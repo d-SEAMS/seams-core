@@ -33,8 +33,8 @@ int main()
     m_MolSys->InitializeSystem();
 
     // Test: Get random step
-    m_MolSys->readParticleFile(20);
-    cout << "Random step info for atom " << 4 << " is " << m_MolSys->molecules[3].posx << "\n";
+    m_MolSys->readParticleFile(1);
+    cout << "Random step info for atom " << 1 << " is " << m_MolSys->molecules[0].posx << "\n";
 
     //Free the memory.
     m_MolSys->deleteMolecules();

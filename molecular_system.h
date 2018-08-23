@@ -28,7 +28,6 @@ class CMolecularSystem {
     //converst int to string
     void IntToString(int , string& );
     
-
     //Get all neighboring particles within neighbordistance
     void get_AllNeighbors();
 
