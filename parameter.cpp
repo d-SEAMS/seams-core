@@ -32,7 +32,6 @@ CParameter::~CParameter()
 //****************************************************************************************
 void CParameter::readParameter()
 {
-  char IntStr[80];
   ifstream paraFile;
   // Open the parameter file
   paraFile.open("input/parameter.txt");
