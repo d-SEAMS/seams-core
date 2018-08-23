@@ -34,3 +34,5 @@ runme
 
 # No more traj
 input/traj/dump-liq.lammpstrj
+# Crazy tramp
+:*
