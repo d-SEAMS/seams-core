@@ -215,9 +215,7 @@ void CMolecularSystem::readParticleFile()
 
       posz = strtod(line.substr(lpos, line.length() - lpos).c_str(),NULL);
 
-      this->molecules[ti].posx = posx;
-      this->molecules[ti].posy = posy;
-      this->molecules[ti].posz = posz;
+      this->molecules[ti].set_position(posx, posy, posz);
     }
   }
   else
@@ -294,9 +292,7 @@ void CMolecularSystem::readParticleFile(int step)
           posz = strtod(line.substr(lpos, line.length() - lpos).c_str(),NULL);
           // cout << posz << "\n";
 
-          this->molecules[iatom].posx = posx;
-          this->molecules[iatom].posy = posy;
-          this->molecules[iatom].posz = posz;
+          this->molecules[iatom].set_position(posx, posy, posz);
 
         }
         else // Skip lines for other snapshots
@@ -313,153 +309,3 @@ void CMolecularSystem::readParticleFile(int step)
     cerr << "Fatal Error : cannot open the file " <<  this->parameter->xyzFile << "\n";
   }
 }
-
-//-------------------------------------------------------------------------------------------------------
-// HELPERS
-//-------------------------------------------------------------------------------------------------------
-
-//converts a int into a string
-void CMolecularSystem::IntToString(int i, string& res)
-{
-    ostringstream tempel;
-    tempel << i;
-    res = tempel.str();
-}
-
-//-------------------------------------------------------------------------------------------------------
-//DISTANCE CACULATIONS
-//-------------------------------------------------------------------------------------------------------
-
-void CMolecularSystem::makeperiodic(int ti)
-{ 
-  double boxx,boxy,boxz;
-  boxx = this->parameter->boxx;
-  boxy = this->parameter->boxy;
-  boxz = this->parameter->boxz;
-  
-  if (this->molecules[ti].posx >=  boxx) {this->molecules[ti].posx -=boxx;}
-  if (this->molecules[ti].posx <   0.0)  {this->molecules[ti].posx +=boxx;}
-  if (this->molecules[ti].posy >=  boxy) {this->molecules[ti].posy -=boxy;}
-  if (this->molecules[ti].posy <   0.0)  {this->molecules[ti].posy +=boxy;}
-  if (this->molecules[ti].posz >=  boxz) {this->molecules[ti].posz -=boxz;}
-  if (this->molecules[ti].posz <   0.0)  {this->molecules[ti].posz +=boxz;}
-
-}
-
-
-//Distance with nearest image convention
-void CMolecularSystem::get_distance(int ti ,int tj ,double &diffx ,double &diffy,double &diffz)
-{
-  diffx = this->molecules[tj].posx - this->molecules[ti].posx;
-  diffy = this->molecules[tj].posy - this->molecules[ti].posy;
-  diffz = this->molecules[tj].posz - this->molecules[ti].posz;
-
-  //nearest image
-  if (diffx >  this->parameter->boxx/2.0) {diffx = diffx - this->parameter->boxx;};
-  if (diffx < -this->parameter->boxx/2.0) {diffx = diffx + this->parameter->boxx;};
-  if (diffy >  this->parameter->boxy/2.0) {diffy = diffy - this->parameter->boxy;};
-  if (diffy < -this->parameter->boxy/2.0) {diffy = diffy + this->parameter->boxy;};
-  if (diffz >  this->parameter->boxz/2.0) {diffz = diffz - this->parameter->boxz;};
-  if (diffz < -this->parameter->boxz/2.0) {diffz = diffz + this->parameter->boxz;};
-}
-
-
-void CMolecularSystem::get_distancePosition(int ti ,double posx, double posy,double posz ,double &diffx,double &diffy,double &diffz)
-{
-  diffx = posx - this->molecules[ti].posx;
-  diffy = posy - this->molecules[ti].posy;
-  diffz = posz - this->molecules[ti].posz;
-
-  //nearest image
-  if (diffx >  this->parameter->boxx/2.0) {diffx = diffx - this->parameter->boxx;};
-  if (diffx < -this->parameter->boxx/2.0) {diffx = diffx + this->parameter->boxx;};
-  if (diffy >  this->parameter->boxy/2.0) {diffy = diffy - this->parameter->boxy;};
-  if (diffy < -this->parameter->boxy/2.0) {diffy = diffy + this->parameter->boxy;};
-  if (diffz >  this->parameter->boxz/2.0) {diffz = diffz - this->parameter->boxz;};
-  if (diffz < -this->parameter->boxz/2.0) {diffz = diffz + this->parameter->boxz;};
-}
-    
-
-double CMolecularSystem::get_absDistance(int ti ,int tj)
-{
-  double abs,diffx,diffy,diffz;
-  diffx = this->molecules[tj].posx - this->molecules[ti].posx;
-  diffy = this->molecules[tj].posy - this->molecules[ti].posy;
-  diffz = this->molecules[tj].posz - this->molecules[ti].posz;
-  //nearest image
-  if (diffx >  this->parameter->boxx/2.0) {diffx = diffx - this->parameter->boxx;};
-  if (diffx < -this->parameter->boxx/2.0) {diffx = diffx + this->parameter->boxx;};
-  if (diffy >  this->parameter->boxy/2.0) {diffy = diffy - this->parameter->boxy;};
-  if (diffy < -this->parameter->boxy/2.0) {diffy = diffy + this->parameter->boxy;};
-  if (diffz >  this->parameter->boxz/2.0) {diffz = diffz - this->parameter->boxz;};
-  if (diffz < -this->parameter->boxz/2.0) {diffz = diffz + this->parameter->boxz;};
-  abs = sqrt(diffx*diffx + diffy*diffy + diffz*diffz);
-  return abs;
-}
-
-//-------------------------------------------------------------------------------------------------------
-//NEIGHBOURHOOD LIST
-//-------------------------------------------------------------------------------------------------------
-
-//Get all nearest neighbors within this->neighbordistance
-//mainly used for the bond orders
-void CMolecularSystem::get_AllNeighbors()
-{
-  double nd,d;
-  nd = this->parameter->neighbordistance;
-  int c,nop;
-  nop = this->parameter->nop;
-
-  for (int ti = 0;ti<nop;ti++)
-  {
-    for (int tn = 0;tn<MAXNUMBEROFNEIGHBORS;tn++)
-    {
-      this->molecules[ti].neighbors[tn] = nilvalue;
-      this->molecules[ti].neighbordist[tn] = -1.0;
-    }
-  }
-
-
-  for (int ti = 0;ti<nop;ti++)
-  {
-    c = 0;
-    for (int tj = 0;tj<nop;tj++)
-    {
-
-          if (tj != ti) { 
-            d = get_absDistance(ti,tj); 
-            if (d < nd) {
-              this->molecules[ti].neighbors[c] = tj; 
-              this->molecules[ti].neighbordist[c]=d; 
-              c += 1;   
-            }
-         }
-    }
-    this->molecules[ti].n_neighbors = c;
-    cout << ti << " " << c << "\n";
-  }
-
-}
-
-
-//-------------------------------------------------------------------------------------------------------
-//CALCULATIONS
-//-------------------------------------------------------------------------------------------------------
-
-// Get the 3-D RDF histograms 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
