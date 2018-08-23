@@ -8,7 +8,7 @@
 // within the input folder. 
 // The xyz file should be inside a folder called xyz
 
-trajFile=./input/traj/dump-bcc.lammpstrj
+trajFile=./input/traj/dump-liq.lammpstrj
 // xyzFile=./input/xyz/configuration.xyz
 
 //The neighbor radius, points are considered neighbors
