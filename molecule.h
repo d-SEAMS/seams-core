@@ -9,10 +9,10 @@ const int MAXNUMBEROFNEIGHBORS = 100;
 class CMolecule {
   private:
     //The position of the particle
+    double posx,posy,posz;
   public:
     CMolecule();
     virtual ~CMolecule();
-    double posx,posy,posz;
     double vx,vy,vz;
     double fx,fy,fz;
     double rfx,rfy,rfz;
