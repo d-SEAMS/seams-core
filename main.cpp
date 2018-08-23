@@ -23,7 +23,22 @@
 
 int main()
 {
+    // The program reads the parameter file inside the input folder
+    // The main obejct is created. It hold all the functions and data
+    // used in the analysis.
+    CMolecularSystem *m_MolSys = new CMolecularSystem;
+    // The parameterfile is read
+    m_MolSys->parameter->readParameter();
+    // System is initalized, memory allocated, ...
+    m_MolSys->InitializeSystem();
 
-  cout << "Welcome to the Black Parade \n";
-  return 0;
+    // Test: Get random step
+    m_MolSys->readParticleFile(20);
+    cout << "Random step info for atom " << 4 << " is " << m_MolSys->molecules[3].posx << "\n";
+
+    //Free the memory.
+    m_MolSys->deleteMolecules();
+
+    cout << "Welcome to the Black Parade \n";
+    return 0;
 }

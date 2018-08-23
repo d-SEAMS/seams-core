@@ -11,14 +11,6 @@ using namespace std;
 
 const int NUMBER_OF_PARAMETERS = 200;
 const double PI = 3.14159265;
- 
-// const int SLIQ = 0;
-// const int SFCC = 1;
-// const int SBCC = 2;
-// const int SHCP = 3;
-// const int SUND = -1;
-// const int SOBER = 4;
-
 
 class ExceptionBadLineInParameterFile{
 
@@ -36,9 +28,8 @@ class CParameter {
   public:
     CParameter();
     virtual ~CParameter();
-    void readParameter(int);
-    void checkParameter();
-    void readWholeTrj();  
+    void readParameter();
+    void checkParameter();  
     //Number of Particles
     int nop;
     //Boxsize x and y

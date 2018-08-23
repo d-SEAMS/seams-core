@@ -1,0 +1,19 @@
+// Parameter file for structure factor calculation
+//
+// Example of a parameter file to read a lammpstrj file 
+// and output the structure factor. The filename is
+// given to XYZFile or trajFile as a relative path to the 
+// path where the program is executed. 
+// The lammps file MUST be inside a folder called traj 
+// within the input folder. 
+// The xyz file should be inside a folder called xyz
+
+trajFile=./input/traj/dump-bcc.lammpstrj
+// xyzFile=./input/xyz/configuration.xyz
+
+//The neighbor radius, points are considered neighbors
+//when their distance is smaller than NeighborDistance
+
+NeighborDistance=8.0
+
+

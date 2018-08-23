@@ -56,18 +56,14 @@ class CMolecularSystem {
     //and delete the System afterwards
     void deleteMolecules();
 
-    //System can be initialized from a perfect Fcc, Bcc or Hcp
-    //structure, reads in a xyz-File
-    // void InitializeSystem();
-    // void readParticleFile();
+    //System can be initialized from a lammps trajectory xyz-File
+    void InitializeSystem();
+    void readParticleFile();
+    // Initialize from the lammps trajectory 
+    void readWholeTrj();
     // To read from a lammpstrj file use the overloaded
-    // function 
+    // function
     void readParticleFile(int );
-
-    //**********************************************************
-    //Output
-    //**********************************************************
-
 
 };
 
