@@ -24,22 +24,6 @@ class NumberOfParticlesNotDefinedException
 };
 
 class CMolecularSystem {
-  private:
-    //converst int to string
-    void IntToString(int , string& );
-    
-    //Get all neighboring particles within neighbordistance
-    void get_AllNeighbors();
-
-    
-    //get distance between two particles with nearest image
-    void get_distance(int,int,double&,double&,double&);
-    //get distance between two particles with nearest image
-    void get_distancePosition(int,double, double,double,double&,double&,double&);
-    //get absolute distance between two particles
-    double get_absDistance(int,int);
-    //Applies periodic boundary conditions on particle i
-    void makeperiodic(int);
     
   public:
     //the main object where all properties of all particles are saved
