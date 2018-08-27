@@ -11,3 +11,13 @@ CAnalysis::~CAnalysis()
 {
   //
 }
+
+//-------------------------------------------------------------------------------------------------------
+// DISTANCE CALCULATIONS
+//-------------------------------------------------------------------------------------------------------
+
+double CAnalysis::getAbsDistance(double x, double y)
+{
+	double box = CMolecularSystem::getBoxx();
+	return box;
+}

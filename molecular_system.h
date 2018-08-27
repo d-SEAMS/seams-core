@@ -49,6 +49,11 @@ class CMolecularSystem {
     // function
     void readParticleFile(int );
 
+    // Getter functions
+    static double getBoxx();
+    static double getBoxy();
+    static double getBoxz();
+
     friend class CAnalysis; // Class CAnalysis is a friend of CMolecularSystem
 
 };
