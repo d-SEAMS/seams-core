@@ -10,6 +10,7 @@
 #include <time.h>
 #include "molecule.h"
 #include "parameter.h"
+#include "analysis.h"
 
 using namespace std;
 
@@ -47,6 +48,8 @@ class CMolecularSystem {
     // To read from a lammpstrj file use the overloaded
     // function
     void readParticleFile(int );
+
+    friend class CAnalysis; // Class CAnalysis is a friend of CMolecularSystem
 
 };
 
