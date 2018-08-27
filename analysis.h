@@ -23,7 +23,7 @@ class CAnalysis {
     	CAnalysis();
     	virtual ~CAnalysis();
 		// Get absolute relative distance from wrapped coordinates
-		double getAbsDistance(double, double, class CMolecularSystem& molSys); 
+		double getAbsDistance(int, int, class CMolecularSystem& molSys); 
 };
 
 #endif
