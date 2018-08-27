@@ -36,13 +36,13 @@ int main()
     m_MolSys->readParticleFile(1);
     cout << "Random step info for atom " << 1 << " is " << m_MolSys->molecules[0].get_posx() << "\n";
 
+    CAnalysis *woot = new CAnalysis;
+    cout << "What even " << woot->getAbsDistance(0,1, *m_MolSys) << "\n";
+
     //Free the memory.
     m_MolSys->deleteMolecules();
 
-    CAnalysis *woot = new CAnalysis;
-    cout << "What even " << woot->getAbsDistance(3,4, *m_MolSys) << "\n";
-    cout << "Box length should be " << m_MolSys->parameter->boxx << "\n";
-
+    
     cout << "Welcome to the Black Parade \n";
     return 0;
 }
