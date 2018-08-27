@@ -39,6 +39,10 @@ int main()
     //Free the memory.
     m_MolSys->deleteMolecules();
 
+    CAnalysis *woot = new CAnalysis;
+    cout << "What even " << woot->getAbsDistance(3,4, *m_MolSys) << "\n";
+    cout << "Box length should be " << m_MolSys->parameter->boxx << "\n";
+
     cout << "Welcome to the Black Parade \n";
     return 0;
 }
