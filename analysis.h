@@ -18,6 +18,10 @@ class CAnalysis {
 	private:
 		// Dynamically allocated array for histogram values
 		int* RDF3D;
+		// No. of bins 
+		int nbin;
+		// No. of snapshots for RDF
+		int nframes;
 	public:
 		//the main object where all properties of all particles are saved
     	CAnalysis();
