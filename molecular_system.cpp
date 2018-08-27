@@ -309,23 +309,3 @@ void CMolecularSystem::readParticleFile(int step)
     cerr << "Fatal Error : cannot open the file " <<  this->parameter->xyzFile << "\n";
   }
 }
-
-//-------------------------------------------------------------------------------------------------------
-// GETTER FUNCTIONS
-//-------------------------------------------------------------------------------------------------------
-
-// Getter functions to return the values of box length
-double CMolecularSystem::getBoxx()
-{
-  return this->parameter->boxx;
-}
-
-double CMolecularSystem::getBoxy()
-{
-  return this->parameter->boxy;
-}
-
-double CMolecularSystem::getBoxz()
-{
-  return this->parameter->boxz;
-}
