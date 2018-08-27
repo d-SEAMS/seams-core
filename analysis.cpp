@@ -16,8 +16,8 @@ CAnalysis::~CAnalysis()
 // DISTANCE CALCULATIONS
 //-------------------------------------------------------------------------------------------------------
 
-double CAnalysis::getAbsDistance(double x, double y)
+double CAnalysis::getAbsDistance(double x, double y, class CMolecularSystem& molSys)
 {
-	double box = CMolecularSystem::getBoxx();
+	double box = molSys.parameter->boxx;
 	return box;
 }
