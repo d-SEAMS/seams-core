@@ -16,9 +16,14 @@ using namespace std;
 
 class CAnalysis {
 	private:
-		//
+		// Dynamically allocated array for histogram values
+		int* RDF3D
 	public:
-		//
+		//the main object where all properties of all particles are saved
+    	CAnalysis();
+    	virtual ~CAnalysis();
+		// Get absolute relative distance from wrapped coordinates
+		double getAbsDistance(double, double) 
 };
 
 #endif
