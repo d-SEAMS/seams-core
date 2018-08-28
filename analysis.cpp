@@ -9,8 +9,10 @@ CAnalysis::CAnalysis()
 
 CAnalysis::~CAnalysis()
 {
-  //
+  delete [] rdf3D;
 }
+
+
 
 //-------------------------------------------------------------------------------------------------------
 // DISTANCE CALCULATIONS

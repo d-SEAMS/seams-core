@@ -17,7 +17,7 @@ using namespace std;
 class CAnalysis {
 	private:
 		// Dynamically allocated array for histogram values
-		int* RDF3D;
+		int* rdf3D;
 		// No. of bins 
 		int nbin;
 		// No. of snapshots for RDF
