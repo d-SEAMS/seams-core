@@ -55,6 +55,11 @@ void CMolecularSystem::InitializeSystem()
     if (this->parameter->xyzFile.compare("notset") == 0) // Read from the traj file
     {
       this->readWholeTrj();
+      // If RDF is to be calculated, check that the max_radius is correct
+      if (this->parameter->max_radius != -1.0)
+      {
+        this->checkRadius();
+      }
     } else if (this->parameter->trajFile.compare("notset") == 0) // Read from the xyz file
     {
       this->readParticleFile();
@@ -308,4 +313,49 @@ void CMolecularSystem::readParticleFile(int step)
   {
     cerr << "Fatal Error : cannot open the file " <<  this->parameter->xyzFile << "\n";
   }
+}
+
+
+//-------------------------------------------------------------------------------------------------------
+// CHECKS AND HELPER FUNCTIONS
+//-------------------------------------------------------------------------------------------------------
+
+// Checks that the max_radius entered is correct. If the max_radius is greater than half the simulation
+// box length, by default it is set as half the smallest box length
+// TODO: Modify for 2-D case
+void CMolecularSystem::checkRadius()
+{
+  double boxx, boxy, boxz;
+  double half_box; // Half the smallest box length
+  double radius = this->parameter->max_radius;
+
+  // Box lengths 
+  boxx = this->parameter->boxx;
+  boxy = this->parameter->boxy;
+  boxz = this->parameter->boxz;
+
+  half_box = 0.5*this->smallest(boxx, boxy, boxz);
+
+  // Check if the max_radius is within bounds
+  if (radius > half_box || radius <= 0.0)
+  {
+    cerr << "The maximum possible value of radius is " << half_box << " and in the parameter.txt file, it was set as " << radius << "\n";
+    cerr << "I will now set the maximum radius to half the simulation box length " <<"\n";
+    this->parameter->max_radius = half_box;
+  }
+}
+
+//****************************************************************************************
+// HELPER FUNCTIONS
+//****************************************************************************************
+
+double CMolecularSystem::smallest(double x, double y, double z)
+{
+  // return min({x,y,z}); // For C++11
+  return min(min(x,y), z);
+}
+
+double CMolecularSystem::smallest(double x, double y)
+{
+  return min(x,y);
 }
