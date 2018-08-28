@@ -18,14 +18,19 @@ class CAnalysis {
 	private:
 		// Dynamically allocated array for histogram values
 		int* rdf3D;
-		// No. of bins 
-		int nbin;
 		// No. of snapshots for RDF
 		int nframes;
 	public:
 		//the main object where all properties of all particles are saved
     	CAnalysis();
     	virtual ~CAnalysis();
+
+    	// Initialize the histogram
+    	void initHistogram();
+
+    	// No. of bins 
+		int nbin;
+
 		// Get absolute relative distance from wrapped coordinates
 		double getAbsDistance(int, int, class CMolecularSystem& molSys); 
 };
