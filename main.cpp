@@ -42,7 +42,7 @@ int main()
     //Free the memory.
     m_MolSys->deleteMolecules();
 
-    
+   
     cout << "Welcome to the Black Parade \n";
     return 0;
 }
