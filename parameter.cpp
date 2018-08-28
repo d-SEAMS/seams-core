@@ -8,7 +8,8 @@ const string PF_BOXZ = "zBox";
 const string PF_XYZFILE = "XYZFile";
 const string PF_TRAJFILE = "trajFile";
 const string PF_NEIGHBORDISTANCE = "NeighborDistance";
-
+const string PF_BINWIDTH = "binwidth";
+const string PF_RADIUS = "max_radius";
 
 //Constructor
 CParameter::CParameter()
@@ -19,6 +20,9 @@ CParameter::CParameter()
   this->boxz = -1.0;
   this->xyzFile = "notset";
   this->trajFile = "notset";
+  this->nsteps = -1.0;
+  this->binwidth = -1.0;
+  this->max_radius = -1.0;
 }
 // Destructor
 CParameter::~CParameter()
@@ -60,5 +64,8 @@ void CParameter::readParameter()
     if (rawParameter[j].name.compare(PF_XYZFILE) == 0) {this->xyzFile = rawParameter[j].value;}
     if (rawParameter[j].name.compare(PF_TRAJFILE) == 0) {this->trajFile = rawParameter[j].value;}
     if (rawParameter[j].name.compare(PF_NEIGHBORDISTANCE) == 0) {this->neighbordistance = atof(rawParameter[j].value.c_str());}
+    if (rawParameter[j].name.compare(PF_BINWIDTH) == 0) {this->binwidth = atof(rawParameter[j].value.c_str());}
+    if (rawParameter[j].name.compare(PF_RADIUS) == 0) {this->max_radius = atof(rawParameter[j].value.c_str());}
   }
 }
+
