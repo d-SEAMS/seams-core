@@ -16,4 +16,14 @@ trajFile=./input/traj/dump-liq.lammpstrj
 
 NeighborDistance=8.0
 
+// Comment out the following lines if they are not required.
+// The RDF requires the binwidth parameter to determine the 
+// number of bins. There should be no spaces before or after
+// the equal sign. The maximum radius upto which the RDF will be 
+// calculated must also be specified. This must be less than or equal 
+// to half the simulation box length. If not specified or incorrectly
+// entered, the maximum radius is set by default to be half of the 
+// smallest box length. 
 
+binwidth=0.01
+max_radius=4;
