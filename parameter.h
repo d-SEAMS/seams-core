@@ -41,6 +41,10 @@ class CParameter {
     string trajFile;
     // Total number of steps; starting step and ending step number
     int nsteps;
+
+    // Parameters for histogram 
+    double binwidth;
+    double max_radius;
  };
 
 
