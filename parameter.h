@@ -28,8 +28,7 @@ class CParameter {
   public:
     CParameter();
     virtual ~CParameter();
-    void readParameter();
-    void checkParameter();  
+    void readParameter(); 
     //Number of Particles
     int nop;
     //Boxsize x and y
