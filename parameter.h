@@ -24,11 +24,13 @@ struct s_rawParameter
 
 class CParameter {
   private:
-    s_rawParameter rawParameter[NUMBER_OF_PARAMETERS];
+    // Moved s_rawParameter to public
   public:
     CParameter();
     virtual ~CParameter();
     void readParameter(); 
+    // To read input files
+    s_rawParameter rawParameter[NUMBER_OF_PARAMETERS];
     //Number of Particles
     int nop;
     //Boxsize x and y
@@ -40,10 +42,6 @@ class CParameter {
     string trajFile;
     // Total number of steps; starting step and ending step number
     int nsteps;
-
-    // Parameters for histogram 
-    double binwidth;
-    double max_radius;
  };
 
 
