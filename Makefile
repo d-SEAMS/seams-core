@@ -1,6 +1,6 @@
 
 all:
-	g++ -g -lm -Wall -o runme analysis.cpp molecular_system.cpp molecule.cpp parameter.cpp main.cpp 
+	g++ -g -lm -Wall -o runme output.cpp analysis.cpp molecular_system.cpp molecule.cpp parameter.cpp main.cpp 
 
 
 molecule.o: molecule.cpp molecule.h
@@ -14,6 +14,9 @@ parameter.o: parameter.cpp
 
 analysis.o: analysis.cpp
 	g++ -c analysis.cpp  
+
+output.o: output.cpp
+	g++ -c output.cpp 
 	
 clean:
 	rm -f *.o runme 
