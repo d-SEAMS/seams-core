@@ -32,15 +32,16 @@ int main()
     // System is initalized, memory allocated, ...
     m_MolSys->InitializeSystem();
 
-    // Test: Get random step
-    m_MolSys->readParticleFile(1);
-    cout << "Random step info for atom " << 1 << " is " << m_MolSys->molecules[0].get_posx() << "\n";
+    //Get random step
+    m_MolSys->readParticleFile(150);
 
+    // Create object for 3D RDF 
     CAnalysis *woot = new CAnalysis;
-    // Testing absolute distance function
-    cout << "What even " << woot->getAbsDistance(0,1, *m_MolSys) << "\n";
-    // Testing init function
+    // Testing 3D rdf function
     woot->initRDF3D(*m_MolSys);
+    // Get the 3D RDF for one step
+    woot->singleRDF3D(*m_MolSys); 
+    
     // Free the memory 
     woot->deleteRDF3D();
 
