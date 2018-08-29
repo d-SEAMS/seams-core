@@ -26,13 +26,11 @@ class CAnalysis: private CParameter {
     	double max_radius;
     	// Total volume in which 3D RDF is to be calculated
     	double volume;
+    	// Total no. of atoms
+    	int nop;
 
-    	// Calculates the RDF over a number of snapshots
-    	void accumulateRDF3D(class CMolecularSystem& molSys);
-    	// Calculates the RDF for a single snapshot
-    	void calcRDF3D(class CMolecularSystem& molSys);
-    	// Normalizes the RDF 
-    	void normalizeRDF3D();
+    	// Calculate the histogram of the 3D RDF
+    	void histogramRDF3D(class CMolecularSystem& molSys);
 	public:
 		//the main object where all properties of all particles are saved
     	CAnalysis();
@@ -40,10 +38,19 @@ class CAnalysis: private CParameter {
     	void readParameter(class CMolecularSystem& molSys);
 
     	// Dynamically allocated array for histogram values
-		int* rdf3D;
+		double* rdf3D;
 
     	// Initialize the histogram
     	void initRDF3D(class CMolecularSystem& molSys);
+    	// Calculates the RDF for a single snapshot
+    	void singleRDF3D(class CMolecularSystem& molSys);
+    	// Calculates the RDF over a number of snapshots
+    	void accumulateRDF3D(class CMolecularSystem& molSys);
+    	// Normalizes the RDF. You don't need to call this separately 
+    	// for calculation of RDF for a single frame. You must call this 
+    	// after using the accumulate RDF command for multiple snapshots
+    	void normalizeRDF3D();
+
     	// Check to make sure that the user-defined max_radius is within limits, assign volume
     	void checkParameter(class CMolecularSystem& molSys);
     	// Calculate the number of bins
