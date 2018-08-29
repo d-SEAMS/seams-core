@@ -28,7 +28,7 @@ void CAnalysis::initRDF3D(class CMolecularSystem& molSys)
     // Calculate the number of bins from user-defined parameters
     this->getBins();
     // Initialize the array for RDF
-    this->rdf3D   = new int[this->nbin];
+    this->rdf3D   = new double[this->nbin];
 }
 
 //Frees the memory
@@ -80,6 +80,8 @@ void CAnalysis::readParameter(class CMolecularSystem& molSys)
 
     // Check that the max_radius is within simulation box limits
     this->checkParameter(molSys);
+    // Since the number of atoms is constant
+    this->nop = molSys.parameter->nop;
 }
 
 //-------------------------------------------------------------------------------------------------------
@@ -88,32 +90,69 @@ void CAnalysis::readParameter(class CMolecularSystem& molSys)
 
 // Calculates the 3D radial distribution function for a number of snapshots
 // There is no need to use calcRDF3D if the RDF is to be calculated over a number of frames
+// You will have to call the normalize function separately after accumulating to get the RDF
 void CAnalysis::accumulateRDF3D(class CMolecularSystem& molSys)
 {
     // Update the number of snapshots calculated
     this->nframes += 1;
-
+    // Add to the RDF histogram
+    this->histogramRDF3D(molSys);
+    // Call the normalize function separately after accumulating 
+    // the histogram over all the desired snapshots
 }
 
 // Calculates the 3D radial distribution function for a single snapshot
 // Use this only if there is one frame only.
-void CAnalysis::calcRDF3D(class CMolecularSystem& molSys)
+void CAnalysis::singleRDF3D(class CMolecularSystem& molSys)
 {
     // There is only one snapshot
     this->nframes = 1;
+    // Add to the RDF histogram
+    this->histogramRDF3D(molSys);
+    // Normalize the RDF 
+    this->normalizeRDF3D();
+}
+
+// Updates 
+void CAnalysis::histogramRDF3D(class CMolecularSystem& molSys)
+{
+    int natoms = this->nop; // Number of particles
+    double dr;              // Relative distance between iatom and jatom (unwrapped)
+    int ibin;               // Index of bin in which the particle falls wrt reference atom                              
+    // Loop through every pair of particles
+    for (int iatom = 0; iatom < natoms-1; iatom++)
+    {
+        for (int jatom = 0; jatom < natoms; jatom++)
+        {
+            dr = this->getAbsDistance(iatom, jatom, molSys);
+            // Only if dr is less than max_radius add to histogram
+            if (dr < this->max_radius)
+            {
+                ibin = int(dr/this->binwidth); // Find which bin the particle falls in 
+                this->rdf3D[ibin] += 2;        // Add to histogram for both iatom and jatom
+            }
+        }
+    }
 }
 
 // Normalize the RDF 
+// You will have to call this separately if you are averaging over
+// severa; snapshots
 void CAnalysis::normalizeRDF3D()
 {
-    double bin_volume;  // Bin volume
-    int nideal;         // No. of ideal gas particles in each bin_volume
+    double bin_volume;              // Bin volume
+    int nideal;                     // No. of ideal gas particles in each bin_volume
+    double rho = this->nop/volume;  // Number density
     // Loop over all bins
     for (int k=1; k <= this->nbin; k++)
     {
         // Volume between bin k+1 and k
-        bin_volume = (pow(k+1, 3) - pow(k, 3)) * pow(this->binwidth, 3); 
-
+        bin_volume = (pow(k+1, 3) - pow(k, 3)) * pow(this->binwidth, 3);
+        // Assuming the total nop does not change with time 
+        // Number of ideal gas particles in bin_volume
+        nideal = 4.0*PI*bin_volume*rho/3.0;
+        // Normalization
+        this->rdf3D[k-1] /= (this->nframes*this->nop*nideal);
     }
 }
 
