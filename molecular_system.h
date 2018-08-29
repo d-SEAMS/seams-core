@@ -50,13 +50,6 @@ class CMolecularSystem {
     // function
     void readParticleFile(int );
 
-    // Checks and helper functions
-    // To check that the max_radius is correct
-    void checkRadius();     
-    // For finding the smallest number
-    double smallest(double, double, double);
-    double smallest(double, double);
-
 };
 
 #endif
