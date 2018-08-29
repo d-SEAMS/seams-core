@@ -37,7 +37,12 @@ int main()
     cout << "Random step info for atom " << 1 << " is " << m_MolSys->molecules[0].get_posx() << "\n";
 
     CAnalysis *woot = new CAnalysis;
+    // Testing absolute distance function
     cout << "What even " << woot->getAbsDistance(0,1, *m_MolSys) << "\n";
+    // Testing init function
+    woot->initRDF3D(*m_MolSys);
+    // Free the memory 
+    woot->deleteRDF3D();
 
     //Free the memory.
     m_MolSys->deleteMolecules();
