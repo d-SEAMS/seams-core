@@ -16,6 +16,8 @@
 #include "molecular_system.h"
 #include "molecule.h"
 #include "parameter.h"
+#include "analysis.h"
+#include "output.h"
 #include <ctime>
 #include <sstream>
 #include <string>
