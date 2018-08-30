@@ -1,8 +1,6 @@
 
 all:
-	g++ -g -lm -Wall -o runme output.cpp analysis.cpp molecular_system.cpp molecule.cpp parameter.cpp main.cpp -std=c++17
-
-# Try -std=c++11  
+	g++ -g -lm -Wall -o runme output.cpp analysis.cpp molecular_system.cpp molecule.cpp parameter.cpp main.cpp 
 
 molecule.o: molecule.cpp molecule.h
 	g++ -c molecule.cpp
