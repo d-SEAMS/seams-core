@@ -50,6 +50,10 @@ int main()
     //Free the memory.
     m_MolSys->deleteMolecules();
 
+    // Test output
+    COutput *bwaha = new COutput;
+    bwaha->createOutputDir("output");
+
    
     cout << "Welcome to the Black Parade \n";
     return 0;
