@@ -11,10 +11,11 @@
 #include "molecule.h"
 #include "parameter.h"
 #include "molecular_system.h"
+#include "output.h"
 
 using namespace std;
 
-class CAnalysis: private CParameter {
+class CAnalysis: private CParameter, public COutput {
 	private:
 		// No. of snapshots for RDF
 		int nframes;		
