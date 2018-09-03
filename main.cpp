@@ -35,7 +35,7 @@ int main()
     m_MolSys->InitializeSystem();
 
     //Get random step
-    m_MolSys->readParticleFile(150);
+    m_MolSys->readParticleFile(1);
 
     // Create object for 3D RDF 
     CAnalysis *woot = new CAnalysis;
@@ -44,10 +44,8 @@ int main()
     // Get the 3D RDF for one step
     woot->singleRDF3D(*m_MolSys); 
 
-    // Print test
-    double x[] = {1,2};
-    double y[] = {2,4};
-    woot->printToFile(2, x, y);
+    // Print the RDF 
+    woot->printRDF3D();
     
     // Free the memory 
     woot->deleteRDF3D();
