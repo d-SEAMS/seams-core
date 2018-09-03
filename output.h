@@ -13,16 +13,16 @@
 using namespace std;
 
 class COutput {
-  private:
-    //Checks whether the output directory exists, and creates it if it doesn't
-    // The directory cannot be created for Windows
-    void createOutputDir(const char *path);
   public:
     COutput();
     virtual ~COutput();
  	// Print arrays to file, with the size, and two x,y arrays 
- 	// as arguments
- 	void printToFile(int, double* x, double* y, const string& filename = "output");
+ 	// as arguments. The names of the arrays can be printed out also, if provided
+ 	// Otherwise default arguments are used
+ 	void printToFile(int, double* x, double* y, const string& filename = "output", const string& xName = "Abscissa", const string& yName = "Ordinate");
+ 	//Checks whether the output directory exists, and creates it if it doesn't
+    // The directory cannot be created for Windows
+    void createOutputDir(const char *path);
 };
 
 #endif
