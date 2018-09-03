@@ -18,6 +18,7 @@ CAnalysis::CAnalysis()
 CAnalysis::~CAnalysis()
 {
   delete [] rdf3D;
+  delete [] rVal;
 }
 
 // Initialize the histogram array
@@ -28,13 +29,20 @@ void CAnalysis::initRDF3D(class CMolecularSystem& molSys)
     // Calculate the number of bins from user-defined parameters
     this->getBins();
     // Initialize the array for RDF
-    this->rdf3D   = new double[this->nbin];
+    this->rdf3D  = new double[this->nbin];
+    // Initialize the RDF array to zero
+    this->rdf3DInitToZero();
+    // Get an array for R
+    this->rVal = new double[this->nbin];
+    // Get the values for radial distance (unchanged over nframes)
+    this->getR();
 }
 
 //Frees the memory
 void CAnalysis::deleteRDF3D()
 {
     delete [] rdf3D;
+    delete [] rVal;
 }
 
 
@@ -122,7 +130,7 @@ void CAnalysis::histogramRDF3D(class CMolecularSystem& molSys)
     // Loop through every pair of particles
     for (int iatom = 0; iatom < natoms-1; iatom++)
     {
-        for (int jatom = 0; jatom < natoms; jatom++)
+        for (int jatom = iatom+1; jatom < natoms; jatom++)
         {
             dr = this->getAbsDistance(iatom, jatom, molSys);
             // Only if dr is less than max_radius add to histogram
@@ -137,22 +145,43 @@ void CAnalysis::histogramRDF3D(class CMolecularSystem& molSys)
 
 // Normalize the RDF 
 // You will have to call this separately if you are averaging over
-// severa; snapshots
+// several snapshots
 void CAnalysis::normalizeRDF3D()
 {
-    double bin_volume;              // Bin volume
-    int nideal;                     // No. of ideal gas particles in each bin_volume
-    double rho = this->nop/volume;  // Number density
+    double bin_volume;                      // Bin volume
+    double nideal;                          // No. of ideal gas particles in each bin_volume
+    double rho = this->nop/this->volume;    // Number density
     // Loop over all bins
-    for (int k=1; k <= this->nbin; k++)
+    for (int ibin=0; ibin < this->nbin; ibin++)
     {
         // Volume between bin k+1 and k
-        bin_volume = (pow(k+1, 3) - pow(k, 3)) * pow(this->binwidth, 3);
+        bin_volume = (pow(ibin+2, 3) - pow(ibin+1, 3)) * pow(this->binwidth, 3);
         // Assuming the total nop does not change with time 
         // Number of ideal gas particles in bin_volume
-        nideal = 4.0*PI*bin_volume*rho/3.0;
+        nideal = (4.0/3.0)*PI*bin_volume*rho;
         // Normalization
-        this->rdf3D[k-1] /= (this->nframes*this->nop*nideal);
+        this->rdf3D[ibin] /= (this->nframes*this->nop*nideal);
+    }
+}
+
+// Get the radial R values corresponding to each RDF value
+// This will remain the same over all frames
+void CAnalysis::getR()
+{
+    // Loop through all bins
+    for (int ibin=0; ibin<this->nbin; ibin++)
+    {
+        this->rVal[ibin] = this->binwidth * (ibin + 1.5);
+    }
+}
+
+// Initialize the RDF array to 0
+void CAnalysis::rdf3DInitToZero()
+{
+    // Loop over all bins
+    for (int ibin=0; ibin < this->nbin; ibin++)
+    {
+        this->rdf3D[ibin] = 0.0;
     }
 }
 
@@ -177,7 +206,7 @@ double CAnalysis::getAbsDistance(int iatom, int jatom, class CMolecularSystem& m
     for (int k=0; k<3; k++)
     {
         // Correct for periodicity
-        dr[k] -= round(dr[k]/box[k]);
+        dr[k] -= box[k]*round(dr[k]/box[k]);
         
         r2 += pow(dr[k],2.0);
     }
@@ -186,6 +215,16 @@ double CAnalysis::getAbsDistance(int iatom, int jatom, class CMolecularSystem& m
     return sqrt(r2);
 }
 
+//-------------------------------------------------------------------------------------------------------
+// OUTPUT FUNCTION
+//-------------------------------------------------------------------------------------------------------
+
+// Prints out the 3D RDF function to a file in the output folder 
+void CAnalysis::printRDF3D()
+{
+    // Prints the radial values and 3D RDF values to a file called rdf3D.txt
+    this->printToFile(this->nbin, this->rVal, this->rdf3D, "rdf3D", "Radial Distance", "RDF");
+} 
 
 //-------------------------------------------------------------------------------------------------------
 // CHECKS AND HELPER FUNCTIONS
