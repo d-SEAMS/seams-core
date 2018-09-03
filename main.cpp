@@ -43,6 +43,11 @@ int main()
     woot->initRDF3D(*m_MolSys);
     // Get the 3D RDF for one step
     woot->singleRDF3D(*m_MolSys); 
+
+    // Print test
+    double x[] = {1,2};
+    double y[] = {2,4};
+    woot->printToFile(2, x, y);
     
     // Free the memory 
     woot->deleteRDF3D();
