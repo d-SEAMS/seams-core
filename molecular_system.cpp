@@ -234,7 +234,8 @@ void CMolecularSystem::readParticleFile(int step)
   ifstream dumpFile;
   string::size_type pos;    // To find positions within the line
   string::size_type lpos;   // Next entry in the line 
-  double number; 
+  double number;            // Each number being read from the line
+  vector<double> lineVal; // Vector containing all the elements in the line
           
   dumpFile.open(this->parameter->trajFile.c_str(),ifstream::in);
 
@@ -271,9 +272,10 @@ void CMolecularSystem::readParticleFile(int step)
 
         // Don't save the particle positions for the rest of the snapshots
         if (istep == step)
-        { // Save the coordinates in the line
-           vector<double> lineVal; // Vector containing all the elements in the line 
+        { // Save the coordinates in the line 
           istringstream is( line );
+          // Clear the contents of the vector
+          lineVal.clear();
           while (is >> number)
           {
             lineVal.push_back(number);
@@ -282,10 +284,6 @@ void CMolecularSystem::readParticleFile(int step)
           posx = lineVal[3];
           posy = lineVal[4];
           posz = lineVal[5];
-          // Test print
-          cout << posx << " ";
-          cout << posy << " ";
-          cout << posz << "\n";
 
           this->molecules[iatom].set_position(posx, posy, posz);
 
