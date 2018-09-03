@@ -15,19 +15,13 @@ void COutput::createOutputDir(const char *path)
 {
 	struct stat info;
 
-	int statRC = stat( path, &info );
-    if( statRC != 0 )
-    {
-		cout<< "The output directory does not yet exist.\n"; // something in path prefix is not a dir
-    }
-
 	if( info.st_mode & S_IFDIR )  
     	cout << "Output directory exists \n";
 	else
 	{
 		// The output directory does not exist
 		// Create the folder
-		int status = mkdir("./output", 0077);
+		int status = mkdir("./output", 0777);
 		switch	(status) {
 			case -1:
 			cout << "Folder exists or you can't access it.\n";
@@ -45,10 +39,26 @@ void COutput::createOutputDir(const char *path)
 // Function for printing out a file to the output directory 
 // The function prints arrays to file, with the size, and two x,y arrays, and
 // desired filename as arguments
-void COutput::printToFile(int nbin, double* x, double*, const char *filename = "output")
+void COutput::printToFile(int nbin, double* x, double* y, const string& filename)
 {
+	ofstream outputFile; 
+
 	// First check if the output directory exists or not. If it does not exist create it.
 	this->createOutputDir("output");
 
-	// Write out the arrays x and y to a file in the output folder
+	// Create a new file in the output directory 
+	outputFile.open (("./output/" + filename + ".dat").c_str());
+
+	if (outputFile.is_open())
+	{
+		// First line
+		outputFile << "# Abscissa Ordinate\n";
+		// Write out the arrays x and y to a file in the output folder
+		for (int ibin=0; ibin<nbin; ibin++)
+		{
+			outputFile << x[ibin] << "\t" <<y[ibin] <<"\n";
+		}
+		// Close the file
+		outputFile.close();
+	}
 }
