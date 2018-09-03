@@ -39,7 +39,7 @@ void COutput::createOutputDir(const char *path)
 // Function for printing out a file to the output directory 
 // The function prints arrays to file, with the size, and two x,y arrays, and
 // desired filename as arguments
-void COutput::printToFile(int nbin, double* x, double* y, const string& filename)
+void COutput::printToFile(int nbin, double* x, double* y, const string& filename, const string& xName, const string& yName)
 {
 	ofstream outputFile; 
 
@@ -52,7 +52,7 @@ void COutput::printToFile(int nbin, double* x, double* y, const string& filename
 	if (outputFile.is_open())
 	{
 		// First line
-		outputFile << "# Abscissa Ordinate\n";
+		outputFile << "# " << xName << "\t" <<  yName << "\n";
 		// Write out the arrays x and y to a file in the output folder
 		for (int ibin=0; ibin<nbin; ibin++)
 		{
