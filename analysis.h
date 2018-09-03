@@ -32,6 +32,20 @@ class CAnalysis: private CParameter, public COutput {
 
     	// Calculate the histogram of the 3D RDF
     	void histogramRDF3D(class CMolecularSystem& molSys);
+
+    	// Calculate the number of bins
+    	void getBins();
+
+    	// Check to make sure that the user-defined max_radius is within limits, assign volume
+    	void checkParameter(class CMolecularSystem& molSys);
+    	// Initialize the 3D RDF array to zero before histogramming
+    	void rdf3DInitToZero();
+    	// Get absolute relative distance from wrapped coordinates
+		double getAbsDistance(int, int, class CMolecularSystem& molSys);
+		// Helper functions
+		// Returns the smallest value
+		double smallest(double, double, double); 
+		double smallest(double, double);
 	public:
 		//the main object where all properties of all particles are saved
     	CAnalysis();
@@ -39,7 +53,9 @@ class CAnalysis: private CParameter, public COutput {
     	void readParameter(class CMolecularSystem& molSys);
 
     	// Dynamically allocated array for histogram values
+    	// for RDF and radial values
 		double* rdf3D;
+		double* rVal; 
 
     	// Initialize the histogram
     	void initRDF3D(class CMolecularSystem& molSys);
@@ -51,20 +67,15 @@ class CAnalysis: private CParameter, public COutput {
     	// for calculation of RDF for a single frame. You must call this 
     	// after using the accumulate RDF command for multiple snapshots
     	void normalizeRDF3D();
+    	// Get the radial values corresponding to each radial bin
+    	void getR();
 
-    	// Check to make sure that the user-defined max_radius is within limits, assign volume
-    	void checkParameter(class CMolecularSystem& molSys);
-    	// Calculate the number of bins
-    	void getBins();
+    	// Print the 3D RDF to a file in the output folder
+    	void printRDF3D();
+
+    	// Free the memory 
     	void deleteRDF3D();
 
-		// Get absolute relative distance from wrapped coordinates
-		double getAbsDistance(int, int, class CMolecularSystem& molSys);
-
-		// Helper functions
-		// Returns the smallest value
-		double smallest(double, double, double); 
-		double smallest(double, double);
 };
 
 #endif
