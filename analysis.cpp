@@ -60,13 +60,13 @@ void CAnalysis::getBins()
 //****************************************************************************************
 void CAnalysis::readParameter(class CMolecularSystem& molSys)
 {
-    ifstream paraFile;
+    std::ifstream paraFile;
     // Open the parameter file
     paraFile.open("input/parameter.txt");
-    string line;
-    string::size_type pos;
+    std::string line;
+    std::string::size_type pos;
     int i = 0;
-    while (getline(paraFile,line))
+    while (std::getline(paraFile,line))
     {
       if(line.substr(0, 2).compare("//")!=0)
       {
@@ -88,7 +88,7 @@ void CAnalysis::readParameter(class CMolecularSystem& molSys)
 
     // Check that the max_radius is within simulation box limits
     this->checkParameter(molSys);
-    // Since the number of atoms is constant
+    // Since the number of atoms is constant (TODO: Get nop)
     this->nop = molSys.parameter->nop;
 }
 
@@ -252,20 +252,20 @@ void CAnalysis::checkParameter(class CMolecularSystem& molSys)
   // Check if the max_radius is within bounds
   if (radius > half_box || radius <= 0.0)
   {
-    cerr << "The maximum possible value of radius is " << half_box << " and in the parameter.txt file, it was set as " << radius << "\n";
-    cerr << "I will now set the maximum radius to half the simulation box length " <<"\n";
+    std::cerr << "The maximum possible value of radius is " << half_box << " and in the parameter.txt file, it was set as " << radius << "\n";
+    std::cerr << "I will now set the maximum radius to half the simulation box length " <<"\n";
     this->max_radius = half_box;
   }
 
   // Check if the volume has been entered. If not set it as the simulation box volume
   if (volume == -1.0)
   {
-    cout << "Since the volume has not been set by the user, the simulation box volume will be used.\n";
+    std::cout << "Since the volume has not been set by the user, the simulation box volume will be used.\n";
     this->volume = boxx*boxy*boxz;
   }
   else if (volume <= 0.0 || volume > boxx*boxy*boxz)
   {
-    cerr << "The volume entered cannot be used. I will use the simulation box volume instead. \n";
+    std::cerr << "The volume entered cannot be used. I will use the simulation box volume instead. \n";
     this->volume = boxx*boxy*boxz;
   }
 }
@@ -273,11 +273,11 @@ void CAnalysis::checkParameter(class CMolecularSystem& molSys)
 // Functions for returning the smallest number
 double CAnalysis::smallest(double x, double y, double z)
 {
-  // return min({x,y,z}); // For C++11
-  return min(min(x,y), z);
+  // return std::min({x,y,z}); // For C++11
+  return std::min(std::min(x,y), z);
 }
 
 double CAnalysis::smallest(double x, double y)
 {
-  return min(x,y);
+  return std::min(x,y);
 }
