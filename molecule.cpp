@@ -3,6 +3,8 @@
 //Constructor
 CMolecule::CMolecule()
 {
+	// Default type ID
+	this->type = 1;
 }
 // Destructor
 CMolecule::~CMolecule()
