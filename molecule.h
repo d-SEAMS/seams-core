@@ -2,7 +2,6 @@
 #define _MOLECULE_H
 
 #include <iostream>
-using namespace std;
 
 const int MAXNUMBEROFNEIGHBORS = 100;
 
