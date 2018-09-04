@@ -35,7 +35,6 @@ class CParameter {
     double boxx, boxy, boxz;
     //XYZFile
     std::string xyzFile;
-    double neighbordistance;
     // LAMMPS trajectory file
     std::string trajFile;
     // Total number of steps; starting step and ending step number

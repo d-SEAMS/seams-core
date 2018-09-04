@@ -7,7 +7,6 @@ const std::string PF_BOXY = "yBox";
 const std::string PF_BOXZ = "zBox";
 const std::string PF_XYZFILE = "XYZFile";
 const std::string PF_TRAJFILE = "trajFile";
-const std::string PF_NEIGHBORDISTANCE = "NeighborDistance";
 
 //Constructor
 CParameter::CParameter()
@@ -59,7 +58,6 @@ void CParameter::readParameter()
     if (rawParameter[j].name.compare(PF_BOXZ) == 0) {this->boxz = atof(rawParameter[j].value.c_str());}
     if (rawParameter[j].name.compare(PF_XYZFILE) == 0) {this->xyzFile = rawParameter[j].value;}
     if (rawParameter[j].name.compare(PF_TRAJFILE) == 0) {this->trajFile = rawParameter[j].value;}
-    if (rawParameter[j].name.compare(PF_NEIGHBORDISTANCE) == 0) {this->neighbordistance = atof(rawParameter[j].value.c_str());}
   }
 }
 
