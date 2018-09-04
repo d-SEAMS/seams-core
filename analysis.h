@@ -13,7 +13,7 @@
 #include "molecular_system.h"
 #include "output.h"
 
-class CAnalysis: private CParameter, public COutput {
+class CAnalysis: public COutput {
 	private:
 		// No. of snapshots for RDF
 		int nframes;		
@@ -48,7 +48,6 @@ class CAnalysis: private CParameter, public COutput {
 		//the main object where all properties of all particles are saved
     	CAnalysis();
     	virtual ~CAnalysis();
-    	void readParameter(class CMolecularSystem& molSys);
 
     	// Dynamically allocated array for histogram values
     	// for RDF and radial values
@@ -56,7 +55,7 @@ class CAnalysis: private CParameter, public COutput {
 		double* rVal; 
 
     	// Initialize the histogram
-    	void initRDF3D(class CMolecularSystem& molSys);
+    	void initRDF3D(class CMolecularSystem& molSys, double binwidth, int, int, double max_radius=-1.0 ,double volume=-1.0);
     	// Calculates the RDF for a single snapshot
     	void singleRDF3D(class CMolecularSystem& molSys);
     	// Calculates the RDF over a number of snapshots

@@ -2,10 +2,6 @@
 #include "molecular_system.h"
 #include "molecule.h"
 
-const std::string PF_BINWIDTH = "binwidth";
-const std::string PF_RADIUS = "max_radius";
-const std::string PF_VOLUME = "volume";
-
 // Constructor
 CAnalysis::CAnalysis()
 {
@@ -21,11 +17,24 @@ CAnalysis::~CAnalysis()
   delete [] rVal;
 }
 
-// Initialize the histogram array
-void CAnalysis::initRDF3D(class CMolecularSystem& molSys)
+
+/********************************************//**
+ *  Initializes the histogram array for 3-D RDF 
+
+ It takes the CMolecularSystem object, binwidth and a pair
+ of int type numbers corresponding to lammps type IDs in the trajectory
+ file as arguments. Optional arguments include the maximum radius upto which 
+ the 3-D RDF will be calculated and the desired volume. If not set, the default
+ values are half the simulation box and the volume of the simulation box respectively
+ ***********************************************/
+void CAnalysis::initRDF3D(class CMolecularSystem& molSys, double binwidth, int typeA, int typeB, double max_radius, double volume)
 {
-    // Read in the parameters from the parameter file
-    this->readParameter(molSys);
+    // Get the binwidth, max_radius and volume
+    this->binwidth = binwidth; this->max_radius = max_radius; this->volume=volume;
+    // Check the max_radius and parameters
+    this->checkParameter(molSys);
+    // Temp nop
+    this->nop = molSys.parameter->nop;
     // Calculate the number of bins from user-defined parameters
     this->getBins();
     // Initialize the array for RDF
@@ -38,7 +47,9 @@ void CAnalysis::initRDF3D(class CMolecularSystem& molSys)
     this->getR();
 }
 
-//Frees the memory
+/********************************************//**
+ *  Frees the memory 
+ ***********************************************/
 void CAnalysis::deleteRDF3D()
 {
     delete [] rdf3D;
@@ -46,59 +57,26 @@ void CAnalysis::deleteRDF3D()
 }
 
 
-// Calculate the number of bins from max_radius and binwidth
+/********************************************//**
+ *  Calculates the number of bins from max_radius and binwidth
+ ***********************************************/
 void CAnalysis::getBins()
 {
     this->nbin = int(this->max_radius/this->binwidth);
 }
 
 
-//****************************************************************************************
-//This procedure reads the parameter.txt file. The keywords are defined above with PF_...
-//if a line starts with // it is handled as comment
-//do not have spaces before or after =
-//****************************************************************************************
-void CAnalysis::readParameter(class CMolecularSystem& molSys)
-{
-    std::ifstream paraFile;
-    // Open the parameter file
-    paraFile.open("input/parameter.txt");
-    std::string line;
-    std::string::size_type pos;
-    int i = 0;
-    while (std::getline(paraFile,line))
-    {
-      if(line.substr(0, 2).compare("//")!=0)
-      {
-        pos  = line.find('=');
-        if (pos != std::string::npos)
-        {
-          this->rawParameter[i].name = line.substr(0, pos );
-          this->rawParameter[i].value = line.substr(pos+1, std::string::npos );
-        i += 1;
-          } else {if (line.compare("")>0) {std::cerr << "malformed line in parameterfile :" << line << "\n";}}
-        }
-    }
-    for (int j = 0;j < i;j++)
-    {
-    if (rawParameter[j].name.compare(PF_BINWIDTH) == 0) {this->binwidth = atof(rawParameter[j].value.c_str());}
-    if (rawParameter[j].name.compare(PF_RADIUS) == 0) {this->max_radius = atof(rawParameter[j].value.c_str());}
-    if (rawParameter[j].name.compare(PF_VOLUME) == 0) {this->volume = atof(rawParameter[j].value.c_str());}
-    }
-
-    // Check that the max_radius is within simulation box limits
-    this->checkParameter(molSys);
-    // Since the number of atoms is constant (TODO: Get nop)
-    this->nop = molSys.parameter->nop;
-}
-
 //-------------------------------------------------------------------------------------------------------
 // CALCULATIONS
 //-------------------------------------------------------------------------------------------------------
 
-// Calculates the 3D radial distribution function for a number of snapshots
-// There is no need to use calcRDF3D if the RDF is to be calculated over a number of frames
-// You will have to call the normalize function separately after accumulating to get the RDF
+/********************************************//**
+ *  Calculates the 3D radial distribution function for a number of snapshots
+
+ There is no need to use singleRDF3D if the RDF is to be calculated over a number of frames.
+ You will have to call the normalize function normalizeRDF3D separately 
+ after accumulating to get the RDF 
+ ***********************************************/
 void CAnalysis::accumulateRDF3D(class CMolecularSystem& molSys)
 {
     // Update the number of snapshots calculated
@@ -109,8 +87,10 @@ void CAnalysis::accumulateRDF3D(class CMolecularSystem& molSys)
     // the histogram over all the desired snapshots
 }
 
-// Calculates the 3D radial distribution function for a single snapshot
-// Use this only if there is one frame only.
+/********************************************//**
+ *  Calculates the 3D radial distribution function for a single snapshot
+ Use this only if there is one frame only.
+ ***********************************************/
 void CAnalysis::singleRDF3D(class CMolecularSystem& molSys)
 {
     // There is only one snapshot
@@ -121,7 +101,9 @@ void CAnalysis::singleRDF3D(class CMolecularSystem& molSys)
     this->normalizeRDF3D();
 }
 
-// Updates 
+/********************************************//**
+ *  Updates the 3D RDF histogram
+ ***********************************************/
 void CAnalysis::histogramRDF3D(class CMolecularSystem& molSys)
 {
     int natoms = this->nop; // Number of particles
@@ -143,9 +125,13 @@ void CAnalysis::histogramRDF3D(class CMolecularSystem& molSys)
     }
 }
 
-// Normalize the RDF 
-// You will have to call this separately if you are averaging over
-// several snapshots
+/********************************************//**
+ *  Normalizes the RDF
+
+ You will have to call this after accumulateRDF3D if you are averaging over
+ several snapshots. This is automatically called inside singleRDF3D
+ ***********************************************/
+
 void CAnalysis::normalizeRDF3D()
 {
     double bin_volume;                      // Bin volume
@@ -164,8 +150,10 @@ void CAnalysis::normalizeRDF3D()
     }
 }
 
-// Get the radial R values corresponding to each RDF value
-// This will remain the same over all frames
+/********************************************//**
+ *  Get the radial R values corresponding to each RDF value
+ This will remain the same over all frames
+ ***********************************************/
 void CAnalysis::getR()
 {
     // Loop through all bins
@@ -175,7 +163,9 @@ void CAnalysis::getR()
     }
 }
 
-// Initialize the RDF array to 0
+/********************************************//**
+ *  Initialize the RDF array to 0
+ ***********************************************/
 void CAnalysis::rdf3DInitToZero()
 {
     // Loop over all bins
@@ -189,8 +179,10 @@ void CAnalysis::rdf3DInitToZero()
 // DISTANCE CALCULATIONS
 //-------------------------------------------------------------------------------------------------------
 
-// Returns the absolute distance between two particles
-// with particle indices iatom and jatom (x[iatom] - x[jatom])
+/********************************************//**
+ *  Returns the absolute distance between two particles
+ with particle indices iatom and jatom (x[iatom] - x[jatom])
+ ***********************************************/
 double CAnalysis::getAbsDistance(int iatom, int jatom, class CMolecularSystem& molSys)
 {
     double dr[3]; // Relative distance between wrapped coordinates
@@ -219,7 +211,9 @@ double CAnalysis::getAbsDistance(int iatom, int jatom, class CMolecularSystem& m
 // OUTPUT FUNCTION
 //-------------------------------------------------------------------------------------------------------
 
-// Prints out the 3D RDF function to a file in the output folder 
+/********************************************//**
+ *  Prints out the 3D RDF function to a file in the output folder
+ ***********************************************/
 void CAnalysis::printRDF3D()
 {
     // Prints the radial values and 3D RDF values to a file called rdf3D.txt
@@ -230,9 +224,12 @@ void CAnalysis::printRDF3D()
 // CHECKS AND HELPER FUNCTIONS
 //-------------------------------------------------------------------------------------------------------
 
-// Checks that the max_radius entered is correct. If the max_radius is greater than half the simulation
-// box length, by default it is set as half the smallest box length
-// If the volume has not been set, set it as the simulation box volume
+/********************************************//**
+ *  Checks that the max_radius entered is correct.
+ If the max_radius is greater than half the simulation
+ box length, by default it is set as half the smallest box length
+ If the volume has not been set, set it as the simulation box volume 
+ ***********************************************/
 // TODO: Modify for 2-D case
 // TODO: Check binwidth
 void CAnalysis::checkParameter(class CMolecularSystem& molSys)
@@ -252,7 +249,6 @@ void CAnalysis::checkParameter(class CMolecularSystem& molSys)
   // Check if the max_radius is within bounds
   if (radius > half_box || radius <= 0.0)
   {
-    std::cerr << "The maximum possible value of radius is " << half_box << " and in the parameter.txt file, it was set as " << radius << "\n";
     std::cerr << "I will now set the maximum radius to half the simulation box length " <<"\n";
     this->max_radius = half_box;
   }
