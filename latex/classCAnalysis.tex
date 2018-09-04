@@ -1,0 +1,91 @@
+\hypertarget{classCAnalysis}{}\section{C\+Analysis Class Reference}
+\label{classCAnalysis}\index{C\+Analysis@{C\+Analysis}}
+Inheritance diagram for C\+Analysis\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classCAnalysis}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classCAnalysis_a9de7483ee6245d5b44270b103d82c923}{init\+R\+D\+F3D}} (class \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} \&mol\+Sys, double binwidth, int, int, double max\+\_\+radius=-\/1.\+0, double volume=-\/1.\+0)
+\item 
+void \mbox{\hyperlink{classCAnalysis_af98ccc59633e86ecf905367b65c4635e}{single\+R\+D\+F3D}} (class \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} \&mol\+Sys)
+\item 
+void \mbox{\hyperlink{classCAnalysis_a3f2969c8e2e2ca69cf80de4210c27a2e}{accumulate\+R\+D\+F3D}} (class \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} \&mol\+Sys)
+\item 
+void \mbox{\hyperlink{classCAnalysis_a1716c9da84e9d41cbb32b97f7708e9f7}{normalize\+R\+D\+F3D}} ()
+\item 
+void \mbox{\hyperlink{classCAnalysis_ac90e1a07030a0954036f4461562b0c1b}{getR}} ()
+\item 
+void \mbox{\hyperlink{classCAnalysis_adf290a55dbb19e9150f03d45fb419cee}{print\+R\+D\+F3D}} ()
+\item 
+void \mbox{\hyperlink{classCAnalysis_ae54948a0123c7ef52857e47363923500}{delete\+R\+D\+F3D}} ()
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classCAnalysis_aa7139079b0f7af4b564352a8d536a79f}\label{classCAnalysis_aa7139079b0f7af4b564352a8d536a79f}} 
+double $\ast$ {\bfseries rdf3D}
+\item 
+\mbox{\Hypertarget{classCAnalysis_aece0c0ea1ca3288218cb6ce4301e2a76}\label{classCAnalysis_aece0c0ea1ca3288218cb6ce4301e2a76}} 
+double $\ast$ {\bfseries r\+Val}
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classCAnalysis_a3f2969c8e2e2ca69cf80de4210c27a2e}\label{classCAnalysis_a3f2969c8e2e2ca69cf80de4210c27a2e}} 
+\index{C\+Analysis@{C\+Analysis}!accumulate\+R\+D\+F3D@{accumulate\+R\+D\+F3D}}
+\index{accumulate\+R\+D\+F3D@{accumulate\+R\+D\+F3D}!C\+Analysis@{C\+Analysis}}
+\subsubsection{\texorpdfstring{accumulate\+R\+D\+F3\+D()}{accumulateRDF3D()}}
+{\footnotesize\ttfamily void C\+Analysis\+::accumulate\+R\+D\+F3D (\begin{DoxyParamCaption}\item[{class \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} \&}]{mol\+Sys }\end{DoxyParamCaption})}
+
+Calculates the 3D radial distribution function for a number of snapshots
+
+There is no need to use single\+R\+D\+F3D if the R\+DF is to be calculated over a number of frames. You will have to call the normalize function normalize\+R\+D\+F3D separately after accumulating to get the R\+DF \mbox{\Hypertarget{classCAnalysis_ae54948a0123c7ef52857e47363923500}\label{classCAnalysis_ae54948a0123c7ef52857e47363923500}} 
+\index{C\+Analysis@{C\+Analysis}!delete\+R\+D\+F3D@{delete\+R\+D\+F3D}}
+\index{delete\+R\+D\+F3D@{delete\+R\+D\+F3D}!C\+Analysis@{C\+Analysis}}
+\subsubsection{\texorpdfstring{delete\+R\+D\+F3\+D()}{deleteRDF3D()}}
+{\footnotesize\ttfamily void C\+Analysis\+::delete\+R\+D\+F3D (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Frees the memory \mbox{\Hypertarget{classCAnalysis_ac90e1a07030a0954036f4461562b0c1b}\label{classCAnalysis_ac90e1a07030a0954036f4461562b0c1b}} 
+\index{C\+Analysis@{C\+Analysis}!getR@{getR}}
+\index{getR@{getR}!C\+Analysis@{C\+Analysis}}
+\subsubsection{\texorpdfstring{get\+R()}{getR()}}
+{\footnotesize\ttfamily void C\+Analysis\+::getR (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Get the radial R values corresponding to each R\+DF value This will remain the same over all frames \mbox{\Hypertarget{classCAnalysis_a9de7483ee6245d5b44270b103d82c923}\label{classCAnalysis_a9de7483ee6245d5b44270b103d82c923}} 
+\index{C\+Analysis@{C\+Analysis}!init\+R\+D\+F3D@{init\+R\+D\+F3D}}
+\index{init\+R\+D\+F3D@{init\+R\+D\+F3D}!C\+Analysis@{C\+Analysis}}
+\subsubsection{\texorpdfstring{init\+R\+D\+F3\+D()}{initRDF3D()}}
+{\footnotesize\ttfamily void C\+Analysis\+::init\+R\+D\+F3D (\begin{DoxyParamCaption}\item[{class \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} \&}]{mol\+Sys,  }\item[{double}]{binwidth,  }\item[{int}]{typeA,  }\item[{int}]{typeB,  }\item[{double}]{max\+\_\+radius = {\ttfamily -\/1.0},  }\item[{double}]{volume = {\ttfamily -\/1.0} }\end{DoxyParamCaption})}
+
+Initializes the histogram array for 3-\/D R\+DF
+
+It takes the \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} object, binwidth and a pair of int type numbers corresponding to lammps type I\+Ds in the trajectory file as arguments. Optional arguments include the maximum radius upto which the 3-\/D R\+DF will be calculated and the desired volume. If not set, the default values are half the simulation box and the volume of the simulation box respectively \mbox{\Hypertarget{classCAnalysis_a1716c9da84e9d41cbb32b97f7708e9f7}\label{classCAnalysis_a1716c9da84e9d41cbb32b97f7708e9f7}} 
+\index{C\+Analysis@{C\+Analysis}!normalize\+R\+D\+F3D@{normalize\+R\+D\+F3D}}
+\index{normalize\+R\+D\+F3D@{normalize\+R\+D\+F3D}!C\+Analysis@{C\+Analysis}}
+\subsubsection{\texorpdfstring{normalize\+R\+D\+F3\+D()}{normalizeRDF3D()}}
+{\footnotesize\ttfamily void C\+Analysis\+::normalize\+R\+D\+F3D (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Normalizes the R\+DF
+
+You will have to call this after accumulate\+R\+D\+F3D if you are averaging over several snapshots. This is automatically called inside single\+R\+D\+F3D \mbox{\Hypertarget{classCAnalysis_adf290a55dbb19e9150f03d45fb419cee}\label{classCAnalysis_adf290a55dbb19e9150f03d45fb419cee}} 
+\index{C\+Analysis@{C\+Analysis}!print\+R\+D\+F3D@{print\+R\+D\+F3D}}
+\index{print\+R\+D\+F3D@{print\+R\+D\+F3D}!C\+Analysis@{C\+Analysis}}
+\subsubsection{\texorpdfstring{print\+R\+D\+F3\+D()}{printRDF3D()}}
+{\footnotesize\ttfamily void C\+Analysis\+::print\+R\+D\+F3D (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Prints out the 3D R\+DF function to a file in the output folder \mbox{\Hypertarget{classCAnalysis_af98ccc59633e86ecf905367b65c4635e}\label{classCAnalysis_af98ccc59633e86ecf905367b65c4635e}} 
+\index{C\+Analysis@{C\+Analysis}!single\+R\+D\+F3D@{single\+R\+D\+F3D}}
+\index{single\+R\+D\+F3D@{single\+R\+D\+F3D}!C\+Analysis@{C\+Analysis}}
+\subsubsection{\texorpdfstring{single\+R\+D\+F3\+D()}{singleRDF3D()}}
+{\footnotesize\ttfamily void C\+Analysis\+::single\+R\+D\+F3D (\begin{DoxyParamCaption}\item[{class \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} \&}]{mol\+Sys }\end{DoxyParamCaption})}
+
+Calculates the 3D radial distribution function for a single snapshot Use this only if there is one frame only. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+analysis.\+h\item 
+analysis.\+cpp\end{DoxyCompactItemize}
