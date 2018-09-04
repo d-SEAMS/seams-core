@@ -13,6 +13,18 @@
 #include "molecular_system.h"
 #include "output.h"
 
+/*! \brief Class for 3D RDF.
+ *         This class creates an object for the 3D-RDF, 
+  and the output of the RDF can be printed to a file
+ *
+ Use initRDF3D() to create an object for the 3D RDF.
+ Depending on the number of frames, use singleRDF3D() or accumulateRDF3D() .
+ In case you have used the accumulate function, you will have to use the normalizeRDF3D()
+ to normalize the RDF. 
+ Finally, print the output to an output file, which is called rdf3D.txt by default using
+ the print function
+ */
+
 class CAnalysis: public COutput {
 	private:
 		// No. of snapshots for RDF

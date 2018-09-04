@@ -73,8 +73,8 @@ void CAnalysis::getBins()
 /********************************************//**
  *  Calculates the 3D radial distribution function for a number of snapshots
 
- There is no need to use singleRDF3D if the RDF is to be calculated over a number of frames.
- You will have to call the normalize function normalizeRDF3D separately 
+ There is no need to use singleRDF3D() if the RDF is to be calculated over a number of frames.
+ You will have to call the normalize function normalizeRDF3D() separately 
  after accumulating to get the RDF 
  ***********************************************/
 void CAnalysis::accumulateRDF3D(class CMolecularSystem& molSys)
@@ -128,7 +128,7 @@ void CAnalysis::histogramRDF3D(class CMolecularSystem& molSys)
 /********************************************//**
  *  Normalizes the RDF
 
- You will have to call this after accumulateRDF3D if you are averaging over
+ You will have to call this after accumulateRDF3D() if you are averaging over
  several snapshots. This is automatically called inside singleRDF3D
  ***********************************************/
 
