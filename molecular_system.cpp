@@ -227,6 +227,7 @@ void CMolecularSystem::readParticleFile()
 
 // Reads configuration from the lammps trajectory file 
 // at a particular step number
+// TODO: Generalize for when mol ID has not been printed out
 void CMolecularSystem::readParticleFile(int step)
 {
   double posx,posy,posz;
@@ -236,6 +237,7 @@ void CMolecularSystem::readParticleFile(int step)
   std::string::size_type lpos;   // Next entry in the line 
   double number;                 // Each number being read from the line
   std::vector<double> lineVal;   // Vector containing all the elements in the line
+  int type;                      // Type ID of a particle
           
   dumpFile.open(this->parameter->trajFile.c_str(), std::ifstream::in);
 
@@ -284,8 +286,10 @@ void CMolecularSystem::readParticleFile(int step)
           posx = lineVal[3];
           posy = lineVal[4];
           posz = lineVal[5];
+          type = lineVal[2];
 
           this->molecules[iatom].set_position(posx, posy, posz);
+          this->molecules[iatom].type = type;
 
         }
         else // Skip lines for other snapshots
