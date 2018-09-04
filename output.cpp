@@ -16,7 +16,7 @@ void COutput::createOutputDir(const char *path)
 	struct stat info;
 
 	if( info.st_mode & S_IFDIR )  
-    	cout << "Output directory exists \n";
+    	std::cout << "Output directory exists \n";
 	else
 	{
 		// The output directory does not exist
@@ -24,13 +24,13 @@ void COutput::createOutputDir(const char *path)
 		int status = mkdir("./output", 0777);
 		switch	(status) {
 			case -1:
-			cout << "Folder exists or you can't access it.\n";
+			std::cout << "Folder exists or you can't access it.\n";
 			break;
 			case 0:
-			cout << "I created something.\n";
+			std::cout << "I created something.\n";
 			break;
 			default:
-			cout << "I have died. Avenge me.\n";
+			std::cout << "I have died. Avenge me.\n";
 		}
 	}
  }
@@ -39,9 +39,9 @@ void COutput::createOutputDir(const char *path)
 // Function for printing out a file to the output directory 
 // The function prints arrays to file, with the size, and two x,y arrays, and
 // desired filename as arguments
-void COutput::printToFile(int nbin, double* x, double* y, const string& filename, const string& xName, const string& yName)
+void COutput::printToFile(int nbin, double* x, double* y, const std::string& filename, const std::string& xName, const std::string& yName)
 {
-	ofstream outputFile; 
+	std::ofstream outputFile; 
 
 	// First check if the output directory exists or not. If it does not exist create it.
 	this->createOutputDir("output");
