@@ -46,6 +46,9 @@ class CAnalysis: public COutput {
     	// Calculate the number of bins
     	void getBins();
 
+        // Calculate the number of atoms in the box for the given frame and IDs
+        int getNatoms(class CMolecularSystem& molSys);
+
     	// Check to make sure that the user-defined max_radius is within limits, assign volume
     	void checkParameter(class CMolecularSystem& molSys);
     	// Initialize the 3D RDF array to zero before histogramming
@@ -64,14 +67,19 @@ class CAnalysis: public COutput {
     	// Dynamically allocated array for histogram values
     	// for RDF and radial values
 		double* rdf3D;
-		double* rVal; 
+		double* rVal;
+
+        // Lammps trajectory IDs of the atoms to compute the RDF 
+        // If not set, RDF for all atoms is calculated
+        int typeA;
+        int typeB; 
 
     	// Initialize the histogram
-    	void initRDF3D(class CMolecularSystem& molSys, double binwidth, int, int, double max_radius=-1.0 ,double volume=-1.0);
+    	void initRDF3D(class CMolecularSystem& molSys, double binwidth, double max_radius=-1.0 ,double volume=-1.0);
     	// Calculates the RDF for a single snapshot
-    	void singleRDF3D(class CMolecularSystem& molSys);
+    	void singleRDF3D(class CMolecularSystem& molSys, int typeA=-1, int typeB=-1);
     	// Calculates the RDF over a number of snapshots
-    	void accumulateRDF3D(class CMolecularSystem& molSys);
+    	void accumulateRDF3D(class CMolecularSystem& molSys, int typeA=-1, int typeB=-1);
     	// Normalizes the RDF. You don't need to call this separately 
     	// for calculation of RDF for a single frame. You must call this 
     	// after using the accumulate RDF command for multiple snapshots
