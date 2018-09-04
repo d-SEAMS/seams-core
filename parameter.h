@@ -7,8 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-using namespace std;
-
 const int NUMBER_OF_PARAMETERS = 200;
 const double PI = 3.14159265;
 
@@ -18,8 +16,8 @@ class ExceptionBadLineInParameterFile{
 
 struct s_rawParameter
 {
-  string name;
-  string value;
+  std::string name;
+  std::string value;
 };
 
 class CParameter {
@@ -36,10 +34,10 @@ class CParameter {
     //Boxsize x and y
     double boxx, boxy, boxz;
     //XYZFile
-    string xyzFile;
+    std::string xyzFile;
     double neighbordistance;
     // LAMMPS trajectory file
-    string trajFile;
+    std::string trajFile;
     // Total number of steps; starting step and ending step number
     int nsteps;
  };

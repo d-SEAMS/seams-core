@@ -2,9 +2,9 @@
 #include "molecular_system.h"
 #include "molecule.h"
 
-const string PF_BINWIDTH = "binwidth";
-const string PF_RADIUS = "max_radius";
-const string PF_VOLUME = "volume";
+const std::string PF_BINWIDTH = "binwidth";
+const std::string PF_RADIUS = "max_radius";
+const std::string PF_VOLUME = "volume";
 
 // Constructor
 CAnalysis::CAnalysis()
@@ -71,12 +71,12 @@ void CAnalysis::readParameter(class CMolecularSystem& molSys)
       if(line.substr(0, 2).compare("//")!=0)
       {
         pos  = line.find('=');
-        if (pos != string::npos)
+        if (pos != std::string::npos)
         {
           this->rawParameter[i].name = line.substr(0, pos );
-          this->rawParameter[i].value = line.substr(pos+1, string::npos );
+          this->rawParameter[i].value = line.substr(pos+1, std::string::npos );
         i += 1;
-          } else {if (line.compare("")>0) {cerr << "malformed line in parameterfile :" << line << "\n";}}
+          } else {if (line.compare("")>0) {std::cerr << "malformed line in parameterfile :" << line << "\n";}}
         }
     }
     for (int j = 0;j < i;j++)

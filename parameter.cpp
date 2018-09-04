@@ -1,13 +1,13 @@
 #include "parameter.h"
 #include<fstream>
 
-const string PF_NUMBEROFPARTICLES = "NumberOfParticles";
-const string PF_BOXX = "xBox";
-const string PF_BOXY = "yBox";
-const string PF_BOXZ = "zBox";
-const string PF_XYZFILE = "XYZFile";
-const string PF_TRAJFILE = "trajFile";
-const string PF_NEIGHBORDISTANCE = "NeighborDistance";
+const std::string PF_NUMBEROFPARTICLES = "NumberOfParticles";
+const std::string PF_BOXX = "xBox";
+const std::string PF_BOXY = "yBox";
+const std::string PF_BOXZ = "zBox";
+const std::string PF_XYZFILE = "XYZFile";
+const std::string PF_TRAJFILE = "trajFile";
+const std::string PF_NEIGHBORDISTANCE = "NeighborDistance";
 
 //Constructor
 CParameter::CParameter()
@@ -32,23 +32,23 @@ CParameter::~CParameter()
 //****************************************************************************************
 void CParameter::readParameter()
 {
-  ifstream paraFile;
+  std::ifstream paraFile;
   // Open the parameter file
   paraFile.open("input/parameter.txt");
-  string line;
-  string::size_type pos;
+  std::string line;
+  std::string::size_type pos;
   int i = 0;
-  while (getline(paraFile,line))
+  while (std::getline(paraFile,line))
   {
     if(line.substr(0, 2).compare("//")!=0)
     {
       pos  = line.find('=');
-      if (pos != string::npos)
+      if (pos != std::string::npos)
       {
         this->rawParameter[i].name = line.substr(0, pos );
-        this->rawParameter[i].value = line.substr(pos+1, string::npos );
+        this->rawParameter[i].value = line.substr(pos+1, std::string::npos );
         i += 1;
-      } else {if (line.compare("")>0) {cerr << "malformed line in parameterfile :" << line << "\n";}}
+      } else {if (line.compare("")>0) {std::cerr << "malformed line in parameterfile :" << line << "\n";}}
     }
   }
   for (int j = 0;j < i;j++)

@@ -2,8 +2,8 @@
 #include "molecule.h"
 
 // For reading in lammps traj files
-const string PF_ITEM = "ITEM:";
-const string PF_ATOM = "ATOMS";
+const std::string PF_ITEM = "ITEM:";
+const std::string PF_ATOM = "ATOMS";
 
 CMolecularSystem::CMolecularSystem()
 {
@@ -84,7 +84,7 @@ void CMolecularSystem::readWholeTrj()
   bool atom_flag = true;    // To test if we are reading in a coordinate line or not
                             // set to true at first
   int natoms;               // To count no. of atoms in each timestep snapshot
-  dumpFile.open(this->parameter->trajFile.c_str(),ifstream::in);
+  dumpFile.open(this->parameter->trajFile.c_str(), std::ifstream::in);
 
 
   nsteps = 1;
@@ -128,7 +128,7 @@ void CMolecularSystem::readWholeTrj()
   {
     // Find the first space in the line
     pos = line.find(' ');
-    if (pos != string::npos) // There's more than one word in the line!
+    if (pos != std::string::npos) // There's more than one word in the line!
     {                             
       word = line.substr(0, pos); // To find the first word      
     }
@@ -137,7 +137,7 @@ void CMolecularSystem::readWholeTrj()
     {                                 // Test the second word if ITEM:
        lpos = pos + 1;
        pos  = line.find(' ', lpos);
-       if (pos != string::npos)
+       if (pos != std::string::npos)
        {                               // Get the second word if there is another space
          word = line.substr(lpos, pos - lpos);
          if (word.compare(PF_ATOM) == 0)
@@ -182,7 +182,7 @@ void CMolecularSystem::readParticleFile()
   int nop;
   std::string line;
   std::ifstream confFile;
-  confFile.open(this->parameter->xyzFile.c_str(),ifstream::in);
+  confFile.open(this->parameter->xyzFile.c_str(), std::ifstream::in);
   if (confFile.is_open())
   {
     //the first line contains the number of particles
@@ -204,12 +204,12 @@ void CMolecularSystem::readParticleFile()
     {
       std::getline(confFile,line);
       std::string::size_type pos  = line.find(' ');
-      if (pos == string::npos) break;
+      if (pos == std::string::npos) break;
       posx = strtod(line.substr(0, pos ).c_str(),NULL);
 
-      string::size_type lpos = pos + 1;
+      std::string::size_type lpos = pos + 1;
       pos  = line.find(' ', lpos);
-      if (pos == string::npos) break;
+      if (pos == std::string::npos) break;
       posy = strtod(line.substr(lpos, pos - lpos).c_str(),NULL);
       lpos = pos+1;
 
@@ -237,7 +237,7 @@ void CMolecularSystem::readParticleFile(int step)
   double number;                 // Each number being read from the line
   std::vector<double> lineVal;   // Vector containing all the elements in the line
           
-  dumpFile.open(this->parameter->trajFile.c_str(),ifstream::in);
+  dumpFile.open(this->parameter->trajFile.c_str(), std::ifstream::in);
 
   // Error handling for an invalid step
   if (step > this->parameter->nsteps)
