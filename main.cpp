@@ -40,7 +40,7 @@ int main()
     // Create object for 3D RDF 
     CAnalysis *woot = new CAnalysis;
     // Testing 3D rdf function
-    woot->initRDF3D(*m_MolSys);
+    woot->initRDF3D(*m_MolSys, 0.05, 1, 1); // 4 
     // Get the 3D RDF for one step
     woot->singleRDF3D(*m_MolSys); 
 
