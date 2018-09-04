@@ -15,8 +15,6 @@
 #include "parameter.h"
 #include "analysis.h"
 
-using namespace std;
-
 //Value used to indicate end of neighbour lists
 const int nilvalue = 33333333;
 //Pi

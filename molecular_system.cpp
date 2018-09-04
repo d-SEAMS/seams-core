@@ -49,7 +49,7 @@ void CMolecularSystem::deleteMolecules()
 void CMolecularSystem::InitializeSystem()
 {
   if (this->parameter->xyzFile.compare("notset") == 0 && this->parameter->trajFile.compare("notset") == 0) {
-    cerr << "The filename must be set in the input file parameter.txt\n";}
+    std::cerr << "The filename must be set in the input file parameter.txt\n";}
   else
   {
     if (this->parameter->xyzFile.compare("notset") == 0) // Read from the traj file
@@ -76,11 +76,11 @@ void CMolecularSystem::readWholeTrj()
   int nsteps;
   double dr[3];             // Array for boxx, boxy, boxz             
   double rlo, rhi;          // To store xlo, xhi etc from the traj file
-  string::size_type pos;    // To find positions within the line
-  string::size_type lpos;   // Next entry in the line
-  string line;              // Current line being read in
-  string word;              // To check which line is being read in 
-  ifstream dumpFile;
+  std::string::size_type pos;    // To find positions within the line
+  std::string::size_type lpos;   // Next entry in the line
+  std::string line;              // Current line being read in
+  std::string word;              // To check which line is being read in 
+  std::ifstream dumpFile;
   bool atom_flag = true;    // To test if we are reading in a coordinate line or not
                             // set to true at first
   int natoms;               // To count no. of atoms in each timestep snapshot
@@ -89,25 +89,25 @@ void CMolecularSystem::readWholeTrj()
 
   nsteps = 1;
   //First line of traj file- ITEM: TIMESTEP
-  getline(dumpFile,line);
+  std::getline(dumpFile,line);
   // Contains the timestep number
-  getline(dumpFile,line);
+  std::getline(dumpFile,line);
   // ITEM: NUMBER OF ATOMS
-  getline(dumpFile,line); // Skip!
+  std::getline(dumpFile,line); // Skip!
     
   // The next line contains the number of particles 
-  getline(dumpFile, line);
+  std::getline(dumpFile, line);
   nop = atoi(line.c_str());
   this->parameter->nop = nop;
   this->initializeMolecules(nop);
     
   // Ignore line- ITEM: BOX BOUNDS pp pp pp
-  getline(dumpFile,line);
+  std::getline(dumpFile,line);
   // Followed by boxx,boxy,boxz
   for (int k = 0; k <= 2; k++) 
   {
     // line contains xlo xhi separated by a space
-    getline(dumpFile,line);
+    std::getline(dumpFile,line);
     pos = line.find(' ');
     rlo = strtod(line.substr(0, pos ).c_str(),NULL); 
     lpos = pos + 1;
@@ -121,10 +121,10 @@ void CMolecularSystem::readWholeTrj()
   this->parameter->boxz = dr[2];
 
   // Skip- ITEM: ATOMS id mol type x y z 
-  getline(dumpFile,line);
+  std::getline(dumpFile,line);
 
   // Loop through the entire file
-  while( getline(dumpFile,line) )
+  while( std::getline(dumpFile,line) )
   {
     // Find the first space in the line
     pos = line.find(' ');
@@ -166,7 +166,7 @@ void CMolecularSystem::readWholeTrj()
   // throw an error
   if (natoms < nop)
   {
-    cerr << "Snapshot number " << nsteps << " has an incomplete list of coordinates." << "\n";
+    std::cerr << "Snapshot number " << nsteps << " has an incomplete list of coordinates." << "\n";
   } 
 
   // Finally save no. of steps
@@ -180,30 +180,30 @@ void CMolecularSystem::readParticleFile()
 {
   double posx,posy,posz;
   int nop;
-  string line;
-  ifstream confFile;
+  std::string line;
+  std::ifstream confFile;
   confFile.open(this->parameter->xyzFile.c_str(),ifstream::in);
   if (confFile.is_open())
   {
     //the first line contains the number of particles
-    getline(confFile,line);
+    std::getline(confFile,line);
     nop = atoi(line.c_str());
     this->parameter->nop = nop;
     this->initializeMolecules(nop);
 
     //Followed by boxx,boxy,boxz
-    getline(confFile,line);
+    std::getline(confFile,line);
     this->parameter->boxx = atof(line.c_str());
-    getline(confFile,line);
+    std::getline(confFile,line);
     this->parameter->boxy = atof(line.c_str());
-    getline(confFile,line);
+    std::getline(confFile,line);
     this->parameter->boxz = atof(line.c_str());
 
     //so lets read the particles positions
     for (int ti = 0;ti<nop;ti++)
     {
-      getline(confFile,line);
-      string::size_type pos  = line.find(' ');
+      std::getline(confFile,line);
+      std::string::size_type pos  = line.find(' ');
       if (pos == string::npos) break;
       posx = strtod(line.substr(0, pos ).c_str(),NULL);
 
@@ -220,7 +220,7 @@ void CMolecularSystem::readParticleFile()
   }
   else
   {
-    cerr << "Fatal Error : cannot open the file " <<  this->parameter->xyzFile << "\n";
+    std::cerr << "Fatal Error : cannot open the file " <<  this->parameter->xyzFile << "\n";
   }
 }
 
@@ -230,20 +230,20 @@ void CMolecularSystem::readParticleFile()
 void CMolecularSystem::readParticleFile(int step)
 {
   double posx,posy,posz;
-  string line;              // Current line being read in
-  ifstream dumpFile;
-  string::size_type pos;    // To find positions within the line
-  string::size_type lpos;   // Next entry in the line 
-  double number;            // Each number being read from the line
-  vector<double> lineVal; // Vector containing all the elements in the line
+  std::string line;              // Current line being read in
+  std::ifstream dumpFile;
+  std::string::size_type pos;    // To find positions within the line
+  std::string::size_type lpos;   // Next entry in the line 
+  double number;                 // Each number being read from the line
+  std::vector<double> lineVal;   // Vector containing all the elements in the line
           
   dumpFile.open(this->parameter->trajFile.c_str(),ifstream::in);
 
   // Error handling for an invalid step
   if (step > this->parameter->nsteps)
   {
-    cerr << "The step number " << step << " is larger than the number of steps in the trajectory" << "\n";
-    cerr << "Using the first snapshot in the lammps trajectory file by default"<< "\n";
+    std::cerr << "The step number " << step << " is larger than the number of steps in the trajectory" << "\n";
+    std::cerr << "Using the first snapshot in the lammps trajectory file by default"<< "\n";
     step = 1;
   }
 
@@ -254,26 +254,26 @@ void CMolecularSystem::readParticleFile(int step)
     for (int istep = 1; istep <= this->parameter->nsteps; istep++)
     {
       // Lines before coordinates in every snapshot
-      getline(dumpFile,line); // ITEM: TIMESTEP
-      getline(dumpFile, line); // Timestep
-      getline(dumpFile, line); // ITEM: NUMBER OF ATOMS
-      getline(dumpFile, line); // No. of particles; already saved though
-      getline(dumpFile, line); // ITEM: BOX BOUNDS pp pp pp
+      std::getline(dumpFile,line); // ITEM: TIMESTEP
+      std::getline(dumpFile, line); // Timestep
+      std::getline(dumpFile, line); // ITEM: NUMBER OF ATOMS
+      std::getline(dumpFile, line); // No. of particles; already saved though
+      std::getline(dumpFile, line); // ITEM: BOX BOUNDS pp pp pp
       // Skip the three lines with box dimenions
       for (int k=0; k<3; k++)
       {
-        getline(dumpFile, line);
+        std::getline(dumpFile, line);
       } 
-      getline(dumpFile, line); // ITEM: ATOMS id mol type x y z 
+      std::getline(dumpFile, line); // ITEM: ATOMS id mol type x y z 
       // Now get the particle positions; only at the correct step
       for (int iatom=0; iatom < this->parameter->nop; iatom++)
       {
-        getline(dumpFile, line);
+        std::getline(dumpFile, line);
 
         // Don't save the particle positions for the rest of the snapshots
         if (istep == step)
         { // Save the coordinates in the line 
-          istringstream is( line );
+          std::istringstream is( line );
           // Clear the contents of the vector
           lineVal.clear();
           while (is >> number)
@@ -299,7 +299,7 @@ void CMolecularSystem::readParticleFile(int step)
   }       // End of check for the file being open
   else
   {
-    cerr << "Fatal Error : cannot open the file " <<  this->parameter->xyzFile << "\n";
+    std::cerr << "Fatal Error : cannot open the file " <<  this->parameter->xyzFile << "\n";
   }
 }
 
