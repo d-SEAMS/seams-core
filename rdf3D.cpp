@@ -1,9 +1,9 @@
-#include "analysis.h"
+#include "rdf3D.h"
 #include "molecular_system.h"
 #include "molecule.h"
 
 // Constructor
-CAnalysis::CAnalysis()
+Rdf3D::Rdf3D()
 {
   this->binwidth = -1.0;
   this->max_radius = -1.0;
@@ -13,7 +13,7 @@ CAnalysis::CAnalysis()
   this->typeB = -1;
 }
 
-CAnalysis::~CAnalysis()
+Rdf3D::~Rdf3D()
 {
   delete [] rdf3D;
   delete [] rVal;
@@ -28,7 +28,7 @@ CAnalysis::~CAnalysis()
  the 3-D RDF will be calculated and the desired volume. If not set, the default
  values are half the simulation box and the volume of the simulation box respectively
  ***********************************************/
-void CAnalysis::initRDF3D(class CMolecularSystem& molSys, double binwidth, double max_radius, double volume)
+void Rdf3D::initRDF3D(class CMolecularSystem& molSys, double binwidth, double max_radius, double volume)
 {
     // Get the binwidth, max_radius and volume
     this->binwidth = binwidth; this->max_radius = max_radius; this->volume=volume;
@@ -49,7 +49,7 @@ void CAnalysis::initRDF3D(class CMolecularSystem& molSys, double binwidth, doubl
 /********************************************//**
  *  Frees the memory 
  ***********************************************/
-void CAnalysis::deleteRDF3D()
+void Rdf3D::deleteRDF3D()
 {
     delete [] rdf3D;
     delete [] rVal;
@@ -59,7 +59,7 @@ void CAnalysis::deleteRDF3D()
 /********************************************//**
  *  Calculates the number of bins from max_radius and binwidth
  ***********************************************/
-void CAnalysis::getBins()
+void Rdf3D::getBins()
 {
     this->nbin = int(this->max_radius/this->binwidth);
 }
@@ -69,11 +69,11 @@ void CAnalysis::getBins()
  entered for the particular frame. The number of atoms is
  required for density calculations used for normalizing the RDF
  ***********************************************/
-int CAnalysis::getNatoms(class CMolecularSystem& molSys)
+int Rdf3D::getNatoms(class CMolecularSystem& molSys, int typeA, int typeB)
 {
   int nop=0; // No. of atoms 
   // If the lammps ID has not been set, then set nop as the total nop
-  if (this->typeA==-1 || this->typeB){return molSys.parameter->nop;}
+  if (typeA==-1 || typeB==-1){return molSys.parameter->nop;}
 
   // Loop through all atoms
   for (int iatom = 0; iatom < molSys.parameter->nop; iatom++)
@@ -81,7 +81,16 @@ int CAnalysis::getNatoms(class CMolecularSystem& molSys)
     if (molSys.molecules[iatom].type==typeA || molSys.molecules[iatom].type==typeB){nop += 1;}
   }
 
-  if (nop==0){std::cerr<<"You have entered incorrect type IDs\n"; return molSys.parameter->nop;}
+  if (nop==0){
+    std::cerr<<"You have entered incorrect type IDs\n"; 
+    this->typeA = -1; 
+    this->typeB = -1;
+    return molSys.parameter->nop;
+  }
+
+  // Set the type IDs if they are correct
+  this->typeA = typeA;
+  this->typeB = typeB;
   return nop;
 }
 
@@ -103,13 +112,13 @@ int CAnalysis::getNatoms(class CMolecularSystem& molSys)
  You will have to call the normalize function normalizeRDF3D() separately 
  after accumulating to get the RDF 
  ***********************************************/
-void CAnalysis::accumulateRDF3D(class CMolecularSystem& molSys, int typeA, int typeB )
+void Rdf3D::accumulateRDF3D(class CMolecularSystem& molSys, int typeA, int typeB )
 {
     // Check to make sure that the user has entered the correct type ID
     if (this->typeA!=-1 && this->typeA!=typeA && nframes>0){std::cerr<<"Type A cannot be changed after init\n";}
     if (this->typeB!=-1 && this->typeB!=typeB && nframes>0){std::cerr<<"Type B cannot be changed after init\n";}
     // Calculate the number of particles in this particular frame
-    this->nop = this->getNatoms(molSys);
+    this->nop = this->getNatoms(molSys, typeA, typeB);
     // Update the number of snapshots calculated
     this->nframes += 1;
     // Add to the RDF histogram
@@ -127,12 +136,12 @@ void CAnalysis::accumulateRDF3D(class CMolecularSystem& molSys, int typeA, int t
  the RDF is calculated for all the atoms in the frame, assuming they are all 
  of the same type.
  ***********************************************/
-void CAnalysis::singleRDF3D(class CMolecularSystem& molSys, int typeA, int typeB)
+void Rdf3D::singleRDF3D(class CMolecularSystem& molSys, int typeA, int typeB)
 {
     // There is only one snapshot
     this->nframes = 1;
     // Calculate the number of particles in this particular frame
-    this->nop = this->getNatoms(molSys);
+    this->nop = this->getNatoms(molSys, typeA, typeB);
     // Add to the RDF histogram
     this->histogramRDF3D(molSys);
     // Normalize the RDF 
@@ -142,7 +151,7 @@ void CAnalysis::singleRDF3D(class CMolecularSystem& molSys, int typeA, int typeB
 /********************************************//**
  *  Updates the 3D RDF histogram
  ***********************************************/
-void CAnalysis::histogramRDF3D(class CMolecularSystem& molSys)
+void Rdf3D::histogramRDF3D(class CMolecularSystem& molSys)
 {
     int natoms = this->nop; // Number of particles
     double dr;              // Relative distance between iatom and jatom (unwrapped)
@@ -176,7 +185,7 @@ void CAnalysis::histogramRDF3D(class CMolecularSystem& molSys)
  several snapshots. This is automatically called inside singleRDF3D
  ***********************************************/
 
-void CAnalysis::normalizeRDF3D()
+void Rdf3D::normalizeRDF3D()
 {
     double bin_volume;                      // Bin volume
     double nideal;                          // No. of ideal gas particles in each bin_volume
@@ -198,7 +207,7 @@ void CAnalysis::normalizeRDF3D()
  *  Get the radial R values corresponding to each RDF value
  This will remain the same over all frames
  ***********************************************/
-void CAnalysis::getR()
+void Rdf3D::getR()
 {
     // Loop through all bins
     for (int ibin=0; ibin<this->nbin; ibin++)
@@ -210,8 +219,28 @@ void CAnalysis::getR()
 /********************************************//**
  *  Initialize the RDF array to 0
  ***********************************************/
-void CAnalysis::rdf3DInitToZero()
+void Rdf3D::rdf3DInitToZero()
 {
+    // Loop over all bins
+    for (int ibin=0; ibin < this->nbin; ibin++)
+    {
+        this->rdf3D[ibin] = 0.0;
+    }
+}
+
+/********************************************//**
+ *  Sets all the histogram values to zero and 
+ sets the number of frames to zero so that the object can be 
+ re-used. However, the binwidth and maximum radius 
+ remain the same. This can be used to re-use the object 
+ for a different frame etc. Use singleRDF3D() or accumulateRDF3D()
+ after this function
+ ***********************************************/
+void Rdf3D::clearRDF3D()
+{
+    // Re-initialize the number of frames
+    this->nframes = 0;
+
     // Loop over all bins
     for (int ibin=0; ibin < this->nbin; ibin++)
     {
@@ -227,7 +256,7 @@ void CAnalysis::rdf3DInitToZero()
  *  Returns the absolute distance between two particles
  with particle indices iatom and jatom (x[iatom] - x[jatom])
  ***********************************************/
-double CAnalysis::getAbsDistance(int iatom, int jatom, class CMolecularSystem& molSys)
+double Rdf3D::getAbsDistance(int iatom, int jatom, class CMolecularSystem& molSys)
 {
     double dr[3]; // Relative distance between wrapped coordinates
     double box[3] = {molSys.parameter->boxx, molSys.parameter->boxy, molSys.parameter->boxz};
@@ -258,7 +287,7 @@ double CAnalysis::getAbsDistance(int iatom, int jatom, class CMolecularSystem& m
 /********************************************//**
  *  Prints out the 3D RDF function to a file in the output folder
  ***********************************************/
-void CAnalysis::printRDF3D()
+void Rdf3D::printRDF3D()
 {
     // Prints the radial values and 3D RDF values to a file called rdf3D.txt
     this->printToFile(this->nbin, this->rVal, this->rdf3D, "rdf3D", "Radial Distance", "RDF");
@@ -276,7 +305,7 @@ void CAnalysis::printRDF3D()
  ***********************************************/
 // TODO: Modify for 2-D case
 // TODO: Check binwidth
-void CAnalysis::checkParameter(class CMolecularSystem& molSys)
+void Rdf3D::checkParameter(class CMolecularSystem& molSys)
 {
   double boxx, boxy, boxz;
   double half_box; // Half the smallest box length
@@ -311,13 +340,13 @@ void CAnalysis::checkParameter(class CMolecularSystem& molSys)
 }
 
 // Functions for returning the smallest number
-double CAnalysis::smallest(double x, double y, double z)
+double Rdf3D::smallest(double x, double y, double z)
 {
   // return std::min({x,y,z}); // For C++11
   return std::min(std::min(x,y), z);
 }
 
-double CAnalysis::smallest(double x, double y)
+double Rdf3D::smallest(double x, double y)
 {
   return std::min(x,y);
 }

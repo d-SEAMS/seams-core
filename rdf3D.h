@@ -1,5 +1,5 @@
-#ifndef _ANALYSIS_H
-#define _ANALYSIS_H
+#ifndef _RDF3D_H
+#define _RDF3D_H
 
 #include <fstream>
 #include <math.h>
@@ -25,7 +25,7 @@
  the print function
  */
 
-class CAnalysis: public COutput {
+class Rdf3D: public COutput {
 	private:
 		// No. of snapshots for RDF
 		int nframes;		
@@ -47,7 +47,7 @@ class CAnalysis: public COutput {
     	void getBins();
 
         // Calculate the number of atoms in the box for the given frame and IDs
-        int getNatoms(class CMolecularSystem& molSys);
+        int getNatoms(class CMolecularSystem& molSys, int, int);
 
     	// Check to make sure that the user-defined max_radius is within limits, assign volume
     	void checkParameter(class CMolecularSystem& molSys);
@@ -61,8 +61,8 @@ class CAnalysis: public COutput {
 		double smallest(double, double);
 	public:
 		//the main object where all properties of all particles are saved
-    	CAnalysis();
-    	virtual ~CAnalysis();
+    	Rdf3D();
+    	virtual ~Rdf3D();
 
     	// Dynamically allocated array for histogram values
     	// for RDF and radial values
@@ -86,6 +86,8 @@ class CAnalysis: public COutput {
     	void normalizeRDF3D();
     	// Get the radial values corresponding to each radial bin
     	void getR();
+        // Reintialize the histogram and number of frames to zero
+        void clearRDF3D();
 
     	// Print the 3D RDF to a file in the output folder
     	void printRDF3D();

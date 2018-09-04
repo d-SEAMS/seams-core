@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['normalizerdf3d',['normalizeRDF3D',['../classCAnalysis.html#a1716c9da84e9d41cbb32b97f7708e9f7',1,'CAnalysis']]],
+  ['normalizerdf3d',['normalizeRDF3D',['../classRdf3D.html#a08d573ef51fd88bd42456a76fc3d7ca4',1,'Rdf3D']]],
   ['numberofparticlesnotdefinedexception',['NumberOfParticlesNotDefinedException',['../classNumberOfParticlesNotDefinedException.html',1,'']]]
 ];

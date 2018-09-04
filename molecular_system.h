@@ -13,7 +13,26 @@
 #include <sstream>
 #include "molecule.h"
 #include "parameter.h"
-#include "analysis.h"
+#include "rdf3D.h"
+
+/*! \brief Class for information in each frame.
+ *         This class creates an object containing an array of CMolecule objects 
+ with positions, type etc. 
+ *
+ The functions in this class read in the lammps trajectory or an xyz file, and 
+ save the information in a particular snapshot. This can be passed to other objects for
+ post-processing. 
+
+ For processing lammps trajectories, 
+ - First read in the entire trajectory to get the number of frames inside the trajectory
+ file using readWholeTrj()
+ - Now read in information at a particular step number using overloaded function
+ readParticleFile(step). The lammps IDs of each atom are stored along with the positions
+
+ For processing an xyz file:
+ - Use the readParticleFile() to read in the positions of the particles 
+ The type ID is set as 1 by default
+ */
 
 //Value used to indicate end of neighbour lists
 const int nilvalue = 33333333;

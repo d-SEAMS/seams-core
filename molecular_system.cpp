@@ -5,27 +5,37 @@
 const std::string PF_ITEM = "ITEM:";
 const std::string PF_ATOM = "ATOMS";
 
+/********************************************//**
+ *  Constructor
+ ***********************************************/
 CMolecularSystem::CMolecularSystem()
 {
   this->parameter = new CParameter;
   this->parameter->nop = -1;
 }
 
+/********************************************//**
+ *  Destructor
+ ***********************************************/
 CMolecularSystem::~CMolecularSystem()
 {
   delete parameter;
   delete [] molecules;
 }
 
-//Initialize Simulation Box with number of Particles given
-//the nop will be set to the given number
+/********************************************//**
+ *  Initialize the simulation Box with number of Particles given.
+ the nop will be set to the given number
+ ***********************************************/
 void CMolecularSystem::initializeMolecules(int numberOfParticles)
 {
   this->molecules   = new CMolecule[numberOfParticles];
   this->parameter->nop = numberOfParticles;
 }
 
-//Assuming nop is allready set, the simulation box is initialized
+/********************************************//**
+ *  Assuming nop is allready set, the simulation box is initialized
+ ***********************************************/
 void CMolecularSystem::initializeMolecules()
 {
   try {
@@ -38,14 +48,17 @@ void CMolecularSystem::initializeMolecules()
 
 }
 
-//Frees the memory
+/********************************************//**
+ *  Frees the memory
+ ***********************************************/
 void CMolecularSystem::deleteMolecules()
 {
   delete [] molecules;
 }
 
-
-// // Initialize the System depending on the choice of file to read from.
+/********************************************//**
+ *  Initialize the System depending on the choice of file to read from.
+ ***********************************************/
 void CMolecularSystem::InitializeSystem()
 {
   if (this->parameter->xyzFile.compare("notset") == 0 && this->parameter->trajFile.compare("notset") == 0) {
@@ -66,10 +79,10 @@ void CMolecularSystem::InitializeSystem()
 // INITIALIZATION FROM FILE, STRUCUTURE OR FROM ARGS
 //-------------------------------------------------------------------------------------------------------
 
-//****************************************************************************************
-//This procedure reads in the entire trajectory file, finds the total number 
-// of steps, natoms, checks the dump file 
-//****************************************************************************************
+/********************************************//**
+ *  This procedure reads in the entire trajectory file, finds the total number 
+ of steps, natoms and checks the trajectory file
+ ***********************************************/
 void CMolecularSystem::readWholeTrj()
 {
   int nop;
@@ -174,8 +187,9 @@ void CMolecularSystem::readWholeTrj()
 
 }
 
-
-//Reads configuration from xyz file
+/********************************************//**
+ *  Reads configuration from xyz file
+ ***********************************************/
 void CMolecularSystem::readParticleFile()
 {
   double posx,posy,posz;
@@ -224,9 +238,10 @@ void CMolecularSystem::readParticleFile()
   }
 }
 
-
-// Reads configuration from the lammps trajectory file 
-// at a particular step number
+/********************************************//**
+ *  Reads configuration from the lammps trajectory file 
+ at a particular step number
+ ***********************************************/
 // TODO: Generalize for when mol ID has not been printed out
 void CMolecularSystem::readParticleFile(int step)
 {

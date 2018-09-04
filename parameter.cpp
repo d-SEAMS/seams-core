@@ -8,7 +8,11 @@ const std::string PF_BOXZ = "zBox";
 const std::string PF_XYZFILE = "XYZFile";
 const std::string PF_TRAJFILE = "trajFile";
 
-//Constructor
+/********************************************//**
+ *  Connstructor
+ Initialize parameters like the number of particles, 
+ box dimensions, xyz and traj file char strings etc
+ ***********************************************/
 CParameter::CParameter()
 {
   this->nop = -1;
@@ -24,11 +28,11 @@ CParameter::~CParameter()
 {
 }
 
-//****************************************************************************************
-//This procedure reads the parameter.txt file. The keywords are defined above with PF_...
-//if a line starts with // it is handled as comment
-//do not have spaces before or after =
-//****************************************************************************************
+/********************************************//**
+ *  This procedure reads the parameter.txt file. The keywords are defined above with PF_...
+ if a line starts with // it is handled as comment
+ do not have spaces before or after =
+ ***********************************************/
 void CParameter::readParameter()
 {
   std::ifstream paraFile;

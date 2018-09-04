@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['printrdf3d',['printRDF3D',['../classCAnalysis.html#adf290a55dbb19e9150f03d45fb419cee',1,'CAnalysis']]]
+  ['normalizerdf3d',['normalizeRDF3D',['../classRdf3D.html#a08d573ef51fd88bd42456a76fc3d7ca4',1,'Rdf3D']]]
 ];

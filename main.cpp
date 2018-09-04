@@ -16,7 +16,7 @@
 #include "molecular_system.h"
 #include "molecule.h"
 #include "parameter.h"
-#include "analysis.h"
+#include "rdf3D.h"
 #include "output.h"
 #include <ctime>
 #include <sstream>
@@ -38,7 +38,7 @@ int main()
     m_MolSys->readParticleFile(1);
 
     // Create object for 3D RDF 
-    CAnalysis *woot = new CAnalysis;
+    Rdf3D *woot = new Rdf3D;
     // Testing 3D rdf function
     woot->initRDF3D(*m_MolSys, 0.05); // 4 
     // Get the 3D RDF for one step
