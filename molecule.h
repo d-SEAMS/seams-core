@@ -3,8 +3,6 @@
 
 #include <iostream>
 
-const int MAXNUMBEROFNEIGHBORS = 100;
-
 class CMolecule {
   private:
     //The position of the particle
@@ -21,9 +19,8 @@ class CMolecule {
     double get_posx();
     double get_posy();
     double get_posz();
-    int neighbors[MAXNUMBEROFNEIGHBORS];
-    double neighbordist[MAXNUMBEROFNEIGHBORS];
-    int n_neighbors;
+    // Lammps trajectory type ID
+    int type;
 };
 
 #endif
