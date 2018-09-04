@@ -9,6 +9,8 @@ CAnalysis::CAnalysis()
   this->max_radius = -1.0;
   this->volume = -1.0;
   this->nframes = 0;
+  this->typeA = -1;
+  this->typeB = -1;
 }
 
 CAnalysis::~CAnalysis()
@@ -21,20 +23,17 @@ CAnalysis::~CAnalysis()
 /********************************************//**
  *  Initializes the histogram array for 3-D RDF 
 
- It takes the CMolecularSystem object, binwidth and a pair
- of int type numbers corresponding to lammps type IDs in the trajectory
- file as arguments. Optional arguments include the maximum radius upto which 
+ It takes the CMolecularSystem object reference and binwidth as arguments.
+ Optional arguments include the maximum radius upto which 
  the 3-D RDF will be calculated and the desired volume. If not set, the default
  values are half the simulation box and the volume of the simulation box respectively
  ***********************************************/
-void CAnalysis::initRDF3D(class CMolecularSystem& molSys, double binwidth, int typeA, int typeB, double max_radius, double volume)
+void CAnalysis::initRDF3D(class CMolecularSystem& molSys, double binwidth, double max_radius, double volume)
 {
     // Get the binwidth, max_radius and volume
     this->binwidth = binwidth; this->max_radius = max_radius; this->volume=volume;
     // Check the max_radius and parameters
     this->checkParameter(molSys);
-    // Temp nop
-    this->nop = molSys.parameter->nop;
     // Calculate the number of bins from user-defined parameters
     this->getBins();
     // Initialize the array for RDF
@@ -65,6 +64,27 @@ void CAnalysis::getBins()
     this->nbin = int(this->max_radius/this->binwidth);
 }
 
+/********************************************//**
+ *  Calculates the number of atoms for the lammps IDs
+ entered for the particular frame. The number of atoms is
+ required for density calculations used for normalizing the RDF
+ ***********************************************/
+int CAnalysis::getNatoms(class CMolecularSystem& molSys)
+{
+  int nop=0; // No. of atoms 
+  // If the lammps ID has not been set, then set nop as the total nop
+  if (this->typeA==-1 || this->typeB){return molSys.parameter->nop;}
+
+  // Loop through all atoms
+  for (int iatom = 0; iatom < molSys.parameter->nop; iatom++)
+  {
+    if (molSys.molecules[iatom].type==typeA || molSys.molecules[iatom].type==typeB){nop += 1;}
+  }
+
+  if (nop==0){std::cerr<<"You have entered incorrect type IDs\n"; return molSys.parameter->nop;}
+  return nop;
+}
+
 
 //-------------------------------------------------------------------------------------------------------
 // CALCULATIONS
@@ -73,12 +93,23 @@ void CAnalysis::getBins()
 /********************************************//**
  *  Calculates the 3D radial distribution function for a number of snapshots
 
+ It accepts the CMolecularSystem object reference and a pair
+ of int type numbers corresponding to lammps type IDs in the trajectory
+ file as arguments. If the integer type IDs are not set, then 
+ the RDF is calculated for all the atoms in the frame, assuming they are all 
+ of the same type.
+ 
  There is no need to use singleRDF3D() if the RDF is to be calculated over a number of frames.
  You will have to call the normalize function normalizeRDF3D() separately 
  after accumulating to get the RDF 
  ***********************************************/
-void CAnalysis::accumulateRDF3D(class CMolecularSystem& molSys)
+void CAnalysis::accumulateRDF3D(class CMolecularSystem& molSys, int typeA, int typeB )
 {
+    // Check to make sure that the user has entered the correct type ID
+    if (this->typeA!=-1 && this->typeA!=typeA && nframes>0){std::cerr<<"Type A cannot be changed after init\n";}
+    if (this->typeB!=-1 && this->typeB!=typeB && nframes>0){std::cerr<<"Type B cannot be changed after init\n";}
+    // Calculate the number of particles in this particular frame
+    this->nop = this->getNatoms(molSys);
     // Update the number of snapshots calculated
     this->nframes += 1;
     // Add to the RDF histogram
@@ -90,11 +121,18 @@ void CAnalysis::accumulateRDF3D(class CMolecularSystem& molSys)
 /********************************************//**
  *  Calculates the 3D radial distribution function for a single snapshot
  Use this only if there is one frame only.
+
+ It accepts a pair of int type numbers corresponding to lammps type IDs in the trajectory
+ file as arguments. If the integer type IDs are not set, then 
+ the RDF is calculated for all the atoms in the frame, assuming they are all 
+ of the same type.
  ***********************************************/
-void CAnalysis::singleRDF3D(class CMolecularSystem& molSys)
+void CAnalysis::singleRDF3D(class CMolecularSystem& molSys, int typeA, int typeB)
 {
     // There is only one snapshot
     this->nframes = 1;
+    // Calculate the number of particles in this particular frame
+    this->nop = this->getNatoms(molSys);
     // Add to the RDF histogram
     this->histogramRDF3D(molSys);
     // Normalize the RDF 
@@ -112,8 +150,14 @@ void CAnalysis::histogramRDF3D(class CMolecularSystem& molSys)
     // Loop through every pair of particles
     for (int iatom = 0; iatom < natoms-1; iatom++)
     {
+        // Only execute if the atom is of typeA
+        if (molSys.molecules[iatom].type != typeA && typeA!= -1){continue;}
+        
+        // Loop through the j^th atom
         for (int jatom = iatom+1; jatom < natoms; jatom++)
         {
+            if (molSys.molecules[jatom].type != typeB && typeB!= -1){continue;}
+            
             dr = this->getAbsDistance(iatom, jatom, molSys);
             // Only if dr is less than max_radius add to histogram
             if (dr < this->max_radius)
