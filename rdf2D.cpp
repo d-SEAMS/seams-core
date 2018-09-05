@@ -161,15 +161,15 @@ void Rdf2D::histogramRDFxy(class CMolecularSystem& molSys, double z_min, double 
     {
         // Only execute if the atom is of typeA
         if (molSys.molecules[iatom].type != typeA && typeA!= -1){continue;}
-        // If the atom is not in the layer, skip it
-        if (molSys.molecules[iatom].get_posz() < z_min || molSys.molecules[iatom].get_posz() > z_min){continue;}
+        if (molSys.molecules[iatom].get_posz() > z_max){continue;}
+        if (molSys.molecules[iatom].get_posz() < z_min){continue;}
         
         // Loop through the j^th atom
         for (int jatom = iatom+1; jatom < natoms; jatom++)
         {
             if (molSys.molecules[jatom].type != typeB && typeB!= -1){continue;}
-            // Skip if the atom is not in the z range
-            if (molSys.molecules[jatom].get_posz() < z_min || molSys.molecules[jatom].get_posz() > z_min){continue;}
+            if (molSys.molecules[jatom].get_posz() > z_max){continue;}
+            if (molSys.molecules[jatom].get_posz() < z_min){continue;}
             
             dr = this->absDistanceXY(iatom, jatom, molSys);
             // Only if dr is less than max_radius add to histogram
@@ -287,6 +287,20 @@ double Rdf2D::absDistanceXY(int iatom, int jatom, class CMolecularSystem& molSys
 
     return sqrt(r2);
 }
+
+//-------------------------------------------------------------------------------------------------------
+// OUTPUT FUNCTION
+//-------------------------------------------------------------------------------------------------------
+
+/********************************************//**
+ *  Prints out the 2D RDF function to a file in the output folder
+ ***********************************************/
+void Rdf2D::printRDF2D()
+{
+    // Prints the radial values and 3D RDF values to a file called rdf3D.txt
+    this->printToFile(this->nbin, this->rVal, this->rdf2D, "rdf2D", "Radial Distance", "RDF");
+} 
+
 
 //-------------------------------------------------------------------------------------------------------
 // CHECKS AND HELPER FUNCTIONS
