@@ -17,6 +17,7 @@
 #include "molecule.h"
 #include "parameter.h"
 #include "rdf3D.h"
+#include "rdf2D.h"
 #include "output.h"
 #include <ctime>
 #include <sstream>
@@ -35,20 +36,31 @@ int main()
     m_MolSys->InitializeSystem();
 
     //Get random step
-    m_MolSys->readParticleFile(1);
+    m_MolSys->readParticleFile(50);
 
-    // Create object for 3D RDF 
-    Rdf3D *woot = new Rdf3D;
-    // Testing 3D rdf function
-    woot->initRDF3D(*m_MolSys, 0.05); // 4 
-    // Get the 3D RDF for one step
-    woot->singleRDF3D(*m_MolSys); // default ID=1
+    // // Create object for 3D RDF 
+    // Rdf3D *woot = new Rdf3D;
+    // // Testing 3D rdf function
+    // woot->initRDF3D(*m_MolSys, 0.05); // 4 
+    // // Get the 3D RDF for one step
+    // woot->singleRDF3D(*m_MolSys, 2, 1); // default ID=1
 
-    // Print the RDF 
-    woot->printRDF3D();
+    // // Print the RDF 
+    // woot->printRDF3D();
     
+    // // Free the memory 
+    // woot->deleteRDF3D();
+
+    // Create object for 2D RDF
+    Rdf2D *rdf = new Rdf2D; 
+     // Testing 2D rdf function. TODO: Input correct volume
+    rdf->initRDFxy(*m_MolSys, 0.05); 
+    // Get the 2D RDF for one step
+    rdf->singleRDFxy(*m_MolSys, 17, 18.5, 2, 1);
+    // Print the RDF 
+    rdf->printRDF2D();
     // Free the memory 
-    woot->deleteRDF3D();
+    rdf->deleteRDF2D();
 
     //Free the memory.
     m_MolSys->deleteMolecules();
