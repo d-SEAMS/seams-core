@@ -34,6 +34,7 @@ runme
 
 # No more traj
 input/traj/dump-liq.lammpstrj
+input/traj/dump-8*
 #Ignore output folder
 output/
 # Crazy tramp
