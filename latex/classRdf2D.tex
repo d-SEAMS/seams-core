@@ -20,9 +20,9 @@ Inheritance diagram for Rdf2D\+:\begin{figure}[H]
 \item 
 void \mbox{\hyperlink{classRdf2D_a767f006de6412394a59f1cae5f7f6b35}{init\+R\+D\+Fxy}} (class \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} \&mol\+Sys, double binwidth, double volume=-\/1.\+0, double max\+\_\+radius=-\/1.\+0)
 \item 
-void \mbox{\hyperlink{classRdf2D_a984b46264ea53aa92f7134509b5da9d0}{single\+R\+D\+Fxy}} (class \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} \&mol\+Sys, double z\+\_\+min, double z\+\_\+max, int typeA=-\/1, int typeB=-\/1)
+void \mbox{\hyperlink{classRdf2D_afc5ff73aa9c126184e94ee3abfc14ff4}{single\+R\+D\+Fxy}} (class \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} \&mol\+Sys, double z\+\_\+layer, double dz, int typeA=-\/1, int typeB=-\/1)
 \item 
-void \mbox{\hyperlink{classRdf2D_ab4c0b7a104e7ee1c3f3044410a21ebfe}{accumulate\+R\+D\+Fxy}} (class \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} \&mol\+Sys, double z\+\_\+min, double z\+\_\+max, int typeA=-\/1, int typeB=-\/1)
+void \mbox{\hyperlink{classRdf2D_a6c716851d80fd2a7dcfefd219892d87b}{accumulate\+R\+D\+Fxy}} (class \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} \&mol\+Sys, double z\+\_\+layer, double dz, int typeA=-\/1, int typeB=-\/1)
 \item 
 void \mbox{\hyperlink{classRdf2D_acf73dc86f20e82799157ff53994a2754}{normalize\+R\+D\+F2D}} (double)
 \item 
@@ -57,17 +57,17 @@ Class for 2D R\+DF. This class creates an object for the 2D-\/\+R\+DF, and the o
 Use 
 
 \subsection{Member Function Documentation}
-\mbox{\Hypertarget{classRdf2D_ab4c0b7a104e7ee1c3f3044410a21ebfe}\label{classRdf2D_ab4c0b7a104e7ee1c3f3044410a21ebfe}} 
+\mbox{\Hypertarget{classRdf2D_a6c716851d80fd2a7dcfefd219892d87b}\label{classRdf2D_a6c716851d80fd2a7dcfefd219892d87b}} 
 \index{Rdf2D@{Rdf2D}!accumulate\+R\+D\+Fxy@{accumulate\+R\+D\+Fxy}}
 \index{accumulate\+R\+D\+Fxy@{accumulate\+R\+D\+Fxy}!Rdf2D@{Rdf2D}}
 \subsubsection{\texorpdfstring{accumulate\+R\+D\+Fxy()}{accumulateRDFxy()}}
-{\footnotesize\ttfamily void Rdf2\+D\+::accumulate\+R\+D\+Fxy (\begin{DoxyParamCaption}\item[{class \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} \&}]{mol\+Sys,  }\item[{double}]{z\+\_\+min,  }\item[{double}]{z\+\_\+max,  }\item[{int}]{typeA = {\ttfamily -\/1},  }\item[{int}]{typeB = {\ttfamily -\/1} }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily void Rdf2\+D\+::accumulate\+R\+D\+Fxy (\begin{DoxyParamCaption}\item[{class \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} \&}]{mol\+Sys,  }\item[{double}]{z\+\_\+layer,  }\item[{double}]{dz,  }\item[{int}]{typeA = {\ttfamily -\/1},  }\item[{int}]{typeB = {\ttfamily -\/1} }\end{DoxyParamCaption})}
 
 Calculates the 2D radial distribution function for a number of snapshots for a particular XY plane, specified by a range of z values
 
 It accepts the \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} object reference and a pair of int type numbers corresponding to lammps type I\+Ds in the trajectory file, and z\+\_\+min and z\+\_\+max as arguments. If the integer type I\+Ds are not set, then the R\+DF is calculated for all the atoms in the frame, assuming they are all of the same type.
 
-There is no need to use \mbox{\hyperlink{classRdf2D_a984b46264ea53aa92f7134509b5da9d0}{single\+R\+D\+Fxy()}} if the R\+DF is to be calculated over a number of frames. You will have to call the normalize function normalize\+R\+D\+Fxy() separately after accumulating to get the R\+DF \mbox{\Hypertarget{classRdf2D_a9658a9bb2229afda0d743bdc05a27411}\label{classRdf2D_a9658a9bb2229afda0d743bdc05a27411}} 
+There is no need to use \mbox{\hyperlink{classRdf2D_afc5ff73aa9c126184e94ee3abfc14ff4}{single\+R\+D\+Fxy()}} if the R\+DF is to be calculated over a number of frames. You will have to call the normalize function normalize\+R\+D\+Fxy() separately after accumulating to get the R\+DF \mbox{\Hypertarget{classRdf2D_a9658a9bb2229afda0d743bdc05a27411}\label{classRdf2D_a9658a9bb2229afda0d743bdc05a27411}} 
 \index{Rdf2D@{Rdf2D}!clear\+R\+D\+F2D@{clear\+R\+D\+F2D}}
 \index{clear\+R\+D\+F2D@{clear\+R\+D\+F2D}!Rdf2D@{Rdf2D}}
 \subsubsection{\texorpdfstring{clear\+R\+D\+F2\+D()}{clearRDF2D()}}
@@ -97,21 +97,21 @@ It takes the \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} obje
 \index{Rdf2D@{Rdf2D}!normalize\+R\+D\+F2D@{normalize\+R\+D\+F2D}}
 \index{normalize\+R\+D\+F2D@{normalize\+R\+D\+F2D}!Rdf2D@{Rdf2D}}
 \subsubsection{\texorpdfstring{normalize\+R\+D\+F2\+D()}{normalizeRDF2D()}}
-{\footnotesize\ttfamily void Rdf2\+D\+::normalize\+R\+D\+F2D (\begin{DoxyParamCaption}\item[{double}]{dr }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily void Rdf2\+D\+::normalize\+R\+D\+F2D (\begin{DoxyParamCaption}\item[{double}]{dz }\end{DoxyParamCaption})}
 
 Normalizes the R\+DF for the 2D R\+DF
 
-You will have to call this after accumulate\+R\+D\+Fxy if you are averaging over several snapshots. This is automatically called inside \mbox{\hyperlink{classRdf2D_a984b46264ea53aa92f7134509b5da9d0}{single\+R\+D\+Fxy()}} and other single frame R\+DF functions. This method also accepts the width of the layer as the argument \mbox{\Hypertarget{classRdf2D_aae00c1526117f6ac63d2c13354b6c404}\label{classRdf2D_aae00c1526117f6ac63d2c13354b6c404}} 
+You will have to call this after \mbox{\hyperlink{classRdf2D_a6c716851d80fd2a7dcfefd219892d87b}{accumulate\+R\+D\+Fxy()}} if you are averaging over several snapshots. This is automatically called inside \mbox{\hyperlink{classRdf2D_afc5ff73aa9c126184e94ee3abfc14ff4}{single\+R\+D\+Fxy()}} and other single frame R\+DF functions. This method also accepts the width of the layer as the argument The accuracy of the R\+DF calculation is sensitive to the layer width entered \mbox{\Hypertarget{classRdf2D_aae00c1526117f6ac63d2c13354b6c404}\label{classRdf2D_aae00c1526117f6ac63d2c13354b6c404}} 
 \index{Rdf2D@{Rdf2D}!print\+R\+D\+F2D@{print\+R\+D\+F2D}}
 \index{print\+R\+D\+F2D@{print\+R\+D\+F2D}!Rdf2D@{Rdf2D}}
 \subsubsection{\texorpdfstring{print\+R\+D\+F2\+D()}{printRDF2D()}}
 {\footnotesize\ttfamily void Rdf2\+D\+::print\+R\+D\+F2D (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
-Prints out the 2D R\+DF function to a file in the output folder \mbox{\Hypertarget{classRdf2D_a984b46264ea53aa92f7134509b5da9d0}\label{classRdf2D_a984b46264ea53aa92f7134509b5da9d0}} 
+Prints out the 2D R\+DF function to a file in the output folder \mbox{\Hypertarget{classRdf2D_afc5ff73aa9c126184e94ee3abfc14ff4}\label{classRdf2D_afc5ff73aa9c126184e94ee3abfc14ff4}} 
 \index{Rdf2D@{Rdf2D}!single\+R\+D\+Fxy@{single\+R\+D\+Fxy}}
 \index{single\+R\+D\+Fxy@{single\+R\+D\+Fxy}!Rdf2D@{Rdf2D}}
 \subsubsection{\texorpdfstring{single\+R\+D\+Fxy()}{singleRDFxy()}}
-{\footnotesize\ttfamily void Rdf2\+D\+::single\+R\+D\+Fxy (\begin{DoxyParamCaption}\item[{class \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} \&}]{mol\+Sys,  }\item[{double}]{z\+\_\+min,  }\item[{double}]{z\+\_\+max,  }\item[{int}]{typeA = {\ttfamily -\/1},  }\item[{int}]{typeB = {\ttfamily -\/1} }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily void Rdf2\+D\+::single\+R\+D\+Fxy (\begin{DoxyParamCaption}\item[{class \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} \&}]{mol\+Sys,  }\item[{double}]{z\+\_\+layer,  }\item[{double}]{dz,  }\item[{int}]{typeA = {\ttfamily -\/1},  }\item[{int}]{typeB = {\ttfamily -\/1} }\end{DoxyParamCaption})}
 
 Calculates the 2D radial distribution function for a single snapshot for a particular XY plane, specified by a range of z values Use this only if there is one frame only.
 

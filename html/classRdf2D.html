@@ -88,10 +88,10 @@ Inheritance diagram for Rdf2D:</div>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a767f006de6412394a59f1cae5f7f6b35"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRdf2D.html#a767f006de6412394a59f1cae5f7f6b35">initRDFxy</a> (class <a class="el" href="classCMolecularSystem.html">CMolecularSystem</a> &amp;molSys, double binwidth, double volume=-1.0, double max_radius=-1.0)</td></tr>
 <tr class="separator:a767f006de6412394a59f1cae5f7f6b35"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a984b46264ea53aa92f7134509b5da9d0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRdf2D.html#a984b46264ea53aa92f7134509b5da9d0">singleRDFxy</a> (class <a class="el" href="classCMolecularSystem.html">CMolecularSystem</a> &amp;molSys, double z_min, double z_max, int typeA=-1, int typeB=-1)</td></tr>
-<tr class="separator:a984b46264ea53aa92f7134509b5da9d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab4c0b7a104e7ee1c3f3044410a21ebfe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRdf2D.html#ab4c0b7a104e7ee1c3f3044410a21ebfe">accumulateRDFxy</a> (class <a class="el" href="classCMolecularSystem.html">CMolecularSystem</a> &amp;molSys, double z_min, double z_max, int typeA=-1, int typeB=-1)</td></tr>
-<tr class="separator:ab4c0b7a104e7ee1c3f3044410a21ebfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc5ff73aa9c126184e94ee3abfc14ff4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRdf2D.html#afc5ff73aa9c126184e94ee3abfc14ff4">singleRDFxy</a> (class <a class="el" href="classCMolecularSystem.html">CMolecularSystem</a> &amp;molSys, double z_layer, double dz, int typeA=-1, int typeB=-1)</td></tr>
+<tr class="separator:afc5ff73aa9c126184e94ee3abfc14ff4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c716851d80fd2a7dcfefd219892d87b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRdf2D.html#a6c716851d80fd2a7dcfefd219892d87b">accumulateRDFxy</a> (class <a class="el" href="classCMolecularSystem.html">CMolecularSystem</a> &amp;molSys, double z_layer, double dz, int typeA=-1, int typeB=-1)</td></tr>
+<tr class="separator:a6c716851d80fd2a7dcfefd219892d87b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acf73dc86f20e82799157ff53994a2754"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRdf2D.html#acf73dc86f20e82799157ff53994a2754">normalizeRDF2D</a> (double)</td></tr>
 <tr class="separator:acf73dc86f20e82799157ff53994a2754"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3c8153b303733b7e5d320f9b20f37b32"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRdf2D.html#a3c8153b303733b7e5d320f9b20f37b32">getR</a> ()</td></tr>
@@ -129,8 +129,8 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>typeB</b></td></tr>
 <div class="textblock"><p class="">Class for 2D RDF. This class creates an object for the 2D-RDF, and the output of the RDF can be printed to a file. </p>
 <p class="">Use </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="ab4c0b7a104e7ee1c3f3044410a21ebfe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab4c0b7a104e7ee1c3f3044410a21ebfe">&#9670;&nbsp;</a></span>accumulateRDFxy()</h2>
+<a id="a6c716851d80fd2a7dcfefd219892d87b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c716851d80fd2a7dcfefd219892d87b">&#9670;&nbsp;</a></span>accumulateRDFxy()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -145,13 +145,13 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>typeB</b></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>z_min</em>, </td>
+          <td class="paramname"><em>z_layer</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>z_max</em>, </td>
+          <td class="paramname"><em>dz</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -174,7 +174,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>typeB</b></td></tr>
 </div><div class="memdoc">
 <p class="">Calculates the 2D radial distribution function for a number of snapshots for a particular XY plane, specified by a range of z values</p>
 <p class="">It accepts the <a class="el" href="classCMolecularSystem.html">CMolecularSystem</a> object reference and a pair of int type numbers corresponding to lammps type IDs in the trajectory file, and z_min and z_max as arguments. If the integer type IDs are not set, then the RDF is calculated for all the atoms in the frame, assuming they are all of the same type.</p>
-<p class="">There is no need to use <a class="el" href="classRdf2D.html#a984b46264ea53aa92f7134509b5da9d0">singleRDFxy()</a> if the RDF is to be calculated over a number of frames. You will have to call the normalize function normalizeRDFxy() separately after accumulating to get the RDF </p>
+<p class="">There is no need to use <a class="el" href="classRdf2D.html#afc5ff73aa9c126184e94ee3abfc14ff4">singleRDFxy()</a> if the RDF is to be calculated over a number of frames. You will have to call the normalize function normalizeRDFxy() separately after accumulating to get the RDF </p>
 
 </div>
 </div>
@@ -284,13 +284,13 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>typeB</b></td></tr>
           <td class="memname">void Rdf2D::normalizeRDF2D </td>
           <td>(</td>
           <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>dr</em></td><td>)</td>
+          <td class="paramname"><em>dz</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 <p class="">Normalizes the RDF for the 2D RDF</p>
-<p class="">You will have to call this after accumulateRDFxy if you are averaging over several snapshots. This is automatically called inside <a class="el" href="classRdf2D.html#a984b46264ea53aa92f7134509b5da9d0">singleRDFxy()</a> and other single frame RDF functions. This method also accepts the width of the layer as the argument </p>
+<p class="">You will have to call this after <a class="el" href="classRdf2D.html#a6c716851d80fd2a7dcfefd219892d87b">accumulateRDFxy()</a> if you are averaging over several snapshots. This is automatically called inside <a class="el" href="classRdf2D.html#afc5ff73aa9c126184e94ee3abfc14ff4">singleRDFxy()</a> and other single frame RDF functions. This method also accepts the width of the layer as the argument The accuracy of the RDF calculation is sensitive to the layer width entered </p>
 
 </div>
 </div>
@@ -312,8 +312,8 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>typeB</b></td></tr>
 
 </div>
 </div>
-<a id="a984b46264ea53aa92f7134509b5da9d0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a984b46264ea53aa92f7134509b5da9d0">&#9670;&nbsp;</a></span>singleRDFxy()</h2>
+<a id="afc5ff73aa9c126184e94ee3abfc14ff4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc5ff73aa9c126184e94ee3abfc14ff4">&#9670;&nbsp;</a></span>singleRDFxy()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -328,13 +328,13 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>typeB</b></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>z_min</em>, </td>
+          <td class="paramname"><em>z_layer</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>z_max</em>, </td>
+          <td class="paramname"><em>dz</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
