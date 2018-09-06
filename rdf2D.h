@@ -85,7 +85,7 @@ class Rdf2D: public COutput {
     	// Normalizes the RDF. You don't need to call this separately 
     	// for calculation of RDF for a single frame. You must call this 
     	// after using the accumulate RDF command for multiple snapshots
-    	void normalizeRDF2D(double);
+    	void normalizeRDF2D(double dz);
     	// Get the radial values corresponding to each radial bin
     	void getR();
         // Reintialize the histogram and number of frames to zero
