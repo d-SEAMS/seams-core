@@ -41,23 +41,21 @@ int main()
     // // Create object for 3D RDF 
     // Rdf3D *woot = new Rdf3D;
     // // Testing 3D rdf function
-    // woot->initRDF3D(*m_MolSys, 0.05); // 4 
+    // woot->initRDF3D(*m_MolSys, 0.01); // 4 
     // // Get the 3D RDF for one step
-    // woot->singleRDF3D(*m_MolSys, 2, 1); // default ID=1
-
+    // woot->singleRDF3D(*m_MolSys); // default ID=1
     // // Print the RDF 
-    // woot->printRDF3D();
-    
+    // woot->printRDF3D();   
     // // Free the memory 
     // woot->deleteRDF3D();
 
     // Create object for 2D RDF
     Rdf2D *rdf = new Rdf2D; 
      // Testing 2D rdf function. RDF calculated is incorrect if the wrong volume is set
-    double volume = 8*m_MolSys->parameter->boxx*m_MolSys->parameter->boxy;
+    double volume = (8-3.91)*m_MolSys->parameter->boxx*m_MolSys->parameter->boxy;
     rdf->initRDFxy(*m_MolSys, 0.05, volume); 
     // Get the 2D RDF for one step
-    rdf->singleRDFxy(*m_MolSys, 19.5, 22, 2, 1);
+    rdf->singleRDFxy(*m_MolSys, 19.5, 22, 2, 2);
     // Print the RDF 
     rdf->printRDF2D();
     // Free the memory 
