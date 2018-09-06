@@ -59,7 +59,7 @@ class Rdf2D: public COutput {
     	// Total no. of atoms
     	int nop;
 
-    	// Calculate the histogram of the 3D RDF
+    	// Calculate the histogram of the 2D RDF in the XY plane
     	void histogramRDFxy(class CMolecularSystem& molSys, double z_layer, double dz);
 
     	// Calculate the number of bins
@@ -85,7 +85,13 @@ class Rdf2D: public COutput {
 		// Returns the smallest value
 		double smallest(double, double, double); 
 		double smallest(double, double);
-	public:
+
+        // Functions for YZ plane 
+        // Calculate the histogram of the 2D RDF in the YZ plane
+        void histogramRDFyz(class CMolecularSystem& molSys, double x_layer, double dx);
+	    // Calculates the number of atoms in the YZ plane
+        int getNatomsYZ(class CMolecularSystem& molSys, double, double);
+    public:
 		//the main object where all properties of all particles are saved
     	Rdf2D();
     	virtual ~Rdf2D();
