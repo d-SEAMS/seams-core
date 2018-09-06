@@ -17,7 +17,16 @@
  *         This class creates an object for the 2D-RDF, 
   and the output of the RDF can be printed to a file
  *
- Use 
+ For example, if you want to find the in-plane RDF in the
+ XY plane, you should use the  initRDFxy() function, followed by
+ either the accumulateRDFxy() or singleRDFxy(), depending on whether
+ you want to average over several frames or not. If you use the accumulateRDFxy
+ function, you must also use the normalizeRDF2D() function.
+
+ The equation used for 2D-RDF is the following for the \f$n^{th}\f$ :
+  \f[
+  g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma_{i \neq j} \delta(r - r_{ij}) \left[ \Theta\left( \frac{\delta z}{2}-|z_i-z^2| \right) \right] \times \Theta\left( \frac{\delta z}{2}-|z_j-z^n| \right)
+  \f]
  */
 
 class Rdf2D: public COutput {
@@ -85,7 +94,7 @@ class Rdf2D: public COutput {
     	// Normalizes the RDF. You don't need to call this separately 
     	// for calculation of RDF for a single frame. You must call this 
     	// after using the accumulate RDF command for multiple snapshots
-    	void normalizeRDF2D(double dz);
+    	void normalizeRDF2D(double dr);
     	// Get the radial values corresponding to each radial bin
     	void getR();
         // Reintialize the histogram and number of frames to zero

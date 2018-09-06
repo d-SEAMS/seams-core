@@ -133,7 +133,11 @@ int Rdf2D::getNatomsXY(class CMolecularSystem& molSys, double z_min, double z_ma
 
  It accepts the CMolecularSystem object reference and a pair
  of int type numbers corresponding to lammps type IDs in the trajectory
- file, and z_min and z_max as arguments. If the integer type IDs are not set, then 
+ file, and the z coordinate of the layer and width of the layer as arguments.
+ The z coordinate of the layer can be chosen to be the midpoint of the peak
+ in the density(or number) vs z plot. The width should be set as the width of the
+ peak.
+ If the integer type IDs are not set, then 
  the RDF is calculated for all the atoms in the frame, assuming they are all 
  of the same type.
  
@@ -234,7 +238,7 @@ void Rdf2D::histogramRDFxy(class CMolecularSystem& molSys, double z_layer, doubl
  The accuracy of the RDF calculation is sensitive to the layer width entered
  ***********************************************/
 
-void Rdf2D::normalizeRDF2D(double dz)
+void Rdf2D::normalizeRDF2D(double dr)
 {
     double bin_area;                      	// Bin area
     double nideal;                          // No. of ideal gas particles in each bin_volume
@@ -245,7 +249,7 @@ void Rdf2D::normalizeRDF2D(double dz)
         // Area between bin k+1 and k
         bin_area = (pow(ibin+2, 2) - pow(ibin+1, 2)) * pow(this->binwidth, 2);
         // // Number of ideal gas particles in bin_volume
-        nideal = PI*bin_area*dz*rho;
+        nideal = PI*bin_area*dr*rho;
         // Normalization
         this->rdf2D[ibin] /= (this->nframes*nideal);
     }
