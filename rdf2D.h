@@ -36,7 +36,7 @@ class Rdf2D: public COutput {
     	int nop;
 
     	// Calculate the histogram of the 3D RDF
-    	void histogramRDFxy(class CMolecularSystem& molSys, double z_min, double z_max);
+    	void histogramRDFxy(class CMolecularSystem& molSys, double z_layer, double dz);
 
     	// Calculate the number of bins
     	void getBins();
@@ -45,6 +45,9 @@ class Rdf2D: public COutput {
         int getNatoms(class CMolecularSystem& molSys, int, int);
         // Calculates the number of atoms in the XY plane
         int getNatomsXY(class CMolecularSystem& molSys, double, double);
+
+        // Check whether the z-coordinate is within the layer
+        bool atomInsideLayer(double z, double z_layer, double dz);
 
     	// Check to make sure that the user-defined max_radius is within limits
     	void checkParameterXY(class CMolecularSystem& molSys);
@@ -76,7 +79,7 @@ class Rdf2D: public COutput {
     	// Initialize the histogram
     	void initRDFxy(class CMolecularSystem& molSys, double binwidth, double volume=-1.0, double max_radius=-1.0);
     	// Calculates the RDF for a single snapshot
-    	void singleRDFxy(class CMolecularSystem& molSys, double z_min, double z_max, int typeA=-1, int typeB=-1);
+    	void singleRDFxy(class CMolecularSystem& molSys, double z_layer, double dz, int typeA=-1, int typeB=-1);
     	// Calculates the RDF over a number of snapshots
     	void accumulateRDFxy(class CMolecularSystem& molSys, double z_min, double z_max, int typeA=-1, int typeB=-1);
     	// Normalizes the RDF. You don't need to call this separately 

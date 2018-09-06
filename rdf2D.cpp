@@ -166,44 +166,45 @@ void Rdf2D::accumulateRDFxy(class CMolecularSystem& molSys, double z_min, double
  the RDF is calculated for all the atoms in the frame, assuming they are all 
  of the same type.
  ***********************************************/
-void Rdf2D::singleRDFxy(class CMolecularSystem& molSys, double z_min, double z_max, int typeA, int typeB)
+void Rdf2D::singleRDFxy(class CMolecularSystem& molSys, double z_layer, double dz, int typeA, int typeB)
 {
     // There is only one snapshot
     this->nframes = 1;
     // Calculate the total number of particles in a particular frame
     this->nop = this->getNatoms(molSys, typeA, typeB);
     // Add to the RDF histogram
-    this->histogramRDFxy(molSys, z_min, z_max);
+    this->histogramRDFxy(molSys, z_layer, dz);
     // Normalize the RDF 
-    this->normalizeRDF2D(molSys, z_max-z_min);
+    this->normalizeRDF2D(molSys, dz);
 }
 
 /********************************************//**
  *  Updates the 2D RDF histogram for a particular XY plane
- defined by z_min and z_max
+ defined by z_layer and dz (layer thickness)
  ***********************************************/
-void Rdf2D::histogramRDFxy(class CMolecularSystem& molSys, double z_min, double z_max)
+void Rdf2D::histogramRDFxy(class CMolecularSystem& molSys, double z_layer, double dz)
 {
     int natoms = this->nop; // Number of particles
     double dr;              // Relative distance between iatom and jatom (unwrapped)
     int ibin;               // Index of bin in which the particle falls wrt reference atom                              
     int nop_layer; 			// Number of atoms in the XY plane
+    double z_atom; 			// z coordinate of atom
     // Get the number of atoms in this layer
-    nop_layer = this->getNatomsXY(molSys, z_min, z_max);
+    nop_layer = this->getNatomsXY(molSys, z_layer-0.5*dz, z_layer+0.5*dz);
     // Loop through every pair of particles
     for (int iatom = 0; iatom < natoms-1; iatom++)
     {
         // Only execute if the atom is of typeA
         if (molSys.molecules[iatom].type != typeA && typeA!= -1){continue;}
-        if (molSys.molecules[iatom].get_posz() > z_max){continue;}
-        if (molSys.molecules[iatom].get_posz() < z_min){continue;}
+        z_atom = molSys.molecules[iatom].get_posz();
+        if (this->atomInsideLayer(z_atom, z_layer, dz)==false){continue;}
         
         // Loop through the j^th atom
         for (int jatom = iatom+1; jatom < natoms; jatom++)
         {
             if (molSys.molecules[jatom].type != typeB && typeB!= -1){continue;}
-            if (molSys.molecules[jatom].get_posz() > z_max){continue;}
-            if (molSys.molecules[jatom].get_posz() < z_min){continue;}
+            z_atom = molSys.molecules[iatom].get_posz();
+            if (this->atomInsideLayer(z_atom, z_layer, dz)==false){continue;}
             // Test
             // double dz = molSys.molecules[jatom].get_posz() - molSys.molecules[iatom].get_posz();
             // if (abs(dz)>0.4){continue;}
@@ -215,9 +216,6 @@ void Rdf2D::histogramRDFxy(class CMolecularSystem& molSys, double z_min, double 
                 ibin = int(dr/this->binwidth); // Find which bin the particle falls in 
                 // my intuition/Prerna
                 this->rdf2D[ibin] += (2.0/nop_layer);        // Add to histogram for both iatom and jatom
-            	// this->rdf2D[ibin] += 2.0;
-            	// // Corrugated plane paper
-            	// this->rdf2D[ibin] += (2.0/(nop_layer*nop_layer));
             }
         }
     }
@@ -238,27 +236,13 @@ void Rdf2D::normalizeRDF2D(class CMolecularSystem& molSys, double dz)
     double nideal;                          // No. of ideal gas particles in each bin_volume
     double rho = this->nop/this->volume;    // Number density
     // Loop over all bins
+    std::cout<<"rho is "<<rho<<"\n";
     for (int ibin=0; ibin < this->nbin; ibin++)
     {
         // Area between bin k+1 and k
         bin_area = (pow(ibin+2, 2) - pow(ibin+1, 2)) * pow(this->binwidth, 2);
-        // Assuming the total nop does not change with time
-        // // -------
-        // // What I thought: 
         // // Number of ideal gas particles in bin_volume
         nideal = PI*bin_area*dz*rho;
-        // // -------
-        // // Prerna
-        // bin_area = 2*PI*this->rVal[ibin]*this->binwidth;
-        // nideal = bin_area/(PI*this->max_radius*this->max_radius);
-        // // -------
-        // // Corrugated planes
-        // bin_area = PI*this->rVal[ibin];
-        // nideal = bin_area/(molSys.parameter->boxx*molSys.parameter->boxy);
-        // // -------
-        // Weird coplanar value = 0.4 according
-        // to paper on flexible nano confinement
-        // nideal = PI*bin_area*0.5*rho;
         // Normalization
         this->rdf2D[ibin] /= (this->nframes*nideal);
     }
@@ -360,6 +344,12 @@ void Rdf2D::printRDF2D()
 //-------------------------------------------------------------------------------------------------------
 // CHECKS AND HELPER FUNCTIONS
 //-------------------------------------------------------------------------------------------------------
+
+bool Rdf2D::atomInsideLayer(double z, double z_layer, double dz)
+{
+	if ((z-z_layer)<=0.5*dz){return true;}
+	else {return false;}
+}
 
 /********************************************//**
  *  Checks that the max_radius entered is correct.
