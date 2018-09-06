@@ -92,8 +92,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:afc5ff73aa9c126184e94ee3abfc14ff4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6c716851d80fd2a7dcfefd219892d87b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRdf2D.html#a6c716851d80fd2a7dcfefd219892d87b">accumulateRDFxy</a> (class <a class="el" href="classCMolecularSystem.html">CMolecularSystem</a> &amp;molSys, double z_layer, double dz, int typeA=-1, int typeB=-1)</td></tr>
 <tr class="separator:a6c716851d80fd2a7dcfefd219892d87b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9b929a0187119b7300ed9fe4ba41f979"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRdf2D.html#a9b929a0187119b7300ed9fe4ba41f979">normalizeRDF2D</a> (double dz)</td></tr>
-<tr class="separator:a9b929a0187119b7300ed9fe4ba41f979"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf6d00ec728e8c694ed2932332691c0d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRdf2D.html#aaf6d00ec728e8c694ed2932332691c0d">normalizeRDF2D</a> (double dr)</td></tr>
+<tr class="separator:aaf6d00ec728e8c694ed2932332691c0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3c8153b303733b7e5d320f9b20f37b32"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRdf2D.html#a3c8153b303733b7e5d320f9b20f37b32">getR</a> ()</td></tr>
 <tr class="separator:a3c8153b303733b7e5d320f9b20f37b32"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9658a9bb2229afda0d743bdc05a27411"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRdf2D.html#a9658a9bb2229afda0d743bdc05a27411">clearRDF2D</a> ()</td></tr>
@@ -127,7 +127,16 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>typeB</b></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p class="">Class for 2D RDF. This class creates an object for the 2D-RDF, and the output of the RDF can be printed to a file. </p>
-<p class="">Use </p>
+<p class="">For example, if you want to find the in-plane RDF in the XY plane, you should use the <a class="el" href="classRdf2D.html#a767f006de6412394a59f1cae5f7f6b35">initRDFxy()</a> function, followed by either the <a class="el" href="classRdf2D.html#a6c716851d80fd2a7dcfefd219892d87b">accumulateRDFxy()</a> or <a class="el" href="classRdf2D.html#afc5ff73aa9c126184e94ee3abfc14ff4">singleRDFxy()</a>, depending on whether you want to average over several frames or not. If you use the accumulateRDFxy function, you must also use the <a class="el" href="classRdf2D.html#aaf6d00ec728e8c694ed2932332691c0d">normalizeRDF2D()</a> function. Don't call call <a class="el" href="classRdf2D.html#aaf6d00ec728e8c694ed2932332691c0d">normalizeRDF2D()</a> when using <a class="el" href="classRdf2D.html#afc5ff73aa9c126184e94ee3abfc14ff4">singleRDFxy()</a>, since this function is called by <a class="el" href="classRdf2D.html#afc5ff73aa9c126184e94ee3abfc14ff4">singleRDFxy()</a> itself. The <a class="el" href="classRdf2D.html#aae00c1526117f6ac63d2c13354b6c404">printRDF2D()</a> function prints the radial values and corresponding RDF values to a file called rdf2D.dat in the output folder.</p>
+<p class="">The equation used for 2D-RDF for the <img class="formulaInl" alt="$n^{th}$" src="form_4.png"/> layer is: </p><p class="formulaDsp">
+<img class="formulaDsp" alt="\[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma_{i \neq j} \delta(r - r_{ij}) \left[ \Theta\left( \frac{\delta z}{2}-|z_i-z^2| \right) \times \Theta\left( \frac{\delta z}{2}-|z_j-z^n| \right) \right] \]" src="form_26.png"/>
+</p>
+<ul>
+<li><img class="formulaInl" alt="$z^n$" src="form_20.png"/> is the z coordinate of the layer chosen. This can be determined by finding the peak in the density(or number) vs <img class="formulaInl" alt="$z$" src="form_21.png"/> plot.</li>
+<li><img class="formulaInl" alt="$\delta z$" src="form_22.png"/> is the thickness of the layer chosen. This can also be determined from the density(or number) vs <img class="formulaInl" alt="$z$" src="form_21.png"/> plot by ascertaining the width of the peak corresponding to the desired layer.</li>
+<li>Here, <img class="formulaInl" alt="$\rho$" src="form_23.png"/> corresponds to the bulk number density of the species chosen. This is determined in the code by calculating the number of atoms and the volume. By default, the program accepts the simulation box volume as the volume. The user should enter the volume for more complex systems. The accuracy of the RDF is sensitive to the calculated value of density, so care should be taken when specifying/calculating the density.</li>
+<li>This calculation is computed upto a maximum radius, which can either be user-defined or is set by default to be half the smallest box length of the <img class="formulaInl" alt="$x$" src="form_24.png"/> or <img class="formulaInl" alt="$y$" src="form_25.png"/> dimensions. </li>
+</ul>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a6c716851d80fd2a7dcfefd219892d87b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6c716851d80fd2a7dcfefd219892d87b">&#9670;&nbsp;</a></span>accumulateRDFxy()</h2>
@@ -173,7 +182,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>typeB</b></td></tr>
       </table>
 </div><div class="memdoc">
 <p class="">Calculates the 2D radial distribution function for a number of snapshots for a particular XY plane, specified by a range of z values</p>
-<p class="">It accepts the <a class="el" href="classCMolecularSystem.html">CMolecularSystem</a> object reference and a pair of int type numbers corresponding to lammps type IDs in the trajectory file, and z_min and z_max as arguments. If the integer type IDs are not set, then the RDF is calculated for all the atoms in the frame, assuming they are all of the same type.</p>
+<p class="">It accepts the <a class="el" href="classCMolecularSystem.html">CMolecularSystem</a> object reference and a pair of int type numbers corresponding to lammps type IDs in the trajectory file, and the z coordinate of the layer and width of the layer as arguments. The z coordinate of the layer can be chosen to be the midpoint of the peak in the density(or number) vs z plot. The width should be set as the width of the peak. If the integer type IDs are not set, then the RDF is calculated for all the atoms in the frame, assuming they are all of the same type.</p>
 <p class="">There is no need to use <a class="el" href="classRdf2D.html#afc5ff73aa9c126184e94ee3abfc14ff4">singleRDFxy()</a> if the RDF is to be calculated over a number of frames. You will have to call the normalize function normalizeRDFxy() separately after accumulating to get the RDF </p>
 
 </div>
@@ -274,8 +283,8 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>typeB</b></td></tr>
 
 </div>
 </div>
-<a id="a9b929a0187119b7300ed9fe4ba41f979"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9b929a0187119b7300ed9fe4ba41f979">&#9670;&nbsp;</a></span>normalizeRDF2D()</h2>
+<a id="aaf6d00ec728e8c694ed2932332691c0d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf6d00ec728e8c694ed2932332691c0d">&#9670;&nbsp;</a></span>normalizeRDF2D()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -284,7 +293,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>typeB</b></td></tr>
           <td class="memname">void Rdf2D::normalizeRDF2D </td>
           <td>(</td>
           <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>dz</em></td><td>)</td>
+          <td class="paramname"><em>dr</em></td><td>)</td>
           <td></td>
         </tr>
       </table>

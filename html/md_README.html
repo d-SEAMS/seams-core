@@ -65,12 +65,20 @@ $(function() {
 <div class="title">structureFactor </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p class="">C++ code that can calculate the structure factor from g(r)</p>
+<div class="textblock"><p class="">Post-processing code for RDF, in-plane RDF, structure factor</p>
+<p class="">This C++ program reads in lammps trajectory files or XYZ files to calculate RDF, in-plane RDF and the structure factor.</p>
 <h1>Compilation</h1>
 <p class="">To generate the executable <em>runme</em> use:</p>
 <div class="fragment"><div class="line">make </div></div><!-- fragment --><p class="">An executable <em>runme</em> will be formed in the base directory.</p>
 <h1>Running</h1>
-<div class="fragment"><div class="line">./runme</div></div><!-- fragment --> </div></div><!-- PageDoc -->
+<div class="fragment"><div class="line">./runme</div></div><!-- fragment --><h1>Details</h1>
+<ul>
+<li>For example, if you want to find the in-plane RDF in the XY plane, you should use the <a class="el" href="classRdf2D.html" title="Class for 2D RDF. This class creates an object for the 2D-RDF, and the output of the RDF can be print...">Rdf2D</a> class. The equation used for 2D-RDF for the <img class="formulaInl" alt="$n^{th}$" src="form_4.png"/> layer is: <p class="formulaDsp">
+<img class="formulaDsp" alt="\[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma_{i \neq j} \delta(r - r_{ij}) \left[ \Theta\left( \frac{\delta z}{2}-|z_i-z^2| \right) \times \Theta\left( \frac{\delta z}{2}-|z_j-z^n| \right) \right] \]" src="form_26.png"/>
+</p>
+ For detailed instructions, see the <a class="el" href="classRdf2D.html" title="Class for 2D RDF. This class creates an object for the 2D-RDF, and the output of the RDF can be print...">Rdf2D</a> class documentation </li>
+</ul>
+</div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

@@ -1,0 +1,27 @@
+\form#0:\[ $\frac{8}{2}$ \]
+\form#1:\[ $$\frac{8}{2}$$ \]
+\form#2:$\frac{8}{2}$
+\form#3:\[ \frac{8}{2} \]
+\form#4:$n^{th}$
+\form#5:\[ g^n(r) = frac{1}{(\rho^n)^2 A \delta z} \Sigma_{i\neqj} \]
+\form#6:\[ g^n(r) = frac{1}{(\rho^n)^2 A \delta z} \Sigma \]
+\form#7:\[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma \]
+\form#8:\[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma_{i \neq j} \]
+\form#9:\[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma\limits_{i \neq j} \]
+\form#10:\[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma\limits_{i \neq j} 5 \]
+\form#11:\[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma \limits_{i=1} \]
+\form#12:\[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma_{i \neq j} \delta(r - r_{ij}) \left[ \right] \]
+\form#13:\[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma_{i \neq j} \delta(r - r_{ij}) \left[ \uptheta \right] \]
+\form#14:\[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma_{i \neq j} \delta(r - r_{ij}) \left[ \Theta \right] \]
+\form#15:\[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma_{i \neq j} \delta(r - r_{ij}) \left[ \Theta\left( \frac{\deltaz}{2}-\mod{z_i-z^2} \right) \right]\times \]
+\form#16:\[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma_{i \neq j} \delta(r - r_{ij}) \left[ \Theta\left( \frac{\deltaz}{2}-\mod{z_i-z^2} \right) \right] \]
+\form#17:\[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma_{i \neq j} \delta(r - r_{ij}) \left[ \Theta\left( \frac{\deltaz}{2}-|z_i-z^2| \right) \right] \]
+\form#18:\[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma_{i \neq j} \delta(r - r_{ij}) \left[ \Theta\left( \frac{\delta z}{2}-|z_i-z^2| \right) \right] \]
+\form#19:\[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma_{i \neq j} \delta(r - r_{ij}) \left[ \Theta\left( \frac{\delta z}{2}-|z_i-z^2| \right) \right] \times \Theta\left( \frac{\delta z}{2}-|z_j-z^n| \right) \]
+\form#20:$z^n$
+\form#21:$z$
+\form#22:$\delta z$
+\form#23:$\rho$
+\form#24:$x$
+\form#25:$y$
+\form#26:\[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma_{i \neq j} \delta(r - r_{ij}) \left[ \Theta\left( \frac{\delta z}{2}-|z_i-z^2| \right) \times \Theta\left( \frac{\delta z}{2}-|z_j-z^n| \right) \right] \]
