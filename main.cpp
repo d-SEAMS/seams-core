@@ -52,10 +52,10 @@ int main()
     // Create object for 2D RDF
     Rdf2D *rdf = new Rdf2D; 
      // Testing 2D rdf function. RDF calculated is incorrect if the wrong volume is set
-    double volume = (8-3.91)*m_MolSys->parameter->boxx*m_MolSys->parameter->boxy;
+    double volume = (8)*m_MolSys->parameter->boxx*m_MolSys->parameter->boxy;
     rdf->initRDFxy(*m_MolSys, 0.05, volume); 
     // Get the 2D RDF for one step
-    rdf->singleRDFxy(*m_MolSys, 19.5, 22, 2, 2);
+    rdf->singleRDFxy(*m_MolSys, 17.85, 0.8, 2, 2);
     // Print the RDF 
     rdf->printRDF2D();
     // Free the memory 
