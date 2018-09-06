@@ -81,11 +81,11 @@ class Rdf2D: public COutput {
     	// Calculates the RDF for a single snapshot
     	void singleRDFxy(class CMolecularSystem& molSys, double z_layer, double dz, int typeA=-1, int typeB=-1);
     	// Calculates the RDF over a number of snapshots
-    	void accumulateRDFxy(class CMolecularSystem& molSys, double z_min, double z_max, int typeA=-1, int typeB=-1);
+    	void accumulateRDFxy(class CMolecularSystem& molSys, double z_layer, double dz, int typeA=-1, int typeB=-1);
     	// Normalizes the RDF. You don't need to call this separately 
     	// for calculation of RDF for a single frame. You must call this 
     	// after using the accumulate RDF command for multiple snapshots
-    	void normalizeRDF2D(class CMolecularSystem& molSys, double);
+    	void normalizeRDF2D(double);
     	// Get the radial values corresponding to each radial bin
     	void getR();
         // Reintialize the histogram and number of frames to zero
