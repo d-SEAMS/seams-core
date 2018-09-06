@@ -141,7 +141,7 @@ int Rdf2D::getNatomsXY(class CMolecularSystem& molSys, double z_min, double z_ma
  You will have to call the normalize function normalizeRDFxy() separately 
  after accumulating to get the RDF 
  ***********************************************/
-void Rdf2D::accumulateRDFxy(class CMolecularSystem& molSys, double z_min, double z_max, int typeA, int typeB)
+void Rdf2D::accumulateRDFxy(class CMolecularSystem& molSys, double z_layer, double dz, int typeA, int typeB)
 {
     // Check to make sure that the user has entered the correct type ID
     if (this->typeA!=-1 && this->typeA!=typeA && nframes>0){std::cerr<<"Type A cannot be changed after init\n";}
@@ -151,7 +151,7 @@ void Rdf2D::accumulateRDFxy(class CMolecularSystem& molSys, double z_min, double
     // Update the number of snapshots calculated
     this->nframes += 1;
     // Add to the RDF histogram
-    this->histogramRDFxy(molSys, z_min, z_max);
+    this->histogramRDFxy(molSys, z_layer, dz);
     // Call the normalize function separately after accumulating 
     // the histogram over all the desired snapshots
 }
@@ -180,7 +180,9 @@ void Rdf2D::singleRDFxy(class CMolecularSystem& molSys, double z_layer, double d
 
 /********************************************//**
  *  Updates the 2D RDF histogram for a particular XY plane
- defined by z_layer and dz (layer thickness)
+ defined by z_layer and dz (layer thickness). The z_layer is the 
+ z coordinate of the midpoint of the peak in the density vs z plot.
+ dz is the width of the peak in the plot. 
  ***********************************************/
 void Rdf2D::histogramRDFxy(class CMolecularSystem& molSys, double z_layer, double dz)
 {
@@ -190,6 +192,7 @@ void Rdf2D::histogramRDFxy(class CMolecularSystem& molSys, double z_layer, doubl
     int nop_layer; 			// Number of atoms in the XY plane
     double z_atom; 			// z coordinate of atom
     // Get the number of atoms in this layer
+    // This is defined by z_min and z_max
     nop_layer = this->getNatomsXY(molSys, z_layer-0.5*dz, z_layer+0.5*dz);
     // Loop through every pair of particles
     for (int iatom = 0; iatom < natoms-1; iatom++)
@@ -224,19 +227,19 @@ void Rdf2D::histogramRDFxy(class CMolecularSystem& molSys, double z_layer, doubl
 /********************************************//**
  *  Normalizes the RDF for the 2D RDF 
 
- You will have to call this after accumulateRDFxy if you are averaging over
+ You will have to call this after accumulateRDFxy() if you are averaging over
  several snapshots. This is automatically called inside singleRDFxy() and other single 
  frame RDF functions.
  This method also accepts the width of the layer as the argument
+ The accuracy of the RDF calculation is sensitive to the layer width entered
  ***********************************************/
 
-void Rdf2D::normalizeRDF2D(class CMolecularSystem& molSys, double dz)
+void Rdf2D::normalizeRDF2D(double dz)
 {
     double bin_area;                      	// Bin area
     double nideal;                          // No. of ideal gas particles in each bin_volume
     double rho = this->nop/this->volume;    // Number density
     // Loop over all bins
-    std::cout<<"rho is "<<rho<<"\n";
     for (int ibin=0; ibin < this->nbin; ibin++)
     {
         // Area between bin k+1 and k
