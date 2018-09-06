@@ -43,6 +43,8 @@ class Rdf2D: public COutput {
 
         // Calculate the number of atoms in the box for the given frame and IDs
         int getNatoms(class CMolecularSystem& molSys, int, int);
+        // Calculates the number of atoms in the XY plane
+        int getNatomsXY(class CMolecularSystem& molSys, double, double);
 
     	// Check to make sure that the user-defined max_radius is within limits
     	void checkParameterXY(class CMolecularSystem& molSys);
@@ -80,7 +82,7 @@ class Rdf2D: public COutput {
     	// Normalizes the RDF. You don't need to call this separately 
     	// for calculation of RDF for a single frame. You must call this 
     	// after using the accumulate RDF command for multiple snapshots
-    	void normalizeRDF2D(double);
+    	void normalizeRDF2D(class CMolecularSystem& molSys, double);
     	// Get the radial values corresponding to each radial bin
     	void getR();
         // Reintialize the histogram and number of frames to zero
