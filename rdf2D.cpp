@@ -175,7 +175,7 @@ void Rdf2D::singleRDFxy(class CMolecularSystem& molSys, double z_layer, double d
     // Add to the RDF histogram
     this->histogramRDFxy(molSys, z_layer, dz);
     // Normalize the RDF 
-    this->normalizeRDF2D(molSys, dz);
+    this->normalizeRDF2D(dz);
 }
 
 /********************************************//**
