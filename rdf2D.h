@@ -48,63 +48,69 @@ class Rdf2D: public COutput {
 	private:
 		// No. of snapshots for RDF
 		int nframes;		
-    	// No. of bins 
+    // No. of bins 
 		int nbin; 
 		// User-specified binwidth
-    	double binwidth;
+    double binwidth;
  		// Max distance upto which calculation is done
-    	double max_radius;
-    	// Total volume required for density calculation
-    	double volume;
-    	// Total no. of atoms
-    	int nop;
+    double max_radius;
+    // Total volume required for density calculation
+    double volume;
+    // Total no. of atoms
+    int nop;
 
-    	// Calculate the histogram of the 2D RDF in the XY plane
-    	void histogramRDFxy(class CMolecularSystem& molSys, double z_layer, double dz);
+    // Calculate the histogram of the 2D RDF in the XY plane
+    void histogramRDFxy(class CMolecularSystem& molSys, double z_layer, double dz);
 
-    	// Calculate the number of bins
-    	void getBins();
+    // Calculate the number of bins
+    void getBins();
 
-        // Calculate the number of atoms in the box for the given frame and IDs
-        int getNatoms(class CMolecularSystem& molSys, int, int);
-        // Calculates the number of atoms in the XY plane
-        int getNatomsXY(class CMolecularSystem& molSys, double, double);
+    // Calculate the number of atoms in the box for the given frame and IDs
+    int getNatoms(class CMolecularSystem& molSys, int, int);
+    // Calculates the number of atoms in the XY plane
+    int getNatomsXY(class CMolecularSystem& molSys, double, double);
 
-        // Check whether the z-coordinate is within the layer
-        bool atomInsideLayer(double z, double z_layer, double dz);
+    // Check whether the given coordinate is within the layer
+    bool atomInsideLayer(double r, double r_layer, double dr);
 
-    	// Check to make sure that the user-defined max_radius is within limits
-    	void checkParameterXY(class CMolecularSystem& molSys);
-    	// Assigns volume
-    	void checkVolume(class CMolecularSystem& molSys); 
-    	// Initialize the 2D RDF array to zero before histogramming
-    	void rdf2DInitToZero();
-    	// Get absolute relative distance in the XY plane from wrapped coordinates
+    // Check to make sure that the user-defined max_radius is within limits
+    void checkParameterXY(class CMolecularSystem& molSys);
+    // Assigns volume
+    void checkVolume(class CMolecularSystem& molSys); 
+    // Initialize the 2D RDF array to zero before histogramming
+    void rdf2DInitToZero();
+    // Get absolute relative distance in the XY plane from wrapped coordinates
 		double absDistanceXY(int, int, class CMolecularSystem& molSys);
 		// Helper functions
 		// Returns the smallest value
 		double smallest(double, double, double); 
 		double smallest(double, double);
 
-        // Functions for YZ plane 
-        // Calculate the histogram of the 2D RDF in the YZ plane
-        void histogramRDFyz(class CMolecularSystem& molSys, double x_layer, double dx);
-	    // Calculates the number of atoms in the YZ plane
-        int getNatomsYZ(class CMolecularSystem& molSys, double, double);
-    public:
-		//the main object where all properties of all particles are saved
+    // ------------------------------------------------------
+    // Functions for YZ plane 
+    // Calculate the histogram of the 2D RDF in the YZ plane
+    void histogramRDFyz(class CMolecularSystem& molSys, double x_layer, double dx);
+    // Calculates the number of atoms in the YZ plane
+    int getNatomsYZ(class CMolecularSystem& molSys, double, double);
+    // Check to make sure that the user-defined max_radius is within limits
+    void checkParameterYZ(class CMolecularSystem& molSys);
+    // Get absolute relative distance in the YZ plane from wrapped coordinates
+    double absDistanceYZ(int, int, class CMolecularSystem& molSys);
+    // ------------------------------------------------------
+  public:
+		  //the main object where all properties of all particles are saved
     	Rdf2D();
     	virtual ~Rdf2D();
 
     	// Dynamically allocated array for histogram values
     	// for RDF and radial values
-		double* rdf2D;
-		double* rVal;
+		  double* rdf2D;
+		  double* rVal;
 
-        // Lammps trajectory IDs of the atoms to compute the RDF 
-        // If not set, RDF for all atoms is calculated
-        int typeA;
-        int typeB; 
+      // Lammps trajectory IDs of the atoms to compute the RDF 
+      // If not set, RDF for all atoms is calculated
+      int typeA;
+      int typeB; 
 
     	// Initialize the histogram
     	void initRDFxy(class CMolecularSystem& molSys, double binwidth, double volume=-1.0, double max_radius=-1.0);
@@ -118,14 +124,24 @@ class Rdf2D: public COutput {
     	void normalizeRDF2D(double dr);
     	// Get the radial values corresponding to each radial bin
     	void getR();
-        // Reintialize the histogram and number of frames to zero
-        void clearRDF2D();
+      // Reintialize the histogram and number of frames to zero
+      void clearRDF2D();
 
     	// Print the 3D RDF to a file in the output folder
     	void printRDF2D();
 
     	// Free the memory 
     	void deleteRDF2D();
+
+      // ------------------------------------------------------
+      // Functions for YZ plane
+      // Initialize the histogram
+      void initRDFyz(class CMolecularSystem& molSys, double binwidth, double volume=-1.0, double max_radius=-1.0);
+      // Calculates the RDF for a single snapshot
+      void singleRDFyz(class CMolecularSystem& molSys, double x_layer, double dx, int typeA=-1, int typeB=-1);
+      // Calculates the RDF over a number of snapshots
+      void accumulateRDFyz(class CMolecularSystem& molSys, double x_layer, double dx, int typeA=-1, int typeB=-1);
+      // ------------------------------------------------------ 
 
 };
 
