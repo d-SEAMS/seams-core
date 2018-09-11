@@ -19,6 +19,7 @@
 #include "rdf3D.h"
 #include "rdf2D.h"
 #include "output.h"
+#include "structure_factor.h"
 #include <ctime>
 #include <sstream>
 #include <string>
@@ -91,12 +92,16 @@ int main()
     rdf->normalizeRDF2D(0.8);
     // Print the RDF 
     rdf->printRDF2D();
-    // Free the memory 
-    rdf->deleteRDF2D();
+    // ----------------------------------------------
+    //Structure Factor from RDF
+    StructureFactor *s_k = new StructureFactor;
+    s_k->initStrucFactor(*rdf);
     // ----------------------------------------------
 
-    //Free the memory.
+    //Free the memory. 
+    rdf->deleteRDF2D();
     m_MolSys->deleteMolecules();
+    s_k->deleteStrucFactor();
    
     std::cout << "Welcome to the Black Parade \n";
     return 0;
