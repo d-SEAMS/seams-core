@@ -76,7 +76,7 @@ int main()
     Rdf2D *rdf = new Rdf2D; 
      // Testing 2D rdf function. RDF calculated is incorrect if the wrong volume is set
     double volume = (8)*m_MolSys->parameter->boxx*m_MolSys->parameter->boxy;
-    rdf->initRDFxy(*m_MolSys, 0.05, volume, 4.0); 
+    rdf->initRDFxy(*m_MolSys, 0.05, volume, 7); 
     // Loop through steps
     for (int istep=1; istep<=50; istep++)
     {
