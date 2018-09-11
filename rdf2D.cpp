@@ -12,6 +12,7 @@ Rdf2D::Rdf2D()
   this->typeA = -1;
   this->typeB = -1;
   this->nop = -1;
+  this->rho = -1;
 }
 
 Rdf2D::~Rdf2D()
@@ -245,6 +246,8 @@ void Rdf2D::normalizeRDF2D(double dr)
     double bin_area;                      	// Bin area
     double nideal;                          // No. of ideal gas particles in each bin_volume
     double rho = this->nop/this->volume;    // Number density
+    // Save this value of rho for future use
+    this->rho=rho;
     // Loop over all bins
     for (int ibin=0; ibin < this->nbin; ibin++)
     {

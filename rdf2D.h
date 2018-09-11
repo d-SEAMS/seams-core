@@ -114,6 +114,9 @@ class Rdf2D: public COutput {
       int typeA;
       int typeB; 
 
+      // Volume bulk density of the system
+      double rho;
+
     	// Initialize the histogram
     	void initRDFxy(class CMolecularSystem& molSys, double binwidth, double volume=-1.0, double max_radius=-1.0);
     	// Calculates the RDF for a single snapshot
