@@ -34,6 +34,10 @@ void StructureFactor::initStrucFactor(class Rdf2D& rdf)
     this->k = new double[this->nbin];
     // Get the values of the inverse distance k
     this->getK();
+    // Get the value of S(k) at k=0
+    this->transformAtZero(rdf);
+    // Get S(k) for all other k
+    this->fourierTransform(rdf);
     // Print to file
     this->printStrucFactor();
 }
@@ -71,6 +75,53 @@ void StructureFactor::initToZero()
     {
         this->strucFactor[ibin] = 0.0;
     }
+}
+
+//-------------------------------------------------------------------------------------------------------
+// CALCULATIONS
+//-------------------------------------------------------------------------------------------------------
+
+/********************************************//**
+ *  Calculates the structure factor for \f$k=0\f$
+
+ It uses the exponential form
+ ***********************************************/
+void StructureFactor::transformAtZero(class Rdf2D& rdf)
+{
+  double sum=0.0; // Variable used for calculating integral approximated as summation
+  double rho=rdf.rho; // Number density
+  // Loop through all the nbin points of g(r)
+  // For k=0, the exponential term is 1
+  for (int ibin=0; ibin < this->nbin; ibin++)
+  {
+    sum += rdf.rdf2D[ibin] -1;
+  }
+  // Multiply by rho and add 1
+  this->strucFactor[0] = 1 + rho*sum;
+}
+
+/********************************************//**
+ *  Calculates the structure factor for \f$k \neq 0\f$
+
+ It uses the sinc
+ ***********************************************/
+void StructureFactor::fourierTransform(class Rdf2D& rdf)
+{
+  double sum=0.0; // Variable used for calculating integral approximated as summation
+  double rho=rdf.rho; // Number density
+  double r; // Radial coordinate
+  
+  for (int ibin=0; ibin < this->nbin; ibin++)
+  {
+    // Loop through all the nbin points of g(r)
+    for (int kbin=1; kbin < this->nbin; kbin++)
+    {
+      r = rdf.rVal[kbin]; // radial value 
+      sum += (rdf.rdf2D[kbin]-1)*r*sin(ibin*r)/double(kbin);
+    }
+  // Multiply by rho and add 1
+  this->strucFactor[ibin] = 1 + 4*PI*rho*sum;
+  }    
 }
 
 //-------------------------------------------------------------------------------------------------------
