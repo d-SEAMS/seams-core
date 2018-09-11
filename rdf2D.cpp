@@ -681,3 +681,10 @@ double Rdf2D::absDistanceYZ(int iatom, int jatom, class CMolecularSystem& molSys
     return sqrt(r2);
 }
 
+/********************************************//**
+ *  Returns the number of bins in the RDF array
+ ***********************************************/
+int Rdf2D::binsInRDF()
+{
+    return this->nbin;
+}

@@ -145,6 +145,9 @@ class Rdf2D: public COutput {
       void accumulateRDFyz(class CMolecularSystem& molSys, double x_layer, double dx, int typeA=-1, int typeB=-1);
       // ------------------------------------------------------ 
 
+      // Returns the number of bins in the RDF array
+      int binsInRDF();
+
 };
 
 #endif
