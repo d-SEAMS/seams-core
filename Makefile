@@ -1,6 +1,6 @@
 
 all:
-	g++ -g -lm -Wall -o runme output.cpp rdf2D.cpp rdf3D.cpp molecular_system.cpp molecule.cpp parameter.cpp main.cpp 
+	g++ -g -lm -Wall -o runme output.cpp structure_factor.cpp rdf2D.cpp rdf3D.cpp molecular_system.cpp molecule.cpp parameter.cpp main.cpp 
 
 molecule.o: molecule.cpp molecule.h
 	g++ -c molecule.cpp
@@ -16,6 +16,9 @@ rdf3D.o: rdf3D.cpp
 
 rdf2D.o: rdf2D.cpp
 	g++ -c rdf2D.cpp 
+
+structure_factor.o: structure_factor.cpp
+	g++ -c structure_factor.cpp 
 
 output.o: output.cpp
 	g++ -c output.cpp 
