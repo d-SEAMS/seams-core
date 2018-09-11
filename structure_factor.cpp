@@ -117,7 +117,7 @@ void StructureFactor::fourierTransform(class Rdf2D& rdf)
     for (int kbin=1; kbin < this->nbin; kbin++)
     {
       r = rdf.rVal[kbin]; // radial value 
-      sum += ((rdf.rdf2D[kbin]-1)*r*sin(ibin*r)/(double(kbin)));
+      sum += ((rdf.rdf2D[kbin]-1)*r*sin(kbin*r)/(double(kbin)));
     }
     // Multiply by rho and add 1
     std::cout<<"sum is "<<sum<<"\n";
