@@ -217,7 +217,8 @@ void Rdf2D::histogramRDFxy(class CMolecularSystem& molSys, double z_layer, doubl
             // double dz = molSys.molecules[jatom].get_posz() - molSys.molecules[iatom].get_posz();
             // if (abs(dz)>0.4){continue;}
 
-            dr = this->absDistanceXY(iatom, jatom, molSys);
+            // dr = this->absDistanceXY(iatom, jatom, molSys);
+            dr = this->getAbsDistance(iatom, jatom, molSys);
             // Only if dr is less than max_radius add to histogram
             if (dr < this->max_radius)
             {
@@ -306,6 +307,34 @@ void Rdf2D::clearRDF2D()
 //-------------------------------------------------------------------------------------------------------
 // DISTANCE CALCULATIONS
 //-------------------------------------------------------------------------------------------------------
+
+/********************************************//**
+ *  Returns the absolute distance between two particles
+ with particle indices iatom and jatom (x[iatom] - x[jatom])
+ ***********************************************/
+double Rdf2D::getAbsDistance(int iatom, int jatom, class CMolecularSystem& molSys)
+{
+    double dr[3]; // Relative distance between wrapped coordinates
+    double box[3] = {molSys.parameter->boxx, molSys.parameter->boxy, molSys.parameter->boxz};
+    double r2 = 0.0; // Squared absolute distance
+
+    // Get the relative distance in the x, y, z dim
+    dr[0] = molSys.molecules[iatom].get_posx() - molSys.molecules[jatom].get_posx();
+    dr[1] = molSys.molecules[iatom].get_posy() - molSys.molecules[jatom].get_posy();
+    dr[2] = molSys.molecules[iatom].get_posz() - molSys.molecules[jatom].get_posz();
+
+    // Get the squared absolute distance
+    for (int k=0; k<3; k++)
+    {
+        // Correct for periodicity
+        dr[k] -= box[k]*round(dr[k]/box[k]);
+        
+        r2 += pow(dr[k],2.0);
+    }
+    
+
+    return sqrt(r2);
+}
 
 /********************************************//**
  *  Returns the absolute distance between two particles
@@ -549,7 +578,7 @@ void Rdf2D::histogramRDFyz(class CMolecularSystem& molSys, double x_layer, doubl
             x_atom = molSys.molecules[iatom].get_posx();
             if (this->atomInsideLayer(x_atom, x_layer, dx)==false){continue;}
 
-            dr = this->absDistanceYZ(iatom, jatom, molSys);
+            dr = this->getAbsDistance(iatom, jatom, molSys);
             // Only if dr is less than max_radius add to histogram
             if (dr < this->max_radius)
             {

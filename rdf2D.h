@@ -79,6 +79,8 @@ class Rdf2D: public COutput {
     void checkVolume(class CMolecularSystem& molSys); 
     // Initialize the 2D RDF array to zero before histogramming
     void rdf2DInitToZero();
+    // Get absolute relative distance from wrapped coordinates
+    double getAbsDistance(int, int, class CMolecularSystem& molSys);
     // Get absolute relative distance in the XY plane from wrapped coordinates
 		double absDistanceXY(int, int, class CMolecularSystem& molSys);
 		// Helper functions
