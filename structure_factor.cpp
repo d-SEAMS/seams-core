@@ -94,7 +94,7 @@ void StructureFactor::transformAtZero(class Rdf2D& rdf)
   // For k=0, the exponential term is 1
   for (int ibin=0; ibin < this->nbin; ibin++)
   {
-    sum += rdf.rdf2D[ibin] -1;
+    sum += (rdf.rdf2D[ibin] -1);
   }
   // Multiply by rho and add 1
   this->strucFactor[0] = 1 + rho*sum;
@@ -117,10 +117,12 @@ void StructureFactor::fourierTransform(class Rdf2D& rdf)
     for (int kbin=1; kbin < this->nbin; kbin++)
     {
       r = rdf.rVal[kbin]; // radial value 
-      sum += (rdf.rdf2D[kbin]-1)*r*sin(ibin*r)/double(kbin);
+      sum += ((rdf.rdf2D[kbin]-1)*r*sin(ibin*r)/(double(kbin)));
     }
-  // Multiply by rho and add 1
-  this->strucFactor[ibin] = 1 + 4*PI*rho*sum;
+    // Multiply by rho and add 1
+    std::cout<<"sum is "<<sum<<"\n";
+    this->strucFactor[ibin] = 1 + 4*PI*rho*sum;
+    std::cout<<"s(k) "<<strucFactor[ibin]<<"\n";
   }    
 }
 
