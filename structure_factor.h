@@ -52,8 +52,15 @@
 
 class StructureFactor: public COutput {
 	private:		
-    // No. of bins 
+    // No. of bins of the RDF
 		int nbin; 
+    // No. of bins of the structure factor
+    int sbin;
+    // Wave vector increment, delta k
+    double kwidth;
+
+    // Calculate the number of bins, with box lengths as arguments
+    void getBins(double, double);
 
     // Take the Fourier transform of g(r) when k is not zero
     void fourierTransform(class Rdf2D& rdf);
@@ -67,6 +74,11 @@ class StructureFactor: public COutput {
     // Get values of the k inverse distance coordinate
     void getK();
 
+    // Helper functions
+    // Returns the largest value
+    double largest(double, double, double);
+    double largest(double, double); 
+
   public:
 		  //the main object in which the structure factor is created and calculated
     	StructureFactor();
@@ -78,7 +90,7 @@ class StructureFactor: public COutput {
 		  double* k;
 
     	// Initialize the histogram
-    	void initStrucFactor(class Rdf2D& rdf);
+    	void initStrucFactor(class Rdf2D& rdf, double box_length1, double box_lenth2);
 
     	// Print the structure factor to a file in the output folder
     	void printStrucFactor();
