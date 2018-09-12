@@ -22,9 +22,11 @@ StructureFactor::~StructureFactor()
  the 2-D RDF will be calculated and the desired volume. If not set, the default
  values are half the simulation box and the volume of the simulation box respectively
  ***********************************************/
-void StructureFactor::initStrucFactor(class Rdf2D& rdf)
+void StructureFactor::initStrucFactor(class Rdf2D& rdf, double box_length1, double box_lenth2)
 {
-    // Get the number of bins 
+    // Get the largest box length
+    double length = this->largest(box_length1, box_lenth2);
+    // Get the number of bins for the RDF 
     this->nbin = rdf.binsInRDF();
     // Initialize the array for structure factor
     this->strucFactor  = new double[this->nbin];
@@ -60,7 +62,7 @@ void StructureFactor::getK()
     // Loop through all bins
     for (int ibin=0; ibin<this->nbin; ibin++)
     {
-        this->k[ibin] = ibin;
+        this->k[ibin] = ibin*this->kwidth;
     }
 }
 
@@ -138,3 +140,20 @@ void StructureFactor::printStrucFactor()
     // Prints the radial values and 3D RDF values to a file called rdf3D.txt
     this->printToFile(this->nbin, this->k, this->strucFactor, "strucFactor", "Inverse Distance Coordinate k", "S(k)");
 } 
+
+//-------------------------------------------------------------------------------------------------------
+// HELPER FUNCTIONS
+//-------------------------------------------------------------------------------------------------------
+
+// Functions for returning the largest number
+double StructureFactor::largest(double x, double y, double z)
+{
+  // return std::min({x,y,z}); // For C++11
+  return std::min(std::min(x,y), z);
+}
+
+double StructureFactor::largest(double x, double y)
+{
+  return std::min(x,y);
+}
+
