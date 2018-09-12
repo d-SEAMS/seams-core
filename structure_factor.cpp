@@ -24,12 +24,12 @@ StructureFactor::~StructureFactor()
  ***********************************************/
 void StructureFactor::initStrucFactor(class Rdf2D& rdf, double box_length1, double box_lenth2)
 {
-    // Get the largest box length
-    double length = this->largest(box_length1, box_lenth2);
     // Get the number of bins for the RDF 
     this->nbin = rdf.binsInRDF();
+    // Get the number of bins for the structure factor
+    this->getBins(box_length1, box_lenth2);
     // Initialize the array for structure factor
-    this->strucFactor  = new double[this->nbin];
+    this->strucFactor = new double[this->nbin];
     // Initialize the RDF array to zero
     this->initToZero();
     // Get an array for k
@@ -77,6 +77,18 @@ void StructureFactor::initToZero()
     {
         this->strucFactor[ibin] = 0.0;
     }
+}
+
+/********************************************//**
+ *  Gets the number of bins for the structure factor,
+ by calculating the width of the wave vector kwidth
+ from the box dimensions using \f$\delta k = \frac{2 \pi}{L}\f$
+ ***********************************************/
+void StructureFactor::getBins(double box_length1, double box_lenth2)
+{
+    // Get the largest box length
+    double length = this->largest(box_length1, box_lenth2);
+    // kwidth is the 
 }
 
 //-------------------------------------------------------------------------------------------------------
