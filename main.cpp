@@ -95,7 +95,7 @@ int main()
     // ----------------------------------------------
     //Structure Factor from RDF
     StructureFactor *s_k = new StructureFactor;
-    s_k->initStrucFactor(*rdf);
+    s_k->initStrucFactor(*rdf, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy);
     // ----------------------------------------------
 
     //Free the memory. 
