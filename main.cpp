@@ -39,10 +39,7 @@ int main()
     //Get random step info at a frame number
     int frame = 100;
     m_MolSys->readParticleFile(100);
-    // No. of steps in traj file
-    int nsteps = m_MolSys->parameter->nsteps;
-    std::cout<<"Total number of steps in traj is "<<nsteps<<"\n";
-
+    
     // ----------------------------------------
     // 3D RDF (single step)
     // // Create object for 3D RDF 
