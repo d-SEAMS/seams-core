@@ -61,18 +61,19 @@ class StructureFactor: public COutput {
 
     // Calculate the number of bins, with box lengths as arguments
     void getBins(double, double);
-
-    // Take the Fourier transform of g(r) when k is not zero
-    void fourierTransform(class Rdf2D& rdf);
-
-    // Calculate structure factor for k=0 
-    void transformAtZero(class Rdf2D& rdf);
  
     // Initialize the structure factor array to zero 
     void initToZero();
 
+    // Calculate the structure factor
+    void calcStrucFactor();
+
     // Get values of the k inverse distance coordinate
     void getK();
+
+    // Integrates the value of the integral in the expression for the structure factor
+    // using 1/3 Simpson's rule
+    double integrateSimpsons(double k);
 
     // Helper functions
     // Returns the largest value
