@@ -29,17 +29,14 @@ void StructureFactor::initStrucFactor(class Rdf2D& rdf, double box_length1, doub
     // Get the number of bins for the structure factor
     this->getBins(box_length1, box_lenth2);
     // Initialize the array for structure factor
-    this->strucFactor = new double[this->nbin];
-    // Initialize the RDF array to zero
+    this->strucFactor = new double[this->sbin];
+    // Initialize the structure factor array to zero
     this->initToZero();
     // Get an array for k
-    this->k = new double[this->nbin];
+    this->k = new double[this->sbin];
     // Get the values of the inverse distance k
     this->getK();
-    // Get the value of S(k) at k=0
-    this->transformAtZero(rdf);
-    // Get S(k) for all other k
-    this->fourierTransform(rdf);
+    // Structure factor calculation
     // Print to file
     this->printStrucFactor();
 }
@@ -60,9 +57,9 @@ void StructureFactor::deleteStrucFactor()
 void StructureFactor::getK()
 {
     // Loop through all bins
-    for (int ibin=0; ibin<this->nbin; ibin++)
+    for (int ibin=0; ibin<this->sbin; ibin++)
     {
-        this->k[ibin] = ibin*this->kwidth;
+        this->k[ibin] = (ibin+1)*this->kwidth;
     }
 }
 
@@ -73,7 +70,7 @@ void StructureFactor::getK()
 void StructureFactor::initToZero()
 {
     // Loop over all bins
-    for (int ibin=0; ibin < this->nbin; ibin++)
+    for (int ibin=0; ibin < this->sbin; ibin++)
     {
         this->strucFactor[ibin] = 0.0;
     }
@@ -88,7 +85,10 @@ void StructureFactor::getBins(double box_length1, double box_lenth2)
 {
     // Get the largest box length
     double length = this->largest(box_length1, box_lenth2);
-    // kwidth is the 
+    // kwidth is the should be such that the amplitude is not larger than the box length
+    this->kwidth = 2*PI/length;
+    this->sbin = 800; // temp
+    this->sbin = this->sbin & ~1; // Round down to an even number for Simpson's rule
 }
 
 //-------------------------------------------------------------------------------------------------------
@@ -96,48 +96,20 @@ void StructureFactor::getBins(double box_length1, double box_lenth2)
 //-------------------------------------------------------------------------------------------------------
 
 /********************************************//**
- *  Calculates the structure factor for \f$k=0\f$
-
- It uses the exponential form
+ *  Calculates the structure factor
  ***********************************************/
-void StructureFactor::transformAtZero(class Rdf2D& rdf)
+void StructureFactor::calcStrucFactor()
 {
-  double sum=0.0; // Variable used for calculating integral approximated as summation
-  double rho=rdf.rho; // Number density
-  // Loop through all the nbin points of g(r)
-  // For k=0, the exponential term is 1
-  for (int ibin=0; ibin < this->nbin; ibin++)
-  {
-    sum += (rdf.rdf2D[ibin] -1);
-  }
-  // Multiply by rho and add 1
-  this->strucFactor[0] = 1 + rho*sum;
+  //
 }
 
 /********************************************//**
- *  Calculates the structure factor for \f$k \neq 0\f$
-
- It uses the sinc
+ *  Calculates the value of the integral \f$\int\f$
+ Takes the value of k as the argument 
  ***********************************************/
-void StructureFactor::fourierTransform(class Rdf2D& rdf)
+double StructureFactor::integrateSimpsons(double k)
 {
-  double sum=0.0; // Variable used for calculating integral approximated as summation
-  double rho=rdf.rho; // Number density
-  double r; // Radial coordinate
-  
-  for (int ibin=0; ibin < this->nbin; ibin++)
-  {
-    // Loop through all the nbin points of g(r)
-    for (int kbin=1; kbin < this->nbin; kbin++)
-    {
-      r = rdf.rVal[kbin]; // radial value 
-      sum += ((rdf.rdf2D[kbin]-1)*r*sin(kbin*r)/(double(kbin)));
-    }
-    // Multiply by rho and add 1
-    std::cout<<"sum is "<<sum<<"\n";
-    this->strucFactor[ibin] = 1 + 4*PI*rho*sum;
-    std::cout<<"s(k) "<<strucFactor[ibin]<<"\n";
-  }    
+    //
 }
 
 //-------------------------------------------------------------------------------------------------------
