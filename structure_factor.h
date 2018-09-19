@@ -58,6 +58,8 @@ class StructureFactor: public COutput {
     int sbin;
     // Wave vector increment, delta k
     double kwidth;
+    // Minimum k value
+    double k_min;
 
     // Calculate the number of bins, with box lengths as arguments
     void getBins(double, double);
@@ -66,19 +68,23 @@ class StructureFactor: public COutput {
     void initToZero();
 
     // Calculate the structure factor
-    void calcStrucFactor();
+    void calcStrucFactor(class Rdf2D& rdf);
 
     // Get values of the k inverse distance coordinate
     void getK();
 
     // Integrates the value of the integral in the expression for the structure factor
     // using 1/3 Simpson's rule
-    double integrateSimpsons(double k);
+    double integrateSimpsons(class Rdf2D& rdf, double k);
+    // Function to return the integrand for a particular g(r) value
+    double integrand(class Rdf2D& rdf, int index, double k);
 
     // Helper functions
     // Returns the largest value
     double largest(double, double, double);
-    double largest(double, double); 
+    double largest(double, double);
+    // Returns the smallest value
+    double smallest(double, double);
 
   public:
 		  //the main object in which the structure factor is created and calculated

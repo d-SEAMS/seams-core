@@ -1,8 +1,6 @@
 var searchData=
 [
-  ['rdf2d',['Rdf2D',['../classRdf2D.html',1,'']]],
-  ['rdf3d',['Rdf3D',['../classRdf3D.html',1,'']]],
-  ['readparameter',['readParameter',['../classCParameter.html#a026d8da357935e384b478913e036f3bc',1,'CParameter']]],
-  ['readparticlefile',['readParticleFile',['../classCMolecularSystem.html#a019709e83f903659bdb82c226da4189a',1,'CMolecularSystem::readParticleFile()'],['../classCMolecularSystem.html#a7ccd08c6a0182faf0316d9f1f8ec1651',1,'CMolecularSystem::readParticleFile(int)']]],
-  ['readwholetrj',['readWholeTrj',['../classCMolecularSystem.html#a68c2be35fb9f9dbd1915ddf1c845eb15',1,'CMolecularSystem']]]
+  ['printrdf2d',['printRDF2D',['../classRdf2D.html#aae00c1526117f6ac63d2c13354b6c404',1,'Rdf2D']]],
+  ['printrdf3d',['printRDF3D',['../classRdf3D.html#a76fdc87564a586883c4f290fff3172b2',1,'Rdf3D']]],
+  ['printstrucfactor',['printStrucFactor',['../classStructureFactor.html#a5b3f1a43405ec79bc8de4075da1316fa',1,'StructureFactor']]]
 ];

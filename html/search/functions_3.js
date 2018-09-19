@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['get_5fposx',['get_posx',['../classCMolecule.html#ac76dbb1e5abbc9fbadcd568d0f2e7d16',1,'CMolecule']]],
-  ['get_5fposy',['get_posy',['../classCMolecule.html#a8cf1a6b995c8cbf4f1881f6f38ebca02',1,'CMolecule']]],
-  ['get_5fposz',['get_posz',['../classCMolecule.html#a69483e3d6820a96f004ba6c78f8d166e',1,'CMolecule']]],
-  ['getr',['getR',['../classRdf2D.html#a3c8153b303733b7e5d320f9b20f37b32',1,'Rdf2D::getR()'],['../classRdf3D.html#ade47a2d360bcc0112f0da45baef6e609',1,'Rdf3D::getR()']]]
+  ['deletemolecules',['deleteMolecules',['../classCMolecularSystem.html#a5a31541d610fe40d42a31283eb9a8845',1,'CMolecularSystem']]],
+  ['deleterdf2d',['deleteRDF2D',['../classRdf2D.html#a8008421c8aedff5887160b455879d36b',1,'Rdf2D']]],
+  ['deleterdf3d',['deleteRDF3D',['../classRdf3D.html#a6af1bf5b0301a6b43d9f0fffdb868c9c',1,'Rdf3D']]],
+  ['deletestrucfactor',['deleteStrucFactor',['../classStructureFactor.html#a0ac46fa427372d9b110f9f9657424803',1,'StructureFactor']]]
 ];

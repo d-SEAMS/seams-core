@@ -37,6 +37,7 @@ void StructureFactor::initStrucFactor(class Rdf2D& rdf, double box_length1, doub
     // Get the values of the inverse distance k
     this->getK();
     // Structure factor calculation
+    this->calcStrucFactor(rdf);
     // Print to file
     this->printStrucFactor();
 }
@@ -59,7 +60,7 @@ void StructureFactor::getK()
     // Loop through all bins
     for (int ibin=0; ibin<this->sbin; ibin++)
     {
-        this->k[ibin] = (ibin+1)*this->kwidth;
+        this->k[ibin] = this->k_min + (ibin+1)*this->kwidth;
     }
 }
 
@@ -81,14 +82,15 @@ void StructureFactor::initToZero()
  by calculating the width of the wave vector kwidth
  from the box dimensions using \f$\delta k = \frac{2 \pi}{L}\f$
  ***********************************************/
-void StructureFactor::getBins(double box_length1, double box_lenth2)
+void StructureFactor::getBins(double box_length1, double box_length2)
 {
-    // Get the largest box length
-    double length = this->largest(box_length1, box_lenth2);
+    // Get the largest possible length
+    double max_length = this->smallest(box_length1, box_length2);
     // kwidth is the should be such that the amplitude is not larger than the box length
-    this->kwidth = 2*PI/length;
-    this->sbin = 800; // temp
-    this->sbin = this->sbin & ~1; // Round down to an even number for Simpson's rule
+    this->kwidth = 2*PI/max_length;
+    this->k_min = 2*PI/3.1589;
+    double k_max = 2*PI/0.075;
+    this->sbin = int((k_max-k_min)/kwidth); // Using s_max
 }
 
 //-------------------------------------------------------------------------------------------------------
@@ -98,18 +100,45 @@ void StructureFactor::getBins(double box_length1, double box_lenth2)
 /********************************************//**
  *  Calculates the structure factor
  ***********************************************/
-void StructureFactor::calcStrucFactor()
+void StructureFactor::calcStrucFactor(class Rdf2D& rdf)
 {
-  //
+    // Loop through all k 
+    for (int kbin=0; kbin < this->sbin; kbin++)
+    {
+        this->strucFactor[kbin] = 1 + 4*PI*rdf.rho*this->integrateSimpsons(rdf, this->k[kbin]);
+    }
 }
 
 /********************************************//**
  *  Calculates the value of the integral \f$\int\f$
  Takes the value of k as the argument 
  ***********************************************/
-double StructureFactor::integrateSimpsons(double k)
+double StructureFactor::integrateSimpsons(class Rdf2D& rdf, double k)
 {
-    //
+    int nbin;
+    double sum = 0.0;                   // Summation for the Simpson's rule
+    double h = rdf.rVal[1]-rdf.rVal[0]; // Step size in r
+    // Divide the range of g(r) into an even number of subintervals
+    if (this->nbin%2 == 0){nbin = this->nbin-1;}
+    else {nbin = this->nbin-1;}
+
+    // Apply Simpson's 1/3 rule
+    for (int ibin=1; ibin <= nbin/2; ibin++)
+    {
+        sum += (this->integrand(rdf, 2*ibin-2, k) + 4*this->integrand(rdf, 2*ibin-1, k) + this->integrand(rdf, 2*ibin, k));
+    }
+
+    return h*sum/3.0;
+}
+
+/********************************************//**
+ *  Function to return the integrand for a particular \f$g(r)\f$ value
+ ***********************************************/
+double StructureFactor::integrand(class Rdf2D& rdf, int index, double k)
+{
+    double r = rdf.rVal[index]; // r at a particular index value
+    double g_r = rdf.rdf2D[index]; // g(r)
+    return ((g_r-1)*r*sin(k*r)/k);
 }
 
 //-------------------------------------------------------------------------------------------------------
@@ -133,11 +162,16 @@ void StructureFactor::printStrucFactor()
 double StructureFactor::largest(double x, double y, double z)
 {
   // return std::min({x,y,z}); // For C++11
-  return std::min(std::min(x,y), z);
+  return std::max(std::min(x,y), z);
 }
 
 double StructureFactor::largest(double x, double y)
 {
-  return std::min(x,y);
+  return std::max(x,y);
 }
 
+// Functions for returning the smallest number
+double StructureFactor::smallest(double x, double y)
+{
+  return std::min(x,y);
+}

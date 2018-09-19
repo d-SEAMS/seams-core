@@ -2,7 +2,7 @@
 \label{classRdf2D}\index{Rdf2D@{Rdf2D}}
 
 
-Class for 2D R\+DF. This class creates an object for the 2\+D-\/\+R\+DF, and the output of the R\+DF can be printed to a file.  
+Class for 2D R\+DF. This class creates an object for the 2D-\/\+R\+DF, and the output of the R\+DF can be printed to a file.  
 
 
 
@@ -39,6 +39,8 @@ void \mbox{\hyperlink{classRdf2D_adf8c5b9d02268de9ee5ebab8cfe7f3df}{init\+R\+D\+
 void \mbox{\hyperlink{classRdf2D_a4e77d415c344954480a121f79a4aab6b}{single\+R\+D\+Fyz}} (class \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} \&mol\+Sys, double x\+\_\+layer, double dx, int typeA=-\/1, int typeB=-\/1)
 \item 
 void \mbox{\hyperlink{classRdf2D_a26d388ff4f8b626c22fa3ea12332e1d7}{accumulate\+R\+D\+Fyz}} (class \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} \&mol\+Sys, double x\+\_\+layer, double dx, int typeA=-\/1, int typeB=-\/1)
+\item 
+int \mbox{\hyperlink{classRdf2D_ad5d65146becc5d7703c783600d924f44}{bins\+In\+R\+DF}} ()
 \end{DoxyCompactItemize}
 \subsection*{Public Attributes}
 \begin{DoxyCompactItemize}
@@ -54,15 +56,18 @@ int {\bfseries typeA}
 \item 
 \mbox{\Hypertarget{classRdf2D_ac4301eef0e368e8b67b6d03a152e0e8b}\label{classRdf2D_ac4301eef0e368e8b67b6d03a152e0e8b}} 
 int {\bfseries typeB}
+\item 
+\mbox{\Hypertarget{classRdf2D_ac7beb9f69ee96e5c5ac692eca802a81b}\label{classRdf2D_ac7beb9f69ee96e5c5ac692eca802a81b}} 
+double {\bfseries rho}
 \end{DoxyCompactItemize}
 
 
 \subsection{Detailed Description}
-Class for 2D R\+DF. This class creates an object for the 2\+D-\/\+R\+DF, and the output of the R\+DF can be printed to a file. 
+Class for 2D R\+DF. This class creates an object for the 2D-\/\+R\+DF, and the output of the R\+DF can be printed to a file. 
 
 For example, if you want to find the in-\/plane R\+DF in the XY plane, you should use the \mbox{\hyperlink{classRdf2D_a767f006de6412394a59f1cae5f7f6b35}{init\+R\+D\+Fxy()}} function, followed by either the \mbox{\hyperlink{classRdf2D_a6c716851d80fd2a7dcfefd219892d87b}{accumulate\+R\+D\+Fxy()}} or \mbox{\hyperlink{classRdf2D_afc5ff73aa9c126184e94ee3abfc14ff4}{single\+R\+D\+Fxy()}}, depending on whether you want to average over several frames or not. If you use the accumulate\+R\+D\+Fxy function, you must also use the \mbox{\hyperlink{classRdf2D_aaf6d00ec728e8c694ed2932332691c0d}{normalize\+R\+D\+F2\+D()}} function. Don\textquotesingle{}t call call \mbox{\hyperlink{classRdf2D_aaf6d00ec728e8c694ed2932332691c0d}{normalize\+R\+D\+F2\+D()}} when using \mbox{\hyperlink{classRdf2D_afc5ff73aa9c126184e94ee3abfc14ff4}{single\+R\+D\+Fxy()}}, since this function is called by \mbox{\hyperlink{classRdf2D_afc5ff73aa9c126184e94ee3abfc14ff4}{single\+R\+D\+Fxy()}} itself. The \mbox{\hyperlink{classRdf2D_aae00c1526117f6ac63d2c13354b6c404}{print\+R\+D\+F2\+D()}} function prints the radial values and corresponding R\+DF values to a file called rdf2\+D.\+dat in the output folder.
 
-The equation used for 2\+D-\/\+R\+DF for the $n^{th}$ layer is\+: \[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma_{i \neq j} \delta(r - r_{ij}) \left[ \Theta\left( \frac{\delta z}{2}-|z_i-z^2| \right) \times \Theta\left( \frac{\delta z}{2}-|z_j-z^n| \right) \right] \]
+The equation used for 2D-\/\+R\+DF for the $n^{th}$ layer is\+: \[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma_{i \neq j} \delta(r - r_{ij}) \left[ \Theta\left( \frac{\delta z}{2}-|z_i-z^2| \right) \times \Theta\left( \frac{\delta z}{2}-|z_j-z^n| \right) \right] \]
 \begin{DoxyItemize}
 \item $z^n$ is the z coordinate of the layer chosen. This can be determined by finding the peak in the density(or number) vs $z$ plot.
 \item $\delta z$ is the thickness of the layer chosen. This can also be determined from the density(or number) vs $z$ plot by ascertaining the width of the peak corresponding to the desired layer.
@@ -91,7 +96,13 @@ Calculates the 2D radial distribution function for a number of snapshots for a p
 
 It accepts the \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} object reference and a pair of int type numbers corresponding to lammps type I\+Ds in the trajectory file, and the x coordinate of the layer and width of the layer as arguments. The z coordinate of the layer can be chosen to be the midpoint of the peak in the density(or number) vs $x$ plot. The width should be set as the width of the peak. If the integer type I\+Ds are not set, then the R\+DF is calculated for all the atoms in the frame, assuming they are all of the same type.
 
-There is no need to use \mbox{\hyperlink{classRdf2D_a4e77d415c344954480a121f79a4aab6b}{single\+R\+D\+Fyz()}} if the R\+DF is to be calculated over a number of frames. You will have to call the normalize function \mbox{\hyperlink{classRdf2D_aaf6d00ec728e8c694ed2932332691c0d}{normalize\+R\+D\+F2\+D()}} separately after accumulating to get the R\+DF \mbox{\Hypertarget{classRdf2D_a9658a9bb2229afda0d743bdc05a27411}\label{classRdf2D_a9658a9bb2229afda0d743bdc05a27411}} 
+There is no need to use \mbox{\hyperlink{classRdf2D_a4e77d415c344954480a121f79a4aab6b}{single\+R\+D\+Fyz()}} if the R\+DF is to be calculated over a number of frames. You will have to call the normalize function \mbox{\hyperlink{classRdf2D_aaf6d00ec728e8c694ed2932332691c0d}{normalize\+R\+D\+F2\+D()}} separately after accumulating to get the R\+DF \mbox{\Hypertarget{classRdf2D_ad5d65146becc5d7703c783600d924f44}\label{classRdf2D_ad5d65146becc5d7703c783600d924f44}} 
+\index{Rdf2D@{Rdf2D}!bins\+In\+R\+DF@{bins\+In\+R\+DF}}
+\index{bins\+In\+R\+DF@{bins\+In\+R\+DF}!Rdf2D@{Rdf2D}}
+\subsubsection{\texorpdfstring{bins\+In\+R\+D\+F()}{binsInRDF()}}
+{\footnotesize\ttfamily int Rdf2\+D\+::bins\+In\+R\+DF (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Returns the number of bins in the R\+DF array \mbox{\Hypertarget{classRdf2D_a9658a9bb2229afda0d743bdc05a27411}\label{classRdf2D_a9658a9bb2229afda0d743bdc05a27411}} 
 \index{Rdf2D@{Rdf2D}!clear\+R\+D\+F2D@{clear\+R\+D\+F2D}}
 \index{clear\+R\+D\+F2D@{clear\+R\+D\+F2D}!Rdf2D@{Rdf2D}}
 \subsubsection{\texorpdfstring{clear\+R\+D\+F2\+D()}{clearRDF2D()}}

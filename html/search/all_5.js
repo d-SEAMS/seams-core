@@ -1,8 +1,7 @@
 var searchData=
 [
-  ['initializemolecules',['initializeMolecules',['../classCMolecularSystem.html#afcebd0d1032cbe262c82825ceb78b4a5',1,'CMolecularSystem::initializeMolecules(int)'],['../classCMolecularSystem.html#a3635729781d41229ce16fabea4ce9b6f',1,'CMolecularSystem::initializeMolecules()']]],
-  ['initializesystem',['InitializeSystem',['../classCMolecularSystem.html#a9084e19d4554f70ae7e603c7cab3a2ae',1,'CMolecularSystem']]],
-  ['initrdf3d',['initRDF3D',['../classRdf3D.html#aa86b927b22b369cd1d6ead93c17e43ee',1,'Rdf3D']]],
-  ['initrdfxy',['initRDFxy',['../classRdf2D.html#a767f006de6412394a59f1cae5f7f6b35',1,'Rdf2D']]],
-  ['initrdfyz',['initRDFyz',['../classRdf2D.html#adf8c5b9d02268de9ee5ebab8cfe7f3df',1,'Rdf2D']]]
+  ['get_5fposx',['get_posx',['../classCMolecule.html#ac76dbb1e5abbc9fbadcd568d0f2e7d16',1,'CMolecule']]],
+  ['get_5fposy',['get_posy',['../classCMolecule.html#a8cf1a6b995c8cbf4f1881f6f38ebca02',1,'CMolecule']]],
+  ['get_5fposz',['get_posz',['../classCMolecule.html#a69483e3d6820a96f004ba6c78f8d166e',1,'CMolecule']]],
+  ['getr',['getR',['../classRdf2D.html#a3c8153b303733b7e5d320f9b20f37b32',1,'Rdf2D::getR()'],['../classRdf3D.html#ade47a2d360bcc0112f0da45baef6e609',1,'Rdf3D::getR()']]]
 ];

@@ -25,3 +25,8 @@
 \form#24:$x$
 \form#25:$y$
 \form#26:\[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma_{i \neq j} \delta(r - r_{ij}) \left[ \Theta\left( \frac{\delta z}{2}-|z_i-z^2| \right) \times \Theta\left( \frac{\delta z}{2}-|z_j-z^n| \right) \right] \]
+\form#27:$\delta k = \frac{2 \pi}{L}$
+\form#28:$\int$
+\form#29:$g(r)$
+\form#30:$k \neq 0$
+\form#31:$k=0$

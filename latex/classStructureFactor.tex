@@ -1,0 +1,81 @@
+\hypertarget{classStructureFactor}{}\section{Structure\+Factor Class Reference}
+\label{classStructureFactor}\index{Structure\+Factor@{Structure\+Factor}}
+
+
+Class for Structure Factor Calculation. This class creates an object for the structure factor, and the output can be printed to a file.  
+
+
+
+
+{\ttfamily \#include $<$structure\+\_\+factor.\+h$>$}
+
+Inheritance diagram for Structure\+Factor\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classStructureFactor}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classStructureFactor_aa1afd82ced049c30b19ad13227301d25}{init\+Struc\+Factor}} (class \mbox{\hyperlink{classRdf2D}{Rdf2D}} \&rdf, double box\+\_\+length1, double box\+\_\+lenth2)
+\item 
+void \mbox{\hyperlink{classStructureFactor_a5b3f1a43405ec79bc8de4075da1316fa}{print\+Struc\+Factor}} ()
+\item 
+void \mbox{\hyperlink{classStructureFactor_a0ac46fa427372d9b110f9f9657424803}{delete\+Struc\+Factor}} ()
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classStructureFactor_a71f225514b29540ac42850e7a478cb5e}\label{classStructureFactor_a71f225514b29540ac42850e7a478cb5e}} 
+double $\ast$ {\bfseries struc\+Factor}
+\item 
+\mbox{\Hypertarget{classStructureFactor_a30b23e2b8b092f032dd06a4506d78df1}\label{classStructureFactor_a30b23e2b8b092f032dd06a4506d78df1}} 
+double $\ast$ {\bfseries k}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Class for Structure Factor Calculation. This class creates an object for the structure factor, and the output can be printed to a file. 
+
+For example, if you want to find the in-\/plane R\+DF in the XY plane, you should use the init\+R\+D\+Fxy() function, followed by either the accumulate\+R\+D\+Fxy() or single\+R\+D\+Fxy(), depending on whether you want to average over several frames or not. If you use the accumulate\+R\+D\+Fxy function, you must also use the normalize\+R\+D\+F2\+D() function. Don\textquotesingle{}t call call normalize\+R\+D\+F2\+D() when using single\+R\+D\+Fxy(), since this function is called by single\+R\+D\+Fxy() itself. The print\+R\+D\+F2\+D() function prints the radial values and corresponding R\+DF values to a file called rdf2\+D.\+dat in the output folder.
+
+The structure factor can be determined in two ways\+: directly from the coordinates or as a Fourier transform of the pair correlation function $g(r)$.
+
+The equation used for $k \neq 0$ is\+: \[ g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma_{i \neq j} \delta(r - r_{ij}) \left[ \Theta\left( \frac{\delta z}{2}-|z_i-z^2| \right) \times \Theta\left( \frac{\delta z}{2}-|z_j-z^n| \right) \right] \]
+
+For $k=0$ use the exponential term
+\begin{DoxyItemize}
+\item $z^n$ is the z coordinate of the layer chosen. This can be determined by finding the peak in the density(or number) vs $z$ plot.
+\item $\delta z$ is the thickness of the layer chosen. This can also be determined from the density(or number) vs $z$ plot by ascertaining the width of the peak corresponding to the desired layer.
+\item Here, $\rho$ corresponds to the bulk number density of the species chosen. This is determined in the code by calculating the number of atoms and the volume. By default, the program accepts the simulation box volume as the volume. The user should enter the volume for more complex systems. The accuracy of the R\+DF is sensitive to the calculated value of density, so care should be taken when specifying/calculating the density.
+\item This calculation is computed upto a maximum radius, which can either be user-\/defined or is set by default to be half the smallest box length of the $x$ or $y$ dimensions. 
+\end{DoxyItemize}
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classStructureFactor_a0ac46fa427372d9b110f9f9657424803}\label{classStructureFactor_a0ac46fa427372d9b110f9f9657424803}} 
+\index{Structure\+Factor@{Structure\+Factor}!delete\+Struc\+Factor@{delete\+Struc\+Factor}}
+\index{delete\+Struc\+Factor@{delete\+Struc\+Factor}!Structure\+Factor@{Structure\+Factor}}
+\subsubsection{\texorpdfstring{delete\+Struc\+Factor()}{deleteStrucFactor()}}
+{\footnotesize\ttfamily void Structure\+Factor\+::delete\+Struc\+Factor (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Frees the memory \mbox{\Hypertarget{classStructureFactor_aa1afd82ced049c30b19ad13227301d25}\label{classStructureFactor_aa1afd82ced049c30b19ad13227301d25}} 
+\index{Structure\+Factor@{Structure\+Factor}!init\+Struc\+Factor@{init\+Struc\+Factor}}
+\index{init\+Struc\+Factor@{init\+Struc\+Factor}!Structure\+Factor@{Structure\+Factor}}
+\subsubsection{\texorpdfstring{init\+Struc\+Factor()}{initStrucFactor()}}
+{\footnotesize\ttfamily void Structure\+Factor\+::init\+Struc\+Factor (\begin{DoxyParamCaption}\item[{class \mbox{\hyperlink{classRdf2D}{Rdf2D}} \&}]{rdf,  }\item[{double}]{box\+\_\+length1,  }\item[{double}]{box\+\_\+lenth2 }\end{DoxyParamCaption})}
+
+Initializes the histogram array for structure factor
+
+It takes the \mbox{\hyperlink{classCMolecularSystem}{C\+Molecular\+System}} object reference and binwidth as arguments. Optional arguments include the maximum radius upto which the 2-\/D R\+DF will be calculated and the desired volume. If not set, the default values are half the simulation box and the volume of the simulation box respectively \mbox{\Hypertarget{classStructureFactor_a5b3f1a43405ec79bc8de4075da1316fa}\label{classStructureFactor_a5b3f1a43405ec79bc8de4075da1316fa}} 
+\index{Structure\+Factor@{Structure\+Factor}!print\+Struc\+Factor@{print\+Struc\+Factor}}
+\index{print\+Struc\+Factor@{print\+Struc\+Factor}!Structure\+Factor@{Structure\+Factor}}
+\subsubsection{\texorpdfstring{print\+Struc\+Factor()}{printStrucFactor()}}
+{\footnotesize\ttfamily void Structure\+Factor\+::print\+Struc\+Factor (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Prints out the 2D R\+DF function to a file in the output folder 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+structure\+\_\+factor.\+h\item 
+structure\+\_\+factor.\+cpp\end{DoxyCompactItemize}
