@@ -88,9 +88,11 @@ void StructureFactor::getBins(double box_length1, double box_length2)
     double max_length = this->smallest(box_length1, box_length2);
     // kwidth is the should be such that the amplitude is not larger than the box length
     this->kwidth = 2*PI/max_length;
+    // this->kwidth = 2*PI/(sqrt(3)*0.154);
     this->k_min = 2*PI/3.1589;
     double k_max = 2*PI/0.075;
     this->sbin = int((k_max-k_min)/kwidth); // Using s_max
+    std::cout<< "kwidth is " << this->kwidth << " and k_max is " << k_max << "\n";
 }
 
 //-------------------------------------------------------------------------------------------------------
@@ -151,7 +153,7 @@ double StructureFactor::integrand(class Rdf2D& rdf, int index, double k)
 void StructureFactor::printStrucFactor()
 {
     // Prints the radial values and 3D RDF values to a file called rdf3D.txt
-    this->printToFile(this->nbin, this->k, this->strucFactor, "strucFactor", "Inverse Distance Coordinate k", "S(k)");
+    this->printToFile(this->sbin, this->k, this->strucFactor, "strucFactor", "Inverse Distance Coordinate k", "S(k)");
 } 
 
 //-------------------------------------------------------------------------------------------------------
