@@ -85,12 +85,14 @@ void StructureFactor::initToZero()
 void StructureFactor::getBins(double box_length1, double box_length2)
 {
     // Get the largest possible length
-    double max_length = this->smallest(box_length1, box_length2);
+    // double max_length = this->smallest(box_length1, box_length2);
+    double max_length = sqrt(pow(box_length1,2) + pow(box_length2, 2));
     // kwidth is the should be such that the amplitude is not larger than the box length
     this->kwidth = 2*PI/max_length;
     // this->kwidth = 2*PI/(sqrt(3)*0.154);
     this->k_min = 2*PI/3.1589;
-    double k_max = 2*PI/0.075;
+    // double k_max = 2*PI/0.075;
+    double k_max = 20;
     this->sbin = int((k_max-k_min)/kwidth); // Using s_max
     std::cout<< "kwidth is " << this->kwidth << " and k_max is " << k_max << "\n";
 }
