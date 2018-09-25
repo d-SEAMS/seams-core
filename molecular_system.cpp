@@ -160,7 +160,8 @@ void CMolecularSystem::readWholeTrj()
        }
        else                            // If there are no more spaces it is the timestep line
        {
-         nsteps += 1;
+         word = line.substr(lpos, std::string::npos); // Get the second word
+         if (word.compare("TIMESTEP") == 0){nsteps += 1;}
          atom_flag = false;
          natoms = 0;
        }                               // End check for TIMESTEP line 
