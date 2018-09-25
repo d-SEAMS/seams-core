@@ -75,7 +75,7 @@ class Rdf3D: public COutput {
         int typeB; 
 
     	// Initialize the histogram
-    	void initRDF3D(class CMolecularSystem& molSys, double binwidth, double max_radius=-1.0 ,double volume=-1.0);
+    	void initRDF3D(class CMolecularSystem& molSys, double binwidth, double volume=-1.0, double max_radius=-1.0);
     	// Calculates the RDF for a single snapshot
     	void singleRDF3D(class CMolecularSystem& molSys, int typeA=-1, int typeB=-1);
     	// Calculates the RDF over a number of snapshots

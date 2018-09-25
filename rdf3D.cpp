@@ -28,7 +28,7 @@ Rdf3D::~Rdf3D()
  the 3-D RDF will be calculated and the desired volume. If not set, the default
  values are half the simulation box and the volume of the simulation box respectively
  ***********************************************/
-void Rdf3D::initRDF3D(class CMolecularSystem& molSys, double binwidth, double max_radius, double volume)
+void Rdf3D::initRDF3D(class CMolecularSystem& molSys, double binwidth, double volume, double max_radius)
 {
     // Get the binwidth, max_radius and volume
     this->binwidth = binwidth; this->max_radius = max_radius; this->volume=volume;
