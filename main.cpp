@@ -41,8 +41,8 @@ int main()
     std::cout<<" The total number of steps in the trajectory is "<< traj_steps << "\n";
 
     //Get random step info at a frame number
-    int frame = 100;
-    m_MolSys->readParticleFile(100);
+    int frame = 400;
+    m_MolSys->readParticleFile(400);
     
     // // ----------------------------------------
     // // 3D RDF (single step)
@@ -69,27 +69,27 @@ int main()
     // // Free the memory 
     // rdf->deleteRDF2D();
 
-    // // ----------------------------------------------
-    // //Rdf23D over multiple frames
-    // // Create object for 3D RDF
-    // Rdf3D *rdf3D = new Rdf3D; 
-    //  // Testing 3D rdf function. RDF calculated is incorrect if the wrong volume is set
-    // rdf3D->initRDF3D(*m_MolSys, 0.01); 
-    // // Loop through steps
-    // for (int istep=1; istep<=50; istep++)
-    // {
-    //     // Get the coordinates at a particule step
-    //     m_MolSys->readParticleFile(frame+istep);
-    //     // Get the 3D RDF at this step
-    //     rdf3D->accumulateRDF3D(*m_MolSys, 1, 1);
-    // }
+    // ----------------------------------------------
+    //Rdf23D over multiple frames
+    // Create object for 3D RDF
+    Rdf3D *rdf3D = new Rdf3D; 
+     // Testing 3D rdf function. RDF calculated is incorrect if the wrong volume is set
+    rdf3D->initRDF3D(*m_MolSys, 0.01); 
+    // Loop through steps
+    for (int istep=1; istep<=50; istep++)
+    {
+        // Get the coordinates at a particule step
+        m_MolSys->readParticleFile(frame+istep);
+        // Get the 3D RDF at this step
+        rdf3D->accumulateRDF3D(*m_MolSys, 2, 2);
+    }
 
-    // // Normalizes the RDF (required for multiple steps. This
-    // // is called automatically in the single step RDF function)
-    // rdf3D->normalizeRDF3D();
-    // // Print the RDF 
-    // rdf3D->printRDF3D();
-    // // ----------------------------------------------
+    // Normalizes the RDF (required for multiple steps. This
+    // is called automatically in the single step RDF function)
+    rdf3D->normalizeRDF3D();
+    // Print the RDF 
+    rdf3D->printRDF3D();
+    // ----------------------------------------------
     
     // // ----------------------------------------------
     // //Rdf2D over multiple frames
@@ -120,9 +120,9 @@ int main()
     // // ----------------------------------------------
 
     //Free the memory. 
+    // rdf3D->deleteRDF3D();
     m_MolSys->deleteMolecules();
     // rdf1->deleteRDF3D();
-    // rdf3D->deleteRDF3D();
     // rdf->deleteRDF2D();
     // s_k->deleteStrucFactor();
    
