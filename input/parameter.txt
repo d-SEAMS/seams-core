@@ -8,8 +8,8 @@
 // within the input folder. 
 // The xyz file should be inside a folder called xyz
 
-// trajFile=./input/traj/dump-liq.lammpstrj
-trajFile=./input/traj/dump-bcc.lammpstrj
+trajFile=./input/traj/dump.lammpstrj
+// trajFile=./input/traj/dump-bcc.lammpstrj
 // trajFile=./input/traj/dump-8-20000.lammpstrj
 // trajFile=./input/traj/dump-l.lammpstrj
 // xyzFile=./input/xyz/configuration.xyz
