@@ -39,6 +39,10 @@ class Rdf3D: public COutput {
     	double volume;
     	// Total no. of atoms
     	int nop;
+        // Total number of central atoms (Itype)
+        int n_iatoms;
+        // Total number of distribution atoms (Jtype)
+        int n_jatoms;
 
     	// Calculate the histogram of the 3D RDF
     	void histogramRDF3D(class CMolecularSystem& molSys);
@@ -47,7 +51,7 @@ class Rdf3D: public COutput {
     	void getBins();
 
         // Calculate the number of atoms in the box for the given frame and IDs
-        int getNatoms(class CMolecularSystem& molSys, int, int);
+        void getNatoms(class CMolecularSystem& molSys, int, int);
 
     	// Check to make sure that the user-defined max_radius is within limits, assign volume
     	void checkParameter(class CMolecularSystem& molSys);
@@ -71,8 +75,8 @@ class Rdf3D: public COutput {
 
         // Lammps trajectory IDs of the atoms to compute the RDF 
         // If not set, RDF for all atoms is calculated
-        int typeA;
-        int typeB; 
+        int typeI;
+        int typeJ; 
 
     	// Initialize the histogram
     	void initRDF3D(class CMolecularSystem& molSys, double binwidth, double volume=-1.0, double max_radius=-1.0);
