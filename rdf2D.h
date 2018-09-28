@@ -111,8 +111,8 @@ class Rdf2D: public COutput {
 
       // Lammps trajectory IDs of the atoms to compute the RDF 
       // If not set, RDF for all atoms is calculated
-      int typeA;
-      int typeB; 
+      int typeI;
+      int typeJ; 
 
       // Volume bulk density of the system
       double rho;
@@ -120,9 +120,9 @@ class Rdf2D: public COutput {
     	// Initialize the histogram
     	void initRDFxy(class CMolecularSystem& molSys, double binwidth, double volume=-1.0, double max_radius=-1.0);
     	// Calculates the RDF for a single snapshot
-    	void singleRDFxy(class CMolecularSystem& molSys, double z_layer, double dz, int typeA=-1, int typeB=-1);
+    	void singleRDFxy(class CMolecularSystem& molSys, double z_layer, double dz, int typeI=-1, int typeJ=-1);
     	// Calculates the RDF over a number of snapshots
-    	void accumulateRDFxy(class CMolecularSystem& molSys, double z_layer, double dz, int typeA=-1, int typeB=-1);
+    	void accumulateRDFxy(class CMolecularSystem& molSys, double z_layer, double dz, int typeI=-1, int typeJ=-1);
     	// Normalizes the RDF. You don't need to call this separately 
     	// for calculation of RDF for a single frame. You must call this 
     	// after using the accumulate RDF command for multiple snapshots
@@ -143,9 +143,9 @@ class Rdf2D: public COutput {
       // Initialize the histogram
       void initRDFyz(class CMolecularSystem& molSys, double binwidth, double volume=-1.0, double max_radius=-1.0);
       // Calculates the RDF for a single snapshot
-      void singleRDFyz(class CMolecularSystem& molSys, double x_layer, double dx, int typeA=-1, int typeB=-1);
+      void singleRDFyz(class CMolecularSystem& molSys, double x_layer, double dx, int typeI=-1, int typeJ=-1);
       // Calculates the RDF over a number of snapshots
-      void accumulateRDFyz(class CMolecularSystem& molSys, double x_layer, double dx, int typeA=-1, int typeB=-1);
+      void accumulateRDFyz(class CMolecularSystem& molSys, double x_layer, double dx, int typeI=-1, int typeJ=-1);
       // ------------------------------------------------------ 
 
       // Returns the number of bins in the RDF array
