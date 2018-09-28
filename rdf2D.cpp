@@ -9,8 +9,8 @@ Rdf2D::Rdf2D()
   this->max_radius = -1.0;
   this->volume = -1.0;
   this->nframes = 0;
-  this->typeA = -1;
-  this->typeB = -1;
+  this->typeI = -1;
+  this->typeJ = -1;
   this->nop = -1;
   this->rho = -1;
 }
@@ -69,28 +69,28 @@ void Rdf2D::getBins()
  entered for the particular frame. The number of atoms is
  required for density calculations used for normalizing the RDF
  ***********************************************/
-int Rdf2D::getNatoms(class CMolecularSystem& molSys, int typeA, int typeB)
+int Rdf2D::getNatoms(class CMolecularSystem& molSys, int typeI, int typeJ)
 {
   int nop=0; // No. of atoms 
   // If the lammps ID has not been set, then set nop as the total nop
-  if (typeA==-1 || typeB==-1){return molSys.parameter->nop;}
+  if (typeI==-1 || typeJ==-1){return molSys.parameter->nop;}
 
   // Loop through all atoms
   for (int iatom = 0; iatom < molSys.parameter->nop; iatom++)
   {
-    if (molSys.molecules[iatom].type==typeA || molSys.molecules[iatom].type==typeB){nop += 1;}
+    if (molSys.molecules[iatom].type==typeI || molSys.molecules[iatom].type==typeJ){nop += 1;}
   }
 
   if (nop==0){
     std::cerr<<"You have entered incorrect type IDs\n"; 
-    this->typeA = -1; 
-    this->typeB = -1;
+    this->typeI = -1; 
+    this->typeJ = -1;
     return molSys.parameter->nop;
   }
 
   // Set the type IDs if they are correct
-  this->typeA = typeA;
-  this->typeB = typeB;
+  this->typeI = typeI;
+  this->typeJ = typeJ;
   return nop;
 }
 
@@ -104,12 +104,12 @@ int Rdf2D::getNatomsXY(class CMolecularSystem& molSys, double z_min, double z_ma
   int nop=0; 	// No. of atoms
   double z; 	// z coordinate 
   // If the lammps ID has not been set, then set nop as the total nop
-  if (typeA==-1 || typeB==-1){return molSys.parameter->nop;}
+  if (typeI==-1 || typeJ==-1){return molSys.parameter->nop;}
 
   // Loop through all atoms
   for (int iatom = 0; iatom < molSys.parameter->nop; iatom++)
   {
-    if (molSys.molecules[iatom].type==typeA || molSys.molecules[iatom].type==typeB)
+    if (molSys.molecules[iatom].type==typeI || molSys.molecules[iatom].type==typeJ)
     	{
     		z = molSys.molecules[iatom].get_posz();
     		if (z>=z_min && z<=z_max){nop += 1;}
@@ -117,7 +117,7 @@ int Rdf2D::getNatomsXY(class CMolecularSystem& molSys, double z_min, double z_ma
   }
 
   if (nop==0){
-    std::cerr<<"There are no atoms of type"<< typeA<< "and" << typeB << "inside the z range given\n"; 
+    std::cerr<<"There are no atoms of type"<< typeI<< "and" << typeJ << "inside the z range given\n"; 
     return molSys.parameter->nop;
   }
 
@@ -147,13 +147,13 @@ int Rdf2D::getNatomsXY(class CMolecularSystem& molSys, double z_min, double z_ma
  You will have to call the normalize function normalizeRDFxy() separately 
  after accumulating to get the RDF 
  ***********************************************/
-void Rdf2D::accumulateRDFxy(class CMolecularSystem& molSys, double z_layer, double dz, int typeA, int typeB)
+void Rdf2D::accumulateRDFxy(class CMolecularSystem& molSys, double z_layer, double dz, int typeI, int typeJ)
 {
     // Check to make sure that the user has entered the correct type ID
-    if (this->typeA!=-1 && this->typeA!=typeA && nframes>0){std::cerr<<"Type A cannot be changed after init\n";}
-    if (this->typeB!=-1 && this->typeB!=typeB && nframes>0){std::cerr<<"Type B cannot be changed after init\n";}
+    if (this->typeI!=-1 && this->typeI!=typeI && nframes>0){std::cerr<<"Type A cannot be changed after init\n";}
+    if (this->typeJ!=-1 && this->typeJ!=typeJ && nframes>0){std::cerr<<"Type B cannot be changed after init\n";}
     // Calculate the total number of particles in this particular frame
-    this->nop = this->getNatoms(molSys, typeA, typeB);
+    this->nop = this->getNatoms(molSys, typeI, typeJ);
     // Update the number of snapshots calculated
     this->nframes += 1;
     // Add to the RDF histogram
@@ -172,12 +172,12 @@ void Rdf2D::accumulateRDFxy(class CMolecularSystem& molSys, double z_layer, doub
  the RDF is calculated for all the atoms in the frame, assuming they are all 
  of the same type.
  ***********************************************/
-void Rdf2D::singleRDFxy(class CMolecularSystem& molSys, double z_layer, double dz, int typeA, int typeB)
+void Rdf2D::singleRDFxy(class CMolecularSystem& molSys, double z_layer, double dz, int typeI, int typeJ)
 {
     // There is only one snapshot
     this->nframes = 1;
     // Calculate the total number of particles in a particular frame
-    this->nop = this->getNatoms(molSys, typeA, typeB);
+    this->nop = this->getNatoms(molSys, typeI, typeJ);
     // Add to the RDF histogram
     this->histogramRDFxy(molSys, z_layer, dz);
     // Normalize the RDF 
@@ -203,15 +203,15 @@ void Rdf2D::histogramRDFxy(class CMolecularSystem& molSys, double z_layer, doubl
     // Loop through every pair of particles
     for (int iatom = 0; iatom < natoms-1; iatom++)
     {
-        // Only execute if the atom is of typeA
-        if (molSys.molecules[iatom].type != typeA && typeA!= -1){continue;}
+        // Only execute if the atom is of typeI
+        if (molSys.molecules[iatom].type != typeI && typeI!= -1){continue;}
         z_atom = molSys.molecules[iatom].get_posz();
         if (this->atomInsideLayer(z_atom, z_layer, dz)==false){continue;}
         
         // Loop through the j^th atom
         for (int jatom = iatom+1; jatom < natoms; jatom++)
         {
-            if (molSys.molecules[jatom].type != typeB && typeB!= -1){continue;}
+            if (molSys.molecules[jatom].type != typeJ && typeJ!= -1){continue;}
             z_atom = molSys.molecules[iatom].get_posz();
             if (this->atomInsideLayer(z_atom, z_layer, dz)==false){continue;}
             // Test
@@ -505,12 +505,12 @@ void Rdf2D::initRDFyz(class CMolecularSystem& molSys, double binwidth, double vo
  the RDF is calculated for all the atoms in the frame, assuming they are all 
  of the same type.
  ***********************************************/
-void Rdf2D::singleRDFyz(class CMolecularSystem& molSys, double x_layer, double dx, int typeA, int typeB)
+void Rdf2D::singleRDFyz(class CMolecularSystem& molSys, double x_layer, double dx, int typeI, int typeJ)
 {
     // There is only one snapshot
     this->nframes = 1;
     // Calculate the total number of particles in a particular frame
-    this->nop = this->getNatoms(molSys, typeA, typeB);
+    this->nop = this->getNatoms(molSys, typeI, typeJ);
     // Add to the RDF histogram
     this->histogramRDFyz(molSys, x_layer, dx);
     // Normalize the RDF 
@@ -535,13 +535,13 @@ void Rdf2D::singleRDFyz(class CMolecularSystem& molSys, double x_layer, double d
  You will have to call the normalize function normalizeRDF2D() separately 
  after accumulating to get the RDF 
  ***********************************************/
-void Rdf2D::accumulateRDFyz(class CMolecularSystem& molSys, double x_layer, double dx, int typeA, int typeB)
+void Rdf2D::accumulateRDFyz(class CMolecularSystem& molSys, double x_layer, double dx, int typeI, int typeJ)
 {
     // Check to make sure that the user has entered the correct type ID
-    if (this->typeA!=-1 && this->typeA!=typeA && nframes>0){std::cerr<<"Type A cannot be changed after init\n";}
-    if (this->typeB!=-1 && this->typeB!=typeB && nframes>0){std::cerr<<"Type B cannot be changed after init\n";}
+    if (this->typeI!=-1 && this->typeI!=typeI && nframes>0){std::cerr<<"Type A cannot be changed after init\n";}
+    if (this->typeJ!=-1 && this->typeJ!=typeJ && nframes>0){std::cerr<<"Type B cannot be changed after init\n";}
     // Calculate the total number of particles in this particular frame
-    this->nop = this->getNatoms(molSys, typeA, typeB);
+    this->nop = this->getNatoms(molSys, typeI, typeJ);
     // Update the number of snapshots calculated
     this->nframes += 1;
     // Add to the RDF histogram
@@ -569,15 +569,15 @@ void Rdf2D::histogramRDFyz(class CMolecularSystem& molSys, double x_layer, doubl
     // Loop through every pair of particles
     for (int iatom = 0; iatom < natoms-1; iatom++)
     {
-        // Only execute if the atom is of typeA
-        if (molSys.molecules[iatom].type != typeA && typeA!= -1){continue;}
+        // Only execute if the atom is of typeI
+        if (molSys.molecules[iatom].type != typeI && typeI!= -1){continue;}
         x_atom = molSys.molecules[iatom].get_posx();
         if (this->atomInsideLayer(x_atom, x_layer, dx)==false){continue;}
         
         // Loop through the j^th atom
         for (int jatom = iatom+1; jatom < natoms; jatom++)
         {
-            if (molSys.molecules[jatom].type != typeB && typeB!= -1){continue;}
+            if (molSys.molecules[jatom].type != typeJ && typeJ!= -1){continue;}
             x_atom = molSys.molecules[iatom].get_posx();
             if (this->atomInsideLayer(x_atom, x_layer, dx)==false){continue;}
 
@@ -603,12 +603,12 @@ int Rdf2D::getNatomsYZ(class CMolecularSystem& molSys, double x_min, double x_ma
   int nop=0;  // No. of atoms
   double x;   // x coordinate 
   // If the lammps ID has not been set, then set nop as the total nop
-  if (typeA==-1 || typeB==-1){return molSys.parameter->nop;}
+  if (typeI==-1 || typeJ==-1){return molSys.parameter->nop;}
 
   // Loop through all atoms
   for (int iatom = 0; iatom < molSys.parameter->nop; iatom++)
   {
-    if (molSys.molecules[iatom].type==typeA || molSys.molecules[iatom].type==typeB)
+    if (molSys.molecules[iatom].type==typeI || molSys.molecules[iatom].type==typeJ)
       {
         x = molSys.molecules[iatom].get_posx();
         if (x>=x_min && x<=x_max){nop += 1;}
@@ -616,7 +616,7 @@ int Rdf2D::getNatomsYZ(class CMolecularSystem& molSys, double x_min, double x_ma
   }
 
   if (nop==0){
-    std::cerr<<"There are no atoms of type"<< typeA<< "and" << typeB << "inside the x range given\n"; 
+    std::cerr<<"There are no atoms of type"<< typeI<< "and" << typeJ << "inside the x range given\n"; 
     return molSys.parameter->nop;
   }
 
