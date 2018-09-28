@@ -9,8 +9,8 @@ Rdf3D::Rdf3D()
   this->max_radius = -1.0;
   this->volume = -1.0;
   this->nframes = 0;
-  this->typeA = -1;
-  this->typeB = -1;
+  this->typeI = -1;
+  this->typeJ = -1;
 }
 
 Rdf3D::~Rdf3D()
@@ -69,28 +69,62 @@ void Rdf3D::getBins()
  entered for the particular frame. The number of atoms is
  required for density calculations used for normalizing the RDF
  ***********************************************/
-int Rdf3D::getNatoms(class CMolecularSystem& molSys, int typeA, int typeB)
+int Rdf3D::getNatoms(class CMolecularSystem& molSys, int typeI, int typeJ)
 {
   int nop=0; // No. of atoms 
   // If the lammps ID has not been set, then set nop as the total nop
-  if (typeA==-1 || typeB==-1){return molSys.parameter->nop;}
+  if (typeI==-1 || typeJ==-1){return molSys.parameter->nop;}
 
   // Loop through all atoms
   for (int iatom = 0; iatom < molSys.parameter->nop; iatom++)
   {
-    if (molSys.molecules[iatom].type==typeA || molSys.molecules[iatom].type==typeB){nop += 1;}
+    if (molSys.molecules[iatom].type==typeI || molSys.molecules[iatom].type==typeJ){nop += 1;}
   }
 
   if (nop==0){
     std::cerr<<"You have entered incorrect type IDs\n"; 
-    this->typeA = -1; 
-    this->typeB = -1;
+    this->typeI = -1; 
+    this->typeJ = -1;
     return molSys.parameter->nop;
   }
 
   // Set the type IDs if they are correct
-  this->typeA = typeA;
-  this->typeB = typeB;
+  this->typeI = typeI;
+  this->typeJ = typeJ;
+  return nop;
+}
+
+/********************************************//**
+ *  Calculates the number of atoms for the lammps IDs
+ entered for the particular frame. The number of atoms is
+ required for density calculations used for normalizing the RDF
+ ***********************************************/
+void Rdf3D::getNatoms(class CMolecularSystem& molSys, int typeI, int typeJ)
+{
+  int nop=0; // Total number of atoms 
+  int n_iatoms=0;
+  int n_jatoms=0;
+
+  // If the lammps ID has not been set, then set nop as the total nop
+  if (typeI==-1 || typeJ==-1){this->n_iatoms = molSys.parameter->nop; this->n_iatoms = this->n_jatoms ;return;}
+
+  // Loop through all atoms
+  for (int iatom = 0; iatom < molSys.parameter->nop; iatom++)
+  {
+    if (molSys.molecules[iatom].type==typeI){nop += 1;}
+    else if (molSys.molecules[iatom].type==typeJ){nop += 1;}
+  }
+
+  if (nop==0){
+    std::cerr<<"You have entered incorrect type IDs\n"; 
+    this->typeI = -1; 
+    this->typeJ = -1;
+    return molSys.parameter->nop;
+  }
+
+  // Set the type IDs if they are correct
+  this->typeI = typeI;
+  this->typeJ = typeJ;
   return nop;
 }
 
@@ -112,13 +146,13 @@ int Rdf3D::getNatoms(class CMolecularSystem& molSys, int typeA, int typeB)
  You will have to call the normalize function normalizeRDF3D() separately 
  after accumulating to get the RDF 
  ***********************************************/
-void Rdf3D::accumulateRDF3D(class CMolecularSystem& molSys, int typeA, int typeB )
+void Rdf3D::accumulateRDF3D(class CMolecularSystem& molSys, int typeI, int typeJ )
 {
     // Check to make sure that the user has entered the correct type ID
-    if (this->typeA!=-1 && this->typeA!=typeA && nframes>0){std::cerr<<"Type A cannot be changed after init\n";}
-    if (this->typeB!=-1 && this->typeB!=typeB && nframes>0){std::cerr<<"Type B cannot be changed after init\n";}
+    if (this->typeI!=-1 && this->typeI!=typeI && nframes>0){std::cerr<<"Type A cannot be changed after init\n";}
+    if (this->typeJ!=-1 && this->typeJ!=typeJ && nframes>0){std::cerr<<"Type B cannot be changed after init\n";}
     // Calculate the number of particles in this particular frame
-    this->nop = this->getNatoms(molSys, typeA, typeB);
+    this->nop = this->getNatoms(molSys, typeI, typeJ);
     // Update the number of snapshots calculated
     this->nframes += 1;
     // Add to the RDF histogram
@@ -136,12 +170,12 @@ void Rdf3D::accumulateRDF3D(class CMolecularSystem& molSys, int typeA, int typeB
  the RDF is calculated for all the atoms in the frame, assuming they are all 
  of the same type.
  ***********************************************/
-void Rdf3D::singleRDF3D(class CMolecularSystem& molSys, int typeA, int typeB)
+void Rdf3D::singleRDF3D(class CMolecularSystem& molSys, int typeI, int typeJ)
 {
     // There is only one snapshot
     this->nframes = 1;
     // Calculate the number of particles in this particular frame
-    this->nop = this->getNatoms(molSys, typeA, typeB);
+    this->nop = this->getNatoms(molSys, typeI, typeJ);
     // Add to the RDF histogram
     this->histogramRDF3D(molSys);
     // Normalize the RDF 
@@ -159,13 +193,13 @@ void Rdf3D::histogramRDF3D(class CMolecularSystem& molSys)
     // Loop through every pair of particles
     for (int iatom = 0; iatom < natoms-1; iatom++)
     {
-        // Only execute if the atom is of typeA
-        if (molSys.molecules[iatom].type != typeA && typeA!= -1){continue;}
+        // Only execute if the atom is of typeI
+        if (molSys.molecules[iatom].type != typeI && typeI!= -1){continue;}
         
         // Loop through the j^th atom
         for (int jatom = iatom+1; jatom < natoms; jatom++)
         {
-            if (molSys.molecules[jatom].type != typeB && typeB!= -1){continue;}
+            if (molSys.molecules[jatom].type != typeJ && typeJ!= -1){continue;}
             
             dr = this->getAbsDistance(iatom, jatom, molSys);
             // Only if dr is less than max_radius add to histogram
@@ -199,7 +233,7 @@ void Rdf3D::normalizeRDF3D()
         // Number of ideal gas particles in bin_volume
         nideal = (4.0/3.0)*PI*bin_volume*rho;
         // Normalization
-        this->rdf3D[ibin] /= (this->nframes*this->nop*nideal);
+        this->rdf3D[ibin] /= (this->nframes*(this->nop)*nideal);
     }
 }
 
