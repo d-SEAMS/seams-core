@@ -272,9 +272,12 @@ void Rdf3D::histogramRDF3Dij(class CMolecularSystem& molSys)
           // Get the index jatom
           jatom =  this->jIndex[j]; 
 
+          // Don't count atoms which are part of the same molecule
+          if (molSys.molecules[iatom].molID == molSys.molecules[jatom].molID){continue;}
+
           dr = this->getAbsDistance(iatom, jatom, molSys);
           // Only if dr is less than max_radius add to histogram
-          if (dr < this->max_radius && dr > 1.0)
+          if (dr < this->max_radius)
           {
             ibin = int(dr/this->binwidth); // Find which bin the particle falls in 
             this->rdf3D[ibin] += 1;        // Add to histogram for both iatom and jatom
