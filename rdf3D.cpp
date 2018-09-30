@@ -17,6 +17,8 @@ Rdf3D::~Rdf3D()
 {
   delete [] rdf3D;
   delete [] rVal;
+  delete [] iIndex;
+  delete [] jIndex;
 }
 
 
@@ -44,6 +46,10 @@ void Rdf3D::initRDF3D(class CMolecularSystem& molSys, double binwidth, double vo
     this->rVal = new double[this->nbin];
     // Get the values for radial distance (unchanged over nframes)
     this->getR();
+    // Create arrays for vectors holding indices for particles
+    // of type I and J
+    this->iIndex  = new int[molSys.parameter->nop];
+    this->jIndex  = new int[molSys.parameter->nop];
 }
 
 /********************************************//**
@@ -69,30 +75,30 @@ void Rdf3D::getBins()
  entered for the particular frame. The number of atoms is
  required for density calculations used for normalizing the RDF
  ***********************************************/
-int Rdf3D::getNatoms(class CMolecularSystem& molSys, int typeI, int typeJ)
-{
-  int nop=0; // No. of atoms 
-  // If the lammps ID has not been set, then set nop as the total nop
-  if (typeI==-1 || typeJ==-1){return molSys.parameter->nop;}
+// int Rdf3D::getNatoms(class CMolecularSystem& molSys, int typeI, int typeJ)
+// {
+//   int nop=0; // No. of atoms 
+//   // If the lammps ID has not been set, then set nop as the total nop
+//   if (typeI==-1 || typeJ==-1){return molSys.parameter->nop;}
 
-  // Loop through all atoms
-  for (int iatom = 0; iatom < molSys.parameter->nop; iatom++)
-  {
-    if (molSys.molecules[iatom].type==typeI || molSys.molecules[iatom].type==typeJ){nop += 1;}
-  }
+//   // Loop through all atoms
+//   for (int iatom = 0; iatom < molSys.parameter->nop; iatom++)
+//   {
+//     if (molSys.molecules[iatom].type==typeI || molSys.molecules[iatom].type==typeJ){nop += 1;}
+//   }
 
-  if (nop==0){
-    std::cerr<<"You have entered incorrect type IDs\n"; 
-    this->typeI = -1; 
-    this->typeJ = -1;
-    return molSys.parameter->nop;
-  }
+//   if (nop==0){
+//     std::cerr<<"You have entered incorrect type IDs\n"; 
+//     this->typeI = -1; 
+//     this->typeJ = -1;
+//     return molSys.parameter->nop;
+//   }
 
-  // Set the type IDs if they are correct
-  this->typeI = typeI;
-  this->typeJ = typeJ;
-  return nop;
-}
+//   // Set the type IDs if they are correct
+//   this->typeI = typeI;
+//   this->typeJ = typeJ;
+//   return nop;
+// }
 
 /********************************************//**
  *  Calculates the number of atoms for the lammps IDs
@@ -101,31 +107,57 @@ int Rdf3D::getNatoms(class CMolecularSystem& molSys, int typeI, int typeJ)
  ***********************************************/
 void Rdf3D::getNatoms(class CMolecularSystem& molSys, int typeI, int typeJ)
 {
-  int nop=0; // Total number of atoms 
   int n_iatoms=0;
   int n_jatoms=0;
+  int ii=0; // Current index of array iIndex being filled
+  int jj=0; // Current index of array jIndex being filled
 
   // If the lammps ID has not been set, then set nop as the total nop
-  if (typeI==-1 || typeJ==-1){this->n_iatoms = molSys.parameter->nop; this->n_iatoms = this->n_jatoms ;return;}
+  if (typeI==-1 || typeJ==-1){this->n_iatoms = molSys.parameter->nop; this->n_jatoms = this->n_iatoms ;return;}
 
+  // If typeI = typeJ
+  if (typeI==typeJ)
+  {
+    for (int iatom = 0; iatom < molSys.parameter->nop; iatom++)
+    {
+      if (molSys.molecules[iatom].type==typeI){
+        n_iatoms += 1; n_jatoms +=1;
+        this->iIndex[ii] = iatom; // Put atom ID in iIndex array
+        ii += 1;
+      }
+    } 
+  }
+  else // for i not equal to j
   // Loop through all atoms
   for (int iatom = 0; iatom < molSys.parameter->nop; iatom++)
   {
-    if (molSys.molecules[iatom].type==typeI){nop += 1;}
-    else if (molSys.molecules[iatom].type==typeJ){nop += 1;}
+    if (molSys.molecules[iatom].type==typeI){
+      n_iatoms += 1;
+      this->iIndex[ii] = iatom; // Put atom ID in iIndex array
+      ii += 1;
+    }
+    else if (molSys.molecules[iatom].type==typeJ){
+      n_jatoms += 1;
+      this->jIndex[jj] = iatom; // Put atom ID in jIndex array
+      jj += 1;
+    }
   }
 
-  if (nop==0){
+  if (n_iatoms==0 || n_jatoms==0){
     std::cerr<<"You have entered incorrect type IDs\n"; 
     this->typeI = -1; 
     this->typeJ = -1;
-    return molSys.parameter->nop;
+    this->n_iatoms = n_iatoms;
+    this->n_jatoms = n_jatoms;
+    return;
   }
 
   // Set the type IDs if they are correct
   this->typeI = typeI;
   this->typeJ = typeJ;
-  return nop;
+  this->n_iatoms = n_iatoms;
+  this->n_jatoms = n_jatoms;
+  return;
 }
 
 
@@ -149,14 +181,15 @@ void Rdf3D::getNatoms(class CMolecularSystem& molSys, int typeI, int typeJ)
 void Rdf3D::accumulateRDF3D(class CMolecularSystem& molSys, int typeI, int typeJ )
 {
     // Check to make sure that the user has entered the correct type ID
-    if (this->typeI!=-1 && this->typeI!=typeI && nframes>0){std::cerr<<"Type A cannot be changed after init\n";}
-    if (this->typeJ!=-1 && this->typeJ!=typeJ && nframes>0){std::cerr<<"Type B cannot be changed after init\n";}
+    if (this->typeI!=-1 && this->typeI!=typeI && nframes>0){std::cerr<<"Type I cannot be changed after init\n";}
+    if (this->typeJ!=-1 && this->typeJ!=typeJ && nframes>0){std::cerr<<"Type J cannot be changed after init\n";}
     // Calculate the number of particles in this particular frame
     this->nop = this->getNatoms(molSys, typeI, typeJ);
     // Update the number of snapshots calculated
     this->nframes += 1;
     // Add to the RDF histogram
-    this->histogramRDF3D(molSys);
+    if (typeI==typeJ){this->histogramRDF3Dii(molSys);}
+    // TODO: do for dissimilar
     // Call the normalize function separately after accumulating 
     // the histogram over all the desired snapshots
 }
@@ -185,32 +218,64 @@ void Rdf3D::singleRDF3D(class CMolecularSystem& molSys, int typeI, int typeJ)
 /********************************************//**
  *  Updates the 3D RDF histogram
  ***********************************************/
-void Rdf3D::histogramRDF3D(class CMolecularSystem& molSys)
+void Rdf3D::histogramRDF3Dii(class CMolecularSystem& molSys)
 {
-    int natoms = this->nop; // Number of particles
+    int n_iatoms = this->n_iatoms; // Total number of atoms of type I 
+    int iatom, jatom;       // Indices of atoms according to iIndex 
     double dr;              // Relative distance between iatom and jatom (unwrapped)
     int ibin;               // Index of bin in which the particle falls wrt reference atom                              
-    // Loop through every pair of particles
-    for (int iatom = 0; iatom < natoms-1; iatom++)
+    // Loop through every particles
+    for (int i = 0; i < n_iatoms-1; i++)
     {
-        // Only execute if the atom is of typeI
-        if (molSys.molecules[iatom].type != typeI && typeI!= -1){continue;}
+      // Get index iatom
+      iatom = this->iIndex[i];
         
-        // Loop through the j^th atom
-        for (int jatom = iatom+1; jatom < natoms; jatom++)
-        {
-            if (molSys.molecules[jatom].type != typeJ && typeJ!= -1){continue;}
-            
-            dr = this->getAbsDistance(iatom, jatom, molSys);
-            // Only if dr is less than max_radius add to histogram
-            if (dr < this->max_radius)
-            {
-                ibin = int(dr/this->binwidth); // Find which bin the particle falls in 
-                this->rdf3D[ibin] += 2;        // Add to histogram for both iatom and jatom
-            }
+      // Loop through the j^th atom
+      for (int j = i+1; j < natoms; j++)
+      {
+          // Get the index jatom
+          jatom =  this->iIndex[j]; 
+
+          dr = this->getAbsDistance(iatom, jatom, molSys);
+          // Only if dr is less than max_radius add to histogram
+          if (dr < this->max_radius)
+          {
+            ibin = int(dr/this->binwidth); // Find which bin the particle falls in 
+            this->rdf3D[ibin] += 2;        // Add to histogram for both iatom and jatom
+          }
         }
     }
 }
+
+// void Rdf3D::histogramRDF3Dii(class CMolecularSystem& molSys)
+// {
+//     int natoms = molSys.parameter->nop; // Total number of particles
+//     double dr;              // Relative distance between iatom and jatom (unwrapped)
+//     int ibin;               // Index of bin in which the particle falls wrt reference atom                              
+//     // Loop through every pair of particles
+//     for (int iatom = 0; iatom < natoms-1; iatom++)
+//     {
+//         // Only execute if the atom is of typeI
+//         if (molSys.molecules[iatom].type != typeI && typeI!= -1){continue;}
+        
+//         // Loop through the j^th atom
+//         for (int jatom = iatom+1; jatom < natoms; jatom++)
+//         {
+//             if (molSys.molecules[jatom].type != typeJ && typeJ!= -1){continue;}
+            
+//             dr = this->getAbsDistance(iatom, jatom, molSys);
+//             // Only if dr is less than max_radius add to histogram
+//             if (dr < this->max_radius)
+//             {
+//                 ibin = int(dr/this->binwidth); // Find which bin the particle falls in 
+//                 this->rdf3D[ibin] += 2;        // Add to histogram for both iatom and jatom
+//             }
+//         }
+//     }
+// }
+
+
+
 
 /********************************************//**
  *  Normalizes the RDF
@@ -223,7 +288,7 @@ void Rdf3D::normalizeRDF3D()
 {
     double bin_volume;                      // Bin volume
     double nideal;                          // No. of ideal gas particles in each bin_volume
-    double rho = this->nop/this->volume;    // Number density
+    double rho = this->n_jatoms/this->volume;    // Number density of distribution atoms J
     // Loop over all bins
     for (int ibin=0; ibin < this->nbin; ibin++)
     {
@@ -233,7 +298,7 @@ void Rdf3D::normalizeRDF3D()
         // Number of ideal gas particles in bin_volume
         nideal = (4.0/3.0)*PI*bin_volume*rho;
         // Normalization
-        this->rdf3D[ibin] /= (this->nframes*(this->nop)*nideal);
+        this->rdf3D[ibin] /= (this->nframes*this->n_iatoms*nideal);
     }
 }
 

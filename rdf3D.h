@@ -37,15 +37,17 @@ class Rdf3D: public COutput {
     	double max_radius;
     	// Total volume in which 3D RDF is to be calculated
     	double volume;
-    	// Total no. of atoms
-    	int nop;
         // Total number of central atoms (Itype)
         int n_iatoms;
         // Total number of distribution atoms (Jtype)
         int n_jatoms;
 
-    	// Calculate the histogram of the 3D RDF
-    	void histogramRDF3D(class CMolecularSystem& molSys);
+        // Dynamically allocated array for indices with particles of type I and J
+        int* iIndex;
+        int* jIndex;
+
+    	// Calculate the histogram of the 3D RDF for I-I similar type calculations
+    	void histogramRDF3Dii(class CMolecularSystem& molSys);
 
     	// Calculate the number of bins
     	void getBins();
