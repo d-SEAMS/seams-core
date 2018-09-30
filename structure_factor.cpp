@@ -22,7 +22,7 @@ StructureFactor::~StructureFactor()
  the 2-D RDF will be calculated and the desired volume. If not set, the default
  values are half the simulation box and the volume of the simulation box respectively
  ***********************************************/
-void StructureFactor::initStrucFactor(class Rdf2D& rdf, double box_length1, double box_lenth2)
+void StructureFactor::initStrucFactor(class Rdf2D& rdf, double box_length1, double box_lenth2, double k_min)
 {
     // Get the number of bins for the RDF 
     this->nbin = rdf.binsInRDF();
@@ -50,7 +50,7 @@ void StructureFactor::initStrucFactor(class Rdf2D& rdf, double box_length1, doub
  the 2-D RDF will be calculated and the desired volume. If not set, the default
  values are half the simulation box and the volume of the simulation box respectively
  ***********************************************/
-void StructureFactor::initStrucFactor(class Rdf3D& rdf, double box_length1, double box_lenth2)
+void StructureFactor::initStrucFactor(class Rdf3D& rdf, double box_length1, double box_lenth2, double k_min)
 {
     // Get the number of bins for the RDF 
     this->nbin = rdf.binsInRDF();
@@ -62,6 +62,7 @@ void StructureFactor::initStrucFactor(class Rdf3D& rdf, double box_length1, doub
     this->initToZero();
     // Get an array for k
     this->k = new double[this->sbin];
+    this->k_min = k_min;
     // Get the values of the inverse distance k
     this->getK();
     // Structure factor calculation
@@ -117,11 +118,9 @@ void StructureFactor::getBins(double box_length1, double box_length2)
     double max_length = sqrt(pow(box_length1,2) + pow(box_length2, 2));
     // kwidth is the should be such that the amplitude is not larger than the box length
     this->kwidth = 2*PI/max_length;
-    // this->kwidth = 2*PI/(sqrt(3)*0.154);
-    this->k_min = 2*PI/3.1589;
-    // double k_max = 2*PI/0.075;
+
     double k_max = 20;
-    this->sbin = int((k_max-k_min)/kwidth); // Using s_max
+    this->sbin = int((k_max-this->k_min)/kwidth); // Using s_max
     std::cout<< "kwidth is " << this->kwidth << " and k_max is " << k_max << "\n";
 }
 
@@ -130,7 +129,7 @@ void StructureFactor::getBins(double box_length1, double box_length2)
 //-------------------------------------------------------------------------------------------------------
 
 /********************************************//**
- *  Calculates the structure factor
+ *  Calculates the structure factor from the 2D RDF
  ***********************************************/
 void StructureFactor::calcStrucFactor(class Rdf2D& rdf)
 {
@@ -142,7 +141,20 @@ void StructureFactor::calcStrucFactor(class Rdf2D& rdf)
 }
 
 /********************************************//**
- *  Calculates the value of the integral \f$\int\f$
+ *  Calculates the structure factor from the 3D RDF
+ ***********************************************/
+void StructureFactor::calcStrucFactor(class Rdf3D& rdf)
+{
+    // Loop through all k 
+    for (int kbin=0; kbin < this->sbin; kbin++)
+    {
+        this->strucFactor[kbin] = 1 + 4*PI*rdf.rho*this->integrateSimpsons(rdf, this->k[kbin]);
+    }
+}
+
+/********************************************//**
+ *  Calculates the value of the integral \f$\int\f$ from the 
+ in-plane RDF
  Takes the value of k as the argument 
  ***********************************************/
 double StructureFactor::integrateSimpsons(class Rdf2D& rdf, double k)
@@ -164,12 +176,47 @@ double StructureFactor::integrateSimpsons(class Rdf2D& rdf, double k)
 }
 
 /********************************************//**
+ *  Calculates the value of the integral \f$\int\f$ from the 
+ 3D RDF
+ Takes the value of k as the argument 
+ ***********************************************/
+double StructureFactor::integrateSimpsons(class Rdf3D& rdf, double k)
+{
+    int nbin;
+    double sum = 0.0;                   // Summation for the Simpson's rule
+    double h = rdf.rVal[1]-rdf.rVal[0]; // Step size in r
+    // Divide the range of g(r) into an even number of subintervals
+    if (this->nbin%2 == 0){nbin = this->nbin-1;}
+    else {nbin = this->nbin-1;}
+
+    // Apply Simpson's 1/3 rule
+    for (int ibin=1; ibin <= nbin/2; ibin++)
+    {
+        sum += (this->integrand(rdf, 2*ibin-2, k) + 4*this->integrand(rdf, 2*ibin-1, k) + this->integrand(rdf, 2*ibin, k));
+    }
+
+    return h*sum/3.0;
+}
+
+/********************************************//**
  *  Function to return the integrand for a particular \f$g(r)\f$ value
+ Here \f$g(r)\f$ is the in-plane radial distribution function
  ***********************************************/
 double StructureFactor::integrand(class Rdf2D& rdf, int index, double k)
 {
     double r = rdf.rVal[index]; // r at a particular index value
     double g_r = rdf.rdf2D[index]; // g(r)
+    return ((g_r-1)*r*sin(k*r)/k);
+}
+
+/********************************************//**
+ *  Function to return the integrand for a particular \f$g(r)\f$ value
+ Here \f$g(r)\f$ is the 3D radial distribution function
+ ***********************************************/
+double StructureFactor::integrand(class Rdf3D& rdf, int index, double k)
+{
+    double r = rdf.rVal[index]; // r at a particular index value
+    double g_r = rdf.rdf3D[index]; // g(r)
     return ((g_r-1)*r*sin(k*r)/k);
 }
 

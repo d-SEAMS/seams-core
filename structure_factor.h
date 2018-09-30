@@ -69,6 +69,7 @@ class StructureFactor: public COutput {
 
     // Calculate the structure factor
     void calcStrucFactor(class Rdf2D& rdf);
+    void calcStrucFactor(class Rdf3D& rdf);
 
     // Get values of the k inverse distance coordinate
     void getK();
@@ -76,8 +77,10 @@ class StructureFactor: public COutput {
     // Integrates the value of the integral in the expression for the structure factor
     // using 1/3 Simpson's rule
     double integrateSimpsons(class Rdf2D& rdf, double k);
+    double integrateSimpsons(class Rdf3D& rdf, double k);
     // Function to return the integrand for a particular g(r) value
     double integrand(class Rdf2D& rdf, int index, double k);
+    double integrand(class Rdf3D& rdf, int index, double k);
 
     // Helper functions
     // Returns the largest value
@@ -97,8 +100,8 @@ class StructureFactor: public COutput {
 		  double* k;
 
     	// Initialize the histogram
-    	void initStrucFactor(class Rdf2D& rdf, double box_length1, double box_lenth2);
-      void initStrucFactor(class Rdf3D& rdf, double box_length1, double box_lenth2);
+    	void initStrucFactor(class Rdf2D& rdf, double box_length1, double box_lenth2, double k_min = 2*PI/(5*PI));
+      void initStrucFactor(class Rdf3D& rdf, double box_length1, double box_lenth2, double k_min = 2*PI/(5*PI));
 
     	// Print the structure factor to a file in the output folder
     	void printStrucFactor();
