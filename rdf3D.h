@@ -48,6 +48,8 @@ class Rdf3D: public COutput {
 
     	// Calculate the histogram of the 3D RDF for I-I similar type calculations
     	void histogramRDF3Dii(class CMolecularSystem& molSys);
+        // Calculate the histogram of the 3D RDF for I-J dissimilar type calculations
+        void histogramRDF3Dij(class CMolecularSystem& molSys);
 
     	// Calculate the number of bins
     	void getBins();
