@@ -63,6 +63,7 @@ class StructureFactor: public COutput {
 
     // Calculate the number of bins, with box lengths as arguments
     void getBins(double, double);
+    void getBins(double, double, double);
  
     // Initialize the structure factor array to zero 
     void initToZero();
@@ -88,6 +89,7 @@ class StructureFactor: public COutput {
     double largest(double, double);
     // Returns the smallest value
     double smallest(double, double);
+    double smallest(double, double, double);
 
   public:
 		  //the main object in which the structure factor is created and calculated
@@ -101,7 +103,7 @@ class StructureFactor: public COutput {
 
     	// Initialize the histogram
     	void initStrucFactor(class Rdf2D& rdf, double box_length1, double box_lenth2, double k_min = 2*PI/(5*PI));
-      void initStrucFactor(class Rdf3D& rdf, double box_length1, double box_lenth2, double k_min = 2*PI/(5*PI));
+      void initStrucFactor(class Rdf3D& rdf, double box_length1, double box_lenth2, double box_lenth3, double k_min = 2*PI/(5*PI));
 
     	// Print the structure factor to a file in the output folder
     	void printStrucFactor();
