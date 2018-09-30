@@ -15,14 +15,42 @@ StructureFactor::~StructureFactor()
 }
 
 /********************************************//**
- *  Initializes the histogram array for structure factor
+ *  Initializes the histogram array for in-plane structure factor
 
- It takes the CMolecularSystem object reference and binwidth as arguments.
+ It takes the Rdf2D object reference and binwidth as arguments.
  Optional arguments include the maximum radius upto which 
  the 2-D RDF will be calculated and the desired volume. If not set, the default
  values are half the simulation box and the volume of the simulation box respectively
  ***********************************************/
 void StructureFactor::initStrucFactor(class Rdf2D& rdf, double box_length1, double box_lenth2)
+{
+    // Get the number of bins for the RDF 
+    this->nbin = rdf.binsInRDF();
+    // Get the number of bins for the structure factor
+    this->getBins(box_length1, box_lenth2);
+    // Initialize the array for structure factor
+    this->strucFactor = new double[this->sbin];
+    // Initialize the structure factor array to zero
+    this->initToZero();
+    // Get an array for k
+    this->k = new double[this->sbin];
+    // Get the values of the inverse distance k
+    this->getK();
+    // Structure factor calculation
+    this->calcStrucFactor(rdf);
+    // Print to file
+    this->printStrucFactor();
+}
+
+/********************************************//**
+ *  Initializes the histogram array for 3-D structure factor
+
+ It takes the Rdf3D object reference and binwidth as arguments.
+ Optional arguments include the maximum radius upto which 
+ the 2-D RDF will be calculated and the desired volume. If not set, the default
+ values are half the simulation box and the volume of the simulation box respectively
+ ***********************************************/
+void StructureFactor::initStrucFactor(class Rdf3D& rdf, double box_length1, double box_lenth2)
 {
     // Get the number of bins for the RDF 
     this->nbin = rdf.binsInRDF();

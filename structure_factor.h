@@ -98,6 +98,7 @@ class StructureFactor: public COutput {
 
     	// Initialize the histogram
     	void initStrucFactor(class Rdf2D& rdf, double box_length1, double box_lenth2);
+      void initStrucFactor(class Rdf3D& rdf, double box_length1, double box_lenth2);
 
     	// Print the structure factor to a file in the output folder
     	void printStrucFactor();
