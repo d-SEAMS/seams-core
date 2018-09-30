@@ -74,7 +74,8 @@ int main()
     // Create object for 3D RDF
     Rdf3D *rdf3D = new Rdf3D; 
      // Testing 3D rdf function. RDF calculated is incorrect if the wrong volume is set
-    rdf3D->initRDF3D(*m_MolSys, 0.01); 
+    double volume = m_MolSys->parameter->boxx*m_MolSys->parameter->boxy*m_MolSys->parameter->boxz;
+    rdf3D->initRDF3D(*m_MolSys, 0.01, volume, 8.5); 
     // Loop through steps
     for (int istep=1; istep<=50; istep++)
     {
