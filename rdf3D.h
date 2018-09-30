@@ -82,6 +82,9 @@ class Rdf3D: public COutput {
         int typeI;
         int typeJ; 
 
+        // Volume bulk density of the system
+        double rho;
+
     	// Initialize the histogram
     	void initRDF3D(class CMolecularSystem& molSys, double binwidth, double volume=-1.0, double max_radius=-1.0);
     	// Calculates the RDF for a single snapshot

@@ -11,6 +11,7 @@ Rdf3D::Rdf3D()
   this->nframes = 0;
   this->typeI = -1;
   this->typeJ = -1;
+  this->rho = 1.0; 
 }
 
 Rdf3D::~Rdf3D()
@@ -281,6 +282,9 @@ void Rdf3D::normalizeRDF3D()
         // Normalization
         this->rdf3D[ibin] /= (this->nframes*this->n_iatoms*nideal);
     }
+
+    // Set the value of volume density for the central atom
+    this->rho = this->n_iatoms/this->volume;;
 }
 
 /********************************************//**
