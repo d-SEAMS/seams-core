@@ -75,7 +75,7 @@ int main()
     Rdf3D *rdf3D = new Rdf3D; 
      // Testing 3D rdf function. RDF calculated is incorrect if the wrong volume is set
     double volume = m_MolSys->parameter->boxx*m_MolSys->parameter->boxy*m_MolSys->parameter->boxz;
-    rdf3D->initRDF3D(*m_MolSys, 0.01, volume, 8.5); 
+    rdf3D->initRDF3D(*m_MolSys, 0.01, volume); 
     // Loop through steps
     for (int istep=1; istep<=50; istep++)
     {
@@ -90,6 +90,13 @@ int main()
     rdf3D->normalizeRDF3D();
     // Print the RDF 
     rdf3D->printRDF3D();
+
+    // ----------------------------------------------
+    //Structure Factor from 3D RDF
+    StructureFactor *s_k = new StructureFactor;
+    s_k->initStrucFactor(*rdf3D, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy);
+    // ----------------------------------------------
+
     // ----------------------------------------------
     
     // // ----------------------------------------------
@@ -117,7 +124,7 @@ int main()
     // // ----------------------------------------------
     // //Structure Factor from RDF
     // StructureFactor *s_k = new StructureFactor;
-    // s_k->initStrucFactor2D(*rdf, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy);
+    // s_k->initStrucFactor(*rdf, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy);
     // // ----------------------------------------------
 
     //Free the memory. 
