@@ -188,8 +188,8 @@ void Rdf3D::accumulateRDF3D(class CMolecularSystem& molSys, int typeI, int typeJ
     // Update the number of snapshots calculated
     this->nframes += 1;
     // Add to the RDF histogram
-    if (typeI==typeJ){this->histogramRDF3Dii(molSys);}
-    // TODO: do for dissimilar
+    if (typeI==typeJ){this->histogramRDF3Dii(molSys);}  // for I-I similar type RDF calculations
+    else {this->histogramRDF3Dij(molSys);}              // for I-J similar type RDF calculations
     // Call the normalize function separately after accumulating 
     // the histogram over all the desired snapshots
 }
@@ -248,6 +248,42 @@ void Rdf3D::histogramRDF3Dii(class CMolecularSystem& molSys)
     }
 }
 
+/********************************************//**
+ *  Updates the 3D RDF histogram for I-J pairs
+ The central particle type is different from the distribution atom
+ type
+ ***********************************************/
+void Rdf3D::histogramRDF3Dij(class CMolecularSystem& molSys)
+{
+    int n_iatoms = this->n_iatoms; // Total number of atoms of type I (Central atom type)
+    int n_jatoms = this->n_jatoms; // Total number of atoms of type J (Distribution atom type)
+    int iatom, jatom;       // Indices of atoms according to iIndex and jIndex
+    double dr;              // Relative distance between iatom and jatom (unwrapped)
+    int ibin;               // Index of bin in which the particle falls wrt reference atom                              
+    // Loop through every particles
+    for (int i = 0; i < n_iatoms; i++)
+    {
+      // Get index iatom
+      iatom = this->iIndex[i];
+        
+      // Loop through the j^th atom
+      for (int j = 0; j < n_jatoms; j++)
+      {
+          // Get the index jatom
+          jatom =  this->jIndex[j]; 
+
+          dr = this->getAbsDistance(iatom, jatom, molSys);
+          // Only if dr is less than max_radius add to histogram
+          if (dr < this->max_radius && dr > 1.0)
+          {
+            ibin = int(dr/this->binwidth); // Find which bin the particle falls in 
+            this->rdf3D[ibin] += 1;        // Add to histogram for both iatom and jatom
+          }
+        }
+    }
+}
+
+
 // void Rdf3D::histogramRDF3Dii(class CMolecularSystem& molSys)
 // {
 //     int natoms = molSys.parameter->nop; // Total number of particles
@@ -291,6 +327,8 @@ void Rdf3D::normalizeRDF3D()
     double nideal;                          // No. of ideal gas particles in each bin_volume
     double rho = this->n_jatoms/this->volume;    // Number density of distribution atoms J
     // Loop over all bins
+    //Test 
+    std::cout<< "i_atoms = " << this->n_iatoms << " and jatoms = "<< this->n_jatoms << "\n";
     for (int ibin=0; ibin < this->nbin; ibin++)
     {
         // Volume between bin k+1 and k
