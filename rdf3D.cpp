@@ -430,3 +430,11 @@ double Rdf3D::smallest(double x, double y)
 {
   return std::min(x,y);
 }
+
+/********************************************//**
+ *  Returns the number of bins in the RDF array
+ ***********************************************/
+int Rdf3D::binsInRDF()
+{
+    return this->nbin;
+}

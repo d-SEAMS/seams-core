@@ -103,6 +103,9 @@ class Rdf3D: public COutput {
     	// Free the memory 
     	void deleteRDF3D();
 
+        // Returns the number of bins in the RDF array
+        int binsInRDF();
+
 };
 
 #endif
