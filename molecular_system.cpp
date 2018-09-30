@@ -254,6 +254,7 @@ void CMolecularSystem::readParticleFile(int step)
   double number;                 // Each number being read from the line
   std::vector<double> lineVal;   // Vector containing all the elements in the line
   int type;                      // Type ID of a particle
+  int molID;                     // Molecule ID of each particle
           
   dumpFile.open(this->parameter->trajFile.c_str(), std::ifstream::in);
 
@@ -303,9 +304,11 @@ void CMolecularSystem::readParticleFile(int step)
           posy = lineVal[4];
           posz = lineVal[5];
           type = lineVal[2];
+          molID = lineVal[1];
 
           this->molecules[iatom].set_position(posx, posy, posz);
           this->molecules[iatom].type = type;
+          this->molecules[iatom].molID = molID;
 
         }
         else // Skip lines for other snapshots
