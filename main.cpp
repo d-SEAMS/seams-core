@@ -94,7 +94,7 @@ int main()
     // ----------------------------------------------
     //Structure Factor from 3D RDF
     StructureFactor *s_k = new StructureFactor;
-    s_k->initStrucFactor(*rdf3D, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy);
+    s_k->initStrucFactor(*rdf3D, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy, m_MolSys->parameter->boxz);
     // ----------------------------------------------
 
     // ----------------------------------------------
