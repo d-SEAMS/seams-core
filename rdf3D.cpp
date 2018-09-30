@@ -184,7 +184,7 @@ void Rdf3D::accumulateRDF3D(class CMolecularSystem& molSys, int typeI, int typeJ
     if (this->typeI!=-1 && this->typeI!=typeI && nframes>0){std::cerr<<"Type I cannot be changed after init\n";}
     if (this->typeJ!=-1 && this->typeJ!=typeJ && nframes>0){std::cerr<<"Type J cannot be changed after init\n";}
     // Calculate the number of particles in this particular frame
-    this->nop = this->getNatoms(molSys, typeI, typeJ);
+    getNatoms(molSys, typeI, typeJ);
     // Update the number of snapshots calculated
     this->nframes += 1;
     // Add to the RDF histogram
@@ -208,11 +208,12 @@ void Rdf3D::singleRDF3D(class CMolecularSystem& molSys, int typeI, int typeJ)
     // There is only one snapshot
     this->nframes = 1;
     // Calculate the number of particles in this particular frame
-    this->nop = this->getNatoms(molSys, typeI, typeJ);
+    getNatoms(molSys, typeI, typeJ);
     // Add to the RDF histogram
-    this->histogramRDF3D(molSys);
-    // Normalize the RDF 
-    this->normalizeRDF3D();
+    // TODO: fix
+    // this->histogramRDF3D(molSys);
+    // // Normalize the RDF 
+    // this->normalizeRDF3D();
 }
 
 /********************************************//**
@@ -231,7 +232,7 @@ void Rdf3D::histogramRDF3Dii(class CMolecularSystem& molSys)
       iatom = this->iIndex[i];
         
       // Loop through the j^th atom
-      for (int j = i+1; j < natoms; j++)
+      for (int j = i+1; j < n_iatoms; j++)
       {
           // Get the index jatom
           jatom =  this->iIndex[j]; 
