@@ -21,6 +21,8 @@ class CMolecule {
     double get_posz();
     // Lammps trajectory type ID
     int type;
+    // Lammps molecule ID
+    int molID;
 };
 
 #endif
