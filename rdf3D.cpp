@@ -118,8 +118,8 @@ void Rdf3D::getNatoms(class CMolecularSystem& molSys, int typeI, int typeJ)
     std::cerr<<"You have entered incorrect type IDs\n"; 
     this->typeI = -1; 
     this->typeJ = -1;
-    this->n_iatoms = n_iatoms;
-    this->n_jatoms = n_jatoms;
+    this->n_iatoms = molSys.parameter->nop;
+    this->n_jatoms = molSys.parameter->nop;
     return;
   }
 
@@ -270,8 +270,6 @@ void Rdf3D::normalizeRDF3D()
     double nideal;                          // No. of ideal gas particles in each bin_volume
     double rho = this->n_jatoms/this->volume;    // Number density of distribution atoms J
     // Loop over all bins
-    //Test 
-    std::cout<< "i_atoms = " << this->n_iatoms << " and jatoms = "<< this->n_jatoms << "\n";
     for (int ibin=0; ibin < this->nbin; ibin++)
     {
         // Volume between bin k+1 and k
