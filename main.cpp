@@ -41,8 +41,8 @@ int main()
     std::cout<<" The total number of steps in the trajectory is "<< traj_steps << "\n";
 
     //Get random step info at a frame number
-    int frame = 400;
-    m_MolSys->readParticleFile(400);
+    int frame = 400; // 400 
+    m_MolSys->readParticleFile(frame);
     
     // // ----------------------------------------
     // // 3D RDF (single step)
@@ -70,7 +70,7 @@ int main()
     // rdf->deleteRDF2D();
 
     // // ----------------------------------------------
-    // //Rdf23D over multiple frames
+    // //Rdf3D over multiple frames
     // // Create object for 3D RDF
     // Rdf3D *rdf3D = new Rdf3D; 
     //  // Testing 3D rdf function. RDF calculated is incorrect if the wrong volume is set
