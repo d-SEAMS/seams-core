@@ -56,11 +56,20 @@ class Rdf2D: public COutput {
     double max_radius;
     // Total volume required for density calculation
     double volume;
-    // Total no. of atoms
+    // Total number of central atoms (Itype)
+    int n_iatoms;
+    // Total number of distribution atoms (Jtype)
+    int n_jatoms;
+    // Total no. of atoms DELETE LATER
     int nop;
 
-    // Calculate the histogram of the 2D RDF in the XY plane
-    void histogramRDFxy(class CMolecularSystem& molSys, double z_layer, double dz);
+    // Dynamically allocated array for indices with particles of type I and J
+    int* iIndex;
+    int* jIndex;
+
+    // Calculate the histogram of the 2D RDF in the XY plane 
+    void histogramRDFxyII(class CMolecularSystem& molSys); // II type calc
+    void histogramRDFxyIJ(class CMolecularSystem& molSys); // IJ pairs calc
 
     // Calculate the number of bins
     void getBins();
@@ -68,9 +77,9 @@ class Rdf2D: public COutput {
     // Calculate the number of atoms in the box for the given frame and IDs
     int getNatoms(class CMolecularSystem& molSys, int, int);
     // Calculates the number of atoms in the XY plane
-    int getNatomsXY(class CMolecularSystem& molSys, double, double);
+    void getNatomsXY(class CMolecularSystem& molSys, double, double, int, int);
 
-    // Check whether the given coordinate is within the layer
+    // Check whether the given coordinate (r) is within the layer (midpoint r_layer)
     bool atomInsideLayer(double r, double r_layer, double dr);
 
     // Check to make sure that the user-defined max_radius is within limits
