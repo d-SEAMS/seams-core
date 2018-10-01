@@ -32,7 +32,7 @@ Rdf2D::~Rdf2D()
 void Rdf2D::initRDFxy(class CMolecularSystem& molSys, double binwidth, double volume, double max_radius)
 {
     // Get the binwidth, max_radius and volume
-    this->binwidth = binwidth; this->max_radius = max_radius; this->volume=volume;
+    this->binwidth = binwidth; this->max_radius = max_radius;
     // Check the max_radius and parameters
     this->checkParameterXY(molSys);
     // Calculate the number of bins from user-defined parameters
@@ -112,6 +112,9 @@ int Rdf2D::getNatoms(class CMolecularSystem& molSys, int typeI, int typeJ)
   int ii=0; // Current index of array iIndex being filled
   int jj=0; // Current index of array jIndex being filled
   double z_atom; // z coordinate of the atom
+
+  // Get the volume of the layer
+  this->volume = molSys.parameter->boxx*molSys.parameter->boxy*dz;
 
   // If the lammps ID has not been set, then set nop as the total nop
   // within the layer defined by z_min and z_max
