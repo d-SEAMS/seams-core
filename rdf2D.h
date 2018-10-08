@@ -127,7 +127,7 @@ class Rdf2D: public COutput {
       double rho;
 
     	// Initialize the histogram
-    	void initRDFxy(class CMolecularSystem& molSys, double binwidth, double volume=-1.0, double max_radius=-1.0);
+    	void initRDFxy(class CMolecularSystem& molSys, double binwidth, double max_radius=-1.0);
     	// Calculates the RDF for a single snapshot
     	void singleRDFxy(class CMolecularSystem& molSys, double z_layer, double dz, int typeI=-1, int typeJ=-1);
     	// Calculates the RDF over a number of snapshots

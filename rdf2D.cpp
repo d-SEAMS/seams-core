@@ -29,7 +29,7 @@ Rdf2D::~Rdf2D()
  the 2-D RDF will be calculated and the desired volume. If not set, the default
  values are half the simulation box and the volume of the simulation box respectively
  ***********************************************/
-void Rdf2D::initRDFxy(class CMolecularSystem& molSys, double binwidth, double volume, double max_radius)
+void Rdf2D::initRDFxy(class CMolecularSystem& molSys, double binwidth, double max_radius)
 {
     // Get the binwidth, max_radius and volume
     this->binwidth = binwidth; this->max_radius = max_radius;
