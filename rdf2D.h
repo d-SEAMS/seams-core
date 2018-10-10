@@ -12,6 +12,7 @@
 #include "parameter.h"
 #include "molecular_system.h"
 #include "output.h"
+#include "layer.h"
 
 /*! \brief Class for 2D RDF.
  *         This class creates an object for the 2D-RDF, 
@@ -44,7 +45,7 @@
   the smallest box length of the \f$x\f$ or \f$y\f$ dimensions.
  */
 
-class Rdf2D: public COutput {
+class Rdf2D: public COutput, private CLayer {
 	private:
 		// No. of snapshots for RDF
 		int nframes;		
@@ -78,9 +79,6 @@ class Rdf2D: public COutput {
     int getNatoms(class CMolecularSystem& molSys, int, int);
     // Calculates the number of atoms in the XY plane
     void getNatomsXY(class CMolecularSystem& molSys, double, double, int, int);
-
-    // Check whether the given coordinate (r) is within the layer (midpoint r_layer)
-    bool atomInsideLayer(double r, double r_layer, double dr);
 
     // Check to make sure that the user-defined max_radius is within limits
     void checkParameterXY(class CMolecularSystem& molSys);

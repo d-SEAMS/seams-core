@@ -479,13 +479,6 @@ void Rdf2D::printRDF2D()
 // CHECKS AND HELPER FUNCTIONS
 //-------------------------------------------------------------------------------------------------------
 
-// Checks if the atom is inside the layer 
-bool Rdf2D::atomInsideLayer(double r, double r_layer, double dr)
-{
-	if ((r-r_layer)<=0.5*dr){return true;}
-	else {return false;}
-}
-
 /********************************************//**
  *  Checks that the max_radius entered is correct.
  If the max_radius is greater than half the simulation
