@@ -15,6 +15,7 @@ CLayer::CLayer()
 	this->zlo = 0.0;
 	this->zhi = 0.0;
 	this->notset = true;
+	this->volFlag = 0;
 }
 /********************************************//**
  *  Destructor
@@ -54,8 +55,19 @@ bool CLayer::atomInsideVol(class CMolecularSystem& molSys, int iatom, double xlo
 	x_atom = molSys.molecules[iatom].get_posx();
 	y_atom = molSys.molecules[iatom].get_posy();
 	z_atom = molSys.molecules[iatom].get_posz();
+
+	this->atomCoordLimits(x_atom, this->xlo, this->xhi);
+	this->atomCoordLimits(y_atom, this->ylo, this->yhi);
+	this->atomCoordLimits(z_atom, this->zlo, this->zhi);
+
+	if(volFlag == 3){return true;}
+	else {return false;}
 }
 
+/********************************************//**
+ *  Checks if the user-entered volume is correct and
+ updates box limits
+ ***********************************************/
 void CLayer::checkVolume()
 {
 	// Volume lengths
@@ -69,4 +81,13 @@ void CLayer::checkVolume()
 			this->notset=true;
 		}
 	else {this->notset=false;}
+}
+
+/********************************************//**
+ *  Check if the atom is within a particular dimension range
+ ***********************************************/
+void CLayer::atomCoordLimits(double r_atom, double r_min, double r_max)
+{
+	if (r_min == 0 && r_max == 0){this->volFlag += 1;}
+	else if (r_atom >=r_min && r_atom <= r_max){this->volFlag += 1;}
 }
