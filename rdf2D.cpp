@@ -15,12 +15,16 @@ Rdf2D::Rdf2D()
   this->rho = -1;
   this->rdf2D = NULL;
   this->rVal = NULL;
+  this->iIndex = NULL;
+  this->jIndex = NULL;
 }
 
 Rdf2D::~Rdf2D()
 {
   delete [] rdf2D;
   delete [] rVal;
+  delete [] iIndex;
+  delete [] jIndex;
 }
 
 /********************************************//**
