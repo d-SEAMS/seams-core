@@ -12,6 +12,7 @@ CMolecularSystem::CMolecularSystem()
 {
   this->parameter = new CParameter;
   this->parameter->nop = -1;
+  this->molecules = NULL;
 }
 
 /********************************************//**
