@@ -12,7 +12,7 @@
 #include "parameter.h"
 #include "molecular_system.h"
 #include "output.h"
-#include "layer.h"
+#include "geometry.h"
 
 /*! \brief Class for 2D RDF.
  *         This class creates an object for the 2D-RDF, 
