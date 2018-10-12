@@ -12,6 +12,10 @@ Rdf3D::Rdf3D()
   this->typeI = -1;
   this->typeJ = -1;
   this->rho = 1.0; 
+  this->rdf3D = NULL;
+  this->rVal = NULL;
+  this->iIndex = NULL;
+  this->jIndex = NULL;
 }
 
 Rdf3D::~Rdf3D()
