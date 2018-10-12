@@ -13,6 +13,8 @@ Rdf2D::Rdf2D()
   this->typeJ = -1;
   this->nop = -1;
   this->rho = -1;
+  this->rdf2D = NULL;
+  this->rVal = NULL;
 }
 
 Rdf2D::~Rdf2D()
