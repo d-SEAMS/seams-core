@@ -11,7 +11,9 @@ Rdf3D::Rdf3D()
   this->nframes = 0;
   this->typeI = -1;
   this->typeJ = -1;
-  this->rho = 1.0; 
+  this->rho = 1.0;
+  this->n_iatoms = 0;
+  this->n_jatoms = 0; 
   this->rdf3D = NULL;
   this->rVal = NULL;
   this->iIndex = NULL;
