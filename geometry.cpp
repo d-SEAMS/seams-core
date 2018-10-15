@@ -46,16 +46,52 @@ CVolume::CVolume()
 	this->zhi = 0.0;
 	this->notset = true;
 	this->volFlag = 0;
+	this->n_iatoms = 0;
+	this->n_jatoms = 0;
+	// Set pointers to null
+	this->iIndex = NULL;
+  	this->jIndex = NULL;
 }
 /********************************************//**
  *  Destructor
  ***********************************************/
 CVolume::~CVolume()
 {
+	delete [] iIndex;
+  	delete [] jIndex;
 }
 
 /********************************************//**
- *  Checks if the atom is inside the user-defined volume
+ *  Makes a list of atom IDs of the particles of type I
+ within a user-defined volume. If the volume is not defined, the 
+ box volume is taken by default
+ ***********************************************/ 
+void CVolume::getAtomListI(class CMolecularSystem& molSys, int typeI, double xlo, double xhi, double ylo, double yhi, double zlo, double zhi)
+{
+	int n_iatoms=0;
+  	int n_jatoms=0;
+  	int ii=0; // Current index of array iIndex being filled
+  	int jj=0; // Current index of array jIndex being filled
+
+	// Set the limits
+	this->xlo=xlo; this->xhi=xhi; this->ylo=ylo; this->yhi=yhi; this->zlo=zlo; this->zhi=zhi;
+	if (xlo==xhi && ylo==yhi && zlo==zhi){this->notset=true;} 
+
+	// Check that the user-defined volume is within the box limits
+	this->checkVolume();
+
+	// Create arrays for vectors holding indices for particles
+    // of type I and J
+    this->iIndex  = new int[molSys.parameter->nop];
+    this->jIndex  = new int[molSys.parameter->nop];
+
+	// Loop through all the atoms and make the list of atom IDs 
+	// that are of type I. If notset=true then don't check inside the volume (don't call atomInsideVol)
+
+}
+
+/********************************************//**
+ *  Checks if the atom is inside the user-defined volume, irrespective of type
  ***********************************************/ 
 bool CVolume::atomInsideVol(class CMolecularSystem& molSys, int iatom, double xlo, double xhi, double ylo, double yhi, double zlo, double zhi)
 {
@@ -110,4 +146,29 @@ void CVolume::atomCoordLimits(double r_atom, double r_min, double r_max)
 {
 	if (r_min == 0 && r_max == 0){this->volFlag += 1;}
 	else if (r_atom >=r_min && r_atom <= r_max){this->volFlag += 1;}
+}
+
+
+/********************************************//**
+ *  Checks if the atom is inside the user-defined volume, irrespective of type
+ This is used when xlo, xhigh etc have been defined separately and do not need to be checked again
+ ***********************************************/ 
+bool CVolume::atomInsideVol(class CMolecularSystem& molSys, int iatom)
+{
+	double x_atom;
+	double y_atom;
+	double z_atom; 
+
+	// Check if the atom is within 
+	// the limits
+	x_atom = molSys.molecules[iatom].get_posx();
+	y_atom = molSys.molecules[iatom].get_posy();
+	z_atom = molSys.molecules[iatom].get_posz();
+
+	this->atomCoordLimits(x_atom, this->xlo, this->xhi);
+	this->atomCoordLimits(y_atom, this->ylo, this->yhi);
+	this->atomCoordLimits(z_atom, this->zlo, this->zhi);
+
+	if(volFlag == 3){return true;}
+	else {return false;}
 }

@@ -35,14 +35,28 @@ class CVolume {
 		bool notset;
 		// Flag to check if the atom is inside the given volume or not 
 		int volFlag;
+		// Total number of atoms of Itype
+        int n_iatoms;
+        // Total number of atoms of Jtype
+        int n_jatoms;
+
+        // Dynamically allocated array for indices with particles of type I and J
+        int* iIndex;
+        int* jIndex;
 
 		// Check whether the atom is inside the user-defined volume
 		bool atomInsideVol(class CMolecularSystem& molSys, int iatom, double xlo = 0.0, double xhi = 0.0, double ylo=0.0, double yhi=0.0, double zlo=0.0, double zhi=0.0);
+		bool atomInsideVol(class CMolecularSystem& molSys, int iatom);
 
 		// Check the volume limits
 		void checkVolume();
 		// Check if the atom is within a particular dimension range
 		void atomCoordLimits(double r_atom, double r_min, double r_max);
+
+		// Get list of atoms of a particular type in a user-defined volume
+		void getAtomListI(class CMolecularSystem& molSys, int typeI=-1, double xlo = 0.0, double xhi = 0.0, double ylo=0.0, double yhi=0.0, double zlo=0.0, double zhi=0.0);
+		void getAtomListIJ(class CMolecularSystem& molSys, int typeI=-1, int typeJ=-1, double xlo = 0.0, double xhi = 0.0, double ylo=0.0, double yhi=0.0, double zlo=0.0, double zhi=0.0);
+
 };
 
 
