@@ -88,9 +88,9 @@ class Rdf3D: public COutput {
     	// Initialize the histogram
     	void initRDF3D(class CMolecularSystem& molSys, double binwidth, double volume=-1.0, double max_radius=-1.0);
     	// Calculates the RDF for a single snapshot
-    	void singleRDF3D(class CMolecularSystem& molSys, int typeA=-1, int typeB=-1);
+    	void singleRDF3D(class CMolecularSystem& molSys, int typeI=-1, int typeJ=-1);
     	// Calculates the RDF over a number of snapshots
-    	void accumulateRDF3D(class CMolecularSystem& molSys, int typeA=-1, int typeB=-1);
+    	void accumulateRDF3D(class CMolecularSystem& molSys, int typeI=-1, int typeJ=-1);
     	// Normalizes the RDF. You don't need to call this separately 
     	// for calculation of RDF for a single frame. You must call this 
     	// after using the accumulate RDF command for multiple snapshots
