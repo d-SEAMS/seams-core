@@ -10,7 +10,6 @@
 #include <time.h>
 #include <algorithm>
 #include <vector>
-#include <sstream>
 #include "molecule.h"
 #include "parameter.h"
 #include "rdf3D.h"
