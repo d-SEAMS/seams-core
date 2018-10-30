@@ -249,14 +249,19 @@ void CMolecularSystem::readParticleFile(int step)
 {
   double posx,posy,posz;
   std::string line;              // Current line being read in
-  std::ifstream dumpFile;
-  std::string::size_type pos;    // To find positions within the line
-  std::string::size_type lpos;   // Next entry in the line 
+  std::ifstream dumpFile; 
   double number;                 // Each number being read from the line
   std::vector<double> lineVal;   // Vector containing all the elements in the line
   int type;                      // Type ID of a particle
   int molID;                     // Molecule ID of each particle
-          
+  std::vector<std::string> lammpsLine;// Line that contains info about column numbers for type, ID etc.
+  bool molFlag=false;            // Flag that checks if the molecular ID has been entered or not
+  std::string word;              // To store individual words
+  int wordNumber = 0;            // To store the word number
+  int molNum;
+  int typeNum;
+  int xNum;
+
   dumpFile.open(this->parameter->trajFile.c_str(), std::ifstream::in);
 
   // Error handling for an invalid step
@@ -284,7 +289,28 @@ void CMolecularSystem::readParticleFile(int step)
       {
         std::getline(dumpFile, line);
       } 
-      std::getline(dumpFile, line); // ITEM: ATOMS id mol type x y z 
+      
+      // -----------------------
+      std::getline(dumpFile, line); // ITEM: ATOMS id mol type x y z
+
+      // Do this only for the first step!
+      if (istep == 1)
+      {
+        // Check what the column number of the x,y,z coordinates are
+        // Find out if the molecular ID has been entered!
+        // breaking line into word using string stream 
+        std::stringstream ss(line);  // Used for breaking words from line
+        wordNumber = 0;
+        while (ss >> word)
+        {
+          wordNumber++;
+          if (word == "mol"){molFlag=true;molNum = wordNumber-3;}
+          if (word == "type"){typeNum = wordNumber-3;}
+          if (word == "x"){xNum = wordNumber-3;}
+        } 
+      }
+      
+      // ------------------------ 
       // Now get the particle positions; only at the correct step
       for (int iatom=0; iatom < this->parameter->nop; iatom++)
       {
@@ -301,11 +327,13 @@ void CMolecularSystem::readParticleFile(int step)
             lineVal.push_back(number);
           }
 
-          posx = lineVal[3];
-          posy = lineVal[4];
-          posz = lineVal[5];
-          type = lineVal[2];
-          molID = lineVal[1];
+          posx = lineVal[xNum];
+          posy = lineVal[xNum+1];
+          posz = lineVal[xNum+2];
+          type = lineVal[typeNum];
+          if (molFlag == true){molID = lineVal[molNum];}
+          else {molID = iatom;}
+          
 
           this->molecules[iatom].set_position(posx, posy, posz);
           this->molecules[iatom].type = type;
