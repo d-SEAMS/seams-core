@@ -1,6 +1,6 @@
 
 all:
-	g++ -g -lm -Wall -o runme geometry.cpp output.cpp structure_factor.cpp rdf2D.cpp rdf3D.cpp molecular_system.cpp molecule.cpp parameter.cpp main.cpp 
+	g++ -g -lm -Wall -o runme chunk.cpp density.cpp geometry.cpp output.cpp structure_factor.cpp rdf2D.cpp rdf3D.cpp molecular_system.cpp molecule.cpp parameter.cpp main.cpp 
 
 molecule.o: molecule.cpp molecule.h
 	g++ -c molecule.cpp
@@ -25,6 +25,12 @@ output.o: output.cpp
 
 geometry.o: geometry.cpp
 	g++ -c geometry.cpp 
+
+density.o: density.cpp
+	g++ -c density.cpp
+
+chunk.o: chunk.cpp
+	g++ -c chunk.cpp
 	
 clean:
 	rm -f *.o runme 
