@@ -71,7 +71,7 @@ void CVolume::getAtomListI(class CMolecularSystem& molSys, int typeI, double xlo
 	int n_iatoms=0;
   	int n_jatoms=0;
   	int ii=0; // Current index of array iIndex being filled
-  	int jj=0; // Current index of array jIndex being filled
+  	// int jj=0; // Current index of array jIndex being filled
 
 	// Set the limits
 	this->xlo=xlo; this->xhi=xhi; this->ylo=ylo; this->yhi=yhi; this->zlo=zlo; this->zhi=zhi;
@@ -83,11 +83,37 @@ void CVolume::getAtomListI(class CMolecularSystem& molSys, int typeI, double xlo
 	// Create arrays for vectors holding indices for particles
     // of type I and J
     this->iIndex  = new int[molSys.parameter->nop];
-    this->jIndex  = new int[molSys.parameter->nop];
+    // this->jIndex  = new int[molSys.parameter->nop];
 
 	// Loop through all the atoms and make the list of atom IDs 
-	// that are of type I. If notset=true then don't check inside the volume (don't call atomInsideVol)
+	// that are of type I. 
+    for (int iatom = 0; iatom < molSys.parameter->nop; iatom++)
+    {
+    	// Check if the atom type is of type I
+    	if (molSys.molecules[iatom].type==typeI || typeI==-1)
+    	{
+    		if (atomInsideVol(molSys,iatom,xlo,xhi,ylo,yhi,zlo,zhi)==true){
+    			n_iatoms += 1;
+    			this->iIndex[ii] = iatom; // Put atom ID in iIndex array
+    			ii += 1;
+    		}
+    	}
+    }
 
+    // Set the n_iatoms value
+
+    // Check to make sure that the atom number is not zero
+    if (n_iatoms==0){
+    	std::cerr<<"You have entered an incorrect type ID\n"; 
+    	this->typeI = -1; 
+    	this->n_iatoms = molSys.parameter->nop;
+    	for (int iatom = 0; iatom < molSys.parameter->nop; iatom++){this->iIndex[ii] = iatom;}
+    	return;
+  	}
+
+  	// Otherwise update the number of iatoms
+  	this->n_iatoms = n_iatoms;
+  	return;
 }
 
 /********************************************//**
