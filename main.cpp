@@ -19,6 +19,7 @@
 #include "rdf3D.h"
 #include "rdf2D.h"
 #include "output.h"
+#include "density.h"
 #include "structure_factor.h"
 #include <ctime>
 #include <sstream>
