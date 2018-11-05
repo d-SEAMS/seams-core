@@ -24,7 +24,7 @@ Density::~Density()
  *  Initializes the number density. The binning dimension 
  is the z dimension
  ***********************************************/
-Density::initNumberZ(class CMolecularSystem& molSys,double binwidth, int typeI, double xlo, double xhi, double ylo, double yhi, double zlo, double zhi)
+void Density::initNumberZ(class CMolecularSystem& molSys,double binwidth, int typeI, double xlo, double xhi, double ylo, double yhi, double zlo, double zhi)
 {
 	double z_length = zhi-zlo; // Length for binning
 	// If the user has not entered z dimension lengths, the box length is taken as default
@@ -43,10 +43,10 @@ Density::initNumberZ(class CMolecularSystem& molSys,double binwidth, int typeI, 
 
 /********************************************//**
  *  Gets the number density of a particle of type I
- in a user-defined volume. If the volume is not defined, the entire 
+ in a user-defined volume, for a single frame? Same func for all. If the volume is not defined, the entire 
  box volume is taken. Binning is done in the z dimension
  ***********************************************/
-Density::NumberZ(class CMolecularSystem& molSys,double binwidth int typeI,double xlo,double xhi,double ylo,double yhi,double zlo,double zhi)
+void Density::NumberSingleFrameZ(class CMolecularSystem& molSys,double binwidth, int typeI,double xlo,double xhi,double ylo,double yhi,double zlo,double zhi)
 {
 	//
 }
@@ -57,7 +57,7 @@ Density::NumberZ(class CMolecularSystem& molSys,double binwidth int typeI,double
  Takes maximum length in which binning will be done, and the CMolecularSystem object
  as the arguments
  ***********************************************/
-Density::getBins(class CMolecularSystem& molSys, double max_length)
+void Density::getBins(class CMolecularSystem& molSys, double max_length)
 {
 	//
 }

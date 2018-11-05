@@ -41,7 +41,7 @@ class Density: public COutput, private CVolume {
 		int typeI;
 
 		// Gets the number density of type I in the defined volume limits; binning done in the z dimension
-		void NumberZ(class CMolecularSystem& molSys, double binwidth, int typeI=-1, double xlo = 0.0, double xhi = 0.0, double ylo=0.0, double yhi=0.0, double zlo=0.0, double zhi=0.0);
+		void NumberSingleFrameZ(class CMolecularSystem& molSys, double binwidth, int typeI=-1, double xlo = 0.0, double xhi = 0.0, double ylo=0.0, double yhi=0.0, double zlo=0.0, double zhi=0.0);
 };
 
 #endif
