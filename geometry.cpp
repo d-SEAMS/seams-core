@@ -69,7 +69,7 @@ CVolume::~CVolume()
 void CVolume::getAtomListI(class CMolecularSystem& molSys, int typeI, double xlo, double xhi, double ylo, double yhi, double zlo, double zhi)
 {
 	int n_iatoms=0;
-  	int n_jatoms=0;
+  	// int n_jatoms=0;
   	int ii=0; // Current index of array iIndex being filled
   	// int jj=0; // Current index of array jIndex being filled
 
@@ -105,7 +105,7 @@ void CVolume::getAtomListI(class CMolecularSystem& molSys, int typeI, double xlo
     // Check to make sure that the atom number is not zero
     if (n_iatoms==0){
     	std::cerr<<"You have entered an incorrect type ID\n"; 
-    	this->typeI = -1; 
+    	typeI = -1; 
     	this->n_iatoms = molSys.parameter->nop;
     	for (int iatom = 0; iatom < molSys.parameter->nop; iatom++){this->iIndex[ii] = iatom;}
     	return;
