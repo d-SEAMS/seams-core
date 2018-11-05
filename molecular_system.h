@@ -68,6 +68,9 @@ class CMolecularSystem {
     // function
     void readParticleFile(int );
 
+    // Reads in the box dimensions from the lammps trajectory
+    double getBoxLength(std::string );
+
 };
 
 #endif
