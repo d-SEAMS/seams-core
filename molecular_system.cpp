@@ -244,7 +244,6 @@ void CMolecularSystem::readParticleFile()
  *  Reads configuration from the lammps trajectory file 
  at a particular step number
  ***********************************************/
-// TODO: Generalize for when mol ID has not been printed out
 void CMolecularSystem::readParticleFile(int step)
 {
   double posx,posy,posz;
@@ -284,10 +283,12 @@ void CMolecularSystem::readParticleFile(int step)
       std::getline(dumpFile, line); // ITEM: NUMBER OF ATOMS
       std::getline(dumpFile, line); // No. of particles; already saved though
       std::getline(dumpFile, line); // ITEM: BOX BOUNDS pp pp pp
-      // Skip the three lines with box dimenions
+
+      // Get the box lengths from the three lines with box dimenions
       for (int k=0; k<3; k++)
       {
         std::getline(dumpFile, line);
+        getBoxLength(line);
       } 
       
       // -----------------------
@@ -356,3 +357,26 @@ void CMolecularSystem::readParticleFile(int step)
 }
 
 
+
+/********************************************//**
+ *  Reads in and updates the box lengths at each step
+ (in case the box volume is changing at each step; eg for NPT)
+ ***********************************************/
+// TODO: Write different logic if you want the exact box dimensions and 
+// not just the box lengths
+double CMolecularSystem::getBoxLength(std::string line)
+{
+  std::vector<double> lineVal;   // Vector containing all the elements in the line
+  double number;                 // Each number being read from the line
+
+  std::stringstream is(line);  // Used for breaking words from line
+  // Clear the contents of the vector
+  lineVal.clear();
+  while (is >> number)
+    {
+      lineVal.push_back(number);
+    }
+
+    // Get the box length
+    return lineVal[1]-lineVal[0];
+}
