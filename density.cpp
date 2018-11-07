@@ -35,7 +35,7 @@ void Density::initNumberZ(class CMolecularSystem& molSys,double binwidth, int ty
 	this->typeI = typeI;
 	this->xlo=xlo; this->xhi = xhi; 
 	this->ylo=ylo; this->yhi=yhi;
-	this->zlo=zhi; this->zhi;
+	this->zlo=zhi; this->zhi=zhi;
 
 
 }
