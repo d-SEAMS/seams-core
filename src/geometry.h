@@ -59,5 +59,12 @@ class CVolume {
 
 };
 
+class CGeneric {
+	public:
+		CGeneric();
+		virtual ~CGeneric();
+    	// Get absolute relative distance from wrapped coordinates
+		double getAbsDistance(int, int, class CMolecularSystem& molSys);
+};
 
 #endif
