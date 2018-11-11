@@ -1,6 +1,6 @@
 
 all:
-	cd src && g++ -g -lm -Wall -o runme chunk.cpp density.cpp geometry.cpp output.cpp structure_factor.cpp rdf2D.cpp rdf3D.cpp molecular_system.cpp molecule.cpp parameter.cpp main.cpp
+	cd src && g++ -g -lm -Wall -o runme transition.cpp chunk.cpp density.cpp geometry.cpp output.cpp structure_factor.cpp rdf2D.cpp rdf3D.cpp molecular_system.cpp molecule.cpp parameter.cpp main.cpp
 
 molecule.o: molecule.cpp molecule.h
 	cd src && g++ -c molecule.cpp
@@ -28,6 +28,9 @@ geometry.o: geometry.cpp
 
 density.o: density.cpp
 	cd src && g++ -c density.cpp
+
+transition.o: transition.cpp
+	cd src && g++ -c transition.cpp
 
 chunk.o: chunk.cpp
 	cd src && g++ -c chunk.cpp
