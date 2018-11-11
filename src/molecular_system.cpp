@@ -344,6 +344,9 @@ void CMolecularSystem::readParticleFile(int step)
           this->molecules[iatom].molID = molID;
           this->molecules[iatom].atomID = atomID;
 
+          // I will not read the rest
+          break;
+
         }
         else // Skip lines for other snapshots
         {
