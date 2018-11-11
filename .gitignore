@@ -40,3 +40,5 @@ input/traj/dump-8*
 output/
 # Crazy tramp
 :*
+# Ignore histories
+.gdb_history
