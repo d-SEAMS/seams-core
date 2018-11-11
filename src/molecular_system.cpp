@@ -25,6 +25,17 @@ CMolecularSystem::~CMolecularSystem()
 }
 
 /********************************************//**
+ *  Prepares frames for further processing.
+ (Used by the transition module)
+ ***********************************************/
+
+void CMolecularSystem::initializeFrames(int nop, std::string fileName) {
+  this->molecules   = new CMolecule[nop];
+  this->parameter->nop = nop;
+  this->parameter->trajFile = fileName;
+}
+
+/********************************************//**
  *  Initialize the simulation Box with number of Particles given.
  the nop will be set to the given number
  ***********************************************/
