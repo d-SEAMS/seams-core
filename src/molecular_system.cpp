@@ -265,11 +265,14 @@ void CMolecularSystem::readParticleFile(int step)
   dumpFile.open(this->parameter->trajFile.c_str(), std::ifstream::in);
 
   // Error handling for an invalid step
+  // TODO: Do this better, maybe use <optional> wrt. https://stackoverflow.com/a/47677892/1895378
+  if ( this->parameter->nsteps > 1 ) {
   if (step > this->parameter->nsteps)
   {
     std::cerr << "The step number " << step << " is larger than the number of steps in the trajectory" << "\n";
     std::cerr << "Using the first snapshot in the lammps trajectory file by default"<< "\n";
     step = 1;
+  }
   }
 
   if (dumpFile.is_open())
