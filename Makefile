@@ -1,36 +1,36 @@
 
 all:
-	g++ -g -lm -Wall -o runme chunk.cpp density.cpp geometry.cpp output.cpp structure_factor.cpp rdf2D.cpp rdf3D.cpp molecular_system.cpp molecule.cpp parameter.cpp main.cpp 
+	cd src && g++ -g -lm -Wall -o runme chunk.cpp density.cpp geometry.cpp output.cpp structure_factor.cpp rdf2D.cpp rdf3D.cpp molecular_system.cpp molecule.cpp parameter.cpp main.cpp
 
 molecule.o: molecule.cpp molecule.h
-	g++ -c molecule.cpp
+	cd src && g++ -c molecule.cpp
 
 molecular_system.o: molecular_system.cpp molecular_system.h
-	g++ -c molecular_system.cpp
+	cd src && g++ -c molecular_system.cpp
 
 parameter.o: parameter.cpp
-	g++ -c parameter.cpp
+	cd src && g++ -c parameter.cpp
 
 rdf3D.o: rdf3D.cpp
-	g++ -c rdf3D.cpp 
+	cd src && g++ -c rdf3D.cpp
 
 rdf2D.o: rdf2D.cpp
-	g++ -c rdf2D.cpp 
+	cd src && g++ -c rdf2D.cpp
 
 structure_factor.o: structure_factor.cpp
-	g++ -c structure_factor.cpp 
+	cd src && g++ -c structure_factor.cpp
 
 output.o: output.cpp
-	g++ -c output.cpp 
+	cd src && g++ -c output.cpp
 
 geometry.o: geometry.cpp
-	g++ -c geometry.cpp 
+	cd src && g++ -c geometry.cpp
 
 density.o: density.cpp
-	g++ -c density.cpp
+	cd src && g++ -c density.cpp
 
 chunk.o: chunk.cpp
-	g++ -c chunk.cpp
-	
+	cd src && g++ -c chunk.cpp
+
 clean:
-	rm -f *.o runme 
+	cd src && rm -f *.o runme
