@@ -45,7 +45,7 @@
   the smallest box length of the \f$x\f$ or \f$y\f$ dimensions.
  */
 
-class Rdf2D: public COutput, private CLayer {
+class Rdf2D: public COutput, private CGeneric, private CLayer {
 	private:
 		// No. of snapshots for RDF
 		int nframes;		
