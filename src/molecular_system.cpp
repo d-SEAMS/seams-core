@@ -274,9 +274,10 @@ void CMolecularSystem::readParticleFile(int step)
 
   if (dumpFile.is_open())
   {
+    int istep = 1;
     // Loop through the number of snapshots in the traj file
     // until you reach the snapshot at step
-    for (int istep = 1; istep <= this->parameter->nsteps; istep++)
+    while ( dumpFile.good() )
     {
       // Lines before coordinates in every snapshot
       std::getline(dumpFile,line); // ITEM: TIMESTEP
@@ -350,6 +351,8 @@ void CMolecularSystem::readParticleFile(int step)
         }
 
       }   // End of loop through coordinate lines
+      // Mimic for loop updates
+      istep++;
     }     // End of loop through snapshots in the dump file
   
   }       // End of check for the file being open
