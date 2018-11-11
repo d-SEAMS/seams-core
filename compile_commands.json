@@ -1,0 +1,145 @@
+[
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-g",
+            "-Wall",
+            "-o",
+            "runme",
+            "chunk.cpp"
+        ],
+        "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
+        "file": "chunk.cpp"
+    },
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-g",
+            "-Wall",
+            "-o",
+            "runme",
+            "molecular_system.cpp"
+        ],
+        "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
+        "file": "molecular_system.cpp"
+    },
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-g",
+            "-Wall",
+            "-o",
+            "runme",
+            "geometry.cpp"
+        ],
+        "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
+        "file": "geometry.cpp"
+    },
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-g",
+            "-Wall",
+            "-o",
+            "runme",
+            "density.cpp"
+        ],
+        "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
+        "file": "density.cpp"
+    },
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-g",
+            "-Wall",
+            "-o",
+            "runme",
+            "main.cpp"
+        ],
+        "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
+        "file": "main.cpp"
+    },
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-g",
+            "-Wall",
+            "-o",
+            "runme",
+            "rdf3D.cpp"
+        ],
+        "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
+        "file": "rdf3D.cpp"
+    },
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-g",
+            "-Wall",
+            "-o",
+            "runme",
+            "parameter.cpp"
+        ],
+        "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
+        "file": "parameter.cpp"
+    },
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-g",
+            "-Wall",
+            "-o",
+            "runme",
+            "rdf2D.cpp"
+        ],
+        "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
+        "file": "rdf2D.cpp"
+    },
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-g",
+            "-Wall",
+            "-o",
+            "runme",
+            "structure_factor.cpp"
+        ],
+        "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
+        "file": "structure_factor.cpp"
+    },
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-g",
+            "-Wall",
+            "-o",
+            "runme",
+            "molecule.cpp"
+        ],
+        "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
+        "file": "molecule.cpp"
+    },
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-g",
+            "-Wall",
+            "-o",
+            "runme",
+            "output.cpp"
+        ],
+        "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
+        "file": "output.cpp"
+    }
+]
