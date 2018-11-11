@@ -9,6 +9,7 @@ CMolecule::CMolecule()
 	this->type = 1;
 	// Default molecule ID
 	this->molID = 1;
+  this->atomID = -1;
 }
 /********************************************//**
  *  Destructor
