@@ -28,7 +28,7 @@ TransitionSystem::~TransitionSystem()
 }
 
 // Handles things pertaining to the phase transition
-bool TransitionSystem::hasTrans(int nop, int typeI, int frameNumOne, int frameNumTwo, std::array<double,3> coordHigh, std::array<double,3> coordLow, std::string fileName){
+void TransitionSystem::mightTrans(int nop, int typeI, int frameNumOne, int frameNumTwo, std::array<double,3> coordHigh, std::array<double,3> coordLow, std::string fileName){
     int loopIndex = 1, frameNumber=frameNumOne+1;
     this->coordLow = coordLow;
     this->coordHigh = coordHigh;
@@ -51,7 +51,6 @@ bool TransitionSystem::hasTrans(int nop, int typeI, int frameNumOne, int frameNu
         frameNumber++;
         loopIndex++;
 }
-    return 1;
 }
 
 void TransitionSystem::prepFrame (int nop, std::string fileName) {

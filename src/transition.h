@@ -45,7 +45,7 @@ class TransitionSystem: public COutput, private CGeneric {
     CMolecularSystem* frameTwo;
 
     // Check for phase transitions
-        bool hasTrans(int nop, int typeI, int frameNumOne, int frameNumTwo, std::array<double,3> coordHigh, std::array<double,3> coordLow, std::string fileName);
+        void mightTrans(int nop, int typeI, int frameNumOne, int frameNumTwo, std::array<double,3> coordHigh, std::array<double,3> coordLow, std::string fileName);
 };
 
 #endif
