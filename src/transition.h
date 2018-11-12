@@ -31,7 +31,7 @@ class TransitionSystem: public COutput, private CGeneric {
     // Calculates the relative change in position
     void frameDiff(int typeI, CMolecularSystem& frameOne, CMolecularSystem& frameTwo);
     // Averages over the atoms in frame pairs
-    double timeAtomAvg();
+    double timeAtomAvg(int nop);
     // Somehow optimized (allegedly)
     static inline int isOdd(int);
     // Check if atom is within limits

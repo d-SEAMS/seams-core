@@ -102,3 +102,21 @@ bool TransitionSystem::isThere(int iatom, CMolecularSystem& frame) {
             }
             return false;
 }
+
+double TransitionSystem::timeAtomAvg(int nop) {
+    int norm=0;
+    double sum=0;
+    for (int i=0; i<=nop; i++) {
+        if (this->currentDiff[i]==-1) {
+            continue;
+        }
+        else {
+            norm++;
+            sum+=this->currentDiff[i];
+        }
+    }
+    if (norm!=0) {
+        return sum/norm;
+    }
+return -1000;
+}
