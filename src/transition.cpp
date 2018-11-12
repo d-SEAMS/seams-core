@@ -73,9 +73,15 @@ void TransitionSystem::frameDiff(int typeI, CMolecularSystem& frameOne, CMolecul
 
     for (int iatom=0; iatom < nop; iatom++)
     {
+        // By default we do not consider the atom
+        this->currentDiff[iatom]=-1;
+        // If the type matches
         if (frameOne.molecules[iatom].type==typeI) {
+            // If the atom is within limits
             if (this->isThere(iatom, frameOne) && this->isThere(iatom, frameTwo)) {
-                this->CGeneric::getAbsDistance(iatom, frameOne, frameTwo);
+                // This is in time. i.e this is the absolute difference in
+                // distance for each valid atom over two frames
+                this->currentDiff[iatom]=this->CGeneric::getAbsDistance(iatom, frameOne, frameTwo);
             }
             // Do nothing
         }
