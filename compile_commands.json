@@ -7,36 +7,10 @@
             "-Wall",
             "-o",
             "runme",
-            "chunk.cpp"
+            "molecule.cpp"
         ],
         "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
-        "file": "chunk.cpp"
-    },
-    {
-        "arguments": [
-            "g++",
-            "-c",
-            "-g",
-            "-Wall",
-            "-o",
-            "runme",
-            "molecular_system.cpp"
-        ],
-        "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
-        "file": "molecular_system.cpp"
-    },
-    {
-        "arguments": [
-            "g++",
-            "-c",
-            "-g",
-            "-Wall",
-            "-o",
-            "runme",
-            "geometry.cpp"
-        ],
-        "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
-        "file": "geometry.cpp"
+        "file": "molecule.cpp"
     },
     {
         "arguments": [
@@ -59,10 +33,10 @@
             "-Wall",
             "-o",
             "runme",
-            "main.cpp"
+            "transition.cpp"
         ],
         "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
-        "file": "main.cpp"
+        "file": "transition.cpp"
     },
     {
         "arguments": [
@@ -85,10 +59,10 @@
             "-Wall",
             "-o",
             "runme",
-            "parameter.cpp"
+            "chunk.cpp"
         ],
         "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
-        "file": "parameter.cpp"
+        "file": "chunk.cpp"
     },
     {
         "arguments": [
@@ -111,6 +85,19 @@
             "-Wall",
             "-o",
             "runme",
+            "main.cpp"
+        ],
+        "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
+        "file": "main.cpp"
+    },
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-g",
+            "-Wall",
+            "-o",
+            "runme",
             "structure_factor.cpp"
         ],
         "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
@@ -124,10 +111,10 @@
             "-Wall",
             "-o",
             "runme",
-            "molecule.cpp"
+            "geometry.cpp"
         ],
         "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
-        "file": "molecule.cpp"
+        "file": "geometry.cpp"
     },
     {
         "arguments": [
@@ -141,5 +128,31 @@
         ],
         "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
         "file": "output.cpp"
+    },
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-g",
+            "-Wall",
+            "-o",
+            "runme",
+            "parameter.cpp"
+        ],
+        "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
+        "file": "parameter.cpp"
+    },
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-g",
+            "-Wall",
+            "-o",
+            "runme",
+            "molecular_system.cpp"
+        ],
+        "directory": "/home/haozeke/Git/Github/C++/Forks/structureFactor/src",
+        "file": "molecular_system.cpp"
     }
 ]
