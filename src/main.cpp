@@ -131,6 +131,16 @@ int main()
     // s_k->initStrucFactor(*rdf, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy);
     // // ----------------------------------------------
 
+    // --------------------------------------
+    // Transition system block
+    TransitionSystem *t_sys = new TransitionSystem;
+
+    std::array<double,3> coordH= {44, 0, 0};
+    std::array<double,3> coordL= {-1.1, 0, 0};
+    t_sys->mightTrans(m_MolSys->parameter->nop, 2, 100, 150, coordH, coordL, m_MolSys->parameter->trajFile);
+
+    // --------------------------------------
+
     //Free the memory.
     // rdf3D->deleteRDF3D();
     // m_MolSys->deleteMolecules();
