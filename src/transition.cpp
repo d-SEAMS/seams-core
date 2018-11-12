@@ -26,13 +26,15 @@ TransitionSystem::~TransitionSystem()
 }
 
 // Handles things pertaining to the phase transition
-void TransitionSystem::mightTrans(int nop, int typeI, int frameNumOne, int frameNumTwo, std::array<double,3> coordHigh, std::array<double,3> coordLow, std::string fileName){
+void TransitionSystem::mightTrans(int nop, int typeI, int frameNumOne, int frameNumTwo, std::array<double,3> coordHigh, std::array<double,3> coordLow, std::string fileName, int nstep){
     int loopIndex = 1, frameNumber=frameNumOne+1;
     double average=0, currentAvg=0;
     this->coordLow = coordLow;
     this->coordHigh = coordHigh;
     // Initialize the objects
     this->prepFrame(nop, fileName);
+    this->frameOne->parameter->nsteps=nstep;
+    this->frameTwo->parameter->nsteps=nstep;
     this->frameOne->readParticleFile(frameNumOne);
     while (1) {
         if (frameNumber > frameNumTwo) {
@@ -49,13 +51,13 @@ void TransitionSystem::mightTrans(int nop, int typeI, int frameNumOne, int frame
         // Diff with standard functions
         this->frameDiff(typeI, frameOne, frameTwo);
         currentAvg = this->timeAtomAvg(nop);
-        average+=currentAvg;
+        average=(average+currentAvg)*0.5;
         // Output stuff here
-        std::cout<<frameNumber<<" "<<currentAvg<<std::endl;
+        std::cout<<frameNumber<<"  from mightTrans "<<currentAvg<<std::endl;
         frameNumber++;
         loopIndex++;
 }
-    std::cout<<"\nWe are done now\n"<<"The final average is "<<average;
+    std::cout<<"\nWe are done now\n"<<"The final average is "<<average<<std::endl;
 }
 
 void TransitionSystem::prepFrame (int nop, std::string fileName) {
@@ -84,6 +86,7 @@ void TransitionSystem::frameDiff(int typeI, CMolecularSystem* frameOne, CMolecul
                 // This is in time. i.e this is the absolute difference in
                 // distance for each valid atom over two frames
                 this->currentDiff[iatom]=this->CGeneric::getAbsDistance(iatom, frameOne, frameTwo);
+                // std::cout<<"FrameDiff "<<iatom<<" has absDist "<<this->currentDiff[iatom]<<std::endl;
             }
             // Do nothing
         }
@@ -92,20 +95,18 @@ void TransitionSystem::frameDiff(int typeI, CMolecularSystem* frameOne, CMolecul
 
 bool TransitionSystem::isThere(int iatom, CMolecularSystem* frame) {
     // TODO: Migrate to CGeneric
-                int iter=0;
                 double coord = frame->molecules[iatom].get_posx();
                 // TODO: Handle non x-dimension things
-            for (auto const& value: this->coordHigh) {
-                if (value==coordLow[iter]) {
+            for (int i=0; i<3; i++) {
+                if (coordHigh[i]==coordLow[i]) {
                     return true;
                 }
-                else if (coord >= coordLow[iter] && coord <= value) {
+                else if (coord >= coordLow[i] && coord <= coordHigh[i] && frame->molecules[iatom].get_posz() <22.91) {
                     return true;
                 }
                 else {
                     return false;
                 }
-            iter++;
             }
             return false;
 }
@@ -120,6 +121,7 @@ double TransitionSystem::timeAtomAvg(int nop) {
         else {
             norm++;
             sum+=this->currentDiff[i];
+            // std::cout<<"Current Diff for "<<i<<" "<<this->currentDiff[i]<<std::endl;
         }
     }
     if (norm!=0) {
