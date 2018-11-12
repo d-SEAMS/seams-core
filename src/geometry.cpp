@@ -1,6 +1,7 @@
 #include "geometry.h"
 #include "molecular_system.h"
 #include "molecule.h"
+#include <cmath>
 
 /********************************************//**
  *  Constructor
@@ -197,4 +198,80 @@ bool CVolume::atomInsideVol(class CMolecularSystem& molSys, int iatom)
 
 	if(volFlag == 3){return true;}
 	else {return false;}
+}
+
+
+//-------------------------------------------------------------------------------------------------------
+// GENERIC CLASS
+//-------------------------------------------------------------------------------------------------------
+
+/********************************************//**
+ *  Constructor
+ ***********************************************/
+CGeneric::CGeneric()
+{
+
+}
+/********************************************//**
+ *  Destructor
+ ***********************************************/
+CGeneric::~CGeneric()
+{
+}
+
+// DISTANCE
+
+/********************************************//**
+ *  Returns the absolute distance between two particles
+ with particle indices iatom and jatom (x[iatom] - x[jatom])
+ ***********************************************/
+double CGeneric::getAbsDistance(int iatom, int jatom, class CMolecularSystem& molSys)
+{
+    double dr[3]; // Relative distance between wrapped coordinates
+    double box[3] = {molSys.parameter->boxx, molSys.parameter->boxy, molSys.parameter->boxz};
+    double r2 = 0.0; // Squared absolute distance
+
+    // Get the relative distance in the x, y, z dim
+    dr[0] = molSys.molecules[iatom].get_posx() - molSys.molecules[jatom].get_posx();
+    dr[1] = molSys.molecules[iatom].get_posy() - molSys.molecules[jatom].get_posy();
+    dr[2] = molSys.molecules[iatom].get_posz() - molSys.molecules[jatom].get_posz();
+
+    // Get the squared absolute distance
+    for (int k=0; k<3; k++)
+    {
+        // Correct for periodicity
+        dr[k] -= box[k]*round(dr[k]/box[k]);
+
+        r2 += pow(dr[k],2.0);
+    }
+
+
+    return sqrt(r2);
+}
+
+// Overload
+
+
+double CGeneric::getAbsDistance(int iatom, class CMolecularSystem* frameOne, class CMolecularSystem* frameTwo)
+{
+    double dr[3]; // Relative distance between wrapped coordinates
+    double box[3] = {frameOne->parameter->boxx, frameOne->parameter->boxy, frameOne->parameter->boxz};
+    double r2 = 0.0; // Squared absolute distance
+
+    // Get the relative distance in the x, y, z dim
+    dr[0] = fdim(frameOne->molecules[iatom].get_posx(),frameTwo->molecules[iatom].get_posx());
+    dr[1] = fdim(frameOne->molecules[iatom].get_posy(),frameTwo->molecules[iatom].get_posy());
+    dr[2] = fdim(frameOne->molecules[iatom].get_posz(),frameTwo->molecules[iatom].get_posz());
+
+    // Get the squared absolute distance
+    for (int k=0; k<3; k++)
+    {
+        // Correct for periodicity
+        dr[k] -= box[k]*round(dr[k]/box[k]);
+
+        r2 += pow(dr[k],2.0);
+    }
+
+
+    return sqrt(r2);
 }
