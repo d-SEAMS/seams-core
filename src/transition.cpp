@@ -28,6 +28,7 @@ TransitionSystem::~TransitionSystem()
 // Handles things pertaining to the phase transition
 void TransitionSystem::mightTrans(int nop, int typeI, int frameNumOne, int frameNumTwo, std::array<double,3> coordHigh, std::array<double,3> coordLow, std::string fileName){
     int loopIndex = 1, frameNumber=frameNumOne+1;
+    double average=0, currentAvg=0;
     this->coordLow = coordLow;
     this->coordHigh = coordHigh;
     // Initialize the objects
@@ -47,9 +48,14 @@ void TransitionSystem::mightTrans(int nop, int typeI, int frameNumOne, int frame
         }
         // Diff with standard functions
         this->frameDiff(typeI, frameOne, frameTwo);
+        currentAvg = this->timeAtomAvg(nop);
+        average+=currentAvg;
+        // Output stuff here
+        std::cout<<frameNumber<<" "<<currentAvg<<std::endl;
         frameNumber++;
         loopIndex++;
 }
+    std::cout<<"\nWe are done now\n"<<"The final average is "<<average;
 }
 
 void TransitionSystem::prepFrame (int nop, std::string fileName) {
