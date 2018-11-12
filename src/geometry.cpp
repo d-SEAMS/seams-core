@@ -252,16 +252,16 @@ double CGeneric::getAbsDistance(int iatom, int jatom, class CMolecularSystem& mo
 // Overload
 
 
-double CGeneric::getAbsDistance(int iatom, class CMolecularSystem& frameOne, class CMolecularSystem& frameTwo)
+double CGeneric::getAbsDistance(int iatom, class CMolecularSystem* frameOne, class CMolecularSystem* frameTwo)
 {
     double dr[3]; // Relative distance between wrapped coordinates
-    double box[3] = {frameOne.parameter->boxx, frameOne.parameter->boxy, frameOne.parameter->boxz};
+    double box[3] = {frameOne->parameter->boxx, frameOne->parameter->boxy, frameOne->parameter->boxz};
     double r2 = 0.0; // Squared absolute distance
 
     // Get the relative distance in the x, y, z dim
-    dr[0] = fdim(frameOne.molecules[iatom].get_posx(),frameTwo.molecules[iatom].get_posx());
-    dr[1] = fdim(frameOne.molecules[iatom].get_posy(),frameTwo.molecules[iatom].get_posy());
-    dr[2] = fdim(frameOne.molecules[iatom].get_posz(),frameTwo.molecules[iatom].get_posz());
+    dr[0] = fdim(frameOne->molecules[iatom].get_posx(),frameTwo->molecules[iatom].get_posx());
+    dr[1] = fdim(frameOne->molecules[iatom].get_posy(),frameTwo->molecules[iatom].get_posy());
+    dr[2] = fdim(frameOne->molecules[iatom].get_posz(),frameTwo->molecules[iatom].get_posz());
 
     // Get the squared absolute distance
     for (int k=0; k<3; k++)

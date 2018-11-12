@@ -46,6 +46,7 @@ void TransitionSystem::mightTrans(int nop, int typeI, int frameNumOne, int frame
             this->frameOne->readParticleFile(frameNumber);
         }
         // Diff with standard functions
+        this->frameDiff(typeI, frameOne, frameTwo);
         frameNumber++;
         loopIndex++;
 }
@@ -62,16 +63,16 @@ void TransitionSystem::prepFrame (int nop, std::string fileName) {
 
 inline int TransitionSystem::isOdd(int x) { return x & 1; }
 
-void TransitionSystem::frameDiff(int typeI, CMolecularSystem& frameOne, CMolecularSystem& frameTwo) {
+void TransitionSystem::frameDiff(int typeI, CMolecularSystem* frameOne, CMolecularSystem* frameTwo) {
 
-    int nop = frameOne.parameter->nop;
+    int nop = frameOne->parameter->nop;
 
     for (int iatom=0; iatom < nop; iatom++)
     {
         // By default we do not consider the atom
         this->currentDiff[iatom]=-1;
         // If the type matches
-        if (frameOne.molecules[iatom].type==typeI) {
+        if (frameOne->molecules[iatom].type==typeI) {
             // If the atom is within limits
             if (this->isThere(iatom, frameOne) && this->isThere(iatom, frameTwo)) {
                 // This is in time. i.e this is the absolute difference in
@@ -83,10 +84,10 @@ void TransitionSystem::frameDiff(int typeI, CMolecularSystem& frameOne, CMolecul
     }
 }
 
-bool TransitionSystem::isThere(int iatom, CMolecularSystem& frame) {
+bool TransitionSystem::isThere(int iatom, CMolecularSystem* frame) {
     // TODO: Migrate to CGeneric
                 int iter=0;
-                double coord = frame.molecules[iatom].get_posx();
+                double coord = frame->molecules[iatom].get_posx();
                 // TODO: Handle non x-dimension things
             for (auto const& value: this->coordHigh) {
                 if (value==coordLow[iter]) {

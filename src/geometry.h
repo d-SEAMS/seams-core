@@ -65,7 +65,7 @@ class CGeneric {
 		virtual ~CGeneric();
     	// Get absolute relative distance from wrapped coordinates
 		double getAbsDistance(int, int, class CMolecularSystem& molSys);
-		double getAbsDistance(int iatom, class CMolecularSystem& frameOne, class CMolecularSystem& frameTwo);
+		double getAbsDistance(int iatom, class CMolecularSystem* frameOne, class CMolecularSystem* frameTwo);
 };
 
 #endif

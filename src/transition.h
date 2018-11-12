@@ -29,13 +29,13 @@ class TransitionSystem: public COutput, private CGeneric {
     // Initializes Frames (CMolSys Obj)
     void prepFrame(int, std::string);
     // Calculates the relative change in position
-    void frameDiff(int typeI, CMolecularSystem& frameOne, CMolecularSystem& frameTwo);
+    void frameDiff(int typeI, CMolecularSystem* frameOne, CMolecularSystem* frameTwo);
     // Averages over the atoms in frame pairs
     double timeAtomAvg(int nop);
     // Somehow optimized (allegedly)
     static inline int isOdd(int);
     // Check if atom is within limits
-    bool isThere(int iatom, CMolecularSystem& frame);
+    bool isThere(int iatom, CMolecularSystem* frame);
 
   public:
     //the main object where all properties of all particles are saved
