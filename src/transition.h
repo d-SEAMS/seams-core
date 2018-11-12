@@ -22,7 +22,6 @@
  */
 
 class TransitionSystem: public COutput, private CGeneric {
-    double* frameAvg;
     double* currentDiff;
 //  Super cool C++11
     std::array<double,3> coordHigh;
@@ -31,6 +30,8 @@ class TransitionSystem: public COutput, private CGeneric {
     void prepFrame(int, std::string);
     // Calculates the relative change in position
     void frameDiff(int typeI, CMolecularSystem& frameOne, CMolecularSystem& frameTwo);
+    // Averages over the atoms in frame pairs
+    double timeAtomAvg();
     // Somehow optimized (allegedly)
     static inline int isOdd(int);
     // Check if atom is within limits

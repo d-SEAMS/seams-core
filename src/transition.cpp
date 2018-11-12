@@ -12,7 +12,6 @@ TransitionSystem::TransitionSystem()
   // Volume Limits
   this->coordLow = this->coordHigh = {0,0,0};
   // Allocate size for the frame diffs
-  this->frameAvg=NULL;
   this->currentDiff=NULL;
 }
 
@@ -23,7 +22,6 @@ TransitionSystem::~TransitionSystem()
 {
   delete frameTwo;
   delete frameOne;
-  delete [] frameAvg;
   delete [] currentDiff;
 }
 
@@ -56,10 +54,8 @@ void TransitionSystem::mightTrans(int nop, int typeI, int frameNumOne, int frame
 void TransitionSystem::prepFrame (int nop, std::string fileName) {
     this->frameOne->initializeFrames(nop, fileName);
     this->frameTwo->initializeFrames(nop, fileName);
-    this->frameAvg = new double [nop];
     this->currentDiff= new double [nop];
     for (int i=0; i < nop; i++) {
-        this->frameAvg[i]=-1;
         this->currentDiff[i]=-1;
     }
 }
