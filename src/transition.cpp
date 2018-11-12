@@ -75,7 +75,7 @@ void TransitionSystem::frameDiff(int typeI, CMolecularSystem& frameOne, CMolecul
     {
         if (frameOne.molecules[iatom].type==typeI) {
             if (this->isThere(iatom, frameOne) && this->isThere(iatom, frameTwo)) {
-                CGeneric::getAbsDistance(iatom, frameOne, frameTwo);
+                this->CGeneric::getAbsDistance(iatom, frameOne, frameTwo);
             }
             // Do nothing
         }
@@ -99,4 +99,5 @@ bool TransitionSystem::isThere(int iatom, CMolecularSystem& frame) {
                 }
             iter++;
             }
+            return false;
 }
