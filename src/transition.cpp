@@ -101,7 +101,7 @@ bool TransitionSystem::isThere(int iatom, CMolecularSystem* frame) {
                 if (coordHigh[i]==coordLow[i]) {
                     return true;
                 }
-                else if (coord >= coordLow[i] && coord <= coordHigh[i] && frame->molecules[iatom].get_posz() <22.91) {
+                else if (coord >= coordLow[i] && coord <= coordHigh[i]) {
                     return true;
                 }
                 else {
