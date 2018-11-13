@@ -6,18 +6,24 @@ or XYZ files to calculate RDF, in-plane RDF and the structure factor.
 
 # Compilation
 
-To generate the executable *runme* use:
+To generate the executable *yodaStruct* in `bin/` use:
 
 ```bash
-make 
+# Always prefer an out of tree build
+mkdir build
+cd build
+cmake ..
+make
 ```
 
-An executable *runme* will be formed in the base directory. 
-
 # Running
+To run the sample inputs, simply move the binary to the project root, or to a
+directory where `input/` is a child directory.
 
 ```bash
-./runme
+# Assuming you are in the project root
+cp bin/yodaStruct .
+./yodaStruct
 ``` 
 
 # Details
@@ -29,3 +35,7 @@ XY plane, you should use the Rdf2D class. The equation used for 2D-RDF for the \
 \f]
   For detailed instructions, see the Rdf2D class documentation
  
+# Acknowledgements
+The following libraries and tools are used in this project:
+- [CMake](https://cmake.org/) for compilation
+- [Doxygen](https://www.doxygen.org) for the developer API

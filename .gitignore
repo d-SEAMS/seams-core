@@ -42,3 +42,6 @@ output/
 :*
 # Ignore histories
 .gdb_history
+*.lammpstrj
+bin/
+build/
