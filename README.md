@@ -6,6 +6,19 @@ or XYZ files to calculate RDF, in-plane RDF and the structure factor.
 
 # Compilation
 
+## Dependency Management
+Unless you are sure that all the libraries necessary are available on your
+system, it is expedient to ensure `conan` is available for managing
+dependencies. A `Pipfile` is also provided for ease of usage. This is preferred
+since it will ensure a reproducable environment which does not interfere with
+the system `python`.
+
+``` bash
+# This will get you conan in a local environment
+pipenv shell
+```
+
+## Build Things
 To generate the executable *yodaStruct* in `bin/` use:
 
 ```bash
