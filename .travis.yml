@@ -1,24 +1,29 @@
 sudo: false
-
 branches:
   only:
     - master
-
+language: python
+python:
+  - '3.6'
+before_install:
+  - cp scripts/ci/texlive.profile $HOME/texlive.profile
+install:
+  - 'pip install pipenv'
+  - 'pipenv --three sync'
+  - source ./scripts/ci/texlive_install.sh
 addons:
   apt:
     packages:
       - doxygen
-      - texlive-base
-      - texlive-latex-extra
-      - texlive-fonts-extra
-      - git
-
+cache:
+  directories:
+    - /tmp/texlive
+    - $HOME/.texlive
+    - $HOME/.cache/pipenv
 before_script:
   - git clone https://github.com/mosra/m.css.git
-
 script:
-  - ./m.css/doxygen/dox2html5.py Doxyfile-mcss
-
+  - pipenv run ./m.css/doxygen/dox2html5.py Doxyfile-mcss
 deploy:
   provider: pages
   skip_cleanup: true
