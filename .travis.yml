@@ -19,6 +19,7 @@ cache:
   directories:
     - /tmp/texlive
     - $HOME/.texlive
+    - $HOME/.cache/pipenv
 before_script:
   - git clone https://github.com/mosra/m.css.git
 script:
