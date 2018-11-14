@@ -69,6 +69,8 @@ string(MAKE_C_IDENTIFIER ${META_PROJECT_NAME} META_PROJECT_ID)
 string(TOUPPER ${META_PROJECT_ID} META_PROJECT_ID)
 # Default to being a debug release
 set(CMAKE_BUILD_TYPE Debug)
+# For rtags
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 #
 # Project configuration options
