@@ -19,12 +19,15 @@
 #include "rdf3D.h"
 #include "rdf2D.h"
 #include "output.h"
+#include "density.h"
 #include "structure_factor.h"
+#include "transition.h"
 #include <ctime>
 #include <sstream>
 #include <string>
 #include <cstdlib>
-
+#include <array>
+#include <yaml-cpp/yaml.h>
 int main()
 {
     // The program reads the parameter file inside the input folder
@@ -41,9 +44,9 @@ int main()
     std::cout<<" The total number of steps in the trajectory is "<< traj_steps << "\n";
 
     //Get random step info at a frame number
-    int frame = 400; // 400 2000
-    int nsteps = 100; // 50 100
-    m_MolSys->readParticleFile(frame);
+    // int frame = 400; // 400 2000
+    // int nsteps = 100; // 50 100
+    // m_MolSys->readParticleFile(frame);
     
     // // ----------------------------------------
     // // 3D RDF (single step)
@@ -100,35 +103,45 @@ int main()
 
     
     
-    // ----------------------------------------------
-    //Rdf2D over multiple frames
-    // Create object for 2D RDF
-    Rdf2D *rdf = new Rdf2D; 
-     // Testing 2D rdf function. RDF calculated is incorrect if the wrong volume is set
-    // double volume = (8)*m_MolSys->parameter->boxx*m_MolSys->parameter->boxy;
-    rdf->initRDFxy(*m_MolSys, 0.03, 15); 
-    // Loop through steps
-    for (int istep=1; istep<=nsteps; istep++)
-    {
-        // Get the coordinates at a particule step
-        m_MolSys->readParticleFile(frame+istep);
-        // Get the 2D RDF at this step
-        rdf->accumulateRDFxy(*m_MolSys, 17.85, 0.8, 2, 2);
-    }
+    // // ----------------------------------------------
+    // //Rdf2D over multiple frames
+    // // Create object for 2D RDF
+    // Rdf2D *rdf = new Rdf2D;
+    //  // Testing 2D rdf function. RDF calculated is incorrect if the wrong volume is set
+    // // double volume = (8)*m_MolSys->parameter->boxx*m_MolSys->parameter->boxy;
+    // rdf->initRDFxy(*m_MolSys, 0.03, 15);
+    // // Loop through steps
+    // for (int istep=1; istep<=nsteps; istep++)
+    // {
+    //     // Get the coordinates at a particule step
+    //     m_MolSys->readParticleFile(frame+istep);
+    //     // Get the 2D RDF at this step
+    //     rdf->accumulateRDFxy(*m_MolSys, 17.85, 0.8, 2, 2);
+    // }
 
-    // Normalizes the RDF (required for multiple steps. This
-    // is called automatically in the single step RDF function)
-    // The width of the layer is the argument 
-    rdf->normalizeRDF2D(0.8);
-    // Print the RDF 
-    rdf->printRDF2D();
-    // ----------------------------------------------
-    //Structure Factor from RDF
-    StructureFactor *s_k = new StructureFactor;
-    s_k->initStrucFactor(*rdf, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy);
-    // ----------------------------------------------
+    // // Normalizes the RDF (required for multiple steps. This
+    // // is called automatically in the single step RDF function)
+    // // The width of the layer is the argument
+    // rdf->normalizeRDF2D(0.8);
+    // // Print the RDF
+    // rdf->printRDF2D();
+    // // ----------------------------------------------
+    // //Structure Factor from RDF
+    // StructureFactor *s_k = new StructureFactor;
+    // s_k->initStrucFactor(*rdf, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy);
+    // // ----------------------------------------------
 
-    //Free the memory. 
+    // --------------------------------------
+    // Transition system block
+    TransitionSystem *t_sys = new TransitionSystem;
+
+    std::array<double,3> coordH= {40, 0, 0};
+    std::array<double,3> coordL= {5, 0, 0};
+    t_sys->mightTrans(m_MolSys->parameter->nop, 2, 100, 150, coordH, coordL, m_MolSys->parameter->trajFile, traj_steps);
+
+    // --------------------------------------
+
+    //Free the memory.
     // rdf3D->deleteRDF3D();
     // m_MolSys->deleteMolecules();
     // rdf1->deleteRDF3D();

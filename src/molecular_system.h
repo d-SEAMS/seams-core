@@ -54,6 +54,7 @@ class CMolecularSystem {
     CParameter* parameter;
     
     //Init the system
+    void initializeFrames(int, std::string);
     void initializeMolecules(int);
     void initializeMolecules();
     //and delete the System afterwards

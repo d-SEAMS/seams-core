@@ -25,6 +25,17 @@ CMolecularSystem::~CMolecularSystem()
 }
 
 /********************************************//**
+ *  Prepares frames for further processing.
+ (Used by the transition module)
+ ***********************************************/
+
+void CMolecularSystem::initializeFrames(int nop, std::string fileName) {
+  this->molecules   = new CMolecule[nop];
+  this->parameter->nop = nop;
+  this->parameter->trajFile = fileName;
+}
+
+/********************************************//**
  *  Initialize the simulation Box with number of Particles given.
  the nop will be set to the given number
  ***********************************************/
@@ -253,6 +264,7 @@ void CMolecularSystem::readParticleFile(int step)
   std::vector<double> lineVal;   // Vector containing all the elements in the line
   int type;                      // Type ID of a particle
   int molID;                     // Molecule ID of each particle
+  int atomID;                    // Stores lammps atom ID
   std::vector<std::string> lammpsLine;// Line that contains info about column numbers for type, ID etc.
   bool molFlag=false;            // Flag that checks if the molecular ID has been entered or not
   std::string word;              // To store individual words
@@ -264,11 +276,14 @@ void CMolecularSystem::readParticleFile(int step)
   dumpFile.open(this->parameter->trajFile.c_str(), std::ifstream::in);
 
   // Error handling for an invalid step
+  // TODO: Do this better, maybe use <optional> wrt. https://stackoverflow.com/a/47677892/1895378
+  if ( this->parameter->nsteps > 1 ) {
   if (step > this->parameter->nsteps)
   {
     std::cerr << "The step number " << step << " is larger than the number of steps in the trajectory" << "\n";
     std::cerr << "Using the first snapshot in the lammps trajectory file by default"<< "\n";
     step = 1;
+  }
   }
 
   if (dumpFile.is_open())
@@ -332,6 +347,7 @@ void CMolecularSystem::readParticleFile(int step)
           posy = lineVal[xNum+1];
           posz = lineVal[xNum+2];
           type = lineVal[typeNum];
+          atomID = lineVal[0];
           if (molFlag == true){molID = lineVal[molNum];}
           else {molID = iatom;}
           
@@ -339,6 +355,7 @@ void CMolecularSystem::readParticleFile(int step)
           this->molecules[iatom].set_position(posx, posy, posz);
           this->molecules[iatom].type = type;
           this->molecules[iatom].molID = molID;
+          this->molecules[iatom].atomID = atomID;
 
         }
         else // Skip lines for other snapshots

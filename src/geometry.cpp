@@ -1,6 +1,7 @@
 #include "geometry.h"
 #include "molecular_system.h"
 #include "molecule.h"
+#include <cmath>
 
 /********************************************//**
  *  Constructor
@@ -69,9 +70,9 @@ CVolume::~CVolume()
 void CVolume::getAtomListI(class CMolecularSystem& molSys, int typeI, double xlo, double xhi, double ylo, double yhi, double zlo, double zhi)
 {
 	int n_iatoms=0;
-  	int n_jatoms=0;
+  	// int n_jatoms=0;
   	int ii=0; // Current index of array iIndex being filled
-  	int jj=0; // Current index of array jIndex being filled
+  	// int jj=0; // Current index of array jIndex being filled
 
 	// Set the limits
 	this->xlo=xlo; this->xhi=xhi; this->ylo=ylo; this->yhi=yhi; this->zlo=zlo; this->zhi=zhi;
@@ -83,11 +84,37 @@ void CVolume::getAtomListI(class CMolecularSystem& molSys, int typeI, double xlo
 	// Create arrays for vectors holding indices for particles
     // of type I and J
     this->iIndex  = new int[molSys.parameter->nop];
-    this->jIndex  = new int[molSys.parameter->nop];
+    // this->jIndex  = new int[molSys.parameter->nop];
 
 	// Loop through all the atoms and make the list of atom IDs 
-	// that are of type I. If notset=true then don't check inside the volume (don't call atomInsideVol)
+	// that are of type I. 
+    for (int iatom = 0; iatom < molSys.parameter->nop; iatom++)
+    {
+    	// Check if the atom type is of type I
+    	if (molSys.molecules[iatom].type==typeI || typeI==-1)
+    	{
+    		if (atomInsideVol(molSys,iatom,xlo,xhi,ylo,yhi,zlo,zhi)==true){
+    			n_iatoms += 1;
+    			this->iIndex[ii] = iatom; // Put atom ID in iIndex array
+    			ii += 1;
+    		}
+    	}
+    }
 
+    // Set the n_iatoms value
+
+    // Check to make sure that the atom number is not zero
+    if (n_iatoms==0){
+    	std::cerr<<"You have entered an incorrect type ID\n"; 
+    	typeI = -1; 
+    	this->n_iatoms = molSys.parameter->nop;
+    	for (int iatom = 0; iatom < molSys.parameter->nop; iatom++){this->iIndex[ii] = iatom;}
+    	return;
+  	}
+
+  	// Otherwise update the number of iatoms
+  	this->n_iatoms = n_iatoms;
+  	return;
 }
 
 /********************************************//**
@@ -171,4 +198,80 @@ bool CVolume::atomInsideVol(class CMolecularSystem& molSys, int iatom)
 
 	if(volFlag == 3){return true;}
 	else {return false;}
+}
+
+
+//-------------------------------------------------------------------------------------------------------
+// GENERIC CLASS
+//-------------------------------------------------------------------------------------------------------
+
+/********************************************//**
+ *  Constructor
+ ***********************************************/
+CGeneric::CGeneric()
+{
+
+}
+/********************************************//**
+ *  Destructor
+ ***********************************************/
+CGeneric::~CGeneric()
+{
+}
+
+// DISTANCE
+
+/********************************************//**
+ *  Returns the absolute distance between two particles
+ with particle indices iatom and jatom (x[iatom] - x[jatom])
+ ***********************************************/
+double CGeneric::getAbsDistance(int iatom, int jatom, class CMolecularSystem& molSys)
+{
+    double dr[3]; // Relative distance between wrapped coordinates
+    double box[3] = {molSys.parameter->boxx, molSys.parameter->boxy, molSys.parameter->boxz};
+    double r2 = 0.0; // Squared absolute distance
+
+    // Get the relative distance in the x, y, z dim
+    dr[0] = molSys.molecules[iatom].get_posx() - molSys.molecules[jatom].get_posx();
+    dr[1] = molSys.molecules[iatom].get_posy() - molSys.molecules[jatom].get_posy();
+    dr[2] = molSys.molecules[iatom].get_posz() - molSys.molecules[jatom].get_posz();
+
+    // Get the squared absolute distance
+    for (int k=0; k<3; k++)
+    {
+        // Correct for periodicity
+        dr[k] -= box[k]*round(dr[k]/box[k]);
+
+        r2 += pow(dr[k],2.0);
+    }
+
+
+    return sqrt(r2);
+}
+
+// Overload
+
+
+double CGeneric::getAbsDistance(int iatom, class CMolecularSystem* frameOne, class CMolecularSystem* frameTwo)
+{
+    double dr[3]; // Relative distance between wrapped coordinates
+    double box[3] = {frameOne->parameter->boxx, frameOne->parameter->boxy, frameOne->parameter->boxz};
+    double r2 = 0.0; // Squared absolute distance
+
+    // Get the relative distance in the x, y, z dim
+    dr[0] = fdim(frameOne->molecules[iatom].get_posx(),frameTwo->molecules[iatom].get_posx());
+    dr[1] = fdim(frameOne->molecules[iatom].get_posy(),frameTwo->molecules[iatom].get_posy());
+    dr[2] = fdim(frameOne->molecules[iatom].get_posz(),frameTwo->molecules[iatom].get_posz());
+
+    // Get the squared absolute distance
+    for (int k=0; k<3; k++)
+    {
+        // Correct for periodicity
+        dr[k] -= box[k]*round(dr[k]/box[k]);
+
+        r2 += pow(dr[k],2.0);
+    }
+
+
+    return sqrt(r2);
 }

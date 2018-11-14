@@ -8,9 +8,16 @@ addons:
   apt:
     packages:
       - doxygen
+      - texlive-base
+      - texlive-latex-extra
+      - texlive-fonts-extra
+      - git
+
+before_script:
+  - git clone https://github.com/mosra/m.css.git
 
 script:
-  - doxygen Doxyfile
+  - ./m.css/doxygen/dox2html5.py Doxyfile-mcss
 
 deploy:
   provider: pages

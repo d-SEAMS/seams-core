@@ -23,6 +23,8 @@ class CMolecule {
     int type;
     // Lammps molecule ID
     int molID;
+    // Lammps atom ID
+    int atomID;
 };
 
 #endif
