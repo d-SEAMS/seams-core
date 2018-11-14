@@ -215,13 +215,8 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/data DESTINATION ${INSTALL_DATA} COMPONE
 
 # Conan
 # Download automatically, you can also just copy the conan.cmake file
-if(NOT EXISTS "cmake/conan.cmake")
+if(NOT EXISTS "cmake/Conan.cmake")
    message(STATUS "Downloading Conan.cmake from https://github.com/conan-io/cmake-conan")
    file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/v0.12/conan.cmake"
                  "cmake/Conan.cmake")
 endif()
-
-include(Conan)
-conan_cmake_run(CONANFILE conanfile.txt  # or relative build/conanfile.txt
-                BASIC_SETUP CMAKE_TARGETS
-                BUILD missing)

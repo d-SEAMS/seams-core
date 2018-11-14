@@ -22,7 +22,10 @@ add_executable( yodaStruct
 #
 # External Libraries
 #
-
+include(Conan)
+conan_cmake_run(CONANFILE conanfile.txt  # or relative build/conanfile.txt
+                BASIC_SETUP CMAKE_TARGETS
+                BUILD missing)
 # YAML-CPP
 find_package("yaml-cpp")
 if(yaml-cpp_FOUND)
