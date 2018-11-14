@@ -37,5 +37,5 @@ XY plane, you should use the Rdf2D class. The equation used for 2D-RDF for the \
  
 # Acknowledgements
 The following libraries and tools are used in this project:
-- [CMake](https://cmake.org/) for compilation
+- [CMake](https://cmake.org/) for compilation ([cmake-init](https://github.com/cginternals/cmake-init) was used as a reference)
 - [Doxygen](https://www.doxygen.org) for the developer API
