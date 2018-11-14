@@ -2,6 +2,7 @@
 #include "molecular_system.h"
 #include "molecule.h"
 #include "geometry.h"
+#include <bits/stdc++.h>
 
 // Constructor
 Rdf2D::Rdf2D()
@@ -14,10 +15,10 @@ Rdf2D::Rdf2D()
   this->typeJ = -1;
   this->nop = -1;
   this->rho = -1;
-  this->rdf2D = NULL;
-  this->rVal = NULL;
-  this->iIndex = NULL;
-  this->jIndex = NULL;
+  this->rdf2D = nullptr;
+  this->rVal = nullptr;
+  this->iIndex = nullptr;
+  this->jIndex = nullptr;
 }
 
 Rdf2D::~Rdf2D()

@@ -1,6 +1,7 @@
 #include "rdf3D.h"
 #include "molecular_system.h"
 #include "molecule.h"
+#include <bits/stdc++.h>
 
 // Constructor
 Rdf3D::Rdf3D()
@@ -14,10 +15,10 @@ Rdf3D::Rdf3D()
   this->rho = 1.0;
   this->n_iatoms = 0;
   this->n_jatoms = 0; 
-  this->rdf3D = NULL;
-  this->rVal = NULL;
-  this->iIndex = NULL;
-  this->jIndex = NULL;
+  this->rdf3D = nullptr;
+  this->rVal = nullptr;
+  this->iIndex = nullptr;
+  this->jIndex = nullptr;
 }
 
 Rdf3D::~Rdf3D()

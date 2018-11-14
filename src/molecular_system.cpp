@@ -1,5 +1,6 @@
 #include "molecular_system.h"
 #include "molecule.h"
+#include <bits/stdc++.h>
 
 // For reading in lammps traj files
 const std::string PF_ITEM = "ITEM:";
@@ -12,7 +13,7 @@ CMolecularSystem::CMolecularSystem()
 {
   this->parameter = new CParameter;
   this->parameter->nop = -1;
-  this->molecules = NULL;
+  this->molecules = nullptr;
 }
 
 /********************************************//**
@@ -134,9 +135,9 @@ void CMolecularSystem::readWholeTrj()
     // line contains xlo xhi separated by a space
     std::getline(dumpFile,line);
     pos = line.find(' ');
-    rlo = strtod(line.substr(0, pos ).c_str(),NULL); 
+    rlo = strtod(line.substr(0, pos ).c_str(),nullptr);
     lpos = pos + 1;
-    rhi = strtod(line.substr(lpos, line.length() - lpos).c_str(),NULL);
+    rhi = strtod(line.substr(lpos, line.length() - lpos).c_str(),nullptr);
     dr[k] = rhi-rlo;
   } 
 
@@ -232,15 +233,15 @@ void CMolecularSystem::readParticleFile()
       std::getline(confFile,line);
       std::string::size_type pos  = line.find(' ');
       if (pos == std::string::npos) break;
-      posx = strtod(line.substr(0, pos ).c_str(),NULL);
+      posx = strtod(line.substr(0, pos ).c_str(),nullptr);
 
       std::string::size_type lpos = pos + 1;
       pos  = line.find(' ', lpos);
       if (pos == std::string::npos) break;
-      posy = strtod(line.substr(lpos, pos - lpos).c_str(),NULL);
+      posy = strtod(line.substr(lpos, pos - lpos).c_str(),nullptr);
       lpos = pos+1;
 
-      posz = strtod(line.substr(lpos, line.length() - lpos).c_str(),NULL);
+      posz = strtod(line.substr(lpos, line.length() - lpos).c_str(),nullptr);
 
       this->molecules[ti].set_position(posx, posy, posz);
     }

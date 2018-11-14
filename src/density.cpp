@@ -1,4 +1,5 @@
 #include "density.h"
+#include <bits/stdc++.h>
 
 /********************************************//**
  *  Constructor
@@ -7,8 +8,8 @@ Density::Density()
 {
 	this->binwidth = -1.0;
 	this->typeI = -1;
-	this->number = NULL; 
-	this->coord = NULL; 
+	this->number = nullptr;
+	this->coord = nullptr;
 }
 /********************************************//**
  *  Destructor

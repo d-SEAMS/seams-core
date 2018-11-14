@@ -2,6 +2,7 @@
 #include "molecular_system.h"
 #include "molecule.h"
 #include <cmath>
+#include <bits/stdc++.h>
 
 /********************************************//**
  *  Constructor
@@ -50,8 +51,8 @@ CVolume::CVolume()
 	this->n_iatoms = 0;
 	this->n_jatoms = 0;
 	// Set pointers to null
-	this->iIndex = NULL;
-  	this->jIndex = NULL;
+	this->iIndex = nullptr;
+  	this->jIndex = nullptr;
 }
 /********************************************//**
  *  Destructor

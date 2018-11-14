@@ -1,5 +1,6 @@
 #include "transition.h"
 #include "geometry.h"
+#include <bits/stdc++.h>
 
 /********************************************//**
  *  Constructor
@@ -12,7 +13,7 @@ TransitionSystem::TransitionSystem()
   // Volume Limits
   this->coordLow = this->coordHigh = {0,0,0};
   // Allocate size for the frame diffs
-  this->currentDiff=NULL;
+  this->currentDiff=nullptr;
 }
 
 /********************************************//**
