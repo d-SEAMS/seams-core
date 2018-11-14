@@ -1,4 +1,4 @@
-# structureFactor
+# structureFactor [![Build Status](https://travis-ci.org/amritagos/structureFactor.svg?branch=master)](https://travis-ci.org/amritagos/structureFactor)
 This C++ program reads in lammps trajectory files
 or XYZ files to calculate RDF, in-plane RDF and the structure factor.
 
