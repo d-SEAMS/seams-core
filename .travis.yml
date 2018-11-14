@@ -8,8 +8,7 @@ python:
 before_install:
   - cp scripts/ci/texlive.profile $HOME/texlive.profile
 install:
-  - 'pip install pipenv'
-  - 'pipenv --three sync'
+  - 'pip install jinja2 Pygments conan'
   - source ./scripts/ci/texlive_install.sh
 addons:
   apt:
@@ -23,7 +22,7 @@ cache:
 before_script:
   - git clone https://github.com/mosra/m.css.git
 script:
-  - pipenv run ./m.css/doxygen/dox2html5.py Doxyfile-mcss
+  - ./m.css/doxygen/dox2html5.py Doxyfile-mcss
 deploy:
   provider: pages
   skip_cleanup: true
