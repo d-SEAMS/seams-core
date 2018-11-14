@@ -5,15 +5,16 @@ branches:
 language: python
 python:
   - '3.6'
+before_install:
+  - cp scripts/ci/texlive.profile $HOME/texlive.profile
 install:
   - 'pip install pipenv'
-  - 'pipenv sync'
+  - 'pipenv --three sync'
   - source ./scripts/ci/texlive_install.sh
 addons:
   apt:
     packages:
       - doxygen
-      - git
 cache:
   directories:
     - /tmp/texlive

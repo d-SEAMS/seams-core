@@ -17,7 +17,7 @@ if ! command -v texlua > /dev/null; then
   cd install-tl-20*
 
   # Install a minimal system
-  ./install-tl --profile=texlive.profile
+  ./install-tl --profile=$HOME/texlive.profile
 
   cd ..
 fi
@@ -28,11 +28,24 @@ tlmgr install luatex
 
 # Other contrib packages: done as a block to avoid multiple calls to tlmgr
 # texlive-latex-base is needed to run pdflatex
+# gensymb is in was
+# newtext in in newtx
+# the font problems are fixed by collection-fontsrecommended
 tlmgr install   \
   exam          \
   amsfonts      \
   stmaryrd      \
   amsmath       \
+  standalone    \
+  xkeyval       \
+  preview       \
+  ucs           \
+  was           \
+  newtx         \
+  fontaxes      \
+  etoolbox      \
+  dvisvgm       \
+  collection-fontsrecommended \
   xcolor
 
 # Keep no backups (not required, simply makes cache bigger)
