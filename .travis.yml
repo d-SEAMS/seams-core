@@ -1,0 +1,28 @@
+sudo: false
+
+branches:
+  only:
+    - master
+
+addons:
+  apt:
+    packages:
+      - doxygen
+      - texlive-base
+      - texlive-latex-extra
+      - texlive-fonts-extra
+      - git
+
+before_script:
+  - git clone https://github.com/mosra/m.css.git
+
+script:
+  - ./m.css/doxygen/dox2html5.py Doxyfile-mcss
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  local_dir: docs/html
+  github_token: $GH_REPO_TOKEN
+  on:
+    branch: master

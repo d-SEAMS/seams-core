@@ -45,3 +45,5 @@ output/
 *.lammpstrj
 bin/
 build/
+docs/
+m.css/

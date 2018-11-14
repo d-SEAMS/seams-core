@@ -14,8 +14,8 @@ since it will ensure a reproducable environment which does not interfere with
 the system `python`.
 
 ``` bash
-# This will get you conan in a local environment
-pipenv shell
+# Do this once to install conan
+pipenv install
 ```
 
 ## Build Things
