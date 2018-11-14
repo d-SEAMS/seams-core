@@ -28,11 +28,12 @@ conan_cmake_run(CONANFILE conanfile.txt  # or relative build/conanfile.txt
                 BUILD missing)
 # YAML-CPP
 find_package("yaml-cpp")
-if(yaml-cpp_FOUND)
-    target_link_libraries(yodaStruct yaml-cpp)
-else()
-    message(FATAL_ERROR "yaml-cpp not found")
-endif()
+target_link_libraries(yodaStruct CONAN_PKG::yaml-cpp)
+
+# if(yaml-cpp_FOUND)
+#     target_link_libraries(yodaStruct yaml-cpp)
+# else()
+#     message(FATAL_ERROR "yaml-cpp not found")
+# endif()
 
 # target_link_libraries(yodaStruct ${CONAN_LIBS})
-# target_link_libraries(yodaStruct CONAN_PKG::yaml-cpp)
