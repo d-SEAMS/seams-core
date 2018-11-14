@@ -221,4 +221,7 @@ if(NOT EXISTS "cmake/conan.cmake")
                  "cmake/Conan.cmake")
 endif()
 
-include(cmake/Conan.cmake)
+include(Conan)
+conan_cmake_run(CONANFILE conanfile.txt  # or relative build/conanfile.txt
+                BASIC_SETUP CMAKE_TARGETS
+                BUILD missing)
