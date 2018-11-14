@@ -1,3 +1,6 @@
+# Build system contributed by Rohit Goswami (@HaoZeke)
+# <rohit.goswami[at]aol.com>
+
 #
 # CMake options
 #
