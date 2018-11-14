@@ -27,7 +27,7 @@
 #include <string>
 #include <cstdlib>
 #include <array>
-
+#include <yaml-cpp/yaml.h>
 int main()
 {
     // The program reads the parameter file inside the input folder

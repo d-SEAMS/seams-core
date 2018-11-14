@@ -1,9 +1,13 @@
+# Build system contributed by Rohit Goswami (@HaoZeke)
+# <rohit.goswami[at]aol.com>
+
 #
 # CMake options
 #
 
 # CMake version
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+set(CMAKE_CXX_STANDARD 11)
 
 #
 # Configure CMake environment
@@ -212,10 +216,8 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/data DESTINATION ${INSTALL_DATA} COMPONE
 
 # Conan
 # Download automatically, you can also just copy the conan.cmake file
-if(NOT EXISTS "cmake/conan.cmake")
+if(NOT EXISTS "cmake/Conan.cmake")
    message(STATUS "Downloading Conan.cmake from https://github.com/conan-io/cmake-conan")
    file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/v0.12/conan.cmake"
                  "cmake/Conan.cmake")
 endif()
-
-include(cmake/Conan.cmake)
