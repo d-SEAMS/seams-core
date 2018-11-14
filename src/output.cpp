@@ -1,4 +1,5 @@
 #include "output.h"
+#include <sys/stat.h>
 
 //Constructor
 COutput::COutput()

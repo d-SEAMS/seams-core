@@ -3,13 +3,8 @@
 
 #include <fstream>
 #include <array>
-#include <math.h>
 #include <string>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include "molecule.h"
 #include "parameter.h"
 #include "molecular_system.h"
 #include "output.h"

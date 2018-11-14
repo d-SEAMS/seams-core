@@ -1,15 +1,6 @@
 #ifndef _RDF3D_H
 #define _RDF3D_H
 
-#include <fstream>
-#include <math.h>
-#include <string>
-#include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include "molecule.h"
-#include "parameter.h"
 #include "molecular_system.h"
 #include "output.h"
 

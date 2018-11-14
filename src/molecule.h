@@ -1,8 +1,6 @@
 #ifndef _MOLECULE_H     
 #define _MOLECULE_H
 
-#include <iostream>
-
 class CMolecule {
   private:
     //The position of the particle

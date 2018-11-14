@@ -2,10 +2,6 @@
 #define _PARAMETER_H
 
 #include <iostream>
-#include <exception>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 const int NUMBER_OF_PARAMETERS = 200;
 const double PI = 3.14159265;

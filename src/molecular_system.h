@@ -2,14 +2,8 @@
 #define _MOLECULAR_SYSTEM_H
 
 #include <fstream>
-#include <math.h>
 #include <string>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <algorithm>
-#include <vector>
 #include "molecule.h"
 #include "parameter.h"
 #include "rdf3D.h"
