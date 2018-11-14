@@ -63,7 +63,8 @@ set(META_CMAKE_INIT_SHA      "${GIT_REV}")
 
 string(MAKE_C_IDENTIFIER ${META_PROJECT_NAME} META_PROJECT_ID)
 string(TOUPPER ${META_PROJECT_ID} META_PROJECT_ID)
-
+# Default to being a debug release
+set(CMAKE_BUILD_TYPE Debug)
 
 #
 # Project configuration options
@@ -204,3 +205,17 @@ install(FILES README.md DESTINATION ${INSTALL_ROOT} COMPONENT runtime)
 
 # Install runtime data
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/data DESTINATION ${INSTALL_DATA} COMPONENT runtime)
+
+#
+# Dependency Management
+#
+
+# Conan
+# Download automatically, you can also just copy the conan.cmake file
+if(NOT EXISTS "cmake/conan.cmake")
+   message(STATUS "Downloading Conan.cmake from https://github.com/conan-io/cmake-conan")
+   file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/v0.12/conan.cmake"
+                 "cmake/Conan.cmake")
+endif()
+
+include(cmake/Conan.cmake)

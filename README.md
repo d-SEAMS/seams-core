@@ -22,10 +22,13 @@ pipenv shell
 To generate the executable *yodaStruct* in `bin/` use:
 
 ```bash
+# Use the bundled conan
+pipenv shell
 # Always prefer an out of tree build
 mkdir build
 cd build
-cmake ..
+# If you forget the flag you will build the Debug version
+cmake .. -DCMAKE_BUILD_TYPE=Release
 make
 ```
 
@@ -51,4 +54,5 @@ XY plane, you should use the Rdf2D class. The equation used for 2D-RDF for the \
 # Acknowledgements
 The following libraries and tools are used in this project:
 - [CMake](https://cmake.org/) for compilation ([cmake-init](https://github.com/cginternals/cmake-init) was used as a reference)
+- [Conan](https://conan.io/) and [https://pipenv.readthedocs.io/en/latest/](pipenv) for dependency management
 - [Doxygen](https://www.doxygen.org) for the developer API
