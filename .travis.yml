@@ -8,6 +8,10 @@ addons:
   apt:
     packages:
       - doxygen
+      - texlive-base
+      - texlive-latex-extra
+      - texlive-fonts-extra
+      - git
 
 script:
   - doxygen Doxyfile
