@@ -22,10 +22,9 @@ addons:
 
 before_script:
   - git clone https://github.com/mosra/m.css.git
-  - 'pipenv shell'
-
+  
 script:
-  - ./m.css/doxygen/dox2html5.py Doxyfile-mcss
+  - pipenv run ./m.css/doxygen/dox2html5.py Doxyfile-mcss
 
 deploy:
   provider: pages
