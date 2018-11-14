@@ -18,6 +18,8 @@ addons:
       - texlive-base
       - texlive-latex-extra
       - texlive-fonts-extra
+      - texlive-font-utils
+      - texlive-fonts-recommended
       - git
 
 before_script:
