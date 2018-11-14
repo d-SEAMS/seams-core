@@ -5,6 +5,8 @@ name = "pypi"
 
 [packages]
 conan = "*"
+"jinja2" = "*"
+pygments = "*"
 
 [dev-packages]
 
