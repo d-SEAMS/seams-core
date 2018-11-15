@@ -217,9 +217,16 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/data DESTINATION ${INSTALL_DATA} COMPONE
 #
 
 # Conan
-# Download automatically, you can also just copy the conan.cmake file
+# Download automatically, you can also just copy the Conan.cmake file
 if(NOT EXISTS "cmake/Conan.cmake")
    message(STATUS "Downloading Conan.cmake from https://github.com/conan-io/cmake-conan")
    file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/v0.12/conan.cmake"
                  "cmake/Conan.cmake")
+endif()
+
+# Cotire
+if(NOT EXISTS "cmake/Cotire.cmake")
+   message(STATUS "Downloading Cotire.cmake from https://github.com/sakra/cotire")
+   file(DOWNLOAD "https://raw.githubusercontent.com/sakra/cotire/cotire-1.8.0/cotire.cmake"
+                 "cmake/Cotire.cmake")
 endif()
