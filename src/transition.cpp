@@ -96,13 +96,16 @@ void TransitionSystem::frameDiff(int typeI, CMolecularSystem* frameOne, CMolecul
 
 bool TransitionSystem::isThere(int iatom, CMolecularSystem* frame) {
     // TODO: Migrate to CGeneric
-                double coord = frame->molecules[iatom].get_posx();
+                double coordX = frame->molecules[iatom].get_posx();
+                double coordY = frame->molecules[iatom].get_posy();
+                double coordZ = frame->molecules[iatom].get_posz();
+                std::array<double,3> coord = { coordX, coordY, coordZ };
                 // TODO: Handle non x-dimension things
             for (int i=0; i<3; i++) {
                 if (coordHigh[i]==coordLow[i]) {
                     return true;
                 }
-                else if (coord >= coordLow[i] && coord <= coordHigh[i]) {
+                else if (coord[i] >= coordLow[i] && coord[i] <= coordHigh[i]) {
                     return true;
                 }
                 else {
