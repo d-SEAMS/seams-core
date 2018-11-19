@@ -125,7 +125,11 @@ double TransitionSystem::timeAtomAvg(int nop) {
         else {
             norm++;
             sum+=this->currentDiff[i];
-            // std::cout<<"Current Diff for "<<i<<" "<<this->currentDiff[i]<<std::endl;
+            // for (auto l=0; l < nop; l++) {
+
+            // std::cout<<"Current Diff for "<<l<<" "<<this->currentDiff[l]<<std::endl;
+            std::cout<<"Current Diff for "<<i<<" "<<this->currentDiff[i]<<std::endl;
+            // }
         }
     }
     if (norm!=0) {
