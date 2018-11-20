@@ -135,9 +135,12 @@ int main()
     // Transition system block
     TransitionSystem *t_sys = new TransitionSystem;
 
-    std::array<double,3> coordH= {40, 0, 0};
-    std::array<double,3> coordL= {5, 0, 0};
-    t_sys->mightTrans(m_MolSys->parameter->nop, 2, 100, 150, coordH, coordL, m_MolSys->parameter->trajFile, traj_steps);
+    std::array<double,3> coordH= {30, 48, 32};
+    std::array<double,3> coordL= {10, 20, 28};
+    // Slice for layer 2 is {10,20,17} to {30,48,20} -> .270359 (solid - 2645 to 2700) && 0.282271 (liquid - 0 to 50)
+    // Slice for layer 1 (adsorbed) is {10,20,13} to {30,48,17}
+    // Layer 3 is 0.315492 for {z=28 to 32} from 5 to 50 (liquid)
+    t_sys->mightTrans(m_MolSys->parameter->nop, 4, 2900, 2950, coordH, coordL, m_MolSys->parameter->trajFile, traj_steps);
 
     // --------------------------------------
 
