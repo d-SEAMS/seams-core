@@ -1,4 +1,6 @@
-# structureFactor [![Build Status](https://travis-ci.org/amritagos/structureFactor.svg?branch=master)](https://travis-ci.org/amritagos/structureFactor)
+# structureFactor 
+
+Check our docs build status [here](https://travis-ci.org/amritagos/structureFactor).
 This C++ program reads in lammps trajectory files
 or XYZ files to calculate RDF, in-plane RDF and the structure factor.
 
@@ -51,8 +53,24 @@ XY plane, you should use the Rdf2D class. The equation used for 2D-RDF for the \
 \f]
   For detailed instructions, see the Rdf2D class documentation
  
+# Contributing
+Please ensure that all contributions are formatted according to the
+[clang-format](./clang-format) configuration file.
+
+Specifically, consider using the following:
+
+-[Sublime Plugin](https://github.com/rosshemsley/SublimeClangFormat) for users
+of Sublime Text
+- [format-all](https://github.com/lassik/emacs-format-all-the-code) for Emacs
+- [vim-clang-format](https://github.com/rhysd/vim-clang-format) for Vim
+- Visual Studio: http://llvm.org/builds/, or use the [integrated support in Visual Studio 2017](https://blogs.msdn.microsoft.com/vcblog/2018/03/13/clangformat-support-in-visual-studio-2017-15-7-preview-1/)
+- Xcode: https://github.com/travisjeffery/ClangFormat-Xcode 
+
+Where some of the above suggestions are derived from [this depreciated githook](https://github.com/andrewseidl/githook-clang-format).
+
 # Acknowledgements
 The following libraries and tools are used in this project:
 - [CMake](https://cmake.org/) for compilation ([cmake-init](https://github.com/cginternals/cmake-init) was used as a reference)
 - [Conan](https://conan.io/) and [https://pipenv.readthedocs.io/en/latest/](pipenv) for dependency management
 - [Doxygen](https://www.doxygen.org) for the developer API
+- [clang-format](https://clang.llvm.org/docs/ClangFormat.html) for code formatting
