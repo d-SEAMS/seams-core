@@ -26,6 +26,7 @@ include(Conan)
 conan_cmake_run(CONANFILE conanfile.txt  # or relative build/conanfile.txt
                 BASIC_SETUP CMAKE_TARGETS
                 BUILD missing)
+
 # YAML-CPP
 find_package("yaml-cpp")
 target_link_libraries(yodaStruct CONAN_PKG::yaml-cpp)
@@ -37,3 +38,7 @@ target_link_libraries(yodaStruct CONAN_PKG::yaml-cpp)
 # endif()
 
 # target_link_libraries(yodaStruct ${CONAN_LIBS})
+
+# Cotire
+include(Cotire)
+cotire(yodaStruct)

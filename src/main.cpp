@@ -8,146 +8,148 @@
 //
 // amrita16thaug646@gmail.com
 // This code has been written for the purpose of obtaining the 1-D analogue of the Structure
-// factor for a confined system, from a lammps trajectory file. 
+// factor for a confined system, from a lammps trajectory file.
 //
 //
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+#include "density.h"
 #include "molecular_system.h"
 #include "molecule.h"
-#include "parameter.h"
-#include "rdf3D.h"
-#include "rdf2D.h"
 #include "output.h"
-#include "density.h"
+#include "parameter.h"
+#include "rdf2D.h"
+#include "rdf3D.h"
 #include "structure_factor.h"
 #include "transition.h"
+#include <array>
+#include <cstdlib>
 #include <ctime>
 #include <sstream>
 #include <string>
-#include <cstdlib>
-#include <array>
 #include <yaml-cpp/yaml.h>
-int main()
-{
-    // The program reads the parameter file inside the input folder
-    // The main obejct is created. It hold all the functions and data
-    // used in the analysis.
-    CMolecularSystem *m_MolSys = new CMolecularSystem;
-    // The parameterfile is read
-    m_MolSys->parameter->readParameter();
-    // System is initalized, memory allocated, ...
-    m_MolSys->InitializeSystem();
+int main() {
+  // The program reads the parameter file inside the input folder
+  // The main obejct is created. It hold all the functions and data
+  // used in the analysis.
+  CMolecularSystem *m_MolSys = new CMolecularSystem;
+  // The parameterfile is read
+  m_MolSys->parameter->readParameter();
+  // System is initalized, memory allocated, ...
+  m_MolSys->InitializeSystem();
 
-    // Total number of steps in the trajectory
-    int traj_steps = m_MolSys->parameter->nsteps;
-    std::cout<<" The total number of steps in the trajectory is "<< traj_steps << "\n";
+  // Total number of steps in the trajectory
+  int traj_steps = m_MolSys->parameter->nsteps;
+  std::cout << " The total number of steps in the trajectory is " << traj_steps
+            << "\n";
 
-    //Get random step info at a frame number
-    // int frame = 400; // 400 2000
-    // int nsteps = 100; // 50 100
-    // m_MolSys->readParticleFile(frame);
-    
-    // // ----------------------------------------
-    // // 3D RDF (single step)
-    // // Create object for 3D RDF 
-    // Rdf3D *rdf1 = new Rdf3D;
-    // // Testing 3D rdf function
-    // rdf1->initRDF3D(*m_MolSys, 0.01); 
-    // // Get the 3D RDF for one step
-    // rdf1->singleRDF3D(*m_MolSys); // default ID=1
-    // // Print the RDF 
-    // rdf1->printRDF3D();   
+  //Get random step info at a frame number
+  // int frame = 400; // 400 2000
+  // int nsteps = 100; // 50 100
+  // m_MolSys->readParticleFile(frame);
 
-    // --------------------------------------------
-    // // Single frame Rdf2D
-    // // Create object for 2D RDF
-    // Rdf2D *rdf = new Rdf2D; 
-    //  // Testing 2D rdf function. RDF calculated is incorrect if the wrong volume is set
-    // double volume = (8)*m_MolSys->parameter->boxx*m_MolSys->parameter->boxy;
-    // rdf->initRDFxy(*m_MolSys, 0.05, volume); 
-    // // Get the 2D RDF for one step
-    // rdf->singleRDFxy(*m_MolSys, 17.85, 0.8, 2, 2);
-    // // Print the RDF 
-    // rdf->printRDF2D();
-    // // Free the memory 
-    // rdf->deleteRDF2D();
+  // // ----------------------------------------
+  // // 3D RDF (single step)
+  // // Create object for 3D RDF
+  // Rdf3D *rdf1 = new Rdf3D;
+  // // Testing 3D rdf function
+  // rdf1->initRDF3D(*m_MolSys, 0.01);
+  // // Get the 3D RDF for one step
+  // rdf1->singleRDF3D(*m_MolSys); // default ID=1
+  // // Print the RDF
+  // rdf1->printRDF3D();
 
-    // // ----------------------------------------------
-    // //Rdf3D over multiple frames
-    // // Create object for 3D RDF
-    // Rdf3D *rdf3D = new Rdf3D; 
-    //  // Testing 3D rdf function. RDF calculated is incorrect if the wrong volume is set
-    // double volume = m_MolSys->parameter->boxx*m_MolSys->parameter->boxy*m_MolSys->parameter->boxz;
-    // rdf3D->initRDF3D(*m_MolSys, 0.01, volume); 
-    // // Loop through steps
-    // for (int istep=1; istep<=nsteps; istep++)
-    // {
-    //     // Get the coordinates at a particule step
-    //     m_MolSys->readParticleFile(frame+istep);
-    //     // Get the 3D RDF at this step
-    //     rdf3D->accumulateRDF3D(*m_MolSys, 2, 2);
-    // }
+  // --------------------------------------------
+  // // Single frame Rdf2D
+  // // Create object for 2D RDF
+  // Rdf2D *rdf = new Rdf2D;
+  //  // Testing 2D rdf function. RDF calculated is incorrect if the wrong volume is set
+  // double volume = (8)*m_MolSys->parameter->boxx*m_MolSys->parameter->boxy;
+  // rdf->initRDFxy(*m_MolSys, 0.05, volume);
+  // // Get the 2D RDF for one step
+  // rdf->singleRDFxy(*m_MolSys, 17.85, 0.8, 2, 2);
+  // // Print the RDF
+  // rdf->printRDF2D();
+  // // Free the memory
+  // rdf->deleteRDF2D();
 
-    // // Normalizes the RDF (required for multiple steps. This
-    // // is called automatically in the single step RDF function)
-    // rdf3D->normalizeRDF3D();
-    // // Print the RDF 
-    // rdf3D->printRDF3D();
+  // // ----------------------------------------------
+  // //Rdf3D over multiple frames
+  // // Create object for 3D RDF
+  // Rdf3D *rdf3D = new Rdf3D;
+  //  // Testing 3D rdf function. RDF calculated is incorrect if the wrong volume is set
+  // double volume = m_MolSys->parameter->boxx*m_MolSys->parameter->boxy*m_MolSys->parameter->boxz;
+  // rdf3D->initRDF3D(*m_MolSys, 0.01, volume);
+  // // Loop through steps
+  // for (int istep=1; istep<=nsteps; istep++)
+  // {
+  //     // Get the coordinates at a particule step
+  //     m_MolSys->readParticleFile(frame+istep);
+  //     // Get the 3D RDF at this step
+  //     rdf3D->accumulateRDF3D(*m_MolSys, 2, 2);
+  // }
 
-    // // ----------------------------------------------
-    // //Structure Factor from 3D RDF
-    // StructureFactor *s_k = new StructureFactor;
-    // s_k->initStrucFactor(*rdf3D, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy, m_MolSys->parameter->boxz);
-    // // ----------------------------------------------
+  // // Normalizes the RDF (required for multiple steps. This
+  // // is called automatically in the single step RDF function)
+  // rdf3D->normalizeRDF3D();
+  // // Print the RDF
+  // rdf3D->printRDF3D();
 
-    
-    
-    // // ----------------------------------------------
-    // //Rdf2D over multiple frames
-    // // Create object for 2D RDF
-    // Rdf2D *rdf = new Rdf2D;
-    //  // Testing 2D rdf function. RDF calculated is incorrect if the wrong volume is set
-    // // double volume = (8)*m_MolSys->parameter->boxx*m_MolSys->parameter->boxy;
-    // rdf->initRDFxy(*m_MolSys, 0.03, 15);
-    // // Loop through steps
-    // for (int istep=1; istep<=nsteps; istep++)
-    // {
-    //     // Get the coordinates at a particule step
-    //     m_MolSys->readParticleFile(frame+istep);
-    //     // Get the 2D RDF at this step
-    //     rdf->accumulateRDFxy(*m_MolSys, 17.85, 0.8, 2, 2);
-    // }
+  // // ----------------------------------------------
+  // //Structure Factor from 3D RDF
+  // StructureFactor *s_k = new StructureFactor;
+  // s_k->initStrucFactor(*rdf3D, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy, m_MolSys->parameter->boxz);
+  // // ----------------------------------------------
 
-    // // Normalizes the RDF (required for multiple steps. This
-    // // is called automatically in the single step RDF function)
-    // // The width of the layer is the argument
-    // rdf->normalizeRDF2D(0.8);
-    // // Print the RDF
-    // rdf->printRDF2D();
-    // // ----------------------------------------------
-    // //Structure Factor from RDF
-    // StructureFactor *s_k = new StructureFactor;
-    // s_k->initStrucFactor(*rdf, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy);
-    // // ----------------------------------------------
+  // // ----------------------------------------------
+  // //Rdf2D over multiple frames
+  // // Create object for 2D RDF
+  // Rdf2D *rdf = new Rdf2D;
+  //  // Testing 2D rdf function. RDF calculated is incorrect if the wrong volume is set
+  // // double volume = (8)*m_MolSys->parameter->boxx*m_MolSys->parameter->boxy;
+  // rdf->initRDFxy(*m_MolSys, 0.03, 15);
+  // // Loop through steps
+  // for (int istep=1; istep<=nsteps; istep++)
+  // {
+  //     // Get the coordinates at a particule step
+  //     m_MolSys->readParticleFile(frame+istep);
+  //     // Get the 2D RDF at this step
+  //     rdf->accumulateRDFxy(*m_MolSys, 17.85, 0.8, 2, 2);
+  // }
 
-    // --------------------------------------
-    // Transition system block
-    TransitionSystem *t_sys = new TransitionSystem;
+  // // Normalizes the RDF (required for multiple steps. This
+  // // is called automatically in the single step RDF function)
+  // // The width of the layer is the argument
+  // rdf->normalizeRDF2D(0.8);
+  // // Print the RDF
+  // rdf->printRDF2D();
+  // // ----------------------------------------------
+  // //Structure Factor from RDF
+  // StructureFactor *s_k = new StructureFactor;
+  // s_k->initStrucFactor(*rdf, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy);
+  // // ----------------------------------------------
 
-    std::array<double,3> coordH= {40, 0, 0};
-    std::array<double,3> coordL= {5, 0, 0};
-    t_sys->mightTrans(m_MolSys->parameter->nop, 2, 100, 150, coordH, coordL, m_MolSys->parameter->trajFile, traj_steps);
+  // --------------------------------------
+  // Transition system block
+  TransitionSystem *t_sys = new TransitionSystem;
 
-    // --------------------------------------
+  std::array<double, 3> coordH = {30, 48, 32};
+  std::array<double, 3> coordL = {10, 20, 28};
+  // Slice for layer 2 is {10,20,17} to {30,48,20} -> .270359 (solid - 2645 to 2700) && 0.282271 (liquid - 0 to 50)
+  // Slice for layer 1 (adsorbed) is {10,20,13} to {30,48,17}
+  // Layer 3 is 0.315492 for {z=28 to 32} from 5 to 50 (liquid)
+  t_sys->mightTrans(m_MolSys->parameter->nop, 4, 2900, 2950, coordH, coordL,
+                    m_MolSys->parameter->trajFile, traj_steps);
 
-    //Free the memory.
-    // rdf3D->deleteRDF3D();
-    // m_MolSys->deleteMolecules();
-    // rdf1->deleteRDF3D();
-    // rdf->deleteRDF2D();
-    // s_k->deleteStrucFactor();
-   
-    std::cout << "Welcome to the Black Parade \n";
-    return 0;
+  // --------------------------------------
+
+  //Free the memory.
+  // rdf3D->deleteRDF3D();
+  // m_MolSys->deleteMolecules();
+  // rdf1->deleteRDF3D();
+  // rdf->deleteRDF2D();
+  // s_k->deleteStrucFactor();
+
+  std::cout << "Welcome to the Black Parade \n";
+  return 0;
 }
