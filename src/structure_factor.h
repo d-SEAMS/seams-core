@@ -1,18 +1,18 @@
 #ifndef _STRUCTURE_FACTOR_H
 #define _STRUCTURE_FACTOR_H
 
+#include "molecular_system.h"
+#include "molecule.h"
+#include "output.h"
+#include "parameter.h"
+#include "rdf2D.h"
 #include <fstream>
 #include <math.h>
-#include <string>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
 #include <time.h>
-#include "molecule.h"
-#include "parameter.h"
-#include "molecular_system.h"
-#include "output.h"
-#include "rdf2D.h"
 
 /*! \brief Class for Structure Factor Calculation.
  *         This class creates an object for the structure factor, 
@@ -50,67 +50,68 @@
   the smallest box length of the \f$x\f$ or \f$y\f$ dimensions.
  */
 
-class StructureFactor: public COutput {
-	private:		
-    // No. of bins of the RDF
-		int nbin; 
-    // No. of bins of the structure factor
-    int sbin;
-    // Wave vector increment, delta k
-    double kwidth;
-    // Minimum k value
-    double k_min;
+class StructureFactor : public COutput {
+private:
+  // No. of bins of the RDF
+  int nbin;
+  // No. of bins of the structure factor
+  int sbin;
+  // Wave vector increment, delta k
+  double kwidth;
+  // Minimum k value
+  double k_min;
 
-    // Calculate the number of bins, with box lengths as arguments
-    void getBins(double, double);
-    void getBins(double, double, double);
- 
-    // Initialize the structure factor array to zero 
-    void initToZero();
+  // Calculate the number of bins, with box lengths as arguments
+  void getBins(double, double);
+  void getBins(double, double, double);
 
-    // Calculate the structure factor
-    void calcStrucFactor(class Rdf2D& rdf);
-    void calcStrucFactor(class Rdf3D& rdf);
+  // Initialize the structure factor array to zero
+  void initToZero();
 
-    // Get values of the k inverse distance coordinate
-    void getK();
+  // Calculate the structure factor
+  void calcStrucFactor(class Rdf2D &rdf);
+  void calcStrucFactor(class Rdf3D &rdf);
 
-    // Integrates the value of the integral in the expression for the structure factor
-    // using 1/3 Simpson's rule
-    double integrateSimpsons(class Rdf2D& rdf, double k);
-    double integrateSimpsons(class Rdf3D& rdf, double k);
-    // Function to return the integrand for a particular g(r) value
-    double integrand(class Rdf2D& rdf, int index, double k);
-    double integrand(class Rdf3D& rdf, int index, double k);
+  // Get values of the k inverse distance coordinate
+  void getK();
 
-    // Helper functions
-    // Returns the largest value
-    double largest(double, double, double);
-    double largest(double, double);
-    // Returns the smallest value
-    double smallest(double, double);
-    double smallest(double, double, double);
+  // Integrates the value of the integral in the expression for the structure factor
+  // using 1/3 Simpson's rule
+  double integrateSimpsons(class Rdf2D &rdf, double k);
+  double integrateSimpsons(class Rdf3D &rdf, double k);
+  // Function to return the integrand for a particular g(r) value
+  double integrand(class Rdf2D &rdf, int index, double k);
+  double integrand(class Rdf3D &rdf, int index, double k);
 
-  public:
-		  //the main object in which the structure factor is created and calculated
-    	StructureFactor();
-    	virtual ~StructureFactor();
+  // Helper functions
+  // Returns the largest value
+  double largest(double, double, double);
+  double largest(double, double);
+  // Returns the smallest value
+  double smallest(double, double);
+  double smallest(double, double, double);
 
-    	// Dynamically allocated array for histogram values
-    	// for RDF and radial values
-		  double* strucFactor;
-		  double* k;
+public:
+  //the main object in which the structure factor is created and calculated
+  StructureFactor();
+  virtual ~StructureFactor();
 
-    	// Initialize the histogram
-    	void initStrucFactor(class Rdf2D& rdf, double box_length1, double box_lenth2, double k_min = 2*PI/(5*PI));
-      void initStrucFactor(class Rdf3D& rdf, double box_length1, double box_lenth2, double box_lenth3, double k_min = 2*PI/(5*PI));
+  // Dynamically allocated array for histogram values
+  // for RDF and radial values
+  double *strucFactor;
+  double *k;
 
-    	// Print the structure factor to a file in the output folder
-    	void printStrucFactor();
+  // Initialize the histogram
+  void initStrucFactor(class Rdf2D &rdf, double box_length1, double box_lenth2,
+                       double k_min = 2 * PI / (5 * PI));
+  void initStrucFactor(class Rdf3D &rdf, double box_length1, double box_lenth2,
+                       double box_lenth3, double k_min = 2 * PI / (5 * PI));
 
-    	// Free the memory 
-    	void deleteStrucFactor();
+  // Print the structure factor to a file in the output folder
+  void printStrucFactor();
 
+  // Free the memory
+  void deleteStrucFactor();
 };
 
 #endif
