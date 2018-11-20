@@ -1,12 +1,12 @@
 #ifndef _MOLECULAR_SYSTEM_H
 #define _MOLECULAR_SYSTEM_H
 
-#include <fstream>
-#include <string>
-#include <sstream>
 #include "molecule.h"
 #include "parameter.h"
 #include "rdf3D.h"
+#include <fstream>
+#include <sstream>
+#include <string>
 
 /*! \brief Class for information in each frame.
  *         This class creates an object containing an array of CMolecule objects 
@@ -32,40 +32,36 @@ const int nilvalue = 33333333;
 //Pi
 const double pi = 3.141592653589793;
 
-
-class NumberOfParticlesNotDefinedException
-{
-};
+class NumberOfParticlesNotDefinedException {};
 
 class CMolecularSystem {
-    
-  public:
-    //the main object where all properties of all particles are saved
-    CMolecularSystem();
-    virtual ~CMolecularSystem();
-    //Properties of one single molecule
-    CMolecule* molecules;
-    CParameter* parameter;
-    
-    //Init the system
-    void initializeFrames(int, std::string);
-    void initializeMolecules(int);
-    void initializeMolecules();
-    //and delete the System afterwards
-    void deleteMolecules();
 
-    //System can be initialized from a lammps trajectory xyz-File
-    void InitializeSystem();
-    void readParticleFile();
-    // Initialize from the lammps trajectory 
-    void readWholeTrj();
-    // To read from a lammpstrj file use the overloaded
-    // function
-    void readParticleFile(int );
+public:
+  //the main object where all properties of all particles are saved
+  CMolecularSystem();
+  virtual ~CMolecularSystem();
+  //Properties of one single molecule
+  CMolecule *molecules;
+  CParameter *parameter;
 
-    // Reads in the box dimensions from the lammps trajectory
-    double getBoxLength(std::string );
+  //Init the system
+  void initializeFrames(int, std::string);
+  void initializeMolecules(int);
+  void initializeMolecules();
+  //and delete the System afterwards
+  void deleteMolecules();
 
+  //System can be initialized from a lammps trajectory xyz-File
+  void InitializeSystem();
+  void readParticleFile();
+  // Initialize from the lammps trajectory
+  void readWholeTrj();
+  // To read from a lammpstrj file use the overloaded
+  // function
+  void readParticleFile(int);
+
+  // Reads in the box dimensions from the lammps trajectory
+  double getBoxLength(std::string);
 };
 
 #endif
