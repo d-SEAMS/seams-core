@@ -16,7 +16,6 @@ add_executable( yodaStruct
   geometry.cpp
   density.cpp
   transition.cpp
-  chunk.cpp
   )
 
 #
