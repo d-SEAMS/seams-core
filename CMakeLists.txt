@@ -9,6 +9,16 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 set(CMAKE_CXX_STANDARD 11)
 
+# Some Defaults
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+  message(
+    FATAL_ERROR
+      "Do not build in-source.
+                       Remove CMakeCache.txt and the CMakeFiles/ directory. Then build in a separate folder.
+       Refer to the docs if needed."
+    )
+endif()
+
 #
 # Configure CMake environment
 #
