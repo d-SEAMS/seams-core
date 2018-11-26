@@ -19,6 +19,14 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
     )
 endif()
 
+# If CMAKE_BUILD_TYPE is undefined, build the Debug version
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Debug")
+endif()
+
+# For rtags
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 #
 # Configure CMake environment
 #
@@ -77,10 +85,6 @@ set(META_CMAKE_INIT_SHA      "${GIT_REV}")
 
 string(MAKE_C_IDENTIFIER ${META_PROJECT_NAME} META_PROJECT_ID)
 string(TOUPPER ${META_PROJECT_ID} META_PROJECT_ID)
-# Default to being a debug release
-set(CMAKE_BUILD_TYPE Debug)
-# For rtags
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 #
 # Project configuration options
