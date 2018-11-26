@@ -9,6 +9,24 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 set(CMAKE_CXX_STANDARD 11)
 
+# Some Defaults
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+  message(
+    FATAL_ERROR
+      "Do not build in-source.
+                       Remove CMakeCache.txt and the CMakeFiles/ directory. Then build in a separate folder.
+       Refer to the docs if needed."
+    )
+endif()
+
+# If CMAKE_BUILD_TYPE is undefined, build the Debug version
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Debug")
+endif()
+
+# For rtags
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 #
 # Configure CMake environment
 #
@@ -67,10 +85,6 @@ set(META_CMAKE_INIT_SHA      "${GIT_REV}")
 
 string(MAKE_C_IDENTIFIER ${META_PROJECT_NAME} META_PROJECT_ID)
 string(TOUPPER ${META_PROJECT_ID} META_PROJECT_ID)
-# Default to being a debug release
-set(CMAKE_BUILD_TYPE Debug)
-# For rtags
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 #
 # Project configuration options
@@ -220,7 +234,7 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/data DESTINATION ${INSTALL_DATA} COMPONE
 # Download automatically, you can also just copy the Conan.cmake file
 if(NOT EXISTS "cmake/Conan.cmake")
    message(STATUS "Downloading Conan.cmake from https://github.com/conan-io/cmake-conan")
-   file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/v0.12/conan.cmake"
+   file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/v0.13/conan.cmake"
                  "cmake/Conan.cmake")
 endif()
 
@@ -230,3 +244,9 @@ if(NOT EXISTS "cmake/Cotire.cmake")
    file(DOWNLOAD "https://raw.githubusercontent.com/sakra/cotire/cotire-1.8.0/cotire.cmake"
                  "cmake/Cotire.cmake")
 endif()
+
+# Catch
+
+include(CTest)
+add_subdirectory(tests)
+enable_testing()

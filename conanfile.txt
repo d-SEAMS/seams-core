@@ -1,5 +1,6 @@
 [requires]
 yaml-cpp/0.6.2@bincrafters/stable
+catch2/2.4.2@bincrafters/stable
 
 [generators]
 cmake
