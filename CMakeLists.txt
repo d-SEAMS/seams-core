@@ -230,3 +230,9 @@ if(NOT EXISTS "cmake/Cotire.cmake")
    file(DOWNLOAD "https://raw.githubusercontent.com/sakra/cotire/cotire-1.8.0/cotire.cmake"
                  "cmake/Cotire.cmake")
 endif()
+
+# Catch
+
+include(CTest)
+add_subdirectory(tests)
+enable_testing()
