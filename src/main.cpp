@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
   // Parse Things
   auto result = parse(argc, argv);
   auto &arguments = result.arguments();
-
+  YAML::Node config = YAML::LoadFile(result["c"].as<std::string>());
   // Initialize Lua
   sol::state lua;
   // Use all libraries
@@ -151,30 +151,32 @@ int main(int argc, char *argv[]) {
   // s_k->initStrucFactor(*rdf, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy);
   // // ----------------------------------------------
 
-  // --------------------------------------
-  // Transition system block
-  TransitionSystem *t_sys = new TransitionSystem;
+  if (config["transition"].as<bool>()) {
 
-  // std::array<double, 3> coordH = {30, 48, 32};
-  // std::array<double, 3> coordL = {10, 20, 28};
-  // Slice for layer 2 is {10,20,17} to {30,48,20} -> .270359 (solid - 2645 to 2700) && 0.282271 (liquid - 0 to 50)
-  // Slice for layer 1 (adsorbed) is {10,20,13} to {30,48,17}
-  // Layer 3 is 0.315492 for {z=28 to 32} from 5 to 50 (liquid)
-  lua.set_function("transition_probability", &TransitionSystem::mightTrans,
-                   t_sys);
-  lua["trajectory_file"] = m_MolSys->parameter->trajFile;
-  lua["steps_in_trajectory"] = traj_steps;
-  lua["number_of_particles"] = m_MolSys->parameter->nop;
-  //   // t_sys->mightTrans(m_MolSys->parameter->nop, 4, 2900, 2950, coordH, coordL,
-  //   //                   m_MolSys->parameter->trajFile, traj_steps);
+    // --------------------------------------
+    // Transition system block
+    TransitionSystem *t_sys = new TransitionSystem;
 
-  // Open the script
-  lua.script_file(result["s"].as<std::string>());
-  // lua.script(R"(
-  // test = my_class_func(1)
-  // )");
-  // lua.script("print('\nhello world')");
+    // std::array<double, 3> coordH = {30, 48, 32};
+    // std::array<double, 3> coordL = {10, 20, 28};
+    // Slice for layer 2 is {10,20,17} to {30,48,20} -> .270359 (solid - 2645 to 2700) && 0.282271 (liquid - 0 to 50)
+    // Slice for layer 1 (adsorbed) is {10,20,13} to {30,48,17}
+    // Layer 3 is 0.315492 for {z=28 to 32} from 5 to 50 (liquid)
+    lua.set_function("transition_probability", &TransitionSystem::mightTrans,
+                     t_sys);
+    lua["trajectory_file"] = m_MolSys->parameter->trajFile;
+    lua["steps_in_trajectory"] = traj_steps;
+    lua["number_of_particles"] = m_MolSys->parameter->nop;
+    //   // t_sys->mightTrans(m_MolSys->parameter->nop, 4, 2900, 2950, coordH, coordL,
+    //   //                   m_MolSys->parameter->trajFile, traj_steps);
 
+    // Open the script
+    lua.script_file(result["s"].as<std::string>());
+    // lua.script(R"(
+    // test = my_class_func(1)
+    // )");
+    // lua.script("print('\nhello world')");
+  }
   // --------------------------------------
 
   //Free the memory.
