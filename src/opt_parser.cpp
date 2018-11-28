@@ -10,8 +10,15 @@ cxxopts::ParseResult parse(int argc, char *argv[]) {
         "f,file", "File name",
         cxxopts::value<std::string>()->default_value("input/parameters.txt"))(
         "s,script", "Lua Script",
-        cxxopts::value<std::string>()->default_value("main.lua"));
+        cxxopts::value<std::string>()->default_value("main.lua"))("h,help",
+                                                                  "Print help");
     auto result = options.parse(argc, argv);
+
+    if (result.count("help")) {
+      std::cout << options.help({"", "Group"}) << std::endl;
+      exit(0);
+    }
+    // No options
     if (result.arguments().size() == 0) {
       std::cout << "DO error handling" << std::endl;
     }
