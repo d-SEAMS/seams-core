@@ -1,0 +1,1 @@
+trajFile=../input/traj/dump-6-8000.lammpstrj

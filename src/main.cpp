@@ -34,6 +34,8 @@
 
 // External bundled libraries
 // #include <cxxopts.hpp>
+#include <sol.hpp>
+#include <sol_forward.hpp>
 
 // Managed with Conan
 #include <rang.hpp>
@@ -150,13 +152,26 @@ int main(int argc, char *argv[]) {
   // Transition system block
   TransitionSystem *t_sys = new TransitionSystem;
 
-  std::array<double, 3> coordH = {30, 48, 32};
-  std::array<double, 3> coordL = {10, 20, 28};
+  // std::array<double, 3> coordH = {30, 48, 32};
+  // std::array<double, 3> coordL = {10, 20, 28};
   // Slice for layer 2 is {10,20,17} to {30,48,20} -> .270359 (solid - 2645 to 2700) && 0.282271 (liquid - 0 to 50)
   // Slice for layer 1 (adsorbed) is {10,20,13} to {30,48,17}
   // Layer 3 is 0.315492 for {z=28 to 32} from 5 to 50 (liquid)
-  t_sys->mightTrans(m_MolSys->parameter->nop, 4, 2900, 2950, coordH, coordL,
-                    m_MolSys->parameter->trajFile, traj_steps);
+  sol::state lua;
+  lua.set_function("transition_probability", &TransitionSystem::mightTrans,
+                   t_sys);
+  lua["trajectory_file"] = m_MolSys->parameter->trajFile;
+  lua["steps_in_trajectory"] = traj_steps;
+  lua["number_of_particles"] = m_MolSys->parameter->nop;
+  //   // t_sys->mightTrans(m_MolSys->parameter->nop, 4, 2900, 2950, coordH, coordL,
+  //   //                   m_MolSys->parameter->trajFile, traj_steps);
+
+  // lua.script(R"(
+  // test = my_class_func(1)
+  // )");
+  lua.open_libraries();
+  lua.script_file(arguments[1].value());
+  // lua.script("print('\nhello world')");
 
   // --------------------------------------
 

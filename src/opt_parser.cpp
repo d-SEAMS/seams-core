@@ -8,7 +8,9 @@ cxxopts::ParseResult parse(int argc, char *argv[]) {
     options.positional_help("[optional args]").show_positional_help();
     options.allow_unrecognised_options().add_options()(
         "f,file", "File name",
-        cxxopts::value<std::string>()->default_value("input/parameters.txt"));
+        cxxopts::value<std::string>()->default_value("input/parameters.txt"))(
+        "s,script", "Lua Script",
+        cxxopts::value<std::string>()->default_value("main.lua"));
     auto result = options.parse(argc, argv);
     if (result.arguments().size() == 0) {
       std::cout << "DO error handling" << std::endl;
