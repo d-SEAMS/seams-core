@@ -18,6 +18,12 @@ add_executable( yodaStruct
   transition.cpp
   )
 
+# Project Libraries
+include_directories(
+  include/internal
+  include/external
+  )
+
 #
 # External Libraries
 #
