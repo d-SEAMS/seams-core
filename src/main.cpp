@@ -4,7 +4,7 @@
 // Structure Factor code
 // MIT License
 
-// Copyright (c) 2018 Amrita Goswami
+// Copyright (c) 2018 Amrita Goswami, Rohit Goswami
 //
 // amrita16thaug646@gmail.com
 // This code has been written for the purpose of obtaining the 1-D analogue of the Structure
