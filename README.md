@@ -53,6 +53,19 @@ XY plane, you should use the Rdf2D class. The equation used for 2D-RDF for the \
 \f]
   For detailed instructions, see the Rdf2D class documentation
  
+# Developer Documentation
+TODO: Move this to some other location.
+
+## Sol2
+
+ For updates to `sol2` change the commit number and use:
+
+ ``` bash
+$ cd src/external
+ wget https://raw.githubusercontent.com/ThePhD/sol2/develop/single/sol/sol_forward.hpp
+ wget https://raw.githubusercontent.com/ThePhD/sol2/develop/single/sol/sol.hpp
+ ```
+
 # Contributing
 Please ensure that all contributions are formatted according to the
 [clang-format](./clang-format) configuration file.
