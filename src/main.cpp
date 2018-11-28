@@ -42,17 +42,21 @@
 
 int main(int argc, char *argv[]) {
 
+  // Parse Things
   auto result = parse(argc, argv);
   auto &arguments = result.arguments();
 
-  std::cout << arguments[0].value() << std::endl;
+  // Initialize Lua
+  sol::state lua;
+  // Use all libraries
+  lua.open_libraries();
 
   // The program reads the parameter file inside the input folder The main obejct
   //     is created.It hold all the functions and data used in the
   //         analysis.
   CMolecularSystem *m_MolSys = new CMolecularSystem;
   // The parameterfile is read
-  m_MolSys->parameter->readParameter(arguments[0].value());
+  m_MolSys->parameter->readParameter(result["f"].as<std::string>());
   // System is initalized, memory allocated, ...
   m_MolSys->InitializeSystem();
 
@@ -156,7 +160,6 @@ int main(int argc, char *argv[]) {
   // Slice for layer 2 is {10,20,17} to {30,48,20} -> .270359 (solid - 2645 to 2700) && 0.282271 (liquid - 0 to 50)
   // Slice for layer 1 (adsorbed) is {10,20,13} to {30,48,17}
   // Layer 3 is 0.315492 for {z=28 to 32} from 5 to 50 (liquid)
-  sol::state lua;
   lua.set_function("transition_probability", &TransitionSystem::mightTrans,
                    t_sys);
   lua["trajectory_file"] = m_MolSys->parameter->trajFile;
@@ -165,11 +168,11 @@ int main(int argc, char *argv[]) {
   //   // t_sys->mightTrans(m_MolSys->parameter->nop, 4, 2900, 2950, coordH, coordL,
   //   //                   m_MolSys->parameter->trajFile, traj_steps);
 
+  // Open the script
+  lua.script_file(result["s"].as<std::string>());
   // lua.script(R"(
   // test = my_class_func(1)
   // )");
-  lua.open_libraries();
-  lua.script_file(arguments[1].value());
   // lua.script("print('\nhello world')");
 
   // --------------------------------------
