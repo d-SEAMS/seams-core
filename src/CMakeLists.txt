@@ -12,6 +12,7 @@ add_executable( yodaStruct
   rdf3D.cpp
   rdf2D.cpp
   structure_factor.cpp
+  opt_parser.cpp
   output.cpp
   geometry.cpp
   density.cpp

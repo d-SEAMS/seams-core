@@ -24,6 +24,7 @@
 #include "density.h"
 #include "molecular_system.h"
 #include "molecule.h"
+#include "opt_parser.h"
 #include "output.h"
 #include "parameter.h"
 #include "rdf2D.h"
@@ -32,7 +33,7 @@
 #include "transition.h"
 
 // External bundled libraries
-#include <cxxopts.hpp>
+// #include <cxxopts.hpp>
 
 // Managed with Conan
 #include <rang.hpp>
@@ -40,15 +41,7 @@
 
 int main(int argc, char *argv[]) {
 
-  // This creates options
-
-  cxxopts::Options options("tester", " - test basic options");
-
-  options.allow_unrecognised_options().add_options()(
-      "f,file", "File name",
-      cxxopts::value<std::string>()->default_value("input/parameters.txt"));
-
-  auto result = options.parse(argc, argv);
+  auto result = parse(argc, argv);
   auto &arguments = result.arguments();
 
   std::cout << arguments[0].value() << std::endl;
