@@ -39,9 +39,8 @@ To run the sample inputs, simply move the binary to the project root, or to a
 directory where `input/` is a child directory.
 
 ```bash
-# Assuming you are in the project root
-cp bin/yodaStruct .
-./yodaStruct
+# Assuming you are in the build directory
+./yodaStruct --script ../lua_inputs/transition_diff.lua -f ../lua_inputs/parameter.txt -c ../lua_inputs/config.yml
 ``` 
 
 # Details
