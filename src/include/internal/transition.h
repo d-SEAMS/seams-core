@@ -40,7 +40,6 @@ public:
   // Frames we need
   CMolecularSystem *frameOne;
   CMolecularSystem *frameTwo;
-
   // Check for phase transitions
   void mightTrans(int nop, int typeI, int frameNumOne, int frameNumTwo,
                   std::array<double, 3> coordHigh,
