@@ -10,8 +10,11 @@ cxxopts::ParseResult parse(int argc, char *argv[]) {
         "f,file", "File name",
         cxxopts::value<std::string>()->default_value("input/parameters.txt"))(
         "s,script", "Lua Script",
-        cxxopts::value<std::string>()->default_value("main.lua"))("h,help",
-                                                                  "Print help");
+        cxxopts::value<std::string>()->default_value("main.lua"))(
+        "c,config", "Yaml Config",
+        cxxopts::value<std::string>()->default_value("conf.yml"))
+
+        ("h,help", "Print help");
     auto result = options.parse(argc, argv);
 
     if (result.count("help")) {
