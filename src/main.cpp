@@ -27,7 +27,11 @@
 #include <ctime>
 #include <sstream>
 #include <string>
+
+// Managed with Conan
+#include <rang.hpp>
 #include <yaml-cpp/yaml.h>
+
 int main() {
   // The program reads the parameter file inside the input folder
   // The main obejct is created. It hold all the functions and data
@@ -150,6 +154,6 @@ int main() {
   // rdf->deleteRDF2D();
   // s_k->deleteStrucFactor();
 
-  std::cout << "Welcome to the Black Parade \n";
+  std::cout << rang::style::bold << "Welcome to the Black Parade \n";
   return 0;
 }
