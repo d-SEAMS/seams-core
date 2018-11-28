@@ -282,6 +282,11 @@ void CMolecularSystem::readParticleFile(int step) {
     // Loop through the number of snapshots in the traj file
     // until you reach the snapshot at step
     for (int istep = 1; istep <= this->parameter->nsteps; istep++) {
+
+      // Stop reading the file if you've already read in the step
+      if (istep == step+1) {
+      	break;
+      }
       // Lines before coordinates in every snapshot
       std::getline(dumpFile, line); // ITEM: TIMESTEP
       std::getline(dumpFile, line); // Timestep
