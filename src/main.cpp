@@ -13,6 +13,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+// Standard Library
+#include <array>
+#include <cstdlib>
+#include <ctime>
+#include <sstream>
+#include <string>
+
+// Internal Libraries
 #include "density.h"
 #include "molecular_system.h"
 #include "molecule.h"
@@ -22,23 +30,35 @@
 #include "rdf3D.h"
 #include "structure_factor.h"
 #include "transition.h"
-#include <array>
-#include <cstdlib>
-#include <ctime>
-#include <sstream>
-#include <string>
+
+// External bundled libraries
+#include <cxxopts.hpp>
 
 // Managed with Conan
 #include <rang.hpp>
 #include <yaml-cpp/yaml.h>
 
-int main() {
-  // The program reads the parameter file inside the input folder
-  // The main obejct is created. It hold all the functions and data
-  // used in the analysis.
+int main(int argc, char *argv[]) {
+
+  // This creates options
+
+  cxxopts::Options options("tester", " - test basic options");
+
+  options.allow_unrecognised_options().add_options()(
+      "f,file", "File name",
+      cxxopts::value<std::string>()->default_value("input/parameters.txt"));
+
+  auto result = options.parse(argc, argv);
+  auto &arguments = result.arguments();
+
+  std::cout << arguments[0].value() << std::endl;
+
+  // The program reads the parameter file inside the input folder The main obejct
+  //     is created.It hold all the functions and data used in the
+  //         analysis.
   CMolecularSystem *m_MolSys = new CMolecularSystem;
   // The parameterfile is read
-  m_MolSys->parameter->readParameter();
+  m_MolSys->parameter->readParameter(arguments[0].value());
   // System is initalized, memory allocated, ...
   m_MolSys->InitializeSystem();
 

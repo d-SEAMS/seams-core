@@ -19,7 +19,7 @@ private:
 public:
   CParameter();
   virtual ~CParameter();
-  void readParameter();
+  void readParameter(std::string filename);
   // To read input files
   s_rawParameter rawParameter[NUMBER_OF_PARAMETERS];
   //Number of Particles
