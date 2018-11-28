@@ -25,22 +25,22 @@ include_directories(
   include/external
   )
 
-#
-# External Libraries
-#
-
 # Conan Stuff
 include(Conan)
 conan_cmake_run(CONANFILE ../conanfile.txt  # or relative build/conanfile.txt
                 BASIC_SETUP CMAKE_TARGETS
                 BUILD missing)
 
-# Find packages
-find_package("yaml-cpp")
-find_package("rang")
 
-# Link them
+# Find packages, including conan packages
+find_package(
+  "Lua" REQUIRED
+  "yaml-cpp"
+  "rang")
+
+# Link everything
 target_link_libraries(yodaStruct
+  ${LUA_LIBRARIES}
   CONAN_PKG::rang
   CONAN_PKG::yaml-cpp)
 
