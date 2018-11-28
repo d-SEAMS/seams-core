@@ -82,8 +82,14 @@ of Sublime Text
 Where some of the above suggestions are derived from [this depreciated githook](https://github.com/andrewseidl/githook-clang-format).
 
 # Acknowledgements
-The following libraries and tools are used in this project:
+The following tools are used in this project:
 - [CMake](https://cmake.org/) for compilation ([cmake-init](https://github.com/cginternals/cmake-init) was used as a reference)
 - [Conan](https://conan.io/) and [https://pipenv.readthedocs.io/en/latest/](pipenv) for dependency management
 - [Doxygen](https://www.doxygen.org) for the developer API
 - [clang-format](https://clang.llvm.org/docs/ClangFormat.html) for code formatting
+
+## Third Party Libraries
+The libraries used are:
+- [rang](https://github.com/agauniyal/rang) for terminal styles (ANSI)
+
+
