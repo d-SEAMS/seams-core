@@ -35,7 +35,6 @@
 // External bundled libraries
 // #include <cxxopts.hpp>
 #include <sol.hpp>
-#include <sol_forward.hpp>
 
 // Managed with Conan
 #include <rang.hpp>
