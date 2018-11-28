@@ -56,14 +56,15 @@ XY plane, you should use the Rdf2D class. The equation used for 2D-RDF for the \
 # Developer Documentation
 TODO: Move this to some other location.
 
-## Sol2
-
- For updates to `sol2` change the commit number and use:
+For updates to any of the **bundled** `external libraries` change the commit number and use:
 
  ``` bash
 $ cd src/external
+# Sol2
  wget https://raw.githubusercontent.com/ThePhD/sol2/develop/single/sol/sol_forward.hpp
  wget https://raw.githubusercontent.com/ThePhD/sol2/develop/single/sol/sol.hpp
+# cxxopts
+ wget https://raw.githubusercontent.com/jarro2783/cxxopts/master/include/cxxopts.hpp 
  ```
 
 # Contributing
@@ -91,5 +92,7 @@ The following tools are used in this project:
 ## Third Party Libraries
 The libraries used are:
 - [rang](https://github.com/agauniyal/rang) for terminal styles (ANSI)
+- [sol2](https://github.com/ThePhD/sol2) for interfacing with lua
+- [cxxopts](https://github.com/jarro2783/cxxopts) for parsing command line options
 
 
