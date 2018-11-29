@@ -5,6 +5,7 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 # Add the new cpp files here
 add_executable( yodaStruct
+  backward.cpp
   main.cpp
   molecule.cpp
   molecular_system.cpp
