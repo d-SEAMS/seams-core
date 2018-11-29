@@ -23,6 +23,7 @@ add_executable( yodaStruct
 include_directories(
   include/internal
   include/external
+  ${LUA_INCLUDE_DIR}
   )
 
 # Conan Stuff
