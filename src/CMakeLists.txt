@@ -37,12 +37,14 @@ conan_cmake_run(CONANFILE ../conanfile.txt  # or relative build/conanfile.txt
 find_package(
   "Lua" REQUIRED
   "yaml-cpp"
+  "fmt"
   "rang")
 
 # Link everything
 target_link_libraries(yodaStruct
   ${LUA_LIBRARIES}
   CONAN_PKG::rang
+  CONAN_PKG::fmt
   CONAN_PKG::yaml-cpp)
 
 # if(yaml-cpp_FOUND)
