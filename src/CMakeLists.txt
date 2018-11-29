@@ -33,7 +33,6 @@ conan_cmake_run(CONANFILE ../conanfile.txt  # or relative build/conanfile.txt
                 BASIC_SETUP CMAKE_TARGETS
                 BUILD missing)
 
-
 # Find packages, including conan packages
 find_package(
   "Lua" REQUIRED
