@@ -30,10 +30,10 @@ CParameter::~CParameter() {}
  if a line starts with // it is handled as comment
  do not have spaces before or after =
  ***********************************************/
-void CParameter::readParameter() {
+void CParameter::readParameter(std::string filename) {
   std::ifstream paraFile;
   // Open the parameter file
-  paraFile.open("input/parameter.txt");
+  paraFile.open(filename);
   std::string line;
   std::string::size_type pos;
   int i = 0;

@@ -1,7 +1,7 @@
 # structureFactor 
 
 Check our docs build status [here](https://travis-ci.org/amritagos/structureFactor).
-This C++ program reads in lammps trajectory files
+This C++14 program reads in lammps trajectory files
 or XYZ files to calculate RDF, in-plane RDF and the structure factor.
 
 \brief Post-processing code for RDF, in-plane RDF, structure factor
@@ -39,9 +39,10 @@ To run the sample inputs, simply move the binary to the project root, or to a
 directory where `input/` is a child directory.
 
 ```bash
-# Assuming you are in the project root
-cp bin/yodaStruct .
-./yodaStruct
+# Assuming you are in the build directory
+# Check help with -h
+# --script and --file are optional now
+./yodaStruct --script ../lua_inputs/transition_diff.lua -f ../lua_inputs/parameter.txt -c ../lua_inputs/config.yml
 ``` 
 
 # Details
@@ -53,6 +54,20 @@ XY plane, you should use the Rdf2D class. The equation used for 2D-RDF for the \
 \f]
   For detailed instructions, see the Rdf2D class documentation
  
+# Developer Documentation
+TODO: Move this to some other location.
+
+For updates to any of the **bundled** `external libraries` change the commit number and use:
+
+ ``` bash
+$ cd src/external
+# Sol2
+ wget https://raw.githubusercontent.com/ThePhD/sol2/develop/single/sol/sol_forward.hpp
+ wget https://raw.githubusercontent.com/ThePhD/sol2/develop/single/sol/sol.hpp
+# cxxopts
+ wget https://raw.githubusercontent.com/jarro2783/cxxopts/master/include/cxxopts.hpp 
+ ```
+
 # Contributing
 Please ensure that all contributions are formatted according to the
 [clang-format](./clang-format) configuration file.
@@ -69,8 +84,16 @@ of Sublime Text
 Where some of the above suggestions are derived from [this depreciated githook](https://github.com/andrewseidl/githook-clang-format).
 
 # Acknowledgements
-The following libraries and tools are used in this project:
+The following tools are used in this project:
 - [CMake](https://cmake.org/) for compilation ([cmake-init](https://github.com/cginternals/cmake-init) was used as a reference)
 - [Conan](https://conan.io/) and [https://pipenv.readthedocs.io/en/latest/](pipenv) for dependency management
 - [Doxygen](https://www.doxygen.org) for the developer API
 - [clang-format](https://clang.llvm.org/docs/ClangFormat.html) for code formatting
+
+## Third Party Libraries
+The libraries used are:
+- [rang](https://github.com/agauniyal/rang) for terminal styles (ANSI)
+- [sol2](https://github.com/ThePhD/sol2) for interfacing with lua
+- [cxxopts](https://github.com/jarro2783/cxxopts) for parsing command line options
+
+

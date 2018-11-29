@@ -1,0 +1,8 @@
+file: "../lua_inputs/parameter.txt"
+transition:
+ use: false
+ script: "../lua_inputs/transition_diff.lua"
+rdf3D:
+  use: true
+rdf2D:
+  use: true
