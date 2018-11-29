@@ -45,7 +45,10 @@ int main(int argc, char *argv[]) {
   // Parse Things
   auto result = parse(argc, argv);
   auto &arguments = result.arguments();
+  // Initialize yaml config
   YAML::Node config = YAML::LoadFile(result["c"].as<std::string>());
+  // This is a dummy used to figure out the order of options (cmd > yml)
+  std::string script;
   // Initialize Lua
   sol::state lua;
   // Use all libraries
@@ -56,7 +59,11 @@ int main(int argc, char *argv[]) {
   //         analysis.
   CMolecularSystem *m_MolSys = new CMolecularSystem;
   // The parameterfile is read
-  m_MolSys->parameter->readParameter(result["f"].as<std::string>());
+  if (result["f"].count() > 0) {
+    m_MolSys->parameter->readParameter(result["f"].as<std::string>());
+  } else {
+    m_MolSys->parameter->readParameter(config["file"].as<std::string>());
+  }
   // System is initalized, memory allocated, ...
   m_MolSys->InitializeSystem();
 
@@ -151,8 +158,7 @@ int main(int argc, char *argv[]) {
   // s_k->initStrucFactor(*rdf, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy);
   // // ----------------------------------------------
 
-  if (config["transition"].as<bool>()) {
-
+  if (config["transition"]["use"].as<bool>()) {
     // --------------------------------------
     // Transition system block
     TransitionSystem *t_sys = new TransitionSystem;
@@ -169,9 +175,13 @@ int main(int argc, char *argv[]) {
     lua["number_of_particles"] = m_MolSys->parameter->nop;
     //   // t_sys->mightTrans(m_MolSys->parameter->nop, 4, 2900, 2950, coordH, coordL,
     //   //                   m_MolSys->parameter->trajFile, traj_steps);
-
+    if (result["s"].count() > 0) {
+      script = result["s"].as<std::string>();
+    } else {
+      script = config["transition"]["script"].as<std::string>();
+    }
     // Open the script
-    lua.script_file(result["s"].as<std::string>());
+    lua.script_file(script);
     // lua.script(R"(
     // test = my_class_func(1)
     // )");
