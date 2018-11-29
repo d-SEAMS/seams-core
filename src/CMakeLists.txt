@@ -6,6 +6,7 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 # Standard cmake stuff
 include(FindBLAS)
 include(FindLAPACK)
+include(FindBoost)
 
 # Add the new cpp files here
 add_executable( yodaStruct
@@ -30,6 +31,7 @@ include_directories(
   include/internal
   include/external
   ${LUA_INCLUDE_DIR}
+  ${Boost_INCLUDE_DIRS}
   )
 
 # Conan Stuff
@@ -41,6 +43,7 @@ conan_cmake_run(CONANFILE ../conanfile.txt  # or relative build/conanfile.txt
 # Find packages, including conan packages
 find_package(
   "Lua" REQUIRED
+  "Boost" REQUIRED
   "blaze"
   "yaml-cpp"
   "fmt"
@@ -48,6 +51,7 @@ find_package(
 
 # Link everything
 target_link_libraries(yodaStruct
+  ${Boost_LIBRARIES}
   ${LUA_LIBRARIES}
   CONAN_PKG::blaze
   CONAN_PKG::rang
