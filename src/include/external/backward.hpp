@@ -138,7 +138,7 @@
 //    - apt-get install binutils-dev
 //    - g++/clang++ -lbfd ...
 //
-#define BACKWARD_HAS_DWARF 1
+// #define BACKWARD_HAS_DWARF 1
 //  - libdwarf gives you the most juicy details out of your stack traces:
 //    - object filename
 //    - function name
