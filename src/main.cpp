@@ -132,8 +132,8 @@ int main(int argc, char *argv[]) {
   // s_k->initStrucFactor(*rdf3D, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy, m_MolSys->parameter->boxz);
   // // ----------------------------------------------
 
-  // // ----------------------------------------------
-  // //Rdf2D over multiple frames
+  // ----------------------------------------------
+  // Rdf2D over multiple frames
   if (config["rdf2D"]["use"].as<bool>()) {
     // Create object for 2D RDF
     Rdf2D *rdf = new Rdf2D;
