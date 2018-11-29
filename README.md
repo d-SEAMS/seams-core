@@ -40,6 +40,8 @@ directory where `input/` is a child directory.
 
 ```bash
 # Assuming you are in the build directory
+# Check help with -h
+# --script and --file are optional now
 ./yodaStruct --script ../lua_inputs/transition_diff.lua -f ../lua_inputs/parameter.txt -c ../lua_inputs/config.yml
 ``` 
 
