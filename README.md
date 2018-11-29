@@ -115,5 +115,6 @@ The libraries used are:
 - [sol2](https://github.com/ThePhD/sol2) for interfacing with lua
 - [yaml-cpp](https://github.com/jbeder/yaml-cpp) for working with `yaml`
 - [fmt](https://github.com/fmtlib/fmt) for safe and fast formatting
+- [GNU Scientific Library](https://www.gnu.org/software/gsl/) so as to not reinvent the wheel
 
 
