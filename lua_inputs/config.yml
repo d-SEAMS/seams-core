@@ -1,1 +1,4 @@
-transition: true
+file: "../lua_inputs/parameter.txt"
+transition:
+ use: false
+ script: "../lua_inputs/transition_diff.lua"
