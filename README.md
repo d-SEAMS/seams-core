@@ -20,6 +20,21 @@ the system `python`.
 pipenv install
 ```
 
+### Lua
+TODO: Move to conan
+
+Lua v5.3 is used for the scripting engine. It needs to be installed via the
+operating system's normal packaging system for now. If possible, install a
+version compiled with `c++`, not `c`.
+
+``` bash
+# Ubuntu and derivatives
+sudo apt install lua5.3 liblua5.3
+# ArchLinux
+sudo pacman -S lua
+```
+
+
 ## Build Things
 To generate the executable *yodaStruct* in `bin/` use:
 
@@ -89,11 +104,14 @@ The following tools are used in this project:
 - [Conan](https://conan.io/) and [https://pipenv.readthedocs.io/en/latest/](pipenv) for dependency management
 - [Doxygen](https://www.doxygen.org) for the developer API
 - [clang-format](https://clang.llvm.org/docs/ClangFormat.html) for code formatting
+- [lua](https://www.lua.org) for the scripting engine
+- [yaml](http://yaml.org/) for the configuration
 
 ## Third Party Libraries
 The libraries used are:
 - [rang](https://github.com/agauniyal/rang) for terminal styles (ANSI)
 - [sol2](https://github.com/ThePhD/sol2) for interfacing with lua
 - [cxxopts](https://github.com/jarro2783/cxxopts) for parsing command line options
+- [yaml-cpp](https://github.com/jbeder/yaml-cpp) for working with `yaml`
 
 
