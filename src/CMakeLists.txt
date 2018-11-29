@@ -5,6 +5,7 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 # Add the new cpp files here
 add_executable( yodaStruct
+  backward.cpp
   main.cpp
   molecule.cpp
   molecular_system.cpp
@@ -23,6 +24,7 @@ add_executable( yodaStruct
 include_directories(
   include/internal
   include/external
+  ${LUA_INCLUDE_DIR}
   )
 
 # Conan Stuff
@@ -31,17 +33,18 @@ conan_cmake_run(CONANFILE ../conanfile.txt  # or relative build/conanfile.txt
                 BASIC_SETUP CMAKE_TARGETS
                 BUILD missing)
 
-
 # Find packages, including conan packages
 find_package(
   "Lua" REQUIRED
   "yaml-cpp"
+  "fmt"
   "rang")
 
 # Link everything
 target_link_libraries(yodaStruct
   ${LUA_LIBRARIES}
   CONAN_PKG::rang
+  CONAN_PKG::fmt
   CONAN_PKG::yaml-cpp)
 
 # if(yaml-cpp_FOUND)
