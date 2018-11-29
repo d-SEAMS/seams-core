@@ -4,7 +4,6 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 # Standard cmake stuff
-include(FindGSL)
 include(FindBLAS)
 include(FindLAPACK)
 
@@ -18,6 +17,7 @@ add_executable( yodaStruct
   rdf3D.cpp
   rdf2D.cpp
   structure_factor.cpp
+  spherical_harmonics.cpp
   opt_parser.cpp
   output.cpp
   geometry.cpp
@@ -29,7 +29,6 @@ add_executable( yodaStruct
 include_directories(
   include/internal
   include/external
-  ${GSL_INCLUDE_DIRS}
   ${LUA_INCLUDE_DIR}
   )
 
@@ -42,7 +41,6 @@ conan_cmake_run(CONANFILE ../conanfile.txt  # or relative build/conanfile.txt
 # Find packages, including conan packages
 find_package(
   "Lua" REQUIRED
-  "GSL" REQUIRED
   "blaze"
   "yaml-cpp"
   "fmt"
@@ -51,7 +49,6 @@ find_package(
 # Link everything
 target_link_libraries(yodaStruct
   ${LUA_LIBRARIES}
-  ${GSL_LIBRARIES}
   CONAN_PKG::blaze
   CONAN_PKG::rang
   CONAN_PKG::fmt
