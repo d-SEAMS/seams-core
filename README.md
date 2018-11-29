@@ -116,5 +116,7 @@ The libraries used are:
 - [yaml-cpp](https://github.com/jbeder/yaml-cpp) for working with `yaml`
 - [fmt](https://github.com/fmtlib/fmt) for safe and fast formatting
 - [GNU Scientific Library](https://www.gnu.org/software/gsl/) so as to not reinvent the wheel
+- [Linear Algebra PACKage (LAPACK)](http://www.netlib.org/lapack/)
+- [Basic Linear Algebra Subprograms (BLAS)](http://www.netlib.org/blas/)
 
 
