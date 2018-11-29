@@ -109,11 +109,11 @@ The following tools are used in this project:
 
 ## Third Party Libraries
 The libraries used are:
+- [backward-cpp](https://github.com/bombela/backward-cpp) for better stacktraces without `gdb`
+- [cxxopts](https://github.com/jarro2783/cxxopts) for parsing command line options
 - [rang](https://github.com/agauniyal/rang) for terminal styles (ANSI)
 - [sol2](https://github.com/ThePhD/sol2) for interfacing with lua
-- [cxxopts](https://github.com/jarro2783/cxxopts) for parsing command line options
 - [yaml-cpp](https://github.com/jbeder/yaml-cpp) for working with `yaml`
-- [backward-cpp](https://github.com/bombela/backward-cpp) for better stacktraces
-  without `gdb`
+- [fmt](https://github.com/fmtlib/fmt) for safe and fast formatting
 
 
