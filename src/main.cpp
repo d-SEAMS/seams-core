@@ -72,10 +72,10 @@ int main(int argc, char *argv[]) {
   std::cout << " The total number of steps in the trajectory is " << traj_steps
             << "\n";
 
-  //Get random step info at a frame number
-  // int frame = 400; // 400 2000
-  // int nsteps = 100; // 50 100
-  // m_MolSys->readParticleFile(frame);
+  // Get random step info at a frame number
+  int frame = 4;   // 400 2000
+  int nsteps = 10; // 50 100
+  m_MolSys->readParticleFile(frame);
 
   // // ----------------------------------------
   // // 3D RDF (single step)
@@ -102,27 +102,29 @@ int main(int argc, char *argv[]) {
   // // Free the memory
   // rdf->deleteRDF2D();
 
-  // // ----------------------------------------------
-  // //Rdf3D over multiple frames
-  // // Create object for 3D RDF
-  // Rdf3D *rdf3D = new Rdf3D;
-  //  // Testing 3D rdf function. RDF calculated is incorrect if the wrong volume is set
-  // double volume = m_MolSys->parameter->boxx*m_MolSys->parameter->boxy*m_MolSys->parameter->boxz;
-  // rdf3D->initRDF3D(*m_MolSys, 0.01, volume);
-  // // Loop through steps
-  // for (int istep=1; istep<=nsteps; istep++)
-  // {
-  //     // Get the coordinates at a particule step
-  //     m_MolSys->readParticleFile(frame+istep);
-  //     // Get the 3D RDF at this step
-  //     rdf3D->accumulateRDF3D(*m_MolSys, 2, 2);
-  // }
+  // ----------------------------------------------
+  //Rdf3D over multiple frames
+  if (config["rdf3D"]["use"].as<bool>()) {
+    // Create object for 3D RDF
+    Rdf3D *rdf3D = new Rdf3D;
+    // Testing 3D rdf function. RDF calculated is incorrect if the wrong volume is set
+    double volume = m_MolSys->parameter->boxx * m_MolSys->parameter->boxy *
+                    m_MolSys->parameter->boxz;
+    rdf3D->initRDF3D(*m_MolSys, 0.01, volume);
+    // Loop through steps
+    for (int istep = 1; istep <= nsteps; istep++) {
+      // Get the coordinates at a particule step
+      m_MolSys->readParticleFile(frame + istep);
+      // Get the 3D RDF at this step
+      rdf3D->accumulateRDF3D(*m_MolSys, 2, 2);
+    }
 
-  // // Normalizes the RDF (required for multiple steps. This
-  // // is called automatically in the single step RDF function)
-  // rdf3D->normalizeRDF3D();
-  // // Print the RDF
-  // rdf3D->printRDF3D();
+    // Normalizes the RDF (required for multiple steps. This
+    // is called automatically in the single step RDF function)
+    rdf3D->normalizeRDF3D();
+    // Print the RDF
+    rdf3D->printRDF3D();
+  }
 
   // // ----------------------------------------------
   // //Structure Factor from 3D RDF
@@ -132,26 +134,28 @@ int main(int argc, char *argv[]) {
 
   // // ----------------------------------------------
   // //Rdf2D over multiple frames
-  // // Create object for 2D RDF
-  // Rdf2D *rdf = new Rdf2D;
-  //  // Testing 2D rdf function. RDF calculated is incorrect if the wrong volume is set
-  // // double volume = (8)*m_MolSys->parameter->boxx*m_MolSys->parameter->boxy;
-  // rdf->initRDFxy(*m_MolSys, 0.03, 15);
-  // // Loop through steps
-  // for (int istep=1; istep<=nsteps; istep++)
-  // {
-  //     // Get the coordinates at a particule step
-  //     m_MolSys->readParticleFile(frame+istep);
-  //     // Get the 2D RDF at this step
-  //     rdf->accumulateRDFxy(*m_MolSys, 17.85, 0.8, 2, 2);
-  // }
+  if (config["rdf2D"]["use"].as<bool>()) {
+    // Create object for 2D RDF
+    Rdf2D *rdf = new Rdf2D;
+    // Testing 2D rdf function. RDF calculated is incorrect if the wrong volume is set
+    // double volume = (8)*m_MolSys->parameter->boxx*m_MolSys->parameter->boxy;
+    rdf->initRDFxy(*m_MolSys, 0.03, 15);
+    // Loop through steps
+    for (int istep = 1; istep <= nsteps; istep++) {
+      // Get the coordinates at a particule step
+      m_MolSys->readParticleFile(frame + istep);
+      // Get the 2D RDF at this step
+      rdf->accumulateRDFxy(*m_MolSys, 17.85, 0.8, 2, 2);
+    }
 
-  // // Normalizes the RDF (required for multiple steps. This
-  // // is called automatically in the single step RDF function)
-  // // The width of the layer is the argument
-  // rdf->normalizeRDF2D(0.8);
-  // // Print the RDF
-  // rdf->printRDF2D();
+    // Normalizes the RDF (required for multiple steps. This
+    // is called automatically in the single step RDF function)
+    // The width of the layer is the argument
+    rdf->normalizeRDF2D(0.8);
+    // Print the RDF
+    rdf->printRDF2D();
+  }
+
   // // ----------------------------------------------
   // //Structure Factor from RDF
   // StructureFactor *s_k = new StructureFactor;
