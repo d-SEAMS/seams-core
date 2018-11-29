@@ -54,7 +54,3 @@ target_link_libraries(yodaStruct
 # endif()
 
 # target_link_libraries(yodaStruct ${CONAN_LIBS})
-
-# Cotire
-include(Cotire)
-cotire(yodaStruct)

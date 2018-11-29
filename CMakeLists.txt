@@ -238,13 +238,6 @@ if(NOT EXISTS "cmake/Conan.cmake")
                  "cmake/Conan.cmake")
 endif()
 
-# Cotire
-if(NOT EXISTS "cmake/Cotire.cmake")
-   message(STATUS "Downloading Cotire.cmake from https://github.com/sakra/cotire")
-   file(DOWNLOAD "https://raw.githubusercontent.com/sakra/cotire/cotire-1.8.0/cotire.cmake"
-                 "cmake/Cotire.cmake")
-endif()
-
 # Catch
 
 include(CTest)
