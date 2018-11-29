@@ -6,7 +6,7 @@
 
 // Copyright (c) 2018 Amrita Goswami, Rohit Goswami
 //
-// amrita16thaug646@gmail.com
+// amrita16thaug646[at]gmail.com, r95g10[at]gmail.com
 // This code has been written for the purpose of obtaining the 1-D analogue of the Structure
 // factor for a confined system, from a lammps trajectory file.
 //
