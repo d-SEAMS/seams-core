@@ -2,6 +2,8 @@
 #include "transition.h"
 #include <bits/stdc++.h>
 
+using namespace trans;
+
 /********************************************/ /**
  *  Constructor
  ***********************************************/
