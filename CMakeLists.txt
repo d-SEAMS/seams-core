@@ -7,7 +7,7 @@
 
 # CMake version
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 # Some Defaults
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
