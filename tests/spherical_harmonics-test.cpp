@@ -83,19 +83,19 @@ SCENARIO("Test the boost spherical harmonics", "[sphericalHarmonics]") {
 TEST_CASE("No negative values for harmonics", "[radialNegative]") {
   std::srand(std::time(0)); //use current time as seed for random generator
   // Initialize Variables
-  int random_variable = std::rand();
+  double random_variable = std::rand();
   std::array<double, 3> testPoint;
   std::array<double, 2> null{0, 0};
   // Always Positive
-  testPoint = {std::rand(), std::rand(), std::rand()};
+  testPoint = {random_variable, random_variable, random_variable};
   REQUIRE(trans::radialCoord(testPoint) >= null);
-  testPoint = {-std::rand(), std::rand(), std::rand()};
+  testPoint = {-random_variable, random_variable, random_variable};
   REQUIRE(trans::radialCoord(testPoint) >= null);
-  testPoint = {-std::rand(), std::rand(), -std::rand()};
+  testPoint = {-random_variable, random_variable, -random_variable};
   REQUIRE(trans::radialCoord(testPoint) >= null);
   // Always Negative
-  testPoint = {-std::rand(), -std::rand(), std::rand()};
+  testPoint = {-random_variable, -random_variable, random_variable};
   REQUIRE(trans::radialCoord(testPoint) <= null);
-  testPoint = {-std::rand(), -std::rand(), -std::rand()};
+  testPoint = {-random_variable, -random_variable, -random_variable};
   REQUIRE(trans::radialCoord(testPoint) <= null);
 }
