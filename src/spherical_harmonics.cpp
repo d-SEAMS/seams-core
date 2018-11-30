@@ -23,30 +23,21 @@ spheriHarmo(int orderL, blaze::StaticVector<double, 2UL> radialCoord) {
   return result;
 }
 
-// std::array<double, 2> radialCoord(std::array<double, 3> cartCoord) {
-//   std::cout << cartCoord[0];
-//   std::cout << cartCoord[1];
-//   std::cout << cartCoord[2];
-//   // The output
-//   std::array<double, 2> result;
-//   // Point Definitions
-//   bg::model::point<long double, 3, bg::cs::cartesian> cartesianPoint;
-//   bg::model::point<long double, 2, bg::cs::spherical<bg::degree>> azuPoint;
-//   // Set Value (TODO: Recurse this)
-//   bg::set<0>(cartesianPoint, cartCoord[0]);
-//   bg::set<1>(cartesianPoint, cartCoord[1]);
-//   bg::set<2>(cartesianPoint, cartCoord[2]);
+std::array<double, 2> radialCoord(std::array<double, 3> cartCoord) {
+  // The output
+  std::array<double, 2> result;
+  // Point Definitions
+  bg::model::point<long double, 3, bg::cs::cartesian> cartesianPoint;
+  bg::model::point<long double, 3, bg::cs::spherical<bg::radian>> azuPoint;
+  // Set Value (TODO: Recurse this)
+  bg::set<0>(cartesianPoint, cartCoord[0]);
+  bg::set<1>(cartesianPoint, cartCoord[1]);
+  bg::set<2>(cartesianPoint, cartCoord[2]);
 
-//   // Transform
-//   bg::transform(cartesianPoint, azuPoint);
-//   result[0] = bg::get<0>(azuPoint);
-//   result[1] = bg::get<1>(azuPoint);
-//   // Test
-//   std::cout << "x=" << bg::get<0>(cartesianPoint) << " should be "
-//             << cartCoord[0] << " is now " << result[0] << std::endl
-//             << " y=" << bg::get<1>(cartesianPoint) << " should be "
-//             << cartCoord[1] << " is now " << result[1] << std::endl
-//             << " z=" << bg::get<2>(cartesianPoint) << " should be "
-//             << cartCoord[2] << std::endl;
-//   return result;
-// }
+  // Transform
+  bg::transform(cartesianPoint, azuPoint);
+  result[0] = bg::get<0>(azuPoint);
+  result[1] = bg::get<1>(azuPoint);
+
+  return result;
+}
