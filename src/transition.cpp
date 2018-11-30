@@ -138,5 +138,6 @@ double TransitionSystem::timeAtomAvg(int nop) {
   if (norm != 0) {
     return sum / norm;
   }
+  // TODO: Error handling
   return -1000;
 }
