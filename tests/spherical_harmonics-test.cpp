@@ -28,7 +28,7 @@ SCENARIO("Get θ and ϕ from cartesian coordinates", "[sphereAngle]") {
     std::array<double, 3> testPoint{1.732, 0, 1};
     std::array<double, 2> convertedPoint{0, 0};
     WHEN("A coordinate transform occurs") {
-      convertedPoint = radialCoord(testPoint);
+      convertedPoint = trans::radialCoord(testPoint);
       THEN("We get the polar and azimuthal angles.") {
         REQUIRE(convertedPoint.size() == 2);
         REQUIRE_THAT(convertedPoint[0], Catch::Matchers::WithinAbs(0, 1.0e-10));
