@@ -44,6 +44,17 @@ pipenv shell
 # Always prefer an out of tree build
 mkdir build
 cd build
+
+#
+# OPTIONAL STEP (TODO: Use CMakeLists.txt to figure this out)
+#
+# We prefer clang, so if you have it, use it
+export CXX=/usr/bin/clang++
+export CC=/usr/bin/clang
+#
+# END OPTIONAL
+#
+
 # If you forget the flag you will build the Debug version
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make
@@ -101,6 +112,7 @@ Where some of the above suggestions are derived from [this depreciated githook](
 # Acknowledgements
 The following tools are used in this project:
 - [CMake](https://cmake.org/) for compilation ([cmake-init](https://github.com/cginternals/cmake-init) was used as a reference)
+- [Clang](https://clang.llvm.org/) because it is more descriptive with better tools
 - [Conan](https://conan.io/) and [https://pipenv.readthedocs.io/en/latest/](pipenv) for dependency management
 - [Doxygen](https://www.doxygen.org) for the developer API
 - [clang-format](https://clang.llvm.org/docs/ClangFormat.html) for code formatting
