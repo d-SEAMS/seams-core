@@ -29,6 +29,7 @@
 #include "parameter.h"
 #include "rdf2D.h"
 #include "rdf3D.h"
+#include "spherical_harmonics.h"
 #include "structure_factor.h"
 #include "transition.h"
 
@@ -40,6 +41,9 @@
 #include <fmt/core.h>
 #include <rang.hpp>
 #include <yaml-cpp/yaml.h>
+
+// Temp
+#include <blaze/math/StaticVector.h>
 
 int main(int argc, char *argv[]) {
 
@@ -180,6 +184,15 @@ int main(int argc, char *argv[]) {
     } else {
       script = config["transition"]["script"].as<std::string>();
     }
+    // Bind Harmonics
+    blaze::StaticVector<double, 2UL, blaze::columnVector> b{1, 2};
+    std::array<double, 3> coordi = {1, 2, 3};
+    std::cout << coordi[0];
+    std::cout << coordi[1];
+    std::cout << coordi[2];
+    std::cout << "c =\n" << b << "\n";
+    radialCoord(coordi);
+    spheriHarmo(1, b);
     // Run the script
     lua.script_file(script);
   }
