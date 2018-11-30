@@ -6,15 +6,18 @@ blaze::StaticVector<std::complex<double>, 7UL>
 trans::spheriHarmo(int orderL, blaze::StaticVector<double, 2UL> radialCoord) {
   // Iterate over the index of order
   std::vector<int> v = {-3, -2, -1, 0, 1, 2, 3};
+  // For keeping track of the index of the output vector
+  int i(0);
   blaze::StaticVector<std::complex<double>, 7UL> result;
   for (auto n : v) {
     auto theta = radialCoord[1];
     auto phi = radialCoord[0];
     // This is for l=3
-    std::complex<double> b = boost::math::spherical_harmonic(3, n, theta, phi);
-    // std::complex<double> b2 = boost::math::spherical_harmonic(3, n, 0.524, 0);
-    // std::complex<double> b1 = boost::math::spherical_harmonic(3, n, 1.047, 0);
-    result[n] = b;
+    std::complex<double> b =
+        boost::math::spherical_harmonic(orderL, n, theta, phi);
+    result[i] = b;
+    // Update the index
+    i++;
   }
   return result;
 }
