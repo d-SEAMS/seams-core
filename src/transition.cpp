@@ -1,6 +1,8 @@
 #include "geometry.h"
 #include "transition.h"
 
+using namespace trans;
+
 /********************************************/ /**
  *  Constructor
  ***********************************************/
