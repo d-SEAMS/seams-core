@@ -2,6 +2,7 @@ add_executable(yodaStruct_test
                main.cpp
                spherical_harmonics-test.cpp
                ${PROJECT_SOURCE_DIR}/src/spherical_harmonics.cpp
+               neighbors-test.cpp
 )
 
 include(Conan)
