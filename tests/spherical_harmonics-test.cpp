@@ -42,7 +42,7 @@ SCENARIO("Get θ and ϕ from cartesian coordinates", "[sphereAngle]") {
           std::cout << rang::fg::blue << s << ' ' << rang::style::reset;
 
         std::cout << std::endl;
-        std::cout << rang::style::bold << "<θ,ϕ>" << std::endl
+        std::cout << rang::style::bold << "<ϕ,θ>" << std::endl
                   << rang::style::reset;
         for (const auto &s : convertedPoint)
           std::cout << rang::fg::green << s << ' ' << rang::style::reset;
@@ -82,16 +82,20 @@ SCENARIO("Test the boost spherical harmonics", "[sphericalHarmonics]") {
 
 TEST_CASE("No negative values for harmonics", "[radialNegative]") {
   std::srand(std::time(0)); //use current time as seed for random generator
+  // Initialize Variables
   int random_variable = std::rand();
-  std::array<double, 3> testPoint{std::rand(), std::rand(), std::rand()};
+  std::array<double, 3> testPoint;
   std::array<double, 2> null{0, 0};
+  // Always Positive
+  testPoint = {std::rand(), std::rand(), std::rand()};
   REQUIRE(trans::radialCoord(testPoint) >= null);
   testPoint = {-std::rand(), std::rand(), std::rand()};
   REQUIRE(trans::radialCoord(testPoint) >= null);
-  testPoint = {-std::rand(), -std::rand(), std::rand()};
-  REQUIRE(trans::radialCoord(testPoint) <= null);
   testPoint = {-std::rand(), std::rand(), -std::rand()};
   REQUIRE(trans::radialCoord(testPoint) >= null);
+  // Always Negative
+  testPoint = {-std::rand(), -std::rand(), std::rand()};
+  REQUIRE(trans::radialCoord(testPoint) <= null);
   testPoint = {-std::rand(), -std::rand(), -std::rand()};
   REQUIRE(trans::radialCoord(testPoint) <= null);
 }
