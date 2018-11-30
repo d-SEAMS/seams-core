@@ -120,5 +120,5 @@ The libraries used are:
 - [Boost Geometry](https://www.boost.org/doc/libs/1_68_0/libs/geometry/doc/html/index.html) for working with different coordinates
 - [Boost Math](https://www.boost.org/doc/libs/?view=category_math) for spherical harmonics
 - [Blaze](https://bitbucket.org/blaze-lib/blaze/) for very fast modern linear algebra
-
+- [nanoflann](https://github.com/jlblancoc/nanoflann) to calculate nearest neighbors
 
