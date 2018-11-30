@@ -10,6 +10,8 @@
 #include <sstream>
 #include <string>
 
+namespace trans {
+
 /*! \brief Truncated minimal class for frame data.
  *          Blah
  *
@@ -46,5 +48,7 @@ public:
                   std::array<double, 3> coordLow, std::string fileName,
                   int nstep);
 };
+
+} // namespace trans
 
 #endif

@@ -167,10 +167,10 @@ int main(int argc, char *argv[]) {
   // --------------------------------------
   // Transition system block
   if (config["transition"]["use"].as<bool>()) {
-    TransitionSystem *t_sys = new TransitionSystem;
+    trans::TransitionSystem *t_sys = new trans::TransitionSystem;
     // Bind Function to class instance
-    lua.set_function("transition_probability", &TransitionSystem::mightTrans,
-                     t_sys);
+    lua.set_function("transition_probability",
+                     &trans::TransitionSystem::mightTrans, t_sys);
     // Pass variables to lua
     lua["trajectory_file"] = m_MolSys->parameter->trajFile;
     lua["steps_in_trajectory"] = traj_steps;
