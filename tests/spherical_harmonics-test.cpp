@@ -51,3 +51,31 @@ SCENARIO("Get θ and ϕ from cartesian coordinates", "[sphereAngle]") {
     }
   }
 }
+
+SCENARIO("Test the boost spherical harmonics", "[sphericalHarmonics]") {
+  GIVEN("A blaze static vector (2) of angles") {
+    int orderL = 3;
+    // {θ,ϕ}
+    blaze::StaticVector<double, 2UL> testAngles{0, 1.047};
+    blaze::StaticVector<std::complex<double>, 7UL> harmonicVector;
+    WHEN("Yₗₘ is calculated") {
+      harmonicVector = trans::spheriHarmo(orderL, testAngles);
+      THEN("We get the polar and azimuthal angles.") {
+        REQUIRE(harmonicVector.size() == 7);
+        // Test
+        std::cout << std::endl;
+        std::cout << rang::style::bold << "<θ,ϕ>" << std::endl
+                  << rang::style::reset;
+        for (const auto &s : testAngles)
+          std::cout << rang::fg::green << s << ' ' << rang::style::reset;
+        std::cout << std::endl;
+        std::cout << rang::style::bold << "Transposed result vector"
+                  << std::endl
+                  << rang::style::reset;
+        for (const auto &s : harmonicVector)
+          std::cout << rang::fg::blue << s << ' ' << rang::style::reset;
+        std::cout << std::endl;
+      }
+    }
+  }
+}
