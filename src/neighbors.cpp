@@ -108,6 +108,11 @@ neigh::PointCloud<double> neigh::treeKNN::byNumber(int particle,
     resultCloud.pts[i].z = resZ;
   }
 
+  // Prep box for output
+  resultCloud.box[0] = frame->parameter->boxx;
+  resultCloud.box[1] = frame->parameter->boxy;
+  resultCloud.box[2] = frame->parameter->boxz;
+  // Send resultCloud out
   return resultCloud;
 }
 
