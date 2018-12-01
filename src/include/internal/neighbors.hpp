@@ -43,7 +43,6 @@ template <typename T> struct PointCloud {
 
 class treeKNN {
 private:
-public:
   //  Super cool C++11
   std::array<double, 3> coordHigh;
   std::array<double, 3> coordLow;
@@ -53,8 +52,7 @@ public:
   // Check if atom is within limits
   bool isThere(int iatom, CMolecularSystem *frame);
 
-  // Things above this are actually private.
-
+public:
   treeKNN();
   virtual ~treeKNN();
 
@@ -63,6 +61,10 @@ public:
   // Returns the points as a vector and the distance
   // std::vector<double> byNumber();
 
+  // Prepare the system to do knn stuff
+  int initKNN(int nop, std::string filename, int frameNum, int typeI);
+
+  // Consider adding a MAX, to get less than nearest if the distance is greater than the MAX
   neigh::PointCloud<double> byNumber(int particle, size_t nearest);
   // void kdtree_demo();
 };

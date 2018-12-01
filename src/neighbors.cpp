@@ -134,91 +134,20 @@ bool neigh::treeKNN::isThere(int iatom, CMolecularSystem *frame) {
   }
   return false;
 }
-/********************************************/ /**
- *  Template Functions
- ***********************************************/
-// void neigh::treeKNN::kdtree_demo() {
-//   neigh::treeKNN::PointCloud<double> cloud;
 
-//   // Generate points:
-//   cloud.pts.resize(10);
-//   for (size_t i = 0; i < 10; i++) {
-//     // point.pts[i].x = max_range * (rand() % 1000) / T(1000);
-//     // point.pts[i].y = max_range * (rand() % 1000) / T(1000);
-//     // point.pts[i].z = max_range * (rand() % 1000) / T(1000);
-//     // Between -1 and 1
-//     cloud.pts[i].x = 2 * (((double)rand()) / RAND_MAX) - 1;
-//     cloud.pts[i].y = 2 * (((double)rand()) / RAND_MAX) - 1;
-//     cloud.pts[i].z = 2 * (((double)rand()) / RAND_MAX) - 1;
-//   }
-
-//   // construct a kd-tree index:
-//   typedef nanoflann::KDTreeSingleIndexAdaptor<
-//       nanoflann::L2_Simple_Adaptor<double, neigh::treeKNN::PointCloud<double>>,
-//       neigh::treeKNN::PointCloud<double>, 3 /* dim */
-//       >
-//       my_kd_tree_t;
-
-//   my_kd_tree_t index(
-//       3 /*dim*/, cloud,
-//       nanoflann::KDTreeSingleIndexAdaptorParams(10 /* max leaf */));
-//   index.buildIndex();
-
-// #if 0
-// 	// Test resize of dataset and rebuild of index:
-// 	cloud.pts.resize(cloud.pts.size()*0.5);
-// 	index.buildIndex();
-// #endif
-
-//   const double query_pt[3] = {4.4, 4.25, 9.4};
-
-//   // ----------------------------------------------------------------
-//   // knnSearch():  Perform a search for the N closest points
-//   // ----------------------------------------------------------------
-//   {
-//     size_t num_results = 5;
-//     std::vector<size_t> ret_index(num_results);
-//     std::vector<double> out_dist_sqr(num_results);
-
-//     num_results = index.knnSearch(&query_pt[0], num_results, &ret_index[0],
-//                                   &out_dist_sqr[0]);
-
-//     // In case of less points in the tree than requested:
-//     ret_index.resize(num_results);
-//     out_dist_sqr.resize(num_results);
-
-//     std::cout << "knnSearch(): num_results=" << num_results << "\n";
-//     for (size_t i = 0; i < num_results; i++)
-//       std::cout << "idx[" << i << "]=" << ret_index[i] << " dist[" << i
-//                 << "]=" << out_dist_sqr[i] << std::endl;
-//     std::cout << "\n";
-
-//     std::cout << "point coordinates"
-//               << "\n";
-//     for (size_t i = 0; i < 3; i++)
-//       std::cout << " coord[" << i
-//                 << "]=" << cloud.kdtree_get_pt(ret_index[0], i);
-//     std::cout << "\n";
-//   }
-
-//   // ----------------------------------------------------------------
-//   // radiusSearch(): Perform a search for the points within search_radius
-//   // ----------------------------------------------------------------
-//   {
-//     const double search_radius = static_cast<double>(0.5);
-//     std::vector<std::pair<size_t, double>> ret_matches;
-
-//     nanoflann::SearchParams params;
-//     //params.sorted = false;
-
-//     const size_t nMatches =
-//         index.radiusSearch(&query_pt[0], search_radius, ret_matches, params);
-
-//     std::cout << "radiusSearch(): radius=" << search_radius << " -> "
-//               << nMatches << " matches\n";
-//     for (size_t i = 0; i < nMatches; i++)
-//       std::cout << "idx[" << i << "]=" << ret_matches[i].first << " dist[" << i
-//                 << "]=" << ret_matches[i].second << std::endl;
-//     std::cout << "\n";
-//   }
-// }
+// Dummy driver (int for error handling)
+// Since the main function reads the traj file, nop is known
+int neigh::treeKNN::initKNN(int nop, std::string filename, int frameNum,
+                            int typeI) {
+  // nsteps must be greater than the frame number here (single frame handling)
+  int nstep = frameNum + 1;
+  // Prepares the frame
+  this->prepFrame(nop, filename);
+  // Use nsteps (dummy)
+  this->frame->parameter->nsteps = nstep;
+  // Read the file
+  this->frame->readParticleFile(frameNum);
+  // Now we populate the cloud (make int and do error handling)
+  this->populateCloud(typeI);
+  return 1;
+}
