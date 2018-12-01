@@ -105,7 +105,6 @@ bool TransitionSystem::isThere(int iatom, CMolecularSystem *frame) {
   double coordY = frame->molecules[iatom].get_posy();
   double coordZ = frame->molecules[iatom].get_posz();
   std::array<double, 3> coord = {coordX, coordY, coordZ};
-  // TODO: Handle non x-dimension things
   for (int i = 0; i < 3; i++) {
     if (coordHigh[i] == coordLow[i]) {
       return true;
