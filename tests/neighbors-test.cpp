@@ -11,11 +11,12 @@
 SCENARIO("Test the neighborlist (number) generation", "[KNNneighborlist]") {
   GIVEN("A file with coordinates and the number of nearest neighbors") {
     auto tkn = new neigh::treeKNN;
+    // std::array<double, 3> testBox = {7.38, 7.38, 7.38};
     // std::array<double, 3> cH{3.2, 5.2, 5.2};
     // std::array<double, 3> cL{0, 0, 0};
     neigh::PointCloud<double> resultCloud;
     int typeP = 1;
-    int frmN = 4;
+    int frmN = 1;
     int np = 432;
     int nstep = 10;
     std::string filename = "../input/traj/dump-bcc.lammpstrj";
@@ -27,7 +28,7 @@ SCENARIO("Test the neighborlist (number) generation", "[KNNneighborlist]") {
       // tkn->coordLow = cL;
       tkn->populateCloud(typeP);
       THEN("We run the KNN search") {
-        resultCloud = tkn->byNumber(11, 5);
+        resultCloud = tkn->byNumber(0, 5);
         THEN("We get a resultCloud") {
           REQUIRE(resultCloud.pts.size() < 7);
           // // Test

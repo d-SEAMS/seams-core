@@ -24,11 +24,13 @@
 
 // Use the nanoflann namespace
 namespace nanoflann {
+
 template <class T, class DataSource, typename _DistanceType = T>
 struct L2_Simple_Adaptor_MD {
   typedef T ElementType;
   typedef _DistanceType DistanceType;
-  double box[3] = {7.438, 7.438, 7.438};
+
+  std::array<double, 3> box = {7.4368, 7.4368, 7.4368};
 
   const DataSource &data_source;
 
@@ -39,12 +41,11 @@ struct L2_Simple_Adaptor_MD {
                                  size_t size) const {
     DistanceType result = DistanceType();
     for (size_t i = 0; i < size; ++i) {
-      const DistanceType diff =
-          diff -
-          box[i] * round(a[i] - data_source.kdtree_get_pt(b_idx, i) / box[i]);
-      result += diff * diff;
+      const DistanceType diff = a[i] - data_source.kdtree_get_pt(b_idx, i);
+      const DistanceType del = diff - box[i] * round(diff / box[i]);
+      result += del * del;
     }
-    return sqrt(result);
+    return result;
   }
 
   template <typename U, typename V>
