@@ -39,12 +39,11 @@ struct L2_Simple_Adaptor_MD {
                                  size_t size) const {
     DistanceType result = DistanceType();
     for (size_t i = 0; i < size; ++i) {
-      const DistanceType diff =
-          diff -
-          box[i] * round(a[i] - data_source.kdtree_get_pt(b_idx, i) / box[i]);
-      result += diff * diff;
+      const DistanceType diff = a[i] - data_source.kdtree_get_pt(b_idx, i);
+      const DistanceType del = diff - box[1] * round(diff / box[1]);
+      result += del * del;
     }
-    return sqrt(result);
+    return result;
   }
 
   template <typename U, typename V>
