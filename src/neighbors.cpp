@@ -84,17 +84,17 @@ neigh::PointCloud<double> neigh::treeKNN::byNumber(int particle,
   ret_index.resize(realNeighbors);
   out_dist_sqr.resize(realNeighbors);
 
-  std::cout << "knnSearch(): num_results=" << realNeighbors << "\n";
-  for (size_t i = 0; i < realNeighbors; i++)
-    std::cout << "idx[" << i << "]=" << ret_index[i] << " dist[" << i
-              << "]=" << out_dist_sqr[i] << std::endl;
-  std::cout << "\n";
+  // std::cout << "knnSearch(): num_results=" << realNeighbors << "\n";
+  // for (size_t i = 0; i < realNeighbors; i++)
+  //   std::cout << "idx[" << i << "]=" << ret_index[i] << " dist[" << i
+  //             << "]=" << out_dist_sqr[i] << std::endl;
+  // std::cout << "\n";
 
-  std::cout << "point coordinates"
-            << "\n";
-  for (size_t i = 0; i < 3; i++)
-    std::cout << " coord[" << i << "]=" << cloud.kdtree_get_pt(ret_index[0], i);
-  std::cout << "\n";
+  // std::cout << "point coordinates"
+  //           << "\n";
+  // for (size_t i = 0; i < 3; i++)
+  //   std::cout << " coord[" << i << "]=" << cloud.kdtree_get_pt(ret_index[0], i);
+  // std::cout << "\n";
 
   // Prepare output
   resultCloud.pts.resize(nearest);
