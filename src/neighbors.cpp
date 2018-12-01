@@ -50,9 +50,10 @@ void neigh::treeKNN::populateCloud(int typeI) {
 // Implements knnSearch to get the nearest neighbor indices and return a pointcloud
 neigh::PointCloud<double> neigh::treeKNN::byNumber(int particle,
                                                    size_t nearest) {
+  size_t realNeighbors = nearest + 1;
   neigh::PointCloud<double> resultCloud;
-  std::vector<size_t> ret_index(nearest);
-  std::vector<double> out_dist_sqr(nearest);
+  std::vector<size_t> ret_index(realNeighbors);
+  std::vector<double> out_dist_sqr(realNeighbors);
   double X = cloud.pts[particle].x;
   double Y = cloud.pts[particle].y;
   double Z = cloud.pts[particle].z;
@@ -73,15 +74,15 @@ neigh::PointCloud<double> neigh::treeKNN::byNumber(int particle,
 	index.buildIndex();
 #endif
 
-  nearest =
-      index.knnSearch(&query_pt[0], nearest, &ret_index[0], &out_dist_sqr[0]);
+  realNeighbors = index.knnSearch(&query_pt[0], realNeighbors, &ret_index[0],
+                                  &out_dist_sqr[0]);
 
   // In case of less points in the tree than requested:
-  ret_index.resize(nearest);
-  out_dist_sqr.resize(nearest);
+  ret_index.resize(realNeighbors);
+  out_dist_sqr.resize(realNeighbors);
 
-  std::cout << "knnSearch(): num_results=" << nearest << "\n";
-  for (size_t i = 0; i < nearest; i++)
+  std::cout << "knnSearch(): num_results=" << realNeighbors << "\n";
+  for (size_t i = 0; i < realNeighbors; i++)
     std::cout << "idx[" << i << "]=" << ret_index[i] << " dist[" << i
               << "]=" << out_dist_sqr[i] << std::endl;
   std::cout << "\n";
@@ -94,10 +95,14 @@ neigh::PointCloud<double> neigh::treeKNN::byNumber(int particle,
 
   // Prepare output
   resultCloud.pts.resize(nearest);
+  double resX, resY, resZ;
   for (int i = 0; i < nearest; i++) {
-    resultCloud.pts[i].x = cloud.kdtree_get_pt(ret_index[0], i);
-    resultCloud.pts[i].y = cloud.kdtree_get_pt(ret_index[1], i);
-    resultCloud.pts[i].z = cloud.kdtree_get_pt(ret_index[2], i);
+    resX = cloud.kdtree_get_pt(ret_index[i + 1], 0);
+    resY = cloud.kdtree_get_pt(ret_index[i + 1], 1);
+    resZ = cloud.kdtree_get_pt(ret_index[i + 1], 2);
+    resultCloud.pts[i].x = resX;
+    resultCloud.pts[i].y = resY;
+    resultCloud.pts[i].z = resZ;
   }
 
   return resultCloud;
