@@ -45,6 +45,9 @@ void neigh::treeKNN::populateCloud(int typeI) {
       }
     }
   }
+  cloud.box[0] = frame->parameter->boxx;
+  cloud.box[1] = frame->parameter->boxy;
+  cloud.box[2] = frame->parameter->boxz;
 }
 
 // Implements knnSearch to get the nearest neighbor indices and return a pointcloud

@@ -16,6 +16,8 @@ template <typename T> struct PointCloud {
 
   std::vector<Point> pts;
 
+  std::array<double, 3> box;
+
   // Must return the number of data points
   inline size_t kdtree_get_point_count() const { return pts.size(); }
 
