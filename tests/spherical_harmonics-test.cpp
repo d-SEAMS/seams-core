@@ -52,6 +52,7 @@ SCENARIO("Get θ and ϕ from cartesian coordinates", "[sphereAngle]") {
   }
 }
 
+// TODO: Test transposed result vectors by value, like in the neighbors test
 SCENARIO("Test the boost spherical harmonics", "[sphericalHarmonics]") {
   GIVEN("A blaze static vector (2) of angles") {
     int orderL = 3;
