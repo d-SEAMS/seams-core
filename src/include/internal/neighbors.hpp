@@ -5,7 +5,7 @@
 #include "molecule.h"
 #include "parameter.h"
 #include <iostream>
-#include <nanoflann.hpp>
+#include <yodaNanoFlann.hpp>
 
 namespace neigh {
 // Struct to hold points and functions

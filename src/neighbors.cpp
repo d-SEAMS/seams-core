@@ -60,7 +60,7 @@ neigh::PointCloud<double> neigh::treeKNN::byNumber(int particle,
   const double query_pt[3] = {X, Y, Z};
   // construct a kd-tree index:
   typedef nanoflann::KDTreeSingleIndexAdaptor<
-      nanoflann::L2_Simple_Adaptor<double, neigh::PointCloud<double>>,
+      nanoflann::L2_Simple_Adaptor_MD<double, neigh::PointCloud<double>>,
       neigh::PointCloud<double>, 3 /* dim */
       >
       my_tree;
