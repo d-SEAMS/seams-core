@@ -257,7 +257,7 @@ void CMolecularSystem::readParticleFile(int step) {
   int typeNum;
   int xNum;
   std::array<double, 3> box;
-  dumpFile.open(parameter->trajFile.c_str(), std::ifstream::in);
+  dumpFile.open(this->parameter->trajFile.c_str(), std::ifstream::in);
 
   // Error handling for an invalid step
   // TODO: Do this better, maybe use <optional> wrt. https://stackoverflow.com/a/47677892/1895378
@@ -294,9 +294,9 @@ void CMolecularSystem::readParticleFile(int step) {
         std::getline(dumpFile, line);
         box[k] = this->getBoxLength(line);
       }
-      parameter->boxx = box[0];
-      parameter->boxy = box[1];
-      parameter->boxz = box[2];
+      this->parameter->boxx = box[0];
+      this->parameter->boxy = box[1];
+      this->parameter->boxz = box[2];
 
       // -----------------------
       std::getline(dumpFile, line); // ITEM: ATOMS id mol type x y z
