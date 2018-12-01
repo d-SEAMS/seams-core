@@ -30,8 +30,6 @@ struct L2_Simple_Adaptor_MD {
   typedef T ElementType;
   typedef _DistanceType DistanceType;
 
-  std::array<double, 3> box = {7.4368, 7.4368, 7.4368};
-
   const DataSource &data_source;
 
   L2_Simple_Adaptor_MD(const DataSource &_data_source)
@@ -42,7 +40,8 @@ struct L2_Simple_Adaptor_MD {
     DistanceType result = DistanceType();
     for (size_t i = 0; i < size; ++i) {
       const DistanceType diff = a[i] - data_source.kdtree_get_pt(b_idx, i);
-      const DistanceType del = diff - box[i] * round(diff / box[i]);
+      const DistanceType del =
+          diff - data_source.box[i] * round(diff / data_source.box[i]);
       result += del * del;
     }
     return result;
