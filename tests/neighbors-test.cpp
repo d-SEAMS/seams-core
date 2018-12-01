@@ -27,7 +27,7 @@ SCENARIO("Test the neighborlist (number) generation", "[KNNneighborlist]") {
       // tkn->coordLow = cL;
       tkn->populateCloud(typeP);
       THEN("We run the KNN search") {
-        tkn->byNumber(11, 5);
+        resultCloud = tkn->byNumber(11, 5);
         THEN("We get a resultCloud") {
           REQUIRE(resultCloud.pts.size() < 7);
           // // Test
