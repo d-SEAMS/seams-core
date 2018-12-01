@@ -261,7 +261,7 @@ void CMolecularSystem::readParticleFile(int step) {
   int molNum;
   int typeNum;
   int xNum;
-
+  std::array<double, 3> box;
   dumpFile.open(this->parameter->trajFile.c_str(), std::ifstream::in);
 
   // Error handling for an invalid step
@@ -284,8 +284,8 @@ void CMolecularSystem::readParticleFile(int step) {
     for (int istep = 1; istep <= this->parameter->nsteps; istep++) {
 
       // Stop reading the file if you've already read in the step
-      if (istep == step+1) {
-      	break;
+      if (istep == step + 1) {
+        break;
       }
       // Lines before coordinates in every snapshot
       std::getline(dumpFile, line); // ITEM: TIMESTEP
@@ -297,8 +297,11 @@ void CMolecularSystem::readParticleFile(int step) {
       // Get the box lengths from the three lines with box dimenions
       for (int k = 0; k < 3; k++) {
         std::getline(dumpFile, line);
-        getBoxLength(line);
+        box[k] = this->getBoxLength(line);
       }
+      this->parameter->boxx = box[0];
+      this->parameter->boxy = box[1];
+      this->parameter->boxz = box[2];
 
       // -----------------------
       std::getline(dumpFile, line); // ITEM: ATOMS id mol type x y z
