@@ -67,7 +67,8 @@ public:
 
   // Consider adding a MAX, to get less than nearest if the distance is greater than the MAX
   neigh::PointCloud<double> byNumber(int pIndex, size_t nearest);
-  // void kdtree_demo();
+
+  void cleanUp();
 };
 
 } // namespace neigh

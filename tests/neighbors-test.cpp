@@ -60,6 +60,7 @@ SCENARIO("Test the neighborlist (number) generation", "[KNNneighborlist]") {
         }
       }
     }
+    tkn->cleanUp();
   }
 }
 
