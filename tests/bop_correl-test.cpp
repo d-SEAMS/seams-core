@@ -24,7 +24,6 @@ SCENARIO("Test the bond order correlation generation", "[bopCIJ]") {
     starter.frameRange = {1, 2};
     starter.filename = testFile;
     WHEN("Initialze bop") {
-      std::cout << "blah";
       bopTest->initBOP(starter);
       THEN("SOMETHING") { REQUIRE(1); }
     }

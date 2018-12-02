@@ -31,12 +31,19 @@ private:
   std::string filename;
   int frameNum;
   int typeI;
+  // Volume slice
+  chill::yodaCloud<double> yCloud;
+  // Private snapshot
+  CMolecularSystem *snapshot;
+
+  void prepSnapshot(int nop, chill::initSlice<double> starter);
+  void populateSnapshot(int typeI, chill::initSlice<double> starter);
 
 public:
   // Constructor
-  bop() : treeKNN() { std::cout << "die"; };
+  bop() : treeKNN() { this->snapshot = new CMolecularSystem; };
   // Destructor (let the compiler figure it out DO NOT ALTER)
-  virtual ~bop() {}
+  virtual ~bop() { delete snapshot; }
 
   // Function to generate a cloud of results
   chill::yodaCloud<double> pointCIJ();
