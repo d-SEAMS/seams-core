@@ -54,11 +54,11 @@ SCENARIO("Get θ and ϕ from cartesian coordinates", "[sphereAngle]") {
 
 // TODO: Test transposed result vectors by value, like in the neighbors test
 SCENARIO("Test the boost spherical harmonics", "[sphericalHarmonics]") {
-  GIVEN("A blaze static vector (2) of angles") {
+  GIVEN("A static vector (2) of angles") {
     int orderL = 3;
     // {θ,ϕ}
-    blaze::StaticVector<double, 2UL> testAngles{0, 1.047};
-    blaze::StaticVector<std::complex<double>, 7UL> harmonicVector;
+    std::array<double, 2> testAngles{0, 1.047};
+    std::vector<std::complex<double>> harmonicVector;
     WHEN("Yₗₘ is calculated") {
       harmonicVector = trans::spheriHarmo(orderL, testAngles);
       THEN("We get the polar and azimuthal angles.") {

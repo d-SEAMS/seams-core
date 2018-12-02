@@ -2,16 +2,17 @@
 
 namespace bg = boost::geometry;
 
-blaze::StaticVector<std::complex<double>, 7UL>
-trans::spheriHarmo(int orderL, blaze::StaticVector<double, 2UL> radialCoord) {
+std::vector<std::complex<double>>
+trans::spheriHarmo(int orderL, std::array<double, 2> radialCoord) {
   // Iterate over the index of order
   std::vector<int> v = {-3, -2, -1, 0, 1, 2, 3};
   // For keeping track of the index of the output vector
   int i(0);
-  blaze::StaticVector<std::complex<double>, 7UL> result;
+  std::vector<std::complex<double>> result;
   for (auto n : v) {
     auto theta = radialCoord[1];
     auto phi = radialCoord[0];
+    result.resize(result.size() + 1);
     // This is for l=3
     std::complex<double> b =
         boost::math::spherical_harmonic(orderL, n, theta, phi);
