@@ -97,14 +97,10 @@ neigh::PointCloud<double> neigh::treeKNN::byNumber(int pIndex, size_t nearest) {
 
   // Prepare output
   resultCloud.pts.resize(nearest);
-  double resX, resY, resZ;
   for (int i = 0; i < nearest; i++) {
-    resX = cloud.kdtree_get_pt(ret_index[i + 1], 0);
-    resY = cloud.kdtree_get_pt(ret_index[i + 1], 1);
-    resZ = cloud.kdtree_get_pt(ret_index[i + 1], 2);
-    resultCloud.pts[i].x = resX;
-    resultCloud.pts[i].y = resY;
-    resultCloud.pts[i].z = resZ;
+    resultCloud.pts[i].x = cloud.kdtree_get_pt(ret_index[i + 1], 0);
+    resultCloud.pts[i].y = cloud.kdtree_get_pt(ret_index[i + 1], 1);
+    resultCloud.pts[i].z = cloud.kdtree_get_pt(ret_index[i + 1], 2);
   }
 
   // Prep box for output
