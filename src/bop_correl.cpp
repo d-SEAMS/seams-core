@@ -9,15 +9,26 @@
  ***********************************************/
 
 // void chill::test::sim() { std::cout << "sim"; };
-int chill::bop::initBOP(chill::initSlice<double> starter) {
+int chill::bop::initBOP(int nop, int typeI, chill::initSlice<double> starter) {
   std::cout << "I am bop\n";
+  // Set private variables
+  this->nop = nop;
+  this->typeI = typeI;
+  // Prepares the frame
+  this->prepSnapshot(starter);
+  // Use nsteps (dummy)
+  this->snapshot->parameter->nsteps = starter.frameRange[1] + 1;
+  // Read the file
+  this->snapshot->readParticleFile(starter.frameRange[0]);
+  // Now we populate the cloud (make int and do error handling)
+  this->populateSnapshot(starter);
   return 1;
 }
 
-void chill::bop::prepSnapshot(int nop, chill::initSlice<double> starter) {
+void chill::bop::prepSnapshot(chill::initSlice<double> starter) {
   this->snapshot->initializeFrames(nop, starter.filename);
 }
-void chill::bop::populateSnapshot(int typeI, chill::initSlice<double> starter) {
+void chill::bop::populateSnapshot(chill::initSlice<double> starter) {
   int filteredParticles(0);
   int nop(snapshot->parameter->nop);
   int dummy(0);

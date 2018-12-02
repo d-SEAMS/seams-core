@@ -24,7 +24,7 @@ SCENARIO("Test the bond order correlation generation", "[bopCIJ]") {
     starter.frameRange = {1, 2};
     starter.filename = testFile;
     WHEN("Initialze bop") {
-      bopTest->initBOP(starter);
+      bopTest->initBOP(num_of_points, atom_type, starter);
       THEN("SOMETHING") { REQUIRE(1); }
     }
   }
