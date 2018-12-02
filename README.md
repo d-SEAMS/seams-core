@@ -93,6 +93,17 @@ $ cd src/external
 # cxxopts
  wget https://raw.githubusercontent.com/jarro2783/cxxopts/master/include/cxxopts.hpp 
  ```
+ 
+## Leaks and performance
+While testing for leaks, use `clang` (for
+[AddressSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizer)
+and [LeakSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer))
+and the following:
+
+``` bash
+export CXX=/usr/bin/clang++ && export CC=/usr/bin/clang
+cmake .. -DCMAKE_CXX_FLAGS="-pg -fsanitize=address " -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg
+```
 
 # Contributing
 Please ensure that all contributions are formatted according to the
