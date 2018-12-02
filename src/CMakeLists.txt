@@ -34,7 +34,6 @@ conan_cmake_run(CONANFILE ../conanfile.txt  # or relative build/conanfile.txt
 find_package(
   "Lua" REQUIRED
   "Boost" REQUIRED
-  "blaze"
   "yaml-cpp"
   "fmt"
   "rang")
@@ -44,7 +43,6 @@ target_link_libraries(
   yodaStruct
   ${Boost_LIBRARIES}
   ${LUA_LIBRARIES}
-  CONAN_PKG::blaze
   CONAN_PKG::rang
   CONAN_PKG::fmt
   CONAN_PKG::yaml-cpp
