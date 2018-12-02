@@ -65,7 +65,7 @@ public:
   int initKNN(int nop, std::string filename, int frameNum, int typeI);
 
   // Consider adding a MAX, to get less than nearest if the distance is greater than the MAX
-  neigh::PointCloud<double> byNumber(int particle, size_t nearest);
+  neigh::PointCloud<double> byNumber(int pIndex, size_t nearest);
   // void kdtree_demo();
 };
 
