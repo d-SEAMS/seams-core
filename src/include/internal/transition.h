@@ -47,6 +47,7 @@ public:
                   std::array<double, 3> coordHigh,
                   std::array<double, 3> coordLow, std::string fileName,
                   int nstep);
+  void cleanUp();
 };
 
 } // namespace trans

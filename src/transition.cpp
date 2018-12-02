@@ -139,3 +139,12 @@ double TransitionSystem::timeAtomAvg(int nop) {
   // TODO: Error handling
   return -1000;
 }
+
+/********************************************/ /**
+ *  Frees the memory
+ ***********************************************/
+void TransitionSystem::cleanUp() {
+  delete frameTwo;
+  delete frameOne;
+  delete[] currentDiff;
+}
