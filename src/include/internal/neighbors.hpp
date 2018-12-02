@@ -39,7 +39,7 @@ template <typename T> struct PointCloud {
   template <class BBOX> bool kdtree_get_bbox(BBOX & /* bb */) const {
     return false;
   }
-}; // namespace neigh
+};
 
 class treeKNN {
 private:
