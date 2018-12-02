@@ -29,15 +29,14 @@ class bop : public neigh::treeKNN {
 private:
   int nop;
   std::string filename;
-  int frameNum;
   int typeI;
   // Volume slice
   chill::yodaCloud<double> yCloud;
   // Private snapshot
   CMolecularSystem *snapshot;
 
-  void prepSnapshot(int nop, chill::initSlice<double> starter);
-  void populateSnapshot(int typeI, chill::initSlice<double> starter);
+  void prepSnapshot(chill::initSlice<double> starter);
+  void populateSnapshot(chill::initSlice<double> starter);
 
 public:
   // Constructor
@@ -48,7 +47,7 @@ public:
   // Function to generate a cloud of results
   chill::yodaCloud<double> pointCIJ();
   // Initializer to get stuff
-  int initBOP(chill::initSlice<double> starter);
+  int initBOP(int nop, int typeI, chill::initSlice<double> starter);
 };
 } // namespace chill
 #endif // __BOP_CORREL_H_
