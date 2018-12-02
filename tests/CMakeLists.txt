@@ -1,6 +1,5 @@
 add_executable(yodaStruct_test
                main.cpp
-               ${PROJECT_SOURCE_DIR}/src/bop_correl.cpp
                ${PROJECT_SOURCE_DIR}/src/molecular_system.cpp
                ${PROJECT_SOURCE_DIR}/src/molecule.cpp
                ${PROJECT_SOURCE_DIR}/src/neighbors.cpp
@@ -34,6 +33,7 @@ target_link_libraries(yodaStruct_test
   CONAN_PKG::fmt
   CONAN_PKG::yaml-cpp
   CONAN_PKG::catch2
+  yodaLib
   )
 
 
