@@ -13,7 +13,7 @@ template <typename T> struct PointCloud {
   struct Point {
     T x, y, z;
   };
-
+  std::vector<int> ret_index;
   std::vector<Point> pts;
 
   std::array<double, 3> box;
