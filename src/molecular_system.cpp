@@ -58,11 +58,6 @@ void CMolecularSystem::initializeMolecules() {
 }
 
 /********************************************/ /**
- *  Frees the memory
- ***********************************************/
-void CMolecularSystem::deleteMolecules() { delete[] molecules; }
-
-/********************************************/ /**
  *  Initialize the System depending on the choice of file to read from.
  ***********************************************/
 void CMolecularSystem::InitializeSystem() {
@@ -392,4 +387,13 @@ double CMolecularSystem::getBoxLength(std::string line) {
 
   // Get the box length
   return lineVal[1] - lineVal[0];
+}
+
+/********************************************/ /**
+ *  Frees the memory
+ ***********************************************/
+void CMolecularSystem::deleteMolecules() {
+
+  delete parameter;
+  delete[] molecules;
 }

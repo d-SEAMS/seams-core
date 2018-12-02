@@ -126,6 +126,8 @@ int main(int argc, char *argv[]) {
     rdf3D->normalizeRDF3D();
     // Print the RDF
     rdf3D->printRDF3D();
+    // Cleanup
+    rdf3D->deleteRDF3D();
   }
 
   // // ----------------------------------------------
@@ -156,6 +158,8 @@ int main(int argc, char *argv[]) {
     rdf->normalizeRDF2D(0.8);
     // Print the RDF
     rdf->printRDF2D();
+    // Cleanup
+    rdf->deleteRDF2D();
   }
 
   // // ----------------------------------------------
@@ -185,15 +189,13 @@ int main(int argc, char *argv[]) {
 
     // Run the script
     lua.script_file(script);
+    // Free the memory.
+    t_sys->cleanUp();
   }
   // --------------------------------------
 
-  //Free the memory.
-  // rdf3D->deleteRDF3D();
-  // m_MolSys->deleteMolecules();
-  // rdf1->deleteRDF3D();
-  // rdf->deleteRDF2D();
-  // s_k->deleteStrucFactor();
+  // Free the memory.
+  m_MolSys->deleteMolecules();
 
   std::cout << rang::style::bold
             << fmt::format("Welcome to the Black Parade.\nYou ran:-\n")
