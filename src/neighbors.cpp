@@ -152,3 +152,5 @@ int neigh::treeKNN::initKNN(int nop, std::string filename, int frameNum,
   this->populateCloud(typeI);
   return 1;
 }
+
+void neigh::treeKNN::cleanUp() { delete frame; }
