@@ -21,7 +21,7 @@ template <typename T> struct initSlice {
 
   std::array<T, 3> coordHigh = {0, 0, 0};
   std::array<T, 3> coordLow = {0, 0, 0};
-  std::string filename = nullptr;
+  std::string filename;
   std::array<int, 2> frameRange = {0, 0};
 };
 
