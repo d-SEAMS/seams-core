@@ -8,28 +8,10 @@ include(FindBLAS)
 include(FindLAPACK)
 include(FindBoost)
 
-# Build library for some normally broken portions
-add_library(
-  yodaLib SHARED
-  bop_correl.cpp
-  )
-
 # Add the new cpp files here
 add_executable( yodaStruct
-  backward.cpp
-  density.cpp
-  geometry.cpp
   main.cpp
-  molecular_system.cpp
-  molecule.cpp
-  opt_parser.cpp
-  output.cpp
-  parameter.cpp
-  rdf2D.cpp
-  rdf3D.cpp
   spherical_harmonics.cpp
-  structure_factor.cpp
-  transition.cpp
   )
 
 # Project Libraries
@@ -67,6 +49,22 @@ target_link_libraries(
   yodaLib
   )
 
+add_library(yodaLib SHARED
+  bop_correl.cpp
+  molecular_system.cpp
+  molecule.cpp
+  neighbors.cpp
+  parameter.cpp
+  structure_factor.cpp
+  transition.cpp
+  opt_parser.cpp
+  output.cpp
+  rdf2D.cpp
+  rdf3D.cpp
+  backward.cpp
+  density.cpp
+  geometry.cpp
+)
 # if(yaml-cpp_FOUND)
 #     target_link_libraries(yodaStruct yaml-cpp)
 # else()
