@@ -19,13 +19,7 @@ find_package(
   "yaml-cpp"
   "fmt"
   "rang")
-add_library(yodaLib SHARED
-               ${PROJECT_SOURCE_DIR}/src/bop_correl.cpp
-               ${PROJECT_SOURCE_DIR}/src/molecular_system.cpp
-               ${PROJECT_SOURCE_DIR}/src/molecule.cpp
-               ${PROJECT_SOURCE_DIR}/src/neighbors.cpp
-               ${PROJECT_SOURCE_DIR}/src/parameter.cpp
-)
+
 # Link everything
 target_link_libraries(yodaStruct_test
   ${Boost_LIBRARIES}
