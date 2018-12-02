@@ -51,15 +51,14 @@ void neigh::treeKNN::populateCloud(int typeI) {
 }
 
 // Implements knnSearch to get the nearest neighbor indices and return a pointcloud
-neigh::PointCloud<double> neigh::treeKNN::byNumber(int particle,
-                                                   size_t nearest) {
+neigh::PointCloud<double> neigh::treeKNN::byNumber(int pIndex, size_t nearest) {
   size_t realNeighbors = nearest + 1;
   neigh::PointCloud<double> resultCloud;
   std::vector<size_t> ret_index(realNeighbors);
   std::vector<double> out_dist_sqr(realNeighbors);
-  double X = cloud.pts[particle].x;
-  double Y = cloud.pts[particle].y;
-  double Z = cloud.pts[particle].z;
+  double X = cloud.pts[pIndex].x;
+  double Y = cloud.pts[pIndex].y;
+  double Z = cloud.pts[pIndex].z;
   const double query_pt[3] = {X, Y, Z};
   // construct a kd-tree index:
   typedef nanoflann::KDTreeSingleIndexAdaptor<
