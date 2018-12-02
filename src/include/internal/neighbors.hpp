@@ -49,17 +49,18 @@ private:
   // Initializes Frames (CMolSys Obj)
   void prepFrame(int nop, std::string filename);
   void populateCloud(int typeI);
+  // Unique
+  CMolecularSystem *frame;
+  neigh::PointCloud<double> cloud;
+
+protected:
   // Check if atom is within limits
-  bool isThere(int iatom, CMolecularSystem *frame);
+  bool isThere(int iatom, CMolecularSystem *frame, std::array<double, 3> cH,
+               std::array<double, 3> cL);
 
 public:
   treeKNN();
   virtual ~treeKNN();
-
-  CMolecularSystem *frame;
-  neigh::PointCloud<double> cloud;
-  // Returns the points as a vector and the distance
-  // std::vector<double> byNumber();
 
   // Prepare the system to do knn stuff
   int initKNN(int nop, std::string filename, int frameNum, int typeI);

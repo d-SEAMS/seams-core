@@ -30,7 +30,7 @@ void neigh::treeKNN::populateCloud(int typeI) {
     // Match type
     if (frame->molecules[t].type == typeI) {
       // Check limits
-      if (this->isThere(t, frame)) {
+      if (this->isThere(t, frame, coordHigh, coordLow)) {
         // Accomodate one more point
         cloud.pts.resize(cloud.pts.size() + 1);
         // Dump point
@@ -116,16 +116,18 @@ neigh::PointCloud<double> neigh::treeKNN::byNumber(int pIndex, size_t nearest) {
 }
 
 // Helper
-bool neigh::treeKNN::isThere(int iatom, CMolecularSystem *frame) {
+bool neigh::treeKNN::isThere(int iatom, CMolecularSystem *frame,
+                             std::array<double, 3> cH,
+                             std::array<double, 3> cL) {
   // TODO: Migrate to CGeneric
   double coordX = frame->molecules[iatom].get_posx();
   double coordY = frame->molecules[iatom].get_posy();
   double coordZ = frame->molecules[iatom].get_posz();
   std::array<double, 3> coord = {coordX, coordY, coordZ};
   for (int i = 0; i < 3; i++) {
-    if (coordHigh[i] == coordLow[i]) {
+    if (cH[i] == cL[i]) {
       return true;
-    } else if (coord[i] >= coordLow[i] && coord[i] <= coordHigh[i]) {
+    } else if (coord[i] >= cL[i] && coord[i] <= cH[i]) {
       return true;
     } else {
       return false;
