@@ -1,11 +1,12 @@
 add_executable(yodaStruct_test
                main.cpp
                spherical_harmonics-test.cpp
-               ${PROJECT_SOURCE_DIR}/src/spherical_harmonics.cpp
-               ${PROJECT_SOURCE_DIR}/src/molecule.cpp
+               ${PROJECT_SOURCE_DIR}/src/bop_correl.cpp
                ${PROJECT_SOURCE_DIR}/src/molecular_system.cpp
-               ${PROJECT_SOURCE_DIR}/src/parameter.cpp
+               ${PROJECT_SOURCE_DIR}/src/molecule.cpp
                ${PROJECT_SOURCE_DIR}/src/neighbors.cpp
+               ${PROJECT_SOURCE_DIR}/src/parameter.cpp
+               ${PROJECT_SOURCE_DIR}/src/spherical_harmonics.cpp
                neighbors-test.cpp
 )
 

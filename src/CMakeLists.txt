@@ -11,18 +11,19 @@ include(FindBoost)
 # Add the new cpp files here
 add_executable( yodaStruct
   backward.cpp
+  bop_correl.cpp
+  density.cpp
+  geometry.cpp
   main.cpp
-  molecule.cpp
   molecular_system.cpp
-  parameter.cpp
-  rdf3D.cpp
-  rdf2D.cpp
-  structure_factor.cpp
-  spherical_harmonics.cpp
+  molecule.cpp
   opt_parser.cpp
   output.cpp
-  geometry.cpp
-  density.cpp
+  parameter.cpp
+  rdf2D.cpp
+  rdf3D.cpp
+  spherical_harmonics.cpp
+  structure_factor.cpp
   transition.cpp
   )
 
