@@ -4,19 +4,18 @@
 #include <neighbors.hpp>
 
 namespace chill {
-// Struct to hold coordinates, Cᵢⱼ, classifiers
-template <typename T> struct yodaCloud {
-  struct Point {
-    T x, y, z;
-    std::vector<T> cij;
-    std::vector<T> classifier;
-  };
 
-  std::vector<Point> pts;
+// Struct for one point
+template <typename T> struct yodaPoint {
+  T x, y, z;
+  std::vector<T> cij;
+  std::vector<T> classifier;
 };
 
-// Input object
+// Struct to hold coordinates, Cᵢⱼ, classifiers
+template <typename T> struct yodaCloud { std::vector<T> pts; };
 
+// Input object
 template <typename T> struct initSlice {
 
   std::array<T, 3> coordHigh = {0, 0, 0};
@@ -31,7 +30,7 @@ private:
   std::string filename;
   int typeI;
   // Volume slice
-  chill::yodaCloud<double> yCloud;
+  chill::yodaCloud<yodaPoint<double>> yCloud;
   // Private snapshot
   CMolecularSystem *snapshot;
 
@@ -45,7 +44,7 @@ public:
   virtual ~bop() { delete snapshot; }
 
   // Function to generate a cloud of results
-  chill::yodaCloud<double> pointCIJ();
+  chill::yodaPoint<double> pointCIJ();
   // Initializer to get stuff
   int initBOP(int nop, int typeI, chill::initSlice<double> starter);
 };
