@@ -57,6 +57,13 @@ SCENARIO("Test the neighborlist (number) generation", "[KNNneighborlist]") {
             REQUIRE_THAT(resultCloud.box[2], Catch::Matchers::WithinAbs(
                                                  7.4379999999999997, 1.0e-10));
           }
+          THEN("We also get the frame-atom-id for each neighbor") {
+            REQUIRE(resultCloud.ret_index[0] == 1);
+            REQUIRE(resultCloud.ret_index[1] == 2);
+            REQUIRE(resultCloud.ret_index[2] == 4);
+            REQUIRE(resultCloud.ret_index[3] == 6);
+            REQUIRE(resultCloud.ret_index[4] == 40);
+          }
         }
       }
     }
