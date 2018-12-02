@@ -30,3 +30,4 @@
  ***********************************************/
 
 // void chill::test::sim() { std::cout << "sim"; };
+int chill::bop::initBOP(chill::initSlice<double> starter) { return 1; }
