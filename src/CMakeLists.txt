@@ -11,6 +11,8 @@ include(FindBoost)
 # Add the new cpp files here
 add_executable( yodaStruct
   main.cpp
+  # Still here since most people will not have blaze installed. Look into conan
+  # shared libraries
   spherical_harmonics.cpp
   )
 
