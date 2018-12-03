@@ -127,7 +127,7 @@ chill::yodaPoint<double> chill::bop::pointCij(int queryIndex) {
     complexDenominator3 = sqrt(complexDenominator2 * complexNumerator);
 
     cDum = complexNumerator / complexDenominator3;
-    std::cout << cDum << " C" << queryIndex << "\n";
+    std::cout << cDum << " C" << queryIndex << j << "\n";
     this->yCloud.pts[queryIndex].cij[j] = cDum.real();
   }
   resPointCij = this->yCloud.pts[queryIndex];
