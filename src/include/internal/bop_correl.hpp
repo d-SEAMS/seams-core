@@ -53,7 +53,7 @@ public:
   chill::yodaPoint<double> pointCij(int queryIndex);
   // Initializer to get stuff
   int initBOP(int nop, int typeI, chill::initSlice<double> starter);
-  chill::yodaPoint<double> frameVerdict();
+  chill::yodaPoint<double> atomVerdict(int queryIndex);
 };
 } // namespace chill
 #endif // __BOP_CORREL_H_

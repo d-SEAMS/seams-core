@@ -121,11 +121,17 @@ chill::yodaPoint<double> chill::bop::pointCij(int queryIndex) {
   return resPointCij;
 }
 
-chill::yodaPoint<double> chill::bop::frameVerdict() {
+// Assumes that you already have
+chill::yodaPoint<double> chill::bop::atomVerdict(int queryIndex) {
   chill::yodaPoint<double> resPointFrame;
-  for (int i = 0; i < 10; i++) {
-    pointQ(i);
+  int nearestID;
+  for (int i = 0; i < 4; i++) {
+    // Use the ID of the nearest neighbor
+    nearestID = yCloud.pts[queryIndex].nearestID[i];
+    if (yCloud.pts[queryIndex].Q.size() != 7) {
+      pointQ(i);
+    }
   }
-  resPointFrame = pointCij(0);
+  resPointFrame = pointCij(queryIndex);
   return resPointFrame;
 }
