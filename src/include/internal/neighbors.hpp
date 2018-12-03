@@ -41,6 +41,13 @@ template <typename T> struct PointCloud {
   }
 };
 
+// Define the KD tree
+typedef nanoflann::KDTreeSingleIndexAdaptor<
+    nanoflann::L2_Simple_Adaptor_MD<double, neigh::PointCloud<double>>,
+    neigh::PointCloud<double>, 3 /* dim */
+    >
+    frameTree;
+
 class treeKNN {
 private:
   //  Super cool C++11

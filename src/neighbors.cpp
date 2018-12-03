@@ -60,14 +60,11 @@ neigh::PointCloud<double> neigh::treeKNN::byNumber(int pIndex, size_t nearest) {
   double Y = cloud.pts[pIndex].y;
   double Z = cloud.pts[pIndex].z;
   const double query_pt[3] = {X, Y, Z};
+
   // construct a kd-tree index:
-  typedef nanoflann::KDTreeSingleIndexAdaptor<
-      nanoflann::L2_Simple_Adaptor_MD<double, neigh::PointCloud<double>>,
-      neigh::PointCloud<double>, 3 /* dim */
-      >
-      my_tree;
-  my_tree index(3 /*dim*/, cloud,
-                nanoflann::KDTreeSingleIndexAdaptorParams(10 /* max leaf */));
+  neigh::frameTree index(
+      3 /*dim*/, cloud,
+      nanoflann::KDTreeSingleIndexAdaptorParams(10 /* max leaf */));
   index.buildIndex();
 
 #if 0
