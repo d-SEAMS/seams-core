@@ -114,6 +114,7 @@ chill::yodaPoint<double> chill::bop::pointCij(int queryIndex) {
     // Use the ID of the nearest neighbor
     nearestID = this->yCloud.pts[queryIndex].nearestID[j];
 
+    // Roma version of Chill
     for (int m = 0; m < 7; m++) {
       testJ = std::conj(this->yCloud.pts[nearestID].Q[m]);
       testI = this->yCloud.pts[queryIndex].Q[m];
@@ -142,6 +143,8 @@ chill::yodaPoint<double> chill::bop::pointCij(int queryIndex) {
 // Assumes that you already have
 chill::yodaPoint<double> chill::bop::atomVerdict(int queryIndex) {
   chill::yodaPoint<double> resPointFrame, temp;
+  std::array<int, 4> bondIs = {-1, -1, -1, -1};
+  int isEclipsed, isStaggered;
   int nearestID = 0;
   this->yCloud.pts[queryIndex] = pointQ(queryIndex);
   for (int i = 0; i < 4; i++) {
@@ -151,6 +154,36 @@ chill::yodaPoint<double> chill::bop::atomVerdict(int queryIndex) {
   }
 
   resPointFrame = pointCij(queryIndex);
+
+  // For chill+ (Molinero et. al.)
+  isEclipsed = isStaggered = 0;
+  for (int i = 0; i < 4; i++) {
+    if (resPointFrame.cij[i] <= 0.25 && resPointFrame.cij[i] > -0.35) {
+      bondIs[i] = 1; // Eclipsed
+      isEclipsed++;
+    } else if (resPointFrame.cij[i] <= -0.35 && resPointFrame.cij[i] >= -1) {
+      bondIs[i] = 0; // Staggered
+      isStaggered++;
+    }
+  }
+
+  if (isEclipsed == 0 && isStaggered == 4) {
+    resPointFrame.chillPlus.isCubic = true;
+  } else if (isEclipsed == 1 && isStaggered == 3) {
+    resPointFrame.chillPlus.isHexa = true;
+  } else if (isStaggered == 2 && isEclipsed == 2) {
+    resPointFrame.chillPlus.isInterfacial = true;
+  } else if (isEclipsed == 3) {
+    resPointFrame.chillPlus.isInterClathrate = true;
+  } else if (isEclipsed == 4 && isStaggered == 0) {
+    resPointFrame.chillPlus.isClathrate = true;
+  } else {
+    resPointFrame.chillPlus.isUndef = true;
+  }
+
+  // Update globally
+  this->yCloud.pts[queryIndex] = resPointFrame;
+  // Return locally
   return resPointFrame;
 }
 

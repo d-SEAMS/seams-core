@@ -5,12 +5,23 @@
 #include <neighbors.hpp>
 
 namespace chill {
+// Classification Struct
+
+struct classifier {
+  bool isHexa = false;
+  bool isCubic = false;
+  bool isInterfacial = false;
+  bool isClathrate = false;
+  bool isInterClathrate = false;
+  bool isWater = false;
+  bool isUndef = false;
+};
 
 // Struct for one point
 template <typename T> struct yodaPoint {
   T x, y, z;
   std::vector<T> cij;
-  std::vector<T> classifier;
+  classifier chillPlus;
   bool inSlice = false;
   std::vector<std::complex<double>> Q;
   std::vector<int> nearestID;
