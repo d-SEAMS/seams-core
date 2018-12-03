@@ -121,12 +121,17 @@ chill::yodaPoint<double> chill::bop::pointCij(int queryIndex) {
     }
     for (int m = 0; m < 7; m++) {
       testJ = this->yCloud.pts[nearestID].Q[m];
-      testI = std::conj(this->yCloud.pts[queryIndex].Q[m]);
+      testI = std::conj(this->yCloud.pts[nearestID].Q[m]);
       complexDenominator2 = complexDenominator2 + (testJ * testI);
     }
-    complexDenominator3 = sqrt(complexDenominator2 * complexNumerator);
+    for (int m = 0; m < 7; m++) {
+      testJ = this->yCloud.pts[queryIndex].Q[m];
+      testI = std::conj(this->yCloud.pts[queryIndex].Q[m]);
+      complexDenominator3 = complexDenominator3 + (testJ * testI);
+    }
+    complexDenominator = sqrt(complexDenominator2 * complexDenominator3);
 
-    cDum = complexNumerator / complexDenominator3;
+    cDum = complexNumerator / complexDenominator;
     std::cout << cDum << " C" << queryIndex << j << "\n";
     this->yCloud.pts[queryIndex].cij[j] = cDum.real();
   }
