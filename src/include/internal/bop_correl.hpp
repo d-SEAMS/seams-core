@@ -17,6 +17,16 @@ struct classifier {
   bool isUndef = false;
 };
 
+struct structurePercentage {
+  float hexa = 0;
+  float cubic = 0;
+  float interfacial = 0;
+  float clathrate = 0;
+  float interClathrate = 0;
+  float water = 0;
+  float undef = 0;
+};
+
 // Struct for one point
 template <typename T> struct yodaPoint {
   T x, y, z;
@@ -28,7 +38,10 @@ template <typename T> struct yodaPoint {
 };
 
 // Struct to hold coordinates, Cᵢⱼ, classifiers
-template <typename T> struct yodaCloud { std::vector<T> pts; };
+template <typename T> struct yodaCloud {
+  std::vector<T> pts;
+  structurePercentage framePercent;
+};
 
 // Input object
 template <typename T> struct initSlice {
@@ -44,6 +57,7 @@ private:
   int nop;
   std::string filename;
   int typeI;
+  int frame;
   // Volume slice
   chill::yodaCloud<yodaPoint<double>> yCloud;
   // Private snapshot
@@ -64,7 +78,10 @@ public:
   chill::yodaPoint<double> pointCij(int queryIndex);
   // Initializer to get stuff
   int initBOP(int nop, int typeI, chill::initSlice<double> starter);
+  // Decide what the atom is
   chill::yodaPoint<double> atomVerdict(int queryIndex);
+  // Frame verdict
+  chill::structurePercentage frameVerdict(int currentFrame);
   void cleanUp();
 };
 } // namespace chill
