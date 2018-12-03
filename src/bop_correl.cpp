@@ -16,12 +16,13 @@ int chill::bop::initBOP(int nop, int typeI, chill::initSlice<double> starter) {
   this->nop = nop;
   this->typeI = typeI;
   this->filename = starter.filename;
+  this->frame = starter.frameRange[0];
   // Prepares the frame
   this->prepSnapshot(starter);
   // Use nsteps (dummy)
   this->snapshot->parameter->nsteps = starter.frameRange[1] + 1;
   // Read the file
-  this->snapshot->readParticleFile(starter.frameRange[0]);
+  this->snapshot->readParticleFile(frame);
   // Now we populate the cloud (make int and do error handling)
   this->populateSnapshot(starter);
   return 1;
@@ -185,6 +186,49 @@ chill::yodaPoint<double> chill::bop::atomVerdict(int queryIndex) {
   this->yCloud.pts[queryIndex] = resPointFrame;
   // Return locally
   return resPointFrame;
+}
+
+// Figure out relative percentages
+chill::structurePercentage chill::bop::frameVerdict(int currentFrame) {
+  chill::structurePercentage resultPercent;
+  chill::yodaPoint<double> temp;
+  int totalParticles = 0;
+  for (int i = 0; i < this->nop; i++) {
+    // Generate the raw values
+    temp = atomVerdict(i);
+    if (temp.chillPlus.isHexa) {
+      this->yCloud.framePercent.hexa++;
+    } else if (temp.chillPlus.isCubic) {
+      this->yCloud.framePercent.cubic++;
+    } else if (temp.chillPlus.isInterfacial) {
+      this->yCloud.framePercent.interfacial++;
+    } else if (temp.chillPlus.isClathrate) {
+      this->yCloud.framePercent.clathrate++;
+    } else if (temp.chillPlus.isWater) {
+      this->yCloud.framePercent.water++;
+    } else if (temp.chillPlus.isInterClathrate) {
+      this->yCloud.framePercent.interClathrate++;
+    } else { // isUndef is implied
+      this->yCloud.framePercent.undef++;
+    }
+    // Track the number of iterations (for slicing)
+    totalParticles++;
+  }
+  // Convert to percentage (local only)
+  resultPercent.hexa = (this->yCloud.framePercent.hexa / totalParticles) * 100;
+  resultPercent.cubic =
+      (this->yCloud.framePercent.cubic / totalParticles) * 100;
+  resultPercent.interfacial =
+      (this->yCloud.framePercent.interfacial / totalParticles) * 100;
+  resultPercent.clathrate =
+      (this->yCloud.framePercent.clathrate / totalParticles) * 100;
+  resultPercent.water =
+      (this->yCloud.framePercent.water / totalParticles) * 100;
+  resultPercent.interClathrate =
+      (this->yCloud.framePercent.interClathrate / totalParticles) * 100;
+  resultPercent.undef =
+      (this->yCloud.framePercent.undef / totalParticles) * 100;
+  return resultPercent;
 }
 
 void chill::bop::cleanUp() { delete snapshot; }
