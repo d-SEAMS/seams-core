@@ -111,9 +111,9 @@ chill::yodaPoint<double> chill::bop::pointCij(int queryIndex) {
       std::cout << complexNumerator << " Numo \n"
                 << complexDenominator << " Deno\n";
     }
-    complexDummy = std::real(complexNumerator) /
-                   sqrt(std::real(complexNumerator)) *
-                   sqrt(std::real(complexDenominator));
+    complexDummy =
+        std::real(complexNumerator) / (sqrt(std::real(complexNumerator)) *
+                                       sqrt(std::real(complexDenominator)));
     std::cout << complexDummy << " C" << queryIndex << j + 1 << "\n";
     yCloud.pts[queryIndex].cij[nearestID] = complexDummy;
   }
