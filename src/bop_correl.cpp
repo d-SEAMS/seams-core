@@ -15,6 +15,7 @@ int chill::bop::initBOP(int nop, int typeI, chill::initSlice<double> starter) {
   // Set private variables
   this->nop = nop;
   this->typeI = typeI;
+  this->filename = starter.filename;
   // Prepares the frame
   this->prepSnapshot(starter);
   // Use nsteps (dummy)
