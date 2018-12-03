@@ -100,3 +100,31 @@ TEST_CASE("No negative values for harmonics", "[radialNegative]") {
   testPoint = {-random_variable, -random_variable, -random_variable};
   REQUIRE(trans::radialCoord(testPoint) <= null);
 }
+
+TEST_CASE("Test wraps", "[testwrap]") {
+  // Initialize Variables
+  std::array<double, 3> testPoint{1.592, 1.592, 1.592};
+  std::array<double, 3> testPoint1{-1.592, -1.592, -1.592};
+  std::array<double, 2> null{0, 0};
+  REQUIRE(trans::radialCoord(testPoint) > null);
+  REQUIRE(trans::radialCoord(testPoint1) < null);
+  std::array<double, 2> testAngles = trans::radialCoord(testPoint);
+  std::vector<std::complex<double>> harmonicVector =
+      trans::spheriHarmo(3, testAngles);
+  REQUIRE(trans::radialCoord(testPoint1) < null);
+  std::array<double, 2> testAngles1 = trans::radialCoord(testPoint1);
+  std::vector<std::complex<double>> harmonicVector1 =
+      trans::spheriHarmo(3, testAngles1);
+  REQUIRE(1);
+}
+
+TEST_CASE("Integration test for Ylm", "[intylm]") {
+  // Initialize Variables
+  std::array<double, 3> testPoint{0, -3.185, -3.185};
+  std::array<double, 2> null{0, 0};
+  REQUIRE(trans::radialCoord(testPoint) < null);
+  std::array<double, 2> testAngles = trans::radialCoord(testPoint);
+  std::vector<std::complex<double>> harmonicVector =
+      trans::spheriHarmo(3, testAngles);
+  REQUIRE(1);
+}
