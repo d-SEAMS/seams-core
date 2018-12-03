@@ -11,7 +11,7 @@
 SCENARIO("Test the neighborlist (number) generation", "[KNNneighborlist]") {
   GIVEN("A file with coordinates and the number of nearest neighbors") {
     // DO NOT EDIT, FILE SPECIFIC
-    auto tkn = new neigh::treeKNN;
+    std::unique_ptr<neigh::treeKNN> tkn(new neigh::treeKNN);
     std::array<double, 3> testBox = {};
     neigh::PointCloud<double> resultCloud;
     int atom_type = 1;

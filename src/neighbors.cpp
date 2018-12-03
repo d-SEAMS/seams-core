@@ -1,3 +1,4 @@
+#include <memory>
 #include <neighbors.hpp>
 
 /********************************************/ /**
@@ -12,7 +13,7 @@ neigh::treeKNN::treeKNN() {
 /********************************************/ /**
  *  Destructor
  ***********************************************/
-neigh::treeKNN::~treeKNN() { delete frame; }
+neigh::treeKNN::~treeKNN() {}
 
 /********************************************/ /**
  *  Prepare the point cloud for KNN
@@ -149,3 +150,5 @@ int neigh::treeKNN::initKNN(int nop, std::string filename, int frameNum,
 }
 
 void neigh::treeKNN::cleanUp() { delete frame; }
+
+template class std::unique_ptr<neigh::treeKNN>;
