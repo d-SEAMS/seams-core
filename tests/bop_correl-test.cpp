@@ -28,7 +28,9 @@ SCENARIO("Test the bond order correlation generation", "[bopCIJ]") {
     WHEN("Initialze bop") {
       bopTest->initBOP(num_of_points, atom_type, starter);
       THEN("Something") {
-        testPoint = bopTest->pointQ(0);
+        // Hand calculate and test the Q_lm at pointQ(0)
+        // testPoint = bopTest->pointQ(0);
+        testPoint = bopTest->frameVerdict();
         REQUIRE(1);
       }
     }
