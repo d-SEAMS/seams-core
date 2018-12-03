@@ -105,20 +105,29 @@ chill::yodaPoint<double> chill::bop::pointCij(int queryIndex) {
     }
     // Use the ID of the nearest neighbor
     nearestID = this->yCloud.pts[queryIndex].nearestID[j];
-    // yCloud.pts[queryIndex].cij.resize(yCloud.pts[queryIndex].cij.size() + 1);
-    // for (int m = 0; m < 7; m++) {
-    //   complexNumerator +=
-    //       yCloud.pts[queryIndex].Q[m] * std::conj(yCloud.pts[nearestID].Q[m]);
-    //   complexDenominator +=
-    //       yCloud.pts[nearestID].Q[m] * std::conj(yCloud.pts[queryIndex].Q[m]);
-    //   std::cout << complexNumerator << " Numo \n"
-    //             << complexDenominator << " Deno\n";
-    // }
-    // complexDummy =
-    //     std::real(complexNumerator) / (sqrt(std::real(complexNumerator)) *
-    //                                    sqrt(std::real(complexDenominator)));
-    // std::cout << complexDummy << " C" << queryIndex << j + 1 << "\n";
-    this->yCloud.pts[queryIndex].cij[j] = (double)2.0;
+
+    // ------ SEGFAULT START -------
+    for (int m = 0; m < 7; m++) {
+      if (m == 0) {
+        complexNumerator = this->yCloud.pts[queryIndex].Q[m] *
+                           std::conj(this->yCloud.pts[nearestID].Q[m]);
+        complexDenominator = this->yCloud.pts[nearestID].Q[m] *
+                             std::conj(this->yCloud.pts[queryIndex].Q[m]);
+        continue;
+      }
+      complexNumerator += this->yCloud.pts[queryIndex].Q[m] *
+                          std::conj(this->yCloud.pts[nearestID].Q[m]);
+      complexDenominator += this->yCloud.pts[nearestID].Q[m] *
+                            std::conj(this->yCloud.pts[queryIndex].Q[m]);
+      std::cout << complexNumerator << " Numo \n"
+                << complexDenominator << " Deno\n";
+    }
+    complexDummy =
+        std::real(complexNumerator) / (sqrt(std::real(complexNumerator)) *
+                                       sqrt(std::real(complexDenominator)));
+    std::cout << complexDummy << " C" << queryIndex << j + 1 << "\n";
+    this->yCloud.pts[queryIndex].cij[j] = complexDummy;
+    // ------ SEGFAULT END -------
   }
   resPointCij = this->yCloud.pts[queryIndex];
   return resPointCij;
