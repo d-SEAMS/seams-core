@@ -35,11 +35,11 @@ void chill::bop::populateSnapshot(chill::initSlice<double> starter) {
   int nop(snapshot->parameter->nop);
   int dummy(0);
   // Do filtering
-  for (int t; t < nop; t++) {
+  for (int t = 0; t < nop; t++) {
     // Accomodate one more point
     yCloud.pts.resize(yCloud.pts.size() + 1);
     // Match type
-    if (snapshot->molecules[t].type == typeI) {
+    if (snapshot->molecules[t].type == this->typeI) {
       // Check limits
       if (treeKNN::isThere(t, snapshot, starter.coordHigh, starter.coordLow)) {
         // Dump point
@@ -86,6 +86,7 @@ chill::yodaPoint<double> chill::bop::pointQ(int queryIndex) {
     yCloud.pts[queryIndex].Q[i] = yCloud.pts[queryIndex].Q[i] * 0.25;
   }
   resPointQ = yCloud.pts[queryIndex];
+  treeKNN::cleanUp();
   return resPointQ;
 }
 
