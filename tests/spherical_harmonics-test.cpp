@@ -128,3 +128,14 @@ TEST_CASE("Integration test for Ylm", "[intylm]") {
       trans::spheriHarmo(3, testAngles);
   REQUIRE(1);
 }
+
+TEST_CASE("Integration test for hexagonal mW", "[inthex]") {
+  // Initialize Variables
+  std::array<double, 3> testPoint{-2.249, 1.299, -3.66};
+  std::array<double, 2> null{0, 0};
+  REQUIRE(trans::radialCoord(testPoint) > null);
+  std::array<double, 2> testAngles = trans::radialCoord(testPoint);
+  std::vector<std::complex<double>> harmonicVector =
+      trans::spheriHarmo(3, testAngles);
+  REQUIRE(1);
+}

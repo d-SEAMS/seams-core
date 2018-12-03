@@ -38,7 +38,7 @@ SCENARIO("Test the bond order correlation for BCC", "[bopMw]") {
   }
 }
 
-SCENARIO("Test the bond order correlation for Mw", "[bopMw]") {
+SCENARIO("Test the bond order correlation for Mw Cubic", "[bopMw]") {
   GIVEN("An object for initializing bop") {
     // DO NOT EDIT, FILE SPECIFIC
     std::unique_ptr<chill::bop> bopTest(new chill::bop);
@@ -61,6 +61,36 @@ SCENARIO("Test the bond order correlation for Mw", "[bopMw]") {
         // Hand calculate and test the Q_lm at pointQ(0)
         // testPoint = bopTest->pointQ(0);
         testPoint = bopTest->atomVerdict(0);
+        REQUIRE(1);
+      }
+    }
+    bopTest->cleanUp();
+  }
+}
+
+SCENARIO("Test the bond order correlation for Mw Hexagonal", "[bopMw]") {
+  GIVEN("An object for initializing bop") {
+    // DO NOT EDIT, FILE SPECIFIC
+    std::unique_ptr<chill::bop> bopTest(new chill::bop);
+    int atom_type = 1;
+    int frame_num = 1;
+    int num_of_neighbors = 4;
+    int num_of_points = 5096;
+    std::array<double, 3> query_point = {0, 2.597, 0.45};
+    std::string testFile = "../input/traj/mW_hexagonal.lammpstrj";
+    chill::initSlice<double> starter;
+    chill::yodaPoint<double> testPoint;
+    // Fill starter
+    // starter.coordHigh = {3, 3, 3};
+    // starter.coordLow = {0, 0, 0};
+    starter.frameRange = {9, 10};
+    starter.filename = testFile;
+    WHEN("Initialze bop") {
+      bopTest->initBOP(num_of_points, atom_type, starter);
+      THEN("Something") {
+        // Hand calculate and test the Q_lm at pointQ(0)
+        // testPoint = bopTest->pointQ(0);
+        testPoint = bopTest->atomVerdict(57);
         REQUIRE(1);
       }
     }
