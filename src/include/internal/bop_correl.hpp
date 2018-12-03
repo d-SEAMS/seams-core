@@ -13,7 +13,7 @@ template <typename T> struct yodaPoint {
   std::vector<T> classifier;
   bool inSlice = false;
   std::vector<std::complex<double>> Q;
-  std::array<int, 4> nearestID;
+  std::vector<int> nearestID;
 };
 
 // Struct to hold coordinates, Cᵢⱼ, classifiers
@@ -47,10 +47,13 @@ public:
   // Destructor (let the compiler figure it out DO NOT ALTER)
   virtual ~bop() { delete snapshot; }
 
-  // Function to generate a cloud of results
+  // Function to generate Q per point
   chill::yodaPoint<double> pointQ(int queryIndex);
+  // Function to generate Cij per pair
+  chill::yodaPoint<double> pointCij(int queryIndex);
   // Initializer to get stuff
   int initBOP(int nop, int typeI, chill::initSlice<double> starter);
+  chill::yodaPoint<double> frameVerdict();
 };
 } // namespace chill
 #endif // __BOP_CORREL_H_
