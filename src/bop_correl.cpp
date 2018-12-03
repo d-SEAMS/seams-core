@@ -135,3 +135,7 @@ chill::yodaPoint<double> chill::bop::atomVerdict(int queryIndex) {
   resPointFrame = pointCij(queryIndex);
   return resPointFrame;
 }
+
+void chill::bop::cleanUp() { delete snapshot; }
+
+template class std::unique_ptr<chill::bop>;
