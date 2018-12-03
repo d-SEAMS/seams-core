@@ -63,29 +63,30 @@ chill::yodaPoint<double> chill::bop::pointQ(int queryIndex) {
   treeKNN::initKNN(nop, filename, 1, typeI);
   resultCloud = treeKNN::byNumber(queryIndex, 4);
   for (int itr = 0; itr < 4; itr++) {
-    if (yCloud.pts[queryIndex].nearestID.size() < 4) {
-      yCloud.pts[queryIndex].nearestID.resize(
-          yCloud.pts[queryIndex].nearestID.size() + 1);
+    if (this->yCloud.pts[queryIndex].nearestID.size() < 4) {
+      this->yCloud.pts[queryIndex].nearestID.resize(
+          this->yCloud.pts[queryIndex].nearestID.size() + 1);
     }
     idx = resultCloud.ret_index[itr];
-    yCloud.pts[queryIndex].nearestID[itr] = idx;
-    delta[0] = yCloud.pts[queryIndex].x - resultCloud.pts[idx].x;
-    delta[1] = yCloud.pts[queryIndex].y - resultCloud.pts[idx].y;
-    delta[2] = yCloud.pts[queryIndex].z - resultCloud.pts[idx].z;
+    this->yCloud.pts[queryIndex].nearestID[itr] = idx;
+    delta[0] = this->yCloud.pts[queryIndex].x - resultCloud.pts[itr].x;
+    delta[1] = this->yCloud.pts[queryIndex].y - resultCloud.pts[itr].y;
+    delta[2] = this->yCloud.pts[queryIndex].z - resultCloud.pts[itr].z;
     angles = trans::radialCoord(delta);
     if (itr == 0) {
-      yCloud.pts[queryIndex].Q = trans::spheriHarmo(3, angles);
+      this->yCloud.pts[queryIndex].Q = trans::spheriHarmo(3, angles);
       continue;
     }
     ylm = trans::spheriHarmo(3, angles);
     for (int m = 0; m < 7; m++) {
-      yCloud.pts[queryIndex].Q[m] += ylm[m];
+      this->yCloud.pts[queryIndex].Q[m] += ylm[m];
     }
   }
   for (int i = 0; i < 7; i++) {
-    yCloud.pts[queryIndex].Q[i] = yCloud.pts[queryIndex].Q[i] * 0.25;
+    this->yCloud.pts[queryIndex].Q[i] =
+        this->yCloud.pts[queryIndex].Q[i] * 0.25;
   }
-  resPointQ = yCloud.pts[queryIndex];
+  resPointQ = this->yCloud.pts[queryIndex];
   return resPointQ;
 }
 
@@ -93,8 +94,15 @@ chill::yodaPoint<double> chill::bop::pointCij(int queryIndex) {
   chill::yodaPoint<double> resPointCij;
   int nearestID;
   std::complex<double> complexNumerator = {0, 0};
+  std::complex<double> testI = {0, 0};
+  std::complex<double> testJ = {0, 0};
   std::complex<double> complexDenominator = {0, 0};
-  double complexDummy = 0;
+  std::complex<double> complexDenominator1 = {0, 0};
+  std::complex<double> complexDenominator2 = {0, 0};
+  std::complex<double> complexDenominator3 = {0, 0};
+  double realI, realJ, imI, imJ, realRes, imRes;
+  realI = realJ = imI = imJ = realRes = imRes = 0;
+  std::complex<double> cDum = {0, 0};
   for (int j = 0; j < 4; j++) {
     // Resize if not the right size
     if (this->yCloud.pts[queryIndex].nearestID.size() != 4) {
@@ -106,28 +114,21 @@ chill::yodaPoint<double> chill::bop::pointCij(int queryIndex) {
     // Use the ID of the nearest neighbor
     nearestID = this->yCloud.pts[queryIndex].nearestID[j];
 
-    // ------ SEGFAULT START -------
-    // for (int m = 0; m < 7; m++) {
-    //   if (m == 0) {
-    //     complexNumerator = this->yCloud.pts[queryIndex].Q[m] *
-    //                        std::conj(this->yCloud.pts[nearestID].Q[m]);
-    //     complexDenominator = this->yCloud.pts[nearestID].Q[m] *
-    //                          std::conj(this->yCloud.pts[queryIndex].Q[m]);
-    //     continue;
-    //   }
-    //   complexNumerator += this->yCloud.pts[queryIndex].Q[m] *
-    //                       std::conj(this->yCloud.pts[nearestID].Q[m]);
-    //   complexDenominator += this->yCloud.pts[nearestID].Q[m] *
-    //                         std::conj(this->yCloud.pts[queryIndex].Q[m]);
-    //   std::cout << complexNumerator << " Numo \n"
-    //             << complexDenominator << " Deno\n";
-    // }
-    // complexDummy =
-    //     std::real(complexNumerator) / (sqrt(std::real(complexNumerator)) *
-    //                                    sqrt(std::real(complexDenominator)));
-    // std::cout << complexDummy << " C" << queryIndex << j + 1 << "\n";
-    // this->yCloud.pts[queryIndex].cij[j] = complexDummy;
-    // ------ SEGFAULT END -------
+    for (int m = 0; m < 7; m++) {
+      testJ = std::conj(this->yCloud.pts[nearestID].Q[m]);
+      testI = this->yCloud.pts[queryIndex].Q[m];
+      complexNumerator = complexNumerator + (testI * testJ);
+    }
+    for (int m = 0; m < 7; m++) {
+      testJ = this->yCloud.pts[nearestID].Q[m];
+      testI = std::conj(this->yCloud.pts[queryIndex].Q[m]);
+      complexDenominator2 = complexDenominator2 + (testJ * testI);
+    }
+    complexDenominator3 = sqrt(complexDenominator2 * complexNumerator);
+
+    cDum = complexNumerator / complexDenominator3;
+    std::cout << cDum << " C" << queryIndex << "\n";
+    this->yCloud.pts[queryIndex].cij[j] = cDum.real();
   }
   resPointCij = this->yCloud.pts[queryIndex];
   return resPointCij;
