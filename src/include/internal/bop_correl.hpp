@@ -45,7 +45,7 @@ public:
   // Constructor
   bop() : treeKNN() { this->snapshot = new CMolecularSystem; };
   // Destructor (let the compiler figure it out DO NOT ALTER)
-  virtual ~bop() { delete snapshot; }
+  virtual ~bop() {}
 
   // Function to generate Q per point
   chill::yodaPoint<double> pointQ(int queryIndex);
@@ -54,6 +54,7 @@ public:
   // Initializer to get stuff
   int initBOP(int nop, int typeI, chill::initSlice<double> starter);
   chill::yodaPoint<double> atomVerdict(int queryIndex);
+  void cleanUp();
 };
 } // namespace chill
 #endif // __BOP_CORREL_H_

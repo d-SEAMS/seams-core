@@ -11,7 +11,7 @@
 SCENARIO("Test the bond order correlation generation", "[bopCIJ]") {
   GIVEN("An object for initializing bop") {
     // DO NOT EDIT, FILE SPECIFIC
-    auto bopTest = new chill::bop;
+    std::unique_ptr<chill::bop> bopTest(new chill::bop);
     int atom_type = 1;
     int frame_num = 1;
     int num_of_neighbors = 4;
@@ -34,5 +34,6 @@ SCENARIO("Test the bond order correlation generation", "[bopCIJ]") {
         REQUIRE(1);
       }
     }
+    bopTest->cleanUp();
   }
 }
