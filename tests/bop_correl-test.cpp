@@ -30,7 +30,7 @@ SCENARIO("Test the bond order correlation generation", "[bopCIJ]") {
       THEN("Something") {
         // Hand calculate and test the Q_lm at pointQ(0)
         // testPoint = bopTest->pointQ(0);
-        testPoint = bopTest->frameVerdict();
+        testPoint = bopTest->atomVerdict(0);
         REQUIRE(1);
       }
     }
