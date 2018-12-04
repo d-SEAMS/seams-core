@@ -15,10 +15,10 @@ dependencies. A `Pipfile` is also provided for ease of usage. This is preferred
 since it will ensure a reproducable environment which does not interfere with
 the system `python`.
 
-``` bash
+~~~{bash}
 # Do this once to install conan
 pipenv install
-```
+~~~
 
 ### Lua
 TODO: Move to conan
@@ -27,18 +27,18 @@ Lua v5.3 is used for the scripting engine. It needs to be installed via the
 operating system's normal packaging system for now. If possible, install a
 version compiled with `c++`, not `c`.
 
-``` bash
+~~~{bash}
 # Ubuntu and derivatives
 sudo apt install lua5.3 liblua5.3
 # ArchLinux
 sudo pacman -S lua
-```
+~~~
 
 
 ## Build Things
 To generate the executable *yodaStruct* in `bin/` use:
 
-```bash
+~~~{bash}
 # Use the bundled conan
 pipenv shell
 # Always prefer an out of tree build
@@ -58,18 +58,18 @@ export CC=/usr/bin/clang
 # If you forget the flag you will build the Debug version
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make
-```
+~~~
 
 # Running
 To run the sample inputs, simply move the binary to the project root, or to a
 directory where `input/` is a child directory.
 
-```bash
+~~~{bash}
 # Assuming you are in the build directory
 # Check help with -h
 # --script and --file are optional now
 ./yodaStruct --script ../lua_inputs/transition_diff.lua -f ../lua_inputs/parameter.txt -c ../lua_inputs/config.yml
-``` 
+~~~ 
 
 # Details
 
@@ -85,14 +85,14 @@ TODO: Move this to some other location.
 
 For updates to any of the **bundled** `external libraries` change the commit number and use:
 
- ``` bash
+~~~{bash}
 $ cd src/external
 # Sol2
  wget https://raw.githubusercontent.com/ThePhD/sol2/develop/single/sol/sol_forward.hpp
  wget https://raw.githubusercontent.com/ThePhD/sol2/develop/single/sol/sol.hpp
 # cxxopts
  wget https://raw.githubusercontent.com/jarro2783/cxxopts/master/include/cxxopts.hpp 
- ```
+~~~
  
 ## Leaks and performance
 While testing for leaks, use `clang` (for
@@ -100,10 +100,10 @@ While testing for leaks, use `clang` (for
 and [LeakSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer))
 and the following:
 
-``` bash
+~~~{bash}
 export CXX=/usr/bin/clang++ && export CC=/usr/bin/clang
 cmake .. -DCMAKE_CXX_FLAGS="-pg -fsanitize=address " -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg
-```
+~~~
 
 # Contributing
 Please ensure that all contributions are formatted according to the
