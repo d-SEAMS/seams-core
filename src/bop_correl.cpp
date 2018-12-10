@@ -151,7 +151,10 @@ chill::yodaPoint<double> chill::bop::atomVerdict(int queryIndex) {
   for (int i = 0; i < 4; i++) {
     // Use the ID of the nearest neighbor
     nearestID = this->yCloud.pts[queryIndex].nearestID[i];
-    this->yCloud.pts[nearestID] = pointQ(nearestID);
+    // Don't re-run this
+    if (this->yCloud.pts[nearestID].Q.size() != 7) {
+      this->yCloud.pts[nearestID] = pointQ(nearestID);
+    }
   }
 
   resPointFrame = pointCij(queryIndex);
@@ -193,7 +196,7 @@ chill::structurePercentage chill::bop::frameVerdict(int currentFrame) {
   chill::structurePercentage resultPercent;
   chill::yodaPoint<double> temp;
   int totalParticles = 0;
-  for (int i = 0; i < this->nop; i++) {
+  for (int i = 0; i < 10; i++) {
     // Generate the raw values
     temp = atomVerdict(i);
     if (temp.chillPlus.isHexa) {

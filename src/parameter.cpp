@@ -1,5 +1,6 @@
 #include "parameter.h"
 #include <fstream>
+#include <memory>
 
 const std::string PF_NUMBEROFPARTICLES = "NumberOfParticles";
 const std::string PF_BOXX = "xBox";
@@ -72,3 +73,5 @@ void CParameter::readParameter(std::string filename) {
     }
   }
 }
+
+template class std::unique_ptr<CParameter>;

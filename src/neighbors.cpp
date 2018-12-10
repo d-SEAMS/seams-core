@@ -29,7 +29,7 @@ void neigh::treeKNN::populateCloud(int typeI) {
   // Do filtering
   for (int t; t < nop; t++) {
     // Match type
-    if (frame->molecules[t].type == typeI) {
+    if (this->frame->molecules[t].type == typeI) {
       // Check limits
       if (this->isThere(t, frame, coordHigh, coordLow)) {
         // Accomodate one more point
@@ -57,9 +57,9 @@ neigh::PointCloud<double> neigh::treeKNN::byNumber(int pIndex, size_t nearest) {
   neigh::PointCloud<double> resultCloud;
   std::vector<size_t> ret_index(realNeighbors);
   std::vector<double> out_dist_sqr(realNeighbors);
-  double X = cloud.pts[pIndex].x;
-  double Y = cloud.pts[pIndex].y;
-  double Z = cloud.pts[pIndex].z;
+  double X = this->cloud.pts[pIndex].x;
+  double Y = this->cloud.pts[pIndex].y;
+  double Z = this->cloud.pts[pIndex].z;
   const double query_pt[3] = {X, Y, Z};
 
   // construct a kd-tree index:
