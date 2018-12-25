@@ -29,6 +29,7 @@
 #include "parameter.h"
 #include "rdf2D.h"
 #include "rdf3D.h"
+#include "spherical_harmonics.h"
 #include "structure_factor.h"
 #include "transition.h"
 
@@ -125,6 +126,8 @@ int main(int argc, char *argv[]) {
     rdf3D->normalizeRDF3D();
     // Print the RDF
     rdf3D->printRDF3D();
+    // Cleanup
+    rdf3D->deleteRDF3D();
   }
 
   // // ----------------------------------------------
@@ -155,6 +158,8 @@ int main(int argc, char *argv[]) {
     rdf->normalizeRDF2D(0.8);
     // Print the RDF
     rdf->printRDF2D();
+    // Cleanup
+    rdf->deleteRDF2D();
   }
 
   // // ----------------------------------------------
@@ -166,10 +171,10 @@ int main(int argc, char *argv[]) {
   // --------------------------------------
   // Transition system block
   if (config["transition"]["use"].as<bool>()) {
-    TransitionSystem *t_sys = new TransitionSystem;
+    trans::TransitionSystem *t_sys = new trans::TransitionSystem;
     // Bind Function to class instance
-    lua.set_function("transition_probability", &TransitionSystem::mightTrans,
-                     t_sys);
+    lua.set_function("transition_probability",
+                     &trans::TransitionSystem::mightTrans, t_sys);
     // Pass variables to lua
     lua["trajectory_file"] = m_MolSys->parameter->trajFile;
     lua["steps_in_trajectory"] = traj_steps;
@@ -180,17 +185,17 @@ int main(int argc, char *argv[]) {
     } else {
       script = config["transition"]["script"].as<std::string>();
     }
+    // Bind Harmonics
+
     // Run the script
     lua.script_file(script);
+    // Free the memory.
+    t_sys->cleanUp();
   }
   // --------------------------------------
 
-  //Free the memory.
-  // rdf3D->deleteRDF3D();
-  // m_MolSys->deleteMolecules();
-  // rdf1->deleteRDF3D();
-  // rdf->deleteRDF2D();
-  // s_k->deleteStrucFactor();
+  // Free the memory.
+  m_MolSys->deleteMolecules();
 
   std::cout << rang::style::bold
             << fmt::format("Welcome to the Black Parade.\nYou ran:-\n")

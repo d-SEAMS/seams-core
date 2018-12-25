@@ -5,4 +5,4 @@ transition:
 rdf3D:
   use: true
 rdf2D:
-  use: true
+  use: false

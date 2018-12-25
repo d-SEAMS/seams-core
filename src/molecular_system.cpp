@@ -13,18 +13,15 @@ const std::string PF_ATOM = "ATOMS";
  *  Constructor
  ***********************************************/
 CMolecularSystem::CMolecularSystem() {
-  this->parameter = new CParameter;
-  this->parameter->nop = -1;
+  std::unique_ptr<CParameter> parameter(new CParameter);
+  parameter->nop = -1;
   this->molecules = nullptr;
 }
 
 /********************************************/ /**
  *  Destructor
  ***********************************************/
-CMolecularSystem::~CMolecularSystem() {
-  delete parameter;
-  delete[] molecules;
-}
+CMolecularSystem::~CMolecularSystem() { delete[] molecules; }
 
 /********************************************/ /**
  *  Prepares frames for further processing.
@@ -33,8 +30,8 @@ CMolecularSystem::~CMolecularSystem() {
 
 void CMolecularSystem::initializeFrames(int nop, std::string fileName) {
   this->molecules = new CMolecule[nop];
-  this->parameter->nop = nop;
-  this->parameter->trajFile = fileName;
+  parameter->nop = nop;
+  parameter->trajFile = fileName;
 }
 
 /********************************************/ /**
@@ -43,7 +40,7 @@ void CMolecularSystem::initializeFrames(int nop, std::string fileName) {
  ***********************************************/
 void CMolecularSystem::initializeMolecules(int numberOfParticles) {
   this->molecules = new CMolecule[numberOfParticles];
-  this->parameter->nop = numberOfParticles;
+  parameter->nop = numberOfParticles;
 }
 
 /********************************************/ /**
@@ -51,33 +48,27 @@ void CMolecularSystem::initializeMolecules(int numberOfParticles) {
  ***********************************************/
 void CMolecularSystem::initializeMolecules() {
   try {
-    if (this->parameter->nop < 0) {
+    if (parameter->nop < 0) {
       throw NumberOfParticlesNotDefinedException();
     } else {
-      this->molecules = new CMolecule[this->parameter->nop];
+      this->molecules = new CMolecule[parameter->nop];
     }
   } catch (NumberOfParticlesNotDefinedException &) {
   }
 }
 
 /********************************************/ /**
- *  Frees the memory
- ***********************************************/
-void CMolecularSystem::deleteMolecules() { delete[] molecules; }
-
-/********************************************/ /**
  *  Initialize the System depending on the choice of file to read from.
  ***********************************************/
 void CMolecularSystem::InitializeSystem() {
-  if (this->parameter->xyzFile.compare("notset") == 0 &&
-      this->parameter->trajFile.compare("notset") == 0) {
+  if (parameter->xyzFile.compare("notset") == 0 &&
+      parameter->trajFile.compare("notset") == 0) {
     std::cerr << "The filename must be set in the input file parameter.txt\n";
   } else {
-    if (this->parameter->xyzFile.compare("notset") ==
-        0) // Read from the traj file
+    if (parameter->xyzFile.compare("notset") == 0) // Read from the traj file
     {
       this->readWholeTrj();
-    } else if (this->parameter->trajFile.compare("notset") ==
+    } else if (parameter->trajFile.compare("notset") ==
                0) // Read from the xyz file
     {
       this->readParticleFile();
@@ -107,7 +98,7 @@ void CMolecularSystem::readWholeTrj() {
       true;   // To test if we are reading in a coordinate line or not
               // set to true at first
   int natoms; // To count no. of atoms in each timestep snapshot
-  dumpFile.open(this->parameter->trajFile.c_str(), std::ifstream::in);
+  dumpFile.open(parameter->trajFile.c_str(), std::ifstream::in);
 
   nsteps = 1;
   //First line of traj file- ITEM: TIMESTEP
@@ -120,7 +111,7 @@ void CMolecularSystem::readWholeTrj() {
   // The next line contains the number of particles
   std::getline(dumpFile, line);
   nop = atoi(line.c_str());
-  this->parameter->nop = nop;
+  parameter->nop = nop;
   this->initializeMolecules(nop);
 
   // Ignore line- ITEM: BOX BOUNDS pp pp pp
@@ -137,9 +128,9 @@ void CMolecularSystem::readWholeTrj() {
   }
 
   // for NVT these will remain constant for all frames
-  this->parameter->boxx = dr[0];
-  this->parameter->boxy = dr[1];
-  this->parameter->boxz = dr[2];
+  parameter->boxx = dr[0];
+  parameter->boxy = dr[1];
+  parameter->boxz = dr[2];
 
   // Skip- ITEM: ATOMS id mol type x y z
   std::getline(dumpFile, line);
@@ -190,7 +181,7 @@ void CMolecularSystem::readWholeTrj() {
   }
 
   // Finally save no. of steps
-  this->parameter->nsteps = nsteps;
+  parameter->nsteps = nsteps;
 }
 
 /********************************************/ /**
@@ -201,21 +192,21 @@ void CMolecularSystem::readParticleFile() {
   int nop;
   std::string line;
   std::ifstream confFile;
-  confFile.open(this->parameter->xyzFile.c_str(), std::ifstream::in);
+  confFile.open(parameter->xyzFile.c_str(), std::ifstream::in);
   if (confFile.is_open()) {
     //the first line contains the number of particles
     std::getline(confFile, line);
     nop = atoi(line.c_str());
-    this->parameter->nop = nop;
+    parameter->nop = nop;
     this->initializeMolecules(nop);
 
     //Followed by boxx,boxy,boxz
     std::getline(confFile, line);
-    this->parameter->boxx = atof(line.c_str());
+    parameter->boxx = atof(line.c_str());
     std::getline(confFile, line);
-    this->parameter->boxy = atof(line.c_str());
+    parameter->boxy = atof(line.c_str());
     std::getline(confFile, line);
-    this->parameter->boxz = atof(line.c_str());
+    parameter->boxz = atof(line.c_str());
 
     //so lets read the particles positions
     for (int ti = 0; ti < nop; ti++) {
@@ -237,8 +228,8 @@ void CMolecularSystem::readParticleFile() {
       this->molecules[ti].set_position(posx, posy, posz);
     }
   } else {
-    std::cerr << "Fatal Error : cannot open the file "
-              << this->parameter->xyzFile << "\n";
+    std::cerr << "Fatal Error : cannot open the file " << parameter->xyzFile
+              << "\n";
   }
 }
 
@@ -264,13 +255,13 @@ void CMolecularSystem::readParticleFile(int step) {
   int molNum;
   int typeNum;
   int xNum;
-
-  dumpFile.open(this->parameter->trajFile.c_str(), std::ifstream::in);
+  std::array<double, 3> box;
+  dumpFile.open(parameter->trajFile.c_str(), std::ifstream::in);
 
   // Error handling for an invalid step
   // TODO: Do this better, maybe use <optional> wrt. https://stackoverflow.com/a/47677892/1895378
-  if (this->parameter->nsteps > 1) {
-    if (step > this->parameter->nsteps) {
+  if (parameter->nsteps > 1) {
+    if (step > parameter->nsteps) {
       std::cerr << "The step number " << step
                 << " is larger than the number of steps in the trajectory"
                 << "\n";
@@ -284,7 +275,7 @@ void CMolecularSystem::readParticleFile(int step) {
   if (dumpFile.is_open()) {
     // Loop through the number of snapshots in the traj file
     // until you reach the snapshot at step
-    for (int istep = 1; istep <= this->parameter->nsteps; istep++) {
+    for (int istep = 1; istep <= parameter->nsteps; istep++) {
 
       // Stop reading the file if you've already read in the step
       if (istep == step + 1) {
@@ -300,8 +291,11 @@ void CMolecularSystem::readParticleFile(int step) {
       // Get the box lengths from the three lines with box dimenions
       for (int k = 0; k < 3; k++) {
         std::getline(dumpFile, line);
-        getBoxLength(line);
+        box[k] = this->getBoxLength(line);
       }
+      parameter->boxx = box[0];
+      parameter->boxy = box[1];
+      parameter->boxz = box[2];
 
       // -----------------------
       std::getline(dumpFile, line); // ITEM: ATOMS id mol type x y z
@@ -330,7 +324,7 @@ void CMolecularSystem::readParticleFile(int step) {
 
       // ------------------------
       // Now get the particle positions; only at the correct step
-      for (int iatom = 0; iatom < this->parameter->nop; iatom++) {
+      for (int iatom = 0; iatom < parameter->nop; iatom++) {
         std::getline(dumpFile, line);
 
         // Don't save the particle positions for the rest of the snapshots
@@ -368,8 +362,8 @@ void CMolecularSystem::readParticleFile(int step) {
 
   } // End of check for the file being open
   else {
-    std::cerr << "Fatal Error : cannot open the file "
-              << this->parameter->xyzFile << "\n";
+    std::cerr << "Fatal Error : cannot open the file " << parameter->xyzFile
+              << "\n";
   }
 }
 
@@ -392,4 +386,13 @@ double CMolecularSystem::getBoxLength(std::string line) {
 
   // Get the box length
   return lineVal[1] - lineVal[0];
+}
+
+/********************************************/ /**
+ *  Frees the memory
+ ***********************************************/
+void CMolecularSystem::deleteMolecules() {
+
+  delete parameter;
+  delete[] molecules;
 }

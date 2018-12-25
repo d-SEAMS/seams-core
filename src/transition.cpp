@@ -1,6 +1,8 @@
 #include "geometry.h"
 #include "transition.h"
 
+using namespace trans;
+
 /********************************************/ /**
  *  Constructor
  ***********************************************/
@@ -102,7 +104,6 @@ bool TransitionSystem::isThere(int iatom, CMolecularSystem *frame) {
   double coordY = frame->molecules[iatom].get_posy();
   double coordZ = frame->molecules[iatom].get_posz();
   std::array<double, 3> coord = {coordX, coordY, coordZ};
-  // TODO: Handle non x-dimension things
   for (int i = 0; i < 3; i++) {
     if (coordHigh[i] == coordLow[i]) {
       return true;
@@ -135,5 +136,15 @@ double TransitionSystem::timeAtomAvg(int nop) {
   if (norm != 0) {
     return sum / norm;
   }
+  // TODO: Error handling
   return -1000;
+}
+
+/********************************************/ /**
+ *  Frees the memory
+ ***********************************************/
+void TransitionSystem::cleanUp() {
+  delete frameTwo;
+  delete frameOne;
+  delete[] currentDiff;
 }

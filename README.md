@@ -15,10 +15,10 @@ dependencies. A `Pipfile` is also provided for ease of usage. This is preferred
 since it will ensure a reproducable environment which does not interfere with
 the system `python`.
 
-``` bash
+~~~{bash}
 # Do this once to install conan
 pipenv install
-```
+~~~
 
 ### Lua
 TODO: Move to conan
@@ -27,38 +27,49 @@ Lua v5.3 is used for the scripting engine. It needs to be installed via the
 operating system's normal packaging system for now. If possible, install a
 version compiled with `c++`, not `c`.
 
-``` bash
+~~~{bash}
 # Ubuntu and derivatives
 sudo apt install lua5.3 liblua5.3
 # ArchLinux
 sudo pacman -S lua
-```
+~~~
 
 
 ## Build Things
 To generate the executable *yodaStruct* in `bin/` use:
 
-```bash
+~~~{bash}
 # Use the bundled conan
 pipenv shell
 # Always prefer an out of tree build
 mkdir build
 cd build
+
+#
+# OPTIONAL STEP (TODO: Use CMakeLists.txt to figure this out)
+#
+# We prefer clang, so if you have it, use it
+export CXX=/usr/bin/clang++
+export CC=/usr/bin/clang
+#
+# END OPTIONAL
+#
+
 # If you forget the flag you will build the Debug version
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make
-```
+~~~
 
 # Running
 To run the sample inputs, simply move the binary to the project root, or to a
 directory where `input/` is a child directory.
 
-```bash
+~~~{bash}
 # Assuming you are in the build directory
 # Check help with -h
 # --script and --file are optional now
 ./yodaStruct --script ../lua_inputs/transition_diff.lua -f ../lua_inputs/parameter.txt -c ../lua_inputs/config.yml
-``` 
+~~~ 
 
 # Details
 
@@ -74,14 +85,25 @@ TODO: Move this to some other location.
 
 For updates to any of the **bundled** `external libraries` change the commit number and use:
 
- ``` bash
+~~~{bash}
 $ cd src/external
 # Sol2
  wget https://raw.githubusercontent.com/ThePhD/sol2/develop/single/sol/sol_forward.hpp
  wget https://raw.githubusercontent.com/ThePhD/sol2/develop/single/sol/sol.hpp
 # cxxopts
  wget https://raw.githubusercontent.com/jarro2783/cxxopts/master/include/cxxopts.hpp 
- ```
+~~~
+ 
+## Leaks and performance
+While testing for leaks, use `clang` (for
+[AddressSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizer)
+and [LeakSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer))
+and the following:
+
+~~~{bash}
+export CXX=/usr/bin/clang++ && export CC=/usr/bin/clang
+cmake .. -DCMAKE_CXX_FLAGS="-pg -fsanitize=address " -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg
+~~~
 
 # Contributing
 Please ensure that all contributions are formatted according to the
@@ -101,6 +123,7 @@ Where some of the above suggestions are derived from [this depreciated githook](
 # Acknowledgements
 The following tools are used in this project:
 - [CMake](https://cmake.org/) for compilation ([cmake-init](https://github.com/cginternals/cmake-init) was used as a reference)
+- [Clang](https://clang.llvm.org/) because it is more descriptive with better tools
 - [Conan](https://conan.io/) and [https://pipenv.readthedocs.io/en/latest/](pipenv) for dependency management
 - [Doxygen](https://www.doxygen.org) for the developer API
 - [clang-format](https://clang.llvm.org/docs/ClangFormat.html) for code formatting
@@ -115,5 +138,10 @@ The libraries used are:
 - [sol2](https://github.com/ThePhD/sol2) for interfacing with lua
 - [yaml-cpp](https://github.com/jbeder/yaml-cpp) for working with `yaml`
 - [fmt](https://github.com/fmtlib/fmt) for safe and fast formatting
-
+- [Linear Algebra PACKage (LAPACK)](http://www.netlib.org/lapack/)
+- [Basic Linear Algebra Subprograms (BLAS)](http://www.netlib.org/blas/)
+- [Boost Geometry](https://www.boost.org/doc/libs/1_68_0/libs/geometry/doc/html/index.html) for working with different coordinates
+- [Boost Math](https://www.boost.org/doc/libs/?view=category_math) for spherical harmonics
+- [Blaze](https://bitbucket.org/blaze-lib/blaze/) for very fast modern linear algebra
+- [nanoflann](https://github.com/jlblancoc/nanoflann) to calculate nearest neighbors
 
