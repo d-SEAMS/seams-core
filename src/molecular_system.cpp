@@ -1,7 +1,5 @@
 #include "molecular_system.h"
 #include "molecule.h"
-#include <bits/stdc++.h>
-
 // For reading in lammps traj files
 const std::string PF_ITEM = "ITEM:";
 const std::string PF_ATOM = "ATOMS";
@@ -284,8 +282,8 @@ void CMolecularSystem::readParticleFile(int step) {
     for (int istep = 1; istep <= this->parameter->nsteps; istep++) {
 
       // Stop reading the file if you've already read in the step
-      if (istep == step+1) {
-      	break;
+      if (istep == step + 1) {
+        break;
       }
       // Lines before coordinates in every snapshot
       std::getline(dumpFile, line); // ITEM: TIMESTEP

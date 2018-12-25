@@ -1,7 +1,6 @@
 #include "geometry.h"
 #include "molecular_system.h"
 #include "molecule.h"
-#include <bits/stdc++.h>
 #include <cmath>
 
 /********************************************/ /**

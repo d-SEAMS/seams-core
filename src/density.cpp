@@ -1,5 +1,4 @@
 #include "density.h"
-#include <bits/stdc++.h>
 
 /********************************************/ /**
  *  Constructor

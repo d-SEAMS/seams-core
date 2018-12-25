@@ -1,8 +1,7 @@
-#include "rdf2D.h"
 #include "geometry.h"
 #include "molecular_system.h"
 #include "molecule.h"
-#include <bits/stdc++.h>
+#include "rdf2D.h"
 
 // Constructor
 Rdf2D::Rdf2D() {

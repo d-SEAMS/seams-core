@@ -1,7 +1,6 @@
-#include "rdf3D.h"
 #include "molecular_system.h"
 #include "molecule.h"
-#include <bits/stdc++.h>
+#include "rdf3D.h"
 
 // Constructor
 Rdf3D::Rdf3D() {
