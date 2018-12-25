@@ -1,5 +1,10 @@
 #include "molecular_system.h"
+// Portable Headers
+#include <vector>
+
+// Application Specific
 #include "molecule.h"
+
 // For reading in lammps traj files
 const std::string PF_ITEM = "ITEM:";
 const std::string PF_ATOM = "ATOMS";
