@@ -1,4 +1,4 @@
-file: "/home/haozeke/Git/Github/C++/Forks/structureFactor/lua_inputs/parameter.txt"
+file: "../lua_inputs/parameter.txt"
 transition:
  use: false
  script: "../lua_inputs/transition_diff.lua"
@@ -8,5 +8,5 @@ rdf2D:
   use: false
 iceType:
   use: true
-  trajectory: "/home/haozeke/Git/Github/C++/Forks/structureFactor/input/traj/mW_cubic.lammpstrj"
+  trajectory: "../input/traj/mW_cubic.lammpstrj"
   variables: "../lua_inputs/iceType/vars.lua"
