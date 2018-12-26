@@ -254,8 +254,14 @@ int main(int argc, char *argv[]) {
       lua["trajectory"] = tFile;
       // Register functions
       lua.set_function("writeDump", gen::writeDump);
+      lua.set_function("writeHistogram", gen::writeHisto);
       lua.set_function("readFrame", molSys::readLammpsTrjO);
-      // lua.set_function("neighborList", nneigh::neighList);
+      lua.set_function("neighborList", nneigh::neighListO);
+      lua.set_function("chillPlus_cij", chill::getCorrelPlus);
+      lua.set_function("chillPlus_iceType", chill::getIceTypePlus);
+      lua.set_function("averageQ6", chill::getq6);
+      lua.set_function("modifyChill", chill::reclassifyWater);
+      lua.set_function("percentage_Ice", chill::printIceType);
       // Use the script
       lua.script_file(lscript);
       std::cout << "\nTest\n";
@@ -290,7 +296,7 @@ int main(int argc, char *argv[]) {
         // // Sort according to atom ID (OPTIONAL)
         // std::sort(resCloud.pts.begin(), resCloud.pts.end(), gen::compareByAtomID);
         // Update the neighbour lists
-        resCloud = nneigh::neighList(rc, &resCloud, oType);
+        resCloud = nneigh::neighListO(rc, &resCloud, oType);
 
         // ------------------------------
         // If you want to use CHILL+
