@@ -1,5 +1,6 @@
 #include "molecular_system.h"
 // Portable Headers
+#include <memory>
 #include <vector>
 
 // Application Specific
