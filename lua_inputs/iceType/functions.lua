@@ -4,18 +4,14 @@ print("\n Welcome to the manual lua function evaluation environment.\n");
 local lfs = require"lfs"
 
 --- Strings are immutable, check https://stackoverflow.com/questions/1405583/concatenation-of-strings-in-lua
---- Handle this better
-lfs.chdir("../output/");
-lfs.mkdir(subdir);
+lfs.mkdir(outDir);
+lfs.chdir(outDir);
 
 --- Variables again (with subdir)
-dumpName= subdir .. "water.lammpstrj";
-cpMod= subdir .. chillPlus_mod;
-cpNMod= subdir .. chillPlus_noMod;
-licn= subdir .. largest_ice_cluster_name;
+dumpName= "water.lammpstrj";
 
 --- Prep the files (O==one, T==two)
-tmpFileO=io.open(cpNMod, "w"); --- Allow overwriting (otherwise use a)
+tmpFileO=io.open(chillPlus_noMod, "w"); --- Allow overwriting (otherwise use a)
 --- sets the default output file as test.lua
 io.output(tmpFileO);
 --- appends a word test to the last line of the file
@@ -23,12 +19,12 @@ io.write("Frame Ic Ih Interfacial Clath InterClath Water Total\n")
 --- closes the open file
 io.close(tmpFileO)
 --- Do it again
-tmpFileT=io.open(cpMod, "w"); --- Allow overwriting (otherwise use a)
+tmpFileT=io.open(chillPlus_mod, "w"); --- Allow overwriting (otherwise use a)
 io.output(tmpFileT);
 io.write("Frame Ic Ih Interfacial Clath InterClath Water Total\n");
 io.close(tmpFileT);
 --- Once more for the cluster
-tmpFileC=io.open(licn, "w"); --- Allow overwriting (otherwise use a)
+tmpFileC=io.open(largest_ice_cluster_name, "w"); --- Allow overwriting (otherwise use a)
 io.output(tmpFileC);
 io.write("Frame number_in_cluster\n");
 io.close(tmpFileC);
