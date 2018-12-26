@@ -75,6 +75,10 @@ int writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 // The file names are cij, q6, q3
 int writeHisto(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                std::vector<double> avgQ6);
+// Function for printing the largest ice cluster
+int writeCluster(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                 std::string fileName = "cluster.txt", bool isSlice = false,
+                 int largestIceCluster = 0);
 } // namespace gen
 
 #endif // __NEIGHBOURS_H_
