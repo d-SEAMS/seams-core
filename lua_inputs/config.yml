@@ -3,6 +3,11 @@ transition:
  use: false
  script: "../lua_inputs/transition_diff.lua"
 rdf3D:
-  use: true
+  use: false
 rdf2D:
   use: false
+iceType:
+  use: true
+  trajectory: "/home/haozeke/Git/Github/C++/Forks/structureFactor/src/input/traj/exploreFull-100.lammpstrj"
+  variables: "../lua_inputs/iceType/vars.lua"
+  script: "../lua_inputs/iceType/functions.lua"
