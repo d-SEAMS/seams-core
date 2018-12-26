@@ -229,9 +229,11 @@ int main(int argc, char *argv[]) {
     auto fGap = lua.get<int>("frameGap");
     auto dumpName = lua.get<std::string>("dumpName");
     auto advUse = lua.get<bool>("defineFunctions");
+    auto outFileChillPlus = lua.get<std::string>("chillPlus_noMod");
+    auto outFileChill = lua.get<std::string>("chill_mod");
+    auto outFileSuper = lua.get<std::string>("chillPlus_mod");
 
-    // Variables which must begin in C++
-
+    // Variables which must be declared in C++
     // Newer pointCloud
     molSys::PointCloud<molSys::Point<double>, double> resCloud;
     // For averaged q6
@@ -239,7 +241,6 @@ int main(int argc, char *argv[]) {
 
     if (advUse == true) {
       // This section basically only registers functions and handles the rest in lua
-
       // Use the functions defined here
       auto lscript = lua.get<std::string>("functionScript");
       // Transfer variables to lua
@@ -278,11 +279,6 @@ int main(int argc, char *argv[]) {
 
       // For overwriting old files
       // and for printing the first line of output files
-      // For changing the names, change it here
-      // TODO: Fix this
-      std::string outFileChillPlus = "chillPlus.txt"; // Default
-      std::string outFileChill = "chill.txt";
-      std::string outFileSuper = "superChill.txt";
       std::ofstream clusterFile;
       for (int frame = tFrame; frame <= fFrame; frame += fGap) {
         // Read in a frame
@@ -327,7 +323,7 @@ int main(int argc, char *argv[]) {
         }
         // Print out and calculate the number
         // and percentage of the ice types after reclassification
-        chill::printIceType(&resCloud, false);
+        chill::printIceType(&resCloud, false, outFileSuper);
         // ---------------------
 
         // ---------------------
