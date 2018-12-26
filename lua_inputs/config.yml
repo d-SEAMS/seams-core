@@ -8,5 +8,5 @@ rdf2D:
   use: false
 iceType:
   use: true
-  trajectory: "../input/traj/mW_cubic.lammpstrj"
+  trajectory: "../input/dumpnvt240pd2_6.lammpstrj"
   variables: "../lua_inputs/iceType/vars.lua"
