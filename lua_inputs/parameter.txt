@@ -1,1 +1,1 @@
-trajFile=../input/traj/MWwater-256.lammpstrj
+trajFile="/home/haozeke/Git/Github/C++/Forks/structureFactor/input/traj/mW_cubic.lammpstrj"

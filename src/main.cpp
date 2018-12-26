@@ -112,79 +112,101 @@ int main(int argc, char *argv[]) {
   // // rdf->deleteRDF2D();
 
   // // ----------------------------------------------
-  // //Structure Factor from 3D RDF
-  // StructureFactor *s_k = new StructureFactor;
-  // s_k->initStrucFactor(*rdf3D, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy, m_MolSys->parameter->boxz);
+  // //Rdf3D over multiple frames
+  // if (config["rdf3D"]["use"].as<bool>()) {
+  //   // Create object for 3D RDF
+  //   Rdf3D *rdf3D = new Rdf3D;
+  //   // Testing 3D rdf function. RDF calculated is incorrect if the wrong volume is set
+  //   double volume = m_MolSys->parameter->boxx * m_MolSys->parameter->boxy *
+  //                   m_MolSys->parameter->boxz;
+  //   rdf3D->initRDF3D(*m_MolSys, 0.01, volume);
+  //   // Loop through steps
+  //   for (int istep = 1; istep <= nsteps; istep++) {
+  //     // Get the coordinates at a particule step
+  //     m_MolSys->readParticleFile(frame + istep);
+  //     // Get the 3D RDF at this step
+  //     rdf3D->accumulateRDF3D(*m_MolSys, 2, 2);
+  //   }
+
+  //   // Normalizes the RDF (required for multiple steps. This
+  //   // is called automatically in the single step RDF function)
+  //   rdf3D->normalizeRDF3D();
+  //   // Print the RDF
+  //   rdf3D->printRDF3D();
+  //   // Cleanup
+  //   rdf3D->deleteRDF3D();
+  // }
+
+  // // // ----------------------------------------------
+  // // //Structure Factor from 3D RDF
+  // // StructureFactor *s_k = new StructureFactor;
+  // // s_k->initStrucFactor(*rdf3D, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy, m_MolSys->parameter->boxz);
+  // // // ----------------------------------------------
+
   // // ----------------------------------------------
+  // // Rdf2D over multiple frames
+  // if (config["rdf2D"]["use"].as<bool>()) {
+  //   // Create object for 2D RDF
+  //   Rdf2D *rdf = new Rdf2D;
+  //   // Testing 2D rdf function. RDF calculated is incorrect if the wrong volume is set
+  //   // double volume = (8)*m_MolSys->parameter->boxx*m_MolSys->parameter->boxy;
+  //   rdf->initRDFxy(*m_MolSys, 0.03, 15);
+  //   // Loop through steps
+  //   for (int istep = 1; istep <= nsteps; istep++) {
+  //     // Get the coordinates at a particule step
+  //     m_MolSys->readParticleFile(frame + istep);
+  //     // Get the 2D RDF at this step
+  //     rdf->accumulateRDFxy(*m_MolSys, 17.85, 0.8, 2, 2);
+  //   }
 
-  // ----------------------------------------------
-  // Rdf2D over multiple frames
-  if (config["rdf2D"]["use"].as<bool>()) {
-    // Create object for 2D RDF
-    Rdf2D *rdf = new Rdf2D;
-    // Testing 2D rdf function. RDF calculated is incorrect if the wrong volume is set
-    // double volume = (8)*m_MolSys->parameter->boxx*m_MolSys->parameter->boxy;
-    rdf->initRDFxy(*m_MolSys, 0.03, 15);
-    // Loop through steps
-    for (int istep = 1; istep <= nsteps; istep++) {
-      // Get the coordinates at a particule step
-      m_MolSys->readParticleFile(frame + istep);
-      // Get the 2D RDF at this step
-      rdf->accumulateRDFxy(*m_MolSys, 17.85, 0.8, 2, 2);
-    }
+  //   // Normalizes the RDF (required for multiple steps. This
+  //   // is called automatically in the single step RDF function)
+  //   // The width of the layer is the argument
+  //   rdf->normalizeRDF2D(0.8);
+  //   // Print the RDF
+  //   rdf->printRDF2D();
+  //   // Cleanup
+  //   rdf->deleteRDF2D();
+  // }
 
-    // Normalizes the RDF (required for multiple steps. This
-    // is called automatically in the single step RDF function)
-    // The width of the layer is the argument
-    rdf->normalizeRDF2D(0.8);
-    // Print the RDF
-    rdf->printRDF2D();
-    // Cleanup
-    rdf->deleteRDF2D();
-  }
+  // // // ----------------------------------------------
+  // // //Structure Factor from RDF
+  // // StructureFactor *s_k = new StructureFactor;
+  // // s_k->initStrucFactor(*rdf, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy);
+  // // // ----------------------------------------------
 
-  // // ----------------------------------------------
-  // //Structure Factor from RDF
-  // StructureFactor *s_k = new StructureFactor;
-  // s_k->initStrucFactor(*rdf, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy);
-  // // ----------------------------------------------
+  // // --------------------------------------
+  // // Transition system block
+  // if (config["transition"]["use"].as<bool>()) {
+  //   trans::TransitionSystem *t_sys = new trans::TransitionSystem;
+  //   // Bind Function to class instance
+  //   lua.set_function("transition_probability",
+  //                    &trans::TransitionSystem::mightTrans, t_sys);
+  //   // Pass variables to lua
+  //   lua["trajectory_file"] = m_MolSys->parameter->trajFile;
+  //   lua["steps_in_trajectory"] = traj_steps;
+  //   lua["number_of_particles"] = m_MolSys->parameter->nop;
+  //   // Determine script location
+  //   if (result["s"].count() > 0) {
+  //     script = result["s"].as<std::string>();
+  //   } else {
+  //     script = config["transition"]["script"].as<std::string>();
+  //   }
+  //   // Bind Harmonics
 
-  // --------------------------------------
-  // Transition system block
-  if (config["transition"]["use"].as<bool>()) {
-    trans::TransitionSystem *t_sys = new trans::TransitionSystem;
-    // Bind Function to class instance
-    lua.set_function("transition_probability",
-                     &trans::TransitionSystem::mightTrans, t_sys);
-    // Pass variables to lua
-    lua["trajectory_file"] = m_MolSys->parameter->trajFile;
-    lua["steps_in_trajectory"] = traj_steps;
-    lua["number_of_particles"] = m_MolSys->parameter->nop;
-    // Determine script location
-    if (result["s"].count() > 0) {
-      script = result["s"].as<std::string>();
-    } else {
-      script = config["transition"]["script"].as<std::string>();
-    }
-    // Bind Harmonics
+  //   // Run the script
+  //   lua.script_file(script);
+  //   // Free the memory.
+  //   t_sys->cleanUp();
+  // }
+  // // --------------------------------------
 
-    // Run the script
-    lua.script_file(script);
-    // Free the memory.
-    t_sys->cleanUp();
-  }
-  // --------------------------------------
-
-  // Free the memory.
-  m_MolSys->deleteMolecules();
+  // // Free the memory.
+  // m_MolSys->deleteMolecules();
 
   // --------------------------------------
   // iceType Determination Block
   if (config["iceType"]["use"].as<bool>()) {
-
-    // Newer pointCloud
-    molSys::PointCloud<molSys::Point<double>, double> resCloud;
-
     // Do error handling if the traj is not there
     // Get the damn file
     // Determine script location [cmd > iceType Traj > Traj]
@@ -193,13 +215,6 @@ int main(int argc, char *argv[]) {
     } else {
       tFile = config["trajectory"].as<std::string>();
     }
-    // Determine script location
-    if (result["s"].count() > 0) {
-      script = result["s"].as<std::string>();
-    } else {
-      script = config["iceType"]["script"].as<std::string>();
-    }
-
     // Get variables
     std::string vars = config["iceType"]["variables"].as<std::string>();
 
@@ -212,118 +227,143 @@ int main(int argc, char *argv[]) {
     auto tFrame = lua.get<int>("targetFrame");
     auto fFrame = lua.get<int>("finalFrame");
     auto fGap = lua.get<int>("frameGap");
+    auto dumpName = lua.get<std::string>("dumpName");
+    auto advUse = lua.get<bool>("defineFunctions");
 
-    // Analyze
+    // Variables which must begin in C++
+
+    // Newer pointCloud
+    molSys::PointCloud<molSys::Point<double>, double> resCloud;
     // For averaged q6
     std::vector<double> avgQ6;
 
-    // Delete later
-    std::ofstream cijFile;
-    cijFile.open("cij.txt");
-    cijFile << "Cij\n";
-    cijFile.close();
-    std::ofstream q3File;
-    q3File.open("q3.txt");
-    q3File << "Q3\n";
-    q3File.close();
-    std::ofstream q6File;
-    q6File.open("q6.txt");
-    q6File << "Q6\n";
-    q6File.close();
+    if (advUse == true) {
+      // This section basically only registers functions and handles the rest in lua
 
-    // For overwriting old files
-    // and for printing the first line of output files
-    // For changing the names, change it here
-    // TODO: Fix this
-    std::string outFileChillPlus = "chillPlus.txt"; // Default
-    std::string outFileChill = "chill.txt";
-    std::string outFileSuper = "superChill.txt";
-    std::ofstream clusterFile;
-    for (int frame = tFrame; frame <= fFrame; frame += fGap) {
-      // Read in a frame
-      resCloud = molSys::readLammpsTrj(tFile, frame, &resCloud, oType);
-      // // Sort according to atom ID (OPTIONAL)
-      // std::sort(resCloud.pts.begin(), resCloud.pts.end(), gen::compareByAtomID);
-      // Update the neighbour lists
-      resCloud = nneigh::neighList(rc, &resCloud, oType);
-
-      // ------------------------------
-      // If you want to use CHILL+
-      // Calculate c_ij
-      resCloud = chill::getCorrelPlus(&resCloud, false);
-      // Print first line to file
-      if (frame == tFrame) {
-        std::ofstream chill;
-        chill.open(outFileChillPlus);
-        chill << "Frame Ic Ih Interfacial Clath InterClath Water Total\n";
-        chill.close();
-      }
-      // Classify according to CHILL+
-      resCloud = chill::getIceTypePlus(&resCloud, false);
-      // ------------------------------
-
-      // Get the averaged q6 per atom
-      // Greater than 0.5 means ice
-      // Update the neighbour lists
-      // resCloud = nneigh::neighList(3.2, &resCloud, oxyType);
-      avgQ6 = chill::getq6(&resCloud, false);
-
-      // Reclassify according to averaged q3 and q6
-      resCloud = chill::reclassifyWater(&resCloud, &avgQ6);
-
-      // --------------------
-      // Print modified parameter
-      // Print first line to file
-      if (frame == tFrame) {
-        std::ofstream chill;
-        chill.open(outFileSuper);
-        chill << "Frame Ic Ih Interfacial Clath InterClath Water Total\n";
-        chill.close();
-      }
-      // Print out and calculate the number
-      // and percentage of the ice types after reclassification
-      chill::printIceType(&resCloud, false);
-      // ---------------------
-
-      // ---------------------
-      // Get the largest ice cluster
-      molSys::PointCloud<molSys::Point<double>, double> solCloud;
-      int largestIceCluster;
-      solCloud = chill::getIceCloud(&resCloud, &solCloud);
-      largestIceCluster = chill::largestIceCluster(&solCloud, rc, true, false);
-      // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-      // Write out the largest ice cluster to a file
-      if (frame == tFrame) {
-        clusterFile.open("cluster.txt");
-        clusterFile << "Frame NumberInCluster\n";
-        clusterFile << solCloud.currentFrame << " " << largestIceCluster
-                    << "\n";
-        clusterFile.close();
-      } else {
-        clusterFile.open("cluster.txt");
-        clusterFile << solCloud.currentFrame << " " << largestIceCluster
-                    << "\n";
-        clusterFile.close();
-      }
-      // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-      solCloud = clearPointCloud(&solCloud);
-      // ---------------------
-
-      // // Print to file here (cij etc)
-      // std::string outName = "chill-"+std::to_string(frame);
-      // int val = gen::prettyPrintYoda(&resCloud, outName);
-
+      // Use the functions defined here
+      auto lscript = lua.get<std::string>("functionScript");
+      // Transfer variables to lua
+      // lua["rc"] = rc;
+      // lua["oType"] = oType;
+      // lua["tFrame"] = tFrame;
+      // lua["rc"] = rc;
+      // lua["rc"] = rc;
+      // lua["rc"] = rc;
       lua["resCloud"] = &resCloud;
+      lua["avgQ6"] = &avgQ6;
+      lua["trajectory"] = tFile;
       // Register functions
       lua.set_function("writeDump", gen::writeDump);
+      lua.set_function("readFrame", molSys::readLammpsTrjO);
+      // lua.set_function("neighborList", nneigh::neighList);
       // Use the script
-      lua.script_file(script);
-      // Print to file here
-      std::string dumpName = "wat.lammpstrj";
-      gen::writeDump(&resCloud, dumpName);
+      lua.script_file(lscript);
+      std::cout << "\nTest\n";
+    } else {
+      // Analyze
 
-      // Write out Cij, Q3, Q6 to files
-      gen::writeHisto(&resCloud, avgQ6);
+      // Delete later
+      std::ofstream cijFile;
+      cijFile.open("cij.txt");
+      cijFile << "Cij\n";
+      cijFile.close();
+      std::ofstream q3File;
+      q3File.open("q3.txt");
+      q3File << "Q3\n";
+      q3File.close();
+      std::ofstream q6File;
+      q6File.open("q6.txt");
+      q6File << "Q6\n";
+      q6File.close();
+
+      // For overwriting old files
+      // and for printing the first line of output files
+      // For changing the names, change it here
+      // TODO: Fix this
+      std::string outFileChillPlus = "chillPlus.txt"; // Default
+      std::string outFileChill = "chill.txt";
+      std::string outFileSuper = "superChill.txt";
+      std::ofstream clusterFile;
+      for (int frame = tFrame; frame <= fFrame; frame += fGap) {
+        // Read in a frame
+        resCloud = molSys::readLammpsTrj(tFile, frame, &resCloud, oType);
+        // // Sort according to atom ID (OPTIONAL)
+        // std::sort(resCloud.pts.begin(), resCloud.pts.end(), gen::compareByAtomID);
+        // Update the neighbour lists
+        resCloud = nneigh::neighList(rc, &resCloud, oType);
+
+        // ------------------------------
+        // If you want to use CHILL+
+        // Calculate c_ij
+        resCloud = chill::getCorrelPlus(&resCloud, false);
+        // Print first line to file
+        if (frame == tFrame) {
+          std::ofstream chill;
+          chill.open(outFileChillPlus);
+          chill << "Frame Ic Ih Interfacial Clath InterClath Water Total\n";
+          chill.close();
+        }
+        // Classify according to CHILL+
+        resCloud = chill::getIceTypePlus(&resCloud, false, outFileChillPlus);
+        // ------------------------------
+
+        // Get the averaged q6 per atom
+        // Greater than 0.5 means ice
+        // Update the neighbour lists
+        // resCloud = nneigh::neighList(3.2, &resCloud, oxyType);
+        avgQ6 = chill::getq6(&resCloud, false);
+
+        // Reclassify according to averaged q3 and q6
+        resCloud = chill::reclassifyWater(&resCloud, &avgQ6);
+
+        // --------------------
+        // Print modified parameter
+        // Print first line to file
+        if (frame == tFrame) {
+          std::ofstream chill;
+          chill.open(outFileSuper);
+          chill << "Frame Ic Ih Interfacial Clath InterClath Water Total\n";
+          chill.close();
+        }
+        // Print out and calculate the number
+        // and percentage of the ice types after reclassification
+        chill::printIceType(&resCloud, false);
+        // ---------------------
+
+        // ---------------------
+        // Get the largest ice cluster
+        molSys::PointCloud<molSys::Point<double>, double> solCloud;
+        int largestIceCluster;
+        solCloud = chill::getIceCloud(&resCloud, &solCloud);
+        largestIceCluster =
+            chill::largestIceCluster(&solCloud, rc, true, false);
+        // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+        // Write out the largest ice cluster to a file
+        if (frame == tFrame) {
+          clusterFile.open("cluster.txt");
+          clusterFile << "Frame NumberInCluster\n";
+          clusterFile << solCloud.currentFrame << " " << largestIceCluster
+                      << "\n";
+          clusterFile.close();
+        } else {
+          clusterFile.open("cluster.txt");
+          clusterFile << solCloud.currentFrame << " " << largestIceCluster
+                      << "\n";
+          clusterFile.close();
+        }
+        // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+        solCloud = clearPointCloud(&solCloud);
+        // ---------------------
+
+        // // Print to file here (cij etc)
+        // std::string outName = "chill-"+std::to_string(frame);
+        // int val = gen::prettyPrintYoda(&resCloud, outName);
+        // Print to file here
+        gen::writeDump(&resCloud, dumpName);
+
+        // Write out Cij, Q3, Q6 to files
+        gen::writeHisto(&resCloud, avgQ6);
+      }
     }
   }
   // --------------------------------------
