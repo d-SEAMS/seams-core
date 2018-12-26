@@ -438,10 +438,12 @@ molSys::PointCloud<molSys::Point<double>, double> molSys::clearPointCloud(
   //
   std::vector<molSys::Point<double>> tempPts;
   std::vector<double> tempBox;
+  //
+  std::vector<double> tempBox1;
 
   tempPts.swap(yCloud->pts);
   tempBox.swap(yCloud->box);
-  tempBox.swap(yCloud->boxLow);
+  tempBox1.swap(yCloud->boxLow);
 
   return *yCloud;
 }
