@@ -60,6 +60,16 @@ cmake .. -DCMAKE_BUILD_TYPE=Release
 make
 ~~~
 
+# Lua Modules
+Since a major portion of the frontend is in `lua`, the following modules are
+required.[LuaRocks](https://luarocks.org/) is the recommended package manager
+and they are to be installed as root.
+
+~~~ sh
+# For cross-OS filesystem operations
+sudo luarocks install luafilesystem
+~~~
+
 # Running
 To run the sample inputs, simply move the binary to the project root, or to a
 directory where `input/` is a child directory.
