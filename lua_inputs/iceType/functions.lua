@@ -15,6 +15,11 @@ tmpFileT=io.open(chillPlus_mod, "w"); --- Allow overwriting (otherwise use a)
 io.output(tmpFileT);
 io.write("Frame Ic Ih Interfacial Clath InterClath Water Total\n");
 io.close(tmpFileT);
+--- Once more for the cluster
+tmpFileC=io.open(largest_ice_cluster_name, "w"); --- Allow overwriting (otherwise use a)
+io.output(tmpFileC);
+io.write("Frame number_in_cluster\n");
+io.close(tmpFileC);
 
 slice={0,0,0}; --- This is not in use
 for frame=targetFrame,finalFrame,frameGap do
@@ -27,5 +32,9 @@ for frame=targetFrame,finalFrame,frameGap do
    percentage_Ice(resCloud,false,chillPlus_mod); --- Post reclassification writeOut
    writeDump(resCloud,dumpName);
    writeHistogram(resCloud,avgQ6);
+   --- Do the largest Ice cluster stuff
+   clusterCloud=create_cluster(resCloud,clusterCloud);
+   largest_ice_cluster=largest_cluster(clusterCloud,cutoffRadius,true,false);
+   writeCluster(clusterCloud,largest_ice_cluster_name,false,largest_ice_cluster);
 end
 print("\nWORM_PWNED\n");
