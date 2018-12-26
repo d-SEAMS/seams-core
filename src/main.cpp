@@ -232,10 +232,11 @@ int main(int argc, char *argv[]) {
     auto outFileChillPlus = lua.get<std::string>("chillPlus_noMod");
     auto outFileChill = lua.get<std::string>("chill_mod");
     auto outFileSuper = lua.get<std::string>("chillPlus_mod");
+    auto outCluster = lua.get<std::string>("largest_ice_cluster_name");
 
     // Variables which must be declared in C++
-    // Newer pointCloud
-    molSys::PointCloud<molSys::Point<double>, double> resCloud;
+    // Newer pointCloud (rescloud -> ice structure, solcloud -> largest cluster)
+    molSys::PointCloud<molSys::Point<double>, double> resCloud, solCloud;
     // For averaged q6
     std::vector<double> avgQ6;
 
@@ -245,18 +246,26 @@ int main(int argc, char *argv[]) {
       auto lscript = lua.get<std::string>("functionScript");
       // Transfer variables to lua
       lua["resCloud"] = &resCloud;
+      lua["clusterCloud"] = &solCloud;
       lua["avgQ6"] = &avgQ6;
       lua["trajectory"] = tFile;
       // Register functions
+      // Writing stuff
       lua.set_function("writeDump", gen::writeDump);
       lua.set_function("writeHistogram", gen::writeHisto);
+      // Generic requirements
       lua.set_function("readFrame", molSys::readLammpsTrjO);
       lua.set_function("neighborList", nneigh::neighListO);
+      // CHILL+ and modifications
       lua.set_function("chillPlus_cij", chill::getCorrelPlus);
       lua.set_function("chillPlus_iceType", chill::getIceTypePlus);
       lua.set_function("averageQ6", chill::getq6);
       lua.set_function("modifyChill", chill::reclassifyWater);
       lua.set_function("percentage_Ice", chill::printIceType);
+      // Largest ice cluster
+      lua.set_function("create_cluster", chill::getIceCloud);
+      lua.set_function("largest_cluster", chill::largestIceCluster);
+      lua.set_function("writeCluster", gen::writeCluster);
       // Use the script
       lua.script_file(lscript);
       std::cout << "\nTest\n";
@@ -342,10 +351,7 @@ int main(int argc, char *argv[]) {
                       << "\n";
           clusterFile.close();
         } else {
-          clusterFile.open("cluster.txt");
-          clusterFile << solCloud.currentFrame << " " << largestIceCluster
-                      << "\n";
-          clusterFile.close();
+          gen::writeCluster(&solCloud, outCluster, false, largestIceCluster);
         }
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
         solCloud = clearPointCloud(&solCloud);
