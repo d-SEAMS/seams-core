@@ -12,4 +12,5 @@ largest_ice_cluster_name="largeCluster.txt"; --- This is the standard file name
 
 --- DO NOT ENABLE if you have not read the instructions
 defineFunctions=true; --- The last test before all hell breaks loose
+subdir="myFol/"; --- The subdirectory used
 functionScript="../lua_inputs/iceType/functions.lua" --- This is relative to the binary location
