@@ -52,6 +52,11 @@ target_link_libraries(
 add_library(yodaLib SHARED
   bop_correl.cpp
   molecular_system.cpp
+  mol_sys.cpp
+  generic.cpp
+  bop.cpp
+  rdf.cpp
+  neighbours.cpp
   molecule.cpp
   neighbors.cpp
   parameter.cpp
