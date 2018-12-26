@@ -11,5 +11,5 @@ chill_noMod="chill.txt"; --- This is the standard file name
 largest_ice_cluster_name="largeCluster.txt"; --- This is the standard file name
 
 --- DO NOT ENABLE if you have not read the instructions
-defineFunctions=false; --- The last test before all hell breaks loose
+defineFunctions=true; --- The last test before all hell breaks loose
 functionScript="../lua_inputs/iceType/functions.lua" --- This is relative to the binary location
