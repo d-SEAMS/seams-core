@@ -5,6 +5,8 @@ targetFrame=1; --- The first frame
 finalFrame=10; --- This is inclusive
 frameGap=1; --- The gap between frames
 dumpName="wat.lammpstrj"; --- Output file name
+chillPlus_mod="supaaChill.txt"; --- This the modified file
+chillPlus_noMod="chillPlus.txt"; --- This is the standard file name
 
 --- DO NOT ENABLE if you have not read the instructions
 defineFunctions=true; --- The last test before all hell breaks loose
