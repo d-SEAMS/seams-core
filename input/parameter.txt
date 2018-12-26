@@ -10,6 +10,6 @@
 
 // trajFile=./input/traj/dump.lammpstrj
 // trajFile=./input/traj/dump-bcc.lammpstrj
-trajFile=./input/traj/dump-8-20000.lammpstrj
+trajFile=./input/traj/mW_cubic.lammpstrj
 // trajFile=./input/traj/dump-l.lammpstrj
 // xyzFile=./input/xyz/configuration.xyz
