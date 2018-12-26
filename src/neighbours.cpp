@@ -75,9 +75,9 @@ nneigh::neighList(double rcutoff,
  particle. Inefficient O(n^2) implementation. This will only work with one type of atom
  ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double>
-nneigh::neighList(double rcutoff,
-                  molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                  int typeI) {
+nneigh::neighListO(double rcutoff,
+                   molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                   int typeI) {
   nneigh::NeighbourList nList;
   nneigh::Jatom tempJatom;
   double r_ij;

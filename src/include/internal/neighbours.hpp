@@ -31,8 +31,9 @@ neighList(double rcutoff,
 // Inefficient O(n^2) implementation of neighbour lists
 // You can only use this for neighbour lists with one type
 molSys::PointCloud<molSys::Point<double>, double>
-neighList(double rcutoff,
-          molSys::PointCloud<molSys::Point<double>, double> *yCloud, int typeI);
+neighListO(double rcutoff,
+           molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+           int typeI);
 
 // Inefficient O(n^2) implementation of neighbour lists
 // You can only use this for neighbour lists with one type
