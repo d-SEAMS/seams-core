@@ -243,12 +243,6 @@ int main(int argc, char *argv[]) {
       // Use the functions defined here
       auto lscript = lua.get<std::string>("functionScript");
       // Transfer variables to lua
-      // lua["rc"] = rc;
-      // lua["oType"] = oType;
-      // lua["tFrame"] = tFrame;
-      // lua["rc"] = rc;
-      // lua["rc"] = rc;
-      // lua["rc"] = rc;
       lua["resCloud"] = &resCloud;
       lua["avgQ6"] = &avgQ6;
       lua["trajectory"] = tFile;
