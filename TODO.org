@@ -1,0 +1,9 @@
+#+TITLE: TODO
+#+AUTHOR: Rohit Goswami
+
+* Ice-Type
+** [ ] Handle hardcoded largest ice cluster trajectory
+** [ ] Add documentation
+** [ ] Parallelize
+** [ ] Play nice with legacy code
+** [ ] Overall cleanUp
