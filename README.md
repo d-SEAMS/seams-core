@@ -11,13 +11,18 @@ or XYZ files to calculate RDF, in-plane RDF and the structure factor.
 ## Dependency Management
 Unless you are sure that all the libraries necessary are available on your
 system, it is expedient to ensure `conan` is available for managing
-dependencies. A `Pipfile` is also provided for ease of usage. This is preferred
-since it will ensure a reproducable environment which does not interfere with
-the system `python`.
+dependencies. Since `conan` is essentially a python package, it is handled
+by[poetry](https://github.com/sdispater/poetry).
+
+### Python
+More recent versions use [poetry](https://github.com/sdispater/poetry) which as
+a non-system python dependant installation.
 
 ~~~{bash}
-# Do this once to install conan
-pipenv install
+# Get poetry (once)
+curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
+# Install packages
+poetry install
 ~~~
 
 ### Lua
@@ -49,7 +54,7 @@ To generate the executable *yodaStruct* in `bin/` use:
 
 ~~~{bash}
 # Use the bundled conan
-pipenv shell
+poetry shell
 # Always prefer an out of tree build
 mkdir build
 cd build
