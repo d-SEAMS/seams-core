@@ -34,6 +34,15 @@ sudo apt install lua5.3 liblua5.3
 sudo pacman -S lua
 ~~~
 
+### Lua Modules
+Since a major portion of the frontend is in `lua`, the following modules are
+required.[LuaRocks](https://luarocks.org/) is the recommended package manager
+and they are to be installed as root.
+
+~~~ sh
+# For cross-OS filesystem operations
+sudo luarocks install luafilesystem
+~~~
 
 ## Build Things
 To generate the executable *yodaStruct* in `bin/` use:
@@ -58,16 +67,6 @@ export CC=/usr/bin/clang
 # If you forget the flag you will build the Debug version
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make
-~~~
-
-# Lua Modules
-Since a major portion of the frontend is in `lua`, the following modules are
-required.[LuaRocks](https://luarocks.org/) is the recommended package manager
-and they are to be installed as root.
-
-~~~ sh
-# For cross-OS filesystem operations
-sudo luarocks install luafilesystem
 ~~~
 
 # Running
