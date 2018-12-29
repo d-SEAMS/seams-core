@@ -80,7 +80,7 @@ We will also determine the appropriate set of packages needed to compile our
 inputs*. So here we stick to setting the *build-time dependencies* via ~nativeBuildInputs~.
 #+NAME: runtimeDeps
 #+BEGIN_SRC nix :tangle no
-nixpkgs.boost nixpkgs.lua nixpkgs.cmake nixpkgs.luarocks nixpkgs.blas nixpkgs.conan
+nixpkgs.boost nixpkgs.lua nixpkgs.cmake nixpkgs.luarocks nixpkgs.blas nixpkgs.conan nixpkgs.libyaml
 #+END_SRC
 *** Nix Variables
 Now that we have the basic function form, let us set the variables.

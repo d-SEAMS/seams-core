@@ -12,7 +12,7 @@ let
     myProject = stdenv.mkDerivation {
       name = "supaaYoda";
       version = "dev-0.1";
-      nativeBuildInputs = [ nixpkgs.boost nixpkgs.lua nixpkgs.cmake nixpkgs.luarocks ];
+      nativeBuildInputs = [ nixpkgs.boost nixpkgs.lua nixpkgs.cmake nixpkgs.luarocks nixpkgs.blas nixpkgs.conan nixpkgs.libyaml ];
       buildInputs = [  ];
   };
   }
