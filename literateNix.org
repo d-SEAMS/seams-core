@@ -3,11 +3,6 @@
 #+PROPERTY: header-args+ :comments link
 #+STARTUP: outline
 
-# Local Variables:
-# eval: (add-hook (quote after-save-hook) (lambda nil (org-babel-tangle)) nil t)
-# org-babel-use-quick-and-dirty-noweb-expansion: t
-# End:
-
 * Rationale
 For utilizing cross system builds, ~cmake~ is not good enough. This is
 especially true for software like ~supaaYoda~ which is developed on ArchLinux,
@@ -172,20 +167,7 @@ stdenv.mkDerivation rec {
 }
 #+END_SRC
 
-We will need a paticular ~luarocks~ package, so we will build that:
-
-#+NAME: luafilesystem
-#+BEGIN_SRC nix :tangle nix/luafilesystem.nix
-fileSystem = buildLuaPackage {
-  name = "filesystem-1.6.2";
-  src = fetchurl {
-    url = "https://github.com/keplerproject/luafilesystem/archive/v1_6_2.tar.gz";
-    sha256 = "1n8qdwa20ypbrny99vhkmx8q04zd2jjycdb5196xdhgvqzk10abz";
-  };
-  meta = {
-    homepage = "https://github.com/keplerproject/luafilesystem";
-    hydraPlatforms = stdenv.lib.platforms.linux;
-    maintainers = with maintainers; [ flosse ];
-  };
-};
-#+END_SRC
+# Local Variables:
+# eval: (add-hook (quote after-save-hook) (lambda nil (org-babel-tangle)) nil t)
+# org-babel-use-quick-and-dirty-noweb-expansion: t
+# End:
