@@ -124,9 +124,9 @@ This is actually handled by ~conan~, and is adapted from [[https://blog.galowicz
 remarkably trivial to mantain static versions of things with ~nix~ though, so it
 is still useful.
 #+BEGIN_SRC nix :tangle nix/pkgs/catch2.nix
-{ stdenv, fetchurl }:
+{ clangStdenv, fetchurl }:
 
-stdenv.mkDerivation rec {
+clangStdenv.mkDerivation rec {
   name = "catch-${version}";
   version = "2.5.0";
 
@@ -273,8 +273,8 @@ We will also need the data to be defined.
 *** FMT
 The header only ~fmt~ library should also be handled without conan.
 #+BEGIN_SRC nix :tangle nix/pkgs/fmtlib/fmt.nix
-{ stdenv, fetchJSON, cmake }:
-stdenv.mkDerivation rec {
+{ clangStdenv, fetchJSON, cmake }:
+clangStdenv.mkDerivation rec {
   name = "fmtlib-master";
   src = fetchJSON ./fmt.src.json;
   nativeBuildInputs = [ cmake ];
@@ -322,8 +322,8 @@ Since ~conan~ will never work with ~nix~, we will simply have to setup ~nix~
 expressions for each package we need.
 #+BEGIN_SRC nix :tangle nix/pkgs/yaml-cpp/yaml-cpp.nix
 # A standard cmake-based build
-{ stdenv, fetchJSON, cmake }:
-stdenv.mkDerivation {
+{ clangStdenv, fetchJSON, cmake }:
+clangStdenv.mkDerivation {
   name = "yaml-cpp-master";
   src = fetchJSON ./yaml-cpp.src.json;
   nativeBuildInputs = [ cmake ];
@@ -367,8 +367,8 @@ yamlCpp
 Incredibly, there isn't much love for the well made [[http://www.shark-ml.org][shark-ml]] software.
 #+BEGIN_SRC nix :tangle nix/pkgs/sharkML/sharkML.nix
 # A standard cmake-based build
-{ stdenv, fetchJSON, cmake, boost, openblas, liblapack }:
-stdenv.mkDerivation {
+{ clangStdenv, fetchJSON, cmake, boost, openblas, liblapack }:
+clangStdenv.mkDerivation {
   name = "sharkML-master";
   src = fetchJSON ./sharkML.src.json;
   nativeBuildInputs = [ cmake boost openblas liblapack ];
