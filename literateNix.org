@@ -35,10 +35,10 @@ The rest of this document tangles to the appropriate files for ~nix-shell~
 usage. We will be using the [[https://orgmode.org/manual/Noweb-reference-syntax.html#Noweb-reference-syntax][noweb syntax]] where required. Most of the blocks will
 be tangled all at once.
 
-#+BEGIN_NOTES
+#+BEGIN_QUOTE
 Due to the fact that ~nix-shell~ respects the system ~.bashrc~, we will not be
 able to obtain a ~nix~ shell directly as the ~$PATH~ variable will be overwritten.
-#+END_NOTES
+#+END_QUOTE
 
 We will use the ~run~ command to spawn a shell in a non-interactive shell (as
 opposed to ~command~ which spawns an interactive shell) so as to not source the
@@ -381,10 +381,10 @@ the ~default.nix~ process, we declare a function which has a variety of inputs,
 either defined in the standard packages or locally, and then we simply declare a
 build script of sorts.
 
-#+BEGIN_NOTES
+#+BEGIN_QUOTE
 It is only at this stage will we note the concept of *runtime dependencies* as
 defined in ~buildInputs~ and the *build dependencies* as defined by ~nativeBuildInputs~.
-#+END_NOTES
+#+END_QUOTE
 
 We are in a position to leverage the project ~README.md~ to ascertain the build
 requirements, and writing out the structure of the project will aid in
