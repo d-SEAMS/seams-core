@@ -45,4 +45,4 @@ for frame=targetFrame,finalFrame,frameGap do
    largest_ice_cluster=largest_cluster(clusterCloud,cutoffRadius,true,false);
    writeCluster(clusterCloud,largest_ice_cluster_name,false,largest_ice_cluster);
 end
-print("\nWORM_PWNED\n");
+print("\nFinito\n");
