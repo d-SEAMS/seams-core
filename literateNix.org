@@ -363,6 +363,51 @@ yamlCpp
 #+BEGIN_SRC nix :tangle no
 yamlCpp
 #+END_SRC
+*** SharkML
+Incredibly, there isn't much love for the well made [[http://www.shark-ml.org][shark-ml]] software.
+#+BEGIN_SRC nix :tangle nix/pkgs/sharkML/sharkML.nix
+# A standard cmake-based build
+{ stdenv, fetchJSON, cmake, boost, blas, cblas, liblapack }:
+stdenv.mkDerivation {
+  name = "sharkML-master";
+  src = fetchJSON ./sharkML.src.json;
+  nativeBuildInputs = [ cmake boost blas cblas liblapack ];
+}
+#+END_SRC
+With the standard data definition
+#+BEGIN_SRC nix :tangle nix/pkgs/sharkML/sharkML.src.json :comments no
+{
+  "owner": "Shark-ML",
+  "repo": "Shark",
+  "branch": "master",
+  "rev": "221c1f2e8abfffadbf3c5ef7cf324bc6dc9b4315",
+  "sha256": "1h6ggcxpcqdj4x9wjz1njibmvlqmdv9kxm163nk9xivnnx0r6qiz"
+}
+#+END_SRC
+
+**** Calling the expression
+For the actual variable definition which will use ~callPackage~ to evaluate the
+expression defined in the tangled block above, we have:
+#+NAME: sharkML
+#+BEGIN_SRC nix :tangle no
+sharkML = callPackage ./pkgs/sharkML/sharkML.nix { };
+#+END_SRC
+As discussed previously, this is now added to the ~noweb~ block to be tangled
+into the output file.
+#+NAME: overlayFiles
+#+BEGIN_SRC nix :tangle no :noweb yes
+# Package for testing
+<<sharkML>>
+#+END_SRC
+We will also need to add it into our ~yodaStruct~ environment.
+#+NAME: yS_runDeps
+#+BEGIN_SRC nix :tangle no
+sharkML
+#+END_SRC
+#+NAME: yS_inputs
+#+BEGIN_SRC nix :tangle no
+sharkML
+#+END_SRC
 ** yodaStruct Overlay
 The main program is also defined and used in the same way as the libraries, so:
 #+NAME: yodaStruct
