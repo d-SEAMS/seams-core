@@ -241,9 +241,9 @@ parameters by a ~json~ file as shown, which is self explanatory.
 {
   "owner": "NixOS",
   "repo": "nixpkgs-channels",
-  "branch": "nixos-17.09",
-  "rev": "fd1d76bb1a80d29524aea5ce5a72b6dc468b7fa5",
-  "sha256": "1xf0z6w7kpswsyvj2pvkm64367jcy3ac8wrp05hp01q4whxmy4aq"
+  "branch": "nixos-18.09",
+  "rev": "6a3f5bcb061e1822f50e299f5616a0731636e4e7",
+  "sha256": "6451af4083485e13daa427f745cbf859bc23cb8b70454c017887c006a13bd65e"
 }
 #+END_SRC
 It is pertinent to note that for the ~json~ file, comments cannot be added
