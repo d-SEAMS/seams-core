@@ -233,3 +233,66 @@ cmake
 # eval: (add-hook (quote after-save-hook) (lambda nil (org-babel-tangle)) nil t)
 # org-babel-use-quick-and-dirty-noweb-expansion: t
 # End:
+** Nix Package Channel
+To pin down the dependencies even further, we will manually determine the branch
+of *NixOS* and the package channel in ~./nix/nixpkgs~. We shall control these
+parameters by a ~json~ file as shown, which is self explanatory.
+#+BEGIN_SRC nix :tangle nix/nixpkgs/default.src.json
+{
+  "owner": "NixOS",
+  "repo": "nixpkgs-channels",
+  "branch": "nixos-17.09",
+  "rev": "fd1d76bb1a80d29524aea5ce5a72b6dc468b7fa5",
+  "sha256": "1xf0z6w7kpswsyvj2pvkm64367jcy3ac8wrp05hp01q4whxmy4aq"
+}
+#+END_SRC
+*** Entry
+As with other subfolders, we will require a ~default.nix~, for pedagogical
+purposes, we shall divide the variable into definitions.
+#+BEGIN_SRC nix :tangle nix/nixpkgs/default.nix :noweb yes
+# Define
+let
+  <<nn_pkgVars>>
+in
+  import src
+#+END_SRC
+
+**** JSON Parser
+We will leverage a ~json~ file as the user's point of entry. That is, we will
+load data describing our *NixOS* package channel via this file.
+
+#+NAME: nn_pkgVars
+#+BEGIN_SRC nix :tangle no
+spec = builtins.fromJSON (builtins.readFile ./default.src.json);
+#+END_SRC
+
+**** Using the JSON
+We will fetch the appropriate ~tar~ file on the basis of data parsed via the
+~builtins~.
+#+NAME: nn_pkgVars
+#+BEGIN_SRC nix :tangle no
+fetchTarball = import ./fetchTarball-compat.nix;
+src = fetchTarball {
+  url = "https://github.com/${spec.owner}/${spec.repo}/archive/${spec.rev}.tar.gz";
+  sha256 = spec.sha256;
+};
+#+END_SRC
+
+In order to marshall the data correctly, we require a compatibility layer on the
+existing function (~fetchTarBall~). This is to ensure backwards compatibility
+with all *NixOS* versions.
+
+#+BEGIN_SRC nix :tangle nix/nixpkgs/fetchTarball-compat.nix
+# fetchTarball version that is compatible between all the versions of Nix
+{ url, sha256 }@attrs:
+let
+  inherit (builtins) lessThan nixVersion fetchTarball;
+in
+if lessThan nixVersion "1.12" then
+  fetchTarball { inherit url; }
+else
+  fetchTarball attrs
+#+END_SRC
+
+Where we note that the *@-pattern* is used to name the entire set, i.e, both
+~url~ and ~sha256~ are contained in ~attrs~.
