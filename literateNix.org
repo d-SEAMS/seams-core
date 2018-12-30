@@ -204,6 +204,18 @@ This is essentially linked against, so it will be used as a ~buildInput~.
 #+BEGIN_SRC nix :tangle no
 boost
 #+END_SRC
+*** Lua Packages
+We will not bother building them, since they are already provided.
+#+NAME: yS_runDeps
+#+BEGIN_SRC nix :tangle no
+luaPackages.luafilesystem
+#+END_SRC
+To do so, however, we will need to pass the ~luaPackages~ function.
+
+#+NAME: yS_inputs
+#+BEGIN_SRC nix :tangle no
+luaPackages
+#+END_SRC
 ** Variable Compilation
 We will now enable the argument parsing ability of ~nix-\*~ commands as
 enumerated in [[https://gist.github.com/daniel-j-h/9a899c1a9fbe5d867f289aba2fcc47e4][this outdated gist]].
