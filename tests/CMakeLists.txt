@@ -25,7 +25,7 @@ target_link_libraries(yodaStruct_test
   ${LUA_LIBRARIES}
   CONAN_PKG::rang
   CONAN_PKG::fmt
-  CONAN_PKG::yaml-cpp
+  yaml-cpp
   CONAN_PKG::catch2
   yodaLib
   )
