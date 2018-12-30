@@ -73,6 +73,7 @@ Although we will be using a file which is meant to build the project,
 that the form of this is as shown.
 
 #+BEGIN_SRC nix :tangle nix/default.nix :noweb yes
+<<pR_headerComments>>
 # something ? default value ---- Variable declration
 # pattern : body ---- Function prototype
 { nixpkgs ? import ./nixpkgs
@@ -195,6 +196,14 @@ enumerated in [[https://gist.github.com/daniel-j-h/9a899c1a9fbe5d867f289aba2fcc4
 #+NAME: pR_arguments
 #+BEGIN_SRC nix :tangle no
 compiler ? "clang"
+#+END_SRC
+
+This will now allow us to pass the ~compiler~ argument to our commands:
+#+NAME: pR_headerComments
+#+BEGIN_SRC nix :tangle no
+# Usage Example
+# nix-shell --argstr compiler gcc5 --run bash
+# nix-shell --argstr compiler clang --run bash
 #+END_SRC
 
 *** Inputs
