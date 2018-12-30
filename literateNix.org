@@ -97,6 +97,25 @@ with the variables defined in the ~overlayFiles~ block.
 Every ~noweb~ expansion block under ~overlayFiles~ is essentially the expression
 defining a particular library or helper variable. To clarify matters, they are
 defined and extended where their constituents are explained.
+** Helper Functions
+To load ~json~ src data easily, we will declare and use a simple helper function.
+#+BEGIN_SRC nix :tangle nix/fetchJSON.nix
+{ fetchFromGitHub }:
+
+# fetches the source described in the <package>.src.json
+
+# path to the .src.json
+path:
+let
+  data = builtins.fromJSON (builtins.readFile path);
+in
+  fetchFromGitHub { inherit (data) owner repo rev sha256; }
+#+END_SRC
+We will need to register the function in the default expression as well.
+#+NAME: overlayFiles
+#+BEGIN_SRC nix :tangle no
+fetchJSON = import ./fetchJSON.nix { inherit (buildpkgs) fetchFromGitHub; };
+#+END_SRC
 ** Nix Sources
 At this stage we will now move towards creating application logic, along with
 it's requisite libraries.
