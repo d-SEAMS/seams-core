@@ -190,6 +190,16 @@ prefix characters]] for generating sane inputs.
 
 ** Cmake
 This is used to actually build things. As such the standard nix package will do.
+#+NAME: yS_buildDeps
+#+BEGIN_SRC nix :tangle no
+cmake
+#+END_SRC
+** Boost
+This is essentially linked against, so it will be used as a ~buildInput~.
+#+NAME: yS_runDeps
+#+BEGIN_SRC nix :tangle no
+boost
+#+END_SRC
 ** LATER Variable Compilation
 We will now enable the argument parsing ability of ~nix-\*~ commands as
 enumerated in [[https://gist.github.com/daniel-j-h/9a899c1a9fbe5d867f289aba2fcc47e4][this outdated gist]].
