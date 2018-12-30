@@ -75,7 +75,9 @@ that the form of this is as shown.
 #+BEGIN_SRC nix :tangle nix/default.nix :noweb yes
 # something ? default value ---- Variable declration
 # pattern : body ---- Function prototype
-{ nixpkgs ? import ./nixpkgs }:
+{ nixpkgs ? import ./nixpkgs
+  , <<pR_arguments>>
+   }:
   # Define
   let overlay = self: pkgs: with buildpkgs {
   # All the other nix files
@@ -186,6 +188,14 @@ determining the libraries to be built or overriden.
 #+END_SRC
 Where we have leveraged the rather strange design choice of ~noweb~ [[https://orgmode.org/manual/noweb.html][honoring
 prefix characters]] for generating sane inputs.
+
+** Variable Compilation
+We will now enable the argument parsing ability of ~nix-\*~ commands as
+enumerated in [[https://gist.github.com/daniel-j-h/9a899c1a9fbe5d867f289aba2fcc47e4][this outdated gist]].
+#+NAME: pR_arguments
+#+BEGIN_SRC nix :tangle no
+compiler ? "clang"
+#+END_SRC
 
 *** Inputs
 Very quickly we shall enumerate the reuired inputs as per the ~README~.
