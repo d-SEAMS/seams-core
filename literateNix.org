@@ -190,13 +190,15 @@ determining the libraries to be built or overriden.
 Where we have leveraged the rather strange design choice of ~noweb~ [[https://orgmode.org/manual/noweb.html][honoring
 prefix characters]] for generating sane inputs.
 
-** Cmake
+** Build Dependencies
+*** Cmake
 This is used to actually build things. As such the standard nix package will do.
 #+NAME: yS_buildDeps
 #+BEGIN_SRC nix :tangle no
 cmake
 #+END_SRC
-** Boost
+** Runtime Dependencies
+*** Boost
 This is essentially linked against, so it will be used as a ~buildInput~.
 #+NAME: yS_runDeps
 #+BEGIN_SRC nix :tangle no
