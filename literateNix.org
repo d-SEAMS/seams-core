@@ -174,11 +174,11 @@ requirements, and writing out the structure of the project will aid in
 determining the libraries to be built or overriden.
 #+BEGIN_SRC nix :tangle nix/yodaStruct.nix :noweb yes
 # Using patterns, and white space negligence
-{ customEnv
-, <<yS_inputs>> }
-  customEnv.mkDerivation {
+{ clangStdenv
+, <<yS_inputs>> }:
+  clangStdenv.mkDerivation {
   name = "yodaStruct";
-  src = lib.cleanSource .././;
+  src = lib.cleanSource ../.;
   nativeBuildInputs = [
   <<yS_buildDeps>>
   ];
