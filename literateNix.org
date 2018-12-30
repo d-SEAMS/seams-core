@@ -76,11 +76,9 @@ that the form of this is as shown.
 <<pR_headerComments>>
 # something ? default value ---- Variable declration
 # pattern : body ---- Function prototype
-{ nixpkgs ? import ./nixpkgs
-  , <<pR_arguments>>
-   }:
+{ nixpkgs ? import ./nixpkgs }:
   # Define
-  let overlay = self: pkgs: with buildpkgs {
+  let overlay = self: buildpkgs: with buildpkgs {
   # All the other nix files
   <<overlayFiles>>
   }; in
@@ -174,9 +172,9 @@ requirements, and writing out the structure of the project will aid in
 determining the libraries to be built or overriden.
 #+BEGIN_SRC nix :tangle nix/yodaStruct.nix :noweb yes
 # Using patterns, and white space negligence
-{ customEnv
+{ clangStdenv
 , <<yS_inputs>> }
-  customEnv.mkDerivation {
+  clangStdenv.mkDerivation {
   name = "yodaStruct";
   src = lib.cleanSource .././;
   nativeBuildInputs = [
@@ -190,7 +188,9 @@ determining the libraries to be built or overriden.
 Where we have leveraged the rather strange design choice of ~noweb~ [[https://orgmode.org/manual/noweb.html][honoring
 prefix characters]] for generating sane inputs.
 
-** Variable Compilation
+** Cmake
+This is used to actually build things. As such the standard nix package will do.
+** LATER Variable Compilation
 We will now enable the argument parsing ability of ~nix-\*~ commands as
 enumerated in [[https://gist.github.com/daniel-j-h/9a899c1a9fbe5d867f289aba2fcc47e4][this outdated gist]].
 #+NAME: pR_arguments
