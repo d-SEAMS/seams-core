@@ -297,7 +297,7 @@ With the standard data definition
 **** Calling the expression
 For the actual variable definition which will use ~callPackage~ to evaluate the
 expression defined in the tangled block above, we have:
-#+NAME: catch2
+#+NAME: fmtlib
 #+BEGIN_SRC nix :tangle no
 fmtlib = callPackage ./pkgs/fmtlib/fmt.nix { };
 #+END_SRC
@@ -343,7 +343,7 @@ With the standard data definition
 **** Calling the expression
 For the actual variable definition which will use ~callPackage~ to evaluate the
 expression defined in the tangled block above, we have:
-#+NAME: catch2
+#+NAME: yamlCpp
 #+BEGIN_SRC nix :tangle no
 yamlCpp = callPackage ./pkgs/yaml-cpp/yaml-cpp.nix { };
 #+END_SRC
