@@ -1,6 +1,6 @@
 # [[file:~/Git/Github/C++/Forks/structureFactor/literateNix.org::*FMT][FMT:1]]
-{ stdenv, fetchJSON, cmake }:
-stdenv.mkDerivation rec {
+{ clangStdenv, fetchJSON, cmake }:
+clangStdenv.mkDerivation rec {
   name = "fmtlib-master";
   src = fetchJSON ./fmt.src.json;
   nativeBuildInputs = [ cmake ];

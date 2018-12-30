@@ -1,7 +1,7 @@
 # [[file:~/Git/Github/C++/Forks/structureFactor/literateNix.org::*Catch2][Catch2:1]]
-{ stdenv, fetchurl }:
+{ clangStdenv, fetchurl }:
 
-stdenv.mkDerivation rec {
+clangStdenv.mkDerivation rec {
   name = "catch-${version}";
   version = "2.5.0";
 
