@@ -123,7 +123,7 @@ it's requisite libraries.
 This is actually handled by ~conan~, and is adapted from [[https://blog.galowicz.de/2018/02/27/managing_libraries_with_nix/][Jacek's blog]]. It is
 remarkably trivial to mantain static versions of things with ~nix~ though, so it
 is still useful.
-#+BEGIN_SRC nix :tangle nix/catch2.nix
+#+BEGIN_SRC nix :tangle nix/pkgs/catch2.nix
 { stdenv, fetchurl }:
 
 stdenv.mkDerivation rec {
@@ -155,16 +155,24 @@ For the actual variable definition which will use ~callPackage~ to evaluate the
 expression defined in the tangled block above, we have:
 #+NAME: catch2
 #+BEGIN_SRC nix :tangle no
-catch2 = callPackage ./catch2.nix {};
+catch2 = callPackage ./pkgs/catch2.nix { };
 #+END_SRC
 As discussed previously, this is now added to the ~noweb~ block to be tangled
 into the output file.
 #+NAME: overlayFiles
 #+BEGIN_SRC nix :tangle no :noweb yes
 # Package for testing
-  <<catch2>>
+<<catch2>>
 #+END_SRC
-
+We will also need to add it into our ~yodaStruct~ environment.
+#+NAME: yS_buildDeps
+#+BEGIN_SRC nix :tangle no
+catch2
+#+END_SRC
+#+NAME: yS_inputs
+#+BEGIN_SRC nix :tangle no
+catch2
+#+END_SRC
 *** Conan
 Unfortunately, ~conan~ breaks with the latest (Sun Dec 30 18:14:00 2018) nix
 expression, so we will override it with our own.
@@ -312,7 +320,7 @@ yamlCpp
 The main program is also defined and used in the same way as the libraries, so:
 #+NAME: yodaStruct
 #+BEGIN_SRC nix :tangle no
-yodaStruct = callPackage ./yodaStruct.nix {};
+yodaStruct = callPackage ./yodaStruct.nix { };
 #+END_SRC
 Into the overlay:
 #+NAME: overlayFiles
@@ -396,7 +404,6 @@ We will not bother building them, since they are already provided.
 luaPackages.luafilesystem
 #+END_SRC
 To do so, however, we will need to pass the ~luaPackages~ function.
-
 #+NAME: yS_inputs
 #+BEGIN_SRC nix :tangle no
 luaPackages
