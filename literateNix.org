@@ -270,6 +270,53 @@ We will also need the data to be defined.
 }
 #+END_SRC
 
+*** FMT
+The header only ~fmt~ library should also be handled without conan.
+#+BEGIN_SRC nix :tangle nix/pkgs/fmtlib/fmt.nix
+{ stdenv, fetchJSON, cmake }:
+stdenv.mkDerivation rec {
+  name = "fmtlib-master";
+  src = fetchJSON ./fmt.src.json;
+  nativeBuildInputs = [ cmake ];
+  meta = {
+    description = "{fmt} is an open-source formatting library for C++. It can be used as a safe and fast alternative to (s)printf and IOStreams.";
+    homepage = http://fmtlib.net;
+  };
+}
+#+END_SRC
+With the standard data definition
+#+BEGIN_SRC nix :tangle nix/pkgs/fmtlib/fmt.src.json :comments no
+{
+  "owner": "fmtlib",
+  "repo": "fmt",
+  "branch": "master",
+  "rev": "1b8a216ddf1a3bb612958b912bce5121372dd2e2",
+  "sha256": "16h08zdfgbmfslp18y84yd2dwmvq47dnr1chc28srjnpfl3cc7sz"
+}
+#+END_SRC
+**** Calling the expression
+For the actual variable definition which will use ~callPackage~ to evaluate the
+expression defined in the tangled block above, we have:
+#+NAME: catch2
+#+BEGIN_SRC nix :tangle no
+fmtlib = callPackage ./pkgs/fmtlib/fmt.nix { };
+#+END_SRC
+As discussed previously, this is now added to the ~noweb~ block to be tangled
+into the output file.
+#+NAME: overlayFiles
+#+BEGIN_SRC nix :tangle no :noweb yes
+# Package for testing
+<<fmtlib>>
+#+END_SRC
+We will also need to add it into our ~yodaStruct~ environment.
+#+NAME: yS_buildDeps
+#+BEGIN_SRC nix :tangle no
+fmtlib
+#+END_SRC
+#+NAME: yS_inputs
+#+BEGIN_SRC nix :tangle no
+fmtlib
+#+END_SRC
 *** YAML Cpp
 Since ~conan~ will never work with ~nix~, we will simply have to setup ~nix~
 expressions for each package we need.
