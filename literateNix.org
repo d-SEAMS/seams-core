@@ -262,6 +262,52 @@ We will also need the data to be defined.
 }
 #+END_SRC
 
+*** YAML Cpp
+Since ~conan~ will never work with ~nix~, we will simply have to setup ~nix~
+expressions for each package we need.
+#+BEGIN_SRC nix :tangle nix/pkgs/yaml-cpp/yaml-cpp.nix
+# A standard cmake-based build
+{ stdenv, fetchJSON, cmake }:
+stdenv.mkDerivation {
+  name = "yaml-cpp-master";
+  src = fetchJSON ./yaml-cpp.src.json;
+  nativeBuildInputs = [ cmake ];
+}
+#+END_SRC
+With the standard data definition
+#+BEGIN_SRC nix :tangle nix/pkgs/yaml-cpp/yaml-cpp.src.json :comments no
+{
+  "owner": "jbeder",
+  "repo": "yaml-cpp",
+  "branch": "master",
+  "rev": "abf941b20d21342cd207df0f8ffe09f41a4d3042",
+  "sha256": "01rri88pr8r4lq8vlfbik63kx1fgsq0m5xfg1nfvyvr9fqzpdi86"
+}
+#+END_SRC
+
+**** Calling the expression
+For the actual variable definition which will use ~callPackage~ to evaluate the
+expression defined in the tangled block above, we have:
+#+NAME: catch2
+#+BEGIN_SRC nix :tangle no
+yamlCpp = callPackage ./pkgs/yaml-cpp/yaml-cpp.nix { };
+#+END_SRC
+As discussed previously, this is now added to the ~noweb~ block to be tangled
+into the output file.
+#+NAME: overlayFiles
+#+BEGIN_SRC nix :tangle no :noweb yes
+# Package for testing
+<<yamlCpp>>
+#+END_SRC
+We will also need to add it into our ~yodaStruct~ environment.
+#+NAME: yS_runDeps
+#+BEGIN_SRC nix :tangle no
+yamlCpp
+#+END_SRC
+#+NAME: yS_inputs
+#+BEGIN_SRC nix :tangle no
+yamlCpp
+#+END_SRC
 ** yodaStruct Overlay
 The main program is also defined and used in the same way as the libraries, so:
 #+NAME: yodaStruct
