@@ -237,7 +237,7 @@ cmake
 To pin down the dependencies even further, we will manually determine the branch
 of *NixOS* and the package channel in ~./nix/nixpkgs~. We shall control these
 parameters by a ~json~ file as shown, which is self explanatory.
-#+BEGIN_SRC nix :tangle nix/nixpkgs/default.src.json
+#+BEGIN_SRC nix :tangle nix/nixpkgs/default.src.json :comments no
 {
   "owner": "NixOS",
   "repo": "nixpkgs-channels",
@@ -246,6 +246,8 @@ parameters by a ~json~ file as shown, which is self explanatory.
   "sha256": "1xf0z6w7kpswsyvj2pvkm64367jcy3ac8wrp05hp01q4whxmy4aq"
 }
 #+END_SRC
+It is pertinent to note that for the ~json~ file, comments cannot be added
+during ~org-babel-tangle~ as they cause parsing errors.
 *** Entry
 As with other subfolders, we will require a ~default.nix~, for pedagogical
 purposes, we shall divide the variable into definitions.
