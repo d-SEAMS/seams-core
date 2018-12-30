@@ -1,8 +1,6 @@
 [requires]
 catch2/2.4.2@bincrafters/stable
-fmt/5.2.1@bincrafters/stable
 rang/3.1.0@rang/stable
-yaml-cpp/0.6.2@bincrafters/stable
 
 [generators]
 cmake
