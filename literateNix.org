@@ -367,11 +367,11 @@ yamlCpp
 Incredibly, there isn't much love for the well made [[http://www.shark-ml.org][shark-ml]] software.
 #+BEGIN_SRC nix :tangle nix/pkgs/sharkML/sharkML.nix
 # A standard cmake-based build
-{ clangStdenv, fetchJSON, cmake, boost, openblas, liblapack, openmp }:
+{ clangStdenv, fetchJSON, cmake, boost, openblas, liblapack }:
 clangStdenv.mkDerivation {
   name = "sharkML-master";
   src = fetchJSON ./sharkML.src.json;
-  nativeBuildInputs = [ cmake boost openblas liblapack openmp ];
+  nativeBuildInputs = [ cmake boost openblas liblapack ];
 }
 #+END_SRC
 With the standard data definition
