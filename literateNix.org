@@ -34,126 +34,88 @@ using ~nix~, this [[https://matthewbauer.us/blog/nix-and-org.html][blog post by 
 The rest of this document tangles to the appropriate files for ~nix-shell~
 usage. We will be using the [[https://orgmode.org/manual/Noweb-reference-syntax.html#Noweb-reference-syntax][noweb syntax]] where required. Most of the blocks will
 be tangled all at once.
-** Default driver
-For readability purposes, the root of the project will contain a ~default.nix~
-which is the entry point for the nix build. As such it is almost blank and
-simply initializes the subsequent calls.
-#+BEGIN_SRC nix :tangle no
-{ pkgs ? import <nixpkgs> {}, }:
-rec {
-  myProject = pkgs.stdenv.mkDerivation {
-    name = "upaaYoda";
-    version = "dev-0.1";
-    buildInputs = with pkgs; [
-      (callPackage ./nix/catch.nix { })
-    ];
-  };
-}
-#+END_SRC
-** Nix Source
-Here we shall delegate the remainder of the code to a subdirectory. This is a
-readability measure which is rather redundant.
-We can define a usage header here as well. This is taken from [[https://gist.github.com/daniel-j-h/9a899c1a9fbe5d867f289aba2fcc47e4][this gist]].
-#+NAME: headerComment
-#+BEGIN_SRC nix :tangle no
-# Nix skeleton for compiler, cmake, boost.
-# Dependencies (boost and the rest) are built with selected compiler (for ABI compatibility).
-# Examples:
-#   nix-shell --argstr compiler gcc5 --run 'mkdir build && cd build && cmake .. && cmake --build .'
-#   nix-shell --argstr compiler gcc6 --run 'mkdir build && cd build && cmake .. && cmake --build .'
-#   nix-shell --argstr compiler clang_38 --run 'mkdir build && cd build && cmake .. && cmake --build .'
-#+END_SRC
-Our program expression will first be defined as a function.
-#+NAME: basicFunctions
-#+BEGIN_SRC nix :noweb yes
-{ nixpkgs ? import <nixpkgs> {}, <<nixArgs>> }:
-#+END_SRC
-*** Nix Arguments
-We can define arguments which may be passed on the command line.
-#+NAME: nixArgs
-#+BEGIN_SRC nix :tangle no
-compiler ? "clang"
-#+END_SRC
-We will also determine the appropriate set of packages needed to compile our
-~supaaYoda~. Since we have no *runtime dependencies* we don't need any *build
-inputs*. So here we stick to setting the *build-time dependencies* via ~nativeBuildInputs~.
-#+NAME: runtimeDeps
-#+BEGIN_SRC nix :tangle no
-nixpkgs.boost nixpkgs.lua nixpkgs.cmake nixpkgs.luarocks nixpkgs.blas nixpkgs.conan nixpkgs.libyaml
-#+END_SRC
-*** Nix Variables
-Now that we have the basic function form, let us set the variables.
-#+NAME: nixVars
-#+BEGIN_SRC nix :tangle no
-stdenv = nixpkgs.overrideCC nixpkgs.stdenv nixpkgs.${compiler};
-#+END_SRC
-*** Overlay Specification
-We can use our own ~nix~ builders with an overlay.
-#+NAME: overlay
-#+BEGIN_SRC nix :tangle no
-overlay = self: pkgs: with nixpkgs; {
-        luafilesystem = callPackage ./nix/luafilesystem.nix
-        }
-#+END_SRC
-*** Nix Meta
-We define project specific meta variables here.
-#+NAME: nixMeta
-#+BEGIN_SRC nix :tangle no :noweb yes
-  myProject = stdenv.mkDerivation {
-    name = "supaaYoda";
-    version = "dev-0.1";
-    nativeBuildInputs = [ <<runtimeDeps>> ];
-    buildInputs = [  ];
-};
-#+END_SRC
-** Putting Things Together
-At this point we can now put everything together and tangle the output.
 
-#+NAME: finalNix
-#+BEGIN_SRC nix :tangle default.nix :noweb yes
-<<headerComment>>
-<<basicFunctions>>
-let
-  <<nixVars>>
-  in rec {
-  <<nixMeta>>
+#+BEGIN_NOTES
+Due to the fact that ~nix-shell~ respects the system ~.bashrc~, we will not be
+able to obtain a ~nix~ shell directly as the ~$PATH~ variable will be overwritten.
+#+END_NOTES
+
+We will use the ~run~ command to spawn a shell in a non-interactive shell (as
+opposed to ~command~ which spawns an interactive shell) so as to not source the
+local ~.bashrc~
+
+#+BEGIN_SRC bash
+nix-shell --run bash
+#+END_SRC
+
+** Project Root
+Every invocation of ~nix-shell~ looks for a ~shell.nix~ file, failing which a
+~default.nix~ is required. To this end, we will generate a dummy file which
+essentially passes control to a ~yodaStruct.nix~ file which may also be built
+directly with ~nix-build~.
+
+We will note that this file simply:
+- defines a variable which is passed to ~yodaStruct.nix~
+- where said variable imports all relevant ~nix~ files in a subfolder
+#+BEGIN_SRC nix :tangle default.nix
+  # Define
+  let
+  # Import
+    buildpkgs = import ./nix {};
+  in
+  # Pass to
+  buildpkgs.yodaStruct
+#+END_SRC
+
+** Project Source
+Although we will be using a file which is meant to build the project,
+~nix-shell~ will still seek a ~default.nix~ in the subfolder, so we shall assert
+that the form of this is as shown.
+
+#+BEGIN_SRC nix :tangle nix/default.nix :noweb yes
+# something ? default value ---- Variable declration
+# pattern : body ---- Function prototype
+{ nixpkgs ? import ./nixpkgs }:
+  # Define
+  let overlay = self: pkgs: with buildpkgs {
+  # All the other nix files
+  <<overlayFiles>>
+  }; in
+  # Ensure reproducibility
+  nixpkgs {
+  config = {};
+  overlays = [overlay];
   }
 #+END_SRC
 
-Additionally this will simply do nothing without a ~default.nix~ so we will
-create one in the ~nix/src~ folder as well.
-
-#+NAME: supaaDefault
-#+BEGIN_SRC nix :tangle no
-{ pkgs ? import <nixpkgs> {}, }:
-rec {
-  myProject = pkgs.stdenv.mkDerivation {
-    name = "supaaYoda";
-    version = "dev-0.1";
-    buildInputs = with pkgs; [
-      (callPackage ./catch.nix { })
-    ];
-  };
-}
-#+END_SRC
-
-Although this is not required here, we will use the latest ~catch2~ (from [[https://blog.galowicz.de/2018/02/27/managing_libraries_with_nix/][here]]).
-
-#+BEGIN_SRC nix :tangle nix/catch.nix
+Essentially we note that we are simply asserting that ~nixpkgs~ will be called
+with the variables defined in the ~overlayFiles~ block.
+*** Nix Libraries
+Every ~noweb~ expansion block under ~overlayFiles~ is essentially the expression
+defining a particular library or helper variable. To clarify matters, they are
+defined and extended where their constituents are explained.
+** Nix Sources
+At this stage we will now move towards creating application logic, along with
+it's requisite libraries.
+*** Catch2
+This is actually handled by ~conan~, and is adapted from [[https://blog.galowicz.de/2018/02/27/managing_libraries_with_nix/][Jacek's blog]]. It is
+remarkably trivial to mantain static versions of things with ~nix~ though, so it
+is still useful.
+#+BEGIN_SRC nix :tangle nix/catch2.nix
 { stdenv, fetchurl }:
 
 stdenv.mkDerivation rec {
   name = "catch-${version}";
-  version = "2.1.2";
+  version = "2.5.0";
 
   src = fetchurl {
-      url = "https://github.com/catchorg/Catch2/releases/download/v2.1.2/catch.hpp";
-      sha256 = "e8b8f3109716891aa99b1a8e29cd0d627419bdc4a8d2eeef0d8370aaf8d5e483";
+      url = "https://github.com/catchorg/Catch2/releases/download/v2.5.0/catch.hpp";
+      sha256 = "a87d5c0417aaf1c3d16565244a1b643e1999d5838d842823731bc18560268f94";
   };
 
-  # It is just the file. No unpacking needed. Seems like we need to create
+  # This is a header only library. No unpacking needed. Seems like we need to create
   # _some_ folder, otherwise we get errors.
-  unpackCmd = "mkdir dummy_dir";
+  unpackCmd = "mkdir fake_dir";
 
   installPhase = ''
     mkdir -p $out/include/catch
@@ -165,6 +127,73 @@ stdenv.mkDerivation rec {
     homepage = http://catch-lib.net;
   };
 }
+#+END_SRC
+**** Calling the expression
+For the actual variable definition which will use ~callPackage~ to evaluate the
+expression defined in the tangled block above, we have:
+#+NAME: catch2
+#+BEGIN_SRC nix :tangle no
+catch2 = callPackage ./catch2.nix {};
+#+END_SRC
+As discussed previously, this is now added to the ~noweb~ block to be tangled
+into the output file.
+#+NAME: overlayFiles
+#+BEGIN_SRC nix :tangle no :noweb yes
+# Package for testing
+  <<catch2>>
+#+END_SRC
+
+** yodaStruct Overlay
+The main program is also defined and used in the same way as the libraries, so:
+#+NAME: yodaStruct
+#+BEGIN_SRC nix :tangle no
+yodaStruct = callPackage ./yodaStruct.nix {};
+#+END_SRC
+Into the overlay:
+#+NAME: overlayFiles
+#+BEGIN_SRC nix :tangle no :noweb yes
+# Program expression
+  <<yodaStruct>>
+#+END_SRC
+*** Expression
+The expression for building the program is conceptually a simple extension of
+the ~default.nix~ process, we declare a function which has a variety of inputs,
+either defined in the standard packages or locally, and then we simply declare a
+build script of sorts.
+
+#+BEGIN_NOTES
+It is only at this stage will we note the concept of *runtime dependencies* as
+defined in ~buildInputs~ and the *build dependencies* as defined by ~nativeBuildInputs~.
+#+END_NOTES
+
+We are in a position to leverage the project ~README.md~ to ascertain the build
+requirements, and writing out the structure of the project will aid in
+determining the libraries to be built or overriden.
+#+BEGIN_SRC nix :tangle nix/yodaStruct.nix :noweb yes
+# Using patterns, and white space negligence
+{ customEnv
+, <<yS_inputs>> }
+  customEnv.mkDerivation {
+  name = "yodaStruct";
+  src = lib.cleanSource .././;
+  nativeBuildInputs = [
+  <<yS_buildDeps>>
+  ];
+  buildInputs = [
+  <<yS_runDeps>>
+  ];
+  }
+#+END_SRC
+Where we have leveraged the rather strange design choice of ~noweb~ [[https://orgmode.org/manual/noweb.html][honoring
+prefix characters]] for generating sane inputs.
+
+*** Inputs
+Very quickly we shall enumerate the reuired inputs as per the ~README~.
+#+NAME: yS_inputs
+#+BEGIN_SRC nix :tangle no
+lib
+boost
+cmake
 #+END_SRC
 
 # Local Variables:
