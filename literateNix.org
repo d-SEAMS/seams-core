@@ -29,8 +29,12 @@ viable options:
 ** Acknowledgements
 Conceptually, this document owes its existence to the excellent work of [[https://github.com/zimbatm][zimbatm]] and
 his [[https://github.com/zimbatm/nix-cpp-demo][nix-cpp-demo]] repository. Of course the opportunity to use [[https://www.cs.tufts.edu/~nr/noweb/][noweb]] is also too
-good to pass up. Finally, much of the descriptions here are lifted from the [[https://nixos.org/nix/manual/#chap-writing-nix-expressions][nix
-manual]].
+good to pass up. Finally, much of the descriptions here are lifted from the [[https://nixos.org/nix/manual/#chap-writing-nix-expressions][nix manual]].
+
+The best introduction to nix and a bunch of functional concepts is the [[https://nixos.org/nixos/nix-pills][nix-pills]]
+set of articles. Additionally the utility of ~--pure~ along with a simple set of
+examples is provided in this [[https://blog.galowicz.de/2018/02/27/managing_libraries_with_nix/][blog post by Jacek]]. For an alternate approach to
+using ~nix~, this [[https://matthewbauer.us/blog/nix-and-org.html][blog post by Matthew Bauer]] is an excellent read.
 * Implementation
 The rest of this document tangles to the appropriate files for ~nix-shell~
 usage. We will be using the [[https://orgmode.org/manual/Noweb-reference-syntax.html#Noweb-reference-syntax][noweb syntax]] where required. Most of the blocks will
