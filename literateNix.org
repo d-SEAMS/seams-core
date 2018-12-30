@@ -76,7 +76,9 @@ that the form of this is as shown.
 <<pR_headerComments>>
 # something ? default value ---- Variable declration
 # pattern : body ---- Function prototype
-{ nixpkgs ? import ./nixpkgs }:
+{ nixpkgs ? import ./nixpkgs
+  , <<pR_arguments>>
+   }:
   # Define
   let overlay = self: buildpkgs: with buildpkgs; {
   # All the other nix files
@@ -172,9 +174,9 @@ requirements, and writing out the structure of the project will aid in
 determining the libraries to be built or overriden.
 #+BEGIN_SRC nix :tangle nix/yodaStruct.nix :noweb yes
 # Using patterns, and white space negligence
-{ clangStdenv
+{ customEnv
 , <<yS_inputs>> }
-  clangStdenv.mkDerivation {
+  customEnv.mkDerivation {
   name = "yodaStruct";
   src = lib.cleanSource .././;
   nativeBuildInputs = [
@@ -200,7 +202,7 @@ This is essentially linked against, so it will be used as a ~buildInput~.
 #+BEGIN_SRC nix :tangle no
 boost
 #+END_SRC
-** LATER Variable Compilation
+** Variable Compilation
 We will now enable the argument parsing ability of ~nix-\*~ commands as
 enumerated in [[https://gist.github.com/daniel-j-h/9a899c1a9fbe5d867f289aba2fcc47e4][this outdated gist]].
 #+NAME: pR_arguments
