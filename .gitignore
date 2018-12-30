@@ -50,3 +50,4 @@ m.css/
 compile_commands.json
 yodaStruct
 *.junk
+.auctex-auto/
