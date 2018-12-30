@@ -1,6 +1,9 @@
 # [[file:~/Git/Github/C++/Forks/structureFactor/literateNix.org::*Expression][Expression:1]]
 # Using patterns, and white space negligence
 { clangStdenv
+, catch2
+, fmtlib
+, yamlCpp
 , lua
 , conan
 , luaPackages
@@ -11,11 +14,14 @@
   name = "yodaStruct";
   src = lib.cleanSource ../.;
   nativeBuildInputs = [
+  catch2
+  fmtlib
   cmake
   lua
   conan
   ];
   buildInputs = [
+  yamlCpp
   boost
   luaPackages.luafilesystem
   ];

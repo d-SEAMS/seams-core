@@ -12,10 +12,16 @@
   # All the other nix files
   fetchJSON = import ./fetchJSON.nix { inherit (buildpkgs) fetchFromGitHub; };
   # Package for testing
-    catch2 = callPackage ./catch2.nix {};
+  catch2 = callPackage ./pkgs/catch2.nix { };
+  fmtlib = callPackage ./pkgs/fmtlib/fmt.nix { };
+  yamlCpp = callPackage ./pkgs/yaml-cpp/yaml-cpp.nix { };
   conan = callPackage ./pkgs/conan/conan.nix { };
+  # Package for testing
+  
+  # Package for testing
+  
   # Program expression
-    yodaStruct = callPackage ./yodaStruct.nix {};
+    yodaStruct = callPackage ./yodaStruct.nix { };
   }; in
   # Ensure reproducibility
   nixpkgs {
