@@ -197,6 +197,29 @@ This is used to actually build things. As such the standard nix package will do.
 #+BEGIN_SRC nix :tangle no
 cmake
 #+END_SRC
+*** Lua
+We will require a nix ~lua~ setup to work in tandem with the runtime nix
+packages.
+#+NAME: yS_buildDeps
+#+BEGIN_SRC nix :tangle no
+lua
+#+END_SRC
+Naturally we will need to pass it in as well.
+#+NAME: yS_inputs
+#+BEGIN_SRC nix :tangle no
+lua
+#+END_SRC
+*** Conan
+To work with windows, ~conan~ is needed for handling much of the ~C++~ packages.
+#+NAME: yS_buildDeps
+#+BEGIN_SRC nix :tangle no
+conan
+#+END_SRC
+#+NAME: yS_inputs
+#+BEGIN_SRC nix :tangle no
+conan
+#+END_SRC
+
 ** Runtime Dependencies
 *** Boost
 This is essentially linked against, so it will be used as a ~buildInput~.
