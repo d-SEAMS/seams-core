@@ -1,6 +1,8 @@
 # structureFactor 
 
-Check our docs build status [here](https://travis-ci.org/amritagos/structureFactor).
+Check our docs build status [here](https://travis-ci.org/d-SEAMS/seams-core).
+The docs themselves are [here](https://d-seams.github.io/seams-core/).
+
 This C++14 program reads in lammps trajectory files
 or XYZ files to calculate RDF, in-plane RDF and the structure factor.
 
