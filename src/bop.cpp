@@ -802,16 +802,13 @@ molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
         avgQ3 /= (double)nnumNeighbours;
 
         // If averaged q3 < -0.75, then reclassify
-        if (avgQ3 <= -0.75) {
-          if (avgQ3 < -0.85) {
-            yCloud->pts[iatom].iceType = molSys::cubic;
-          } else {
-            yCloud->pts[iatom].iceType = molSys::hexagonal;
-          }
+        if(avgQ3 <= -0.75){
+          if(avgQ3 < -0.85){yCloud->pts[iatom].iceType = molSys::reCubic;} // molSys::cubic
+          else{yCloud->pts[iatom].iceType = molSys::reHex;} // molSys::hexagonal
         } // end of reclassification
-      }   // check for solid atom!
-    }     // end of check for water
-  }       // End loop through every iatom
+      } // check for solid atom!
+    } // end of check for water 
+  } // End loop through every iatom
 
   return *yCloud;
 }
