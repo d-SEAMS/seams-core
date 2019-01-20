@@ -61,9 +61,13 @@ int gen::writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   outputFile << "ITEM: NUMBER OF ATOMS\n";
   outputFile << yCloud->nop << "\n";
   outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
-  for (int k = 0; k < yCloud->boxLow.size(); k++) {
-    outputFile << yCloud->boxLow[k] << " " << yCloud->boxLow[k] + yCloud->box[k]
-               << "\n";
+  for (int k=0; k<yCloud->boxLow.size(); k++){
+    outputFile << yCloud->boxLow[k] << " " << yCloud->boxLow[k]+yCloud->box[k]; // print xlo xhi etc
+    // print out the tilt factors too if it is a triclinic box
+    if(yCloud->box.size()==2*yCloud->boxLow.size() ){
+      outputFile << " " << yCloud->box[k+yCloud->boxLow.size()]; // this would be +2 for a 2D box
+    }
+    outputFile <<"\n"; // print end of line
   } // end of printing box lengths
   outputFile << "ITEM: ATOMS id mol type x y z\n";
   // -----------------------
