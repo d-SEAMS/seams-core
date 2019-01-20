@@ -933,9 +933,14 @@ int chill::largestIceCluster(
     outputFile << "ITEM: NUMBER OF ATOMS\n";
     outputFile << nLargestCluster << "\n";
     outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
-    for (int k = 0; k < iceCloud->boxLow.size(); k++) {
-      outputFile << iceCloud->boxLow[k] << " "
-                 << iceCloud->boxLow[k] + iceCloud->box[k] << "\n";
+    for (int k=0; k<iceCloud->boxLow.size(); k++){
+      outputFile << iceCloud->boxLow[k] << " " << iceCloud->boxLow[k]+iceCloud->box[k];
+      // for triclinic boxes
+      if(iceCloud->box.size()==2*iceCloud->boxLow.size()){
+        // The tilt factors are saved after the box lengths; so add 3 
+        outputFile << " " << iceCloud->box[k+iceCloud->boxLow.size()]; // this would be +2 for a 2D box
+      }
+      outputFile <<"\n";
     } // end of printing box lengths
     outputFile << "ITEM: ATOMS id mol type x y z\n";
 
