@@ -24,12 +24,6 @@ include_directories(
   ${Boost_INCLUDE_DIRS}
   )
 
-# Conan Stuff
-include(Conan)
-conan_cmake_run(CONANFILE ../conanfile.txt  # or relative build/conanfile.txt
-                BASIC_SETUP CMAKE_TARGETS
-                BUILD missing)
-
 # Find packages, including conan packages
 find_package(
   "Lua" REQUIRED
@@ -75,5 +69,3 @@ add_library(yodaLib SHARED
 # else()
 #     message(FATAL_ERROR "yaml-cpp not found")
 # endif()
-
-# target_link_libraries(yodaStruct ${CONAN_LIBS})
