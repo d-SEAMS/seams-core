@@ -19,7 +19,7 @@
   # Package for testing
   yamlCpp = callPackage ./pkgs/yaml-cpp/yaml-cpp.nix { };
   # Package for testing
-  sharkML = callPackage ./pkgs/sharkML/sharkML.nix { };
+  rang = callPackage ./pkgs/rang/rang.nix { };
   # Program expression
     yodaStruct = callPackage ./yodaStruct.nix { };
   }; in

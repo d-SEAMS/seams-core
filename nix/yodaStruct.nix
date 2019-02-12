@@ -11,12 +11,14 @@
 , blas
 , lib
 , boost
+, rang
 , cmake }:
   clangStdenv.mkDerivation {
   name = "yodaStruct";
   src = lib.cleanSource ../.;
   nativeBuildInputs = [
   fmtlib
+  rang
   cmake
   lua
   ];
