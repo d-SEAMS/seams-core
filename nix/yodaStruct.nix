@@ -4,10 +4,11 @@
 , catch2
 , fmtlib
 , yamlCpp
-, sharkML
+, eigen
 , lua
-, conan
 , luaPackages
+, liblapack
+, blas
 , lib
 , boost
 , cmake }:
@@ -15,16 +16,17 @@
   name = "yodaStruct";
   src = lib.cleanSource ../.;
   nativeBuildInputs = [
-  catch2
   fmtlib
   cmake
   lua
-  conan
   ];
   buildInputs = [
   yamlCpp
-  sharkML
+  eigen
+  catch2
   boost
+  liblapack
+  blas
   luaPackages.luafilesystem
   ];
   }
