@@ -6,7 +6,7 @@
 
 // Conan
 #include <catch2/catch.hpp>
-// #include <rang.hpp>
+#include <rang.hpp>
 
 SCENARIO("Test the neighborlist (number) generation", "[KNNneighborlist]") {
   GIVEN("A file with coordinates and the number of nearest neighbors") {

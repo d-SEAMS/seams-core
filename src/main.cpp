@@ -46,7 +46,7 @@
 
 // Managed with Conan
 #include <fmt/core.h>
-// #include <rang.hpp>
+#include <rang.hpp>
 #include <yaml-cpp/yaml.h>
 
 int main(int argc, char *argv[]) {
@@ -370,16 +370,16 @@ int main(int argc, char *argv[]) {
   }
   // --------------------------------------
 
-  // std::cout << rang::style::bold
-  //           << fmt::format("Welcome to the Black Parade.\nYou ran:-\n")
-  //           << rang::style::reset
-  //           << fmt::format("RDF 3D Analysis: {}",
-  //                          config["rdf3D"]["use"].as<bool>())
-  //           << fmt::format("\nRDF 2D Analysis: {}",
-  //                          config["rdf2D"]["use"].as<bool>())
-  //           << fmt::format("\nPhase Transition Analysis: {}",
-  //                          config["transition"]["use"].as<bool>())
-  //           << fmt::format("\nIce Structure: {}\n",
-  //                          config["iceType"]["use"].as<bool>());
+  std::cout << rang::style::bold
+            << fmt::format("Welcome to the Black Parade.\nYou ran:-\n")
+            << rang::style::reset
+            << fmt::format("RDF 3D Analysis: {}",
+                           config["rdf3D"]["use"].as<bool>())
+            << fmt::format("\nRDF 2D Analysis: {}",
+                           config["rdf2D"]["use"].as<bool>())
+            << fmt::format("\nPhase Transition Analysis: {}",
+                           config["transition"]["use"].as<bool>())
+            << fmt::format("\nIce Structure: {}\n",
+                           config["iceType"]["use"].as<bool>());
   return 0;
 }

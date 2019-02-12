@@ -21,7 +21,7 @@
 
 // Conan
 #include <catch2/catch.hpp>
-// #include <rang.hpp>
+#include <rang.hpp>
 
 SCENARIO("Get θ and ϕ from cartesian coordinates", "[sphereAngle]") {
   GIVEN("A cartesian coordinate array.") {
@@ -36,17 +36,17 @@ SCENARIO("Get θ and ϕ from cartesian coordinates", "[sphereAngle]") {
                      Catch::Matchers::WithinAbs(1.047184849, 1.0e-10));
         // Test
         std::cout << std::endl;
-        // std::cout << rang::style::bold << "<x,y,z>" << std::endl
-        //           << rang::style::reset;
+        std::cout << rang::style::bold << "<x,y,z>" << std::endl
+                  << rang::style::reset;
         for (const auto &s : testPoint)
-          // std::cout << rang::fg::blue << s << ' ' << rang::style::reset;
+          std::cout << rang::fg::blue << s << ' ' << rang::style::reset;
 
-          std::cout << std::endl;
-        // std::cout << rang::style::bold << "<ϕ,θ>" << std::endl
-        //           << rang::style::reset;
+        std::cout << std::endl;
+        std::cout << rang::style::bold << "<ϕ,θ>" << std::endl
+                  << rang::style::reset;
         for (const auto &s : convertedPoint)
-          // std::cout << rang::fg::green << s << ' ' << rang::style::reset;
-          std::cout << std::endl;
+          std::cout << rang::fg::green << s << ' ' << rang::style::reset;
+        std::cout << std::endl;
       }
     }
   }
@@ -65,16 +65,17 @@ SCENARIO("Test the boost spherical harmonics", "[sphericalHarmonics]") {
         REQUIRE(harmonicVector.size() == 7);
         // Test
         std::cout << std::endl;
-        // std::cout << rang::style::bold << "<θ,ϕ>" << std::endl
-        //           << rang::style::reset;
+        std::cout << rang::style::bold << "<θ,ϕ>" << std::endl
+                  << rang::style::reset;
         for (const auto &s : testAngles)
-          // std::cout << rang::fg::green << s << ' ' << rang::style::reset;
-          std::cout << std::endl;
-        // std::cout << rang::style::bold << "Transposed result vector"
-        // << rang::style::reset;
+          std::cout << rang::fg::green << s << ' ' << rang::style::reset;
+        std::cout << std::endl;
+        std::cout << rang::style::bold << "Transposed result vector"
+                  << std::endl
+                  << rang::style::reset;
         for (const auto &s : harmonicVector)
-          // std::cout << rang::fg::blue << s << ' ' << rang::style::reset;
-          std::cout << std::endl;
+          std::cout << rang::fg::blue << s << ' ' << rang::style::reset;
+        std::cout << std::endl;
       }
     }
   }

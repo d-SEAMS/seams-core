@@ -37,7 +37,6 @@ target_link_libraries(
   yodaStruct
   ${Boost_LIBRARIES}
   ${LUA_LIBRARIES}
-  # CONAN_PKG::rang
   fmt
   yaml-cpp
   yodaLib
