@@ -6,7 +6,7 @@
 
 // Conan
 #include <catch2/catch.hpp>
-#include <rang.hpp>
+// #include <rang.hpp>
 
 // SCENARIO("Test the bond order correlation for BCC", "[bopMw]") {
 //   GIVEN("An object for initializing bop") {
