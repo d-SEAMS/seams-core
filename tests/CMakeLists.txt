@@ -6,12 +6,7 @@ add_executable(yodaStruct_test
                ${PROJECT_SOURCE_DIR}/src/spherical_harmonics.cpp
 )
 
-include(Conan)
-conan_cmake_run(CONANFILE ../conanfile.txt  # or relative build/conanfile.txt
-                BASIC_SETUP CMAKE_TARGETS
-                BUILD missing)
-
-# Find packages, including conan packages
+# Find packages
 find_package(
   "Lua" REQUIRED
   "Boost" REQUIRED
@@ -23,10 +18,10 @@ find_package(
 target_link_libraries(yodaStruct_test
   ${Boost_LIBRARIES}
   ${LUA_LIBRARIES}
-  CONAN_PKG::rang
   fmt
   yaml-cpp
-  CONAN_PKG::catch2
+  catch2
+  rang
   yodaLib
   )
 
