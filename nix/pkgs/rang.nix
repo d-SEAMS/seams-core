@@ -1,4 +1,3 @@
-# [[file:~/Git/Github/C++/Forks/structureFactor/literateNix.org::*Catch2][Catch2:1]]
 { clangStdenv, fetchurl }:
 
 clangStdenv.mkDerivation rec {
@@ -15,7 +14,7 @@ clangStdenv.mkDerivation rec {
   unpackCmd = "mkdir fake_dir";
 
   installPhase = ''
-    mkdir -p $out/include/rang
+    mkdir -p $out/include/
     cp ${src} $out/include/rang.hpp
   '';
 
@@ -25,4 +24,3 @@ A Minimal, Header only Modern c++ library for terminals";
     homepage = https://agauniyal.github.io/rang/;
   };
 }
-# Catch2:1 ends here
