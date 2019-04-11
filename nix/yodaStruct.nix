@@ -10,7 +10,8 @@
 , lib
 , rang
 , boost
-, cmake }:
+, cmake
+, prod ? true}:
   clangStdenv.mkDerivation {
   name = "yodaStruct";
   src = lib.cleanSource ../.;
@@ -27,5 +28,13 @@
   boost
   luaPackages.luafilesystem
   ];
+  cmakeFlags = [
+    (lib.optional prod "-DCMAKE_EXPORT_COMPILE_COMMANDS=OFF")
+];
+    # postInstall =  o.postInstall + ''
+    #   source $stdenv/setup
+    #   cp yodaStruct $out/bin
+    #   cp -r lib $out
+    # '';
   }
 # Expression:1 ends here
