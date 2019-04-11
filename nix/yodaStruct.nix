@@ -4,7 +4,7 @@
 , catch2
 , fmtlib
 , yamlCpp
-, sharkML
+# , sharkML
 , lua
 , luaPackages
 , lib
@@ -24,7 +24,7 @@
   ];
   buildInputs = [
   yamlCpp
-  sharkML
+  # sharkML
   boost
   luaPackages.luafilesystem
   ];
