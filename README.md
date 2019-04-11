@@ -102,6 +102,8 @@ nix-env -if .
 # Use anywhere
 cd lua_inputs/
 yodaStruct -c config.yml
+# Use with lua modules
+nix-shell --run 'bash' --pure
 ```
 
 ### Caveats
@@ -114,6 +116,18 @@ system.
 
 The above caveats are not relevant when you run it in the shell environment
 defined by `shell.nix`
+
+#### Reproducible Lua
+
+For reproducing `lua` we use [luas](https://github.com/limadm/luas). Note that
+this is still an imperfect method and the best way to run this is via the
+`nix-shell --run 'bash' --pure` environment.
+
+```sh
+luas init 5.2.4
+luas use 5.2.4
+luarocks install luafilesystem
+```
 
 ## Development
 
