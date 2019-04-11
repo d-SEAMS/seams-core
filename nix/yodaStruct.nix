@@ -8,6 +8,7 @@
 , lua
 , luaPackages
 , lib
+, rang
 , boost
 , cmake }:
   clangStdenv.mkDerivation {
@@ -17,6 +18,7 @@
   catch2
   fmtlib
   cmake
+  rang
   lua
   ];
   buildInputs = [
