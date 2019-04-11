@@ -15,8 +15,8 @@ clangStdenv.mkDerivation rec {
   unpackCmd = "mkdir fake_dir";
 
   installPhase = ''
-    mkdir -p $out/include/catch
-    cp ${src} $out/include/catch/catch.hpp
+    mkdir -p $out/include/catch2
+    cp ${src} $out/include/catch2/catch.hpp
   '';
 
   meta = {
