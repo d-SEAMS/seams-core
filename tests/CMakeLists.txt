@@ -20,8 +20,6 @@ target_link_libraries(yodaStruct_test
   ${LUA_LIBRARIES}
   fmt
   yaml-cpp
-  catch2
-  rang
   yodaLib
   )
 
