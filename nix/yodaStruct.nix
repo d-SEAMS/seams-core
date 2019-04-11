@@ -6,7 +6,6 @@
 , yamlCpp
 , sharkML
 , lua
-, conan
 , luaPackages
 , lib
 , boost
@@ -19,7 +18,6 @@
   fmtlib
   cmake
   lua
-  conan
   ];
   buildInputs = [
   yamlCpp

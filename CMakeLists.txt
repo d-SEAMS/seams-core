@@ -237,14 +237,6 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/data DESTINATION ${INSTALL_DATA} COMPONE
 # Dependency Management
 #
 
-# Conan
-# Download automatically, you can also just copy the Conan.cmake file
-if(NOT EXISTS "cmake/Conan.cmake")
-   message(STATUS "Downloading Conan.cmake from https://github.com/conan-io/cmake-conan")
-   file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/v0.13/conan.cmake"
-                 "cmake/Conan.cmake")
-endif()
-
 # Catch
 
 include(CTest)
