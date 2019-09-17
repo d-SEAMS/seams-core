@@ -18,3 +18,7 @@ USE_MDFILE_AS_MAINPAGE = README.md
 # Language additions
 OPTIMIZE_OUTPUT_FOR_C = YES
 BUILTIN_STL_SUPPORT = YES
+# Lua Support
+# EXTENSION_MAPPING =*.lua
+# FILTER_PATTERNS=*.lua=/home/haozeke/Git/Github/Doxygen/doxygen-lua/bin/lua2dox
+# FILE_PATTERNS          = *.lua
