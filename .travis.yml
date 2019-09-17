@@ -4,11 +4,11 @@ branches:
     - master
 language: python
 python:
-  - '3.6'
+  - "3.6"
 before_install:
   - cp scripts/ci/texlive.profile $HOME/texlive.profile
 install:
-  - 'pip install jinja2 Pygments conan'
+  - "pip install jinja2 Pygments conan"
   - source ./scripts/ci/texlive_install.sh
 addons:
   apt:
