@@ -2,13 +2,22 @@
 //
 //
 // Harmonics Test
-// MIT License
-
-// Copyright (c) 2018 Amrita Goswami, Rohit Goswami
-//
+// d-SEAMS molecular dynamics analysis engine code
+// Copyright (C) <2018-present> Amrita Goswami, Rohit Goswami
 // amrita16thaug646[at]gmail.com, r95g10[at]gmail.com
-// This code has been written for the purpose of obtaining the 1-D analogue of the Structure
-// factor for a confined system, from a lammps trajectory file.
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 //
 ///////////////////////////////////////////////////////////////////////////////////////////
