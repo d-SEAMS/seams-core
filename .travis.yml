@@ -22,7 +22,7 @@ cache:
 before_script:
   - git clone https://github.com/mosra/m.css.git
 script:
-  - ./m.css/doxygen/dox2html5.py Doxyfile-mcss
+  - ./m.css/documentation/doxygen.py Doxyfile-mcss
 deploy:
   provider: pages
   skip_cleanup: true
