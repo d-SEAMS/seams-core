@@ -4,8 +4,6 @@
 namespace bg = boost::geometry;
 
 // //SPHERICAL HARMONIC FUNCTIONS
-<<<<<<< HEAD
-=======
 // /********************************************/ /**
 //  *  Spherical harmonics using boost
 //  ***********************************************/
@@ -30,7 +28,6 @@ namespace bg = boost::geometry;
 //   return result;
 // }
 
->>>>>>> glab/nixBuild
 /********************************************/ /**
  *  Spherical harmonics using boost (General)
  ***********************************************/
@@ -779,8 +776,6 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 }
 
 /********************************************/ /**
-<<<<<<< HEAD
-=======
  *  Reclassifies atoms which may have been misclassified
  as water using the averaged q6 and q3 parameters
  Call this after both averaged q6 and c_ij have been calculated
@@ -807,19 +802,22 @@ molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
         avgQ3 /= (double)nnumNeighbours;
 
         // If averaged q3 < -0.75, then reclassify
-        if(avgQ3 <= -0.75){
-          if(avgQ3 < -0.85){yCloud->pts[iatom].iceType = molSys::reCubic;} // molSys::cubic
-          else{yCloud->pts[iatom].iceType = molSys::reHex;} // molSys::hexagonal
-        } // end of reclassification
-      } // check for solid atom!
-    } // end of check for water 
-  } // End loop through every iatom
+        if (avgQ3 <= -0.75) {
+          if (avgQ3 < -0.85) {
+            yCloud->pts[iatom].iceType = molSys::reCubic;
+          } // molSys::cubic
+          else {
+            yCloud->pts[iatom].iceType = molSys::reHex;
+          } // molSys::hexagonal
+        }   // end of reclassification
+      }     // check for solid atom!
+    }       // end of check for water
+  }         // End loop through every iatom
 
   return *yCloud;
 }
 
 /********************************************/ /**
->>>>>>> glab/nixBuild
  *  Gets a PointCloud struct of all the solid particles for
  a given frame 
  ***********************************************/
@@ -939,20 +937,18 @@ int chill::largestIceCluster(
     outputFile << "ITEM: NUMBER OF ATOMS\n";
     outputFile << nLargestCluster << "\n";
     outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
-<<<<<<< HEAD
     for (int k = 0; k < iceCloud->boxLow.size(); k++) {
       outputFile << iceCloud->boxLow[k] << " "
-                 << iceCloud->boxLow[k] + iceCloud->box[k] << "\n";
-=======
-    for (int k=0; k<iceCloud->boxLow.size(); k++){
-      outputFile << iceCloud->boxLow[k] << " " << iceCloud->boxLow[k]+iceCloud->box[k];
+                 << iceCloud->boxLow[k] + iceCloud->box[k];
       // for triclinic boxes
-      if(iceCloud->box.size()==2*iceCloud->boxLow.size()){
-        // The tilt factors are saved after the box lengths; so add 3 
-        outputFile << " " << iceCloud->box[k+iceCloud->boxLow.size()]; // this would be +2 for a 2D box
+      if (iceCloud->box.size() == 2 * iceCloud->boxLow.size()) {
+        // The tilt factors are saved after the box lengths; so add 3
+        outputFile
+            << " "
+            << iceCloud->box[k + iceCloud->boxLow
+                                     .size()]; // this would be +2 for a 2D box
       }
-      outputFile <<"\n";
->>>>>>> glab/nixBuild
+      outputFile << "\n";
     } // end of printing box lengths
     outputFile << "ITEM: ATOMS id mol type x y z\n";
 
