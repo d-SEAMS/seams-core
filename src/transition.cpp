@@ -1,7 +1,5 @@
-#include "geometry.h"
 #include "transition.h"
-
-using namespace trans;
+#include "geometry.h"
 
 using namespace trans;
 

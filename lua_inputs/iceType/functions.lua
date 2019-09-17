@@ -8,7 +8,8 @@ lfs.mkdir(outDir);
 lfs.chdir(outDir);
 
 --- Variables again (with subdir)
-dumpName= "water.lammpstrj";
+dumpChillP= "waterChillP.lammpstrj";
+dumpSupaaP= "waterSupaaP.lammpstrj";
 
 --- Prep the files (O==one, T==two)
 tmpFileO=io.open(chillPlus_noMod, "w"); --- Allow overwriting (otherwise use a)
@@ -34,9 +35,12 @@ for frame=targetFrame,finalFrame,frameGap do
    resCloud=readFrame(trajectory, frame, resCloud, oxygenAtomType,false,slice,slice) --- Get the frame
    resCloud=neighborList(cutoffRadius, resCloud, oxygenAtomType); --- Calculate the neighborlist
    resCloud=chillPlus_cij(resCloud,false); --- Calculate Cij (cloud,slice)
+   resCloud=chillPlus_iceType(resCloud,false,chillPlus_noMod); --- Write out data (cloud,slice,name)
+   writeDump(resCloud,dumpChillP); --- Dump the rescloud which currently has CHILL Plus classifications
    avgQ6=averageQ6(resCloud,false); --- Average Q6 (cloud,slice)
-   percentage_Ice(resCloud,false,chillPlus_mod); ---  --- Write out data (cloud,slice,name)
-   writeDump(resCloud,dumpName);
+   resCloud=modifyChill(resCloud,avgQ6); --- Modification (cloud,q6)
+   percentage_Ice(resCloud,false,chillPlus_mod); --- Post reclassification writeOut
+   writeDump(resCloud,dumpSupaaP); --- Dump the rescloud which now has the supaa CHILL Plus Trajectory
    writeHistogram(resCloud,avgQ6);
    --- Do the largest Ice cluster stuff
    clusterCloud=create_cluster(resCloud,clusterCloud);

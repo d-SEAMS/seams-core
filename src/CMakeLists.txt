@@ -15,6 +15,7 @@ add_executable( yodaStruct
   # shared libraries
   spherical_harmonics.cpp
   )
+<<<<<<< HEAD
 
 add_library(yodaLib SHARED
   bop_correl.cpp
@@ -42,6 +43,8 @@ add_library(yodaLib SHARED
 install(TARGETS yodaStruct yodaLib
   RUNTIME DESTINATION ${INSTALL_BIN}
   LIBRARY DESTINATION ${INSTALL_LIB})
+=======
+>>>>>>> glab/nixBuild
 
 # Project Libraries
 include_directories(
@@ -68,10 +71,29 @@ target_link_libraries(
   yaml-cpp
   yodaLib
   )
+add_library(yodaLib SHARED
+  bop_correl.cpp
+  molecular_system.cpp
+  mol_sys.cpp
+  generic.cpp
+  bop.cpp
+  rdf.cpp
+  neighbours.cpp
+  molecule.cpp
+  neighbors.cpp
+  parameter.cpp
+  structure_factor.cpp
+  transition.cpp
+  opt_parser.cpp
+  output.cpp
+  rdf2D.cpp
+  rdf3D.cpp
+  backward.cpp
+  density.cpp
+  geometry.cpp
+)
 # if(yaml-cpp_FOUND)
 #     target_link_libraries(yodaStruct yaml-cpp)
 # else()
 #     message(FATAL_ERROR "yaml-cpp not found")
 # endif()
-
-# target_link_libraries(yodaStruct ${CONAN_LIBS})

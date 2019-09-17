@@ -60,8 +60,6 @@ sudo luarocks install luafilesystem
 
 ## Build Things
 
-To generate the executable _yodaStruct_ in `bin/` use:
-
 ```{bash}
 # Use the bundled conan
 poetry shell
@@ -181,7 +179,8 @@ $ cd src/external
 
 While testing for leaks, use `clang` (for
 [AddressSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizer)
-and [LeakSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer))
+and
+[LeakSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer))
 and the following:
 
 ```{bash}

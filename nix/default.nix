@@ -11,12 +11,15 @@
   let overlay = self: buildpkgs: with buildpkgs; {
   # All the other nix files
   fetchJSON = import ./fetchJSON.nix { inherit (buildpkgs) fetchFromGitHub; };
+  # Package for testing
   catch2 = callPackage ./pkgs/catch2.nix { };
-  rang = callPackage ./pkgs/rang.nix { };
   conan = callPackage ./pkgs/conan/conan.nix { };
+  # Package for testing
   fmtlib = callPackage ./pkgs/fmtlib/fmt.nix { };
+  # Package for testing
   yamlCpp = callPackage ./pkgs/yaml-cpp/yaml-cpp.nix { };
-  sharkML = callPackage ./pkgs/sharkML/sharkML.nix { };
+  # Package for testing
+  rang = callPackage ./pkgs/rang/rang.nix { };
   # Program expression
     yodaStruct = callPackage ./yodaStruct.nix { };
   }; in

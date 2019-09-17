@@ -3,11 +3,11 @@
 
 clangStdenv.mkDerivation rec {
   name = "catch-${version}";
-  version = "2.5.0";
+  version = "2.6.0";
 
   src = fetchurl {
-      url = "https://github.com/catchorg/Catch2/releases/download/v2.5.0/catch.hpp";
-      sha256 = "a87d5c0417aaf1c3d16565244a1b643e1999d5838d842823731bc18560268f94";
+      url = "https://github.com/catchorg/Catch2/releases/download/v2.6.0/catch.hpp";
+      sha256 = "1zkm95z5f4ih0fs0fna7ya1ryy39lhg9hwbirzhvc8a79nrk6qd8";
   };
 
   # This is a header only library. No unpacking needed. Seems like we need to create

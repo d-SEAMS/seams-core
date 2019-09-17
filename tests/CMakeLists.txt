@@ -6,13 +6,15 @@ add_executable(yodaStruct_test
                ${PROJECT_SOURCE_DIR}/src/spherical_harmonics.cpp
 )
 
-# Find packages
+# Find packages, including conan packages
 find_package(
   "Lua" REQUIRED
   "Boost" REQUIRED
+  "Catch2" REQUIRED
   "yaml-cpp"
   "fmt"
-  "rang")
+  "rang"
+  )
 
 # Link everything
 target_link_libraries(yodaStruct_test

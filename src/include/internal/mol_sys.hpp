@@ -23,7 +23,9 @@ enum atom_state_type {
   interfacial,
   clathrate,
   interClathrate,
-  unclassified
+  unclassified,
+  reCubic,
+  reHex
 };
 
 // Struct containing the result

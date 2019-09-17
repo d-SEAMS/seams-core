@@ -50,6 +50,14 @@ std::vector<double>
 getq6(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
       bool isSlice = false);
 
+// 'Test' condition for classifying hexagonal ice using averaged q6 and q3
+// Checks water
+// According to https://pubs.rsc.org/en/content/articlehtml/2011/cp/c1cp22167a
+// Gets c_ij and then classifies bond types according to the CHILL+ algorithm
+molSys::PointCloud<molSys::Point<double>, double>
+reclassifyWater(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                std::vector<double> *q6);
+
 // Gets a PointCloud struct of the ice particles in a given frame
 molSys::PointCloud<molSys::Point<double>, double>
 getIceCloud(molSys::PointCloud<molSys::Point<double>, double> *yCloud,

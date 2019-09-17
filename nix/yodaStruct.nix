@@ -4,37 +4,32 @@
 , catch2
 , fmtlib
 , yamlCpp
-# , sharkML
+, eigen
 , lua
 , luaPackages
+, liblapack
+, blas
 , lib
-, rang
 , boost
-, cmake
-, prod ? true}:
+, rang
+, cmake }:
   clangStdenv.mkDerivation {
   name = "yodaStruct";
   src = lib.cleanSource ../.;
   nativeBuildInputs = [
-  catch2
   fmtlib
-  cmake
   rang
+  cmake
   lua
   ];
   buildInputs = [
   yamlCpp
-  # sharkML
+  eigen
+  catch2
   boost
+  liblapack
+  blas
   luaPackages.luafilesystem
   ];
-  cmakeFlags = [
-    (lib.optional prod "-DCMAKE_EXPORT_COMPILE_COMMANDS=OFF")
-];
-    # postInstall =  o.postInstall + ''
-    #   source $stdenv/setup
-    #   cp yodaStruct $out/bin
-    #   cp -r lib $out
-    # '';
   }
 # Expression:1 ends here

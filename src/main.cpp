@@ -260,6 +260,7 @@ int main(int argc, char *argv[]) {
       lua.set_function("chillPlus_cij", chill::getCorrelPlus);
       lua.set_function("chillPlus_iceType", chill::getIceTypePlus);
       lua.set_function("averageQ6", chill::getq6);
+      lua.set_function("modifyChill", chill::reclassifyWater);
       lua.set_function("percentage_Ice", chill::printIceType);
       // Largest ice cluster
       lua.set_function("create_cluster", chill::getIceCloud);
@@ -317,6 +318,9 @@ int main(int argc, char *argv[]) {
         // resCloud = nneigh::neighList(3.2, &resCloud, oxyType);
         avgQ6 = chill::getq6(&resCloud, false);
 
+        // Reclassify according to averaged q3 and q6
+        resCloud = chill::reclassifyWater(&resCloud, &avgQ6);
+
         // --------------------
         // Print modified parameter
         // Print first line to file
@@ -326,6 +330,9 @@ int main(int argc, char *argv[]) {
           chill << "Frame Ic Ih Interfacial Clath InterClath Water Total\n";
           chill.close();
         }
+        // Print out and calculate the number
+        // and percentage of the ice types after reclassification
+        chill::printIceType(&resCloud, false, outFileSuper);
         // ---------------------
 
         // ---------------------

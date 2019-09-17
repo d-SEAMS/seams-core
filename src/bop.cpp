@@ -4,6 +4,33 @@
 namespace bg = boost::geometry;
 
 // //SPHERICAL HARMONIC FUNCTIONS
+<<<<<<< HEAD
+=======
+// /********************************************/ /**
+//  *  Spherical harmonics using boost
+//  ***********************************************/
+// std::vector<std::complex<double>>
+// sph::spheriHarmo(int orderL, std::array<double, 2> radialCoord) {
+//   // Iterate over the index of order
+//   std::vector<int> v = {-3, -2, -1, 0, 1, 2, 3};
+//   // For keeping track of the index of the output vector
+//   int i(0);
+//   std::vector<std::complex<double>> result;
+//   for (auto n : v) {
+//     auto theta = radialCoord[1];
+//     auto phi = radialCoord[0];
+//     result.resize(result.size() + 1);
+//     // This is for l=3
+//     std::complex<double> b =
+//         boost::math::spherical_harmonic(orderL, n, theta, phi);
+//     result[i] = b;
+//     // Update the index
+//     i++;
+//   }
+//   return result;
+// }
+
+>>>>>>> glab/nixBuild
 /********************************************/ /**
  *  Spherical harmonics using boost (General)
  ***********************************************/
@@ -752,6 +779,47 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 }
 
 /********************************************/ /**
+<<<<<<< HEAD
+=======
+ *  Reclassifies atoms which may have been misclassified
+ as water using the averaged q6 and q3 parameters
+ Call this after both averaged q6 and c_ij have been calculated
+ https://pubs.rsc.org/en/content/articlehtml/2011/cp/c1cp22167a
+ ***********************************************/
+molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<double> *q6) {
+  // If averaged q6 > 0.5, then consider it to be ice
+  // If averaged q3 < -0.75 then it is ih or ic. If q3 < -0.85 then it is cubic, otherwise it is hexagonal
+  double avgQ3 = 0.0;
+  int nnumNeighbours;
+
+  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+    // Check if it has been classified as water
+    if (yCloud->pts[iatom].iceType == molSys::water) {
+      if ((*q6)[iatom] > 0.5) {
+        avgQ3 = 0.0; // init to zero
+        // Loop through all c_ij
+        nnumNeighbours = yCloud->pts[iatom].c_ij.size();
+        for (int j = 0; j < nnumNeighbours; j++) {
+          avgQ3 += yCloud->pts[iatom].c_ij[j].c_value;
+        }
+        avgQ3 /= (double)nnumNeighbours;
+
+        // If averaged q3 < -0.75, then reclassify
+        if(avgQ3 <= -0.75){
+          if(avgQ3 < -0.85){yCloud->pts[iatom].iceType = molSys::reCubic;} // molSys::cubic
+          else{yCloud->pts[iatom].iceType = molSys::reHex;} // molSys::hexagonal
+        } // end of reclassification
+      } // check for solid atom!
+    } // end of check for water 
+  } // End loop through every iatom
+
+  return *yCloud;
+}
+
+/********************************************/ /**
+>>>>>>> glab/nixBuild
  *  Gets a PointCloud struct of all the solid particles for
  a given frame 
  ***********************************************/
@@ -871,9 +939,20 @@ int chill::largestIceCluster(
     outputFile << "ITEM: NUMBER OF ATOMS\n";
     outputFile << nLargestCluster << "\n";
     outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
+<<<<<<< HEAD
     for (int k = 0; k < iceCloud->boxLow.size(); k++) {
       outputFile << iceCloud->boxLow[k] << " "
                  << iceCloud->boxLow[k] + iceCloud->box[k] << "\n";
+=======
+    for (int k=0; k<iceCloud->boxLow.size(); k++){
+      outputFile << iceCloud->boxLow[k] << " " << iceCloud->boxLow[k]+iceCloud->box[k];
+      // for triclinic boxes
+      if(iceCloud->box.size()==2*iceCloud->boxLow.size()){
+        // The tilt factors are saved after the box lengths; so add 3 
+        outputFile << " " << iceCloud->box[k+iceCloud->boxLow.size()]; // this would be +2 for a 2D box
+      }
+      outputFile <<"\n";
+>>>>>>> glab/nixBuild
     } // end of printing box lengths
     outputFile << "ITEM: ATOMS id mol type x y z\n";
 
