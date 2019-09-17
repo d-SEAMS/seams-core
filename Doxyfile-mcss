@@ -1,8 +1,20 @@
+# Customized Options
+# Make changes here to prevent things from being overwritten when the main file
+# is updated
+# Defaults
 @INCLUDE                = Doxyfile
+# For m.css
 GENERATE_HTML           = NO
 GENERATE_XML            = YES
 XML_PROGRAMLISTING      = NO
-XML_NAMESPACE_MEMBERS_IN_FILE_SCOPE = YES
-EXTRACT_ALL            = NO
-INPUT = README.md src/
+# Project Settings
+PROJECT_NAME            = "d-SEAMS"
+RECURSIVE              = YES
+EXTRACT_ALL            = YES
+INPUT = README.md ./src/
+EXCLUDE = ./src/include/external
 USE_MDFILE_AS_MAINPAGE = README.md
+
+# Language additions
+OPTIMIZE_OUTPUT_FOR_C = YES
+BUILTIN_STL_SUPPORT = YES
