@@ -1,4 +1,6 @@
-# structureFactor [![Docs Status](https://travis-ci.org/d-SEAMS/seams-core.svg?branch=master)](https://travis-ci.org/d-SEAMS/seams-core) [![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
+# d-SEAMS [![Docs Status](https://travis-ci.org/d-SEAMS/seams-core.svg?branch=master)](https://travis-ci.org/d-SEAMS/seams-core)
+
+[![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
 
 Check our docs build status [here](https://travis-ci.org/d-SEAMS/seams-core).
 The docs themselves are [here](https://d-seams.github.io/seams-core/) and
