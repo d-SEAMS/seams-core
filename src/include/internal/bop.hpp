@@ -11,6 +11,83 @@
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 
+/*!
+ *  \addtogroup chill
+ *  @{
+ */
+
+/*! \brief CHILL and CHILL+ structure classification.
+ *         This namespace contains functions that are used in the 
+CHILL/CHILL+ classification scheme, as well as a yodaCloud struct to hold 
+ all the information.
+ *
+ Both the <a href="https://pubs.rsc.org/en/content/articlehtml/2010/cp/b919724a">CHILL</a> and <a href="https://pubs.acs.org/doi/abs/10.1021/jp510289t">CHILL+</a> methods are based on the <a href="https://aip.scitation.org/doi/10.1063/1.471721">local bond order parameter method</a>, developed by 
+ ten Wolde et al. for the identification of crystal nuclei in Lennard-Jones systems. The local order 
+ parameter method is based on <a href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.47.1297">order parameters</a> introduced by Steinhardt et al.  
+  
+ The local environment of the water molecules is classified using an algorithm based on spherical harmonics, which is independent of the specific crystal structure and does not require the definition of a reference frame.
+ The local order around each water molecule \f$i\f$ is described by a local orientational bond order parameter \f$q_l(i)\f$, with \f$ 2l+1 \f$ complex components:
+
+  \f[
+  q_{lm}(i) = \frac{1}{N_b(i)} \Sigma_{j=1}^{N_b(i)} Y_{lm}(r_{ij})
+  \f]
+
+  Here, \f$N_b(i)=4\f$ is the number of nearest neighbours for water molecule \f$i\f$, \f$l\f$ is a free integer parameter,
+  \f$m\f$ is an integer such that \f$m \in [-l,l]\f$. The functions \f$Y_{lm}(r_{ij})\f$ are the spherical harmonics and \f$r_{ij}\f$ is
+  the distance vector between molecule \f$i\f$ and each one of its four nearest neighbours \f$j\f$.
+
+  The alignment of the orientation of the local structures is measured by the normalized dot product of the local orientational bond order parameter, \f$q_l(i)\f$,
+  between each pair of neighbor molecules \f$i\f$ and \f$j\f$, given by:
+
+  \f[
+  a(i,j) = \frac{q_l(i).q_l(j)}{|q_l(i)||q_l(j)|} = \frac{ \Sigma_{m=-l}^{l} q_l(i) q_l^*(j)}{ (\Sigma_{m=-l}^{l} q_l(j) q_l^*(i))^{1/2} (\Sigma_{m=-l}^{l} q_l(j) q_l^*(i))^{1/2} }
+  \f]
+
+  where, \f$q_{lm}^*\f$ is the complex conjugate of \f$q_{lm}\f$.
+
+  Depending on the values of \f$a(i,j)\f$, the bond between each pair of molecules \f$i\f$ and \f$j\f$ is classified as
+  being either staggered or eclipsed. 
+
+  | Algorithm | Eclipsed Bonds                | Staggered Bonds       |
+  | :----:    | :----:                        | :----:                |
+  | CHILL     | \f$-0.05 >= a(i,j) >= -0.2\f$ | \f$a(i,j) <= -0.8\f$  |
+  | CHILL+    | \f$0.25 >= a(i,j) >= -0.35\f$ | \f$a(i,j) <= -0.8\f$  |
+
+  Since each molecule \f$i\f$ in deeply supercooled water has four nearest neighbours, the type of the resultant four bonds is used to 
+  identify phases according to the CHILL and CHILL+ algorithms.
+
+  The CHILL algorithm can classify water molecules as belonging to the cubic, hexagonal, interfacial or liquid (amorphous) phase:
+  
+  | Phase       | E   | S   | Neighbours | Description                                             |
+  |-------------|-----|-----|------------|---------------------------------------------------------|
+  | Cubic       | 0   | 4   | 4          | All 4 neighbours are staggered.                         |
+  | Hexagonal   | 1   | 3   | 4          | 3 staggered and 1 eclipsed bond.                        |
+  | Interfacial | any | 2   | 4          | Belongs to the ice phase, but does not satisfy strict criteria of cubic and hexagonal |
+  |             | 0   | 3   | 4          |                                                         |
+  | Liquid      | N/A | N/A | any        | Classification by exclusion.                            |
+
+  Here, E and S refer to eclipsed and staggered bonds. The neighbours column contains the number of nearest neighbours.
+
+  The CHILL+ algorithm, which is a modified version of CHILL, additionally identifies clathrate and interfacial clathrate phases. The criteria are
+  enumerated in the table below:
+  
+  | Phase                 | E   | S   | Neighbours | Description                                                                                       |
+  |-----------------------|-----|-----|------------|---------------------------------------------------------------------------------------------------|
+  | Cubic                 | 0   | 4   | 4          | no change was made to staggered bond criterion from CHILL                                         |
+  | Hexagonal             | 1   | 3   | 4          | wider eclipsed range compared to CHILL; identifies 99% hexagonal ice up to 270 K                  |
+  | Interfacial           | any | 2   | 4          | must have at least one first neighbor water with more than two staggered bonds                    |
+  |                       | 0   | 3   | 4          | must have at least one first neighbor water with more than one staggered bond                     |
+  | Clathrate             | 4   | 0   | 4          | bulk clathrate and part of the interface of clathrates can be identified with four eclipsed bonds |
+  | Interfacial clathrate | 3   | any | 4          | partial clathrate cages and threads of clathrate-like order                                       |
+  | Liquid                | N/A | N/A | any        | classifies as liquid if none of the above criteria are fulfilled                                  |
+  
+  Although both the CHILL and CHILL+ classification schemes take into account the local order of the environment of each particle, both schemes output a per-particle classification.
+  
+  ### Changelog ###
+
+  - Amrita Goswami [amrita16thaug646@gmail.com]; date modified: Sept 19, 2019
+ */
+
 namespace chill {
 
 // 2*l+1 length complex vector
