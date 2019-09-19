@@ -7,7 +7,9 @@
 
 Check our docs build status [here](https://travis-ci.org/d-SEAMS/seams-core).
 The docs themselves are [here](https://d-seams.github.io/seams-core/) and
-development is ongoing [on GitHub](https://github.com/d-SEAMS/seams-core).
+development is ongoing [on GitHub](https://github.com/d-SEAMS/seams-core). We
+also have [a Zenodo community](https://zenodo.org/communities/d-seams/) for user-contributions like reviews, testimonials
+and tutorials.
 
 \brief The C++ core of d-SEAMS, a molecular dynamics trajectory analysis engine.
 
