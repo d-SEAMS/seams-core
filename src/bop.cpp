@@ -276,7 +276,7 @@ std::complex<double> sph::lookupTableQ6(int m, std::array<double, 2> angles) {
 /********************************************/ /**
  *  Function for getting the bond order correlations \f$c_{ij}\f$  (or \f$a_{ij}\f$ in some treatments)
  according to the CHILL algorithm.
- *  @param[out] yCloud The output molSys::PointCloud
+ *  @param[in,out] yCloud The output molSys::PointCloud
  *  @param[in] isSlice This decides whether there is a slice or not
  ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double>
@@ -396,7 +396,7 @@ chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 /********************************************/ /**
  *  Function that classifies every particle's #molSys::atom_state_type ice type, according to 
  the CHILL algorithm.
- *  @param[out] yCloud The output molSys::PointCloud
+ *  @param[in,out] yCloud The output molSys::PointCloud
  *  @param[in] isSlice This decides whether there is a slice or not
  *  @param[in] outputFileName Name of the output file, to which the ice types will be written out. 
  * The default file name is "chill.txt"
@@ -481,7 +481,7 @@ chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 /********************************************/ /**
  *  Function for getting the bond order correlations \f$c_{ij}\f$ (alternatively \f$a_{ij}\f$ in certain texts)
  using the CHILL+ algorithm
- *  @param[out] yCloud The output molSys::PointCloud
+ *  @param[in,out] yCloud The output molSys::PointCloud
  *  @param[in] isSlice This decides whether there is a slice or not
  ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double>
@@ -606,7 +606,7 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 /********************************************/ /**
  *  Function that classifies the #molSys::atom_state_type ice type of each particle, according to the CHILL+
  algorithm.
- *  @param[out] yCloud The output molSys::PointCloud
+ *  @param[in,out] yCloud The output molSys::PointCloud
  *  @param[in] isSlice This decides whether there is a slice or not
  *  @param[in] outputFileName Name of the output file, to which the ice types will be written out. 
  * The default file name is "chillPlus.txt"
@@ -711,7 +711,7 @@ chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 /********************************************/ /**
  *  Function for getting the averaged \f$q_6\f$ parameter. 
  *
- *  @param[out] yCloud The output molSys::PointCloud
+ *  @param[in,out] yCloud The output molSys::PointCloud
  *  @param[in] isSlice This decides whether there is a slice or not
  *  \return a double vector of the averaged \f$q_6\f$ values.
  ***********************************************/
@@ -833,7 +833,7 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
  * This function can be called after both averaged \f$q_6\f$ and bond order correlation function
  * \f$c_{ij}\f$ have been <a href="https://pubs.rsc.org/en/content/articlehtml/2011/cp/c1cp22167a">calculated</a> .
  *
- *  @param[out] yCloud The output molSys::PointCloud
+ *  @param[in,out] yCloud The output molSys::PointCloud
  *  @param[in] q6 Vector containing the previously calculated averaged \f$q_6\f$ values (using chill::getq6)
  ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
