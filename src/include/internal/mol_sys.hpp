@@ -150,6 +150,7 @@ template <typename S, typename T> struct PointCloud {
 
 /********************************************/ /**
  *  Function for checking if a file exists or not.
+ *  @param[in] name The name of the file 
  ***********************************************/
 inline bool file_exists(const std::string &name) {
   struct stat buffer;
@@ -159,6 +160,7 @@ inline bool file_exists(const std::string &name) {
 /********************************************/ /**
  *  Function for tokenizing line strings into words (strings) delimited
  *  by whitespace. This returns a vector with the words in it.
+ *  @param[in] line The string containing the line to be tokenized
  ***********************************************/
 inline std::vector<std::string> tokenizer(std::string line) {
   std::istringstream iss(line);
@@ -169,6 +171,7 @@ inline std::vector<std::string> tokenizer(std::string line) {
 
 /********************************************/ /**
  *  Function for tokenizing line strings into a vector of doubles.
+ *  @param[in] line The string containing the line to be tokenized
  ***********************************************/
 inline std::vector<double> tokenizerDouble(std::string line) {
   std::istringstream iss(line);
@@ -184,8 +187,8 @@ inline std::vector<double> tokenizerDouble(std::string line) {
 PointCloud<Point<double>, double>
 readLammpsTrj(std::string filename, int targetFrame,
               PointCloud<Point<double>, double> *yCloud, bool isSlice = false,
-              std::array<double, 3> = std::array<double, 3>{0, 0, 0},
-              std::array<double, 3> = std::array<double, 3>{0, 0, 0});
+              std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
+              std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
 
 // Function for reading in a specified frame (frame number and not timestep value)
 // This only reads in oxygen atoms
@@ -193,8 +196,8 @@ PointCloud<Point<double>, double>
 readLammpsTrjO(std::string filename, int targetFrame,
                PointCloud<Point<double>, double> *yCloud, int typeO,
                bool isSlice = false,
-               std::array<double, 3> = std::array<double, 3>{0, 0, 0},
-               std::array<double, 3> = std::array<double, 3>{0, 0, 0});
+               std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
+               std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
 
 // Function for clearing vectors in PointCloud after multiple usage
 PointCloud<Point<double>, double>
