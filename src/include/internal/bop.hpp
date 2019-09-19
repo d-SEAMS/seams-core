@@ -11,6 +11,12 @@
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 
+/*! \file bop.hpp
+    \brief File for the bond order parameter analysis.
+    
+    Details.
+*/
+
 /*!
  *  \addtogroup chill
  *  @{
@@ -26,7 +32,7 @@ CHILL/CHILL+ classification scheme, as well as a yodaCloud struct to hold
  parameter method is based on <a href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.47.1297">order parameters</a> introduced by Steinhardt et al.  
   
  The local environment of the water molecules is classified using an algorithm based on spherical harmonics, which is independent of the specific crystal structure and does not require the definition of a reference frame.
- The local order around each water molecule \f$i\f$ is described by a local orientational bond order parameter \f$q_l(i)\f$, with \f$ 2l+1 \f$ complex components:
+ The local order around each water molecule \f$i\f$ is described by a local orientational bond order parameter \f$q_{lm}(i)\f$, with \f$ 2l+1 \f$ complex components:
 
   \f[
   q_{lm}(i) = \frac{1}{N_b(i)} \Sigma_{j=1}^{N_b(i)} Y_{lm}(r_{ij})
@@ -91,11 +97,30 @@ CHILL/CHILL+ classification scheme, as well as a yodaCloud struct to hold
 namespace chill {
 
 // 2*l+1 length complex vector
+/*! \struct YlmAtom
+ * \brief This contains a complex vector of length \f$2l+1\f$.
+ *
+ * Contains specifically:
+ * - A complex vector, projecting the orientational structure of a single pair with each of the four nearest neighbours, on the basis of spherical harmonics
+ */
 struct YlmAtom {
   std::vector<std::complex<double>> ylm;
 };
 
 // Vector of 2*l+1 averaged over 4 nearest neighbours
+/*! \struct QlmAtom
+ * \brief This is the local orientational bond order parameter \f$q_{lm}\f$, of length \f$2l+1\f$.
+ *
+ * This complex vector is averaged over the four nearest neighbours, according to the following equation:
+ *
+ * \f[
+ * q_{lm}(i) = \frac{1}{N_b(i)} \Sigma_{j=1}^{N_b(i)} Y_{lm}(r_{ij})
+ * \f]
+ *
+ * Here, \f$N_b(i)=4\f$ is the number of nearest neighbours for the molecule \f$i\f$.
+ * This struct contains specifically:
+ * - A complex vector of length \f$2l+1\f$, calculated according to the equation above
+ */
 struct QlmAtom {
 
   std::vector<YlmAtom> ptq; // Averaged over neighbours
@@ -160,14 +185,22 @@ int numStaggered(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 
 } // namespace chill
 
+/*! \brief Functions used for spherical harmonics
+ *
+ The recommended function for calculating the spherical-harmonics based complex vector is sph::spheriHarmo.
+ This function uses the <a href="https://www.boost.org/">Boost</a> libraries. 
+  ### Changelog ###
+
+  - Amrita Goswami [amrita16thaug646@gmail.com]; date modified: Sept 19, 2019
+ */
 namespace sph {
 
 // 7 is for Q3, orderL=3
 
 std::vector<std::complex<double>> spheriHarmo(int orderL,
-                                              std::array<double, 2> coordSph);
+                                              std::array<double, 2> radialCoord);
 
-std::array<double, 2> radialCoord(std::array<double, 3>);
+std::array<double, 2> radialCoord(std::array<double, 3> cartCoord);
 
 // Lookup table for Q3
 std::vector<std::complex<double>>
@@ -185,6 +218,14 @@ std::complex<double> lookupTableQ6(int m, std::array<double, 2> angles);
 
 } // namespace sph
 
+/********************************************/ /**
+ *  Calculates the complex vector, normalized by the number of nearest neighbours, of length \f$2l+1\f$.
+ *
+ *  @param[in] v The complex vector to be normalized, of length \f$2l+1\f$ 
+ *  @param[in] l A free integer parameter
+ *  @param[in] neigh The number of nearest neighbours
+ *  \return a complex vector, of length \f$2l+1\f$, normalized by the number of nearest neighbours
+ ***********************************************/
 inline std::vector<std::complex<double>>
 avgVector(std::vector<std::complex<double>> v, int l, int neigh) {
   if (neigh == 0) {
