@@ -10,6 +10,21 @@
 #include <sys/stat.h>
 #include <vector>
 
+/*!
+ *  \addtogroup molSys
+ *  @{
+ */
+
+/*! \brief Bare-bones structs used throughout the architecture.
+ *         This namespace defines Point and PointCloud structs, alongwith other basic functions and enums.
+ *
+ PointCloud is a struct that contains the information of a collection of Point structs, at every frame. Point contains the coordinates and types of each point,
+ along with information about whether the particular particle is within a slice or not.
+  ### Changelog ###
+
+  - Amrita Goswami [amrita16thaug646@gmail.com]; date modified: Sept 19, 2019
+ */
+
 namespace molSys {
 
 // Enum type for bond type
@@ -34,6 +49,7 @@ struct Result {
   double c_value;       // Bond correlation factor
 };
 
+// Struct that contains per-particle information
 template <typename T> struct Point {
   int type, molID, atomID;    // type ID, molID, atomID
   T x, y, z;                  // coordinates
@@ -44,6 +60,7 @@ template <typename T> struct Point {
   bool inSlice = true;      // Is the point inside the slice or not?
 };
 
+// Struct for a collection of points; contains information for a particular frame
 template <typename S, typename T> struct PointCloud {
 
   std::vector<S> pts;    // Collection of points
