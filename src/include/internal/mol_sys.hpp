@@ -197,7 +197,7 @@ readLammpsTrjO(std::string filename, int targetFrame,
                PointCloud<Point<double>, double> *yCloud, int typeO,
                bool isSlice = false,
                std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
-               std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
+               std::array<double, 3> coordHigh= std::array<double, 3>{0, 0, 0});
 
 // Function for clearing vectors in PointCloud after multiple usage
 PointCloud<Point<double>, double>
