@@ -10,6 +10,12 @@
 #include <sys/stat.h>
 #include <vector>
 
+/*! \file mol_sys.hpp
+    \brief The main molecular system handler.
+    
+    Details.
+*/
+
 /*!
  *  \addtogroup molSys
  *  @{
@@ -42,13 +48,32 @@ enum atom_state_type {
   reCubic,
   reHex
 };
+/*! \enum molSys::atom_state_type
+ * A description of the enum type.
+ */
+
+/*! \var molSys::atom_state_type cubic
+ * Ic, or particle type signifying Cubic Ice.
+ */
 
 // Struct containing the result
 struct Result {
   bond_type classifier; // Classifier according to CHILL, CHILL+ etc
   double c_value;       // Bond correlation factor
 };
-
+/*! \struct Point
+ * \brief This contains per-particle information.
+ *
+ * Specifically
+ * - Type ID
+ * - Molecular ID
+ * - Atom ID
+ * - Coordinates
+ * - Neighbourlist
+ * - Results
+ * - Type of iceType
+ * - In slice bool
+ */
 // Struct that contains per-particle information
 template <typename T> struct Point {
   int type, molID, atomID;    // type ID, molID, atomID
