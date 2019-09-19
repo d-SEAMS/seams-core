@@ -11,6 +11,7 @@ XML_PROGRAMLISTING      = NO
 PROJECT_NAME            = "d-SEAMS"
 RECURSIVE              = YES
 EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
 INPUT = README.md ./src/
 EXCLUDE = ./src/include/external
 USE_MDFILE_AS_MAINPAGE = README.md
