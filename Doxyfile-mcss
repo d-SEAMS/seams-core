@@ -11,7 +11,7 @@ XML_PROGRAMLISTING      = NO
 PROJECT_NAME            = "d-SEAMS"
 RECURSIVE              = YES
 EXTRACT_ALL            = YES
-INPUT = README.md ./src/
+INPUT = README.md ./src/ ./lua_inputs
 EXCLUDE = ./src/include/external
 USE_MDFILE_AS_MAINPAGE = README.md
 
@@ -19,6 +19,6 @@ USE_MDFILE_AS_MAINPAGE = README.md
 OPTIMIZE_OUTPUT_FOR_C = YES
 BUILTIN_STL_SUPPORT = YES
 # Lua Support
-# EXTENSION_MAPPING =*.lua
-# FILTER_PATTERNS=*.lua=/home/haozeke/Git/Github/Doxygen/doxygen-lua/bin/lua2dox
-# FILE_PATTERNS          = *.lua
+EXTENSION_MAPPING =*.lua
+FILTER_PATTERNS=*.lua=lua2dox/lua2dox_filter
+FILE_PATTERNS          = *.lua
