@@ -9,7 +9,8 @@
 // External Libraries
 
 /********************************************/ /**
- *  Function for reading in a lammps file
+ *  Function for reading in a lammps file. 
+ *  Reads in a specified frame (frame number and not timestep value).
  ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double>
 molSys::readLammpsTrj(std::string filename, int targetFrame,
@@ -216,8 +217,8 @@ molSys::readLammpsTrj(std::string filename, int targetFrame,
 }
 
 /********************************************/ /**
- *  Function for reading in a lammps file; and saves only the Oxygen atoms
- This is an overloaded function. The Oxygen atom ID must be specified
+ *  Function for reading in a lammps file; and saves only the Oxygen atoms.
+ This is an overloaded function. The Oxygen atom ID must be specified.
  ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double> molSys::readLammpsTrjO(
     std::string filename, int targetFrame,
@@ -430,7 +431,7 @@ molSys::PointCloud<molSys::Point<double>, double> molSys::readLammpsTrjO(
 
 /********************************************/ /**
  *  Function for clearing PointCloud if it is already 
- filled
+ filled. This should be called before every frame is read in.
  ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double> molSys::clearPointCloud(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
