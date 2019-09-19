@@ -29,7 +29,13 @@ namespace bg = boost::geometry;
 // }
 
 /********************************************/ /**
- *  Spherical harmonics using boost (General)
+ *  Function for calculating spherical harmonics, that works for a general \f$l\f$.
+ *
+ * This function uses the <a href="https://www.boost.org/">Boost</a> libraries.
+ *
+ *  @param[in] orderL The int value of \f$l\f$
+ *  @param[in] radialCoord Array containing the polar and azimuth angles
+ *  \return a complex vector, holding the complex spherical harmonics values, of length \f$2l+1\f$ 
  ***********************************************/
 std::vector<std::complex<double>>
 sph::spheriHarmo(int orderL, std::array<double, 2> radialCoord) {
@@ -50,6 +56,14 @@ sph::spheriHarmo(int orderL, std::array<double, 2> radialCoord) {
   return result;
 }
 
+/********************************************/ /**
+ *  Function for the azimuth and polar angles, given the Cartesian coordinates
+ *
+ * This function uses the <a href="https://www.boost.org/">Boost</a> libraries.
+ *
+ *  @param[in] cartCoord The Cartesian coordinates of a particular point
+ *  \return a double array, holding the azimuth and polar angles
+ ***********************************************/
 std::array<double, 2> sph::radialCoord(std::array<double, 3> cartCoord) {
   // The output
   std::array<double, 2> result;
@@ -68,7 +82,12 @@ std::array<double, 2> sph::radialCoord(std::array<double, 3> cartCoord) {
 }
 
 /********************************************/ /**
- *  Get Q3 using lookup tables
+ *  Calculates \f$Q_3\f$ using hard-coded look-up values.
+ *
+ * It is recommended to use the Boost version of this function, sph::spheriHarmo, instead.
+ *
+ *  @param[in] angles The azimuth and polar angles of a particular point
+ *  \return a complex vector, of length \f$7\f$, calculated using spherical harmonics
  ***********************************************/
 std::vector<std::complex<double>>
 sph::lookupTableQ3Vec(std::array<double, 2> angles) {
@@ -87,7 +106,13 @@ sph::lookupTableQ3Vec(std::array<double, 2> angles) {
 }
 
 /********************************************/ /**
- *  Lookup table for Q3
+ *  Look-up hard-coded values for \f$Q_3\f$
+ *
+ * It is recommended to use the Boost version of this function, sph::spheriHarmo, instead.
+ *
+ *  @param[in] m An int such that \f$-3<=m<=3\f$
+ *  @param[in] angles The azimuth and polar angles for a particular particle
+ *  \return a complex vector, of length \f$7\f$, calculated using hard-coded values
  ***********************************************/
 std::complex<double> sph::lookupTableQ3(int m, std::array<double, 2> angles) {
   std::complex<double> result(0.0, 0.0);
@@ -135,7 +160,12 @@ std::complex<double> sph::lookupTableQ3(int m, std::array<double, 2> angles) {
 }
 
 /********************************************/ /**
- *  Get Q6 using lookup tables
+ *  Calculates \f$Q_6\f$ using hard-coded values.
+ *
+ * It is recommended to use the Boost version of this function, sph::spheriHarmo, instead.
+ *
+ *  @param[in] angles The azimuth and polar angles for a particular particle
+ *  \return a complex vector, of length \f$13\f$, calculated using hard-coded values
  ***********************************************/
 std::vector<std::complex<double>>
 sph::lookupTableQ6Vec(std::array<double, 2> angles) {
@@ -154,7 +184,13 @@ sph::lookupTableQ6Vec(std::array<double, 2> angles) {
 }
 
 /********************************************/ /**
- *  Lookup table for Q6
+ *  Hard-coded calculations for determining \f$Q_6\f$.
+ *
+ * It is recommended to use the general Boost version of this function, sph::spheriHarmo, instead.
+ *
+ *  @param[in] m An int such that \f$-6<=m<=6\f$
+ *  @param[in] angles The azimuth and polar angles for a particular particle
+ *  \return a complex vector, of length \f$13\f$, calculated using hard-coded values
  ***********************************************/
 std::complex<double> sph::lookupTableQ6(int m, std::array<double, 2> angles) {
   std::complex<double> result(0.0, 0.0);
@@ -238,8 +274,10 @@ std::complex<double> sph::lookupTableQ6(int m, std::array<double, 2> angles) {
 }
 
 /********************************************/ /**
- *  Function for getting the bond order correlations c_{ij}
- according to the CHILL algorithm
+ *  Function for getting the bond order correlations \f$c_{ij}\f$  (or \f$a_{ij}\f$ in some treatments)
+ according to the CHILL algorithm.
+ *  @param[out] yCloud The output molSys::PointCloud
+ *  @param[in] isSlice This decides whether there is a slice or not
  ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double>
 chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
@@ -356,8 +394,12 @@ chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 }
 
 /********************************************/ /**
- *  Function that classifies each ice type according to 
- the CHILL algorithm
+ *  Function that classifies every particle's #molSys::atom_state_type ice type, according to 
+ the CHILL algorithm.
+ *  @param[out] yCloud The output molSys::PointCloud
+ *  @param[in] isSlice This decides whether there is a slice or not
+ *  @param[in] outputFileName Name of the output file, to which the ice types will be written out. 
+ * The default file name is "chill.txt"
  ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double>
 chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
@@ -437,8 +479,10 @@ chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 }
 
 /********************************************/ /**
- *  Function for getting the bond order correlations c_{ij}
+ *  Function for getting the bond order correlations \f$c_{ij}\f$ (alternatively \f$a_{ij}\f$ in certain texts)
  using the CHILL+ algorithm
+ *  @param[out] yCloud The output molSys::PointCloud
+ *  @param[in] isSlice This decides whether there is a slice or not
  ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double>
 chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
@@ -560,8 +604,12 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 }
 
 /********************************************/ /**
- *  Function that classifies each ice type according to the CHILL+
- algorithm
+ *  Function that classifies the #molSys::atom_state_type ice type of each particle, according to the CHILL+
+ algorithm.
+ *  @param[out] yCloud The output molSys::PointCloud
+ *  @param[in] isSlice This decides whether there is a slice or not
+ *  @param[in] outputFileName Name of the output file, to which the ice types will be written out. 
+ * The default file name is "chillPlus.txt"
  ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double>
 chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
@@ -659,9 +707,13 @@ chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   return *yCloud;
 }
 
+// TODO: Add code for slices!
 /********************************************/ /**
- *  Function for getting the averaged q6 paramter, 
- returning the values as a vector. TODO: SLICE!
+ *  Function for getting the averaged \f$q_6\f$ parameter. 
+ *
+ *  @param[out] yCloud The output molSys::PointCloud
+ *  @param[in] isSlice This decides whether there is a slice or not
+ *  \return a double vector of the averaged \f$q_6\f$ values.
  ***********************************************/
 std::vector<double>
 chill::getq6(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
@@ -776,10 +828,13 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 }
 
 /********************************************/ /**
- *  Reclassifies atoms which may have been misclassified
- as water using the averaged q6 and q3 parameters
- Call this after both averaged q6 and c_ij have been calculated
- https://pubs.rsc.org/en/content/articlehtml/2011/cp/c1cp22167a
+ *  Reclassifies atoms which may have been mis-classified
+ as water using the averaged \f$q_6\f$ and \f$q_3\f$ parameters.
+ * This function can be called after both averaged \f$q_6\f$ and bond order correlation function
+ * \f$c_{ij}\f$ have been <a href="https://pubs.rsc.org/en/content/articlehtml/2011/cp/c1cp22167a">calculated</a> .
+ *
+ *  @param[out] yCloud The output molSys::PointCloud
+ *  @param[in] q6 Vector containing the previously calculated averaged \f$q_6\f$ values (using chill::getq6)
  ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
@@ -818,8 +873,10 @@ molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
 }
 
 /********************************************/ /**
- *  Gets a PointCloud struct of all the solid particles for
- a given frame 
+ *  Gets a molSys::PointCloud struct of all the solid particles for
+ a given frame. 
+ *  @param[in] yCloud The input molSys::PointCloud for the current frame
+ *  @param[out] iceCloud The output molSys::PointCloud, for all ice-like particles only
  ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double> chill::getIceCloud(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
@@ -846,7 +903,13 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceCloud(
 }
 
 /********************************************/ /**
- *  Finds the largest ice cluster for a given frame
+ *  Finds the number of particles in the largest ice cluster, for a given frame.
+ *  @param[in] iceCloud The input molSys::PointCloud for all the ice-like particles
+ *  @param[in] cutoff The cut-off distance for determining nearest-neighbours. For water, the cut-off
+ * value is typically taken to be \f$3.2\f$ or \f$3.5\f$ Angstrom, encompassing the first-neighbour shell molecules.
+ *  @param[in] printCluster Decides whether the cluster should be printed out to a file as a lammpstrj or not
+ *  @param[in] isSlice Decides whether there is a slice (true) or not (false)
+ *  \return an int value holding the number of particles in the largest ice cluster 
  ***********************************************/
 int chill::largestIceCluster(
     molSys::PointCloud<molSys::Point<double>, double> *iceCloud, double cutoff,
@@ -970,7 +1033,11 @@ int chill::largestIceCluster(
 }
 
 /********************************************/ /**
- *  Prints out the iceType for a particular frame to a file
+ *  Prints out the #molSys::atom_state_type per-particle ice type, for a particular frame, to a file.
+ *  @param[in] yCloud The input molSys::PointCloud for the current frame
+ *  @param[in] isSlice Determines whether there is a slice or not
+ *  @param[in] outputFileName File name of the output file, to which the per-particle ice types will be written out.
+ * The default file name is "superChill.txt"
  ***********************************************/
 int chill::printIceType(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, bool isSlice,
@@ -1025,8 +1092,13 @@ int chill::printIceType(
 }
 
 /********************************************/ /**
- *  Function that checks if the the atom with atom index
- iatom is interfacial or not 
+ *  Function that checks if the particle with the given atom index
+  is interfacial or not. 
+ *  @param[in] yCloud The input molSys::PointCloud
+ *  @param[in] iatom The vector index of the current particle
+ *  @param[in] num_staggrd The number of staggered bonds that the current particle participates in
+ *  @param[in] num_eclipsd The number of eclipsed bonds that the current particle participates in
+ *  \return a bool; true if the particle is interfacial and otherwise false
  ***********************************************/
 bool chill::isInterfacial(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
@@ -1075,8 +1147,11 @@ bool chill::isInterfacial(
 }
 
 /********************************************/ /**
- *  Returns the number of staggered bonds of an atom
- of index jatom 
+ *  Calculates the number of staggered bonds of an atom
+ with the given index.
+ *  @param[in] yCloud The input molSys::PointCloud
+ *  @param[in] jatom The vector index of the current particle
+ *  \return an int value, holding the number of staggered bonds of the given particle 
  ***********************************************/
 int chill::numStaggered(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int jatom) {
