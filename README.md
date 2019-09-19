@@ -1,40 +1,21 @@
-# d-SEAMS [![Docs Status](https://travis-ci.org/d-SEAMS/seams-core.svg?branch=master)](https://travis-ci.org/d-SEAMS/seams-core)
+# d-SEAMS
 
+**Deferred Structural Elucidation Analysis for Molecular Simulations**
+
+[![Docs Status](https://travis-ci.org/d-SEAMS/seams-core.svg?branch=master)](https://travis-ci.org/d-SEAMS/seams-core)
 [![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
 
 Check our docs build status [here](https://travis-ci.org/d-SEAMS/seams-core).
 The docs themselves are [here](https://d-seams.github.io/seams-core/) and
 development is ongoing [on GitHub](https://github.com/d-SEAMS/seams-core).
 
-This C++14 program reads in lammps trajectory files
-or XYZ files to calculate RDF, in-plane RDF and the structure factor.
-
-\brief Post-processing code for RDF, in-plane RDF, structure factor
+\brief The C++ core of d-SEAMS, a molecular dynamics trajectory analysis engine.
 
 # Compilation
 
 ## Dependency Management
 
-Unless you are sure that all the libraries necessary are available on your
-system, it is expedient to ensure `conan` is available for managing
-dependencies. Since `conan` is essentially a python package, it is handled
-by[poetry](https://github.com/sdispater/poetry).
-
-### Python
-
-More recent versions use [poetry](https://github.com/sdispater/poetry) which as
-a non-system python dependant installation.
-
-```{bash}
-# Get poetry (once)
-curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
-# Install packages
-poetry install
-```
-
 ### Lua
-
-TODO: Move to conan
 
 Lua v5.3 is used for the scripting engine. It needs to be installed via the
 operating system's normal packaging system for now. If possible, install a
@@ -56,30 +37,6 @@ and they are to be installed as root.
 ```sh
 # For cross-OS filesystem operations
 sudo luarocks install luafilesystem
-```
-
-## Build Things
-
-```{bash}
-# Use the bundled conan
-poetry shell
-# Always prefer an out of tree build
-mkdir build
-cd build
-
-#
-# OPTIONAL STEP (TODO: Use CMakeLists.txt to figure this out)
-#
-# We prefer clang, so if you have it, use it
-export CXX=/usr/bin/clang++
-export CC=/usr/bin/clang
-#
-# END OPTIONAL
-#
-
-# If you forget the flag you will build the Debug version
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make
 ```
 
 # Nix Usage
@@ -151,18 +108,9 @@ directory where `input/` is a child directory.
 ./yodaStruct --script ../lua_inputs/transition_diff.lua -f ../lua_inputs/parameter.txt -c ../lua_inputs/config.yml
 ```
 
-# Details
-
-- For example, if you want to find the in-plane RDF in the
-  XY plane, you should use the Rdf2D class. The equation used for 2D-RDF for the \f$n^{th}\f$ layer is:
-  \f[
-  g^n(r) = \frac{1}{(\rho^n)^2 A \delta z} \Sigma*{i \neq j} \delta(r - r*{ij}) \left[ \Theta\left( \frac{\delta z}{2}-|z_i-z^2| \right) \times \Theta\left( \frac{\delta z}{2}-|z_j-z^n| \right) \right]
-  \f]
-  For detailed instructions, see the Rdf2D class documentation
-
 # Developer Documentation
 
-TODO: Move this to some other location.
+<!-- TODO: Move this to some other location. -->
 
 For updates to any of the **bundled** `external libraries` change the commit number and use:
 
@@ -204,6 +152,9 @@ of Sublime Text
 - Xcode: https://github.com/travisjeffery/ClangFormat-Xcode
 
 Where some of the above suggestions are derived from [this depreciated githook](https://github.com/andrewseidl/githook-clang-format).
+
+Also, do note that we have a `CONTRIBUTING` file you **need to read** to
+contribute, for certain reasons, like, common sense.
 
 # Acknowledgements
 
