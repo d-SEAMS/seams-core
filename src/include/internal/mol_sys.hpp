@@ -34,9 +34,51 @@
 namespace molSys {
 
 // Enum type for bond type
+
+/*! \enum molSys::bond_type
+ * Qualifier for the bond type between two nearest-neighbours, according to the CHILL or CHILL+ classification scheme.
+ *
+ * \var molSys::bond_type staggered
+ * The bond is a staggered bond, according to the \f$a(i,j)\f$ or \f$c(i,j)\f$ value.
+ *
+ * \var molSys::bond_type eclipsed
+ * The bond is an eclipsed bond.
+ *
+ * \var molSys::bond_type out_of_range
+ * The bond cannot be classified as either staggered or eclipsed.
+ */
 enum bond_type { staggered, eclipsed, out_of_range };
 
-// Enum type for bond type
+/*! \enum molSys::atom_state_type
+ * Qualifier for the per-particle phase state, according to the CHILL, CHILL+, or \f$q_6\f$ order parameter.
+ *
+ * \var molSys::atom_state_type cubic
+ * Ic, or particle type signifying Cubic Ice.
+ *
+ * \var molSys::atom_state_type hexagonal
+ * Ih, or particle type signifying Hexagonal Ice.
+ *
+ * \var molSys::atom_state_type water
+ * Liquid/amorphous phase.
+ *
+ * \var molSys::atom_state_type interfacial
+ * Interfacial ice: ice-like molecules which do not fulfill the strict criteria of the Ic or Ih phases.
+ *
+ * \var molSys::atom_state_type clathrate
+ * Clathrate ice phase.
+ *
+ * \var molSys::atom_state_type interClathrate
+ * Interfacial clathrate ice phase.
+ *
+ * \var molSys::atom_state_type unclassified
+ * Not classified into any other category.
+ *
+ * \var molSys::atom_state_type reCubic
+ * Reclassified as cubic ice, according to the \f$q_6\f$ order parameter.
+ *
+ * \var molSys::atom_state_type reHex
+ * Reclassified as hexagonal ice, according to the \f$q_6\f$ order parameter.
+ */
 enum atom_state_type {
   cubic,
   hexagonal,
@@ -48,19 +90,20 @@ enum atom_state_type {
   reCubic,
   reHex
 };
-/*! \enum molSys::atom_state_type
- * A description of the enum type.
- */
 
-/*! \var molSys::atom_state_type cubic
- * Ic, or particle type signifying Cubic Ice.
+/*! \struct Result
+ * \brief This contains the bond classifier of enum type #bond_type, and the bond
+ * correlation factor.
+ *
+ * Contains specifically the members:
+ * - Bond classifier or the type of the bond (staggered, eclipsed, out-of-range)
+ * - Bond correlation factor
  */
-
-// Struct containing the result
 struct Result {
   bond_type classifier; // Classifier according to CHILL, CHILL+ etc
   double c_value;       // Bond correlation factor
 };
+
 /*! \struct Point
  * \brief This contains per-particle information.
  *
@@ -70,8 +113,8 @@ struct Result {
  * - Atom ID
  * - Coordinates
  * - Neighbourlist
- * - Results
- * - Type of iceType
+ * - Bond correlation type of type Result
+ * - Type of #atom_state_type iceType
  * - In slice bool
  */
 // Struct that contains per-particle information
@@ -86,6 +129,16 @@ template <typename T> struct Point {
 };
 
 // Struct for a collection of points; contains information for a particular frame
+/*! \struct PointCloud
+ * \brief This contains a collection of points; contains information for a particular frame.
+ *
+ * Specifically
+ * - A vector of Point structs
+ * - The current frame number
+ * - The number of particles in the current frame
+ * - A vector for the simulation box lengths in each dimension
+ * - A vector containing the absolute lower box coordinates
+ */
 template <typename S, typename T> struct PointCloud {
 
   std::vector<S> pts;    // Collection of points
@@ -95,13 +148,18 @@ template <typename S, typename T> struct PointCloud {
   std::vector<T> boxLow; // xlo, ylo, zlo
 };
 
+/********************************************/ /**
+ *  Function for checking if a file exists or not.
+ ***********************************************/
 inline bool file_exists(const std::string &name) {
   struct stat buffer;
   return (stat(name.c_str(), &buffer) == 0);
 }
 
-// Function for tokenizing line strings into words (strings) delimited
-// by whitespace. This returns a vector with the words in it
+/********************************************/ /**
+ *  Function for tokenizing line strings into words (strings) delimited
+ *  by whitespace. This returns a vector with the words in it.
+ ***********************************************/
 inline std::vector<std::string> tokenizer(std::string line) {
   std::istringstream iss(line);
   std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
@@ -109,7 +167,9 @@ inline std::vector<std::string> tokenizer(std::string line) {
   return tokens;
 }
 
-// Function for tokenizing line strings into a vector of doubles
+/********************************************/ /**
+ *  Function for tokenizing line strings into a vector of doubles.
+ ***********************************************/
 inline std::vector<double> tokenizerDouble(std::string line) {
   std::istringstream iss(line);
   std::vector<double> tokens;
