@@ -12,6 +12,7 @@ PROJECT_NAME            = "d-SEAMS"
 # PROJECT_BRIEF           = "Deferred Structural Elucidation Analysis for Molecular Simulations"
 PROJECT_LOGO            = "images/dSeamsLogo.png"
 M_FAVICON               = "images/dSeamsLogo.ico"
+M_PAGE_FINE_PRINT	    = <b>(C) 2018-present</b> <a href="https://github.com/HaoZeke">Rohit Goswami</a>, <a href="https://github.com/amritagos">Amrita Goswami</a>, <a href="https://github.com/d-Seams">d-SEAMS core team</a>
 
 # Doxygen Settings
 RECURSIVE              = YES
