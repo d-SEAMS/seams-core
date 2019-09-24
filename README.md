@@ -13,6 +13,13 @@ and tutorials.
 
 \brief The C++ core of d-SEAMS, a molecular dynamics trajectory analysis engine.
 
+# Citation
+
+This software is being actively developed and written up. If you do use it in an
+academic capacity, for now please cite the following preprint:
+
+    Goswami, R.; Goswami, A.; Singh, J. K. (2019). "d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations". arXiv:1909.09830 [physics.comp-ph].
+
 # Compilation
 
 ## Dependency Management
