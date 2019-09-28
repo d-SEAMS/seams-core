@@ -16,7 +16,7 @@ and tutorials.
 # Citation
 
 This software is being actively developed and written up. If you do use it in an
-academic capacity, for now please cite the following preprint:
+academic capacity, for now please cite [the following preprint](https://arxiv.org/abs/1909.09830):
 
     Goswami, R.; Goswami, A.; Singh, J. K. (2019). "d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations". arXiv:1909.09830 [physics.comp-ph].
 
