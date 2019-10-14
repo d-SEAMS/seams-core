@@ -25,7 +25,7 @@ struct PairCorrel {
 // Function for accumulating the RDF for a frame, when the central atom is of the same type as
 // the distribution atom
 PairCorrel
-accumulateRDFii(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+accumulateRDFii(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
                 PairCorrel *rdf, double binwidth, double cutoff, int typeI,
                 bool isSlice = false,
                 std::array<double, 3> = std::array<double, 3>{0, 0, 0},
@@ -34,7 +34,7 @@ accumulateRDFii(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 // Function for normalizing the RDF for a frame, when the central atom is of the same type as
 // the distribution atom
 PairCorrel
-normalizeRDF(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+normalizeRDF(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
              PairCorrel *rdf, bool isSlice = false,
              std::array<double, 3> = std::array<double, 3>{0, 0, 0},
              std::array<double, 3> = std::array<double, 3>{0, 0, 0});

@@ -18,9 +18,9 @@
  *  @param[in] coordLow Contains the lower limits of the slice, if a slice is to be created
  *  @param[in] coordHigh Contains the upper limits of the slice, if a slice is to be created
  ***********************************************/
-molSys::PointCloud<molSys::Point<double>, double>
-molSys::readLammpsTrj(std::string filename, int targetFrame,
-                      molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+MolSys::PointCloud<MolSys::Point<double>, double>
+MolSys::readLammpsTrj(std::string filename, int targetFrame,
+                      MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
                       bool isSlice, std::array<double, 3> coordLow,
                       std::array<double, 3> coordHigh) {
   std::unique_ptr<std::ifstream> dumpFile;
@@ -40,11 +40,11 @@ molSys::readLammpsTrj(std::string filename, int targetFrame,
       typeIndex;     // Indices for x,y,z coordinates, and LAMMPS type ID
   int molIndex = 0;  // Index for molecular ID
   int atomIndex = 0; // Index for atom ID (Only used if mol ID has not been set)
-  molSys::Point<double> iPoint; // Current point being read in from the file
+  MolSys::Point<double> iPoint; // Current point being read in from the file
   xIndex = yIndex = zIndex = typeIndex = -1; // Default values
   bool isTriclinic = false; // Flag for an orthogonal or triclinic box
 
-  if (!(molSys::file_exists(filename))) {
+  if (!(MolSys::file_exists(filename))) {
     std::cout
         << "Fatal Error: The file does not exist or you gave the wrong path.\n";
     // Throw exception?
@@ -68,7 +68,7 @@ molSys::readLammpsTrj(std::string filename, int targetFrame,
     // This loop searches for targetFrame
     while (std::getline((*dumpFile), line)) {
       // Read in lines and tokenize them
-      tokens = molSys::tokenizer(line);
+      tokens = MolSys::tokenizer(line);
       // Find out which timestep number
       // you are inside
       if (tokens[0].compare("ITEM:") == 0) {
@@ -88,7 +88,7 @@ molSys::readLammpsTrj(std::string filename, int targetFrame,
     // ----------------------------------------------------------
     // Before filling up the PointCloud, if the vectors are filled
     // empty them
-    *yCloud = molSys::clearPointCloud(yCloud);
+    *yCloud = MolSys::clearPointCloud(yCloud);
 
     // ----------------------------------------------------------
     // If targetFrame has been found, read in the box lengths,
@@ -98,8 +98,8 @@ molSys::readLammpsTrj(std::string filename, int targetFrame,
       // Run this until EOF or you reach the next timestep
       while (std::getline((*dumpFile), line)) {
         // Read in lines and tokenize them into std::string words and <double> numbers
-        tokens = molSys::tokenizer(line);
-        numbers = molSys::tokenizerDouble(line);
+        tokens = MolSys::tokenizer(line);
+        numbers = MolSys::tokenizerDouble(line);
 
         // If you've reached the timestep line then you've reached the
         // next frame. Break out of the while loop
@@ -154,7 +154,7 @@ molSys::readLammpsTrj(std::string filename, int targetFrame,
           // Check if the particle is inside the volume Slice
           // or not
           if (isSlice) { // only if a slice has been requested
-            iPoint.inSlice = molSys::atomInSlice(iPoint.x, iPoint.y, iPoint.z,
+            iPoint.inSlice = MolSys::atomInSlice(iPoint.x, iPoint.y, iPoint.z,
                                                  coordLow, coordHigh);
           }
           yCloud->pts.push_back(iPoint);
@@ -233,9 +233,9 @@ molSys::readLammpsTrj(std::string filename, int targetFrame,
  *  @param[in] coordLow Contains the lower limits of the slice, if a slice is to be created
  *  @param[in] coordHigh Contains the upper limits of the slice, if a slice is to be created
  ***********************************************/
-molSys::PointCloud<molSys::Point<double>, double> molSys::readLammpsTrjO(
+MolSys::PointCloud<MolSys::Point<double>, double> MolSys::readLammpsTrjO(
     std::string filename, int targetFrame,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int typeO,
+    MolSys::PointCloud<MolSys::Point<double>, double> *yCloud, int typeO,
     bool isSlice, std::array<double, 3> coordLow,
     std::array<double, 3> coordHigh) {
   std::unique_ptr<std::ifstream> dumpFile;
@@ -255,12 +255,12 @@ molSys::PointCloud<molSys::Point<double>, double> molSys::readLammpsTrjO(
       typeIndex;     // Indices for x,y,z coordinates, and LAMMPS type ID
   int molIndex = 0;  // Index for molecular ID
   int atomIndex = 0; // Index for atom ID (Only used if mol ID has not been set)
-  molSys::Point<double> iPoint; // Current point being read in from the file
+  MolSys::Point<double> iPoint; // Current point being read in from the file
   xIndex = yIndex = zIndex = typeIndex = -1; // Default values
   bool isTriclinic = false; // Flag for an orthogonal or triclinic box
   int nOxy = 0;             // Number of oxygen atoms
 
-  if (!(molSys::file_exists(filename))) {
+  if (!(MolSys::file_exists(filename))) {
     std::cout
         << "Fatal Error: The file does not exist or you gave the wrong path.\n";
     // Throw exception?
@@ -284,7 +284,7 @@ molSys::PointCloud<molSys::Point<double>, double> molSys::readLammpsTrjO(
     // This loop searches for targetFrame
     while (std::getline((*dumpFile), line)) {
       // Read in lines and tokenize them
-      tokens = molSys::tokenizer(line);
+      tokens = MolSys::tokenizer(line);
       // Find out which timestep number
       // you are inside
       if (tokens[0].compare("ITEM:") == 0) {
@@ -304,7 +304,7 @@ molSys::PointCloud<molSys::Point<double>, double> molSys::readLammpsTrjO(
     // ----------------------------------------------------------
     // Before filling up the PointCloud, if the vectors are filled
     // empty them
-    *yCloud = molSys::clearPointCloud(yCloud);
+    *yCloud = MolSys::clearPointCloud(yCloud);
 
     // ----------------------------------------------------------
     // If targetFrame has been found, read in the box lengths,
@@ -314,8 +314,8 @@ molSys::PointCloud<molSys::Point<double>, double> molSys::readLammpsTrjO(
       // Run this until EOF or you reach the next timestep
       while (std::getline((*dumpFile), line)) {
         // Read in lines and tokenize them into std::string words and <double> numbers
-        tokens = molSys::tokenizer(line);
-        numbers = molSys::tokenizerDouble(line);
+        tokens = MolSys::tokenizer(line);
+        numbers = MolSys::tokenizerDouble(line);
 
         // If you've reached the timestep line then you've reached the
         // next frame. Break out of the while loop
@@ -368,7 +368,7 @@ molSys::PointCloud<molSys::Point<double>, double> molSys::readLammpsTrjO(
           // Check if the particle is inside the volume Slice
           // or not
           if (isSlice) { // only if a slice has been requested
-            iPoint.inSlice = molSys::atomInSlice(iPoint.x, iPoint.y, iPoint.z,
+            iPoint.inSlice = MolSys::atomInSlice(iPoint.x, iPoint.y, iPoint.z,
                                                  coordLow, coordHigh);
           }
           // Save only oxygen atoms
@@ -447,11 +447,11 @@ molSys::PointCloud<molSys::Point<double>, double> molSys::readLammpsTrjO(
  filled. This should be called before every frame is read in.
  *  @param[out] yCloud The cleared PointCloud
  ***********************************************/
-molSys::PointCloud<molSys::Point<double>, double> molSys::clearPointCloud(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
+MolSys::PointCloud<MolSys::Point<double>, double> MolSys::clearPointCloud(
+    MolSys::PointCloud<MolSys::Point<double>, double> *yCloud) {
 
   //
-  std::vector<molSys::Point<double>> tempPts;
+  std::vector<MolSys::Point<double>> tempPts;
   std::vector<double> tempBox;
   //
   std::vector<double> tempBox1;

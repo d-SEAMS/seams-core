@@ -23,23 +23,23 @@ struct NeighbourList {
 };
 
 // Inefficient O(n^2) implementation of neighbour lists
-molSys::PointCloud<molSys::Point<double>, double>
+MolSys::PointCloud<MolSys::Point<double>, double>
 neighList(double rcutoff,
-          molSys::PointCloud<molSys::Point<double>, double> *yCloud, int typeI,
+          MolSys::PointCloud<MolSys::Point<double>, double> *yCloud, int typeI,
           int typeJ);
 
 // Inefficient O(n^2) implementation of neighbour lists
 // You can only use this for neighbour lists with one type
-molSys::PointCloud<molSys::Point<double>, double>
+MolSys::PointCloud<MolSys::Point<double>, double>
 neighListO(double rcutoff,
-           molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+           MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
            int typeI);
 
 // Inefficient O(n^2) implementation of neighbour lists
 // You can only use this for neighbour lists with one type
-molSys::PointCloud<molSys::Point<double>, double>
+MolSys::PointCloud<MolSys::Point<double>, double>
 halfNeighList(double rcutoff,
-              molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+              MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
               int typeI = 1);
 
 // Comparator for std::sort
@@ -48,8 +48,8 @@ inline bool compareByLength(const Jatom &a, const Jatom &b) {
 }
 
 // Clear neighbour list for the i^th atom if it is already full
-molSys::PointCloud<molSys::Point<double>, double>
-clearNeighList(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+MolSys::PointCloud<MolSys::Point<double>, double>
+clearNeighList(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
                int iatom);
 
 } // namespace nneigh

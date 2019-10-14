@@ -243,7 +243,7 @@ int main(int argc, char *argv[]) {
 
     // Variables which must be declared in C++
     // Newer pointCloud (rescloud -> ice structure, solcloud -> largest cluster)
-    molSys::PointCloud<molSys::Point<double>, double> resCloud, solCloud;
+    MolSys::PointCloud<MolSys::Point<double>, double> resCloud, solCloud;
     // For averaged q6
     std::vector<double> avgQ6;
 
@@ -261,7 +261,7 @@ int main(int argc, char *argv[]) {
       lua.set_function("writeDump", gen::writeDump);
       lua.set_function("writeHistogram", gen::writeHisto);
       // Generic requirements
-      lua.set_function("readFrame", molSys::readLammpsTrjO);
+      lua.set_function("readFrame", MolSys::readLammpsTrjO);
       lua.set_function("neighborList", nneigh::neighListO);
       // CHILL+ and modifications
       lua.set_function("chillPlus_cij", chill::getCorrelPlus);
@@ -298,7 +298,7 @@ int main(int argc, char *argv[]) {
       std::ofstream clusterFile;
       for (int frame = tFrame; frame <= fFrame; frame += fGap) {
         // Read in a frame
-        resCloud = molSys::readLammpsTrj(tFile, frame, &resCloud, oType);
+        resCloud = MolSys::readLammpsTrj(tFile, frame, &resCloud, oType);
         // // Sort according to atom ID (OPTIONAL)
         // std::sort(resCloud.pts.begin(), resCloud.pts.end(), gen::compareByAtomID);
         // Update the neighbour lists
@@ -344,7 +344,7 @@ int main(int argc, char *argv[]) {
 
         // ---------------------
         // Get the largest ice cluster
-        molSys::PointCloud<molSys::Point<double>, double> solCloud;
+        MolSys::PointCloud<MolSys::Point<double>, double> solCloud;
         int largestIceCluster;
         solCloud = chill::getIceCloud(&resCloud, &solCloud);
         largestIceCluster =

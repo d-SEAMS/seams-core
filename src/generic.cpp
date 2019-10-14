@@ -7,7 +7,7 @@
  *  Function for printing out info in PairCorrel struct
  ***********************************************/
 int gen::prettyPrintYoda(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
     std::string outFile) {
   std::ofstream outputFile;
   // Create a new file in the output directory
@@ -35,7 +35,7 @@ int gen::prettyPrintYoda(
 /********************************************/ /**
  *  Function for printing out info in PairCorrel struct
  ***********************************************/
-int gen::writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+int gen::writeDump(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
                    std::string outFile) {
   std::ofstream outputFile;
   // Create a new file in the output directory
@@ -92,7 +92,7 @@ int gen::writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
  *  Function for printing out values of averaged Q6, averaged Q3 and
  Cij values
  ***********************************************/
-int gen::writeHisto(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+int gen::writeHisto(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
                     std::vector<double> avgQ6) {
   std::ofstream cijFile;
   std::ofstream q3File;
@@ -132,7 +132,7 @@ int gen::writeHisto(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 /********************************************/ /**
  * Function to print out the largest ice cluster
  ***********************************************/
-int gen::writeCluster(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+int gen::writeCluster(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
                       std::string fileName, bool isSlice,
                       int largestIceCluster) {
   std::ofstream clusterFile;

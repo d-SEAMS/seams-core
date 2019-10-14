@@ -17,7 +17,7 @@
 */
 
 /*!
- *  \addtogroup molSys
+ *  \addtogroup MolSys
  *  @{
  */
 
@@ -31,52 +31,52 @@
   - Amrita Goswami [amrita16thaug646@gmail.com]; date modified: Sept 19, 2019
  */
 
-namespace molSys {
+namespace MolSys {
 
 // Enum type for bond type
 
-/*! \enum molSys::bond_type
+/*! \enum MolSys::bond_type
  * Qualifier for the bond type between two nearest-neighbours, according to the CHILL or CHILL+ classification scheme.
  *
- * \var molSys::bond_type staggered
+ * \var MolSys::bond_type staggered
  * The bond is a staggered bond, according to the \f$a(i,j)\f$ or \f$c(i,j)\f$ value.
  *
- * \var molSys::bond_type eclipsed
+ * \var MolSys::bond_type eclipsed
  * The bond is an eclipsed bond.
  *
- * \var molSys::bond_type out_of_range
+ * \var MolSys::bond_type out_of_range
  * The bond cannot be classified as either staggered or eclipsed.
  */
 enum bond_type { staggered, eclipsed, out_of_range };
 
-/*! \enum molSys::atom_state_type
+/*! \enum MolSys::atom_state_type
  * Qualifier for the per-particle phase state, according to the CHILL, CHILL+, or \f$q_6\f$ order parameter.
  *
- * \var molSys::atom_state_type cubic
+ * \var MolSys::atom_state_type cubic
  * Ic, or particle type signifying Cubic Ice.
  *
- * \var molSys::atom_state_type hexagonal
+ * \var MolSys::atom_state_type hexagonal
  * Ih, or particle type signifying Hexagonal Ice.
  *
- * \var molSys::atom_state_type water
+ * \var MolSys::atom_state_type water
  * Liquid/amorphous phase.
  *
- * \var molSys::atom_state_type interfacial
+ * \var MolSys::atom_state_type interfacial
  * Interfacial ice: ice-like molecules which do not fulfill the strict criteria of the Ic or Ih phases.
  *
- * \var molSys::atom_state_type clathrate
+ * \var MolSys::atom_state_type clathrate
  * Clathrate ice phase.
  *
- * \var molSys::atom_state_type interClathrate
+ * \var MolSys::atom_state_type interClathrate
  * Interfacial clathrate ice phase.
  *
- * \var molSys::atom_state_type unclassified
+ * \var MolSys::atom_state_type unclassified
  * Not classified into any other category.
  *
- * \var molSys::atom_state_type reCubic
+ * \var MolSys::atom_state_type reCubic
  * Reclassified as cubic ice, according to the \f$q_6\f$ order parameter.
  *
- * \var molSys::atom_state_type reHex
+ * \var MolSys::atom_state_type reHex
  * Reclassified as hexagonal ice, according to the \f$q_6\f$ order parameter.
  */
 enum atom_state_type {
@@ -124,7 +124,7 @@ template <typename T> struct Point {
   std::vector<int> neighList; // Neighbour list
   std::vector<Result> c_ij;   // Results (contains bond correlation type)
   atom_state_type iceType =
-      molSys::unclassified; // Type of ice/water etc based on cij
+      MolSys::unclassified; // Type of ice/water etc based on cij
   bool inSlice = true;      // Is the point inside the slice or not?
 };
 
@@ -192,12 +192,11 @@ readLammpsTrj(std::string filename, int targetFrame,
 
 // Function for reading in a specified frame (frame number and not timestep value)
 // This only reads in oxygen atoms
-PointCloud<Point<double>, double>
-readLammpsTrjO(std::string filename, int targetFrame,
-               PointCloud<Point<double>, double> *yCloud, int typeO,
-               bool isSlice = false,
-               std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
-               std::array<double, 3> coordHigh= std::array<double, 3>{0, 0, 0});
+PointCloud<Point<double>, double> readLammpsTrjO(
+    std::string filename, int targetFrame,
+    PointCloud<Point<double>, double> *yCloud, int typeO, bool isSlice = false,
+    std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
+    std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
 
 // Function for clearing vectors in PointCloud after multiple usage
 PointCloud<Point<double>, double>
@@ -225,6 +224,6 @@ inline bool atomInSlice(double x, double y, double z,
   }
 }
 
-} // namespace molSys
+} // namespace MolSys
 
 #endif // __MOL_SYS_H_

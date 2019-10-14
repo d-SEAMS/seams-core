@@ -9,7 +9,7 @@ namespace gen {
 
 // Generic function for getting the unwrapped distance
 inline double
-periodicDist(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+periodicDist(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
              int iatom, int jatom) {
   std::array<double, 3> dr;
   double r2 = 0.0; // Squared absolute distance
@@ -31,7 +31,7 @@ periodicDist(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 
 // Generic function for getting the relative coordinates
 inline std::array<double, 3>
-relDist(molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
+relDist(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud, int iatom,
         int jatom) {
   std::array<double, 3> dr;
   std::array<double, 3> box = {yCloud->box[0], yCloud->box[1], yCloud->box[2]};
@@ -58,25 +58,25 @@ relDist(molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
 
 // Function for sorting according to atom ID
 // Comparator for std::sort
-inline bool compareByAtomID(const molSys::Point<double> &a,
-                            const molSys::Point<double> &b) {
+inline bool compareByAtomID(const MolSys::Point<double> &a,
+                            const MolSys::Point<double> &b) {
   return a.atomID < b.atomID;
 }
 
 // Generic function for printing all the struct information
-int prettyPrintYoda(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+int prettyPrintYoda(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
                     std::string outFile);
 
 // Generic function for writing out to a dump file
-int writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+int writeDump(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
               std::string outFile);
 
 // Function for printing out Q6, Cij and averaged Q3 values as single columns to text files
 // The file names are cij, q6, q3
-int writeHisto(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+int writeHisto(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
                std::vector<double> avgQ6);
 // Function for printing the largest ice cluster
-int writeCluster(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+int writeCluster(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
                  std::string fileName = "cluster.txt", bool isSlice = false,
                  int largestIceCluster = 0);
 } // namespace gen
