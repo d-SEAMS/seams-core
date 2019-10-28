@@ -9,7 +9,7 @@ namespace gen {
 
 // Generic function for getting the unwrapped distance
 inline double
-periodicDist(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
+periodicDist(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
              int iatom, int jatom) {
   std::array<double, 3> dr;
   double r2 = 0.0; // Squared absolute distance
@@ -31,7 +31,7 @@ periodicDist(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
 
 // Generic function for getting the relative coordinates
 inline std::array<double, 3>
-relDist(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud, int iatom,
+relDist(molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
         int jatom) {
   std::array<double, 3> dr;
   std::array<double, 3> box = {yCloud->box[0], yCloud->box[1], yCloud->box[2]};
@@ -58,27 +58,63 @@ relDist(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud, int iatom,
 
 // Function for sorting according to atom ID
 // Comparator for std::sort
-inline bool compareByAtomID(const MolSys::Point<double> &a,
-                            const MolSys::Point<double> &b) {
+inline bool compareByAtomID(const molSys::Point<double> &a,
+                            const molSys::Point<double> &b) {
   return a.atomID < b.atomID;
 }
 
 // Generic function for printing all the struct information
-int prettyPrintYoda(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
+int prettyPrintYoda(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                     std::string outFile);
 
 // Generic function for writing out to a dump file
-int writeDump(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
+int writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
               std::string outFile);
 
 // Function for printing out Q6, Cij and averaged Q3 values as single columns to text files
 // The file names are cij, q6, q3
-int writeHisto(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
+int writeHisto(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                std::vector<double> avgQ6);
 // Function for printing the largest ice cluster
-int writeCluster(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
+int writeCluster(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                  std::string fileName = "cluster.txt", bool isSlice = false,
                  int largestIceCluster = 0);
+
+/********************************************/ /**
+ *  Function for tokenizing line strings into words (strings) delimited
+ *  by whitespace. This returns a vector with the words in it.
+ *  @param[in] line The string containing the line to be tokenized
+ ***********************************************/
+inline std::vector<std::string> tokenizer(std::string line) {
+  std::istringstream iss(line);
+  std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
+                                  std::istream_iterator<std::string>{}};
+  return tokens;
+}
+
+/********************************************/ /**
+ *  Function for tokenizing line strings into a vector of doubles.
+ *  @param[in] line The string containing the line to be tokenized
+ ***********************************************/
+inline std::vector<double> tokenizerDouble(std::string line) {
+  std::istringstream iss(line);
+  std::vector<double> tokens;
+  double number; // Each number being read in from the line
+  while (iss >> number) {
+    tokens.push_back(number);
+  }
+  return tokens;
+}
+
+/********************************************/ /**
+ *  Function for checking if a file exists or not.
+ *  @param[in] name The name of the file 
+ ***********************************************/
+inline bool file_exists(const std::string &name) {
+  // Replace by boost function later
+  struct stat buffer;
+  return (stat(name.c_str(), &buffer) == 0);
+}
 } // namespace gen
 
 #endif // __NEIGHBOURS_H_

@@ -148,67 +148,6 @@ template <typename S, typename T> struct PointCloud {
   std::vector<T> boxLow; // xlo, ylo, zlo
 };
 
-/********************************************/ /**
- *  Function for checking if a file exists or not.
- *  @param[in] name The name of the file 
- ***********************************************/
-inline bool file_exists(const std::string &name) {
-  struct stat buffer;
-  return (stat(name.c_str(), &buffer) == 0);
-}
-
-/********************************************/ /**
- *  Function for tokenizing line strings into words (strings) delimited
- *  by whitespace. This returns a vector with the words in it.
- *  @param[in] line The string containing the line to be tokenized
- ***********************************************/
-inline std::vector<std::string> tokenizer(std::string line) {
-  std::istringstream iss(line);
-  std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
-                                  std::istream_iterator<std::string>{}};
-  return tokens;
-}
-
-/********************************************/ /**
- *  Function for tokenizing line strings into a vector of doubles.
- *  @param[in] line The string containing the line to be tokenized
- ***********************************************/
-inline std::vector<double> tokenizerDouble(std::string line) {
-  std::istringstream iss(line);
-  std::vector<double> tokens;
-  double number; // Each number being read in from the line
-  while (iss >> number) {
-    tokens.push_back(number);
-  }
-  return tokens;
-}
-
-// Function for clearing vectors in PointCloud after multiple usage
-PointCloud<Point<double>, double>
-clearPointCloud(PointCloud<Point<double>, double> *yCloud);
-
-inline bool atomInSlice(double x, double y, double z,
-                        std::array<double, 3> coordLow,
-                        std::array<double, 3> coordHigh) {
-  int flag = 0; // If this is 3 then the particle is inside the volume slice
-
-  if (x >= coordLow[0] && x <= coordHigh[0]) {
-    flag++;
-  }
-  if (y >= coordLow[1] && y <= coordHigh[1]) {
-    flag++;
-  }
-  if (z >= coordLow[2] && z <= coordHigh[2]) {
-    flag++;
-  }
-
-  if (flag == 3) {
-    return true;
-  } else {
-    return false;
-  }
-}
-
 } // namespace molSys
 
 #endif // __MOL_SYS_H_

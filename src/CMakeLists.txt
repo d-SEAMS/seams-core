@@ -40,6 +40,7 @@ target_link_libraries(
   )
 add_library(yodaLib SHARED
   mol_sys.cpp
+  seams-input.cpp
   generic.cpp
   bop.cpp
   neighbours.cpp
