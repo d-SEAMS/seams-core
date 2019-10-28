@@ -20,15 +20,16 @@ include_directories(
   ${LUA_INCLUDE_DIR}
   ${Boost_INCLUDE_DIRS}
   )
-
+add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
 # Find packages, including conan packages
 find_package(
   "Lua" REQUIRED
-  "Boost" REQUIRED
+  "Boost" REQUIRED COMPONENTS system filesystem
   "yaml-cpp"
   "fmt"
   "rang")
 
+link_directories(${Boost_LIBRARY_DIRS})
 # Link everything
 target_link_libraries(
   yodaStruct
