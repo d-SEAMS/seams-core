@@ -88,10 +88,15 @@ int prettyPrintYoda(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                     std::string outFile);
 
 /********************************************/ /**
- *  Function for tokenizing line strings into words (strings) delimited
- *  by whitespace. This returns a vector with the words in it.
- *  @param[in] line The string containing the line to be tokenized
- ***********************************************/
+                                                *  Function for tokenizing line
+                                                *strings into words (strings)
+                                                *delimited by whitespace. This
+                                                *returns a vector with the words
+                                                *in it.
+                                                *  @param[in] line The string
+                                                *containing the line to be
+                                                *tokenized
+                                                ***********************************************/
 inline std::vector<std::string> tokenizer(std::string line) {
   std::istringstream iss(line);
   std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
@@ -100,9 +105,13 @@ inline std::vector<std::string> tokenizer(std::string line) {
 }
 
 /********************************************/ /**
- *  Function for tokenizing line strings into a vector of doubles.
- *  @param[in] line The string containing the line to be tokenized
- ***********************************************/
+                                                *  Function for tokenizing line
+                                                *strings into a vector of
+                                                *doubles.
+                                                *  @param[in] line The string
+                                                *containing the line to be
+                                                *tokenized
+                                                ***********************************************/
 inline std::vector<double> tokenizerDouble(std::string line) {
   std::istringstream iss(line);
   std::vector<double> tokens;
@@ -114,14 +123,46 @@ inline std::vector<double> tokenizerDouble(std::string line) {
 }
 
 /********************************************/ /**
- *  Function for checking if a file exists or not.
- *  @param[in] name The name of the file 
- ***********************************************/
+                                                *  Function for checking if a
+                                                *file exists or not.
+                                                *  @param[in] name The name of
+                                                *the file
+                                                ***********************************************/
 inline bool file_exists(const std::string &name) {
   // Replace by boost function later
   struct stat buffer;
   return (stat(name.c_str(), &buffer) == 0);
 }
+
+/********************************************/ /**
+                                                *  Calculates the complex
+                                                *vector, normalized by the
+                                                *number of nearest neighbours,
+                                                *of length \f$2l+1\f$.
+                                                *
+                                                *  @param[in] v The complex
+                                                *vector to be normalized, of
+                                                *length \f$2l+1\f$
+                                                *  @param[in] l A free integer
+                                                *parameter
+                                                *  @param[in] neigh The number
+                                                *of nearest neighbours \return a
+                                                *complex vector, of length
+                                                *\f$2l+1\f$, normalized by the
+                                                *number of nearest neighbours
+                                                ***********************************************/
+inline std::vector<std::complex<double>>
+avgVector(std::vector<std::complex<double>> v, int l, int neigh) {
+  if (neigh == 0) {
+    return v;
+  }
+  for (int m = 0; m < 2 * l + 1; m++) {
+    v[m] = (1.0 / (double)neigh) * v[m];
+  }
+
+  return v;
+}
+
 } // namespace gen
 
 #endif // __NEIGHBOURS_H_
