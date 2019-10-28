@@ -11,6 +11,9 @@
 #include <sys/stat.h>
 #include <vector>
 
+/// For debugging, instantiate the unordered map
+template class std::unordered_map<int, int>;
+
 /*! \file mol_sys.hpp
     \brief The main molecular system handler.
     
