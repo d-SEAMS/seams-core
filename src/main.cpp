@@ -93,6 +93,8 @@ int main(int argc, char *argv[]) {
     // Variables which must be declared in C++
     // Newer pointCloud (rescloud -> ice structure, solcloud -> largest cluster)
     molSys::PointCloud<molSys::Point<double>, double> resCloud, solCloud;
+    // Some neighbor
+    std::vector<std::vector<int>> nList, hbnList;
     // For averaged q6
     std::vector<double> avgQ6;
 
@@ -101,6 +103,8 @@ int main(int argc, char *argv[]) {
       // Use the functions defined here
       auto lscript = lua.get<std::string>("functionScript");
       // Transfer variables to lua
+      lua["nList"] = &nList;
+      lua["hbnList"] = &hbnList;
       lua["resCloud"] = &resCloud;
       lua["clusterCloud"] = &solCloud;
       lua["avgQ6"] = &avgQ6;
