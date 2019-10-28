@@ -24,6 +24,10 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
+# No optimizations while debugging
+SET(CMAKE_CXX_FLAGS_DEBUG "-O0")
+SET(CMAKE_C_FLAGS_DEBUG "-O0")
+
 # Use ccache if avaliable
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
