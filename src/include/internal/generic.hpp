@@ -67,19 +67,6 @@ inline bool compareByAtomID(const molSys::Point<double> &a,
 int prettyPrintYoda(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                     std::string outFile);
 
-// Generic function for writing out to a dump file
-int writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-              std::string outFile);
-
-// Function for printing out Q6, Cij and averaged Q3 values as single columns to text files
-// The file names are cij, q6, q3
-int writeHisto(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-               std::vector<double> avgQ6);
-// Function for printing the largest ice cluster
-int writeCluster(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                 std::string fileName = "cluster.txt", bool isSlice = false,
-                 int largestIceCluster = 0);
-
 /********************************************/ /**
  *  Function for tokenizing line strings into words (strings) delimited
  *  by whitespace. This returns a vector with the words in it.

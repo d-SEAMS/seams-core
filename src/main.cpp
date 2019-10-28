@@ -36,6 +36,7 @@
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <seams_input.hpp>
+#include <seams_output.hpp>
 
 // Externally bundled-input libraries
 // #include <cxxopts.hpp>
@@ -110,8 +111,8 @@ int main(int argc, char *argv[]) {
       lua["trajectory"] = tFile;
       // Register functions
       // Writing stuff
-      lua.set_function("writeDump", gen::writeDump);
-      lua.set_function("writeHistogram", gen::writeHisto);
+      lua.set_function("writeDump", sout::writeDump);
+      lua.set_function("writeHistogram", sout::writeHisto);
       // Generic requirements
       lua.set_function("readFrame", sinp::readLammpsTrjO);
       lua.set_function("neighborList", nneigh::neighListO);
@@ -124,7 +125,7 @@ int main(int argc, char *argv[]) {
       // Largest ice cluster
       lua.set_function("create_cluster", chill::getIceCloud);
       lua.set_function("largest_cluster", chill::largestIceCluster);
-      lua.set_function("writeCluster", gen::writeCluster);
+      lua.set_function("writeCluster", sout::writeCluster);
       // Use the script
       lua.script_file(lscript);
       std::cout << "\nTest\n";
