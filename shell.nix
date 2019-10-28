@@ -13,6 +13,7 @@ pkgs.mkShell {
     pkgs.git
                 ];
   buildInputs = with pkgs; [
+    gdb
     git
   ]
   ++ optional stdenv.isLinux glibcLocales # To allow setting consistent locale on linux
