@@ -35,8 +35,9 @@
 #include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <seams-input.hpp>
 
-// External bundled libraries
+// Externally bundled-input libraries
 // #include <cxxopts.hpp>
 #include <sol.hpp>
 
@@ -109,7 +110,7 @@ int main(int argc, char *argv[]) {
       lua.set_function("writeDump", gen::writeDump);
       lua.set_function("writeHistogram", gen::writeHisto);
       // Generic requirements
-      lua.set_function("readFrame", molSys::readLammpsTrjO);
+      lua.set_function("readFrame", sinp::readLammpsTrjO);
       lua.set_function("neighborList", nneigh::neighListO);
       // CHILL+ and modifications
       lua.set_function("chillPlus_cij", chill::getCorrelPlus);
@@ -146,7 +147,7 @@ int main(int argc, char *argv[]) {
       std::ofstream clusterFile;
       for (int frame = tFrame; frame <= fFrame; frame += fGap) {
         // Read in a frame
-        resCloud = molSys::readLammpsTrj(tFile, frame, &resCloud, oType);
+        resCloud = sinp::readLammpsTrj(tFile, frame, &resCloud, oType);
         // // Sort according to atom ID (OPTIONAL)
         // std::sort(resCloud.pts.begin(), resCloud.pts.end(), gen::compareByAtomID);
         // Update the neighbour lists
@@ -209,7 +210,7 @@ int main(int argc, char *argv[]) {
           gen::writeCluster(&solCloud, outCluster, false, largestIceCluster);
         }
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-        solCloud = clearPointCloud(&solCloud);
+        solCloud = sinp::clearPointCloud(&solCloud);
         // ---------------------
 
         // // Print to file here (cij etc)
