@@ -1,6 +1,7 @@
 #ifndef __MOL_SYS_H_
 #define __MOL_SYS_H_
 
+#include "boost/multi_array.hpp"
 #include <algorithm>
 #include <array>
 #include <fstream>
@@ -146,6 +147,7 @@ template <typename S, typename T> struct PointCloud {
   int nop;               // Number of atoms
   std::vector<T> box;    // Periodic box lengths
   std::vector<T> boxLow; // xlo, ylo, zlo
+  std::unordered_map<int, int> idIndexMap;
 };
 
 } // namespace molSys
