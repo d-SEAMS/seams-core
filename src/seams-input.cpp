@@ -66,6 +66,7 @@ int sinp::readXYZ(std::string filename,
       iPoint.z = std::stod(tokens[3]);
 
       yCloud->pts.push_back(iPoint);
+      yCloud->idIndexMap[iPoint.atomID] = yCloud->pts.size() - 1;
       iatom++; // Increase index
 
     } // end of while, looping through lines till EOF
@@ -233,6 +234,7 @@ sinp::readLammpsTrj(std::string filename, int targetFrame,
                                                coordLow, coordHigh);
           }
           yCloud->pts.push_back(iPoint);
+          yCloud->idIndexMap[iPoint.atomID] = yCloud->pts.size() - 1;
         }
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
@@ -451,6 +453,7 @@ sinp::readLammpsTrjO(std::string filename, int targetFrame,
             nOxy++;
             // yCloud->pts.resize(yCloud->pts.size()+1);
             yCloud->pts.push_back(iPoint);
+            yCloud->idIndexMap[iPoint.atomID] = yCloud->pts.size() - 1;
           }
         }
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
