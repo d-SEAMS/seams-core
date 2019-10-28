@@ -2,6 +2,110 @@
 #include <seams_input.hpp>
 
 /********************************************/ /**
+ *  Get all the ring information, from the R.I.N.G.S. file. Each line contains
+ the IDs of the atoms in the ring. This is saved inside a vector of vectors.
+ Rings which have more than three consecutive water molecules are discarded.
+ ***********************************************/
+std::vector<std::vector<int>>
+sinp::readRings(std::string filename, std::vector<std::vector<int>> nList) {
+  std::unique_ptr<std::ifstream> inpFile;
+  inpFile = std::make_unique<std::ifstream>(filename);
+  std::vector<std::vector<int>> rings;
+  std::string line;                // Current line being read in
+  std::vector<std::string> tokens; // Vector containing word tokens
+  std::vector<int> id;             // Vector for the IDs in the ring
+
+  if (!(gen::file_exists(filename))) {
+    std::cout
+        << "Fatal Error: The file does not exist or you gave the wrong path.\n";
+    // Throw exception?
+    return rings;
+  }
+
+  // Format of the file:
+  // 272    214    906   1361    388      1
+  // 388   1361   1042   1548    237      1
+  // 272   1536   1582   1701   1905      1
+
+  if (inpFile->is_open()) {
+    // ----------------------------------------------------------
+    // At this point we know that the XYZ file is open
+    // Run this until EOF or you reach the next timestep
+    while (std::getline((*inpFile), line)) {
+      // Read in lines and tokenize them into std::string words
+      tokens = gen::tokenizer(line);
+
+      id.clear();
+
+      for (int i = 0; i < tokens.size(); i++) {
+        id.push_back(std::stoi(tokens[i]));
+      } // end of for, assigning values to id
+
+      if (ring::checkRing(id, nList)) {
+        rings.push_back(id);
+      } // end of check for ring validity
+
+    } // end of while, till EOF
+    // ----------------------------------------------------------
+  } // End of if file open statement
+
+  inpFile->close();
+
+  return rings;
+}
+
+/********************************************/ /**
+ *  Get all the ring information, from the R.I.N.G.S. file. Each line contains
+ the IDs of the atoms in the ring. This is saved inside a vector of vectors.
+ Rings which have more than three consecutive water molecules are discarded.
+ ***********************************************/
+std::vector<std::vector<int>> sinp::readBonds(std::string filename) {
+  std::unique_ptr<std::ifstream> inpFile;
+  inpFile = std::make_unique<std::ifstream>(filename);
+  std::vector<std::vector<int>> bonds;
+  std::string line;                // Current line being read in
+  std::vector<std::string> tokens; // Vector containing word tokens
+  std::vector<int> id;             // Vector for the IDs in the ring
+
+  if (!(gen::file_exists(filename))) {
+    std::cout << "Fatal Error: The bond file does not exist or you gave the "
+                 "wrong path.\n";
+    // Throw exception?
+    return bonds;
+  }
+
+  // Format of the file:
+  // 481 Bonds
+  // 272    214    906   1361    388      1
+  // 388   1361   1042   1548    237      1
+  // 272   1536   1582   1701   1905      1
+
+  if (inpFile->is_open()) {
+    // ----------------------------------------------------------
+    // At this point we know that the file is open
+    std::getline((*inpFile), line); // Read in bonds
+    // Run this until EOF or you reach the next timestep
+    while (std::getline((*inpFile), line)) {
+      // Read in lines and tokenize them into std::string words
+      tokens = gen::tokenizer(line);
+
+      id.clear();
+
+      for (int i = 0; i < tokens.size(); i++) {
+        id.push_back(std::stoi(tokens[i]));
+      } // end of for, assigning values to id
+
+      bonds.push_back(id);
+
+    } // end of while, till EOF
+    // ----------------------------------------------------------
+  } // End of if file open statement
+
+  inpFile->close();
+
+  return bonds;
+}
+/********************************************/ /**
  *  Function for reading in an XYZ file
  ***********************************************/
 int sinp::readXYZ(std::string filename,

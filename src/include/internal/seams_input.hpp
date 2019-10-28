@@ -4,6 +4,8 @@
 #include <iostream>
 #include <memory>
 #include <mol_sys.hpp>
+#include <ring.hpp>
+#include <string>
 
 //// Boost
 #include "boost/filesystem/operations.hpp"
@@ -34,6 +36,14 @@ molSys::PointCloud<molSys::Point<double>, double> readLammpsTrjO(
 //// Function for reading in atom coordinates from an XYZ file
 int readXYZ(std::string filename,
             molSys::PointCloud<molSys::Point<double>, double> *yCloud);
+
+/// Get all the ring information, from the R.I.N.G.S. file. Each line contains
+/// the IDs of the atoms in the ring. This is saved inside a vector of vectors
+std::vector<std::vector<int>> readRings(std::string filename,
+                                        std::vector<std::vector<int>> nList);
+
+/// Reads bonds into a vector of vectors from a file with a specific format
+std::vector<std::vector<int>> readBonds(std::string filename);
 
 inline bool atomInSlice(double x, double y, double z,
                         std::array<double, 3> coordLow,

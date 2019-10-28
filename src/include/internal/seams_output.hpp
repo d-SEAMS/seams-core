@@ -1,6 +1,9 @@
 #ifndef __SEAMS_OUTPUT_H_
 #define __SEAMS_OUTPUT_H_
 
+#include <bond.hpp>
+#include <cage.hpp>
+#include <generic.hpp>
 #include <iostream>
 #include <memory>
 #include <mol_sys.hpp>
@@ -8,6 +11,9 @@
 //// Boost
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
+namespace fs = boost::filesystem;
+// #include <filesystem>
+// namespace fs = std::filesystem;
 
 namespace sout {
 

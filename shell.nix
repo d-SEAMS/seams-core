@@ -12,6 +12,7 @@ pkgs.mkShell {
     buildpkgs.yodaStruct
     pkgs.git
                 ];
+  nativeBuildInputs = with pkgs; [pkgconfig];
   buildInputs = with pkgs; [
     gdb
     git

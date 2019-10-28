@@ -1,111 +1,5 @@
+#include <seams_input.hpp>
 #include <seams_output.hpp>
-
-namespace fs = boost::filesystem;
-
-/********************************************/ /**
- *  Get all the ring information, from the R.I.N.G.S. file. Each line contains
- the IDs of the atoms in the ring. This is saved inside a vector of vectors.
- Rings which have more than three consecutive water molecules are discarded.
- ***********************************************/
-std::vector<std::vector<int>>
-sout::readRings(std::string filename, std::vector<std::vector<int>> nList) {
-  std::unique_ptr<std::ifstream> inpFile;
-  inpFile = std::make_unique<std::ifstream>(filename);
-  std::vector<std::vector<int>> rings;
-  std::string line;                // Current line being read in
-  std::vector<std::string> tokens; // Vector containing word tokens
-  std::vector<int> id;             // Vector for the IDs in the ring
-
-  if (!(gen::file_exists(filename))) {
-    std::cout
-        << "Fatal Error: The file does not exist or you gave the wrong path.\n";
-    // Throw exception?
-    return rings;
-  }
-
-  // Format of the file:
-  // 272    214    906   1361    388      1
-  // 388   1361   1042   1548    237      1
-  // 272   1536   1582   1701   1905      1
-
-  if (inpFile->is_open()) {
-    // ----------------------------------------------------------
-    // At this point we know that the XYZ file is open
-    // Run this until EOF or you reach the next timestep
-    while (std::getline((*inpFile), line)) {
-      // Read in lines and tokenize them into std::string words
-      tokens = gen::tokenizer(line);
-
-      id.clear();
-
-      for (int i = 0; i < tokens.size(); i++) {
-        id.push_back(std::stoi(tokens[i]));
-      } // end of for, assigning values to id
-
-      if (ring::checkRing(id, nList)) {
-        rings.push_back(id);
-      } // end of check for ring validity
-
-    } // end of while, till EOF
-    // ----------------------------------------------------------
-  } // End of if file open statement
-
-  inpFile->close();
-
-  return rings;
-}
-
-/********************************************/ /**
- *  Get all the ring information, from the R.I.N.G.S. file. Each line contains
- the IDs of the atoms in the ring. This is saved inside a vector of vectors.
- Rings which have more than three consecutive water molecules are discarded.
- ***********************************************/
-std::vector<std::vector<int>> sout::readBonds(std::string filename) {
-  std::unique_ptr<std::ifstream> inpFile;
-  inpFile = std::make_unique<std::ifstream>(filename);
-  std::vector<std::vector<int>> bonds;
-  std::string line;                // Current line being read in
-  std::vector<std::string> tokens; // Vector containing word tokens
-  std::vector<int> id;             // Vector for the IDs in the ring
-
-  if (!(gen::file_exists(filename))) {
-    std::cout << "Fatal Error: The bond file does not exist or you gave the "
-                 "wrong path.\n";
-    // Throw exception?
-    return bonds;
-  }
-
-  // Format of the file:
-  // 481 Bonds
-  // 272    214    906   1361    388      1
-  // 388   1361   1042   1548    237      1
-  // 272   1536   1582   1701   1905      1
-
-  if (inpFile->is_open()) {
-    // ----------------------------------------------------------
-    // At this point we know that the file is open
-    std::getline((*inpFile), line); // Read in bonds
-    // Run this until EOF or you reach the next timestep
-    while (std::getline((*inpFile), line)) {
-      // Read in lines and tokenize them into std::string words
-      tokens = gen::tokenizer(line);
-
-      id.clear();
-
-      for (int i = 0; i < tokens.size(); i++) {
-        id.push_back(std::stoi(tokens[i]));
-      } // end of for, assigning values to id
-
-      bonds.push_back(id);
-
-    } // end of while, till EOF
-    // ----------------------------------------------------------
-  } // End of if file open statement
-
-  inpFile->close();
-
-  return bonds;
-}
 
 /********************************************/ /**
  *  Function for printing out ring info, when there is a
@@ -118,10 +12,10 @@ int sout::writeRingsWithSlice(std::vector<std::vector<int>> rings,
   // ----------------
   // Create output dir if it doesn't exist already
   const char *path = "../output"; // relative to the build directory
-  boost::filesystem::path dir(path);
-  if (boost::filesystem::create_directory(dir)) {
-    std::cerr << "Output directory created\n";
-  }
+  fs::path dir(path);
+  // if (fs::create_directory(dir)) {
+  //   std::cerr << "Output directory created\n";
+  // }
   // ----------------
   // Write output to file inside the output directory
   outputFile.open("../output/" + filename);
@@ -163,10 +57,10 @@ int sout::writeHexagonals(std::vector<std::vector<int>> rings,
   // Otherwise create file
   // Create output dir if it doesn't exist already
   const char *path = "../output"; // relative to the build directory
-  boost::filesystem::path dir(path);
-  if (boost::filesystem::create_directory(dir)) {
-    std::cerr << "Output directory created\n";
-  }
+  fs::path dir(path);
+  // if (fs::create_directory(dir)) {
+  //   std::cerr << "Output directory created\n";
+  // }
   // ----------------
   // Write output to file inside the output directory
   outputFile.open("../output/" + filename);
@@ -212,10 +106,10 @@ int sout::writeHexagonalsWithSlice(std::vector<std::vector<int>> rings,
   // Otherwise create file
   // Create output dir if it doesn't exist already
   const char *path = "../output"; // relative to the build directory
-  boost::filesystem::path dir(path);
-  if (boost::filesystem::create_directory(dir)) {
-    std::cerr << "Output directory created\n";
-  }
+  fs::path dir(path);
+  // if (fs::create_directory(dir)) {
+  //   std::cerr << "Output directory created\n";
+  // }
   // ----------------
   // Write output to file inside the output directory
   outputFile.open("../output/" + filename);
@@ -268,10 +162,10 @@ int sout::writeHexXYZ(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   // Otherwise create file
   // Create output dir if it doesn't exist already
   const char *path = "../output"; // relative to the build directory
-  boost::filesystem::path dir(path);
-  if (boost::filesystem::create_directory(dir)) {
-    std::cerr << "Output directory created\n";
-  }
+  fs::path dir(path);
+  // if (fs::create_directory(dir)) {
+  //   std::cerr << "Output directory created\n";
+  // }
   // ----------------
   // Get all the unique atomIDs of the atoms in the rings of this type
   // Put all atom IDs into one 1-D vector
@@ -350,10 +244,10 @@ int sout::writeLAMMPSdata(
   // Otherwise create file
   // Create output dir if it doesn't exist already
   const char *path = "../output"; // relative to the build directory
-  boost::filesystem::path dir(path);
-  if (boost::filesystem::create_directory(dir)) {
-    std::cerr << "Output directory created\n";
-  }
+  fs::path dir(path);
+  // if (fs::create_directory(dir)) {
+  //   std::cerr << "Output directory created\n";
+  // }
   // ----------------
   // Get all the unique atomIDs of the atoms in the rings of this type
   // Put all atom IDs into one 1-D vector
@@ -494,10 +388,10 @@ int sout::writeRings(std::vector<std::vector<int>> rings,
   // ----------------
   // Create output dir if it doesn't exist already
   const char *path = "../output"; // relative to the build directory
-  boost::filesystem::path dir(path);
-  if (boost::filesystem::create_directory(dir)) {
-    std::cerr << "Output directory created\n";
-  }
+  fs::path dir(path);
+  // if (fs::create_directory(dir)) {
+  //   std::cerr << "Output directory created\n";
+  // }
   // ----------------
   // Write output to file inside the output directory
   outputFile.open("../output/" + filename);
@@ -536,10 +430,10 @@ int sout::writePrisms(
   // ----------------
   // Create output dir if it doesn't exist already
   const char *path = "../output/prisms"; // relative to the build directory
-  boost::filesystem::path dir(path);
-  if (boost::filesystem::create_directory(dir)) {
-    std::cerr << "Output Prism directory created\n";
-  }
+  fs::path dir(path);
+  // if (fs::create_directory(dir)) {
+  //   std::cerr << "Output Prism directory created\n";
+  // }
   // ----------------
   // Write output to file inside the output directory
   outputFile.open("../output/prisms/" + filename);
@@ -687,15 +581,15 @@ int sout::writeEachCage(
   // ----------------
   // Create output dir if it doesn't exist already
   const char *path = "../output/cages"; // relative to the build directory
-  boost::filesystem::path dir(path);
-  if (boost::filesystem::create_directory(dir)) {
-    std::cerr << "Output Cage directory created\n";
-  }
+  fs::path dir(path);
+  // if (fs::create_directory(dir)) {
+  //   std::cerr << "Output Cage directory created\n";
+  // }
   // ----------------
   // Subdirectory
 
-  const boost::filesystem::path path1(cageChar);
-  boost::filesystem::create_directories(path1);
+  const fs::path path1(cageChar);
+  // fs::create_directories(path1);
 
   // Write output to file inside the output directory
   std::string fileOutNameFull =
@@ -790,15 +684,15 @@ int sout::writeBasalRingsHex(std::vector<int> currentCage, int cageNum,
   // ----------------
   // Create output dir if it doesn't exist already
   const char *path = "../output/cages"; // relative to the build directory
-  boost::filesystem::path dir(path);
-  if (boost::filesystem::create_directory(dir)) {
-    std::cerr << "Output Cage directory created\n";
-  }
+  fs::path dir(path);
+  // if (fs::create_directory(dir)) {
+  //   std::cerr << "Output Cage directory created\n";
+  // }
   // ----------------
   // Subdirectory
 
-  const boost::filesystem::path path1("../output/cages/hexBasalRings");
-  boost::filesystem::create_directories(path1);
+  const fs::path path1("../output/cages/hexBasalRings");
+  // fs::create_directories(path1);
 
   // Write output to file inside the output directory
   std::string fileOutNameFull = "../output/cages/hexBasalRings/" + filename;
@@ -987,15 +881,15 @@ int sout::writeBasalRingsPrism(
   if (isDeformed) {
     // Create output dir if it doesn't exist already
     const char *path = "../output/deformed"; // relative to the build directory
-    boost::filesystem::path dir(path);
-    if (boost::filesystem::create_directory(dir)) {
-      std::cerr << "Output Cage directory created\n";
-    }
+    fs::path dir(path);
+    // if (fs::create_directory(dir)) {
+    //   std::cerr << "Output Cage directory created\n";
+    // }
     // ----------------
     // Subdirectory
 
-    const boost::filesystem::path path1("../output/deformed/basalRings");
-    boost::filesystem::create_directories(path1);
+    const fs::path path1("../output/deformed/basalRings");
+    // fs::create_directories(path1);
 
     // Write output to file inside the output directory
     std::string fileOutNameFull = "../output/deformed/basalRings/" + filename;
@@ -1003,15 +897,15 @@ int sout::writeBasalRingsPrism(
   } else {
     // Create output dir if it doesn't exist already
     const char *path = "../output/perfect"; // relative to the build directory
-    boost::filesystem::path dir(path);
-    if (boost::filesystem::create_directory(dir)) {
-      std::cerr << "Output Cage directory created\n";
-    }
+    fs::path dir(path);
+    // if (fs::create_directory(dir)) {
+    //   std::cerr << "Output Cage directory created\n";
+    // }
     // ----------------
     // Subdirectory
 
-    const boost::filesystem::path path1("../output/perfect/basalRings");
-    boost::filesystem::create_directories(path1);
+    const fs::path path1("../output/perfect/basalRings");
+    // fs::create_directories(path1);
 
     // Write output to file inside the output directory
     std::string fileOutNameFull = "../output/perfect/basalRings/" + filename;
@@ -1085,8 +979,8 @@ int sout::writeBasalRingsPrism(
   int currentI = (*basal1)[iatom] - 1;
 
   // Check clockwise
-  double distClock = molSys::periodicDist(yCloud, currentI, forwardJ);
-  double distAntiClock = molSys::periodicDist(yCloud, currentI, backwardJ);
+  double distClock = gen::periodicDist(yCloud, currentI, forwardJ);
+  double distAntiClock = gen::periodicDist(yCloud, currentI, backwardJ);
 
   // Clockwise
   if (distClock < distAntiClock) {
@@ -1159,10 +1053,10 @@ int sout::writePrismNum(int nPrisms, int ringSize, std::string filename) {
   // ----------------
   // Create output dir if it doesn't exist already
   const char *path = "../output"; // relative to the build directory
-  boost::filesystem::path dir(path);
-  if (boost::filesystem::create_directory(dir)) {
-    std::cerr << "Output directory created\n";
-  }
+  fs::path dir(path);
+  // if (fs::create_directory(dir)) {
+  //   std::cerr << "Output directory created\n";
+  // }
   // ----------------
   // Write output to file inside the output directory
   outputFile.open("../output/" + filename);
@@ -1191,10 +1085,10 @@ int sout::writeBonds(std::vector<std::vector<int>> bonds,
   // ----------------
   // Create output dir if it doesn't exist already
   const char *path = "../output"; // relative to the build directory
-  boost::filesystem::path dir(path);
-  if (boost::filesystem::create_directory(dir)) {
-    std::cerr << "Output directory created\n";
-  }
+  fs::path dir(path);
+  // if (fs::create_directory(dir)) {
+  //   std::cerr << "Output directory created\n";
+  // }
   // ----------------
   // Write output to file inside the output directory
   outputFile.open("../output/" + filename);
@@ -1219,62 +1113,6 @@ int sout::writeBonds(std::vector<std::vector<int>> bonds,
   } // end of loop through bonds
 
   return 0;
-}
-
-/********************************************/ /**
- *  Function for getting a file list
- of input files inside the input folder
- ***********************************************/
-std::vector<std::string> sout::getInpFileList(std::string inputFolder) {
-  unsigned long file_count = 0;
-  unsigned long dir_count = 0;
-  unsigned long other_count = 0;
-  unsigned long err_count = 0;
-  std::vector<std::string> filenames;
-
-  fs::path full_path(fs::initial_path<fs::path>());
-
-  full_path = fs::system_complete(fs::path(inputFolder));
-
-  if (!fs::exists(full_path)) {
-    std::cout << "\nCannot find the input directory \n";
-    return filenames;
-  }
-
-  // If the path given is a directory, then
-  if (fs::is_directory(full_path)) {
-    fs::directory_iterator end_iter;
-    // Iterate over all files in the directory
-    for (fs::directory_iterator dir_itr(full_path); dir_itr != end_iter;
-         ++dir_itr) {
-      try {
-        if (fs::is_directory(dir_itr->status())) {
-          ++dir_count;
-          // std::cout << dir_itr->path().filename() << " [directory]\n";
-        } else if (fs::is_regular_file(dir_itr->status())) {
-          ++file_count;
-          // // Full path
-          // std::cout << dir_itr->path().string() <<"\n";
-          filenames.push_back(dir_itr->path().string());
-        } else {
-          ++other_count;
-          // std::cout << dir_itr->path().filename() << " [other]\n";
-        }
-
-      } catch (const std::exception &ex) {
-        ++err_count;
-        // std::cout << dir_itr->path().filename() << " " << ex.what() << "\n";
-      }
-    } // end of iteration over all the files in the directory
-
-  } // end of check to see if this path is a directory
-
-  if (file_count == 0) {
-    std::cerr << "The input folder has no input files \n";
-    return filenames;
-  }
-
-  return filenames;
 }
 
 /********************************************/ /**
@@ -1313,7 +1151,7 @@ int sout::writeLAMMPSdataPrisms(
   // Get the bonds
   if (useBondFile) {
     // Bonds from file
-    bonds = sout::readBonds(bondFile);
+    bonds = sinp::readBonds(bondFile);
   } // get bonds from file
   else {
     bonds = bond::populateBonds(rings);
@@ -1323,10 +1161,10 @@ int sout::writeLAMMPSdataPrisms(
   // Otherwise create file
   // Create output dir if it doesn't exist already
   const char *path = "../output"; // relative to the build directory
-  boost::filesystem::path dir(path);
-  if (boost::filesystem::create_directory(dir)) {
-    std::cerr << "Output directory created\n";
-  }
+  fs::path dir(path);
+  // if (fs::create_directory(dir)) {
+  //   std::cerr << "Output directory created\n";
+  // }
   // ----------------
   // Get all the unique atomIDs of the atoms in the rings of this type
   // Put all atom IDs into one 1-D vector
@@ -1552,10 +1390,10 @@ int sout::writeLAMMPSdataCages(
   // Otherwise create file
   // Create output dir if it doesn't exist already
   const char *path = "../output"; // relative to the build directory
-  boost::filesystem::path dir(path);
-  if (boost::filesystem::create_directory(dir)) {
-    std::cerr << "Output directory created\n";
-  }
+  fs::path dir(path);
+  // if (fs::create_directory(dir)) {
+  //   std::cerr << "Output directory created\n";
+  // }
   // ----------------
   // Get all the unique atomIDs of the atoms in the rings of this type
   // Put all atom IDs into one 1-D vector
@@ -1719,149 +1557,117 @@ int sout::writeLAMMPSdataCages(
 
   // Once the datafile has been printed, exit
   return 0;
+}
+/// Legacy
 
-  /// Legacy
-
-  /********************************************/ /**
+/********************************************/ /**
  *  Function for printing out info in PairCorrel struct
  ***********************************************/
-  int sout::prettyPrintYoda(molSys::PointCloud<molSys::Point<double>, double> *
-                                yCloud,
-                            std::string outFile) {
-    std::ofstream outputFile;
-    // Create a new file in the output directory
-    outputFile.open(outFile);
+int sout::writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                    std::string outFile) {
+  std::ofstream outputFile;
+  // Create a new file in the output directory
+  outputFile.open(outFile, std::ios_base::app);
 
-    if (outputFile.is_open()) {
-      // First line
-      outputFile << "# Frame\tAtomID\tx\ty\tz\tcij\ticeType\n";
-      // Write out all the information out line by line
-      for (int i = 0; i < yCloud->nop; i++) {
-        outputFile << yCloud->currentFrame << "\t" << yCloud->pts[i].atomID
-                   << "\t" << yCloud->pts[i].x << "\t" << yCloud->pts[i].y
-                   << "\t" << yCloud->pts[i].z << "\t";
-        // Print out cij
-        // for(int c=0; c<yCloud->pts[i].c_ij.size(); c++){outputFile << yCloud->pts[i].c_ij[c]<<"\t";}
-        // Print out the classifier
-        outputFile << yCloud->pts[i].iceType << "\n";
-      }
+  // Append stuff
+  // -----------------------
+  // Header
+
+  // The format of the LAMMPS trajectory file is:
+  // ITEM: TIMESTEP
+  // 0
+  // ITEM: NUMBER OF ATOMS
+  // 4096
+  // ITEM: BOX BOUNDS pp pp pp
+  // -7.9599900000000001e-01 5.0164000000000001e+01
+  // -7.9599900000000001e-01 5.0164000000000001e+01
+  // -7.9599900000000001e-01 5.0164000000000001e+01
+  // ITEM: ATOMS id type x y z
+  // 1 1 0 0 0 etc
+  outputFile << "ITEM: TIMESTEP\n";
+  outputFile << yCloud->currentFrame << "\n";
+  outputFile << "ITEM: NUMBER OF ATOMS\n";
+  outputFile << yCloud->nop << "\n";
+  outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
+  for (int k = 0; k < yCloud->boxLow.size(); k++) {
+    outputFile << yCloud->boxLow[k] << " "
+               << yCloud->boxLow[k] + yCloud->box[k]; // print xlo xhi etc
+    // print out the tilt factors too if it is a triclinic box
+    if (yCloud->box.size() == 2 * yCloud->boxLow.size()) {
+      outputFile
+          << " "
+          << yCloud->box[k + yCloud->boxLow
+                                 .size()]; // this would be +2 for a 2D box
     }
-    // Close the file
-    outputFile.close();
-    return 0;
-  }
+    outputFile << "\n"; // print end of line
+  }                     // end of printing box lengths
+  outputFile << "ITEM: ATOMS id mol type x y z\n";
+  // -----------------------
+  // Atom lines
+  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+    outputFile << yCloud->pts[iatom].atomID << " " << yCloud->pts[iatom].molID
+               << " " << yCloud->pts[iatom].iceType << " "
+               << yCloud->pts[iatom].x << " " << yCloud->pts[iatom].y << " "
+               << yCloud->pts[iatom].z << "\n";
+  } // end of loop through all atoms
 
-  /********************************************/ /**
- *  Function for printing out info in PairCorrel struct
- ***********************************************/
-  int sout::writeDump(molSys::PointCloud<molSys::Point<double>, double> *
-                          yCloud,
-                      std::string outFile) {
-    std::ofstream outputFile;
-    // Create a new file in the output directory
-    outputFile.open(outFile, std::ios_base::app);
+  // Close the file
+  outputFile.close();
+  return 0;
+}
 
-    // Append stuff
-    // -----------------------
-    // Header
-
-    // The format of the LAMMPS trajectory file is:
-    // ITEM: TIMESTEP
-    // 0
-    // ITEM: NUMBER OF ATOMS
-    // 4096
-    // ITEM: BOX BOUNDS pp pp pp
-    // -7.9599900000000001e-01 5.0164000000000001e+01
-    // -7.9599900000000001e-01 5.0164000000000001e+01
-    // -7.9599900000000001e-01 5.0164000000000001e+01
-    // ITEM: ATOMS id type x y z
-    // 1 1 0 0 0 etc
-    outputFile << "ITEM: TIMESTEP\n";
-    outputFile << yCloud->currentFrame << "\n";
-    outputFile << "ITEM: NUMBER OF ATOMS\n";
-    outputFile << yCloud->nop << "\n";
-    outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
-    for (int k = 0; k < yCloud->boxLow.size(); k++) {
-      outputFile << yCloud->boxLow[k] << " "
-                 << yCloud->boxLow[k] + yCloud->box[k]; // print xlo xhi etc
-      // print out the tilt factors too if it is a triclinic box
-      if (yCloud->box.size() == 2 * yCloud->boxLow.size()) {
-        outputFile
-            << " "
-            << yCloud->box[k + yCloud->boxLow
-                                   .size()]; // this would be +2 for a 2D box
-      }
-      outputFile << "\n"; // print end of line
-    }                     // end of printing box lengths
-    outputFile << "ITEM: ATOMS id mol type x y z\n";
-    // -----------------------
-    // Atom lines
-    for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-      outputFile << yCloud->pts[iatom].atomID << " " << yCloud->pts[iatom].molID
-                 << " " << yCloud->pts[iatom].iceType << " "
-                 << yCloud->pts[iatom].x << " " << yCloud->pts[iatom].y << " "
-                 << yCloud->pts[iatom].z << "\n";
-    } // end of loop through all atoms
-
-    // Close the file
-    outputFile.close();
-    return 0;
-  }
-
-  /********************************************/ /**
+/********************************************/ /**
  *  Function for printing out values of averaged Q6, averaged Q3 and
  Cij values
  ***********************************************/
-  int sout::writeHisto(molSys::PointCloud<molSys::Point<double>, double> *
-                           yCloud,
-                       std::vector<double> avgQ6) {
-    std::ofstream cijFile;
-    std::ofstream q3File;
-    std::ofstream q6File;
-    // Create a new file in the output directory
-    int nNumNeighbours;
-    double avgQ3;
+int sout::writeHisto(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                     std::vector<double> avgQ6) {
+  std::ofstream cijFile;
+  std::ofstream q3File;
+  std::ofstream q6File;
+  // Create a new file in the output directory
+  int nNumNeighbours;
+  double avgQ3;
 
-    cijFile.open("cij.txt", std::ofstream::out | std::ofstream::app);
-    q3File.open("q3.txt", std::ofstream::out | std::ofstream::app);
-    q6File.open("q6.txt", std::ofstream::out | std::ofstream::app);
+  cijFile.open("cij.txt", std::ofstream::out | std::ofstream::app);
+  q3File.open("q3.txt", std::ofstream::out | std::ofstream::app);
+  q6File.open("q6.txt", std::ofstream::out | std::ofstream::app);
 
-    for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-      if (yCloud->pts[iatom].type != 1) {
-        continue;
-      }
-      // Check for slice later
-      nNumNeighbours = yCloud->pts[iatom].neighList.size();
-      avgQ3 = 0.0;
-      for (int j = 0; j < nNumNeighbours; j++) {
-        cijFile << yCloud->pts[iatom].c_ij[j].c_value << "\n";
-        avgQ3 += yCloud->pts[iatom].c_ij[j].c_value;
-      } // Loop through neighbours
-      avgQ3 /= nNumNeighbours;
-      q3File << avgQ3 << "\n";
-      q6File << avgQ6[iatom] << "\n";
-    } // loop through all atoms
+  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+    if (yCloud->pts[iatom].type != 1) {
+      continue;
+    }
+    // Check for slice later
+    nNumNeighbours = yCloud->pts[iatom].neighList.size();
+    avgQ3 = 0.0;
+    for (int j = 0; j < nNumNeighbours; j++) {
+      cijFile << yCloud->pts[iatom].c_ij[j].c_value << "\n";
+      avgQ3 += yCloud->pts[iatom].c_ij[j].c_value;
+    } // Loop through neighbours
+    avgQ3 /= nNumNeighbours;
+    q3File << avgQ3 << "\n";
+    q6File << avgQ6[iatom] << "\n";
+  } // loop through all atoms
 
-    // Close the file
-    cijFile.close();
-    q3File.close();
-    q6File.close();
+  // Close the file
+  cijFile.close();
+  q3File.close();
+  q6File.close();
 
-    return 0;
-  }
+  return 0;
+}
 
-  /********************************************/ /**
+/********************************************/ /**
  * Function to print out the largest ice cluster
  ***********************************************/
-  int sout::writeCluster(
-      molSys::PointCloud<molSys::Point<double>, double> * yCloud,
-      std::string fileName, bool isSlice, int largestIceCluster) {
-    std::ofstream clusterFile;
-    // Create a new file in the output directory
-    clusterFile.open(fileName, std::ofstream::out | std::ofstream::app);
-    clusterFile << yCloud->currentFrame << " " << largestIceCluster << "\n";
-    // Close the file
-    clusterFile.close();
-    return 0;
-  }
+int sout::writeCluster(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::string fileName, bool isSlice, int largestIceCluster) {
+  std::ofstream clusterFile;
+  // Create a new file in the output directory
+  clusterFile.open(fileName, std::ofstream::out | std::ofstream::app);
+  clusterFile << yCloud->currentFrame << " " << largestIceCluster << "\n";
+  // Close the file
+  clusterFile.close();
+  return 0;
 }

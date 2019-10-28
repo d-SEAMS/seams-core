@@ -29,6 +29,26 @@ periodicDist(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   return sqrt(r2);
 }
 
+// Generic function for getting the distance (no PBCs applied)
+inline double
+distance(molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
+         int jatom) {
+  std::array<double, 3> dr;
+  double r2 = 0.0; // Squared absolute distance
+
+  // Get x1-x2 etc
+  dr[0] = fabs(yCloud->pts[iatom].x - yCloud->pts[jatom].x);
+  dr[1] = fabs(yCloud->pts[iatom].y - yCloud->pts[jatom].y);
+  dr[2] = fabs(yCloud->pts[iatom].z - yCloud->pts[jatom].z);
+
+  // Get the squared absolute distance
+  for (int k = 0; k < 3; k++) {
+    r2 += pow(dr[k], 2.0);
+  }
+
+  return sqrt(r2);
+}
+
 // Generic function for getting the relative coordinates
 inline std::array<double, 3>
 relDist(molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,

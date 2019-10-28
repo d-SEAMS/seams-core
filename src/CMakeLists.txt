@@ -8,7 +8,7 @@ include(FindBLAS)
 include(FindLAPACK)
 include(FindBoost)
 add_compile_options(
-  "-Wall" "-Wpedantic" "-Wextra" "-fexceptions"
+  # "-Wall" "-Wpedantic" "-Wextra" "-fexceptions"
   "$<$<CONFIG:Debug>:-O0;-g3;-ggdb>"
 )
 # Add the new cpp files here
@@ -38,6 +38,7 @@ target_link_libraries(
   yodaStruct
   ${Boost_LIBRARIES}
   ${LUA_LIBRARIES}
+  stdc++fs
   fmt
   yaml-cpp
   yodaLib
@@ -46,6 +47,8 @@ add_library(yodaLib SHARED
   mol_sys.cpp
   seams_input.cpp
   seams_output.cpp
+  ring.cpp
+  bond.cpp
   generic.cpp
   bop.cpp
   neighbours.cpp
