@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+
+topLevel=$(git rev-parse --show-toplevel)
+cd $topLevel
 if [[ "$PWD" =~ seams-core ]]; then
     rm -rf build
     mkdir build
