@@ -7,7 +7,10 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 include(FindBLAS)
 include(FindLAPACK)
 include(FindBoost)
-
+add_compile_options(
+  "-Wall" "-Wpedantic" "-Wextra" "-fexceptions"
+  "$<$<CONFIG:Debug>:-O0;-g3;-ggdb>"
+)
 # Add the new cpp files here
 add_executable( yodaStruct
   main.cpp

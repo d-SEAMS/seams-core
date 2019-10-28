@@ -23,7 +23,7 @@ endif()
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
 endif()
-
+ 
 # Use ccache if avaliable
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
