@@ -8,9 +8,9 @@
  Full neighbour list. Use this when iatom and jatom
  are different
  ***********************************************/
-MolSys::PointCloud<MolSys::Point<double>, double>
+molSys::PointCloud<molSys::Point<double>, double>
 nneigh::neighList(double rcutoff,
-                  MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
+                  molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                   int typeI, int typeJ) {
   nneigh::NeighbourList nList;
   nneigh::Jatom tempJatom;
@@ -74,9 +74,9 @@ nneigh::neighList(double rcutoff,
  *  Function for building neighbour lists for each
  particle. Inefficient O(n^2) implementation. This will only work with one type of atom
  ***********************************************/
-MolSys::PointCloud<MolSys::Point<double>, double>
+molSys::PointCloud<molSys::Point<double>, double>
 nneigh::neighListO(double rcutoff,
-                   MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
+                   molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                    int typeI) {
   nneigh::NeighbourList nList;
   nneigh::Jatom tempJatom;
@@ -141,9 +141,9 @@ nneigh::neighListO(double rcutoff,
  particle. Inefficient O(n^2) implementation. This will only work with one type of atom
  Half neighbour list
  ***********************************************/
-MolSys::PointCloud<MolSys::Point<double>, double>
+molSys::PointCloud<molSys::Point<double>, double>
 nneigh::halfNeighList(double rcutoff,
-                      MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
+                      molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                       int typeI) {
   nneigh::NeighbourList nList;
   nneigh::Jatom tempJatom;
@@ -214,8 +214,8 @@ nneigh::halfNeighList(double rcutoff,
 }
 
 // Clear neighbour list for the i^th atom if it is full TODO: Gives segfault.
-MolSys::PointCloud<MolSys::Point<double>, double> nneigh::clearNeighList(
-    MolSys::PointCloud<MolSys::Point<double>, double> *yCloud, int iatom) {
+molSys::PointCloud<molSys::Point<double>, double> nneigh::clearNeighList(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom) {
 
   if (yCloud->pts[iatom].neighList.size() != 0) {
     yCloud->pts[iatom].neighList.resize(0);
