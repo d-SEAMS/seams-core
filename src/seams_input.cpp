@@ -1,5 +1,5 @@
 #include <generic.hpp>
-#include <seams-input.hpp>
+#include <seams_input.hpp>
 
 /********************************************/ /**
  *  Function for reading in an XYZ file

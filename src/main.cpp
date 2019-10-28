@@ -35,7 +35,7 @@
 #include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
-#include <seams-input.hpp>
+#include <seams_input.hpp>
 
 // Externally bundled-input libraries
 // #include <cxxopts.hpp>
@@ -43,8 +43,8 @@
 
 // Managed with Conan
 #include <fmt/core.h>
-#include <yaml-cpp/yaml.h>
 #include <rang.hpp>
+#include <yaml-cpp/yaml.h>
 
 int main(int argc, char *argv[]) {
   // Parse Things
@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
       lua.script_file(lscript);
       std::cout << "\nTest\n";
     }
-  }  // end of ice type determination block
+  } // end of ice type determination block
   // --------------------------------------
 
   std::cout << rang::style::bold
