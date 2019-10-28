@@ -1,11 +1,12 @@
 print("\n Welcome to the manual lua function evaluation environment.\n");
 
---- Init Modules
-local lfs = require"lfs"
+-- --- Init Modules
+-- local lfs = require"lfs"
 
---- Strings are immutable, check https://stackoverflow.com/questions/1405583/concatenation-of-strings-in-lua
-lfs.mkdir(outDir);
-lfs.chdir(outDir);
+-- --- Strings are immutable, check https://stackoverflow.com/questions/1405583/concatenation-of-strings-in-lua
+-- lfs.mkdir(outDir);
+-- lfs.chdir(outDir);
+-- os.execute("mkdir " .. outDir)
 
 --- Variables again (with subdir)
 dumpChillP= "waterChillP.lammpstrj";
