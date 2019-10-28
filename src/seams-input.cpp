@@ -25,7 +25,7 @@ int sinp::readXYZ(std::string filename,
   // --------
   // Before filling up the PointCloud, if the vectors are filled
   // empty them
-  *yCloud = sinp::clearPointCloud(yCloud);
+  *yCloud = molSys::clearPointCloud(yCloud);
   // --------
 
   // Format of an XYZ file:
@@ -163,7 +163,7 @@ sinp::readLammpsTrj(std::string filename, int targetFrame,
     // ----------------------------------------------------------
     // Before filling up the PointCloud, if the vectors are filled
     // empty them
-    *yCloud = sinp::clearPointCloud(yCloud);
+    *yCloud = molSys::clearPointCloud(yCloud);
 
     // ----------------------------------------------------------
     // If targetFrame has been found, read in the box lengths,
@@ -379,7 +379,7 @@ sinp::readLammpsTrjO(std::string filename, int targetFrame,
     // ----------------------------------------------------------
     // Before filling up the PointCloud, if the vectors are filled
     // empty them
-    *yCloud = sinp::clearPointCloud(yCloud);
+    *yCloud = molSys::clearPointCloud(yCloud);
 
     // ----------------------------------------------------------
     // If targetFrame has been found, read in the box lengths,
@@ -514,26 +514,5 @@ sinp::readLammpsTrjO(std::string filename, int targetFrame,
   yCloud->currentFrame = targetFrame;
 
   dumpFile->close();
-  return *yCloud;
-}
-
-/********************************************/ /**
- *  Function for clearing PointCloud if it is already 
- filled. This should be called before every frame is read in.
- *  @param[out] yCloud The cleared PointCloud
- ***********************************************/
-molSys::PointCloud<molSys::Point<double>, double> sinp::clearPointCloud(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
-
-  //
-  std::vector<molSys::Point<double>> tempPts;
-  std::vector<double> tempBox;
-  //
-  std::vector<double> tempBox1;
-
-  tempPts.swap(yCloud->pts);
-  tempBox.swap(yCloud->box);
-  tempBox1.swap(yCloud->boxLow);
-
   return *yCloud;
 }

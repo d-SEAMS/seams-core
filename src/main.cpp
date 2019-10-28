@@ -210,7 +210,7 @@ int main(int argc, char *argv[]) {
           gen::writeCluster(&solCloud, outCluster, false, largestIceCluster);
         }
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-        solCloud = sinp::clearPointCloud(&solCloud);
+        solCloud = molSys::clearPointCloud(&solCloud);
         // ---------------------
 
         // // Print to file here (cij etc)

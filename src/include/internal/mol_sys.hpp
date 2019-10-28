@@ -150,6 +150,9 @@ template <typename S, typename T> struct PointCloud {
   std::unordered_map<int, int> idIndexMap;
 };
 
+//// Function for clearing vectors in PointCloud after multiple usage
+molSys::PointCloud<molSys::Point<double>, double>
+clearPointCloud(molSys::PointCloud<molSys::Point<double>, double> *yCloud);
 } // namespace molSys
 
 #endif // __MOL_SYS_H_

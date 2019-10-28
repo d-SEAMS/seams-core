@@ -35,10 +35,6 @@ molSys::PointCloud<molSys::Point<double>, double> readLammpsTrjO(
 int readXYZ(std::string filename,
             molSys::PointCloud<molSys::Point<double>, double> *yCloud);
 
-//// Function for clearing vectors in PointCloud after multiple usage
-molSys::PointCloud<molSys::Point<double>, double>
-clearPointCloud(molSys::PointCloud<molSys::Point<double>, double> *yCloud);
-
 inline bool atomInSlice(double x, double y, double z,
                         std::array<double, 3> coordLow,
                         std::array<double, 3> coordHigh) {
