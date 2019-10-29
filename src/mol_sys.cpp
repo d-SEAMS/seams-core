@@ -90,3 +90,26 @@ std::vector<std::vector<int>> molSys::hAtomMolList(
 
   return hMolList;
 }  // end of function
+
+/********************************************/ /**
+                                                *  Function for searching a
+                                                *vector of vectors for a
+                                                *particular molecular ID, and
+                                                *returns the index found in
+                                                *molList. Returns -1 if not
+                                                *found.
+                                                ***********************************************/
+int molSys::searchMolList(std::vector<std::vector<int>> molList,
+                          int molIDtoFind) {
+  int index = -1;  // init invalid index
+
+  for (int iatom = 0; iatom < molList.size(); iatom++) {
+    // If the molecular ID is equal, return the index in the array
+    if (molList[iatom][0] == molIDtoFind) {
+      index = iatom;
+      return index;
+    }  // end of check
+  }    // end of looping through iatom
+
+  return index;
+}

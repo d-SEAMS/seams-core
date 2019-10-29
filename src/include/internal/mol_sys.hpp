@@ -173,6 +173,10 @@ std::vector<std::vector<int>> hAtomMolList(
     molSys::PointCloud<molSys::Point<double>, double> *hCloud,
     molSys::PointCloud<molSys::Point<double>, double> *oCloud);
 
+// This function searches a vector of vectors molList, for a particular
+// molecular ID, and returns the index in molList
+int searchMolList(std::vector<std::vector<int>> molList, int molIDtoFind);
+
 //// Function for clearing vectors in PointCloud after multiple usage
 molSys::PointCloud<molSys::Point<double>, double> clearPointCloud(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud);
