@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 #include <vector>
 
-/// For debugging, instantiate the unordered map
+/// For debugging, instantiate the unordered map [consider removal for production]
 template class std::unordered_map<int, int>;
 template class std::vector<std::vector<int>>;
 
