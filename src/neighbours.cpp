@@ -8,25 +8,42 @@
  Full neighbour list. Use this when iatom and jatom
  are different
  ***********************************************/
-molSys::PointCloud<molSys::Point<double>, double> nneigh::neighList(
+std::vector<std::vector<int>> nneigh::neighList(
     double rcutoff, molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     int typeI, int typeJ) {
-  nneigh::NeighbourList nList;
-  nneigh::Jatom tempJatom;
-  double r_ij;
-  int indexYay;
-  std::vector<int> tempListIatom;
+  std::vector<std::vector<int>> nList;  // Vector of vector of ints
+  int jatomIndex;                       // Atom ID corresponding to jatom
+  int iatomIndex;                       // Atom ID corresponding to iatom
+  double r_ij;                          // cutoff
 
-  // Resize the neighbour list
-  nList.iVector.resize(yCloud->nop);
+  // Initialize with nop (irrespective of type)
+  // Initialize and fill the first element with the current atom ID whose
+  // neighbour list will be filled
+  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+    // Find the atom ID (key) given the index or iatom (value)
+    auto itr = std::find_if(
+        yCloud->idIndexMap.begin(), yCloud->idIndexMap.end(),
+        [&iatom](const std::pair<int, int> &p) { return p.second == iatom; });
+    // If found:
+    if (itr == yCloud->idIndexMap.end()) {
+      std::cerr << "Something is wrong with your idIndexMap!\n";
+      continue;
+    } else {
+      iatomIndex = itr->first;
+    }  // End of finding the atom ID to fill as the first element in the
+       // neighbour list
+    nList.push_back(std::vector<int>());  // Empty vector for the index iatom
+    // Fill the first element with the atom ID of iatom itself
+    nList[iatom].push_back(iatomIndex);
+  }  // end of init
 
+  // pairs of atoms of type I and J
   // Loop through every iatom and find nearest neighbours within rcutoff
   for (int iatom = 0; iatom < yCloud->nop; iatom++) {
     if (yCloud->pts[iatom].type != typeI) {
       continue;
     }
-    *yCloud =
-        nneigh::clearNeighList(yCloud, iatom);  // Clear neighbour list if full
+    // Loop through the other atoms
     for (int jatom = 0; jatom < yCloud->nop; jatom++) {
       if (yCloud->pts[jatom].type != typeJ) {
         continue;
@@ -36,37 +53,36 @@ molSys::PointCloud<molSys::Point<double>, double> nneigh::neighList(
       if (r_ij > rcutoff) {
         continue;
       }
-      tempJatom.r = r_ij;
-      tempJatom.index = jatom;
 
-      // Increase number
-      nList.iVector[iatom].nearest_neighbours += 1;
-      nList.iVector[jatom].nearest_neighbours += 1;
-      // Update the neighbour indices
-      nList.iVector[iatom].n.push_back(tempJatom);
-      tempJatom.index = iatom;
-      nList.iVector[jatom].n.push_back(tempJatom);
+      // Get the atom IDs for iatom and jatom
+      auto gotI = std::find_if(
+          yCloud->idIndexMap.begin(), yCloud->idIndexMap.end(),
+          [&iatom](const std::pair<int, int> &p) { return p.second == iatom; });
+      if (gotI == yCloud->idIndexMap.end()) {
+        std::cerr << "Something is wrong with your idIndexMap!\n";
+        return nList;
+      } else {
+        iatomIndex = gotI->first;
+      }  // End of finding the atom ID for iatom
+      // Find the atom ID of jatom
+      auto gotJ = std::find_if(
+          yCloud->idIndexMap.begin(), yCloud->idIndexMap.end(),
+          [&jatom](const std::pair<int, int> &p) { return p.second == jatom; });
+      if (gotJ == yCloud->idIndexMap.end()) {
+        std::cerr << "Something is wrong with your idIndexMap!\n";
+        return nList;
+      } else {
+        jatomIndex = gotJ->first;
+      }  // End of finding the atom ID for jatom
+      // Update the neighbour indices with atom IDs for iatom and jatom both
+      // (full list)
+      nList[iatom].push_back(jatomIndex);
+      nList[jatom].push_back(iatomIndex);
 
     }  // End of loop through jatom
   }    // End of loop for iatom
 
-  // Now sort in ascending order
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-    if (yCloud->pts[iatom].type != typeI) {
-      continue;
-    }  // check atom type
-    // clear nlist if full TODO
-    std::sort(nList.iVector[iatom].n.begin(), nList.iVector[iatom].n.end(),
-              nneigh::compareByLength);
-
-    // Update neighbour lists in yCloud
-    for (int t = 0; t < nList.iVector[iatom].nearest_neighbours; t++) {
-      indexYay = nList.iVector[iatom].n[t].index;
-      yCloud->pts[iatom].neighList.push_back(indexYay);
-    }
-  }
-
-  return *yCloud;
+  return nList;
 }
 
 /********************************************/ /**
@@ -74,10 +90,10 @@ molSys::PointCloud<molSys::Point<double>, double> nneigh::neighList(
  particle. Inefficient O(n^2) implementation. This will only work with one type
  of atom
  ***********************************************/
-std::vector<std::vector<int> > nneigh::neighListO(
+std::vector<std::vector<int>> nneigh::neighListO(
     double rcutoff, molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     int typeI) {
-  std::vector<std::vector<int> >
+  std::vector<std::vector<int>>
       nList;       // Vector of vectors of the neighbour list
   double r_ij;     // Distance between iatom and jatom
   int iatomIndex;  // Atomic ID of the atom with index iatom
@@ -157,25 +173,43 @@ std::vector<std::vector<int> > nneigh::neighListO(
  particle. Inefficient O(n^2) implementation. This will only work with one type
  of atom Half neighbour list
  ***********************************************/
-molSys::PointCloud<molSys::Point<double>, double> nneigh::halfNeighList(
+std::vector<std::vector<int>> nneigh::halfNeighList(
     double rcutoff, molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     int typeI) {
-  nneigh::NeighbourList nList;
-  nneigh::Jatom tempJatom;
-  double r_ij;
+  std::vector<std::vector<int>>
+      nList;       // Vector of vectors of the neighbour list
+  double r_ij;     // Distance between iatom and jatom
+  int iatomIndex;  // Atomic ID of the atom with index iatom
+  int jatomIndex;  // Atomic ID of the atom with index jatom
   int indexYay;
   std::vector<int> tempListIatom;
 
-  // Resize the neighbour list
-  nList.iVector.resize(yCloud->nop);
+  // Initialize and fill the first element with the current atom ID whose
+  // neighbour list will be filled
+  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+    // Find the atom ID (key) given the index or iatom (value)
+    auto itr = std::find_if(
+        yCloud->idIndexMap.begin(), yCloud->idIndexMap.end(),
+        [&iatom](const std::pair<int, int> &p) { return p.second == iatom; });
+    // If found:
+    if (itr == yCloud->idIndexMap.end()) {
+      std::cerr << "Something is wrong with your idIndexMap!\n";
+      continue;
+    } else {
+      iatomIndex = itr->first;
+    }  // End of finding the atom ID to fill as the first element in the
+       // neighbour list
+    nList.push_back(std::vector<int>());  // Empty vector for the index iatom
+    // Fill the first element with the atom ID of iatom itself
+    nList[iatom].push_back(iatomIndex);
+  }  // end of init
 
   // Loop through every iatom and find nearest neighbours within rcutoff
   for (int iatom = 0; iatom < yCloud->nop - 1; iatom++) {
     if (yCloud->pts[iatom].type != typeI) {
       continue;
     }
-    *yCloud =
-        nneigh::clearNeighList(yCloud, iatom);  // Clear neighbour list if full
+    // Loop through the other atoms
     for (int jatom = iatom + 1; jatom < yCloud->nop; jatom++) {
       if (yCloud->pts[jatom].type != typeI) {
         continue;
@@ -185,58 +219,33 @@ molSys::PointCloud<molSys::Point<double>, double> nneigh::halfNeighList(
       if (r_ij > rcutoff) {
         continue;
       }
-      tempJatom.r = r_ij;
-      tempJatom.index = jatom;
 
-      // Increase number
-      nList.iVector[iatom].nearest_neighbours += 1;
-
-      // Update the neighbour indices
-      nList.iVector[iatom].n.push_back(tempJatom);
+      // Get the atom IDs for iatom and jatom
+      auto gotI = std::find_if(
+          yCloud->idIndexMap.begin(), yCloud->idIndexMap.end(),
+          [&iatom](const std::pair<int, int> &p) { return p.second == iatom; });
+      if (gotI == yCloud->idIndexMap.end()) {
+        std::cerr << "Something is wrong with your idIndexMap!\n";
+        return nList;
+      } else {
+        iatomIndex = gotI->first;
+      }  // End of finding the atom ID for iatom
+      // Find the atom ID of jatom
+      auto gotJ = std::find_if(
+          yCloud->idIndexMap.begin(), yCloud->idIndexMap.end(),
+          [&jatom](const std::pair<int, int> &p) { return p.second == jatom; });
+      if (gotJ == yCloud->idIndexMap.end()) {
+        std::cerr << "Something is wrong with your idIndexMap!\n";
+        return nList;
+      } else {
+        jatomIndex = gotJ->first;
+      }  // End of finding the atom ID for jatom
+      // Update the neighbour indices with atom IDs for iatom and jatom both
+      // (full list)
+      nList[iatom].push_back(jatomIndex);
 
     }  // End of loop through jatom
   }    // End of loop for iatom
 
-  // // Now sort in ascending order
-  // for(int iatom=0; iatom<yCloud->nop; iatom++){
-  // 	if(yCloud->pts[iatom].type!=typeI){continue;} // check atom type
-  // 	// clear nlist if full TODO
-  // 	std::sort(nList.iVector[iatom].n.begin(), nList.iVector[iatom].n.end(),
-  // nneigh::compareByLength);
-
-  // 	// Update neighbour lists in yCloud
-  // 	for(int t=0; t<nList.iVector[iatom].nearest_neighbours; t++){
-  // 		indexYay = nList.iVector[iatom].n[t].index;
-  // 		yCloud->pts[iatom].neighList.push_back(indexYay);
-  // 	}
-  // }
-
-  // No need to sort!
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-    if (yCloud->pts[iatom].type != typeI) {
-      continue;
-    }  // check atom type
-    // clear nlist if full TODO
-    // std::sort(nList.iVector[iatom].n.begin(), nList.iVector[iatom].n.end(),
-    // nneigh::compareByLength);
-
-    // Update neighbour lists in yCloud
-    for (int t = 0; t < nList.iVector[iatom].nearest_neighbours; t++) {
-      indexYay = nList.iVector[iatom].n[t].index;
-      yCloud->pts[iatom].neighList.push_back(indexYay);
-    }
-  }
-
-  return *yCloud;
-}
-
-// Clear neighbour list for the i^th atom if it is full TODO: Gives segfault.
-molSys::PointCloud<molSys::Point<double>, double> nneigh::clearNeighList(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom) {
-  if (yCloud->pts[iatom].neighList.size() != 0) {
-    yCloud->pts[iatom].neighList.resize(0);
-    yCloud->pts[iatom].neighList.shrink_to_fit();
-  }
-
-  return *yCloud;
+  return nList;
 }
