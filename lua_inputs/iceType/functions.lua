@@ -35,10 +35,10 @@ slice={0,0,0}; --- This is not in use
 for frame=targetFrame,finalFrame,frameGap do
    resCloud=readFrame(trajectory, frame, resCloud, oxygenAtomType,false,slice,slice) --- Get the frame
    nList=neighborList(cutoffRadius, resCloud, oxygenAtomType); --- Calculate the neighborlist
-   -- resCloud=chillPlus_cij(resCloud,false); --- Calculate Cij (cloud,slice)
-   -- resCloud=chillPlus_iceType(resCloud,false,chillPlus_noMod); --- Write out data (cloud,slice,name)
-   -- writeDump(resCloud,dumpChillP); --- Dump the rescloud which currently has CHILL Plus classifications
-   -- avgQ6=averageQ6(resCloud,false); --- Average Q6 (cloud,slice)
+   resCloud=chillPlus_cij(resCloud,nList,false); --- Calculate Cij (cloud,slice)
+   resCloud=chillPlus_iceType(resCloud,nList,false,chillPlus_noMod); --- Write out data (cloud,slice,name)
+   writeDump(resCloud,dumpChillP); --- Dump the rescloud which currently has CHILL Plus classifications
+   avgQ6=averageQ6(resCloud,nList,false); --- Average Q6 (cloud,slice)
    -- resCloud=modifyChill(resCloud,avgQ6); --- Modification (cloud,q6)
    -- percentage_Ice(resCloud,false,chillPlus_mod); --- Post reclassification writeOut
    -- writeDump(resCloud,dumpSupaaP); --- Dump the rescloud which now has the supaa CHILL Plus Trajectory
