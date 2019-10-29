@@ -905,7 +905,7 @@ std::vector<double> chill::getq6(
       jatomID = nList[iatom][j];  // Atom ID (key)
 
       // Get the index jatomIndex
-      it = yCloud->idIndexMap.find(jatomID);
+      auto it = yCloud->idIndexMap.find(jatomID);
 
       if (it != yCloud->idIndexMap.end()) {
         jatomIndex = it->second;
