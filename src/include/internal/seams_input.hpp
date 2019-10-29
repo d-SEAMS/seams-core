@@ -16,17 +16,27 @@ namespace sinp {
 //// Get file list inside the input folder
 std::vector<std::string> getInpFileList(std::string inputFolder);
 
-//// Function for reading in a specified frame (frame number and not timestep value)
-molSys::PointCloud<molSys::Point<double>, double>
-readLammpsTrj(std::string filename, int targetFrame,
-              molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-              bool isSlice = false,
-              std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
-              std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
+//// Function for reading in a specified frame (frame number and not timestep
+/// value)
+molSys::PointCloud<molSys::Point<double>, double> readLammpsTrj(
+    std::string filename, int targetFrame,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    bool isSlice = false,
+    std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
+    std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
 
-//// Function for reading in a specified frame (frame number and not timestep value)
-//// This only reads in oxygen atoms
+//// Function for reading in a specified frame (frame number and not timestep
+/// value) / This only reads in oxygen atoms
 molSys::PointCloud<molSys::Point<double>, double> readLammpsTrjO(
+    std::string filename, int targetFrame,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int typeO,
+    bool isSlice = false,
+    std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
+    std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
+
+// Function that reads in only oxygen atoms and ignores all atoms which are not
+// in the slice as well
+molSys::PointCloud<molSys::Point<double>, double> readLammpsTrjOreduced(
     std::string filename, int targetFrame,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int typeO,
     bool isSlice = false,
@@ -48,7 +58,7 @@ std::vector<std::vector<int>> readBonds(std::string filename);
 inline bool atomInSlice(double x, double y, double z,
                         std::array<double, 3> coordLow,
                         std::array<double, 3> coordHigh) {
-  int flag = 0; // If this is 3 then the particle is inside the volume slice
+  int flag = 0;  // If this is 3 then the particle is inside the volume slice
 
   if (x >= coordLow[0] && x <= coordHigh[0]) {
     flag++;
@@ -67,6 +77,6 @@ inline bool atomInSlice(double x, double y, double z,
   }
 }
 
-} // namespace sinp
+}  // namespace sinp
 
-#endif //// __SEAMS_INPUT_H_
+#endif  //// __SEAMS_INPUT_H_
