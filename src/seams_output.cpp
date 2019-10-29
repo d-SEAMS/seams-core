@@ -11,7 +11,7 @@ int sout::writeRingsWithSlice(std::vector<std::vector<int>> rings,
   std::ofstream outputFile;
   // ----------------
   // Create output dir if it doesn't exist already
-  const char *path = "../output"; // relative to the build directory
+  const char *path = "../output";  // relative to the build directory
   fs::path dir(path);
   // if (fs::create_directory(dir)) {
   //   std::cerr << "Output directory created\n";
@@ -32,9 +32,9 @@ int sout::writeRingsWithSlice(std::vector<std::vector<int>> rings,
     // Otherwise, write out to the file
     for (int k = 0; k < rings[iring].size(); k++) {
       outputFile << rings[iring][k] << " ";
-    } // end of loop through ring elements
+    }  // end of loop through ring elements
     outputFile << "\n";
-  } // end of loop through rings
+  }  // end of loop through rings
 
   return 0;
 }
@@ -56,7 +56,7 @@ int sout::writeHexagonals(std::vector<std::vector<int>> rings,
   // ----------------
   // Otherwise create file
   // Create output dir if it doesn't exist already
-  const char *path = "../output"; // relative to the build directory
+  const char *path = "../output";  // relative to the build directory
   fs::path dir(path);
   // if (fs::create_directory(dir)) {
   //   std::cerr << "Output directory created\n";
@@ -78,9 +78,9 @@ int sout::writeHexagonals(std::vector<std::vector<int>> rings,
     // Write iring out to the file
     for (int k = 0; k < rings[iring].size(); k++) {
       outputFile << rings[iring][k] << " ";
-    } // end of loop through ring elements
+    }  // end of loop through ring elements
     outputFile << "\n";
-  } // end of loop through rings
+  }  // end of loop through rings
 
   // Once the rings have been printed, exit
   return 0;
@@ -105,7 +105,7 @@ int sout::writeHexagonalsWithSlice(std::vector<std::vector<int>> rings,
   // ----------------
   // Otherwise create file
   // Create output dir if it doesn't exist already
-  const char *path = "../output"; // relative to the build directory
+  const char *path = "../output";  // relative to the build directory
   fs::path dir(path);
   // if (fs::create_directory(dir)) {
   //   std::cerr << "Output directory created\n";
@@ -122,7 +122,7 @@ int sout::writeHexagonalsWithSlice(std::vector<std::vector<int>> rings,
     iring = (*list)[i];
     if (iring == dummyValue) {
       continue;
-    } // Skip dummy values
+    }  // Skip dummy values
     // Check if iring is inside the slice or not
     // Skip rings that do not belong to the volume slice
     if ((*flag)[iring] == false) {
@@ -131,9 +131,9 @@ int sout::writeHexagonalsWithSlice(std::vector<std::vector<int>> rings,
     // Write iring out to the file
     for (int k = 0; k < rings[iring].size(); k++) {
       outputFile << rings[iring][k] << " ";
-    } // end of loop through ring elements
+    }  // end of loop through ring elements
     outputFile << "\n";
-  } // end of loop through rings
+  }  // end of loop through rings
 
   // Once the rings have been printed, exit
   return 0;
@@ -149,10 +149,10 @@ int sout::writeHexXYZ(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                       std::vector<int> *list, std::string type,
                       std::string filename) {
   std::ofstream outputFile;
-  std::vector<int> atoms;         // Holds all atom IDs to print
-  int ringSize = rings[0].size(); // Ring size of each ring in rings
+  std::vector<int> atoms;          // Holds all atom IDs to print
+  int ringSize = rings[0].size();  // Ring size of each ring in rings
   int iring;
-  int iatom; // Index, not atom ID
+  int iatom;  // Index, not atom ID
   // ----------------
   // Return if there are no rings
   if ((*list).size() == 0) {
@@ -161,7 +161,7 @@ int sout::writeHexXYZ(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   // ----------------
   // Otherwise create file
   // Create output dir if it doesn't exist already
-  const char *path = "../output"; // relative to the build directory
+  const char *path = "../output";  // relative to the build directory
   fs::path dir(path);
   // if (fs::create_directory(dir)) {
   //   std::cerr << "Output directory created\n";
@@ -176,10 +176,10 @@ int sout::writeHexXYZ(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   atoms.reserve(total_size);
   // Fill up all these atom IDs
   for (int i = 0; i < (*list).size(); i++) {
-    iring = (*list)[i]; // Ring ID of ring to be appended
+    iring = (*list)[i];  // Ring ID of ring to be appended
     std::move(rings[iring].begin(), rings[iring].end(),
               std::back_inserter(atoms));
-  } // end of loop through all rings in the list
+  }  // end of loop through all rings in the list
 
   // Sort the array according to atom ID, which will be needed to get the
   // unique IDs and to remove duplicates
@@ -206,11 +206,11 @@ int sout::writeHexXYZ(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   // Write out the atom coordinates
   // Loop through atoms
   for (int i = 0; i < atoms.size(); i++) {
-    iatom = atoms[i] - 1; // The actual index is one less than the ID
+    iatom = atoms[i] - 1;  // The actual index is one less than the ID
     // Write out coordinates
     outputFile << " " << type << "\t" << yCloud->pts[iatom].x << "\t"
                << yCloud->pts[iatom].y << "\t" << yCloud->pts[iatom].z << "\n";
-  } // end of loop through all atoms
+  }  // end of loop through all atoms
 
   // Once the rings have been printed, exit
   return 0;
@@ -227,14 +227,14 @@ int sout::writeLAMMPSdata(
     std::vector<std::vector<int>> rings, std::vector<std::vector<int>> bonds,
     std::string filename) {
   std::ofstream outputFile;
-  std::vector<int> atoms;         // Holds all atom IDs to print
-  int ringSize = rings[0].size(); // Ring size of each ring in rings
-  int iatom;                      // Index, not atom ID
-  bool padAtoms = false;          // Add extra atoms if the atom IDs are skipped
-  int prevAtomID = 0;             // Check for previous atom ID
-  int dummyAtoms = 0;             // Number of dummy atoms to fill
+  std::vector<int> atoms;          // Holds all atom IDs to print
+  int ringSize = rings[0].size();  // Ring size of each ring in rings
+  int iatom;                       // Index, not atom ID
+  bool padAtoms = false;  // Add extra atoms if the atom IDs are skipped
+  int prevAtomID = 0;     // Check for previous atom ID
+  int dummyAtoms = 0;     // Number of dummy atoms to fill
   int dummyID;
-  int jatom; // Array index is 1 less than the ID (index for dummy atom)
+  int jatom;  // Array index is 1 less than the ID (index for dummy atom)
   // ----------------
   // Return if there are no rings
   if (rings.size() == 0) {
@@ -243,7 +243,7 @@ int sout::writeLAMMPSdata(
   // ----------------
   // Otherwise create file
   // Create output dir if it doesn't exist already
-  const char *path = "../output"; // relative to the build directory
+  const char *path = "../output";  // relative to the build directory
   fs::path dir(path);
   // if (fs::create_directory(dir)) {
   //   std::cerr << "Output directory created\n";
@@ -260,7 +260,7 @@ int sout::writeLAMMPSdata(
   for (int iring = 0; iring < rings.size(); iring++) {
     std::move(rings[iring].begin(), rings[iring].end(),
               std::back_inserter(atoms));
-  } // end of loop through all rings in the list
+  }  // end of loop through all rings in the list
 
   // Sort the array according to atom ID, which will be needed to get the
   // unique IDs and to remove duplicates
@@ -319,7 +319,7 @@ int sout::writeLAMMPSdata(
     outputFile << "2 atom types\n";
   } else {
     outputFile << "1 atom types\n";
-  } // end of atom types
+  }  // end of atom types
   outputFile
       << "1 bond types\n0 angle types\n0 dihedral types\n0 improper types\n";
   // Box lengths
@@ -338,7 +338,7 @@ int sout::writeLAMMPSdata(
   // Write out the atom coordinates
   // Loop through atoms
   for (int i = 0; i < atoms.size(); i++) {
-    iatom = atoms[i] - 1; // The actual index is one less than the ID
+    iatom = atoms[i] - 1;  // The actual index is one less than the ID
     // -----------
     // Pad out
     // Fill in dummy atoms if some have been skipped
@@ -353,8 +353,8 @@ int sout::writeLAMMPSdata(
         outputFile << dummyID << " " << yCloud->pts[jatom].molID << " 2 0 "
                    << yCloud->pts[jatom].x << " " << yCloud->pts[jatom].y << " "
                    << yCloud->pts[jatom].z << "\n";
-      } // end of dummy atom write-out
-    }   // end of check for dummy atom printing
+      }  // end of dummy atom write-out
+    }    // end of check for dummy atom printing
     // -----------
     // Write out coordinates
     // 1 molecule-tag atom-type q x y z
@@ -363,7 +363,7 @@ int sout::writeLAMMPSdata(
                << yCloud->pts[iatom].z << "\n";
     // update the previous atom ID
     prevAtomID = atoms[i];
-  } // end of loop through all atoms in atomID
+  }  // end of loop through all atoms in atomID
 
   // Print the bonds now!
   outputFile << "\nBonds\n\n";
@@ -387,7 +387,7 @@ int sout::writeRings(std::vector<std::vector<int>> rings,
   std::ofstream outputFile;
   // ----------------
   // Create output dir if it doesn't exist already
-  const char *path = "../output"; // relative to the build directory
+  const char *path = "../output";  // relative to the build directory
   fs::path dir(path);
   // if (fs::create_directory(dir)) {
   //   std::cerr << "Output directory created\n";
@@ -403,9 +403,9 @@ int sout::writeRings(std::vector<std::vector<int>> rings,
     // Otherwise, write out to the file
     for (int k = 0; k < rings[iring].size(); k++) {
       outputFile << rings[iring][k] << " ";
-    } // end of loop through ring elements
+    }  // end of loop through ring elements
     outputFile << "\n";
-  } // end of loop through rings
+  }  // end of loop through rings
 
   outputFile.close();
 
@@ -424,12 +424,12 @@ int sout::writePrisms(
   std::string number = std::to_string(prismNum);
   std::string filename = "prism" + number + ".dat";
   int ringSize =
-      (*basal1).size(); // Size of the ring; each ring contains n elements
-  int iatomIndex;       // index of atom coordinate being written out
+      (*basal1).size();  // Size of the ring; each ring contains n elements
+  int iatomIndex;        // index of atom coordinate being written out
 
   // ----------------
   // Create output dir if it doesn't exist already
-  const char *path = "../output/prisms"; // relative to the build directory
+  const char *path = "../output/prisms";  // relative to the build directory
   fs::path dir(path);
   // if (fs::create_directory(dir)) {
   //   std::cerr << "Output Prism directory created\n";
@@ -443,25 +443,25 @@ int sout::writePrisms(
 
   // For basal 1
   for (int iring = 0; iring < ringSize; iring++) {
-    iatomIndex = (*basal1)[iring] - 1; // C++ indices are one less
+    iatomIndex = (*basal1)[iring] - 1;  // C++ indices are one less
     // Write the coordinates out to the file
     outputFile << yCloud->pts[iatomIndex].x << " ";
     outputFile << yCloud->pts[iatomIndex].y << " ";
     outputFile << yCloud->pts[iatomIndex].z << " ";
 
     outputFile << "\n";
-  } // end of loop through basal1
+  }  // end of loop through basal1
 
   // For basal 2
   for (int iring = 0; iring < ringSize; iring++) {
-    iatomIndex = (*basal2)[iring] - 1; // C++ indices are one less
+    iatomIndex = (*basal2)[iring] - 1;  // C++ indices are one less
     // Write the coordinates out to the file
     outputFile << yCloud->pts[iatomIndex].x << " ";
     outputFile << yCloud->pts[iatomIndex].y << " ";
     outputFile << yCloud->pts[iatomIndex].z << " ";
 
     outputFile << "\n";
-  } // end of loop through basal1
+  }  // end of loop through basal1
 
   outputFile.close();
 
@@ -470,14 +470,14 @@ int sout::writePrisms(
     outputFile.open("../output/prisms/singleRing.dat");
     // For basal 1
     for (int iring = 0; iring < ringSize; iring++) {
-      iatomIndex = (*basal1)[iring] - 1; // C++ indices are one less
+      iatomIndex = (*basal1)[iring] - 1;  // C++ indices are one less
       // Write the coordinates out to the file
       outputFile << yCloud->pts[iatomIndex].x << " ";
       outputFile << yCloud->pts[iatomIndex].y << " ";
       outputFile << yCloud->pts[iatomIndex].z << " ";
 
       outputFile << "\n";
-    } // end of loop through basal1
+    }  // end of loop through basal1
     outputFile.close();
   }
 
@@ -493,11 +493,11 @@ int sout::writeAllCages(
     std::vector<cage::Cage> *cageList, std::vector<std::vector<int>> rings,
     std::vector<std::vector<int>> nList,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
-  int numDDC;                          // Number of DDCs
-  int numHC;                           // Number of HCs
-  int numMC;                           // Number of MCs
-  int totalCages = (*cageList).size(); // Total number of cages
-  cage::cageType type;                 // Current cage type
+  int numDDC;                           // Number of DDCs
+  int numHC;                            // Number of HCs
+  int numMC;                            // Number of MCs
+  int totalCages = (*cageList).size();  // Total number of cages
+  cage::cageType type;                  // Current cage type
 
   // ---------------------------------
   // Error handling!
@@ -521,25 +521,25 @@ int sout::writeAllCages(
       numHC++;
       sout::writeEachCage((*cageList)[icage].rings, numHC, type, rings, yCloud);
       sout::writeBasalRingsHex((*cageList)[icage].rings, numHC, nList, rings);
-    } // end of write out of HCs
+    }  // end of write out of HCs
     // Double diamond Cages
     else if (type == cage::DoubleDiaC) {
       numDDC++;
       sout::writeEachCage((*cageList)[icage].rings, numDDC, type, rings,
                           yCloud);
-    } // end of write out of DDCs
+    }  // end of write out of DDCs
     // Mixed Cages
     else if (type == cage::Mixed) {
       numMC++;
       sout::writeEachCage((*cageList)[icage].rings, numMC, type, rings, yCloud);
-    } // end of write out of MCs
+    }  // end of write out of MCs
     // Error
     else {
       std::cerr << "The cage is of the wrong type\n";
       continue;
-    } // some error
+    }  // some error
     // ------
-  } // end of loop through all cages
+  }  // end of loop through all cages
 
   return 0;
 }
@@ -557,11 +557,11 @@ int sout::writeEachCage(
   std::string number = std::to_string(cageNum);
   std::string filename = "cage" + number + ".dat";
   int ringSize =
-      rings[0].size();        // Size of the ring; each ring contains n elements
-  int iatomIndex;             // index of atom coordinate being written out
-  std::string actualCageType; // is icage a DDC, HC or MC?
-  char cageChar[100];         // is icage a DDC, HC or MC?
-  int iring;                  // Ring index of the current ring
+      rings[0].size();  // Size of the ring; each ring contains n elements
+  int iatomIndex;       // index of atom coordinate being written out
+  std::string actualCageType;  // is icage a DDC, HC or MC?
+  char cageChar[100];          // is icage a DDC, HC or MC?
+  int iring;                   // Ring index of the current ring
 
   if (type == cage::HexC) {
     strcpy(cageChar, "../output/cages/hexCages");
@@ -576,11 +576,11 @@ int sout::writeEachCage(
     // throw error
     std::cerr << "The cage is of the wrong type. Exit\n";
     return 1;
-  } //
+  }  //
 
   // ----------------
   // Create output dir if it doesn't exist already
-  const char *path = "../output/cages"; // relative to the build directory
+  const char *path = "../output/cages";  // relative to the build directory
   fs::path dir(path);
   // if (fs::create_directory(dir)) {
   //   std::cerr << "Output Cage directory created\n";
@@ -604,36 +604,36 @@ int sout::writeEachCage(
     // Print out only basal ring atoms, since they describe the outer structure
     // The first two rings are basal rings
     for (int i = 0; i < 2; i++) {
-      iring = currentCage[i]; // Current iring
+      iring = currentCage[i];  // Current iring
       // Get every node of iring
       for (int j = 0; j < ringSize; j++) {
-        iatomIndex = rings[iring][j] - 1; // C++ indices are one less
+        iatomIndex = rings[iring][j] - 1;  // C++ indices are one less
         // Write out the coordinates to the file
         outputFile << yCloud->pts[iatomIndex].x << " ";
         outputFile << yCloud->pts[iatomIndex].y << " ";
         outputFile << yCloud->pts[iatomIndex].z << " ";
 
         outputFile << "\n";
-      } // end of loop through iring
-    }   // end of getting every ring in the current cage
-  }     // end of printing basal ring atoms for hexagonal cages
+      }  // end of loop through iring
+    }    // end of getting every ring in the current cage
+  }      // end of printing basal ring atoms for hexagonal cages
   // For currentCage
   else {
     // Loop through all cages (could be duplicates) TODO: remove duplicates
     for (int i = 0; i < currentCage.size(); i++) {
-      iring = currentCage[i]; // Current iring
+      iring = currentCage[i];  // Current iring
       // Get every node of iring
       for (int j = 0; j < ringSize; j++) {
-        iatomIndex = rings[iring][j] - 1; // C++ indices are one less
+        iatomIndex = rings[iring][j] - 1;  // C++ indices are one less
         // Write out the coordinates to the file
         outputFile << yCloud->pts[iatomIndex].x << " ";
         outputFile << yCloud->pts[iatomIndex].y << " ";
         outputFile << yCloud->pts[iatomIndex].z << " ";
 
         outputFile << "\n";
-      } // end of loop through iring
-    }   // end of getting every ring in the current cage
-  }     // end of cage printing (has duplicates)
+      }  // end of loop through iring
+    }    // end of getting every ring in the current cage
+  }      // end of cage printing (has duplicates)
 
   // Close the output file
   outputFile.close();
@@ -653,37 +653,37 @@ int sout::writeBasalRingsHex(std::vector<int> currentCage, int cageNum,
   std::string number = std::to_string(cageNum);
   std::string filename = "basalRings" + number + ".dat";
   int ringSize =
-      rings[0].size(); // Size of the ring; each ring contains n elements
-  int iatomIndex; // index of atom coordinate being written out TODO get rid of
-                  // this
-  int iring;      // Ring index of the current ring
+      rings[0].size();  // Size of the ring; each ring contains n elements
+  int iatomIndex;  // index of atom coordinate being written out TODO get rid of
+                   // this
+  int iring;       // Ring index of the current ring
   // Variables for the hydrogen-bonded 'second' basal ring
   std::vector<int>
-      basal2; // Elements are bonded to each element of basal1 in order
-  std::vector<int> basal1; // 'First' basal ring
+      basal2;  // Elements are bonded to each element of basal1 in order
+  std::vector<int> basal1;  // 'First' basal ring
   std::vector<int>
-      unOrderedBasal2; // Unordered basal2 ring, the ith element is not
-                       // necessarily bonded to the ith element of basal1
-  int iatom, jatom;    // Atom numbers (starting from 1), not C++ indices; saved
-                       // inside rings
-  int natom;           // Neighbour list ID for iatom
-  int findAtom;        // Atom number of atomID to find in neighbour list
-  bool atomFound; // bool to check if an atomID has been found in the neighbour
-                  // list or not
+      unOrderedBasal2;  // Unordered basal2 ring, the ith element is not
+                        // necessarily bonded to the ith element of basal1
+  int iatom, jatom;  // Atom numbers (starting from 1), not C++ indices; saved
+                     // inside rings
+  int natom;         // Neighbour list ID for iatom
+  int findAtom;      // Atom number of atomID to find in neighbour list
+  bool atomFound;  // bool to check if an atomID has been found in the neighbour
+                   // list or not
   // Variables for ordering basal2
   // After finding the nearest neighbours, elements which are not nearest
   // neighbours are assigned a value of zero.
-  int needle;      // First non-zero element of basal2 after getting the nearest
-                   // neighbours
-  int startNeedle; // Index of basal2; the first non-zero element of basal2
-  int startHayStack; // Index of unOrderedBasal2, corresponding to the first
-                     // non-zero element of basal2
-  bool isClock;      // Original order of unOrderedBasal2
-  int nextElement;   // Next element in unOrderedBasal2 after startHayStack
+  int needle;  // First non-zero element of basal2 after getting the nearest
+               // neighbours
+  int startNeedle;    // Index of basal2; the first non-zero element of basal2
+  int startHayStack;  // Index of unOrderedBasal2, corresponding to the first
+                      // non-zero element of basal2
+  bool isClock;       // Original order of unOrderedBasal2
+  int nextElement;    // Next element in unOrderedBasal2 after startHayStack
 
   // ----------------
   // Create output dir if it doesn't exist already
-  const char *path = "../output/cages"; // relative to the build directory
+  const char *path = "../output/cages";  // relative to the build directory
   fs::path dir(path);
   // if (fs::create_directory(dir)) {
   //   std::cerr << "Output Cage directory created\n";
@@ -705,38 +705,38 @@ int sout::writeBasalRingsHex(std::vector<int> currentCage, int cageNum,
 
   // ---------------
   // Find the nearest neighbours of basal1 elements in basal2
-  basal1 = rings[currentCage[0]];          // First basal ring
-  unOrderedBasal2 = rings[currentCage[1]]; // Unordered second basal ring
+  basal1 = rings[currentCage[0]];           // First basal ring
+  unOrderedBasal2 = rings[currentCage[1]];  // Unordered second basal ring
 
   for (int i = 0; i < basal1.size(); i++) {
-    iatom = basal1[i]; // This is the atom particle ID, not the C++ index
+    iatom = basal1[i];  // This is the atom particle ID, not the C++ index
 
     // Search through unOrderedBasal2 for an element in the neighbourlist of
     // iatom
     for (int k = 0; k < unOrderedBasal2.size(); k++) {
       findAtom =
-          unOrderedBasal2[k]; // Atom ID to find in the neighbour list of iatom
+          unOrderedBasal2[k];  // Atom ID to find in the neighbour list of iatom
 
-      atomFound = false; // init
+      atomFound = false;  // init
       jatom = 0;
 
       // Search through the neighbour list for findAtom
       for (int n = 1; n < nList[iatom - 1].size(); n++) {
-        natom = nList[iatom - 1][n]; // Atom ID
+        natom = nList[iatom - 1][n];  // Atom ID
 
         if (findAtom == natom) {
           atomFound = true;
           break;
-        } // Check
-      }   // Loop through nList
+        }  // Check
+      }    // Loop through nList
 
       if (atomFound) {
         jatom = natom;
         break;
-      } // atom has been found
-    }   // end of loop through all atomIDs in unOrderedBasal2
+      }  // atom has been found
+    }    // end of loop through all atomIDs in unOrderedBasal2
     basal2.push_back(jatom);
-  } // end of loop through all the atomIDs in basal1
+  }  // end of loop through all the atomIDs in basal1
 
   // ---------------------------------------------------
   // Get particles which are not nearest neighbours
@@ -750,18 +750,18 @@ int sout::writeBasalRingsHex(std::vector<int> currentCage, int cageNum,
   // Get the first non-zero index {needle}
   for (int i = 0; i < 2; i++) {
     if (basal2[i] != 0) {
-      needle = basal2[i]; // Set the needle to the first non-zero element
-      startNeedle = i;    // Index of basal2
-      break;              // Break out of the loop
-    }                     // end of checking for non-zero index
-  }                       // end of getting the first non-zero index
+      needle = basal2[i];  // Set the needle to the first non-zero element
+      startNeedle = i;     // Index of basal2
+      break;               // Break out of the loop
+    }                      // end of checking for non-zero index
+  }                        // end of getting the first non-zero index
 
   // Find the index matching needle in unOrderedBasal2
   for (int i = 0; i < unOrderedBasal2.size(); i++) {
     if (unOrderedBasal2[i] == needle) {
-      startHayStack = i; // Index at which needle has been found
-    }                    // end of check for needle
-  }                      // end of search for needle in unOrderedBasal2
+      startHayStack = i;  // Index at which needle has been found
+    }                     // end of check for needle
+  }                       // end of search for needle in unOrderedBasal2
 
   // ---------------
   // Check for 'clockwise' order
@@ -790,15 +790,15 @@ int sout::writeBasalRingsHex(std::vector<int> currentCage, int cageNum,
       }
 
       basal2[iatom] = unOrderedBasal2[jatom];
-    } // end of filling next two alternate elements
-  }   // check to see if clockwise order is correct
+    }  // end of filling next two alternate elements
+  }    // check to see if clockwise order is correct
 
   // ---------------
   // Check for 'anticlockwise' order
   // Check 'next' element
   if (!isClock) {
     iatom = 0;
-    jatom = 0; // init
+    jatom = 0;  // init
 
     // First element
     iatom = startNeedle + 2;
@@ -821,13 +821,13 @@ int sout::writeBasalRingsHex(std::vector<int> currentCage, int cageNum,
         }
 
         basal2[iatom] = unOrderedBasal2[jatom];
-      } // end of filling next two alternate elements
-    }   // check to see if anticlockwise order is correct
+      }  // end of filling next two alternate elements
+    }    // check to see if anticlockwise order is correct
     else {
       std::cerr << "Something is wrong with your HCs.\n";
       return 1;
-    } // exit with error
-  }   // End of check for anticlockwise stuff
+    }  // exit with error
+  }    // End of check for anticlockwise stuff
 
   // ---------------------------------------------------
   // Print out the ordered rings
@@ -837,13 +837,13 @@ int sout::writeBasalRingsHex(std::vector<int> currentCage, int cageNum,
   // BASAL1
   for (int i = 0; i < basal1.size(); i++) {
     outputFile << basal1[i] << " ";
-  } // end of loop through basal1
+  }  // end of loop through basal1
   outputFile << "\n";
 
   // BASAL2
   for (int i = 0; i < basal2.size(); i++) {
     outputFile << basal2[i] << " ";
-  } // end of loop through basal2
+  }  // end of loop through basal2
 
   // Close the output file
   outputFile.close();
@@ -864,23 +864,23 @@ int sout::writeBasalRingsPrism(
   std::string number = std::to_string(prismNum);
   std::string filename = "basalRings" + number + ".dat";
   int ringSize =
-      (*basal1).size(); // Size of the ring; each ring contains n elements
-  int nBonds;           // Number of bonds between the two deformed prisms
-  int l_k, m_k;         // Atom ID in basal1 and basal2 respectively
+      (*basal1).size();  // Size of the ring; each ring contains n elements
+  int nBonds;            // Number of bonds between the two deformed prisms
+  int l_k, m_k;          // Atom ID in basal1 and basal2 respectively
   int iatom,
-      jatom; // Index not ID of basal1 and basal2 respectively which match
-  int currentIatom, currentJatom; // Index not ID for matchedBasal1 and
-                                  // matchedBasal2 respectively
-  bool isNeighbour; // Basal rings should have at least one nearest neighbour
-  bool isClock;     // The order is in the original 'direction' of basal2
-  bool isAntiClock; // The order must be reversed
-  std::vector<int> matchedBasal1, matchedBasal2; // Vectors with revised order
+      jatom;  // Index not ID of basal1 and basal2 respectively which match
+  int currentIatom, currentJatom;  // Index not ID for matchedBasal1 and
+                                   // matchedBasal2 respectively
+  bool isNeighbour;  // Basal rings should have at least one nearest neighbour
+  bool isClock;      // The order is in the original 'direction' of basal2
+  bool isAntiClock;  // The order must be reversed
+  std::vector<int> matchedBasal1, matchedBasal2;  // Vectors with revised order
 
   // ----------------
   // Path for deformed prisms
   if (isDeformed) {
     // Create output dir if it doesn't exist already
-    const char *path = "../output/deformed"; // relative to the build directory
+    const char *path = "../output/deformed";  // relative to the build directory
     fs::path dir(path);
     // if (fs::create_directory(dir)) {
     //   std::cerr << "Output Cage directory created\n";
@@ -896,7 +896,7 @@ int sout::writeBasalRingsPrism(
     outputFile.open(fileOutNameFull);
   } else {
     // Create output dir if it doesn't exist already
-    const char *path = "../output/perfect"; // relative to the build directory
+    const char *path = "../output/perfect";  // relative to the build directory
     fs::path dir(path);
     // if (fs::create_directory(dir)) {
     //   std::cerr << "Output Cage directory created\n";
@@ -910,7 +910,7 @@ int sout::writeBasalRingsPrism(
     // Write output to file inside the output directory
     std::string fileOutNameFull = "../output/perfect/basalRings/" + filename;
     outputFile.open(fileOutNameFull);
-  } // end of creating file paths
+  }  // end of creating file paths
 
   // Format:
   // Coordinate IDs (starting from 1), ordered according to the input XYZ file
@@ -924,12 +924,12 @@ int sout::writeBasalRingsPrism(
   isNeighbour = false;
   // Loop through every element of basal1
   for (int l = 0; l < ringSize; l++) {
-    l_k = (*basal1)[l]; // This is the atom particle ID, not the C++ index
+    l_k = (*basal1)[l];  // This is the atom particle ID, not the C++ index
 
     // Search for the nearest neighbour of l_k in basal2
     // Loop through basal2 elements
     for (int m = 0; m < ringSize; m++) {
-      m_k = (*basal2)[m]; // Atom ID to find in the neighbour list of iatom
+      m_k = (*basal2)[m];  // Atom ID to find in the neighbour list of iatom
 
       // Find m_k inside l_k neighbour list
       auto it =
@@ -938,17 +938,17 @@ int sout::writeBasalRingsPrism(
       // If the element has been found, for l1
       if (it != nList[l_k - 1].end()) {
         isNeighbour = true;
-        iatom = l; // index of basal1
-        jatom = m; // index of basal2
+        iatom = l;  // index of basal1
+        jatom = m;  // index of basal2
         break;
-      } // found element
+      }  // found element
 
-    } // end of loop through all atomIDs in basal2
+    }  // end of loop through all atomIDs in basal2
 
     if (isNeighbour) {
       break;
-    } // nearest neighbour found
-  }   // end of loop through all the atomIDs in basal1
+    }  // nearest neighbour found
+  }    // end of loop through all the atomIDs in basal1
 
   if (!isNeighbour) {
     std::cerr << "Something is wrong with your deformed prism.\n";
@@ -956,7 +956,7 @@ int sout::writeBasalRingsPrism(
   }
   // ---------------------------------------------------
   // Find out if the order of basal2 is 'clockwise' or 'anticlockwise'
-  isClock = false; // init
+  isClock = false;  // init
   isAntiClock = false;
 
   // atom index (not ID)
@@ -985,37 +985,37 @@ int sout::writeBasalRingsPrism(
   // Clockwise
   if (distClock < distAntiClock) {
     isClock = true;
-  } // end of clockwise check
+  }  // end of clockwise check
   // Anti-clockwise
   if (distAntiClock < distClock) {
     isAntiClock = true;
-  } // end of anti-clockwise check
+  }  // end of anti-clockwise check
   // Some error
   if (isClock == false && isAntiClock == false) {
     std::cerr << "There is some mistake with your prism basal rings.\n";
     return 1;
-  } // end of error handling
+  }  // end of error handling
   // ---------------------------------------------------
   // Get the order of basal1 and basal2
   for (int i = 0; i < ringSize; i++) {
     currentIatom = iatom + i;
     if (currentIatom >= ringSize) {
       currentIatom -= ringSize;
-    } // end of basal1 element wrap-around
+    }  // end of basal1 element wrap-around
 
     // In clockwise order
     if (isClock) {
       currentJatom = jatom + i;
       if (currentJatom >= ringSize) {
         currentJatom -= ringSize;
-      } // wrap around
-    }   // end of clockwise update
+      }  // wrap around
+    }    // end of clockwise update
     else {
       currentJatom = jatom - i;
       if (currentJatom < 0) {
         currentJatom += ringSize;
-      } // wrap around
-    }   // end of anti-clockwise update
+      }  // wrap around
+    }    // end of anti-clockwise update
 
     // Add to matchedBasal1 and matchedBasal2 now
     matchedBasal1.push_back((*basal1)[currentIatom]);
@@ -1029,13 +1029,13 @@ int sout::writeBasalRingsPrism(
   // BASAL1
   for (int i = 0; i < matchedBasal1.size(); i++) {
     outputFile << matchedBasal1[i] << " ";
-  } // end of loop through basal1
+  }  // end of loop through basal1
   outputFile << "\n";
 
   // BASAL2
   for (int i = 0; i < matchedBasal2.size(); i++) {
     outputFile << matchedBasal2[i] << " ";
-  } // end of loop through basal2
+  }  // end of loop through basal2
 
   // Close the output file
   outputFile.close();
@@ -1052,7 +1052,7 @@ int sout::writePrismNum(int nPrisms, int ringSize, std::string filename) {
   std::ofstream outputFile;
   // ----------------
   // Create output dir if it doesn't exist already
-  const char *path = "../output"; // relative to the build directory
+  const char *path = "../output";  // relative to the build directory
   fs::path dir(path);
   // if (fs::create_directory(dir)) {
   //   std::cerr << "Output directory created\n";
@@ -1084,7 +1084,7 @@ int sout::writeBonds(std::vector<std::vector<int>> bonds,
   std::ofstream outputFile;
   // ----------------
   // Create output dir if it doesn't exist already
-  const char *path = "../output"; // relative to the build directory
+  const char *path = "../output";  // relative to the build directory
   fs::path dir(path);
   // if (fs::create_directory(dir)) {
   //   std::cerr << "Output directory created\n";
@@ -1110,7 +1110,7 @@ int sout::writeBonds(std::vector<std::vector<int>> bonds,
     }
     // Otherwise print the bond
     outputFile << bonds[ibond][0] << " " << bonds[ibond][1] << "\n";
-  } // end of loop through bonds
+  }  // end of loop through bonds
 
   return 0;
 }
@@ -1126,19 +1126,19 @@ int sout::writeLAMMPSdataPrisms(
     std::vector<std::vector<int>> rings, bool useBondFile, std::string bondFile,
     std::vector<int> listPrism, std::string filename) {
   std::ofstream outputFile;
-  std::vector<int> atoms;         // Holds all atom IDs to print
-  int ringSize = rings[0].size(); // Ring size of each ring in rings
-  int iatom;                      // Index, not atom ID
-  bool padAtoms = false;          // Add extra atoms if the atom IDs are skipped
-  int prevAtomID = 0;             // Check for previous atom ID
-  int dummyAtoms = 0;             // Number of dummy atoms to fill
+  std::vector<int> atoms;          // Holds all atom IDs to print
+  int ringSize = rings[0].size();  // Ring size of each ring in rings
+  int iatom;                       // Index, not atom ID
+  bool padAtoms = false;  // Add extra atoms if the atom IDs are skipped
+  int prevAtomID = 0;     // Check for previous atom ID
+  int dummyAtoms = 0;     // Number of dummy atoms to fill
   int dummyID;
-  int jatom; // Array index is 1 less than the ID (index for dummy atom)
+  int jatom;  // Array index is 1 less than the ID (index for dummy atom)
   int bondTypes = 1;
   // Bond stuff
-  std::vector<std::vector<int>> bonds; // Vector of vector, with each row
-                                       // containing the atom IDs of each bond
-  bool atomOne, atomTwo;               // If bond atoms are in the prism or not
+  std::vector<std::vector<int>> bonds;  // Vector of vector, with each row
+                                        // containing the atom IDs of each bond
+  bool atomOne, atomTwo;                // If bond atoms are in the prism or not
   bool isPrismBond;
 
   // ----------------
@@ -1152,15 +1152,15 @@ int sout::writeLAMMPSdataPrisms(
   if (useBondFile) {
     // Bonds from file
     bonds = sinp::readBonds(bondFile);
-  } // get bonds from file
+  }  // get bonds from file
   else {
     bonds = bond::populateBonds(rings);
-  } // Bonds from rings
+  }  // Bonds from rings
   //
   // ----------------
   // Otherwise create file
   // Create output dir if it doesn't exist already
-  const char *path = "../output"; // relative to the build directory
+  const char *path = "../output";  // relative to the build directory
   fs::path dir(path);
   // if (fs::create_directory(dir)) {
   //   std::cerr << "Output directory created\n";
@@ -1177,7 +1177,7 @@ int sout::writeLAMMPSdataPrisms(
   for (int iring = 0; iring < listPrism.size(); iring++) {
     std::move(rings[listPrism[iring]].begin(), rings[listPrism[iring]].end(),
               std::back_inserter(atoms));
-  } // end of loop through all rings in the list
+  }  // end of loop through all rings in the list
 
   // Sort the array according to atom ID, which will be needed to get the
   // unique IDs and to remove duplicates
@@ -1237,7 +1237,7 @@ int sout::writeLAMMPSdataPrisms(
     outputFile << "2 atom types\n";
   } else {
     outputFile << "1 atom types\n";
-  } // end of atom types
+  }  // end of atom types
   outputFile
       << bondTypes
       << " bond types\n0 angle types\n0 dihedral types\n0 improper types\n";
@@ -1257,7 +1257,7 @@ int sout::writeLAMMPSdataPrisms(
   // Write out the atom coordinates
   // Loop through atoms
   for (int i = 0; i < atoms.size(); i++) {
-    iatom = atoms[i] - 1; // The actual index is one less than the ID
+    iatom = atoms[i] - 1;  // The actual index is one less than the ID
     // -----------
     // Pad out
     // Fill in dummy atoms if some have been skipped
@@ -1272,8 +1272,8 @@ int sout::writeLAMMPSdataPrisms(
         outputFile << dummyID << " " << yCloud->pts[jatom].molID << " 2 0 "
                    << yCloud->pts[jatom].x << " " << yCloud->pts[jatom].y << " "
                    << yCloud->pts[jatom].z << "\n";
-      } // end of dummy atom write-out
-    }   // end of check for dummy atom printing
+      }  // end of dummy atom write-out
+    }    // end of check for dummy atom printing
     // -----------
     // Write out coordinates
     // 1 molecule-tag atom-type q x y z
@@ -1282,7 +1282,7 @@ int sout::writeLAMMPSdataPrisms(
                << yCloud->pts[iatom].z << "\n";
     // update the previous atom ID
     prevAtomID = atoms[i];
-  } // end of loop through all atoms in atomID
+  }  // end of loop through all atoms in atomID
 
   // Fill in the rest of the dummy atoms
   if (atoms[atoms.size() - 1] != yCloud->nop) {
@@ -1292,7 +1292,7 @@ int sout::writeLAMMPSdataPrisms(
       outputFile << id << " " << yCloud->pts[jatom].molID << " 2 0 "
                  << yCloud->pts[jatom].x << " " << yCloud->pts[jatom].y << " "
                  << yCloud->pts[jatom].z << "\n";
-    } // end of printing out dummy atoms
+    }  // end of printing out dummy atoms
   }
 
   // Print the bonds now!
@@ -1339,7 +1339,7 @@ int sout::writeLAMMPSdataPrisms(
                  << bonds[ibond][1] << "\n";
     }
 
-  } // end of for loop for bonds
+  }  // end of for loop for bonds
 
   // Once the datafile has been printed, exit
   return 0;
@@ -1356,21 +1356,21 @@ int sout::writeLAMMPSdataCages(
     std::vector<std::vector<int>> rings, std::vector<cage::Cage> *cageList,
     cage::cageType type, int numCages, std::string filename) {
   std::ofstream outputFile;
-  std::vector<int> atoms;         // Holds all atom IDs to print
-  int ringSize = rings[0].size(); // Ring size of each ring in rings
-  int iatom;                      // Index, not atom ID
-  bool padAtoms = false;          // Add extra atoms if the atom IDs are skipped
-  int prevAtomID = 0;             // Check for previous atom ID
-  int dummyAtoms = 0;             // Number of dummy atoms to fill
+  std::vector<int> atoms;          // Holds all atom IDs to print
+  int ringSize = rings[0].size();  // Ring size of each ring in rings
+  int iatom;                       // Index, not atom ID
+  bool padAtoms = false;  // Add extra atoms if the atom IDs are skipped
+  int prevAtomID = 0;     // Check for previous atom ID
+  int dummyAtoms = 0;     // Number of dummy atoms to fill
   int dummyID;
-  int iring; // Current ring index (vector index)
-  int jatom; // Array index is 1 less than the ID (index for dummy atom)
+  int iring;  // Current ring index (vector index)
+  int jatom;  // Array index is 1 less than the ID (index for dummy atom)
   int bondTypes = 1;
-  std::string actualCageType; // The actual name of the cage types
+  std::string actualCageType;  // The actual name of the cage types
   // Bond stuff
-  std::vector<std::vector<int>> bonds; // Vector of vector, with each row
-                                       // containing the atom IDs of each bond
-  int nRings = 0;                      // Number of rings
+  std::vector<std::vector<int>> bonds;  // Vector of vector, with each row
+                                        // containing the atom IDs of each bond
+  int nRings = 0;                       // Number of rings
 
   // ----------------
   // Return if there are no cages at all
@@ -1389,7 +1389,7 @@ int sout::writeLAMMPSdataCages(
   // ----------------
   // Otherwise create file
   // Create output dir if it doesn't exist already
-  const char *path = "../output"; // relative to the build directory
+  const char *path = "../output";  // relative to the build directory
   fs::path dir(path);
   // if (fs::create_directory(dir)) {
   //   std::cerr << "Output directory created\n";
@@ -1411,12 +1411,12 @@ int sout::writeLAMMPSdataCages(
     }
     // Loop through every ring inside Cage
     for (int k = 0; k < (*cageList)[icage].rings.size(); k++) {
-      iring = (*cageList)[icage].rings[k]; // Current ring index
+      iring = (*cageList)[icage].rings[k];  // Current ring index
       std::move(rings[iring].begin(), rings[iring].end(),
                 std::back_inserter(atoms));
-    } // end of loop through every ring in icage
+    }  // end of loop through every ring in icage
 
-  } // end of loop through all cages in cageList
+  }  // end of loop through all cages in cageList
 
   // Sort the array according to atom ID, which will be needed to get the
   // unique IDs and to remove duplicates
@@ -1476,7 +1476,7 @@ int sout::writeLAMMPSdataCages(
     outputFile << "2 atom types\n";
   } else {
     outputFile << "1 atom types\n";
-  } // end of atom types
+  }  // end of atom types
   outputFile
       << bondTypes
       << " bond types\n0 angle types\n0 dihedral types\n0 improper types\n";
@@ -1507,7 +1507,7 @@ int sout::writeLAMMPSdataCages(
   // Write out the atom coordinates
   // Loop through atoms
   for (int i = 0; i < atoms.size(); i++) {
-    iatom = atoms[i] - 1; // The actual index is one less than the ID
+    iatom = atoms[i] - 1;  // The actual index is one less than the ID
     // -----------
     // Pad out
     // Fill in dummy atoms if some have been skipped
@@ -1522,8 +1522,8 @@ int sout::writeLAMMPSdataCages(
         outputFile << dummyID << " " << yCloud->pts[jatom].molID << " 2 0 "
                    << yCloud->pts[jatom].x << " " << yCloud->pts[jatom].y << " "
                    << yCloud->pts[jatom].z << "\n";
-      } // end of dummy atom write-out
-    }   // end of check for dummy atom printing
+      }  // end of dummy atom write-out
+    }    // end of check for dummy atom printing
     // -----------
     // Write out coordinates
     // 1 molecule-tag atom-type q x y z
@@ -1532,7 +1532,7 @@ int sout::writeLAMMPSdataCages(
                << yCloud->pts[iatom].z << "\n";
     // update the previous atom ID
     prevAtomID = atoms[i];
-  } // end of loop through all atoms in atomID
+  }  // end of loop through all atoms in atomID
 
   // Fill in the rest of the dummy atoms
   if (atoms[atoms.size() - 1] != yCloud->nop) {
@@ -1542,7 +1542,7 @@ int sout::writeLAMMPSdataCages(
       outputFile << id << " " << yCloud->pts[jatom].molID << " 2 0 "
                  << yCloud->pts[jatom].x << " " << yCloud->pts[jatom].y << " "
                  << yCloud->pts[jatom].z << "\n";
-    } // end of printing out dummy atoms
+    }  // end of printing out dummy atoms
   }
 
   // Print the bonds now!
@@ -1553,7 +1553,7 @@ int sout::writeLAMMPSdataCages(
     outputFile << ibond + 1 << " 1 " << bonds[ibond][0] << " "
                << bonds[ibond][1] << "\n";
 
-  } // end of for loop for bonds
+  }  // end of for loop for bonds
 
   // Once the datafile has been printed, exit
   return 0;
@@ -1561,8 +1561,9 @@ int sout::writeLAMMPSdataCages(
 /// Legacy
 
 /********************************************/ /**
- *  Function for printing out info in PairCorrel struct
- ***********************************************/
+                                                *  Function for printing out
+                                                *info in PairCorrel struct
+                                                ***********************************************/
 int sout::writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                     std::string outFile) {
   std::ofstream outputFile;
@@ -1591,16 +1592,15 @@ int sout::writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
   for (int k = 0; k < yCloud->boxLow.size(); k++) {
     outputFile << yCloud->boxLow[k] << " "
-               << yCloud->boxLow[k] + yCloud->box[k]; // print xlo xhi etc
+               << yCloud->boxLow[k] + yCloud->box[k];  // print xlo xhi etc
     // print out the tilt factors too if it is a triclinic box
     if (yCloud->box.size() == 2 * yCloud->boxLow.size()) {
-      outputFile
-          << " "
-          << yCloud->box[k + yCloud->boxLow
-                                 .size()]; // this would be +2 for a 2D box
+      outputFile << " "
+                 << yCloud->box[k + yCloud->boxLow.size()];  // this would be +2
+                                                             // for a 2D box
     }
-    outputFile << "\n"; // print end of line
-  }                     // end of printing box lengths
+    outputFile << "\n";  // print end of line
+  }                      // end of printing box lengths
   outputFile << "ITEM: ATOMS id mol type x y z\n";
   // -----------------------
   // Atom lines
@@ -1609,7 +1609,7 @@ int sout::writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                << " " << yCloud->pts[iatom].iceType << " "
                << yCloud->pts[iatom].x << " " << yCloud->pts[iatom].y << " "
                << yCloud->pts[iatom].z << "\n";
-  } // end of loop through all atoms
+  }  // end of loop through all atoms
 
   // Close the file
   outputFile.close();
@@ -1621,6 +1621,7 @@ int sout::writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
  Cij values
  ***********************************************/
 int sout::writeHisto(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                     std::vector<std::vector<int>> nList,
                      std::vector<double> avgQ6) {
   std::ofstream cijFile;
   std::ofstream q3File;
@@ -1638,16 +1639,16 @@ int sout::writeHisto(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
       continue;
     }
     // Check for slice later
-    nNumNeighbours = yCloud->pts[iatom].neighList.size();
+    nNumNeighbours = nList[iatom].size() - 1;
     avgQ3 = 0.0;
     for (int j = 0; j < nNumNeighbours; j++) {
       cijFile << yCloud->pts[iatom].c_ij[j].c_value << "\n";
       avgQ3 += yCloud->pts[iatom].c_ij[j].c_value;
-    } // Loop through neighbours
+    }  // Loop through neighbours
     avgQ3 /= nNumNeighbours;
     q3File << avgQ3 << "\n";
     q6File << avgQ6[iatom] << "\n";
-  } // loop through all atoms
+  }  // loop through all atoms
 
   // Close the file
   cijFile.close();
@@ -1658,8 +1659,9 @@ int sout::writeHisto(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 }
 
 /********************************************/ /**
- * Function to print out the largest ice cluster
- ***********************************************/
+                                                * Function to print out the
+                                                *largest ice cluster
+                                                ***********************************************/
 int sout::writeCluster(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::string fileName, bool isSlice, int largestIceCluster) {
