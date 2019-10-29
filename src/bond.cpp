@@ -3,13 +3,13 @@
 #include <generic.hpp>
 
 /********************************************/ /**
- *  Create a vector of vectors containing bond information (bonded atom IDs, not indices!)
- from the ring vector of vectors 
+ *  Create a vector of vectors containing bond information (bonded atom IDs, not
+ indices!) from the ring vector of vectors
  ***********************************************/
-std::vector<std::vector<int>>
-bond::populateBonds(std::vector<std::vector<int>> rings) {
-  std::vector<std::vector<int>> bonds; // Output vector of vectors
-  std::vector<int> currentBond;        // Vector for the current bond
+std::vector<std::vector<int>> bond::populateBonds(
+    std::vector<std::vector<int>> rings) {
+  std::vector<std::vector<int>> bonds;  // Output vector of vectors
+  std::vector<int> currentBond;         // Vector for the current bond
   int ringSize = rings[0].size();
 
   // Error handling
@@ -38,7 +38,7 @@ bond::populateBonds(std::vector<std::vector<int>> rings) {
       std::sort(currentBond.begin(), currentBond.end());
       // Add to the bonds vector of vectors
       bonds.push_back(currentBond);
-    } // end of loop through ring elements, except the last one
+    }  // end of loop through ring elements, except the last one
     // The last pair is with the last element and the first element
     // Fill currentBond and update bonds
     currentBond.clear();
@@ -46,23 +46,37 @@ bond::populateBonds(std::vector<std::vector<int>> rings) {
     currentBond.push_back(rings[iring][0]);
     std::sort(currentBond.begin(), currentBond.end());
     bonds.push_back(currentBond);
-  } // end of loop through rings
+  }  // end of loop through rings
 
   return bonds;
 }
 
 /********************************************/ /**
- *  Create a vector of vectors containing bond information (bonded atom IDs, not vector or array indices!)
- from the ring vector of vectors and cageList 
+ *  Create a vector of vectors containing bond information (bonded atom IDs, not
+ indices!) from the ring vector of vectors
  ***********************************************/
-std::vector<std::vector<int>>
-bond::createBondsFromCages(std::vector<std::vector<int>> rings,
-                           std::vector<cage::Cage> *cageList,
-                           cage::cageType type, int *nRings) {
-  std::vector<std::vector<int>> bonds; // Output vector of vectors
-  std::vector<int> currentBond;        // Vector for the current bond
+std::vector<std::vector<int>> populateHbonds(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<std::vector<int>> nList, int Htype) {
+  std::vector<std::vector<int>>
+      hBondNet;  // Output vector of vectors containing the HBN
+
+  //
+
+  return hBondNet;
+}
+
+/********************************************/ /**
+ *  Create a vector of vectors containing bond information (bonded atom IDs, not
+ vector or array indices!) from the ring vector of vectors and cageList
+ ***********************************************/
+std::vector<std::vector<int>> bond::createBondsFromCages(
+    std::vector<std::vector<int>> rings, std::vector<cage::Cage> *cageList,
+    cage::cageType type, int *nRings) {
+  std::vector<std::vector<int>> bonds;  // Output vector of vectors
+  std::vector<int> currentBond;         // Vector for the current bond
   int ringSize = rings[0].size();
-  int currentRing; // (vector) index of the current ring in a particular cage
+  int currentRing;  // (vector) index of the current ring in a particular cage
 
   // Error handling
   if (rings.size() == 0) {
@@ -78,7 +92,7 @@ bond::createBondsFromCages(std::vector<std::vector<int>> rings,
 
   // Traverse the cageList vector of Cages
 
-  *nRings = 0; // init
+  *nRings = 0;  // init
 
   // Loop through all the cages
   for (int icage = 0; icage < (*cageList).size(); icage++) {
@@ -86,11 +100,11 @@ bond::createBondsFromCages(std::vector<std::vector<int>> rings,
     if ((*cageList)[icage].type != type) {
       continue;
     }
-    *nRings += (*cageList)[icage].rings.size(); // Add to the number of rings
+    *nRings += (*cageList)[icage].rings.size();  // Add to the number of rings
     //
     // Now loop through a particular ring inside the i^th cage
     for (int iring = 0; iring < (*cageList)[icage].rings.size(); iring++) {
-      currentRing = (*cageList)[icage].rings[iring]; // Current ring index
+      currentRing = (*cageList)[icage].rings[iring];  // Current ring index
       // Get the first atom of each pair inside currentRing
       for (int k = 0; k < rings[currentRing].size() - 1; k++) {
         // Clear the current bond vector
@@ -101,7 +115,7 @@ bond::createBondsFromCages(std::vector<std::vector<int>> rings,
         std::sort(currentBond.begin(), currentBond.end());
         // Add to the bonds vector of vectors
         bonds.push_back(currentBond);
-      } // end of loop through ring elements, except the last one
+      }  // end of loop through ring elements, except the last one
       // The last pair is with the last element and the first element
       // Fill currentBond and update bonds
       currentBond.clear();
@@ -109,8 +123,8 @@ bond::createBondsFromCages(std::vector<std::vector<int>> rings,
       currentBond.push_back(rings[currentRing][0]);
       std::sort(currentBond.begin(), currentBond.end());
       bonds.push_back(currentBond);
-    } // end of loop through a particular ring
-  }   // end of loop through cages
+    }  // end of loop through a particular ring
+  }    // end of loop through cages
 
   // This may have duplicates, so the duplicates should be removed
   std::sort(bonds.begin(), bonds.end());
@@ -120,14 +134,14 @@ bond::createBondsFromCages(std::vector<std::vector<int>> rings,
 }
 
 /********************************************/ /**
- *  The bond 1 2 and 2 1 are the same. To prevent multiple bonds between the same 
- atoms, remove all bonds which are duplicates of the reversed vectors (denoting individual bonds)
- within the bonds vector of vectors 
+ *  The bond 1 2 and 2 1 are the same. To prevent multiple bonds between the
+ same atoms, remove all bonds which are duplicates of the reversed vectors
+ (denoting individual bonds) within the bonds vector of vectors
  ***********************************************/
-std::vector<std::vector<int>>
-bond::trimBonds(std::vector<std::vector<int>> bonds) {
+std::vector<std::vector<int>> bond::trimBonds(
+    std::vector<std::vector<int>> bonds) {
   std::vector<int>
-      reversedBond; // Vector for the current bond in reversed order
+      reversedBond;  // Vector for the current bond in reversed order
   std::vector<bool> isBondFlag;
   int temp = 0;
 
@@ -173,18 +187,18 @@ bond::trimBonds(std::vector<std::vector<int>> bonds) {
 
 /********************************************/ /**
  *  Remove bonds which are diagonal, cutting across rings
- Set the flag to false if the bond is diagonal 
+ Set the flag to false if the bond is diagonal
  ***********************************************/
 int bond::rmDiagBonds(std::vector<std::vector<int>> rings,
                       std::vector<std::vector<int>> bonds,
                       std::vector<bool> *flag) {
-  std::vector<int> currentBond;   // Bond to be compared. A diagonal bond
-  std::vector<int> reversedBond;  // Reversed order wrt currentBond
-  int ringSize = rings[0].size(); // Number of elements in each ring
+  std::vector<int> currentBond;    // Bond to be compared. A diagonal bond
+  std::vector<int> reversedBond;   // Reversed order wrt currentBond
+  int ringSize = rings[0].size();  // Number of elements in each ring
   int nNonBondPairs =
-      (ringSize - 1) - 2; // Number of non-bonding pairs per atom in each ring
-  int iatom, jatom;       // Actual atom IDs within a bond
-  int j, k;               // Counter
+      (ringSize - 1) - 2;  // Number of non-bonding pairs per atom in each ring
+  int iatom, jatom;        // Actual atom IDs within a bond
+  int j, k;                // Counter
 
   if (nNonBondPairs == 0) {
     return 0;
@@ -197,7 +211,7 @@ int bond::rmDiagBonds(std::vector<std::vector<int>> rings,
       // Loop over other elements of the ring wrt i
       j = i + 2;
       for (int nbonds = 0; nbonds < nNonBondPairs; nbonds++) {
-        k = j + nbonds; // Index
+        k = j + nbonds;  // Index
         // Wrap the index around the ring
         if (k >= ringSize) {
           k -= ringSize;
@@ -215,9 +229,9 @@ int bond::rmDiagBonds(std::vector<std::vector<int>> rings,
         // Match with all other bonds
         bond::searchBondMatch(currentBond, bonds, flag);
         bond::searchBondMatch(reversedBond, bonds, flag);
-      } // end of selection of the seconf atom in the bond
-    }   // Selection of the first atom in the bond
-  }     // end of loop through every ring
+      }  // end of selection of the seconf atom in the bond
+    }    // Selection of the first atom in the bond
+  }      // end of loop through every ring
 
   // Bond selection requires the selection of a pair of atoms
 
@@ -226,12 +240,11 @@ int bond::rmDiagBonds(std::vector<std::vector<int>> rings,
 
 /********************************************/ /**
  *  Search through vector of vector (bonds). If the input vector (matchBond)
- is the same as a bond inside the vector of vectors, set its flag to false 
+ is the same as a bond inside the vector of vectors, set its flag to false
  ***********************************************/
 int bond::searchBondMatch(std::vector<int> matchBond,
                           std::vector<std::vector<int>> bonds,
                           std::vector<bool> *flag) {
-
   for (int ibond; ibond < bonds.size(); ibond++) {
     // Skip a bond if the flag is already false
     if ((*flag)[ibond] == false) {
@@ -241,20 +254,21 @@ int bond::searchBondMatch(std::vector<int> matchBond,
     // Check if the bond matches
     if (matchBond == bonds[ibond]) {
       (*flag)[ibond] = false;
-    } // end of check for matching
-  }   // end of loop through all possible bonds in the vector of vector
+    }  // end of check for matching
+  }    // end of loop through all possible bonds in the vector of vector
 
   return 0;
 }
 
 /********************************************/ /**
- *  Remove bonds which are longer than the cutoff 
- ***********************************************/
+                                                *  Remove bonds which are longer
+                                                *than the cutoff
+                                                ***********************************************/
 int bond::rmLongBonds(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                       std::vector<std::vector<int>> bonds,
                       std::vector<bool> *flag, double cutoff) {
-  double bondLength; // Bond distance
-  int iatom, jatom;  // Indices are 1 less than the atom ID
+  double bondLength;  // Bond distance
+  int iatom, jatom;   // Indices are 1 less than the atom ID
   for (int ibond; ibond < bonds.size(); ibond++) {
     // Skip a bond if the flag is already false
     if ((*flag)[ibond] == false) {
@@ -268,8 +282,8 @@ int bond::rmLongBonds(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     // Check if the bond matches
     if (bondLength > cutoff) {
       (*flag)[ibond] = false;
-    } // end of check for matching
-  }   // end of loop through all possible bonds in the vector of vector
+    }  // end of check for matching
+  }    // end of loop through all possible bonds in the vector of vector
 
   return 0;
 }
