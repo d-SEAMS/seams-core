@@ -44,8 +44,8 @@
 
 // Managed with Conan
 #include <fmt/core.h>
-#include <rang.hpp>
 #include <yaml-cpp/yaml.h>
+#include <rang.hpp>
 
 int main(int argc, char *argv[]) {
   // Parse Things
@@ -119,6 +119,10 @@ int main(int argc, char *argv[]) {
       // CHILL+ and modifications
       lua.set_function("chillPlus_cij", chill::getCorrelPlus);
       lua.set_function("chillPlus_iceType", chill::getIceTypePlus);
+      // CHILL functions
+      lua.set_function("chill_cij", chill::getCorrel);
+      lua.set_function("chill_iceType", chill::getIceType);
+      // Reclassify using q6
       lua.set_function("averageQ6", chill::getq6);
       lua.set_function("modifyChill", chill::reclassifyWater);
       lua.set_function("percentage_Ice", chill::printIceType);
@@ -130,7 +134,7 @@ int main(int argc, char *argv[]) {
       lua.script_file(lscript);
       std::cout << "\nTest\n";
     }
-  } // end of ice type determination block
+  }  // end of ice type determination block
   // --------------------------------------
 
   std::cout << rang::style::bold
