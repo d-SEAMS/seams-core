@@ -11,7 +11,16 @@
 
 namespace gen {
 
+/// Use boost for pi
 const double pi = boost::math::constants::pi<double>();
+
+/********************************************/ /**
+ *  Function for Converting radians->degrees
+ ***********************************************/
+inline double radDeg(double angle) { return (angle * 180) / gen::pi; }
+
+/// GSL for angles
+double gslVecAngle(std::vector<double> OO, std::vector<double> OH);
 
 // Generic function for getting the unwrapped distance
 inline double

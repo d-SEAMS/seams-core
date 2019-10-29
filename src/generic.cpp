@@ -29,3 +29,23 @@ int gen::prettyPrintYoda(
   outputFile.close();
   return 0;
 }
+
+/********************************************/ /**
+ *  Function for Converting to GSL and getting the angle
+ ***********************************************/
+double gen::gslVecAngle(std::vector<double> OO, std::vector<double> OH) {
+  gsl_vector *gOO = gsl_vector_alloc(3);
+  gsl_vector *gOH = gsl_vector_alloc(3);
+  double norm_gOO, norm_gOH, xDummy, angle;
+  for (int i = 0; i < 3; i++) {
+    gsl_vector_set(gOO, i, OO[i]);
+    gsl_vector_set(gOH, i, OH[i]);
+  }
+  norm_gOO = gsl_blas_dnrm2(gOO);
+  norm_gOH = gsl_blas_dnrm2(gOH);
+  gsl_blas_ddot(gOO, gOH, &xDummy);
+  angle = acos(xDummy / (norm_gOO * norm_gOH));
+  gsl_vector_free(gOO);
+  gsl_vector_free(gOH);
+  return angle;
+}
