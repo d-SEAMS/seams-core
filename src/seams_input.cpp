@@ -647,22 +647,23 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjO(
 }
 
 /********************************************/ /**
- *  Function for reading in a lammps file; and saves only the Oxygen atoms.
- Atoms which are not inside the slice or not oxygen atoms are not saved at all
- This is an overloaded function. The Oxygen atom ID must be specified.
+ *  Function for reading in a lammps file; and saves only the atoms of the
+ desired type. Atoms which are not inside the slice or not of type I are not
+ saved at all This is an overloaded function. The type atom ID must be
+ specified.
  *  @param[in] filename The name of the lammps trajectory file to be read in
  *  @param[in] targetFrame The frame number whose information will be read in
  *  @param[out] yCloud The outputted PointCloud
- *  @param[in] typeO The type ID of the Oxygen atoms
+ *  @param[in] typeO The type ID of the desired type of atoms
  *  @param[in] isSlice This decides whether a slice will be created or not
  *  @param[in] coordLow Contains the lower limits of the slice, if a slice is to
  be created
  *  @param[in] coordHigh Contains the upper limits of the slice, if a slice is
  to be created
  ***********************************************/
-molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjOreduced(
+molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
     std::string filename, int targetFrame,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int typeO,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int typeI,
     bool isSlice, std::array<double, 3> coordLow,
     std::array<double, 3> coordHigh) {
   std::unique_ptr<std::ifstream> dumpFile;
@@ -805,8 +806,8 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjOreduced(
               continue;
             }  // do not save if not inside the slice
           }
-          // Save only oxygen atoms
-          if (iPoint.type == typeO) {
+          // Save only atoms of the desired type
+          if (iPoint.type == typeI) {
             nOxy++;
             // yCloud->pts.resize(yCloud->pts.size()+1);
             yCloud->pts.push_back(iPoint);
