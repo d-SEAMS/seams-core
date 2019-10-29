@@ -162,6 +162,11 @@ struct PointCloud {
   std::unordered_map<int, int> idIndexMap;
 };
 
+// Creates an unordered map, with the atomIDs as keys and molecular IDs as the
+// values
+std::unordered_map<int, int> createIDMolIDmap(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud);
+
 //// Function for clearing vectors in PointCloud after multiple usage
 molSys::PointCloud<molSys::Point<double>, double> clearPointCloud(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud);
