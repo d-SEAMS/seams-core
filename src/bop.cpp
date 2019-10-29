@@ -806,10 +806,12 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypePlus(
                                                 *\f$q_6\f$ values.
                                                 ***********************************************/
 std::vector<double> chill::getq6(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, bool isSlice) {
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<std::vector<int>> nList, bool isSlice) {
   //
-  int l = 6;  // We're using q6 here
-  int jatom;  // Index of nearest neighbour
+  int l = 6;       // We're using q6 here
+  int jatomID;     // Atom ID of the nearest neighbour
+  int jatomIndex;  // Index of nearest neighbour
   std::array<double, 3> delta;
   std::array<double, 2> angles;
   chill::QlmAtom QlmTotal;  // Qlm for each iatom
@@ -830,15 +832,29 @@ std::vector<double> chill::getq6(
   QlmTotal.ptq.resize(yCloud->nop);
   resultQ.resize(yCloud->nop);
 
+  // Loop through every index in yCloud
   for (int iatom = 0; iatom < yCloud->nop; iatom++) {
     // if(yCloud->pts[iatom].type!=typeO){continue;}
 
-    nnumNeighbours = yCloud->pts[iatom].neighList.size();
+    nnumNeighbours =
+        nList[iatom].size() - 1;  // One less than the actual length
     // Now loop over the first four neighbours
-    for (int j = 0; j < nnumNeighbours; j++) {
-      jatom = yCloud->pts[iatom].neighList[j];
+    for (int j = 1; j <= nnumNeighbours; j++) {
+      // Get the atom ID
+      jatomID = nList[iatom][j];  // Atom ID (key)
+
+      // Get the atom index (value) from the atom ID (key)
+      auto it = yCloud->idIndexMap.find(jatomID);
+
+      if (it != yCloud->idIndexMap.end()) {
+        jatomIndex = it->second;
+      } else {
+        std::cerr << "Your map must be wrong.\n";
+        return resultQ;  // return with error
+      }
+
       // Get the relative distances
-      delta = gen::relDist(yCloud, iatom, jatom);
+      delta = gen::relDist(yCloud, iatom, jatomIndex);
 
       // angles = sph::radialCoord(delta);
       double r = std::sqrt(std::pow(delta[0], 2.0) + std::pow(delta[1], 2.0) +
@@ -847,16 +863,16 @@ std::vector<double> chill::getq6(
       angles[0] = atan2(delta[0], delta[1]);  // phi
 
       // Now add over all nearest neighbours
-      if (j == 0) {
+      if (j == 1) {
         // QlmTotal.ptq[iatom].ylm = sph::spheriHarmo(l, angles);
         QlmTotal.ptq[iatom].ylm = sph::lookupTableQ6Vec(angles);
         continue;
       }
       // Not for the first jatom
-      // yl = sph::spheriHarmo(l, angles);
+      yl = sph::spheriHarmo(l, angles);
       for (int m = 0; m < 2 * l + 1; m++) {
-        // QlmTotal.ptq[iatom].ylm[m] += yl[m];
-        QlmTotal.ptq[iatom].ylm[m] += sph::lookupTableQ6(m, angles);
+        QlmTotal.ptq[iatom].ylm[m] += yl[m];
+        // QlmTotal.ptq[iatom].ylm[m] += sph::lookupTableQ6(m, angles);
       }
     }  // End of loop over 4 nearest neighbours
 
@@ -876,20 +892,28 @@ std::vector<double> chill::getq6(
     // 	if(yCloud->pts[iatom].inSlice==false){continue;}
     // }
 
-    nnumNeighbours = yCloud->pts[iatom].neighList.size();
-    q_value = 0.0;  // initialize to zero
+    nnumNeighbours = nList[iatom].size() - 1;  // Number of nearest neighbours
+    q_value = 0.0;                             // initialize to zero
     // yCloud->pts[iatom].c_ij.reserve(nnumNeighbours);
     // loop over the 4 nearest neighbours
-    for (int j = 0; j < nnumNeighbours; j++) {
+    for (int j = 1; j <= nnumNeighbours; j++) {
       // Init to zero
       dot_product = {0, 0};
       Inorm = {0, 0};
       Jnorm = {0, 0};
-      // Get index of the nearest neighbour
-      jatom = yCloud->pts[iatom].neighList[j];
+      // Get index of the nearest neighbour!
+      jatomID = nList[iatom][j];  // Atom ID (key)
+
+      // Get the index jatomIndex
+      auto it = yCloud->idIndexMap.find(jatomID);
+
+      if (it != yCloud->idIndexMap.end()) {
+        jatomIndex = it->second;
+      }  // end of getting the index of jatom
+
       for (int m = 0; m < 2 * l + 1; m++) {
         qI = QlmTotal.ptq[iatom].ylm[m];
-        qJ = QlmTotal.ptq[jatom].ylm[m];
+        qJ = QlmTotal.ptq[jatomIndex].ylm[m];
         dot_product = dot_product + (qI * std::conj(qJ));  // unnormalized
         Inorm = Inorm + (qI * std::conj(qI));
         Jnorm = Jnorm + (qJ * std::conj(qJ));

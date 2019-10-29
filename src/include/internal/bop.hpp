@@ -183,7 +183,7 @@ molSys::PointCloud<molSys::Point<double>, double> getIceTypePlus(
 // cluster
 std::vector<double> getq6(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    bool isSlice = false);
+    std::vector<std::vector<int>> nList, bool isSlice = false);
 
 // 'Test' condition for classifying hexagonal ice using averaged q6 and q3
 // Checks water
