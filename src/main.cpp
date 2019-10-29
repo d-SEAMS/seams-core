@@ -31,6 +31,7 @@
 #include "opt_parser.h"
 
 // Newer pointCloud
+#include <bond.hpp>
 #include <bop.hpp>
 #include <generic.hpp>
 #include <mol_sys.hpp>
@@ -147,7 +148,8 @@ int main(int argc, char *argv[]) {
       // -----------------
       // Confined Ice
       // Generic requirements (read in only inside the slice)
-      lua.set_function("readFrameOnlyO", sinp::readLammpsTrjOreduced);
+      lua.set_function("readFrameOnlyOne", sinp::readLammpsTrjreduced);
+      lua.set_function("getHbondNetwork", bond::populateHbonds);
       // -----------------
       // Use the script
       lua.script_file(lscript);
