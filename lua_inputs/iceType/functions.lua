@@ -39,9 +39,9 @@ for frame=targetFrame,finalFrame,frameGap do
    resCloud=chillPlus_iceType(resCloud,nList,false,chillPlus_noMod); --- Write out data (cloud,slice,name)
    writeDump(resCloud,dumpChillP); --- Dump the rescloud which currently has CHILL Plus classifications
    avgQ6=averageQ6(resCloud,nList,false); --- Average Q6 (cloud,slice)
-   -- resCloud=modifyChill(resCloud,avgQ6); --- Modification (cloud,q6)
-   -- percentage_Ice(resCloud,false,chillPlus_mod); --- Post reclassification writeOut
-   -- writeDump(resCloud,dumpSupaaP); --- Dump the rescloud which now has the supaa CHILL Plus Trajectory
+   resCloud=modifyChill(resCloud,avgQ6); --- Modification (cloud,q6)
+   percentage_Ice(resCloud,false,chillPlus_mod); --- Post reclassification writeOut
+   writeDump(resCloud,dumpSupaaP); --- Dump the rescloud which now has the supaa CHILL Plus Trajectory
    -- writeHistogram(resCloud,avgQ6);
    -- --- Do the largest Ice cluster stuff
    -- clusterCloud=create_cluster(resCloud,clusterCloud);
