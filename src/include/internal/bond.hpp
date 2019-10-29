@@ -16,6 +16,7 @@
 // Internal
 #include <cage.hpp>
 #include <mol_sys.hpp>
+#include <seams_input.hpp>
 
 namespace bond {
 
@@ -24,8 +25,9 @@ namespace bond {
 // of the hydrogen bond depending on the O--O and O--H vectors from the
 // neighbour list already constructed
 std::vector<std::vector<int>> populateHbonds(
+    std::string filename,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, int Htype);
+    std::vector<std::vector<int>> nList, int targetFrame, int Htype);
 
 // Create a vector of vectors containing bond connectivity information. May
 // contain duplicates! Gets the bond information from the vector of vectors

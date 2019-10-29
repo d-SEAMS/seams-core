@@ -55,11 +55,18 @@ std::vector<std::vector<int>> bond::populateBonds(
  *  Create a vector of vectors containing bond information (bonded atom IDs, not
  indices!) from the ring vector of vectors
  ***********************************************/
-std::vector<std::vector<int>> populateHbonds(
+std::vector<std::vector<int>> bond::populateHbonds(
+    std::string filename,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, int Htype) {
+    std::vector<std::vector<int>> nList, int targetFrame, int Htype) {
   std::vector<std::vector<int>>
       hBondNet;  // Output vector of vectors containing the HBN
+  molSys::PointCloud<molSys::Point<double>, double>
+      hCloud;  // point Cloud for the hydrogen atoms
+
+  // --------------------
+  // Get all the hydrogen bonds in the frame (no slice)
+  hCloud = sinp::readLammpsTrjreduced(filename, targetFrame, &hCloud, Htype);
 
   //
 
