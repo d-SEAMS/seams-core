@@ -161,12 +161,13 @@ struct QlmAtom {
 // algorithm
 molSys::PointCloud<molSys::Point<double>, double> getCorrel(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    bool isSlice = false);
+    std::vector<std::vector<int>> nList, bool isSlice = false);
 
 // Classifies each atom according to the CHILL algorithm
 molSys::PointCloud<molSys::Point<double>, double> getIceType(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    bool isSlice = false, std::string outputFileName = "chill.txt");
+    std::vector<std::vector<int>> nList, bool isSlice = false,
+    std::string outputFileName = "chill.txt");
 
 // Gets c_ij and then classifies bond types according to the CHILL+ algorithm
 molSys::PointCloud<molSys::Point<double>, double> getCorrelPlus(
