@@ -176,7 +176,8 @@ molSys::PointCloud<molSys::Point<double>, double> getCorrelPlus(
 // Classifies each atom according to the CHILL+ algorithm
 molSys::PointCloud<molSys::Point<double>, double> getIceTypePlus(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    bool isSlice = false, std::string outputFileName = "chillPlus.txt");
+    std::vector<std::vector<int>> nList, bool isSlice = false,
+    std::string outputFileName = "chillPlus.txt");
 
 // q6 can distinguish between water and ice. Use this for the largest ice
 // cluster
@@ -210,11 +211,12 @@ int printIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 // Checks if a given iatom is interfacial ice or not, according to the CHILL
 // algorithm
 bool isInterfacial(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                   int iatom, int num_staggrd, int num_eclipsd);
+                   std::vector<std::vector<int>> nList, int iatom,
+                   int num_staggrd, int num_eclipsd);
 
 // Finds the number of staggered bonds for a given atom of index jatom
 int numStaggered(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                 int jatom);
+                 std::vector<std::vector<int>> nList, int jatom);
 
 }  // namespace chill
 
