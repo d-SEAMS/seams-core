@@ -78,6 +78,8 @@ int main(int argc, char *argv[]) {
     lua.script_file(vars);
 
     // Get Variables (explicitly)
+    // -----------------
+    // Bulk
     auto rc = lua.get<double>("cutoffRadius");
     auto oType = lua.get<int>("oxygenAtomType");
     auto tFrame = lua.get<int>("targetFrame");
@@ -89,14 +91,23 @@ int main(int argc, char *argv[]) {
     auto outFileChill = lua.get<std::string>("chill_mod");
     auto outFileSuper = lua.get<std::string>("chillPlus_mod");
     auto outCluster = lua.get<std::string>("largest_ice_cluster_name");
-
+    // -----------------
+    // Confined Ice lua variables
+    auto hType =
+        lua.get<int>("hydrogenAtomType");  // If you want to use the hydrogen
+                                           // atoms to get the HBN
+    // -----------------
+    // Bulk/Common Variables defined in C++
     // Variables which must be declared in C++
+    //
     // Newer pointCloud (rescloud -> ice structure, solcloud -> largest cluster)
     molSys::PointCloud<molSys::Point<double>, double> resCloud, solCloud;
     // Some neighbor
     std::vector<std::vector<int>> nList, hbnList;
     // For averaged q6
     std::vector<double> avgQ6;
+    // -----------------
+    // Variables defined in C++ specific to confined systems
 
     if (advUse == true) {
       // This section basically only registers functions and handles the rest in
@@ -109,7 +120,10 @@ int main(int argc, char *argv[]) {
       lua["clusterCloud"] = &solCloud;
       lua["avgQ6"] = &avgQ6;
       lua["trajectory"] = tFile;
+      // Confined ice stuff
+      //
       // Register functions
+      //
       // Writing stuff
       lua.set_function("writeDump", sout::writeDump);
       lua.set_function("writeHistogram", sout::writeHisto);
@@ -130,6 +144,11 @@ int main(int argc, char *argv[]) {
       lua.set_function("create_cluster", chill::getIceCloud);
       lua.set_function("largest_cluster", chill::largestIceCluster);
       lua.set_function("writeCluster", sout::writeCluster);
+      // -----------------
+      // Confined Ice
+      // Generic requirements (read in only inside the slice)
+      lua.set_function("readFrameOnlyO", sinp::readLammpsTrjOreduced);
+      // -----------------
       // Use the script
       lua.script_file(lscript);
       std::cout << "\nTest\n";
