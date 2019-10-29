@@ -5,7 +5,12 @@
 #include <math.h>
 #include <mol_sys.hpp>
 
+// Boost
+#include <boost/math/constants/constants.hpp>
+
 namespace gen {
+
+const double pi = boost::math::constants::pi<double>();
 
 // Generic function for getting the unwrapped distance
 inline double

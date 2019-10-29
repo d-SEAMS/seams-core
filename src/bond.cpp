@@ -85,9 +85,6 @@ bond::populateHbonds(std::string filename,
   std::vector<int> ooVec;   // Array for the O--O vector
   std::vector<int> ohVec;   // Array for the O-H vector
 
-  // pi value
-  auto pi = std::atan(1) * 4;
-
   // --------------------
   // Get all the hydrogen atoms in the frame (no slice)
   hCloud = sinp::readLammpsTrjreduced(filename, targetFrame, &hCloud, Htype);
@@ -186,7 +183,7 @@ bond::populateHbonds(std::string filename,
                             sqrt(std::inner_product(ohVec.begin(), ohVec.end(),
                                                     ohVec.begin(), 0));
         double calcAngle = acos(dot_product / normFactor); // in radians
-        calcAngle *= 180 / pi;                             // Convert to degrees
+        calcAngle *= 180 / gen::pi;                        // Convert to degrees
         //
         // A hydrogen bond is formed if the angle is less than 30 degrees
         if (calcAngle > angleCutoff) {
