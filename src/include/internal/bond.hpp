@@ -29,6 +29,13 @@ std::vector<std::vector<int>> populateHbonds(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, int targetFrame, int Htype);
 
+// Calculates the distance of the hydrogen bond between O and H (of different
+// atoms), given the respective pointClouds and the indices to each atom
+double getHbondDistanceOH(
+    molSys::PointCloud<molSys::Point<double>, double> *oCloud,
+    molSys::PointCloud<molSys::Point<double>, double> *hCloud, int oAtomIndex,
+    int hAtomIndex);
+
 // Create a vector of vectors containing bond connectivity information. May
 // contain duplicates! Gets the bond information from the vector of vectors
 // containing the rings
