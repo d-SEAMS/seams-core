@@ -7,6 +7,7 @@
 
 // Boost
 #include <boost/math/constants/constants.hpp>
+#include <gsl/gsl_blas.h>
 
 namespace gen {
 
