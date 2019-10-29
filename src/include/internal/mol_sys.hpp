@@ -167,6 +167,12 @@ struct PointCloud {
 std::unordered_map<int, int> createIDMolIDmap(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud);
 
+// Returns a vector of vectors, which contains the molIDs in the first column,
+// and the hydrogen atom indices (not atom IDs) in the row
+std::vector<std::vector<int>> hAtomMolList(
+    molSys::PointCloud<molSys::Point<double>, double> *hCloud,
+    molSys::PointCloud<molSys::Point<double>, double> *oCloud);
+
 //// Function for clearing vectors in PointCloud after multiple usage
 molSys::PointCloud<molSys::Point<double>, double> clearPointCloud(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud);
