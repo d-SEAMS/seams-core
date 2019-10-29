@@ -33,8 +33,9 @@ print("\n Welcome to the manual lua function evaluation environment.\n");
 
 slice={0,0,0}; --- This is not in use
 for frame=targetFrame,finalFrame,frameGap do
-   resCloud=readFrameOnlyO(trajectory, frame, resCloud, oxygenAtomType,false,slice,slice) --- Get the frame
+   resCloud=readFrameOnlyOne(trajectory,frame,resCloud,oxygenAtomType,false,slice,slice) --- Get the frame
    nList=neighborList(cutoffRadius, resCloud, oxygenAtomType); --- Calculate the neighborlist
+   hbnList=getHbondNetwork(trajectory,resCloud,nList,frame,hydrogenAtomType) --- Get the hydrogen-bonded network for the current frame
    -- resCloud=chillPlus_cij(resCloud,nList,false); --- Calculate Cij (cloud,slice)
    -- resCloud=chillPlus_iceType(resCloud,nList,false,chillPlus_noMod); --- Write out data (cloud,slice,name)
    -- writeDump(resCloud,dumpChillP); --- Dump the rescloud which currently has CHILL Plus classifications
