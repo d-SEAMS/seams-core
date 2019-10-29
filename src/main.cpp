@@ -43,11 +43,10 @@
 
 // Managed with Conan
 #include <fmt/core.h>
-#include <rang.hpp>
 #include <yaml-cpp/yaml.h>
+#include <rang.hpp>
 
 int main(int argc, char *argv[]) {
-
   // Parse Things
   auto result = parse(argc, argv);
   auto &arguments = result.arguments();
@@ -99,8 +98,8 @@ int main(int argc, char *argv[]) {
     std::vector<double> avgQ6;
 
     if (advUse == true) {
-      // This section basically only registers functions and handles the rest in lua
-      // Use the functions defined here
+      // This section basically only registers functions and handles the rest in
+      // lua Use the functions defined here
       auto lscript = lua.get<std::string>("functionScript");
       // Transfer variables to lua
       lua["nList"] = &nList;
@@ -129,105 +128,8 @@ int main(int argc, char *argv[]) {
       // Use the script
       lua.script_file(lscript);
       std::cout << "\nTest\n";
-    } else {
-      // Analyze
-
-      // Delete later
-      std::ofstream cijFile;
-      cijFile.open("cij.txt");
-      cijFile << "Cij\n";
-      cijFile.close();
-      std::ofstream q3File;
-      q3File.open("q3.txt");
-      q3File << "Q3\n";
-      q3File.close();
-      std::ofstream q6File;
-      q6File.open("q6.txt");
-      q6File << "Q6\n";
-      q6File.close();
-
-      // For overwriting old files
-      // and for printing the first line of output files
-      std::ofstream clusterFile;
-      for (int frame = tFrame; frame <= fFrame; frame += fGap) {
-        // Read in a frame
-        resCloud = sinp::readLammpsTrj(tFile, frame, &resCloud, oType);
-        // // Sort according to atom ID (OPTIONAL)
-        // std::sort(resCloud.pts.begin(), resCloud.pts.end(), gen::compareByAtomID);
-        // Update the neighbour lists
-        resCloud = nneigh::neighListO(rc, &resCloud, oType);
-
-        // ------------------------------
-        // If you want to use CHILL+
-        // Calculate c_ij
-        resCloud = chill::getCorrelPlus(&resCloud, false);
-        // Print first line to file
-        if (frame == tFrame) {
-          std::ofstream chill;
-          chill.open(outFileChillPlus);
-          chill << "Frame Ic Ih Interfacial Clath InterClath Water Total\n";
-          chill.close();
-        }
-        // Classify according to CHILL+
-        resCloud = chill::getIceTypePlus(&resCloud, false, outFileChillPlus);
-        // ------------------------------
-
-        // Get the averaged q6 per atom
-        // Greater than 0.5 means ice
-        // Update the neighbour lists
-        // resCloud = nneigh::neighList(3.2, &resCloud, oxyType);
-        avgQ6 = chill::getq6(&resCloud, false);
-
-        // Reclassify according to averaged q3 and q6
-        resCloud = chill::reclassifyWater(&resCloud, &avgQ6);
-
-        // --------------------
-        // Print modified parameter
-        // Print first line to file
-        if (frame == tFrame) {
-          std::ofstream chill;
-          chill.open(outFileSuper);
-          chill << "Frame Ic Ih Interfacial Clath InterClath Water Total\n";
-          chill.close();
-        }
-        // Print out and calculate the number
-        // and percentage of the ice types after reclassification
-        chill::printIceType(&resCloud, false, outFileSuper);
-        // ---------------------
-
-        // ---------------------
-        // Get the largest ice cluster
-        molSys::PointCloud<molSys::Point<double>, double> solCloud;
-        int largestIceCluster;
-        solCloud = chill::getIceCloud(&resCloud, &solCloud);
-        largestIceCluster =
-            chill::largestIceCluster(&solCloud, rc, true, false);
-        // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-        // Write out the largest ice cluster to a file
-        if (frame == tFrame) {
-          clusterFile.open("cluster.txt");
-          clusterFile << "Frame NumberInCluster\n";
-          clusterFile << solCloud.currentFrame << " " << largestIceCluster
-                      << "\n";
-          clusterFile.close();
-        } else {
-          gen::writeCluster(&solCloud, outCluster, false, largestIceCluster);
-        }
-        // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-        solCloud = molSys::clearPointCloud(&solCloud);
-        // ---------------------
-
-        // // Print to file here (cij etc)
-        // std::string outName = "chill-"+std::to_string(frame);
-        // int val = gen::prettyPrintYoda(&resCloud, outName);
-        // Print to file here
-        gen::writeDump(&resCloud, dumpName);
-
-        // Write out Cij, Q3, Q6 to files
-        gen::writeHisto(&resCloud, avgQ6);
-      }
     }
-  }
+  }  // end of ice type determination block
   // --------------------------------------
 
   std::cout << rang::style::bold
