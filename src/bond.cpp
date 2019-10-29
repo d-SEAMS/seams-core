@@ -80,10 +80,10 @@ bond::populateHbonds(std::string filename,
                    // ID
   int jOxyMolID;   // Molecular ID of the jatom oxygen atom
   double hBondLen; // Length of O-H (between the donor O and acceptor H)
-  double distCutoff = 2.42; // Distance cutoff of O-H, hard-coded
-  double angleCutoff = 30;  // Angle cutoff in degrees
-  std::vector<int> ooVec;   // Array for the O--O vector
-  std::vector<int> ohVec;   // Array for the O-H vector
+  double distCutoff = 2.42;  // Distance cutoff of O-H, hard-coded
+  double angleCutoff = 30;   // Angle cutoff in degrees
+  std::vector<double> ooVec; // Array for the O--O vector
+  std::vector<double> ohVec; // Array for the O-H vector
 
   // --------------------
   // Get all the hydrogen atoms in the frame (no slice)
@@ -176,17 +176,12 @@ bond::populateHbonds(std::string filename,
         } // end of applying PBCs to the O-H and O--O vectors
         //
         // Get the angle between the O--O and O-H vectors
-        double dot_product =
-            std::inner_product(ooVec.begin(), ooVec.end(), ohVec.begin(), 0);
-        double normFactor = sqrt(std::inner_product(ooVec.begin(), ooVec.end(),
-                                                    ooVec.begin(), 0)) *
-                            sqrt(std::inner_product(ohVec.begin(), ohVec.end(),
-                                                    ohVec.begin(), 0));
-        double calcAngle = acos(dot_product / normFactor); // in radians
-        calcAngle *= 180 / gen::pi;                        // Convert to degrees
+        double gslAngle = gen::gslVecAngle(ooVec, ohVec);
+        double gslAngleDeg = gen::radDeg(gslAngle);
+
         //
         // A hydrogen bond is formed if the angle is less than 30 degrees
-        if (calcAngle > angleCutoff) {
+        if (gslAngleDeg > angleCutoff) {
           continue;
         } // not a hydrogen bond
 
