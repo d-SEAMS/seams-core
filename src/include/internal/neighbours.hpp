@@ -7,9 +7,8 @@
 namespace nneigh {
 
 struct Jatom {
-
-  int index; // Index
-  double r;  // Distance from iatom
+  int index;  // Index
+  double r;   // Distance from iatom
 };
 
 struct JList {
@@ -18,29 +17,25 @@ struct JList {
 };
 
 struct NeighbourList {
-
-  std::vector<JList> iVector; // Collection of points
+  std::vector<JList> iVector;  // Collection of points
 };
 
 // Inefficient O(n^2) implementation of neighbour lists
-molSys::PointCloud<molSys::Point<double>, double>
-neighList(double rcutoff,
-          molSys::PointCloud<molSys::Point<double>, double> *yCloud, int typeI,
-          int typeJ);
+molSys::PointCloud<molSys::Point<double>, double> neighList(
+    double rcutoff, molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    int typeI, int typeJ);
 
 // Inefficient O(n^2) implementation of neighbour lists
 // You can only use this for neighbour lists with one type
-molSys::PointCloud<molSys::Point<double>, double>
-neighListO(double rcutoff,
-           molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-           int typeI);
+std::vector<std::vector<int> > neighListO(
+    double rcutoff, molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    int typeI);
 
 // Inefficient O(n^2) implementation of neighbour lists
 // You can only use this for neighbour lists with one type
-molSys::PointCloud<molSys::Point<double>, double>
-halfNeighList(double rcutoff,
-              molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-              int typeI = 1);
+molSys::PointCloud<molSys::Point<double>, double> halfNeighList(
+    double rcutoff, molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    int typeI = 1);
 
 // Comparator for std::sort
 inline bool compareByLength(const Jatom &a, const Jatom &b) {
@@ -48,10 +43,9 @@ inline bool compareByLength(const Jatom &a, const Jatom &b) {
 }
 
 // Clear neighbour list for the i^th atom if it is already full
-molSys::PointCloud<molSys::Point<double>, double>
-clearNeighList(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-               int iatom);
+molSys::PointCloud<molSys::Point<double>, double> clearNeighList(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom);
 
-} // namespace nneigh
+}  // namespace nneigh
 
-#endif // __NEIGHBOURS_H_
+#endif  // __NEIGHBOURS_H_
