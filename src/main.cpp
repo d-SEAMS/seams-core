@@ -173,32 +173,38 @@ int main(int argc, char *argv[]) {
       testgraph.pts.push_back(iVer);
       // second
       iVer.atomID = 1;
+      iVer.neighListIndex.clear();
       iVer.neighListIndex.push_back(0);
       iVer.neighListIndex.push_back(2);
       testgraph.pts.push_back(iVer);
       // third
       iVer.atomID = 2;
+      iVer.neighListIndex.clear();
       iVer.neighListIndex.push_back(0);
       iVer.neighListIndex.push_back(1);
       testgraph.pts.push_back(iVer);
       // fourth
       iVer.atomID = 3;
+      iVer.neighListIndex.clear();
       iVer.neighListIndex.push_back(4);
       iVer.neighListIndex.push_back(6);
       testgraph.pts.push_back(iVer);
       // fifth
       iVer.atomID = 4;
+      iVer.neighListIndex.clear();
       iVer.neighListIndex.push_back(3);
       iVer.neighListIndex.push_back(5);
       testgraph.pts.push_back(iVer);
       // sixth
       iVer.atomID = 5;
+      iVer.neighListIndex.clear();
       iVer.neighListIndex.push_back(4);
       iVer.neighListIndex.push_back(6);
       testgraph.pts.push_back(iVer);
       // seventh
       // sixth
       iVer.atomID = 6;
+      iVer.neighListIndex.clear();
       iVer.neighListIndex.push_back(3);
       iVer.neighListIndex.push_back(5);
       testgraph.pts.push_back(iVer);
