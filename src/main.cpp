@@ -294,9 +294,46 @@ int main(int argc, char *argv[]) {
         primitive::findRings(&testgraph, i, &visited, maxDepth, depth);
       }  // end of loop through every point
       std::cout << "test2: should have 8 franzblau rings\n";
+      // ---------
+      // Generate the neighbour list again
+      // Element {0}
+      testgraph.pts[0].neighListIndex.clear();
+      testgraph.pts[0].neighListIndex.push_back(1);
+      testgraph.pts[0].neighListIndex.push_back(2);
+      // Element {1}
+      testgraph.pts[1].neighListIndex.clear();
+      testgraph.pts[1].neighListIndex.push_back(0);
+      testgraph.pts[1].neighListIndex.push_back(2);
+      // Element {2}
+      testgraph.pts[2].neighListIndex.clear();
+      testgraph.pts[2].neighListIndex.push_back(0);
+      testgraph.pts[2].neighListIndex.push_back(1);
+      // Element {3}
+      testgraph.pts[3].neighListIndex.clear();
+      testgraph.pts[3].neighListIndex.push_back(4);
+      testgraph.pts[3].neighListIndex.push_back(5);
+      testgraph.pts[3].neighListIndex.push_back(6);
+      // Element {4}
+      testgraph.pts[4].neighListIndex.clear();
+      testgraph.pts[4].neighListIndex.push_back(3);
+      testgraph.pts[4].neighListIndex.push_back(5);
+      testgraph.pts[4].neighListIndex.push_back(6);
+      // Element {5}
+      testgraph.pts[5].neighListIndex.clear();
+      testgraph.pts[5].neighListIndex.push_back(3);
+      testgraph.pts[5].neighListIndex.push_back(4);
+      testgraph.pts[5].neighListIndex.push_back(6);
+      // Element {6}
+      testgraph.pts[6].neighListIndex.clear();
+      testgraph.pts[6].neighListIndex.push_back(3);
+      testgraph.pts[6].neighListIndex.push_back(4);
+      testgraph.pts[6].neighListIndex.push_back(5);
       // -------------------------
-    }
-  }  // end of ice type determination block
+      // Remove non-SP rings
+      testgraph = primitive::removeNonSPrings(&testgraph);
+      std::cout << "After removing non-primitive rings there should be 5 \n";
+    }  // If adv=true
+  }    // end of ice type determination block
   // --------------------------------------
 
   std::cout << rang::style::bold
