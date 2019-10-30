@@ -23,7 +23,6 @@ namespace primitive {
 // A vertex is a collection of elements required for graph traversal
 struct Vertex {
   int atomID;                       // This may not be the same as the index
-  double x, y, z;                   // The coordinates of the vertex
   std::vector<int> neighListIndex;  // contains the INDICES (not the atomIDs) of
                                     // the neighbouring vertices
   bool inGraph =
@@ -51,9 +50,16 @@ Graph populateGraph(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 Graph countAllRings(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                     std::vector<std::vector<int>> neighHbondList, int maxDepth);
 
+// Creates a vector of vectors of all possible rings
+Graph removeNonSPrings(Graph *fullGraph);
+
 // Main function that searches for all rings
 int findRings(Graph *fullGraph, int iNode, std::vector<int> *visited,
               int maxDepth, int depth, int root = -1);
+
+// Calculates the shortest path
+int shortestPath(Graph *fullGraph, int v, int goal, std::vector<int> *path,
+                 std::vector<int> *visited, int maxDepth, int depth = 1);
 
 //// Function for clearing vectors in Graph after multiple usage
 Graph clearGraph(Graph *currentGraph);
