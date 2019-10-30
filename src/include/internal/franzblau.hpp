@@ -48,9 +48,12 @@ Graph populateGraph(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                     std::vector<std::vector<int>> neighHbondList);
 
 // Creates a vector of vectors of all possible rings
-std::vector<std::vector<int>> countAllRings(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> neighHbondList, int maxDepth);
+Graph countAllRings(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                    std::vector<std::vector<int>> neighHbondList, int maxDepth);
+
+// Main function that searches for all rings
+int findRings(Graph *fullGraph, int iNode, std::vector<int> *visited,
+              int maxDepth, int *depth, int root = -1);
 
 }  // namespace primitive
 
