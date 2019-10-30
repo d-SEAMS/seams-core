@@ -108,8 +108,9 @@ int main(int argc, char *argv[]) {
     std::vector<std::vector<int>> nList, hbnList;
     // For averaged q6
     std::vector<double> avgQ6;
-    // For the list of all rings
+    // For the list of all rings (not used rn)
     std::vector<std::vector<int>> rings;
+    primitive::Graph iGraph;
     // -----------------
     // Variables defined in C++ specific to confined systems
 
@@ -125,7 +126,8 @@ int main(int argc, char *argv[]) {
       lua["avgQ6"] = &avgQ6;
       lua["trajectory"] = tFile;
       // Confined ice stuff
-      lua["rings"] = &rings;
+      // lua["rings"] = &rings;
+      lua["graph"] = &iGraph;
       // Register functions
       //
       // Writing stuff
