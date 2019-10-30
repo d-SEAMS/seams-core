@@ -166,6 +166,16 @@ int main(int argc, char *argv[]) {
       // fill fullGraph
       primitive::Graph testgraph;
       primitive::Vertex iVer;
+      // Neighbour list generated
+      // {element} #neighbors [neighbor list]
+      // {0} 2 [1 2 ]
+      // {1} 2 [0 2 ]
+      // {2} 2 [0 1 ]
+      // {3} 2 [4 6 ]
+      // {4} 2 [3 5 ]
+      // {5} 2 [4 6 ]
+      // {6} 2 [3 5 ]
+
       // first
       iVer.atomID = 0;
       iVer.neighListIndex.push_back(1);
@@ -220,6 +230,71 @@ int main(int argc, char *argv[]) {
       }  // end of loop through every point
       std::cout << "tadaaa\n";
       // --------------------------
+      // TEST TEST TEST for two primitive rings
+      // 8 franzblau rings
+      testgraph = primitive::clearGraph(&testgraph);
+      // {element} #neighbors [neighbor list]
+      // {0} 2 [1 2 ]
+      // {1} 2 [0 2 ]
+      // {2} 2 [0 1 ]
+      // {3} 3 [4 5 6 ]
+      // {4} 3 [3 5 6 ]
+      // {5} 3 [3 4 6 ]
+      // {6} 3 [3 4 5 ]
+      // Element {0}
+      iVer.atomID = 0;
+      iVer.neighListIndex.push_back(1);
+      iVer.neighListIndex.push_back(2);
+      testgraph.pts.push_back(iVer);
+      // Element {1}
+      iVer.atomID = 1;
+      iVer.neighListIndex.clear();
+      iVer.neighListIndex.push_back(0);
+      iVer.neighListIndex.push_back(2);
+      testgraph.pts.push_back(iVer);
+      // Element {2}
+      iVer.atomID = 2;
+      iVer.neighListIndex.clear();
+      iVer.neighListIndex.push_back(0);
+      iVer.neighListIndex.push_back(1);
+      testgraph.pts.push_back(iVer);
+      // Element {3}
+      iVer.atomID = 3;
+      iVer.neighListIndex.clear();
+      iVer.neighListIndex.push_back(4);
+      iVer.neighListIndex.push_back(5);
+      iVer.neighListIndex.push_back(6);
+      testgraph.pts.push_back(iVer);
+      // Element {4}
+      iVer.atomID = 4;
+      iVer.neighListIndex.clear();
+      iVer.neighListIndex.push_back(3);
+      iVer.neighListIndex.push_back(5);
+      iVer.neighListIndex.push_back(6);
+      testgraph.pts.push_back(iVer);
+      // Element {5}
+      iVer.atomID = 5;
+      iVer.neighListIndex.clear();
+      iVer.neighListIndex.push_back(3);
+      iVer.neighListIndex.push_back(4);
+      iVer.neighListIndex.push_back(6);
+      testgraph.pts.push_back(iVer);
+      // Element {6}
+      iVer.atomID = 6;
+      iVer.neighListIndex.clear();
+      iVer.neighListIndex.push_back(3);
+      iVer.neighListIndex.push_back(4);
+      iVer.neighListIndex.push_back(5);
+      testgraph.pts.push_back(iVer);
+      // ---
+      // Loop through every point
+      for (int i = 0; i < testgraph.pts.size(); i++) {
+        visited.clear();
+        depth = 0;
+        primitive::findRings(&testgraph, i, &visited, maxDepth, depth);
+      }  // end of loop through every point
+      std::cout << "test2: should have 8 franzblau rings\n";
+      // -------------------------
     }
   }  // end of ice type determination block
   // --------------------------------------
