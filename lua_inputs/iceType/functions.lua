@@ -36,6 +36,6 @@ for frame=targetFrame,finalFrame,frameGap do
    resCloud=readFrameOnlyOne(trajectory,frame,resCloud,oxygenAtomType,false,slice,slice) --- Get the frame
    nList=neighborList(cutoffRadius, resCloud, oxygenAtomType); --- Calculate the neighborlist
    hbnList=getHbondNetwork(trajectory,resCloud,nList,frame,hydrogenAtomType) --- Get the hydrogen-bonded network for the current frame
-   graph=countEveryRing(resCloud, nList,7); --- Gets every ring (non-primitives included)
+   -- graph=countEveryRing(resCloud, nList,7); --- Gets every ring (non-primitives included)
 end
 print("\nFinito\n");

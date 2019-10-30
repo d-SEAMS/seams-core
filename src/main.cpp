@@ -157,11 +157,63 @@ int main(int argc, char *argv[]) {
       lua.set_function("getHbondNetwork", bond::populateHbonds);
       // -----------------
       // Primitive rings
-      lua.set_function("countEveryRing", primitive::countAllRings);
+      // lua.set_function("countEveryRing", primitive::countAllRings);
       // -----------------
       // Use the script
       lua.script_file(lscript);
-      // --------
+      // --------------------------
+      // TEST TEST TEST
+      // fill fullGraph
+      primitive::Graph testgraph;
+      primitive::Vertex iVer;
+      // first
+      iVer.atomID = 0;
+      iVer.neighListIndex.push_back(1);
+      iVer.neighListIndex.push_back(2);
+      testgraph.pts.push_back(iVer);
+      // second
+      iVer.atomID = 1;
+      iVer.neighListIndex.push_back(0);
+      iVer.neighListIndex.push_back(2);
+      testgraph.pts.push_back(iVer);
+      // third
+      iVer.atomID = 2;
+      iVer.neighListIndex.push_back(0);
+      iVer.neighListIndex.push_back(1);
+      testgraph.pts.push_back(iVer);
+      // fourth
+      iVer.atomID = 3;
+      iVer.neighListIndex.push_back(4);
+      iVer.neighListIndex.push_back(6);
+      testgraph.pts.push_back(iVer);
+      // fifth
+      iVer.atomID = 4;
+      iVer.neighListIndex.push_back(3);
+      iVer.neighListIndex.push_back(5);
+      testgraph.pts.push_back(iVer);
+      // sixth
+      iVer.atomID = 5;
+      iVer.neighListIndex.push_back(4);
+      iVer.neighListIndex.push_back(6);
+      testgraph.pts.push_back(iVer);
+      // seventh
+      // sixth
+      iVer.atomID = 6;
+      iVer.neighListIndex.push_back(3);
+      iVer.neighListIndex.push_back(5);
+      testgraph.pts.push_back(iVer);
+      // ---
+      std::vector<int> visited;
+      int depth = 0;
+      int maxDepth = 7;
+      // Loop through every point
+      for (int i = 0; i < testgraph.pts.size(); i++) {
+        visited.clear();
+        depth = 0;
+        primitive::findRings(&testgraph, i, &visited, maxDepth, depth);
+      }  // end of loop through every point
+      std::cout << "tadaaa\n";
+      // --------------------------
     }
   }  // end of ice type determination block
   // --------------------------------------

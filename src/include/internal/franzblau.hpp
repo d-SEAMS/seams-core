@@ -53,7 +53,7 @@ Graph countAllRings(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 
 // Main function that searches for all rings
 int findRings(Graph *fullGraph, int iNode, std::vector<int> *visited,
-              int maxDepth, int *depth, int root = -1);
+              int maxDepth, int depth, int root = -1);
 
 }  // namespace primitive
 
