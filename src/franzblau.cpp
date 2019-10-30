@@ -24,12 +24,14 @@ primitive::Graph primitive::countAllRings(
   // Initialize the graph object with all the information from the pointCloud
   // and neighbour list
   fullGraph = primitive::populateGraph(yCloud, neighHbondList);
+  depth = 0;  // init
   // ------------------------------
   // Loop through every vertex
   for (int iatom = 0; iatom < yCloud->nop; iatom++) {
     // init
-    visited.clear();
-    depth = 0;  // zero for the first call
+    if (depth >= maxDepth) {
+      depth = 0;
+    }
     // Recursive call
     primitive::findRings(&fullGraph, iatom, &visited, maxDepth, &depth);
   }  // loop through
