@@ -204,3 +204,19 @@ primitive::Graph primitive::populateGraph(
 
   return fullGraph;
 }
+
+/********************************************/ /**
+ *  Function for clearing Graph if it is already
+ filled. This should be called before every frame is read in.
+ *  @param[out] currentGraph The cleared Graph
+ ***********************************************/
+primitive::Graph primitive::clearGraph(Graph *currentGraph) {
+  //
+  std::vector<primitive::Vertex> tempPts;
+  std::vector<std::vector<int>> tempRings;
+
+  tempPts.swap(currentGraph->pts);
+  tempRings.swap(currentGraph->rings);
+
+  return *currentGraph;
+}

@@ -55,6 +55,9 @@ Graph countAllRings(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 int findRings(Graph *fullGraph, int iNode, std::vector<int> *visited,
               int maxDepth, int depth, int root = -1);
 
+//// Function for clearing vectors in Graph after multiple usage
+Graph clearGraph(Graph *currentGraph);
+
 }  // namespace primitive
 
 #endif  // __FRANZBLAU_H_
