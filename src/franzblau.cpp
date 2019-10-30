@@ -144,8 +144,8 @@ int primitive::findRings(Graph *fullGraph, int v, std::vector<int> *visited,
   }  // remove root not edges
 
   //
-  // (*visited).pop_back();
-  (*visited).erase(visited->end() - 1);
+  (*visited).pop_back();
+  // (*visited).erase(visited->end() - 1);
   //
   // return 0;
 }
