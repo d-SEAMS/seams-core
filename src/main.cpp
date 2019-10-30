@@ -33,6 +33,7 @@
 // Newer pointCloud
 #include <bond.hpp>
 #include <bop.hpp>
+#include <franzblau.hpp>
 #include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
@@ -107,6 +108,8 @@ int main(int argc, char *argv[]) {
     std::vector<std::vector<int>> nList, hbnList;
     // For averaged q6
     std::vector<double> avgQ6;
+    // For the list of all rings
+    std::vector<std::vector<int>> rings;
     // -----------------
     // Variables defined in C++ specific to confined systems
 
@@ -122,7 +125,7 @@ int main(int argc, char *argv[]) {
       lua["avgQ6"] = &avgQ6;
       lua["trajectory"] = tFile;
       // Confined ice stuff
-      //
+      lua["rings"] = &rings;
       // Register functions
       //
       // Writing stuff
@@ -151,9 +154,12 @@ int main(int argc, char *argv[]) {
       lua.set_function("readFrameOnlyOne", sinp::readLammpsTrjreduced);
       lua.set_function("getHbondNetwork", bond::populateHbonds);
       // -----------------
+      // Primitive rings
+      lua.set_function("countEveryRing", primitive::countAllRings);
+      // -----------------
       // Use the script
       lua.script_file(lscript);
-      std::cout << "\nTest\n";
+      // --------
     }
   }  // end of ice type determination block
   // --------------------------------------
