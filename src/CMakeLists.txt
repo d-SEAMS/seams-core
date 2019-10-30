@@ -58,6 +58,7 @@ add_library(yodaLib SHARED
   neighbours.cpp
   opt_parser.cpp
   backward.cpp
+  franzblau.cpp
 )
 # if(yaml-cpp_FOUND)
 #     target_link_libraries(yodaStruct yaml-cpp)
