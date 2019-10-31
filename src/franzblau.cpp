@@ -1,6 +1,33 @@
 #include <franzblau.hpp>
 
 /********************************************/ /**
+                                                *  The vector of vector of
+                                                *rings, by index, is returned,
+                                                *given a neighbour list (also by
+                                                *index) and the maximum depth
+                                                *upto which rings will be
+                                                *searched, using the Frnazblau
+                                                *algorithm for shortest paths
+                                                ***********************************************/
+std::vector<std::vector<int>> primitive::ringNetwork(
+    std::vector<std::vector<int>> nList, int maxDepth) {
+  //
+  primitive::Graph fullGraph;  // Graph object, contains the connectivity
+                               // information from the neighbourlist
+
+  // Find all possible rings, using backtracking. This may contain non-primitive
+  // rings as well.
+  fullGraph = primitive::countAllRingsFromIndex(nList, maxDepth);
+
+  // Remove all non-SP rings using the Franzblau algorithm.
+  fullGraph = primitive::removeNonSPrings(&fullGraph);
+
+  // The rings vector of vectors inside the fullGraph graph object is the ring
+  // network information we want
+  return fullGraph.rings;
+}
+
+/********************************************/ /**
                                                 *  Get all possible rings (only
                                                 *atom indices, not IDs). The
                                                 *neighbour list is in terms of
@@ -9,7 +36,7 @@
 primitive::Graph primitive::countAllRingsFromIndex(
     std::vector<std::vector<int>> neighHbondList, int maxDepth) {
   //
-  primitive::Graph fullGraph;  // Contains the neighbours of each index
+  primitive::Graph fullGraph;  // Graph object
   std::vector<int>
       visited;  // Contains the indices (NOT IDs) visited for a particular node
   int depth;    // Current depth
