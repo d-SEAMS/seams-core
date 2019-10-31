@@ -94,10 +94,12 @@ int main(int argc, char *argv[]) {
     auto outFileSuper = lua.get<std::string>("chillPlus_mod");
     auto outCluster = lua.get<std::string>("largest_ice_cluster_name");
     // -----------------
-    // Confined Ice lua variables
+    // Topological Network Ring lua variables
     auto hType =
         lua.get<int>("hydrogenAtomType");  // If you want to use the hydrogen
                                            // atoms to get the HBN
+    auto maxDepth = lua.get<int>("maxDepth");  // If you want to use the
+                                               // hydrogen atoms to get the HBN
     // -----------------
     // Bulk/Common Variables defined in C++
     // Variables which must be declared in C++
@@ -108,9 +110,8 @@ int main(int argc, char *argv[]) {
     std::vector<std::vector<int>> nList, hbnList;
     // For averaged q6
     std::vector<double> avgQ6;
-    // For the list of all rings (not used rn)
+    // For the list of all rings (of all sizes)
     std::vector<std::vector<int>> rings;
-    primitive::Graph iGraph;
     // -----------------
     // Variables defined in C++ specific to confined systems
 
@@ -126,8 +127,7 @@ int main(int argc, char *argv[]) {
       lua["avgQ6"] = &avgQ6;
       lua["trajectory"] = tFile;
       // Confined ice stuff
-      // lua["rings"] = &rings;
-      lua["graph"] = &iGraph;
+      lua["rings"] = &rings;
       // Register functions
       //
       // Writing stuff
@@ -151,13 +151,14 @@ int main(int argc, char *argv[]) {
       lua.set_function("largest_cluster", chill::largestIceCluster);
       lua.set_function("writeCluster", sout::writeCluster);
       // -----------------
-      // Confined Ice
+      // Topological Network Methods
       // Generic requirements (read in only inside the slice)
       lua.set_function("readFrameOnlyOne", sinp::readLammpsTrjreduced);
       lua.set_function("getHbondNetwork", bond::populateHbonds);
+      lua.set_function("hBondNetworkByIndex", nneigh::neighbourListByIndex);
       // -----------------
       // Primitive rings
-      // lua.set_function("countEveryRing", primitive::countAllRings);
+      lua.set_function("getPrimitiveRings", primitive::ringNetwork);
       // -----------------
       // Use the script
       lua.script_file(lscript);
