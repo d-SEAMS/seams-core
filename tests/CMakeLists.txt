@@ -1,16 +1,21 @@
 add_executable(yodaStruct_test
                main.cpp
-               bop_correl-test.cpp
-               neighbors-test.cpp
-               spherical_harmonics-test.cpp
-               ${PROJECT_SOURCE_DIR}/src/spherical_harmonics.cpp
+               franzblau-test.cpp
+               ${PROJECT_SOURCE_DIR}/src/franzblau.cpp
 )
+
+# Standard cmake stuff
+# include(FindBLAS)
+# include(FindLAPACK)
+# include(FindBoost)
+include(FindGSL)
 
 # Find packages, including conan packages
 find_package(
   "Lua" REQUIRED
   "Boost" REQUIRED
   "Catch2" REQUIRED
+  "GSL" REQUIRED
   "yaml-cpp"
   "fmt"
   "rang"
@@ -20,6 +25,7 @@ find_package(
 target_link_libraries(yodaStruct_test
   ${Boost_LIBRARIES}
   ${LUA_LIBRARIES}
+  ${GSL_LIBRARIES}
   fmt
   yaml-cpp
   yodaLib
@@ -30,6 +36,7 @@ target_link_libraries(yodaStruct_test
 include_directories(
   ${PROJECT_SOURCE_DIR}/src/include/internal
   ${PROJECT_SOURCE_DIR}/src/include/external
+  ${GSL_INCLUDE_DIRS}
   )
 # Run unit tests
 add_test(NAME yodaStruct-unit-tests COMMAND $<TARGET_FILE:yodaStruct_test>)
