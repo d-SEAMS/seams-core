@@ -249,3 +249,54 @@ std::vector<std::vector<int>> nneigh::halfNeighList(
 
   return nList;
 }
+
+/********************************************/ /**
+ *  Function for getting the neighbour list by index instead of by atom ID.
+ The ordering is with respect to the pointCloud with the coordinates.The first
+ element is the atom for which the other atom indices are neighbours For
+ example, if the neighbours of 1 are 2, 3, 4 the sub-vector would have 1 2 3 4
+ ***********************************************/
+std::vector<std::vector<int>> nneigh::neighbourListByIndex(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<std::vector<int>> nList) {
+  //
+  std::vector<std::vector<int>>
+      indexNlist;              // Desired neighbour list of indices
+  int iatomID, jatomID;        // Atom IDs
+  int iatomIndex, jatomIndex;  // Indices of iatom and jatom
+  int nnumNeighbours;          // Number of nearest neighbours
+
+  // Loop through every atom whose neighbours are contained in the neighbour
+  // list
+  for (int iatom = 0; iatom < nList.size(); iatom++) {
+    iatomID = nList[iatom][0];  // Atom ID
+    // Get the index of iatom
+    auto gotI = yCloud->idIndexMap.find(iatomID);
+    if (gotI != yCloud->idIndexMap.end()) {
+      iatomIndex = gotI->second;
+    }  // found iatomIndex
+    //
+    nnumNeighbours = nList[iatomIndex].size() - 1;
+    // Update the new neighbour list
+    indexNlist.push_back(
+        std::vector<int>());  // Empty vector for the index iatom
+    // Fill the first element with the atom ID of iatom itself
+    indexNlist[iatom].push_back(iatomIndex);
+    //
+    // Loop through the neighbours of iatom
+    for (int jatom = 1; jatom <= nnumNeighbours; jatom++) {
+      jatomID = nList[iatomIndex][jatom];  // Atom ID of neighbour
+      //
+      // Get the index of the j^th atom
+      auto gotJ = yCloud->idIndexMap.find(jatomID);
+      if (gotJ != yCloud->idIndexMap.end()) {
+        jatomIndex = gotJ->second;
+      }  // found jatomIndex
+      // Add to the neighbour list
+      indexNlist[iatom].push_back(jatomIndex);
+    }  // end of loop through neighbours
+  }    // end of loop through every atom
+
+  // Return the new neighbour list
+  return indexNlist;
+}
