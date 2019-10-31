@@ -2,71 +2,38 @@
 
 /********************************************/ /**
                                                 *  Get all possible rings (only
-                                                *atom indices, not IDs)
+                                                *atom indices, not IDs). The
+                                                *neighbour list is in terms of
+                                                *indices
                                                 ***********************************************/
-// primitive::Graph primitive::countAllRings(
-//     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-//     std::vector<std::vector<int>> neighHbondList, int maxDepth) {
-//   //
-//   primitive::Graph fullGraph;  // Contains all the information of the
-//   pointCloud std::vector<std::vector<int>>
-//       rings;  // List of all possible rings (update at the end) (SAVE ATOM
-//       IDs)
-//   std::vector<int>
-//       visited;  // Contains the indices (NOT IDs) visited for a particular
-//       node
-//   int depth;    // Current depth
-//   // Variables required for restoring the neighbour list
-//   std::vector<int> iNeigh;  // Neighbour list of indices NOT ATOM IDs
-//   int nnumNeighbours;       // Number of nearest neighbours for iatom
-//   int jatomID, jatomIndex;  // For the neighbour
+primitive::Graph primitive::countAllRingsFromIndex(
+    std::vector<std::vector<int>> neighHbondList, int maxDepth) {
+  //
+  primitive::Graph fullGraph;  // Contains the neighbours of each index
+  std::vector<int>
+      visited;  // Contains the indices (NOT IDs) visited for a particular node
+  int depth;    // Current depth
 
-//   // ------------------------------
-//   // Init
-//   // Initialize the graph object with all the information from the pointCloud
-//   // and neighbour list
-//   fullGraph = primitive::populateGraph(yCloud, neighHbondList);
-//   depth = 0;  // init
-//   // ------------------------------
-//   // Loop through every vertex
-//   for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-//     // init
-//     if (depth >= maxDepth) {
-//       depth = 0;
-//     }
-//     // Recursive call
-//     primitive::findRings(&fullGraph, iatom, &visited, maxDepth, &depth);
-//   }  // loop through
-//   // ------------------------------
-//   // Restore back-up of the edges (some may have been removed)
-//   for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-//     // -----
-//     // Update the neighbours of iatom (only the indices!)
-//     iNeigh.clear();  // init
-//     nnumNeighbours = neighHbondList[iatom].size() -
-//                      1;  // The first element is atomID of iatom
-//     for (int j = 1; j <= nnumNeighbours; j++) {
-//       jatomID = neighHbondList[iatom][j];  // Atom ID
-//       // Get the atom index for the vector nearest neighbour list
-//       auto it = yCloud->idIndexMap.find(jatomID);
-//       if (it != yCloud->idIndexMap.end()) {
-//         jatomIndex = it->second;
-//       }  // found jatomIndex
-//       else {
-//         std::cerr << "Panic induced! Something is very wrong with your
-//         map.\n";
-//       }  // jatomIndex not found
-//       // Update iNeigh
-//       iNeigh.push_back(jatomIndex);
-//     }  // end of loop through nearest neighbours
-//     // -----
-//     // Update fullGraph
-//     fullGraph.pts[iatom].neighListIndex = iNeigh;
-//   }  // end of loop through every iatom
-//   // ------------------------------
+  // ------------------------------
+  // Init
+  // Initialize the graph object with all the information from the neighbour
+  // list (of indices only)
+  fullGraph = primitive::populateGraphFromIndices(neighHbondList);
+  // ------------------------------
+  // Loop through every vertex
+  for (int iatom = 0; iatom < neighHbondList.size(); iatom++) {
+    visited.clear();
+    depth = 0;
+    // Call the function for getting rings
+    primitive::findRings(&fullGraph, iatom, &visited, maxDepth, depth);
+  }  // loop through every vertex
+  // ------------------------------
+  // Restore back-up of the edges (some may have been removed)
+  fullGraph = primitive::restoreEdgesFromIndices(&fullGraph, neighHbondList);
+  // ------------------------------
 
-//   return fullGraph;
-// }
+  return fullGraph;
+}
 
 /********************************************/ /**
                                                 *  All possible rings are
@@ -158,7 +125,7 @@ int primitive::findRings(Graph *fullGraph, int v, std::vector<int> *visited,
                                                 *Vertex object are NOT the atom
                                                 *IDs.
                                                 ***********************************************/
-primitive::Graph primitive::populateGraph(
+primitive::Graph primitive::populateGraphFromNListID(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> neighHbondList) {
   //
@@ -192,7 +159,7 @@ primitive::Graph primitive::populateGraph(
     }  // end of loop through nearest neighbours
     // -----
     // Update iVertex
-    iVertex.atomID = yCloud->pts[iatom].atomID;
+    iVertex.atomIndex = iatom;
     iVertex.neighListIndex = iNeigh;
     // Add to the Graph object
     fullGraph.pts.push_back(iVertex);
@@ -200,6 +167,61 @@ primitive::Graph primitive::populateGraph(
   // ------------------------------
 
   return fullGraph;
+}
+
+/********************************************/ /**
+                                                *  Fills a Graph object with
+                                                *information from pointCloud and
+                                                *the neighbour list of INDICES
+                                                *not atom IDs. The indices in
+                                                *the neighbour list in the
+                                                *Vertex object are NOT the atom
+                                                *IDs.
+                                                ***********************************************/
+primitive::Graph primitive::populateGraphFromIndices(
+    std::vector<std::vector<int>> nList) {
+  //
+  primitive::Graph fullGraph;  // Contains all the information of the pointCloud
+  primitive::Vertex iVertex;   // The vertex corresponding to a particular point
+  int nnumNeighbours;          // Number of nearest neighbours for iatom
+  int iatom, jatom;            // Atom index being saved
+  // ------------------------------
+  // Loop through every point in nList
+  for (int i = 0; i < nList.size(); i++) {
+    iatom = nList[i][0];  // Atom index of i
+    // neighListIndex is simply the i^th row of nList
+    //
+    // Update iVertex
+    iVertex.atomIndex = iatom;
+    iVertex.neighListIndex = nList[i];
+    // Add to the Graph object
+    fullGraph.pts.push_back(iVertex);
+  }  // end of loop through iatom
+
+  return fullGraph;
+}
+
+/********************************************/ /**
+                                                *  Re-fills the neighbour lists
+                                                *of a graph object from a
+                                                *neighbour the neighbour list of
+                                                *INDICES not atom IDs. The
+                                                *indices in the neighbour list
+                                                *in the Vertex object are NOT
+                                                *the atom IDs.
+                                                ***********************************************/
+primitive::Graph primitive::restoreEdgesFromIndices(
+    Graph *fullGraph, std::vector<std::vector<int>> nList) {
+  //
+  // ------------------------------
+  // Loop through every point in nList
+  for (int i = 0; i < nList.size(); i++) {
+    // neighListIndex is simply the i^th row of nList
+    // Update the neighListIndex list in the graph object
+    fullGraph->pts[i].neighListIndex = nList[i];
+  }  // end of loop through iatom
+
+  return *fullGraph;
 }
 
 /********************************************/ /**

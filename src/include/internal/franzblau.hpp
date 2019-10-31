@@ -22,7 +22,7 @@ namespace primitive {
 
 // A vertex is a collection of elements required for graph traversal
 struct Vertex {
-  int atomID;                       // This may not be the same as the index
+  int atomIndex;                    // This is the index according to pointCloud
   std::vector<int> neighListIndex;  // contains the INDICES (not the atomIDs) of
                                     // the neighbouring vertices
   bool inGraph =
@@ -43,12 +43,24 @@ struct Graph {
 // Creates a graph object and fills it with the information from a neighbour
 // list and pointCloud created before. NOTE: the neighbourListIndex contains the
 // indices and NOT the atom IDs as in the neighbour list
-Graph populateGraph(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                    std::vector<std::vector<int>> neighHbondList);
+Graph populateGraphFromNListID(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<std::vector<int>> neighHbondList);
+
+// Creates a graph object and fills it with the information from a neighbour
+// list of INDICES NOT ATOM IDs created before. NOTE: the neighbourListIndex
+// contains the indices and NOT the atom IDs as in the neighbour list
+Graph populateGraphFromIndices(std::vector<std::vector<int>> nList);
+
+// Re-fills the neighbour lists of a graph object from a neighbour
+// list of INDICES NOT ATOM IDs created before. NOTE: the neighbourListIndex
+// contains the indices and NOT the atom IDs as in the neighbour list
+Graph restoreEdgesFromIndices(Graph *fullGraph,
+                              std::vector<std::vector<int>> nList);
 
 // Creates a vector of vectors of all possible rings
-Graph countAllRings(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                    std::vector<std::vector<int>> neighHbondList, int maxDepth);
+Graph countAllRingsFromIndex(std::vector<std::vector<int>> neighHbondList,
+                             int maxDepth);
 
 // Creates a vector of vectors of all possible rings
 Graph removeNonSPrings(Graph *fullGraph);
