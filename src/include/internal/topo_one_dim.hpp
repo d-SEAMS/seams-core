@@ -45,7 +45,7 @@ bool discardExtraTetragonBlocks(
 
 // Find out which rings are prisms, looping through all ring sizes upto the
 // maxDepth The input ringsAllSizes array has rings of every size.
-int prismAnalysis(std::vector<std::vector<int>> rings,
+int prismAnalysis(std::string path, std::vector<std::vector<int>> rings,
                   std::vector<std::vector<int>> nList,
                   molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                   int maxDepth);

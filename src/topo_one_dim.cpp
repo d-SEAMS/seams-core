@@ -16,7 +16,8 @@
                                                 *starting from 0.
                                                 ***********************************************/
 int ring::prismAnalysis(
-    std::vector<std::vector<int>> rings, std::vector<std::vector<int>> nList,
+    std::string path, std::vector<std::vector<int>> rings,
+    std::vector<std::vector<int>> nList,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int maxDepth) {
   //
   std::vector<std::vector<int>>
@@ -25,7 +26,17 @@ int ring::prismAnalysis(
   std::vector<ring::strucType>
       ringType;  // This vector will have a value for each ring inside
   int nPrisms;   // Number of prisms of each type
-
+  std::vector<int> nPrismList;  // Vector of the values of the number of prisms
+                                // for a particular frame
+  std::vector<double>
+      heightPercent;  // Height percent for a particular n and frame
+  // -------------------------------------------------------------------------------
+  // Init
+  nPrismList.resize(
+      maxDepth -
+      2);  // Has a value for every value of ringSize from 3, upto maxDepth
+  heightPercent.resize(maxDepth - 2);
+  // -------------------------------------------------------------------------------
   // Run this loop for rings of sizes upto maxDepth
   // The smallest possible ring is of size 3
   for (int ringSize = 3; ringSize <= maxDepth; ringSize++) {
@@ -36,6 +47,7 @@ int ring::prismAnalysis(
     //
     // Continue if there are zero rings of ringSize
     if (ringsOneType.size() == 0) {
+      nPrismList[ringSize - 3] = 0;
       continue;
     }  // skip if there are no rings
        //
@@ -51,9 +63,23 @@ int ring::prismAnalysis(
     // Find prisms, saving the IDs to listPrism
     listPrism =
         ring::findPrisms(ringsOneType, &ringType, &nPrisms, nList, yCloud);
+    // -------------
+    nPrismList[ringSize - 3] = nPrisms;  // Update the number of prisms
+    // Continue if there are no prism units
+    if (nPrisms == 0) {
+      continue;
+    }  // skip for no prisms
     // Do a bunch of write-outs and calculations
+    // TODO: Write out each individual prism as data files (maybe with an
+    // option)
     // -------------
   }  // end of loop through every possible ringSize
+
+  // Calculate the height%
+
+  // Write out the prism information
+  sout::writePrismNum(path, yCloud->currentFrame, nPrismList, heightPercent,
+                      maxDepth);
 
   return 0;
 }
