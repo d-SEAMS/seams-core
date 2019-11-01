@@ -1,16 +1,16 @@
 #ifndef __RINGS_H_
 #define __RINGS_H_
 
+#include <math.h>
+#include <sys/stat.h>
 #include <algorithm>
 #include <array>
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <math.h>
 #include <memory>
 #include <sstream>
 #include <string>
-#include <sys/stat.h>
 #include <vector>
 
 #include <cage.hpp>
@@ -65,30 +65,6 @@ int findMixedCages(std::vector<strucType> *ringType,
                    std::vector<cage::Cage> *cageList, int *numDDC, int *numHC,
                    int *numMC);
 
-// Find out which rings are prisms.
-// Returns a vector containing all the ring IDs which are prisms
-std::vector<int>
-findPrisms(std::vector<std::vector<int>> rings,
-           std::vector<strucType> *ringType, int *nPrisms,
-           std::vector<std::vector<int>> nList,
-           molSys::PointCloud<molSys::Point<double>, double> *yCloud);
-
-// Tests whether two rings are basal rings (true) or not (false) for a prism
-// (strict criterion)
-bool basalPrismConditions(std::vector<std::vector<int>> nList,
-                          std::vector<int> *basal1, std::vector<int> *basal2);
-
-// Reduced criterion: Two candidate basal rings of a prism block should have at
-// least one bond between them
-bool relaxedPrismConditions(std::vector<std::vector<int>> nList,
-                            std::vector<int> *basal1, std::vector<int> *basal2);
-
-// Checks whether two 4-membered rings are parallel in one dimension or not to
-// prevent overcounting
-bool discardExtraTetragonBlocks(
-    std::vector<int> *basal1, std::vector<int> *basal2,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud);
-
 // First condition for the DDC: There must be at least 3 other
 // rings in which each element of the equatorial  ring is present
 bool conditionOneDDC(std::vector<std::vector<int>> rings,
@@ -131,6 +107,6 @@ int findPrismatic(std::vector<std::vector<int>> rings, std::vector<int> *listHC,
 // Compares two disordered vectors and checks to see if they contain the same
 // elements
 bool compareRings(std::vector<int> ring1, std::vector<int> ring2);
-} // namespace ring
+}  // namespace ring
 
-#endif // __RINGS_H_
+#endif  // __RINGS_H_
