@@ -5,6 +5,60 @@
 // -----------------------------------------------------------------------------------------------------
 
 /********************************************/ /**
+                                                *  Loops through a vector of
+                                                *vector of rings of all sizes,
+                                                *upto maxDepth. returns a vector
+                                                *which contains the ring IDs of
+                                                *all the rings which are prisms.
+                                                * The ring IDs correspond to the
+                                                *index of the rings inside the
+                                                *vector of vector rings,
+                                                *starting from 0.
+                                                ***********************************************/
+int ring::prismAnalysis(
+    std::vector<std::vector<int>> rings, std::vector<std::vector<int>> nList,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int maxDepth) {
+  //
+  std::vector<std::vector<int>>
+      ringsOneType;            // Vector of vectors of rings of a single size
+  std::vector<int> listPrism;  // Vector for ring indices of n-sided prism
+  std::vector<ring::strucType>
+      ringType;  // This vector will have a value for each ring inside
+  int nPrisms;   // Number of prisms of each type
+
+  // Run this loop for rings of sizes upto maxDepth
+  // The smallest possible ring is of size 3
+  for (int ringSize = 3; ringSize <= maxDepth; ringSize++) {
+    // Clear ringsOneType
+    ring::clearRingList(ringsOneType);
+    // Get rings of the current ring size
+    ringsOneType = ring::getSingleRingSize(rings, ringSize);
+    //
+    // Continue if there are zero rings of ringSize
+    if (ringsOneType.size() == 0) {
+      continue;
+    }  // skip if there are no rings
+       //
+       // -------------
+       // Init of variables specific to ringSize prisms
+    listPrism.resize(0);
+    ringType.resize(0);
+    nPrisms = 0;
+    ringType.resize(
+        ringsOneType.size());  // Has a value for each ring. init to zero.
+    // -------------
+    // Now that you have rings of a certain size:
+    // Find prisms, saving the IDs to listPrism
+    listPrism =
+        ring::findPrisms(ringsOneType, &ringType, &nPrisms, nList, yCloud);
+    // Do a bunch of write-outs and calculations
+    // -------------
+  }  // end of loop through every possible ringSize
+
+  return 0;
+}
+
+/********************************************/ /**
  *  Determines which rings are n-sided prisms. This function
  returns a vector which contains the ring IDs of all the rings which are prisms.
  The ring IDs correspond to the index of the rings inside the vector of vector
@@ -141,10 +195,10 @@ bool ring::basalPrismConditions(std::vector<std::vector<int>> nList,
     // =================================
     // Checking to seee if m_k is be a neighbour of l1
     // Find m_k inside l1 neighbour list
-    auto it = std::find(nList[l1 - 1].begin() + 1, nList[l1 - 1].end(), m_k);
+    auto it = std::find(nList[l1].begin() + 1, nList[l1].end(), m_k);
 
     // If the element has been found, for l1
-    if (it != nList[l1 - 1].end()) {
+    if (it != nList[l1].end()) {
       l1_neighbour = true;
       kIndex = k;
       break;
@@ -174,11 +228,11 @@ bool ring::basalPrismConditions(std::vector<std::vector<int>> nList,
 
       // Checking to see if kAtomID is a neighbour of lAtomID
       // Find kAtomID inside lAtomID neighbour list
-      auto it1 = std::find(nList[lAtomID - 1].begin() + 1,
-                           nList[lAtomID - 1].end(), kAtomID);
+      auto it1 =
+          std::find(nList[lAtomID].begin() + 1, nList[lAtomID].end(), kAtomID);
 
       // If the element has been found, for l1
-      if (it1 != nList[lAtomID - 1].end()) {
+      if (it1 != nList[lAtomID].end()) {
         isNeighbour[k] = true;
       }
     }  // Loop through basal2
@@ -224,11 +278,10 @@ bool ring::relaxedPrismConditions(std::vector<std::vector<int>> nList,
     for (int m = 0; m < ringSize; m++) {
       m_k = (*basal2)[m];
       // Find m_k inside l_k neighbour list
-      auto it =
-          std::find(nList[l_k - 1].begin() + 1, nList[l_k - 1].end(), m_k);
+      auto it = std::find(nList[l_k].begin() + 1, nList[l_k].end(), m_k);
 
       // If the element has been found, for l1
-      if (it != nList[l_k - 1].end()) {
+      if (it != nList[l_k].end()) {
         isNeighbour = true;
         break;
       }  // found element
@@ -246,26 +299,33 @@ bool ring::relaxedPrismConditions(std::vector<std::vector<int>> nList,
 
 /********************************************/ /**
  *  Discards basal tetragonal rings which are not oriented perpendicular to the
- z dimension. This is hard-coded for the z-dimension but any dimension is
+ axial direction. This is hard-coded for the z-dimension but any dimension is
  equivalent. If true, then the rings are axial.
  ***********************************************/
 bool ring::discardExtraTetragonBlocks(
     std::vector<int> *basal1, std::vector<int> *basal2,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
   int ringSize =
-      (*basal1).size();    // Size of the ring; each ring contains n elements
-  bool isHigher, isLower;  // For figuring out if basal1 is in above or beneath
-                           // basal2, in the +X direction
+      (*basal1).size();  // Size of the ring; each ring contains n elements
   int iatomIndex,
       jatomIndex;   // Indices of the elements in basal1 and basal2 respectively
-  double z_i, z_j;  // Z coordinates of iatom and jatom of basal1 and basal2
-                    // respectively
+  double r_i, r_j;  // Coordinates in the axial dimension of iatom and jatom of
+                    // basal1 and basal2 respectively
+  int axialDim;     // 0 for x, 1 for y and 2 for z dimensions respectively
   // Variables for getting the projected area
   bool axialBasal1, axialBasal2;  // bools for checking if basal1 and basal2 are
                                   // axial (true) respectively
   double areaXY, areaXZ,
       areaYZ;  // Projected area on the XY, XZ and YZ planes respectively
-
+  // ----------------------------------------
+  // Find the axial dimension for a quasi-one-dimensional ice nanotube
+  // The axial dimension will have the largest box length
+  // Index -> axial dimension
+  // 0 -> x dim
+  // 1 -> y dim
+  // 2 -> z dim
+  axialDim = std::max_element(yCloud->box.begin(), yCloud->box.end()) -
+             yCloud->box.begin();
   // ----------------------------------------
   // Calculate projected area onto the XY, YZ and XZ planes for basal1
   axialBasal1 = false;  // Init to false
@@ -276,11 +336,11 @@ bool ring::discardExtraTetragonBlocks(
   areaXZ = 0.0;
   areaYZ = 0.0;
 
-  jatomIndex = (*basal1)[0] - 1;
+  jatomIndex = (*basal1)[0];
 
   // All points except the first pair
   for (int k = 1; k < ringSize; k++) {
-    iatomIndex = (*basal1)[k] - 1;  // Current vertex
+    iatomIndex = (*basal1)[k];  // Current vertex
 
     // Add to the polygon area
     // ------
@@ -300,7 +360,7 @@ bool ring::discardExtraTetragonBlocks(
   }
 
   // Closure point
-  iatomIndex = (*basal1)[0] - 1;
+  iatomIndex = (*basal1)[0];
   // ------
   // XY plane
   areaXY += (yCloud->pts[jatomIndex].x + yCloud->pts[iatomIndex].x) *
@@ -323,10 +383,31 @@ bool ring::discardExtraTetragonBlocks(
   areaXZ = fabs(areaXZ);
   areaYZ = fabs(areaYZ);
 
-  // Hard-coded for the z-axis. Check if xy projected area is the greatest
-  if (areaXY > areaXZ && areaXY > areaYZ) {
-    axialBasal1 = true;
-  }  // end of check for axial ring for basal1
+  // If the axial dimension is x, y, or z:
+  // then the maximum basal area should be in the YZ, XZ and XY dimensions
+  // respectively
+  // x dim
+  if (axialDim == 0) {
+    if (areaYZ > areaXY && areaYZ > areaXZ) {
+      axialBasal1 = true;
+    }  // end of check for axial ring for basal1
+  }    // x dim
+  // y dim
+  else if (axialDim == 1) {
+    if (areaXZ > areaXY && areaXZ > areaYZ) {
+      axialBasal1 = true;
+    }  // end of check for axial ring for basal1
+  }    // x dim
+  // z dim
+  else if (axialDim == 2) {
+    if (areaXY > areaXZ && areaXY > areaYZ) {
+      axialBasal1 = true;
+    }  // end of check for axial ring for basal1
+  }    // x dim
+  else {
+    std::cerr << "Could not find the axial dimension.\n";
+    return false;
+  }
   // ----------------------------------------
   // Calculate projected area onto the XY, YZ and XZ planes for basal2
 
@@ -335,11 +416,11 @@ bool ring::discardExtraTetragonBlocks(
   areaXZ = 0.0;
   areaYZ = 0.0;
 
-  jatomIndex = (*basal2)[0] - 1;
+  jatomIndex = (*basal2)[0];
 
   // All points except the first pair
   for (int k = 1; k < ringSize; k++) {
-    iatomIndex = (*basal2)[k] - 1;  // Current vertex
+    iatomIndex = (*basal2)[k];  // Current vertex
 
     // Add to the polygon area
     // ------
@@ -359,7 +440,7 @@ bool ring::discardExtraTetragonBlocks(
   }
 
   // Closure point
-  iatomIndex = (*basal2)[0] - 1;
+  iatomIndex = (*basal2)[0];
   // ------
   // XY plane
   areaXY += (yCloud->pts[jatomIndex].x + yCloud->pts[iatomIndex].x) *
@@ -382,10 +463,32 @@ bool ring::discardExtraTetragonBlocks(
   areaXZ = fabs(areaXZ);
   areaYZ = fabs(areaYZ);
 
-  // Hard-coded for the z-axis. Check if xy projected area is the greatest
-  if (areaXY > areaXZ && areaXY > areaYZ) {
-    axialBasal2 = true;
-  }  // end of check for axial ring for basal1
+  // Check if xy projected area is the greatest
+  // If the axial dimension is x, y, or z:
+  // then the maximum basal area should be in the YZ, XZ and XY dimensions
+  // respectively
+  // x dim
+  if (axialDim == 0) {
+    if (areaYZ > areaXY && areaYZ > areaXZ) {
+      axialBasal2 = true;
+    }  // end of check for axial ring for basal1
+  }    // x dim
+  // y dim
+  else if (axialDim == 1) {
+    if (areaXZ > areaXY && areaXZ > areaYZ) {
+      axialBasal2 = true;
+    }  // end of check for axial ring for basal1
+  }    // x dim
+  // z dim
+  else if (axialDim == 2) {
+    if (areaXY > areaXZ && areaXY > areaYZ) {
+      axialBasal2 = true;
+    }  // end of check for axial ring for basal1
+  }    // x dim
+  else {
+    std::cerr << "Could not find the axial dimension.\n";
+    return false;
+  }
   // ----------------------------------------
 
   // Now check if basal1 and basal2 are axial or not
@@ -393,57 +496,5 @@ bool ring::discardExtraTetragonBlocks(
     return true;
   } else {
     return false;
-  }
-
-  // ----------------------------------------
-
-  // Get the one element of basal1
-  iatomIndex = (*basal1)[0] - 1;    // C++ indices are one less
-  z_i = yCloud->pts[iatomIndex].z;  // z coordinate of element 0 of basal1
-  // First element of basal2
-  jatomIndex = (*basal2)[0] - 1;    // C++ indices are one less
-  z_j = yCloud->pts[jatomIndex].z;  // z coordinate of element 0 of basal2
-
-  // Init
-  isHigher = false;
-  isLower = false;
-
-  if (z_i > z_j) {
-    isHigher = true;
-  }  // basal1 is 'above' basal2
-  else if (z_i < z_j) {
-    isLower = true;
-  }  // basal1 is 'below' basal2
-  else {
-    return false;
-  }  // Basal1 and basal2 are 'lateral rings'
-
-  // Check to see that every element of basal1 is above or below basal2
-  // Loop through the elements of basal1 and basal2
-  for (int k = 0; k < ringSize; k++) {
-    iatomIndex = (*basal1)[k] - 1;    // C++ indices are one less
-    z_i = yCloud->pts[iatomIndex].z;  // z coordinate of iatom of basal1
-    // Now loop through every element of basal2
-    for (int l = 0; l < ringSize; l++) {
-      jatomIndex = (*basal2)[l] - 1;    // C++ indices are one less
-      z_j = yCloud->pts[jatomIndex].z;  // z coordinate of basal2
-
-      // when basal1 is higher than basal2
-      if (isHigher) {
-        if (z_i <= z_j) {
-          return false;
-        }
-      }
-      //
-      // when basal1 is lower
-      if (isLower) {
-        if (z_i >= z_j) {
-          return false;
-        }
-      }
-      //
-    }  // end of loop through basal2
-  }    // end of loop through elements of basal1
-
-  return true;
+  }  // Check for basal1 and basal2
 }
