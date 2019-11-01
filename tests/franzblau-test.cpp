@@ -11,7 +11,7 @@
 SCENARIO(
     "Test the number of rings formed when there is one 4-membered ring and one "
     "3-membered ring.",
-    "[franzblauAlreadyPrimitive]") {
+    "[ring]") {
   GIVEN("An adjacency or neighbour list") {
     // Hard-coded example of a known system
     // There are 2 franzblau rings
@@ -91,7 +91,7 @@ SCENARIO(
 SCENARIO(
     "Test the number of rings formed when there are 8 Franzblau rings and 5 "
     "primitive rings.",
-    "[franzblauOnlySP]") {
+    "[ring]") {
   GIVEN(
       "A known adjacency or neighbour list with the number of all rings "
       "obtained from backtracking not equal to the number of primitive rings") {
@@ -163,10 +163,12 @@ SCENARIO(
     iNeigh.push_back(5);      // neighbour
     nList.push_back(iNeigh);  // Add to neighbour list
     // --------------------
-    WHEN("Calculate every possible ring using backtracking") {
+    WHEN(
+        "Calculating primitive rings according to Phys. Rev. B, "
+        "44(10):4925-4930 (1991).") {
       // Calculate the number of rings
       fullGraph = primitive::countAllRingsFromIndex(nList, maxDepth);
-      THEN("The number of rings should be 2 for this case.") {
+      THEN("The number of primitive rings should be 5 for this case.") {
         // Find the number of rings inside the graph object
         nAllRings =
             fullGraph.rings.size();  // Number of rings after backtracking
