@@ -991,7 +991,7 @@ int sout::writeBasalRingsPrism(
   }  // end of anti-clockwise check
   // Some error
   if (isClock == false && isAntiClock == false) {
-    std::cerr << "There is some mistake with your prism basal rings.\n";
+    // std::cerr << "The points are equidistant.\n";
     return 1;
   }  // end of error handling
   // ---------------------------------------------------
