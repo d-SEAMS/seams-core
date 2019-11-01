@@ -103,6 +103,15 @@ int main(int argc, char *argv[]) {
     auto maxDepth = lua.get<int>("maxDepth");  // If you want to use the
                                                // hydrogen atoms to get the HBN
     // -----------------
+    // Variables for output directory writing: TODO: shift to config??
+    auto doBOP = lua.get<bool>("doBOP");  // If you want to do BOP analysis
+    auto topoOneDim = lua.get<bool>(
+        "topoOneDim");  // If you want to do the topological analysis for INTs
+    auto topoTwoDim = lua.get<bool>(
+        "topoTwoDim");  // If you want to do topological analysis for monolayers
+    auto topoBulk = lua.get<bool>(
+        "topoBulk");  // If you want topological network analysis for bulk
+    // -----------------
     // Bulk/Common Variables defined in C++
     // Variables which must be declared in C++
     //
