@@ -1047,26 +1047,27 @@ int sout::writeBasalRingsPrism(
  volume slice
  Uses Boost!
  ***********************************************/
-int sout::writePrismNum(int nPrisms, int ringSize, std::string filename) {
+int sout::writePrismNum(std::string path, int currentFrame,
+                        std::vector<int> nPrisms,
+                        std::vector<double> heightPercent, int maxDepth) {
   std::ofstream outputFile;
   // ----------------
-  // Create output dir if it doesn't exist already
-  const char *path = "../output";  // relative to the build directory
-  fs::path dir(path);
-  // if (fs::create_directory(dir)) {
-  //   std::cerr << "Output directory created\n";
-  // }
-  // ----------------
   // Write output to file inside the output directory
-  outputFile.open("../output/" + filename);
+  outputFile.open(path + "topoINT/nPrisms.dat",
+                  std::ios_base::app | std::ios_base::out);
 
   // Format:
-  // # Ringsize number_of_prisms
-  // 272    214    906   1361    388      1
+  // Frame RingSize Num_of_prisms Height% RingSize ... Height%
+  // 1 3 0 0 4 35 40 ....
 
-  outputFile << "# Ringsize number_of_prisms\n";
+  outputFile << currentFrame << " ";
 
-  outputFile << ringSize << "  " << nPrisms;
+  for (int ringSize = 3; ringSize <= maxDepth; ringSize++) {
+    outputFile << ringSize << " " << nPrisms[ringSize - 3] << " "
+               << heightPercent[ringSize - 3] << " ";
+  }
+
+  outputFile << "\n";
 
   outputFile.close();
 

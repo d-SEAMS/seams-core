@@ -37,10 +37,10 @@ int writeHexagonalsWithSlice(std::vector<std::vector<int>> rings,
 int writeRings(std::vector<std::vector<int>> rings,
                std::string filename = "rings.dat");
 
-// Function for printing out the number of prism blocks, when there is no volume
-// slice
-int writePrismNum(int nPrisms, int ringSize,
-                  std::string filename = "nPrisms.dat");
+// Function for printing out the number of prism blocks, with or without slices.
+// Be careful when using slices!
+int writePrismNum(std::string path, int currentFrame, std::vector<int> nPrisms,
+                  std::vector<double> heightPercent, int maxDepth);
 
 // Function for writing out each prism
 int writePrisms(std::vector<int> *basal1, std::vector<int> *basal2,
