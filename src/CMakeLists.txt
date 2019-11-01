@@ -60,6 +60,7 @@ add_library(yodaLib SHARED
   backward.cpp
   franzblau.cpp
   topo_one_dim.cpp
+  order_parameter.cpp
 )
 # if(yaml-cpp_FOUND)
 #     target_link_libraries(yodaStruct yaml-cpp)
