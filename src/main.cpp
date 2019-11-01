@@ -37,8 +37,10 @@
 #include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <ring.hpp>
 #include <seams_input.hpp>
 #include <seams_output.hpp>
+#include <topo_one_dim.hpp>
 
 // Externally bundled-input libraries
 // #include <cxxopts.hpp>
@@ -111,6 +113,7 @@ int main(int argc, char *argv[]) {
     // For averaged q6
     std::vector<double> avgQ6;
     // For the list of all rings (of all sizes)
+    std::vector<std::vector<int>> ringsAllSizes;
     std::vector<std::vector<int>> rings;
     // -----------------
     // Variables defined in C++ specific to confined systems
@@ -127,7 +130,7 @@ int main(int argc, char *argv[]) {
       lua["avgQ6"] = &avgQ6;
       lua["trajectory"] = tFile;
       // Confined ice stuff
-      lua["rings"] = &rings;
+      lua["ringsAllSizes"] = &rings;
       // Register functions
       //
       // Writing stuff
@@ -160,9 +163,12 @@ int main(int argc, char *argv[]) {
       // Primitive rings
       lua.set_function("getPrimitiveRings", primitive::ringNetwork);
       // -----------------
+      // Quasi-one-dimensional ice
+      lua.set_function("prismAnalysis", ring::prismAnalysis);
       // Use the script
       lua.script_file(lscript);
       // --------------------------
+
     }  // If adv=true
   }    // end of ice type determination block
   // --------------------------------------
