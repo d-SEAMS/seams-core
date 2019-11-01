@@ -14,6 +14,7 @@
 #include <vector>
 
 #include <mol_sys.hpp>
+#include <order_parameter.hpp>
 #include <ring.hpp>
 #include <seams_input.hpp>
 #include <seams_output.hpp>

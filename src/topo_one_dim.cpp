@@ -32,6 +32,7 @@ int ring::prismAnalysis(
       heightPercent;  // Height percent for a particular n and frame
   std::vector<int>
       atomTypes;  // contains int values for each prism type considered
+  double avgPrismHeight = 2.845;  // A value of 2.7-2.85 Angstrom is reasonable
   // -------------------------------------------------------------------------------
   // Init
   nPrismList.resize(
@@ -51,7 +52,8 @@ int ring::prismAnalysis(
     //
     // Continue if there are zero rings of ringSize
     if (ringsOneType.size() == 0) {
-      nPrismList[ringSize - 3] = 0;
+      nPrismList[ringSize - 3] = 0;       // Update the number of prisms
+      heightPercent[ringSize - 3] = 0.0;  // Update the height%
       continue;
     }  // skip if there are no rings
        //
@@ -69,6 +71,9 @@ int ring::prismAnalysis(
         ring::findPrisms(ringsOneType, &ringType, &nPrisms, nList, yCloud);
     // -------------
     nPrismList[ringSize - 3] = nPrisms;  // Update the number of prisms
+    // Update the height% for the phase
+    heightPercent[ringSize - 3] =
+        topoparam::normHeightPercent(yCloud, nPrisms, avgPrismHeight);
     // Continue if there are no prism units
     if (nPrisms == 0) {
       continue;
