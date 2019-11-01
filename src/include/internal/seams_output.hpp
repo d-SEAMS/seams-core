@@ -63,11 +63,18 @@ int writeLAMMPSdata(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                     std::vector<std::vector<int>> bonds,
                     std::string filename = "system-rings.data");
 
-// Write a data file for prisms
+// Write a data file for prisms of every type
+int writeLAMMPSdataAllPrisms(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
+    int maxDepth, std::string path);
+
+// Write a data file for prisms of a single type
 int writeLAMMPSdataPrisms(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> rings, bool useBondFile, std::string bondFile,
-    std::vector<int> listPrism, std::string filename = "system-prisms.data");
+    std::vector<int> listPrism, std::vector<std::vector<int>> nList,
+    std::string filename = "system-prisms.data");
 
 // Write out a lammps data file for DDCs or HCs, assuming that there is no slice
 int writeLAMMPSdataCages(
