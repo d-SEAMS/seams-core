@@ -30,12 +30,16 @@ int ring::prismAnalysis(
                                 // for a particular frame
   std::vector<double>
       heightPercent;  // Height percent for a particular n and frame
+  std::vector<int>
+      atomTypes;  // contains int values for each prism type considered
   // -------------------------------------------------------------------------------
   // Init
   nPrismList.resize(
       maxDepth -
       2);  // Has a value for every value of ringSize from 3, upto maxDepth
   heightPercent.resize(maxDepth - 2);
+  // The atomTypes vector is the same size as the pointCloud atoms
+  atomTypes.resize(yCloud->nop, 1);  // The dummy or unclassified value is 1
   // -------------------------------------------------------------------------------
   // Run this loop for rings of sizes upto maxDepth
   // The smallest possible ring is of size 3
@@ -60,7 +64,7 @@ int ring::prismAnalysis(
         ringsOneType.size());  // Has a value for each ring. init to zero.
     // -------------
     // Now that you have rings of a certain size:
-    // Find prisms, saving the IDs to listPrism
+    // Find prisms, saving the ring indices to listPrism
     listPrism =
         ring::findPrisms(ringsOneType, &ringType, &nPrisms, nList, yCloud);
     // -------------
@@ -72,6 +76,8 @@ int ring::prismAnalysis(
     // Do a bunch of write-outs and calculations
     // TODO: Write out each individual prism as data files (maybe with an
     // option)
+    // Get the atom types for a particular prism type
+    ring::assignPrismType(ringsOneType, listPrism, ringSize, &atomTypes);
     // -------------
   }  // end of loop through every possible ringSize
 
@@ -80,6 +86,8 @@ int ring::prismAnalysis(
   // Write out the prism information
   sout::writePrismNum(path, yCloud->currentFrame, nPrismList, heightPercent,
                       maxDepth);
+  // Write out the lammps data file for the particular frame
+  sout::writeLAMMPSdataAllPrisms(yCloud, nList, atomTypes, maxDepth, path);
 
   return 0;
 }
@@ -524,3 +532,35 @@ bool ring::discardExtraTetragonBlocks(
     return false;
   }  // Check for basal1 and basal2
 }
+
+/********************************************/ /**
+ *  Assign an atomType (equal to the number of nodes in the ring)
+ given a vector with a list of indices of rings comprising the prisms.
+ Note that the ring indices in listPrism correspond to the indices
+ in the input rings vector of vectors
+ ***********************************************/
+int ring::assignPrismType(std::vector<std::vector<int>> rings,
+                          std::vector<int> listPrism, int ringSize,
+                          std::vector<int> *atomTypes) {
+  // Every value in listPrism corresponds to an index in rings.
+  // Every ring contains atom indices, corresponding to the indices (not atom
+  // IDs) in rings
+  int iring;  // Index of current ring
+  int iatom;  // Index of current atom
+
+  // Dummy value corresponds to a value of 1.
+  // Each value is initialized to the value of 1.
+
+  // Loop through every ring in rings
+  for (int i = 0; i < listPrism.size(); i++) {
+    iring = listPrism[i];
+    // Loop through every element in iring
+    for (int j = 0; j < ringSize; j++) {
+      iatom = rings[iring][j];  // Atom index
+      // Update the atom type
+      (*atomTypes)[iatom] = ringSize;
+    }  // end of loop through every atom in iring
+  }    // end of loop through every ring
+
+  return 0;
+}  // end of function

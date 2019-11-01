@@ -50,6 +50,12 @@ int prismAnalysis(std::string path, std::vector<std::vector<int>> rings,
                   molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                   int maxDepth);
 
+// Assign an atomType (equal to the number of nodes in the ring)
+// given a vector with a list of indices of rings comprising the prisms
+int assignPrismType(std::vector<std::vector<int>> rings,
+                    std::vector<int> listPrism, int ringSize,
+                    std::vector<int> *atomTypes);
+
 }  // namespace ring
 
 #endif  // __TOPOCONFINED_H_
