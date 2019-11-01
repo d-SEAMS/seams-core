@@ -9,5 +9,11 @@ maxDepth = 7; --- The maximum depth upto which rings will be searched.
 
 --- DO NOT ENABLE if you have not read the instructions
 defineFunctions=true; --- The last test before all hell breaks loose
-outDir="../runOne/"; --- The subdirectory used
+outDir="../runOne/"; --- The subdirectory used; 
 functionScript="../lua_inputs/iceType/functions.lua" --- This is relative to the binary location
+
+--- Variables for creating directories, maybe shift to the config later?
+doBOP = false; --- Bond orienational parameter analysis (yes/no)
+topoOneDim = true; --- Topological network criterion for one-dimensional prisms
+topoTwoDim = false; --- Topological network criterion for two-dimensional ice
+topoBulk = false; --- DDC/HC criterion for bulk ice 
