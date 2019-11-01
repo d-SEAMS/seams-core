@@ -107,6 +107,14 @@ int findPrismatic(std::vector<std::vector<int>> rings, std::vector<int> *listHC,
 // Compares two disordered vectors and checks to see if they contain the same
 // elements
 bool compareRings(std::vector<int> ring1, std::vector<int> ring2);
+
+// Returns a vector of vectors of rings of a single size
+std::vector<std::vector<int>> getSingleRingSize(
+    std::vector<std::vector<int>> rings, int ringSize);
+
+// Erases memory for a vector of vectors for a list of rings
+int clearRingList(std::vector<std::vector<int>> &rings);
+
 }  // namespace ring
 
 #endif  // __RINGS_H_

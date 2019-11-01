@@ -1,6 +1,44 @@
 #include <ring.hpp>
 
 /********************************************/ /**
+                                                *  Deletes the memory of a
+                                                *vector of vectors
+                                                ***********************************************/
+int ring::clearRingList(std::vector<std::vector<int>> &rings) {
+  //
+  std::vector<std::vector<int>> tempEmpty;
+
+  rings.swap(tempEmpty);
+
+  return 0;
+}
+
+/********************************************/ /**
+                                                *  Gets rings of a single ring
+                                                *size from all primitive rings
+                                                *and returns that vector of
+                                                *vectors
+                                                ***********************************************/
+std::vector<std::vector<int>> ring::getSingleRingSize(
+    std::vector<std::vector<int>> rings, int ringSize) {
+  //
+  std::vector<std::vector<int>> ringSingleSize;  // rings of one size
+
+  // rings contains primitive rings of all sizes
+  // Only save rings of a given size (ringSize) to the new
+  // vector of vectors, ringSingleSize
+  for (int iring = 0; iring < rings.size(); iring++) {
+    // Check the size of the current ring
+    // If it is the correct size, save it in ringSingleSize
+    if (rings[iring].size() == ringSize) {
+      ringSingleSize.push_back(rings[iring]);
+    }  // End of check of the size of iring
+  }    // end of loop through all rings in rings
+
+  return ringSingleSize;
+}
+
+/********************************************/ /**
  *  Checks if the ring has more than three consecutive
  water molecules or not. Returns false if a quadruplet is within
  the neighbour list.
