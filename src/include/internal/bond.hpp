@@ -40,7 +40,8 @@ double getHbondDistanceOH(
 // contain duplicates! Gets the bond information from the vector of vectors
 // containing the rings
 std::vector<std::vector<int>> populateBonds(
-    std::vector<std::vector<int>> rings);
+    std::vector<std::vector<int>> nList,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud);
 
 // Creates a vector of vectors containing bond connectivity information from the
 // rings vector of vectors and cage information
