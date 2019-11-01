@@ -1,7 +1,12 @@
 add_executable(yodaStruct_test
                main.cpp
                franzblau-test.cpp
+               topo_one_dim-test.cpp
                ${PROJECT_SOURCE_DIR}/src/franzblau.cpp
+               ${PROJECT_SOURCE_DIR}/src/topo_one_dim.cpp
+               ${PROJECT_SOURCE_DIR}/src/ring.cpp
+               ${PROJECT_SOURCE_DIR}/src/neighbours.cpp
+               ${PROJECT_SOURCE_DIR}/src/mol_sys.cpp
 )
 
 # Standard cmake stuff
