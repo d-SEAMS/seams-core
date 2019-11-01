@@ -443,7 +443,7 @@ int sout::writePrisms(
 
   // For basal 1
   for (int iring = 0; iring < ringSize; iring++) {
-    iatomIndex = (*basal1)[iring] - 1;  // C++ indices are one less
+    iatomIndex = (*basal1)[iring];  // C++ indices are one less
     // Write the coordinates out to the file
     outputFile << yCloud->pts[iatomIndex].x << " ";
     outputFile << yCloud->pts[iatomIndex].y << " ";
@@ -454,7 +454,7 @@ int sout::writePrisms(
 
   // For basal 2
   for (int iring = 0; iring < ringSize; iring++) {
-    iatomIndex = (*basal2)[iring] - 1;  // C++ indices are one less
+    iatomIndex = (*basal2)[iring];  // C++ indices are one less
     // Write the coordinates out to the file
     outputFile << yCloud->pts[iatomIndex].x << " ";
     outputFile << yCloud->pts[iatomIndex].y << " ";
@@ -470,7 +470,7 @@ int sout::writePrisms(
     outputFile.open("../output/prisms/singleRing.dat");
     // For basal 1
     for (int iring = 0; iring < ringSize; iring++) {
-      iatomIndex = (*basal1)[iring] - 1;  // C++ indices are one less
+      iatomIndex = (*basal1)[iring];  // C++ indices are one less
       // Write the coordinates out to the file
       outputFile << yCloud->pts[iatomIndex].x << " ";
       outputFile << yCloud->pts[iatomIndex].y << " ";
@@ -932,11 +932,10 @@ int sout::writeBasalRingsPrism(
       m_k = (*basal2)[m];  // Atom ID to find in the neighbour list of iatom
 
       // Find m_k inside l_k neighbour list
-      auto it =
-          std::find(nList[l_k - 1].begin() + 1, nList[l_k - 1].end(), m_k);
+      auto it = std::find(nList[l_k].begin() + 1, nList[l_k].end(), m_k);
 
       // If the element has been found, for l1
-      if (it != nList[l_k - 1].end()) {
+      if (it != nList[l_k].end()) {
         isNeighbour = true;
         iatom = l;  // index of basal1
         jatom = m;  // index of basal2
@@ -974,9 +973,9 @@ int sout::writeBasalRingsPrism(
     tempJback = ringSize - 1;
   }
 
-  int forwardJ = (*basal2)[tempJfor] - 1;
-  int backwardJ = (*basal2)[tempJback] - 1;
-  int currentI = (*basal1)[iatom] - 1;
+  int forwardJ = (*basal2)[tempJfor];
+  int backwardJ = (*basal2)[tempJback];
+  int currentI = (*basal1)[iatom];
 
   // Check clockwise
   double distClock = gen::periodicDist(yCloud, currentI, forwardJ);
