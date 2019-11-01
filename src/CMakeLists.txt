@@ -59,7 +59,7 @@ add_library(yodaLib SHARED
   opt_parser.cpp
   backward.cpp
   franzblau.cpp
-  topoConfined.cpp
+  topo_one_dim.cpp
 )
 # if(yaml-cpp_FOUND)
 #     target_link_libraries(yodaStruct yaml-cpp)

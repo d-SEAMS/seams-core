@@ -1,4 +1,4 @@
-#include <topoConfined.hpp>
+#include <topo_one_dim.hpp>
 
 // -----------------------------------------------------------------------------------------------------
 // PRISM ALGORITHMS

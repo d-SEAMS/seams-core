@@ -1,5 +1,5 @@
-#ifndef __TOPOCONFINED_H_
-#define __TOPOCONFINED_H_
+#ifndef __TOPO_ONE_DIM_H_
+#define __TOPO_ONE_DIM_H_
 
 #include <math.h>
 #include <sys/stat.h>
