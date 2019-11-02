@@ -47,11 +47,6 @@ molSys::PointCloud<molSys::Point<double>, double> readLammpsTrjreduced(
 int readXYZ(std::string filename,
             molSys::PointCloud<molSys::Point<double>, double> *yCloud);
 
-/// Get all the ring information, from the R.I.N.G.S. file. Each line contains
-/// the IDs of the atoms in the ring. This is saved inside a vector of vectors
-std::vector<std::vector<int>> readRings(std::string filename,
-                                        std::vector<std::vector<int>> nList);
-
 /// Reads bonds into a vector of vectors from a file with a specific format
 std::vector<std::vector<int>> readBonds(std::string filename);
 

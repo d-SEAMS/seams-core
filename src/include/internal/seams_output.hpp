@@ -85,10 +85,11 @@ int writeLAMMPSdataCages(
 
 // Write out all cages of all types into a folder called cages inside the output
 // directory
-int writeAllCages(std::vector<cage::Cage> *cageList,
+int writeAllCages(std::string path, std::vector<cage::Cage> *cageList,
                   std::vector<std::vector<int>> rings,
                   std::vector<std::vector<int>> nList,
-                  molSys::PointCloud<molSys::Point<double>, double> *yCloud);
+                  molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                  int currentFrame);
 
 // Write out a particular cage to a file
 int writeEachCage(std::vector<int> currentCage, int cageNum,

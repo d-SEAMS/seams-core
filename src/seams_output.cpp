@@ -490,9 +490,10 @@ int sout::writePrisms(
                                                 *folder in the output
                                                 ***********************************************/
 int sout::writeAllCages(
-    std::vector<cage::Cage> *cageList, std::vector<std::vector<int>> rings,
-    std::vector<std::vector<int>> nList,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
+    std::string path, std::vector<cage::Cage> *cageList,
+    std::vector<std::vector<int>> rings, std::vector<std::vector<int>> nList,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    int currentFrame) {
   int numDDC;                           // Number of DDCs
   int numHC;                            // Number of HCs
   int numMC;                            // Number of MCs
