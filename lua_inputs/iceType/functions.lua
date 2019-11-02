@@ -31,10 +31,18 @@ function make_output_dirs( doBOP, topoOneDim, topoTwoDim, topoBulk )
   end --- end of topo one dimensional dir
   -- Topological network criterion for quasi-two-dimensional INTs
   if not not topoTwoDim then
-    topoTwoDimDir = outDir .. "topoMonolayer";
+    topoTwoDimDir = outDir .. "topoMonolayer/";
     lfs.mkdir(topoTwoDimDir);
     topoTwoDimData = outDir .. "topoMonolayer/dataFiles";
     lfs.mkdir(topoTwoDimData);
+    --- Printing out cages per frame
+    if not not printCages then
+      for frame=targetFrame,finalFrame, frameGap
+       do
+        lfs.mkdir(topoTwoDimDir .. frame);
+      end --- end of for loop through frames
+    end --- End of making folders for every frame
+    ---
   end --- end of topo two dimensional dir
   -- Bulk topological network criterion 
   if not not topoBulk then
@@ -53,9 +61,8 @@ slice={0,0,0}; --- This is not in use
 for frame=targetFrame,finalFrame,frameGap do
    resCloud=readFrameOnlyOne(trajectory,frame,resCloud,oxygenAtomType,false,slice,slice) --- Get the frame
    nList=neighborList(cutoffRadius, resCloud, oxygenAtomType); --- Calculate the neighborlist
-   hbnList=getHbondNetwork(trajectory,resCloud,nList,frame,hydrogenAtomType) --- Get the hydrogen-bonded network for the current frame
-   hbnList=hBondNetworkByIndex(resCloud,hbnList) --- Hydrogen-bonded network using indices not IDs
-   rings=getPrimitiveRings(hbnList,maxDepth); --- Gets every ring (non-primitives included)
-   prismAnalysis(outDir, rings, hbnList, resCloud, maxDepth); --- Does the prism analysis for quasi-one-dimensional ice
+   nList=hBondNetworkByIndex(resCloud,nList) --- Neighbour list using indices not IDs
+   rings=getPrimitiveRings(nList,maxDepth); --- Gets every ring (non-primitives included)
+   bulkTopologicalNetworkCriterion(outDir, rings, nList, resCloud, printCages); --- Finds DDCs and HCs
 end
 print("\nFinito\n");
