@@ -7,5 +7,5 @@ rdf2D:
   use: false
 iceType:
   use: true
-  trajectory: "../input/traj/dump-240-square.lammpstrj"
+  trajectory: "../input/traj/smallCluster.lammpstrj"
   variables: "../lua_inputs/iceType/vars.lua"
