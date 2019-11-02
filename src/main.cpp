@@ -40,6 +40,7 @@
 #include <ring.hpp>
 #include <seams_input.hpp>
 #include <seams_output.hpp>
+#include <topo_bulk.hpp>
 #include <topo_one_dim.hpp>
 
 // Externally bundled-input libraries
@@ -111,6 +112,8 @@ int main(int argc, char *argv[]) {
         "topoTwoDim");  // If you want to do topological analysis for monolayers
     auto topoBulk = lua.get<bool>(
         "topoBulk");  // If you want topological network analysis for bulk
+    auto printCages = lua.get<bool>(
+        "printCages");  // If you want topological network analysis for bulk
     // -----------------
     // Bulk/Common Variables defined in C++
     // Variables which must be declared in C++
@@ -174,6 +177,11 @@ int main(int argc, char *argv[]) {
       // -----------------
       // Quasi-one-dimensional ice
       lua.set_function("prismAnalysis", ring::prismAnalysis);
+      // -----------------
+      // Bulk ice, using the topological network criterion
+      lua.set_function("bulkTopologicalNetworkCriterion",
+                       ring::topoBulkAnalysis);
+      // --------------------------
       // Use the script
       lua.script_file(lscript);
       // --------------------------
