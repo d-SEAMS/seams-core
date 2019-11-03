@@ -91,6 +91,11 @@ int getAtomTypesTopoBulk(std::vector<std::vector<int>> rings,
                          std::vector<ring::strucType> ringType,
                          std::vector<cage::iceType> *atomTypes);
 
+// Determines the number of HCs, DDCs, Mixed rings, prismatic and basal rings
+int getStrucNumbers(std::vector<ring::strucType> ringType,
+                    std::vector<cage::Cage> cageList, int *numHC, int *numDDC,
+                    int *mixedRings, int *prismaticRings, int *basalRings);
+
 }  // namespace ring
 
 #endif  // __TOPO_BULK_H_

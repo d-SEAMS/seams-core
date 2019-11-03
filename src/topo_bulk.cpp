@@ -23,7 +23,6 @@ int ring::topoBulkAnalysis(
   std::vector<ring::strucType>
       ringType;  // This vector will have a value for each ring inside
                  // ringList, of type enum strucType in gen.hpp
-  int numDDC, numHC, numMC;  // Number of DDCs, HCs and MCs
   // Make a list of all the DDCs and HCs
   std::vector<cage::Cage> cageList;
   std::vector<std::vector<int>>
@@ -31,6 +30,8 @@ int ring::topoBulkAnalysis(
   int ringSize = 6;  // DDCs and HCs are for 6-membered rings
   std::vector<cage::iceType>
       atomTypes;  // This vector will have a value for every atom
+  // Number of types
+  int numHC, numDDC, mixedRings, prismaticRings, basalRings;
 
   // ----------------------------------------------
   // Init
@@ -62,6 +63,11 @@ int ring::topoBulkAnalysis(
   //   io::writeAllCages(&cageList, ringsOneType, nList, yCloud,
   //                     yCloud->currentFrame);
   // }  // end of printing each cage
+
+  // Get the number of structures (DDCs, HCs, mixed rings, basal rings,
+  // prismatic rings)
+  ring::getStrucNumbers(ringType, cageList, &numHC, &numDDC, &mixedRings,
+                        &prismaticRings, &basalRings);
 
   // Gets the atom type for every atom, to be used for printing out the ice
   // types found
@@ -851,11 +857,6 @@ int ring::getAtomTypesTopoBulk(std::vector<std::vector<int>> rings,
       iRingType = cage::hc;
     }  // HC atoms
     //
-    // Mixed
-    else if (ringType[iring] == ring::bothBasal ||
-             ringType[iring] == ring::bothBasal) {
-      iRingType = cage::mixed;
-    }  // Mixed atoms
     // Should never go here
     else {
       continue;
@@ -870,3 +871,68 @@ int ring::getAtomTypesTopoBulk(std::vector<std::vector<int>> rings,
 
   return 0;
 }
+
+/********************************************/ /**
+ *  Determines the number of HCs, DDCs from the cageList vector,
+ containing a list of cages.
+ The number of mixed rings, prismatic rings and basal rings are obtained
+ from the ringType vector.
+ ***********************************************/
+// Determines the number of HCs, DDCs, Mixed rings, prismatic and basal rings
+int ring::getStrucNumbers(std::vector<ring::strucType> ringType,
+                          std::vector<cage::Cage> cageList, int *numHC,
+                          int *numDDC, int *mixedRings, int *prismaticRings,
+                          int *basalRings) {
+  //
+  // Init
+  *numHC = 0;
+  *numDDC = 0;
+  *mixedRings = 0;
+  *prismaticRings = 0;
+  *basalRings = 0;
+  // ------------------------------------
+  // GETTING THE CAGES (DDCs and HCs)
+  // Loop through cages
+  for (int icage = 0; icage < cageList.size(); icage++) {
+    //
+    // HC
+    if (cageList[icage].type == cage::HexC) {
+      *numHC += 1;
+    }  // end of updating HC number
+    //
+    // DDC
+    if (cageList[icage].type == cage::DoubleDiaC) {
+      *numDDC += 1;
+    }  // end of updating DDC number
+  }    // end of loop through cages
+  // ------------------------------------
+  // GETTING THE RINGSS (Mixed, Prismatic and Basal rings)
+  // Loop through the rings
+  for (int iring = 0; iring < ringType.size(); iring++) {
+    // Mixed
+    if (ringType[iring] == ring::bothBasal ||
+        ringType[iring] == ring::bothPrismatic) {
+      *mixedRings += 1;
+      // Also update basal rings
+      if (ringType[iring] == ring::bothBasal) {
+        *basalRings += 1;
+      }  // mixed basal rings
+      // Also update prismatic rings
+      if (ringType[iring] == ring::bothPrismatic) {
+        *prismaticRings += 1;
+      }  // mixed prismatic rings
+    }    // end of updating mixed
+    //
+    // HCs
+    if (ringType[iring] == ring::HCprismatic) {
+      *prismaticRings += 1;
+    }  // HC prismatic
+    // basal HCs
+    if (ringType[iring] == ring::HCbasal) {
+      *basalRings += 1;
+    }  // HC basal
+  }    // end of loop through every ring
+  // ------------------------------------
+
+  return 0;
+}  // end of function
