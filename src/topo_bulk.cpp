@@ -775,10 +775,7 @@ int ring::findPrismatic(std::vector<std::vector<int>> rings,
     // -------------------------------------------
     // Now that a triplet has been found, find all rings with that triplet in
     // it!
-    for (int kring = 0; kring < ringSize; kring++) {
-      if (kring == ringSize - 1) {
-        break;
-      }
+    for (int kring = 0; kring < rings.size(); kring++) {
       // If this is the same as iring or jring, skip
       if (kring == iring || kring == jring) {
         continue;
