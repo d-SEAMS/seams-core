@@ -314,12 +314,13 @@ int sout::writeAllCages(
       sout::writeEachCage((*cageList)[icage].rings, numDDC, type, rings,
                           yCloud);
     }  // end of write out of DDCs
-    // Mixed Cages
-    else if (type == cage::Mixed) {
-      numMC++;
-      sout::writeEachCage((*cageList)[icage].rings, numMC, type, rings, yCloud);
-    }  // end of write out of MCs
-    // Error
+    // // Mixed Cages
+    // else if (type == cage::Mixed) {
+    //   numMC++;
+    //   sout::writeEachCage((*cageList)[icage].rings, numMC, type, rings,
+    //   yCloud);
+    // }  // end of write out of MCs
+    // // Error
     else {
       std::cerr << "The cage is of the wrong type\n";
       continue;
@@ -355,9 +356,6 @@ int sout::writeEachCage(
   } else if (type == cage::DoubleDiaC) {
     strcpy(cageChar, "../output/cages/doubleDiaCages");
     actualCageType = "doubleDiaCages";
-  } else if (type == cage::Mixed) {
-    strcpy(cageChar, "../output/cages/mixedCages");
-    actualCageType = "mixedCages";
   } else {
     // throw error
     std::cerr << "The cage is of the wrong type. Exit\n";
@@ -1355,8 +1353,6 @@ int sout::writeLAMMPSdataCages(
     actualCageType = "HC";
   } else if (type == cage::DoubleDiaC) {
     actualCageType = "DDC";
-  } else if (type == cage::Mixed) {
-    actualCageType = "MC";
   } else {
     actualCageType = "error";
   }
