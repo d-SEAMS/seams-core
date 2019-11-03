@@ -123,6 +123,7 @@ SCENARIO("Test the HC algorithm for a single hexagonal cage.", "[topo]") {
             rings.size());  // Has a value for each ring. init to zero.
         // Find the number of hexagonal cages
         listHC = ring::findHC(rings, &ringType, nList, &cageList);
+
         // Assert the number of cages
         REQUIRE(cageList.size() ==
                 1);  // Evaluate condition for a single tetragonal prism

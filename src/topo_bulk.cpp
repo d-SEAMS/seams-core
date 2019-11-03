@@ -752,85 +752,84 @@ int ring::findPrismatic(std::vector<std::vector<int>> rings,
                         std::vector<int> *listHC,
                         std::vector<ring::strucType> *ringType, int iring,
                         int jring, std::vector<int> *prismaticRings) {
-  int j1, j2, j3;    // Used for making rings to be searched
-  int ringSize = 6;  // This is 6 for hexagons
-  bool isEqual;      // Tests to see if two rings have the same elements or not
-  std::vector<int> iTriplet;    // triplet formed from iring
-  std::vector<int> jTriplet;    // triplet formed from jring
-  std::vector<int> sortedRing;  // triplet formed from jring
-  int j;
+  int iIndex, jIndex;              // Used for making rings to be searched
+  int ringSize = rings[0].size();  // This is 6 for hexagons
+  std::vector<int> iTriplet;       // triplet formed from iring
+  std::vector<int> jTriplet;       // triplet formed from jring
+  std::vector<int> common;         // Common elements
 
-  // Make all possible alternate triplets from iring
-  for (int k = 0; k < ringSize; k += 2) {
-    // Clear vector
+  // Make all possible triplets out of iring
+  for (int i = 0; i < ringSize; i++) {
+    // init
     iTriplet.clear();
-    // -----------------------
-    // Get a vector out of indices in iring and jring
-    // Indices for making findRing out of iring and jring
-    j1 = k;
-    j2 = k + 1;
-    j3 = k + 2;
-    if (j3 >= ringSize) {
-      j3 -= ringSize;
-    }
-    // Make a triplet out of iring (alternate!)
-    // Replace this ugly code later!
-    iTriplet.push_back(rings[iring][j1]);
-    iTriplet.push_back(rings[iring][j2]);
-    iTriplet.push_back(rings[iring][j3]);
-    // -----------------------
-    // Once the triplet for iring has been made,
-    // make every possible triplet out of jring
-    // and combine the two to create a new vector
-    // Loop through every three to make a triplet
-    for (int m = 0; m < ringSize; m++) {
-      jTriplet.clear();  // Clear the triplet
-      // ------
-      // Get a triplet
-      for (int i = m; i < m + 3; i++) {
-        j = i;
-        if (i >= ringSize) {
-          j = i - ringSize;
+    // ------
+    // Get a triplet
+    for (int m = 0; m < 3; m++) {
+      iIndex = i + m;
+      if (iIndex >= ringSize) {
+        iIndex -= ringSize;
+      }
+      iTriplet.push_back(rings[iring][iIndex]);
+    }  // end of getting a triplet from iring
+
+    // -------------------------------------------
+    // Now that a triplet has been found, find all rings with that triplet in
+    // it!
+    for (int kring = 0; kring < ringSize; kring++) {
+      if (kring == ringSize - 1) {
+        break;
+      }
+      // If this is the same as iring or jring, skip
+      if (kring == iring || kring == jring) {
+        continue;
+      }  // is not prismatic
+         //
+         // Now find out whether kring has the triplet or not!
+      common = ring::findsCommonElements(iTriplet, rings[kring]);
+
+      // If this triplet is not shared by  kring
+      // skip
+      if (common.size() != 3) {
+        continue;
+      }  // kring does not have iTriplet
+
+      // -----------------
+      // If kring does have the triplet, check to see if at least three other
+      // elements of kring are shared by jring
+      jTriplet.clear();  // init
+      // Make jTriplet
+      for (int j = 0; j < ringSize; j++) {
+        int katom = rings[kring][j];
+        auto it = std::find(iTriplet.begin(), iTriplet.end(), katom);
+
+        // If not found, add it to jTriplet
+        if (it == iTriplet.end()) {
+          jTriplet.push_back(katom);
+        }  // update jTriplet
+      }    // end of making jTriplet out of kring
+      // -----------------
+
+      // Now search for jTriplet inside jring
+      common = ring::findsCommonElements(jTriplet, rings[jring]);
+
+      // Update the prismatic rings
+      if (common.size() == 3) {
+        //
+        (*listHC).push_back(kring);          // Update listHC vector
+        (*prismaticRings).push_back(kring);  // Update prismatic rings
+        // Update the type inside ringType
+        // If the ring is already a DDC ring, it is a mixed ring
+        if ((*ringType)[kring] == ring::DDC) {
+          (*ringType)[kring] = ring::bothPrismatic;
         }
-        jTriplet.push_back(rings[jring][j]);
-      }  // end of getting a triplet from k
-      // ------
-      // Append iTriplet to jTriplet
-      jTriplet.reserve(jTriplet.size() + iTriplet.size());
-      jTriplet.insert(jTriplet.end(), iTriplet.begin(), iTriplet.end());
-      // ------
-      // Now search through all the rings to find a match for
-      // jTriplet, which contains a triplet from iring and jring
-      for (int kring = 0; kring < rings.size(); kring++) {
-        //
-        if (kring == iring || kring == jring) {
-          continue;
-        }
-        //
-        // Test to see if findRing and kring are equal or not
-        //
-        isEqual = ring::compareRings(jTriplet, rings[kring]);
-        //
-        // If they are equal, this is a prismatic ring!
-        if (isEqual) {
-          (*listHC).push_back(kring);          // Update listHC vector
-          (*prismaticRings).push_back(kring);  // Update prismatic rings
-          // Update the type inside ringType
-          // If the ring is already a DDC ring, it is a mixed ring
-          if ((*ringType)[kring] == ring::DDC) {
-            (*ringType)[kring] = ring::bothPrismatic;
-          }
-          // If it is unclassified, it is just a prismatic ring
-          if ((*ringType)[kring] == ring::unclassified) {
-            (*ringType)[kring] = ring::HCprismatic;
-          }
-          break;
-        }  // end of check for prismatic ring
-      }    // end of search for match in rings for jTriplet
-      // ------
-    }  // end of loop through every three for jring
-    // -----------------------
-  }  // end of triplet making for iring
+        // If it is unclassified, it is just a prismatic ring
+        if ((*ringType)[kring] == ring::unclassified) {
+          (*ringType)[kring] = ring::HCprismatic;
+        }  // end ring update
+      }    // add kring to the list of prismatic rings
+    }      // end of searching through rings for kring
+    // -------------------------------------------
+  }  // end of getting pairs of triplets
 
   return 0;
 }
