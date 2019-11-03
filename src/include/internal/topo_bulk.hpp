@@ -30,13 +30,6 @@ int topoBulkAnalysis(std::string path, std::vector<std::vector<int>> rings,
                      molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                      bool printEachCage = false);
 
-// Function for determining whether a ring has more than
-// 3 consecutive water molecules or not.
-bool checkRing(std::vector<int> ring, std::vector<std::vector<int>> nList);
-
-// Compare a quadruplet with the neighbour list
-bool compareQuad(std::vector<int> quad, std::vector<std::vector<int>> nList);
-
 // Find out which hexagonal rings are DDC (Double Diamond Cages) rings.
 // Returns a vector containing all the ring IDs which are DDC rings
 std::vector<int> findDDC(std::vector<std::vector<int>> rings,
@@ -57,11 +50,6 @@ std::vector<int> findHC(std::vector<std::vector<int>> rings,
                         std::vector<strucType> *ringType,
                         std::vector<std::vector<int>> nList,
                         std::vector<cage::Cage> *cageList);
-
-// Find out which cages are mixed cages
-int findMixedCages(std::vector<strucType> *ringType,
-                   std::vector<cage::Cage> *cageList, int *numDDC, int *numHC,
-                   int *numMC);
 
 // First condition for the DDC: There must be at least 3 other
 // rings in which each element of the equatorial  ring is present
@@ -96,6 +84,12 @@ bool notNeighboursOfRing(std::vector<std::vector<int>> nList,
 int findPrismatic(std::vector<std::vector<int>> rings, std::vector<int> *listHC,
                   std::vector<strucType> *ringType, int iring, int jring,
                   std::vector<int> *prismaticRings);
+
+// Assigns a type of enum iceType, to every atom, using information from
+// ringType, which has the information of every ring
+int getAtomTypesTopoBulk(std::vector<std::vector<int>> rings,
+                         std::vector<ring::strucType> ringType,
+                         std::vector<cage::iceType> *atomTypes);
 
 }  // namespace ring
 

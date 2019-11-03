@@ -29,6 +29,8 @@ int ring::topoBulkAnalysis(
   std::vector<std::vector<int>>
       ringsOneType;  // Vector of vectors of rings of a single size
   int ringSize = 6;  // DDCs and HCs are for 6-membered rings
+  std::vector<cage::iceType>
+      atomTypes;  // This vector will have a value for every atom
 
   // ----------------------------------------------
   // Init
@@ -40,6 +42,8 @@ int ring::topoBulkAnalysis(
   // Init the ringType vector
   ringType.resize(
       ringsOneType.size());  // Has a value for each ring. init to zero.
+  // Init the atom type vector
+  atomTypes.resize(yCloud->nop);  // Has a value for each atom
   // ----------------------------------------------
   // Get the cages
   // Find DDC rings, saving the IDs to listDDC
@@ -52,9 +56,6 @@ int ring::topoBulkAnalysis(
   // A dummy value of -10 in the listDDC and listHC vectors for mixed rings
   listMixed = ring::findMixedRings(ringsOneType, &ringType, &listDDC, &listHC);
 
-  // Find the mixed cages: but there may be degeneracy
-  ring::findMixedCages(&ringType, &cageList, &numDDC, &numHC, &numMC);
-
   // // Print out each cage into a new folder called cages inside output
   // // if the flag for printing cages is true. TODO: fix
   // if (printEachCage) {
@@ -62,75 +63,14 @@ int ring::topoBulkAnalysis(
   //                     yCloud->currentFrame);
   // }  // end of printing each cage
 
+  // Gets the atom type for every atom, to be used for printing out the ice
+  // types found
+  ring::getAtomTypesTopoBulk(ringsOneType, ringType, &atomTypes);
+
+  // Print out the lammps data file with the bonds
+  sout::writeLAMMPSdataTopoBulk(yCloud, nList, atomTypes, path);
+
   return 0;
-}
-
-/********************************************/ /**
- *  Checks if the ring has more than three consecutive
- water molecules or not. Returns false if a quadruplet is within
- the neighbour list.
- ***********************************************/
-bool ring::checkRing(std::vector<int> ring,
-                     std::vector<std::vector<int>> nList) {
-  int ringSize = ring.size();  // Size of the ring (no. of atoms in each ring)
-  std::vector<int> subRing;    //  Quadruplet formed from a ring
-  int j;
-
-  for (int k = 0; k < ringSize; k++) {
-    subRing.clear();  // Clear the quadruplet
-    // Get 4 elements
-    for (int i = k; i < k + 4; i++) {
-      j = i;
-      if (i >= ringSize) {
-        j = i - ringSize;
-      }
-      subRing.push_back(ring[j]);
-    }  // end of getting a quadruplet from k
-    // Check to see that the quadruplet isn't part
-    // of the neighbour list
-    if (ring::compareQuad(subRing, nList) == true) {
-      return false;
-    }  // end of comparison
-  }    // end of looping through all possible quadruplets in ring
-
-  return true;
-}
-
-/********************************************/ /**
- *  Checks if a quadruplet has more than three consecutive
- water molecules or not. Returns true if the quadruplet is within
- the neighbour list. The neighbour list is sorted already
- ***********************************************/
-bool ring::compareQuad(std::vector<int> quad,
-                       std::vector<std::vector<int>> nList) {
-  int iatom = quad[0];  // Index of the first atom ID in the quadruplet
-  int atomIndex;
-  int jatom;
-  int flag = 0;
-  int nNumNeighbours =
-      nList[iatom].size() - 1;  // Number of nearest neighbours for iatom
-
-  for (int k = 1; k < 4; k++) {
-    atomIndex = quad[k];
-    flag = 0;  // init to zero
-    for (int j = 1; j <= nNumNeighbours; j++) {
-      jatom = nList[iatom][j];  // Get j^th element of the iatom row in vector
-                                // of vectors nList
-      if (jatom == atomIndex) {
-        flag++;
-      }
-      if (jatom > atomIndex) {
-        continue;
-      }  // sorted list
-    }    // end of loop through neighbour list
-    // If the flag is three, then the quadruplet is within the nearest
-    // neighbours
-    if (flag == 3) {
-      return true;
-    }
-  }  // end of looping through elements in quad
-
-  return false;
 }
 
 /********************************************/ /**
@@ -878,52 +818,55 @@ std::vector<int> ring::findMixedRings(std::vector<std::vector<int>> rings,
 }
 
 /********************************************/ /**
- *  Determines which complete cages are 'mixed'. For a cage to be classified as
- mixed, all rings must be of enum type bothBasal OR bothPrismatic.
+ *  Assigns a type (cage::iceType) to each atom, according to the previous
+ classification of every ring in ringType.
+ Each subring or vector inside the
+ vector of vector rings, is by index, meaning that the atoms are saved by their
+ indices starting from 0 in the pointCloud.
  ***********************************************/
-int ring::findMixedCages(std::vector<strucType> *ringType,
-                         std::vector<cage::Cage> *cageList, int *numDDC,
-                         int *numHC, int *numMC) {
-  int iring;        // Ring index (starting from 0) comprising a particular cage
-  int nrings;       // Number of rings in a particular cage
-  int nMixedRings;  // Number of mixed rings
-  cage::cageType currentType;  // Type of icage
+int ring::getAtomTypesTopoBulk(std::vector<std::vector<int>> rings,
+                               std::vector<ring::strucType> ringType,
+                               std::vector<cage::iceType> *atomTypes) {
+  //
+  cage::iceType iRingType;  // Type of the current ring
 
-  // Init
-  *numDDC = 0;
-  *numHC = 0;
-  *numMC = 0;
+  // Loop through every ring in ringType
+  for (int iring = 0; iring < ringType.size(); iring++) {
+    //
+    // Skip if the ring is unclassified
+    if (ringType[iring] == ring::unclassified) {
+      continue;
+    }  // skip for unclassified rings
 
-  // Loop through every cage in cageList
-  for (int icage = 0; icage < (*cageList).size(); icage++) {
-    nrings = (*cageList)[icage].rings.size();
-    nMixedRings = 0;  // init to zero
-    // Loop through every ring inside icage
-    for (int i = 0; i < nrings; i++) {
-      iring = (*cageList)[icage].rings[i];  // Ring index of ith ring in icage
-      // Check if iring is a mixed ring or not
-      if ((*ringType)[iring] == ring::bothBasal ||
-          (*ringType)[iring] == ring::bothPrismatic) {
-        nMixedRings++;
-      }  // end of check to see if iring is mixed
-    }    // end of loop through every ring in icage
-    // Check to see if all the rings in icage are mixed or not
-    if (nMixedRings == nrings) {
-      (*cageList)[icage].type = cage::Mixed;
-      *numMC += 1;  // Add to the number of mixed cages
-    }               // icage is a mixed cage
+    // ------------
+    // Get the current ring type
+    // DDC
+    if (ringType[iring] == ring::DDC) {
+      iRingType = cage::ddc;
+    }  // DDC atoms
+    //
+    // HC
+    else if (ringType[iring] == ring::HCbasal ||
+             ringType[iring] == ring::HCprismatic) {
+      iRingType = cage::hc;
+    }  // HC atoms
+    //
+    // Mixed
+    else if (ringType[iring] == ring::bothBasal ||
+             ringType[iring] == ring::bothBasal) {
+      iRingType = cage::mixed;
+    }  // Mixed atoms
+    // Should never go here
     else {
-      // Add to the count of DDCs and HCs
-      currentType = (*cageList)[icage].type;
-      if (currentType == cage::DoubleDiaC) {
-        *numDDC += 1;
-      } else if (currentType == cage::HexC) {
-        *numHC += 1;
-      } else {
-        std::cerr << "The cage is the wrong type!\n";
-      }
-    }
-  }  // end of loop through every cage
+      continue;
+    }  // TODO: add prism??
+    // ------------
+    // Otherwise, loop through every atom inside atomTypes and assign it the
+    // iRingType
+    for (int iatom = 0; iatom < (*atomTypes).size(); iatom++) {
+      (*atomTypes)[iatom] = iRingType;
+    }  // end of loop thorugh atomTypes
+  }    // end of loop through every ring
 
   return 0;
 }
