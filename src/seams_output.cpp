@@ -935,9 +935,12 @@ int sout::writeLAMMPSdataAllPrisms(
       << bondTypes
       << " bond types\n0 angle types\n0 dihedral types\n0 improper types\n";
   // Box lengths
-  outputFile << yCloud->boxLow[0] << " " << yCloud->box[0] << " xlo xhi\n";
-  outputFile << yCloud->boxLow[1] << " " << yCloud->box[1] << " ylo yhi\n";
-  outputFile << yCloud->boxLow[2] << " " << yCloud->box[2] << " zlo zhi\n";
+  outputFile << yCloud->boxLow[0] << " " << yCloud->boxLow[0] + yCloud->box[0]
+             << " xlo xhi\n";
+  outputFile << yCloud->boxLow[1] << " " << yCloud->boxLow[1] + yCloud->box[1]
+             << " ylo yhi\n";
+  outputFile << yCloud->boxLow[2] << " " << yCloud->boxLow[2] + yCloud->box[2]
+             << " zlo zhi\n";
   // Masses
   outputFile << "\nMasses\n\n";
   outputFile << "1 15.999400 # dummy\n";
@@ -1543,19 +1546,18 @@ atoms are printed out. Bonds are inferred from the neighbour list
 ***********************************************/
 int sout::writeLAMMPSdataTopoBulk(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
+    std::vector<std::vector<int>> nList, std::vector<cage::iceType> atomTypes,
     std::string path) {
   //
   std::ofstream outputFile;
   int iatom;             // Index, not atom ID
   int numAtomTypes = 4;  // DDC, HC, Mixed, dummy
-  int maxDepth = 6;      // remove
   int bondTypes = 1;
   // Bond stuff
   std::vector<std::vector<int>> bonds;  // Vector of vector, with each row
                                         // containing the atom IDs of each bond
   std::string filename =
-      "system-prisms-" + std::to_string(yCloud->currentFrame) + ".data";
+      "system-" + std::to_string(yCloud->currentFrame) + ".data";
 
   // ---------------
   // Get the bonds
@@ -1565,7 +1567,7 @@ int sout::writeLAMMPSdataTopoBulk(
   // The directory should have already been made by lua.
   // ----------------
   // Write output to file inside the output directory
-  outputFile.open(path + "topoINT/dataFiles/" + filename);
+  outputFile.open(path + "bulkTopo/dataFiles/" + filename);
   // FORMAT:
   //  Comment Line
   //  4 atoms
@@ -1611,17 +1613,18 @@ int sout::writeLAMMPSdataTopoBulk(
       << bondTypes
       << " bond types\n0 angle types\n0 dihedral types\n0 improper types\n";
   // Box lengths
-  outputFile << yCloud->boxLow[0] << " " << yCloud->box[0] << " xlo xhi\n";
-  outputFile << yCloud->boxLow[1] << " " << yCloud->box[1] << " ylo yhi\n";
-  outputFile << yCloud->boxLow[2] << " " << yCloud->box[2] << " zlo zhi\n";
+  outputFile << yCloud->boxLow[0] << " " << yCloud->boxLow[0] + yCloud->box[0]
+             << " xlo xhi\n";
+  outputFile << yCloud->boxLow[1] << " " << yCloud->boxLow[1] + yCloud->box[1]
+             << " ylo yhi\n";
+  outputFile << yCloud->boxLow[2] << " " << yCloud->boxLow[2] + yCloud->box[2]
+             << " zlo zhi\n";
   // Masses
   outputFile << "\nMasses\n\n";
-  outputFile << "1 15.999400 # dummy\n";
-  outputFile << "2 1.0 # \n";
-  // There are maxDepth-2 other prism types
-  for (int ringSize = 3; ringSize <= maxDepth; ringSize++) {
-    outputFile << ringSize << " 15.999400 # prism" << ringSize << "\n";
-  }  // end of writing out atom types
+  outputFile << "0 15.999400 # dummy\n";
+  outputFile << "1 15.999400 # hc \n";
+  outputFile << "2 15.999400 # ddc \n";
+  outputFile << "3 15.999400 # mixed \n";
   // Atoms
   outputFile << "\nAtoms\n\n";
   // -------

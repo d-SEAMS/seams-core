@@ -47,7 +47,7 @@ int writeLAMMPSdataAllPrisms(
 // structures (DDCs/HCs)
 int writeLAMMPSdataTopoBulk(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
+    std::vector<std::vector<int>> nList, std::vector<cage::iceType> atomTypes,
     std::string path);
 
 // Write a data file for prisms of a single type
