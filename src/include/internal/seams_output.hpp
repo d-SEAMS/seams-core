@@ -17,22 +17,6 @@ namespace fs = boost::filesystem;
 
 namespace sout {
 
-// Function for printing out ring info, when there is a volume slice
-int writeRingsWithSlice(std::vector<std::vector<int>> rings,
-                        std::vector<bool> *flag,
-                        std::string filename = "rings.dat");
-
-// Function for printing out ring info for DDCs or HCs, for rings with IDs
-// present in a vector passed in
-int writeHexagonals(std::vector<std::vector<int>> rings, std::vector<int> *list,
-                    std::string filename = "ddc-hc.dat");
-
-// Function for printing out ring info for DDCs or HCs, for rings with IDs
-// present in a vector passed in, when there is a volume slice
-int writeHexagonalsWithSlice(std::vector<std::vector<int>> rings,
-                             std::vector<bool> *flag, std::vector<int> *list,
-                             std::string filename = "ddc-hc.dat");
-
 // Function for printing out ring info, when there is no volume slice
 int writeRings(std::vector<std::vector<int>> rings,
                std::string filename = "rings.dat");
@@ -47,16 +31,6 @@ int writePrisms(std::vector<int> *basal1, std::vector<int> *basal2,
                 int prismNum,
                 molSys::PointCloud<molSys::Point<double>, double> *yCloud);
 
-// Function for printing out the bonds flagged as true, when there is no volume
-// slice
-int writeBonds(std::vector<std::vector<int>> bonds, std::vector<bool> *flag,
-               std::string filename = "bonds.dat");
-
-// Write XYZ file for DDCs or HCs
-int writeHexXYZ(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                std::vector<std::vector<int>> rings, std::vector<int> *list,
-                std::string type = "O", std::string filename = "ddc-hc.xyz");
-
 // Write a data file for rings
 int writeLAMMPSdata(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                     std::vector<std::vector<int>> rings,
@@ -68,6 +42,13 @@ int writeLAMMPSdataAllPrisms(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
     int maxDepth, std::string path);
+
+// Write a data file for a particular frame, writing out topological bulk ice
+// structures (DDCs/HCs)
+int writeLAMMPSdataTopoBulk(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
+    std::string path);
 
 // Write a data file for prisms of a single type
 int writeLAMMPSdataPrisms(
@@ -115,6 +96,7 @@ int writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 // text files The file names are cij, q6, q3
 int writeHisto(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                std::vector<std::vector<int>> nList, std::vector<double> avgQ6);
+
 // Function for printing the largest ice cluster
 int writeCluster(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                  std::string fileName = "cluster.txt", bool isSlice = false,

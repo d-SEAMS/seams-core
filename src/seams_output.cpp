@@ -2,221 +2,6 @@
 #include <seams_output.hpp>
 
 /********************************************/ /**
- *  Function for printing out ring info, when there is a
- volume slice
- Uses Boost!
- ***********************************************/
-int sout::writeRingsWithSlice(std::vector<std::vector<int>> rings,
-                              std::vector<bool> *flag, std::string filename) {
-  std::ofstream outputFile;
-  // ----------------
-  // Create output dir if it doesn't exist already
-  const char *path = "../output";  // relative to the build directory
-  fs::path dir(path);
-  // if (fs::create_directory(dir)) {
-  //   std::cerr << "Output directory created\n";
-  // }
-  // ----------------
-  // Write output to file inside the output directory
-  outputFile.open("../output/" + filename);
-
-  // Format:
-  // 272    214    906   1361    388      1
-
-  for (int iring = 0; iring < rings.size(); iring++) {
-    // Skip rings that do not belong to the volume slice
-    if ((*flag)[iring] == false) {
-      continue;
-    }
-
-    // Otherwise, write out to the file
-    for (int k = 0; k < rings[iring].size(); k++) {
-      outputFile << rings[iring][k] << " ";
-    }  // end of loop through ring elements
-    outputFile << "\n";
-  }  // end of loop through rings
-
-  return 0;
-}
-
-/********************************************/ /**
- *  Function for printing out ring info, when passed a vector containing IDs of
- the rings Uses Boost!
- ***********************************************/
-int sout::writeHexagonals(std::vector<std::vector<int>> rings,
-                          std::vector<int> *list, std::string filename) {
-  std::ofstream outputFile;
-  int iring;
-  int dummyValue = -10;
-  // ----------------
-  // Return if there are no rings
-  if ((*list).size() == 0) {
-    return 1;
-  }
-  // ----------------
-  // Otherwise create file
-  // Create output dir if it doesn't exist already
-  const char *path = "../output";  // relative to the build directory
-  fs::path dir(path);
-  // if (fs::create_directory(dir)) {
-  //   std::cerr << "Output directory created\n";
-  // }
-  // ----------------
-  // Write output to file inside the output directory
-  outputFile.open("../output/" + filename);
-
-  // Format:
-  // 272    214    906   1361    388      1
-
-  for (int i = 0; i < (*list).size(); i++) {
-    // Get ring index to be printed
-    iring = (*list)[i];
-    // Skip for rings which are actually mixed
-    if (iring == dummyValue) {
-      continue;
-    }
-    // Write iring out to the file
-    for (int k = 0; k < rings[iring].size(); k++) {
-      outputFile << rings[iring][k] << " ";
-    }  // end of loop through ring elements
-    outputFile << "\n";
-  }  // end of loop through rings
-
-  // Once the rings have been printed, exit
-  return 0;
-}
-
-/********************************************/ /**
- *  Function for printing out ring info, when passed a vector containing IDs of
- the rings, for a volume slice Uses Boost!
- ***********************************************/
-int sout::writeHexagonalsWithSlice(std::vector<std::vector<int>> rings,
-                                   std::vector<bool> *flag,
-                                   std::vector<int> *list,
-                                   std::string filename) {
-  std::ofstream outputFile;
-  int iring;
-  int dummyValue = -10;
-  // ----------------
-  // Return if there are no rings
-  if ((*list).size() == 0) {
-    return 1;
-  }
-  // ----------------
-  // Otherwise create file
-  // Create output dir if it doesn't exist already
-  const char *path = "../output";  // relative to the build directory
-  fs::path dir(path);
-  // if (fs::create_directory(dir)) {
-  //   std::cerr << "Output directory created\n";
-  // }
-  // ----------------
-  // Write output to file inside the output directory
-  outputFile.open("../output/" + filename);
-
-  // Format:
-  // 272    214    906   1361    388      1
-
-  for (int i = 0; i < (*list).size(); i++) {
-    // Get ring index to be printed
-    iring = (*list)[i];
-    if (iring == dummyValue) {
-      continue;
-    }  // Skip dummy values
-    // Check if iring is inside the slice or not
-    // Skip rings that do not belong to the volume slice
-    if ((*flag)[iring] == false) {
-      continue;
-    }
-    // Write iring out to the file
-    for (int k = 0; k < rings[iring].size(); k++) {
-      outputFile << rings[iring][k] << " ";
-    }  // end of loop through ring elements
-    outputFile << "\n";
-  }  // end of loop through rings
-
-  // Once the rings have been printed, exit
-  return 0;
-}
-
-/********************************************/ /**
-                                                *  Prints out an XYZ file for
-                                                *DDCs or HCs. Only Oxygen atoms
-                                                *are printed out
-                                                ***********************************************/
-int sout::writeHexXYZ(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                      std::vector<std::vector<int>> rings,
-                      std::vector<int> *list, std::string type,
-                      std::string filename) {
-  std::ofstream outputFile;
-  std::vector<int> atoms;          // Holds all atom IDs to print
-  int ringSize = rings[0].size();  // Ring size of each ring in rings
-  int iring;
-  int iatom;  // Index, not atom ID
-  // ----------------
-  // Return if there are no rings
-  if ((*list).size() == 0) {
-    return 1;
-  }
-  // ----------------
-  // Otherwise create file
-  // Create output dir if it doesn't exist already
-  const char *path = "../output";  // relative to the build directory
-  fs::path dir(path);
-  // if (fs::create_directory(dir)) {
-  //   std::cerr << "Output directory created\n";
-  // }
-  // ----------------
-  // Get all the unique atomIDs of the atoms in the rings of this type
-  // Put all atom IDs into one 1-D vector
-  size_t total_size{0};
-  // Get the total number of atoms (repeated)
-  total_size = (*list).size() * ringSize;
-  // Reserve this size inside atoms
-  atoms.reserve(total_size);
-  // Fill up all these atom IDs
-  for (int i = 0; i < (*list).size(); i++) {
-    iring = (*list)[i];  // Ring ID of ring to be appended
-    std::move(rings[iring].begin(), rings[iring].end(),
-              std::back_inserter(atoms));
-  }  // end of loop through all rings in the list
-
-  // Sort the array according to atom ID, which will be needed to get the
-  // unique IDs and to remove duplicates
-  sort(atoms.begin(), atoms.end());
-  // Get the unique atom IDs
-  auto ip = std::unique(atoms.begin(), atoms.end());
-  // Resize the vector to remove undefined terms
-  atoms.resize(std::distance(atoms.begin(), ip));
-  // ----------------
-  // Write output to file inside the output directory
-  outputFile.open("../output/" + filename);
-
-  //  360
-  // generated by VMD
-  // O         0.000000        2.597000        7.772000
-  // O         0.000000        2.597000       15.094000
-
-  // Write the header
-  // Write out the number of atoms
-  outputFile << atoms.size() << "\n";
-  // Write comment line
-  outputFile << " Written out by D-SEAMS\n";
-
-  // Write out the atom coordinates
-  // Loop through atoms
-  for (int i = 0; i < atoms.size(); i++) {
-    iatom = atoms[i] - 1;  // The actual index is one less than the ID
-    // Write out coordinates
-    outputFile << " " << type << "\t" << yCloud->pts[iatom].x << "\t"
-               << yCloud->pts[iatom].y << "\t" << yCloud->pts[iatom].z << "\n";
-  }  // end of loop through all atoms
-
-  // Once the rings have been printed, exit
-  return 0;
-}
-
-/********************************************/ /**
                                                 *  Prints out a LAMMPS data
                                                 *file, with some default
                                                 *options. Only Oxygen atoms are
@@ -1076,47 +861,6 @@ int sout::writePrismNum(std::string path, int currentFrame,
 }
 
 /********************************************/ /**
- *  Function for printing out bond info as pairs of atom IDs, when there is no
- volume slice
- Uses Boost!
- ***********************************************/
-int sout::writeBonds(std::vector<std::vector<int>> bonds,
-                     std::vector<bool> *flag, std::string filename) {
-  std::ofstream outputFile;
-  // ----------------
-  // Create output dir if it doesn't exist already
-  const char *path = "../output";  // relative to the build directory
-  fs::path dir(path);
-  // if (fs::create_directory(dir)) {
-  //   std::cerr << "Output directory created\n";
-  // }
-  // ----------------
-  // Write output to file inside the output directory
-  outputFile.open("../output/" + filename);
-
-  // The ring vector of vector looks like:
-  // 272    214    906   1361    388      1
-  // The bonds corresponding to this ring are:
-  // 272 214
-  // 214 906
-  // 1361 388
-  // 388 1
-  // 1 272
-
-  // Loop through all possible bonds
-  for (int ibond = 0; ibond < bonds.size(); ibond++) {
-    // If the bond is a duplicate bond (flagged as false), skip it
-    if ((*flag)[ibond] == false) {
-      continue;
-    }
-    // Otherwise print the bond
-    outputFile << bonds[ibond][0] << " " << bonds[ibond][1] << "\n";
-  }  // end of loop through bonds
-
-  return 0;
-}
-
-/********************************************/ /**
 *  Prints out a LAMMPS data file
 for all the prisms for a single frame, with some
 default options. Only Oxygen
@@ -1788,5 +1532,121 @@ int sout::writeCluster(
   clusterFile << yCloud->currentFrame << " " << largestIceCluster << "\n";
   // Close the file
   clusterFile.close();
+  return 0;
+}
+
+/********************************************/ /**
+*  Prints out a LAMMPS data file
+for all the topological bulk ice for a single frame, with some
+default options. Only Oxygen
+atoms are printed out. Bonds are inferred from the neighbour list
+***********************************************/
+int sout::writeLAMMPSdataTopoBulk(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
+    std::string path) {
+  //
+  std::ofstream outputFile;
+  int iatom;             // Index, not atom ID
+  int numAtomTypes = 4;  // DDC, HC, Mixed, dummy
+  int maxDepth = 6;      // remove
+  int bondTypes = 1;
+  // Bond stuff
+  std::vector<std::vector<int>> bonds;  // Vector of vector, with each row
+                                        // containing the atom IDs of each bond
+  std::string filename =
+      "system-prisms-" + std::to_string(yCloud->currentFrame) + ".data";
+
+  // ---------------
+  // Get the bonds
+  bonds = bond::populateBonds(nList, yCloud);
+  //
+  // ----------------
+  // The directory should have already been made by lua.
+  // ----------------
+  // Write output to file inside the output directory
+  outputFile.open(path + "topoINT/dataFiles/" + filename);
+  // FORMAT:
+  //  Comment Line
+  //  4 atoms
+  //  4 bonds
+  //  0 angles
+  //  0 dihedrals
+  //  0 impropers
+  //  1 atom types
+  //  1 bond types
+  //  0 angle types
+  //  0 dihedral types
+  //  0 improper types
+  //  -1.124000 52.845002  xlo xhi
+  //  0.000000 54.528999  ylo yhi
+  //  1.830501 53.087501  zlo zhi
+
+  //  Masses
+
+  //  1 15.999400 # O
+
+  //  Atoms
+
+  // 1 1 1 0 20.239  1.298 6.873 # O
+  // 2 1 1 0 0 5.193 6.873 # O
+  // 3 1 1 0 2.249 1.298 6.873 # O
+
+  // -------
+  // Write the header
+  // Write comment line
+  outputFile << "Written out by D-SEAMS\n";
+  // Write out the number of atoms
+  outputFile << yCloud->pts.size() << " "
+             << "atoms"
+             << "\n";
+  // Number of bonds
+  outputFile << bonds.size() << " bonds"
+             << "\n";
+  outputFile << "0 angles\n0 dihedrals\n0 impropers\n";
+  // There are maxDepth-2 total types of prisms + dummy
+  outputFile << numAtomTypes << " atom types\n";
+  // Bond types
+  outputFile
+      << bondTypes
+      << " bond types\n0 angle types\n0 dihedral types\n0 improper types\n";
+  // Box lengths
+  outputFile << yCloud->boxLow[0] << " " << yCloud->box[0] << " xlo xhi\n";
+  outputFile << yCloud->boxLow[1] << " " << yCloud->box[1] << " ylo yhi\n";
+  outputFile << yCloud->boxLow[2] << " " << yCloud->box[2] << " zlo zhi\n";
+  // Masses
+  outputFile << "\nMasses\n\n";
+  outputFile << "1 15.999400 # dummy\n";
+  outputFile << "2 1.0 # \n";
+  // There are maxDepth-2 other prism types
+  for (int ringSize = 3; ringSize <= maxDepth; ringSize++) {
+    outputFile << ringSize << " 15.999400 # prism" << ringSize << "\n";
+  }  // end of writing out atom types
+  // Atoms
+  outputFile << "\nAtoms\n\n";
+  // -------
+  // Write out the atom coordinates
+  // Loop through atoms
+  for (int i = 0; i < yCloud->pts.size(); i++) {
+    iatom =
+        yCloud->pts[i].atomID;  // The actual ID can be different from the index
+    // Write out coordinates
+    // atomID molecule-tag atom-type q x y z
+    outputFile << iatom << " " << yCloud->pts[i].molID << " " << atomTypes[i]
+               << " 0 " << yCloud->pts[i].x << " " << yCloud->pts[i].y << " "
+               << yCloud->pts[i].z << "\n";
+
+  }  // end of loop through all atoms in pointCloud
+
+  // Print the bonds now!
+  outputFile << "\nBonds\n\n";
+  // Loop through all bonds
+  for (int ibond = 0; ibond < bonds.size(); ibond++) {
+    //
+    outputFile << ibond + 1 << " 1 " << bonds[ibond][0] << " "
+               << bonds[ibond][1] << "\n";
+  }  // end of for loop for bonds
+
+  // Once the datafile has been printed, exit
   return 0;
 }
