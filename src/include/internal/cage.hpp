@@ -6,7 +6,7 @@
 namespace cage {
 
 // Type of a cage (a group of rings)
-enum cageType { HexC, DoubleDiaC, Mixed };
+enum cageType { HexC, DoubleDiaC };
 
 // Type of ice for a particular atom. Dummy means that the atom is unclassified
 // and is most probably water
