@@ -45,6 +45,17 @@ bool hasCommonElements(std::vector<int> ring1, std::vector<int> ring2);
 // elements
 bool compareRings(std::vector<int> ring1, std::vector<int> ring2);
 
+// Searches a particular ring for a triplet
+bool findTripletInRing(std::vector<int> ring, std::vector<int> triplet);
+
+// Common elements in 3 rings
+bool commonElementsInThreeRings(std::vector<int> ring1, std::vector<int> ring2,
+                                std::vector<int> ring3);
+
+// Returns the common elements of two rings
+std::vector<int> findsCommonElements(std::vector<int> ring1,
+                                     std::vector<int> ring2);
+
 // Erases memory for a vector of vectors for a list of rings
 int clearRingList(std::vector<std::vector<int>> &rings);
 

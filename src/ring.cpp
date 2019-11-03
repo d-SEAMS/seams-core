@@ -14,6 +14,106 @@ int ring::clearRingList(std::vector<std::vector<int>> &rings) {
 }
 
 /********************************************/ /**
+                                                *  Finds and returns all the
+                                                *elements common between the two
+                                                *vectors
+                                                ***********************************************/
+std::vector<int> ring::findsCommonElements(std::vector<int> ring1,
+                                           std::vector<int> ring2) {
+  //
+  std::vector<int> common;
+  int iatom;  // Index to search for
+
+  for (int i = 0; i < ring1.size(); i++) {
+    iatom = ring1[i];
+    // Search for iatom in ring2
+
+    auto it = std::find(ring2.begin(), ring2.end(), iatom);
+
+    if (it != ring2.end()) {
+      common.push_back(iatom);
+    }  // iatom was found!
+  }    // end of loop through every element of ring1
+
+  return common;
+}
+
+/********************************************/ /**
+                                                *  Finds the common elements in
+                                                *three rings
+                                                ***********************************************/
+bool ring::commonElementsInThreeRings(std::vector<int> ring1,
+                                      std::vector<int> ring2,
+                                      std::vector<int> ring3) {
+  //
+  std::vector<int>
+      common1;  // Vector containing the common elements of the first two rings
+  std::vector<int>
+      common2;  // Vector containing the common elements of the three rings
+
+  // Common elements among the first two rings
+  common1 = ring::findsCommonElements(ring1, ring2);
+  if (common1.size() == 0) {
+    return false;
+  }  // no common elements in ring1 and ring2
+
+  // Common elements among all three rings
+  common2 = ring::findsCommonElements(common1, ring3);
+
+  // If no common elements were found:
+  if (common2.size() == 0) {
+    return false;
+  }  // no common elements between ring1, ring2, and ring3
+
+  return true;  // Common elements found!
+}
+
+/********************************************/ /**
+                                                *  Finds out if a triplet is
+                                                *present (in the same order or
+                                                *reversed) in a given ring
+                                                ***********************************************/
+bool ring::findTripletInRing(std::vector<int> ring, std::vector<int> triplet) {
+  //
+  int ringSize = ring.size();    // should be 6
+  std::vector<int> ringTriplet;  // triplet from the ring to be searched
+  int kIndex;                    // Used for making the triplet
+
+  // Loop through every possible triplet in the ring to be searched
+  for (int i = 0; i < ringSize; i++) {
+    ringTriplet.clear();  // init
+    // Get the first element of the ring triplet
+    ringTriplet.push_back(ring[i]);
+    //
+    // Get the next two elements
+    for (int k = 1; k < 3; k++) {
+      kIndex = i + k;
+      // Wrap-around
+      if (kIndex >= ringSize) {
+        kIndex -= ringSize;
+      }  // end of wrap-around
+      ringTriplet.push_back(ring[kIndex]);
+    }  // next two elements of ringTriplet
+    //
+    // Obtained ringTriplet!
+    // Check equality
+    if (triplet == ringTriplet) {
+      return true;
+    }  // triplet matches!
+    //
+    // Check the reversed triplet too
+    std::reverse(ringTriplet.begin(), ringTriplet.end());
+
+    // Check for equality
+    if (triplet == ringTriplet) {
+      return true;
+    }  // reversed triplet matches
+  }    // first element of ringTriplet
+
+  return false;
+}
+
+/********************************************/ /**
                                                 *  Gets rings of a single ring
                                                 *size from all primitive rings
                                                 *and returns that vector of
