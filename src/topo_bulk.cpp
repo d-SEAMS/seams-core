@@ -163,22 +163,29 @@ std::vector<int> ring::findDDC(std::vector<std::vector<int>> rings,
     peripheralRings.clear();
     // ------------
     // Step one: Find all rings which contain each index (m_k) of the equatorial
-    // ring iring in at least three other rings
+    // ring, iring, in at least three other rings
     cond1 = ring::conditionOneDDC(rings, &peripheralRings, iring);
     if (cond1 == false) {
       continue;
     }
     // ------------
     // Step two: For every triplet in iring, there is at least one
-    // hexagonal ring other than iring that passes through the triplet
+    // hexagonal ring other than iring that passes through the triplet.
+    // The peripheral rings are stored in order of the starting element
+    // of each triplet.
     cond2 = ring::conditionTwoDDC(rings, &peripheralRings, iring);
     if (cond2 == false) {
       continue;
     }
     // ------------
-    // Step three: For every triplet in iring, there is at least one
-    // hexagonal ring other than iring that passes through the triplet
-    cond3 = ring::conditionThreeDDC(rings, &peripheralRings, iring);
+    // Step three: For every triplet in the equatorial ring, there is at least
+    // one hexagonal ring other than iring that passes through the triplet.
+    // Rings corresponding to triplets need not be searched again since
+    // peripheralRings are stored in that order. Rings corresponding to T1, T3,
+    // T5 must have a common element. Similarly rings corresponding to T2, T4,
+    // T6 must have at least one common element. Alternating rings corresponding
+    // to triplets must have at least three common elements
+    cond3 = ring::conditionThreeDDC(rings, &peripheralRings);
     if (cond3 == false) {
       continue;
     }
@@ -235,7 +242,7 @@ bool ring::conditionOneDDC(std::vector<std::vector<int>> rings,
 
   // Loop through each element of iring for finding matches
   for (int m = 0; m < 6; m++) {
-    index = rings[iring][m];  // Atom ID to be compared and matched with
+    index = rings[iring][m];  // Atom Index to be compared and matched with
     noOfCommonRings = 0;      // init to zero.
     // Loop through every ring except iring
     for (int jring = 0; jring < rings.size(); jring++) {
@@ -317,12 +324,13 @@ bool ring::conditionTwoDDC(std::vector<std::vector<int>> rings,
     for (int m = 0; m < (*peripheralRings).size(); m++) {
       jring = (*peripheralRings)[m];  // Ring ID of ring to be searched
       // Search inside the ring with index jring for the triplet
-      const auto it = std::search(rings[jring].begin(), rings[jring].end(),
-                                  triplet.begin(), triplet.end());
-      // If the ring has been found inside jring
-      if (it != rings[jring].end()) {
+      bool foundTriplet = ring::findTripletInRing(rings[jring], triplet);
+
+      // If the triplet has been found inside jring
+      if (foundTriplet) {
         newPeripherals.push_back(jring);  // Update new peripheral vector
         count++;
+        break;
       }  // end of ring found
     }    // end of loop through all possible peripheral rings
     // If count is 0, then the triplet was not found in any peripheral ring
@@ -348,157 +356,60 @@ bool ring::conditionTwoDDC(std::vector<std::vector<int>> rings,
 
 /********************************************/ /**
  *  For a given ring, which is being tested as the equatorial ring,
- this function tests if a set of even vector-index triplets and odd vector-index
- triplets have at least one element in common or not. Returns false if this is
- not true. If the condition is true, all six peripheral rings and the equatorial
- ring are DDC cages
+ this function tests the following, given peripheralRings stored in increasing
+ order of the triplet starting element:
+ 1. Rings corresponding to T1, T3, T5 should have at least one common element.
+ 2. Rings corresponding to T2, T4, T6 should have at least one common element.
+ 3. The following rings should have at least three common elements- {T1, T3},
+ {T2, T4}, {T3, T5}, {T4, T6}
+
  ***********************************************/
 bool ring::conditionThreeDDC(std::vector<std::vector<int>> rings,
-                             std::vector<int> *peripheralRings, int iring) {
-  std::vector<int> triplet;  //  Triplet formed from iring
-  int ringSize = 6;          // Here, all the rings are hexagons
-  // Three peripheral rings, each intersecting with a triplet of iring
-  std::vector<int> ring1;
-  std::vector<int> ring2;
-  std::vector<int> ring3;
-  std::vector<int> ringIndex;  // Contains ring IDs of the peripheral indices
-                               // matching with the triplets
-  int j;                       // Used for making the triplet
-  int jring;                   // Peripheral ring ID to be searched
-
+                             std::vector<int> *peripheralRings) {
+  // New
+  std::vector<int> common;  // Vector containing common elements
+  bool hasCommon;           // true if the rings have a common element
+  int iring, jring;         // Pairs of peripheral rings
   // ----------------------------------------------------------------------------
-  // EVEN-INDEXED TRIPLETS
-  // Search within even-indexed triplets and find ring1, ring2, ring3
-  for (int k = 0; k < ringSize; k += 2) {
-    triplet.clear();  // Clear the triplet
-    // Get a triplet
-    for (int i = k; i < k + 3; i++) {
-      j = i;
-      if (i >= ringSize) {
-        j = i - ringSize;
-      }
-      triplet.push_back(rings[iring][j]);
-    }  // end of getting a triplet from k
-    // -------------
-    // Compare the triplet with every possible peripheral
-    // ring inside peripheralRings.
-    // Loop through all possible peripheral rings
-    for (int m = 0; m < (*peripheralRings).size(); m++) {
-      jring = (*peripheralRings)[m];  // Ring ID of ring to be searched
-      // Search inside the ring with index jring for the triplet
-      const auto it = std::search(rings[jring].begin(), rings[jring].end(),
-                                  triplet.begin(), triplet.end());
-      // If the ring has been found inside jring
-      if (it != rings[jring].end()) {
-        // Put jring found into ringIndex
-        ringIndex.push_back(jring);
-        break;
-      }  // end of ring found
-    }    // end of loop through all possible peripheral rings
-    // -------------
-  }  // end of looping through 0-6 to get triplets
+  // CONDITION 1: Rings corresponding to T1, T3, T5 should have at least one
+  // common element.
+  hasCommon = ring::commonElementsInThreeRings(rings[(*peripheralRings)[0]],
+                                               rings[(*peripheralRings)[2]],
+                                               rings[(*peripheralRings)[4]]);
 
-  // Save the even-indexed triplet-matching rings into ring1, ring2, ring3
-  ring1 = rings[ringIndex[0]];
-  ring2 = rings[ringIndex[1]];
-  ring3 = rings[ringIndex[2]];
-
-  // Get the intersection of 2 rings first
-  sort(ring1.begin(), ring1.end());  // Sort ring1 by ID
-  sort(ring2.begin(), ring2.end());  // Sort ring2 by ID
-  std::vector<int>
-      common2;  // Vector for holding common elements from ring1 and ring2
-
-  // Get the intersection of sorted ring1 and ring2
-  auto it1 = std::set_intersection(ring1.begin(), ring1.end(), ring2.begin(),
-                                   ring2.end(), std::back_inserter(common2));
-  // If the common2 vector is empty, there are no elements in common
-  if (common2.size() == 0) {
+  // If T1, T3, T5 don't have a common element, return false
+  if (!hasCommon) {
     return false;
-  }
-
-  // Get intersection of the common elements from ring1, ring2 and ring3
-  sort(ring3.begin(), ring3.end());  // Sort ring3 by ID
-  std::vector<int>
-      common3;  // Vector for holding common elements of ring1, ring2, ring3
-  // Get the intersection of sorted ring1 and ring2 and ring3 and save in
-  // common3
-  auto it2 =
-      std::set_intersection(common2.begin(), common2.end(), ring3.begin(),
-                            ring3.end(), std::back_inserter(common3));
-  // If there are no elements in common, then return false
-  if (common3.size() == 0) {
-    return false;
-  }
+  }  // not a DDC
   // ----------------------------------------------------------------------------
-  // ODD-INDEXED TRIPLETS
+  // CONDITION 2: Rings corresponding to T1, T3, T5 should have at least one
+  // common element.
+  hasCommon = ring::commonElementsInThreeRings(rings[(*peripheralRings)[1]],
+                                               rings[(*peripheralRings)[3]],
+                                               rings[(*peripheralRings)[5]]);
+
+  // If T1, T3, T5 don't have a common element, return false
+  if (!hasCommon) {
+    return false;
+  }  // not a DDC
   // ----------------------------------------------------------------------------
-  // Clear all vectors used before
-  ring1.clear();
-  ring2.clear();
-  ring3.clear();
-  common2.clear();
-  common3.clear();
-  ringIndex.clear();
+  // CONDITION 3: Rings corresponding to {T1, T3}, {T2, T4}, {T3, T5}, {T4,
+  // T6}
+  // must have three elements in common amongst them
 
-  // Search within odd-indexed triplets and find ring1, ring2, ring3
-  for (int k = 1; k < ringSize; k += 2) {
-    triplet.clear();  // Clear the triplet
-    // Get a triplet
-    for (int i = k; i < k + 3; i++) {
-      j = i;
-      if (i >= ringSize) {
-        j = i - ringSize;
-      }
-      triplet.push_back(rings[iring][j]);
-    }  // end of getting a triplet from k
-    // -------------
-    // Compare the triplet with every possible peripheral
-    // ring inside peripheralRings.
-    // Loop through all possible peripheral rings
-    for (int m = 0; m < (*peripheralRings).size(); m++) {
-      jring = (*peripheralRings)[m];  // Ring ID of ring to be searched
-      // Search inside the ring with index jring for the triplet
-      const auto iter = std::search(rings[jring].begin(), rings[jring].end(),
-                                    triplet.begin(), triplet.end());
-      // If the ring has been found inside jring
-      if (iter != rings[jring].end()) {
-        // Put jring found into ringIndex
-        ringIndex.push_back(jring);
-        break;
-      }  // end of ring found
-    }    // end of loop through all possible peripheral rings
-    // -------------
-  }  // end of looping through 0-6 to get triplets
-
-  // Save the even-indexed triplet-matching rings into ring1, ring2, ring3
-  ring1 = rings[ringIndex[0]];
-  ring2 = rings[ringIndex[1]];
-  ring3 = rings[ringIndex[2]];
-
-  // Get the intersection of 2 rings first
-  sort(ring1.begin(), ring1.end());  // Sort ring1 by ID
-  sort(ring2.begin(), ring2.end());  // Sort ring2 by ID
-
-  // Get the intersection of sorted ring1 and ring2
-  it1 = std::set_intersection(ring1.begin(), ring1.end(), ring2.begin(),
-                              ring2.end(), std::back_inserter(common2));
-  // If the common2 vector is empty, there are no elements in common
-  if (common2.size() == 0) {
-    return false;
-  }
-
-  // Get intersection of the common elements from ring1, ring2 and ring3
-  sort(ring3.begin(), ring3.end());  // Sort ring3 by ID
-
-  // Get the intersection of sorted ring1 and ring2 and ring3 and save in
-  // common3
-  it2 = std::set_intersection(common2.begin(), common2.end(), ring3.begin(),
-                              ring3.end(), std::back_inserter(common3));
-  // If there are no elements in common, then return false
-  if (common3.size() == 0) {
-    return false;
-  }
+  // Loops to get pairs of rings corresponding to the right triplets
+  for (int i = 0; i <= 3; i++) {
+    common.clear();  // init
+    // Pairs of rings corresponding to triplets.
+    iring = (*peripheralRings)[i];
+    jring = (*peripheralRings)[i + 2];
+    // Get the common elements
+    common = ring::findsCommonElements(rings[iring], rings[jring]);
+    // There should be at least three elements
+    if (common.size() < 3) {
+      return false;
+    }  // not a DDC
+  }    // end of getting iring and jring
   // ----------------------------------------------------------------------------
 
   // iring is an equatorial ring and peripheralRings has the 6 peripheral rings

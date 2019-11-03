@@ -76,7 +76,7 @@ bool conditionTwoDDC(std::vector<std::vector<int>> rings,
 // Third condition for the DDC: Even (by vector index) numbered index triplets
 // and odd triplets must have at least one element in common
 bool conditionThreeDDC(std::vector<std::vector<int>> rings,
-                       std::vector<int> *peripheralRings, int iring);
+                       std::vector<int> *peripheralRings);
 
 // Tests whether two rings are basal rings (true) or not (false)
 bool basalConditions(std::vector<std::vector<int>> nList,
