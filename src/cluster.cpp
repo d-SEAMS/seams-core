@@ -173,12 +173,15 @@ int clump::largestIceCluster(
  *  Does the cluster analysis of ice particles in the system. Returns a
  pointCloud of the largest ice cluster (using the q6 parameter by default).
  Uses the full neighbour list (by ID) according to the full
- PointCloud yCloud.
+ PointCloud yCloud. Returns a neighbour list by index, according to the largest
+ ice cluster.
  ***********************************************/
-molSys::PointCloud<molSys::Point<double>, double> clump::clusterAnalysis(
+int clump::clusterAnalysis(
     molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, std::string bopAnalysis) {
+    std::vector<std::vector<int>> nList,
+    std::vector<std::vector<int>> &iceNeighbourList, double cutoff,
+    std::string bopAnalysis) {
   //
   std::vector<bool> isIce;     // For every particle in yCloud, has a value
   int nTotalIce;               // Total number of ice-like molecules
@@ -192,6 +195,8 @@ molSys::PointCloud<molSys::Point<double>, double> clump::clusterAnalysis(
   // Init
   // Clear the largest ice cluster pointCloud.
   *iceCloud = molSys::clearPointCloud(iceCloud);
+  // Clear the neighbour list by index
+  nneigh::clearNeighbourList(iceNeighbourList);
   // Init the vector of bools for every particle in yCloud
   isIce.resize(yCloud->nop);
   nTotalIce = 0;  // Total number of ice-like molecules
@@ -240,5 +245,10 @@ molSys::PointCloud<molSys::Point<double>, double> clump::clusterAnalysis(
   clump::largestIceCluster(yCloud, iceCloud, nList, &isIce, &clusterID,
                            &nClusters, &indexNumber);
 
-  return *iceCloud;
+  // -------------------------------------------------------
+  // Get the neighbour list by index according to the largest ice cluster
+  // pointCloud
+  iceNeighbourList = nneigh::getNewNeighbourListByIndex(iceCloud, cutoff);
+
+  return 0;
 }  // end of function
