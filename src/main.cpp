@@ -33,6 +33,7 @@
 // Newer pointCloud
 #include <bond.hpp>
 #include <bop.hpp>
+#include <cluster.hpp>
 #include <franzblau.hpp>
 #include <generic.hpp>
 #include <mol_sys.hpp>
@@ -162,9 +163,7 @@ int main(int argc, char *argv[]) {
       lua.set_function("modifyChill", chill::reclassifyWater);
       lua.set_function("percentage_Ice", chill::printIceType);
       // Largest ice cluster
-      lua.set_function("create_cluster", chill::getIceCloud);
-      lua.set_function("largest_cluster", chill::largestIceCluster);
-      lua.set_function("writeCluster", sout::writeCluster);
+      lua.set_function("clusterAnalysis", clump::clusterAnalysis);
       // -----------------
       // Topological Network Methods
       // Generic requirements (read in only inside the slice)
