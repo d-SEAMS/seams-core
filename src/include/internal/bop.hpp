@@ -163,6 +163,11 @@ molSys::PointCloud<molSys::Point<double>, double> getCorrel(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, bool isSlice = false);
 
+// Classifies each atom according to the CHILL algorithm without printing
+molSys::PointCloud<molSys::Point<double>, double> getIceTypeNoPrint(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<std::vector<int>> nList, bool isSlice = false);
+
 // Classifies each atom according to the CHILL algorithm
 molSys::PointCloud<molSys::Point<double>, double> getIceType(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,

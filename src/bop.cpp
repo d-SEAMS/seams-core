@@ -466,6 +466,81 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getCorrel(
 
 /********************************************/ /**
  *  Function that classifies every particle's #molSys::atom_state_type ice
+ type, according to the CHILL algorithm. Does not print out the information.
+ *  @param[in,out] yCloud The output molSys::PointCloud
+ *  @param[in] isSlice This decides whether there is a slice or not
+ *  @param[in] outputFileName Name of the output file, to which the ice types
+ will be written out.
+ * The default file name is "chill.txt"
+ ***********************************************/
+molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypeNoPrint(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<std::vector<int>> nList, bool isSlice) {
+  int ih, ic, water, interIce, unknown, total;  // No. of particles of each type
+  ih = ic = water = unknown = interIce = total = 0;
+  int num_staggrd, num_eclipsd, na;
+  molSys::bond_type bondType;
+  int nnumNeighbours;  // Number of nearest neighbours
+
+  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+    // if(yCloud->pts[iatom].type!=typeO){continue;}
+    // if this is a slice and the particle is not in the slice
+    // then skip
+    if (isSlice) {
+      if (yCloud->pts[iatom].inSlice == false) {
+        continue;
+      }
+    }
+    total++;  // Update the total number of atoms considered. Change this to
+    // check for slices
+    num_staggrd = num_eclipsd = na =
+        0;  // init to zero before loop through neighbours
+
+    nnumNeighbours = nList[iatom].size() - 1;
+    // Loop through the bond cij and get the number of staggered, eclipsed bonds
+    for (int j = 0; j < nnumNeighbours; j++) {
+      bondType = yCloud->pts[iatom].c_ij[j].classifier;
+      if (bondType == molSys::eclipsed) {
+        num_eclipsd++;
+      } else if (bondType == molSys::staggered) {
+        num_staggrd++;
+      } else {
+        na++;
+      }
+    }  // End of loop through neighbours
+
+    // Add more tests later
+    yCloud->pts[iatom].iceType = molSys::unclassified;  // default
+    // Cubic ice
+    // if (num_eclipsd==0 && num_staggrd==4){
+    //  yCloud->pts[iatom].iceType = molSys::cubic;
+    //  ic++;
+    // }
+    if (num_staggrd >= 4) {
+      yCloud->pts[iatom].iceType = molSys::cubic;
+      ic++;
+    }
+    // Hexagonal
+    else if (num_eclipsd == 1 && num_staggrd == 3) {
+      yCloud->pts[iatom].iceType = molSys::hexagonal;
+      ih++;
+    }
+    // Interfacial
+    else if (isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd)) {
+      yCloud->pts[iatom].iceType = molSys::interfacial;
+      interIce++;
+    } else {
+      yCloud->pts[iatom].iceType = molSys::water;
+      water++;
+    }
+
+  }  // End of loop through every iatom
+
+  return *yCloud;
+}
+
+/********************************************/ /**
+ *  Function that classifies every particle's #molSys::atom_state_type ice
  type, according to the CHILL algorithm.
  *  @param[in,out] yCloud The output molSys::PointCloud
  *  @param[in] isSlice This decides whether there is a slice or not
