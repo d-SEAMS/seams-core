@@ -62,6 +62,7 @@ add_library(yodaLib SHARED
   topo_one_dim.cpp
   topo_bulk.cpp
   order_parameter.cpp
+  cluster.cpp
 )
 # if(yaml-cpp_FOUND)
 #     target_link_libraries(yodaStruct yaml-cpp)
