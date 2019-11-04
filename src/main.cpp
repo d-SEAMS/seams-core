@@ -123,6 +123,7 @@ int main(int argc, char *argv[]) {
     molSys::PointCloud<molSys::Point<double>, double> resCloud, solCloud;
     // Some neighbor
     std::vector<std::vector<int>> nList, hbnList;
+    std::vector<std::vector<int>> iceList;
     // For averaged q6
     std::vector<double> avgQ6;
     // For the list of all rings (of all sizes)
@@ -138,6 +139,7 @@ int main(int argc, char *argv[]) {
       // Transfer variables to lua
       lua["nList"] = &nList;
       lua["hbnList"] = &hbnList;
+      lua["iceNeighbourList"] = &iceList;
       lua["resCloud"] = &resCloud;
       lua["clusterCloud"] = &solCloud;
       lua["avgQ6"] = &avgQ6;
@@ -169,7 +171,7 @@ int main(int argc, char *argv[]) {
       // Generic requirements (read in only inside the slice)
       lua.set_function("readFrameOnlyOne", sinp::readLammpsTrjreduced);
       lua.set_function("getHbondNetwork", bond::populateHbonds);
-      lua.set_function("hBondNetworkByIndex", nneigh::neighbourListByIndex);
+      lua.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);
       // -----------------
       // Primitive rings
       lua.set_function("getPrimitiveRings", primitive::ringNetwork);
