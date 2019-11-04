@@ -26,6 +26,11 @@ int writeRings(std::vector<std::vector<int>> rings,
 int writePrismNum(std::string path, int currentFrame, std::vector<int> nPrisms,
                   std::vector<double> heightPercent, int maxDepth);
 
+// Function for printing out the number of DDCs, HCs, mixed rings, basal and
+// prismatic rings
+int writeTopoBulkData(std::string path, int currentFrame, int numHC, int numDDC,
+                      int mixedRings, int basalRings, int prismaticRings);
+
 // Function for writing out each prism
 int writePrisms(std::vector<int> *basal1, std::vector<int> *basal2,
                 int prismNum,

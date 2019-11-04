@@ -829,7 +829,6 @@ int sout::writeBasalRingsPrism(
 /********************************************/ /**
  *  Function for printing out ring info, when there is no
  volume slice
- Uses Boost!
  ***********************************************/
 int sout::writePrismNum(std::string path, int currentFrame,
                         std::vector<int> nPrisms,
@@ -857,6 +856,33 @@ int sout::writePrismNum(std::string path, int currentFrame,
 
   return 0;
 }
+
+/********************************************/ /**
+ *  Function for out the number of DDCs, HCs, mixed rings, basal and
+ prismatic rings.
+ ***********************************************/
+int sout::writeTopoBulkData(std::string path, int currentFrame, int numHC,
+                            int numDDC, int mixedRings, int basalRings,
+                            int prismaticRings) {
+  //
+  std::ofstream outputFile;
+  // ----------------
+  // Write output to file inside the output directory
+  outputFile.open(path + "bulkTopo/cageData.dat",
+                  std::ios_base::app | std::ios_base::out);
+
+  // Format:
+  // Frame RingSize Num_of_prisms Height% RingSize ... Height%
+  // 1 3 0 0 4 35 40 ....
+
+  outputFile << currentFrame << " " << numHC << " " << numDDC << " "
+             << mixedRings << " " << prismaticRings << " " << basalRings
+             << "\n";
+
+  outputFile << "\n";
+
+  outputFile.close();
+}  // end of function
 
 /********************************************/ /**
 *  Prints out a LAMMPS data file
