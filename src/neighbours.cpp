@@ -251,6 +251,49 @@ std::vector<std::vector<int>> nneigh::halfNeighList(
 }
 
 /********************************************/ /**
+ *  Function for creating a neighbour list by index instead of by atom ID.
+ The ordering is with respect to the pointCloud with the coordinates.The first
+ element is the atom for which the other atom indices are neighbours For
+ example, if the neighbours of 1 are 2, 3, 4 the sub-vector would have 1 2 3 4
+ ***********************************************/
+std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, double cutoff) {
+  //
+  std::vector<std::vector<int>> nList;
+  double r_ij;  // Distance between iatom and jatom
+  std::vector<int> tempListIatom;
+
+  // Initialize and fill the first element with the current atom ID whose
+  // neighbour list will be filled
+  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+    //
+    nList.push_back(std::vector<int>());  // Empty vector for the index iatom
+    // Fill the first element with the atom ID of iatom itself
+    nList[iatom].push_back(iatom);
+  }  // end of init
+  // -------------------------------------------------------
+  // Loop through every iatom and find nearest neighbours within rcutoff
+  for (int iatom = 0; iatom < yCloud->nop - 1; iatom++) {
+    // Loop through the other atoms
+    for (int jatom = iatom + 1; jatom < yCloud->nop; jatom++) {
+      // If the distance is greater than rcutoff, continue
+      r_ij = gen::periodicDist(yCloud, iatom, jatom);
+      if (r_ij > cutoff) {
+        continue;
+      }
+
+      // Update the neighbour indices with atom IDs for iatom and jatom both
+      // (full list)
+      nList[iatom].push_back(jatom);
+      nList[jatom].push_back(iatom);
+
+    }  // End of loop through jatom
+  }    // End of loop for iatom
+
+  return nList;
+}  // end of function
+
+/********************************************/ /**
  *  Function for getting the neighbour list by index instead of by atom ID.
  The ordering is with respect to the pointCloud with the coordinates.The first
  element is the atom for which the other atom indices are neighbours For
@@ -299,4 +342,17 @@ std::vector<std::vector<int>> nneigh::neighbourListByIndex(
 
   // Return the new neighbour list
   return indexNlist;
+}
+
+/********************************************/ /**
+                                                *  Deletes the memory of a
+                                                *vector of vectors
+                                                ***********************************************/
+int nneigh::clearNeighbourList(std::vector<std::vector<int>> &nList) {
+  //
+  std::vector<std::vector<int>> tempEmpty;
+
+  nList.swap(tempEmpty);
+
+  return 0;
 }

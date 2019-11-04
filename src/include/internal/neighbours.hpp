@@ -35,6 +35,14 @@ std::vector<std::vector<int>> neighbourListByIndex(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList);
 
+// Gets a neighbour list by index, according to a pointCloud given as the input.
+// Assume no slices or other skullduggery
+std::vector<std::vector<int>> getNewNeighbourListByIndex(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, double cutoff);
+
+// Erases memory for a vector of vectors for the neighbour list
+int clearNeighbourList(std::vector<std::vector<int>> &nList);
+
 }  // namespace nneigh
 
 #endif  // __NEIGHBOURS_H_
