@@ -1573,6 +1573,7 @@ int sout::writeLAMMPSdataTopoBulk(
   //
   std::ofstream outputFile;
   int iatom;             // Index, not atom ID
+  int currentAtomType;   // Current atom type: a value from 1 to 4
   int numAtomTypes = 4;  // DDC, HC, Mixed, dummy
   int bondTypes = 1;
   // Bond stuff
@@ -1643,10 +1644,10 @@ int sout::writeLAMMPSdataTopoBulk(
              << " zlo zhi\n";
   // Masses
   outputFile << "\nMasses\n\n";
-  outputFile << "0 15.999400 # dummy\n";
-  outputFile << "1 15.999400 # hc \n";
-  outputFile << "2 15.999400 # ddc \n";
-  outputFile << "3 15.999400 # mixed \n";
+  outputFile << "1 15.999400 # dummy\n";
+  outputFile << "2 15.999400 # hc \n";
+  outputFile << "3 15.999400 # ddc \n";
+  outputFile << "4 15.999400 # mixed \n";
   // Atoms
   outputFile << "\nAtoms\n\n";
   // -------
@@ -1655,9 +1656,27 @@ int sout::writeLAMMPSdataTopoBulk(
   for (int i = 0; i < yCloud->pts.size(); i++) {
     iatom =
         yCloud->pts[i].atomID;  // The actual ID can be different from the index
+    //
+    // Get the atom type
+    // hc atom type
+    if (atomTypes[i] == cage::hc) {
+      currentAtomType = 2;
+    }  // hc
+    else if (atomTypes[i] == cage::ddc) {
+      currentAtomType = 3;
+    }  // ddc
+    // mixed
+    else if (atomTypes[i] == cage::mixed) {
+      currentAtomType = 4;
+    }  // mixed
+    // dummy
+    else {
+      currentAtomType = 1;
+    }  // dummy
+    //
     // Write out coordinates
     // atomID molecule-tag atom-type q x y z
-    outputFile << iatom << " " << yCloud->pts[i].molID << " " << atomTypes[i]
+    outputFile << iatom << " " << yCloud->pts[i].molID << " " << currentAtomType
                << " 0 " << yCloud->pts[i].x << " " << yCloud->pts[i].y << " "
                << yCloud->pts[i].z << "\n";
 
