@@ -6,149 +6,167 @@ namespace bg = boost::geometry;
 /********************************************/ /**
                                                 *  Finds the number of particles
                                                 *in the largest ice cluster, for
-                                                *a given frame.
-                                                *  @param[in] iceCloud The input
-                                                *molSys::PointCloud for all the
-                                                *ice-like particles
-                                                *  @param[in] cutoff The cut-off
-                                                *distance for determining
-                                                *nearest-neighbours. For water,
-                                                *the cut-off value is typically
-                                                *taken to be \f$3.2\f$ or
-                                                *\f$3.5\f$ Angstrom,
-                                                *encompassing the
-                                                *first-neighbour shell
-                                                *molecules.
-                                                *  @param[in] printCluster
-                                                *Decides whether the cluster
-                                                *should be printed out to a file
-                                                *as a lammpstrj or not
-                                                *  @param[in] isSlice Decides
-                                                *whether there is a slice (true)
-                                                *or not (false) \return an int
-                                                *value holding the number of
-                                                *particles in the largest ice
-                                                *cluster
+                                                *a given frame, using Stoddard's
+                                                *1978 algorithm
                                                 ***********************************************/
 int clump::largestIceCluster(
-    molSys::PointCloud<molSys::Point<double>, double> *iceCloud, double cutoff,
-    bool printCluster, bool isSlice) {
-  std::vector<int>
-      clusterFlag;  // This will contain flags for each solid atom. If
-                    // 'flagged', move onto the next unflagged element
-  std::vector<int> linkedListCluster;  // This will contain the ID of the
-                                       // cluster it belongs to
-  std::vector<int>
-      clusterID;  // This will contain the starting point of a cluster
-  std::vector<int> nCluster;  // No. of particles in each cluster
-  int nLargestCluster = 0;    // No. of particles in the largest cluster
-  int nnumNeighbours;         // Number of nearest neighbours
-  int j;
-  int noc = 0;      // no. of particles in a cluster
-  double r_jk = 0;  // Distance between j^th and k^th atom
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
+    std::vector<std::vector<int>> nList, std::vector<bool> *isIce,
+    std::vector<int> *list, std::vector<int> *nClusters,
+    std::unordered_map<int, int> *indexNumber) {
+  //
+  int kAtomID;                     // Atom ID of the nearest neighbour
+  int iClusterNumber;              // Number in the current cluster
+  int nLargestCluster;             // Number in the largest cluster
+  std::vector<int> linkedList;     // Linked list
+  int j;                           // Index
+  std::vector<int> startingIndex;  // Contains the vector index in list
+                                   // corresponding to a particular cluster
+  int temp;                        // For swapping
+  std::vector<bool>
+      visited;  // To make sure you don't go through the same atoms again.
+  molSys::Point<double> iPoint;  // Current point
+  int currentIndex;              // Current index
 
-  clusterFlag.resize(iceCloud->nop);  // Init cluster flag vector to 0. If added
-                                      // to a cluster, then skip
-  linkedListCluster.reserve(iceCloud->nop);
-
-  // Initialize the linked list
-  for (int iatom = 0; iatom < iceCloud->nop; iatom++) {
-    linkedListCluster[iatom] = iatom;
-  }
-
-  // -------------------------------------------------
-  // Construct the linked list
-  for (int i = 0; i < iceCloud->nop - 1; i++) {
-    if (linkedListCluster[i] != i) {
+  // -----------------------------------------------------------
+  // INITIALIZATION
+  linkedList.resize(yCloud->nop, -1);  // init to dummy value
+  // Initial values of the list. -1 is a dummy value if the molecule is
+  // water or not in the slice
+  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+    // Skip if the molecule is water or if it is not in the slice
+    if ((*isIce)[iatom] == false || yCloud->pts[iatom].inSlice == false) {
       continue;
-    }  // i is already in a cluster
-    j = i;
+    }  // skip for water or not in slice
+    // Otherwise, assign the index as the ID
+    linkedList[iatom] = iatom;
+  }  // init of cluster IDs
+  // -----------------------------------------------------------
+  // Get the linked list
+  for (int i = 0; i < yCloud->nop - 1; i++) {
+    //
+    // Skip if the molecule is water or if it is not in the slice
+    if (linkedList[i] == -1) {
+      continue;
+    }  // skip for water or not in slice
+    //
+    // If iatom is already in a cluster, skip it
+    if (linkedList[i] != i) {
+      continue;
+    }  // Already part of a cluster
+    //
+    j = i;  // Init of j
+    // Execute the next part of the loop while j is not equal to i
     do {
-      for (int k = i + 1; k < iceCloud->nop; k++) {
-        // If L[k] == k and r_jk < cutoff then
-        if (linkedListCluster[k] == k) {
-          r_jk = gen::periodicDist(iceCloud, j, k);
-          if (r_jk <= cutoff) {
-            iter_swap(linkedListCluster.begin() + j,
-                      linkedListCluster.begin() + k);
-          }  // end of check that j&k are neighbours
-        }    // check for L[k] and k
-      }
-      j = linkedListCluster[j];
-    } while (j != i);
+      //
+      // Go through the rest of the atoms (KLOOP)
+      for (int k = i + 1; k < yCloud->nop; k++) {
+        // Skip if not ice
+        if ((*isIce)[k] == false) {
+          continue;
+        }  // not ice
+        // Skip if already part of a cluster
+        if (linkedList[k] != k) {
+          continue;
+        }  // Already part of a cluster
+        //
+        // Check to see if k is a nearest neighbour of j
+        kAtomID = yCloud->pts[k].atomID;  // Atom ID
+        auto it = std::find(nList[j].begin() + 1, nList[j].end(), kAtomID);
+        if (it != nList[j].end()) {
+          // Swap!
+          temp = linkedList[j];
+          linkedList[j] = linkedList[k];
+          linkedList[k] = temp;
+        }  // j and k are nearest neighbours
+      }    // end of loop through k (KLOOP)
+      //
+      j = linkedList[j];
+    } while (j != i);  // end of control for j!=i
+    //
 
-  }  // Loop through N-1 atoms
-  // -------------------------------------------------
+  }  // end of looping through every i
 
-  // Get the number of particles per cluster
-  int jatom, iatom;
+  // -----------------------------------------------------------
+  // Get the starting index (which is the vector index in list) corresponding to
+  // clusters with more than one molecule in them
+  int nextElement;  // value in list
+  int index;        // starting index value
+  // init
+  visited.resize(yCloud->nop);
 
-  for (int i = 0; i < iceCloud->nop; i++) {
-    if (clusterFlag[i] == 1) {
+  for (int i = 0; i < yCloud->nop; i++) {
+    //
+    if (visited[i]) {
       continue;
-    }  // The particle has already been tagged as part of a previous cluster
-    // Start a new cluster
-    clusterID.push_back(i);
-    iatom = i;
-    noc = 0;
-    for (int j = 0; j < iceCloud->nop; j++) {
-      jatom = linkedListCluster[iatom];
-      clusterFlag[jatom] = 1;
-      iatom = jatom;
-      noc++;
-      if (jatom == i) {
-        break;
-      }
-    }  // The maximum no. of particles in a cluster is N
-    nCluster.push_back(noc);
-  }  // Loop through all solid particles
+    }                   // Already counted
+    visited[i] = true;  // Visited
+    if (linkedList[i] == -1) {
+      continue;
+    }  // not ice
+    if (linkedList[i] == i) {
+      continue;
+    }  // only one element
+    //
+    currentIndex = i;
+    nextElement = linkedList[currentIndex];
+    index = i;
+    iClusterNumber = 1;  // at least one value
+    while (nextElement != index) {
+      iClusterNumber++;
+      currentIndex = nextElement;
+      visited[currentIndex] = true;
+      nextElement = linkedList[currentIndex];
+    }  // get number
+    // Update startingIndex with index
+    startingIndex.push_back(index);
+    // Update the number of molecules in the cluster
+    (*nClusters).push_back(iClusterNumber);
+  }  // end of loop through
+  // -----------------------------------------------------------
+  // Get the largest cluster and save the atoms to the iceCloud pointCloud
+  nLargestCluster = *std::max_element((*nClusters).begin(), (*nClusters).end());
+  int lClusIndex = distance(
+      (*nClusters).begin(),
+      max_element(
+          (*nClusters).begin(),
+          (*nClusters).end()));  // index of the cluster with the largest number
+  // -----------------------------------------------------------
+  // Loop through the linked list from the starting element
+  // startingIndex[lClusIndex].
+  int startCluster =
+      startingIndex[lClusIndex];  // index in linkedList to start from
 
-  auto largest = std::max_element(nCluster.begin(), nCluster.end());
-  int indexOfCluster = std::distance(std::begin(nCluster), largest);
-  nLargestCluster = nCluster[indexOfCluster];
-  // -----------------------------------------------
-  // If the user wants, print out the largest ice cluster to a lammpstrj
+  // L[i]->j->L[j]->k->L[k]->i
+  index = startCluster;
+  // Update iceCloud
+  iPoint = yCloud->pts[index];
+  iceCloud->pts.push_back(iPoint);
+  //
+  nextElement = linkedList[startCluster];
+  while (nextElement != index) {
+    currentIndex = nextElement;
+    // update with currentIndex
+    iPoint = yCloud->pts[currentIndex];
+    iceCloud->pts.push_back(iPoint);
+    // end update
+    nextElement = linkedList[currentIndex];
+  }  // get the largest cluster
+  // -----------------------------------------------------------
+  // Update other variables in iceCloud
 
-  if (printCluster) {
-    // Header of traj file
-    std::ofstream outputFile;
-    // Create a new file in the output directory
-    outputFile.open("largestCluster.lammpstrj", std::ios_base::app);
-    outputFile << "ITEM: TIMESTEP\n";
-    outputFile << iceCloud->currentFrame << "\n";
-    outputFile << "ITEM: NUMBER OF ATOMS\n";
-    outputFile << nLargestCluster << "\n";
-    outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
-    for (int k = 0; k < iceCloud->boxLow.size(); k++) {
-      outputFile << iceCloud->boxLow[k] << " "
-                 << iceCloud->boxLow[k] + iceCloud->box[k];
-      // for triclinic boxes
-      if (iceCloud->box.size() == 2 * iceCloud->boxLow.size()) {
-        // The tilt factors are saved after the box lengths; so add 3
-        outputFile
-            << " "
-            << iceCloud->box[k + iceCloud->boxLow.size()];  // this would be +2
-                                                            // for a 2D box
-      }
-      outputFile << "\n";
-    }  // end of printing box lengths
-    outputFile << "ITEM: ATOMS id mol type x y z\n";
+  iceCloud->currentFrame = yCloud->currentFrame;
+  iceCloud->nop = iceCloud->pts.size();
+  iceCloud->box = yCloud->box;
+  iceCloud->boxLow = yCloud->boxLow;
 
-    iatom = clusterID[indexOfCluster];
-    for (int i = 0; i < nLargestCluster; i++) {
-      jatom = linkedListCluster[iatom];  // Get index of the atom to print
-      iatom = jatom;
-      outputFile << iceCloud->pts[jatom].atomID << " "
-                 << iceCloud->pts[jatom].molID << " "
-                 << iceCloud->pts[jatom].iceType << " "
-                 << iceCloud->pts[jatom].x << " " << iceCloud->pts[jatom].y
-                 << " " << iceCloud->pts[jatom].z << "\n";
-    }  // End of traversing through the largest ice cluster
-  }
+  // Update idIndexMap
+  for (int iatom = 0; iatom < iceCloud->nop; iceCloud++) {
+    iceCloud->idIndexMap[iceCloud->pts[iatom].atomID] = iatom;
+  }  // end of loop through iceCloud
 
-  // -------------------------------------------------
-
-  return nLargestCluster;
+  return 0;
 }
 
 /********************************************/ /**
@@ -162,8 +180,13 @@ molSys::PointCloud<molSys::Point<double>, double> clump::clusterAnalysis(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, std::string bopAnalysis) {
   //
-  std::vector<bool> isIce;  // For every particle in yCloud, has a value
-  int nTotalIce;            // Total number of ice-like molecules
+  std::vector<bool> isIce;     // For every particle in yCloud, has a value
+  int nTotalIce;               // Total number of ice-like molecules
+  std::vector<int> clusterID;  // Vector containing the cluster IDs of all the
+                               // ice-like molecules.
+  std::vector<int> nClusters;  // Number of clusters for each index
+  std::unordered_map<int, int>
+      indexNumber;  // Map for cluster index and index in the number vector
 
   // -------------------------------------------------------
   // Init
@@ -190,7 +213,32 @@ molSys::PointCloud<molSys::Point<double>, double> clump::clusterAnalysis(
       }                       // ice-like molecule found
     }                         // end of loop through every atom in yCloud
   }  // end of getting a vector of bools for ice-like particles
+  //
+  // CHILL
+  // Q6
+  if (bopAnalysis == "chill") {
+    //
+    *yCloud = chill::getCorrel(yCloud, nList, false);
+    // Get the ice types
+    *yCloud = chill::getIceTypeNoPrint(yCloud, nList, false);
+    // Assign values to isIce according to the CHILL algorithm
+    for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+      // If it is an ice-like molecule, add it, otherwise skip
+      if (yCloud->pts[iatom].iceType == molSys::water) {
+        continue;
+      }  // water
+      if (yCloud->pts[iatom].iceType == molSys::unclassified) {
+        continue;
+      }                     // unclassified
+      isIce[iatom] = true;  // is ice-like; by default false
+      nTotalIce++;          // Add to the number of ice-like molecules
+
+    }  // end of loop through every atom in yCloud
+  }    // end of getting a vector of bools for ice-like particles
   // -------------------------------------------------------
+  // Get the largest ice cluster and other data
+  clump::largestIceCluster(yCloud, iceCloud, nList, &isIce, &clusterID,
+                           &nClusters, &indexNumber);
 
   return *iceCloud;
 }  // end of function

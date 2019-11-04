@@ -38,8 +38,11 @@ namespace clump {
 
 // Finds the largest ice cluster
 int largestIceCluster(
-    molSys::PointCloud<molSys::Point<double>, double> *iceCloud, double cutoff,
-    bool printCluster = false, bool isSlice = false);
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
+    std::vector<std::vector<int>> nList, std::vector<bool> *isIce,
+    std::vector<int> *clusterID, std::vector<int> *nClusters,
+    std::unordered_map<int, int> *indexNumber);
 
 // Does the cluster analysis of ice particles in the system. Returns a
 // pointCloud of the largest ice cluster.
