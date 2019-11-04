@@ -194,16 +194,6 @@ molSys::PointCloud<molSys::Point<double>, double> reclassifyWater(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<double> *q6);
 
-// Gets a PointCloud struct of the ice particles in a given frame
-molSys::PointCloud<molSys::Point<double>, double> getIceCloud(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    molSys::PointCloud<molSys::Point<double>, double> *iceCloud);
-
-// Finds the largest ice cluster
-int largestIceCluster(
-    molSys::PointCloud<molSys::Point<double>, double> *iceCloud, double cutoff,
-    bool printCluster = false, bool isSlice = false);
-
 // Prints out the iceType for a particular frame onto the terminal
 int printIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                  bool isSlice = false,
@@ -218,6 +208,14 @@ bool isInterfacial(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 // Finds the number of staggered bonds for a given atom of index jatom
 int numStaggered(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                  std::vector<std::vector<int>> nList, int jatom);
+
+// Does the cluster analysis of ice particles in the system. Returns a
+// pointCloud of the largest ice cluster.
+molSys::PointCloud<molSys::Point<double>, double> clusterAnalysis(
+    molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<std::vector<int>> nList, std::string bopAnalysis = "q6",
+    bool isSlice = false);
 
 }  // namespace chill
 
