@@ -69,6 +69,10 @@ int ring::topoBulkAnalysis(
   ring::getStrucNumbers(ringType, cageList, &numHC, &numDDC, &mixedRings,
                         &prismaticRings, &basalRings);
 
+  // Write out to a file
+  sout::writeTopoBulkData(path, yCloud->currentFrame, numHC, numDDC, mixedRings,
+                          basalRings, prismaticRings);
+
   // Gets the atom type for every atom, to be used for printing out the ice
   // types found
   ring::getAtomTypesTopoBulk(ringsOneType, ringType, &atomTypes);
