@@ -838,7 +838,9 @@ int ring::getAtomTypesTopoBulk(std::vector<std::vector<int>> rings,
                                std::vector<ring::strucType> ringType,
                                std::vector<cage::iceType> *atomTypes) {
   //
-  cage::iceType iRingType;  // Type of the current ring
+  cage::iceType iRingType;         // Type of the current ring
+  int iatom;                       // Current ring
+  int ringSize = rings[0].size();  // Size of the ring
 
   // Loop through every ring in ringType
   for (int iring = 0; iring < ringType.size(); iring++) {
@@ -866,11 +868,12 @@ int ring::getAtomTypesTopoBulk(std::vector<std::vector<int>> rings,
       continue;
     }  // TODO: add prism??
     // ------------
-    // Otherwise, loop through every atom inside atomTypes and assign it the
+    // Otherwise, loop through every inside the ring and assign atomTypes the
     // iRingType
-    for (int iatom = 0; iatom < (*atomTypes).size(); iatom++) {
+    for (int i = 0; i < ringSize; i++) {
+      iatom = rings[iring][i];  // Atom index in ring
       (*atomTypes)[iatom] = iRingType;
-    }  // end of loop thorugh atomTypes
+    }  // end of loop thorugh the current ring
   }    // end of loop through every ring
 
   return 0;
