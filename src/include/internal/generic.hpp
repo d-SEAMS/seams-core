@@ -1,13 +1,14 @@
 #ifndef __GENERIC_H_
 #define __GENERIC_H_
 
-#include <array>
 #include <math.h>
+#include <array>
+#include <iostream>
 #include <mol_sys.hpp>
 
 // Boost
-#include <boost/math/constants/constants.hpp>
 #include <gsl/gsl_blas.h>
+#include <boost/math/constants/constants.hpp>
 
 namespace gen {
 
@@ -15,19 +16,20 @@ namespace gen {
 const double pi = boost::math::constants::pi<double>();
 
 /********************************************/ /**
- *  Function for Converting radians->degrees
- ***********************************************/
+                                                *  Function for Converting
+                                                *radians->degrees
+                                                ***********************************************/
 inline double radDeg(double angle) { return (angle * 180) / gen::pi; }
 
 /// GSL for angles
 double gslVecAngle(std::vector<double> OO, std::vector<double> OH);
 
 // Generic function for getting the unwrapped distance
-inline double
-periodicDist(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-             int iatom, int jatom) {
+inline double periodicDist(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
+    int jatom) {
   std::array<double, 3> dr;
-  double r2 = 0.0; // Squared absolute distance
+  double r2 = 0.0;  // Squared absolute distance
 
   // Get x1-x2 etc
   dr[0] = fabs(yCloud->pts[iatom].x - yCloud->pts[jatom].x);
@@ -44,12 +46,42 @@ periodicDist(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   return sqrt(r2);
 }
 
+// Generic function for getting the relative distance in the X(dim=0),
+// Y (dim=1) or Z (dim=2) dimensions without PBCs
+inline double relativeDist(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
+    int jatom, int dim) {
+  double dr;
+
+  // Get dr1-dr2
+  if (dim == 0) {
+    dr = fabs(yCloud->pts[iatom].x - yCloud->pts[jatom].x);
+  }  // x
+  // y
+  else if (dim == 1) {
+    dr = fabs(yCloud->pts[iatom].y - yCloud->pts[jatom].y);
+  }  // y
+  // z
+  else if (dim == 2) {
+    dr = fabs(yCloud->pts[iatom].z - yCloud->pts[jatom].z);
+  }  // z
+  else {
+    std::cerr << "Error\n";
+    return dr;
+  }
+
+  // // Unwrapped relative distance
+  // dr -= yCloud->box[dim] * round(dr / yCloud->box[dim]);
+
+  return dr;
+}  // end of function
+
 // Generic function for getting the distance (no PBCs applied)
-inline double
-distance(molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
-         int jatom) {
+inline double distance(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
+    int jatom) {
   std::array<double, 3> dr;
-  double r2 = 0.0; // Squared absolute distance
+  double r2 = 0.0;  // Squared absolute distance
 
   // Get x1-x2 etc
   dr[0] = fabs(yCloud->pts[iatom].x - yCloud->pts[jatom].x);
@@ -65,12 +97,12 @@ distance(molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
 }
 
 // Generic function for getting the relative coordinates
-inline std::array<double, 3>
-relDist(molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
-        int jatom) {
+inline std::array<double, 3> relDist(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
+    int jatom) {
   std::array<double, 3> dr;
   std::array<double, 3> box = {yCloud->box[0], yCloud->box[1], yCloud->box[2]};
-  double r2 = 0.0; // Squared absolute distance
+  double r2 = 0.0;  // Squared absolute distance
 
   // Get x1-x2 etc
   dr[0] = yCloud->pts[iatom].x - yCloud->pts[jatom].x;
@@ -130,7 +162,7 @@ inline std::vector<std::string> tokenizer(std::string line) {
 inline std::vector<double> tokenizerDouble(std::string line) {
   std::istringstream iss(line);
   std::vector<double> tokens;
-  double number; // Each number being read in from the line
+  double number;  // Each number being read in from the line
   while (iss >> number) {
     tokens.push_back(number);
   }
@@ -166,8 +198,8 @@ inline bool file_exists(const std::string &name) {
                                                 *\f$2l+1\f$, normalized by the
                                                 *number of nearest neighbours
                                                 ***********************************************/
-inline std::vector<std::complex<double>>
-avgVector(std::vector<std::complex<double>> v, int l, int neigh) {
+inline std::vector<std::complex<double>> avgVector(
+    std::vector<std::complex<double>> v, int l, int neigh) {
   if (neigh == 0) {
     return v;
   }
@@ -178,6 +210,6 @@ avgVector(std::vector<std::complex<double>> v, int l, int neigh) {
   return v;
 }
 
-} // namespace gen
+}  // namespace gen
 
-#endif // __NEIGHBOURS_H_
+#endif  // __NEIGHBOURS_H_
