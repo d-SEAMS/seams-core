@@ -79,6 +79,8 @@ int ring::topoBulkAnalysis(
 
   // Print out the lammps data file with the bonds
   sout::writeLAMMPSdataTopoBulk(yCloud, nList, atomTypes, path);
+  // To output the bonds between dummy atoms, uncomment the following line
+  // sout::writeLAMMPSdataTopoBulk(yCloud, nList, atomTypes, path, true);
 
   return 0;
 }
