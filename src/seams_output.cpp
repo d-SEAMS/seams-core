@@ -904,8 +904,6 @@ int sout::writeTopoBulkData(std::string path, int currentFrame, int numHC,
              << mixedRings << " " << prismaticRings << " " << basalRings
              << "\n";
 
-  outputFile << "\n";
-
   outputFile.close();
 }  // end of function
 
