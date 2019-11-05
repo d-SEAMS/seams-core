@@ -36,6 +36,11 @@ int writePrisms(std::vector<int> *basal1, std::vector<int> *basal2,
                 int prismNum,
                 molSys::PointCloud<molSys::Point<double>, double> *yCloud);
 
+// Function for writing out cluster statistics
+int writeClusterStats(std::string path, int currentFrame, int largestCluster,
+                      int numOfClusters, int smallestCluster,
+                      double avgClusterSize);
+
 // Write a data file for rings
 int writeLAMMPSdata(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                     std::vector<std::vector<int>> rings,
