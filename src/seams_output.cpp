@@ -1569,7 +1569,7 @@ atoms are printed out. Bonds are inferred from the neighbour list
 int sout::writeLAMMPSdataTopoBulk(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, std::vector<cage::iceType> atomTypes,
-    std::string path) {
+    std::string path, bool bondsBetweenDummy) {
   //
   std::ofstream outputFile;
   int iatom;             // Index, not atom ID
@@ -1584,7 +1584,12 @@ int sout::writeLAMMPSdataTopoBulk(
 
   // ---------------
   // Get the bonds
-  bonds = bond::populateBonds(nList, yCloud);
+  if (bondsBetweenDummy) {
+    bonds = bond::populateBonds(nList, yCloud);
+  }  // create bonds between dummy atoms
+  else {
+    bonds = bond::populateBonds(nList, yCloud, atomTypes);
+  }  // only create bonds between non-dummy atoms
   //
   // ----------------
   // The directory should have already been made by lua.
