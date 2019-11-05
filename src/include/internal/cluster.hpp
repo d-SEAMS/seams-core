@@ -9,6 +9,7 @@
 #include <cmath>
 #include <complex>
 #include <generic.hpp>
+#include <iostream>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 
@@ -52,6 +53,10 @@ int clusterAnalysis(molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
                     std::vector<std::vector<int>> nList,
                     std::vector<std::vector<int>> &iceNeighbourList,
                     double cutoff, std::string bopAnalysis = "q6");
+
+// Recenters the coordinates of a pointCloud
+int recenterClusterCloud(
+    molSys::PointCloud<molSys::Point<double>, double> *iceCloud);
 
 }  // namespace clump
 
