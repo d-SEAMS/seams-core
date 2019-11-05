@@ -61,9 +61,20 @@ function make_output_dirs( doBOP, topoOneDim, topoTwoDim, topoBulk )
   end --- end of topo two dimensional dir
 end
 ---
+function clusterStatsFile()
+  -- Create the file
+  clusterFileName = outDir .. "clusterStats.dat";
+  clusterFile=io.open(clusterFileName, "w"); --- Allow overwriting (otherwise use a)
+    io.output(clusterFile);
+    --- appends a word test to the last line of the file
+    io.write("Frame largestCluster numOfClusters smallestCluster avgClusterSize\n");
+    --- closes the open file
+    io.close(clusterFile);
+end
 
---- Make the directories
+--- Make the directories and files
 make_output_dirs( doBOP, topoOneDim, topoTwoDim, topoBulk );
+clusterStatsFile(); --- For cluster stats file
 
 slice={0,0,0}; --- This is not in use
 for frame=targetFrame,finalFrame,frameGap do
@@ -74,7 +85,7 @@ for frame=targetFrame,finalFrame,frameGap do
    --- it is recommended to apply it on the largest ice cluster.
    --- If you want to apply it on all the particles in the box, uncomment the following lines
    --- and use resCloud as the pointCloud for the ring analyses. 
-   clusterAnalysis(clusterCloud, resCloud, nList, iceNeighbourList, cutoffRadius, "q6");
+   clusterAnalysis(outDir, clusterCloud, resCloud, nList, iceNeighbourList, cutoffRadius, "q6");
    --- Recenter the cluster such that the centroid is at the center of the simulation box 
    recenterCluster(clusterCloud);
    --- End of getting the largest ice cluster
