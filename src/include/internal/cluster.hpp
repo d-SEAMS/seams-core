@@ -12,6 +12,7 @@
 #include <iostream>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <seams_output.hpp>
 
 /*! \file cluster.hpp
     \brief File for the bond order parameter analysis.
@@ -39,7 +40,7 @@ namespace clump {
 
 // Finds the largest ice cluster
 int largestIceCluster(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::string path, molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
     std::vector<std::vector<int>> nList, std::vector<bool> *isIce,
     std::vector<int> *clusterID, std::vector<int> *nClusters,
@@ -48,7 +49,8 @@ int largestIceCluster(
 // Does the cluster analysis of ice particles in the system. Returns a
 // pointCloud of the largest ice cluster. The neighbour list returned is BY
 // INDEX of the largest ice cluster pointCloud.
-int clusterAnalysis(molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
+int clusterAnalysis(std::string path,
+                    molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
                     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                     std::vector<std::vector<int>> nList,
                     std::vector<std::vector<int>> &iceNeighbourList,

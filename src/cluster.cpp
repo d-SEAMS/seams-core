@@ -10,7 +10,7 @@ namespace bg = boost::geometry;
                                                 *1978 algorithm
                                                 ***********************************************/
 int clump::largestIceCluster(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::string path, molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
     std::vector<std::vector<int>> nList, std::vector<bool> *isIce,
     std::vector<int> *list, std::vector<int> *nClusters,
@@ -166,6 +166,33 @@ int clump::largestIceCluster(
     iceCloud->idIndexMap[iceCloud->pts[iatom].atomID] = iatom;
   }  // end of loop through iceCloud
 
+  // -----------------------------------------------------------
+  // Write out the cluster statistics
+  int totalClusters = (*nClusters).size();  // Total number of clusters
+  int smallestCluster = nLargestCluster =
+      *std::min_element((*nClusters).begin(),
+                        (*nClusters).end());  // Size of the smallest cluster
+  double avgClusterSize = 0.0;
+
+  // Get the average cluster size
+  for (int iCluster = 0; iCluster < totalClusters; iCluster++) {
+    avgClusterSize += (*nClusters)[iCluster];
+  }  // Loop through the clusters
+  // Normalize by the number
+  if (totalClusters == 0) {
+    avgClusterSize = 0;
+  } else {
+    avgClusterSize /= totalClusters;
+  }
+
+  iceCloud->currentFrame = yCloud->currentFrame;
+  nLargestCluster = (*nClusters)[lClusIndex];
+
+  // Write out to the file
+  sout::writeClusterStats(path, yCloud->currentFrame, nLargestCluster,
+                          totalClusters, smallestCluster, avgClusterSize);
+
+  // -----------------------------------------------------------
   return 0;
 }
 
@@ -177,6 +204,7 @@ int clump::largestIceCluster(
  ice cluster.
  ***********************************************/
 int clump::clusterAnalysis(
+    std::string path,
     molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList,
@@ -242,7 +270,7 @@ int clump::clusterAnalysis(
   }    // end of getting a vector of bools for ice-like particles
   // -------------------------------------------------------
   // Get the largest ice cluster and other data
-  clump::largestIceCluster(yCloud, iceCloud, nList, &isIce, &clusterID,
+  clump::largestIceCluster(path, yCloud, iceCloud, nList, &isIce, &clusterID,
                            &nClusters, &indexNumber);
 
   // -------------------------------------------------------
