@@ -38,10 +38,19 @@ double getHbondDistanceOH(
 
 // Create a vector of vectors containing bond connectivity information. May
 // contain duplicates! Gets the bond information from the vector of vectors
-// containing the rings
+// containing the neighbour list by index
 std::vector<std::vector<int>> populateBonds(
     std::vector<std::vector<int>> nList,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud);
+
+// Create a vector of vectors containing bond connectivity information
+// Gets the bond information from the vector of vectors
+// containing the neighbour list by index. Bonds between dummy atoms are not
+// filled.
+std::vector<std::vector<int>> populateBonds(
+    std::vector<std::vector<int>> nList,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<cage::iceType> atomTypes);
 
 // Creates a vector of vectors containing bond connectivity information from the
 // rings vector of vectors and cage information

@@ -66,6 +66,79 @@ std::vector<std::vector<int>> bond::populateBonds(
 }
 
 /********************************************/ /**
+ *  Create a vector of vectors containing bond information (outputs bonded atom
+ IDs, not indices!) from the neighbour list vector of vectors (which contains
+ atom INDICES). Bonds between dummy atoms, and between dummy and ice atoms are
+ not added. Moreover, the first element corresponds to the atom whose neighbours
+ have been found.
+ ***********************************************/
+std::vector<std::vector<int>> bond::populateBonds(
+    std::vector<std::vector<int>> nList,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<cage::iceType> atomTypes) {
+  //
+  std::vector<std::vector<int>> bonds;  // Output vector of vectors
+  std::vector<int> currentBond;         // Vector for the current bond
+  int first, second;                    // Indices for the bonds
+  int iatom, jatom;                     // Elements of the bond
+  int iatomID, jatomID;  // Atom IDs of the elements which are bonded
+
+  // Error handling
+  if (nList.size() == 0) {
+    // There is some problem!
+    std::cerr << "There are no bonds in the system!\n";
+    return bonds;
+  }
+
+  // Form of the bonds vector of vectors:
+  // 214    272
+  // 1       2
+  // Meaning that 272 and 214 are bonded; similarly 1 and 2 are bonded
+  // To avoid repitition, discard bonds whose first value is greater than the
+  // second value
+
+  // Traverse the neighbour list
+
+  // Loop through every atom in the neighbour list by index
+  for (int i = 0; i < nList.size(); i++) {
+    iatom = nList[i][0];  // Index of the i^th atom
+    // Skip for dummy atoms
+    if (atomTypes[iatom] == cage::dummy) {
+      continue;
+    }  // Skip for dummy atoms
+    // Get the neighbours of iatom
+    for (int j = 1; j < nList[i].size(); j++) {
+      //
+      jatom = nList[iatom][j];  // Index of the neighbour
+      // Skip for dummy atoms
+      if (atomTypes[jatom] == cage::dummy) {
+        continue;
+      }  // Skip for dummy atoms
+      // To avoid duplicates, skip all bonds such
+      // that iatom>jatom
+      if (iatom > jatom) {
+        continue;
+      }  // Skip to avoid duplicates
+
+      // Clear the current bond vector
+      currentBond.clear();
+      // Fill the current bond vector with ATOM IDs
+      iatomID = yCloud->pts[iatom].atomID;
+      jatomID = yCloud->pts[jatom].atomID;
+      currentBond.push_back(iatomID);
+      currentBond.push_back(jatomID);
+      // Add to the bonds vector of vectors
+      bonds.push_back(currentBond);
+    }  // end of loop the neighbour list
+    // The last pair is with the last element and the first element
+    // Fill currentBond and update bonds
+
+  }  // end of loop through rings
+
+  return bonds;
+}
+
+/********************************************/ /**
  *  Create a vector of vectors containing bond information (bonded atom IDs, not
  indices!) from the ring vector of vectors
  ***********************************************/
