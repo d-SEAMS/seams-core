@@ -75,6 +75,8 @@ for frame=targetFrame,finalFrame,frameGap do
    --- If you want to apply it on all the particles in the box, uncomment the following lines
    --- and use resCloud as the pointCloud for the ring analyses. 
    clusterAnalysis(clusterCloud, resCloud, nList, iceNeighbourList, cutoffRadius, "q6");
+   --- Recenter the cluster such that the centroid is at the center of the simulation box 
+   recenterCluster(clusterCloud);
    --- End of getting the largest ice cluster
    ---
    --- Start of analysis using rings (by index from here onwards.)

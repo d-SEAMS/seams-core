@@ -166,6 +166,7 @@ int main(int argc, char *argv[]) {
       lua.set_function("percentage_Ice", chill::printIceType);
       // Largest ice cluster
       lua.set_function("clusterAnalysis", clump::clusterAnalysis);
+      lua.set_function("recenterCluster", clump::recenterClusterCloud);
       // -----------------
       // Topological Network Methods
       // Generic requirements (read in only inside the slice)
