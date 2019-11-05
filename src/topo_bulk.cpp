@@ -865,6 +865,11 @@ int ring::getAtomTypesTopoBulk(std::vector<std::vector<int>> rings,
       iRingType = cage::hc;
     }  // HC atoms
     //
+    // Mixed
+    else if (ringType[iring] == ring::bothBasal ||
+             ringType[iring] == ring::bothPrismatic) {
+      iRingType = cage::mixed;
+    }  // HC atoms
     // Should never go here
     else {
       continue;
@@ -874,6 +879,9 @@ int ring::getAtomTypesTopoBulk(std::vector<std::vector<int>> rings,
     // iRingType
     for (int i = 0; i < ringSize; i++) {
       iatom = rings[iring][i];  // Atom index in ring
+      if ((*atomTypes)[iatom] == cage::mixed) {
+        continue;
+      }  // Don't reassign
       (*atomTypes)[iatom] = iRingType;
     }  // end of loop thorugh the current ring
   }    // end of loop through every ring

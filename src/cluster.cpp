@@ -345,7 +345,7 @@ int clump::recenterClusterCloud(
           if (nearBoxHigh) {
             iceCloud->pts[jatom].x = iceCloud->pts[iatom].x + dr_ij;
           }  // xHi
-          else {
+          if (nearBoxLow) {
             iceCloud->pts[jatom].x = iceCloud->pts[iatom].x - dr_ij;
           }  // xLo
         }    // x
