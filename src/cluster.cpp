@@ -197,6 +197,65 @@ int clump::largestIceCluster(
 }
 
 /********************************************/ /**
+ *  Get the linked list of a cluster, given by iceCloud,
+ for a single cluster. Required for cluster re-centering
+ ***********************************************/
+int clump::singleClusterLinkedList(
+    molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
+    std::vector<std::vector<int>> nList, std::vector<int> *linkedList) {
+  //
+  int j;
+  int temp;  // For swapping indices
+  //
+  // -----------------------------------------------------------
+  // INITIALIZATION
+  (*linkedList).resize(iceCloud->nop);
+  // Initial values of the list.
+  for (int iatom = 0; iatom < iceCloud->nop; iatom++) {
+    // Assign the index as the ID
+    (*linkedList)[iatom] = iatom;
+  }  // init of cluster IDs
+  // -----------------------------------------------------------
+  // Get the linked list
+  for (int i = 0; i < iceCloud->nop - 1; i++) {
+    //
+    // If iatom is already in a cluster, skip it
+    if ((*linkedList)[i] != i) {
+      continue;
+    }  // Already part of a cluster
+    //
+    j = i;  // Init of j
+    // Execute the next part of the loop while j is not equal to i
+    do {
+      //
+      // Go through the rest of the atoms (KLOOP)
+      for (int k = i + 1; k < iceCloud->nop; k++) {
+        // Skip if already part of a cluster
+        if ((*linkedList)[k] != k) {
+          continue;
+        }  // Already part of a cluster
+        //
+        // Check to see if k is a nearest neighbour of j
+        auto it = std::find(nList[j].begin() + 1, nList[j].end(), k);
+        if (it != nList[j].end()) {
+          // Swap!
+          temp = (*linkedList)[j];
+          (*linkedList)[j] = (*linkedList)[k];
+          (*linkedList)[k] = temp;
+        }  // j and k are nearest neighbours
+      }    // end of loop through k (KLOOP)
+      //
+      j = (*linkedList)[j];
+    } while (j != i);  // end of control for j!=i
+    //
+
+  }  // end of looping through every i
+
+  // Return 0
+  return 0;
+}  // end of function
+
+/********************************************/ /**
  *  Does the cluster analysis of ice particles in the system. Returns a
  pointCloud of the largest ice cluster (using the q6 parameter by default).
  Uses the full neighbour list (by ID) according to the full
@@ -283,92 +342,113 @@ int clump::clusterAnalysis(
 
 /********************************************/ /**
  *  Recenters the largest ice cluster, by applying a transformation on the
- largest ice cluster coordinates.
+ largest ice cluster coordinates. Requires the neighbour list BY INDEX.
  ***********************************************/
 int clump::recenterClusterCloud(
-    molSys::PointCloud<molSys::Point<double>, double> *iceCloud) {
+    molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
+    std::vector<std::vector<int>> nList) {
   //
-  int dim = 3;       // Dimensions
-  bool nearBoxHigh;  // iatom is close to the higher box boundary
-  bool nearBoxLow;   // iatom is close to the lower box boundary
-  int iatom = 0;     // Atom index
-  double dr_ij;      // Relative unwrapped distance
-  std::vector<double> distFromBoxHi;  // Distance from the box boundaries
-  std::vector<double> distFromBoxLo;
+  int dim = 3;  // Dimensions
   std::vector<double> box = iceCloud->box;
   std::vector<double> boxLow = iceCloud->boxLow;
   std::vector<double> boxHigh;
   double xBoxCenter, yBoxCenter, zBoxCenter;  // Centroid of the simulation box
   double x_centroid, y_centroid, z_centroid;  // Centroid of the cluster
+  // Variables for the linked list
+  std::vector<int> linkedList;  // Contains the linked list for the cluster
+  std::vector<bool> visited;  // Records whether an item has been visited or not
 
-  // boxHigh filling
-  boxHigh.push_back(box[0] + boxLow[0]);
-  boxHigh.push_back(box[1] + boxLow[1]);
-  boxHigh.push_back(box[2] + boxLow[2]);
-
-  // Init
-  // x coordinates
-  distFromBoxLo.push_back(fabs(iceCloud->pts[iatom].x - boxLow[0]));
-  distFromBoxHi.push_back(fabs(iceCloud->pts[iatom].x - boxHigh[0]));
-  // y coordinates
-  distFromBoxLo.push_back(fabs(iceCloud->pts[iatom].y - boxLow[1]));
-  distFromBoxHi.push_back(fabs(iceCloud->pts[iatom].y - boxHigh[1]));
-  // z coordinates
-  distFromBoxLo.push_back(fabs(iceCloud->pts[iatom].z - boxLow[2]));
-  distFromBoxHi.push_back(fabs(iceCloud->pts[iatom].z - boxHigh[2]));
+  // To avoid long confusing lines, fill boxHigh
+  for (int k = 0; k < dim; k++) {
+    boxHigh.push_back(boxLow[k] + box[k]);
+  }  // end of filling up boxHigh
 
   // --------------------------------------------------------------------------
-  // Loop through every dimension (k=0 or x to k=2 or z)
-  for (int k = 0; k < dim; k++) {
-    // init
-    nearBoxHigh = false;
-    nearBoxLow = false;
+  // Get the linked list of the cluster
+  clump::singleClusterLinkedList(iceCloud, nList, &linkedList);
+  // --------------------------------------------------------------------------
+  // Loop through the entire looped list
+  // init
+  visited.resize(iceCloud->nop);
+
+  // The starting value is the first atom
+  int iatom = 0;     // Atom index of the 'starting value'
+  int currentIndex;  // Current atom
+  int nextElement;   // Next linked atom
+  int index;         // Keeps track of the first element in the linked list
+  double x_ij, y_ij, z_ij;  // Relative distance between the two atoms
+  double xPBC, yPBC, zPBC;  // Actual distance
+
+  // Loop through the entire linked list
+  for (int i = 0; i < iceCloud->nop; i++) {
     //
-    // Figure out whether iatom is close to the higher or lower box boundary
-    if (distFromBoxHi[k] <= distFromBoxLo[k]) {
-      nearBoxHigh = true;
-    }  // close to the rHi boundary
-    else {
-      nearBoxLow = true;
-    }  // close to rLo boundary
-
-    // Get atom pairs
-    for (int jatom = 1; jatom < iceCloud->nop; jatom++) {
-      // Get the actual relative distance without PBCs
-      dr_ij = gen::relativeDist(iceCloud, iatom, jatom, k);
-      // If dr_ij is greater than half the box length, then shift it,
-      if (dr_ij > 0.5 * box[k]) {
-        dr_ij -= iceCloud->box[k] * round(dr_ij / iceCloud->box[k]);
-        dr_ij = fabs(dr_ij);
-        //
-        if (k == 0) {
-          if (nearBoxHigh) {
-            iceCloud->pts[jatom].x = iceCloud->pts[iatom].x + dr_ij;
-          }  // xHi
-          if (nearBoxLow) {
-            iceCloud->pts[jatom].x = iceCloud->pts[iatom].x - dr_ij;
-          }  // xLo
-        }    // x
-        else if (k == 1) {
-          if (nearBoxHigh) {
-            iceCloud->pts[jatom].y = iceCloud->pts[iatom].y + dr_ij;
-          }  // yHi
-          else {
-            iceCloud->pts[jatom].y = iceCloud->pts[iatom].y - dr_ij;
-          }  // yLo
-        }    // y
+    if (visited[i]) {
+      continue;
+    }                   // Already counted
+    visited[i] = true;  // Visited
+    // Should never execute
+    if (linkedList[i] == i) {
+      continue;
+    }  // only one element
+    //
+    currentIndex = i;
+    nextElement = linkedList[currentIndex];
+    index = i;
+    // Keep looping
+    while (nextElement != index) {
+      currentIndex = nextElement;
+      visited[currentIndex] = true;
+      nextElement = linkedList[currentIndex];
+      // -----------------------------------
+      // Get the relative distance between the central atom (iatom)
+      // and the next element
+      // Coordinates
+      // if (nextElement != index) {
+      x_ij = iceCloud->pts[currentIndex].x - iceCloud->pts[nextElement].x;
+      y_ij = iceCloud->pts[currentIndex].y - iceCloud->pts[nextElement].y;
+      z_ij = iceCloud->pts[currentIndex].z - iceCloud->pts[nextElement].z;
+      // Shift the nextElement if it's on the other side of the box
+      // Shift x
+      if (fabs(x_ij) > 0.5 * box[0]) {
+        // Get the actual distance
+        xPBC = box[0] - fabs(x_ij);
+        if (x_ij < 0) {
+          iceCloud->pts[nextElement].x = iceCloud->pts[currentIndex].x - xPBC;
+        }  // To the -x side of currentIndex
         else {
-          if (nearBoxHigh) {
-            iceCloud->pts[jatom].z = iceCloud->pts[iatom].z + dr_ij;
-          }  // zHi
-          else {
-            iceCloud->pts[jatom].z = iceCloud->pts[iatom].z - dr_ij;
-          }  // zLo
-        }    // z
-      }      // end of shift
-    }        // end loop through atom pairs
-  }          // end of loop through every dimension
+          iceCloud->pts[nextElement].x = iceCloud->pts[currentIndex].x + xPBC;
+        }  // Add to the + side
+      }    // Shift nextElement
+      //
+      // Shift y
+      if (fabs(y_ij) > 0.5 * box[1]) {
+        // Get the actual distance
+        yPBC = box[1] - fabs(y_ij);
+        if (y_ij < 0) {
+          iceCloud->pts[nextElement].y = iceCloud->pts[currentIndex].y - yPBC;
+        }  // To the -y side of currentIndex
+        else {
+          iceCloud->pts[nextElement].y = iceCloud->pts[currentIndex].y + yPBC;
+        }  // Add to the + side
+      }    // Shift nextElement
+      //
+      // Shift z
+      if (fabs(z_ij) > 0.5 * box[2]) {
+        // Get the actual distance
+        zPBC = box[2] - fabs(z_ij);
+        if (z_ij < 0) {
+          iceCloud->pts[nextElement].z = iceCloud->pts[currentIndex].z - zPBC;
+        }  // To the -z side of currentIndex
+        else {
+          iceCloud->pts[nextElement].z = iceCloud->pts[currentIndex].z + zPBC;
+        }  // Add to the + side
+      }    // Shift nextElement
+           // -----------------------------------
+      // }  // don't shift the last atom!
 
+    }  // End of going through linked atoms
+    //
+  }  // end of loop through atoms
   // --------------------------------------------------------------------------
   // Center of the simulation box
   xBoxCenter = 0.5 * (boxLow[0] + boxHigh[0]);

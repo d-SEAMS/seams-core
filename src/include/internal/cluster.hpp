@@ -46,6 +46,12 @@ int largestIceCluster(
     std::vector<int> *clusterID, std::vector<int> *nClusters,
     std::unordered_map<int, int> *indexNumber);
 
+// Get the linked list of a cluster, given by iceCloud, for a single cluster.
+// Required for cluster re-centering
+int singleClusterLinkedList(
+    molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
+    std::vector<std::vector<int>> nList, std::vector<int> *linkedList);
+
 // Does the cluster analysis of ice particles in the system. Returns a
 // pointCloud of the largest ice cluster. The neighbour list returned is BY
 // INDEX of the largest ice cluster pointCloud.
@@ -58,7 +64,8 @@ int clusterAnalysis(std::string path,
 
 // Recenters the coordinates of a pointCloud
 int recenterClusterCloud(
-    molSys::PointCloud<molSys::Point<double>, double> *iceCloud);
+    molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
+    std::vector<std::vector<int>> nList);
 
 }  // namespace clump
 
