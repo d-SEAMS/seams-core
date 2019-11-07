@@ -46,36 +46,6 @@ inline double periodicDist(
   return sqrt(r2);
 }
 
-// Generic function for getting the relative distance in the X(dim=0),
-// Y (dim=1) or Z (dim=2) dimensions without PBCs
-inline double relativeDist(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
-    int jatom, int dim) {
-  double dr;
-
-  // Get dr1-dr2
-  if (dim == 0) {
-    dr = fabs(yCloud->pts[iatom].x - yCloud->pts[jatom].x);
-  }  // x
-  // y
-  else if (dim == 1) {
-    dr = fabs(yCloud->pts[iatom].y - yCloud->pts[jatom].y);
-  }  // y
-  // z
-  else if (dim == 2) {
-    dr = fabs(yCloud->pts[iatom].z - yCloud->pts[jatom].z);
-  }  // z
-  else {
-    std::cerr << "Error\n";
-    return dr;
-  }
-
-  // // Unwrapped relative distance
-  // dr -= yCloud->box[dim] * round(dr / yCloud->box[dim]);
-
-  return dr;
-}  // end of function
-
 // Generic function for getting the distance (no PBCs applied)
 inline double distance(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
