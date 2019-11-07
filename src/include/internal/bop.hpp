@@ -214,14 +214,6 @@ bool isInterfacial(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 int numStaggered(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                  std::vector<std::vector<int>> nList, int jatom);
 
-// Does the cluster analysis of ice particles in the system. Returns a
-// pointCloud of the largest ice cluster.
-molSys::PointCloud<molSys::Point<double>, double> clusterAnalysis(
-    molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, std::string bopAnalysis = "q6",
-    bool isSlice = false);
-
 }  // namespace chill
 
 /*! \brief Functions used for spherical harmonics
