@@ -7,6 +7,9 @@
 GENERATE_HTML           = NO
 GENERATE_XML            = YES
 XML_PROGRAMLISTING      = NO
+# Additional Search Strings
+M_SEARCH_BASE_URL       = "https://docs.dseams.info/"
+M_SEARCH_EXTERNAL_URL   = "https://google.com/search?q=site:docs.dseams.info+{query}"
 # Project Settings
 PROJECT_NAME            = "d-SEAMS"
 # PROJECT_BRIEF           = "Deferred Structural Elucidation Analysis for Molecular Simulations"
