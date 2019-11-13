@@ -18,6 +18,35 @@
 #include <mol_sys.hpp>
 #include <seams_input.hpp>
 
+/*! \file bond.hpp
+    \brief File for bond-related analyses (hydrogen bonds, bonded atoms for data file write-outs etc.).
+
+    Details.
+*/
+
+/*!
+ *  \addtogroup bond
+ *  @{
+ */
+
+/*! \brief Functions for bond-related analyses 
+ *         This namespace contains functions that are used for determining the hydrogen bonds, or lists of bonded atoms for
+ write-outs to data files and visualization. 
+ *
+These functions are distinct from the neighbour-list building functions. Bonds can be built from cages, ring lists etc.
+
+Hydrogen bonds are determined using a strict geometric criterion.
+
+A hydrogen bond between two water molecules exists when:
+
+1. The distance between the donor oxygen atom and the acceptor hydrogen atom is less than 2.42 Angstrom
+2. The angle between the O--O vector and the O-H vector should be less than 30 degrees 
+
+  ### Changelog ###
+
+  - Amrita Goswami [amrita16thaug646@gmail.com]; date modified: Nov 13, 2019
+ */
+
 namespace bond {
 
 // Create a vector of vectors (similar to the neighbour list conventions)
@@ -61,20 +90,6 @@ std::vector<std::vector<int>> createBondsFromCages(
 // Remove duplicate bonds
 std::vector<std::vector<int>> trimBonds(std::vector<std::vector<int>> bonds);
 
-// Remove bonds which are diagonals within rings
-int rmDiagBonds(std::vector<std::vector<int>> rings,
-                std::vector<std::vector<int>> bonds, std::vector<bool> *flag);
-
-// Remove bonds which are longer than the cutoff
-int rmLongBonds(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                std::vector<std::vector<int>> bonds, std::vector<bool> *flag,
-                double cutoff);
-
-// Search and set flag to false if a given 'bond' matches a bond in the vector
-// of vectors
-int searchBondMatch(std::vector<int> matchBond,
-                    std::vector<std::vector<int>> bonds,
-                    std::vector<bool> *flag);
 }  // namespace bond
 
 #endif  // __BONDING_H_

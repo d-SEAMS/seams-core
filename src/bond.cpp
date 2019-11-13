@@ -71,6 +71,9 @@ std::vector<std::vector<int>> bond::populateBonds(
  atom INDICES). Bonds between dummy atoms, and between dummy and ice atoms are
  not added. Moreover, the first element corresponds to the atom whose neighbours
  have been found.
+ *  @param[in] nList Row-ordered neighbour list by ID
+ *  @param[in] yCloud The input molSys::PointCloud 
+ *  @param[in] atomTypes Contains an atom type for each particle in yCloud
  ***********************************************/
 std::vector<std::vector<int>> bond::populateBonds(
     std::vector<std::vector<int>> nList,
@@ -139,8 +142,16 @@ std::vector<std::vector<int>> bond::populateBonds(
 }
 
 /********************************************/ /**
- *  Create a vector of vectors containing bond information (bonded atom IDs, not
- indices!) from the ring vector of vectors
+ *  Create a vector of vectors (similar to the neighbour list conventions). The output
+ vector of vectors is row-ordered. The first element is the atom ID of the particle for which 
+ the neighbours are enumerated (the central atom), followed by the central atom's neighbour's IDs (not indices).
+ Decides the existence of the hydrogen bond depending on the O--O and O--H vectors from the
+ neighbour list (by ID) already constructed.
+ *  @param[in] filename Filename of the trajectory, with the hydrogen and oxygen coordinates
+ *  @param[in] yCloud The input molSys::PointCloud for the oxygen atoms only
+ *  @param[in] nList Row-ordered neighbour list by atom ID
+ *  @param[in] targetFrame The target or current frame number (starts from 1) and is not the timestep value
+ *  @param[in] Htype The type ID of the hydrogen atoms 
  ***********************************************/
 std::vector<std::vector<int>> bond::populateHbonds(
     std::string filename,
@@ -298,13 +309,14 @@ std::vector<std::vector<int>> bond::populateHbonds(
 }
 
 /********************************************/ /**
-                                                *  Calculates the bond length
-                                                *between a Hydrogen and Oxygen
-                                                *atom of two different atoms,
-                                                *given their respective
-                                                *pointClouds and the indices to
-                                                *each atom
-                                                ***********************************************/
+*  Calculates the bond length between a Hydrogen and Oxygen
+ atom of two different atoms, given their respective pointClouds and the indices to
+ each atom.
+ *  @param[in] oCloud The molSys::PointCloud for the oxygen atoms only
+ *  @param[in] hCloud The molSys::PointCloud for the hydrogen atoms only
+ *  @param[in] oAtomIndex The index (in the oCloud) of the oxygen atom
+ *  @param[in] hAtomIndex The index (in the hCloud) of the hydrogen atom
+***********************************************/
 double bond::getHbondDistanceOH(
     molSys::PointCloud<molSys::Point<double>, double> *oCloud,
     molSys::PointCloud<molSys::Point<double>, double> *hCloud, int oAtomIndex,
@@ -327,6 +339,11 @@ double bond::getHbondDistanceOH(
 /********************************************/ /**
  *  Create a vector of vectors containing bond information (bonded atom IDs, not
  vector or array indices!) from the ring vector of vectors and cageList
+ *  @param[in] rings Row-ordered vector of vectors atom indices of ring information. 
+ Each row is a ring, containing the indices of the particles in that ring 
+ *  @param[in] cageList A vector of cage::Cage containing a list of HCs or DDCs
+ *  @param[in] type The type of cage to get bonds for
+ *  @param[in, out] nRings The total number of rings for all the cages, for the particular cage type 
  ***********************************************/
 std::vector<std::vector<int>> bond::createBondsFromCages(
     std::vector<std::vector<int>> rings, std::vector<cage::Cage> *cageList,
@@ -395,6 +412,8 @@ std::vector<std::vector<int>> bond::createBondsFromCages(
  *  The bond 1 2 and 2 1 are the same. To prevent multiple bonds between the
  same atoms, remove all bonds which are duplicates of the reversed vectors
  (denoting individual bonds) within the bonds vector of vectors
+ *  @param[in, out] bonds Row-ordered vector of vectors of the bond matrix
+ Each row is a ring, containing the indices of the particles in that ring 
  ***********************************************/
 std::vector<std::vector<int>> bond::trimBonds(
     std::vector<std::vector<int>> bonds) {
@@ -441,107 +460,4 @@ std::vector<std::vector<int>> bond::trimBonds(
   // // temp
 
   return bonds;
-}
-
-/********************************************/ /**
- *  Remove bonds which are diagonal, cutting across rings
- Set the flag to false if the bond is diagonal
- ***********************************************/
-int bond::rmDiagBonds(std::vector<std::vector<int>> rings,
-                      std::vector<std::vector<int>> bonds,
-                      std::vector<bool> *flag) {
-  std::vector<int> currentBond;    // Bond to be compared. A diagonal bond
-  std::vector<int> reversedBond;   // Reversed order wrt currentBond
-  int ringSize = rings[0].size();  // Number of elements in each ring
-  int nNonBondPairs =
-      (ringSize - 1) - 2;  // Number of non-bonding pairs per atom in each ring
-  int iatom, jatom;        // Actual atom IDs within a bond
-  int j, k;                // Counter
-
-  if (nNonBondPairs == 0) {
-    return 0;
-  }
-
-  for (int iring = 0; iring < rings.size(); iring++) {
-    // Select all but the last atom. Use reversedBond for reversing the order
-    for (int i = 0; i < ringSize - 1; i++) {
-      iatom = rings[iring][i];
-      // Loop over other elements of the ring wrt i
-      j = i + 2;
-      for (int nbonds = 0; nbonds < nNonBondPairs; nbonds++) {
-        k = j + nbonds;  // Index
-        // Wrap the index around the ring
-        if (k >= ringSize) {
-          k -= ringSize;
-        }
-        jatom = rings[iring][k];
-
-        // Update currentBond and reversedBond
-        currentBond.clear();
-        reversedBond.clear();
-        currentBond.push_back(iatom);
-        currentBond.push_back(jatom);
-        reversedBond.push_back(jatom);
-        reversedBond.push_back(iatom);
-
-        // Match with all other bonds
-        bond::searchBondMatch(currentBond, bonds, flag);
-        bond::searchBondMatch(reversedBond, bonds, flag);
-      }  // end of selection of the seconf atom in the bond
-    }    // Selection of the first atom in the bond
-  }      // end of loop through every ring
-
-  // Bond selection requires the selection of a pair of atoms
-
-  return 0;
-}
-
-/********************************************/ /**
- *  Search through vector of vector (bonds). If the input vector (matchBond)
- is the same as a bond inside the vector of vectors, set its flag to false
- ***********************************************/
-int bond::searchBondMatch(std::vector<int> matchBond,
-                          std::vector<std::vector<int>> bonds,
-                          std::vector<bool> *flag) {
-  for (int ibond; ibond < bonds.size(); ibond++) {
-    // Skip a bond if the flag is already false
-    if ((*flag)[ibond] == false) {
-      continue;
-    }
-
-    // Check if the bond matches
-    if (matchBond == bonds[ibond]) {
-      (*flag)[ibond] = false;
-    }  // end of check for matching
-  }    // end of loop through all possible bonds in the vector of vector
-
-  return 0;
-}
-
-/********************************************/ /**
-                                                *  Remove bonds which are longer
-                                                *than the cutoff
-                                                ***********************************************/
-int bond::rmLongBonds(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                      std::vector<std::vector<int>> bonds,
-                      std::vector<bool> *flag, double cutoff) {
-  double bondLength;  // Bond distance
-  int iatom, jatom;   // Indices are 1 less than the atom ID
-  for (int ibond; ibond < bonds.size(); ibond++) {
-    // Skip a bond if the flag is already false
-    if ((*flag)[ibond] == false) {
-      continue;
-    }
-
-    iatom = bonds[ibond][0] - 1;
-    jatom = bonds[ibond][1] - 1;
-    // Calculate the bond length
-    bondLength = gen::distance(yCloud, iatom, jatom);
-    // Check if the bond matches
-    if (bondLength > cutoff) {
-      (*flag)[ibond] = false;
-    }  // end of check for matching
-  }    // end of loop through all possible bonds in the vector of vector
-
-  return 0;
 }
