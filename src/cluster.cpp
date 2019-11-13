@@ -4,10 +4,16 @@
 namespace bg = boost::geometry;
 
 /********************************************/ /**
-                                                *  Finds the number of particles
-                                                *in the largest ice cluster, for
-                                                *a given frame, using Stoddard's
-                                                *1978 algorithm
+*  Finds the number of particles in the largest ice cluster, for a given frame, using Stoddard's
+clustering algorithm<a href="https://www.sciencedirect.com/science/article/pii/0021999178900116">(Stoddard J. Comp. Phys., 27, 291, 1977)</a>.
+ *  @param[in] path Output directory path, specified by the user
+ *  @param[in] yCloud The molSys::PointCloud for all particles, regardless of type classification
+ *  @param[in, out] iceCloud The molSys::PointCloud for the largest ice cluster of the ice-like molecules
+ *  @param[in] nList Row-ordered neighbour list by atom ID
+ *  @param[in] isIce Holds a bool value for each particle in yCloud. This is true for ice-like molecules and false otherwise
+ *  @param[in] list Linked list created by the clustering algorithm.
+ *  @param[in] nClusters Contains the number of particles in every ice-like cluster found
+ *  @param[in] indexNumber Unordered map for mapping the cluster ID indices to the number in each cluster
                                                 ***********************************************/
 int clump::largestIceCluster(
     std::string path, molSys::PointCloud<molSys::Point<double>, double> *yCloud,
@@ -199,6 +205,9 @@ int clump::largestIceCluster(
 /********************************************/ /**
  *  Get the linked list of a cluster, given by iceCloud,
  for a single cluster. Required for cluster re-centering
+ *  @param[in] iceCloud The molSys::PointCloud for the largest ice cluster of the ice-like molecules
+ *  @param[in] nList Row-ordered neighbour list by atom index, not ID
+ *  @param[in, out] linkedList Linked list created by the clustering algorithm for the largest ice cluster
  ***********************************************/
 int clump::singleClusterLinkedList(
     molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
@@ -257,10 +266,18 @@ int clump::singleClusterLinkedList(
 
 /********************************************/ /**
  *  Does the cluster analysis of ice particles in the system. Returns a
- pointCloud of the largest ice cluster (using the q6 parameter by default).
+ molSys::PointCloud of the largest ice cluster (using the \f$ q_6 \f$ parameter by default).
  Uses the full neighbour list (by ID) according to the full
  PointCloud yCloud. Returns a neighbour list by index, according to the largest
  ice cluster.
+ *  @param[in] path Output directory path, specified by the user
+ *  @param[in, out] iceCloud The molSys::PointCloud for the largest ice cluster of the ice-like molecules
+ *  @param[in] yCloud The molSys::PointCloud for all the particles in the frame, regardless of ice type
+ *  @param[in] nList Row-ordered neighbour list by atom ID
+ *  @param[in] iceNeighbourList Row-ordered neighbour list by atom index, not ID, according to the iceCloud atoms
+ *  @param[in] cutoff Cutoff for the nearest neighbours 
+ *  @param[in] bopAnalysis This determines which method to use for determining the ice-like nature of the particles.
+ This can be "q6" or "chill", for using the \f$ q_6 \f$ parameter or CHILL algorithm, respectively
  ***********************************************/
 int clump::clusterAnalysis(
     std::string path,
@@ -343,6 +360,8 @@ int clump::clusterAnalysis(
 /********************************************/ /**
  *  Recenters the largest ice cluster, by applying a transformation on the
  largest ice cluster coordinates. Requires the neighbour list BY INDEX.
+ *  @param[in] iceCloud The molSys::PointCloud for the largest ice cluster of the ice-like molecules
+ *  @param[in] nList Row-ordered neighbour list by atom index, for the molSys::PointCloud iceCloud 
  ***********************************************/
 int clump::recenterClusterCloud(
     molSys::PointCloud<molSys::Point<double>, double> *iceCloud,

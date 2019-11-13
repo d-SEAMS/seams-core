@@ -29,11 +29,18 @@
  *         This namespace contains functions that are used in the
 for clustering ice-like particles.
  *
- Cluster analysis
+Particles are clustered according to Stoddard's algorithm <a
+href="https://www.sciencedirect.com/science/article/pii/0021999178900116">(Stoddard J. Comp. Phys., 27, 291, 1977)</a>. 
+
+The largest ice cluster determines the largest cluster of ice-like particles, using a "linked list" created 
+by the clustering algorithm. The determination of ice-like molecules can be done using the \f$ q_6 \f$  parameter, CHILL or CHILL+
+parameters.
+
+The largest ice cluster thus determined can be re-centered for ease of visualization.
 
   ### Changelog ###
 
-  - Amrita Goswami [amrita16thaug646@gmail.com]; date modified: Nov 4, 2019
+  - Amrita Goswami [amrita16thaug646@gmail.com]; date modified: Nov 13, 2019
  */
 
 namespace clump {
