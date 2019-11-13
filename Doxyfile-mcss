@@ -20,7 +20,7 @@ M_PAGE_FINE_PRINT	    = <b>(C) 2018-present</b> <a href="https://github.com/HaoZ
 # Doxygen Settings
 RECURSIVE              = YES
 EXTRACT_ALL            = YES
-INPUT = README.md ./src/
+INPUT = robots.txt README.md ./src/
 EXCLUDE = ./src/include/external
 USE_MDFILE_AS_MAINPAGE = README.md
 
