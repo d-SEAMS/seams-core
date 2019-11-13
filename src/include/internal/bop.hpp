@@ -157,18 +157,39 @@ struct QlmAtom {
   std::vector<YlmAtom> ptq;  // Averaged over neighbours
 };
 
-// Uses Boost for spherical harmonics, and gets c_ij according to the CHILL
-// algorithm
+/********************************************/ /**
+ *  Function for getting the bond order correlations \f$c_{ij}\f$  (or
+ \f$a_{ij}\f$ in some treatments) according to the CHILL algorithm.
+ *  @param[in,out] yCloud The output molSys::PointCloud
+ *  @param[in] nList The row-ordered neighbour list, by ID. 
+ The first element of each row is the particle ID, followed by the IDs of the neighbours 
+ *  @param[in] isSlice This decides whether there is a slice or not
+ ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double> getCorrel(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, bool isSlice = false);
 
-// Classifies each atom according to the CHILL algorithm without printing
+/********************************************/ /**
+ *  Function that classifies every particle's #molSys::atom_state_type ice
+ type, according to the CHILL algorithm. Does not print out the information.
+ *  @param[in,out] yCloud The output molSys::PointCloud
+ *  @param[in] isSlice This decides whether there is a slice or not
+ *  @param[in] nList Row-ordered neighbour list by atom ID 
+ ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double> getIceTypeNoPrint(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, bool isSlice = false);
 
 // Classifies each atom according to the CHILL algorithm
+/********************************************/ /**
+ *  Function that classifies every particle's #molSys::atom_state_type ice
+ type, according to the CHILL algorithm.
+ *  @param[in,out] yCloud The output molSys::PointCloud
+ *  @param[in] nList Row-ordered neighbour list by atom ID
+ *  @param[in] isSlice This decides whether there is a slice or not
+ *  @param[in] outputFileName Name of the output file, to which the ice types
+ will be written out.
+ ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double> getIceType(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, bool isSlice = false,

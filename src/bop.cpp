@@ -320,12 +320,8 @@ std::complex<double> sph::lookupTableQ6(int m, std::array<double, 2> angles) {
   return result;
 }
 
-/********************************************/ /**
- *  Function for getting the bond order correlations \f$c_{ij}\f$  (or
- \f$a_{ij}\f$ in some treatments) according to the CHILL algorithm.
- *  @param[in,out] yCloud The output molSys::PointCloud
- *  @param[in] isSlice This decides whether there is a slice or not
- ***********************************************/
+// Uses Boost for spherical harmonics, and gets c_ij according to the CHILL
+// algorithm
 molSys::PointCloud<molSys::Point<double>, double> chill::getCorrel(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, bool isSlice) {
@@ -464,15 +460,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getCorrel(
   return *yCloud;
 }
 
-/********************************************/ /**
- *  Function that classifies every particle's #molSys::atom_state_type ice
- type, according to the CHILL algorithm. Does not print out the information.
- *  @param[in,out] yCloud The output molSys::PointCloud
- *  @param[in] isSlice This decides whether there is a slice or not
- *  @param[in] outputFileName Name of the output file, to which the ice types
- will be written out.
- * The default file name is "chill.txt"
- ***********************************************/
+// Classifies each atom according to the CHILL algorithm without printing
 molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypeNoPrint(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, bool isSlice) {
@@ -539,15 +527,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypeNoPrint(
   return *yCloud;
 }
 
-/********************************************/ /**
- *  Function that classifies every particle's #molSys::atom_state_type ice
- type, according to the CHILL algorithm.
- *  @param[in,out] yCloud The output molSys::PointCloud
- *  @param[in] isSlice This decides whether there is a slice or not
- *  @param[in] outputFileName Name of the output file, to which the ice types
- will be written out.
- * The default file name is "chill.txt"
- ***********************************************/
+// Classifies each atom according to the CHILL algorithm
 molSys::PointCloud<molSys::Point<double>, double> chill::getIceType(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, bool isSlice,
@@ -628,6 +608,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceType(
  *  Function for getting the bond order correlations \f$c_{ij}\f$ (alternatively
  \f$a_{ij}\f$ in certain texts) using the CHILL+ algorithm
  *  @param[in,out] yCloud The output molSys::PointCloud
+ *  @param[in] nList Row-ordered neighbour list by atom ID
  *  @param[in] isSlice This decides whether there is a slice or not
  ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double> chill::getCorrelPlus(
@@ -774,6 +755,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getCorrelPlus(
  *  Function that classifies the #molSys::atom_state_type ice type of each
  particle, according to the CHILL+ algorithm.
  *  @param[in,out] yCloud The output molSys::PointCloud
+ *  @param[in] nList Row-ordered neighbour list by atom ID
  *  @param[in] isSlice This decides whether there is a slice or not
  *  @param[in] outputFileName Name of the output file, to which the ice types
  will be written out.
@@ -888,6 +870,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypePlus(
                                                 *
                                                 *  @param[in,out] yCloud The
                                                 *output molSys::PointCloud
+                                                *  @param[in] nList Row-ordered neighbour list by atom ID
                                                 *  @param[in] isSlice This
                                                 *decides whether there is a
                                                 *slice or not \return a double
@@ -1155,6 +1138,7 @@ int chill::printIceType(
  *  Function that checks if the particle with the given atom index
   is interfacial or not.
  *  @param[in] yCloud The input molSys::PointCloud
+ *  @param[in] nList Row-ordered neighbour list by atom ID
  *  @param[in] iatom The vector index of the current particle
  *  @param[in] num_staggrd The number of staggered bonds that the current
  particle participates in
@@ -1229,6 +1213,7 @@ bool chill::isInterfacial(
  *  Calculates the number of staggered bonds of an atom
  with the given index.
  *  @param[in] yCloud The input molSys::PointCloud
+ *  @param[in] nList Row-ordered neighbour list by atom ID
  *  @param[in] jatom The vector index of the current particle
  *  \return an int value, holding the number of staggered bonds of the given
  particle
