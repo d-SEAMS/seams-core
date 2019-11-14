@@ -80,17 +80,14 @@ struct Vertex {
       true;  // True by default. Setting it to false removes it from the graph
 };
 
-// A graph is a per-frame object, containing all the vertices and a vector of
-// vectors of the rings found
 /*! \struct Graph
- * \brief This is a per-frame object, containing all the vertices for the particular frame
- * bond correlation factor.
+ * \brief This is a per-frame object, containing all the vertices for the particular frame,
+ * along with the vector of rings generated.
  *
  * Contains specifically the members:
- * - <b>atomIndex</b> : This is the index according to the PointCloud.
- * - <b>neighListIndex</b> : A vector of indices (not IDs) of the neighboring vertices.
- * - <b>inGraph</b> : Bool qualifier, which is true by default. Setting it to false
- * removes the vertex from the graph.
+ * - <b>pts</b> : Collection of vertices. The index of each should be the index according to the PointCloud.
+ * - <b>rings</b> : A row-ordered vector of vectors for the rings generated, containing the indices (not IDs) 
+ * of each member of the rings.
  */
 struct Graph {
   std::vector<Vertex> pts;  // Collection of vertices. The index of each should
