@@ -601,7 +601,7 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjO(
  *  @param[in] filename The name of the lammps trajectory file to be read in
  *  @param[in] targetFrame The frame number whose information will be read in
  *  @param[out] yCloud The outputted PointCloud
- *  @param[in] typeO The type ID of the desired type of atoms
+ *  @param[in] typeI The type ID of the desired type of atoms
  *  @param[in] isSlice This decides whether a slice will be created or not
  *  @param[in] coordLow Contains the lower limits of the slice, if a slice is to
  be created
