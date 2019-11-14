@@ -4,9 +4,13 @@
 
 /********************************************/ /**
  *  Function for building neighbour lists for each
- particle. Inefficient O(n^2) implementation
- Full neighbour list. Use this when iatom and jatom
- are different
+  particle. Inefficient brute-force \f$ O(n^2) \f$ implementation.
+  This generates the full neighbour list, by ID.
+ *  @param[in] rcutoff Distance cutoff, within which two atoms are neighbours.
+ *  @param[in] yCloud The input molSys::PointCloud
+ *  @param[in] typeI Type ID of particles of type I.
+ *  @param[in] typeJ Type ID of particles of type J.
+ *  \return Row-ordered full neighbour list, by atom ID.
  ***********************************************/
 std::vector<std::vector<int>> nneigh::neighList(
     double rcutoff, molSys::PointCloud<molSys::Point<double>, double> *yCloud,
@@ -87,8 +91,13 @@ std::vector<std::vector<int>> nneigh::neighList(
 
 /********************************************/ /**
  *  Function for building neighbour lists for each
- particle. Inefficient O(n^2) implementation. This will only work with one type
- of atom
+  particle of only one type. Inefficient brute-force \f$ O(n^2) \f$
+ implementation. This generates the full neighbour list, by ID. This function
+ will only work for building a neighbour list between one type of particles.
+ *  @param[in] rcutoff Distance cutoff, within which two atoms are neighbours.
+ *  @param[in] yCloud The input molSys::PointCloud
+ *  @param[in] typeI Type ID of the \f$ i^{th} \f$ particle type.
+ *  \return Row-ordered full neighbour list, by atom ID.
  ***********************************************/
 std::vector<std::vector<int>> nneigh::neighListO(
     double rcutoff, molSys::PointCloud<molSys::Point<double>, double> *yCloud,
@@ -170,8 +179,13 @@ std::vector<std::vector<int>> nneigh::neighListO(
 
 /********************************************/ /**
  *  Function for building neighbour lists for each
- particle. Inefficient O(n^2) implementation. This will only work with one type
- of atom Half neighbour list
+  particle of only one type. Inefficient brute-force \f$ O(n^2) \f$
+ implementation. This generates the half neighbour list, by ID. This function
+ will only work for building a neighbour list between one type of particles.
+ *  @param[in] rcutoff Distance cutoff, within which two atoms are neighbours.
+ *  @param[in] yCloud The input molSys::PointCloud
+ *  @param[in] typeI Type ID of the \f$ i^{th} \f$ particle type.
+ *  \return Row-ordered half neighbour list, by atom ID.
  ***********************************************/
 std::vector<std::vector<int>> nneigh::halfNeighList(
     double rcutoff, molSys::PointCloud<molSys::Point<double>, double> *yCloud,
@@ -251,10 +265,14 @@ std::vector<std::vector<int>> nneigh::halfNeighList(
 }
 
 /********************************************/ /**
- *  Function for creating a neighbour list by index instead of by atom ID.
- The ordering is with respect to the pointCloud with the coordinates.The first
- element is the atom for which the other atom indices are neighbours For
- example, if the neighbours of 1 are 2, 3, 4 the sub-vector would have 1 2 3 4
+ *  Function for creating a neighbour list by index (from scratch) instead of by
+ atom ID. The ordering is with respect to the pointCloud with the
+ coordinates.The first element is the atom for which the other atom indices are
+ neighbours For example, if the neighbours of 1 are 2, 3, 4 the sub-vector would
+ have 1 2 3 4
+ *  @param[in] yCloud The input molSys::PointCloud
+ *  @param[in] cutoff Distance cutoff, within which two atoms are neighbours.
+ *  \return Row-ordered full neighbour list, by index, NOT atom ID.
  ***********************************************/
 std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, double cutoff) {
@@ -294,10 +312,14 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
 }  // end of function
 
 /********************************************/ /**
- *  Function for getting the neighbour list by index instead of by atom ID.
- The ordering is with respect to the pointCloud with the coordinates.The first
- element is the atom for which the other atom indices are neighbours For
- example, if the neighbours of 1 are 2, 3, 4 the sub-vector would have 1 2 3 4
+ *  Function for getting the neighbour list by index instead of by atom ID from
+ a previously constructed input neighbour list by ID. The ordering is with
+ respect to the pointCloud with the coordinates.The first element is the atom
+ for which the other atom indices are neighbours For example, if the neighbours
+ of 1 are 2, 3, 4 the sub-vector would have 1 2 3 4
+ *  @param[in] yCloud The input molSys::PointCloud
+ *  @param[in] nList Full neighbour list, by atom ID.
+ *  \return Row-ordered full neighbour list, by index, NOT atom ID.
  ***********************************************/
 std::vector<std::vector<int>> nneigh::neighbourListByIndex(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
@@ -345,9 +367,11 @@ std::vector<std::vector<int>> nneigh::neighbourListByIndex(
 }
 
 /********************************************/ /**
-                                                *  Deletes the memory of a
-                                                *vector of vectors
-                                                ***********************************************/
+ *  Deletes the memory of a
+ vector of vectors. Call this before creating the neighbour list for a new
+ frame.
+ *  @param[in, out] nList Vector of vectors, of the neighbour list to be erased.
+ ***********************************************/
 int nneigh::clearNeighbourList(std::vector<std::vector<int>> &nList) {
   //
   std::vector<std::vector<int>> tempEmpty;

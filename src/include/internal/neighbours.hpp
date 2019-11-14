@@ -4,6 +4,39 @@
 #include <generic.hpp>
 #include <mol_sys.hpp>
 
+/*! \file neighbours.hpp
+    \brief Header file for neighbour list generation.
+
+    Details.
+*/
+
+/*!
+ *  \addtogroup nneigh
+ *  @{
+ */
+
+/*! \brief Functions for building neighbour lists.
+ * This namespace contains functions that build neighbour lists (using
+brute-force), saving either the atom IDs or atom indices (according to a
+PointCloud) in a row-ordered vector of vectors.
+ *
+Whether the atom IDs or atom indices (i.e. the indices of the elements in the
+vector pts inside the PointCloud) are saved, the neighbour lists are constructed
+such that the first element is the 'central atom', whose neighbours are being
+saved on that particular line. The central atom is followed by the atom IDs or
+indices of the nearest neighbours.
+
+In a 'full' neighbour list, if 1 is a neighbour of 2 then 1 is saved in the
+neighbour list of 2 AND 2 is also saved in the neighbour list of 1.
+
+In a 'half' neighbour list, if 1 is a neighbour of 2, then 2 is saved in the
+neighbour list of 1 but not vice versa.
+
+  ### Changelog ###
+
+  - Amrita Goswami [amrita16thaug646@gmail.com]; date modified: Nov 14, 2019
+ */
+
 namespace nneigh {
 // All these functions use atom IDs and not indices
 
