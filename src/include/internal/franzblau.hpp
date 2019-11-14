@@ -18,9 +18,62 @@
 #include <seams_input.hpp>
 #include <seams_output.hpp>
 
+/*! \file franzblau.hpp
+    \brief File for generating shortest-path rings according to the Franzblau
+   algorithm.
+
+    Details.
+*/
+
+/*!
+ *  \addtogroup primitive
+ *  @{
+ */
+
+/*! \brief Functions for generating primitive rings.
+ *         This namespace contains struct definitions and functions that are
+used for generating primitive (shortest-path) rings (directed cyclic graphs).
+ *
+The Vertex object is a collection of elements for each point, required for graph
+traversal. The Graph object is an object for the whole frame, containing the
+information of all vertices, and a row-ordered vector of vector of the rings
+generated.
+
+The <a
+href="https://journals.aps.org/prb/pdf/10.1103/PhysRevB.44.4925">Franzblau
+shortest-path criterion</a> has been used. The SP (shortest-path) criterion is
+midway between the least restrictive and most restrictive criteria in the
+hierarchy.
+
+The following is the procedure for finding primitive rings:
+
+1. All possible rings (including non-SP) rings are found, in the
+primitive::findRings function, using the <a
+href="https://www.math.upenn.edu/~wilf/website/CombinatorialAlgorithms.pdf">backtracking
+algorithm</a>. This is a recursive algorithm.
+
+2. The non-SP rings are then removed from the list of all rings, using the
+Franzblau shortest path criterion (primitive::removeNonSPrings). This also uses
+recursion.
+
+  ### Changelog ###
+
+  - Amrita Goswami [amrita16thaug646@gmail.com]; date modified: Nov 14, 2019
+ */
+
 namespace primitive {
 
 // A vertex is a collection of elements required for graph traversal
+/*! \struct Vertex
+ * \brief This contains the bond classifier of enum type #bond_type, and the
+ * bond correlation factor.
+ *
+ * Contains specifically the members:
+ * - atomIndex : This is the index according to the PointCloud.
+ * - neighListIndex : A vector of indices (not IDs) of the neighboring vertices.
+ * - inGraph : Bool qualifier, which is true by default. Setting it to false
+ * removes the vertex from the graph.
+ */
 struct Vertex {
   int atomIndex;                    // This is the index according to pointCloud
   std::vector<int> neighListIndex;  // contains the INDICES (not the atomIDs) of
@@ -68,7 +121,7 @@ Graph restoreEdgesFromIndices(Graph *fullGraph,
 Graph countAllRingsFromIndex(std::vector<std::vector<int>> neighHbondList,
                              int maxDepth);
 
-// Creates a vector of vectors of all possible rings
+// Removes the non-SP rings, using the Franzblau shortest path criterion
 Graph removeNonSPrings(Graph *fullGraph);
 
 // Main function that searches for all rings
