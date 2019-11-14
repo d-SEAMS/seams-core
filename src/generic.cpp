@@ -2,8 +2,12 @@
 #include <iostream>
 
 /********************************************/ /**
- *  Function for printing out info in PairCorrel struct
- ***********************************************/
+*  Function for printing out
+ info in a PointCloud object.
+ *  @param[in] yCloud The input PointCloud to be printed.
+ *  @param[in] outFile The name of the output file to which the information will
+be printed.
+***********************************************/
 int gen::prettyPrintYoda(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::string outFile) {
@@ -20,8 +24,8 @@ int gen::prettyPrintYoda(
                  << "\t" << yCloud->pts[i].x << "\t" << yCloud->pts[i].y << "\t"
                  << yCloud->pts[i].z << "\t";
       // Print out cij
-      // for(int c=0; c<yCloud->pts[i].c_ij.size(); c++){outputFile << yCloud->pts[i].c_ij[c]<<"\t";}
-      // Print out the classifier
+      // for(int c=0; c<yCloud->pts[i].c_ij.size(); c++){outputFile <<
+      // yCloud->pts[i].c_ij[c]<<"\t";} Print out the classifier
       outputFile << yCloud->pts[i].iceType << "\n";
     }
   }
@@ -31,7 +35,12 @@ int gen::prettyPrintYoda(
 }
 
 /********************************************/ /**
- *  Function for Converting to GSL and getting the angle
+ *  Function for obtaining the angle between two input vectors (std::vector).
+ Internally, the vectors are converted to GSL vectors. The dot product between
+ the input vectors is used to calculate the angle between them.
+ *  @param[in] OO The O--O vector (but can be any vector, in general).
+ *  @param[in] OH The O-H vector (but can be any vector, in general).
+ *  \return The output angle between the input vectors, in radians
  ***********************************************/
 double gen::gslVecAngle(std::vector<double> OO, std::vector<double> OH) {
   gsl_vector *gOO = gsl_vector_alloc(3);
