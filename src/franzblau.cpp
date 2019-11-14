@@ -7,7 +7,9 @@
                                                 *index) and the maximum depth
                                                 *upto which rings will be
                                                 *searched, using the Frnazblau
-                                                *algorithm for shortest paths
+                                                *algorithm for shortest paths.
+                                                *This function is registered in
+                                                *Lua and exposed to the user.
                                                 ***********************************************/
 std::vector<std::vector<int>> primitive::ringNetwork(
     std::vector<std::vector<int>> nList, int maxDepth) {

@@ -63,15 +63,13 @@ recursion.
 
 namespace primitive {
 
-// A vertex is a collection of elements required for graph traversal
 /*! \struct Vertex
- * \brief This contains the bond classifier of enum type #bond_type, and the
- * bond correlation factor.
+ * \brief This is a collection of elements, for each point, required for graph traversal.
  *
  * Contains specifically the members:
- * - atomIndex : This is the index according to the PointCloud.
- * - neighListIndex : A vector of indices (not IDs) of the neighboring vertices.
- * - inGraph : Bool qualifier, which is true by default. Setting it to false
+ * - <b>atomIndex</b> : This is the index according to the PointCloud.
+ * - <b>neighListIndex</b> : A vector of indices (not IDs) of the neighboring vertices.
+ * - <b>inGraph</b> : Bool qualifier, which is true by default. Setting it to false
  * removes the vertex from the graph.
  */
 struct Vertex {
@@ -84,6 +82,16 @@ struct Vertex {
 
 // A graph is a per-frame object, containing all the vertices and a vector of
 // vectors of the rings found
+/*! \struct Graph
+ * \brief This is a per-frame object, containing all the vertices for the particular frame
+ * bond correlation factor.
+ *
+ * Contains specifically the members:
+ * - <b>atomIndex</b> : This is the index according to the PointCloud.
+ * - <b>neighListIndex</b> : A vector of indices (not IDs) of the neighboring vertices.
+ * - <b>inGraph</b> : Bool qualifier, which is true by default. Setting it to false
+ * removes the vertex from the graph.
+ */
 struct Graph {
   std::vector<Vertex> pts;  // Collection of vertices. The index of each should
                             // be the same as that in pointCloud
