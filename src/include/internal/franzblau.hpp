@@ -80,8 +80,6 @@ struct Vertex {
                                     // the neighbouring vertices
   bool inGraph =
       true;  // True by default. Setting it to false removes it from the graph
-  bool visited =
-      false;  // Flag determining whether the vertex has been visited or not
 };
 
 // A graph is a per-frame object, containing all the vertices and a vector of
