@@ -13,7 +13,7 @@
  *  @{
  */
 
-/*! \brief Functions for topological network criteria cage types
+/*! \brief Functions for topological network criteria cage types.
  *         This namespace contains structs and enums for cage types
  *
 Type definitions for atoms, rings and cages which are DDCs and HCs.
@@ -55,7 +55,8 @@ enum cageType { HexC, DoubleDiaC };
  * Type for an atom which belongs to a DDC
  *
  * \var molSys::iceType mixed
- * Type for an atom which is part of a mixed ring, shared by both a DDC and an HC
+ * Type for an atom which is part of a mixed ring, shared by both a DDC and an
+ * HC
  */
 enum iceType { dummy, hc, ddc, mixed };
 
