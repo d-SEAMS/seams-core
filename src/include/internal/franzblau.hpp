@@ -48,7 +48,7 @@ hierarchy.
 The following is the procedure for finding primitive rings:
 
 1. All possible rings (including non-SP) rings are found, in the
-primitive::findRings function, using the <a
+primitive::countAllRingsFromIndex function, using the <a
 href="https://www.math.upenn.edu/~wilf/website/CombinatorialAlgorithms.pdf">backtracking
 algorithm</a>. This is a recursive algorithm.
 
@@ -64,13 +64,15 @@ recursion.
 namespace primitive {
 
 /*! \struct Vertex
- * \brief This is a collection of elements, for each point, required for graph traversal.
+ * \brief This is a collection of elements, for each point, required for graph
+ * traversal.
  *
  * Contains specifically the members:
  * - <b>atomIndex</b> : This is the index according to the PointCloud.
- * - <b>neighListIndex</b> : A vector of indices (not IDs) of the neighboring vertices.
- * - <b>inGraph</b> : Bool qualifier, which is true by default. Setting it to false
- * removes the vertex from the graph.
+ * - <b>neighListIndex</b> : A vector of indices (not IDs) of the neighboring
+ * vertices.
+ * - <b>inGraph</b> : Bool qualifier, which is true by default. Setting it to
+ * false removes the vertex from the graph.
  */
 struct Vertex {
   int atomIndex;                    // This is the index according to pointCloud
@@ -81,13 +83,14 @@ struct Vertex {
 };
 
 /*! \struct Graph
- * \brief This is a per-frame object, containing all the vertices for the particular frame,
- * along with the vector of rings generated.
+ * \brief This is a per-frame object, containing all the vertices for the
+ * particular frame, along with the vector of rings generated.
  *
  * Contains specifically the members:
- * - <b>pts</b> : Collection of vertices. The index of each should be the index according to the PointCloud.
- * - <b>rings</b> : A row-ordered vector of vectors for the rings generated, containing the indices (not IDs) 
- * of each member of the rings.
+ * - <b>pts</b> : Collection of vertices. The index of each should be the index
+ * according to the PointCloud.
+ * - <b>rings</b> : A row-ordered vector of vectors for the rings generated,
+ * containing the indices (not IDs) of each member of the rings.
  */
 struct Graph {
   std::vector<Vertex> pts;  // Collection of vertices. The index of each should
@@ -128,8 +131,8 @@ Graph countAllRingsFromIndex(std::vector<std::vector<int>> neighHbondList,
 Graph removeNonSPrings(Graph *fullGraph);
 
 // Main function that searches for all rings
-int findRings(Graph *fullGraph, int iNode, std::vector<int> *visited,
-              int maxDepth, int depth, int root = -1);
+int findRings(Graph *fullGraph, int v, std::vector<int> *visited, int maxDepth,
+              int depth, int root = -1);
 
 // Calculates the shortest path
 int shortestPath(Graph *fullGraph, int v, int goal, std::vector<int> *path,

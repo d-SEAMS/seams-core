@@ -6,10 +6,31 @@
                                                 *given a neighbour list (also by
                                                 *index) and the maximum depth
                                                 *upto which rings will be
-                                                *searched, using the Frnazblau
+                                                *searched, using the Franzblau
                                                 *algorithm for shortest paths.
                                                 *This function is registered in
                                                 *Lua and exposed to the user.
+                                                *This internally calls the
+                                                *functions:
+                                                *-
+                                                *primitive::countAllRingsFromIndex
+                                                *(to generate all rings)
+                                                *- primitive::removeNonSPrings
+                                                *(to only get the primitive
+                                                *rings)
+                                                *  @param[in] nList Row-ordered
+                                                *neighbour list by index (and
+                                                *NOT the atom ID)
+                                                *  @param[in] maxDepth The
+                                                *maximum depth upto which rings
+                                                *will be searched. This means
+                                                *that rings larger than maxDepth
+                                                *in length will not be
+                                                *generated.
+                                                * \return A vector of
+                                                *vectors of the rings; each ring
+                                                *contains the atom indices of
+                                                *the ring members.
                                                 ***********************************************/
 std::vector<std::vector<int>> primitive::ringNetwork(
     std::vector<std::vector<int>> nList, int maxDepth) {
@@ -30,11 +51,19 @@ std::vector<std::vector<int>> primitive::ringNetwork(
 }
 
 /********************************************/ /**
-                                                *  Get all possible rings (only
-                                                *atom indices, not IDs). The
-                                                *neighbour list is in terms of
-                                                *indices
-                                                ***********************************************/
+ *  Get all possible rings (only atom indices, not IDs). The input
+  neighbour list is in terms of indices. All possible rings (including non-SP)
+  rings are generated using a recursive backtracking algorithm.
+  This function calls the following functions internally:
+  - primitive::populateGraphFromIndices (for initializing the Graph object)
+  - primitive::findRings (for getting all rings, using backtracking)
+  - primitive::restoreEdgesFromIndices (restores back-up of the edges since some
+ may have been removed)
+ *  @param[in] neighHbondList Row-ordered neighbour list by atom index (not ID).
+ *  @param[in] maxDepth The maximum depth upto which rings will be searched.
+ This means that rings larger than maxDepth will not be generated.
+ *  \return The Graph object for the current frame.
+ ***********************************************/
 primitive::Graph primitive::countAllRingsFromIndex(
     std::vector<std::vector<int>> neighHbondList, int maxDepth) {
   //
@@ -65,13 +94,27 @@ primitive::Graph primitive::countAllRingsFromIndex(
 }
 
 /********************************************/ /**
-                                                *  All possible rings are
-                                                *searched for here in this
-                                                *function, which recursively
-                                                *calls itself. When it is first
-                                                *called, root is a dummy value
-                                                *(-1)
-                                                ***********************************************/
+ *  All possible rings are searched for in this function, which recursively
+ calls itself. The rings are 'grown' from the root node (which is the first
+ vertex) using the backtracking algorithm. When it is first called (before the
+ root node has been assigned), root is a dummy value (which is equal to -1, a
+ value that can never be legitimate).
+ *  @param[in, out] fullGraph Graph object containing the vertices (and the
+ neighbour lists). Vertices may be 'removed' from the Graph.
+ *  @param[in] v The current vertex being visited or checked. It is added to the
+ list of all vertices visited.
+ *  @param[in] visited A vector containing a list of the vertices visited for
+ book-keeping. If the current visited vector fulfills the condition for being a
+ ring, it is added to the rings vector of vector in the Graph.
+ *  @param[in] maxDepth The maximum depth upto which rings will be searched.
+ This means that rings larger than maxDepth will not be generated.
+ *  @param[in] depth The current depth. When this function is called for the
+ first time from primitive::countAllRingsFromIndex, the depth is initialized to
+ 0. When the depth is greater than or equal to maxDepth, the function exits.
+ *  @param[in] root The first vertex, from which the current visited vector
+ (candidate ring) is being grown. This is initialized to a dummy value of -1,
+ when it is called from primitive::countAllRingsFromIndex.
+ ***********************************************/
 int primitive::findRings(Graph *fullGraph, int v, std::vector<int> *visited,
                          int maxDepth, int depth, int root) {
   //
@@ -130,30 +173,24 @@ int primitive::findRings(Graph *fullGraph, int v, std::vector<int> *visited,
             fullGraph->pts[v].neighListIndex.begin() + j);
       }  // end of erase
     }    // end of search
-    // // Search for root in the neighbour list of v
-    // auto it = std::find(fullGraph->pts[v].neighListIndex.begin(),
-    //                     fullGraph->pts[v].neighListIndex.end(), root);
-    // // If found, remove root
-    // if (it != fullGraph->pts[v].neighListIndex.end()) {
-    //   fullGraph->pts[v].neighListIndex.erase(it);
-    // }  // search and remove in neighbour list
-  }  // remove root not edges
+  }      // remove root not edges
 
   //
   (*visited).pop_back();
-  // (*visited).erase(visited->end() - 1);
   //
   // return 0;
 }
 
 /********************************************/ /**
-                                                *  Fills a Graph object with
-                                                *information from pointCloud and
-                                                *the neighbour list. The indices
-                                                * in the neighbour list in the
-                                                *Vertex object are NOT the atom
-                                                *IDs.
-                                                ***********************************************/
+ *  Fills a Graph object with information from the PointCloud and the neighbour
+ list. The indices in the neighbour list in the Vertex object are NOT the atom
+ IDs (they are the atom indices according to the input PointCloud). The input
+ neighbour list is by atom ID.
+ *  @param[in] yCloud The input PointCloud.
+ *  @param[in] neighHbondList The row-ordered neighbour list, containing atom
+ IDs, and not the atom indices.
+ *  \return The Graph object for the current frame.
+ ***********************************************/
 primitive::Graph primitive::populateGraphFromNListID(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> neighHbondList) {
@@ -199,14 +236,16 @@ primitive::Graph primitive::populateGraphFromNListID(
 }
 
 /********************************************/ /**
-                                                *  Fills a Graph object with
-                                                *information from pointCloud and
-                                                *the neighbour list of INDICES
-                                                *not atom IDs. The indices in
-                                                *the neighbour list in the
-                                                *Vertex object are NOT the atom
-                                                *IDs.
-                                                ***********************************************/
+ *  Fills a Graph object with information from the PointCloud and the neighbour
+ list. The indices in the neighbour list in the Vertex object are NOT the atom
+ IDs (they are the atom indices according to the input PointCloud). The input
+ neighbour list is by index NOT atom IDs. Otherwise, this function does the same
+ thing as primitive::populateGraphFromNListID. The only difference is that this
+ function takes the neighbour list BY INDEX.
+ *  @param[in] nList The row-ordered neighbour list, containing atom
+ indices (according to the input PointCloud).
+ *  \return The Graph object for the current frame.
+ ***********************************************/
 primitive::Graph primitive::populateGraphFromIndices(
     std::vector<std::vector<int>> nList) {
   //
@@ -231,14 +270,17 @@ primitive::Graph primitive::populateGraphFromIndices(
 }
 
 /********************************************/ /**
-                                                *  Re-fills the neighbour lists
-                                                *of a graph object from a
-                                                *neighbour the neighbour list of
-                                                *INDICES not atom IDs. The
-                                                *indices in the neighbour list
-                                                *in the Vertex object are NOT
-                                                *the atom IDs.
-                                                ***********************************************/
+ *  Re-fills the neighbour lists of a Graph object from a row-ordered neighbour
+ list (which is BY INDEX not IDs). Some vertices may have been removed while
+ rings were generated using the backtracking algorithm (primitive::findRings).
+ Also, the indices in the neighbour list in the Vertex object are not the atom
+ IDs.
+ *  @param[in] fullGraph The Graph object for the current frame. The neighbour
+ lists of component Vertex objects may have been depleted.
+ *  @param[in] nList The row-ordered neighbour list, containing atom
+ indices (according to the input PointCloud).
+ *  \return The Graph object for the current frame.
+ ***********************************************/
 primitive::Graph primitive::restoreEdgesFromIndices(
     Graph *fullGraph, std::vector<std::vector<int>> nList) {
   //
@@ -254,13 +296,15 @@ primitive::Graph primitive::restoreEdgesFromIndices(
 }
 
 /********************************************/ /**
-                                                *  Removes non-SP rings
-                                                *(Franzblau algorithm) from the
-                                                *rings vector of vectors member
-                                                *in the Graph object. The rings
-                                                *vector still only contains
-                                                *indices and NOT atom IDs.
-                                                ***********************************************/
+ *  Removes non-SP rings (according to the Franzblau shortest path criterion)
+ from the rings vector of vectors member n the Graph object. The rings vector of
+ vectors contains indices and NOT atom IDs. This function calls
+ primitive::shortestPath internally to calculate the shortest path.
+ *  @param[in] fullGraph The Graph object for the current frame. This also
+ contains the rings vector of vectors, which has all possible rings (possibly
+ inclding non-SP rings).
+ *  \return The Graph object for the current frame.
+ ***********************************************/
 primitive::Graph primitive::removeNonSPrings(primitive::Graph *fullGraph) {
   //
   int nVertices = fullGraph->pts.size();  // Number of vertices in the graph
@@ -335,9 +379,21 @@ primitive::Graph primitive::removeNonSPrings(primitive::Graph *fullGraph) {
 }
 
 /********************************************/ /**
-                                                *  Calculates the shortest path
-                                                *for a particular ring
-                                                ***********************************************/
+ *  Calculates the shortest path for a particular ring. This function uses
+ recursion.
+ *  @param[in] fullGraph The Graph object for the current frame.
+ *  @param[in] v The current vertex being checked.
+ *  @param[in] goal The first element of the candidate ring being checked (the
+ root node).
+ *  @param[in] path The path or length of the visited points (This basically
+ contains all the indices in the visited vector, excluding the current vertex).
+ *  @param[in] visited This vector contains the indices of the vertices visited
+ or checked (for book-keeping).
+ *  @param[in] maxDepth The maximum depth or maximum length of the rings.
+ *  @param[in] depth The current depth. When this function is called from
+ primitive::removeNonSPrings, the depth is initialized as 0.
+ *  \return The Graph object for the current frame.
+ ***********************************************/
 int primitive::shortestPath(Graph *fullGraph, int v, int goal,
                             std::vector<int> *path, std::vector<int> *visited,
                             int maxDepth, int depth) {
