@@ -1,9 +1,10 @@
 #include <ring.hpp>
 
 /********************************************/ /**
-                                                *  Deletes the memory of a
-                                                *vector of vectors
-                                                ***********************************************/
+*  Deletes the memory of a
+ vector of vectors (specifically for rings).
+ *  @param[in, out] rings The vector of vectors to be cleared.
+***********************************************/
 int ring::clearRingList(std::vector<std::vector<int>> &rings) {
   //
   std::vector<std::vector<int>> tempEmpty;
@@ -14,10 +15,12 @@ int ring::clearRingList(std::vector<std::vector<int>> &rings) {
 }
 
 /********************************************/ /**
-                                                *  Finds and returns all the
-                                                *elements common between the two
-                                                *vectors
-                                                ***********************************************/
+ *  Function that finds and returns a vector containing the elements
+  shared by two input rings (each ring is a vector).
+ *  @param[in] ring1 The first ring.
+ *  @param[in] ring2 The second ring.
+ *  \return A vector containing the common elements between the input rings.
+ ***********************************************/
 std::vector<int> ring::findsCommonElements(std::vector<int> ring1,
                                            std::vector<int> ring2) {
   //
@@ -39,9 +42,14 @@ std::vector<int> ring::findsCommonElements(std::vector<int> ring1,
 }
 
 /********************************************/ /**
-                                                *  Finds the common elements in
-                                                *three rings
-                                                ***********************************************/
+ *  Function that finds the common elements
+  in three input rings
+ *  @param[in] ring1 The first ring.
+ *  @param[in] ring2 The second ring.
+ *  @param[in] ring3 The third ring.
+ *  \return A value which is true if the three rings have at least one common
+ element, and false if the three rings have no elements in common.
+ ***********************************************/
 bool ring::commonElementsInThreeRings(std::vector<int> ring1,
                                       std::vector<int> ring2,
                                       std::vector<int> ring3) {
@@ -69,10 +77,14 @@ bool ring::commonElementsInThreeRings(std::vector<int> ring1,
 }
 
 /********************************************/ /**
-                                                *  Finds out if a triplet is
-                                                *present (in the same order or
-                                                *reversed) in a given ring
-                                                ***********************************************/
+ *  Function that finds out if a given triplet is
+  is present (in the same order or in reversed order) in a given ring.
+ *  @param[in] ring The input ring containing the indices of atoms.
+ *  @param[in] triplet Vector containing the triplet, for whose presence the
+ input ring vector will be checked.
+ *  \return A bool value which is true if the triplet is present in the ring,
+ and is false if the triplet is not in the ring.
+ ***********************************************/
 bool ring::findTripletInRing(std::vector<int> ring, std::vector<int> triplet) {
   //
   int ringSize = ring.size();    // should be 6
@@ -114,11 +126,16 @@ bool ring::findTripletInRing(std::vector<int> ring, std::vector<int> triplet) {
 }
 
 /********************************************/ /**
-                                                *  Gets rings of a single ring
-                                                *size from all primitive rings
-                                                *and returns that vector of
-                                                *vectors
-                                                ***********************************************/
+ *  Function that gets rings of a single ring size (i.e. a particular number of
+ nodes) from all primitive rings, and returns a vector of vectors containing the
+ rings of the specified size.
+ *  @param[in] rings The vector of vectors containing the primitive rings of all
+ sizes.
+ *  @param[in] ringSize The desired ring size or number of nodes in each ring to
+ be saved.
+ *  \return A vector of vectors containing primitive rings of one ring size or
+ length.
+ ***********************************************/
 std::vector<std::vector<int>> ring::getSingleRingSize(
     std::vector<std::vector<int>> rings, int ringSize) {
   //
@@ -140,7 +157,12 @@ std::vector<std::vector<int>> ring::getSingleRingSize(
 
 /********************************************/ /**
  *  For two vectors, checks to see if there are common elements (true)
- or not (false)
+ or not (false).
+ *  @param[in] ring1 The vector of the first ring.
+ sizes.
+ *  @param[in] ring2 The vector of the second ring.
+ *  \return A bool which is true if the input vectors have at least one common
+ element, and false if there are no common elements.
  ***********************************************/
 bool ring::hasCommonElements(std::vector<int> ring1, std::vector<int> ring2) {
   std::vector<int> commonElements;  // Vector containing common elements
@@ -166,8 +188,13 @@ bool ring::hasCommonElements(std::vector<int> ring1, std::vector<int> ring2) {
 
 /********************************************/ /**
  *  Checks to see if two vectors (ring1, ring2) have the same
- elements (disordered). So the sequence is not important here.
- Returns true if the rings have the same elements
+ elements (which may or may not be disordered). The order or sequence of
+ elements is not important, so the rings are sorted. Returns true if the rings
+ have the same elements
+ *  @param[in] ring1 The first ring.
+ *  @param[in] ring2 The second ring.
+ *  \return A bool; true if the rings contain the same elements (not necessarily
+ in the same sequence) and false if they do not have the same elements.
  ***********************************************/
 bool ring::compareRings(std::vector<int> ring1, std::vector<int> ring2) {
   // Sort the rings first
