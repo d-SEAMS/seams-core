@@ -5,16 +5,31 @@
 // -----------------------------------------------------------------------------------------------------
 
 /********************************************/ /**
-                                                *  Loops through a vector of
-                                                *vector of rings of all sizes,
-                                                *upto maxDepth. returns a vector
-                                                *which contains the ring IDs of
-                                                *all the rings which are prisms.
-                                                * The ring IDs correspond to the
-                                                *index of the rings inside the
-                                                *vector of vector rings,
-                                                *starting from 0.
-                                                ***********************************************/
+ * Function that loops through the primitive rings (which is a vector of
+ vectors) of all sizes, upto maxDepth (the largest ring size). The function
+ returns a vector which contains the ring indices of all the rings which
+ constitute prism blocks. The ring IDs correspond to the index of the rings
+ inside the vector of vector rings, starting from 0. This is registered as a Lua
+ function, and is exposed to the user directly.
+ The function calls the following functions internally:
+ - ring::clearRingList (Clears the vector of vectors for rings of a single type,
+ to prevent excessive memory being blocked).
+ - ring::getSingleRingSize (Fill a vector of vectors for rings of a particular
+ ring size).
+ - ring::findPrisms (Now that rings of a particular size have been obtained,
+ prism blocks are found and saved).
+ - topoparam::normHeightPercent (Gets the height% for the prism blocks).
+ - ring::assignPrismType (Assigns a prism type to each atom type).
+ - sout::writePrismNum (Write out the prism information for the current frame).
+ - sout::writeLAMMPSdataAllPrisms (Writes out a LAMMPS data file for the current
+ frame, which can be visualized in OVITO).
+ *  @param[in] path The string to the output directory, in which files will be
+ written out.
+ *  @param[in] rings Row-ordered vector of vectors for rings of a single type.
+ *  @param[in] nList Row-ordered neighbour list by index.
+ *  @param[in] yCloud The input PointCloud.
+ *  @param[in] maxDepth The maximum possible size of the primitive rings.
+ ***********************************************/
 int ring::prismAnalysis(
     std::string path, std::vector<std::vector<int>> rings,
     std::vector<std::vector<int>> nList,
@@ -98,15 +113,27 @@ int ring::prismAnalysis(
 }
 
 /********************************************/ /**
- *  Determines which rings are n-sided prisms. This function
- returns a vector which contains the ring IDs of all the rings which are prisms.
- The ring IDs correspond to the index of the rings inside the vector of vector
- rings, starting from 0. Prism rings can be found using a three-step procedure,
- in which first two basal rings are found. Prismatic rings are simply rings
- which share every face made by upper and lower triplets of the basal rings The
- neighbour list is also required as an input, which is a vector of vectors,
- containing atom IDs. The first element of the neighbour list is the atomID of
- the atom for which the other elements are nearest neighbours.
+ * Determines which rings are n-sided prisms. This function
+ returns a vector which contains the ring indices of all the rings which are
+ prisms. The ring indices correspond to the index of the rings inside the vector
+ of vector rings, starting from 0. Prism rings can be found using a three-step
+ procedure, in which first two basal rings are found. Prismatic rings are simply
+ rings which share every face made by upper and lower triplets of the basal
+ rings The neighbour list is also required as an input, which is a vector of
+ vectors, containing atom IDs. The first element of the neighbour list is the
+ atom index of
+ the atom for which the other elements are nearest neighbours.\
+ *  @param[in] rings The input vector of vectors containing the primitive rings
+ of a single ring size (number of nodes).
+ *  @param[in] ringType A vector containing a ring::strucType value (a
+ classification type) for each ring.
+ *  @param[in] nPrisms The number of prism blocks identified for the number of
+ nodes.
+ *  @param[in] nList The row-ordered neighbour list (by atom index).
+ *  @param[in] yCloud The input PointCloud.
+ *  \return A vector containing the ring indices of all the rings which have
+ been classified as prisms. The indices are with respect to the input rings
+ vector of vectors.
  ***********************************************/
 std::vector<int> ring::findPrisms(
     std::vector<std::vector<int>> rings, std::vector<ring::strucType> *ringType,
@@ -204,11 +231,16 @@ std::vector<int> ring::findPrisms(
 }
 
 /********************************************/ /**
- *  Check to see if two basal rings are basal rings of a prism block or not,
- using the neighbour list information. The neighbour list nlist is a vector of
- vectors, containing atom IDs (not vector indices!). The first element of each
- subvector in nlist is the atom ID of the particle for which the other elements
- are the nearest neighbours
+ * A function that checks to see if two basal rings are basal rings of a prism
+ block or not, using the neighbour list information. The neighbour list nList is
+ a row-ordered vector of vectors, containing atom indices (not atom IDs!). The
+ first element of each subvector in nList is the atom index of the particle for
+ which the other elements are the nearest neighbours.
+ *  @param[in] nList Row-ordered neighbour list by atom index.
+ *  @param[in] basal1 The vector for one of the basal rings.
+ *  @param[in] basal2 The vector for the other basal ring.
+ *  \return A value that is true if the basal rings constitute a prism block,
+ and false if they do not make up a prism block.
  ***********************************************/
 bool ring::basalPrismConditions(std::vector<std::vector<int>> nList,
                                 std::vector<int> *basal1,
@@ -292,11 +324,11 @@ bool ring::basalPrismConditions(std::vector<std::vector<int>> nList,
 }
 
 /********************************************/ /**
-                                                *  Relaxed criteria for deformed
-                                                *prism blocks: at least one bond
-                                                *should exist between the basal
-                                                *rings
-                                                ***********************************************/
+* Relaxed criteria for deformed
+ prism blocks: at least one bond
+ should exist between the basal
+ rings.
+***********************************************/
 bool ring::relaxedPrismConditions(std::vector<std::vector<int>> nList,
                                   std::vector<int> *basal1,
                                   std::vector<int> *basal2) {
@@ -337,9 +369,16 @@ bool ring::relaxedPrismConditions(std::vector<std::vector<int>> nList,
 }
 
 /********************************************/ /**
- *  Discards basal tetragonal rings which are not oriented perpendicular to the
- axial direction. This is hard-coded for the z-dimension but any dimension is
- equivalent. If true, then the rings are axial.
+ * A function that discards basal tetragonal rings which are not oriented
+ perpendicular to the axial direction. This is will only work for the XY, YZ or
+ XZ planes. If true is returned, then the rings are axial. This function is only
+ needed for tetragonal prism blocks because in the other cases, the basal rings
+ and lateral planes have a different number of nodes.
+ *  @param[in] basal1 The first basal ring.
+ *  @param[in] basal2 The other candidate basal ring.
+ *  @param[in] yCloud The input PointCloud.
+ *  \return A bool value which is true if the candidate basal rings are axial,
+ and is false if the planes are lateral planes.
  ***********************************************/
 bool ring::discardExtraTetragonBlocks(
     std::vector<int> *basal1, std::vector<int> *basal2,
@@ -539,10 +578,16 @@ bool ring::discardExtraTetragonBlocks(
 }
 
 /********************************************/ /**
- *  Assign an atomType (equal to the number of nodes in the ring)
+ * Assign an atomType (equal to the number of nodes in the ring)
  given a vector with a list of indices of rings comprising the prisms.
- Note that the ring indices in listPrism correspond to the indices
- in the input rings vector of vectors
+ Note that the ring indices in the listPrism vector correspond to the indices
+ in the input rings vector of vectors.
+ *  @param[in] rings The vector of vectors containing the primitive rings, of a
+ particular ring size.
+ *  @param[in] listPrism The list of prism blocks found.
+ *  @param[in] ringSize The current ring size or number of nodes in each ring.
+ *  @param[in, out] atomTypes A vector which contains a type for each atom,
+ depending on it's type as classified by the prism identification scheme.
  ***********************************************/
 int ring::assignPrismType(std::vector<std::vector<int>> rings,
                           std::vector<int> listPrism, int ringSize,

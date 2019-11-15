@@ -19,6 +19,16 @@
 #include <seams_input.hpp>
 #include <seams_output.hpp>
 
+/*! \file topo_one_dim.hpp
+    \brief File containing functions used specific to quasi-one-dimensional
+   topological network critera (the prism identification scheme).
+*/
+
+/*!
+ *  \addtogroup ring
+ *  @{
+ */
+
 namespace ring {
 
 // Find out which rings are prisms.
