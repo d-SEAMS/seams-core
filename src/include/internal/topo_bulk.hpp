@@ -20,6 +20,16 @@
 #include <seams_input.hpp>
 #include <seams_output.hpp>
 
+/*! \file topo_bulk.hpp
+    \brief File containing functions used specific to bulk topological
+   network critera.
+*/
+
+/*!
+ *  \addtogroup ring
+ *  @{
+ */
+
 namespace ring {
 
 // Find out which rings are DDCs or HCs, which are comprised of 6-membered

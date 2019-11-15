@@ -7,7 +7,33 @@
 /********************************************/ /**
  *  Finds out if rings constitute double-diamond cages or hexagonal cages.
  Requires a neighbour list (by index) and a vector of vectors of primitive rings
- which should also be by index.
+ which should also be by index. This is registered as a Lua function and is
+ accessible to the user.
+ Internally, this function calls the following functions:
+ - ring::getSingleRingSize (Saves rings of a single ring size into a new vector
+ of vectors, which is subsequently used for finding DDCs, HCs etc).
+ - ring::findDDC (Finds the DDCs).
+ - ring::findHC (Finds the HCs).
+ - ring::findMixedRings (Finds the mixed rings, which are shared by DDCs and HCs
+ both).
+ - ring::getStrucNumbers (Gets the number of structures (DDCs, HCs, mixed rings,
+ basal rings, prismatic rings, to be used for write-outs).
+ - sout::writeTopoBulkData (Writes out the numbers and data obtained for the
+ current frame).
+ - ring::getAtomTypesTopoBulk (Gets the atom type for every atom, to be used for
+ printing out the ice types found).
+ - sout::writeLAMMPSdataTopoBulk (Writes out the atoms, with the classified
+ types, into a LAMMPS data file, which can be visualized in OVITO).
+ *  @param[in] path The file path of the output directory to which output files
+ will be written.
+ *  @param[in] rings Vector of vectors containing the primitive rings. This
+ contains rings of all sizes.
+ *  @param[in] nList Row-ordered neighbour list, by index.
+ *  @param[in] yCloud The input PointCloud, with respect to which the indices in
+ the rings and nList vector of vectors have been saved.
+ *  @param[in] printEachCage Flag for printing the information of each cage in
+ the frame (true) or not printing the coordinates/connectivity of each cage
+ (false).
  ***********************************************/
 int ring::topoBulkAnalysis(
     std::string path, std::vector<std::vector<int>> rings,
@@ -96,7 +122,28 @@ int ring::topoBulkAnalysis(
  are found, their values must be updated to DDC enum type inside the ringType
  vector, which has been passed as an input to this function. At the end, the
  output vector can be updated to avoid adding the same ring index more than once
- (this may happen for peripheral rings, which can be shared)
+ (this may happen for peripheral rings, which can be shared).
+ Internally, the function calls the following:
+ - ring::conditionOneDDC (Step one: Finds all rings which contain each index
+ (m_k) of the equatorial ring, iring, in at least three other rings).
+ - ring::conditionTwoDDC (Step two: For every triplet in iring, there is at
+ least one hexagonal ring other than iring that passes through the triplet. The
+ peripheral rings are stored in order of the starting element of each triplet.)
+ - ring::conditionThreeDDC (Step three: For every triplet in the equatorial
+ ring, there is at least one hexagonal ring other than iring that passes through
+ the triplet. Rings corresponding to triplets need not be searched again since
+ peripheralRings are stored in that order. Rings corresponding to T1, T3, T5
+ must have a common element. Similarly rings corresponding to T2, T4, T6 must
+ have at least one common element. Alternating rings corresponding to triplets
+ must have at least three common elements).
+ *
+ *  @param[in] rings Vector of vectors containing 6-membered primitive rings
+ (wherein each ring contains the atom indices of the particles which constitute
+ the ring).
+ *  @param[in] ringType Vector containing a ring::strucType (structure type) for
+ each ring.
+ *  @param[in] cageList Vector in which every cage is saved.
+ *  \return A vector of all the ring indices which constitute DDCs.
  ***********************************************/
 std::vector<int> ring::findDDC(std::vector<std::vector<int>> rings,
                                std::vector<ring::strucType> *ringType,
@@ -179,11 +226,19 @@ std::vector<int> ring::findDDC(std::vector<std::vector<int>> rings,
 
 /********************************************/ /**
  *  For a given ring, which is being tested as the equatorial ring,
- this function tests if each element of the ring (m_k) is present
+ this function tests if each element of the ring \f$ (m_k) \f$ is present
  in at least three other rings or not. Returns false if this is not true.
- The ring IDs of rings that have the common element are saved inside
- the periperal ring vector as potential peripheral rings, which is passed
- as an input to the function
+ The ring indices of rings that have the common element are saved inside
+ the periperal ring vector (peripheralRings) as potential peripheral rings,
+ which is then passed as an input to the subsequent functions testing
+ conditions.
+ *  @param[in] rings Vector of vectors containing the 6-membered primitive
+ rings.
+ *  @param[in] peripheralRings Vector containing the indices of rings which are
+ potential peripheral rings.
+ *  @param[in] iring Index of the ring being tested as equatorial.
+ *  \return A bool; true if ring being tested as equatorial, iring, satisfies
+ the above condition for being an equatorial ring, and false otherwise.
  ***********************************************/
 bool ring::conditionOneDDC(std::vector<std::vector<int>> rings,
                            std::vector<int> *peripheralRings, int iring) {
@@ -243,9 +298,19 @@ bool ring::conditionOneDDC(std::vector<std::vector<int>> rings,
  *  For a given ring, which is being tested as the equatorial ring,
  this function tests if each triplet that can be formed from the ring is
  common to at least one other ring or not. Returns false if this is not true.
- The ring IDs of rings that have the common triplet are ultimately saved inside
- the periperal ring vector as potential peripheral rings, which is passed
- as an input to the function
+ The ring indices of rings that have the common triplet are ultimately saved
+ inside the periperal ring vector as potential peripheral rings, which is passed
+ as an input to the subsequent condition-testing functions.
+ The function calls the following function internally:
+ - ring::findTripletInRing (Searches inside another ring with index jring for
+ the current triplet, which was obtained from iring).
+ *  @param[in] rings Vector of vectors containing the 6-membered primitive
+ rings.
+ *  @param[in] peripheralRings Vector containing the indices of rings which are
+ potential peripheral rings.
+ *  @param[in] iring Index of the ring being tested as equatorial.
+ *  \return A bool; true if ring being tested as equatorial, iring, satisfies
+ the above condition for being an equatorial ring, and false otherwise.
  ***********************************************/
 bool ring::conditionTwoDDC(std::vector<std::vector<int>> rings,
                            std::vector<int> *peripheralRings, int iring) {
@@ -313,8 +378,19 @@ bool ring::conditionTwoDDC(std::vector<std::vector<int>> rings,
  1. Rings corresponding to T1, T3, T5 should have at least one common element.
  2. Rings corresponding to T2, T4, T6 should have at least one common element.
  3. The following rings should have at least three common elements- {T1, T3},
- {T2, T4}, {T3, T5}, {T4, T6}
-
+ {T2, T4}, {T3, T5}, {T4, T6}.
+ Internally calls the following functions:
+ - ring::commonElementsInThreeRings (CONDITION 1: Rings corresponding to T1, T3,
+ T5 should have at least one common element).
+ - ring::commonElementsInThreeRings (CONDITION 2: Rings corresponding to T1, T3,
+ T5 should have at least one common element).
+ - ring::findsCommonElements (Gets the common elements between a pair of rings).
+ *  @param[in] rings Vector of vectors containing the 6-membered primitive
+ rings.
+ *  @param[in] peripheralRings Vector containing the indices of rings which are
+ potential peripheral rings.
+ *  \return A bool; true if ring being tested as equatorial satisfies
+ the above condition for being an equatorial ring, and false otherwise.
  ***********************************************/
 bool ring::conditionThreeDDC(std::vector<std::vector<int>> rings,
                              std::vector<int> *peripheralRings) {
@@ -378,6 +454,26 @@ bool ring::conditionThreeDDC(std::vector<std::vector<int>> rings,
  rings The neighbour list is also required as an input, which is a vector of
  vectors, containing atom IDs. The first element of the neighbour list is the
  atomID of the atom for which the other elements are nearest neighbours.
+ The function calls the following functions internally:
+ - ring::hasCommonElements (Step one: Checks to see if basal1 and basal2, two
+ candidate basal rings, have common elements or not. If they don't, then they
+ cannot be basal rings).
+ - ring::basalConditions (Step two and three: One of the elements of basal2 must
+ be the nearest neighbour of either the first (index0; \f$ l_1 \f$) or second
+ (index1; \f$ l_2 \f$) element of basal1. If \f$ m_k \f$ is the nearest
+ neighbour of \f$ l_1 \f$, \f$ m_{k+2} \f$ and \f$ m_{k+4} \f$ must be
+ neighbours of \f$ l_3 \f$ and \f$ l_5 \f$(\f$ l_5 \f$ or \f$ l_3 \f$).
+ Similarly modified for \f$ l_2 \f$).
+ *
+ *  @param[in] rings Vector of vectors containing 6-membered primitive rings
+ (wherein each ring contains the atom indices of the particles which constitute
+ the ring).
+ *  @param[in] ringType Vector containing a ring::strucType (structure type) for
+ each ring.
+ *  @param[in] nList Row-ordered vector of vectors of the neighbour list (by
+ index).
+ *  @param[in] cageList Vector in which every cage is saved.
+ *  \return A vector of all the ring indices which constitute HCs.
  ***********************************************/
 std::vector<int> ring::findHC(std::vector<std::vector<int>> rings,
                               std::vector<ring::strucType> *ringType,
@@ -477,9 +573,23 @@ std::vector<int> ring::findHC(std::vector<std::vector<int>> rings,
 
 /********************************************/ /**
  *  Check to see if two basal rings are HCs or not, using the neighbour list
- information. The neighbour list nlist is a vector of vectors, containing atom
- IDs (not vector indices!). The first element of each subvector in nlist is the
- atom ID of the particle for which the other elements are the nearest neighbours
+ information. The neighbour list nList is a vector of vectors, containing atom
+ indices (not atom IDs!). The first element of each subvector in nList is the
+ atom index of the particle for which the other elements are the nearest
+ neighbours.
+ Internally, the following functions are called:
+ - ring::basalNeighbours (CONDITION1: \f$ m_{k+2} \f$ and \f$ m_{k+4} \f$ must
+ be bonded to \f$ l_3 \f$ and \f$ l_5 \f$ (if \f$ l_1 \f$ is a neighbour) or \f$
+ m_{k+2} \f$ and \f$ m_{k+4} \f$ must be bonded to \f$ l_4 \f$ and \f$ l_6 \f$
+ (if \f$ l_2 \f$ is a neighbour)).
+ - ring::notNeighboursOfRing (CONDITION2: \f$ m_{k+1} \f$, \f$ m_{k+3} \f$ and
+ \f$ m_{k+5} f$ must NOT be bonded to any element in basal1).
+ *
+ *  @param[in] nList Vector of vectors of the neighbour list (by index).
+ *  @param[in] basal1 Vector containing the first candidate basal ring.
+ *  @param[in] basal2 Vector containing the second candidate basal ring.
+ *  \return A bool; true if the basal rings being tested fulfill this condition
+ for being the basal rings of an HC.
  ***********************************************/
 bool ring::basalConditions(std::vector<std::vector<int>> nList,
                            std::vector<int> *basal1, std::vector<int> *basal2) {
@@ -595,11 +705,14 @@ bool ring::basalConditions(std::vector<std::vector<int>> nList,
 }  // end of function
 
 /********************************************/ /**
-                                                *  Tests whether the last two
-                                                *elements of a triplet are
-                                                *neighbours of two atom IDs
-                                                *passed in
-                                                ***********************************************/
+*  Tests whether the last two elements of a triplet are neighbours of two atom
+indices which have been passed in as inputs.
+*  @param[in] nList Vector of vectors of the neighbour list (by index).
+*  @param[in] triplet Vector containing the current triplet being tested.
+*  @param[in] atomOne Index of the first atom.
+*  @param[in] atomTwo Index of the second atom.
+*  \return A bool; true if the condition is met and false otherwise.
+***********************************************/
 bool ring::basalNeighbours(std::vector<std::vector<int>> nList,
                            std::vector<int> *triplet, int atomOne,
                            int atomTwo) {
@@ -667,7 +780,11 @@ bool ring::basalNeighbours(std::vector<std::vector<int>> nList,
 /********************************************/ /**
  *  Checks to make sure that the elements of the triplet are NOT
  neighbours of any elements inside a vector (ring) passed in (false)
- If any of them are neighbours, this function returns false
+ If any of them are neighbours, this function returns false.
+ *  @param[in] nList Vector of vectors of the neighbour list (by index).
+ *  @param[in] triplet Vector containing the current triplet being tested.
+ *  @param[in] ring Ring passed in.
+ *  \return A bool; true if the condition is met and false otherwise.
  ***********************************************/
 bool ring::notNeighboursOfRing(std::vector<std::vector<int>> nList,
                                std::vector<int> *triplet,
@@ -698,8 +815,17 @@ bool ring::notNeighboursOfRing(std::vector<std::vector<int>> nList,
 }
 
 /********************************************/ /**
-                                                *  Finding prismatic rings
-                                                ***********************************************/
+*  Finding prismatic rings when passed the information in the
+ringType input vector.
+ *  @param[in] rings The 6-membered primitive rings.
+ *  @param[in] listHC Vector containing the ring indices of rings which are part
+of HCs.
+ *  @param[in] ringType Contains a structure type for each ring.
+ *  @param[in] iring Index of the \f$ i^{th} \f$ ring.
+ *  @param[in] jring Index of the \f$ j^{th} \f$ ring.
+ *  @param[in] prismaticRings Vector containing the indices of rings which are
+prismatic.
+***********************************************/
 int ring::findPrismatic(std::vector<std::vector<int>> rings,
                         std::vector<int> *listHC,
                         std::vector<ring::strucType> *ringType, int iring,
@@ -789,7 +915,12 @@ int ring::findPrismatic(std::vector<std::vector<int>> rings,
  The ring IDs correspond to the index of the rings inside the vector of vector
  rings, starting from 0. Rings which are both are of enum type bothBasal OR
  bothPrismatic. Reassign rings which are mixed in listDDC and listHC as the
- dummy value -10
+ dummy value -10.
+ *  @param[in] rings The 6-membered primitive rings.
+ *  @param[in] ringType Structure type for every ring.
+ *  @param[in] listDDC Contains a vector of ring indices of DDCs.
+ *  @param[in] listHC Contains a vector of ring indices of HCs.
+ *  \return A vector containing the indices of rings which are mixed.
  ***********************************************/
 std::vector<int> ring::findMixedRings(std::vector<std::vector<int>> rings,
                                       std::vector<strucType> *ringType,
@@ -834,7 +965,10 @@ std::vector<int> ring::findMixedRings(std::vector<std::vector<int>> rings,
  classification of every ring in ringType.
  Each subring or vector inside the
  vector of vector rings, is by index, meaning that the atoms are saved by their
- indices starting from 0 in the pointCloud.
+ indices starting from 0 in the PointCloud.
+ *  @param[in] rings Vector of vectors of 6-membered rings.
+ *  @param[in] ringType Vector containing the structural type for each ring.
+ *  @param[in] atomTypes Structural type for each atom.
  ***********************************************/
 int ring::getAtomTypesTopoBulk(std::vector<std::vector<int>> rings,
                                std::vector<ring::strucType> ringType,
@@ -894,6 +1028,15 @@ int ring::getAtomTypesTopoBulk(std::vector<std::vector<int>> rings,
  containing a list of cages.
  The number of mixed rings, prismatic rings and basal rings are obtained
  from the ringType vector.
+ *  @param[in] ringType Vector containing the structural type for each ring.
+ *  @param[in] cageList Contains all the cages (DDCs and HCs).
+ *  @param[in] numHC The number of HCs.
+ *  @param[in] numDDC The number of DDCs.
+ *  @param[in] mixedRings The number of mixed rings.
+ *  @param[in] prismaticRings The number of prismatic rings (of HCs/mixed
+ rings).
+ *  @param[in] basalRings TThe number of basal rings (of HCs/mixed
+ rings).
  ***********************************************/
 // Determines the number of HCs, DDCs, Mixed rings, prismatic and basal rings
 int ring::getStrucNumbers(std::vector<ring::strucType> ringType,
