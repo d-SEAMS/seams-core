@@ -852,7 +852,7 @@ int sout::writeClusterStats(std::string path, int currentFrame,
 }
 
 /********************************************/ /**
- *  Function for printing out ring info, when there is no
+ *  Function for printing out prism info, when there is no
  volume slice
  ***********************************************/
 int sout::writePrismNum(std::string path, int currentFrame,
@@ -878,6 +878,82 @@ int sout::writePrismNum(std::string path, int currentFrame,
   outputFile << "\n";
 
   outputFile.close();
+
+  return 0;
+}
+
+/********************************************/ /**
+ *  Function for printing out ring info, for
+ a monolayer
+ ***********************************************/
+int sout::writeRingNum(std::string path, int currentFrame,
+                       std::vector<int> nRings,
+                       std::vector<double> coverageAreaXY,
+                       std::vector<double> coverageAreaXZ,
+                       std::vector<double> coverageAreaYZ, int maxDepth) {
+  std::ofstream outputFileXY;
+  std::ofstream outputFileXZ;
+  std::ofstream outputFileYZ;
+  // ----------------
+  // Coverage Area of XY
+  // Write output to file inside the output directory
+  outputFileXY.open(path + "topoMonolayer/coverageAreaXY.dat",
+                    std::ios_base::app | std::ios_base::out);
+
+  // Format:
+  // Frame RingSize Num_of_prisms Height% RingSize ... Height%
+  // 1 3 0 0 4 35 40 ....
+
+  outputFileXY << currentFrame << " ";
+
+  for (int ringSize = 3; ringSize <= maxDepth; ringSize++) {
+    outputFileXY << ringSize << " " << nRings[ringSize - 3] << " "
+                 << coverageAreaXY[ringSize - 3] << " ";
+  }
+
+  outputFileXY << "\n";
+
+  outputFileXY.close();
+  // ----------------
+  // Coverage Area of XZ
+  // Write output to file inside the output directory
+  outputFileXZ.open(path + "topoMonolayer/coverageAreaXZ.dat",
+                    std::ios_base::app | std::ios_base::out);
+
+  // Format:
+  // Frame RingSize Num_of_prisms Height% RingSize ... Height%
+  // 1 3 0 0 4 35 40 ....
+
+  outputFileXZ << currentFrame << " ";
+
+  for (int ringSize = 3; ringSize <= maxDepth; ringSize++) {
+    outputFileXZ << ringSize << " " << nRings[ringSize - 3] << " "
+                 << coverageAreaXZ[ringSize - 3] << " ";
+  }
+
+  outputFileXZ << "\n";
+
+  outputFileXZ.close();
+  // ----------------
+  // Coverage Area of YZ
+  // Write output to file inside the output directory
+  outputFileYZ.open(path + "topoMonolayer/coverageAreaYZ.dat",
+                    std::ios_base::app | std::ios_base::out);
+
+  // Format:
+  // Frame RingSize Num_of_prisms Height% RingSize ... Height%
+  // 1 3 0 0 4 35 40 ....
+
+  outputFileYZ << currentFrame << " ";
+
+  for (int ringSize = 3; ringSize <= maxDepth; ringSize++) {
+    outputFileYZ << ringSize << " " << nRings[ringSize - 3] << " "
+                 << coverageAreaYZ[ringSize - 3] << " ";
+  }
+
+  outputFileYZ << "\n";
+
+  outputFileYZ.close();
 
   return 0;
 }
@@ -995,6 +1071,124 @@ int sout::writeLAMMPSdataAllPrisms(
   // There are maxDepth-2 other prism types
   for (int ringSize = 3; ringSize <= maxDepth; ringSize++) {
     outputFile << ringSize << " 15.999400 # prism" << ringSize << "\n";
+  }  // end of writing out atom types
+  // Atoms
+  outputFile << "\nAtoms\n\n";
+  // -------
+  // Write out the atom coordinates
+  // Loop through atoms
+  for (int i = 0; i < yCloud->pts.size(); i++) {
+    iatom =
+        yCloud->pts[i].atomID;  // The actual ID can be different from the index
+    // Write out coordinates
+    // atomID molecule-tag atom-type q x y z
+    outputFile << iatom << " " << yCloud->pts[i].molID << " " << atomTypes[i]
+               << " 0 " << yCloud->pts[i].x << " " << yCloud->pts[i].y << " "
+               << yCloud->pts[i].z << "\n";
+
+  }  // end of loop through all atoms in pointCloud
+
+  // Print the bonds now!
+  outputFile << "\nBonds\n\n";
+  // Loop through all bonds
+  for (int ibond = 0; ibond < bonds.size(); ibond++) {
+    //
+    outputFile << ibond + 1 << " 1 " << bonds[ibond][0] << " "
+               << bonds[ibond][1] << "\n";
+  }  // end of for loop for bonds
+
+  // Once the datafile has been printed, exit
+  return 0;
+}
+
+/********************************************/ /**
+*  Prints out a LAMMPS data file
+for all the rings for a single frame, with some
+default options. Only Oxygen
+atoms are printed out. Bonds are inferred from the rings
+vector of vectors
+***********************************************/
+int sout::writeLAMMPSdataAllRings(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
+    int maxDepth, std::string path) {
+  //
+  std::ofstream outputFile;
+  int iatom;  // Index, not atom ID
+  int bondTypes = 1;
+  // Bond stuff
+  std::vector<std::vector<int>> bonds;  // Vector of vector, with each row
+                                        // containing the atom IDs of each bond
+  std::string filename =
+      "system-rings-" + std::to_string(yCloud->currentFrame) + ".data";
+
+  // ---------------
+  // Get the bonds
+  bonds = bond::populateBonds(nList, yCloud);
+  //
+  // ----------------
+  // The directory should have already been made by lua.
+  // ----------------
+  // Write output to file inside the output directory
+  outputFile.open(path + "topoMonolayer/dataFiles/" + filename);
+  // FORMAT:
+  //  Comment Line
+  //  4 atoms
+  //  4 bonds
+  //  0 angles
+  //  0 dihedrals
+  //  0 impropers
+  //  1 atom types
+  //  1 bond types
+  //  0 angle types
+  //  0 dihedral types
+  //  0 improper types
+  //  -1.124000 52.845002  xlo xhi
+  //  0.000000 54.528999  ylo yhi
+  //  1.830501 53.087501  zlo zhi
+
+  //  Masses
+
+  //  1 15.999400 # O
+
+  //  Atoms
+
+  // 1 1 1 0 20.239  1.298 6.873 # O
+  // 2 1 1 0 0 5.193 6.873 # O
+  // 3 1 1 0 2.249 1.298 6.873 # O
+
+  // -------
+  // Write the header
+  // Write comment line
+  outputFile << "Written out by D-SEAMS\n";
+  // Write out the number of atoms
+  outputFile << yCloud->pts.size() << " "
+             << "atoms"
+             << "\n";
+  // Number of bonds
+  outputFile << bonds.size() << " bonds"
+             << "\n";
+  outputFile << "0 angles\n0 dihedrals\n0 impropers\n";
+  // There are maxDepth-2 total types of prisms + dummy
+  outputFile << maxDepth << " atom types\n";
+  // Bond types
+  outputFile
+      << bondTypes
+      << " bond types\n0 angle types\n0 dihedral types\n0 improper types\n";
+  // Box lengths
+  outputFile << yCloud->boxLow[0] << " " << yCloud->boxLow[0] + yCloud->box[0]
+             << " xlo xhi\n";
+  outputFile << yCloud->boxLow[1] << " " << yCloud->boxLow[1] + yCloud->box[1]
+             << " ylo yhi\n";
+  outputFile << yCloud->boxLow[2] << " " << yCloud->boxLow[2] + yCloud->box[2]
+             << " zlo zhi\n";
+  // Masses
+  outputFile << "\nMasses\n\n";
+  outputFile << "1 15.999400 # dummy\n";
+  outputFile << "2 1.0 # \n";
+  // There are maxDepth-2 other prism types
+  for (int ringSize = 3; ringSize <= maxDepth; ringSize++) {
+    outputFile << ringSize << " 15.999400 # ring" << ringSize << "\n";
   }  // end of writing out atom types
   // Atoms
   outputFile << "\nAtoms\n\n";
