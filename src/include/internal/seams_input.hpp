@@ -55,13 +55,13 @@ inline bool atomInSlice(double x, double y, double z,
                         std::array<double, 3> coordHigh) {
   int flag = 0;  // If this is 3 then the particle is inside the volume slice
 
-  if (x >= coordLow[0] && x <= coordHigh[0]) {
+  if (x >= coordLow[0] && x <= coordHigh[0] || coordLow[0] == coordHigh[0]) {
     flag++;
   }
-  if (y >= coordLow[1] && y <= coordHigh[1]) {
+  if (y >= coordLow[1] && y <= coordHigh[1] || coordLow[1] == coordHigh[1]) {
     flag++;
   }
-  if (z >= coordLow[2] && z <= coordHigh[2]) {
+  if (z >= coordLow[2] && z <= coordHigh[2] || coordLow[2] == coordHigh[2]) {
     flag++;
   }
 
