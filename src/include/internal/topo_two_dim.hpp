@@ -40,10 +40,9 @@ int polygonRingAnalysis(
     double sheetArea);
 
 // Assign an atomType (equal to the number of nodes in the ring)
-// given a vector with a list of indices of rings comprising the prisms
+// given n-membered rings.
 int assignPolygonType(std::vector<std::vector<int>> rings,
-                      std::vector<int> listPrism, int ringSize,
-                      std::vector<int> *atomTypes);
+                      std::vector<int> *atomTypes, std::vector<int> nRings);
 
 }  // namespace ring
 

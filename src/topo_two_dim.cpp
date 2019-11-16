@@ -41,8 +41,14 @@ int ring::polygonRingAnalysis(
   int nRings;                  // Number of rings of the current type
   std::vector<int> nRingList;  // Vector of the values of the number of prisms
                                // for a particular frame
-  std::vector<double>
-      coverageArea;  // Coverage area percent for a particular n and frame
+  std::vector<double> coverageAreaXY;  // Coverage area percent on the XY plane
+                                       // for a particular n and frame
+  std::vector<double> coverageAreaXZ;  // Coverage area percent on the XZ plane
+                                       // for a particular n and frame
+  std::vector<double> coverageAreaYZ;  // Coverage area percent on the YZ plane
+                                       // for a particular n and frame
+  std::vector<double> singleAreas;  // Coverage area on the XY, XZ and YZ planes
+                                    // for a single ring
   std::vector<int>
       atomTypes;  // contains int values for each prism type considered
   // -------------------------------------------------------------------------------
@@ -50,7 +56,9 @@ int ring::polygonRingAnalysis(
   nRingList.resize(
       maxDepth -
       2);  // Has a value for every value of ringSize from 3, upto maxDepth
-  coverageArea.resize(maxDepth - 2);
+  coverageAreaXY.resize(maxDepth - 2);
+  coverageAreaXZ.resize(maxDepth - 2);
+  coverageAreaYZ.resize(maxDepth - 2);
   // The atomTypes vector is the same size as the pointCloud atoms
   atomTypes.resize(yCloud->nop, 1);  // The dummy or unclassified value is 1
   // -------------------------------------------------------------------------------
@@ -64,8 +72,11 @@ int ring::polygonRingAnalysis(
     //
     // Continue if there are zero rings of ringSize
     if (ringsOneType.size() == 0) {
-      nRingList[ringSize - 3] = 0;       // Update the number of prisms
-      coverageArea[ringSize - 3] = 0.0;  // Update the height%
+      nRingList[ringSize - 3] = 0;  // Update the number of prisms
+      // Update the coverage area%
+      coverageAreaXY[ringSize - 3] = 0.0;
+      coverageAreaXZ[ringSize - 3] = 0.0;
+      coverageAreaYZ[ringSize - 3] = 0.0;
       continue;
     }  // skip if there are no rings
     //
@@ -75,22 +86,23 @@ int ring::polygonRingAnalysis(
     // -------------
     // Now that you have rings of a certain size:
     nRingList[ringSize - 3] = nRings;  // Update the number of n-membered rings
-    // Update the coverage area% for the n-membered ring phase. TODO
-    coverageArea[ringSize - 3] =
-        topoparam::normHeightPercent(yCloud, nPrisms, avgPrismHeight);
-    // Do a bunch of write-outs and calculations
-    // TODO: Write out each individual prism as data files (maybe with an
-    // option)
-    // Get the atom types for a particular prism type
-    ring::assignPolygonType(ringsOneType, listPrism, ringSize, &atomTypes);
+    // Update the coverage area% for the n-membered ring phase.
+    singleAreas = topoparam::calcCoverageArea(yCloud, ringsOneType, sheetArea);
+    // XY plane
+    coverageAreaXY[ringSize - 3] = singleAreas[0];
+    // XZ plane
+    coverageAreaXZ[ringSize - 3] = singleAreas[1];
+    // YZ plane
+    coverageAreaYZ[ringSize - 3] = singleAreas[2];
     // -------------
   }  // end of loop through every possible ringSize
 
-  // Calculate the height%
+  // Get the atom types for all the ring types
+  ring::assignPolygonType(rings, &atomTypes, nRingList);
 
-  // Write out the prism information
-  sout::writeRingNum(path, yCloud->currentFrame, nPrismList, heightPercent,
-                     maxDepth);
+  // Write out the ring information
+  sout::writeRingNum(path, yCloud->currentFrame, nRingList, coverageAreaXY,
+                     coverageAreaXZ, coverageAreaYZ, maxDepth);
   // Write out the lammps data file for the particular frame
   sout::writeLAMMPSdataAllRings(yCloud, nList, atomTypes, maxDepth, path);
 
@@ -99,38 +111,47 @@ int ring::polygonRingAnalysis(
 
 /********************************************/ /**
  * Assign an atomType (equal to the number of nodes in the ring)
- given a vector with a list of indices of rings comprising the prisms.
- Note that the ring indices in the listPrism vector correspond to the indices
- in the input rings vector of vectors.
+ given the rings vector.
  *  @param[in] rings The vector of vectors containing the primitive rings, of a
  particular ring size.
- *  @param[in] listPrism The list of prism blocks found.
  *  @param[in] ringSize The current ring size or number of nodes in each ring.
  *  @param[in, out] atomTypes A vector which contains a type for each atom,
  depending on it's type as classified by the prism identification scheme.
  ***********************************************/
 int ring::assignPolygonType(std::vector<std::vector<int>> rings,
-                            std::vector<int> listPrism, int ringSize,
-                            std::vector<int> *atomTypes) {
+                            std::vector<int> *atomTypes,
+                            std::vector<int> nRings) {
   // Every value in listPrism corresponds to an index in rings.
   // Every ring contains atom indices, corresponding to the indices (not atom
   // IDs) in rings
-  int iring;  // Index of current ring
-  int iatom;  // Index of current atom
+  int iring;         // Index of current ring
+  int iatom;         // Index of current atom
+  int ringSize;      // Ring size of the current ring
+  int prevRingSize;  // Ring size previously assigned to a point
 
   // Dummy value corresponds to a value of 1.
-  // Each value is initialized to the value of 1.
+  // If an atom is shared by more than one ring type, it is assigned the
+  // value 2.
 
   // Loop through every ring in rings
-  for (int i = 0; i < listPrism.size(); i++) {
-    iring = listPrism[i];
+  for (int iring = 0; iring < rings.size(); iring++) {
+    ringSize = rings[iring].size();
     // Loop through every element in iring
     for (int j = 0; j < ringSize; j++) {
       iatom = rings[iring][j];  // Atom index
       // Update the atom type
-      (*atomTypes)[iatom] = ringSize;
-    }  // end of loop through every atom in iring
-  }    // end of loop through every ring
+      if ((*atomTypes)[iatom] == 1) {
+        (*atomTypes)[iatom] = ringSize;
+      }  // The atom is unclassified
+      else {
+        // Only update the ring type if the number is higher
+        prevRingSize = (*atomTypes)[iatom];  // Previously assigned ring size
+        if (ringSize > prevRingSize) {
+          (*atomTypes)[iatom] = ringSize;
+        }  // end of assigning the new ring size
+      }    // only update if the number is higher
+    }      // end of loop through every atom in iring
+  }        // end of loop through every ring
 
   return 0;
 }  // end of function
