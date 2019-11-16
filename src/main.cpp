@@ -43,6 +43,7 @@
 #include <seams_output.hpp>
 #include <topo_bulk.hpp>
 #include <topo_one_dim.hpp>
+#include <topo_two_dim.hpp>
 
 // Externally bundled-input libraries
 // #include <cxxopts.hpp>
@@ -188,6 +189,9 @@ int main(int argc, char *argv[]) {
       // -----------------
       // Quasi-one-dimensional ice
       lua.set_function("prismAnalysis", ring::prismAnalysis);
+      // -----------------
+      // Quasi-two-dimensional ice
+      lua.set_function("ringAnalysis", ring::polygonRingAnalysis);
       // -----------------
       // Bulk ice, using the topological network criterion
       lua.set_function("bulkTopologicalNetworkCriterion",
