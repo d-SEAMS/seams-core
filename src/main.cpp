@@ -98,12 +98,21 @@ int main(int argc, char *argv[]) {
     auto outFileSuper = lua.get<std::string>("chillPlus_mod");
     auto outCluster = lua.get<std::string>("largest_ice_cluster_name");
     // -----------------
+    // Slice variables
+    auto isSlice = lua.get<bool>("isSlice");
+    auto sliceLow = lua.get<std::vector<double>>("sliceLowerLimits");
+    auto sliceHigh = lua.get<std::vector<double>>("sliceUpperLimits");
+    // -----------------
     // Topological Network Ring lua variables
     auto hType =
         lua.get<int>("hydrogenAtomType");  // If you want to use the hydrogen
                                            // atoms to get the HBN
     auto maxDepth = lua.get<int>("maxDepth");  // If you want to use the
                                                // hydrogen atoms to get the HBN
+    // -----------------
+    // Variables for the monolayer
+    auto sheetArea = lua.get<double>(
+        "confiningSheetArea");  // Area of the confining sheet for the monolayer
     // -----------------
     // Variables for output directory writing: TODO: shift to config??
     auto doBOP = lua.get<bool>("doBOP");  // If you want to do BOP analysis
