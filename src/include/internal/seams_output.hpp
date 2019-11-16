@@ -26,6 +26,13 @@ int writeRings(std::vector<std::vector<int>> rings,
 int writePrismNum(std::string path, int currentFrame, std::vector<int> nPrisms,
                   std::vector<double> heightPercent, int maxDepth);
 
+// Function for printing out the coverage area and the number of rings of each
+// type
+int writeRingNum(std::string path, int currentFrame, std::vector<int> nRings,
+                 std::vector<double> coverageAreaXY,
+                 std::vector<double> coverageAreaXZ,
+                 std::vector<double> coverageAreaYZ, int maxDepth);
+
 // Function for printing out the number of DDCs, HCs, mixed rings, basal and
 // prismatic rings
 int writeTopoBulkData(std::string path, int currentFrame, int numHC, int numDDC,
@@ -49,6 +56,12 @@ int writeLAMMPSdata(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 
 // Write a data file for prisms of every type
 int writeLAMMPSdataAllPrisms(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
+    int maxDepth, std::string path);
+
+// Write a data file for rings of every type for a monolayer
+int writeLAMMPSdataAllRings(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
     int maxDepth, std::string path);
