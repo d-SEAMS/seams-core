@@ -35,6 +35,30 @@ function make_output_dirs( doBOP, topoOneDim, topoTwoDim, topoBulk )
     lfs.mkdir(topoTwoDimDir);
     topoTwoDimData = outDir .. "topoMonolayer/dataFiles";
     lfs.mkdir(topoTwoDimData);
+    -- Create file for coverageAreaXY.dat 
+    areaFileName = outDir .. "topoMonolayer/coverageAreaXY.dat";
+    areaFile=io.open(areaFileName, "w"); --- Allow overwriting (otherwise use a)
+    io.output(areaFile);
+    --- appends a word test to the last line of the file
+    io.write("Frame RingSize Num_of_rings CoverageAreaXY% RingSize ... CoverageAreaXY%\n");
+    --- closes the open file
+    io.close(areaFile);
+    -- Create file for coverageAreaXZ.dat 
+    areaFileNameXZ = outDir .. "topoMonolayer/coverageAreaXZ.dat";
+    areaFileXZ=io.open(areaFileNameXZ, "w"); --- Allow overwriting (otherwise use a)
+    io.output(areaFileXZ);
+    --- appends a word test to the last line of the file
+    io.write("Frame RingSize Num_of_rings CoverageAreaXZ% RingSize ... CoverageAreaXZ%\n");
+    --- closes the open file
+    io.close(areaFileXZ);
+    -- Create file for coverageAreaYZ.dat 
+    areaFileNameYZ = outDir .. "topoMonolayer/coverageAreaYZ.dat";
+    areaFileYZ=io.open(areaFileNameYZ, "w"); --- Allow overwriting (otherwise use a)
+    io.output(areaFileYZ);
+    --- appends a word test to the last line of the file
+    io.write("Frame RingSize Num_of_rings CoverageAreaYZ% RingSize ... CoverageAreaYZ%\n");
+    --- closes the open file
+    io.close(areaFileYZ);
   end --- end of topo two dimensional dir
   -- Bulk topological network criterion 
   if not not topoBulk then
@@ -55,6 +79,6 @@ for frame=targetFrame,finalFrame,frameGap do
    hbnList=getHbondNetwork(trajectory,resCloud,nList,frame,hydrogenAtomType) --- Get the hydrogen-bonded network for the current frame
    hbnList=bondNetworkByIndex(resCloud,hbnList) --- Hydrogen-bonded network using indices not IDs
    rings=getPrimitiveRings(hbnList,maxDepth); --- Gets every ring (non-primitives included)
-   prismAnalysis(outDir, rings, hbnList, resCloud, maxDepth); --- Does the prism analysis for quasi-one-dimensional ice
+   ringAnalysis(outDir, rings, hbnList, resCloud, maxDepth, confiningSheetArea); --- Does the ring analysis for quasi-two-dimensional ice
 end
 print("\nFinito\n");

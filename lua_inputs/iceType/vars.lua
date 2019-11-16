@@ -5,7 +5,7 @@ hydrogenAtomType = 1; --- Hydrogen atom type assigned
 targetFrame=1000; --- The first frame
 finalFrame=1000; --- This is inclusive
 frameGap=1; --- The gap between frames
-maxDepth = 5; --- The maximum depth upto which rings will be searched.
+maxDepth = 4; --- The maximum depth upto which rings will be searched.
 --- Slice Information
 isSlice = true; --- This is true if the analysis is to be done only for a volume slice
 sliceLowerLimits = {0,0,0}; --- Lower limit of the slice (for box dim, keep the values the same as 0)
