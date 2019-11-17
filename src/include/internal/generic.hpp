@@ -168,6 +168,12 @@ inline bool compareByAtomID(const molSys::Point<double> &a,
 int prettyPrintYoda(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                     std::string outFile);
 
+// Shift particles (unwrapped coordinates)
+int unwrappedCoordShift(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatomIndex,
+    int jatomIndex, double *x_i, double *y_i, double *z_i, double *x_j,
+    double *y_j, double *z_j);
+
 /********************************************/ /**
                                                 *  Function for tokenizing line
                                                 *strings into words (strings)

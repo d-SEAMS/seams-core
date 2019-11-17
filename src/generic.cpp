@@ -35,6 +35,88 @@ int gen::prettyPrintYoda(
 }
 
 /********************************************/ /**
+*  Function for getting the unwrapped coordinates
+ of a pair of atoms.
+ *  @param[in] yCloud The input PointCloud to be printed.
+ *  @param[in] outFile The name of the output file to which the information will
+be printed.
+***********************************************/
+int gen::unwrappedCoordShift(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatomIndex,
+    int jatomIndex, double *x_i, double *y_i, double *z_i, double *x_j,
+    double *y_j, double *z_j) {
+  //
+  double x_iatom, y_iatom, z_iatom;
+  double x_jatom, y_jatom, z_jatom;
+  double x_ij, y_ij, z_ij;  // Relative distance
+  std::vector<double> box = yCloud->box;
+  double xPBC, yPBC, zPBC;  // Actual unwrapped distance
+
+  // ----------------------------------------------------------------------
+  // INIT
+  // iatom
+  x_iatom = yCloud->pts[iatomIndex].x;
+  y_iatom = yCloud->pts[iatomIndex].y;
+  z_iatom = yCloud->pts[iatomIndex].z;
+  // jatom
+  x_jatom = yCloud->pts[jatomIndex].x;
+  y_jatom = yCloud->pts[jatomIndex].y;
+  z_jatom = yCloud->pts[jatomIndex].z;
+  // ----------------------------------------------------------------------
+  // GET RELATIVE DISTANCE
+  x_ij = x_iatom - x_jatom;
+  y_ij = y_iatom - y_jatom;
+  z_ij = z_iatom - z_jatom;
+  // ----------------------------------------------------------------------
+  // SHIFT COORDINATES IF REQUIRED
+  // Shift x
+  if (fabs(x_ij) > 0.5 * box[0]) {
+    // Get the actual distance
+    xPBC = box[0] - fabs(x_ij);
+    if (x_ij < 0) {
+      x_jatom = x_iatom - xPBC;
+    }  // To the -x side of currentIndex
+    else {
+      x_jatom = x_iatom + xPBC;
+    }  // Add to the + side
+  }    // Shift nextElement
+  //
+  // Shift y
+  if (fabs(y_ij) > 0.5 * box[1]) {
+    // Get the actual distance
+    yPBC = box[1] - fabs(y_ij);
+    if (y_ij < 0) {
+      y_jatom = y_iatom - yPBC;
+    }  // To the -y side of currentIndex
+    else {
+      y_jatom = y_iatom + yPBC;
+    }  // Add to the + side
+  }    // Shift nextElement
+  //
+  // Shift z
+  if (fabs(z_ij) > 0.5 * box[2]) {
+    // Get the actual distance
+    zPBC = box[2] - fabs(z_ij);
+    if (z_ij < 0) {
+      z_jatom = z_iatom - zPBC;
+    }  // To the -z side of currentIndex
+    else {
+      z_jatom = z_iatom + zPBC;
+    }  // Add to the + side
+  }    // Shift nextElement
+  // ----------------------------------------------------------------------
+  // Assign values
+  *x_i = x_iatom;
+  *y_i = y_iatom;
+  *z_i = z_iatom;
+  *x_j = x_jatom;
+  *y_j = y_jatom;
+  *z_j = z_jatom;
+
+  return 0;
+}
+
+/********************************************/ /**
  *  Function for obtaining the angle between two input vectors (std::vector).
  Internally, the vectors are converted to GSL vectors. The dot product between
  the input vectors is used to calculate the angle between them.
