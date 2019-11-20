@@ -113,7 +113,7 @@ int writeBasalRingsPrism(
 
 // Generic function for writing out to a dump file
 int writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-              std::string outFile);
+              std::string path, std::string outFile);
 
 // Function for printing out Q6, Cij and averaged Q3 values as single columns to
 // text files The file names are cij, q6, q3

@@ -1668,10 +1668,10 @@ int sout::writeLAMMPSdataCages(
                                                 *info in PairCorrel struct
                                                 ***********************************************/
 int sout::writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                    std::string outFile) {
+                    std::string path, std::string outFile) {
   std::ofstream outputFile;
   // Create a new file in the output directory
-  outputFile.open(outFile, std::ios_base::app);
+  outputFile.open(path + outFile, std::ios_base::app);
 
   // Append stuff
   // -----------------------
@@ -1708,10 +1708,54 @@ int sout::writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   // -----------------------
   // Atom lines
   for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-    outputFile << yCloud->pts[iatom].atomID << " " << yCloud->pts[iatom].molID
-               << " " << yCloud->pts[iatom].iceType << " "
-               << yCloud->pts[iatom].x << " " << yCloud->pts[iatom].y << " "
-               << yCloud->pts[iatom].z << "\n";
+    outputFile << yCloud->pts[iatom].atomID << " " << yCloud->pts[iatom].molID;
+
+    // Cubic ice
+    if (yCloud->pts[iatom].iceType == molSys::cubic) {
+      outputFile << " Ic " << yCloud->pts[iatom].x << " "
+                 << yCloud->pts[iatom].y << " " << yCloud->pts[iatom].z << "\n";
+    }  // end of cubic ice
+    // Hexagonal ice
+    else if (yCloud->pts[iatom].iceType == molSys::hexagonal) {
+      outputFile << " Ih " << yCloud->pts[iatom].x << " "
+                 << yCloud->pts[iatom].y << " " << yCloud->pts[iatom].z << "\n";
+    }  // end hexagonal ice
+    // water
+    else if (yCloud->pts[iatom].iceType == molSys::water) {
+      outputFile << " wat " << yCloud->pts[iatom].x << " "
+                 << yCloud->pts[iatom].y << " " << yCloud->pts[iatom].z << "\n";
+    }  // end water
+    // interfacial
+    else if (yCloud->pts[iatom].iceType == molSys::interfacial) {
+      outputFile << " intFc " << yCloud->pts[iatom].x << " "
+                 << yCloud->pts[iatom].y << " " << yCloud->pts[iatom].z << "\n";
+    }  // end interfacial
+    // clathrate
+    else if (yCloud->pts[iatom].iceType == molSys::clathrate) {
+      outputFile << " clathrate " << yCloud->pts[iatom].x << " "
+                 << yCloud->pts[iatom].y << " " << yCloud->pts[iatom].z << "\n";
+    }  // end clathrate
+    // interClathrate
+    else if (yCloud->pts[iatom].iceType == molSys::interClathrate) {
+      outputFile << " interClathrate " << yCloud->pts[iatom].x << " "
+                 << yCloud->pts[iatom].y << " " << yCloud->pts[iatom].z << "\n";
+    }  // end interClathrate
+    // unclassified
+    else if (yCloud->pts[iatom].iceType == molSys::unclassified) {
+      outputFile << " unclassified " << yCloud->pts[iatom].x << " "
+                 << yCloud->pts[iatom].y << " " << yCloud->pts[iatom].z << "\n";
+    }  // end unclassified
+    // reCubic
+    else if (yCloud->pts[iatom].iceType == molSys::reCubic) {
+      outputFile << " reIc " << yCloud->pts[iatom].x << " "
+                 << yCloud->pts[iatom].y << " " << yCloud->pts[iatom].z << "\n";
+    }  // end reCubic
+    // reHexagonal
+    else {
+      outputFile << " reIh " << yCloud->pts[iatom].x << " "
+                 << yCloud->pts[iatom].y << " " << yCloud->pts[iatom].z << "\n";
+    }  // end reHex
+
   }  // end of loop through all atoms
 
   // Close the file
