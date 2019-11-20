@@ -152,7 +152,84 @@ int main(int argc, char *argv[]) {
     // --------------------------
 
   }  // end of two-dimensional ice block
-  // // --------------------------------------
+  // --------------------------------------
+  // Structure determination block for ONE-DIMENSIONAL ICE
+  if (config["topoOneDim"]["use"].as<bool>()) {
+    // Get variables
+    std::string vars = config["topoOneDim"]["variables"].as<std::string>();
+
+    // Use the script
+    lua.script_file(vars);
+
+    // Get Variables (explicitly)
+    // -----------------
+    // Basic variables for neighbour lists and trajectory reading
+    auto rc = lua.get<double>("cutoffRadius");
+    auto oType = lua.get<int>("oxygenAtomType");
+    auto tFrame = lua.get<int>("targetFrame");
+    auto fFrame = lua.get<int>("finalFrame");
+    auto fGap = lua.get<int>("frameGap");
+    // -----------------
+    // Slice variables
+    auto isSlice = lua.get<bool>("isSlice");
+    auto sliceLow = lua.get<std::vector<double>>("sliceLowerLimits");
+    auto sliceHigh = lua.get<std::vector<double>>("sliceUpperLimits");
+    // -----------------
+    // Topological Network Ring lua variables
+    auto hType =
+        lua.get<int>("hydrogenAtomType");  // If you want to use the hydrogen
+                                           // atoms to get the HBN
+    auto maxDepth = lua.get<int>("maxDepth");  // If you want to use the
+                                               // hydrogen atoms to get the HBN
+    // -----------------
+    // Variables which must be declared in C++
+    //
+    // Newer pointCloud (rescloud -> ice structure, solcloud -> largest cluster)
+    molSys::PointCloud<molSys::Point<double>, double> resCloud;
+    // Some neighbor
+    std::vector<std::vector<int>> nList, hbnList;
+    // For the list of all rings (of all sizes)
+    std::vector<std::vector<int>> ringsAllSizes;
+    std::vector<std::vector<int>> rings;
+    // -----------------
+    // This section basically only registers functions and handles the rest in
+    // lua Use the functions defined here
+    auto lscript = lua.get<std::string>("functionScript");
+    // Transfer variables to lua
+    lua["doBOP"] = config["bulk"]["use"].as<bool>();
+    lua["topoOneDim"] = config["topoOneDim"]["use"].as<bool>();
+    lua["topoTwoDim"] = config["topoTwoDim"]["use"].as<bool>();
+    lua["topoBulk"] = config["bulk"]["use"].as<bool>();
+    //
+    lua["nList"] = &nList;
+    lua["hbnList"] = &hbnList;
+    lua["resCloud"] = &resCloud;
+    lua["trajectory"] = tFile;
+    // Confined ice stuff
+    lua["ringsAllSizes"] = &rings;
+    // Register functions
+    //
+    // Writing stuff
+    // Generic requirements
+    lua.set_function("readFrameOnlyOne", sinp::readLammpsTrjreduced);
+    lua.set_function("neighborList", nneigh::neighListO);
+    // -----------------
+    // Topological Network Method Specific Functions
+    // Generic requirements (read in only inside the slice)
+    lua.set_function("getHbondNetwork", bond::populateHbonds);
+    lua.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);
+    // -----------------
+    // Primitive rings
+    lua.set_function("getPrimitiveRings", primitive::ringNetwork);
+    // -----------------
+    // Quasi-one-dimensional ice
+    lua.set_function("prismAnalysis", ring::prismAnalysis);
+    // --------------------------
+    // Use the script
+    lua.script_file(lscript);
+    // --------------------------
+
+  }  // end of one-dimensional ice block
   // // --------------------------------------
   // // iceType Determination Block
   // if (config["iceType"]["use"].as<bool>()) {
