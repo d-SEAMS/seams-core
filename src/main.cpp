@@ -230,154 +230,127 @@ int main(int argc, char *argv[]) {
     // --------------------------
 
   }  // end of one-dimensional ice block
-  // // --------------------------------------
-  // // iceType Determination Block
-  // if (config["iceType"]["use"].as<bool>()) {
-  //   // Do error handling if the traj is not there
-  //   // Get the damn file
-  //   // Determine script location [cmd > iceType Traj > Traj]
-  //   if (config["iceType"]["trajectory"]) {
-  //     tFile = config["iceType"]["trajectory"].as<std::string>();
-  //   } else {
-  //     tFile = config["trajectory"].as<std::string>();
-  //   }
-  //   // Get variables
-  //   std::string vars = config["iceType"]["variables"].as<std::string>();
+  // --------------------------------------
+  // Ice Structure Determination for BULK ICE
+  if (config["bulk"]["use"].as<bool>()) {
+    // Get variables
+    std::string vars = config["bulk"]["variables"].as<std::string>();
 
-  //   // Use the script
-  //   lua.script_file(vars);
+    // Use the variables script
+    lua.script_file(vars);
 
-  //   // Get Variables (explicitly)
-  //   // -----------------
-  //   // Bulk
-  //   auto rc = lua.get<double>("cutoffRadius");
-  //   auto oType = lua.get<int>("oxygenAtomType");
-  //   auto tFrame = lua.get<int>("targetFrame");
-  //   auto fFrame = lua.get<int>("finalFrame");
-  //   auto fGap = lua.get<int>("frameGap");
-  //   auto dumpName = lua.get<std::string>("dumpName");
-  //   auto advUse = lua.get<bool>("defineFunctions");
-  //   auto outFileChillPlus = lua.get<std::string>("chillPlus_noMod");
-  //   auto outFileChill = lua.get<std::string>("chill_mod");
-  //   auto outFileSuper = lua.get<std::string>("chillPlus_mod");
-  //   auto outCluster = lua.get<std::string>("largest_ice_cluster_name");
-  //   // -----------------
-  //   // Slice variables
-  //   auto isSlice = lua.get<bool>("isSlice");
-  //   auto sliceLow = lua.get<std::vector<double>>("sliceLowerLimits");
-  //   auto sliceHigh = lua.get<std::vector<double>>("sliceUpperLimits");
-  //   // -----------------
-  //   // Topological Network Ring lua variables
-  //   auto hType =
-  //       lua.get<int>("hydrogenAtomType");  // If you want to use the hydrogen
-  //                                          // atoms to get the HBN
-  //   auto maxDepth = lua.get<int>("maxDepth");  // If you want to use the
-  //                                              // hydrogen atoms to get the
-  //                                              HBN
-  //   // -----------------
-  //   // Variables for the monolayer
-  //   auto sheetArea = lua.get<double>(
-  //       "confiningSheetArea");  // Area of the confining sheet for the
-  //       monolayer
-  //   // -----------------
-  //   // Variables for output directory writing: TODO: shift to config??
-  //   auto doBOP = lua.get<bool>("doBOP");  // If you want to do BOP analysis
-  //   auto topoOneDim = lua.get<bool>(
-  //       "topoOneDim");  // If you want to do the topological analysis for
-  //       INTs
-  //   auto topoTwoDim = lua.get<bool>(
-  //       "topoTwoDim");  // If you want to do topological analysis for
-  //       monolayers
-  //   auto topoBulk = lua.get<bool>(
-  //       "topoBulk");  // If you want topological network analysis for bulk
-  //   auto printCages = lua.get<bool>(
-  //       "printCages");  // If you want topological network analysis for bulk
-  //   // -----------------
-  //   // Bulk/Common Variables defined in C++
-  //   // Variables which must be declared in C++
-  //   //
-  //   // Newer pointCloud (rescloud -> ice structure, solcloud -> largest
-  //   cluster) molSys::PointCloud<molSys::Point<double>, double> resCloud,
-  //   solCloud;
-  //   // Some neighbor
-  //   std::vector<std::vector<int>> nList, hbnList;
-  //   std::vector<std::vector<int>> iceList;
-  //   // For averaged q6
-  //   std::vector<double> avgQ6;
-  //   // For the list of all rings (of all sizes)
-  //   std::vector<std::vector<int>> ringsAllSizes;
-  //   std::vector<std::vector<int>> rings;
-  //   // -----------------
-  //   // Variables defined in C++ specific to confined systems
+    // Get Variables (explicitly)
+    // -----------------
+    // General Variables
+    auto rc = lua.get<double>("cutoffRadius");
+    auto oType = lua.get<int>("oxygenAtomType");
+    auto tFrame = lua.get<int>("targetFrame");
+    auto fFrame = lua.get<int>("finalFrame");
+    auto fGap = lua.get<int>("frameGap");
+    auto dumpName = lua.get<std::string>("dumpName");
+    auto advUse = lua.get<bool>("defineFunctions");
+    auto outFileChillPlus = lua.get<std::string>("chillPlus_noMod");
+    auto outFileChill = lua.get<std::string>("chill_mod");
+    auto outFileSuper = lua.get<std::string>("chillPlus_mod");
+    auto outCluster = lua.get<std::string>("largest_ice_cluster_name");
+    // -----------------
+    // Slice variables
+    auto isSlice = lua.get<bool>("isSlice");
+    auto sliceLow = lua.get<std::vector<double>>("sliceLowerLimits");
+    auto sliceHigh = lua.get<std::vector<double>>("sliceUpperLimits");
+    // -----------------
+    // Topological Network Ring lua variables
+    auto hType =
+        lua.get<int>("hydrogenAtomType");  // If you want to use the hydrogen
+                                           // atoms to get the HBN
+    auto maxDepth = lua.get<int>(
+        "maxDepth");  // If you want to use the hydrogen atoms to get the HBN
+    // -----------------
+    // Variables for output directory writing:
+    auto printCages = lua.get<bool>(
+        "printCages");  // If you want topological network analysis for bulk
+    // -----------------
+    // Variables which must be declared in C++
+    //
+    // Newer pointCloud (rescloud -> ice structure, solcloud -> largest
+    molSys::PointCloud<molSys::Point<double>, double> resCloud, solCloud;
+    // Some neighbor
+    std::vector<std::vector<int>> nList,
+        hbnList;  // Neighbour lists (by cutoff and hydrogen-bonded neighbour
+                  // lists)
+    std::vector<std::vector<int>>
+        iceList;  // Neighbour list for the largest ice cluster
+    // For averaged q6
+    std::vector<double> avgQ6;
+    // For the list of all rings (of all sizes)
+    std::vector<std::vector<int>> ringsAllSizes;
+    std::vector<std::vector<int>> rings;
+    // -----------------
+    // Variables defined in C++ specific to confined systems
 
-  //   if (advUse == true) {
-  //     // This section basically only registers functions and handles the rest
-  //     in
-  //     // lua Use the functions defined here
-  //     auto lscript = lua.get<std::string>("functionScript");
-  //     // Transfer variables to lua
-  //     lua["nList"] = &nList;
-  //     lua["hbnList"] = &hbnList;
-  //     lua["iceNeighbourList"] = &iceList;
-  //     lua["resCloud"] = &resCloud;
-  //     lua["clusterCloud"] = &solCloud;
-  //     lua["avgQ6"] = &avgQ6;
-  //     lua["trajectory"] = tFile;
-  //     // Confined ice stuff
-  //     lua["ringsAllSizes"] = &rings;
-  //     // Register functions
-  //     //
-  //     // Writing stuff
-  //     lua.set_function("writeDump", sout::writeDump);
-  //     lua.set_function("writeHistogram", sout::writeHisto);
-  //     // Generic requirements
-  //     lua.set_function("readFrame", sinp::readLammpsTrjO);
-  //     lua.set_function("neighborList", nneigh::neighListO);
-  //     // CHILL+ and modifications
-  //     lua.set_function("chillPlus_cij", chill::getCorrelPlus);
-  //     lua.set_function("chillPlus_iceType", chill::getIceTypePlus);
-  //     // CHILL functions
-  //     lua.set_function("chill_cij", chill::getCorrel);
-  //     lua.set_function("chill_iceType", chill::getIceType);
-  //     // Reclassify using q6
-  //     lua.set_function("averageQ6", chill::getq6);
-  //     lua.set_function("modifyChill", chill::reclassifyWater);
-  //     lua.set_function("percentage_Ice", chill::printIceType);
-  //     // Largest ice cluster
-  //     lua.set_function("clusterAnalysis", clump::clusterAnalysis);
-  //     lua.set_function("recenterCluster", clump::recenterClusterCloud);
-  //     // -----------------
-  //     // Topological Network Methods
-  //     // Generic requirements (read in only inside the slice)
-  //     lua.set_function("readFrameOnlyOne", sinp::readLammpsTrjreduced);
-  //     lua.set_function("getHbondNetwork", bond::populateHbonds);
-  //     lua.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);
-  //     // -----------------
-  //     // Primitive rings
-  //     lua.set_function("getPrimitiveRings", primitive::ringNetwork);
-  //     // -----------------
-  //     // Quasi-one-dimensional ice
-  //     lua.set_function("prismAnalysis", ring::prismAnalysis);
-  //     // -----------------
-  //     // Quasi-two-dimensional ice
-  //     lua.set_function("ringAnalysis", ring::polygonRingAnalysis);
-  //     // -----------------
-  //     // Bulk ice, using the topological network criterion
-  //     lua.set_function("bulkTopologicalNetworkCriterion",
-  //                      ring::topoBulkAnalysis);
-  //     // --------------------------
-  //     // Use the script
-  //     lua.script_file(lscript);
-  //     // --------------------------
+    // This section basically only registers functions and handles the rest in
+    // lua lua Use the functions defined here
+    auto lscript = lua.get<std::string>("functionScript");
+    // Transfer variables to lua
+    lua["doBOP"] = config["bulk"]["bondOrderParameters"].as<bool>();
+    lua["topoOneDim"] = config["topoOneDim"]["use"].as<bool>();
+    lua["topoTwoDim"] = config["topoTwoDim"]["use"].as<bool>();
+    lua["topoBulk"] = config["bulk"]["topologicalNetworkCriterion"].as<bool>();
+    //
+    lua["nList"] = &nList;
+    lua["hbnList"] = &hbnList;
+    lua["iceNeighbourList"] = &iceList;
+    lua["resCloud"] = &resCloud;
+    lua["clusterCloud"] = &solCloud;
+    lua["avgQ6"] = &avgQ6;
+    lua["trajectory"] = tFile;
+    // Confined ice stuff
+    lua["ringsAllSizes"] = &rings;
+    // Register functions
+    //
+    // Writing stuff
+    lua.set_function("writeDump", sout::writeDump);
+    lua.set_function("writeHistogram", sout::writeHisto);
+    // Generic requirements
+    lua.set_function("readFrame", sinp::readLammpsTrjO);
+    lua.set_function("neighborList", nneigh::neighListO);
+    // CHILL+ and modifications
+    lua.set_function("chillPlus_cij", chill::getCorrelPlus);
+    lua.set_function("chillPlus_iceType", chill::getIceTypePlus);
+    // CHILL functions
+    lua.set_function("chill_cij", chill::getCorrel);
+    lua.set_function("chill_iceType", chill::getIceType);
+    // Reclassify using q6
+    lua.set_function("averageQ6", chill::getq6);
+    lua.set_function("modifyChill", chill::reclassifyWater);
+    lua.set_function("percentage_Ice", chill::printIceType);
+    // Largest ice cluster
+    lua.set_function("clusterAnalysis", clump::clusterAnalysis);
+    lua.set_function("recenterCluster", clump::recenterClusterCloud);
+    // -----------------
+    // Topological Network Methods
+    // Generic requirements (read in only inside the slice)
+    lua.set_function("readFrameOnlyOne", sinp::readLammpsTrjreduced);
+    lua.set_function("getHbondNetwork", bond::populateHbonds);
+    lua.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);
+    // -----------------
+    // Primitive rings
+    lua.set_function("getPrimitiveRings", primitive::ringNetwork);
+    // -----------------
+    // Bulk ice, using the topological network criterion
+    lua.set_function("bulkTopologicalNetworkCriterion", ring::topoBulkAnalysis);
+    // --------------------------
+    // Use the script
+    lua.script_file(lscript);
+    // --------------------------
 
-  //   }  // If adv=true
-  // }    // end of ice type determination block
-  //      // --------------------------------------
+  }  // end of bulk ice structure determination block
+  // --------------------------------------
 
   std::cout << rang::style::bold
             << fmt::format("Welcome to the Black Parade.\nYou ran:-\n")
             << rang::style::reset
-            << fmt::format("Bulk Ice Analysis: {}",
+            << fmt::format("\nBulk Ice Analysis: {}",
                            config["bulk"]["use"].as<bool>())
             << fmt::format("\nQuasi-one-dimensional Ice Analysis: {}",
                            config["topoOneDim"]["use"].as<bool>())
