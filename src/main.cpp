@@ -247,12 +247,14 @@ int main(int argc, char *argv[]) {
     auto tFrame = lua.get<int>("targetFrame");
     auto fFrame = lua.get<int>("finalFrame");
     auto fGap = lua.get<int>("frameGap");
+    // Output file names
     auto dumpName = lua.get<std::string>("dumpName");
-    auto advUse = lua.get<bool>("defineFunctions");
     auto outFileChillPlus = lua.get<std::string>("chillPlus_noMod");
     auto outFileChill = lua.get<std::string>("chill_mod");
     auto outFileSuper = lua.get<std::string>("chillPlus_mod");
-    auto outCluster = lua.get<std::string>("largest_ice_cluster_name");
+    auto dumpChillP = lua.get<std::string>("dumpChillP");
+    auto dumpSupaaP = lua.get<std::string>("dumpSupaaP");
+    auto largestClusterDump = lua.get<std::string>("largestClusterDump");
     // -----------------
     // Slice variables
     auto isSlice = lua.get<bool>("isSlice");
