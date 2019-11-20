@@ -5,15 +5,12 @@ hydrogenAtomType = 1; --- Hydrogen atom type assigned
 targetFrame=100; --- The first frame
 finalFrame=100; --- This is inclusive
 frameGap=1; --- The gap between frames
-maxDepth = 7; --- The maximum depth upto which rings will be searched. 
+maxDepth = 6; --- The maximum depth upto which rings will be searched.
+--- Slice Information
+isSlice = false; --- This is true if the analysis is to be done only for a volume slice
+sliceLowerLimits = {0,0,0}; --- Lower limit of the slice (for box dim, keep the values the same as 0)
+sliceUpperLimits = {0,0,0}; --- Upper limit of the slice   
 
---- DO NOT ENABLE if you have not read the instructions
-defineFunctions=true; --- The last test before all hell breaks loose
+--- Paths for the output directories and lua scipt
 outDir="../runOne/"; --- The subdirectory used; 
-functionScript="../lua_inputs/iceType/functions.lua" --- This is relative to the binary location
-
---- Variables for creating directories, maybe shift to the config later?
-doBOP = false; --- Bond orienational parameter analysis (yes/no)
-topoOneDim = true; --- Topological network criterion for one-dimensional prisms
-topoTwoDim = false; --- Topological network criterion for two-dimensional ice
-topoBulk = false; --- DDC/HC criterion for bulk ice 
+functionScript="../lua_inputs/iceType/functions.lua" --- This is relative to the binary location 

@@ -35,6 +35,30 @@ function make_output_dirs( doBOP, topoOneDim, topoTwoDim, topoBulk )
     lfs.mkdir(topoTwoDimDir);
     topoTwoDimData = outDir .. "topoMonolayer/dataFiles";
     lfs.mkdir(topoTwoDimData);
+    -- Create file for coverageAreaXY.dat 
+    areaFileName = outDir .. "topoMonolayer/coverageAreaXY.dat";
+    areaFile=io.open(areaFileName, "w"); --- Allow overwriting (otherwise use a)
+    io.output(areaFile);
+    --- appends a word test to the last line of the file
+    io.write("Frame RingSize Num_of_rings CoverageAreaXY% RingSize ... CoverageAreaXY%\n");
+    --- closes the open file
+    io.close(areaFile);
+    -- Create file for coverageAreaXZ.dat 
+    areaFileNameXZ = outDir .. "topoMonolayer/coverageAreaXZ.dat";
+    areaFileXZ=io.open(areaFileNameXZ, "w"); --- Allow overwriting (otherwise use a)
+    io.output(areaFileXZ);
+    --- appends a word test to the last line of the file
+    io.write("Frame RingSize Num_of_rings CoverageAreaXZ% RingSize ... CoverageAreaXZ%\n");
+    --- closes the open file
+    io.close(areaFileXZ);
+    -- Create file for coverageAreaYZ.dat 
+    areaFileNameYZ = outDir .. "topoMonolayer/coverageAreaYZ.dat";
+    areaFileYZ=io.open(areaFileNameYZ, "w"); --- Allow overwriting (otherwise use a)
+    io.output(areaFileYZ);
+    --- appends a word test to the last line of the file
+    io.write("Frame RingSize Num_of_rings CoverageAreaYZ% RingSize ... CoverageAreaYZ%\n");
+    --- closes the open file
+    io.close(areaFileYZ);
   end --- end of topo two dimensional dir
   -- Bulk topological network criterion 
   if not not topoBulk then
@@ -49,13 +73,11 @@ end
 --- Make the directories
 make_output_dirs( doBOP, topoOneDim, topoTwoDim, topoBulk );
 
-slice={0,0,0}; --- This is not in use
 for frame=targetFrame,finalFrame,frameGap do
-   resCloud=readFrameOnlyOne(trajectory,frame,resCloud,oxygenAtomType,false,slice,slice) --- Get the frame
-   nList=neighborList(cutoffRadius, resCloud, oxygenAtomType); --- Calculate the neighborlist
+   resCloud=readFrameOnlyOne(trajectory,frame,resCloud,oxygenAtomType,isSlice,sliceLowerLimits,sliceUpperLimits) --- Get the frame
+   nList=neighborList(cutoffRadius, resCloud, oxygenAtomType); --- Calculate the neighborlist by ID
    hbnList=getHbondNetwork(trajectory,resCloud,nList,frame,hydrogenAtomType) --- Get the hydrogen-bonded network for the current frame
    hbnList=bondNetworkByIndex(resCloud,hbnList) --- Hydrogen-bonded network using indices not IDs
    rings=getPrimitiveRings(hbnList,maxDepth); --- Gets every ring (non-primitives included)
    prismAnalysis(outDir, rings, hbnList, resCloud, maxDepth); --- Does the prism analysis for quasi-one-dimensional ice
 end
-print("\nFinito\n");
