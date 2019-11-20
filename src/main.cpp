@@ -69,14 +69,13 @@ int main(int argc, char *argv[]) {
   // Get the trajectory string
   if (config["trajectory"]) {
     tFile = config["trajectory"].as<std::string>();
-  }
+  }  // end of getting the trajectory
+  // Get variable file string
+  std::string vars = config["variables"].as<std::string>();
   // --------------------------------------
   // Structure determination block for TWO-DIMENSIONAL ICE
   if (config["topoTwoDim"]["use"].as<bool>()) {
-    // Get variables
-    std::string vars = config["topoTwoDim"]["variables"].as<std::string>();
-
-    // Use the script
+    // Use the variables script
     lua.script_file(vars);
 
     // Get Variables (explicitly)
@@ -155,9 +154,6 @@ int main(int argc, char *argv[]) {
   // --------------------------------------
   // Structure determination block for ONE-DIMENSIONAL ICE
   if (config["topoOneDim"]["use"].as<bool>()) {
-    // Get variables
-    std::string vars = config["topoOneDim"]["variables"].as<std::string>();
-
     // Use the script
     lua.script_file(vars);
 
@@ -233,9 +229,6 @@ int main(int argc, char *argv[]) {
   // --------------------------------------
   // Ice Structure Determination for BULK ICE
   if (config["bulk"]["use"].as<bool>()) {
-    // Get variables
-    std::string vars = config["bulk"]["variables"].as<std::string>();
-
     // Use the variables script
     lua.script_file(vars);
 
