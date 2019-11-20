@@ -81,4 +81,3 @@ for frame=targetFrame,finalFrame,frameGap do
    rings=getPrimitiveRings(hbnList,maxDepth); --- Gets every ring (non-primitives included)
    ringAnalysis(outDir, rings, hbnList, resCloud, maxDepth, confiningSheetArea); --- Does the ring analysis for quasi-two-dimensional ice
 end
-print("\nFinito\n");
