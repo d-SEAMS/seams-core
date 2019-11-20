@@ -530,7 +530,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypeNoPrint(
 // Classifies each atom according to the CHILL algorithm
 molSys::PointCloud<molSys::Point<double>, double> chill::getIceType(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, bool isSlice,
+    std::vector<std::vector<int>> nList, std::string path, bool isSlice,
     std::string outputFileName) {
   int ih, ic, water, interIce, unknown, total;  // No. of particles of each type
   ih = ic = water = unknown = interIce = total = 0;
@@ -596,7 +596,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceType(
 
   // Print to file
   std::ofstream outputFile;
-  outputFile.open(outputFileName, std::ios_base::app);
+  outputFile.open(path + "bop/" + outputFileName, std::ios_base::app);
   outputFile << yCloud->currentFrame << " " << ic << " " << ih << " "
              << interIce << " " << water << " " << total << "\n";
   outputFile.close();
@@ -763,7 +763,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getCorrelPlus(
  ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypePlus(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, bool isSlice,
+    std::vector<std::vector<int>> nList, std::string path, bool isSlice,
     std::string outputFileName) {
   int ih, ic, interIce, water, unknown, clath, interClath,
       total;  // No. of particles of each type
@@ -842,19 +842,8 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypePlus(
 
   // water = total - ic -ih;
 
-  // Test; do pretty printing instead
-  // std::cout<<"For frame " << yCloud->currentFrame <<" , the number of ic=
-  // "<<ic<<" , ih= "<<ih<<" interfacial ice= "
-  // <<interIce<<" , clathrate= "<<clath<<" , interfacial clathrate=
-  // "<<interClath<<" and water= "<<water<<" and the total is "<<total<<"\n";
-  // std::cout<<"For frame " << yCloud->currentFrame <<" , ic=
-  // "<<(double)ic/(double)total * 100
-  // <<"% , ih= "<<(double)ih/(double)total * 100<<"% interfacial ice=
-  // "<<(double)interIce/(double)total * 100<<"% and water=
-  // "<<(double)water/(double)total * 100<<"% \n"; std::cout<<"\n"; Print to
-  // file
   std::ofstream outputFile;
-  outputFile.open(outputFileName, std::ios_base::app);
+  outputFile.open(path + "bop/" + outputFileName, std::ios_base::app);
   outputFile << yCloud->currentFrame << " " << ic << " " << ih << " "
              << interIce << " " << clath << " " << interClath << " " << water
              << " " << total << "\n";
@@ -870,7 +859,8 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypePlus(
                                                 *
                                                 *  @param[in,out] yCloud The
                                                 *output molSys::PointCloud
-                                                *  @param[in] nList Row-ordered neighbour list by atom ID
+                                                *  @param[in] nList Row-ordered
+                                                *neighbour list by atom ID
                                                 *  @param[in] isSlice This
                                                 *decides whether there is a
                                                 *slice or not \return a double
@@ -1079,8 +1069,8 @@ molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
                                                 *"superChill.txt"
                                                 ***********************************************/
 int chill::printIceType(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, bool isSlice,
-    std::string outputFileName) {
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, std::string path,
+    bool isSlice, std::string outputFileName) {
   int ih, ic, interIce, water, unknown, clath, interClath,
       total;  // No. of particles of each type
   ih = ic = water = unknown = interIce = total = 0;
@@ -1112,20 +1102,9 @@ int chill::printIceType(
     }
   }
 
-  // Test; do pretty printing instead
-  // std::cout<<"\nFor frame " << yCloud->currentFrame <<" , the number of ic=
-  // "<<ic<<" , ih= "<<ih<<" interfacial ice= "
-  // <<interIce<<" , clathrate= "<<clath<<" , interfacial clathrate=
-  // "<<interClath<<" and water= "<<water<<" and the total is "<<total<<"\n";
-  // std::cout<<"For frame " << yCloud->currentFrame <<" , ic=
-  // "<<(double)ic/(double)total * 100
-  // <<"% , ih= "<<(double)ih/(double)total * 100<<"% interfacial ice=
-  // "<<(double)interIce/(double)total * 100<<"% and water=
-  // "<<(double)water/(double)total * 100<<"% \n"; std::cout<<"\n";
-
   // Print to file
   std::ofstream outputFile;
-  outputFile.open(outputFileName, std::ios_base::app);
+  outputFile.open(path + "bop/" + outputFileName, std::ios_base::app);
   outputFile << yCloud->currentFrame << " " << ic << " " << ih << " "
              << interIce << " " << clath << " " << interClath << " " << water
              << " " << total << "\n";
