@@ -1,11 +1,13 @@
-transition:
-  use: false
-  script: "../lua_inputs/transition_diff.lua"
-rdf3D:
-  use: false
-rdf2D:
-  use: false
-iceType:
+trajectory: "../input/traj/nucleation.lammpstrj"
+bulk:
   use: true
-  trajectory: "../input/traj/nucleation.lammpstrj"
   variables: "../lua_inputs/iceType/vars.lua"
+  topologicalNetworkCriterion: true
+  bondOrderParameters: false
+topoOneDim:
+  use: false
+  variables: "../lua_inputs/iceType/vars.lua"
+topoTwoDim:
+  use: false
+  variables: "../lua_inputs/iceType/vars.lua"
+

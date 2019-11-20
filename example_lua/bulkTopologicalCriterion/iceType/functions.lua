@@ -31,18 +31,34 @@ function make_output_dirs( doBOP, topoOneDim, topoTwoDim, topoBulk )
   end --- end of topo one dimensional dir
   -- Topological network criterion for quasi-two-dimensional INTs
   if not not topoTwoDim then
-    topoTwoDimDir = outDir .. "topoMonolayer/";
+    topoTwoDimDir = outDir .. "topoMonolayer";
     lfs.mkdir(topoTwoDimDir);
     topoTwoDimData = outDir .. "topoMonolayer/dataFiles";
     lfs.mkdir(topoTwoDimData);
-    --- Printing out cages per frame
-    if not not printCages then
-      for frame=targetFrame,finalFrame, frameGap
-       do
-        lfs.mkdir(topoTwoDimDir .. frame);
-      end --- end of for loop through frames
-    end --- End of making folders for every frame
-    ---
+    -- Create file for coverageAreaXY.dat 
+    areaFileName = outDir .. "topoMonolayer/coverageAreaXY.dat";
+    areaFile=io.open(areaFileName, "w"); --- Allow overwriting (otherwise use a)
+    io.output(areaFile);
+    --- appends a word test to the last line of the file
+    io.write("Frame RingSize Num_of_rings CoverageAreaXY% RingSize ... CoverageAreaXY%\n");
+    --- closes the open file
+    io.close(areaFile);
+    -- Create file for coverageAreaXZ.dat 
+    areaFileNameXZ = outDir .. "topoMonolayer/coverageAreaXZ.dat";
+    areaFileXZ=io.open(areaFileNameXZ, "w"); --- Allow overwriting (otherwise use a)
+    io.output(areaFileXZ);
+    --- appends a word test to the last line of the file
+    io.write("Frame RingSize Num_of_rings CoverageAreaXZ% RingSize ... CoverageAreaXZ%\n");
+    --- closes the open file
+    io.close(areaFileXZ);
+    -- Create file for coverageAreaYZ.dat 
+    areaFileNameYZ = outDir .. "topoMonolayer/coverageAreaYZ.dat";
+    areaFileYZ=io.open(areaFileNameYZ, "w"); --- Allow overwriting (otherwise use a)
+    io.output(areaFileYZ);
+    --- appends a word test to the last line of the file
+    io.write("Frame RingSize Num_of_rings CoverageAreaYZ% RingSize ... CoverageAreaYZ%\n");
+    --- closes the open file
+    io.close(areaFileYZ);
   end --- end of topo two dimensional dir
   -- Bulk topological network criterion 
   if not not topoBulk then
@@ -51,14 +67,14 @@ function make_output_dirs( doBOP, topoOneDim, topoTwoDim, topoBulk )
     topoBulkDataDir = outDir .. "bulkTopo/dataFiles";
     lfs.mkdir(topoBulkDataDir);
     -- Create file for cageData (no. of cages, rings etc.)
-    prismFileName = outDir .. "bulkTopo/cageData.dat";
-    prismFile=io.open(prismFileName, "w"); --- Allow overwriting (otherwise use a)
-    io.output(prismFile);
+    topoFileName = outDir .. "bulkTopo/cageData.dat";
+    topoFile=io.open(prismFileName, "w"); --- Allow overwriting (otherwise use a)
+    io.output(topoFile);
     --- appends a word test to the last line of the file
     io.write("Frame HCnumber DDCnumber MixedRingNumber PrismaticRings basalRings\n");
     --- closes the open file
-    io.close(prismFile);
-  end --- end of topo two dimensional dir
+    io.close(topoFile);
+  end --- end of topo bulk dir creation
 end
 ---
 function clusterStatsFile()
@@ -72,13 +88,12 @@ function clusterStatsFile()
     io.close(clusterFile);
 end
 
---- Make the directories and files
+--- Make the directories
 make_output_dirs( doBOP, topoOneDim, topoTwoDim, topoBulk );
 clusterStatsFile(); --- For cluster stats file
 
-slice={0,0,0}; --- This is not in use
 for frame=targetFrame,finalFrame,frameGap do
-   resCloud=readFrameOnlyOne(trajectory,frame,resCloud,oxygenAtomType,false,slice,slice) --- Get the frame
+   resCloud=readFrameOnlyOne(trajectory,frame,resCloud,oxygenAtomType,isSlice,sliceLowerLimits,sliceUpperLimits) --- Get the frame
    nList=neighborList(cutoffRadius, resCloud, oxygenAtomType); --- Calculate the neighborlist by ID
    ---
    --- Since the bulk topological network criteria are slow for dense systems,
@@ -93,6 +108,4 @@ for frame=targetFrame,finalFrame,frameGap do
    --- Start of analysis using rings (by index from here onwards.)
    rings=getPrimitiveRings(iceNeighbourList,maxDepth); --- Gets every ring (non-primitives included)
    bulkTopologicalNetworkCriterion(outDir, rings, iceNeighbourList, clusterCloud, printCages); --- Finds DDCs and HCs
-   --- Clean up for ice cluster and neighbour
 end
-print("\nFinito\n");
