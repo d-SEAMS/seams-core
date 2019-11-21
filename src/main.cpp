@@ -77,37 +77,12 @@ int main(int argc, char *argv[]) {
   if (config["topoTwoDim"]["use"].as<bool>()) {
     // Use the variables script
     lua.script_file(vars);
-
-    // Get Variables (explicitly)
-    // -----------------
-    // Basic variables for neighbour lists and trajectory reading
-    auto rc = lua.get<double>("cutoffRadius");
-    auto oType = lua.get<int>("oxygenAtomType");
-    auto tFrame = lua.get<int>("targetFrame");
-    auto fFrame = lua.get<int>("finalFrame");
-    auto fGap = lua.get<int>("frameGap");
-    // -----------------
-    // Slice variables
-    auto isSlice = lua.get<bool>("isSlice");
-    auto sliceLow = lua.get<std::vector<double>>("sliceLowerLimits");
-    auto sliceHigh = lua.get<std::vector<double>>("sliceUpperLimits");
-    // -----------------
-    // Topological Network Ring lua variables
-    auto hType =
-        lua.get<int>("hydrogenAtomType");  // If you want to use the hydrogen
-                                           // atoms to get the HBN
-    auto maxDepth = lua.get<int>("maxDepth");  // If you want to use the
-                                               // hydrogen atoms to get the HBN
-    // -----------------
-    // Variables for the monolayer
-    auto sheetArea = lua.get<double>(
-        "confiningSheetArea");  // Area of the confining sheet for the monolayer
     // -----------------
     // Variables which must be declared in C++
     //
     // Newer pointCloud (rescloud -> ice structure, solcloud -> largest cluster)
     molSys::PointCloud<molSys::Point<double>, double> resCloud;
-    // Some neighbor
+    // Some neighbor lists
     std::vector<std::vector<int>> nList, hbnList;
     // For the list of all rings (of all sizes)
     std::vector<std::vector<int>> ringsAllSizes;
@@ -156,27 +131,6 @@ int main(int argc, char *argv[]) {
   if (config["topoOneDim"]["use"].as<bool>()) {
     // Use the script
     lua.script_file(vars);
-
-    // Get Variables (explicitly)
-    // -----------------
-    // Basic variables for neighbour lists and trajectory reading
-    auto rc = lua.get<double>("cutoffRadius");
-    auto oType = lua.get<int>("oxygenAtomType");
-    auto tFrame = lua.get<int>("targetFrame");
-    auto fFrame = lua.get<int>("finalFrame");
-    auto fGap = lua.get<int>("frameGap");
-    // -----------------
-    // Slice variables
-    auto isSlice = lua.get<bool>("isSlice");
-    auto sliceLow = lua.get<std::vector<double>>("sliceLowerLimits");
-    auto sliceHigh = lua.get<std::vector<double>>("sliceUpperLimits");
-    // -----------------
-    // Topological Network Ring lua variables
-    auto hType =
-        lua.get<int>("hydrogenAtomType");  // If you want to use the hydrogen
-                                           // atoms to get the HBN
-    auto maxDepth = lua.get<int>("maxDepth");  // If you want to use the
-                                               // hydrogen atoms to get the HBN
     // -----------------
     // Variables which must be declared in C++
     //
@@ -231,40 +185,6 @@ int main(int argc, char *argv[]) {
   if (config["bulk"]["use"].as<bool>()) {
     // Use the variables script
     lua.script_file(vars);
-
-    // Get Variables (explicitly)
-    // -----------------
-    // General Variables
-    auto rc = lua.get<double>("cutoffRadius");
-    auto oType = lua.get<int>("oxygenAtomType");
-    auto tFrame = lua.get<int>("targetFrame");
-    auto fFrame = lua.get<int>("finalFrame");
-    auto fGap = lua.get<int>("frameGap");
-    // Output file names
-    auto dumpName = lua.get<std::string>("dumpName");
-    auto outFileChillPlus = lua.get<std::string>("chillPlus_noMod");
-    auto outFileChill = lua.get<std::string>("chill_mod");
-    auto outFileSuper = lua.get<std::string>("chillPlus_mod");
-    auto dumpChillP = lua.get<std::string>("dumpChillP");
-    auto dumpSupaaP = lua.get<std::string>("dumpSupaaP");
-    auto largestClusterDump = lua.get<std::string>("largestClusterDump");
-    // -----------------
-    // Slice variables
-    auto isSlice = lua.get<bool>("isSlice");
-    auto sliceLow = lua.get<std::vector<double>>("sliceLowerLimits");
-    auto sliceHigh = lua.get<std::vector<double>>("sliceUpperLimits");
-    // -----------------
-    // Topological Network Ring lua variables
-    auto hType =
-        lua.get<int>("hydrogenAtomType");  // If you want to use the hydrogen
-                                           // atoms to get the HBN
-    auto maxDepth = lua.get<int>(
-        "maxDepth");  // If you want to use the hydrogen atoms to get the HBN
-    // -----------------
-    // Variables for output directory writing:
-    auto printCages = lua.get<bool>(
-        "printCages");  // If you want topological network analysis for bulk
-    // -----------------
     // Variables which must be declared in C++
     //
     // Newer pointCloud (rescloud -> ice structure, solcloud -> largest

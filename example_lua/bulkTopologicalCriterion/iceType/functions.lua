@@ -8,8 +8,8 @@ package.path = './../lua_inputs/luaModules/?.lua;' .. package.path
 local luaFunctions = require("scripts");
 
 --- Make the directories
-make_output_dirs( doBOP, topoOneDim, topoTwoDim, topoBulk );
-clusterStatsFile(); --- For cluster stats file
+luaFunctions.make_output_dirs( doBOP, topoOneDim, topoTwoDim, topoBulk );
+luaFunctions.clusterStatsFile(); --- For cluster stats file
 
 for frame=targetFrame,finalFrame,frameGap do
    resCloud=readFrameOnlyOne(trajectory,frame,resCloud,oxygenAtomType,isSlice,sliceLowerLimits,sliceUpperLimits) --- Get the frame

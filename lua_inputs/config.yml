@@ -1,10 +1,10 @@
-trajectory: "../input/traj/mW_cubic.lammpstrj"
+trajectory: "../input/traj/dump-320.lammpstrj"
 variables: "../lua_inputs/iceType/vars.lua"
 bulk:
-  use: true
+  use: false
   topologicalNetworkCriterion: false
-  bondOrderParameters: true
+  bondOrderParameters: false
 topoOneDim:
   use: false
 topoTwoDim:
-  use: false
+  use: true
