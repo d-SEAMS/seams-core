@@ -4,7 +4,8 @@ print("\n Welcome to the manual lua function evaluation environment.\n");
 local lfs = require"lfs"
 
 --- Call functions defined in script file
-local luaFunctions = require("luaFunctions.scripts");
+package.path = './../lua_inputs/luaFunctions/?.lua;' .. package.path
+local luaFunctions = require("scripts");
 
 --- Make the directories
 luaFunctions.make_output_dirs( doBOP, topoOneDim, topoTwoDim, topoBulk );
