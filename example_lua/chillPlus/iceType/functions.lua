@@ -4,7 +4,7 @@ print("\n Welcome to the manual lua function evaluation environment.\n");
 local lfs = require"lfs"
 
 --- Call functions defined in script file
-package.path = './../lua_inputs/luaFunctions/?.lua;' .. package.path
+package.path = './../lua_inputs/luaModules/?.lua;' .. package.path
 local luaFunctions = require("scripts");
 
 --- Make the directories
