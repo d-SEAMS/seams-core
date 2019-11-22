@@ -33,6 +33,10 @@ int writeRingNum(std::string path, int currentFrame, std::vector<int> nRings,
                  std::vector<double> coverageAreaXZ,
                  std::vector<double> coverageAreaYZ, int maxDepth);
 
+// Function for printing out the RDF, given the filename
+int printRDF(std::string fileName, std::vector<double> *rdfValues,
+             double binwidth, int nbin);
+
 // Function for printing out the number of DDCs, HCs, mixed rings, basal and
 // prismatic rings
 int writeTopoBulkData(std::string path, int currentFrame, int numHC, int numDDC,

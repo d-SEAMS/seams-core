@@ -959,6 +959,30 @@ int sout::writeRingNum(std::string path, int currentFrame,
 }
 
 /********************************************/ /**
+ *  Function for printing out the RDF
+ to a file, given that the file already exists and given
+ the filename.
+ ***********************************************/
+int sout::printRDF(std::string fileName, std::vector<double> *rdfValues,
+                   double binwidth, int nbin) {
+  //
+  std::ofstream outputFile;  // For the output file
+  double r;                  // Distance for the current bin
+
+  // Append to the file
+  outputFile.open(fileName, std::ios_base::app | std::ios_base::out);
+
+  // Loop through all the bins
+  for (int ibin = 0; ibin < nbin; ibin++) {
+    //
+    r = binwidth * (ibin + 0.5);  // Current distance for ibin
+    outputFile << r << " " << (*rdfValues)[ibin] << "\n";
+  }  // end of loop through all bins
+
+  return 0;
+}
+
+/********************************************/ /**
  *  Function for out the number of DDCs, HCs, mixed rings, basal and
  prismatic rings.
  ***********************************************/
