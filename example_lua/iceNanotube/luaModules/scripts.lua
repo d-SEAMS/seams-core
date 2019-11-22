@@ -104,4 +104,53 @@ function M.clusterStatsFile()
     io.close(clusterFile);
 end
 
+--- Function for creating the RDF file
+function M.make_RDF_file( doBOP, topoOneDim, topoTwoDim, topoBulk )
+    -- Bond orientational parameter
+  if not not doBOP then
+    --- Prep the output files 
+    tmpFileBOP=io.open(outDir .. "bop/rdf.dat", "w"); --- Allow overwriting (otherwise use a)
+    --- sets the default output file as test.lua
+    io.output(tmpFileBOP);
+    --- appends a word test to the last line of the file
+    io.write("# r  g(r)\n");
+    --- closes the open file
+    io.close(tmpFileBOP);
+    ---
+  end --- end of bop dir
+  -- Topological network criterion for quasi-one-dimensional INTs
+  if not not topoOneDim then
+    --- Prep the output files 
+    tmpFileOne=io.open(outDir .. "topoINT/rdf.dat", "w"); --- Allow overwriting (otherwise use a)
+    --- sets the default output file as test.lua
+    io.output(tmpFileOne);
+    --- appends a word test to the last line of the file
+    io.write("# r  g(r)\n");
+    --- closes the open file
+    io.close(tmpFileOne);
+  end --- end of topo one dimensional dir
+  -- Topological network criterion for quasi-two-dimensional INTs
+  if not not topoTwoDim then
+    --- Prep the output files 
+    tmpFileTwo=io.open(outDir .. "topoMonolayer/rdf.dat", "w"); --- Allow overwriting (otherwise use a)
+    --- sets the default output file as test.lua
+    io.output(tmpFileTwo);
+    --- appends a word test to the last line of the file
+    io.write("# r  g(r)\n");
+    --- closes the open file
+    io.close(tmpFileTwo);
+  end --- end of topo two dimensional dir
+  -- Bulk topological network criterion 
+  if not not topoBulk then
+    --- Prep the output files 
+    tmpFileBulkTopo=io.open(outDir .. "bulkTopo/rdf.dat", "w"); --- Allow overwriting (otherwise use a)
+    --- sets the default output file as test.lua
+    io.output(tmpFileBulkTopo);
+    --- appends a word test to the last line of the file
+    io.write("# r  g(r)\n");
+    --- closes the open file
+    io.close(tmpFileBulkTopo);
+  end --- end of topo bulk dir creation
+end
+
 return M;
