@@ -64,6 +64,7 @@ add_library(yodaLib SHARED
   topo_bulk.cpp
   order_parameter.cpp
   cluster.cpp
+  rdf2d.cpp
 )
 # if(yaml-cpp_FOUND)
 #     target_link_libraries(yodaStruct yaml-cpp)
