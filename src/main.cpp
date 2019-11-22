@@ -38,6 +38,7 @@
 #include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <rdf2d.hpp>
 #include <ring.hpp>
 #include <seams_input.hpp>
 #include <seams_output.hpp>
@@ -87,6 +88,8 @@ int main(int argc, char *argv[]) {
     // For the list of all rings (of all sizes)
     std::vector<std::vector<int>> ringsAllSizes;
     std::vector<std::vector<int>> rings;
+    // RDF stuff
+    std::vector<double> rdfValues;  // RDF vector
     // -----------------
     // This section basically only registers functions and handles the rest in
     // lua Use the functions defined here
@@ -103,6 +106,9 @@ int main(int argc, char *argv[]) {
     lua["trajectory"] = tFile;
     // Confined ice stuff
     lua["ringsAllSizes"] = &rings;
+    // RDF stuff
+    lua["rdf"] = &rdfValues;
+    // -----------------
     // Register functions
     //
     // Writing stuff
@@ -120,6 +126,9 @@ int main(int argc, char *argv[]) {
     // -----------------
     // Quasi-two-dimensional ice
     lua.set_function("ringAnalysis", ring::polygonRingAnalysis);
+    // --------------------------
+    // RDF functions
+    lua.set_function("calcRDF", rdf2::rdf2Danalysis_AA);
     // --------------------------
     // Use the script
     lua.script_file(lscript);
