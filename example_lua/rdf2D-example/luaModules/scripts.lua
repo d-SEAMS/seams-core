@@ -84,7 +84,7 @@ function M.make_output_dirs( doBOP, topoOneDim, topoTwoDim, topoBulk )
     lfs.mkdir(topoBulkDataDir);
     -- Create file for cageData (no. of cages, rings etc.)
     topoFileName = outDir .. "bulkTopo/cageData.dat";
-    topoFile=io.open(prismFileName, "w"); --- Allow overwriting (otherwise use a)
+    topoFile=io.open(topoFileName, "w"); --- Allow overwriting (otherwise use a)
     io.output(topoFile);
     --- appends a word test to the last line of the file
     io.write("Frame HCnumber DDCnumber MixedRingNumber PrismaticRings basalRings\n");
