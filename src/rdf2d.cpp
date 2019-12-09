@@ -11,30 +11,19 @@
  This is registered as a Lua function and is
  accessible to the user.
  Internally, this function calls the following functions:
- - ring::getSingleRingSize (Saves rings of a single ring size into a new vector
- of vectors, which is subsequently used for finding DDCs, HCs etc).
- - ring::findDDC (Finds the DDCs).
- - ring::findHC (Finds the HCs).
- - ring::findMixedRings (Finds the mixed rings, which are shared by DDCs and HCs
- both).
- - ring::getStrucNumbers (Gets the number of structures (DDCs, HCs, mixed rings,
- basal rings, prismatic rings, to be used for write-outs).
- - sout::writeTopoBulkData (Writes out the numbers and data obtained for the
- current frame).
- - ring::getAtomTypesTopoBulk (Gets the atom type for every atom, to be used for
- printing out the ice types found).
- - sout::writeLAMMPSdataTopoBulk (Writes out the atoms, with the classified
- types, into a LAMMPS data file, which can be visualized in OVITO).
+ - rdf2::getSystemLengths (Gets the dimensions of the quasi-two-dimensional system).
+ - ring::rdf2::sampleRDF_AA (Samples the current frame, binning the coordinates).
+ - ring::rdf2::normalizeRDF (Normalizes the RDF).
+ - ring::sout::printRDF (Writes out the RDF to the desired output directory,
+ in the form of an ASCII file)
  *  @param[in] path The file path of the output directory to which output files
  will be written.
- *  @param[in] rings Vector of vectors containing the primitive rings. This
- contains rings of all sizes.
- *  @param[in] nList Row-ordered neighbour list, by index.
- *  @param[in] yCloud The input PointCloud, with respect to which the indices in
- the rings and nList vector of vectors have been saved.
- *  @param[in] printEachCage Flag for printing the information of each cage in
- the frame (true) or not printing the coordinates/connectivity of each cage
- (false).
+ *  @param[in] rdfValues Vector containing the RDF values.
+ *  @param[in] yCloud The input PointCloud.
+ *  @param[in] cutoff Cutoff for the RDF. This should not be greater than half the box length.
+ *  @param[in] binwidth Width of the bin for histogramming.
+ *  @param[in] firstFrame The first frame for RDF binning.
+ *  @param[in] finalFrame The final frame for RDF binning.
  ***********************************************/
 int rdf2::rdf2Danalysis_AA(
     std::string path, std::vector<double> *rdfValues,
@@ -85,18 +74,13 @@ int rdf2::rdf2Danalysis_AA(
  *  Samples the RDF for a particular frame
  The input PointCloud only has particles
  of type A in it.
- - sout::writeLAMMPSdataTopoBulk (Writes out the atoms, with the classified
- types, into a LAMMPS data file, which can be visualized in OVITO).
- *  @param[in] path The file path of the output directory to which output files
- will be written.
- *  @param[in] rings Vector of vectors containing the primitive rings. This
- contains rings of all sizes.
- *  @param[in] nList Row-ordered neighbour list, by index.
- *  @param[in] yCloud The input PointCloud, with respect to which the indices in
- the rings and nList vector of vectors have been saved.
- *  @param[in] printEachCage Flag for printing the information of each cage in
- the frame (true) or not printing the coordinates/connectivity of each cage
- (false).
+ - gen::periodicDist (Periodic distance between a pair of atoms).
+ *  @param[in] yCloud The input PointCloud.
+ *  @param[in] cutoff Cutoff for the RDF calculation, which should be less than
+ or equal to half the box length.
+ *  @param[in] binwidth Width of the bin.
+ *  @param[in] nbin Number of bins. 
+ *  \return RDF histogram for the current frame.
  ***********************************************/
 std::vector<int> rdf2::sampleRDF_AA(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, double cutoff,
@@ -133,16 +117,15 @@ std::vector<int> rdf2::sampleRDF_AA(
 /********************************************/ /**
  *  Normalizes the histogram and adds it to the RDF.
  The normalization requires the plane area and height.
- *  @param[in] path The file path of the output directory to which output files
- will be written.
- *  @param[in] rings Vector of vectors containing the primitive rings. This
- contains rings of all sizes.
- *  @param[in] nList Row-ordered neighbour list, by index.
- *  @param[in] yCloud The input PointCloud, with respect to which the indices in
- the rings and nList vector of vectors have been saved.
- *  @param[in] printEachCage Flag for printing the information of each cage in
- the frame (true) or not printing the coordinates/connectivity of each cage
- (false).
+ *  @param[in] nopA The number of particles of type A.
+ *  @param[in] rdfValues Radial distribution function values for all the frames, in the form of a vector.
+ *  @param[in] histogram The histogram for the current frame.
+ *  @param[in] binwidth The width of each bin for the RDF histogram.
+ *  @param[in] nbin The number of bins for the RDF.
+ *  @param[in] volumeLengths The confining dimensions of the quasi-two-dimensional system,
+ which may be the slice dimensions or the dimensions of the box.
+ *  @param[in] nIter The number of iterations for which the coordinates will be binned.
+ This is basically equivalent to the number of frames over which the RDF will be calculated.
  ***********************************************/
 int rdf2::normalizeRDF(int nopA, std::vector<double> *rdfValues,
                        std::vector<int> histogram, double binwidth, int nbin,
@@ -190,16 +173,8 @@ int rdf2::normalizeRDF(int nopA, std::vector<double> *rdfValues,
 /********************************************/ /**
  *  Calculates the lengths of the quasi-two-dimensional
  system. The smallest length is the 'height'.
- *  @param[in] path The file path of the output directory to which output files
- will be written.
- *  @param[in] rings Vector of vectors containing the primitive rings. This
- contains rings of all sizes.
- *  @param[in] nList Row-ordered neighbour list, by index.
- *  @param[in] yCloud The input PointCloud, with respect to which the indices in
- the rings and nList vector of vectors have been saved.
- *  @param[in] printEachCage Flag for printing the information of each cage in
- the frame (true) or not printing the coordinates/connectivity of each cage
- (false).
+ *  @param[in] yCloud The molSys::PointCloud struct for the system. 
+ *  \return The length (i.e. the 'height') of the smallest dimension of quasi-two-dimensional system. 
  ***********************************************/
 std::vector<double> rdf2::getSystemLengths(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
@@ -248,17 +223,9 @@ std::vector<double> rdf2::getSystemLengths(
 /********************************************/ /**
  *  Calculates the plane area from the volume lengths.
  This is the product of the two largest dimensions of the quasi-two-dimensional
- water.
- *  @param[in] path The file path of the output directory to which output files
- will be written.
- *  @param[in] rings Vector of vectors containing the primitive rings. This
- contains rings of all sizes.
- *  @param[in] nList Row-ordered neighbour list, by index.
- *  @param[in] yCloud The input PointCloud, with respect to which the indices in
- the rings and nList vector of vectors have been saved.
- *  @param[in] printEachCage Flag for printing the information of each cage in
- the frame (true) or not printing the coordinates/connectivity of each cage
- (false).
+ system.
+ *  @param[in] volumeLengths A vector of the lengths of the volume slice or simulation box
+ *  \return The plane area of the two significant dimensions
  ***********************************************/
 double rdf2::getPlaneArea(std::vector<double> volumeLengths) {
   //

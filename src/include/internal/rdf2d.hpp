@@ -22,6 +22,10 @@
 /*! \file rdf2d.hpp
     \brief File containing functions used to calculate the
    in-plane radial distribution functions.
+   *
+   ### Changelog ###
+
+  - Amrita Goswami [amrita16thaug646@gmail.com]; date modified: Dec 9, 2019
 */
 
 /*!
