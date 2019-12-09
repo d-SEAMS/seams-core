@@ -187,6 +187,7 @@ molSys::PointCloud<molSys::Point<double>, double> getIceTypeNoPrint(
  type, according to the CHILL algorithm.
  *  @param[in,out] yCloud The output molSys::PointCloud
  *  @param[in] nList Row-ordered neighbour list by atom ID
+ *  @param[in] path Path to the output directory to which ice types are written out to 
  *  @param[in] isSlice This decides whether there is a slice or not
  *  @param[in] outputFileName Name of the output file, to which the ice types
  will be written out.
