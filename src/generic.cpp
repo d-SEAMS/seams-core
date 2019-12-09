@@ -38,8 +38,14 @@ int gen::prettyPrintYoda(
 *  Function for getting the unwrapped coordinates
  of a pair of atoms.
  *  @param[in] yCloud The input PointCloud to be printed.
- *  @param[in] outFile The name of the output file to which the information will
-be printed.
+ *  @param[in] iatomIndex Index of the \f$ i^{th} \f$ atom.
+ *  @param[in] jatomIndex Index of the \f$ j^{th} \f$ atom.
+ *  @param[in, out] x_i X Coordinate of the \f$ i^{th} \f$ atom corresponding to the unwrapped distance.
+ *  @param[in, out] y_i Y Coordinate of the \f$ i^{th} \f$ atom corresponding to the unwrapped distance.
+ *  @param[in, out] z_i Z Coordinate of the \f$ i^{th} \f$ atom corresponding to the unwrapped distance.
+ *  @param[in, out] x_j X Coordinate of the \f$ j^{th} \f$ atom corresponding to the unwrapped distance.
+ *  @param[in, out] y_j Y Coordinate of the \f$ j^{th} \f$ atom corresponding to the unwrapped distance.
+ *  @param[in, out] z_j Z Coordinate of the \f$ j^{th} \f$ atom corresponding to the unwrapped distance.
 ***********************************************/
 int gen::unwrappedCoordShift(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatomIndex,
