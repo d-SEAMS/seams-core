@@ -29,6 +29,8 @@
  *  @param[in] nList Row-ordered neighbour list by index.
  *  @param[in] yCloud The input PointCloud.
  *  @param[in] maxDepth The maximum possible size of the primitive rings.
+ *  @param[in] sheetArea Area calculated using the two significant dimensions of the 
+ quasi-two-dimensional sheet.
  ***********************************************/
 int ring::polygonRingAnalysis(
     std::string path, std::vector<std::vector<int>> rings,
@@ -114,9 +116,9 @@ int ring::polygonRingAnalysis(
  given the rings vector.
  *  @param[in] rings The vector of vectors containing the primitive rings, of a
  particular ring size.
- *  @param[in] ringSize The current ring size or number of nodes in each ring.
  *  @param[in, out] atomTypes A vector which contains a type for each atom,
  depending on it's type as classified by the prism identification scheme.
+ *  @param[in] nRings Number of rings.
  ***********************************************/
 int ring::assignPolygonType(std::vector<std::vector<int>> rings,
                             std::vector<int> *atomTypes,
