@@ -1,13 +1,15 @@
 #include <generic.hpp>
 #include <iostream>
 
-// using namespace ;
-
 /********************************************/ /**
- *  Function for printing out info in PairCorrel struct
- ***********************************************/
+*  Function for printing out
+ info in a PointCloud object.
+ *  @param[in] yCloud The input PointCloud to be printed.
+ *  @param[in] outFile The name of the output file to which the information will
+be printed.
+***********************************************/
 int gen::prettyPrintYoda(
-    MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::string outFile) {
   std::ofstream outputFile;
   // Create a new file in the output directory
@@ -22,8 +24,8 @@ int gen::prettyPrintYoda(
                  << "\t" << yCloud->pts[i].x << "\t" << yCloud->pts[i].y << "\t"
                  << yCloud->pts[i].z << "\t";
       // Print out cij
-      // for(int c=0; c<yCloud->pts[i].c_ij.size(); c++){outputFile << yCloud->pts[i].c_ij[c]<<"\t";}
-      // Print out the classifier
+      // for(int c=0; c<yCloud->pts[i].c_ij.size(); c++){outputFile <<
+      // yCloud->pts[i].c_ij[c]<<"\t";} Print out the classifier
       outputFile << yCloud->pts[i].iceType << "\n";
     }
   }
@@ -33,113 +35,114 @@ int gen::prettyPrintYoda(
 }
 
 /********************************************/ /**
- *  Function for printing out info in PairCorrel struct
- ***********************************************/
-int gen::writeDump(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
-                   std::string outFile) {
-  std::ofstream outputFile;
-  // Create a new file in the output directory
-  outputFile.open(outFile, std::ios_base::app);
+*  Function for getting the unwrapped coordinates
+ of a pair of atoms.
+ *  @param[in] yCloud The input PointCloud to be printed.
+ *  @param[in] iatomIndex Index of the \f$ i^{th} \f$ atom.
+ *  @param[in] jatomIndex Index of the \f$ j^{th} \f$ atom.
+ *  @param[in, out] x_i X Coordinate of the \f$ i^{th} \f$ atom corresponding to the unwrapped distance.
+ *  @param[in, out] y_i Y Coordinate of the \f$ i^{th} \f$ atom corresponding to the unwrapped distance.
+ *  @param[in, out] z_i Z Coordinate of the \f$ i^{th} \f$ atom corresponding to the unwrapped distance.
+ *  @param[in, out] x_j X Coordinate of the \f$ j^{th} \f$ atom corresponding to the unwrapped distance.
+ *  @param[in, out] y_j Y Coordinate of the \f$ j^{th} \f$ atom corresponding to the unwrapped distance.
+ *  @param[in, out] z_j Z Coordinate of the \f$ j^{th} \f$ atom corresponding to the unwrapped distance.
+***********************************************/
+int gen::unwrappedCoordShift(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatomIndex,
+    int jatomIndex, double *x_i, double *y_i, double *z_i, double *x_j,
+    double *y_j, double *z_j) {
+  //
+  double x_iatom, y_iatom, z_iatom;
+  double x_jatom, y_jatom, z_jatom;
+  double x_ij, y_ij, z_ij;  // Relative distance
+  std::vector<double> box = yCloud->box;
+  double xPBC, yPBC, zPBC;  // Actual unwrapped distance
 
-  // Append stuff
-  // -----------------------
-  // Header
-
-  // The format of the LAMMPS trajectory file is:
-  // ITEM: TIMESTEP
-  // 0
-  // ITEM: NUMBER OF ATOMS
-  // 4096
-  // ITEM: BOX BOUNDS pp pp pp
-  // -7.9599900000000001e-01 5.0164000000000001e+01
-  // -7.9599900000000001e-01 5.0164000000000001e+01
-  // -7.9599900000000001e-01 5.0164000000000001e+01
-  // ITEM: ATOMS id type x y z
-  // 1 1 0 0 0 etc
-  outputFile << "ITEM: TIMESTEP\n";
-  outputFile << yCloud->currentFrame << "\n";
-  outputFile << "ITEM: NUMBER OF ATOMS\n";
-  outputFile << yCloud->nop << "\n";
-  outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
-  for (int k = 0; k < yCloud->boxLow.size(); k++) {
-    outputFile << yCloud->boxLow[k] << " "
-               << yCloud->boxLow[k] + yCloud->box[k]; // print xlo xhi etc
-    // print out the tilt factors too if it is a triclinic box
-    if (yCloud->box.size() == 2 * yCloud->boxLow.size()) {
-      outputFile
-          << " "
-          << yCloud->box[k + yCloud->boxLow
-                                 .size()]; // this would be +2 for a 2D box
-    }
-    outputFile << "\n"; // print end of line
-  }                     // end of printing box lengths
-  outputFile << "ITEM: ATOMS id mol type x y z\n";
-  // -----------------------
-  // Atom lines
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-    outputFile << yCloud->pts[iatom].atomID << " " << yCloud->pts[iatom].molID
-               << " " << yCloud->pts[iatom].iceType << " "
-               << yCloud->pts[iatom].x << " " << yCloud->pts[iatom].y << " "
-               << yCloud->pts[iatom].z << "\n";
-  } // end of loop through all atoms
-
-  // Close the file
-  outputFile.close();
-  return 0;
-}
-
-/********************************************/ /**
- *  Function for printing out values of averaged Q6, averaged Q3 and
- Cij values
- ***********************************************/
-int gen::writeHisto(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
-                    std::vector<double> avgQ6) {
-  std::ofstream cijFile;
-  std::ofstream q3File;
-  std::ofstream q6File;
-  // Create a new file in the output directory
-  int nNumNeighbours;
-  double avgQ3;
-
-  cijFile.open("cij.txt", std::ofstream::out | std::ofstream::app);
-  q3File.open("q3.txt", std::ofstream::out | std::ofstream::app);
-  q6File.open("q6.txt", std::ofstream::out | std::ofstream::app);
-
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-    if (yCloud->pts[iatom].type != 1) {
-      continue;
-    }
-    // Check for slice later
-    nNumNeighbours = yCloud->pts[iatom].neighList.size();
-    avgQ3 = 0.0;
-    for (int j = 0; j < nNumNeighbours; j++) {
-      cijFile << yCloud->pts[iatom].c_ij[j].c_value << "\n";
-      avgQ3 += yCloud->pts[iatom].c_ij[j].c_value;
-    } // Loop through neighbours
-    avgQ3 /= nNumNeighbours;
-    q3File << avgQ3 << "\n";
-    q6File << avgQ6[iatom] << "\n";
-  } // loop through all atoms
-
-  // Close the file
-  cijFile.close();
-  q3File.close();
-  q6File.close();
+  // ----------------------------------------------------------------------
+  // INIT
+  // iatom
+  x_iatom = yCloud->pts[iatomIndex].x;
+  y_iatom = yCloud->pts[iatomIndex].y;
+  z_iatom = yCloud->pts[iatomIndex].z;
+  // jatom
+  x_jatom = yCloud->pts[jatomIndex].x;
+  y_jatom = yCloud->pts[jatomIndex].y;
+  z_jatom = yCloud->pts[jatomIndex].z;
+  // ----------------------------------------------------------------------
+  // GET RELATIVE DISTANCE
+  x_ij = x_iatom - x_jatom;
+  y_ij = y_iatom - y_jatom;
+  z_ij = z_iatom - z_jatom;
+  // ----------------------------------------------------------------------
+  // SHIFT COORDINATES IF REQUIRED
+  // Shift x
+  if (fabs(x_ij) > 0.5 * box[0]) {
+    // Get the actual distance
+    xPBC = box[0] - fabs(x_ij);
+    if (x_ij < 0) {
+      x_jatom = x_iatom - xPBC;
+    }  // To the -x side of currentIndex
+    else {
+      x_jatom = x_iatom + xPBC;
+    }  // Add to the + side
+  }    // Shift nextElement
+  //
+  // Shift y
+  if (fabs(y_ij) > 0.5 * box[1]) {
+    // Get the actual distance
+    yPBC = box[1] - fabs(y_ij);
+    if (y_ij < 0) {
+      y_jatom = y_iatom - yPBC;
+    }  // To the -y side of currentIndex
+    else {
+      y_jatom = y_iatom + yPBC;
+    }  // Add to the + side
+  }    // Shift nextElement
+  //
+  // Shift z
+  if (fabs(z_ij) > 0.5 * box[2]) {
+    // Get the actual distance
+    zPBC = box[2] - fabs(z_ij);
+    if (z_ij < 0) {
+      z_jatom = z_iatom - zPBC;
+    }  // To the -z side of currentIndex
+    else {
+      z_jatom = z_iatom + zPBC;
+    }  // Add to the + side
+  }    // Shift nextElement
+  // ----------------------------------------------------------------------
+  // Assign values
+  *x_i = x_iatom;
+  *y_i = y_iatom;
+  *z_i = z_iatom;
+  *x_j = x_jatom;
+  *y_j = y_jatom;
+  *z_j = z_jatom;
 
   return 0;
 }
 
 /********************************************/ /**
- * Function to print out the largest ice cluster
+ *  Function for obtaining the angle between two input vectors (std::vector).
+ Internally, the vectors are converted to GSL vectors. The dot product between
+ the input vectors is used to calculate the angle between them.
+ *  @param[in] OO The O--O vector (but can be any vector, in general).
+ *  @param[in] OH The O-H vector (but can be any vector, in general).
+ *  \return The output angle between the input vectors, in radians
  ***********************************************/
-int gen::writeCluster(MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
-                      std::string fileName, bool isSlice,
-                      int largestIceCluster) {
-  std::ofstream clusterFile;
-  // Create a new file in the output directory
-  clusterFile.open(fileName, std::ofstream::out | std::ofstream::app);
-  clusterFile << yCloud->currentFrame << " " << largestIceCluster << "\n";
-  // Close the file
-  clusterFile.close();
-  return 0;
+double gen::gslVecAngle(std::vector<double> OO, std::vector<double> OH) {
+  gsl_vector *gOO = gsl_vector_alloc(3);
+  gsl_vector *gOH = gsl_vector_alloc(3);
+  double norm_gOO, norm_gOH, xDummy, angle;
+  for (int i = 0; i < 3; i++) {
+    gsl_vector_set(gOO, i, OO[i]);
+    gsl_vector_set(gOH, i, OH[i]);
+  }
+  norm_gOO = gsl_blas_dnrm2(gOO);
+  norm_gOH = gsl_blas_dnrm2(gOH);
+  gsl_blas_ddot(gOO, gOH, &xDummy);
+  angle = acos(xDummy / (norm_gOO * norm_gOH));
+  gsl_vector_free(gOO);
+  gsl_vector_free(gOH);
+  return angle;
 }

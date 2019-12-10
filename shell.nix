@@ -8,8 +8,13 @@
 pkgs.mkShell {
   # this will make all the build inputs from hello and gnutar
   # available to the shell environment
-  inputsFrom =  [ buildpkgs.yodaStruct ];
+  inputsFrom =  [
+    buildpkgs.yodaStruct
+    pkgs.git
+                ];
+  nativeBuildInputs = with pkgs; [pkgconfig];
   buildInputs = with pkgs; [
+    gdb
     git
   ]
   ++ optional stdenv.isLinux glibcLocales # To allow setting consistent locale on linux

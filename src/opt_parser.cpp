@@ -7,8 +7,6 @@ cxxopts::ParseResult parse(int argc, char *argv[]) {
         argv[0], "Structure calculations for molecular simulations");
     options.positional_help("[optional args]").show_positional_help();
     options.allow_unrecognised_options().add_options()(
-        "f,file", "File name",
-        cxxopts::value<std::string>()->default_value("input/parameters.txt"))(
         "s,script", "Lua Script",
         cxxopts::value<std::string>()->default_value("main.lua"))(
         "c,config", "Yaml Config",

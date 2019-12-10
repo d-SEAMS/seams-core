@@ -1,0 +1,10 @@
+trajectory: "../input/traj/nucleation.lammpstrj"
+variables: "../lua_inputs/iceType/vars.lua"
+bulk:
+  use: true  
+  topologicalNetworkCriterion: true
+  bondOrderParameters: false
+topoOneDim:
+  use: false
+topoTwoDim:
+  use: false

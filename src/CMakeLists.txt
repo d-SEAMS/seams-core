@@ -7,13 +7,14 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 include(FindBLAS)
 include(FindLAPACK)
 include(FindBoost)
-
+include(FindGSL)
+add_compile_options(
+  # "-Wall" "-Wpedantic" "-Wextra" "-fexceptions"
+  "$<$<CONFIG:Debug>:-O0;-g3;-ggdb>"
+)
 # Add the new cpp files here
 add_executable( yodaStruct
   main.cpp
-  # Still here since most people will not have blaze installed. Look into conan
-  # shared libraries
-  spherical_harmonics.cpp
   )
 
 # Project Libraries
@@ -22,45 +23,48 @@ include_directories(
   include/external
   ${LUA_INCLUDE_DIR}
   ${Boost_INCLUDE_DIRS}
+  ${GSL_INCLUDE_DIRS}
   )
-
+add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
 # Find packages, including conan packages
 find_package(
   "Lua" REQUIRED
-  "Boost" REQUIRED
+  "GSL" REQUIRED
+  "Boost" REQUIRED COMPONENTS system filesystem
   "yaml-cpp"
   "fmt"
   "rang")
 
+link_directories(${Boost_LIBRARY_DIRS})
 # Link everything
 target_link_libraries(
   yodaStruct
   ${Boost_LIBRARIES}
   ${LUA_LIBRARIES}
+  ${GSL_LIBRARIES}
+  stdc++fs
   fmt
   yaml-cpp
   yodaLib
   )
 add_library(yodaLib SHARED
-  bop_correl.cpp
-  molecular_system.cpp
   mol_sys.cpp
+  seams_input.cpp
+  seams_output.cpp
+  ring.cpp
+  bond.cpp
   generic.cpp
   bop.cpp
-  rdf.cpp
   neighbours.cpp
-  molecule.cpp
-  neighbors.cpp
-  parameter.cpp
-  structure_factor.cpp
-  transition.cpp
   opt_parser.cpp
-  output.cpp
-  rdf2D.cpp
-  rdf3D.cpp
   backward.cpp
-  density.cpp
-  geometry.cpp
+  franzblau.cpp
+  topo_one_dim.cpp
+  topo_two_dim.cpp
+  topo_bulk.cpp
+  order_parameter.cpp
+  cluster.cpp
+  rdf2d.cpp
 )
 # if(yaml-cpp_FOUND)
 #     target_link_libraries(yodaStruct yaml-cpp)

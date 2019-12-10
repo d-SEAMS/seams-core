@@ -1,1 +1,0 @@
-trajFile="/home/haozeke/Git/Github/C++/Forks/structureFactor/input/traj/mW_cubic.lammpstrj"

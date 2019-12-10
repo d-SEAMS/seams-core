@@ -11,6 +11,7 @@
 , blas
 , lib
 , boost
+,  gsl
 , rang
 , cmake }:
   clangStdenv.mkDerivation {
@@ -27,6 +28,7 @@
   eigen
   catch2
   boost
+  gsl
   liblapack
   blas
   luaPackages.luafilesystem

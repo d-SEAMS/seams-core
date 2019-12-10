@@ -28,36 +28,34 @@
 #include <string>
 
 // Internal Libraries
-#include "density.h"
-#include "molecular_system.h"
-#include "molecule.h"
 #include "opt_parser.h"
-#include "output.h"
-#include "parameter.h"
-#include "rdf2D.h"
-#include "rdf3D.h"
-#include "spherical_harmonics.h"
-#include "structure_factor.h"
-#include "transition.h"
 
 // Newer pointCloud
+#include <bond.hpp>
 #include <bop.hpp>
+#include <cluster.hpp>
+#include <franzblau.hpp>
 #include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
-#include <rdf.hpp>
+#include <rdf2d.hpp>
+#include <ring.hpp>
+#include <seams_input.hpp>
+#include <seams_output.hpp>
+#include <topo_bulk.hpp>
+#include <topo_one_dim.hpp>
+#include <topo_two_dim.hpp>
 
-// External bundled libraries
+// Externally bundled-input libraries
 // #include <cxxopts.hpp>
 #include <sol.hpp>
 
 // Managed with Conan
 #include <fmt/core.h>
-#include <rang.hpp>
 #include <yaml-cpp/yaml.h>
+#include <rang.hpp>
 
 int main(int argc, char *argv[]) {
-
   // Parse Things
   auto result = parse(argc, argv);
   auto &arguments = result.arguments();
@@ -69,324 +67,220 @@ int main(int argc, char *argv[]) {
   sol::state lua;
   // Use all libraries
   lua.open_libraries();
-
-  // // The program reads the parameter file inside the input folder The main obejct
-  // //     is created.It hold all the functions and data used in the
-  // //         analysis.
-  // CMolecularSystem *m_MolSys = new CMolecularSystem;
-  // // The parameterfile is read
-  // if (result["f"].count() > 0) {
-  //   m_MolSys->parameter->readParameter(result["f"].as<std::string>());
-  // } else {
-  //   m_MolSys->parameter->readParameter(config["file"].as<std::string>());
-  // }
-  // // System is initalized, memory allocated, ...
-  // m_MolSys->InitializeSystem();
-
-  // // Total number of steps in the trajectory
-  // int traj_steps = m_MolSys->parameter->nsteps;
-  // std::cout << " The total number of steps in the trajectory is " << traj_steps
-  //           << "\n";
-
-  // // Get random step info at a frame number
-  // int frame = 4;   // 400 2000
-  // int nsteps = 10; // 50 100
-  // m_MolSys->readParticleFile(frame);
-
-  // // // ----------------------------------------
-  // // // 3D RDF (single step)
-  // // // Create object for 3D RDF
-  // // Rdf3D *rdf1 = new Rdf3D;
-  // // // Testing 3D rdf function
-  // // rdf1->initRDF3D(*m_MolSys, 0.01);
-  // // // Get the 3D RDF for one step
-  // // rdf1->singleRDF3D(*m_MolSys); // default ID=1
-  // // // Print the RDF
-  // // rdf1->printRDF3D();
-
-  // // --------------------------------------------
-  // // // Single frame Rdf2D
-  // // // Create object for 2D RDF
-  // // Rdf2D *rdf = new Rdf2D;
-  // //  // Testing 2D rdf function. RDF calculated is incorrect if the wrong volume is set
-  // // double volume = (8)*m_MolSys->parameter->boxx*m_MolSys->parameter->boxy;
-  // // rdf->initRDFxy(*m_MolSys, 0.05, volume);
-  // // // Get the 2D RDF for one step
-  // // rdf->singleRDFxy(*m_MolSys, 17.85, 0.8, 2, 2);
-  // // // Print the RDF
-  // // rdf->printRDF2D();
-  // // // Free the memory
-  // // rdf->deleteRDF2D();
-
-  // // ----------------------------------------------
-  // //Rdf3D over multiple frames
-  // if (config["rdf3D"]["use"].as<bool>()) {
-  //   // Create object for 3D RDF
-  //   Rdf3D *rdf3D = new Rdf3D;
-  //   // Testing 3D rdf function. RDF calculated is incorrect if the wrong volume is set
-  //   double volume = m_MolSys->parameter->boxx * m_MolSys->parameter->boxy *
-  //                   m_MolSys->parameter->boxz;
-  //   rdf3D->initRDF3D(*m_MolSys, 0.01, volume);
-  //   // Loop through steps
-  //   for (int istep = 1; istep <= nsteps; istep++) {
-  //     // Get the coordinates at a particule step
-  //     m_MolSys->readParticleFile(frame + istep);
-  //     // Get the 3D RDF at this step
-  //     rdf3D->accumulateRDF3D(*m_MolSys, 2, 2);
-  //   }
-
-  //   // Normalizes the RDF (required for multiple steps. This
-  //   // is called automatically in the single step RDF function)
-  //   rdf3D->normalizeRDF3D();
-  //   // Print the RDF
-  //   rdf3D->printRDF3D();
-  //   // Cleanup
-  //   rdf3D->deleteRDF3D();
-  // }
-
-  // // // ----------------------------------------------
-  // // //Structure Factor from 3D RDF
-  // // StructureFactor *s_k = new StructureFactor;
-  // // s_k->initStrucFactor(*rdf3D, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy, m_MolSys->parameter->boxz);
-  // // // ----------------------------------------------
-
-  // // ----------------------------------------------
-  // // Rdf2D over multiple frames
-  // if (config["rdf2D"]["use"].as<bool>()) {
-  //   // Create object for 2D RDF
-  //   Rdf2D *rdf = new Rdf2D;
-  //   // Testing 2D rdf function. RDF calculated is incorrect if the wrong volume is set
-  //   // double volume = (8)*m_MolSys->parameter->boxx*m_MolSys->parameter->boxy;
-  //   rdf->initRDFxy(*m_MolSys, 0.03, 15);
-  //   // Loop through steps
-  //   for (int istep = 1; istep <= nsteps; istep++) {
-  //     // Get the coordinates at a particule step
-  //     m_MolSys->readParticleFile(frame + istep);
-  //     // Get the 2D RDF at this step
-  //     rdf->accumulateRDFxy(*m_MolSys, 17.85, 0.8, 2, 2);
-  //   }
-
-  //   // Normalizes the RDF (required for multiple steps. This
-  //   // is called automatically in the single step RDF function)
-  //   // The width of the layer is the argument
-  //   rdf->normalizeRDF2D(0.8);
-  //   // Print the RDF
-  //   rdf->printRDF2D();
-  //   // Cleanup
-  //   rdf->deleteRDF2D();
-  // }
-
-  // // // ----------------------------------------------
-  // // //Structure Factor from RDF
-  // // StructureFactor *s_k = new StructureFactor;
-  // // s_k->initStrucFactor(*rdf, m_MolSys->parameter->boxx, m_MolSys->parameter->boxy);
-  // // // ----------------------------------------------
-
-  // // --------------------------------------
-  // // Transition system block
-  // if (config["transition"]["use"].as<bool>()) {
-  //   trans::TransitionSystem *t_sys = new trans::TransitionSystem;
-  //   // Bind Function to class instance
-  //   lua.set_function("transition_probability",
-  //                    &trans::TransitionSystem::mightTrans, t_sys);
-  //   // Pass variables to lua
-  //   lua["trajectory_file"] = m_MolSys->parameter->trajFile;
-  //   lua["steps_in_trajectory"] = traj_steps;
-  //   lua["number_of_particles"] = m_MolSys->parameter->nop;
-  //   // Determine script location
-  //   if (result["s"].count() > 0) {
-  //     script = result["s"].as<std::string>();
-  //   } else {
-  //     script = config["transition"]["script"].as<std::string>();
-  //   }
-  //   // Bind Harmonics
-
-  //   // Run the script
-  //   lua.script_file(script);
-  //   // Free the memory.
-  //   t_sys->cleanUp();
-  // }
-  // // --------------------------------------
-
-  // // Free the memory.
-  // m_MolSys->deleteMolecules();
-
+  // Get the trajectory string
+  if (config["trajectory"]) {
+    tFile = config["trajectory"].as<std::string>();
+  }  // end of getting the trajectory
+  // Get variable file string
+  std::string vars = config["variables"].as<std::string>();
   // --------------------------------------
-  // iceType Determination Block
-  if (config["iceType"]["use"].as<bool>()) {
-    // Do error handling if the traj is not there
-    // Get the damn file
-    // Determine script location [cmd > iceType Traj > Traj]
-    if (config["iceType"]["trajectory"]) {
-      tFile = config["iceType"]["trajectory"].as<std::string>();
-    } else {
-      tFile = config["trajectory"].as<std::string>();
-    }
-    // Get variables
-    std::string vars = config["iceType"]["variables"].as<std::string>();
+  // Structure determination block for TWO-DIMENSIONAL ICE
+  if (config["topoTwoDim"]["use"].as<bool>()) {
+    // Use the variables script
+    lua.script_file(vars);
+    // -----------------
+    // Variables which must be declared in C++
+    //
+    // Newer pointCloud (rescloud -> ice structure, solcloud -> largest cluster)
+    molSys::PointCloud<molSys::Point<double>, double> resCloud;
+    // Some neighbor lists
+    std::vector<std::vector<int>> nList, hbnList;
+    // For the list of all rings (of all sizes)
+    std::vector<std::vector<int>> ringsAllSizes;
+    std::vector<std::vector<int>> rings;
+    // RDF stuff
+    std::vector<double> rdfValues;  // RDF vector
+    // -----------------
+    // This section basically only registers functions and handles the rest in
+    // lua Use the functions defined here
+    auto lscript = lua.get<std::string>("functionScript");
+    // Transfer variables to lua
+    lua["doBOP"] = config["bulk"]["use"].as<bool>();
+    lua["topoOneDim"] = config["topoOneDim"]["use"].as<bool>();
+    lua["topoTwoDim"] = config["topoTwoDim"]["use"].as<bool>();
+    lua["topoBulk"] = config["bulk"]["use"].as<bool>();
+    //
+    lua["nList"] = &nList;
+    lua["hbnList"] = &hbnList;
+    lua["resCloud"] = &resCloud;
+    lua["trajectory"] = tFile;
+    // Confined ice stuff
+    lua["ringsAllSizes"] = &rings;
+    // RDF stuff
+    lua["rdf"] = &rdfValues;
+    // -----------------
+    // Register functions
+    //
+    // Writing stuff
+    // Generic requirements
+    lua.set_function("readFrameOnlyOne", sinp::readLammpsTrjreduced);
+    lua.set_function("neighborList", nneigh::neighListO);
+    // -----------------
+    // Topological Network Method Specific Functions
+    // Generic requirements (read in only inside the slice)
+    lua.set_function("getHbondNetwork", bond::populateHbonds);
+    lua.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);
+    // -----------------
+    // Primitive rings
+    lua.set_function("getPrimitiveRings", primitive::ringNetwork);
+    // -----------------
+    // Quasi-two-dimensional ice
+    lua.set_function("ringAnalysis", ring::polygonRingAnalysis);
+    // --------------------------
+    // RDF functions
+    lua.set_function("calcRDF", rdf2::rdf2Danalysis_AA);
+    // --------------------------
+    // Use the script
+    lua.script_file(lscript);
+    // --------------------------
 
+  }  // end of two-dimensional ice block
+  // --------------------------------------
+  // Structure determination block for ONE-DIMENSIONAL ICE
+  if (config["topoOneDim"]["use"].as<bool>()) {
     // Use the script
     lua.script_file(vars);
-
-    // Get Variables (explicitly)
-    auto rc = lua.get<double>("cutoffRadius");
-    auto oType = lua.get<int>("oxygenAtomType");
-    auto tFrame = lua.get<int>("targetFrame");
-    auto fFrame = lua.get<int>("finalFrame");
-    auto fGap = lua.get<int>("frameGap");
-    auto dumpName = lua.get<std::string>("dumpName");
-    auto advUse = lua.get<bool>("defineFunctions");
-    auto outFileChillPlus = lua.get<std::string>("chillPlus_noMod");
-    auto outFileChill = lua.get<std::string>("chill_mod");
-    auto outFileSuper = lua.get<std::string>("chillPlus_mod");
-    auto outCluster = lua.get<std::string>("largest_ice_cluster_name");
-
+    // -----------------
     // Variables which must be declared in C++
+    //
     // Newer pointCloud (rescloud -> ice structure, solcloud -> largest cluster)
-    MolSys::PointCloud<MolSys::Point<double>, double> resCloud, solCloud;
+    molSys::PointCloud<molSys::Point<double>, double> resCloud;
+    // Some neighbor
+    std::vector<std::vector<int>> nList, hbnList;
+    // For the list of all rings (of all sizes)
+    std::vector<std::vector<int>> ringsAllSizes;
+    std::vector<std::vector<int>> rings;
+    // -----------------
+    // This section basically only registers functions and handles the rest in
+    // lua Use the functions defined here
+    auto lscript = lua.get<std::string>("functionScript");
+    // Transfer variables to lua
+    lua["doBOP"] = config["bulk"]["use"].as<bool>();
+    lua["topoOneDim"] = config["topoOneDim"]["use"].as<bool>();
+    lua["topoTwoDim"] = config["topoTwoDim"]["use"].as<bool>();
+    lua["topoBulk"] = config["bulk"]["use"].as<bool>();
+    //
+    lua["nList"] = &nList;
+    lua["hbnList"] = &hbnList;
+    lua["resCloud"] = &resCloud;
+    lua["trajectory"] = tFile;
+    // Confined ice stuff
+    lua["ringsAllSizes"] = &rings;
+    // Register functions
+    //
+    // Writing stuff
+    // Generic requirements
+    lua.set_function("readFrameOnlyOne", sinp::readLammpsTrjreduced);
+    lua.set_function("neighborList", nneigh::neighListO);
+    // -----------------
+    // Topological Network Method Specific Functions
+    // Generic requirements (read in only inside the slice)
+    lua.set_function("getHbondNetwork", bond::populateHbonds);
+    lua.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);
+    // -----------------
+    // Primitive rings
+    lua.set_function("getPrimitiveRings", primitive::ringNetwork);
+    // -----------------
+    // Quasi-one-dimensional ice
+    lua.set_function("prismAnalysis", ring::prismAnalysis);
+    // --------------------------
+    // Use the script
+    lua.script_file(lscript);
+    // --------------------------
+
+  }  // end of one-dimensional ice block
+  // --------------------------------------
+  // Ice Structure Determination for BULK ICE
+  if (config["bulk"]["use"].as<bool>()) {
+    // Use the variables script
+    lua.script_file(vars);
+    // Variables which must be declared in C++
+    //
+    // Newer pointCloud (rescloud -> ice structure, solcloud -> largest
+    molSys::PointCloud<molSys::Point<double>, double> resCloud, solCloud;
+    // Some neighbor
+    std::vector<std::vector<int>> nList,
+        hbnList;  // Neighbour lists (by cutoff and hydrogen-bonded neighbour
+                  // lists)
+    std::vector<std::vector<int>>
+        iceList;  // Neighbour list for the largest ice cluster
     // For averaged q6
     std::vector<double> avgQ6;
+    // For the list of all rings (of all sizes)
+    std::vector<std::vector<int>> ringsAllSizes;
+    std::vector<std::vector<int>> rings;
+    // -----------------
+    // Variables defined in C++ specific to confined systems
 
-    if (advUse == true) {
-      // This section basically only registers functions and handles the rest in lua
-      // Use the functions defined here
-      auto lscript = lua.get<std::string>("functionScript");
-      // Transfer variables to lua
-      lua["resCloud"] = &resCloud;
-      lua["clusterCloud"] = &solCloud;
-      lua["avgQ6"] = &avgQ6;
-      lua["trajectory"] = tFile;
-      // Register functions
-      // Writing stuff
-      lua.set_function("writeDump", gen::writeDump);
-      lua.set_function("writeHistogram", gen::writeHisto);
-      // Generic requirements
-      lua.set_function("readFrame", MolSys::readLammpsTrjO);
-      lua.set_function("neighborList", nneigh::neighListO);
-      // CHILL+ and modifications
-      lua.set_function("chillPlus_cij", chill::getCorrelPlus);
-      lua.set_function("chillPlus_iceType", chill::getIceTypePlus);
-      lua.set_function("averageQ6", chill::getq6);
-      lua.set_function("modifyChill", chill::reclassifyWater);
-      lua.set_function("percentage_Ice", chill::printIceType);
-      // Largest ice cluster
-      lua.set_function("create_cluster", chill::getIceCloud);
-      lua.set_function("largest_cluster", chill::largestIceCluster);
-      lua.set_function("writeCluster", gen::writeCluster);
-      // Use the script
-      lua.script_file(lscript);
-      std::cout << "\nTest\n";
-    } else {
-      // Analyze
+    // This section basically only registers functions and handles the rest in
+    // lua lua Use the functions defined here
+    auto lscript = lua.get<std::string>("functionScript");
+    // Transfer variables to lua
+    lua["doBOP"] = config["bulk"]["bondOrderParameters"].as<bool>();
+    lua["topoOneDim"] = config["topoOneDim"]["use"].as<bool>();
+    lua["topoTwoDim"] = config["topoTwoDim"]["use"].as<bool>();
+    lua["topoBulk"] = config["bulk"]["topologicalNetworkCriterion"].as<bool>();
+    //
+    lua["nList"] = &nList;
+    lua["hbnList"] = &hbnList;
+    lua["iceNeighbourList"] = &iceList;
+    lua["resCloud"] = &resCloud;
+    lua["clusterCloud"] = &solCloud;
+    lua["avgQ6"] = &avgQ6;
+    lua["trajectory"] = tFile;
+    // Confined ice stuff
+    lua["ringsAllSizes"] = &rings;
+    // Register functions
+    //
+    // Writing stuff
+    lua.set_function("writeDump", sout::writeDump);
+    lua.set_function("writeHistogram", sout::writeHisto);
+    // Generic requirements
+    lua.set_function("readFrame", sinp::readLammpsTrjO);
+    lua.set_function("neighborList", nneigh::neighListO);
+    // CHILL+ and modifications
+    lua.set_function("chillPlus_cij", chill::getCorrelPlus);
+    lua.set_function("chillPlus_iceType", chill::getIceTypePlus);
+    // CHILL functions
+    lua.set_function("chill_cij", chill::getCorrel);
+    lua.set_function("chill_iceType", chill::getIceType);
+    // Reclassify using q6
+    lua.set_function("averageQ6", chill::getq6);
+    lua.set_function("modifyChill", chill::reclassifyWater);
+    lua.set_function("percentage_Ice", chill::printIceType);
+    // Largest ice cluster
+    lua.set_function("clusterAnalysis", clump::clusterAnalysis);
+    lua.set_function("recenterCluster", clump::recenterClusterCloud);
+    // -----------------
+    // Topological Network Methods
+    // Generic requirements (read in only inside the slice)
+    lua.set_function("readFrameOnlyOne", sinp::readLammpsTrjreduced);
+    lua.set_function("getHbondNetwork", bond::populateHbonds);
+    lua.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);
+    // -----------------
+    // Primitive rings
+    lua.set_function("getPrimitiveRings", primitive::ringNetwork);
+    // -----------------
+    // Bulk ice, using the topological network criterion
+    lua.set_function("bulkTopologicalNetworkCriterion", ring::topoBulkAnalysis);
+    // --------------------------
+    // Use the script
+    lua.script_file(lscript);
+    // --------------------------
 
-      // Delete later
-      std::ofstream cijFile;
-      cijFile.open("cij.txt");
-      cijFile << "Cij\n";
-      cijFile.close();
-      std::ofstream q3File;
-      q3File.open("q3.txt");
-      q3File << "Q3\n";
-      q3File.close();
-      std::ofstream q6File;
-      q6File.open("q6.txt");
-      q6File << "Q6\n";
-      q6File.close();
-
-      // For overwriting old files
-      // and for printing the first line of output files
-      std::ofstream clusterFile;
-      for (int frame = tFrame; frame <= fFrame; frame += fGap) {
-        // Read in a frame
-        resCloud = MolSys::readLammpsTrj(tFile, frame, &resCloud, oType);
-        // // Sort according to atom ID (OPTIONAL)
-        // std::sort(resCloud.pts.begin(), resCloud.pts.end(), gen::compareByAtomID);
-        // Update the neighbour lists
-        resCloud = nneigh::neighListO(rc, &resCloud, oType);
-
-        // ------------------------------
-        // If you want to use CHILL+
-        // Calculate c_ij
-        resCloud = chill::getCorrelPlus(&resCloud, false);
-        // Print first line to file
-        if (frame == tFrame) {
-          std::ofstream chill;
-          chill.open(outFileChillPlus);
-          chill << "Frame Ic Ih Interfacial Clath InterClath Water Total\n";
-          chill.close();
-        }
-        // Classify according to CHILL+
-        resCloud = chill::getIceTypePlus(&resCloud, false, outFileChillPlus);
-        // ------------------------------
-
-        // Get the averaged q6 per atom
-        // Greater than 0.5 means ice
-        // Update the neighbour lists
-        // resCloud = nneigh::neighList(3.2, &resCloud, oxyType);
-        avgQ6 = chill::getq6(&resCloud, false);
-
-        // Reclassify according to averaged q3 and q6
-        resCloud = chill::reclassifyWater(&resCloud, &avgQ6);
-
-        // --------------------
-        // Print modified parameter
-        // Print first line to file
-        if (frame == tFrame) {
-          std::ofstream chill;
-          chill.open(outFileSuper);
-          chill << "Frame Ic Ih Interfacial Clath InterClath Water Total\n";
-          chill.close();
-        }
-        // Print out and calculate the number
-        // and percentage of the ice types after reclassification
-        chill::printIceType(&resCloud, false, outFileSuper);
-        // ---------------------
-
-        // ---------------------
-        // Get the largest ice cluster
-        MolSys::PointCloud<MolSys::Point<double>, double> solCloud;
-        int largestIceCluster;
-        solCloud = chill::getIceCloud(&resCloud, &solCloud);
-        largestIceCluster =
-            chill::largestIceCluster(&solCloud, rc, true, false);
-        // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-        // Write out the largest ice cluster to a file
-        if (frame == tFrame) {
-          clusterFile.open("cluster.txt");
-          clusterFile << "Frame NumberInCluster\n";
-          clusterFile << solCloud.currentFrame << " " << largestIceCluster
-                      << "\n";
-          clusterFile.close();
-        } else {
-          gen::writeCluster(&solCloud, outCluster, false, largestIceCluster);
-        }
-        // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-        solCloud = clearPointCloud(&solCloud);
-        // ---------------------
-
-        // // Print to file here (cij etc)
-        // std::string outName = "chill-"+std::to_string(frame);
-        // int val = gen::prettyPrintYoda(&resCloud, outName);
-        // Print to file here
-        gen::writeDump(&resCloud, dumpName);
-
-        // Write out Cij, Q3, Q6 to files
-        gen::writeHisto(&resCloud, avgQ6);
-      }
-    }
-  }
+  }  // end of bulk ice structure determination block
   // --------------------------------------
 
   std::cout << rang::style::bold
             << fmt::format("Welcome to the Black Parade.\nYou ran:-\n")
             << rang::style::reset
-            << fmt::format("RDF 3D Analysis: {}",
-                           config["rdf3D"]["use"].as<bool>())
-            << fmt::format("\nRDF 2D Analysis: {}",
-                           config["rdf2D"]["use"].as<bool>())
-            << fmt::format("\nPhase Transition Analysis: {}",
-                           config["transition"]["use"].as<bool>())
-            << fmt::format("\nIce Structure: {}\n",
-                           config["iceType"]["use"].as<bool>());
+            << fmt::format("\nBulk Ice Analysis: {}",
+                           config["bulk"]["use"].as<bool>())
+            << fmt::format("\nQuasi-one-dimensional Ice Analysis: {}",
+                           config["topoOneDim"]["use"].as<bool>())
+            << fmt::format("\nQuasi-two-dimensional Ice Analysis: {}",
+                           config["topoTwoDim"]["use"].as<bool>())
+            << "\n";
+
   return 0;
 }

@@ -2,456 +2,15 @@
 #include <memory>
 #include <mol_sys.hpp>
 
-// #include <boost/filesystem.hpp>
-
-// namespace fs = boost::filesystem;
-
-// External Libraries
-
 /********************************************/ /**
- *  Function for reading in a lammps file. 
- *  Reads in a specified frame (frame number and not timestep value).
- *  @param[in] filename The name of the lammps trajectory file to be read in
- *  @param[in] targetFrame The frame number whose information will be read in
- *  @param[out] yCloud The outputted PointCloud
- *  @param[in] isSlice This decides whether a slice will be created or not
- *  @param[in] coordLow Contains the lower limits of the slice, if a slice is to be created
- *  @param[in] coordHigh Contains the upper limits of the slice, if a slice is to be created
- ***********************************************/
-MolSys::PointCloud<MolSys::Point<double>, double>
-MolSys::readLammpsTrj(std::string filename, int targetFrame,
-                      MolSys::PointCloud<MolSys::Point<double>, double> *yCloud,
-                      bool isSlice, std::array<double, 3> coordLow,
-                      std::array<double, 3> coordHigh) {
-  std::unique_ptr<std::ifstream> dumpFile;
-  dumpFile = std::make_unique<std::ifstream>(filename);
-  std::string line;                // Current line being read in
-  std::vector<std::string> tokens; // Vector containing word tokens
-  std::vector<double> numbers;     // Vector containing type double numbers
-  std::vector<double> tilt;        // Vector containing tilt factors
-  int currentFrame = 0;            // Current frame being read in
-  int nop = -1;                    // Number of atoms in targetFrame
-  bool foundFrame =
-      false;            // Determines whether targetFrame has been found or not
-  bool readNOP = false; // Flag for reading in the number of atoms
-  bool readBox = false; // Flag for reading in the box lengths
-  bool readAtoms = false; // Flag for reading in the atoms
-  int xIndex, yIndex, zIndex,
-      typeIndex;     // Indices for x,y,z coordinates, and LAMMPS type ID
-  int molIndex = 0;  // Index for molecular ID
-  int atomIndex = 0; // Index for atom ID (Only used if mol ID has not been set)
-  MolSys::Point<double> iPoint; // Current point being read in from the file
-  xIndex = yIndex = zIndex = typeIndex = -1; // Default values
-  bool isTriclinic = false; // Flag for an orthogonal or triclinic box
-
-  if (!(MolSys::file_exists(filename))) {
-    std::cout
-        << "Fatal Error: The file does not exist or you gave the wrong path.\n";
-    // Throw exception?
-    return *yCloud;
-  }
-
-  // The format of the LAMMPS trajectory file is:
-  // ITEM: TIMESTEP
-  // 0
-  // ITEM: NUMBER OF ATOMS
-  // 4096
-  // ITEM: BOX BOUNDS pp pp pp
-  // -7.9599900000000001e-01 5.0164000000000001e+01
-  // -7.9599900000000001e-01 5.0164000000000001e+01
-  // -7.9599900000000001e-01 5.0164000000000001e+01
-  // ITEM: ATOMS id type x y z
-  // 1 1 0 0 0 etc
-  if (dumpFile->is_open()) {
-    // ----------------------------------------------------------
-    // At this point we know that the dumpfile is open
-    // This loop searches for targetFrame
-    while (std::getline((*dumpFile), line)) {
-      // Read in lines and tokenize them
-      tokens = MolSys::tokenizer(line);
-      // Find out which timestep number
-      // you are inside
-      if (tokens[0].compare("ITEM:") == 0) {
-        if (tokens[1].compare("TIMESTEP") == 0) {
-          // Now you are in a new timestep. Update frame number
-          currentFrame++;
-        }
-      }
-
-      // If targetFrame has been found
-      // break out of the while loop
-      if (currentFrame == targetFrame) {
-        foundFrame = true;
-        break; // Exit the while loop
-      }
-    } // End of while loop searching for targetFrame
-    // ----------------------------------------------------------
-    // Before filling up the PointCloud, if the vectors are filled
-    // empty them
-    *yCloud = MolSys::clearPointCloud(yCloud);
-
-    // ----------------------------------------------------------
-    // If targetFrame has been found, read in the box lengths,
-    // number of atoms and then read in atom positions, type, molID
-    // By default, set molID=1 if not specified
-    if (foundFrame) {
-      // Run this until EOF or you reach the next timestep
-      while (std::getline((*dumpFile), line)) {
-        // Read in lines and tokenize them into std::string words and <double> numbers
-        tokens = MolSys::tokenizer(line);
-        numbers = MolSys::tokenizerDouble(line);
-
-        // If you've reached the timestep line then you've reached the
-        // next frame. Break out of the while loop
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("TIMESTEP") == 0) {
-            break;
-          }
-        }
-
-        // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-        // Read number of particles
-        if (readNOP) {
-          nop = std::stoi(line.data());
-          readNOP = false;
-          yCloud->pts.reserve(nop);
-          yCloud->nop = nop;
-        }
-        // Read box lengths
-        if (readBox) {
-          // You've reached the end of box lengths
-          if (tokens[0].compare("ITEM:") == 0) {
-            readBox = false;
-            // If the box is triclinic, get the
-            // orthogonal 'bounding box'
-            if (isTriclinic) {
-              // Update tilt factors
-              for (int k = 0; k < tilt.size(); k++) {
-                yCloud->box.push_back(tilt[k]);
-              }
-            } // end of check for triclinic
-          }
-          // Or else fill up the box lengths
-          else {
-            yCloud->box.push_back(numbers[1] - numbers[0]); // Update box length
-            yCloud->boxLow.push_back(
-                numbers[0]); // Update the lower box coordinate
-            // Do this for a triclinic box only
-            if (numbers.size() == 3) {
-              isTriclinic = true;
-              tilt.push_back(numbers[2]);
-            }
-          }
-        }
-        // Read atoms into yCloud line by line
-        if (readAtoms) {
-          iPoint.type = numbers[typeIndex];
-          iPoint.molID = numbers[molIndex];
-          iPoint.atomID = numbers[atomIndex];
-          iPoint.x = numbers[xIndex];
-          iPoint.y = numbers[yIndex];
-          iPoint.z = numbers[zIndex];
-          // Check if the particle is inside the volume Slice
-          // or not
-          if (isSlice) { // only if a slice has been requested
-            iPoint.inSlice = MolSys::atomInSlice(iPoint.x, iPoint.y, iPoint.z,
-                                                 coordLow, coordHigh);
-          }
-          yCloud->pts.push_back(iPoint);
-        }
-        // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-
-        // Tests for reading in nop, box lengths, and atoms
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("NUMBER") == 0) {
-            readNOP = true;
-          }
-        }
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("BOX") == 0) {
-            readBox = true;
-          }
-        }
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("ATOMS") == 0) {
-            readAtoms = true;
-            // Now find out which index is the coordinate index etc
-            for (int i = 2; i < tokens.size(); i++) {
-              if (tokens[i].compare("type") == 0) {
-                typeIndex = i - 2;
-              }
-              if (tokens[i].compare("x") == 0) {
-                xIndex = i - 2;
-              }
-              if (tokens[i].compare("y") == 0) {
-                yIndex = i - 2;
-              }
-              if (tokens[i].compare("z") == 0) {
-                zIndex = i - 2;
-              }
-              if (tokens[i].compare("mol") == 0) {
-                molIndex = i - 2;
-              }
-              if (tokens[i].compare("id") == 0) {
-                atomIndex = i - 2;
-              }
-            } // End of for loop over tokens
-            if (molIndex == 0) {
-              molIndex = atomIndex;
-            } // Set mol ID=atomID if not given
-          }
-        } // End of nested if loops for checking atom
-
-      } // End of while
-    }   // End of targetFrame found
-    // ----------------------------------------------------------
-  } // End of if file open statement
-
-  // Check if you filled in the frame correctly
-  if (!(foundFrame)) {
-    std::cout << "You entered a frame that doesn't exist.\n";
-  } // Throw exception
-  if (foundFrame) {
-    if (yCloud->pts.size() != yCloud->nop) {
-      std::cout << "Atoms didn't get filled in properly.\n";
-    }
-  } // Throw exception
-  yCloud->currentFrame = targetFrame;
-
-  dumpFile->close();
-  return *yCloud;
-}
-
-/********************************************/ /**
- *  Function for reading in a lammps file; and saves only the Oxygen atoms.
- This is an overloaded function. The Oxygen atom ID must be specified.
- *  @param[in] filename The name of the lammps trajectory file to be read in
- *  @param[in] targetFrame The frame number whose information will be read in
- *  @param[out] yCloud The outputted PointCloud
- *  @param[in] typeO The type ID of the Oxygen atoms
- *  @param[in] isSlice This decides whether a slice will be created or not
- *  @param[in] coordLow Contains the lower limits of the slice, if a slice is to be created
- *  @param[in] coordHigh Contains the upper limits of the slice, if a slice is to be created
- ***********************************************/
-MolSys::PointCloud<MolSys::Point<double>, double> MolSys::readLammpsTrjO(
-    std::string filename, int targetFrame,
-    MolSys::PointCloud<MolSys::Point<double>, double> *yCloud, int typeO,
-    bool isSlice, std::array<double, 3> coordLow,
-    std::array<double, 3> coordHigh) {
-  std::unique_ptr<std::ifstream> dumpFile;
-  dumpFile = std::make_unique<std::ifstream>(filename);
-  std::string line;                // Current line being read in
-  std::vector<std::string> tokens; // Vector containing word tokens
-  std::vector<double> numbers;     // Vector containing type double numbers
-  std::vector<double> tilt;        // Vector containing tilt factors
-  int currentFrame = 0;            // Current frame being read in
-  int nop = -1;                    // Number of atoms in targetFrame
-  bool foundFrame =
-      false;            // Determines whether targetFrame has been found or not
-  bool readNOP = false; // Flag for reading in the number of atoms
-  bool readBox = false; // Flag for reading in the box lengths
-  bool readAtoms = false; // Flag for reading in the atoms
-  int xIndex, yIndex, zIndex,
-      typeIndex;     // Indices for x,y,z coordinates, and LAMMPS type ID
-  int molIndex = 0;  // Index for molecular ID
-  int atomIndex = 0; // Index for atom ID (Only used if mol ID has not been set)
-  MolSys::Point<double> iPoint; // Current point being read in from the file
-  xIndex = yIndex = zIndex = typeIndex = -1; // Default values
-  bool isTriclinic = false; // Flag for an orthogonal or triclinic box
-  int nOxy = 0;             // Number of oxygen atoms
-
-  if (!(MolSys::file_exists(filename))) {
-    std::cout
-        << "Fatal Error: The file does not exist or you gave the wrong path.\n";
-    // Throw exception?
-    return *yCloud;
-  }
-
-  // The format of the LAMMPS trajectory file is:
-  // ITEM: TIMESTEP
-  // 0
-  // ITEM: NUMBER OF ATOMS
-  // 4096
-  // ITEM: BOX BOUNDS pp pp pp
-  // -7.9599900000000001e-01 5.0164000000000001e+01
-  // -7.9599900000000001e-01 5.0164000000000001e+01
-  // -7.9599900000000001e-01 5.0164000000000001e+01
-  // ITEM: ATOMS id type x y z
-  // 1 1 0 0 0 etc
-  if (dumpFile->is_open()) {
-    // ----------------------------------------------------------
-    // At this point we know that the dumpfile is open
-    // This loop searches for targetFrame
-    while (std::getline((*dumpFile), line)) {
-      // Read in lines and tokenize them
-      tokens = MolSys::tokenizer(line);
-      // Find out which timestep number
-      // you are inside
-      if (tokens[0].compare("ITEM:") == 0) {
-        if (tokens[1].compare("TIMESTEP") == 0) {
-          // Now you are in a new timestep. Update frame number
-          currentFrame++;
-        }
-      }
-
-      // If targetFrame has been found
-      // break out of the while loop
-      if (currentFrame == targetFrame) {
-        foundFrame = true;
-        break; // Exit the while loop
-      }
-    } // End of while loop searching for targetFrame
-    // ----------------------------------------------------------
-    // Before filling up the PointCloud, if the vectors are filled
-    // empty them
-    *yCloud = MolSys::clearPointCloud(yCloud);
-
-    // ----------------------------------------------------------
-    // If targetFrame has been found, read in the box lengths,
-    // number of atoms and then read in atom positions, type, molID
-    // By default, set molID=1 if not specified
-    if (foundFrame) {
-      // Run this until EOF or you reach the next timestep
-      while (std::getline((*dumpFile), line)) {
-        // Read in lines and tokenize them into std::string words and <double> numbers
-        tokens = MolSys::tokenizer(line);
-        numbers = MolSys::tokenizerDouble(line);
-
-        // If you've reached the timestep line then you've reached the
-        // next frame. Break out of the while loop
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("TIMESTEP") == 0) {
-            break;
-          }
-        }
-
-        // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-        // Read number of particles
-        if (readNOP) {
-          nop = std::stoi(line.data());
-          readNOP = false;
-        }
-        // Read box lengths
-        if (readBox) {
-          // You've reached the end of box lengths
-          if (tokens[0].compare("ITEM:") == 0) {
-            readBox = false;
-            // If the box is triclinic, get the
-            // orthogonal 'bounding box'
-            if (isTriclinic) {
-              // Update tilt factors
-              for (int k = 0; k < tilt.size(); k++) {
-                yCloud->box.push_back(tilt[k]);
-              }
-            } // end of check for triclinic
-          }
-          // Or else fill up the box lengths
-          else {
-            yCloud->box.push_back(numbers[1] - numbers[0]); // Update box length
-            yCloud->boxLow.push_back(
-                numbers[0]); // Update the lower box coordinate
-            // Do this for a triclinic box only
-            if (numbers.size() == 3) {
-              isTriclinic = true;
-              tilt.push_back(numbers[2]);
-            }
-          }
-        }
-        // Read atoms into yCloud line by line
-        if (readAtoms) {
-          iPoint.type = numbers[typeIndex];
-          iPoint.molID = numbers[molIndex];
-          iPoint.atomID = numbers[atomIndex];
-          iPoint.x = numbers[xIndex];
-          iPoint.y = numbers[yIndex];
-          iPoint.z = numbers[zIndex];
-          // Check if the particle is inside the volume Slice
-          // or not
-          if (isSlice) { // only if a slice has been requested
-            iPoint.inSlice = MolSys::atomInSlice(iPoint.x, iPoint.y, iPoint.z,
-                                                 coordLow, coordHigh);
-          }
-          // Save only oxygen atoms
-          if (iPoint.type == typeO) {
-            nOxy++;
-            // yCloud->pts.resize(yCloud->pts.size()+1);
-            yCloud->pts.push_back(iPoint);
-          }
-        }
-        // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-
-        // Tests for reading in nop, box lengths, and atoms
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("NUMBER") == 0) {
-            readNOP = true;
-          }
-        }
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("BOX") == 0) {
-            readBox = true;
-          }
-        }
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("ATOMS") == 0) {
-            readAtoms = true;
-            // Now find out which index is the coordinate index etc
-            for (int i = 2; i < tokens.size(); i++) {
-              if (tokens[i].compare("type") == 0) {
-                typeIndex = i - 2;
-              }
-              if (tokens[i].compare("x") == 0) {
-                xIndex = i - 2;
-              }
-              if (tokens[i].compare("y") == 0) {
-                yIndex = i - 2;
-              }
-              if (tokens[i].compare("z") == 0) {
-                zIndex = i - 2;
-              }
-              if (tokens[i].compare("mol") == 0) {
-                molIndex = i - 2;
-              }
-              if (tokens[i].compare("id") == 0) {
-                atomIndex = i - 2;
-              }
-            } // End of for loop over tokens
-            if (molIndex == 0) {
-              molIndex = atomIndex;
-            } // Set mol ID=atomID if not given
-          }
-        } // End of nested if loops for checking atom
-
-      } // End of while
-    }   // End of targetFrame found
-    // ----------------------------------------------------------
-  } // End of if file open statement
-
-  // Check if you filled in the frame correctly
-  if (!(foundFrame)) {
-    std::cout << "You entered a frame that doesn't exist.\n";
-  } // Throw exception
-  if (foundFrame) {
-    yCloud->nop = yCloud->pts.size();
-    if (yCloud->pts.size() != nOxy) {
-      std::cout << "Atoms didn't get filled in properly.\n";
-    }
-  } // Throw exception
-  yCloud->currentFrame = targetFrame;
-
-  dumpFile->close();
-  return *yCloud;
-}
-
-/********************************************/ /**
- *  Function for clearing PointCloud if it is already 
+ *  Function for clearing PointCloud if it is already
  filled. This should be called before every frame is read in.
  *  @param[out] yCloud The cleared PointCloud
  ***********************************************/
-MolSys::PointCloud<MolSys::Point<double>, double> MolSys::clearPointCloud(
-    MolSys::PointCloud<MolSys::Point<double>, double> *yCloud) {
-
+molSys::PointCloud<molSys::Point<double>, double> molSys::clearPointCloud(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
   //
-  std::vector<MolSys::Point<double>> tempPts;
+  std::vector<molSys::Point<double>> tempPts;
   std::vector<double> tempBox;
   //
   std::vector<double> tempBox1;
@@ -459,6 +18,98 @@ MolSys::PointCloud<MolSys::Point<double>, double> MolSys::clearPointCloud(
   tempPts.swap(yCloud->pts);
   tempBox.swap(yCloud->box);
   tempBox1.swap(yCloud->boxLow);
+  yCloud->idIndexMap.clear();
 
   return *yCloud;
+}
+
+/********************************************/ /**
+                                                *  Function for creating an
+                                                *unordered map with the atomIDs
+                                                *in the pointCloud as the keys
+                                                *and the molecular IDs as the
+                                                *values
+                                                ***********************************************/
+std::unordered_map<int, int> molSys::createIDMolIDmap(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
+  std::unordered_map<int, int>
+      idMolIDmap;  // atom IDs as keys and mol IDs as values
+  int iatomMolID;  // molID of the current iatom
+  int iatomID;     // atom ID of the current iatom
+
+  // Loop through the atoms in yCloud
+  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+    iatomID = yCloud->pts[iatom].atomID;    // atom ID
+    iatomMolID = yCloud->pts[iatom].molID;  // molecular ID
+    // Update the unordered map
+    idMolIDmap[iatomID] = iatomMolID;
+  }  // end of loop through every iatom in pointCloud
+
+  return idMolIDmap;
+}
+
+/********************************************/ /**
+                                                *  Function that returns a
+                                                *vector of vectors, which
+                                                *contains the hydrogen atoms for
+                                                *each molID in the oxygen atom
+                                                *pointCloud
+                                                ***********************************************/
+std::vector<std::vector<int>> molSys::hAtomMolList(
+    molSys::PointCloud<molSys::Point<double>, double> *hCloud,
+    molSys::PointCloud<molSys::Point<double>, double> *oCloud) {
+  std::vector<std::vector<int>>
+      hMolList;  // the first column contains the molecular IDs, and the next
+                 // two elements in the row are the hydrogen bond atoms in the
+                 // molecule
+  int iMolID;    // Current molecular ID
+  int nHatoms;   // No. of h atoms found for a particular molID.
+
+  for (int iatom = 0; iatom < oCloud->nop; iatom++) {
+    // Get the molID
+    iMolID = oCloud->pts[iatom].molID;
+
+    hMolList.push_back(std::vector<int>());  // Empty vector for the index iatom
+    // Fill the first element with the molecular ID
+    hMolList[iatom].push_back(iMolID);
+
+    nHatoms = 0;  // init (no. of h atoms for the particular molID)
+
+    // Now search through the hydrogen atom pointCloud for this particular molID
+    for (int jatom = 0; jatom < hCloud->nop; jatom++) {
+      if (hCloud->pts[jatom].molID == iMolID) {
+        hMolList[iatom].push_back(jatom);  // fill the hatom index
+        nHatoms++;
+        // If the two hydrogens have been found, break out of the loop
+        if (nHatoms == 2) {
+          break;
+        }  // end of break
+      }    // end of check to see if jatom is part of iMolID
+    }      // end of loop through the hydrogen atom pointCloud
+  }        // end of looping through every oxygen atom
+
+  return hMolList;
+}  // end of function
+
+/********************************************/ /**
+                                                *  Function for searching a
+                                                *vector of vectors for a
+                                                *particular molecular ID, and
+                                                *returns the index found in
+                                                *molList. Returns -1 if not
+                                                *found.
+                                                ***********************************************/
+int molSys::searchMolList(std::vector<std::vector<int>> molList,
+                          int molIDtoFind) {
+  int index = -1;  // init invalid index
+
+  for (int iatom = 0; iatom < molList.size(); iatom++) {
+    // If the molecular ID is equal, return the index in the array
+    if (molList[iatom][0] == molIDtoFind) {
+      index = iatom;
+      return index;
+    }  // end of check
+  }    // end of looping through iatom
+
+  return index;
 }
