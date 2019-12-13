@@ -21,6 +21,7 @@ include(FindGSL)
 find_package(
   "Lua" REQUIRED
   "Boost" REQUIRED
+  "Eigen3 3.3" REQUIRED
   "Catch2" REQUIRED
   "GSL" REQUIRED
   "yaml-cpp"
@@ -31,6 +32,7 @@ find_package(
 # Link everything
 target_link_libraries(yodaStruct_test
   ${Boost_LIBRARIES}
+  ${Eigen3_LIBRARIES}
   ${LUA_LIBRARIES}
   ${GSL_LIBRARIES}
   fmt
@@ -44,6 +46,7 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/src/include/internal
   ${PROJECT_SOURCE_DIR}/src/include/external
   ${GSL_INCLUDE_DIRS}
+  ${Eigen3_INCLUDE_DIRS}
   )
 # Run unit tests
 add_test(NAME yodaStruct-unit-tests COMMAND $<TARGET_FILE:yodaStruct_test>)
