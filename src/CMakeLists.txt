@@ -23,6 +23,7 @@ include_directories(
   include/external
   ${LUA_INCLUDE_DIR}
   ${Boost_INCLUDE_DIRS}
+  ${Eigen3_INCLUDE_DIRS}
   ${GSL_INCLUDE_DIRS}
   )
 add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
@@ -31,6 +32,7 @@ find_package(
   "Lua" REQUIRED
   "GSL" REQUIRED
   "Boost" REQUIRED COMPONENTS system filesystem
+  "Eigen3 3.3" REQUIRED
   "yaml-cpp"
   "fmt"
   "rang")
@@ -40,6 +42,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 target_link_libraries(
   yodaStruct
   ${Boost_LIBRARIES}
+  ${Eigen3_LIBRARIES}
   ${LUA_LIBRARIES}
   ${GSL_LIBRARIES}
   stdc++fs
