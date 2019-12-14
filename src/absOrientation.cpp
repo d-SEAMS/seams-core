@@ -15,6 +15,8 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd& refPoints,
       nop, dim);  // Target point set after centering wrt the centroid
   Eigen::MatrixXd S(dim,
                     dim);  // Matrix containing sums of products of coordinates
+  Eigen::MatrixXd N(
+      4, 4);  // 4x4 Matrix, whose largest eigenvector must be calculated
   // -----
   // Check that the sizes of the reference point set (right point system) and
   // the target point set (left point system) are the same
@@ -36,6 +38,9 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd& refPoints,
   //
   // Find the 3x3 matrix S
   S = absor::calcMatrixS(centeredRefPnts, centeredTargetPnts, nop, dim);
+  // Calculate the 4x4 symmetric matrix N, whose largest eigenvector yields the
+  // quaternion in the same direction
+  N = absor::calcMatrixN(S);
   // ---------------------------------------------------
   return 0;
 }  // end of function
@@ -65,6 +70,56 @@ Eigen::MatrixXd absor::calcMatrixS(const Eigen::MatrixXd& centeredRefPnts,
 
   // Output matrix
   return S;
+}  // end of function
+
+// Compute the matrix S, or M, whose elements are the sums of products of
+// coordinates measured in the left and right systems
+Eigen::MatrixXd absor::calcMatrixN(const Eigen::MatrixXd& S) {
+  //
+  Eigen::MatrixXd N(4, 4);  // Output matrix N
+  // Components of S
+  double Sxx = S(0, 0);
+  double Sxy = S(0, 1);
+  double Sxz = S(0, 2);
+  double Syx = S(1, 0);
+  double Syy = S(1, 1);
+  double Syz = S(1, 2);
+  double Szx = S(2, 0);
+  double Szy = S(2, 1);
+  double Szz = S(2, 2);
+
+  // N=[(Sxx+Syy+Szz)  (Syz-Szy)      (Szx-Sxz)      (Sxy-Syx);...
+  //          (Syz-Szy)      (Sxx-Syy-Szz)  (Sxy+Syx)      (Szx+Sxz);...
+  //          (Szx-Sxz)      (Sxy+Syx)     (-Sxx+Syy-Szz)  (Syz+Szy);...
+  //          (Sxy-Syx)      (Szx+Sxz)      (Syz+Szy)      (-Sxx-Syy+Szz)];
+
+  // ------------------
+  // Calculating N:
+  // Diagonal elements
+  N(0, 0) = Sxx + Syy + Szz;
+  N(1, 1) = Sxx - Syy - Szz;
+  N(2, 2) = -Sxx + Syy - Szz;
+  N(3, 3) = -Sxx - Syy + Szz;
+  // Other elements
+  // First row
+  N(0, 1) = Syz - Szy;
+  N(0, 2) = Szx - Sxz;
+  N(0, 3) = Sxy - Syx;
+  // Second row
+  N(1, 0) = Syz - Szy;
+  N(1, 2) = Sxy + Syx;
+  N(1, 3) = Szx + Sxz;
+  // Third row
+  N(2, 0) = Szx - Sxz;
+  N(2, 1) = Sxy + Syx;
+  N(2, 3) = Syz + Szy;
+  // Fourth row
+  N(3, 0) = Sxy - Syx;
+  N(3, 1) = Szx + Sxz;
+  N(3, 2) = Syz + Szy;
+  // ------------------
+  // Output matrix
+  return N;
 }  // end of function
 
 // Center a point set wrt the centroid

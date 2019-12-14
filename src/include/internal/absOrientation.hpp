@@ -33,6 +33,10 @@ Eigen::MatrixXd calcMatrixS(const Eigen::MatrixXd& centeredRefPnts,
                             const Eigen::MatrixXd& centeredTargetPnts, int nop,
                             int dim);
 
+// Compute the matrix N, a 4x4 symmetric matrix, by combining sums (saved as
+// elements in the matrix S)
+Eigen::MatrixXd calcMatrixN(const Eigen::MatrixXd& S);
+
 // Center a point set wrt the centroid
 Eigen::MatrixXd centerWRTcentroid(const Eigen::MatrixXd& pointSet);
 
