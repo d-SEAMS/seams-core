@@ -210,6 +210,24 @@ inline std::vector<double> tokenizerDouble(std::string line) {
 }
 
 /********************************************/ /**
+                                                *  Function for tokenizing line
+                                                *strings into a vector of
+                                                *ints.
+                                                *  @param[in] line The string
+                                                *containing the line to be
+                                                *tokenized
+                                                ***********************************************/
+inline std::vector<int> tokenizerInt(std::string line) {
+  std::istringstream iss(line);
+  std::vector<int> tokens;
+  int number;  // Each number being read in from the line
+  while (iss >> number) {
+    tokens.push_back(number);
+  }
+  return tokens;
+}
+
+/********************************************/ /**
                                                 *  Function for checking if a
                                                 *file exists or not.
                                                 *  @param[in] name The name of
