@@ -824,3 +824,51 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
   dumpFile->close();
   return *yCloud;
 }
+
+/********************************************/ /**
+*  Function for reading in the connectivity information
+of a reference HC
+***********************************************/
+std::vector<std::vector<int>> sinp::readRefHCdata(std::string filename) {
+  std::unique_ptr<std::ifstream> datFile;
+  datFile = std::make_unique<std::ifstream>(filename);
+  std::string line;                 // Current line being read in
+  std::vector<std::string> tokens;  // Vector containing word tokens
+  std::vector<int> numbers;         // Vector containing type int numbers
+  // The values in the file are according to the index (not ID)
+  std::vector<std::vector<int>> refPntToPnt;  // Vector of vector of ints with
+                                              // the connectivity information
+
+  if (!(gen::file_exists(filename))) {
+    std::cout << "Fatal Error: The template data file does not exist or you "
+                 "gave the wrong path.\n";
+    // Throw exception?
+    return refPntToPnt;
+  }
+
+  // Format of the custom dat file:
+  //  # Particle indices (starting from 0) of the two basal rings
+  // 3 1 5 2 4 0
+  // 6 10 8 11 7 9
+  if (datFile->is_open()) {
+    // ----------------------------------------------------------
+    // At this point we know that the dat file is open
+    //
+    // The first line is a description line
+    std::getline((*datFile), line);  // Skip this line
+    //
+    // First basal ring
+    std::getline((*datFile), line);  // basal ring 1
+    numbers = gen::tokenizerInt(line);
+    refPntToPnt.push_back(numbers);  // First basal ring added
+    //
+    // Second basal ring
+    std::getline((*datFile), line);  // basal ring 2
+    numbers = gen::tokenizerInt(line);
+    refPntToPnt.push_back(numbers);  // Second basal ring added
+  }                                  // End of if file open statement
+
+  datFile->close();
+
+  return refPntToPnt;
+}

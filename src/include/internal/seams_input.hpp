@@ -50,6 +50,9 @@ int readXYZ(std::string filename,
 /// Reads bonds into a vector of vectors from a file with a specific format
 std::vector<std::vector<int>> readBonds(std::string filename);
 
+// Reads in the connectivity of the template HC, into a vector of vectors
+std::vector<std::vector<int>> readRefHCdata(std::string filename);
+
 inline bool atomInSlice(double x, double y, double z,
                         std::array<double, 3> coordLow,
                         std::array<double, 3> coordHigh) {
