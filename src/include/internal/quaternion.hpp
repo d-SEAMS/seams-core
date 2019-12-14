@@ -16,6 +16,7 @@
 // External
 #include <Spectra/GenEigsSolver.h>
 #include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/SparseCore>
 
 #include <cage.hpp>
