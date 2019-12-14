@@ -198,6 +198,7 @@ The libraries used are:
 - [fmt](https://github.com/fmtlib/fmt) for safe and fast formatting
 - [Linear Algebra PACKage (LAPACK)](http://www.netlib.org/lapack/)
 - [Basic Linear Algebra Subprograms (BLAS)](http://www.netlib.org/blas/)
+- [Spectra] (https://github.com/yixuan/spectra/)
 - [Boost Geometry](https://www.boost.org/doc/libs/1_68_0/libs/geometry/doc/html/index.html) for working with different coordinates
 - [Boost Math](https://www.boost.org/doc/libs/?view=category_math) for spherical harmonics
 - [Blaze](https://bitbucket.org/blaze-lib/blaze/) for very fast modern linear algebra
