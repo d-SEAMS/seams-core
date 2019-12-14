@@ -68,6 +68,8 @@ add_library(yodaLib SHARED
   order_parameter.cpp
   cluster.cpp
   rdf2d.cpp
+  absOrientation.cpp
+  quaternion.cpp
 )
 # if(yaml-cpp_FOUND)
 #     target_link_libraries(yodaStruct yaml-cpp)
