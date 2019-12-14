@@ -19,9 +19,16 @@
 #include <seams_input.hpp>
 #include <seams_output.hpp>
 
+// Inspired by AStar_Dual_Tree_HandPose by jsupancic
+
 namespace absor {
 
-//
+// Get the absolute orientation using Horn's algorithm (with quaternions)
+int hornAbsOrientation(const Eigen::MatrixXd& refPoints,
+                       const Eigen::MatrixXd& targetPoints);
+
+// Center a point set wrt the centroid
+Eigen::MatrixXd centerWRTcentroid(const Eigen::MatrixXd& pointSet);
 
 }  // namespace absor
 
