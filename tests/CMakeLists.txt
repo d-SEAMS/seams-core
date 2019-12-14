@@ -3,12 +3,17 @@ add_executable(yodaStruct_test
                franzblau-test.cpp
                topo_one_dim-test.cpp
                topo_bulk-test.cpp
+               absor-test.cpp
                ${PROJECT_SOURCE_DIR}/src/franzblau.cpp
                ${PROJECT_SOURCE_DIR}/src/topo_one_dim.cpp
                ${PROJECT_SOURCE_DIR}/src/topo_bulk.cpp
                ${PROJECT_SOURCE_DIR}/src/ring.cpp
                ${PROJECT_SOURCE_DIR}/src/neighbours.cpp
                ${PROJECT_SOURCE_DIR}/src/mol_sys.cpp
+               ${PROJECT_SOURCE_DIR}/src/absOrientation.cpp
+               ${PROJECT_SOURCE_DIR}/src/seams_input.cpp
+               ${PROJECT_SOURCE_DIR}/src/seams_output.cpp
+               ${PROJECT_SOURCE_DIR}/src/pntCorrespondence.cpp
 )
 
 # Standard cmake stuff
