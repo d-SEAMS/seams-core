@@ -13,6 +13,8 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd& refPoints,
       nop, dim);  // Reference point set after centering wrt the centroid
   Eigen::MatrixXd centeredTargetPnts(
       nop, dim);  // Target point set after centering wrt the centroid
+  Eigen::MatrixXd S(dim,
+                    dim);  // Matrix containing sums of products of coordinates
   // -----
   // Check that the sizes of the reference point set (right point system) and
   // the target point set (left point system) are the same
@@ -30,7 +32,39 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd& refPoints,
   centeredRefPnts = absor::centerWRTcentroid(refPoints);
   centeredTargetPnts = absor::centerWRTcentroid(targetPoints);
   // ---------------------------------------------------
+  // FINDING THE ROTATION MATRIX
+  //
+  // Find the 3x3 matrix S
+  S = absor::calcMatrixS(centeredRefPnts, centeredTargetPnts, nop, dim);
+  // ---------------------------------------------------
   return 0;
+}  // end of function
+
+// Compute the matrix S, or M, whose elements are the sums of products of
+// coordinates measured in the left and right systems
+Eigen::MatrixXd absor::calcMatrixS(const Eigen::MatrixXd& centeredRefPnts,
+                                   const Eigen::MatrixXd& centeredTargetPnts,
+                                   int nop, int dim) {
+  //
+  Eigen::MatrixXd S(nop, dim);       // Output matrix S
+  Eigen::VectorXd targetCoord(nop);  // Column of the target point set
+  Eigen::VectorXd refCoord(nop);     // Column of the reference point set
+  double Svalue;  // Current value being filled (Sxx, Sxy etc.)
+
+  // Calculate Sxx, Sxy, Sxz etc
+  for (int iCol = 0; iCol < dim; iCol++) {
+    //
+    for (int jCol = 0; jCol < dim; jCol++) {
+      targetCoord =
+          centeredTargetPnts.col(iCol);  // iCol^th column of target point set
+      refCoord = centeredRefPnts.col(jCol);  // jCol^th of reference point set
+      Svalue = targetCoord.dot(refCoord);
+      S(iCol, jCol) = Svalue;
+    }  // end column wise filling
+  }    // end of filling
+
+  // Output matrix
+  return S;
 }  // end of function
 
 // Center a point set wrt the centroid

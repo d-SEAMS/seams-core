@@ -27,6 +27,12 @@ namespace absor {
 int hornAbsOrientation(const Eigen::MatrixXd& refPoints,
                        const Eigen::MatrixXd& targetPoints);
 
+// Compute the matrix S, or M, whose elements are the sums of products of
+// coordinates measured in the left and right systems
+Eigen::MatrixXd calcMatrixS(const Eigen::MatrixXd& centeredRefPnts,
+                            const Eigen::MatrixXd& centeredTargetPnts, int nop,
+                            int dim);
+
 // Center a point set wrt the centroid
 Eigen::MatrixXd centerWRTcentroid(const Eigen::MatrixXd& pointSet);
 
