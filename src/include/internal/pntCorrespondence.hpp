@@ -23,7 +23,12 @@
 
 namespace pntToPnt {
 
-//
+// Fills up an eigen matrix point set for an HC, according to an input
+// pointCloud, the relative order given by the basal rings, beginning from the
+// startingIndex
+Eigen::MatrixXd fillPointSetHC(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<std::vector<int>> relOrder, int startingIndex);
 
 }  // namespace pntToPnt
 
