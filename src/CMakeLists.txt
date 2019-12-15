@@ -69,7 +69,6 @@ add_library(yodaLib SHARED
   cluster.cpp
   rdf2d.cpp
   absOrientation.cpp
-  quaternion.cpp
   pntCorrespondence.cpp
 )
 # if(yaml-cpp_FOUND)
