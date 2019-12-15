@@ -19,7 +19,6 @@
 #include <eigen3/Eigen/Dense>
 
 #include <mol_sys.hpp>
-#include <quaternion.hpp>
 #include <ring.hpp>
 #include <seams_input.hpp>
 #include <seams_output.hpp>
