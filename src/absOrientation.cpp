@@ -17,6 +17,8 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd& refPoints,
                     dim);  // Matrix containing sums of products of coordinates
   Eigen::MatrixXd N(
       4, 4);  // 4x4 Matrix, whose largest eigenvector must be calculated
+  Eigen::VectorXd calcEigenVec(
+      4);  // This should have 4 components (eigen vector calculated from N)
   // -----
   // Check that the sizes of the reference point set (right point system) and
   // the target point set (left point system) are the same
@@ -41,6 +43,29 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd& refPoints,
   // Calculate the 4x4 symmetric matrix N, whose largest eigenvector yields the
   // quaternion in the same direction
   N = absor::calcMatrixN(S);
+  // --------
+  // Calculate the eigenvector corresponding to the largest eigenvalue
+  //
+  // Construct matrix operation object (op) using the wrapper class
+  // DenseSymMatProd for the matrix N
+  Spectra::DenseSymShiftSolve<double> op(N);
+  //
+  // Construct eigen solver object, requesting the largest 1 eigenvalue and
+  // eigenvector
+  Spectra::SymEigsShiftSolver<double, Spectra::LARGEST_MAGN,
+                              Spectra::DenseSymShiftSolve<double> >
+      eigs(&op, 1, 4, 1.0);
+  //
+  // Initialize and compute
+  eigs.init();
+  int nconv = eigs.compute();
+  // Get the eigenvalue and eigenvector
+  if (eigs.info() == Spectra::SUCCESSFUL) {
+    Eigen::VectorXd calcEigenValue = eigs.eigenvalues();  // Eigenvalue
+    calcEigenVec = eigs.eigenvectors();
+    std::cout << "The eigenvector is: \n" << calcEigenVec << "\n";
+  }  // end of eigenvector calculation
+  // --------
   // ---------------------------------------------------
   return 0;
 }  // end of function

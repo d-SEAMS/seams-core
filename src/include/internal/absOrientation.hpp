@@ -13,6 +13,11 @@
 #include <string>
 #include <vector>
 
+// External
+#include <Spectra/SymEigsShiftSolver.h>
+#include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Dense>
+
 #include <mol_sys.hpp>
 #include <quaternion.hpp>
 #include <ring.hpp>
