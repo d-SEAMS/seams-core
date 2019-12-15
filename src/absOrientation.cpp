@@ -1,9 +1,23 @@
 #include <absOrientation.hpp>
 
-// Get the absolute orientation using Horn's algorithm (with quaternions)
+/********************************************/ /**
+ *  Get the absolute orientation using Horn's algorithm (with quaternions).
+ The algorithm is described in the <a
+href="http://people.csail.mit.edu/bkph/papers/Absolute_Orientation.pdf">linked
+paper</a>.
+ *  @param[in] refPoints The point set of the reference system (or right
+system). This is a \f$ (n \times 3) \f$ Eigen matrix. Here, \f$ n \f$ is the
+number of particles.
+ *  @param[in] targetPoints \f$ (n \times 3) \f$ Eigen matrix of the
+candidate/test system (or left system).
+ *  @param[in, out] quat The quaternion for the optimum rotation of the left
+system into the right system.
+ *  @param[in, out] scale The scale factor obtained from Horn's algorithm.
+ ***********************************************/
 int absor::hornAbsOrientation(const Eigen::MatrixXd& refPoints,
                               const Eigen::MatrixXd& targetPoints,
-                              std::vector<double>* quat) {
+                              std::vector<double>* quat, double* rmsd,
+                              double* scale) {
   //
   int nop =
       refPoints.rows();  // Number of particles (equal to the number of rows)
@@ -77,11 +91,32 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd& refPoints,
   }  // end of quaternion update
   // --------
   // ---------------------------------------------------
+  // COMPUTE THE OPTIMUM SCALE
+  (*scale) = absor::calcScaleFactor(centeredRefPnts, centeredTargetPnts, nop);
+  // ---------------------------------------------------
+  // GETTING THE ERROR
+  (*rmsd) = absor::getRMSD(centeredRefPnts, centeredTargetPnts, calcEigenVec,
+                           nop, (*scale));
+  // ---------------------------------------------------
   return 0;
 }  // end of function
 
-// Compute the matrix S, or M, whose elements are the sums of products of
-// coordinates measured in the left and right systems
+/********************************************/ /**
+ *  Compute the matrix S, or M, whose elements are the sums of products of
+ coordinates measured in the left and right systems.
+The matrix S is :
+S=[Sxx  Sxy      Sxz;...
+   Syx  Syy      Syz;...
+   Szx  Szy      Szz];
+ *  @param[in] centeredRefPnts The point set of the reference system (or right
+system), centered with respect to the centroid. This is a \f$ (n \times 3) \f$
+Eigen matrix. Here, \f$ n \f$ is the number of particles.
+ *  @param[in] centeredTargetPnts \f$ (n \times 3) \f$ Eigen matrix of the
+candidate/test system (or left system), centered with respect to the centroid.
+ *  @param[in] nop The number of particles.
+ *  @param[in] dim The number of dimensions = 3.
+ *  \return a \f$ (3 \times 3) \f$ Eigen matrix, or S.
+ ***********************************************/
 Eigen::MatrixXd absor::calcMatrixS(const Eigen::MatrixXd& centeredRefPnts,
                                    const Eigen::MatrixXd& centeredTargetPnts,
                                    int nop, int dim) {
@@ -107,8 +142,17 @@ Eigen::MatrixXd absor::calcMatrixS(const Eigen::MatrixXd& centeredRefPnts,
   return S;
 }  // end of function
 
-// Compute the matrix S, or M, whose elements are the sums of products of
-// coordinates measured in the left and right systems
+/********************************************/ /**
+ *  Compute the matrix (4 \times 4) N, whose largest eigenvector
+ corresponds to the optimal rotation. It is calculated from the elements of the
+(3 \times 3) matrix S. The matrix N is : N=[(Sxx+Syy+Szz)  (Syz-Szy) (Szx-Sxz)
+(Sxy-Syx);... (Syz-Szy)      (Sxx-Syy-Szz)  (Sxy+Syx)      (Szx+Sxz);...
+          (Szx-Sxz)      (Sxy+Syx)     (-Sxx+Syy-Szz)  (Syz+Szy);...
+          (Sxy-Syx)      (Szx+Sxz)      (Syz+Szy)      (-Sxx-Syy+Szz)];
+ *  @param[in] S (3 \times 3) Eigen matrix whose elements are the sums of
+products of the coordinates measured in the left and right systems.
+ *  \return a \f$ (4 \times 4) \f$ Eigen matrix, or N.
+ ***********************************************/
 Eigen::MatrixXd absor::calcMatrixN(const Eigen::MatrixXd& S) {
   //
   Eigen::MatrixXd N(4, 4);  // Output matrix N
@@ -157,7 +201,14 @@ Eigen::MatrixXd absor::calcMatrixN(const Eigen::MatrixXd& S) {
   return N;
 }  // end of function
 
-// Center a point set wrt the centroid
+/********************************************/ /**
+ *  Centers a point set (which is an Eigen matrix),
+ with respect to the centroid.
+ *  @param[in] pointSet \f$ (n \times 3) \f$ Eigen matrix for the point set.
+ Here \f$ n \f$ is the number of points.
+ *  \return a \f$ (n \times 3) \f$ Eigen matrix of the same size as the input
+ point set.
+ ***********************************************/
 Eigen::MatrixXd absor::centerWRTcentroid(const Eigen::MatrixXd& pointSet) {
   //
   int nop = pointSet.rows();                   // Number of particles
@@ -195,37 +246,121 @@ Eigen::MatrixXd absor::centerWRTcentroid(const Eigen::MatrixXd& pointSet) {
   return centeredPointSet;
 }  // end of function
 
-// Get a rotation matrix from a unit quaternion
+/********************************************/ /**
+ *  Calculate the scale factor from the centered right
+ and left point sets.
+ *  @param[in] centeredRefPnts The point set of the reference system (or right
+system), centered with respect to the centroid. This is a \f$ (n \times 3) \f$
+Eigen matrix. Here, \f$ n \f$ is the number of particles.
+ *  @param[in] centeredTargetPnts \f$ (n \times 3) \f$ Eigen matrix of the
+candidate/test system (or left system), centered with respect to the centroid.
+ *  @param[in] n The number of points.
+ *  \return the scale factor.
+ ***********************************************/
+double absor::calcScaleFactor(const Eigen::MatrixXd& rightSys,
+                              const Eigen::MatrixXd& leftSys, int n) {
+  //
+  double scale;   // Output scale
+  double v1, v2;  // Sum of the length of the vector
+  Eigen::VectorXd rightVec(
+      3);  // Vector of the i^th particle in the right system
+  Eigen::VectorXd leftVec(
+      3);  // Vector of the i^th particle in the right system
+
+  // scale = (sigma_to_n ||r_r||^2 / ||r_l||^2)^0.5
+  // ref: http://people.csail.mit.edu/bkph/papers/Absolute_Orientation.pdf
+
+  // Loop through all the points, and get the dot product of the vector for each
+  // point
+  for (int i = 0; i < n; i++) {
+    //
+    rightVec = rightSys.row(i);  // i^th row of the right system
+    leftVec = leftSys.row(i);    // i^th row of the left system
+    v1 += rightVec.dot(rightVec);
+    v2 += leftVec.dot(leftVec);
+  }  // end of loop through all points
+
+  // The optimum scale is the ratio of v1 and v2
+  scale = std::sqrt(v1 / v2);
+
+  return scale;
+}  // end of function
+
+/********************************************/ /**
+ *  Get a \f$ (3 \times 3) \f$ rotation matrix from
+ a unit quaternion.
+ *  @param[in] quat The Eigen vector of length 4, for the input quaternion.
+ *  \return the rotation matrix.
+ ***********************************************/
 Eigen::MatrixXd absor::quat2RotMatrix(const Eigen::VectorXd& quat) {
   //
   Eigen::MatrixXd R(3, 3);  // Rotation matrix
   // Components of the quaternion
-  double q_r = quat(0);
-  double q_i = quat(1);
-  double q_j = quat(2);
-  double q_k = quat(3);
+  double q0 = quat(0);
+  double qx = quat(1);
+  double qy = quat(2);
+  double qz = quat(3);
 
-  // Quaternion derived rotation matrix, when q (q=qr+qi*i+qj*j+qk*k)
+  // Quaternion derived rotation matrix, when q (q=q0+qx*i+qy*j+qz*k)
   // is a unit quaternion:
-  // R=[1-2(qj^2+qk^2)      2(qi*qj-qk*qr)      2(qi*qk+qj*qr);...
-  //    2(qi*qj-qk*qr)      1-2(qi^2-qk^2)      2(qj*qk-qi*qr);...
-  //    2(qi*qk-qj*qr)      2(qj*qk+qi*qr)      1-2(qi^2+qj^2)];
+  // R=[(q0^2+qx^2+qy^2+qz^2)      2(qx*qy-q0*qz)        2(qx*qz+q0*qy);...
+  //    2(qy*qx-q0*qz)            (q0^2+qx^2+qy^2+qz^2)  2(qy*qz-q0*qx);...
+  //    2(qz*qx-q0*qy)            2(qz*qy+q0*qz)         (q0^2+qx^2+qy^2+qz^2)];
 
   // Fill up the rotation matrix R according to the above formula
   //
   // First row
-  R(0, 0) = 1 - 2 * (q_j * q_j + q_k + q_k);
-  R(1, 0) = 2 * (q_i * q_j - q_k * q_r);
-  R(2, 0) = 2 * (q_i * q_k + q_j * q_r);
+  R(0, 0) = q0 * q0 + qx * qx + qy * qy + qz * qz;
+  R(0, 1) = 2 * (qx * qy - q0 * qz);
+  R(0, 2) = 2 * (qx * qz + q0 * qy);
   // Second row
-  R(1, 0) = 2 * (q_i * q_j + q_k * q_r);
-  R(1, 1) = 1 - 2 * (q_i * q_i + q_k * q_k);
-  R(1, 2) = 2 * (q_j * q_k - q_i * q_r);
+  R(1, 0) = 2 * (qy * qx + q0 * qz);
+  R(1, 1) = q0 * q0 + qx * qx + qy * qy + qz * qz;
+  R(1, 2) = 2 * (qy * qz - q0 * qy);
   // Third row
-  R(2, 0) = 2 * (q_i * q_k - q_j * q_r);
-  R(2, 1) = 2 * (q_j * q_k + q_i * q_r);
-  R(2, 2) = 1 - 2 * (q_i * q_i + q_j * q_j);
+  R(2, 0) = 2 * (qz * qx - q0 * qy);
+  R(2, 1) = 2 * (qz * qy + q0 * qz);
+  R(2, 2) = q0 * q0 + qx * qx + qy * qy + qz * qz;
 
   // return the rotation matrix
   return R;
+}  // end of function
+
+/********************************************/ /**
+ *  Get the root mean square of the errors
+ from Horn's absolute orientation algorithm.
+ *  @param[in] quat The Eigen vector of length 4, for the input quaternion.
+ *  @param[in] centeredRefPnts The point set of the reference system (or right
+system), centered with respect to the centroid. This is a \f$ (n \times 3) \f$
+Eigen matrix. Here, \f$ n \f$ is the number of particles.
+ *  @param[in] centeredTargetPnts \f$ (n \times 3) \f$ Eigen matrix of the
+candidate/test system (or left system), centered with respect to the centroid.
+ *  @param[in] quat The Eigen vector of length 4, for the quaternion denoting
+the rotation.
+ *  @param[in] nop The number of particles.
+ *  @param[in] scale The scale factor
+ *  \return the least RMSD.
+ ***********************************************/
+double absor::getRMSD(const Eigen::MatrixXd& centeredRefPnts,
+                      const Eigen::MatrixXd& centeredTargetPnts,
+                      const Eigen::VectorXd& quat, int nop, double scale) {
+  //
+  Eigen::MatrixXd R(3, 3);  // The (3x3) rotation vector
+  R = absor::quat2RotMatrix(
+      quat);  // orthonormal rotation matrix from the quaternion
+  // The total error is:
+  // sum_over_all_n (r'_r - s*rotated_r_l')
+  double rmsd = 0.0;            // Error
+  Eigen::VectorXd errorVec(3);  // The vector which is the r_r -s*R
+  Eigen::VectorXd rotatedLeft(3);
+  //
+  for (int i = 0; i > nop; i++) {
+    //
+    // Rotate the left system coordinate using the rotation matrix
+    rotatedLeft = R * centeredTargetPnts.row(i);
+    errorVec = centeredRefPnts.row(i) - scale * rotatedLeft;
+    rmsd += errorVec.dot(errorVec);
+  }  // end of loop through every row
+  //
+  return sqrt(rmsd);
 }  // end of function
