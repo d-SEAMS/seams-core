@@ -131,19 +131,24 @@ SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
     // with respect to the right (template/reference) system test
     //
     std::vector<double> quaternionRot;  // quaternion rotation
+    double rmsd1, rmsd2;                // least RMSD
+    double scale;                       // Scale factor
     //
     // absolute orientation using Horn's algorithm between the target and test
     // set
-    absor::hornAbsOrientation(refPointSet, targetPointSet, &quaternionRot);
+    absor::hornAbsOrientation(refPointSet, targetPointSet, &quaternionRot,
+                              &rmsd1, &scale);
     //
     std::vector<double>
-        selfQuatRot;  // quaternion for the reference set and itself
-    absor::hornAbsOrientation(refPointSet, refPointSet, &selfQuatRot);
+        selfQuatRot;   // quaternion for the reference set and itself
+    double selfScale;  // Scale for the reference set and itself
+    absor::hornAbsOrientation(refPointSet, refPointSet, &selfQuatRot, &rmsd2,
+                              &selfScale);
 
     double angDist = gen::angDistDegQuaternions(selfQuatRot, quaternionRot);
     //
     REQUIRE_THAT(angDist, Catch::Matchers::Floating::WithinAbsMatcher(
-                              30.0, 0.1));  // Evaluate condition
+                              30.0, 0.01));  // Evaluate condition
     // --------------------------
   }  // End of given
 }  // End of scenario
