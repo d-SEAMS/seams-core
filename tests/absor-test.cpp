@@ -130,8 +130,23 @@ SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
     // Now get the absolute orientation of the left (candidate/target) system
     // with respect to the right (template/reference) system test
     //
-    absor::hornAbsOrientation(refPointSet, targetPointSet);
+    std::vector<double> quaternionRot;  // quaternion rotation
     //
+    // absolute orientation using Horn's algorithm between the target and test
+    // set
+    absor::hornAbsOrientation(refPointSet, targetPointSet, &quaternionRot);
+    //
+    std::vector<double>
+        selfQuatRot;  // quaternion for the reference set and itself
+    absor::hornAbsOrientation(refPointSet, refPointSet, &selfQuatRot);
+
+    double cojRes =
+        selfQuatRot[0] * quaternionRot[0] - selfQuatRot[1] * quaternionRot[1] -
+        selfQuatRot[2] * quaternionRot[2] - selfQuatRot[3] * quaternionRot[3];
+
+    double angDist = 2 * acos(cojRes) * 180.0 / (gen::pi);
+    //
+    std::cout << "The angle is " << angDist << "\n";
     REQUIRE(2 == 2);  // Evaluate condition
     // --------------------------
   }  // End of given
