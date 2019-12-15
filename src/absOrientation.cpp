@@ -2,7 +2,8 @@
 
 // Get the absolute orientation using Horn's algorithm (with quaternions)
 int absor::hornAbsOrientation(const Eigen::MatrixXd& refPoints,
-                              const Eigen::MatrixXd& targetPoints) {
+                              const Eigen::MatrixXd& targetPoints,
+                              std::vector<double>* quat) {
   //
   int nop =
       refPoints.rows();  // Number of particles (equal to the number of rows)
@@ -48,13 +49,13 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd& refPoints,
   //
   // Construct matrix operation object (op) using the wrapper class
   // DenseSymMatProd for the matrix N
-  Spectra::DenseSymShiftSolve<double> op(N);
+  Spectra::DenseSymMatProd<double> op(N);
   //
   // Construct eigen solver object, requesting the largest 1 eigenvalue and
   // eigenvector
-  Spectra::SymEigsShiftSolver<double, Spectra::LARGEST_MAGN,
-                              Spectra::DenseSymShiftSolve<double> >
-      eigs(&op, 1, 4, 1.0);
+  Spectra::SymEigsSolver<double, Spectra::LARGEST_ALGE,
+                         Spectra::DenseSymMatProd<double> >
+      eigs(&op, 1, 4);
   //
   // Initialize and compute
   eigs.init();
@@ -63,8 +64,17 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd& refPoints,
   if (eigs.info() == Spectra::SUCCESSFUL) {
     Eigen::VectorXd calcEigenValue = eigs.eigenvalues();  // Eigenvalue
     calcEigenVec = eigs.eigenvectors();
-    std::cout << "The eigenvector is: \n" << calcEigenVec << "\n";
   }  // end of eigenvector calculation
+  //
+  // --------
+  // Normalize the eigenvector calculated
+  double qNorm = sqrt(calcEigenVec.dot(calcEigenVec));
+  calcEigenVec /= qNorm;  // Divide by the square root of the sum
+  // Update the quaternion with the normalized eigenvector
+  (*quat).resize(4);  // Output quaternion update
+  for (int i = 0; i < 4; i++) {
+    (*quat)[i] = calcEigenVec(i);
+  }  // end of quaternion update
   // --------
   // ---------------------------------------------------
   return 0;
@@ -183,4 +193,39 @@ Eigen::MatrixXd absor::centerWRTcentroid(const Eigen::MatrixXd& pointSet) {
   }    // end of loop through the rows
   // --------------------------------
   return centeredPointSet;
+}  // end of function
+
+// Get a rotation matrix from a unit quaternion
+Eigen::MatrixXd absor::quat2RotMatrix(const Eigen::VectorXd& quat) {
+  //
+  Eigen::MatrixXd R(3, 3);  // Rotation matrix
+  // Components of the quaternion
+  double q_r = quat(0);
+  double q_i = quat(1);
+  double q_j = quat(2);
+  double q_k = quat(3);
+
+  // Quaternion derived rotation matrix, when q (q=qr+qi*i+qj*j+qk*k)
+  // is a unit quaternion:
+  // R=[1-2(qj^2+qk^2)      2(qi*qj-qk*qr)      2(qi*qk+qj*qr);...
+  //    2(qi*qj-qk*qr)      1-2(qi^2-qk^2)      2(qj*qk-qi*qr);...
+  //    2(qi*qk-qj*qr)      2(qj*qk+qi*qr)      1-2(qi^2+qj^2)];
+
+  // Fill up the rotation matrix R according to the above formula
+  //
+  // First row
+  R(0, 0) = 1 - 2 * (q_j * q_j + q_k + q_k);
+  R(1, 0) = 2 * (q_i * q_j - q_k * q_r);
+  R(2, 0) = 2 * (q_i * q_k + q_j * q_r);
+  // Second row
+  R(1, 0) = 2 * (q_i * q_j + q_k * q_r);
+  R(1, 1) = 1 - 2 * (q_i * q_i + q_k * q_k);
+  R(1, 2) = 2 * (q_j * q_k - q_i * q_r);
+  // Third row
+  R(2, 0) = 2 * (q_i * q_k - q_j * q_r);
+  R(2, 1) = 2 * (q_j * q_k + q_i * q_r);
+  R(2, 2) = 1 - 2 * (q_i * q_i + q_j * q_j);
+
+  // return the rotation matrix
+  return R;
 }  // end of function

@@ -15,6 +15,7 @@
 
 // External
 #include <Spectra/SymEigsShiftSolver.h>
+#include <Spectra/SymEigsSolver.h>
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
 
@@ -29,7 +30,8 @@ namespace absor {
 
 // Get the absolute orientation using Horn's algorithm (with quaternions)
 int hornAbsOrientation(const Eigen::MatrixXd& refPoints,
-                       const Eigen::MatrixXd& targetPoints);
+                       const Eigen::MatrixXd& targetPoints,
+                       std::vector<double>* quat);
 
 // Compute the matrix S, or M, whose elements are the sums of products of
 // coordinates measured in the left and right systems
@@ -43,6 +45,9 @@ Eigen::MatrixXd calcMatrixN(const Eigen::MatrixXd& S);
 
 // Center a point set wrt the centroid
 Eigen::MatrixXd centerWRTcentroid(const Eigen::MatrixXd& pointSet);
+
+// Get a rotation matrix from a unit quaternion
+Eigen::MatrixXd quat2RotMatrix(const Eigen::VectorXd& quat);
 
 }  // namespace absor
 
