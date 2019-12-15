@@ -174,6 +174,11 @@ int unwrappedCoordShift(
     int jatomIndex, double *x_i, double *y_i, double *z_i, double *x_j,
     double *y_j, double *z_j);
 
+// Function for getting the angular distance between two quaternions. Returns
+// the result in degrees
+double angDistDegQuaternions(std::vector<double> quat1,
+                             std::vector<double> quat2);
+
 /********************************************/ /**
                                                 *  Function for tokenizing line
                                                 *strings into words (strings)

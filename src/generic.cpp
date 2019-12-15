@@ -40,12 +40,18 @@ int gen::prettyPrintYoda(
  *  @param[in] yCloud The input PointCloud to be printed.
  *  @param[in] iatomIndex Index of the \f$ i^{th} \f$ atom.
  *  @param[in] jatomIndex Index of the \f$ j^{th} \f$ atom.
- *  @param[in, out] x_i X Coordinate of the \f$ i^{th} \f$ atom corresponding to the unwrapped distance.
- *  @param[in, out] y_i Y Coordinate of the \f$ i^{th} \f$ atom corresponding to the unwrapped distance.
- *  @param[in, out] z_i Z Coordinate of the \f$ i^{th} \f$ atom corresponding to the unwrapped distance.
- *  @param[in, out] x_j X Coordinate of the \f$ j^{th} \f$ atom corresponding to the unwrapped distance.
- *  @param[in, out] y_j Y Coordinate of the \f$ j^{th} \f$ atom corresponding to the unwrapped distance.
- *  @param[in, out] z_j Z Coordinate of the \f$ j^{th} \f$ atom corresponding to the unwrapped distance.
+ *  @param[in, out] x_i X Coordinate of the \f$ i^{th} \f$ atom corresponding to
+the unwrapped distance.
+ *  @param[in, out] y_i Y Coordinate of the \f$ i^{th} \f$ atom corresponding to
+the unwrapped distance.
+ *  @param[in, out] z_i Z Coordinate of the \f$ i^{th} \f$ atom corresponding to
+the unwrapped distance.
+ *  @param[in, out] x_j X Coordinate of the \f$ j^{th} \f$ atom corresponding to
+the unwrapped distance.
+ *  @param[in, out] y_j Y Coordinate of the \f$ j^{th} \f$ atom corresponding to
+the unwrapped distance.
+ *  @param[in, out] z_j Z Coordinate of the \f$ j^{th} \f$ atom corresponding to
+the unwrapped distance.
 ***********************************************/
 int gen::unwrappedCoordShift(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatomIndex,
@@ -145,4 +151,25 @@ double gen::gslVecAngle(std::vector<double> OO, std::vector<double> OH) {
   gsl_vector_free(gOO);
   gsl_vector_free(gOH);
   return angle;
+}
+
+/********************************************/ /**
+ *  Function for getting the angular distance between two quaternions. Returns
+ the result in degrees.
+ *  @param[in] quat1 The first quaternion
+ *  @param[in] quat2 The second quaternion
+ *  \return The output angle between the input quaternions, in degrees
+ ***********************************************/
+double gen::angDistDegQuaternions(std::vector<double> quat1,
+                                  std::vector<double> quat2) {
+  //
+  double prod;  // Product of quat1 and conjugate of quat2
+  // The angular distance is
+  // angularDistance = 2*cosInverse(quat1*conj(quat2))
+  prod = quat1[0] * quat2[0] - quat1[1] * quat2[1] - quat1[2] * quat2[2] -
+         quat1[3] * quat2[3];
+  // The angular distance is:
+  double angDist = 2 * acos(prod) * 180.0 / (gen::pi);
+  // Return the angular distance
+  return angDist;
 }
