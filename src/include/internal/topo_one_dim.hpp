@@ -18,6 +18,7 @@
 #include <ring.hpp>
 #include <seams_input.hpp>
 #include <seams_output.hpp>
+#include <shapeMatch.hpp>
 
 /*! \file topo_one_dim.hpp
     \brief File containing functions used specific to quasi-one-dimensional
