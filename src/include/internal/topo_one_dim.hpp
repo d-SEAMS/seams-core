@@ -36,7 +36,8 @@ namespace ring {
 std::vector<int> findPrisms(
     std::vector<std::vector<int>> rings, std::vector<strucType> *ringType,
     int *nPrisms, std::vector<std::vector<int>> nList,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud);
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    bool doShapeMatching = false);
 
 // Tests whether two rings are basal rings (true) or not (false) for a prism
 // (strict criterion)
@@ -59,7 +60,7 @@ bool discardExtraTetragonBlocks(
 int prismAnalysis(std::string path, std::vector<std::vector<int>> rings,
                   std::vector<std::vector<int>> nList,
                   molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                  int maxDepth);
+                  int maxDepth, bool doShapeMatching = false);
 
 // Assign an atomType (equal to the number of nodes in the ring)
 // given a vector with a list of indices of rings comprising the prisms

@@ -33,7 +33,8 @@
 int ring::prismAnalysis(
     std::string path, std::vector<std::vector<int>> rings,
     std::vector<std::vector<int>> nList,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int maxDepth) {
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int maxDepth,
+    bool doShapeMatching) {
   //
   std::vector<std::vector<int>>
       ringsOneType;            // Vector of vectors of rings of a single size
@@ -82,8 +83,8 @@ int ring::prismAnalysis(
     // -------------
     // Now that you have rings of a certain size:
     // Find prisms, saving the ring indices to listPrism
-    listPrism =
-        ring::findPrisms(ringsOneType, &ringType, &nPrisms, nList, yCloud);
+    listPrism = ring::findPrisms(ringsOneType, &ringType, &nPrisms, nList,
+                                 yCloud, doShapeMatching);
     // -------------
     nPrismList[ringSize - 3] = nPrisms;  // Update the number of prisms
     // Update the height% for the phase
@@ -138,7 +139,8 @@ int ring::prismAnalysis(
 std::vector<int> ring::findPrisms(
     std::vector<std::vector<int>> rings, std::vector<ring::strucType> *ringType,
     int *nPrisms, std::vector<std::vector<int>> nList,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    bool doShapeMatching) {
   std::vector<int> listPrism;
   int totalRingNum = rings.size();  // Total number of rings
   std::vector<int> basal1;          // First basal ring
