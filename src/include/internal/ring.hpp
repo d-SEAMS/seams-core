@@ -1,16 +1,16 @@
 #ifndef __RINGS_H_
 #define __RINGS_H_
 
-#include <math.h>
-#include <sys/stat.h>
 #include <algorithm>
 #include <array>
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <math.h>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <sys/stat.h>
 #include <vector>
 
 #include <cage.hpp>
@@ -97,23 +97,9 @@ enum strucType {
   mixedPrismRing
 };
 
-/*! \struct matchInfo
- * \brief This contains the information after shape-matching
- for each atom
- *
- * Contains specifically the members:
- */
-struct matchInfo {
-  strucType type = ring::unclassified;  // Per-atom classification, based on
-                                        // which ring it belongs to
-  double l_rmsd = -1;     // The least RMSD obtained from shape-matching
-                          // (initialized to a dummy value)
-  int nSharedStrucs = 0;  // Number of cages or blocks shared
-};
-
 // Returns a vector of vectors of rings of a single size
-std::vector<std::vector<int>> getSingleRingSize(
-    std::vector<std::vector<int>> rings, int ringSize);
+std::vector<std::vector<int>>
+getSingleRingSize(std::vector<std::vector<int>> rings, int ringSize);
 
 // Check to see if two vectors have common elements or not
 // True, if common elements are present and false if there are no common
@@ -138,6 +124,6 @@ std::vector<int> findsCommonElements(std::vector<int> ring1,
 // Erases memory for a vector of vectors for a list of rings
 int clearRingList(std::vector<std::vector<int>> &rings);
 
-}  // namespace ring
+} // namespace ring
 
-#endif  // __RINGS_H_
+#endif // __RINGS_H_
