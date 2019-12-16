@@ -1,16 +1,16 @@
 #ifndef __SHAPEMATCH_H_
 #define __SHAPEMATCH_H_
 
-#include <math.h>
-#include <sys/stat.h>
 #include <algorithm>
 #include <array>
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <math.h>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <sys/stat.h>
 #include <vector>
 
 #include <absOrientation.hpp>
@@ -27,10 +27,9 @@ namespace match {
 bool matchPrismBlock(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                      std::vector<std::vector<int>> nList,
                      const Eigen::MatrixXd &refPoints, std::vector<int> *basal1,
-                     std::vector<int> *basal2,
-                     std::vector<ring::matchInfo> *matchedAtomTypes,
+                     std::vector<int> *basal2, std::vector<double> *rmsdPerAtom,
                      bool isPerfect = true);
 
-}  // namespace match
+} // namespace match
 
-#endif  // __SHAPEMATCH_H_
+#endif // __SHAPEMATCH_H_

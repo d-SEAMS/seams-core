@@ -6,14 +6,13 @@ bool match::matchPrismBlock(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, const Eigen::MatrixXd &refPoints,
     std::vector<int> *basal1, std::vector<int> *basal2,
-    std::vector<ring::matchInfo> *matchedAtomTypes, bool isPerfect) {
+    std::vector<double> *rmsdPerAtom, bool isPerfect) {
   //
-  int ringSize = (*basal1).size();  // Number of nodes in each basal ring
-  std::vector<std::vector<int>>
-      refPntToPnt;  // Vector of vector of ints with
-                    // the connectivity information for the two basal rings
+  int ringSize = (*basal1).size(); // Number of nodes in each basal ring
+  std::vector<std::vector<int>> refPntToPnt; // Vector of vector of ints with
+  // the connectivity information for the two basal rings
   std::vector<int> matchedBasal1,
-      matchedBasal2;  // Re-ordered basal rings 1 and 2
+      matchedBasal2; // Re-ordered basal rings 1 and 2
 
   // -----------------------
   // Getting the target Eigen vectors
@@ -24,4 +23,4 @@ bool match::matchPrismBlock(
 
   // Change this later
   return false;
-}  // end of function
+} // end of function
