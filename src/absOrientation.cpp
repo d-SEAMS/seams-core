@@ -17,7 +17,7 @@ system into the right system.
 int absor::hornAbsOrientation(const Eigen::MatrixXd &refPoints,
                               const Eigen::MatrixXd &targetPoints,
                               std::vector<double> *quat, double *rmsd,
-                              double *scale) {
+                              std::vector<double> *rmsdList, double *scale) {
   //
   int nop =
       refPoints.rows(); // Number of particles (equal to the number of rows)
@@ -95,7 +95,7 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd &refPoints,
   // ---------------------------------------------------
   // GETTING THE ERROR
   (*rmsd) = absor::getRMSD(centeredRefPnts, centeredTargetPnts, calcEigenVec,
-                           nop, (*scale));
+                           rmsdList, nop, (*scale));
   // ---------------------------------------------------
   return 0;
 } // end of function
@@ -341,9 +341,13 @@ the rotation.
  ***********************************************/
 double absor::getRMSD(const Eigen::MatrixXd &centeredRefPnts,
                       const Eigen::MatrixXd &centeredTargetPnts,
-                      const Eigen::VectorXd &quat, int nop, double scale) {
+                      const Eigen::VectorXd &quat,
+                      std::vector<double> *rmsdList, int nop, double scale) {
   //
   Eigen::MatrixXd R(3, 3); // The (3x3) rotation vector
+  // The RMSD per atom is filled in this vector
+  (*rmsdList).resize(nop);
+  //
   R = absor::quat2RotMatrix(
       quat); // orthonormal rotation matrix from the quaternion
   // The total error is:
@@ -357,7 +361,8 @@ double absor::getRMSD(const Eigen::MatrixXd &centeredRefPnts,
     // Rotate the left system coordinate using the rotation matrix
     rotatedLeft = R * centeredTargetPnts.row(i);
     errorVec = centeredRefPnts.row(i) - scale * rotatedLeft;
-    rmsd += errorVec.dot(errorVec);
+    rmsd += errorVec.dot(errorVec);                // Total error
+    (*rmsdList)[i] = sqrt(errorVec.dot(errorVec)); // Error per atom
   } // end of loop through every row
   //
   return sqrt(rmsd);
