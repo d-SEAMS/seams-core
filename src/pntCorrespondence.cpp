@@ -53,3 +53,25 @@ Eigen::MatrixXd pntToPnt::fillPointSetHC(
   // Return the set of points
   return pointSet;
 }  // end function
+
+// Fills up an eigen matrix point set a reference ring, which is a regular
+// n-gonal polygon, constructed with radius 1 by default; where n is the number
+// of nodes in the ring
+Eigen::MatrixXd pntToPnt::getPointSetRefRing(int n) {
+  //
+  Eigen::MatrixXd pointSet(n, 3);  // Output point set for a regular polygon
+
+  // To get the vertices of a regular polygon, use the following formula:
+  // x[i] = r * cos(2*pi*i/n)
+  // y[i] = r * sin(2*pi*i/n)
+  // where n is the number of points and the index i is 0<=i<=n
+
+  // Loop through every particle
+  for (int i = 0; i < n; i++) {
+    pointSet(i, 0) = cos((2.0 * gen::pi * i) / n);  // x
+    pointSet(i, 1) = sin((2.0 * gen::pi * i) / n);  // y
+    pointSet(i, 2) = 0.0;                           // z
+  }  // end of loop through all the points
+
+  return pointSet;
+}  // end of function
