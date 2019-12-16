@@ -14,26 +14,25 @@ candidate/test system (or left system).
 system into the right system.
  *  @param[in, out] scale The scale factor obtained from Horn's algorithm.
  ***********************************************/
-int absor::hornAbsOrientation(const Eigen::MatrixXd& refPoints,
-                              const Eigen::MatrixXd& targetPoints,
-                              std::vector<double>* quat, double* rmsd,
-                              double* scale) {
+int absor::hornAbsOrientation(const Eigen::MatrixXd &refPoints,
+                              const Eigen::MatrixXd &targetPoints,
+                              std::vector<double> *quat, double *rmsd,
+                              double *scale) {
   //
   int nop =
-      refPoints.rows();  // Number of particles (equal to the number of rows)
+      refPoints.rows(); // Number of particles (equal to the number of rows)
   int dim =
-      refPoints
-          .cols();  // Number of dimensions (equal to the number of columns)
+      refPoints.cols(); // Number of dimensions (equal to the number of columns)
   Eigen::MatrixXd centeredRefPnts(
-      nop, dim);  // Reference point set after centering wrt the centroid
+      nop, dim); // Reference point set after centering wrt the centroid
   Eigen::MatrixXd centeredTargetPnts(
-      nop, dim);  // Target point set after centering wrt the centroid
+      nop, dim); // Target point set after centering wrt the centroid
   Eigen::MatrixXd S(dim,
-                    dim);  // Matrix containing sums of products of coordinates
+                    dim); // Matrix containing sums of products of coordinates
   Eigen::MatrixXd N(
-      4, 4);  // 4x4 Matrix, whose largest eigenvector must be calculated
+      4, 4); // 4x4 Matrix, whose largest eigenvector must be calculated
   Eigen::VectorXd calcEigenVec(
-      4);  // This should have 4 components (eigen vector calculated from N)
+      4); // This should have 4 components (eigen vector calculated from N)
   // -----
   // Check that the sizes of the reference point set (right point system) and
   // the target point set (left point system) are the same
@@ -43,7 +42,7 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd& refPoints,
     std::cerr
         << "The reference and target point sets are not of the same size.\n";
     return 1;
-  }  // unequal size; error!
+  } // unequal size; error!
   // -----
   //
   // ---------------------------------------------------
@@ -68,7 +67,7 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd& refPoints,
   // Construct eigen solver object, requesting the largest 1 eigenvalue and
   // eigenvector
   Spectra::SymEigsSolver<double, Spectra::LARGEST_ALGE,
-                         Spectra::DenseSymMatProd<double> >
+                         Spectra::DenseSymMatProd<double>>
       eigs(&op, 1, 4);
   //
   // Initialize and compute
@@ -76,19 +75,19 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd& refPoints,
   int nconv = eigs.compute();
   // Get the eigenvalue and eigenvector
   if (eigs.info() == Spectra::SUCCESSFUL) {
-    Eigen::VectorXd calcEigenValue = eigs.eigenvalues();  // Eigenvalue
+    Eigen::VectorXd calcEigenValue = eigs.eigenvalues(); // Eigenvalue
     calcEigenVec = eigs.eigenvectors();
-  }  // end of eigenvector calculation
+  } // end of eigenvector calculation
   //
   // --------
   // Normalize the eigenvector calculated
   double qNorm = sqrt(calcEigenVec.dot(calcEigenVec));
-  calcEigenVec /= qNorm;  // Divide by the square root of the sum
+  calcEigenVec /= qNorm; // Divide by the square root of the sum
   // Update the quaternion with the normalized eigenvector
-  (*quat).resize(4);  // Output quaternion update
+  (*quat).resize(4); // Output quaternion update
   for (int i = 0; i < 4; i++) {
     (*quat)[i] = calcEigenVec(i);
-  }  // end of quaternion update
+  } // end of quaternion update
   // --------
   // ---------------------------------------------------
   // COMPUTE THE OPTIMUM SCALE
@@ -99,7 +98,7 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd& refPoints,
                            nop, (*scale));
   // ---------------------------------------------------
   return 0;
-}  // end of function
+} // end of function
 
 /********************************************/ /**
  *  Compute the matrix S, or M, whose elements are the sums of products of
@@ -117,30 +116,30 @@ candidate/test system (or left system), centered with respect to the centroid.
  *  @param[in] dim The number of dimensions = 3.
  *  \return a \f$ (3 \times 3) \f$ Eigen matrix, or S.
  ***********************************************/
-Eigen::MatrixXd absor::calcMatrixS(const Eigen::MatrixXd& centeredRefPnts,
-                                   const Eigen::MatrixXd& centeredTargetPnts,
+Eigen::MatrixXd absor::calcMatrixS(const Eigen::MatrixXd &centeredRefPnts,
+                                   const Eigen::MatrixXd &centeredTargetPnts,
                                    int nop, int dim) {
   //
-  Eigen::MatrixXd S(nop, dim);       // Output matrix S
-  Eigen::VectorXd targetCoord(nop);  // Column of the target point set
-  Eigen::VectorXd refCoord(nop);     // Column of the reference point set
-  double Svalue;  // Current value being filled (Sxx, Sxy etc.)
+  Eigen::MatrixXd S(nop, dim);      // Output matrix S
+  Eigen::VectorXd targetCoord(nop); // Column of the target point set
+  Eigen::VectorXd refCoord(nop);    // Column of the reference point set
+  double Svalue; // Current value being filled (Sxx, Sxy etc.)
 
   // Calculate Sxx, Sxy, Sxz etc
   for (int iCol = 0; iCol < dim; iCol++) {
     //
     for (int jCol = 0; jCol < dim; jCol++) {
       targetCoord =
-          centeredTargetPnts.col(iCol);  // iCol^th column of target point set
-      refCoord = centeredRefPnts.col(jCol);  // jCol^th of reference point set
+          centeredTargetPnts.col(iCol); // iCol^th column of target point set
+      refCoord = centeredRefPnts.col(jCol); // jCol^th of reference point set
       Svalue = targetCoord.dot(refCoord);
       S(iCol, jCol) = Svalue;
-    }  // end column wise filling
-  }    // end of filling
+    } // end column wise filling
+  }   // end of filling
 
   // Output matrix
   return S;
-}  // end of function
+} // end of function
 
 /********************************************/ /**
  *  Compute the matrix (4 \times 4) N, whose largest eigenvector
@@ -153,9 +152,9 @@ Eigen::MatrixXd absor::calcMatrixS(const Eigen::MatrixXd& centeredRefPnts,
 products of the coordinates measured in the left and right systems.
  *  \return a \f$ (4 \times 4) \f$ Eigen matrix, or N.
  ***********************************************/
-Eigen::MatrixXd absor::calcMatrixN(const Eigen::MatrixXd& S) {
+Eigen::MatrixXd absor::calcMatrixN(const Eigen::MatrixXd &S) {
   //
-  Eigen::MatrixXd N(4, 4);  // Output matrix N
+  Eigen::MatrixXd N(4, 4); // Output matrix N
   // Components of S
   double Sxx = S(0, 0);
   double Sxy = S(0, 1);
@@ -199,7 +198,7 @@ Eigen::MatrixXd absor::calcMatrixN(const Eigen::MatrixXd& S) {
   // ------------------
   // Output matrix
   return N;
-}  // end of function
+} // end of function
 
 /********************************************/ /**
  *  Centers a point set (which is an Eigen matrix),
@@ -209,17 +208,17 @@ Eigen::MatrixXd absor::calcMatrixN(const Eigen::MatrixXd& S) {
  *  \return a \f$ (n \times 3) \f$ Eigen matrix of the same size as the input
  point set.
  ***********************************************/
-Eigen::MatrixXd absor::centerWRTcentroid(const Eigen::MatrixXd& pointSet) {
+Eigen::MatrixXd absor::centerWRTcentroid(const Eigen::MatrixXd &pointSet) {
   //
-  int nop = pointSet.rows();                   // Number of particles
-  int dim = pointSet.cols();                   // Number of dimensions
-  Eigen::MatrixXd centeredPointSet(nop, dim);  // Output point set
-  Eigen::VectorXd vecOfOnes(nop);              // vector of ones
+  int nop = pointSet.rows();                  // Number of particles
+  int dim = pointSet.cols();                  // Number of dimensions
+  Eigen::MatrixXd centeredPointSet(nop, dim); // Output point set
+  Eigen::VectorXd vecOfOnes(nop);             // vector of ones
   std::vector<double> centroid;
   double coordValue;
   double centeredVal;
   //
-  centroid.resize(dim);  // Init to zero
+  centroid.resize(dim); // Init to zero
   vecOfOnes = Eigen::VectorXd::Ones(nop);
   // --------------------------------
 
@@ -227,12 +226,12 @@ Eigen::MatrixXd absor::centerWRTcentroid(const Eigen::MatrixXd& pointSet) {
     for (int k = 0; k < dim; k++) {
       coordValue = pointSet(i, k);
       centroid[k] += coordValue;
-    }  // loop through columns
-  }    // end of loop through rows
+    } // loop through columns
+  }   // end of loop through rows
   // Divide by the total number of particles
-  centroid[0] /= nop;  // x
-  centroid[1] /= nop;  // y
-  centroid[2] /= nop;  // z
+  centroid[0] /= nop; // x
+  centroid[1] /= nop; // y
+  centroid[2] /= nop; // z
   // --------------------------------
   // Subtract the centroid from the coordinates to get the centered point set
   for (int i = 0; i < nop; i++) {
@@ -240,11 +239,11 @@ Eigen::MatrixXd absor::centerWRTcentroid(const Eigen::MatrixXd& pointSet) {
       coordValue = pointSet(i, k);
       centeredVal = coordValue - centroid[k];
       centeredPointSet(i, k) = centeredVal;
-    }  // end of loop through columns (dimensions)
-  }    // end of loop through the rows
+    } // end of loop through columns (dimensions)
+  }   // end of loop through the rows
   // --------------------------------
   return centeredPointSet;
-}  // end of function
+} // end of function
 
 /********************************************/ /**
  *  Calculate the scale factor from the centered right
@@ -257,15 +256,14 @@ candidate/test system (or left system), centered with respect to the centroid.
  *  @param[in] n The number of points.
  *  \return the scale factor.
  ***********************************************/
-double absor::calcScaleFactor(const Eigen::MatrixXd& rightSys,
-                              const Eigen::MatrixXd& leftSys, int n) {
+double absor::calcScaleFactor(const Eigen::MatrixXd &rightSys,
+                              const Eigen::MatrixXd &leftSys, int n) {
   //
-  double scale;   // Output scale
-  double v1, v2;  // Sum of the length of the vector
+  double scale;  // Output scale
+  double v1, v2; // Sum of the length of the vector
   Eigen::VectorXd rightVec(
-      3);  // Vector of the i^th particle in the right system
-  Eigen::VectorXd leftVec(
-      3);  // Vector of the i^th particle in the right system
+      3);                     // Vector of the i^th particle in the right system
+  Eigen::VectorXd leftVec(3); // Vector of the i^th particle in the right system
 
   // scale = (sigma_to_n ||r_r||^2 / ||r_l||^2)^0.5
   // ref: http://people.csail.mit.edu/bkph/papers/Absolute_Orientation.pdf
@@ -274,17 +272,17 @@ double absor::calcScaleFactor(const Eigen::MatrixXd& rightSys,
   // point
   for (int i = 0; i < n; i++) {
     //
-    rightVec = rightSys.row(i);  // i^th row of the right system
-    leftVec = leftSys.row(i);    // i^th row of the left system
+    rightVec = rightSys.row(i); // i^th row of the right system
+    leftVec = leftSys.row(i);   // i^th row of the left system
     v1 += rightVec.dot(rightVec);
     v2 += leftVec.dot(leftVec);
-  }  // end of loop through all points
+  } // end of loop through all points
 
   // The optimum scale is the ratio of v1 and v2
   scale = std::sqrt(v1 / v2);
 
   return scale;
-}  // end of function
+} // end of function
 
 /********************************************/ /**
  *  Get a \f$ (3 \times 3) \f$ rotation matrix from
@@ -292,9 +290,9 @@ double absor::calcScaleFactor(const Eigen::MatrixXd& rightSys,
  *  @param[in] quat The Eigen vector of length 4, for the input quaternion.
  *  \return the rotation matrix.
  ***********************************************/
-Eigen::MatrixXd absor::quat2RotMatrix(const Eigen::VectorXd& quat) {
+Eigen::MatrixXd absor::quat2RotMatrix(const Eigen::VectorXd &quat) {
   //
-  Eigen::MatrixXd R(3, 3);  // Rotation matrix
+  Eigen::MatrixXd R(3, 3); // Rotation matrix
   // Components of the quaternion
   double q0 = quat(0);
   double qx = quat(1);
@@ -324,7 +322,7 @@ Eigen::MatrixXd absor::quat2RotMatrix(const Eigen::VectorXd& quat) {
 
   // return the rotation matrix
   return R;
-}  // end of function
+} // end of function
 
 /********************************************/ /**
  *  Get the root mean square of the errors
@@ -341,17 +339,17 @@ the rotation.
  *  @param[in] scale The scale factor
  *  \return the least RMSD.
  ***********************************************/
-double absor::getRMSD(const Eigen::MatrixXd& centeredRefPnts,
-                      const Eigen::MatrixXd& centeredTargetPnts,
-                      const Eigen::VectorXd& quat, int nop, double scale) {
+double absor::getRMSD(const Eigen::MatrixXd &centeredRefPnts,
+                      const Eigen::MatrixXd &centeredTargetPnts,
+                      const Eigen::VectorXd &quat, int nop, double scale) {
   //
-  Eigen::MatrixXd R(3, 3);  // The (3x3) rotation vector
+  Eigen::MatrixXd R(3, 3); // The (3x3) rotation vector
   R = absor::quat2RotMatrix(
-      quat);  // orthonormal rotation matrix from the quaternion
+      quat); // orthonormal rotation matrix from the quaternion
   // The total error is:
   // sum_over_all_n (r'_r - s*rotated_r_l')
-  double rmsd = 0.0;            // Error
-  Eigen::VectorXd errorVec(3);  // The vector which is the r_r -s*R
+  double rmsd = 0.0;           // Error
+  Eigen::VectorXd errorVec(3); // The vector which is the r_r -s*R
   Eigen::VectorXd rotatedLeft(3);
   //
   for (int i = 0; i > nop; i++) {
@@ -360,7 +358,7 @@ double absor::getRMSD(const Eigen::MatrixXd& centeredRefPnts,
     rotatedLeft = R * centeredTargetPnts.row(i);
     errorVec = centeredRefPnts.row(i) - scale * rotatedLeft;
     rmsd += errorVec.dot(errorVec);
-  }  // end of loop through every row
+  } // end of loop through every row
   //
   return sqrt(rmsd);
-}  // end of function
+} // end of function
