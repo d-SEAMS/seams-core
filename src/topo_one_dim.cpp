@@ -169,6 +169,12 @@ std::vector<int> ring::findPrisms(
   int ringSize = rings[0].size();  // Number of nodes in each ring
   *nImperfectPrisms = 0;           // Number of undeformed prisms
   *nPerfectPrisms = 0;             // Number of undeformed prisms
+  // Matrix for the reference ring for a given ringSize.
+  Eigen::MatrixXd refPointSet(ringSize, 3);
+
+  // Get the reference ring point set for a given ring size.
+  refPointSet = pntToPnt::getPointSetRefRing(ringSize);
+  //
 
   // Two loops through all the rings are required to find pairs of basal rings
   for (int iring = 0; iring < totalRingNum - 1; iring++) {
@@ -215,7 +221,9 @@ std::vector<int> ring::findPrisms(
         }  // end of skipping if the prisms do not fulfil relaxed criteria
 
         // Do shape matching here
-        bool isDeformedPrism = false;
+        bool isDeformedPrism =
+            match::matchPrismBlock(yCloud, nList, refPointSet, &basal1, &basal2,
+                                   matchedAtomTypes, false);
 
         // Success! The rings are basal rings of a deformed prism!
         if (isDeformedPrism) {
@@ -261,6 +269,13 @@ std::vector<int> ring::findPrisms(
         } else if ((*ringType)[jring] == ring::deformedPrism) {
           (*ringType)[jring] = ring::mixedPrismRing;
         }  // if it is deformed
+        //
+        // Shape-matching to get the RMSD (if shape-matching is desired)
+        if (doShapeMatching) {
+          bool isKnownPrism =
+              match::matchPrismBlock(yCloud, nList, refPointSet, &basal1,
+                                     &basal2, matchedAtomTypes, true);
+        }  // end of shape-matching to get rmsd
         //
         // // Now write out axial basal rings for convex hull calculations
         // sout::writePrisms(&basal1, &basal2, *nPrisms, yCloud);
