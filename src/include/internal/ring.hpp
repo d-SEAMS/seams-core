@@ -92,7 +92,23 @@ enum strucType {
   HCprismatic,
   bothBasal,
   bothPrismatic,
-  Prism
+  Prism,
+  deformedPrism,
+  mixedPrismRing
+};
+
+/*! \struct matchInfo
+ * \brief This contains the information after shape-matching
+ for each atom
+ *
+ * Contains specifically the members:
+ */
+struct matchInfo {
+  strucType type = ring::unclassified;  // Per-atom classification, based on
+                                        // which ring it belongs to
+  double l_rmsd = -1;     // The least RMSD obtained from shape-matching
+                          // (initialized to a dummy value)
+  int nSharedStrucs = 0;  // Number of cages or blocks shared
 };
 
 // Returns a vector of vectors of rings of a single size
