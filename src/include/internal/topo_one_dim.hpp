@@ -36,8 +36,10 @@ namespace ring {
 // Returns a vector containing all the ring IDs which are prisms
 std::vector<int> findPrisms(
     std::vector<std::vector<int>> rings, std::vector<strucType> *ringType,
-    int *nPrisms, std::vector<std::vector<int>> nList,
+    int *nPerfectPrisms, int *nImperfectPrisms,
+    std::vector<std::vector<int>> nList,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<ring::matchInfo> *matchedAtomTypes,
     bool doShapeMatching = false);
 
 // Tests whether two rings are basal rings (true) or not (false) for a prism

@@ -92,12 +92,15 @@ SCENARIO("Test the prism identification scheme for a single tetragonal prism.",
       // Find the vector of vector of rings
       rings = primitive::ringNetwork(nList, 5);
       THEN("There should be exactly one tetragonal prism.") {
-        int nPrisms = 0;  // The number of prisms
+        int nPrisms = 0;  // The number of perfect prisms
+        int nDeformed = 0;
+        // Qualifier for the type of atom it is:
+        std::vector<ring::matchInfo> matchedAtoms;  // Not used here
         ringType.resize(
             rings.size());  // Has a value for each ring. init to zero.
         // Find the number of tetragonal prisms
-        listPrism =
-            ring::findPrisms(rings, &ringType, &nPrisms, nList, &yCloud);
+        listPrism = ring::findPrisms(rings, &ringType, &nPrisms, &nDeformed,
+                                     nList, &yCloud, &matchedAtoms, false);
         // Assert the number of prism blocks
         REQUIRE(nPrisms ==
                 1);  // Evaluate condition for a single tetragonal prism

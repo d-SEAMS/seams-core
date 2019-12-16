@@ -40,23 +40,32 @@ int ring::prismAnalysis(
       ringsOneType;            // Vector of vectors of rings of a single size
   std::vector<int> listPrism;  // Vector for ring indices of n-sided prism
   std::vector<ring::strucType>
-      ringType;  // This vector will have a value for each ring inside
-  int nPrisms;   // Number of prisms of each type
-  std::vector<int> nPrismList;  // Vector of the values of the number of prisms
-                                // for a particular frame
+      ringType;          // This vector will have a value for each ring inside
+  int nPerfectPrisms;    // Number of perfect prisms of each type
+  int nImperfectPrisms;  // Number of deformed prisms of each type
+  std::vector<int> nPrismList;  // Vector of the values of the number of perfect
+                                // prisms for a particular frame
+  std::vector<int> nDefPrismList;  // Vector of the values of the number of
+                                   // deformed prisms for a particular frame
   std::vector<double>
       heightPercent;  // Height percent for a particular n and frame
   std::vector<int>
       atomTypes;  // contains int values for each prism type considered
   double avgPrismHeight = 2.845;  // A value of 2.7-2.85 Angstrom is reasonable
+  // Qualifier for the type of atom it is:
+  std::vector<ring::matchInfo> matchedAtoms;
   // -------------------------------------------------------------------------------
   // Init
   nPrismList.resize(
       maxDepth -
       2);  // Has a value for every value of ringSize from 3, upto maxDepth
+  nDefPrismList.resize(maxDepth - 2);
   heightPercent.resize(maxDepth - 2);
   // The atomTypes vector is the same size as the pointCloud atoms
   atomTypes.resize(yCloud->nop, 1);  // The dummy or unclassified value is 1
+  // The matchedAtoms vector is the same size as the pointCloud atoms and has a
+  // value for every atom
+  matchedAtoms.resize(yCloud->nop);
   // -------------------------------------------------------------------------------
   // Run this loop for rings of sizes upto maxDepth
   // The smallest possible ring is of size 3
@@ -68,7 +77,8 @@ int ring::prismAnalysis(
     //
     // Continue if there are zero rings of ringSize
     if (ringsOneType.size() == 0) {
-      nPrismList[ringSize - 3] = 0;       // Update the number of prisms
+      nPrismList[ringSize - 3] = 0;     // Update the number of prisms
+      nDefPrismList[ringSize - 3] = 0;  // Update the number of deformed prisms
       heightPercent[ringSize - 3] = 0.0;  // Update the height%
       continue;
     }  // skip if there are no rings
@@ -77,21 +87,26 @@ int ring::prismAnalysis(
        // Init of variables specific to ringSize prisms
     listPrism.resize(0);
     ringType.resize(0);
-    nPrisms = 0;
+    nPerfectPrisms = 0;
+    nImperfectPrisms = 0;
     ringType.resize(
         ringsOneType.size());  // Has a value for each ring. init to zero.
     // -------------
     // Now that you have rings of a certain size:
     // Find prisms, saving the ring indices to listPrism
-    listPrism = ring::findPrisms(ringsOneType, &ringType, &nPrisms, nList,
-                                 yCloud, doShapeMatching);
+    listPrism = ring::findPrisms(ringsOneType, &ringType, &nPerfectPrisms,
+                                 &nImperfectPrisms, nList, yCloud,
+                                 &matchedAtoms, doShapeMatching);
     // -------------
-    nPrismList[ringSize - 3] = nPrisms;  // Update the number of prisms
+    nPrismList[ringSize - 3] =
+        nPerfectPrisms;  // Update the number of perfect prisms
+    nDefPrismList[ringSize - 3] =
+        nImperfectPrisms;  // Update the number of defromed prisms
     // Update the height% for the phase
-    heightPercent[ringSize - 3] =
-        topoparam::normHeightPercent(yCloud, nPrisms, avgPrismHeight);
+    heightPercent[ringSize - 3] = topoparam::normHeightPercent(
+        yCloud, nPerfectPrisms + nImperfectPrisms, avgPrismHeight);
     // Continue if there are no prism units
-    if (nPrisms == 0) {
+    if (nPerfectPrisms + nImperfectPrisms == 0) {
       continue;
     }  // skip for no prisms
     // Do a bunch of write-outs and calculations
@@ -104,7 +119,7 @@ int ring::prismAnalysis(
 
   // Calculate the height%
 
-  // Write out the prism information
+  // Write out the prism information (TODO: include nDefPrismList)
   sout::writePrismNum(path, yCloud->currentFrame, nPrismList, heightPercent,
                       maxDepth);
   // Write out the lammps data file for the particular frame
@@ -138,9 +153,10 @@ int ring::prismAnalysis(
  ***********************************************/
 std::vector<int> ring::findPrisms(
     std::vector<std::vector<int>> rings, std::vector<ring::strucType> *ringType,
-    int *nPrisms, std::vector<std::vector<int>> nList,
+    int *nPerfectPrisms, int *nImperfectPrisms,
+    std::vector<std::vector<int>> nList,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    bool doShapeMatching) {
+    std::vector<ring::matchInfo> *matchedAtomTypes, bool doShapeMatching) {
   std::vector<int> listPrism;
   int totalRingNum = rings.size();  // Total number of rings
   std::vector<int> basal1;          // First basal ring
@@ -151,8 +167,8 @@ std::vector<int> ring::findPrisms(
   bool isAxialPair;   // Basal rings should be parallel in one dimension to
                       // prevent overcounting
   int ringSize = rings[0].size();  // Number of nodes in each ring
-  int nDeformedPrisms = 0;         // Number of undeformed prisms
-  *nPrisms = 0;                    // Number of undeformed prisms
+  *nImperfectPrisms = 0;           // Number of undeformed prisms
+  *nPerfectPrisms = 0;             // Number of undeformed prisms
 
   // Two loops through all the rings are required to find pairs of basal rings
   for (int iring = 0; iring < totalRingNum - 1; iring++) {
@@ -186,6 +202,11 @@ std::vector<int> ring::findPrisms(
       cond2 = ring::basalPrismConditions(nList, &basal1, &basal2);
       // If cond2 is false, the strict criteria for prisms has not been met
       if (cond2 == false) {
+        // Skip if shape-matching is not desired
+        if (!doShapeMatching) {
+          continue;
+        }  // shape-matching not desired
+        // If shape-matching is to be done:
         // Check for the reduced criteria fulfilment
         relaxedCond = ring::relaxedPrismConditions(nList, &basal1, &basal2);
         // Skip if relaxed criteria are not met
@@ -193,31 +214,59 @@ std::vector<int> ring::findPrisms(
           continue;
         }  // end of skipping if the prisms do not fulfil relaxed criteria
 
-        // Write outs
-        nDeformedPrisms += 1;
-        // Now write out axial basal rings
-        sout::writeBasalRingsPrism(&basal1, &basal2, nDeformedPrisms, nList,
-                                   yCloud, true);
+        // Do shape matching here
+        bool isDeformedPrism = false;
+
+        // Success! The rings are basal rings of a deformed prism!
+        if (isDeformedPrism) {
+          //
+          // // Update the number of prism blocks
+          *nImperfectPrisms += 1;
+          // Update iring
+          if ((*ringType)[iring] == ring::unclassified) {
+            (*ringType)[iring] = ring::deformedPrism;
+            listPrism.push_back(iring);
+          } else if ((*ringType)[iring] == ring::Prism) {
+            (*ringType)[iring] = ring::mixedPrismRing;
+          }  // if it is deformed
+          // Update jring
+          if ((*ringType)[jring] == ring::unclassified) {
+            (*ringType)[jring] = ring::deformedPrism;
+            listPrism.push_back(jring);
+          } else if ((*ringType)[jring] == ring::Prism) {
+            (*ringType)[jring] = ring::mixedPrismRing;
+          }  // if it is deformed
+        }    // end of update of ring types
+
+        // // Write outs
+        // // Now write out axial basal rings
+        // sout::writeBasalRingsPrism(&basal1, &basal2, nDeformedPrisms, nList,
+        //                            yCloud, true);
       }  // end of reduced criteria
       // Strict criteria
       else {
         // Update the number of prism blocks
-        *nPrisms += 1;
+        *nPerfectPrisms += 1;
         // Update iring
         if ((*ringType)[iring] == ring::unclassified) {
           (*ringType)[iring] = ring::Prism;
           listPrism.push_back(iring);
-        }
+        } else if ((*ringType)[iring] == ring::deformedPrism) {
+          (*ringType)[iring] = ring::mixedPrismRing;
+        }  // if it is deformed
         // Update jring
         if ((*ringType)[jring] == ring::unclassified) {
           (*ringType)[jring] = ring::Prism;
           listPrism.push_back(jring);
-        }
-        // Now write out axial basal rings for convex hull calculations
-        sout::writePrisms(&basal1, &basal2, *nPrisms, yCloud);
-        // Write out prisms for shape-matching
-        sout::writeBasalRingsPrism(&basal1, &basal2, *nPrisms, nList, yCloud,
-                                   false);
+        } else if ((*ringType)[jring] == ring::deformedPrism) {
+          (*ringType)[jring] = ring::mixedPrismRing;
+        }  // if it is deformed
+        //
+        // // Now write out axial basal rings for convex hull calculations
+        // sout::writePrisms(&basal1, &basal2, *nPrisms, yCloud);
+        // // Write out prisms for shape-matching
+        // sout::writeBasalRingsPrism(&basal1, &basal2, *nPrisms, nList, yCloud,
+        //                            false);
         // -----------
       }  // end of strict criteria
 
