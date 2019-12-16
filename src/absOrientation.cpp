@@ -365,5 +365,5 @@ double absor::getRMSD(const Eigen::MatrixXd &centeredRefPnts,
     (*rmsdList)[i] = sqrt(errorVec.dot(errorVec)); // Error per atom
   } // end of loop through every row
   //
-  return sqrt(rmsd);
+  return sqrt(rmsd / nop);
 } // end of function
