@@ -30,6 +30,11 @@ bool matchPrismBlock(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                      std::vector<int> *basal2, std::vector<double> *rmsdPerAtom,
                      bool isPerfect = true);
 
+// Update the per-particle RMSD for a prism block basal ring.
+int updatePerAtomRMSDRing(std::vector<int> basalRing, int startingIndex,
+                          std::vector<double> rmsdFromMatch,
+                          std::vector<double> *rmsdPerAtom);
+
 } // namespace match
 
 #endif // __SHAPEMATCH_H_
