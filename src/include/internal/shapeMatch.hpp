@@ -25,7 +25,10 @@ namespace match {
 // Shape-matching for a pair of polygon basal rings. Returns true if the pair of
 // basal rings form a prism block.
 bool matchPrismBlock(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                     std::vector<int> *basal1, std::vector<int> *basal2,
+                     std::vector<std::vector<int>> nList,
+                     const Eigen::MatrixXd &refPoints, std::vector<int> *basal1,
+                     std::vector<int> *basal2,
+                     std::vector<ring::matchInfo> *matchedAtomTypes,
                      bool isPerfect = true);
 
 }  // namespace match
