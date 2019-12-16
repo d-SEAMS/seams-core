@@ -75,3 +75,131 @@ Eigen::MatrixXd pntToPnt::getPointSetRefRing(int n) {
 
   return pointSet;
 }  // end of function
+
+// Get the relative ordering of a pair of basal rings for a deformed
+// prism/perfect prism. Outputs a vector of vectors of indices, such that the
+// first vector is for the first basal ring, and the second vector is for the
+// second basal ring. The input neighbour list is with respect to indices, not
+// IDs
+int pntToPnt::relOrderPrismBlock(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<int> basal1, std::vector<int> basal2,
+    std::vector<std::vector<int>> nList, std::vector<int> *outBasal1,
+    std::vector<int> *outBasal2) {
+  //
+  int ringSize = basal1.size();  // Number of nodes in basal1 and basal2
+  int nBonds;        // Number of bonds between two parallel basal rings
+  bool isNeighbour;  // Bool for checking if two atoms are neighbours or not
+  int l_k, m_k;      // Elements in basal1 and basal2
+  bool isClock, isAntiClock;  // Clockwise and anti-clockwise ordering of basal1
+                              // and basal2
+  int iatom, jatom;  // Index in the ring to start from, for basal1 and basal2
+  int currentIatom, currentJatom;
+  // ---------------
+  // Find the nearest neighbours of basal1 elements in basal2
+  nBonds = 0;
+  isNeighbour = false;
+  // Loop through every element of basal1
+  for (int l = 0; l < ringSize; l++) {
+    l_k = basal1[l];  // This is the atom particle C++ index
+
+    // Search for the nearest neighbour of l_k in basal2
+    // Loop through basal2 elements
+    for (int m = 0; m < ringSize; m++) {
+      m_k = basal2[m];  // Atom index to find in the neighbour list of iatom
+
+      // Find m_k inside l_k neighbour list
+      auto it = std::find(nList[l_k].begin() + 1, nList[l_k].end(), m_k);
+
+      // If the element has been found, for l1
+      if (it != nList[l_k].end()) {
+        isNeighbour = true;
+        iatom = l;  // index of basal1
+        jatom = m;  // index of basal2
+        break;
+      }  // found element
+
+    }  // end of loop through all atomIDs in basal2
+
+    if (isNeighbour) {
+      break;
+    }  // nearest neighbour found
+  }    // end of loop through all the atomIDs in basal1
+
+  if (!isNeighbour) {
+    std::cerr << "Something is wrong with your deformed prism.\n";
+    // Error handling
+    return 1;
+  }
+  // ---------------------------------------------------
+  // Find out if the order of basal2 is 'clockwise' or 'anticlockwise'
+  isClock = false;  // init
+  isAntiClock = false;
+
+  // atom index in the ring
+  int tempJfor, tempJback;
+
+  tempJfor = jatom + 1;
+  tempJback = jatom - 1;
+
+  if (jatom == ringSize - 1) {
+    tempJfor = 0;
+    tempJback = ringSize - 2;
+  }
+  if (jatom == 0) {
+    tempJfor = 1;
+    tempJback = ringSize - 1;
+  }
+
+  int forwardJ = basal2[tempJfor];
+  int backwardJ = basal2[tempJback];
+  int currentI = basal1[iatom];
+
+  // Check clockwise
+  double distClock = gen::periodicDist(yCloud, currentI, forwardJ);
+  double distAntiClock = gen::periodicDist(yCloud, currentI, backwardJ);
+
+  // Clockwise
+  if (distClock < distAntiClock) {
+    isClock = true;
+  }  // end of clockwise check
+  // Anti-clockwise
+  if (distAntiClock < distClock) {
+    isAntiClock = true;
+  }  // end of anti-clockwise check
+  // Some error
+  if (isClock == false && isAntiClock == false) {
+    // std::cerr << "The points are equidistant.\n";
+    // Error handling
+    return 1;
+  }  // end of error handling
+  // ---------------------------------------------------
+  // Get the order of basal1 and basal2
+  for (int i = 0; i < ringSize; i++) {
+    currentIatom = iatom + i;
+    if (currentIatom >= ringSize) {
+      currentIatom -= ringSize;
+    }  // end of basal1 element wrap-around
+
+    // In clockwise order
+    if (isClock) {
+      currentJatom = jatom + i;
+      if (currentJatom >= ringSize) {
+        currentJatom -= ringSize;
+      }  // wrap around
+    }    // end of clockwise update
+    else {
+      currentJatom = jatom - i;
+      if (currentJatom < 0) {
+        currentJatom += ringSize;
+      }  // wrap around
+    }    // end of anti-clockwise update
+
+    // Add to outBasal1 and outBasal2 now
+    (*outBasal1).push_back(basal1[currentIatom]);
+    (*outBasal2).push_back(basal2[currentJatom]);
+  }  //
+  //
+
+  return 0;
+}  // end of function
