@@ -41,7 +41,7 @@ function M.make_output_dirs( doBOP, topoOneDim, topoTwoDim, topoBulk )
     prismFile=io.open(prismFileName, "w"); --- Allow overwriting (otherwise use a)
     io.output(prismFile);
     --- appends a word test to the last line of the file
-    io.write("Frame RingSize Num_of_prisms Height% RingSize ... Height%\n");
+    io.write("Frame RingSize Total_prisms Def_Prisms Height% RingSize ... Height%\n");
     --- closes the open file
     io.close(prismFile);
   end --- end of topo one dimensional dir
