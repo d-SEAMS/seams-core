@@ -1,16 +1,16 @@
 #ifndef __TOPO_ONE_DIM_H_
 #define __TOPO_ONE_DIM_H_
 
+#include <math.h>
+#include <sys/stat.h>
 #include <algorithm>
 #include <array>
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <math.h>
 #include <memory>
 #include <sstream>
 #include <string>
-#include <sys/stat.h>
 #include <vector>
 
 #include <mol_sys.hpp>
@@ -34,12 +34,12 @@ namespace ring {
 
 // Find out which rings are prisms.
 // Returns a vector containing all the ring IDs which are prisms
-std::vector<int>
-findPrisms(std::vector<std::vector<int>> rings,
-           std::vector<strucType> *ringType, int *nPerfectPrisms,
-           int *nImperfectPrisms, std::vector<std::vector<int>> nList,
-           molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-           std::vector<double> *rmsdPerAtom, bool doShapeMatching = false);
+std::vector<int> findPrisms(
+    std::vector<std::vector<int>> rings, std::vector<strucType> *ringType,
+    int *nPerfectPrisms, int *nImperfectPrisms,
+    std::vector<std::vector<int>> nList,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<double> *rmsdPerAtom, bool doShapeMatching = false);
 
 // Tests whether two rings are basal rings (true) or not (false) for a prism
 // (strict criterion)
@@ -68,8 +68,14 @@ int prismAnalysis(std::string path, std::vector<std::vector<int>> rings,
 // given a vector with a list of indices of rings comprising the prisms
 int assignPrismType(std::vector<std::vector<int>> rings,
                     std::vector<int> listPrism, int ringSize,
-                    std::vector<int> *atomTypes);
+                    std::vector<ring::strucType> ringType,
+                    std::vector<int> *atomTypes,
+                    std::vector<ring::strucType> *atomState);
 
-} // namespace ring
+// Get the atom type values for deformed prisms
+int deformedPrismTypes(std::vector<ring::strucType> atomState,
+                       std::vector<int> *atomTypes, int maxDepth);
 
-#endif // __TOPOCONFINED_H_
+}  // namespace ring
+
+#endif  // __TOPOCONFINED_H_

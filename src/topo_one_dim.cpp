@@ -37,35 +37,40 @@ int ring::prismAnalysis(
     bool doShapeMatching) {
   //
   std::vector<std::vector<int>>
-      ringsOneType;           // Vector of vectors of rings of a single size
-  std::vector<int> listPrism; // Vector for ring indices of n-sided prism
+      ringsOneType;            // Vector of vectors of rings of a single size
+  std::vector<int> listPrism;  // Vector for ring indices of n-sided prism
   std::vector<ring::strucType>
-      ringType;         // This vector will have a value for each ring inside
-  int nPerfectPrisms;   // Number of perfect prisms of each type
-  int nImperfectPrisms; // Number of deformed prisms of each type
-  std::vector<int> nPrismList; // Vector of the values of the number of perfect
-                               // prisms for a particular frame
-  std::vector<int> nDefPrismList; // Vector of the values of the number of
-                                  // deformed prisms for a particular frame
+      ringType;  // This vector will have a value for each ring inside
+  std::vector<ring::strucType>
+      atomState;  // This vector will have a value for each atom, depending on
+                  // the ring type
+  int nPerfectPrisms;           // Number of perfect prisms of each type
+  int nImperfectPrisms;         // Number of deformed prisms of each type
+  std::vector<int> nPrismList;  // Vector of the values of the number of perfect
+                                // prisms for a particular frame
+  std::vector<int> nDefPrismList;  // Vector of the values of the number of
+                                   // deformed prisms for a particular frame
   std::vector<double>
-      heightPercent; // Height percent for a particular n and frame
+      heightPercent;  // Height percent for a particular n and frame
   std::vector<int>
-      atomTypes; // contains int values for each prism type considered
-  double avgPrismHeight = 2.845; // A value of 2.7-2.85 Angstrom is reasonable
+      atomTypes;  // contains int values for each prism type considered
+  double avgPrismHeight = 2.845;  // A value of 2.7-2.85 Angstrom is reasonable
   // Qualifier for the RMSD per atom:
   std::vector<double> rmsdPerAtom;
   // -------------------------------------------------------------------------------
   // Init
   nPrismList.resize(
       maxDepth -
-      2); // Has a value for every value of ringSize from 3, upto maxDepth
+      2);  // Has a value for every value of ringSize from 3, upto maxDepth
   nDefPrismList.resize(maxDepth - 2);
   heightPercent.resize(maxDepth - 2);
   // The atomTypes vector is the same size as the pointCloud atoms
-  atomTypes.resize(yCloud->nop, 1); // The dummy or unclassified value is 1
+  atomTypes.resize(yCloud->nop, 1);  // The dummy or unclassified value is 1
   // The rmsdPerAtom vector is the same size as the pointCloud atoms and has an
   // RMSD value for every atom
   rmsdPerAtom.resize(yCloud->nop, -1);
+  // Resize the atom state vector
+  atomState.resize(yCloud->nop);  // Dummy or unclassified
   // -------------------------------------------------------------------------------
   // Run this loop for rings of sizes upto maxDepth
   // The smallest possible ring is of size 3
@@ -77,11 +82,11 @@ int ring::prismAnalysis(
     //
     // Continue if there are zero rings of ringSize
     if (ringsOneType.size() == 0) {
-      nPrismList[ringSize - 3] = 0;      // Update the number of prisms
-      nDefPrismList[ringSize - 3] = 0;   // Update the number of deformed prisms
-      heightPercent[ringSize - 3] = 0.0; // Update the height%
+      nPrismList[ringSize - 3] = 0;     // Update the number of prisms
+      nDefPrismList[ringSize - 3] = 0;  // Update the number of deformed prisms
+      heightPercent[ringSize - 3] = 0.0;  // Update the height%
       continue;
-    } // skip if there are no rings
+    }  // skip if there are no rings
     //
     // -------------
     // Init of variables specific to ringSize prisms
@@ -90,7 +95,7 @@ int ring::prismAnalysis(
     nPerfectPrisms = 0;
     nImperfectPrisms = 0;
     ringType.resize(
-        ringsOneType.size()); // Has a value for each ring. init to zero.
+        ringsOneType.size());  // Has a value for each ring. init to zero.
     // -------------
     // Now that you have rings of a certain size:
     // Find prisms, saving the ring indices to listPrism
@@ -99,31 +104,38 @@ int ring::prismAnalysis(
                                  doShapeMatching);
     // -------------
     nPrismList[ringSize - 3] =
-        nPerfectPrisms; // Update the number of perfect prisms
+        nPerfectPrisms;  // Update the number of perfect prisms
     nDefPrismList[ringSize - 3] =
-        nImperfectPrisms; // Update the number of defromed prisms
+        nImperfectPrisms;  // Update the number of defromed prisms
+    int totalPrisms = nPerfectPrisms + nImperfectPrisms;
     // Update the height% for the phase
-    heightPercent[ringSize - 3] = topoparam::normHeightPercent(
-        yCloud, nPerfectPrisms + nImperfectPrisms, avgPrismHeight);
+    heightPercent[ringSize - 3] =
+        topoparam::normHeightPercent(yCloud, totalPrisms, avgPrismHeight);
     // Continue if there are no prism units
     if (nPerfectPrisms + nImperfectPrisms == 0) {
       continue;
-    } // skip for no prisms
+    }  // skip for no prisms
     // Do a bunch of write-outs and calculations
     // TODO: Write out each individual prism as data files (maybe with an
     // option)
     // Get the atom types for a particular prism type
-    ring::assignPrismType(ringsOneType, listPrism, ringSize, &atomTypes);
+    ring::assignPrismType(ringsOneType, listPrism, ringSize, ringType,
+                          &atomTypes, &atomState);
     // -------------
-  } // end of loop through every possible ringSize
+  }  // end of loop through every possible ringSize
 
   // Calculate the height%
 
-  // Write out the prism information (TODO: include nDefPrismList)
-  sout::writePrismNum(path, yCloud->currentFrame, nPrismList, heightPercent,
-                      maxDepth);
+  // Write out the prism information
+  sout::writePrismNum(path, yCloud->currentFrame, nPrismList, nDefPrismList,
+                      heightPercent, maxDepth);
+  // Reassign the prism block types for the deformed prisms
+  if (doShapeMatching) {
+    ring::deformedPrismTypes(atomState, &atomTypes, maxDepth);
+  }  // reassign prism block types for deformed prisms
   // Write out the lammps data file for the particular frame
-  sout::writeLAMMPSdataAllPrisms(yCloud, nList, atomTypes, maxDepth, path);
+  sout::writeLAMMPSdataAllPrisms(yCloud, nList, atomTypes, maxDepth, path,
+                                 doShapeMatching);
 
   return 0;
 }
@@ -151,24 +163,24 @@ int ring::prismAnalysis(
  been classified as prisms. The indices are with respect to the input rings
  vector of vectors.
  ***********************************************/
-std::vector<int>
-ring::findPrisms(std::vector<std::vector<int>> rings,
-                 std::vector<ring::strucType> *ringType, int *nPerfectPrisms,
-                 int *nImperfectPrisms, std::vector<std::vector<int>> nList,
-                 molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                 std::vector<double> *rmsdPerAtom, bool doShapeMatching) {
+std::vector<int> ring::findPrisms(
+    std::vector<std::vector<int>> rings, std::vector<ring::strucType> *ringType,
+    int *nPerfectPrisms, int *nImperfectPrisms,
+    std::vector<std::vector<int>> nList,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<double> *rmsdPerAtom, bool doShapeMatching) {
   std::vector<int> listPrism;
-  int totalRingNum = rings.size(); // Total number of rings
-  std::vector<int> basal1;         // First basal ring
-  std::vector<int> basal2;         // Second basal ring
-  bool cond1, cond2; // Conditions for rings to be basal (true) or not (false)
-  bool relaxedCond;  // Condition so that at least one bond exists between the
-                     // two basal rings
-  bool isAxialPair;  // Basal rings should be parallel in one dimension to
-                     // prevent overcounting
-  int ringSize = rings[0].size(); // Number of nodes in each ring
-  *nImperfectPrisms = 0;          // Number of undeformed prisms
-  *nPerfectPrisms = 0;            // Number of undeformed prisms
+  int totalRingNum = rings.size();  // Total number of rings
+  std::vector<int> basal1;          // First basal ring
+  std::vector<int> basal2;          // Second basal ring
+  bool cond1, cond2;  // Conditions for rings to be basal (true) or not (false)
+  bool relaxedCond;   // Condition so that at least one bond exists between the
+                      // two basal rings
+  bool isAxialPair;   // Basal rings should be parallel in one dimension to
+                      // prevent overcounting
+  int ringSize = rings[0].size();  // Number of nodes in each ring
+  *nImperfectPrisms = 0;           // Number of undeformed prisms
+  *nPerfectPrisms = 0;             // Number of undeformed prisms
   // Matrix for the reference ring for a given ringSize.
   Eigen::MatrixXd refPointSet(ringSize, 3);
 
@@ -180,20 +192,20 @@ ring::findPrisms(std::vector<std::vector<int>> rings,
   for (int iring = 0; iring < totalRingNum - 1; iring++) {
     cond1 = false;
     cond2 = false;
-    basal1 = rings[iring]; // Assign iring to basal1
+    basal1 = rings[iring];  // Assign iring to basal1
     // Loop through the other rings to get a pair
     for (int jring = iring + 1; jring < totalRingNum; jring++) {
-      basal2 = rings[jring]; // Assign jring to basal2
+      basal2 = rings[jring];  // Assign jring to basal2
       // ------------
       // Put extra check for tetragonal prism blocks to prevent overcounting
       if (ringSize == 4) {
-        isAxialPair = false; // init
+        isAxialPair = false;  // init
         isAxialPair =
             ring::discardExtraTetragonBlocks(&basal1, &basal2, yCloud);
         if (isAxialPair == false) {
           continue;
         }
-      } // end of check for tetragonal prism blocks
+      }  // end of check for tetragonal prism blocks
       // ------------
       // Step one: Check to see if basal1 and basal2 have common
       // elements or not. If they don't, then they cannot be basal rings
@@ -211,14 +223,14 @@ ring::findPrisms(std::vector<std::vector<int>> rings,
         // Skip if shape-matching is not desired
         if (!doShapeMatching) {
           continue;
-        } // shape-matching not desired
+        }  // shape-matching not desired
         // If shape-matching is to be done:
         // Check for the reduced criteria fulfilment
         relaxedCond = ring::relaxedPrismConditions(nList, &basal1, &basal2);
         // Skip if relaxed criteria are not met
         if (relaxedCond == false) {
           continue;
-        } // end of skipping if the prisms do not fulfil relaxed criteria
+        }  // end of skipping if the prisms do not fulfil relaxed criteria
 
         // Do shape matching here
         bool isDeformedPrism = match::matchPrismBlock(
@@ -235,21 +247,21 @@ ring::findPrisms(std::vector<std::vector<int>> rings,
             listPrism.push_back(iring);
           } else if ((*ringType)[iring] == ring::Prism) {
             (*ringType)[iring] = ring::mixedPrismRing;
-          } // if it is deformed
+          }  // if it is deformed
           // Update jring
           if ((*ringType)[jring] == ring::unclassified) {
             (*ringType)[jring] = ring::deformedPrism;
             listPrism.push_back(jring);
           } else if ((*ringType)[jring] == ring::Prism) {
             (*ringType)[jring] = ring::mixedPrismRing;
-          } // if it is deformed
-        }   // end of update of ring types
+          }  // if it is deformed
+        }    // end of update of ring types
 
         // // Write outs
         // // Now write out axial basal rings
         // sout::writeBasalRingsPrism(&basal1, &basal2, nDeformedPrisms, nList,
         //                            yCloud, true);
-      } // end of reduced criteria
+      }  // end of reduced criteria
       // Strict criteria
       else {
         // Update the number of prism blocks
@@ -260,20 +272,20 @@ ring::findPrisms(std::vector<std::vector<int>> rings,
           listPrism.push_back(iring);
         } else if ((*ringType)[iring] == ring::deformedPrism) {
           (*ringType)[iring] = ring::mixedPrismRing;
-        } // if it is deformed
+        }  // if it is deformed
         // Update jring
         if ((*ringType)[jring] == ring::unclassified) {
           (*ringType)[jring] = ring::Prism;
           listPrism.push_back(jring);
         } else if ((*ringType)[jring] == ring::deformedPrism) {
           (*ringType)[jring] = ring::mixedPrismRing;
-        } // if it is deformed
+        }  // if it is deformed
         //
         // Shape-matching to get the RMSD (if shape-matching is desired)
         if (doShapeMatching) {
           bool isKnownPrism = match::matchPrismBlock(
               yCloud, nList, refPointSet, &basal1, &basal2, rmsdPerAtom, true);
-        } // end of shape-matching to get rmsd
+        }  // end of shape-matching to get rmsd
         //
         // // Now write out axial basal rings for convex hull calculations
         // sout::writePrisms(&basal1, &basal2, *nPrisms, yCloud);
@@ -281,10 +293,10 @@ ring::findPrisms(std::vector<std::vector<int>> rings,
         // sout::writeBasalRingsPrism(&basal1, &basal2, *nPrisms, nList, yCloud,
         //                            false);
         // -----------
-      } // end of strict criteria
+      }  // end of strict criteria
 
-    } // end of loop through rest of the rings to get the second basal ring
-  }   // end of loop through all rings for first basal ring
+    }  // end of loop through rest of the rings to get the second basal ring
+  }    // end of loop through all rings for first basal ring
 
   sort(listPrism.begin(), listPrism.end());
   auto ip = std::unique(listPrism.begin(), listPrism.end());
@@ -309,18 +321,18 @@ ring::findPrisms(std::vector<std::vector<int>> rings,
 bool ring::basalPrismConditions(std::vector<std::vector<int>> nList,
                                 std::vector<int> *basal1,
                                 std::vector<int> *basal2) {
-  int l1 = (*basal1)[0]; // first element of basal1 ring
+  int l1 = (*basal1)[0];  // first element of basal1 ring
   int ringSize =
-      (*basal1).size(); // Size of the ring; each ring contains n elements
-  int m_k;              // Atom ID of element in basal2
-  bool l1_neighbour;    // m_k is a neighbour of l1(true) or not (false)
+      (*basal1).size();  // Size of the ring; each ring contains n elements
+  int m_k;               // Atom ID of element in basal2
+  bool l1_neighbour;     // m_k is a neighbour of l1(true) or not (false)
 
   // isNeighbour is initialized to false for all basal2 elements; indication if
   // basal2 elements are neighbours of basal1
   std::vector<bool> isNeighbour(ringSize, false);
-  int kIndex;  // m_k index
-  int lAtomID; // atomID of the current element of basal1
-  int kAtomID; // atomID of the current element of basal2
+  int kIndex;   // m_k index
+  int lAtomID;  // atomID of the current element of basal1
+  int kAtomID;  // atomID of the current element of basal2
 
   // ---------------------------------------------
   // COMPARISON OF basal2 ELEMENTS WITH l1
@@ -338,7 +350,7 @@ bool ring::basalPrismConditions(std::vector<std::vector<int>> nList,
       kIndex = k;
       break;
     }
-  } // l1 is a neighbour of m_k
+  }  // l1 is a neighbour of m_k
 
   // If there is no nearest neighbour, then the two rings are not part of the
   // prism
@@ -352,14 +364,14 @@ bool ring::basalPrismConditions(std::vector<std::vector<int>> nList,
 
   // All elements of basal1 must be neighbours of basal2
   for (int i = 1; i < ringSize; i++) {
-    lAtomID = (*basal1)[i]; // element of basal1 ring
+    lAtomID = (*basal1)[i];  // element of basal1 ring
     for (int k = 0; k < ringSize; k++) {
       // Skip if already a neighbour
       if (isNeighbour[k]) {
         continue;
       }
       // Get the comparison basal2 element
-      kAtomID = (*basal2)[k]; // element of basal2 ring;
+      kAtomID = (*basal2)[k];  // element of basal2 ring;
 
       // Checking to see if kAtomID is a neighbour of lAtomID
       // Find kAtomID inside lAtomID neighbour list
@@ -370,8 +382,8 @@ bool ring::basalPrismConditions(std::vector<std::vector<int>> nList,
       if (it1 != nList[lAtomID].end()) {
         isNeighbour[k] = true;
       }
-    } // Loop through basal2
-  }   // end of check for neighbours of basal1
+    }  // Loop through basal2
+  }    // end of check for neighbours of basal1
 
   // ---------------------------------------------
 
@@ -397,11 +409,11 @@ bool ring::relaxedPrismConditions(std::vector<std::vector<int>> nList,
                                   std::vector<int> *basal1,
                                   std::vector<int> *basal2) {
   int ringSize =
-      (*basal1).size();     // Size of the ring; each ring contains n elements
-  int m_k;                  // Atom ID of element in basal2
-  bool isNeighbour = false; // This is true if there is at least one bond
-                            // between the basal rings
-  int l_k;                  // Atom ID of element in basal1
+      (*basal1).size();      // Size of the ring; each ring contains n elements
+  int m_k;                   // Atom ID of element in basal2
+  bool isNeighbour = false;  // This is true if there is at least one bond
+                             // between the basal rings
+  int l_k;                   // Atom ID of element in basal1
 
   // ---------------------------------------------
   // COMPARISON OF basal2 ELEMENTS (m_k) WITH basal1 ELEMENTS (l_k)
@@ -419,14 +431,14 @@ bool ring::relaxedPrismConditions(std::vector<std::vector<int>> nList,
       if (it != nList[l_k].end()) {
         isNeighbour = true;
         break;
-      } // found element
-    }   // end of loop through all the elements of basal2
+      }  // found element
+    }    // end of loop through all the elements of basal2
 
     // If a neighbour has been found then
     if (isNeighbour) {
       return true;
     }
-  } // end of loop through all the elements of basal1
+  }  // end of loop through all the elements of basal1
 
   // If a neighbour has not been found, return false
   return false;
@@ -448,17 +460,17 @@ bool ring::discardExtraTetragonBlocks(
     std::vector<int> *basal1, std::vector<int> *basal2,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
   int ringSize =
-      (*basal1).size(); // Size of the ring; each ring contains n elements
+      (*basal1).size();  // Size of the ring; each ring contains n elements
   int iatomIndex,
-      jatomIndex;  // Indices of the elements in basal1 and basal2 respectively
-  double r_i, r_j; // Coordinates in the axial dimension of iatom and jatom of
-                   // basal1 and basal2 respectively
-  int axialDim;    // 0 for x, 1 for y and 2 for z dimensions respectively
+      jatomIndex;   // Indices of the elements in basal1 and basal2 respectively
+  double r_i, r_j;  // Coordinates in the axial dimension of iatom and jatom of
+                    // basal1 and basal2 respectively
+  int axialDim;     // 0 for x, 1 for y and 2 for z dimensions respectively
   // Variables for getting the projected area
-  bool axialBasal1, axialBasal2; // bools for checking if basal1 and basal2 are
-                                 // axial (true) respectively
+  bool axialBasal1, axialBasal2;  // bools for checking if basal1 and basal2 are
+                                  // axial (true) respectively
   double areaXY, areaXZ,
-      areaYZ; // Projected area on the XY, XZ and YZ planes respectively
+      areaYZ;  // Projected area on the XY, XZ and YZ planes respectively
   // ----------------------------------------
   // Find the axial dimension for a quasi-one-dimensional ice nanotube
   // The axial dimension will have the largest box length
@@ -470,8 +482,8 @@ bool ring::discardExtraTetragonBlocks(
              yCloud->box.begin();
   // ----------------------------------------
   // Calculate projected area onto the XY, YZ and XZ planes for basal1
-  axialBasal1 = false; // Init to false
-  axialBasal2 = false; // Init
+  axialBasal1 = false;  // Init to false
+  axialBasal2 = false;  // Init
 
   // Init the projected area
   areaXY = 0.0;
@@ -482,7 +494,7 @@ bool ring::discardExtraTetragonBlocks(
 
   // All points except the first pair
   for (int k = 1; k < ringSize; k++) {
-    iatomIndex = (*basal1)[k]; // Current vertex
+    iatomIndex = (*basal1)[k];  // Current vertex
 
     // Add to the polygon area
     // ------
@@ -532,20 +544,20 @@ bool ring::discardExtraTetragonBlocks(
   if (axialDim == 0) {
     if (areaYZ > areaXY && areaYZ > areaXZ) {
       axialBasal1 = true;
-    } // end of check for axial ring for basal1
-  }   // x dim
+    }  // end of check for axial ring for basal1
+  }    // x dim
   // y dim
   else if (axialDim == 1) {
     if (areaXZ > areaXY && areaXZ > areaYZ) {
       axialBasal1 = true;
-    } // end of check for axial ring for basal1
-  }   // x dim
+    }  // end of check for axial ring for basal1
+  }    // x dim
   // z dim
   else if (axialDim == 2) {
     if (areaXY > areaXZ && areaXY > areaYZ) {
       axialBasal1 = true;
-    } // end of check for axial ring for basal1
-  }   // x dim
+    }  // end of check for axial ring for basal1
+  }    // x dim
   else {
     std::cerr << "Could not find the axial dimension.\n";
     return false;
@@ -562,7 +574,7 @@ bool ring::discardExtraTetragonBlocks(
 
   // All points except the first pair
   for (int k = 1; k < ringSize; k++) {
-    iatomIndex = (*basal2)[k]; // Current vertex
+    iatomIndex = (*basal2)[k];  // Current vertex
 
     // Add to the polygon area
     // ------
@@ -613,20 +625,20 @@ bool ring::discardExtraTetragonBlocks(
   if (axialDim == 0) {
     if (areaYZ > areaXY && areaYZ > areaXZ) {
       axialBasal2 = true;
-    } // end of check for axial ring for basal1
-  }   // x dim
+    }  // end of check for axial ring for basal1
+  }    // x dim
   // y dim
   else if (axialDim == 1) {
     if (areaXZ > areaXY && areaXZ > areaYZ) {
       axialBasal2 = true;
-    } // end of check for axial ring for basal1
-  }   // x dim
+    }  // end of check for axial ring for basal1
+  }    // x dim
   // z dim
   else if (axialDim == 2) {
     if (areaXY > areaXZ && areaXY > areaYZ) {
       axialBasal2 = true;
-    } // end of check for axial ring for basal1
-  }   // x dim
+    }  // end of check for axial ring for basal1
+  }    // x dim
   else {
     std::cerr << "Could not find the axial dimension.\n";
     return false;
@@ -638,7 +650,7 @@ bool ring::discardExtraTetragonBlocks(
     return true;
   } else {
     return false;
-  } // Check for basal1 and basal2
+  }  // Check for basal1 and basal2
 }
 
 /********************************************/ /**
@@ -655,12 +667,15 @@ bool ring::discardExtraTetragonBlocks(
  ***********************************************/
 int ring::assignPrismType(std::vector<std::vector<int>> rings,
                           std::vector<int> listPrism, int ringSize,
-                          std::vector<int> *atomTypes) {
+                          std::vector<ring::strucType> ringType,
+                          std::vector<int> *atomTypes,
+                          std::vector<ring::strucType> *atomState) {
   // Every value in listPrism corresponds to an index in rings.
   // Every ring contains atom indices, corresponding to the indices (not atom
   // IDs) in rings
-  int iring; // Index of current ring
-  int iatom; // Index of current atom
+  int iring;                     // Index of current ring
+  int iatom;                     // Index of current atom
+  ring::strucType currentState;  // Current state of the ring being filled
 
   // Dummy value corresponds to a value of 1.
   // Each value is initialized to the value of 1.
@@ -668,13 +683,68 @@ int ring::assignPrismType(std::vector<std::vector<int>> rings,
   // Loop through every ring in rings
   for (int i = 0; i < listPrism.size(); i++) {
     iring = listPrism[i];
+    // Get the state of all atoms in the ring
+    currentState = ringType[iring];
     // Loop through every element in iring
     for (int j = 0; j < ringSize; j++) {
-      iatom = rings[iring][j]; // Atom index
+      iatom = rings[iring][j];  // Atom index
       // Update the atom type
       (*atomTypes)[iatom] = ringSize;
-    } // end of loop through every atom in iring
-  }   // end of loop through every ring
+      //
+      // Update the state of the atom
+      if ((*atomState)[iatom] == ring::unclassified) {
+        (*atomState)[iatom] = currentState;
+      }  // Update the unclassified atom
+      else {
+        if ((*atomState)[iatom] != currentState) {
+          // For mixed, there is a preference
+          if (currentState == ring::mixedPrismRing) {
+            (*atomState)[iatom] = currentState;
+          }  // fill
+          else if ((*atomState)[iatom] == ring::deformedPrism &&
+                   currentState == ring::Prism) {
+            (*atomState)[iatom] = ring::mixedPrismRing;
+          } else if ((*atomState)[iatom] == ring::Prism &&
+                     currentState == ring::deformedPrism) {
+            (*atomState)[iatom] = ring::mixedPrismRing;
+          }
+        }  //
+      }    // already filled?
+
+    }  // end of loop through every atom in iring
+  }    // end of loop through every ring
 
   return 0;
-} // end of function
+}  // end of function
+
+// Get the atom type values for deformed prisms
+/********************************************/ /**
+ * Assign an atomType value
+ for atoms belonging to deformed prisms.
+ *  @param[in] rings The vector of vectors containing the primitive rings, of a
+ particular ring size.
+ *  @param[in] listPrism The list of prism blocks found.
+ *  @param[in] ringSize The current ring size or number of nodes in each ring.
+ *  @param[in, out] atomTypes A vector which contains a type for each atom,
+ depending on it's type as classified by the prism identification scheme.
+ ***********************************************/
+int ring::deformedPrismTypes(std::vector<ring::strucType> atomState,
+                             std::vector<int> *atomTypes, int maxDepth) {
+  //
+  int nop = atomState.size();  // Number of particles
+
+  // Loop through all particles
+  for (int iatom = 0; iatom < nop; iatom++) {
+    // Check the atom state
+    // Deformed
+    if (atomState[iatom] == ring::deformedPrism) {
+      (*atomTypes)[iatom] += maxDepth - 2;
+    }  // type for a deformed prism atom
+    else if (atomState[iatom] == ring::mixedPrismRing) {
+      (*atomTypes)[iatom] = 2;
+    }  // type for a mixed prism ring
+  }    // end of reassignation
+
+  //
+  return 0;
+}
