@@ -856,9 +856,10 @@ int sout::writeClusterStats(std::string path, int currentFrame,
  volume slice
  ***********************************************/
 int sout::writePrismNum(std::string path, int currentFrame,
-                        std::vector<int> nPrisms,
+                        std::vector<int> nPrisms, std::vector<int> nDefPrisms,
                         std::vector<double> heightPercent, int maxDepth) {
   std::ofstream outputFile;
+  int totalPrisms;  // Number of total prisms
   // ----------------
   // Write output to file inside the output directory
   outputFile.open(path + "topoINT/nPrisms.dat",
@@ -871,8 +872,11 @@ int sout::writePrismNum(std::string path, int currentFrame,
   outputFile << currentFrame << " ";
 
   for (int ringSize = 3; ringSize <= maxDepth; ringSize++) {
-    outputFile << ringSize << " " << nPrisms[ringSize - 3] << " "
-               << heightPercent[ringSize - 3] << " ";
+    totalPrisms = nPrisms[ringSize - 3] + nDefPrisms[ringSize - 3];
+    // Write out
+    outputFile << ringSize << " " << totalPrisms << " "
+               << nDefPrisms[ringSize - 3] << " " << heightPercent[ringSize - 3]
+               << " ";
   }
 
   outputFile << "\n";
@@ -1017,7 +1021,7 @@ vector of vectors
 int sout::writeLAMMPSdataAllPrisms(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
-    int maxDepth, std::string path) {
+    int maxDepth, std::string path, bool doShapeMatching) {
   //
   std::ofstream outputFile;
   int iatom;  // Index, not atom ID
@@ -1076,7 +1080,11 @@ int sout::writeLAMMPSdataAllPrisms(
              << "\n";
   outputFile << "0 angles\n0 dihedrals\n0 impropers\n";
   // There are maxDepth-2 total types of prisms + dummy
-  outputFile << maxDepth << " atom types\n";
+  if (doShapeMatching) {
+    outputFile << 2 * maxDepth - 2 << " atom types\n";
+  } else {
+    outputFile << maxDepth << " atom types\n";
+  }
   // Bond types
   outputFile
       << bondTypes
@@ -1091,11 +1099,19 @@ int sout::writeLAMMPSdataAllPrisms(
   // Masses
   outputFile << "\nMasses\n\n";
   outputFile << "1 15.999400 # dummy\n";
-  outputFile << "2 1.0 # \n";
+  outputFile << "2 1.0 # mixedRings \n";
   // There are maxDepth-2 other prism types
   for (int ringSize = 3; ringSize <= maxDepth; ringSize++) {
     outputFile << ringSize << " 15.999400 # prism" << ringSize << "\n";
-  }  // end of writing out atom types
+  }  // end of writing out perfect atom types
+  // Write out the types for the deformed prism blocks
+  if (doShapeMatching) {
+    for (int ringSize = maxDepth + 1; ringSize <= 2 * maxDepth - 2;
+         ringSize++) {
+      int p = ringSize - maxDepth + 2;
+      outputFile << ringSize << " 15.999400 # deformPrism" << p << "\n";
+    }  // end of writing out perfect atom types
+  }    // Deformed prism types
   // Atoms
   outputFile << "\nAtoms\n\n";
   // -------

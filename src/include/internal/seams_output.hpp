@@ -24,6 +24,7 @@ int writeRings(std::vector<std::vector<int>> rings,
 // Function for printing out the number of prism blocks, with or without slices.
 // Be careful when using slices!
 int writePrismNum(std::string path, int currentFrame, std::vector<int> nPrisms,
+                  std::vector<int> nDefPrisms,
                   std::vector<double> heightPercent, int maxDepth);
 
 // Function for printing out the coverage area and the number of rings of each
@@ -62,7 +63,7 @@ int writeLAMMPSdata(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 int writeLAMMPSdataAllPrisms(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
-    int maxDepth, std::string path);
+    int maxDepth, std::string path, bool doShapeMatching = false);
 
 // Write a data file for rings of every type for a monolayer
 int writeLAMMPSdataAllRings(
