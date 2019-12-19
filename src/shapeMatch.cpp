@@ -28,6 +28,8 @@ bool match::matchPrismBlock(
   std::vector<double> rmsdList1,
       rmsdList2;          // List of RMSD per atom in the order fed in
   double scale1, scale2;  // Scale factor
+  // Deformed block classification
+  bool doAngleCriterion = false;  // For deformed blocks
   // -----------------------
   // Getting the target Eigen vectors
   // Get the re-ordered matched basal rings, ordered with respect to each other
@@ -111,22 +113,49 @@ bool match::matchPrismBlock(
   // The basal rings of a deformed block should have an angular distance within
   // a cutoff angle.
   if (!isPerfect) {
-    angDist = gen::angDistDegQuaternions(quat1, quat2);
-    // within angle cutoff:
-    // within angle tolerance of 0 degrees
-    if (angDist > -1 * cutoffAngle && angDist < cutoffAngle) {
-      return true;
-    }  // angle tolerance satisfied
-    else if (angDist > 180 - 1 * cutoffAngle && angDist < 180 + cutoffAngle) {
-      return true;
-    }  // angle tolerance satisfied
-    else if (angDist > 360 - 1 * cutoffAngle && angDist < 360 + cutoffAngle) {
-      return true;
-    }  // angle tolerance satisfied
-    else {
-      return false;
-    }  // angle tolerance not satisfied
-  }    // Classification criterion for deformed blocks
+    // DELETE BLOCK
+    // if (ringSize == 6) {
+    //   std::fstream rmsdFile;
+    //   rmsdFile.open("../runOne/topoINT/rmsd.dat",
+    //                 std::fstream::in | std::fstream::out |
+    //                 std::fstream::app);
+    //   rmsdFile << rmsd1 << "\n";
+    //   rmsdFile << rmsd2 << "\n";
+    //   rmsdFile.close();
+    // }
+    // END DELETE BLOCK
+    //
+    // For deformed blocks, if the rmsd for both blocks is above 0.5, then
+    // return false
+    if (doAngleCriterion) {
+      angDist = gen::angDistDegQuaternions(quat1, quat2);
+      // within angle cutoff:
+      // within angle tolerance of 0 degrees
+      if (angDist > -1 * cutoffAngle && angDist < cutoffAngle) {
+        return true;
+      }  // angle tolerance satisfied
+      else if (angDist > 180 - 1 * cutoffAngle && angDist < 180 + cutoffAngle) {
+        return true;
+      }  // angle tolerance satisfied
+      else if (angDist > 360 - 1 * cutoffAngle && angDist < 360 + cutoffAngle) {
+        return true;
+      }  // angle tolerance satisfied
+      else {
+        return false;
+      }  // angle tolerance not satisfied
+    }    // End of angle criterion for deformed blocks
+  }      // Classification criterion for deformed blocks
+  // // DELETE LATER ONLY FOR PARAMS
+  // else {
+  //   std::fstream perfectFile;
+  //   perfectFile.open("../runOne/topoINT/perfectRmsd.dat",
+  //                    std::fstream::in | std::fstream::out |
+  //                    std::fstream::app);
+  //   perfectFile << rmsd1 << "\n";
+  //   perfectFile << rmsd2 << "\n";
+  //   perfectFile.close();
+  // }
+  // // END OF DELETE
 
   // Delete this later
   angDist = gen::angDistDegQuaternions(quat1, quat2);
@@ -148,7 +177,7 @@ bool match::matchPrismBlock(
             std::fstream::in | std::fstream::out | std::fstream::app);
   temp << angDist << "\n";
   temp.close();
-  //
+  // END DELETE
 
   return true;
 }  // end of function
