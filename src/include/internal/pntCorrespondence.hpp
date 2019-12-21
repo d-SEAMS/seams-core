@@ -1,16 +1,16 @@
 #ifndef __PNTCORRESPONDENCE_H_
 #define __PNTCORRESPONDENCE_H_
 
+#include <math.h>
+#include <sys/stat.h>
 #include <algorithm>
 #include <array>
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <math.h>
 #include <memory>
 #include <sstream>
 #include <string>
-#include <sys/stat.h>
 #include <vector>
 
 // External
@@ -26,13 +26,13 @@ namespace pntToPnt {
 // Fills up an eigen matrix point set for an HC, according to an input
 // pointCloud, the relative order given by the basal rings, beginning from the
 // startingIndex
-Eigen::MatrixXd
-fillPointSetHC(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-               std::vector<std::vector<int>> relOrder, int startingIndex);
+Eigen::MatrixXd fillPointSetHC(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<std::vector<int>> relOrder, int startingIndex);
 
 // Fills up an eigen matrix point set a reference ring, which is a regular
 // n-gonal polygon; where n is the number of nodes in the ring
-Eigen::MatrixXd getPointSetRefRing(int n);
+Eigen::MatrixXd getPointSetRefRing(int n, int axialDim);
 
 // Get the relative ordering of a pair of basal rings for a deformed
 // prism/perfect prism. Outputs a vector of vectors of indices, such that the
@@ -46,10 +46,10 @@ int relOrderPrismBlock(
     std::vector<int> *outBasal2);
 
 // Fill up an Eigen Matrix from an input vector of atom indices
-Eigen::MatrixXd
-fillPointSetPrismRing(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                      std::vector<int> basalRing, int startingIndex);
+Eigen::MatrixXd fillPointSetPrismRing(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<int> basalRing, int startingIndex);
 
-} // namespace pntToPnt
+}  // namespace pntToPnt
 
-#endif // __PNTCORRESPONDENCE_H_
+#endif  // __PNTCORRESPONDENCE_H_
