@@ -125,8 +125,9 @@ bool match::matchPrismBlock(
     // }
     // END DELETE BLOCK
     //
-    // For deformed blocks, if the rmsd for both blocks is above 0.5, then
-    // return false
+    // For deformed blocks, compare with the complete block geometry?
+    //
+    //
     if (doAngleCriterion) {
       angDist = gen::angDistDegQuaternions(quat1, quat2);
       // within angle cutoff:
