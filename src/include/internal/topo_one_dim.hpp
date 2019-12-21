@@ -57,6 +57,11 @@ bool discardExtraTetragonBlocks(
     std::vector<int> *basal1, std::vector<int> *basal2,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud);
 
+// Saves only axial rings out of all possible rings
+std::vector<std::vector<int>> keepAxialRingsOnly(
+    std::vector<std::vector<int>> rings,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud);
+
 // Find out which rings are prisms, looping through all ring sizes upto the
 // maxDepth The input ringsAllSizes array has rings of every size.
 int prismAnalysis(std::string path, std::vector<std::vector<int>> rings,

@@ -185,7 +185,10 @@ std::vector<int> ring::findPrisms(
   Eigen::MatrixXd refPointSet(ringSize, 3);
 
   // Get the reference ring point set for a given ring size.
-  refPointSet = pntToPnt::getPointSetRefRing(ringSize);
+  // Get the axial dimension
+  int axialDim = std::max_element(yCloud->box.begin(), yCloud->box.end()) -
+                 yCloud->box.begin();
+  refPointSet = pntToPnt::getPointSetRefRing(ringSize, axialDim);
   //
 
   // Two loops through all the rings are required to find pairs of basal rings
@@ -197,8 +200,8 @@ std::vector<int> ring::findPrisms(
     for (int jring = iring + 1; jring < totalRingNum; jring++) {
       basal2 = rings[jring];  // Assign jring to basal2
       // ------------
-      // Put extra check for tetragonal prism blocks to prevent overcounting
-      if (ringSize == 4) {
+      // Put extra check for axial basal rings if shapeMatching is being done
+      if (doShapeMatching) {
         isAxialPair = false;  // init
         isAxialPair =
             ring::discardExtraTetragonBlocks(&basal1, &basal2, yCloud);
@@ -224,6 +227,7 @@ std::vector<int> ring::findPrisms(
         if (!doShapeMatching) {
           continue;
         }  // shape-matching not desired
+        //
         // If shape-matching is to be done:
         // Check for the reduced criteria fulfilment
         relaxedCond = ring::relaxedPrismConditions(nList, &basal1, &basal2);
