@@ -237,7 +237,7 @@ std::vector<int> ring::findPrisms(
         }  // end of skipping if the prisms do not fulfil relaxed criteria
 
         // Do shape matching here
-        bool isDeformedPrism = match::matchPrismBlock(
+        bool isDeformedPrism = match::matchPrism(
             yCloud, nList, refPointSet, &basal1, &basal2, rmsdPerAtom, false);
 
         // Success! The rings are basal rings of a deformed prism!
@@ -287,7 +287,7 @@ std::vector<int> ring::findPrisms(
         //
         // Shape-matching to get the RMSD (if shape-matching is desired)
         if (doShapeMatching) {
-          bool isKnownPrism = match::matchPrismBlock(
+          bool isKnownPrism = match::matchPrism(
               yCloud, nList, refPointSet, &basal1, &basal2, rmsdPerAtom, true);
         }  // end of shape-matching to get rmsd
         //
