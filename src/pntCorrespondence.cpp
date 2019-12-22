@@ -86,6 +86,149 @@ Eigen::MatrixXd pntToPnt::getPointSetRefRing(int n, int axialDim) {
   return pointSet;
 }  // end of function
 
+// Creates an eigen matrix for the points of a prism block, constructed from the
+// points of a perfect polygon of radius 1, given the basal rings and axial
+// dimension
+Eigen::MatrixXd pntToPnt::createPrismBlock(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    const Eigen::MatrixXd &refPoints, int ringSize, std::vector<int> basal1,
+    std::vector<int> basal2) {
+  //
+  int nop = ringSize * 2;            // Number of particles in the prism block
+  Eigen::MatrixXd pointSet(nop, 3);  // Output point set for a regular prism
+  int axialDim;                      // Has a value of 0, 1 or 2 for x, y or z
+  double avgRadius;  // Average radius within which the basal ring points lie
+  double avgHeight;  // Get the average height of the prism
+  int iBasalOne,
+      iBasalTwo;  // Indices for the basal1 and basal2 points in the point set
+  // --------------------------------------
+  // Get the axial dimension
+  // The axial dimension will have the largest box length
+  // Index -> axial dimension
+  // 0 -> x dim
+  // 1 -> y dim
+  // 2 -> z dim
+  axialDim = std::max_element(yCloud->box.begin(), yCloud->box.end()) -
+             yCloud->box.begin();
+  // --------------------------------------
+  // Get the average radius
+  avgRadius = pntToPnt::getRadiusFromRings(yCloud, basal1, basal2);
+  // --------------------------------------
+  // Get the average height of the prism
+  avgHeight = pntToPnt::getAvgHeightPrismBlock(yCloud, basal1, basal2);
+  // --------------------------------------
+  // Fill in the matrix of the point set
+  //
+  // Fill basal1 first, and then basal2
+  for (int i = 0; i < ringSize; i++) {
+    iBasalOne = i;             // index in point set for basal1 point
+    iBasalTwo = i + ringSize;  // index in point set for basal2 point
+    // Fill up the dimensions
+    for (int k = 0; k < 3; k++) {
+      // For the axial dimension
+      if (k == axialDim) {
+        pointSet(iBasalOne, k) = 0.0;        // basal1
+        pointSet(iBasalTwo, k) = avgHeight;  // basal2
+      }  // end of filling up the axial dimension
+      else {
+        pointSet(iBasalOne, k) = avgRadius * refPoints(i, k);  // basal1
+        pointSet(iBasalTwo, k) = avgRadius * refPoints(i, k);  // basal2
+      }  // fill up the non-axial dimension coordinate dimension
+    }    // Fill up all the dimensions
+  }      // end of filling in the point set
+  // --------------------------------------
+  return pointSet;
+}  // end of function
+
+// Calculate the average radial distance for the basal rings, calculated from
+// the centroid of each basal ring
+double pntToPnt::getRadiusFromRings(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<int> basal1, std::vector<int> basal2) {
+  //
+  double avgRadius = 0.0;
+  std::vector<double> centroid1, centroid2;
+  std::vector<double> dist;      // Distances
+  int ringSize = basal1.size();  // Number of nodes in the basal rings
+  double r1, r2;                 // Distance from the centroid
+  int iatom;  // Atom index in yCloud for the current point in basal1
+  int jatom;  // Atom index in yCloud for the current point in basal2
+  // -----------------------
+  // Calculate the centroid for basal1 and basal2
+  centroid1.resize(3);
+  centroid2.resize(3);  // init
+  // Loop through basal1 and basal2
+  for (int i = 0; i < ringSize; i++) {
+    // For basal1
+    centroid1[0] += yCloud->pts[basal1[i]].x;
+    centroid1[1] += yCloud->pts[basal1[i]].y;
+    centroid1[2] += yCloud->pts[basal1[i]].z;
+    //
+    // For basal2
+    centroid2[0] += yCloud->pts[basal2[i]].x;
+    centroid2[1] += yCloud->pts[basal2[i]].y;
+    centroid2[2] += yCloud->pts[basal2[i]].z;
+    //
+  }  // end of loop through basal1 and basal2
+  // Normalize by the number of nodes
+  for (int k = 0; k < 3; k++) {
+    centroid1[k] /= ringSize;
+    centroid2[k] /= ringSize;
+  }  // end of dividing by the number
+  // Calculated the centroid for basal1 and basal2!
+  // -----------------------
+  // Calculate the distances of each point from the respective centroid
+  for (int i = 0; i < ringSize; i++) {
+    // Get the current point in basal1 and basal2
+    iatom = basal1[i];
+    jatom = basal2[i];
+    // Get the distance from the respective centroid
+    // basal1
+    r1 = gen::unWrappedDistFromPoint(yCloud, iatom, centroid1);
+    // basal2
+    r2 = gen::unWrappedDistFromPoint(yCloud, jatom, centroid2);
+    // Update the distances
+    dist.push_back(r1);
+    dist.push_back(r2);
+  }  // Loop through every point in basal1 and basal2
+  // -----------------------
+  // Calculate the average, excluding the outliers
+  avgRadius = gen::getAverageWithoutOutliers(dist);
+  // -----------------------
+  return avgRadius;
+}  // end of function
+
+// Calculate the average height of the prism block, calculated using the basal
+// rings of the prism and the axial dimension
+double pntToPnt::getAvgHeightPrismBlock(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<int> basal1, std::vector<int> basal2) {
+  //
+  double avgHeight = 0.0;
+  double r_ij;               // Distance between a point in basal1 and basal2
+  std::vector<double> dist;  // Distances
+  int ringSize = basal1.size();  // Number of nodes in the basal rings
+  int iatom;  // Atom index in yCloud for the current point in basal1
+  int jatom;  // Atom index in yCloud for the current point in basal2
+  // -----------------------
+  // Calculate the distances of each point from the respective centroid
+  for (int i = 0; i < ringSize; i++) {
+    // Get the current point in basal1 and basal2
+    iatom = basal1[i];
+    jatom = basal2[i];
+    // Get the distance between a point in basal1 and the corresponding point in
+    // basal2
+    r_ij = gen::periodicDist(yCloud, iatom, jatom);
+    // Update the distances
+    dist.push_back(r_ij);
+  }  // Loop through every point in basal1 and basal2
+  // -----------------------
+  // Calculate the average, excluding the outliers
+  avgHeight = gen::getAverageWithoutOutliers(dist);
+  // -----------------------
+  return avgHeight;
+}  // end of function
+
 // Get the relative ordering of a pair of basal rings for a deformed
 // prism/perfect prism. Outputs a vector of vectors of indices, such that the
 // first vector is for the first basal ring, and the second vector is for the
@@ -214,7 +357,8 @@ int pntToPnt::relOrderPrismBlock(
   return 0;
 }  // end of function
 
-// Fill up an Eigen Matrix from an input vector of atom indices
+// Fill up an Eigen Matrix for a prism basal ring from an input vector of atom
+// indices
 Eigen::MatrixXd pntToPnt::fillPointSetPrismRing(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<int> basalRing, int startingIndex) {
@@ -249,6 +393,62 @@ Eigen::MatrixXd pntToPnt::fillPointSetPrismRing(
     pointSet(i, 0) = yCloud->pts[index].x;  // x coord
     pointSet(i, 1) = yCloud->pts[index].y;  // y coord
     pointSet(i, 2) = yCloud->pts[index].z;  // z coord
+  }  // end of point filling from the relative ordering vector of vectors
+
+  // Return the set of points
+  return pointSet;
+}  // end of function
+
+// Fill up an Eigen Matrix for a prism block from input vectors of atom
+// indices of the basal rings
+Eigen::MatrixXd pntToPnt::fillPointSetPrismBlock(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<int> basal1, std::vector<int> basal2, int startingIndex) {
+  //
+  //
+  int dim = 3;                         // Number of dimensions (3)
+  int ringSize = basal1.size();        // Number of nodes in the ring
+  int nop = ringSize * 2;              // Number of particles in prism block
+  Eigen::MatrixXd pointSet(nop, dim);  // Output set of 3D points
+  // Indices for the first and second basal rings being filled
+  int currentPosition;         // Current position in the basal ring vectors
+  int iatom, jatom;            // Current index in the point set
+  int iatomIndex, jatomIndex;  // Index in yCloud corresponding to the basal1
+                               // and basal2 points
+
+  // Fill up basal1 points, followed by basal2 points
+
+  // Check
+  if (startingIndex >= ringSize || startingIndex < 0) {
+    startingIndex = 0;
+  }  // end of check
+
+  // Beginning from the starting index, get the points in the basal ring
+  for (int i = 0; i < ringSize; i++) {
+    //
+    // Getting currentIndex
+    currentPosition = startingIndex + i;
+    // Wrapping around for the ring
+    if (currentPosition >= ringSize) {
+      currentPosition -= ringSize;
+    }  // end of wrap-around
+    //
+    // -------------------
+    // Basal1 ring points
+    iatomIndex =
+        basal1[currentPosition];  // Index of the current point in basal1
+    iatom = i;                    // index in the point set being filled
+    pointSet(iatom, 0) = yCloud->pts[iatomIndex].x;  // x coord
+    pointSet(iatom, 1) = yCloud->pts[iatomIndex].y;  // y coord
+    pointSet(iatom, 2) = yCloud->pts[iatomIndex].z;  // z coord
+    // -------------------
+    // Basal2 ring points
+    jatomIndex =
+        basal2[currentPosition];  // Index of the current point in basal2
+    jatom = i + ringSize;         // index in the point set being filled
+    pointSet(jatom, 0) = yCloud->pts[jatomIndex].x;  // x coord
+    pointSet(jatom, 1) = yCloud->pts[jatomIndex].y;  // y coord
+    pointSet(jatom, 2) = yCloud->pts[jatomIndex].z;  // z coord
   }  // end of point filling from the relative ordering vector of vectors
 
   // Return the set of points
