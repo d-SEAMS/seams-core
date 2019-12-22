@@ -2,7 +2,7 @@
 
 // Shape-matching for a pair of polygon basal rings. Returns true if the pair of
 // basal rings form a prism block.
-bool match::matchPrismBlock(
+bool match::matchPrism(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, const Eigen::MatrixXd &refPoints,
     std::vector<int> *basal1, std::vector<int> *basal2,
@@ -35,6 +35,12 @@ bool match::matchPrismBlock(
   // Get the re-ordered matched basal rings, ordered with respect to each other
   pntToPnt::relOrderPrismBlock(yCloud, *basal1, *basal2, nList, &matchedBasal1,
                                &matchedBasal2);
+  // -----------------------
+  // Match the basal rings with a complete prism block, given the relatively
+  // ordered basal rings This actually only needs to be done for deformed prism
+  // blocks
+  bool blockMatch = match::matchPrismBlock(yCloud, nList, refPoints,
+                                           &matchedBasal1, &matchedBasal2);
   // -----------------------
   // Loop through possible point-to-point correspondences
   if (ringSize % 2 == 0 || ringSize == 3) {
@@ -215,3 +221,102 @@ int match::updatePerAtomRMSDRing(std::vector<int> basalRing, int startingIndex,
   // finito
   return 0;
 }  // end of function
+
+// Shape-matching for a pair of polygon basal rings, comparing with a complete
+// prism block. Returns true if the pair of basal rings form a prism block.
+bool match::matchPrismBlock(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<std::vector<int>> nList, const Eigen::MatrixXd &refPoints,
+    std::vector<int> *basal1, std::vector<int> *basal2) {
+  //
+  int ringSize = (*basal1).size();  // Number of nodes in the basal rings
+  bool isMatch = true;  // Qualifier for whether the prism block matches or not
+  int dim = 3;          // Number of dimensions
+  int nop = 2 * ringSize;  // Number of particles in the prism block
+  Eigen::MatrixXd refPrismBlock(
+      nop, dim);  // eigen matrix for the reference prism block
+  Eigen::MatrixXd targetPrismBlock(
+      nop, dim);      // eigen matrix for the target prism block
+  int startingIndex;  // Index from which the basal rings will be ordered
+                      // (permutations)
+  // variables for shape-matching
+  std::vector<double> quat;      // Quaternion for the rotation
+  double rmsd;                   // RMSD value for the entire shape
+  std::vector<double> rmsdList;  // RMSD value for each point
+  double scale;                  // Scale factor
+  // ----------------------------------------------------
+  // Get the reference prism block
+  refPrismBlock =
+      pntToPnt::createPrismBlock(yCloud, refPoints, ringSize, *basal1, *basal2);
+  // ----------------------------------------------------
+
+  // Loop through possible point-to-point correspondences
+  if (ringSize % 2 == 0 || ringSize == 3) {
+    startingIndex = 0;
+    // Fill up the point set for the target prism block
+    targetPrismBlock =
+        pntToPnt::fillPointSetPrismBlock(yCloud, *basal1, *basal2, 0);
+    // Shape-matching
+    absor::hornAbsOrientation(refPrismBlock, targetPrismBlock, &quat, &rmsd,
+                              &rmsdList,
+                              &scale);  // basal2
+  }                                     // even or if there are 3 nodes
+  else {
+    // Define the vector, RMSD etc:
+    std::vector<double> currentQuat;  // quaternion rotation
+    double currentRmsd;               // least total RMSD
+    std::vector<double>
+        currentRmsdList;  // List of RMSD per atom in the order fed in
+    double currentScale;
+    // Loop through all possible startingIndex
+    for (int i = 0; i < ringSize; i++) {
+      //
+      // Fill up the point set for basal1
+      targetPrismBlock =
+          pntToPnt::fillPointSetPrismBlock(yCloud, *basal1, *basal2, i);
+      // Use Horn's algorithm to calculate the absolute orientation and RMSD
+      // etc. for basal1
+      absor::hornAbsOrientation(refPrismBlock, targetPrismBlock, &currentQuat,
+                                &currentRmsd, &currentRmsdList, &currentScale);
+      // Comparison to get the least RMSD for the correct mapping
+      if (i == 0) {
+        // Init
+        quat = currentQuat;
+        rmsd = currentRmsd;
+        rmsdList = currentRmsdList;
+        scale = currentScale;
+        startingIndex = i;
+      }  // init
+      else {
+        // Check to see if the calculated RMSD is less than the RMSD already
+        // saved
+        if (currentRmsd < rmsd) {
+          quat = currentQuat;
+          rmsd = currentRmsd;
+          rmsdList = currentRmsdList;
+          scale = currentScale;
+          startingIndex = i;
+        }  // end of check to see if the current RMSD is smaller
+      }    // end of comparison and filling
+    }      // end of loop through startingIndex
+  }        // ringSize is odd, so every point must be tried
+
+  // TEST DELETE BLOCK LATER
+  if (ringSize == 6) {
+    std::fstream rmsdFile;
+    rmsdFile.open("../runOne/topoINT/rmsd6.dat",
+                  std::fstream::in | std::fstream::out | std::fstream::app);
+    rmsdFile << rmsd << "\n";
+    rmsdFile.close();
+  } else if (ringSize == 4) {
+    std::fstream rmsdFile;
+    rmsdFile.open("../runOne/topoINT/rmsd4.dat",
+                  std::fstream::in | std::fstream::out | std::fstream::app);
+    rmsdFile << rmsd << "\n";
+    rmsdFile.close();
+  }
+  // END OF BLOCK TO BE DELETED
+
+  // Return
+  return isMatch;
+}
