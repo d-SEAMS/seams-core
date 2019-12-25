@@ -35,7 +35,7 @@ bool matchPrism(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 bool matchPrismBlock(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                      std::vector<std::vector<int>> nList,
                      const Eigen::MatrixXd &refPoints, std::vector<int> *basal1,
-                     std::vector<int> *basal2);
+                     std::vector<int> *basal2, int *beginIndex);
 
 // Update the per-particle RMSD for a prism block basal ring.
 int updatePerAtomRMSDRing(std::vector<int> basalRing, int startingIndex,
