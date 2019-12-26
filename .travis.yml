@@ -23,7 +23,7 @@ before_script:
   - git clone https://github.com/mosra/m.css.git
 script:
   - ./m.css/documentation/doxygen.py Doxyfile-mcss
-  - find docs/ -type f -name "*" -print0 | xargs -0 sed -i '' -e 's/>Pages</>Wiki</g'
+  - find docs/ -type f -name "*" -print0 | xargs -0 sed -i '' -e 's/>Pages</>Wiki</g' || true
 deploy:
   provider: pages
   skip_cleanup: true
