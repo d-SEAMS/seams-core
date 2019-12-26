@@ -22,6 +22,6 @@ Inside the output directory, a directory called *topoINT* is created. Inside the
 ## References 
 
 1. Goswami, A., & Singh, J. K. (2020). A general topological network criterion for exploring the structure of icy nanoribbons and monolayers. Physical Chemistry Chemical Physics. doi:10.1039/c9cp04902a
-2. d-SEAMS paper
+2. Goswami, R.; Goswami, A.; Singh, J. K. (2019). "d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations". arXiv:1909.09830 [physics.comp-ph].
 
 
