@@ -21,9 +21,10 @@ M_PAGE_FINE_PRINT	    = <b>(C) 2018-present</b> <a href="https://github.com/HaoZ
 # Doxygen Settings
 RECURSIVE              = YES
 EXTRACT_ALL            = YES
-INPUT = robots.txt README.md ./src/ ./markdown/
-EXCLUDE = ./src/include/external
+INPUT                  = robots.txt README.md ./src/ ./markdown/
+EXCLUDE                = ./src/include/external
 USE_MDFILE_AS_MAINPAGE = README.md
+CITE_BIB_FILES         = refs.bib
 
 # Mathjax
 USE_MATHJAX            = YES
