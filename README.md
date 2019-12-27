@@ -130,6 +130,10 @@ above:
 ./testBuild.sh
 ```
 
+## Tests
+
+Apart from the examples, the test-suite can be run with the `yodaStruct_test` binary.
+
 # Developer Documentation
 
 <!-- TODO: Move this to some other location. -->
