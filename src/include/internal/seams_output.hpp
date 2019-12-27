@@ -15,6 +15,32 @@ namespace fs = boost::filesystem;
 // #include <filesystem>
 // namespace fs = std::filesystem;
 
+/*! \file seams_output.hpp
+    \brief File for functions that write out output to files).
+
+    Details.
+*/
+
+/*!
+ *  \addtogroup sout
+ *  @{
+ */
+
+/*! \brief Functions for output
+ *         This namespace contains functions that are used for writing the
+various outputs produced by d-SEAMS to text files, LAMMPS data files and
+trajectory files.
+ *
+The LAMMPS data files and trajectory files can be easily visualized in <a
+href="https://www.ovito.org/">OVITO</a> or <a
+href="http://www.ks.uiuc.edu/Research/vmd/">VMD</a>, although
+OVITO is recommended.
+
+  ### Changelog ###
+
+  - Amrita Goswami [amrita16thaug646@gmail.com]; date modified: Dec 26, 2019
+ */
+
 namespace sout {
 
 // Function for printing out ring info, when there is no volume slice

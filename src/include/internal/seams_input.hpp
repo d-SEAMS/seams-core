@@ -11,6 +11,29 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 
+/*! \file seams_input.hpp
+    \brief File for functions that read in files).
+
+    Details.
+*/
+
+/*!
+ *  \addtogroup sinp
+ *  @{
+ */
+
+/*! \brief Functions for the d-SEAMS readers.
+ *         This namespace contains functions that are used for reading in the
+formats supported by d-SEAMS. LAMMPS trajectory files and XYZ files are
+currently supported, though it is recommended to use LAMMPS trajectory files,
+since the simulation box size etc. are not normally present in XYZ files, and
+many analyses may fail without the correct box dimensions.
+
+  ### Changelog ###
+
+  - Amrita Goswami [amrita16thaug646@gmail.com]; date modified: Dec 26, 2019
+ */
+
 namespace sinp {
 
 //// Get file list inside the input folder
