@@ -4,13 +4,15 @@ The trajectory file for this example is [here on
 figshare](https://figshare.com/articles/In_plane_2D_RDF_LAMMPS_Trajectory/11448711).
 The trajectory file details the fMSI (flat Monolayer Square Ice) formed when quasi-one-dimensional water at 320 K. In this example, the in-plane RDF of the quasi-two-dimensional fMSI is determined.
 
-The radial distribution function $g(r)$, or pair distribution function. It
+The radial distribution function \f$g(r)\f$, or pair distribution function. It
 can be used to illuminate features of short-range and long-range order. The RDF
-is the probability of finding a particle at a distance of $r$ from a tagged
-reference particle, relative to that of an ideal gas. For a system of $N$
-particles, the pair correlation function for $N(N-1)$ pairs is:
+is the probability of finding a particle at a distance of \f$r\f$ from a tagged
+reference particle, relative to that of an ideal gas. For a system of \f$N\f$
+particles, the pair correlation function for \f$N(N-1)\f$ pairs is:
 
-$$\rho_N^{(2)}(r,r') = ⟨\sum_{i=1}^{N} \sum_{j=1,j \neq i}^{N} \delta (r-r_i) \delta (r'-r_j) \langle$$
+  \f[
+  \rho_N^{(2)}(r,r') = ⟨\sum_{i=1}^{N} \sum_{j=1,j \neq i}^{N} \delta
+ (r-r_i) \delta (r'-r_j) \langle \f]
 
 The C++ backend code essentially bins distances between pairs of particles, and normalizes the resulting histogram. The normalization is done with respect to an ideal gas.
 
