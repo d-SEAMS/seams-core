@@ -117,8 +117,7 @@ directory where `input/` is a child directory.
 ```{bash}
 # Assuming you are in the build directory
 # Check help with -h
-# --script and --file are optional now
-./yodaStruct --script ../lua_inputs/transition_diff.lua -c ../lua_inputs/config.yml
+./yodaStruct -c ../lua_inputs/config.yml
 ```
 
 This can also now be tested with a single shell script, which will drop into the
