@@ -1,11 +1,11 @@
-# Quasi-One-Dimensional Ice Classification
+# Quasi-Two-Dimensional Ice Classification
 
 The trajectory file for this example is [here on
 figshare](https://figshare.com/articles/Monolayer_LAMMPS_Trajectory/11448741).
 The trajectory file details the fMSI (flat Monolayer Square Ice) formed when quasi-one-dimensional water is cooled from 320 K to 310 K. In this
 example, the quasi-one-dimensional ice is almost entirely composed of 4-membered rings. The square ice (4-membered primitive rings) are identified according to a topological network
 criterion for confined ice [1]. On running the example, an output top-level
-directory named _runOne_ is created. 
+directory named _runOne_ is created.
 
 ## Steps to Run the Example
 
