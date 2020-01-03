@@ -50,6 +50,37 @@ inline double radDeg(double angle) { return (angle * 180) / gen::pi; }
 // GSL for getting the angle (in radians) between the O--O and O-H vectors
 double gslVecAngle(std::vector<double> OO, std::vector<double> OH);
 
+// Get the average, after excluding the outliers, using quartiles
+double getAverageWithoutOutliers(std::vector<double> inpVec);
+
+/********************************************/ /**
+ *  Inline generic function for calculating
+ the median given a vector of the values
+ *  @param[in] yCloud The input PointCloud, which contains the particle
+ coordinates, simulation box lengths etc.
+ *  @param[in] input The input vector with the values
+ *  \return The median value
+ ***********************************************/
+inline double calcMedian(std::vector<double> *input) {
+  int n = (*input).size();  // Number of elements
+  double median;            // Output median value
+
+  // Sort the vector
+  std::sort((*input).begin(), (*input).end());
+
+  // Calculate the median
+  // For even values, the median is the average of the two middle values
+  if (n % 2 == 0) {
+    median = 0.5 * ((*input)[n / 2] + (*input)[n / 2 - 1]);  // n/2+n/2-1
+  }  // median is average of middle values
+  else {
+    median = (*input)[(n + 1) / 2 -
+                      1];  // middle value of 7 elements is the 4th element
+  }                        // if odd, it is the middle value
+
+  return median;
+}
+
 // Generic function for getting the unwrapped distance
 /********************************************/ /**
  *  Inline generic function for obtaining
@@ -71,6 +102,37 @@ inline double periodicDist(
   dr[0] = fabs(yCloud->pts[iatom].x - yCloud->pts[jatom].x);
   dr[1] = fabs(yCloud->pts[iatom].y - yCloud->pts[jatom].y);
   dr[2] = fabs(yCloud->pts[iatom].z - yCloud->pts[jatom].z);
+
+  // Get the squared absolute distance
+  for (int k = 0; k < 3; k++) {
+    // Correct for periodicity
+    dr[k] -= yCloud->box[k] * round(dr[k] / yCloud->box[k]);
+    r2 += pow(dr[k], 2.0);
+  }
+
+  return sqrt(r2);
+}
+
+/********************************************/ /**
+ *  Inline generic function for obtaining
+ the unwrapped periodic distance between one particle and another point, whose
+ index has been given.
+ *  @param[in] yCloud The input PointCloud, which contains the particle
+ coordinates, simulation box lengths etc.
+ *  @param[in] iatom The index of the \f$ i^{th} \f$ atom.
+ *  @param[in] singlePoint Vector containing coordinate values
+ *  \return The unwrapped periodic distance.
+ ***********************************************/
+inline double unWrappedDistFromPoint(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
+    std::vector<double> singlePoint) {
+  std::array<double, 3> dr;
+  double r2 = 0.0;  // Squared absolute distance
+
+  // Get x1-x2 etc
+  dr[0] = fabs(yCloud->pts[iatom].x - singlePoint[0]);
+  dr[1] = fabs(yCloud->pts[iatom].y - singlePoint[1]);
+  dr[2] = fabs(yCloud->pts[iatom].z - singlePoint[2]);
 
   // Get the squared absolute distance
   for (int k = 0; k < 3; k++) {

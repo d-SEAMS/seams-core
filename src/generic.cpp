@@ -154,6 +154,91 @@ double gen::gslVecAngle(std::vector<double> OO, std::vector<double> OH) {
 }
 
 /********************************************/ /**
+ *  Get the average, after excluding
+ the outliers, using quartiles
+ *  @param[in] inpVec The vector containing values whose average is desired
+ *  \return The desired average value
+ ***********************************************/
+double gen::getAverageWithoutOutliers(std::vector<double> inpVec) {
+  //
+  double avgVal = 0.0;    // Average value, excluding the outliers
+  double median;          // Median value
+  int n = inpVec.size();  // Number of values
+  std::vector<double> lowerRange,
+      upperRange;                        // n/2 smallest and n/2 largest numbers
+  double firstQuartile, thirdQuartile;   // First and third quartiles
+  double iqr;                            // Interquartile range
+  double outlierLimLow, outlierLimHigh;  // Outliers limit
+  int numOfObservations = 0;  // Number of observations used for the average
+  // ----------------------
+  // Calculate the median (the vector is sorted inside the function)
+  median = calcMedian(&inpVec);
+  // ----------------------
+  // Get the n/2 smallest and largest numbers
+  //
+  if (n % 2 == 0) {
+    for (int i = 0; i < n / 2; i++) {
+      // n/2 smallest numbers
+      lowerRange.push_back(inpVec[i]);
+      // n/2 largest numbers
+      upperRange.push_back(inpVec[n / 2 + i]);
+    }  // end of loop to fill up the n/2 smallest and n/2 largest
+  }    // even
+  else {
+    //
+    int halfN = (n + 1) / 2;
+    // Exclude the median
+    for (int i = 0; i < halfN; i++) {
+      // (n+1)/2 smallest numbers
+      lowerRange.push_back(inpVec[i]);
+      // (n+1)/2 largest numbers
+      upperRange.push_back(inpVec[halfN + i]);
+    }  // end of filling up the smallest and largest half-ranges
+  }    // for odd numbers
+  // ----------------------
+  // Calculate the first and third quartiles, and interquartile range
+  //
+  // First quartile
+  firstQuartile = calcMedian(&lowerRange);
+  // Third quartile
+  thirdQuartile = calcMedian(&upperRange);
+  // Interquartile range
+  iqr = thirdQuartile - firstQuartile;
+  // ----------------------
+  // Calculate the average without outliers
+  // Outliers are defined as values which
+  // are less than Q1 - 1.5IQR
+  // or greater than Q3 + 1.5IQR
+  //
+  // Get the limits for the outliers
+  outlierLimLow = firstQuartile - 1.5 * iqr;
+  outlierLimHigh = thirdQuartile + 1.5 * iqr;
+  //
+  // Loop through the values in inpVec to get the average, excluding outliers
+  for (int i = 0; i < n; i++) {
+    //
+    if (inpVec[i] < outlierLimLow) {
+      continue;
+    }  // lower limit outlier
+    else if (inpVec[i] > outlierLimHigh) {
+      continue;
+    }  // higher limit outlier
+    else {
+      // Number of observations added
+      numOfObservations++;
+      // Add to the average
+      avgVal += inpVec[i];
+    }  // take the average
+  }    // end of loop for getting the average
+  //
+  // Divide by the number of observations used
+  avgVal /= numOfObservations;
+  // ----------------------
+
+  return avgVal;
+}
+
+/********************************************/ /**
  *  Function for getting the angular distance between two quaternions. Returns
  the result in degrees.
  *  @param[in] quat1 The first quaternion
