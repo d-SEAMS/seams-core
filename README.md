@@ -74,6 +74,24 @@ yodaStruct -c config.yml
 nix-shell --run 'bash' --pure
 ```
 
+### Language Server Support
+
+To generate a `compile_commands.json` file for working with a language server
+like [ccls](https://github.com/MaskRay/ccls) use the following commands:
+
+```sh
+# Pure environment
+nix-shell --run 'bash' --pure
+mkdir -p build && cd build
+cmake -H. -BDebug -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES ../
+cp compile_commands.json ../
+```
+
+Note that there is no need to actually compile the project if you simply need to
+get the compiler database for the language server.
+
+**Do Not** commit the `.json` file.
+
 ### Caveats
 
 Though the build itself is guaranteed to be reproducible as the `nixpkgs` are
