@@ -22,6 +22,7 @@
   rang
   cmake
   lua
+  luaPackages.luafilesystem
   ];
   buildInputs = [
   yamlCpp
@@ -31,6 +32,7 @@
   gsl
   liblapack
   blas
+  lua
   luaPackages.luafilesystem
   ];
   }
