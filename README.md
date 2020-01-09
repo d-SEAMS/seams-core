@@ -83,7 +83,7 @@ like [ccls](https://github.com/MaskRay/ccls) use the following commands:
 # Pure environment
 nix-shell --run 'bash' --pure
 mkdir -p build && cd build
-cmake -H. -BDebug -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES ../
+cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES ../
 cp compile_commands.json ../
 ```
 
