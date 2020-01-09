@@ -12,5 +12,5 @@ sliceLowerLimits = {0,0,0}; --- Lower limit of the slice (for box dim, keep the 
 sliceUpperLimits = {0,0,0}; --- Upper limit of the slice   
 
 --- Paths for the output directories and lua scipt
-outDir="/home/amritagos/Git/Github/seams-core/runOne/"; --- The subdirectory used; 
-functionScript="/home/amritagos/Git/Github/seams-core/lua_inputs/iceType/functions.lua" --- This is relative to the binary location 
+outDir="runOne/"; --- The subdirectory used; 
+functionScript="lua_inputs/iceType/functions.lua" --- This is relative to the binary location 
