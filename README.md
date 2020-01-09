@@ -6,7 +6,7 @@
 [![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
 
 Check our docs build status [here](https://travis-ci.org/d-SEAMS/seams-core).
-The docs themselves are [here](https://d-seams.github.io/seams-core/) and
+The docs themselves are [here](https://docs.dseams.info) and
 development is ongoing [on GitHub](https://github.com/d-SEAMS/seams-core). We
 also have [a Zenodo community](https://zenodo.org/communities/d-seams/) for user-contributions like reviews, testimonials
 and tutorials.
@@ -17,7 +17,7 @@ and tutorials.
 the data-sets (trajectories) <a
 href="https://figshare.com/projects/d-SEAMS_Datasets/73545">from figshare</a>.
 
-\alert **If** you are unwilling to use the `nix` build system, then **please note** that you must manage the dependencies MANUALLY, including the compiler versions
+\warning **If** you are unwilling to use the `nix` build system, then **please note** that you must manage the dependencies MANUALLY, including the compiler versions.
 
 # Citation
 
@@ -26,38 +26,12 @@ academic capacity, for now please cite [the following preprint](https://arxiv.or
 
     Goswami, R.; Goswami, A.; Singh, J. K. (2019). "d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations". arXiv:1909.09830 [physics.comp-ph].
 
-# Compilation
-
-## Dependency Management
-
-### Lua
-
-Lua v5.3 is used for the scripting engine. It needs to be installed via the
-operating system's normal packaging system for now. If possible, install a
-version compiled with `c++`, not `c`.
-
-```{bash}
-# Ubuntu and derivatives
-sudo apt install lua5.3 liblua5.3
-# ArchLinux
-sudo pacman -S lua
-```
-
-### Lua Modules
-
-Since a major portion of the frontend is in `lua`, the following modules are
-required.[LuaRocks](https://luarocks.org/) is the recommended package manager
-and they are to be installed as root.
-
-```sh
-# For cross-OS filesystem operations
-sudo luarocks install luafilesystem
-```
-
-# Nix Usage
+# Compilation with Nix
 
 We use a deterministic build system to generate both bug reports and uniform
-usage statistics.
+usage statistics. This also handles the `lua` scripting engine.
+
+\note The lua functions are documented on the [wiki](https://docs.dseams.info/md_markdown_luafunctions)
 
 ## Build
 
@@ -71,22 +45,11 @@ rm -rf build
 nix-build .
 # Install into your path
 nix-env -if .
-# Go into shell with lfs
-nix-shell
 # Run the command anywhere
-cd lua_inputs/
-yodaStruct -c config.yml
+yodaStruct -c lua_inputs/config.yml
 ```
 
-### Caveats
-
-Though the build itself is guaranteed to be reproducible as the `nixpkgs` are
-also pinned to a particular commit, the `luarocks` dependencies are still local,
-since they are determined at runtime.
-
-The above caveats are not relevant when you run it in the shell environment
-defined by `shell.nix`. The **recommended usage is to run it in nix-shell**
-without **pure**.
+\note The paths in the `.yml` should be **relative to the folder from which the binary is called**.
 
 ### Language Server Support
 
@@ -137,7 +100,6 @@ above:
 nix-build .
 nix-env -if .
 # If you get a CMake error
-nix-build --check .
 nix-store --delete /nix/store/$whatever # $whatever is the derivation complaining
 nix-collect-garbage # then try again [worst case scenario]
 ```
@@ -159,6 +121,7 @@ and
 and the following:
 
 ```{bash}
+# From the developer shell
 export CXX=/usr/bin/clang++ && export CC=/usr/bin/clang
 cmake .. -DCMAKE_CXX_FLAGS="-pg -fsanitize=address " -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg
 ```
