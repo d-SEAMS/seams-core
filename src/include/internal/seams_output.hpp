@@ -3,10 +3,15 @@
 
 #include <bond.hpp>
 #include <cage.hpp>
+#include <errno.h> // errno, ENOENT, EEXIST
 #include <generic.hpp>
 #include <iostream>
 #include <memory>
 #include <mol_sys.hpp>
+#include <sys/stat.h> // stat
+#if defined(_WIN32)
+#include <direct.h> // _mkdir
+#endif
 
 //// Boost
 #include "boost/filesystem/operations.hpp"
@@ -16,6 +21,77 @@ namespace fs = boost::filesystem;
 // namespace fs = std::filesystem;
 
 namespace sout {
+
+/********************************************/ /**
+ *  Inline function for checking if
+ the directory exists or not
+ *  @param[in] path The path of the directory
+ *  \return True or false
+ ***********************************************/
+inline bool isDirExist(const std::string &path) {
+#if defined(_WIN32)
+  struct _stat info;
+  if (_stat(path.c_str(), &info) != 0) {
+    return false;
+  }
+  return (info.st_mode & _S_IFDIR) != 0;
+#else
+  struct stat info;
+  if (stat(path.c_str(), &info) != 0) {
+    return false;
+  }
+  return (info.st_mode & S_IFDIR) != 0;
+#endif
+}
+
+/********************************************/ /**
+ *  Inline function for creating
+ the desried directory.
+ *  @param[in] path The path of the directory
+ ***********************************************/
+inline int makePath(const std::string &path) {
+#if defined(_WIN32)
+  int ret = _mkdir(path.c_str());
+#else
+  mode_t mode = 0755;
+  int ret = mkdir(path.c_str(), mode);
+#endif
+  if (ret == 0)
+    return 0;
+
+  switch (errno) {
+  case ENOENT:
+    // parent didn't exist, try to create it
+    {
+      int pos = path.find_last_of('/');
+      if (pos == std::string::npos)
+#if defined(_WIN32)
+        pos = path.find_last_of('\\');
+      if (pos == std::string::npos)
+#endif
+        return 1;
+      if (!makePath(path.substr(0, pos)))
+        return 1;
+    }
+// now, try to create again
+#if defined(_WIN32)
+    return 0 == _mkdir(path.c_str());
+#else
+    return 0 == mkdir(path.c_str(), mode);
+#endif
+
+  case EEXIST:
+    // done!
+    if (isDirExist(path)) {
+      return 0;
+    } else {
+      return 1;
+    }
+
+  default:
+    return 1;
+  }
+}
 
 // Function for printing out ring info, when there is no volume slice
 int writeRings(std::vector<std::vector<int>> rings,
@@ -58,6 +134,12 @@ int writeLAMMPSdata(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                     std::vector<std::vector<int>> rings,
                     std::vector<std::vector<int>> bonds,
                     std::string filename = "system-rings.data");
+
+// Write out a LAMMPS dump file containing the RMSD per atom
+int writeLAMMPSdumpINT(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
+    int maxDepth, std::string path);
 
 // Write a data file for prisms of every type
 int writeLAMMPSdataAllPrisms(
@@ -129,5 +211,5 @@ int writeHisto(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 int writeCluster(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                  std::string fileName = "cluster.txt", bool isSlice = false,
                  int largestIceCluster = 0);
-}  // namespace sout
-#endif  // __SEAMS_OUTPUT_H_
+} // namespace sout
+#endif // __SEAMS_OUTPUT_H_
