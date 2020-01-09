@@ -17,6 +17,8 @@ and tutorials.
 the data-sets (trajectories) <a
 href="https://figshare.com/projects/d-SEAMS_Datasets/73545">from figshare</a>.
 
+\alert **If** you are unwilling to use the `nix` build system, then **please note** that you must manage the dependencies MANUALLY, including the compiler versions
+
 # Citation
 
 This software is being actively developed and written up. If you do use it in an
