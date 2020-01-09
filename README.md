@@ -138,6 +138,7 @@ nix-build .
 nix-env -if .
 # If you get a CMake error
 nix-build --check .
+nix-store --delete /nix/store/$whatever # $whatever is the derivation complaining
 nix-collect-garbage # then try again [worst case scenario]
 ```
 
