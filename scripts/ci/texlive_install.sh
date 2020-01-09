@@ -10,16 +10,16 @@
 
 # See if there is a cached version of TL available
 export PATH=/tmp/texlive/bin/x86_64-linux:$PATH
-if ! command -v texlua > /dev/null; then
-  # Obtain TeX Live
-  wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
-  tar -xzf install-tl-unx.tar.gz
-  cd install-tl-20*
+if ! command -v texlua >/dev/null; then
+	# Obtain TeX Live
+	wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
+	tar -xzf install-tl-unx.tar.gz
+	cd install-tl-20*
 
-  # Install a minimal system
-  ./install-tl --profile=$HOME/texlive.profile
+	# Install a minimal system
+	./install-tl --profile=$HOME/texlive.profile
 
-  cd ..
+	cd ..
 fi
 
 # Just including texlua so the cache check above works
@@ -31,22 +31,23 @@ tlmgr install luatex
 # gensymb is in was
 # newtext in in newtx
 # the font problems are fixed by collection-fontsrecommended
-tlmgr install   \
-  exam          \
-  amsfonts      \
-  stmaryrd      \
-  amsmath       \
-  standalone    \
-  xkeyval       \
-  preview       \
-  ucs           \
-  was           \
-  newtx         \
-  fontaxes      \
-  etoolbox      \
-  dvisvgm       \
-  collection-fontsrecommended \
-  xcolor
+tlmgr install \
+	exam \
+	amsfonts \
+	stmaryrd \
+	amsmath \
+	standalone \
+	xkeyval \
+	preview \
+	ucs \
+	was \
+	newtx \
+	fontaxes \
+	etoolbox \
+	dvisvgm \
+	mweights \
+	collection-fontsrecommended \
+	xcolor
 
 # Keep no backups (not required, simply makes cache bigger)
 tlmgr option -- autobackup 0
