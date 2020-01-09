@@ -66,6 +66,12 @@ add_library(yodaLib SHARED
   cluster.cpp
   rdf2d.cpp
 )
+
+install(TARGETS yodaStruct yodaLib LIBRARY DESTINATION "lib"
+                      ARCHIVE DESTINATION "lib"
+                      RUNTIME DESTINATION "bin"
+                      COMPONENT library)
+
 # if(yaml-cpp_FOUND)
 #     target_link_libraries(yodaStruct yaml-cpp)
 # else()
