@@ -71,12 +71,22 @@ rm -rf build
 nix-build .
 # Install into your path
 nix-env -if .
-# Use anywhere
+# Go into shell with lfs
+nix-shell
+# Run the command anywhere
 cd lua_inputs/
 yodaStruct -c config.yml
-# Use with lua modules
-nix-shell --run 'bash' --pure
 ```
+
+### Caveats
+
+Though the build itself is guaranteed to be reproducible as the `nixpkgs` are
+also pinned to a particular commit, the `luarocks` dependencies are still local,
+since they are determined at runtime.
+
+The above caveats are not relevant when you run it in the shell environment
+defined by `shell.nix`. The **recommended usage is to run it in nix-shell**
+without **pure**.
 
 ### Language Server Support
 
@@ -95,24 +105,6 @@ Note that there is no need to actually compile the project if you simply need to
 get the compiler database for the language server.
 
 **Do Not** commit the `.json` file.
-
-### Caveats
-
-Though the build itself is guaranteed to be reproducible as the `nixpkgs` are
-also pinned to a particular commit, the `luarocks` dependencies are still local,
-since they are determined at runtime.
-
-The above caveats are not relevant when you run it in the shell environment
-defined by `shell.nix`. The **recommended usage is to run it in nix-shell**
-without **pure**.
-
-```bash
-# Install
-nix-env -if .
-# Go into shell with lfs
-nix-shell
-# Run the command anywhere
-```
 
 ## Development
 
