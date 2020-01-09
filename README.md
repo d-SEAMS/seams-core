@@ -63,7 +63,7 @@ Since this project is built with `nix`, we can simply do the following from the
 root directory:
 
 ```sh
-# This will take a long time the first time since it builds sharkML
+# This will take a long time the first time as it builds the dependencies
 nix-build .
 # Install into your path
 nix-env -if .
