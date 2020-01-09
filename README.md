@@ -141,7 +141,8 @@ above:
 nix-build .
 nix-env -if .
 # If you get a CMake error
-nix-collect-garbage # then try again
+nix-build --check .
+nix-collect-garbage # then try again [worst case scenario]
 ```
 
 ## Tests
