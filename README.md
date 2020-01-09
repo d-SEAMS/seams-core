@@ -186,8 +186,8 @@ Please ensure that all contributions are formatted according to the
 
 Specifically, consider using the following:
 
--[Sublime Plugin](https://github.com/rosshemsley/SublimeClangFormat) for users
-of Sublime Text
+- [Sublime Plugin](https://github.com/rosshemsley/SublimeClangFormat) for users
+  of Sublime Text
 
 - [format-all](https://github.com/lassik/emacs-format-all-the-code) for Emacs
 - [vim-clang-format](https://github.com/rhysd/vim-clang-format) for Vim
