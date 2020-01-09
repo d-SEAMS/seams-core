@@ -96,23 +96,18 @@ get the compiler database for the language server.
 
 Though the build itself is guaranteed to be reproducible as the `nixpkgs` are
 also pinned to a particular commit, the `luarocks` dependencies are still local,
-since they are determined at runtime. This means, for example, to use the sample
-file, you need to ensure you have the `luarocks` modules installled in your
-system.
+since they are determined at runtime.
 
 The above caveats are not relevant when you run it in the shell environment
-defined by `shell.nix`
+defined by `shell.nix`. The **recommended usage is to run it in nix-shell**
+without **pure**.
 
-#### Reproducible Lua
-
-For reproducing `lua` we use [luas](https://github.com/limadm/luas). Note that
-this is still an imperfect method and the best way to run this is via the
-`nix-shell --run 'bash' --pure` environment.
-
-```sh
-luas init 5.2.4
-luas use 5.2.4
-luarocks install luafilesystem
+```bash
+# Install
+nix-env -if .
+# Go into shell with lfs
+nix-shell
+# Run the command anywhere
 ```
 
 ## Development
@@ -122,9 +117,6 @@ We can simply use the `nix` environment:
 ```sh
 # From the project root
 nix-shell
-# Sanitize and fix the shell
-stty sane
-export TERM="xterm-256color"
 ```
 
 # Running
@@ -145,26 +137,20 @@ above:
 ```{bash}
 # Just run this
 ./testBuild.sh
+# Or, better yet
+nix-build .
+nix-env -if .
+# If you get a CMake error
+nix-collect-garbage # then try again
 ```
 
 ## Tests
 
-Apart from the examples, the test-suite can be run with the `yodaStruct_test` binary.
+Apart from the [examples](https://docs.dseams.info/pages.html), the test-suite can be run with the `yodaStruct_test` binary.
 
 # Developer Documentation
 
 <!-- TODO: Move this to some other location. -->
-
-For updates to any of the **bundled** `external libraries` change the commit number and use:
-
-```{bash}
-$ cd src/external
-# Sol2
- wget https://raw.githubusercontent.com/ThePhD/sol2/develop/single/sol/sol_forward.hpp
- wget https://raw.githubusercontent.com/ThePhD/sol2/develop/single/sol/sol.hpp
-# cxxopts
- wget https://raw.githubusercontent.com/jarro2783/cxxopts/master/include/cxxopts.hpp
-```
 
 ## Leaks and performance
 
