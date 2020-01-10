@@ -31,6 +31,7 @@
  *  @param[in] nList Row-ordered neighbour list, by index.
  *  @param[in] yCloud The input PointCloud, with respect to which the indices in
  the rings and nList vector of vectors have been saved.
+ *  @param[in] firstFrame First frame to be analyzed
  *  @param[in] printEachCage Flag for printing the information of each cage in
  the frame (true) or not printing the coordinates/connectivity of each cage
  (false).
@@ -38,7 +39,7 @@
 int ring::topoBulkAnalysis(
     std::string path, std::vector<std::vector<int>> rings,
     std::vector<std::vector<int>> nList,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int firstFrame,
     bool printEachCage) {
   //
   // Ring IDs of each type will be saved in these vectors
@@ -97,7 +98,7 @@ int ring::topoBulkAnalysis(
 
   // Write out to a file
   sout::writeTopoBulkData(path, yCloud->currentFrame, numHC, numDDC, mixedRings,
-                          basalRings, prismaticRings);
+                          basalRings, prismaticRings, firstFrame);
 
   // Gets the atom type for every atom, to be used for printing out the ice
   // types found
