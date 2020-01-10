@@ -29,11 +29,13 @@
  *  @param[in] nList Row-ordered neighbour list by index.
  *  @param[in] yCloud The input PointCloud.
  *  @param[in] maxDepth The maximum possible size of the primitive rings.
+ *  @param[in] maxDepth The first frame.
  ***********************************************/
 int ring::prismAnalysis(
     std::string path, std::vector<std::vector<int>> rings,
     std::vector<std::vector<int>> nList,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int maxDepth) {
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int maxDepth,
+    int firstFrame) {
   //
   std::vector<std::vector<int>>
       ringsOneType;            // Vector of vectors of rings of a single size
@@ -104,8 +106,8 @@ int ring::prismAnalysis(
   // Calculate the height%
 
   // Write out the prism information
-  sout::writePrismNum(path, yCloud->currentFrame, nPrismList, heightPercent,
-                      maxDepth);
+  sout::writePrismNum(path, nPrismList, heightPercent, maxDepth,
+                      yCloud->currentFrame, firstFrame);
   // Write out the lammps data file for the particular frame
   sout::writeLAMMPSdataAllPrisms(yCloud, nList, atomTypes, maxDepth, path);
 

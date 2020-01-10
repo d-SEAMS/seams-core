@@ -59,7 +59,7 @@ bool discardExtraTetragonBlocks(
 int prismAnalysis(std::string path, std::vector<std::vector<int>> rings,
                   std::vector<std::vector<int>> nList,
                   molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                  int maxDepth);
+                  int maxDepth, int firstFrame);
 
 // Assign an atomType (equal to the number of nodes in the ring)
 // given a vector with a list of indices of rings comprising the prisms
