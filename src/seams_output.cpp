@@ -832,7 +832,8 @@ int sout::writeBasalRingsPrism(
                                                 ***********************************************/
 int sout::writeClusterStats(std::string path, int currentFrame,
                             int largestCluster, int numOfClusters,
-                            int smallestCluster, double avgClusterSize) {
+                            int smallestCluster, double avgClusterSize,
+                            int firstFrame) {
   std::ofstream outputFile;
   // ----------------
   // Make the output directory if it doesn't exist
@@ -843,8 +844,16 @@ int sout::writeClusterStats(std::string path, int currentFrame,
                   std::ios_base::app | std::ios_base::out);
 
   // Format:
-  // Frame RingSize Num_of_prisms Height% RingSize ... Height%
+  // Comment line
   // 1 3 0 0 4 35 40 ....
+
+  // ----------------
+  // Comment line for the first frame
+  if (currentFrame == firstFrame) {
+    outputFile << "Frame largestCluster numOfClusters smallestCluster "
+                  "avgClusterSize\n";
+  }
+  // ----------------
 
   outputFile << currentFrame << " " << largestCluster << " " << numOfClusters
              << " " << smallestCluster << " " << avgClusterSize << "\n";
@@ -1007,7 +1016,7 @@ int sout::printRDF(std::string fileName, std::vector<double> *rdfValues,
  ***********************************************/
 int sout::writeTopoBulkData(std::string path, int currentFrame, int numHC,
                             int numDDC, int mixedRings, int basalRings,
-                            int prismaticRings) {
+                            int prismaticRings, int firstFrame) {
   //
   std::ofstream outputFile;
   // ----------------
@@ -1023,7 +1032,13 @@ int sout::writeTopoBulkData(std::string path, int currentFrame, int numHC,
   // Format:
   // Frame RingSize Num_of_prisms Height% RingSize ... Height%
   // 1 3 0 0 4 35 40 ....
-
+  // -------------------
+  // If first frame then write the comment line
+  if (currentFrame == firstFrame) {
+    outputFile << "Frame HCnumber DDCnumber MixedRingNumber PrismaticRings "
+                  "basalRings\n";
+  }
+  // -------------------
   outputFile << currentFrame << " " << numHC << " " << numDDC << " "
              << mixedRings << " " << prismaticRings << " " << basalRings
              << "\n";

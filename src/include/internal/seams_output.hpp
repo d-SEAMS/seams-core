@@ -115,7 +115,8 @@ int printRDF(std::string fileName, std::vector<double> *rdfValues,
 // Function for printing out the number of DDCs, HCs, mixed rings, basal and
 // prismatic rings
 int writeTopoBulkData(std::string path, int currentFrame, int numHC, int numDDC,
-                      int mixedRings, int basalRings, int prismaticRings);
+                      int mixedRings, int basalRings, int prismaticRings,
+                      int firstFrame);
 
 // Function for writing out each prism
 int writePrisms(std::vector<int> *basal1, std::vector<int> *basal2,
@@ -125,7 +126,7 @@ int writePrisms(std::vector<int> *basal1, std::vector<int> *basal2,
 // Function for writing out cluster statistics
 int writeClusterStats(std::string path, int currentFrame, int largestCluster,
                       int numOfClusters, int smallestCluster,
-                      double avgClusterSize);
+                      double avgClusterSize, int firstFrame);
 
 // Write a data file for rings
 int writeLAMMPSdata(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
