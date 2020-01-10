@@ -1,12 +1,17 @@
 #ifndef __SEAMS_OUTPUT_H_
 #define __SEAMS_OUTPUT_H_
 
+#include <errno.h>     // errno, ENOENT, EEXIST
+#include <sys/stat.h>  // stat
 #include <bond.hpp>
 #include <cage.hpp>
 #include <generic.hpp>
 #include <iostream>
 #include <memory>
 #include <mol_sys.hpp>
+#if defined(_WIN32)
+#include <direct.h>  // _mkdir
+#endif
 
 //// Boost
 #include "boost/filesystem/operations.hpp"
@@ -15,33 +20,76 @@ namespace fs = boost::filesystem;
 // #include <filesystem>
 // namespace fs = std::filesystem;
 
-/*! \file seams_output.hpp
-    \brief File for functions that write out output to files).
-
-    Details.
-*/
-
-/*!
- *  \addtogroup sout
- *  @{
- */
-
-/*! \brief Functions for output
- *         This namespace contains functions that are used for writing the
-various outputs produced by d-SEAMS to text files, LAMMPS data files and
-trajectory files.
- *
-The LAMMPS data files and trajectory files can be easily visualized in <a
-href="https://www.ovito.org/">OVITO</a> or <a
-href="http://www.ks.uiuc.edu/Research/vmd/">VMD</a>, although
-OVITO is recommended.
-
-  ### Changelog ###
-
-  - Amrita Goswami [amrita16thaug646@gmail.com]; date modified: Dec 26, 2019
- */
-
 namespace sout {
+
+/********************************************/ /**
+ *  Inline function for checking if
+ the directory exists or not
+ *  @param[in] path The path of the directory
+ *  \return True or false
+ ***********************************************/
+inline bool isDirExist(const std::string &path) {
+#if defined(_WIN32)
+  struct _stat info;
+  if (_stat(path.c_str(), &info) != 0) {
+    return false;
+  }
+  return (info.st_mode & _S_IFDIR) != 0;
+#else
+  struct stat info;
+  if (stat(path.c_str(), &info) != 0) {
+    return false;
+  }
+  return (info.st_mode & S_IFDIR) != 0;
+#endif
+}
+
+/********************************************/ /**
+ *  Inline function for creating
+ the desried directory.
+ *  @param[in] path The path of the directory
+ ***********************************************/
+inline int makePath(const std::string &path) {
+#if defined(_WIN32)
+  int ret = _mkdir(path.c_str());
+#else
+  mode_t mode = 0755;
+  int ret = mkdir(path.c_str(), mode);
+#endif
+  if (ret == 0) return 0;
+
+  switch (errno) {
+    case ENOENT:
+      // parent didn't exist, try to create it
+      {
+        int pos = path.find_last_of('/');
+        if (pos == std::string::npos)
+#if defined(_WIN32)
+          pos = path.find_last_of('\\');
+        if (pos == std::string::npos)
+#endif
+          return 1;
+        if (!makePath(path.substr(0, pos))) return 1;
+      }
+// now, try to create again
+#if defined(_WIN32)
+      return 0 == _mkdir(path.c_str());
+#else
+      return 0 == mkdir(path.c_str(), mode);
+#endif
+
+    case EEXIST:
+      // done!
+      if (isDirExist(path)) {
+        return 0;
+      } else {
+        return 1;
+      }
+
+    default:
+      return 1;
+  }
+}
 
 // Function for printing out ring info, when there is no volume slice
 int writeRings(std::vector<std::vector<int>> rings,
@@ -49,8 +97,9 @@ int writeRings(std::vector<std::vector<int>> rings,
 
 // Function for printing out the number of prism blocks, with or without slices.
 // Be careful when using slices!
-int writePrismNum(std::string path, int currentFrame, std::vector<int> nPrisms,
-                  std::vector<double> heightPercent, int maxDepth);
+int writePrismNum(std::string path, std::vector<int> nPrisms,
+                  std::vector<double> heightPercent, int maxDepth,
+                  int currentFrame, int firstFrame);
 
 // Function for printing out the coverage area and the number of rings of each
 // type

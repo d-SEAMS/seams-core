@@ -835,6 +835,9 @@ int sout::writeClusterStats(std::string path, int currentFrame,
                             int smallestCluster, double avgClusterSize) {
   std::ofstream outputFile;
   // ----------------
+  // Make the output directory if it doesn't exist
+  sout::makePath(path);
+  // ----------------
   // Write output to file inside the output directory
   outputFile.open(path + "clusterStats.dat",
                   std::ios_base::app | std::ios_base::out);
@@ -855,15 +858,26 @@ int sout::writeClusterStats(std::string path, int currentFrame,
  *  Function for printing out prism info, when there is no
  volume slice
  ***********************************************/
-int sout::writePrismNum(std::string path, int currentFrame,
-                        std::vector<int> nPrisms,
-                        std::vector<double> heightPercent, int maxDepth) {
+int sout::writePrismNum(std::string path, std::vector<int> nPrisms,
+                        std::vector<double> heightPercent, int maxDepth,
+                        int currentFrame, int firstFrame) {
   std::ofstream outputFile;
+  // ----------------
+  // Make the output directory if it doesn't exist
+  sout::makePath(path);
+  std::string outputDirName = path + "topoINT";
+  sout::makePath(outputDirName);
   // ----------------
   // Write output to file inside the output directory
   outputFile.open(path + "topoINT/nPrisms.dat",
                   std::ios_base::app | std::ios_base::out);
 
+  // ----------------
+  // Write the comment line if the first frame is being written out
+  if (currentFrame == firstFrame) {
+    outputFile << "Frame RingSize Num_of_prisms Height% RingSize ... Height\n";
+  }
+  // ----------------
   // Format:
   // Frame RingSize Num_of_prisms Height% RingSize ... Height%
   // 1 3 0 0 4 35 40 ....
@@ -894,6 +908,11 @@ int sout::writeRingNum(std::string path, int currentFrame,
   std::ofstream outputFileXY;
   std::ofstream outputFileXZ;
   std::ofstream outputFileYZ;
+  // ----------------
+  // Make the output directory if it doesn't exist
+  sout::makePath(path);
+  std::string outputDirName = path + "topoMonolayer";
+  sout::makePath(outputDirName);
   // ----------------
   // Coverage Area of XY
   // Write output to file inside the output directory
@@ -992,6 +1011,11 @@ int sout::writeTopoBulkData(std::string path, int currentFrame, int numHC,
   //
   std::ofstream outputFile;
   // ----------------
+  // Make the output directory if it doesn't exist
+  sout::makePath(path);
+  std::string outputDirName = path + "bulkTopo";
+  sout::makePath(outputDirName);
+  // ----------------
   // Write output to file inside the output directory
   outputFile.open(path + "bulkTopo/cageData.dat",
                   std::ios_base::app | std::ios_base::out);
@@ -1033,7 +1057,12 @@ int sout::writeLAMMPSdataAllPrisms(
   bonds = bond::populateBonds(nList, yCloud);
   //
   // ----------------
-  // The directory should have already been made by lua.
+  // Make the output directory if it doesn't exist
+  sout::makePath(path);
+  std::string outputDirName = path + "topoINT";
+  sout::makePath(outputDirName);
+  outputDirName = path + "topoINT/dataFiles/";
+  sout::makePath(outputDirName);
   // ----------------
   // Write output to file inside the output directory
   outputFile.open(path + "topoINT/dataFiles/" + filename);
@@ -1151,7 +1180,12 @@ int sout::writeLAMMPSdataAllRings(
   bonds = bond::populateBonds(nList, yCloud);
   //
   // ----------------
-  // The directory should have already been made by lua.
+  // Make the output directory if it doesn't exist
+  sout::makePath(path);
+  std::string outputDirName = path + "topoMonolayer";
+  sout::makePath(outputDirName);
+  outputDirName = path + "topoMonolayer/dataFiles/";
+  sout::makePath(outputDirName);
   // ----------------
   // Write output to file inside the output directory
   outputFile.open(path + "topoMonolayer/dataFiles/" + filename);
@@ -1694,6 +1728,10 @@ int sout::writeLAMMPSdataCages(
 int sout::writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                     std::string path, std::string outFile) {
   std::ofstream outputFile;
+  // ----------------
+  // Make the output directory if it doesn't exist
+  sout::makePath(path);
+  // ----------------
   // Create a new file in the output directory
   outputFile.open(path + outFile, std::ios_base::app);
 
@@ -1877,7 +1915,12 @@ int sout::writeLAMMPSdataTopoBulk(
   }  // only create bonds between non-dummy atoms
   //
   // ----------------
-  // The directory should have already been made by lua.
+  // Make the output directory if it doesn't exist
+  sout::makePath(path);
+  std::string outputDirName = path + "bulkTopo";
+  sout::makePath(outputDirName);
+  outputDirName = path + "bulkTopo/dataFiles/";
+  sout::makePath(outputDirName);
   // ----------------
   // Write output to file inside the output directory
   outputFile.open(path + "bulkTopo/dataFiles/" + filename);
