@@ -29,14 +29,15 @@
  *  @param[in] nList Row-ordered neighbour list by index.
  *  @param[in] yCloud The input PointCloud.
  *  @param[in] maxDepth The maximum possible size of the primitive rings.
- *  @param[in] sheetArea Area calculated using the two significant dimensions of the 
- quasi-two-dimensional sheet.
+ *  @param[in] sheetArea Area calculated using the two significant dimensions of
+ the quasi-two-dimensional sheet.
+ *  @param[in] firstFrame The first frame to be analyzed
  ***********************************************/
 int ring::polygonRingAnalysis(
     std::string path, std::vector<std::vector<int>> rings,
     std::vector<std::vector<int>> nList,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int maxDepth,
-    double sheetArea) {
+    double sheetArea, int firstFrame) {
   //
   std::vector<std::vector<int>>
       ringsOneType;            // Vector of vectors of rings of a single size
@@ -104,7 +105,7 @@ int ring::polygonRingAnalysis(
 
   // Write out the ring information
   sout::writeRingNum(path, yCloud->currentFrame, nRingList, coverageAreaXY,
-                     coverageAreaXZ, coverageAreaYZ, maxDepth);
+                     coverageAreaXZ, coverageAreaYZ, maxDepth, firstFrame);
   // Write out the lammps data file for the particular frame
   sout::writeLAMMPSdataAllRings(yCloud, nList, atomTypes, maxDepth, path);
 

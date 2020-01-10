@@ -106,7 +106,8 @@ int writePrismNum(std::string path, std::vector<int> nPrisms,
 int writeRingNum(std::string path, int currentFrame, std::vector<int> nRings,
                  std::vector<double> coverageAreaXY,
                  std::vector<double> coverageAreaXZ,
-                 std::vector<double> coverageAreaYZ, int maxDepth);
+                 std::vector<double> coverageAreaYZ, int maxDepth,
+                 int firstFrame);
 
 // Function for printing out the RDF, given the filename
 int printRDF(std::string fileName, std::vector<double> *rdfValues,

@@ -913,7 +913,8 @@ int sout::writeRingNum(std::string path, int currentFrame,
                        std::vector<int> nRings,
                        std::vector<double> coverageAreaXY,
                        std::vector<double> coverageAreaXZ,
-                       std::vector<double> coverageAreaYZ, int maxDepth) {
+                       std::vector<double> coverageAreaYZ, int maxDepth,
+                       int firstFrame) {
   std::ofstream outputFileXY;
   std::ofstream outputFileXZ;
   std::ofstream outputFileYZ;
@@ -929,8 +930,16 @@ int sout::writeRingNum(std::string path, int currentFrame,
                     std::ios_base::app | std::ios_base::out);
 
   // Format:
-  // Frame RingSize Num_of_prisms Height% RingSize ... Height%
+  // Comment line
   // 1 3 0 0 4 35 40 ....
+
+  // ----------------
+  // Add comment for the first frame
+  if (currentFrame == firstFrame) {
+    outputFileXY << "Frame RingSize Num_of_rings CoverageAreaXY% RingSize ... "
+                    "CoverageAreaXY%\n";
+  }
+  // ----------------
 
   outputFileXY << currentFrame << " ";
 
@@ -947,6 +956,14 @@ int sout::writeRingNum(std::string path, int currentFrame,
   // Write output to file inside the output directory
   outputFileXZ.open(path + "topoMonolayer/coverageAreaXZ.dat",
                     std::ios_base::app | std::ios_base::out);
+
+  // ----------------
+  // Add comment for the first frame
+  if (currentFrame == firstFrame) {
+    outputFileXZ << "Frame RingSize Num_of_rings CoverageAreaXZ% RingSize ... "
+                    "CoverageAreaXZ%\n";
+  }
+  // ----------------
 
   // Format:
   // Frame RingSize Num_of_prisms Height% RingSize ... Height%
@@ -967,6 +984,14 @@ int sout::writeRingNum(std::string path, int currentFrame,
   // Write output to file inside the output directory
   outputFileYZ.open(path + "topoMonolayer/coverageAreaYZ.dat",
                     std::ios_base::app | std::ios_base::out);
+
+  // ----------------
+  // Add comment for the first frame
+  if (currentFrame == firstFrame) {
+    outputFileYZ << "Frame RingSize Num_of_rings CoverageAreaYZ% RingSize ... "
+                    "CoverageAreaYZ%\n";
+  }
+  // ----------------
 
   // Format:
   // Frame RingSize Num_of_prisms Height% RingSize ... Height%
@@ -1201,9 +1226,10 @@ int sout::writeLAMMPSdataAllRings(
   sout::makePath(outputDirName);
   outputDirName = path + "topoMonolayer/dataFiles/";
   sout::makePath(outputDirName);
-  // ----------------
+
   // Write output to file inside the output directory
   outputFile.open(path + "topoMonolayer/dataFiles/" + filename);
+
   // FORMAT:
   //  Comment Line
   //  4 atoms
