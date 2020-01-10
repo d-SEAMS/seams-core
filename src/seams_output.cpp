@@ -1017,8 +1017,8 @@ for all the prisms, for every frame, printing the RMSD per atom as well
 ***********************************************/
 int sout::writeLAMMPSdumpINT(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
-    int maxDepth, std::string path) {
+    std::vector<double> rmsdPerAtom, std::vector<int> atomTypes, int maxDepth,
+    std::string path) {
   //
   std::ofstream outputFile;
   int iatom; // Index, not atom ID
@@ -1031,7 +1031,57 @@ int sout::writeLAMMPSdumpINT(
   // ----------------
   // Write output to file inside the output directory
   outputFile.open(path + "topoINT/dumpFiles/" + filename);
-  // ----------------
+  // ----------------------------------------------------
+  // Header Format
+
+  // ITEM: TIMESTEP
+  // 0
+  // ITEM: NUMBER OF ATOMS
+  // 500
+  // ITEM: BOX BOUNDS pp pp pp
+  // -9.0400100000000005e-01 1.7170999999999999e+01
+  // -9.0400100000000005e-01 1.7170999999999999e+01
+  // -9.0400100000000005e-01 1.7170999999999999e+01
+  // ITEM: ATOMS id mol type x y z rmsd
+
+  // -----------------
+  // -------
+  // Write the header
+  // ITEM: TIMESTEP
+  outputFile << "ITEM: TIMESTEP\n";
+  // Write out frame number
+  outputFile << yCloud->currentFrame << "\n";
+  // ITEM: NUMBER OF ATOMS
+  outputFile << "ITEM: NUMBER OF ATOMS\n";
+  // Number of atoms
+  outputFile << yCloud->pts.size() << "\n";
+  // ITEM: BOX BOUNDS pp pp pp
+  outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
+  // Box lengths
+  outputFile << yCloud->boxLow[0] << " " << yCloud->boxLow[0] + yCloud->box[0]
+             << "\n";
+  outputFile << yCloud->boxLow[1] << " " << yCloud->boxLow[1] + yCloud->box[1]
+             << "\n";
+  outputFile << yCloud->boxLow[2] << " " << yCloud->boxLow[2] + yCloud->box[2]
+             << "\n";
+  // ITEM: ATOMS id mol type x y z rmsd
+  outputFile << "ITEM: ATOMS id mol type x y z rmsd\n";
+  // -------
+  // Write out the atom coordinates
+  // Format
+  // ITEM: ATOMS id mol type x y z rmsd
+  //
+  // Loop through atoms
+  for (int i = 0; i < yCloud->pts.size(); i++) {
+    iatom =
+        yCloud->pts[i].atomID; // The actual ID can be different from the index
+    // Write out coordinates
+    outputFile << iatom << " " << yCloud->pts[i].molID << " " << atomTypes[i]
+               << " " << yCloud->pts[i].x << " " << yCloud->pts[i].y << " "
+               << yCloud->pts[i].z << " " << rmsdPerAtom[i] << "\n";
+
+  } // end of loop through all atoms in pointCloud
+  // -----------------------------------------------------
   return 0;
 } // end of function
 
@@ -1161,6 +1211,7 @@ int sout::writeLAMMPSdataAllPrisms(
                << bonds[ibond][1] << "\n";
   } // end of for loop for bonds
 
+  outputFile.close();
   // Once the datafile has been printed, exit
   return 0;
 }
@@ -1279,6 +1330,7 @@ int sout::writeLAMMPSdataAllRings(
                << bonds[ibond][1] << "\n";
   } // end of for loop for bonds
 
+  outputFile.close();
   // Once the datafile has been printed, exit
   return 0;
 }
@@ -1510,6 +1562,7 @@ int sout::writeLAMMPSdataPrisms(
 
   } // end of for loop for bonds
 
+  outputFile.close();
   // Once the datafile has been printed, exit
   return 0;
 }
@@ -1722,6 +1775,7 @@ int sout::writeLAMMPSdataCages(
 
   } // end of for loop for bonds
 
+  outputFile.close();
   // Once the datafile has been printed, exit
   return 0;
 }

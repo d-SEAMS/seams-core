@@ -140,7 +140,7 @@ int ring::prismAnalysis(
   // Write out dump files with the RMSD per atom for the shape-matching
   // criterion
   if (doShapeMatching) {
-    sout::writeLAMMPSdumpINT(yCloud, nList, atomTypes, maxDepth, path);
+    sout::writeLAMMPSdumpINT(yCloud, rmsdPerAtom, atomTypes, maxDepth, path);
   } // reassign prism block types for deformed prisms
 
   // Write out the lammps data file for the particular frame
