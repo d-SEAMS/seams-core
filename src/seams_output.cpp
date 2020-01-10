@@ -1032,6 +1032,8 @@ int sout::printRDF(std::string fileName, std::vector<double> *rdfValues,
     outputFile << r << " " << (*rdfValues)[ibin] << "\n";
   }  // end of loop through all bins
 
+  outputFile.close();
+
   return 0;
 }
 
