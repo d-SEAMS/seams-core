@@ -11,8 +11,10 @@
  This is registered as a Lua function and is
  accessible to the user.
  Internally, this function calls the following functions:
- - rdf2::getSystemLengths (Gets the dimensions of the quasi-two-dimensional system).
- - ring::rdf2::sampleRDF_AA (Samples the current frame, binning the coordinates).
+ - rdf2::getSystemLengths (Gets the dimensions of the quasi-two-dimensional
+ system).
+ - ring::rdf2::sampleRDF_AA (Samples the current frame, binning the
+ coordinates).
  - ring::rdf2::normalizeRDF (Normalizes the RDF).
  - ring::sout::printRDF (Writes out the RDF to the desired output directory,
  in the form of an ASCII file)
@@ -20,7 +22,8 @@
  will be written.
  *  @param[in] rdfValues Vector containing the RDF values.
  *  @param[in] yCloud The input PointCloud.
- *  @param[in] cutoff Cutoff for the RDF. This should not be greater than half the box length.
+ *  @param[in] cutoff Cutoff for the RDF. This should not be greater than half
+ the box length.
  *  @param[in] binwidth Width of the bin for histogramming.
  *  @param[in] firstFrame The first frame for RDF binning.
  *  @param[in] finalFrame The final frame for RDF binning.
@@ -62,7 +65,20 @@ int rdf2::rdf2Danalysis_AA(
   // ----------------------------------------------
   // PRINT OUT
   if (currentFrame == finalFrame) {
+    // Create folder if required
+    sout::makePath(path);
+    std::string outputDirName = path + "topoMonolayer";
+    sout::makePath(outputDirName);
+    //
     std::string fileName = path + "topoMonolayer/rdf.dat";
+    //
+    // Comment line
+    std::ofstream outputFile;  // For the output file
+    outputFile.open(fileName, std::ios_base::app | std::ios_base::out);
+    outputFile << "# r  g(r)\n";
+    outputFile.close();
+    //
+    //
     sout::printRDF(fileName, rdfValues, binwidth, nbin);
   }  // end of print out
   // ----------------------------------------------
@@ -79,7 +95,7 @@ int rdf2::rdf2Danalysis_AA(
  *  @param[in] cutoff Cutoff for the RDF calculation, which should be less than
  or equal to half the box length.
  *  @param[in] binwidth Width of the bin.
- *  @param[in] nbin Number of bins. 
+ *  @param[in] nbin Number of bins.
  *  \return RDF histogram for the current frame.
  ***********************************************/
 std::vector<int> rdf2::sampleRDF_AA(
@@ -118,14 +134,17 @@ std::vector<int> rdf2::sampleRDF_AA(
  *  Normalizes the histogram and adds it to the RDF.
  The normalization requires the plane area and height.
  *  @param[in] nopA The number of particles of type A.
- *  @param[in] rdfValues Radial distribution function values for all the frames, in the form of a vector.
+ *  @param[in] rdfValues Radial distribution function values for all the frames,
+ in the form of a vector.
  *  @param[in] histogram The histogram for the current frame.
  *  @param[in] binwidth The width of each bin for the RDF histogram.
  *  @param[in] nbin The number of bins for the RDF.
- *  @param[in] volumeLengths The confining dimensions of the quasi-two-dimensional system,
- which may be the slice dimensions or the dimensions of the box.
- *  @param[in] nIter The number of iterations for which the coordinates will be binned.
- This is basically equivalent to the number of frames over which the RDF will be calculated.
+ *  @param[in] volumeLengths The confining dimensions of the
+ quasi-two-dimensional system, which may be the slice dimensions or the
+ dimensions of the box.
+ *  @param[in] nIter The number of iterations for which the coordinates will be
+ binned. This is basically equivalent to the number of frames over which the RDF
+ will be calculated.
  ***********************************************/
 int rdf2::normalizeRDF(int nopA, std::vector<double> *rdfValues,
                        std::vector<int> histogram, double binwidth, int nbin,
@@ -173,8 +192,9 @@ int rdf2::normalizeRDF(int nopA, std::vector<double> *rdfValues,
 /********************************************/ /**
  *  Calculates the lengths of the quasi-two-dimensional
  system. The smallest length is the 'height'.
- *  @param[in] yCloud The molSys::PointCloud struct for the system. 
- *  \return The length (i.e. the 'height') of the smallest dimension of quasi-two-dimensional system. 
+ *  @param[in] yCloud The molSys::PointCloud struct for the system.
+ *  \return The length (i.e. the 'height') of the smallest dimension of
+ quasi-two-dimensional system.
  ***********************************************/
 std::vector<double> rdf2::getSystemLengths(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
@@ -224,7 +244,8 @@ std::vector<double> rdf2::getSystemLengths(
  *  Calculates the plane area from the volume lengths.
  This is the product of the two largest dimensions of the quasi-two-dimensional
  system.
- *  @param[in] volumeLengths A vector of the lengths of the volume slice or simulation box
+ *  @param[in] volumeLengths A vector of the lengths of the volume slice or
+ simulation box
  *  \return The plane area of the two significant dimensions
  ***********************************************/
 double rdf2::getPlaneArea(std::vector<double> volumeLengths) {
