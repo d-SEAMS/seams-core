@@ -32,8 +32,6 @@ function M.make_output_dirs( doBOP, topoOneDim, topoTwoDim, topoBulk )
   if not not topoOneDim then
     topoOneDimDir = outDir .. "topoINT";
     lfs.mkdir(topoOneDimDir);
-    topoOneDimDir = outDir .. "topoINT/prisms";
-    lfs.mkdir(topoOneDimDir);
     topoOneDimData = outDir .. "topoINT/dataFiles";
     lfs.mkdir(topoOneDimData);
     -- Create file for nPrisms (no. of prisms)
