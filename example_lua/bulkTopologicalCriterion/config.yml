@@ -1,5 +1,5 @@
-trajectory: "../input/traj/nucleation.lammpstrj"
-variables: "../lua_inputs/iceType/vars.lua"
+trajectory: "input/traj/nucleation.lammpstrj"
+variables: "lua_inputs/iceType/vars.lua"
 bulk:
   use: true  
   topologicalNetworkCriterion: true
