@@ -530,8 +530,8 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypeNoPrint(
 // Classifies each atom according to the CHILL algorithm
 molSys::PointCloud<molSys::Point<double>, double> chill::getIceType(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, std::string path, bool isSlice,
-    std::string outputFileName) {
+    std::vector<std::vector<int>> nList, std::string path, int firstFrame,
+    bool isSlice, std::string outputFileName) {
   int ih, ic, water, interIce, unknown, total;  // No. of particles of each type
   ih = ic = water = unknown = interIce = total = 0;
   int num_staggrd, num_eclipsd, na;
@@ -594,9 +594,22 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceType(
 
   // water = total - ic -ih;
 
+  // --------------------
+  // Create the directories if needed
+  sout::makePath(path);
+  std::string outputDirName = path + "bop";
+  sout::makePath(outputDirName);
+  // --------------------
+
   // Print to file
   std::ofstream outputFile;
   outputFile.open(path + "bop/" + outputFileName, std::ios_base::app);
+  // --------------------
+  // Write out the comment line for the first frame
+  if (yCloud->currentFrame == firstFrame) {
+    outputFile << "Frame Ic Ih Interfacial Water Total \n";
+  }
+  // --------------------
   outputFile << yCloud->currentFrame << " " << ic << " " << ih << " "
              << interIce << " " << water << " " << total << "\n";
   outputFile.close();
@@ -756,7 +769,9 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getCorrelPlus(
  particle, according to the CHILL+ algorithm.
  *  @param[in,out] yCloud The output molSys::PointCloud
  *  @param[in] nList Row-ordered neighbour list by atom ID
- *  @param[in] path Path to the output directory to which ice types are written out to 
+ *  @param[in] path Path to the output directory to which ice types are written
+ out to
+ *  @param[in] firstFrame The first frame to be analyzed
  *  @param[in] isSlice This decides whether there is a slice or not
  *  @param[in] outputFileName Name of the output file, to which the ice types
  will be written out.
@@ -764,8 +779,8 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getCorrelPlus(
  ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypePlus(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, std::string path, bool isSlice,
-    std::string outputFileName) {
+    std::vector<std::vector<int>> nList, std::string path, int firstFrame,
+    bool isSlice, std::string outputFileName) {
   int ih, ic, interIce, water, unknown, clath, interClath,
       total;  // No. of particles of each type
   ih = ic = water = unknown = interIce = total = 0;
@@ -843,8 +858,21 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypePlus(
 
   // water = total - ic -ih;
 
+  // --------------------
+  // Create the directories if needed
+  sout::makePath(path);
+  std::string outputDirName = path + "bop";
+  sout::makePath(outputDirName);
+  // --------------------
+
   std::ofstream outputFile;
   outputFile.open(path + "bop/" + outputFileName, std::ios_base::app);
+  // --------------------
+  // Comment line for the first line
+  if (yCloud->currentFrame == firstFrame) {
+    outputFile << "Frame Ic Ih Interfacial Clath InterClath Water Total\n";
+  }
+  // --------------------
   outputFile << yCloud->currentFrame << " " << ic << " " << ih << " "
              << interIce << " " << clath << " " << interClath << " " << water
              << " " << total << "\n";
@@ -1060,7 +1088,11 @@ molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
                                                 *  @param[in] yCloud The input
                                                 *molSys::PointCloud for the
                                                 *current frame
-                                                *  @param[in] path Path to the output directory to which ice types are written out to 
+                                                *  @param[in] path Path to the
+                                                *output directory to which ice
+                                                *types are written out to
+                                                *  @param[in] firstFrame First
+                                                *frame to be analyzed
                                                 *  @param[in] isSlice Determines
                                                 *whether there is a slice or not
                                                 *  @param[in] outputFileName
@@ -1072,7 +1104,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
                                                 ***********************************************/
 int chill::printIceType(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, std::string path,
-    bool isSlice, std::string outputFileName) {
+    int firstFrame, bool isSlice, std::string outputFileName) {
   int ih, ic, interIce, water, unknown, clath, interClath,
       total;  // No. of particles of each type
   ih = ic = water = unknown = interIce = total = 0;
@@ -1104,9 +1136,21 @@ int chill::printIceType(
     }
   }
 
+  // --------------------
+  // Create the directories if needed
+  sout::makePath(path);
+  std::string outputDirName = path + "bop";
+  sout::makePath(outputDirName);
+  // --------------------
   // Print to file
   std::ofstream outputFile;
   outputFile.open(path + "bop/" + outputFileName, std::ios_base::app);
+  // --------------------
+  // Write out the comment line
+  if (yCloud->currentFrame == firstFrame) {
+    outputFile << "Frame Ic Ih Interfacial Clath InterClath Water Total\n";
+  }
+  // --------------------
   outputFile << yCloud->currentFrame << " " << ic << " " << ih << " "
              << interIce << " " << clath << " " << interClath << " " << water
              << " " << total << "\n";

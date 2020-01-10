@@ -10,6 +10,7 @@
 #include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <seams_output.hpp>
 
 /*! \file bop.hpp
     \brief File for the bond order parameter analysis.
@@ -187,15 +188,17 @@ molSys::PointCloud<molSys::Point<double>, double> getIceTypeNoPrint(
  type, according to the CHILL algorithm.
  *  @param[in,out] yCloud The output molSys::PointCloud
  *  @param[in] nList Row-ordered neighbour list by atom ID
- *  @param[in] path Path to the output directory to which ice types are written out to 
+ *  @param[in] path Path to the output directory to which ice types are written
+ out to
+ *  @param[in] firstFrame First frame to be analyzed
  *  @param[in] isSlice This decides whether there is a slice or not
  *  @param[in] outputFileName Name of the output file, to which the ice types
  will be written out.
  ***********************************************/
 molSys::PointCloud<molSys::Point<double>, double> getIceType(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, std::string path, bool isSlice = false,
-    std::string outputFileName = "chill.txt");
+    std::vector<std::vector<int>> nList, std::string path, int firstFrame,
+    bool isSlice = false, std::string outputFileName = "chill.txt");
 
 // Gets c_ij and then classifies bond types according to the CHILL+ algorithm
 molSys::PointCloud<molSys::Point<double>, double> getCorrelPlus(
@@ -205,8 +208,8 @@ molSys::PointCloud<molSys::Point<double>, double> getCorrelPlus(
 // Classifies each atom according to the CHILL+ algorithm
 molSys::PointCloud<molSys::Point<double>, double> getIceTypePlus(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, std::string path, bool isSlice = false,
-    std::string outputFileName = "chillPlus.txt");
+    std::vector<std::vector<int>> nList, std::string path, int firstFrame,
+    bool isSlice = false, std::string outputFileName = "chillPlus.txt");
 
 // q6 can distinguish between water and ice. Use this for the largest ice
 // cluster
@@ -224,7 +227,7 @@ molSys::PointCloud<molSys::Point<double>, double> reclassifyWater(
 
 // Prints out the iceType for a particular frame onto the terminal
 int printIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                 std::string path, bool isSlice = false,
+                 std::string path, int firstFrame, bool isSlice = false,
                  std::string outputFileName = "superChill.txt");
 
 // Checks if a given iatom is interfacial ice or not, according to the CHILL

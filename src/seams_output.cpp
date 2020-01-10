@@ -832,7 +832,8 @@ int sout::writeBasalRingsPrism(
                                                 ***********************************************/
 int sout::writeClusterStats(std::string path, int currentFrame,
                             int largestCluster, int numOfClusters,
-                            int smallestCluster, double avgClusterSize) {
+                            int smallestCluster, double avgClusterSize,
+                            int firstFrame) {
   std::ofstream outputFile;
   // ----------------
   // Make the output directory if it doesn't exist
@@ -843,8 +844,16 @@ int sout::writeClusterStats(std::string path, int currentFrame,
                   std::ios_base::app | std::ios_base::out);
 
   // Format:
-  // Frame RingSize Num_of_prisms Height% RingSize ... Height%
+  // Comment line
   // 1 3 0 0 4 35 40 ....
+
+  // ----------------
+  // Comment line for the first frame
+  if (currentFrame == firstFrame) {
+    outputFile << "Frame largestCluster numOfClusters smallestCluster "
+                  "avgClusterSize\n";
+  }
+  // ----------------
 
   outputFile << currentFrame << " " << largestCluster << " " << numOfClusters
              << " " << smallestCluster << " " << avgClusterSize << "\n";
@@ -904,7 +913,8 @@ int sout::writeRingNum(std::string path, int currentFrame,
                        std::vector<int> nRings,
                        std::vector<double> coverageAreaXY,
                        std::vector<double> coverageAreaXZ,
-                       std::vector<double> coverageAreaYZ, int maxDepth) {
+                       std::vector<double> coverageAreaYZ, int maxDepth,
+                       int firstFrame) {
   std::ofstream outputFileXY;
   std::ofstream outputFileXZ;
   std::ofstream outputFileYZ;
@@ -920,8 +930,16 @@ int sout::writeRingNum(std::string path, int currentFrame,
                     std::ios_base::app | std::ios_base::out);
 
   // Format:
-  // Frame RingSize Num_of_prisms Height% RingSize ... Height%
+  // Comment line
   // 1 3 0 0 4 35 40 ....
+
+  // ----------------
+  // Add comment for the first frame
+  if (currentFrame == firstFrame) {
+    outputFileXY << "Frame RingSize Num_of_rings CoverageAreaXY% RingSize ... "
+                    "CoverageAreaXY%\n";
+  }
+  // ----------------
 
   outputFileXY << currentFrame << " ";
 
@@ -938,6 +956,14 @@ int sout::writeRingNum(std::string path, int currentFrame,
   // Write output to file inside the output directory
   outputFileXZ.open(path + "topoMonolayer/coverageAreaXZ.dat",
                     std::ios_base::app | std::ios_base::out);
+
+  // ----------------
+  // Add comment for the first frame
+  if (currentFrame == firstFrame) {
+    outputFileXZ << "Frame RingSize Num_of_rings CoverageAreaXZ% RingSize ... "
+                    "CoverageAreaXZ%\n";
+  }
+  // ----------------
 
   // Format:
   // Frame RingSize Num_of_prisms Height% RingSize ... Height%
@@ -958,6 +984,14 @@ int sout::writeRingNum(std::string path, int currentFrame,
   // Write output to file inside the output directory
   outputFileYZ.open(path + "topoMonolayer/coverageAreaYZ.dat",
                     std::ios_base::app | std::ios_base::out);
+
+  // ----------------
+  // Add comment for the first frame
+  if (currentFrame == firstFrame) {
+    outputFileYZ << "Frame RingSize Num_of_rings CoverageAreaYZ% RingSize ... "
+                    "CoverageAreaYZ%\n";
+  }
+  // ----------------
 
   // Format:
   // Frame RingSize Num_of_prisms Height% RingSize ... Height%
@@ -1007,7 +1041,7 @@ int sout::printRDF(std::string fileName, std::vector<double> *rdfValues,
  ***********************************************/
 int sout::writeTopoBulkData(std::string path, int currentFrame, int numHC,
                             int numDDC, int mixedRings, int basalRings,
-                            int prismaticRings) {
+                            int prismaticRings, int firstFrame) {
   //
   std::ofstream outputFile;
   // ----------------
@@ -1023,7 +1057,13 @@ int sout::writeTopoBulkData(std::string path, int currentFrame, int numHC,
   // Format:
   // Frame RingSize Num_of_prisms Height% RingSize ... Height%
   // 1 3 0 0 4 35 40 ....
-
+  // -------------------
+  // If first frame then write the comment line
+  if (currentFrame == firstFrame) {
+    outputFile << "Frame HCnumber DDCnumber MixedRingNumber PrismaticRings "
+                  "basalRings\n";
+  }
+  // -------------------
   outputFile << currentFrame << " " << numHC << " " << numDDC << " "
              << mixedRings << " " << prismaticRings << " " << basalRings
              << "\n";
@@ -1186,9 +1226,10 @@ int sout::writeLAMMPSdataAllRings(
   sout::makePath(outputDirName);
   outputDirName = path + "topoMonolayer/dataFiles/";
   sout::makePath(outputDirName);
-  // ----------------
+
   // Write output to file inside the output directory
   outputFile.open(path + "topoMonolayer/dataFiles/" + filename);
+
   // FORMAT:
   //  Comment Line
   //  4 atoms
