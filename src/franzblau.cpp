@@ -178,7 +178,7 @@ int primitive::findRings(Graph *fullGraph, int v, std::vector<int> *visited,
   //
   (*visited).pop_back();
   //
-  // return 0;
+  return 0;
 }
 
 /********************************************/ /**
@@ -433,7 +433,7 @@ int primitive::shortestPath(Graph *fullGraph, int v, int goal,
     // Pop the vector
     (*visited).pop_back();
   }  // for depth less than maxDepth
-  // return 0;
+  return 0;
 }
 
 /********************************************/ /**
