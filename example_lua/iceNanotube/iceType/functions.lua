@@ -16,5 +16,5 @@ for frame=targetFrame,finalFrame,frameGap do
    hbnList=getHbondNetwork(trajectory,resCloud,nList,frame,hydrogenAtomType) --- Get the hydrogen-bonded network for the current frame
    hbnList=bondNetworkByIndex(resCloud,hbnList) --- Hydrogen-bonded network using indices not IDs
    rings=getPrimitiveRings(hbnList,maxDepth); --- Gets every ring (non-primitives included)
-   prismAnalysis(outDir, rings, hbnList, resCloud, maxDepth); --- Does the prism analysis for quasi-one-dimensional ice
+   prismAnalysis(outDir, rings, hbnList, resCloud, maxDepth, targetFrame); --- Does the prism analysis for quasi-one-dimensional ice
 end
