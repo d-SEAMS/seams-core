@@ -9,7 +9,6 @@ local luaFunctions = require("scripts");
 
 --- Make the directories
 luaFunctions.make_output_dirs( doBOP, topoOneDim, topoTwoDim, topoBulk );
-luaFunctions.make_RDF_file( doBOP, topoOneDim, topoTwoDim, topoBulk );
 
 for frame=targetFrame,finalFrame,frameGap do
    resCloud=readFrameOnlyOne(trajectory,frame,resCloud,oxygenAtomType,isSlice,sliceLowerLimits,sliceUpperLimits) --- Get the frame
@@ -17,8 +16,5 @@ for frame=targetFrame,finalFrame,frameGap do
    hbnList=getHbondNetwork(trajectory,resCloud,nList,frame,hydrogenAtomType) --- Get the hydrogen-bonded network for the current frame
    hbnList=bondNetworkByIndex(resCloud,hbnList) --- Hydrogen-bonded network using indices not IDs
    rings=getPrimitiveRings(hbnList,maxDepth); --- Gets every ring (non-primitives included)
-   ringAnalysis(outDir, rings, hbnList, resCloud, maxDepth, confiningSheetArea); --- Does the ring analysis for quasi-two-dimensional ice
-   --- RDF analysis
-   calcRDF(outDir,rdf,resCloud,rdfCutoff,binwidth,targetFrame,finalFrame); 
-   ---
+   prismAnalysis(outDir, rings, hbnList, resCloud, maxDepth); --- Does the prism analysis for quasi-one-dimensional ice
 end
