@@ -1,5 +1,5 @@
-trajectory: "../input/traj/exampleTraj.lammpstrj"
-variables: "../lua_inputs/iceType/vars.lua"
+trajectory: "/home/amritagos/Git/Github/seams-core/input/traj/exampleTraj.lammpstrj"
+variables: "/home/amritagos/Git/Github/seams-core/lua_inputs/iceType/vars.lua"
 bulk:
   use: false
   topologicalNetworkCriterion: false
