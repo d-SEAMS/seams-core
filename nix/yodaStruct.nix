@@ -11,12 +11,13 @@
 , blas
 , lib
 , boost
-,  gsl
+, gsl
 , rang
 , cmake }:
   clangStdenv.mkDerivation {
   name = "yodaStruct";
   src = lib.cleanSource ../.;
+  enableParallelBuilding=true;
   nativeBuildInputs = [
   fmtlib
   rang
