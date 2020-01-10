@@ -41,12 +41,12 @@ std::vector<std::string> getInpFileList(std::string inputFolder);
 
 //// Function for reading in a specified frame (frame number and not timestep
 /// value)
-molSys::PointCloud<molSys::Point<double>, double> readLammpsTrj(
-    std::string filename, int targetFrame,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    bool isSlice = false,
-    std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
-    std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
+molSys::PointCloud<molSys::Point<double>, double>
+readLammpsTrj(std::string filename, int targetFrame,
+              molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+              bool isSlice = false,
+              std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
+              std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
 
 //// Function for reading in a specified frame (frame number and not timestep
 /// value) / This only reads in oxygen atoms
@@ -76,15 +76,18 @@ std::vector<std::vector<int>> readBonds(std::string filename);
 inline bool atomInSlice(double x, double y, double z,
                         std::array<double, 3> coordLow,
                         std::array<double, 3> coordHigh) {
-  int flag = 0;  // If this is 3 then the particle is inside the volume slice
+  int flag = 0; // If this is 3 then the particle is inside the volume slice
 
-  if (x >= coordLow[0] && x <= coordHigh[0] || coordLow[0] == coordHigh[0]) {
+  if (((x >= coordLow[0]) && (x <= coordHigh[0])) ||
+      coordLow[0] == coordHigh[0]) {
     flag++;
   }
-  if (y >= coordLow[1] && y <= coordHigh[1] || coordLow[1] == coordHigh[1]) {
+  if (((y >= coordLow[1]) && (y <= coordHigh[1])) ||
+      coordLow[1] == coordHigh[1]) {
     flag++;
   }
-  if (z >= coordLow[2] && z <= coordHigh[2] || coordLow[2] == coordHigh[2]) {
+  if (((z >= coordLow[2]) && (z <= coordHigh[2])) ||
+      coordLow[2] == coordHigh[2]) {
     flag++;
   }
 
@@ -95,6 +98,6 @@ inline bool atomInSlice(double x, double y, double z,
   }
 }
 
-}  // namespace sinp
+} // namespace sinp
 
-#endif  //// __SEAMS_INPUT_H_
+#endif //// __SEAMS_INPUT_H_
