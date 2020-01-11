@@ -51,6 +51,8 @@ yodaStruct -c lua_inputs/config.yml
 
 \note The paths in the `.yml` should be **relative to the folder from which the binary is called**.
 
+If you're confused about how to handle the relative paths, run the command `yodaStruct -c lua_inputs/config.yml` in the top-level directory, and set the paths relative to the top-level directory. This is the convention used in the examples as well.
+
 ### Language Server Support
 
 To generate a `compile_commands.json` file for working with a language server
