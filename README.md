@@ -82,7 +82,7 @@ nix-shell
 
 # Running
 
-This can also now be built completely with nix:
+This is built completely with nix:
 
 ```{bash}
 # Install systemwide
