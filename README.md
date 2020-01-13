@@ -42,9 +42,9 @@ root directory:
 # Make sure there are no artifacts
 rm -rf build
 # This will take a long time the first time as it builds the dependencies
-nix-build .
+nix-build . # Optional
 # Install into your path
-nix-env -if .
+nix-env -if . # Required
 # Run the command anywhere
 yodaStruct -c lua_inputs/config.yml
 ```
@@ -82,27 +82,26 @@ nix-shell
 
 # Running
 
-To run the sample inputs, simply move the binary to the project root, or to a
-directory where `input/` is a child directory.
-
-```{bash}
-# Assuming you are in the build directory
-# Check help with -h
-./yodaStruct -c ../lua_inputs/config.yml
-```
-
-This can also now be tested with a single shell script, which will drop into the
-`nix` environment before building and executing the single run test listed
-above:
+This can also now be built completely with nix:
 
 ```{bash}
 # Install systemwide
 nix-env -if .
 ```
 
+To run the sample inputs, simply install the software, and ensure that `input/` is a child directory.
+
+```{bash}
+# Assuming you are in the src directory
+# Check help with -h
+yodaStruct -c lua_inputs/config.yml
+```
+
 ## Tests
 
-Apart from the [examples](https://docs.dseams.info/pages.html), the test-suite can be run with the `yodaStruct_test` binary.
+Apart from the [examples](https://docs.dseams.info/pages.html), the test-suite
+can be run with the `yodaStruct_test` binary, which will drop into the
+`nix` environment before building and executing `gdb`:
 
 ```{bash}
 # Just run this
