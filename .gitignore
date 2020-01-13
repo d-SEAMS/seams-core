@@ -302,3 +302,4 @@ TSWLatexianTemp*
 *.sta
 /result
 /.ccls-cache/
+shellBuild/
