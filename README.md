@@ -96,23 +96,39 @@ This can also now be tested with a single shell script, which will drop into the
 above:
 
 ```{bash}
-# Just run this
-./testBuild.sh
-# Or, better yet
-nix-build .
+# Install systemwide
 nix-env -if .
-# If you get a CMake error
-nix-store --delete /nix/store/$whatever # $whatever is the derivation complaining
-nix-collect-garbage # then try again [worst case scenario]
 ```
 
 ## Tests
 
 Apart from the [examples](https://docs.dseams.info/pages.html), the test-suite can be run with the `yodaStruct_test` binary.
 
+```{bash}
+# Just run this
+./testBuild.sh
+# quit gdb with quit
+# Go run the test binary
+cd shellBuild
+./yodaStruct_test
+```
+
+Do note that the regular installation via `nix-env` runs the tests before the installation
+
 # Developer Documentation
 
 <!-- TODO: Move this to some other location. -->
+
+Test the build with nix:
+
+```bash
+nix-build .
+# Outputs are in ./result
+# If you get a CMake error
+rm -rf build
+nix-store --delete /nix/store/$whatever # $whatever is the derivation complaining
+nix-collect-garbage # then try again [worst case scenario]
+```
 
 ## Leaks and performance
 
