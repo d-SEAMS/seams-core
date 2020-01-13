@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sinp module | d-SEAMS</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="icon" href="dSeamsLogo.ico" type="image/vnd.microsoft.icon" />
+  <link rel="search" type="application/opensearchdescription+xml" href="opensearch.xml" title="Search d-SEAMS documentation" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m"><img src="dSeamsLogo.png" />d-SEAMS</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="namespaces.html">Namespaces</a></li>
+            <li><a href="modules.html">Modules</a></li>
+            <li><a href="pages.html">Wiki</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          Sinp <span class="m-thin">module</span></h1>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#func-members">Functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespacesinp.html" class="m-doc">sinp</a></dt>
+            <dd>Functions for the d-SEAMS readers. This namespace contains functions that are used for reading in the formats supported by d-SEAMS. LAMMPS trajectory files and XYZ files are currently supported, though it is recommended to use LAMMPS trajectory files, since the simulation box size etc. are not normally present in XYZ files, and many analyses may fail without the correct box dimensions.</dd>
+          </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga1cbdb840118d27e2c2a3c05393ae8320" class="m-doc">readLammpsTrj</a>(</span><span class="m-doc-wrap">std::string filename,
+              int targetFrame,
+              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              bool isSlice = false,
+              std::array&lt;double, 3&gt; coordLow = std::array&lt;double, 3&gt;{0, 0, 0},
+              std::array&lt;double, 3&gt; coordHigh = std::array&lt;double, 3&gt;{0, 0, 0}) -&gt; <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga594a5996c0ea3ba9ee53c2ab475bde7c" class="m-doc">readLammpsTrjO</a>(</span><span class="m-doc-wrap">std::string filename,
+              int targetFrame,
+              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              int typeO,
+              bool isSlice = false,
+              std::array&lt;double, 3&gt; coordLow = std::array&lt;double, 3&gt;{0, 0, 0},
+              std::array&lt;double, 3&gt; coordHigh = std::array&lt;double, 3&gt;{0, 0, 0}) -&gt; <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga30633be4befe606953d55db43d389c7b" class="m-doc">readLammpsTrjreduced</a>(</span><span class="m-doc-wrap">std::string filename,
+              int targetFrame,
+              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              int typeI,
+              bool isSlice = false,
+              std::array&lt;double, 3&gt; coordLow = std::array&lt;double, 3&gt;{0, 0, 0},
+              std::array&lt;double, 3&gt; coordHigh = std::array&lt;double, 3&gt;{0, 0, 0}) -&gt; <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#gab2f8bc3f639a2d2618460883116d5b5b" class="m-doc">readXYZ</a>(</span><span class="m-doc-wrap">std::string filename,
+              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud) -&gt; int</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#gada34d9d30df182a408a6b69ba7310509" class="m-doc">readBonds</a>(</span><span class="m-doc-wrap">std::string filename) -&gt; std::vector&lt;std::vector&lt;int&gt;&gt;</span>
+            </dt>
+            <dd>Reads bonds into a vector of vectors from a file with a specific format.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ga1cbdb840118d27e2c2a3c05393ae8320"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga1cbdb840118d27e2c2a3c05393ae8320" class="m-doc-self">readLammpsTrj</a>(</span><span class="m-doc-wrap">std::string filename,
+              int targetFrame,
+              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              bool isSlice = false,
+              std::array&lt;double, 3&gt; coordLow = std::array&lt;double, 3&gt;{0, 0, 0},
+              std::array&lt;double, 3&gt; coordHigh = std::array&lt;double, 3&gt;{0, 0, 0})</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="seams__input_8hpp.html">&lt;src/include/internal/seams_input.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The name of the lammps trajectory file to be read in</td>
+                </tr>
+                <tr>
+                  <td>targetFrame&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The frame number whose information will be read in</td>
+                </tr>
+                <tr>
+                  <td>yCloud&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>The outputted PointCloud</td>
+                </tr>
+                <tr>
+                  <td>isSlice&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>This decides whether a slice will be created or not</td>
+                </tr>
+                <tr>
+                  <td>coordLow&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Contains the lower limits of the slice, if a slice is to be created</td>
+                </tr>
+                <tr>
+                  <td>coordHigh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Contains the upper limits of the slice, if a slice is to be created</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Function for reading in a specified frame (frame number and not timestep value)</p><p>Function for reading in a lammps file. Reads in a specified frame (frame number and not timestep value).</p>
+          </div></section>
+          <section class="m-doc-details" id="ga594a5996c0ea3ba9ee53c2ab475bde7c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga594a5996c0ea3ba9ee53c2ab475bde7c" class="m-doc-self">readLammpsTrjO</a>(</span><span class="m-doc-wrap">std::string filename,
+              int targetFrame,
+              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              int typeO,
+              bool isSlice = false,
+              std::array&lt;double, 3&gt; coordLow = std::array&lt;double, 3&gt;{0, 0, 0},
+              std::array&lt;double, 3&gt; coordHigh = std::array&lt;double, 3&gt;{0, 0, 0})</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="seams__input_8hpp.html">&lt;src/include/internal/seams_input.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The name of the lammps trajectory file to be read in</td>
+                </tr>
+                <tr>
+                  <td>targetFrame&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The frame number whose information will be read in</td>
+                </tr>
+                <tr>
+                  <td>yCloud&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>The outputted PointCloud</td>
+                </tr>
+                <tr>
+                  <td>typeO&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The type ID of the Oxygen atoms</td>
+                </tr>
+                <tr>
+                  <td>isSlice&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>This decides whether a slice will be created or not</td>
+                </tr>
+                <tr>
+                  <td>coordLow&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Contains the lower limits of the slice, if a slice is to be created</td>
+                </tr>
+                <tr>
+                  <td>coordHigh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Contains the upper limits of the slice, if a slice is to be created</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Function for reading in a specified frame (frame number and not timestep value) / This only reads in oxygen atoms</p><p>Function for reading in a lammps file; and saves only the Oxygen atoms. This is an overloaded function. The Oxygen atom ID must be specified.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga30633be4befe606953d55db43d389c7b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga30633be4befe606953d55db43d389c7b" class="m-doc-self">readLammpsTrjreduced</a>(</span><span class="m-doc-wrap">std::string filename,
+              int targetFrame,
+              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              int typeI,
+              bool isSlice = false,
+              std::array&lt;double, 3&gt; coordLow = std::array&lt;double, 3&gt;{0, 0, 0},
+              std::array&lt;double, 3&gt; coordHigh = std::array&lt;double, 3&gt;{0, 0, 0})</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="seams__input_8hpp.html">&lt;src/include/internal/seams_input.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The name of the lammps trajectory file to be read in</td>
+                </tr>
+                <tr>
+                  <td>targetFrame&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The frame number whose information will be read in</td>
+                </tr>
+                <tr>
+                  <td>yCloud&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>The outputted PointCloud</td>
+                </tr>
+                <tr>
+                  <td>typeI&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The type ID of the desired type of atoms</td>
+                </tr>
+                <tr>
+                  <td>isSlice&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>This decides whether a slice will be created or not</td>
+                </tr>
+                <tr>
+                  <td>coordLow&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Contains the lower limits of the slice, if a slice is to be created</td>
+                </tr>
+                <tr>
+                  <td>coordHigh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Contains the upper limits of the slice, if a slice is to be created</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Function for reading in a lammps file; and saves only the atoms of the desired type. Atoms which are not inside the slice or not of type I are not saved at all This is an overloaded function. The type atom ID must be specified.</p>
+          </div></section>
+          <section class="m-doc-details" id="gab2f8bc3f639a2d2618460883116d5b5b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">int </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gab2f8bc3f639a2d2618460883116d5b5b" class="m-doc-self">readXYZ</a>(</span><span class="m-doc-wrap">std::string filename,
+              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="seams__input_8hpp.html">&lt;src/include/internal/seams_input.hpp&gt;</a></div>
+            </h3>
+<p>Function for reading in an XYZ file</p>
+          </div></section>
+          <section class="m-doc-details" id="gada34d9d30df182a408a6b69ba7310509"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;std::vector&lt;int&gt;&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gada34d9d30df182a408a6b69ba7310509" class="m-doc-self">readBonds</a>(</span><span class="m-doc-wrap">std::string filename)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="seams__input_8hpp.html">&lt;src/include/internal/seams_input.hpp&gt;</a></div>
+            </h3>
+            <p>Reads bonds into a vector of vectors from a file with a specific format.</p>
+<p>Get all the ring information, from the R.I.N.G.S. file. Each line contains the IDs of the atoms in the ring. This is saved inside a vector of vectors. Rings which have more than three consecutive water molecules are discarded.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form action="https://docs.dseams.info/#search">
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript. Enable it or <a href="https://google.com/search?q=site:docs.dseams.info+">use an external search engine</a>.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.<br />Maybe try a full-text <a href="#" id="search-external" data-search-engine="https://google.com/search?q=site:docs.dseams.info+{query}">search with external engine</a>?</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v1.js"></script>
+<script src="searchdata-v1.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <b>(C)
+2018-present</b>
+<a
+href="https://github.com/HaoZeke">Rohit
+Goswami</a>,
+<a
+href="https://github.com/amritagos">Amrita
+Goswami</a>,
+<a
+href="https://github.com/d-Seams">d-SEAMS
+core
+team</a>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

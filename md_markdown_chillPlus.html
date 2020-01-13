@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bulk Ice Classification Using the CHILL+ Criterion | d-SEAMS</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="icon" href="dSeamsLogo.ico" type="image/vnd.microsoft.icon" />
+  <link rel="search" type="application/opensearchdescription+xml" href="opensearch.xml" title="Search d-SEAMS documentation" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m"><img src="dSeamsLogo.png" />d-SEAMS</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="namespaces.html">Namespaces</a></li>
+            <li><a href="modules.html">Modules</a></li>
+            <li><a href="pages.html">Wiki</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          Bulk Ice Classification Using the CHILL+ Criterion
+        </h1>
+<p>The trajectory file for this example is <a href="https://figshare.com/articles/CHILL_LAMMPS_Trajectory/11448720">here on figshare</a>. The trajectory file details a portion of a long run of 4096 molecules of a perfect Ic (cubic ice) lattice. In this example, the all 4096 molecules are identified as Ic, according to the CHILL+ algorithm [1]. On running the example, an output top-level directory named <em>runOne</em> is created.</p><h3>Steps to Run the Example</h3><p>In order to run this example, without making any changes to the example files, please follow the steps below.</p><ul><li>Download the LAMMPS trajectory file from <a href="https://figshare.com/articles/CHILL_LAMMPS_Trajectory/11448720">here on figshare</a>. Copy the downloaded trajectory file, entitled <em>nucleation.lammpstrj</em>, into the <em>traj</em> folder inside the top-level directory <em>input</em>. Alternatively, you could change the path to the trajectory file in the <em>conf.yaml</em> file:</li></ul><pre class="m-code"><span class="nl">trajectory</span><span class="p">:</span> <span class="s">&quot;path/to/trajectory/file&quot;</span></pre><ul><li>You can obtain the other input files required from <em>example_lua/chillPlus</em> folder. Copy the contents of the <em>chillPlus</em> into the top-level <em>lua_inputs</em> directory.</li><li>You can change the frames to be analyzed by updating the options in the <em>vars.lua</em> file. The starting and ending frames are inclusive, starting from 1 onwards, irrespective of the timestep number.</li><li>A custom volume slice can also be defined in the <em>vars.lua</em> file.</li><li>The <em>functions.lua</em> file actually contains the Lua functions which interface with the C++ backend.</li></ul><h3>Analyzing the Output</h3><p>Inside the output directory, a file called <em>clusterStats.dat</em> contains the cluster statistics for each frame. Each frame is also written out to a LAMMPS trajectory file called <em>waterChillP.lammpstrj</em>, containing the classified atoms, and the <em>largestIce.lammpstrj</em>, which has the particles in the largest ice cluster. These trajectory files can be visualized in <a href="https://www.ovito.org/">OVITO</a> or <a href="http://www.ks.uiuc.edu/Research/vmd/">VMD</a>. Inside the <em>bop</em> directory, <em>chillPlus.txt</em> contains the number of particles identified as cubic ice (Ic), hexagonal ice (Ih), interfacial ice (Interfacial), clathrates (Clath), interfacial clathrates (InterClath), water and the total number of molecules (Total).</p><h3>References</h3><ol><li>Nguyen, A. H., &amp; Molinero, V. (2014). Identification of Clathrate Hydrates, Hexagonal Ice, Cubic Ice, and Liquid Water in Simulations: the CHILL+ Algorithm. The Journal of Physical Chemistry B, 119(29), 9369-9376. doi:10.1021/jp510289t</li></ol>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form action="https://docs.dseams.info/#search">
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript. Enable it or <a href="https://google.com/search?q=site:docs.dseams.info+">use an external search engine</a>.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.<br />Maybe try a full-text <a href="#" id="search-external" data-search-engine="https://google.com/search?q=site:docs.dseams.info+{query}">search with external engine</a>?</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v1.js"></script>
+<script src="searchdata-v1.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <b>(C)
+2018-present</b>
+<a
+href="https://github.com/HaoZeke">Rohit
+Goswami</a>,
+<a
+href="https://github.com/amritagos">Amrita
+Goswami</a>,
+<a
+href="https://github.com/d-Seams">d-SEAMS
+core
+team</a>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

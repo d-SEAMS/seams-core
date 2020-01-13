@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chill module | d-SEAMS</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="icon" href="dSeamsLogo.ico" type="image/vnd.microsoft.icon" />
+  <link rel="search" type="application/opensearchdescription+xml" href="opensearch.xml" title="Search d-SEAMS documentation" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m"><img src="dSeamsLogo.png" />d-SEAMS</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="namespaces.html">Namespaces</a></li>
+            <li><a href="modules.html">Modules</a></li>
+            <li><a href="pages.html">Wiki</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          Chill <span class="m-thin">module</span></h1>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#func-members">Functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespacechill.html" class="m-doc">chill</a></dt>
+            <dd>CHILL and CHILL+ structure classification. This namespace contains functions that are used in the CHILL/CHILL+ classification scheme, as well as a yodaCloud struct to hold all the information.</dd>
+            <dt>namespace <a href="namespacesph.html" class="m-doc">sph</a></dt>
+            <dd>Functions used for spherical harmonics.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              struct <a href="structchill_1_1YlmAtom.html" class="m-doc">chill::YlmAtom</a>
+            </dt>
+            <dd>This contains a complex vector of length <svg class="m-math" style="width: 3.112em; height: 0.960em;" viewBox="0 -8.302191 29.873767 9.215393">
+<title>
+$2l+1$
+</title>
+<defs>
+<path id='eq3-g0-108' d='M3.036613 -7.998007C3.048568 -8.045828 3.072478 -8.117559 3.072478 -8.177335C3.072478 -8.296887 2.952927 -8.296887 2.929016 -8.296887C2.917061 -8.296887 2.486675 -8.261021 2.271482 -8.237111C2.068244 -8.225156 1.888917 -8.201245 1.673724 -8.18929C1.3868 -8.16538 1.303113 -8.153425 1.303113 -7.938232C1.303113 -7.81868 1.422665 -7.81868 1.542217 -7.81868C2.15193 -7.81868 2.15193 -7.711083 2.15193 -7.591532C2.15193 -7.543711 2.15193 -7.519801 2.092154 -7.304608L0.609714 -1.374844C0.573848 -1.243337 0.549938 -1.147696 0.549938 -0.956413C0.549938 -0.358655 0.992279 0.119552 1.601993 0.119552C1.996513 0.119552 2.259527 -0.143462 2.450809 -0.514072C2.654047 -0.908593 2.82142 -1.661768 2.82142 -1.709589C2.82142 -1.769365 2.773599 -1.817186 2.701868 -1.817186C2.594271 -1.817186 2.582316 -1.75741 2.534496 -1.578082C2.319303 -0.753176 2.10411 -0.119552 1.625903 -0.119552C1.267248 -0.119552 1.267248 -0.502117 1.267248 -0.669489C1.267248 -0.71731 1.267248 -0.968369 1.350934 -1.303113L3.036613 -7.998007Z'/>
+<path id='eq3-g1-43' d='M4.770112 -2.761644H8.069738C8.237111 -2.761644 8.452304 -2.761644 8.452304 -2.976837C8.452304 -3.203985 8.249066 -3.203985 8.069738 -3.203985H4.770112V-6.503611C4.770112 -6.670984 4.770112 -6.886177 4.554919 -6.886177C4.327771 -6.886177 4.327771 -6.682939 4.327771 -6.503611V-3.203985H1.028144C0.860772 -3.203985 0.645579 -3.203985 0.645579 -2.988792C0.645579 -2.761644 0.848817 -2.761644 1.028144 -2.761644H4.327771V0.537983C4.327771 0.705355 4.327771 0.920548 4.542964 0.920548C4.770112 0.920548 4.770112 0.71731 4.770112 0.537983V-2.761644Z'/>
+<path id='eq3-g1-49' d='M3.443088 -7.663263C3.443088 -7.938232 3.443088 -7.950187 3.203985 -7.950187C2.917061 -7.627397 2.319303 -7.185056 1.08792 -7.185056V-6.838356C1.362889 -6.838356 1.960648 -6.838356 2.618182 -7.149191V-0.920548C2.618182 -0.490162 2.582316 -0.3467 1.530262 -0.3467H1.159651V0C1.482441 -0.02391 2.642092 -0.02391 3.036613 -0.02391S4.578829 -0.02391 4.901619 0V-0.3467H4.531009C3.478954 -0.3467 3.443088 -0.490162 3.443088 -0.920548V-7.663263Z'/>
+<path id='eq3-g1-50' d='M5.260274 -2.008468H4.99726C4.961395 -1.80523 4.865753 -1.147696 4.746202 -0.956413C4.662516 -0.848817 3.981071 -0.848817 3.622416 -0.848817H1.41071C1.733499 -1.123786 2.462765 -1.888917 2.773599 -2.175841C4.590785 -3.849564 5.260274 -4.471233 5.260274 -5.654795C5.260274 -7.029639 4.172354 -7.950187 2.785554 -7.950187S0.585803 -6.766625 0.585803 -5.738481C0.585803 -5.128767 1.111831 -5.128767 1.147696 -5.128767C1.398755 -5.128767 1.709589 -5.308095 1.709589 -5.69066C1.709589 -6.025405 1.482441 -6.252553 1.147696 -6.252553C1.0401 -6.252553 1.016189 -6.252553 0.980324 -6.240598C1.207472 -7.053549 1.853051 -7.603487 2.630137 -7.603487C3.646326 -7.603487 4.267995 -6.75467 4.267995 -5.654795C4.267995 -4.638605 3.682192 -3.753923 3.000747 -2.988792L0.585803 -0.286924V0H4.94944L5.260274 -2.008468Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g1-50'/>
+<use x='5.85299' y='0' xlink:href='#eq3-g0-108'/>
+<use x='12.259462' y='0' xlink:href='#eq3-g1-43'/>
+<use x='24.020777' y='0' xlink:href='#eq3-g1-49'/>
+</g>
+</svg>.</dd>
+            <dt>
+              struct <a href="structchill_1_1QlmAtom.html" class="m-doc">chill::QlmAtom</a>
+            </dt>
+            <dd>This is the local orientational bond order parameter <svg class="m-math" style="width: 1.594em; height: 0.778em;" viewBox="0 -5.147373 15.302859 7.47198">
+<title>
+$q_{lm}$
+</title>
+<defs>
+<path id='eq1-g0-108' d='M2.088169 -5.292154C2.096139 -5.308095 2.12005 -5.411706 2.12005 -5.419676C2.12005 -5.459527 2.088169 -5.531258 1.992528 -5.531258L1.187547 -5.467497C0.892653 -5.443587 0.828892 -5.435616 0.828892 -5.292154C0.828892 -5.180573 0.940473 -5.180573 1.036115 -5.180573C1.41868 -5.180573 1.41868 -5.132752 1.41868 -5.061021C1.41868 -5.037111 1.41868 -5.021171 1.378829 -4.877709L0.390535 -0.924533C0.358655 -0.797011 0.358655 -0.67746 0.358655 -0.669489C0.358655 -0.175342 0.765131 0.079701 1.163636 0.079701C1.506351 0.079701 1.689664 -0.191283 1.777335 -0.366625C1.920797 -0.629639 2.040349 -1.099875 2.040349 -1.139726C2.040349 -1.187547 2.016438 -1.243337 1.912827 -1.243337C1.841096 -1.243337 1.817186 -1.203487 1.817186 -1.195517C1.801245 -1.171606 1.761395 -1.028144 1.737484 -0.940473C1.617933 -0.478207 1.466501 -0.143462 1.179577 -0.143462C0.988294 -0.143462 0.932503 -0.326775 0.932503 -0.518057C0.932503 -0.669489 0.956413 -0.757161 0.980324 -0.860772L2.088169 -5.292154Z'/>
+<path id='eq1-g0-109' d='M1.594022 -1.307098C1.617933 -1.42665 1.697634 -1.729514 1.721544 -1.849066C1.745455 -1.928767 1.793275 -2.12005 1.809215 -2.199751C1.825156 -2.239601 2.088169 -2.757659 2.438854 -3.020672C2.709838 -3.227895 2.972852 -3.291656 3.196015 -3.291656C3.490909 -3.291656 3.650311 -3.116314 3.650311 -2.749689C3.650311 -2.558406 3.602491 -2.375093 3.514819 -2.016438C3.459029 -1.809215 3.323537 -1.275218 3.275716 -1.060025L3.156164 -0.581818C3.116314 -0.446326 3.060523 -0.207223 3.060523 -0.167372C3.060523 0.01594 3.211955 0.079701 3.315567 0.079701C3.459029 0.079701 3.57858 -0.01594 3.634371 -0.111582C3.658281 -0.159402 3.722042 -0.430386 3.761893 -0.597758L3.945205 -1.307098C3.969116 -1.42665 4.048817 -1.729514 4.072727 -1.849066C4.184309 -2.279452 4.184309 -2.287422 4.367621 -2.550436C4.630635 -2.940971 5.00523 -3.291656 5.539228 -3.291656C5.826152 -3.291656 5.993524 -3.124284 5.993524 -2.749689C5.993524 -2.311333 5.65878 -1.39477 5.507347 -1.012204C5.427646 -0.804981 5.403736 -0.749191 5.403736 -0.597758C5.403736 -0.143462 5.778331 0.079701 6.121046 0.079701C6.902117 0.079701 7.228892 -1.036115 7.228892 -1.139726C7.228892 -1.219427 7.165131 -1.243337 7.10934 -1.243337C7.013699 -1.243337 6.997758 -1.187547 6.973848 -1.107846C6.782565 -0.446326 6.447821 -0.143462 6.144956 -0.143462C6.017435 -0.143462 5.953674 -0.223163 5.953674 -0.406476S6.017435 -0.765131 6.097136 -0.964384C6.216687 -1.267248 6.567372 -2.183811 6.567372 -2.630137C6.567372 -3.227895 6.152927 -3.514819 5.579078 -3.514819C5.029141 -3.514819 4.574844 -3.227895 4.216189 -2.733748C4.152428 -3.371357 3.642341 -3.514819 3.227895 -3.514819C2.86127 -3.514819 2.375093 -3.387298 1.936737 -2.81345C1.880946 -3.291656 1.498381 -3.514819 1.123786 -3.514819C0.844832 -3.514819 0.645579 -3.347447 0.510087 -3.076463C0.318804 -2.701868 0.239103 -2.311333 0.239103 -2.295392C0.239103 -2.223661 0.294894 -2.191781 0.358655 -2.191781C0.462267 -2.191781 0.470237 -2.223661 0.526027 -2.430884C0.621669 -2.82142 0.765131 -3.291656 1.099875 -3.291656C1.307098 -3.291656 1.354919 -3.092403 1.354919 -2.917061C1.354919 -2.773599 1.315068 -2.622167 1.251308 -2.359153C1.235367 -2.295392 1.115816 -1.825156 1.083935 -1.713574L0.789041 -0.518057C0.757161 -0.398506 0.70934 -0.199253 0.70934 -0.167372C0.70934 0.01594 0.860772 0.079701 0.964384 0.079701C1.107846 0.079701 1.227397 -0.01594 1.283188 -0.111582C1.307098 -0.159402 1.370859 -0.430386 1.41071 -0.597758L1.594022 -1.307098Z'/>
+<path id='eq1-g1-113' d='M5.272229 -5.152677C5.272229 -5.212453 5.224408 -5.260274 5.164633 -5.260274C5.068991 -5.260274 4.60274 -4.829888 4.375592 -4.411457C4.160399 -4.94944 3.789788 -5.272229 3.275716 -5.272229C1.924782 -5.272229 0.466252 -3.526775 0.466252 -1.75741C0.466252 -0.573848 1.159651 0.119552 1.972603 0.119552C2.606227 0.119552 3.132254 -0.358655 3.383313 -0.633624L3.395268 -0.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229 -5.152677ZM3.58655 -1.422665C3.526775 -1.219427 3.526775 -1.195517 3.359402 -0.968369C3.096389 -0.633624 2.570361 -0.119552 2.008468 -0.119552C1.518306 -0.119552 1.243337 -0.561893 1.243337 -1.267248C1.243337 -1.924782 1.613948 -3.263761 1.841096 -3.765878C2.247572 -4.60274 2.809465 -5.033126 3.275716 -5.033126C4.064757 -5.033126 4.220174 -4.052802 4.220174 -3.957161C4.220174 -3.945205 4.184309 -3.789788 4.172354 -3.765878L3.58655 -1.422665Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g1-113'/>
+<use x='5.190208' y='1.793263' xlink:href='#eq1-g0-108'/>
+<use x='7.812333' y='1.793263' xlink:href='#eq1-g0-109'/>
+</g>
+</svg>, of length <svg class="m-math" style="width: 3.112em; height: 0.960em;" viewBox="0 -8.302191 29.873767 9.215393">
+<title>
+$2l+1$
+</title>
+<defs>
+<path id='eq2-g0-108' d='M3.036613 -7.998007C3.048568 -8.045828 3.072478 -8.117559 3.072478 -8.177335C3.072478 -8.296887 2.952927 -8.296887 2.929016 -8.296887C2.917061 -8.296887 2.486675 -8.261021 2.271482 -8.237111C2.068244 -8.225156 1.888917 -8.201245 1.673724 -8.18929C1.3868 -8.16538 1.303113 -8.153425 1.303113 -7.938232C1.303113 -7.81868 1.422665 -7.81868 1.542217 -7.81868C2.15193 -7.81868 2.15193 -7.711083 2.15193 -7.591532C2.15193 -7.543711 2.15193 -7.519801 2.092154 -7.304608L0.609714 -1.374844C0.573848 -1.243337 0.549938 -1.147696 0.549938 -0.956413C0.549938 -0.358655 0.992279 0.119552 1.601993 0.119552C1.996513 0.119552 2.259527 -0.143462 2.450809 -0.514072C2.654047 -0.908593 2.82142 -1.661768 2.82142 -1.709589C2.82142 -1.769365 2.773599 -1.817186 2.701868 -1.817186C2.594271 -1.817186 2.582316 -1.75741 2.534496 -1.578082C2.319303 -0.753176 2.10411 -0.119552 1.625903 -0.119552C1.267248 -0.119552 1.267248 -0.502117 1.267248 -0.669489C1.267248 -0.71731 1.267248 -0.968369 1.350934 -1.303113L3.036613 -7.998007Z'/>
+<path id='eq2-g1-43' d='M4.770112 -2.761644H8.069738C8.237111 -2.761644 8.452304 -2.761644 8.452304 -2.976837C8.452304 -3.203985 8.249066 -3.203985 8.069738 -3.203985H4.770112V-6.503611C4.770112 -6.670984 4.770112 -6.886177 4.554919 -6.886177C4.327771 -6.886177 4.327771 -6.682939 4.327771 -6.503611V-3.203985H1.028144C0.860772 -3.203985 0.645579 -3.203985 0.645579 -2.988792C0.645579 -2.761644 0.848817 -2.761644 1.028144 -2.761644H4.327771V0.537983C4.327771 0.705355 4.327771 0.920548 4.542964 0.920548C4.770112 0.920548 4.770112 0.71731 4.770112 0.537983V-2.761644Z'/>
+<path id='eq2-g1-49' d='M3.443088 -7.663263C3.443088 -7.938232 3.443088 -7.950187 3.203985 -7.950187C2.917061 -7.627397 2.319303 -7.185056 1.08792 -7.185056V-6.838356C1.362889 -6.838356 1.960648 -6.838356 2.618182 -7.149191V-0.920548C2.618182 -0.490162 2.582316 -0.3467 1.530262 -0.3467H1.159651V0C1.482441 -0.02391 2.642092 -0.02391 3.036613 -0.02391S4.578829 -0.02391 4.901619 0V-0.3467H4.531009C3.478954 -0.3467 3.443088 -0.490162 3.443088 -0.920548V-7.663263Z'/>
+<path id='eq2-g1-50' d='M5.260274 -2.008468H4.99726C4.961395 -1.80523 4.865753 -1.147696 4.746202 -0.956413C4.662516 -0.848817 3.981071 -0.848817 3.622416 -0.848817H1.41071C1.733499 -1.123786 2.462765 -1.888917 2.773599 -2.175841C4.590785 -3.849564 5.260274 -4.471233 5.260274 -5.654795C5.260274 -7.029639 4.172354 -7.950187 2.785554 -7.950187S0.585803 -6.766625 0.585803 -5.738481C0.585803 -5.128767 1.111831 -5.128767 1.147696 -5.128767C1.398755 -5.128767 1.709589 -5.308095 1.709589 -5.69066C1.709589 -6.025405 1.482441 -6.252553 1.147696 -6.252553C1.0401 -6.252553 1.016189 -6.252553 0.980324 -6.240598C1.207472 -7.053549 1.853051 -7.603487 2.630137 -7.603487C3.646326 -7.603487 4.267995 -6.75467 4.267995 -5.654795C4.267995 -4.638605 3.682192 -3.753923 3.000747 -2.988792L0.585803 -0.286924V0H4.94944L5.260274 -2.008468Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g1-50'/>
+<use x='5.85299' y='0' xlink:href='#eq2-g0-108'/>
+<use x='12.259462' y='0' xlink:href='#eq2-g1-43'/>
+<use x='24.020777' y='0' xlink:href='#eq2-g1-49'/>
+</g>
+</svg>.</dd>
+          </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga4ec7f9663b66377a4156b72039b58f40" class="m-doc">getCorrel</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              bool isSlice = false) -&gt; <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#gad8c1ae4aaa660900988e494f682b2b09" class="m-doc">getIceTypeNoPrint</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              bool isSlice = false) -&gt; <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#gae2288a52bfd6e9c52dbf4f70b2273953" class="m-doc">getIceType</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              std::string path,
+              int firstFrame,
+              bool isSlice = false,
+              std::string outputFileName = &quot;chill.txt&quot;) -&gt; <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga1b99e4a99a857d595c2800b88dc02b74" class="m-doc">getCorrelPlus</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              bool isSlice = false) -&gt; <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga340b0de2ed081c9e428a865242a1bc7f" class="m-doc">getIceTypePlus</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              std::string path,
+              int firstFrame,
+              bool isSlice = false,
+              std::string outputFileName = &quot;chillPlus.txt&quot;) -&gt; <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga06aa04366cf8d05811e0c0a881464c24" class="m-doc">getq6</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              bool isSlice = false) -&gt; std::vector&lt;double&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#gadcda1fbc16c0a4ac61f38c139f423f42" class="m-doc">reclassifyWater</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;double&gt;* q6) -&gt; <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga548414bf35e3ef8e6ea0d786ce13a05b" class="m-doc">printIceType</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::string path,
+              int firstFrame,
+              bool isSlice = false,
+              std::string outputFileName = &quot;superChill.txt&quot;) -&gt; int</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga7cdd33801f3510b1076589e1a0c60872" class="m-doc">isInterfacial</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              int iatom,
+              int num_staggrd,
+              int num_eclipsd) -&gt; bool</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#gac22f6b4686eacecb745080411c41f45f" class="m-doc">numStaggered</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              int jatom) -&gt; int</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#gaa9220b76da7400c9d934fa08ceeeba7a" class="m-doc">spheriHarmo</a>(</span><span class="m-doc-wrap">int orderL,
+              std::array&lt;double, 2&gt; radialCoord) -&gt; std::vector&lt;std::complex&lt;double&gt;&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga514fadfbfeabee5d144ef4102fb3004d" class="m-doc">radialCoord</a>(</span><span class="m-doc-wrap">std::array&lt;double, 3&gt; cartCoord) -&gt; std::array&lt;double, 2&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga08491bfa3fa2f6bacdf997be433508c4" class="m-doc">lookupTableQ3Vec</a>(</span><span class="m-doc-wrap">std::array&lt;double, 2&gt; angles) -&gt; std::vector&lt;std::complex&lt;double&gt;&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#gaccbcfa30cf3762a55c59e7b632117af5" class="m-doc">lookupTableQ3</a>(</span><span class="m-doc-wrap">int m,
+              std::array&lt;double, 2&gt; angles) -&gt; std::complex&lt;double&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga004e7b144d261654c556c7e66fdd9b2e" class="m-doc">lookupTableQ6Vec</a>(</span><span class="m-doc-wrap">std::array&lt;double, 2&gt; angles) -&gt; std::vector&lt;std::complex&lt;double&gt;&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga63be01f86931b2a45e70606f5b8f545d" class="m-doc">lookupTableQ6</a>(</span><span class="m-doc-wrap">int m,
+              std::array&lt;double, 2&gt; angles) -&gt; std::complex&lt;double&gt;</span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ga4ec7f9663b66377a4156b72039b58f40"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga4ec7f9663b66377a4156b72039b58f40" class="m-doc-self">getCorrel</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              bool isSlice = false)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bop_8hpp.html">&lt;src/include/internal/bop.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">yCloud&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>The output <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a></td>
+                </tr>
+                <tr>
+                  <td>nList&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The row-ordered neighbour list, by ID. The first element of each row is the particle ID, followed by the IDs of the neighbours</td>
+                </tr>
+                <tr>
+                  <td>isSlice&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>This decides whether there is a slice or not</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Function for getting the bond order correlations <svg class="m-math" style="width: 1.230em; height: 0.884em;" viewBox="0 -5.147373 11.805153 8.490382">
+<title>
+$c_{ij}$
+</title>
+<defs>
+<path id='eq1-g0-105' d='M2.375093 -4.97335C2.375093 -5.148692 2.247572 -5.276214 2.064259 -5.276214C1.857036 -5.276214 1.625903 -5.084932 1.625903 -4.845828C1.625903 -4.670486 1.753425 -4.542964 1.936737 -4.542964C2.14396 -4.542964 2.375093 -4.734247 2.375093 -4.97335ZM1.211457 -2.048319L0.781071 -0.948443C0.74122 -0.828892 0.70137 -0.73325 0.70137 -0.597758C0.70137 -0.207223 1.004234 0.079701 1.42665 0.079701C2.199751 0.079701 2.526526 -1.036115 2.526526 -1.139726C2.526526 -1.219427 2.462765 -1.243337 2.406974 -1.243337C2.311333 -1.243337 2.295392 -1.187547 2.271482 -1.107846C2.088169 -0.470237 1.761395 -0.143462 1.44259 -0.143462C1.346949 -0.143462 1.251308 -0.183313 1.251308 -0.398506C1.251308 -0.589788 1.307098 -0.73325 1.41071 -0.980324C1.490411 -1.195517 1.570112 -1.41071 1.657783 -1.625903L1.904857 -2.271482C1.976588 -2.454795 2.072229 -2.701868 2.072229 -2.83736C2.072229 -3.235866 1.753425 -3.514819 1.346949 -3.514819C0.573848 -3.514819 0.239103 -2.399004 0.239103 -2.295392C0.239103 -2.223661 0.294894 -2.191781 0.358655 -2.191781C0.462267 -2.191781 0.470237 -2.239601 0.494147 -2.319303C0.71731 -3.076463 1.083935 -3.291656 1.323039 -3.291656C1.43462 -3.291656 1.514321 -3.251806 1.514321 -3.028643C1.514321 -2.948941 1.506351 -2.83736 1.42665 -2.598257L1.211457 -2.048319Z'/>
+<path id='eq1-g0-106' d='M3.291656 -4.97335C3.291656 -5.124782 3.172105 -5.276214 2.980822 -5.276214C2.741719 -5.276214 2.534496 -5.053051 2.534496 -4.845828C2.534496 -4.694396 2.654047 -4.542964 2.84533 -4.542964C3.084433 -4.542964 3.291656 -4.766127 3.291656 -4.97335ZM1.625903 0.398506C1.506351 0.884682 1.115816 1.40274 0.629639 1.40274C0.502117 1.40274 0.382565 1.370859 0.366625 1.362889C0.613699 1.243337 0.645579 1.028144 0.645579 0.956413C0.645579 0.765131 0.502117 0.661519 0.334745 0.661519C0.103611 0.661519 -0.111582 0.860772 -0.111582 1.123786C-0.111582 1.42665 0.183313 1.625903 0.637609 1.625903C1.123786 1.625903 2.000498 1.323039 2.239601 0.366625L2.956912 -2.486675C2.980822 -2.582316 2.996762 -2.646077 2.996762 -2.765629C2.996762 -3.203985 2.646077 -3.514819 2.183811 -3.514819C1.338979 -3.514819 0.844832 -2.399004 0.844832 -2.295392C0.844832 -2.223661 0.900623 -2.191781 0.964384 -2.191781C1.052055 -2.191781 1.060025 -2.215691 1.115816 -2.335243C1.354919 -2.885181 1.761395 -3.291656 2.1599 -3.291656C2.327273 -3.291656 2.422914 -3.180075 2.422914 -2.917061C2.422914 -2.805479 2.399004 -2.693898 2.375093 -2.582316L1.625903 0.398506Z'/>
+<path id='eq1-g1-99' d='M4.674471 -4.495143C4.447323 -4.495143 4.339726 -4.495143 4.172354 -4.351681C4.100623 -4.291905 3.969116 -4.112578 3.969116 -3.921295C3.969116 -3.682192 4.148443 -3.53873 4.375592 -3.53873C4.662516 -3.53873 4.985305 -3.777833 4.985305 -4.25604C4.985305 -4.829888 4.435367 -5.272229 3.610461 -5.272229C2.044334 -5.272229 0.478207 -3.56264 0.478207 -1.865006C0.478207 -0.824907 1.123786 0.119552 2.343213 0.119552C3.969116 0.119552 4.99726 -1.147696 4.99726 -1.303113C4.99726 -1.374844 4.925529 -1.43462 4.877709 -1.43462C4.841843 -1.43462 4.829888 -1.422665 4.722291 -1.315068C3.957161 -0.298879 2.82142 -0.119552 2.367123 -0.119552C1.542217 -0.119552 1.279203 -0.836862 1.279203 -1.43462C1.279203 -1.853051 1.482441 -3.012702 1.912827 -3.825654C2.223661 -4.387547 2.86924 -5.033126 3.622416 -5.033126C3.777833 -5.033126 4.435367 -5.009215 4.674471 -4.495143Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g1-99'/>
+<use x='5.037988' y='1.793263' xlink:href='#eq1-g0-105'/>
+<use x='7.921128' y='1.793263' xlink:href='#eq1-g0-106'/>
+</g>
+</svg> (or <svg class="m-math" style="width: 1.345em; height: 0.884em;" viewBox="0 -5.147373 12.912109 8.490382">
+<title>
+$a_{ij}$
+</title>
+<defs>
+<path id='eq2-g0-105' d='M2.375093 -4.97335C2.375093 -5.148692 2.247572 -5.276214 2.064259 -5.276214C1.857036 -5.276214 1.625903 -5.084932 1.625903 -4.845828C1.625903 -4.670486 1.753425 -4.542964 1.936737 -4.542964C2.14396 -4.542964 2.375093 -4.734247 2.375093 -4.97335ZM1.211457 -2.048319L0.781071 -0.948443C0.74122 -0.828892 0.70137 -0.73325 0.70137 -0.597758C0.70137 -0.207223 1.004234 0.079701 1.42665 0.079701C2.199751 0.079701 2.526526 -1.036115 2.526526 -1.139726C2.526526 -1.219427 2.462765 -1.243337 2.406974 -1.243337C2.311333 -1.243337 2.295392 -1.187547 2.271482 -1.107846C2.088169 -0.470237 1.761395 -0.143462 1.44259 -0.143462C1.346949 -0.143462 1.251308 -0.183313 1.251308 -0.398506C1.251308 -0.589788 1.307098 -0.73325 1.41071 -0.980324C1.490411 -1.195517 1.570112 -1.41071 1.657783 -1.625903L1.904857 -2.271482C1.976588 -2.454795 2.072229 -2.701868 2.072229 -2.83736C2.072229 -3.235866 1.753425 -3.514819 1.346949 -3.514819C0.573848 -3.514819 0.239103 -2.399004 0.239103 -2.295392C0.239103 -2.223661 0.294894 -2.191781 0.358655 -2.191781C0.462267 -2.191781 0.470237 -2.239601 0.494147 -2.319303C0.71731 -3.076463 1.083935 -3.291656 1.323039 -3.291656C1.43462 -3.291656 1.514321 -3.251806 1.514321 -3.028643C1.514321 -2.948941 1.506351 -2.83736 1.42665 -2.598257L1.211457 -2.048319Z'/>
+<path id='eq2-g0-106' d='M3.291656 -4.97335C3.291656 -5.124782 3.172105 -5.276214 2.980822 -5.276214C2.741719 -5.276214 2.534496 -5.053051 2.534496 -4.845828C2.534496 -4.694396 2.654047 -4.542964 2.84533 -4.542964C3.084433 -4.542964 3.291656 -4.766127 3.291656 -4.97335ZM1.625903 0.398506C1.506351 0.884682 1.115816 1.40274 0.629639 1.40274C0.502117 1.40274 0.382565 1.370859 0.366625 1.362889C0.613699 1.243337 0.645579 1.028144 0.645579 0.956413C0.645579 0.765131 0.502117 0.661519 0.334745 0.661519C0.103611 0.661519 -0.111582 0.860772 -0.111582 1.123786C-0.111582 1.42665 0.183313 1.625903 0.637609 1.625903C1.123786 1.625903 2.000498 1.323039 2.239601 0.366625L2.956912 -2.486675C2.980822 -2.582316 2.996762 -2.646077 2.996762 -2.765629C2.996762 -3.203985 2.646077 -3.514819 2.183811 -3.514819C1.338979 -3.514819 0.844832 -2.399004 0.844832 -2.295392C0.844832 -2.223661 0.900623 -2.191781 0.964384 -2.191781C1.052055 -2.191781 1.060025 -2.215691 1.115816 -2.335243C1.354919 -2.885181 1.761395 -3.291656 2.1599 -3.291656C2.327273 -3.291656 2.422914 -3.180075 2.422914 -2.917061C2.422914 -2.805479 2.399004 -2.693898 2.375093 -2.582316L1.625903 0.398506Z'/>
+<path id='eq2-g1-97' d='M3.598506 -1.422665C3.53873 -1.219427 3.53873 -1.195517 3.371357 -0.968369C3.108344 -0.633624 2.582316 -0.119552 2.020423 -0.119552C1.530262 -0.119552 1.255293 -0.561893 1.255293 -1.267248C1.255293 -1.924782 1.625903 -3.263761 1.853051 -3.765878C2.259527 -4.60274 2.82142 -5.033126 3.287671 -5.033126C4.076712 -5.033126 4.23213 -4.052802 4.23213 -3.957161C4.23213 -3.945205 4.196264 -3.789788 4.184309 -3.765878L3.598506 -1.422665ZM4.363636 -4.483188C4.23213 -4.794022 3.90934 -5.272229 3.287671 -5.272229C1.936737 -5.272229 0.478207 -3.526775 0.478207 -1.75741C0.478207 -0.573848 1.171606 0.119552 1.984558 0.119552C2.642092 0.119552 3.203985 -0.394521 3.53873 -0.789041C3.658281 -0.083686 4.220174 0.119552 4.578829 0.119552S5.224408 -0.095641 5.439601 -0.526027C5.630884 -0.932503 5.798257 -1.661768 5.798257 -1.709589C5.798257 -1.769365 5.750436 -1.817186 5.678705 -1.817186C5.571108 -1.817186 5.559153 -1.75741 5.511333 -1.578082C5.332005 -0.872727 5.104857 -0.119552 4.614695 -0.119552C4.267995 -0.119552 4.244085 -0.430386 4.244085 -0.669489C4.244085 -0.944458 4.27995 -1.075965 4.387547 -1.542217C4.471233 -1.841096 4.531009 -2.10411 4.62665 -2.450809C5.068991 -4.244085 5.176588 -4.674471 5.176588 -4.746202C5.176588 -4.913574 5.045081 -5.045081 4.865753 -5.045081C4.483188 -5.045081 4.387547 -4.62665 4.363636 -4.483188Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g1-97'/>
+<use x='6.144944' y='1.793263' xlink:href='#eq2-g0-105'/>
+<use x='9.028084' y='1.793263' xlink:href='#eq2-g0-106'/>
+</g>
+</svg> in some treatments) according to the CHILL algorithm.</p>
+          </div></section>
+          <section class="m-doc-details" id="gad8c1ae4aaa660900988e494f682b2b09"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gad8c1ae4aaa660900988e494f682b2b09" class="m-doc-self">getIceTypeNoPrint</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              bool isSlice = false)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bop_8hpp.html">&lt;src/include/internal/bop.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">yCloud&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>The output <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a></td>
+                </tr>
+                <tr>
+                  <td>nList&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Row-ordered neighbour list by atom ID</td>
+                </tr>
+                <tr>
+                  <td>isSlice&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>This decides whether there is a slice or not</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Function that classifies every particle&#x27;s <a href="group__molSys.html#ga13ffe3a39a0816627553f195e102abb5" class="m-doc">molSys::<wbr />atom_state_type</a> ice type, according to the CHILL algorithm. Does not print out the information.</p>
+          </div></section>
+          <section class="m-doc-details" id="gae2288a52bfd6e9c52dbf4f70b2273953"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gae2288a52bfd6e9c52dbf4f70b2273953" class="m-doc-self">getIceType</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              std::string path,
+              int firstFrame,
+              bool isSlice = false,
+              std::string outputFileName = &quot;chill.txt&quot;)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bop_8hpp.html">&lt;src/include/internal/bop.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">yCloud&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>The output <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a></td>
+                </tr>
+                <tr>
+                  <td>nList&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Row-ordered neighbour list by atom ID</td>
+                </tr>
+                <tr>
+                  <td>path&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Path to the output directory to which ice types are written out to</td>
+                </tr>
+                <tr>
+                  <td>firstFrame&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>First frame to be analyzed</td>
+                </tr>
+                <tr>
+                  <td>isSlice&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>This decides whether there is a slice or not</td>
+                </tr>
+                <tr>
+                  <td>outputFileName&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Name of the output file, to which the ice types will be written out.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Function that classifies every particle&#x27;s <a href="group__molSys.html#ga13ffe3a39a0816627553f195e102abb5" class="m-doc">molSys::<wbr />atom_state_type</a> ice type, according to the CHILL algorithm.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga1b99e4a99a857d595c2800b88dc02b74"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga1b99e4a99a857d595c2800b88dc02b74" class="m-doc-self">getCorrelPlus</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              bool isSlice = false)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bop_8hpp.html">&lt;src/include/internal/bop.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">yCloud&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>The output <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a></td>
+                </tr>
+                <tr>
+                  <td>nList&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Row-ordered neighbour list by atom ID</td>
+                </tr>
+                <tr>
+                  <td>isSlice&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>This decides whether there is a slice or not</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Function for getting the bond order correlations <svg class="m-math" style="width: 1.230em; height: 0.884em;" viewBox="0 -5.147373 11.805153 8.490382">
+<title>
+$c_{ij}$
+</title>
+<defs>
+<path id='eq3-g0-105' d='M2.375093 -4.97335C2.375093 -5.148692 2.247572 -5.276214 2.064259 -5.276214C1.857036 -5.276214 1.625903 -5.084932 1.625903 -4.845828C1.625903 -4.670486 1.753425 -4.542964 1.936737 -4.542964C2.14396 -4.542964 2.375093 -4.734247 2.375093 -4.97335ZM1.211457 -2.048319L0.781071 -0.948443C0.74122 -0.828892 0.70137 -0.73325 0.70137 -0.597758C0.70137 -0.207223 1.004234 0.079701 1.42665 0.079701C2.199751 0.079701 2.526526 -1.036115 2.526526 -1.139726C2.526526 -1.219427 2.462765 -1.243337 2.406974 -1.243337C2.311333 -1.243337 2.295392 -1.187547 2.271482 -1.107846C2.088169 -0.470237 1.761395 -0.143462 1.44259 -0.143462C1.346949 -0.143462 1.251308 -0.183313 1.251308 -0.398506C1.251308 -0.589788 1.307098 -0.73325 1.41071 -0.980324C1.490411 -1.195517 1.570112 -1.41071 1.657783 -1.625903L1.904857 -2.271482C1.976588 -2.454795 2.072229 -2.701868 2.072229 -2.83736C2.072229 -3.235866 1.753425 -3.514819 1.346949 -3.514819C0.573848 -3.514819 0.239103 -2.399004 0.239103 -2.295392C0.239103 -2.223661 0.294894 -2.191781 0.358655 -2.191781C0.462267 -2.191781 0.470237 -2.239601 0.494147 -2.319303C0.71731 -3.076463 1.083935 -3.291656 1.323039 -3.291656C1.43462 -3.291656 1.514321 -3.251806 1.514321 -3.028643C1.514321 -2.948941 1.506351 -2.83736 1.42665 -2.598257L1.211457 -2.048319Z'/>
+<path id='eq3-g0-106' d='M3.291656 -4.97335C3.291656 -5.124782 3.172105 -5.276214 2.980822 -5.276214C2.741719 -5.276214 2.534496 -5.053051 2.534496 -4.845828C2.534496 -4.694396 2.654047 -4.542964 2.84533 -4.542964C3.084433 -4.542964 3.291656 -4.766127 3.291656 -4.97335ZM1.625903 0.398506C1.506351 0.884682 1.115816 1.40274 0.629639 1.40274C0.502117 1.40274 0.382565 1.370859 0.366625 1.362889C0.613699 1.243337 0.645579 1.028144 0.645579 0.956413C0.645579 0.765131 0.502117 0.661519 0.334745 0.661519C0.103611 0.661519 -0.111582 0.860772 -0.111582 1.123786C-0.111582 1.42665 0.183313 1.625903 0.637609 1.625903C1.123786 1.625903 2.000498 1.323039 2.239601 0.366625L2.956912 -2.486675C2.980822 -2.582316 2.996762 -2.646077 2.996762 -2.765629C2.996762 -3.203985 2.646077 -3.514819 2.183811 -3.514819C1.338979 -3.514819 0.844832 -2.399004 0.844832 -2.295392C0.844832 -2.223661 0.900623 -2.191781 0.964384 -2.191781C1.052055 -2.191781 1.060025 -2.215691 1.115816 -2.335243C1.354919 -2.885181 1.761395 -3.291656 2.1599 -3.291656C2.327273 -3.291656 2.422914 -3.180075 2.422914 -2.917061C2.422914 -2.805479 2.399004 -2.693898 2.375093 -2.582316L1.625903 0.398506Z'/>
+<path id='eq3-g1-99' d='M4.674471 -4.495143C4.447323 -4.495143 4.339726 -4.495143 4.172354 -4.351681C4.100623 -4.291905 3.969116 -4.112578 3.969116 -3.921295C3.969116 -3.682192 4.148443 -3.53873 4.375592 -3.53873C4.662516 -3.53873 4.985305 -3.777833 4.985305 -4.25604C4.985305 -4.829888 4.435367 -5.272229 3.610461 -5.272229C2.044334 -5.272229 0.478207 -3.56264 0.478207 -1.865006C0.478207 -0.824907 1.123786 0.119552 2.343213 0.119552C3.969116 0.119552 4.99726 -1.147696 4.99726 -1.303113C4.99726 -1.374844 4.925529 -1.43462 4.877709 -1.43462C4.841843 -1.43462 4.829888 -1.422665 4.722291 -1.315068C3.957161 -0.298879 2.82142 -0.119552 2.367123 -0.119552C1.542217 -0.119552 1.279203 -0.836862 1.279203 -1.43462C1.279203 -1.853051 1.482441 -3.012702 1.912827 -3.825654C2.223661 -4.387547 2.86924 -5.033126 3.622416 -5.033126C3.777833 -5.033126 4.435367 -5.009215 4.674471 -4.495143Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g1-99'/>
+<use x='5.037988' y='1.793263' xlink:href='#eq3-g0-105'/>
+<use x='7.921128' y='1.793263' xlink:href='#eq3-g0-106'/>
+</g>
+</svg> (alternatively <svg class="m-math" style="width: 1.345em; height: 0.884em;" viewBox="0 -5.147373 12.912109 8.490382">
+<title>
+$a_{ij}$
+</title>
+<defs>
+<path id='eq4-g0-105' d='M2.375093 -4.97335C2.375093 -5.148692 2.247572 -5.276214 2.064259 -5.276214C1.857036 -5.276214 1.625903 -5.084932 1.625903 -4.845828C1.625903 -4.670486 1.753425 -4.542964 1.936737 -4.542964C2.14396 -4.542964 2.375093 -4.734247 2.375093 -4.97335ZM1.211457 -2.048319L0.781071 -0.948443C0.74122 -0.828892 0.70137 -0.73325 0.70137 -0.597758C0.70137 -0.207223 1.004234 0.079701 1.42665 0.079701C2.199751 0.079701 2.526526 -1.036115 2.526526 -1.139726C2.526526 -1.219427 2.462765 -1.243337 2.406974 -1.243337C2.311333 -1.243337 2.295392 -1.187547 2.271482 -1.107846C2.088169 -0.470237 1.761395 -0.143462 1.44259 -0.143462C1.346949 -0.143462 1.251308 -0.183313 1.251308 -0.398506C1.251308 -0.589788 1.307098 -0.73325 1.41071 -0.980324C1.490411 -1.195517 1.570112 -1.41071 1.657783 -1.625903L1.904857 -2.271482C1.976588 -2.454795 2.072229 -2.701868 2.072229 -2.83736C2.072229 -3.235866 1.753425 -3.514819 1.346949 -3.514819C0.573848 -3.514819 0.239103 -2.399004 0.239103 -2.295392C0.239103 -2.223661 0.294894 -2.191781 0.358655 -2.191781C0.462267 -2.191781 0.470237 -2.239601 0.494147 -2.319303C0.71731 -3.076463 1.083935 -3.291656 1.323039 -3.291656C1.43462 -3.291656 1.514321 -3.251806 1.514321 -3.028643C1.514321 -2.948941 1.506351 -2.83736 1.42665 -2.598257L1.211457 -2.048319Z'/>
+<path id='eq4-g0-106' d='M3.291656 -4.97335C3.291656 -5.124782 3.172105 -5.276214 2.980822 -5.276214C2.741719 -5.276214 2.534496 -5.053051 2.534496 -4.845828C2.534496 -4.694396 2.654047 -4.542964 2.84533 -4.542964C3.084433 -4.542964 3.291656 -4.766127 3.291656 -4.97335ZM1.625903 0.398506C1.506351 0.884682 1.115816 1.40274 0.629639 1.40274C0.502117 1.40274 0.382565 1.370859 0.366625 1.362889C0.613699 1.243337 0.645579 1.028144 0.645579 0.956413C0.645579 0.765131 0.502117 0.661519 0.334745 0.661519C0.103611 0.661519 -0.111582 0.860772 -0.111582 1.123786C-0.111582 1.42665 0.183313 1.625903 0.637609 1.625903C1.123786 1.625903 2.000498 1.323039 2.239601 0.366625L2.956912 -2.486675C2.980822 -2.582316 2.996762 -2.646077 2.996762 -2.765629C2.996762 -3.203985 2.646077 -3.514819 2.183811 -3.514819C1.338979 -3.514819 0.844832 -2.399004 0.844832 -2.295392C0.844832 -2.223661 0.900623 -2.191781 0.964384 -2.191781C1.052055 -2.191781 1.060025 -2.215691 1.115816 -2.335243C1.354919 -2.885181 1.761395 -3.291656 2.1599 -3.291656C2.327273 -3.291656 2.422914 -3.180075 2.422914 -2.917061C2.422914 -2.805479 2.399004 -2.693898 2.375093 -2.582316L1.625903 0.398506Z'/>
+<path id='eq4-g1-97' d='M3.598506 -1.422665C3.53873 -1.219427 3.53873 -1.195517 3.371357 -0.968369C3.108344 -0.633624 2.582316 -0.119552 2.020423 -0.119552C1.530262 -0.119552 1.255293 -0.561893 1.255293 -1.267248C1.255293 -1.924782 1.625903 -3.263761 1.853051 -3.765878C2.259527 -4.60274 2.82142 -5.033126 3.287671 -5.033126C4.076712 -5.033126 4.23213 -4.052802 4.23213 -3.957161C4.23213 -3.945205 4.196264 -3.789788 4.184309 -3.765878L3.598506 -1.422665ZM4.363636 -4.483188C4.23213 -4.794022 3.90934 -5.272229 3.287671 -5.272229C1.936737 -5.272229 0.478207 -3.526775 0.478207 -1.75741C0.478207 -0.573848 1.171606 0.119552 1.984558 0.119552C2.642092 0.119552 3.203985 -0.394521 3.53873 -0.789041C3.658281 -0.083686 4.220174 0.119552 4.578829 0.119552S5.224408 -0.095641 5.439601 -0.526027C5.630884 -0.932503 5.798257 -1.661768 5.798257 -1.709589C5.798257 -1.769365 5.750436 -1.817186 5.678705 -1.817186C5.571108 -1.817186 5.559153 -1.75741 5.511333 -1.578082C5.332005 -0.872727 5.104857 -0.119552 4.614695 -0.119552C4.267995 -0.119552 4.244085 -0.430386 4.244085 -0.669489C4.244085 -0.944458 4.27995 -1.075965 4.387547 -1.542217C4.471233 -1.841096 4.531009 -2.10411 4.62665 -2.450809C5.068991 -4.244085 5.176588 -4.674471 5.176588 -4.746202C5.176588 -4.913574 5.045081 -5.045081 4.865753 -5.045081C4.483188 -5.045081 4.387547 -4.62665 4.363636 -4.483188Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g1-97'/>
+<use x='6.144944' y='1.793263' xlink:href='#eq4-g0-105'/>
+<use x='9.028084' y='1.793263' xlink:href='#eq4-g0-106'/>
+</g>
+</svg> in certain texts) using the CHILL+ algorithm</p>
+          </div></section>
+          <section class="m-doc-details" id="ga340b0de2ed081c9e428a865242a1bc7f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga340b0de2ed081c9e428a865242a1bc7f" class="m-doc-self">getIceTypePlus</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              std::string path,
+              int firstFrame,
+              bool isSlice = false,
+              std::string outputFileName = &quot;chillPlus.txt&quot;)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bop_8hpp.html">&lt;src/include/internal/bop.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">yCloud&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>The output <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a></td>
+                </tr>
+                <tr>
+                  <td>nList&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Row-ordered neighbour list by atom ID</td>
+                </tr>
+                <tr>
+                  <td>path&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Path to the output directory to which ice types are written out to</td>
+                </tr>
+                <tr>
+                  <td>firstFrame&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The first frame to be analyzed</td>
+                </tr>
+                <tr>
+                  <td>isSlice&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>This decides whether there is a slice or not</td>
+                </tr>
+                <tr>
+                  <td>outputFileName&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Name of the output file, to which the ice types will be written out. The default file name is &quot;chillPlus.txt&quot;</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Function that classifies the <a href="group__molSys.html#ga13ffe3a39a0816627553f195e102abb5" class="m-doc">molSys::<wbr />atom_state_type</a> ice type of each particle, according to the CHILL+ algorithm.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga06aa04366cf8d05811e0c0a881464c24"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;double&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga06aa04366cf8d05811e0c0a881464c24" class="m-doc-self">getq6</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              bool isSlice = false)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bop_8hpp.html">&lt;src/include/internal/bop.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">yCloud&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>The output <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a></td>
+                </tr>
+                <tr>
+                  <td>nList&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Row-ordered neighbour list by atom ID</td>
+                </tr>
+                <tr>
+                  <td>isSlice&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>This decides whether there is a slice or not</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>a double vector of the averaged <svg class="m-math" style="width: 0.982em; height: 0.778em;" viewBox="0 -5.147373 9.424391 7.47198">
+<title>
+$q_6$
+</title>
+<defs>
+<path id='eq6-g1-54' d='M1.099875 -2.638107C1.099875 -3.299626 1.155666 -3.881445 1.44259 -4.367621C1.681694 -4.766127 2.088169 -5.092902 2.590286 -5.092902C2.749689 -5.092902 3.116314 -5.068991 3.299626 -4.790037C2.940971 -4.774097 2.909091 -4.503113 2.909091 -4.415442C2.909091 -4.176339 3.092403 -4.040847 3.283686 -4.040847C3.427148 -4.040847 3.658281 -4.128518 3.658281 -4.431382C3.658281 -4.909589 3.299626 -5.300125 2.582316 -5.300125C1.474471 -5.300125 0.350685 -4.24807 0.350685 -2.526526C0.350685 -0.366625 1.354919 0.167372 2.12802 0.167372C2.510585 0.167372 2.925031 0.063761 3.283686 -0.278954C3.602491 -0.589788 3.873474 -0.924533 3.873474 -1.617933C3.873474 -2.662017 3.084433 -3.395268 2.199751 -3.395268C1.625903 -3.395268 1.283188 -3.028643 1.099875 -2.638107ZM2.12802 -0.071731C1.705604 -0.071731 1.44259 -0.366625 1.323039 -0.589788C1.139726 -0.948443 1.123786 -1.490411 1.123786 -1.793275C1.123786 -2.582316 1.554172 -3.172105 2.16787 -3.172105C2.566376 -3.172105 2.805479 -2.964882 2.956912 -2.685928C3.124284 -2.391034 3.124284 -2.032379 3.124284 -1.625903S3.124284 -0.868742 2.964882 -0.581818C2.757659 -0.215193 2.478705 -0.071731 2.12802 -0.071731Z'/>
+<path id='eq6-g0-113' d='M5.272229 -5.152677C5.272229 -5.212453 5.224408 -5.260274 5.164633 -5.260274C5.068991 -5.260274 4.60274 -4.829888 4.375592 -4.411457C4.160399 -4.94944 3.789788 -5.272229 3.275716 -5.272229C1.924782 -5.272229 0.466252 -3.526775 0.466252 -1.75741C0.466252 -0.573848 1.159651 0.119552 1.972603 0.119552C2.606227 0.119552 3.132254 -0.358655 3.383313 -0.633624L3.395268 -0.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229 -5.152677ZM3.58655 -1.422665C3.526775 -1.219427 3.526775 -1.195517 3.359402 -0.968369C3.096389 -0.633624 2.570361 -0.119552 2.008468 -0.119552C1.518306 -0.119552 1.243337 -0.561893 1.243337 -1.267248C1.243337 -1.924782 1.613948 -3.263761 1.841096 -3.765878C2.247572 -4.60274 2.809465 -5.033126 3.275716 -5.033126C4.064757 -5.033126 4.220174 -4.052802 4.220174 -3.957161C4.220174 -3.945205 4.184309 -3.789788 4.172354 -3.765878L3.58655 -1.422665Z'/>
+</defs>
+<g id='eq6-page1'>
+<use x='0' y='0' xlink:href='#eq6-g0-113'/>
+<use x='5.190208' y='1.793263' xlink:href='#eq6-g1-54'/>
+</g>
+</svg> values.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Function for getting the averaged <svg class="m-math" style="width: 0.982em; height: 0.778em;" viewBox="0 -5.147373 9.424391 7.47198">
+<title>
+$q_6$
+</title>
+<defs>
+<path id='eq5-g1-54' d='M1.099875 -2.638107C1.099875 -3.299626 1.155666 -3.881445 1.44259 -4.367621C1.681694 -4.766127 2.088169 -5.092902 2.590286 -5.092902C2.749689 -5.092902 3.116314 -5.068991 3.299626 -4.790037C2.940971 -4.774097 2.909091 -4.503113 2.909091 -4.415442C2.909091 -4.176339 3.092403 -4.040847 3.283686 -4.040847C3.427148 -4.040847 3.658281 -4.128518 3.658281 -4.431382C3.658281 -4.909589 3.299626 -5.300125 2.582316 -5.300125C1.474471 -5.300125 0.350685 -4.24807 0.350685 -2.526526C0.350685 -0.366625 1.354919 0.167372 2.12802 0.167372C2.510585 0.167372 2.925031 0.063761 3.283686 -0.278954C3.602491 -0.589788 3.873474 -0.924533 3.873474 -1.617933C3.873474 -2.662017 3.084433 -3.395268 2.199751 -3.395268C1.625903 -3.395268 1.283188 -3.028643 1.099875 -2.638107ZM2.12802 -0.071731C1.705604 -0.071731 1.44259 -0.366625 1.323039 -0.589788C1.139726 -0.948443 1.123786 -1.490411 1.123786 -1.793275C1.123786 -2.582316 1.554172 -3.172105 2.16787 -3.172105C2.566376 -3.172105 2.805479 -2.964882 2.956912 -2.685928C3.124284 -2.391034 3.124284 -2.032379 3.124284 -1.625903S3.124284 -0.868742 2.964882 -0.581818C2.757659 -0.215193 2.478705 -0.071731 2.12802 -0.071731Z'/>
+<path id='eq5-g0-113' d='M5.272229 -5.152677C5.272229 -5.212453 5.224408 -5.260274 5.164633 -5.260274C5.068991 -5.260274 4.60274 -4.829888 4.375592 -4.411457C4.160399 -4.94944 3.789788 -5.272229 3.275716 -5.272229C1.924782 -5.272229 0.466252 -3.526775 0.466252 -1.75741C0.466252 -0.573848 1.159651 0.119552 1.972603 0.119552C2.606227 0.119552 3.132254 -0.358655 3.383313 -0.633624L3.395268 -0.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229 -5.152677ZM3.58655 -1.422665C3.526775 -1.219427 3.526775 -1.195517 3.359402 -0.968369C3.096389 -0.633624 2.570361 -0.119552 2.008468 -0.119552C1.518306 -0.119552 1.243337 -0.561893 1.243337 -1.267248C1.243337 -1.924782 1.613948 -3.263761 1.841096 -3.765878C2.247572 -4.60274 2.809465 -5.033126 3.275716 -5.033126C4.064757 -5.033126 4.220174 -4.052802 4.220174 -3.957161C4.220174 -3.945205 4.184309 -3.789788 4.172354 -3.765878L3.58655 -1.422665Z'/>
+</defs>
+<g id='eq5-page1'>
+<use x='0' y='0' xlink:href='#eq5-g0-113'/>
+<use x='5.190208' y='1.793263' xlink:href='#eq5-g1-54'/>
+</g>
+</svg> parameter.</p>
+          </div></section>
+          <section class="m-doc-details" id="gadcda1fbc16c0a4ac61f38c139f423f42"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gadcda1fbc16c0a4ac61f38c139f423f42" class="m-doc-self">reclassifyWater</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;double&gt;* q6)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bop_8hpp.html">&lt;src/include/internal/bop.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">yCloud&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>The output <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a></td>
+                </tr>
+                <tr>
+                  <td>q6&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Vector containing the previously calculated averaged <svg class="m-math" style="width: 0.982em; height: 0.778em;" viewBox="0 -5.147373 9.424391 7.47198">
+<title>
+$q_6$
+</title>
+<defs>
+<path id='eq11-g1-54' d='M1.099875 -2.638107C1.099875 -3.299626 1.155666 -3.881445 1.44259 -4.367621C1.681694 -4.766127 2.088169 -5.092902 2.590286 -5.092902C2.749689 -5.092902 3.116314 -5.068991 3.299626 -4.790037C2.940971 -4.774097 2.909091 -4.503113 2.909091 -4.415442C2.909091 -4.176339 3.092403 -4.040847 3.283686 -4.040847C3.427148 -4.040847 3.658281 -4.128518 3.658281 -4.431382C3.658281 -4.909589 3.299626 -5.300125 2.582316 -5.300125C1.474471 -5.300125 0.350685 -4.24807 0.350685 -2.526526C0.350685 -0.366625 1.354919 0.167372 2.12802 0.167372C2.510585 0.167372 2.925031 0.063761 3.283686 -0.278954C3.602491 -0.589788 3.873474 -0.924533 3.873474 -1.617933C3.873474 -2.662017 3.084433 -3.395268 2.199751 -3.395268C1.625903 -3.395268 1.283188 -3.028643 1.099875 -2.638107ZM2.12802 -0.071731C1.705604 -0.071731 1.44259 -0.366625 1.323039 -0.589788C1.139726 -0.948443 1.123786 -1.490411 1.123786 -1.793275C1.123786 -2.582316 1.554172 -3.172105 2.16787 -3.172105C2.566376 -3.172105 2.805479 -2.964882 2.956912 -2.685928C3.124284 -2.391034 3.124284 -2.032379 3.124284 -1.625903S3.124284 -0.868742 2.964882 -0.581818C2.757659 -0.215193 2.478705 -0.071731 2.12802 -0.071731Z'/>
+<path id='eq11-g0-113' d='M5.272229 -5.152677C5.272229 -5.212453 5.224408 -5.260274 5.164633 -5.260274C5.068991 -5.260274 4.60274 -4.829888 4.375592 -4.411457C4.160399 -4.94944 3.789788 -5.272229 3.275716 -5.272229C1.924782 -5.272229 0.466252 -3.526775 0.466252 -1.75741C0.466252 -0.573848 1.159651 0.119552 1.972603 0.119552C2.606227 0.119552 3.132254 -0.358655 3.383313 -0.633624L3.395268 -0.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229 -5.152677ZM3.58655 -1.422665C3.526775 -1.219427 3.526775 -1.195517 3.359402 -0.968369C3.096389 -0.633624 2.570361 -0.119552 2.008468 -0.119552C1.518306 -0.119552 1.243337 -0.561893 1.243337 -1.267248C1.243337 -1.924782 1.613948 -3.263761 1.841096 -3.765878C2.247572 -4.60274 2.809465 -5.033126 3.275716 -5.033126C4.064757 -5.033126 4.220174 -4.052802 4.220174 -3.957161C4.220174 -3.945205 4.184309 -3.789788 4.172354 -3.765878L3.58655 -1.422665Z'/>
+</defs>
+<g id='eq11-page1'>
+<use x='0' y='0' xlink:href='#eq11-g0-113'/>
+<use x='5.190208' y='1.793263' xlink:href='#eq11-g1-54'/>
+</g>
+</svg> values (using <a href="group__chill.html#ga06aa04366cf8d05811e0c0a881464c24" class="m-doc">chill::<wbr />getq6</a>)</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Reclassifies atoms which may have been mis-classified as water using the averaged <svg class="m-math" style="width: 0.982em; height: 0.778em;" viewBox="0 -5.147373 9.424391 7.47198">
+<title>
+$q_6$
+</title>
+<defs>
+<path id='eq7-g1-54' d='M1.099875 -2.638107C1.099875 -3.299626 1.155666 -3.881445 1.44259 -4.367621C1.681694 -4.766127 2.088169 -5.092902 2.590286 -5.092902C2.749689 -5.092902 3.116314 -5.068991 3.299626 -4.790037C2.940971 -4.774097 2.909091 -4.503113 2.909091 -4.415442C2.909091 -4.176339 3.092403 -4.040847 3.283686 -4.040847C3.427148 -4.040847 3.658281 -4.128518 3.658281 -4.431382C3.658281 -4.909589 3.299626 -5.300125 2.582316 -5.300125C1.474471 -5.300125 0.350685 -4.24807 0.350685 -2.526526C0.350685 -0.366625 1.354919 0.167372 2.12802 0.167372C2.510585 0.167372 2.925031 0.063761 3.283686 -0.278954C3.602491 -0.589788 3.873474 -0.924533 3.873474 -1.617933C3.873474 -2.662017 3.084433 -3.395268 2.199751 -3.395268C1.625903 -3.395268 1.283188 -3.028643 1.099875 -2.638107ZM2.12802 -0.071731C1.705604 -0.071731 1.44259 -0.366625 1.323039 -0.589788C1.139726 -0.948443 1.123786 -1.490411 1.123786 -1.793275C1.123786 -2.582316 1.554172 -3.172105 2.16787 -3.172105C2.566376 -3.172105 2.805479 -2.964882 2.956912 -2.685928C3.124284 -2.391034 3.124284 -2.032379 3.124284 -1.625903S3.124284 -0.868742 2.964882 -0.581818C2.757659 -0.215193 2.478705 -0.071731 2.12802 -0.071731Z'/>
+<path id='eq7-g0-113' d='M5.272229 -5.152677C5.272229 -5.212453 5.224408 -5.260274 5.164633 -5.260274C5.068991 -5.260274 4.60274 -4.829888 4.375592 -4.411457C4.160399 -4.94944 3.789788 -5.272229 3.275716 -5.272229C1.924782 -5.272229 0.466252 -3.526775 0.466252 -1.75741C0.466252 -0.573848 1.159651 0.119552 1.972603 0.119552C2.606227 0.119552 3.132254 -0.358655 3.383313 -0.633624L3.395268 -0.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229 -5.152677ZM3.58655 -1.422665C3.526775 -1.219427 3.526775 -1.195517 3.359402 -0.968369C3.096389 -0.633624 2.570361 -0.119552 2.008468 -0.119552C1.518306 -0.119552 1.243337 -0.561893 1.243337 -1.267248C1.243337 -1.924782 1.613948 -3.263761 1.841096 -3.765878C2.247572 -4.60274 2.809465 -5.033126 3.275716 -5.033126C4.064757 -5.033126 4.220174 -4.052802 4.220174 -3.957161C4.220174 -3.945205 4.184309 -3.789788 4.172354 -3.765878L3.58655 -1.422665Z'/>
+</defs>
+<g id='eq7-page1'>
+<use x='0' y='0' xlink:href='#eq7-g0-113'/>
+<use x='5.190208' y='1.793263' xlink:href='#eq7-g1-54'/>
+</g>
+</svg> and <svg class="m-math" style="width: 0.982em; height: 0.778em;" viewBox="0 -5.147373 9.424391 7.47198">
+<title>
+$q_3$
+</title>
+<defs>
+<path id='eq8-g1-51' d='M2.016438 -2.662017C2.646077 -2.662017 3.044583 -2.199751 3.044583 -1.362889C3.044583 -0.366625 2.478705 -0.071731 2.056289 -0.071731C1.617933 -0.071731 1.020174 -0.231133 0.74122 -0.653549C1.028144 -0.653549 1.227397 -0.836862 1.227397 -1.099875C1.227397 -1.354919 1.044085 -1.538232 0.789041 -1.538232C0.573848 -1.538232 0.350685 -1.40274 0.350685 -1.083935C0.350685 -0.326775 1.163636 0.167372 2.072229 0.167372C3.132254 0.167372 3.873474 -0.565878 3.873474 -1.362889C3.873474 -2.024408 3.347447 -2.630137 2.534496 -2.805479C3.164134 -3.028643 3.634371 -3.57061 3.634371 -4.208219S2.917061 -5.300125 2.088169 -5.300125C1.235367 -5.300125 0.589788 -4.837858 0.589788 -4.23213C0.589788 -3.937235 0.789041 -3.809714 0.996264 -3.809714C1.243337 -3.809714 1.40274 -3.985056 1.40274 -4.216189C1.40274 -4.511083 1.147696 -4.622665 0.972354 -4.630635C1.307098 -5.068991 1.920797 -5.092902 2.064259 -5.092902C2.271482 -5.092902 2.87721 -5.029141 2.87721 -4.208219C2.87721 -3.650311 2.646077 -3.315567 2.534496 -3.188045C2.295392 -2.940971 2.11208 -2.925031 1.625903 -2.893151C1.474471 -2.885181 1.41071 -2.87721 1.41071 -2.773599C1.41071 -2.662017 1.482441 -2.662017 1.617933 -2.662017H2.016438Z'/>
+<path id='eq8-g0-113' d='M5.272229 -5.152677C5.272229 -5.212453 5.224408 -5.260274 5.164633 -5.260274C5.068991 -5.260274 4.60274 -4.829888 4.375592 -4.411457C4.160399 -4.94944 3.789788 -5.272229 3.275716 -5.272229C1.924782 -5.272229 0.466252 -3.526775 0.466252 -1.75741C0.466252 -0.573848 1.159651 0.119552 1.972603 0.119552C2.606227 0.119552 3.132254 -0.358655 3.383313 -0.633624L3.395268 -0.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229 -5.152677ZM3.58655 -1.422665C3.526775 -1.219427 3.526775 -1.195517 3.359402 -0.968369C3.096389 -0.633624 2.570361 -0.119552 2.008468 -0.119552C1.518306 -0.119552 1.243337 -0.561893 1.243337 -1.267248C1.243337 -1.924782 1.613948 -3.263761 1.841096 -3.765878C2.247572 -4.60274 2.809465 -5.033126 3.275716 -5.033126C4.064757 -5.033126 4.220174 -4.052802 4.220174 -3.957161C4.220174 -3.945205 4.184309 -3.789788 4.172354 -3.765878L3.58655 -1.422665Z'/>
+</defs>
+<g id='eq8-page1'>
+<use x='0' y='0' xlink:href='#eq8-g0-113'/>
+<use x='5.190208' y='1.793263' xlink:href='#eq8-g1-51'/>
+</g>
+</svg> parameters. This function can be called after both averaged <svg class="m-math" style="width: 0.982em; height: 0.778em;" viewBox="0 -5.147373 9.424391 7.47198">
+<title>
+$q_6$
+</title>
+<defs>
+<path id='eq9-g1-54' d='M1.099875 -2.638107C1.099875 -3.299626 1.155666 -3.881445 1.44259 -4.367621C1.681694 -4.766127 2.088169 -5.092902 2.590286 -5.092902C2.749689 -5.092902 3.116314 -5.068991 3.299626 -4.790037C2.940971 -4.774097 2.909091 -4.503113 2.909091 -4.415442C2.909091 -4.176339 3.092403 -4.040847 3.283686 -4.040847C3.427148 -4.040847 3.658281 -4.128518 3.658281 -4.431382C3.658281 -4.909589 3.299626 -5.300125 2.582316 -5.300125C1.474471 -5.300125 0.350685 -4.24807 0.350685 -2.526526C0.350685 -0.366625 1.354919 0.167372 2.12802 0.167372C2.510585 0.167372 2.925031 0.063761 3.283686 -0.278954C3.602491 -0.589788 3.873474 -0.924533 3.873474 -1.617933C3.873474 -2.662017 3.084433 -3.395268 2.199751 -3.395268C1.625903 -3.395268 1.283188 -3.028643 1.099875 -2.638107ZM2.12802 -0.071731C1.705604 -0.071731 1.44259 -0.366625 1.323039 -0.589788C1.139726 -0.948443 1.123786 -1.490411 1.123786 -1.793275C1.123786 -2.582316 1.554172 -3.172105 2.16787 -3.172105C2.566376 -3.172105 2.805479 -2.964882 2.956912 -2.685928C3.124284 -2.391034 3.124284 -2.032379 3.124284 -1.625903S3.124284 -0.868742 2.964882 -0.581818C2.757659 -0.215193 2.478705 -0.071731 2.12802 -0.071731Z'/>
+<path id='eq9-g0-113' d='M5.272229 -5.152677C5.272229 -5.212453 5.224408 -5.260274 5.164633 -5.260274C5.068991 -5.260274 4.60274 -4.829888 4.375592 -4.411457C4.160399 -4.94944 3.789788 -5.272229 3.275716 -5.272229C1.924782 -5.272229 0.466252 -3.526775 0.466252 -1.75741C0.466252 -0.573848 1.159651 0.119552 1.972603 0.119552C2.606227 0.119552 3.132254 -0.358655 3.383313 -0.633624L3.395268 -0.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229 -5.152677ZM3.58655 -1.422665C3.526775 -1.219427 3.526775 -1.195517 3.359402 -0.968369C3.096389 -0.633624 2.570361 -0.119552 2.008468 -0.119552C1.518306 -0.119552 1.243337 -0.561893 1.243337 -1.267248C1.243337 -1.924782 1.613948 -3.263761 1.841096 -3.765878C2.247572 -4.60274 2.809465 -5.033126 3.275716 -5.033126C4.064757 -5.033126 4.220174 -4.052802 4.220174 -3.957161C4.220174 -3.945205 4.184309 -3.789788 4.172354 -3.765878L3.58655 -1.422665Z'/>
+</defs>
+<g id='eq9-page1'>
+<use x='0' y='0' xlink:href='#eq9-g0-113'/>
+<use x='5.190208' y='1.793263' xlink:href='#eq9-g1-54'/>
+</g>
+</svg> and bond order correlation function <svg class="m-math" style="width: 1.230em; height: 0.884em;" viewBox="0 -5.147373 11.805153 8.490382">
+<title>
+$c_{ij}$
+</title>
+<defs>
+<path id='eq10-g0-105' d='M2.375093 -4.97335C2.375093 -5.148692 2.247572 -5.276214 2.064259 -5.276214C1.857036 -5.276214 1.625903 -5.084932 1.625903 -4.845828C1.625903 -4.670486 1.753425 -4.542964 1.936737 -4.542964C2.14396 -4.542964 2.375093 -4.734247 2.375093 -4.97335ZM1.211457 -2.048319L0.781071 -0.948443C0.74122 -0.828892 0.70137 -0.73325 0.70137 -0.597758C0.70137 -0.207223 1.004234 0.079701 1.42665 0.079701C2.199751 0.079701 2.526526 -1.036115 2.526526 -1.139726C2.526526 -1.219427 2.462765 -1.243337 2.406974 -1.243337C2.311333 -1.243337 2.295392 -1.187547 2.271482 -1.107846C2.088169 -0.470237 1.761395 -0.143462 1.44259 -0.143462C1.346949 -0.143462 1.251308 -0.183313 1.251308 -0.398506C1.251308 -0.589788 1.307098 -0.73325 1.41071 -0.980324C1.490411 -1.195517 1.570112 -1.41071 1.657783 -1.625903L1.904857 -2.271482C1.976588 -2.454795 2.072229 -2.701868 2.072229 -2.83736C2.072229 -3.235866 1.753425 -3.514819 1.346949 -3.514819C0.573848 -3.514819 0.239103 -2.399004 0.239103 -2.295392C0.239103 -2.223661 0.294894 -2.191781 0.358655 -2.191781C0.462267 -2.191781 0.470237 -2.239601 0.494147 -2.319303C0.71731 -3.076463 1.083935 -3.291656 1.323039 -3.291656C1.43462 -3.291656 1.514321 -3.251806 1.514321 -3.028643C1.514321 -2.948941 1.506351 -2.83736 1.42665 -2.598257L1.211457 -2.048319Z'/>
+<path id='eq10-g0-106' d='M3.291656 -4.97335C3.291656 -5.124782 3.172105 -5.276214 2.980822 -5.276214C2.741719 -5.276214 2.534496 -5.053051 2.534496 -4.845828C2.534496 -4.694396 2.654047 -4.542964 2.84533 -4.542964C3.084433 -4.542964 3.291656 -4.766127 3.291656 -4.97335ZM1.625903 0.398506C1.506351 0.884682 1.115816 1.40274 0.629639 1.40274C0.502117 1.40274 0.382565 1.370859 0.366625 1.362889C0.613699 1.243337 0.645579 1.028144 0.645579 0.956413C0.645579 0.765131 0.502117 0.661519 0.334745 0.661519C0.103611 0.661519 -0.111582 0.860772 -0.111582 1.123786C-0.111582 1.42665 0.183313 1.625903 0.637609 1.625903C1.123786 1.625903 2.000498 1.323039 2.239601 0.366625L2.956912 -2.486675C2.980822 -2.582316 2.996762 -2.646077 2.996762 -2.765629C2.996762 -3.203985 2.646077 -3.514819 2.183811 -3.514819C1.338979 -3.514819 0.844832 -2.399004 0.844832 -2.295392C0.844832 -2.223661 0.900623 -2.191781 0.964384 -2.191781C1.052055 -2.191781 1.060025 -2.215691 1.115816 -2.335243C1.354919 -2.885181 1.761395 -3.291656 2.1599 -3.291656C2.327273 -3.291656 2.422914 -3.180075 2.422914 -2.917061C2.422914 -2.805479 2.399004 -2.693898 2.375093 -2.582316L1.625903 0.398506Z'/>
+<path id='eq10-g1-99' d='M4.674471 -4.495143C4.447323 -4.495143 4.339726 -4.495143 4.172354 -4.351681C4.100623 -4.291905 3.969116 -4.112578 3.969116 -3.921295C3.969116 -3.682192 4.148443 -3.53873 4.375592 -3.53873C4.662516 -3.53873 4.985305 -3.777833 4.985305 -4.25604C4.985305 -4.829888 4.435367 -5.272229 3.610461 -5.272229C2.044334 -5.272229 0.478207 -3.56264 0.478207 -1.865006C0.478207 -0.824907 1.123786 0.119552 2.343213 0.119552C3.969116 0.119552 4.99726 -1.147696 4.99726 -1.303113C4.99726 -1.374844 4.925529 -1.43462 4.877709 -1.43462C4.841843 -1.43462 4.829888 -1.422665 4.722291 -1.315068C3.957161 -0.298879 2.82142 -0.119552 2.367123 -0.119552C1.542217 -0.119552 1.279203 -0.836862 1.279203 -1.43462C1.279203 -1.853051 1.482441 -3.012702 1.912827 -3.825654C2.223661 -4.387547 2.86924 -5.033126 3.622416 -5.033126C3.777833 -5.033126 4.435367 -5.009215 4.674471 -4.495143Z'/>
+</defs>
+<g id='eq10-page1'>
+<use x='0' y='0' xlink:href='#eq10-g1-99'/>
+<use x='5.037988' y='1.793263' xlink:href='#eq10-g0-105'/>
+<use x='7.921128' y='1.793263' xlink:href='#eq10-g0-106'/>
+</g>
+</svg> have been <a href="https://pubs.rsc.org/en/content/articlehtml/2011/cp/c1cp22167a">calculated</a></p>
+          </div></section>
+          <section class="m-doc-details" id="ga548414bf35e3ef8e6ea0d786ce13a05b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">int </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga548414bf35e3ef8e6ea0d786ce13a05b" class="m-doc-self">printIceType</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::string path,
+              int firstFrame,
+              bool isSlice = false,
+              std::string outputFileName = &quot;superChill.txt&quot;)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bop_8hpp.html">&lt;src/include/internal/bop.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">yCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The input <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a> for the current frame</td>
+                </tr>
+                <tr>
+                  <td>path&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Path to the output directory to which ice types are written out to</td>
+                </tr>
+                <tr>
+                  <td>firstFrame&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>First frame to be analyzed</td>
+                </tr>
+                <tr>
+                  <td>isSlice&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Determines whether there is a slice or not</td>
+                </tr>
+                <tr>
+                  <td>outputFileName&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>File name of the output file, to which the per-particle ice types will be written out. The default file name is &quot;superChill.txt&quot;</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Prints out the <a href="group__molSys.html#ga13ffe3a39a0816627553f195e102abb5" class="m-doc">molSys::<wbr />atom_state_type</a> per-particle ice type, for a particular frame, to a file.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga7cdd33801f3510b1076589e1a0c60872"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga7cdd33801f3510b1076589e1a0c60872" class="m-doc-self">isInterfacial</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              int iatom,
+              int num_staggrd,
+              int num_eclipsd)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bop_8hpp.html">&lt;src/include/internal/bop.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">yCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The input <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a></td>
+                </tr>
+                <tr>
+                  <td>nList&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Row-ordered neighbour list by atom ID</td>
+                </tr>
+                <tr>
+                  <td>iatom&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The vector index of the current particle</td>
+                </tr>
+                <tr>
+                  <td>num_staggrd&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The number of staggered bonds that the current particle participates in</td>
+                </tr>
+                <tr>
+                  <td>num_eclipsd&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The number of eclipsed bonds that the current particle participates in</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>a bool; true if the particle is interfacial and otherwise false</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Function that checks if the particle with the given atom index is interfacial or not.</p>
+          </div></section>
+          <section class="m-doc-details" id="gac22f6b4686eacecb745080411c41f45f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">int </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gac22f6b4686eacecb745080411c41f45f" class="m-doc-self">numStaggered</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              int jatom)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bop_8hpp.html">&lt;src/include/internal/bop.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">yCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The input <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a></td>
+                </tr>
+                <tr>
+                  <td>nList&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Row-ordered neighbour list by atom ID</td>
+                </tr>
+                <tr>
+                  <td>jatom&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The vector index of the current particle</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>an int value, holding the number of staggered bonds of the given particle</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Calculates the number of staggered bonds of an atom with the given index.</p>
+          </div></section>
+          <section class="m-doc-details" id="gaa9220b76da7400c9d934fa08ceeeba7a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;std::complex&lt;double&gt;&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gaa9220b76da7400c9d934fa08ceeeba7a" class="m-doc-self">spheriHarmo</a>(</span><span class="m-doc-wrap">int orderL,
+              std::array&lt;double, 2&gt; radialCoord)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bop_8hpp.html">&lt;src/include/internal/bop.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">orderL&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The int value of <svg class="m-math" style="width: 0.391em; height: 0.865em;" viewBox="0 -8.302191 3.749808 8.302191">
+<title>
+$l$
+</title>
+<defs>
+<path id='eq13-g0-108' d='M3.036613 -7.998007C3.048568 -8.045828 3.072478 -8.117559 3.072478 -8.177335C3.072478 -8.296887 2.952927 -8.296887 2.929016 -8.296887C2.917061 -8.296887 2.486675 -8.261021 2.271482 -8.237111C2.068244 -8.225156 1.888917 -8.201245 1.673724 -8.18929C1.3868 -8.16538 1.303113 -8.153425 1.303113 -7.938232C1.303113 -7.81868 1.422665 -7.81868 1.542217 -7.81868C2.15193 -7.81868 2.15193 -7.711083 2.15193 -7.591532C2.15193 -7.543711 2.15193 -7.519801 2.092154 -7.304608L0.609714 -1.374844C0.573848 -1.243337 0.549938 -1.147696 0.549938 -0.956413C0.549938 -0.358655 0.992279 0.119552 1.601993 0.119552C1.996513 0.119552 2.259527 -0.143462 2.450809 -0.514072C2.654047 -0.908593 2.82142 -1.661768 2.82142 -1.709589C2.82142 -1.769365 2.773599 -1.817186 2.701868 -1.817186C2.594271 -1.817186 2.582316 -1.75741 2.534496 -1.578082C2.319303 -0.753176 2.10411 -0.119552 1.625903 -0.119552C1.267248 -0.119552 1.267248 -0.502117 1.267248 -0.669489C1.267248 -0.71731 1.267248 -0.968369 1.350934 -1.303113L3.036613 -7.998007Z'/>
+</defs>
+<g id='eq13-page1'>
+<use x='0' y='0' xlink:href='#eq13-g0-108'/>
+</g>
+</svg></td>
+                </tr>
+                <tr>
+                  <td>radialCoord&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Array containing the polar and azimuth angles</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>a complex vector, holding the complex spherical harmonics values, of length <svg class="m-math" style="width: 3.112em; height: 0.960em;" viewBox="0 -8.302191 29.873767 9.215393">
+<title>
+$2l+1$
+</title>
+<defs>
+<path id='eq14-g0-108' d='M3.036613 -7.998007C3.048568 -8.045828 3.072478 -8.117559 3.072478 -8.177335C3.072478 -8.296887 2.952927 -8.296887 2.929016 -8.296887C2.917061 -8.296887 2.486675 -8.261021 2.271482 -8.237111C2.068244 -8.225156 1.888917 -8.201245 1.673724 -8.18929C1.3868 -8.16538 1.303113 -8.153425 1.303113 -7.938232C1.303113 -7.81868 1.422665 -7.81868 1.542217 -7.81868C2.15193 -7.81868 2.15193 -7.711083 2.15193 -7.591532C2.15193 -7.543711 2.15193 -7.519801 2.092154 -7.304608L0.609714 -1.374844C0.573848 -1.243337 0.549938 -1.147696 0.549938 -0.956413C0.549938 -0.358655 0.992279 0.119552 1.601993 0.119552C1.996513 0.119552 2.259527 -0.143462 2.450809 -0.514072C2.654047 -0.908593 2.82142 -1.661768 2.82142 -1.709589C2.82142 -1.769365 2.773599 -1.817186 2.701868 -1.817186C2.594271 -1.817186 2.582316 -1.75741 2.534496 -1.578082C2.319303 -0.753176 2.10411 -0.119552 1.625903 -0.119552C1.267248 -0.119552 1.267248 -0.502117 1.267248 -0.669489C1.267248 -0.71731 1.267248 -0.968369 1.350934 -1.303113L3.036613 -7.998007Z'/>
+<path id='eq14-g1-43' d='M4.770112 -2.761644H8.069738C8.237111 -2.761644 8.452304 -2.761644 8.452304 -2.976837C8.452304 -3.203985 8.249066 -3.203985 8.069738 -3.203985H4.770112V-6.503611C4.770112 -6.670984 4.770112 -6.886177 4.554919 -6.886177C4.327771 -6.886177 4.327771 -6.682939 4.327771 -6.503611V-3.203985H1.028144C0.860772 -3.203985 0.645579 -3.203985 0.645579 -2.988792C0.645579 -2.761644 0.848817 -2.761644 1.028144 -2.761644H4.327771V0.537983C4.327771 0.705355 4.327771 0.920548 4.542964 0.920548C4.770112 0.920548 4.770112 0.71731 4.770112 0.537983V-2.761644Z'/>
+<path id='eq14-g1-49' d='M3.443088 -7.663263C3.443088 -7.938232 3.443088 -7.950187 3.203985 -7.950187C2.917061 -7.627397 2.319303 -7.185056 1.08792 -7.185056V-6.838356C1.362889 -6.838356 1.960648 -6.838356 2.618182 -7.149191V-0.920548C2.618182 -0.490162 2.582316 -0.3467 1.530262 -0.3467H1.159651V0C1.482441 -0.02391 2.642092 -0.02391 3.036613 -0.02391S4.578829 -0.02391 4.901619 0V-0.3467H4.531009C3.478954 -0.3467 3.443088 -0.490162 3.443088 -0.920548V-7.663263Z'/>
+<path id='eq14-g1-50' d='M5.260274 -2.008468H4.99726C4.961395 -1.80523 4.865753 -1.147696 4.746202 -0.956413C4.662516 -0.848817 3.981071 -0.848817 3.622416 -0.848817H1.41071C1.733499 -1.123786 2.462765 -1.888917 2.773599 -2.175841C4.590785 -3.849564 5.260274 -4.471233 5.260274 -5.654795C5.260274 -7.029639 4.172354 -7.950187 2.785554 -7.950187S0.585803 -6.766625 0.585803 -5.738481C0.585803 -5.128767 1.111831 -5.128767 1.147696 -5.128767C1.398755 -5.128767 1.709589 -5.308095 1.709589 -5.69066C1.709589 -6.025405 1.482441 -6.252553 1.147696 -6.252553C1.0401 -6.252553 1.016189 -6.252553 0.980324 -6.240598C1.207472 -7.053549 1.853051 -7.603487 2.630137 -7.603487C3.646326 -7.603487 4.267995 -6.75467 4.267995 -5.654795C4.267995 -4.638605 3.682192 -3.753923 3.000747 -2.988792L0.585803 -0.286924V0H4.94944L5.260274 -2.008468Z'/>
+</defs>
+<g id='eq14-page1'>
+<use x='0' y='0' xlink:href='#eq14-g1-50'/>
+<use x='5.85299' y='0' xlink:href='#eq14-g0-108'/>
+<use x='12.259462' y='0' xlink:href='#eq14-g1-43'/>
+<use x='24.020777' y='0' xlink:href='#eq14-g1-49'/>
+</g>
+</svg></td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Function for calculating spherical harmonics, that works for a general <svg class="m-math" style="width: 0.391em; height: 0.865em;" viewBox="0 -8.302191 3.749808 8.302191">
+<title>
+$l$
+</title>
+<defs>
+<path id='eq12-g0-108' d='M3.036613 -7.998007C3.048568 -8.045828 3.072478 -8.117559 3.072478 -8.177335C3.072478 -8.296887 2.952927 -8.296887 2.929016 -8.296887C2.917061 -8.296887 2.486675 -8.261021 2.271482 -8.237111C2.068244 -8.225156 1.888917 -8.201245 1.673724 -8.18929C1.3868 -8.16538 1.303113 -8.153425 1.303113 -7.938232C1.303113 -7.81868 1.422665 -7.81868 1.542217 -7.81868C2.15193 -7.81868 2.15193 -7.711083 2.15193 -7.591532C2.15193 -7.543711 2.15193 -7.519801 2.092154 -7.304608L0.609714 -1.374844C0.573848 -1.243337 0.549938 -1.147696 0.549938 -0.956413C0.549938 -0.358655 0.992279 0.119552 1.601993 0.119552C1.996513 0.119552 2.259527 -0.143462 2.450809 -0.514072C2.654047 -0.908593 2.82142 -1.661768 2.82142 -1.709589C2.82142 -1.769365 2.773599 -1.817186 2.701868 -1.817186C2.594271 -1.817186 2.582316 -1.75741 2.534496 -1.578082C2.319303 -0.753176 2.10411 -0.119552 1.625903 -0.119552C1.267248 -0.119552 1.267248 -0.502117 1.267248 -0.669489C1.267248 -0.71731 1.267248 -0.968369 1.350934 -1.303113L3.036613 -7.998007Z'/>
+</defs>
+<g id='eq12-page1'>
+<use x='0' y='0' xlink:href='#eq12-g0-108'/>
+</g>
+</svg>.</p><p>This function uses the <a href="https://www.boost.org/">Boost</a> libraries.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga514fadfbfeabee5d144ef4102fb3004d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::array&lt;double, 2&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga514fadfbfeabee5d144ef4102fb3004d" class="m-doc-self">radialCoord</a>(</span><span class="m-doc-wrap">std::array&lt;double, 3&gt; cartCoord)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bop_8hpp.html">&lt;src/include/internal/bop.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">cartCoord&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The Cartesian coordinates of a particular point</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>a double array, holding the azimuth and polar angles</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Function for the azimuth and polar angles, given the Cartesian coordinates</p><p>This function uses the <a href="https://www.boost.org/">Boost</a> libraries.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga08491bfa3fa2f6bacdf997be433508c4"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;std::complex&lt;double&gt;&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga08491bfa3fa2f6bacdf997be433508c4" class="m-doc-self">lookupTableQ3Vec</a>(</span><span class="m-doc-wrap">std::array&lt;double, 2&gt; angles)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bop_8hpp.html">&lt;src/include/internal/bop.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">angles&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The azimuth and polar angles of a particular point</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>a complex vector, of length <svg class="m-math" style="width: 0.610em; height: 0.803em;" viewBox="0 -7.704442 5.85299 7.704442">
+<title>
+$7$
+</title>
+<defs>
+<path id='eq16-g0-55' d='M5.678705 -7.424159V-7.699128H2.797509C1.350934 -7.699128 1.327024 -7.854545 1.279203 -8.081694H1.016189L0.645579 -5.69066H0.908593C0.944458 -5.905853 1.052055 -6.647073 1.207472 -6.77858C1.303113 -6.850311 2.199751 -6.850311 2.367123 -6.850311H4.901619L3.634371 -5.033126C3.311582 -4.566874 2.10411 -2.606227 2.10411 -0.358655C2.10411 -0.227148 2.10411 0.251059 2.594271 0.251059C3.096389 0.251059 3.096389 -0.215193 3.096389 -0.37061V-0.968369C3.096389 -2.749689 3.383313 -4.136488 3.945205 -4.937484L5.678705 -7.424159Z'/>
+</defs>
+<g id='eq16-page1'>
+<use x='0' y='0' xlink:href='#eq16-g0-55'/>
+</g>
+</svg>, calculated using spherical harmonics</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Calculates <svg class="m-math" style="width: 1.407em; height: 1.093em;" viewBox="0 -8.169366 13.505431 10.493973">
+<title>
+$Q_3$
+</title>
+<defs>
+<path id='eq15-g1-51' d='M2.016438 -2.662017C2.646077 -2.662017 3.044583 -2.199751 3.044583 -1.362889C3.044583 -0.366625 2.478705 -0.071731 2.056289 -0.071731C1.617933 -0.071731 1.020174 -0.231133 0.74122 -0.653549C1.028144 -0.653549 1.227397 -0.836862 1.227397 -1.099875C1.227397 -1.354919 1.044085 -1.538232 0.789041 -1.538232C0.573848 -1.538232 0.350685 -1.40274 0.350685 -1.083935C0.350685 -0.326775 1.163636 0.167372 2.072229 0.167372C3.132254 0.167372 3.873474 -0.565878 3.873474 -1.362889C3.873474 -2.024408 3.347447 -2.630137 2.534496 -2.805479C3.164134 -3.028643 3.634371 -3.57061 3.634371 -4.208219S2.917061 -5.300125 2.088169 -5.300125C1.235367 -5.300125 0.589788 -4.837858 0.589788 -4.23213C0.589788 -3.937235 0.789041 -3.809714 0.996264 -3.809714C1.243337 -3.809714 1.40274 -3.985056 1.40274 -4.216189C1.40274 -4.511083 1.147696 -4.622665 0.972354 -4.630635C1.307098 -5.068991 1.920797 -5.092902 2.064259 -5.092902C2.271482 -5.092902 2.87721 -5.029141 2.87721 -4.208219C2.87721 -3.650311 2.646077 -3.315567 2.534496 -3.188045C2.295392 -2.940971 2.11208 -2.925031 1.625903 -2.893151C1.474471 -2.885181 1.41071 -2.87721 1.41071 -2.773599C1.41071 -2.662017 1.482441 -2.662017 1.617933 -2.662017H2.016438Z'/>
+<path id='eq15-g0-81' d='M5.092902 -0.071731C7.149191 -0.896638 8.679452 -3.072478 8.679452 -5.236364C8.679452 -7.208966 7.388294 -8.416438 5.71457 -8.416438C3.156164 -8.416438 0.573848 -5.66675 0.573848 -2.905106C0.573848 -1.028144 1.817186 0.251059 3.550685 0.251059C3.957161 0.251059 4.351681 0.191283 4.734247 0.071731C4.662516 0.789041 4.662516 0.848817 4.662516 1.075965C4.662516 1.422665 4.662516 2.319303 5.618929 2.319303C7.041594 2.319303 7.567621 0.083686 7.567621 0.011955S7.519801 -0.107597 7.460025 -0.107597C7.388294 -0.107597 7.364384 -0.047821 7.328518 0.083686C7.065504 0.836862 6.443836 1.267248 5.917808 1.267248C5.308095 1.267248 5.152677 0.848817 5.092902 -0.071731ZM2.940971 -0.131507C1.996513 -0.454296 1.542217 -1.446575 1.542217 -2.546451C1.542217 -3.383313 1.853051 -4.97335 2.642092 -6.180822C3.526775 -7.543711 4.710336 -8.153425 5.642839 -8.153425C6.886177 -8.153425 7.723039 -7.149191 7.723039 -5.595019C7.723039 -4.710336 7.304608 -1.745455 5.057036 -0.430386C4.99726 -1.0401 4.829888 -1.75741 4.040847 -1.75741C3.395268 -1.75741 2.84533 -1.111831 2.84533 -0.526027C2.84533 -0.394521 2.893151 -0.215193 2.940971 -0.131507ZM4.758157 -0.274969C4.327771 -0.083686 3.957161 -0.011955 3.622416 -0.011955C3.502864 -0.011955 3.084433 -0.011955 3.084433 -0.537983C3.084433 -0.968369 3.502864 -1.518306 4.040847 -1.518306C4.638605 -1.518306 4.770112 -1.111831 4.770112 -0.514072C4.770112 -0.442341 4.770112 -0.3467 4.758157 -0.274969Z'/>
+</defs>
+<g id='eq15-page1'>
+<use x='0' y='0' xlink:href='#eq15-g0-81'/>
+<use x='9.271248' y='1.793263' xlink:href='#eq15-g1-51'/>
+</g>
+</svg> using hard-coded look-up values.</p><p>It is recommended to use the Boost version of this function, <a href="group__chill.html#gaa9220b76da7400c9d934fa08ceeeba7a" class="m-doc">sph::<wbr />spheriHarmo</a>, instead.</p>
+          </div></section>
+          <section class="m-doc-details" id="gaccbcfa30cf3762a55c59e7b632117af5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::complex&lt;double&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gaccbcfa30cf3762a55c59e7b632117af5" class="m-doc-self">lookupTableQ3</a>(</span><span class="m-doc-wrap">int m,
+              std::array&lt;double, 2&gt; angles)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bop_8hpp.html">&lt;src/include/internal/bop.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">m&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>An int such that <svg class="m-math" style="width: 8.432em; height: 0.906em;" viewBox="0 -7.704442 80.945668 8.700714">
+<title>
+$-3&lt;=m&lt;=3$
+</title>
+<defs>
+<path id='eq18-g1-60' d='M7.878456 -5.822167C8.093649 -5.917808 8.117559 -6.001494 8.117559 -6.073225C8.117559 -6.204732 8.021918 -6.300374 7.890411 -6.300374C7.866501 -6.300374 7.854545 -6.288418 7.687173 -6.216687L1.219427 -3.239851C1.004234 -3.144209 0.980324 -3.060523 0.980324 -2.988792C0.980324 -2.905106 0.992279 -2.833375 1.219427 -2.725778L7.687173 0.251059C7.84259 0.32279 7.866501 0.334745 7.890411 0.334745C8.021918 0.334745 8.117559 0.239103 8.117559 0.107597C8.117559 0.035866 8.093649 -0.047821 7.878456 -0.143462L1.721544 -2.976837L7.878456 -5.822167Z'/>
+<path id='eq18-g1-109' d='M2.462765 -3.502864C2.486675 -3.574595 2.785554 -4.172354 3.227895 -4.554919C3.53873 -4.841843 3.945205 -5.033126 4.411457 -5.033126C4.889664 -5.033126 5.057036 -4.674471 5.057036 -4.196264C5.057036 -4.124533 5.057036 -3.88543 4.913574 -3.323537L4.614695 -2.092154C4.519054 -1.733499 4.291905 -0.848817 4.267995 -0.71731C4.220174 -0.537983 4.148443 -0.227148 4.148443 -0.179328C4.148443 -0.011955 4.27995 0.119552 4.459278 0.119552C4.817933 0.119552 4.877709 -0.155417 4.985305 -0.585803L5.702615 -3.443088C5.726526 -3.53873 6.348194 -5.033126 7.663263 -5.033126C8.141469 -5.033126 8.308842 -4.674471 8.308842 -4.196264C8.308842 -3.526775 7.84259 -2.223661 7.579577 -1.506351C7.47198 -1.219427 7.412204 -1.06401 7.412204 -0.848817C7.412204 -0.310834 7.782814 0.119552 8.356663 0.119552C9.468493 0.119552 9.886924 -1.637858 9.886924 -1.709589C9.886924 -1.769365 9.839103 -1.817186 9.767372 -1.817186C9.659776 -1.817186 9.647821 -1.78132 9.588045 -1.578082C9.313076 -0.621669 8.870735 -0.119552 8.392528 -0.119552C8.272976 -0.119552 8.081694 -0.131507 8.081694 -0.514072C8.081694 -0.824907 8.225156 -1.207472 8.272976 -1.338979C8.488169 -1.912827 9.026152 -3.323537 9.026152 -4.016936C9.026152 -4.734247 8.607721 -5.272229 7.699128 -5.272229C6.898132 -5.272229 6.252553 -4.817933 5.774346 -4.112578C5.738481 -4.758157 5.34396 -5.272229 4.447323 -5.272229C3.383313 -5.272229 2.82142 -4.519054 2.606227 -4.220174C2.570361 -4.901619 2.080199 -5.272229 1.554172 -5.272229C1.207472 -5.272229 0.932503 -5.104857 0.705355 -4.65056C0.490162 -4.220174 0.32279 -3.490909 0.32279 -3.443088S0.37061 -3.335492 0.454296 -3.335492C0.549938 -3.335492 0.561893 -3.347447 0.633624 -3.622416C0.812951 -4.327771 1.0401 -5.033126 1.518306 -5.033126C1.793275 -5.033126 1.888917 -4.841843 1.888917 -4.483188C1.888917 -4.220174 1.769365 -3.753923 1.685679 -3.383313L1.350934 -2.092154C1.303113 -1.865006 1.171606 -1.327024 1.111831 -1.111831C1.028144 -0.800996 0.896638 -0.239103 0.896638 -0.179328C0.896638 -0.011955 1.028144 0.119552 1.207472 0.119552C1.350934 0.119552 1.518306 0.047821 1.613948 -0.131507C1.637858 -0.191283 1.745455 -0.609714 1.80523 -0.848817L2.068244 -1.924782L2.462765 -3.502864Z'/>
+<path id='eq18-g2-51' d='M2.199751 -4.291905C1.996513 -4.27995 1.948692 -4.267995 1.948692 -4.160399C1.948692 -4.040847 2.008468 -4.040847 2.223661 -4.040847H2.773599C3.789788 -4.040847 4.244085 -3.203985 4.244085 -2.056289C4.244085 -0.490162 3.431133 -0.071731 2.84533 -0.071731C2.271482 -0.071731 1.291158 -0.3467 0.944458 -1.135741C1.327024 -1.075965 1.673724 -1.291158 1.673724 -1.721544C1.673724 -2.068244 1.422665 -2.307347 1.08792 -2.307347C0.800996 -2.307347 0.490162 -2.139975 0.490162 -1.685679C0.490162 -0.621669 1.554172 0.251059 2.881196 0.251059C4.303861 0.251059 5.355915 -0.836862 5.355915 -2.044334C5.355915 -3.144209 4.471233 -4.004981 3.323537 -4.208219C4.363636 -4.507098 5.033126 -5.379826 5.033126 -6.312329C5.033126 -7.256787 4.052802 -7.950187 2.893151 -7.950187C1.697634 -7.950187 0.812951 -7.220922 0.812951 -6.348194C0.812951 -5.869988 1.183562 -5.774346 1.362889 -5.774346C1.613948 -5.774346 1.900872 -5.953674 1.900872 -6.312329C1.900872 -6.694894 1.613948 -6.862267 1.350934 -6.862267C1.279203 -6.862267 1.255293 -6.862267 1.219427 -6.850311C1.673724 -7.663263 2.797509 -7.663263 2.857285 -7.663263C3.251806 -7.663263 4.028892 -7.483935 4.028892 -6.312329C4.028892 -6.085181 3.993026 -5.415691 3.646326 -4.901619C3.287671 -4.375592 2.881196 -4.339726 2.558406 -4.327771L2.199751 -4.291905Z'/>
+<path id='eq18-g2-61' d='M8.069738 -3.873474C8.237111 -3.873474 8.452304 -3.873474 8.452304 -4.088667C8.452304 -4.315816 8.249066 -4.315816 8.069738 -4.315816H1.028144C0.860772 -4.315816 0.645579 -4.315816 0.645579 -4.100623C0.645579 -3.873474 0.848817 -3.873474 1.028144 -3.873474H8.069738ZM8.069738 -1.649813C8.237111 -1.649813 8.452304 -1.649813 8.452304 -1.865006C8.452304 -2.092154 8.249066 -2.092154 8.069738 -2.092154H1.028144C0.860772 -2.092154 0.645579 -2.092154 0.645579 -1.876961C0.645579 -1.649813 0.848817 -1.649813 1.028144 -1.649813H8.069738Z'/>
+<path id='eq18-g0-0' d='M7.878456 -2.749689C8.081694 -2.749689 8.296887 -2.749689 8.296887 -2.988792S8.081694 -3.227895 7.878456 -3.227895H1.41071C1.207472 -3.227895 0.992279 -3.227895 0.992279 -2.988792S1.207472 -2.749689 1.41071 -2.749689H7.878456Z'/>
+</defs>
+<g id='eq18-page1'>
+<use x='0' y='0' xlink:href='#eq18-g0-0'/>
+<use x='9.298497' y='0' xlink:href='#eq18-g2-51'/>
+<use x='18.472317' y='0' xlink:href='#eq18-g1-60'/>
+<use x='27.576968' y='0' xlink:href='#eq18-g2-61'/>
+<use x='40.002449' y='0' xlink:href='#eq18-g1-109'/>
+<use x='53.562545' y='0' xlink:href='#eq18-g1-60'/>
+<use x='62.667197' y='0' xlink:href='#eq18-g2-61'/>
+<use x='75.092678' y='0' xlink:href='#eq18-g2-51'/>
+</g>
+</svg></td>
+                </tr>
+                <tr>
+                  <td>angles&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The azimuth and polar angles for a particular particle</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>a complex vector, of length <svg class="m-math" style="width: 0.610em; height: 0.803em;" viewBox="0 -7.704442 5.85299 7.704442">
+<title>
+$7$
+</title>
+<defs>
+<path id='eq19-g0-55' d='M5.678705 -7.424159V-7.699128H2.797509C1.350934 -7.699128 1.327024 -7.854545 1.279203 -8.081694H1.016189L0.645579 -5.69066H0.908593C0.944458 -5.905853 1.052055 -6.647073 1.207472 -6.77858C1.303113 -6.850311 2.199751 -6.850311 2.367123 -6.850311H4.901619L3.634371 -5.033126C3.311582 -4.566874 2.10411 -2.606227 2.10411 -0.358655C2.10411 -0.227148 2.10411 0.251059 2.594271 0.251059C3.096389 0.251059 3.096389 -0.215193 3.096389 -0.37061V-0.968369C3.096389 -2.749689 3.383313 -4.136488 3.945205 -4.937484L5.678705 -7.424159Z'/>
+</defs>
+<g id='eq19-page1'>
+<use x='0' y='0' xlink:href='#eq19-g0-55'/>
+</g>
+</svg>, calculated using hard-coded values</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Look-up hard-coded values for <svg class="m-math" style="width: 1.407em; height: 1.093em;" viewBox="0 -8.169366 13.505431 10.493973">
+<title>
+$Q_3$
+</title>
+<defs>
+<path id='eq17-g1-51' d='M2.016438 -2.662017C2.646077 -2.662017 3.044583 -2.199751 3.044583 -1.362889C3.044583 -0.366625 2.478705 -0.071731 2.056289 -0.071731C1.617933 -0.071731 1.020174 -0.231133 0.74122 -0.653549C1.028144 -0.653549 1.227397 -0.836862 1.227397 -1.099875C1.227397 -1.354919 1.044085 -1.538232 0.789041 -1.538232C0.573848 -1.538232 0.350685 -1.40274 0.350685 -1.083935C0.350685 -0.326775 1.163636 0.167372 2.072229 0.167372C3.132254 0.167372 3.873474 -0.565878 3.873474 -1.362889C3.873474 -2.024408 3.347447 -2.630137 2.534496 -2.805479C3.164134 -3.028643 3.634371 -3.57061 3.634371 -4.208219S2.917061 -5.300125 2.088169 -5.300125C1.235367 -5.300125 0.589788 -4.837858 0.589788 -4.23213C0.589788 -3.937235 0.789041 -3.809714 0.996264 -3.809714C1.243337 -3.809714 1.40274 -3.985056 1.40274 -4.216189C1.40274 -4.511083 1.147696 -4.622665 0.972354 -4.630635C1.307098 -5.068991 1.920797 -5.092902 2.064259 -5.092902C2.271482 -5.092902 2.87721 -5.029141 2.87721 -4.208219C2.87721 -3.650311 2.646077 -3.315567 2.534496 -3.188045C2.295392 -2.940971 2.11208 -2.925031 1.625903 -2.893151C1.474471 -2.885181 1.41071 -2.87721 1.41071 -2.773599C1.41071 -2.662017 1.482441 -2.662017 1.617933 -2.662017H2.016438Z'/>
+<path id='eq17-g0-81' d='M5.092902 -0.071731C7.149191 -0.896638 8.679452 -3.072478 8.679452 -5.236364C8.679452 -7.208966 7.388294 -8.416438 5.71457 -8.416438C3.156164 -8.416438 0.573848 -5.66675 0.573848 -2.905106C0.573848 -1.028144 1.817186 0.251059 3.550685 0.251059C3.957161 0.251059 4.351681 0.191283 4.734247 0.071731C4.662516 0.789041 4.662516 0.848817 4.662516 1.075965C4.662516 1.422665 4.662516 2.319303 5.618929 2.319303C7.041594 2.319303 7.567621 0.083686 7.567621 0.011955S7.519801 -0.107597 7.460025 -0.107597C7.388294 -0.107597 7.364384 -0.047821 7.328518 0.083686C7.065504 0.836862 6.443836 1.267248 5.917808 1.267248C5.308095 1.267248 5.152677 0.848817 5.092902 -0.071731ZM2.940971 -0.131507C1.996513 -0.454296 1.542217 -1.446575 1.542217 -2.546451C1.542217 -3.383313 1.853051 -4.97335 2.642092 -6.180822C3.526775 -7.543711 4.710336 -8.153425 5.642839 -8.153425C6.886177 -8.153425 7.723039 -7.149191 7.723039 -5.595019C7.723039 -4.710336 7.304608 -1.745455 5.057036 -0.430386C4.99726 -1.0401 4.829888 -1.75741 4.040847 -1.75741C3.395268 -1.75741 2.84533 -1.111831 2.84533 -0.526027C2.84533 -0.394521 2.893151 -0.215193 2.940971 -0.131507ZM4.758157 -0.274969C4.327771 -0.083686 3.957161 -0.011955 3.622416 -0.011955C3.502864 -0.011955 3.084433 -0.011955 3.084433 -0.537983C3.084433 -0.968369 3.502864 -1.518306 4.040847 -1.518306C4.638605 -1.518306 4.770112 -1.111831 4.770112 -0.514072C4.770112 -0.442341 4.770112 -0.3467 4.758157 -0.274969Z'/>
+</defs>
+<g id='eq17-page1'>
+<use x='0' y='0' xlink:href='#eq17-g0-81'/>
+<use x='9.271248' y='1.793263' xlink:href='#eq17-g1-51'/>
+</g>
+</svg></p><p>It is recommended to use the Boost version of this function, <a href="group__chill.html#gaa9220b76da7400c9d934fa08ceeeba7a" class="m-doc">sph::<wbr />spheriHarmo</a>, instead.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga004e7b144d261654c556c7e66fdd9b2e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;std::complex&lt;double&gt;&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga004e7b144d261654c556c7e66fdd9b2e" class="m-doc-self">lookupTableQ6Vec</a>(</span><span class="m-doc-wrap">std::array&lt;double, 2&gt; angles)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bop_8hpp.html">&lt;src/include/internal/bop.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">angles&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The azimuth and polar angles for a particular particle</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>a complex vector, of length <svg class="m-math" style="width: 1.219em; height: 0.803em;" viewBox="0 -7.704442 11.705981 7.704442">
+<title>
+$13$
+</title>
+<defs>
+<path id='eq21-g0-49' d='M3.443088 -7.663263C3.443088 -7.938232 3.443088 -7.950187 3.203985 -7.950187C2.917061 -7.627397 2.319303 -7.185056 1.08792 -7.185056V-6.838356C1.362889 -6.838356 1.960648 -6.838356 2.618182 -7.149191V-0.920548C2.618182 -0.490162 2.582316 -0.3467 1.530262 -0.3467H1.159651V0C1.482441 -0.02391 2.642092 -0.02391 3.036613 -0.02391S4.578829 -0.02391 4.901619 0V-0.3467H4.531009C3.478954 -0.3467 3.443088 -0.490162 3.443088 -0.920548V-7.663263Z'/>
+<path id='eq21-g0-51' d='M2.199751 -4.291905C1.996513 -4.27995 1.948692 -4.267995 1.948692 -4.160399C1.948692 -4.040847 2.008468 -4.040847 2.223661 -4.040847H2.773599C3.789788 -4.040847 4.244085 -3.203985 4.244085 -2.056289C4.244085 -0.490162 3.431133 -0.071731 2.84533 -0.071731C2.271482 -0.071731 1.291158 -0.3467 0.944458 -1.135741C1.327024 -1.075965 1.673724 -1.291158 1.673724 -1.721544C1.673724 -2.068244 1.422665 -2.307347 1.08792 -2.307347C0.800996 -2.307347 0.490162 -2.139975 0.490162 -1.685679C0.490162 -0.621669 1.554172 0.251059 2.881196 0.251059C4.303861 0.251059 5.355915 -0.836862 5.355915 -2.044334C5.355915 -3.144209 4.471233 -4.004981 3.323537 -4.208219C4.363636 -4.507098 5.033126 -5.379826 5.033126 -6.312329C5.033126 -7.256787 4.052802 -7.950187 2.893151 -7.950187C1.697634 -7.950187 0.812951 -7.220922 0.812951 -6.348194C0.812951 -5.869988 1.183562 -5.774346 1.362889 -5.774346C1.613948 -5.774346 1.900872 -5.953674 1.900872 -6.312329C1.900872 -6.694894 1.613948 -6.862267 1.350934 -6.862267C1.279203 -6.862267 1.255293 -6.862267 1.219427 -6.850311C1.673724 -7.663263 2.797509 -7.663263 2.857285 -7.663263C3.251806 -7.663263 4.028892 -7.483935 4.028892 -6.312329C4.028892 -6.085181 3.993026 -5.415691 3.646326 -4.901619C3.287671 -4.375592 2.881196 -4.339726 2.558406 -4.327771L2.199751 -4.291905Z'/>
+</defs>
+<g id='eq21-page1'>
+<use x='0' y='0' xlink:href='#eq21-g0-49'/>
+<use x='5.85299' y='0' xlink:href='#eq21-g0-51'/>
+</g>
+</svg>, calculated using hard-coded values</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Calculates <svg class="m-math" style="width: 1.407em; height: 1.093em;" viewBox="0 -8.169366 13.505431 10.493973">
+<title>
+$Q_6$
+</title>
+<defs>
+<path id='eq20-g1-54' d='M1.099875 -2.638107C1.099875 -3.299626 1.155666 -3.881445 1.44259 -4.367621C1.681694 -4.766127 2.088169 -5.092902 2.590286 -5.092902C2.749689 -5.092902 3.116314 -5.068991 3.299626 -4.790037C2.940971 -4.774097 2.909091 -4.503113 2.909091 -4.415442C2.909091 -4.176339 3.092403 -4.040847 3.283686 -4.040847C3.427148 -4.040847 3.658281 -4.128518 3.658281 -4.431382C3.658281 -4.909589 3.299626 -5.300125 2.582316 -5.300125C1.474471 -5.300125 0.350685 -4.24807 0.350685 -2.526526C0.350685 -0.366625 1.354919 0.167372 2.12802 0.167372C2.510585 0.167372 2.925031 0.063761 3.283686 -0.278954C3.602491 -0.589788 3.873474 -0.924533 3.873474 -1.617933C3.873474 -2.662017 3.084433 -3.395268 2.199751 -3.395268C1.625903 -3.395268 1.283188 -3.028643 1.099875 -2.638107ZM2.12802 -0.071731C1.705604 -0.071731 1.44259 -0.366625 1.323039 -0.589788C1.139726 -0.948443 1.123786 -1.490411 1.123786 -1.793275C1.123786 -2.582316 1.554172 -3.172105 2.16787 -3.172105C2.566376 -3.172105 2.805479 -2.964882 2.956912 -2.685928C3.124284 -2.391034 3.124284 -2.032379 3.124284 -1.625903S3.124284 -0.868742 2.964882 -0.581818C2.757659 -0.215193 2.478705 -0.071731 2.12802 -0.071731Z'/>
+<path id='eq20-g0-81' d='M5.092902 -0.071731C7.149191 -0.896638 8.679452 -3.072478 8.679452 -5.236364C8.679452 -7.208966 7.388294 -8.416438 5.71457 -8.416438C3.156164 -8.416438 0.573848 -5.66675 0.573848 -2.905106C0.573848 -1.028144 1.817186 0.251059 3.550685 0.251059C3.957161 0.251059 4.351681 0.191283 4.734247 0.071731C4.662516 0.789041 4.662516 0.848817 4.662516 1.075965C4.662516 1.422665 4.662516 2.319303 5.618929 2.319303C7.041594 2.319303 7.567621 0.083686 7.567621 0.011955S7.519801 -0.107597 7.460025 -0.107597C7.388294 -0.107597 7.364384 -0.047821 7.328518 0.083686C7.065504 0.836862 6.443836 1.267248 5.917808 1.267248C5.308095 1.267248 5.152677 0.848817 5.092902 -0.071731ZM2.940971 -0.131507C1.996513 -0.454296 1.542217 -1.446575 1.542217 -2.546451C1.542217 -3.383313 1.853051 -4.97335 2.642092 -6.180822C3.526775 -7.543711 4.710336 -8.153425 5.642839 -8.153425C6.886177 -8.153425 7.723039 -7.149191 7.723039 -5.595019C7.723039 -4.710336 7.304608 -1.745455 5.057036 -0.430386C4.99726 -1.0401 4.829888 -1.75741 4.040847 -1.75741C3.395268 -1.75741 2.84533 -1.111831 2.84533 -0.526027C2.84533 -0.394521 2.893151 -0.215193 2.940971 -0.131507ZM4.758157 -0.274969C4.327771 -0.083686 3.957161 -0.011955 3.622416 -0.011955C3.502864 -0.011955 3.084433 -0.011955 3.084433 -0.537983C3.084433 -0.968369 3.502864 -1.518306 4.040847 -1.518306C4.638605 -1.518306 4.770112 -1.111831 4.770112 -0.514072C4.770112 -0.442341 4.770112 -0.3467 4.758157 -0.274969Z'/>
+</defs>
+<g id='eq20-page1'>
+<use x='0' y='0' xlink:href='#eq20-g0-81'/>
+<use x='9.271248' y='1.793263' xlink:href='#eq20-g1-54'/>
+</g>
+</svg> using hard-coded values.</p><p>It is recommended to use the Boost version of this function, <a href="group__chill.html#gaa9220b76da7400c9d934fa08ceeeba7a" class="m-doc">sph::<wbr />spheriHarmo</a>, instead.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga63be01f86931b2a45e70606f5b8f545d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::complex&lt;double&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga63be01f86931b2a45e70606f5b8f545d" class="m-doc-self">lookupTableQ6</a>(</span><span class="m-doc-wrap">int m,
+              std::array&lt;double, 2&gt; angles)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bop_8hpp.html">&lt;src/include/internal/bop.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">m&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>An int such that <svg class="m-math" style="width: 8.432em; height: 0.906em;" viewBox="0 -7.704442 80.945668 8.700714">
+<title>
+$-6&lt;=m&lt;=6$
+</title>
+<defs>
+<path id='eq23-g1-60' d='M7.878456 -5.822167C8.093649 -5.917808 8.117559 -6.001494 8.117559 -6.073225C8.117559 -6.204732 8.021918 -6.300374 7.890411 -6.300374C7.866501 -6.300374 7.854545 -6.288418 7.687173 -6.216687L1.219427 -3.239851C1.004234 -3.144209 0.980324 -3.060523 0.980324 -2.988792C0.980324 -2.905106 0.992279 -2.833375 1.219427 -2.725778L7.687173 0.251059C7.84259 0.32279 7.866501 0.334745 7.890411 0.334745C8.021918 0.334745 8.117559 0.239103 8.117559 0.107597C8.117559 0.035866 8.093649 -0.047821 7.878456 -0.143462L1.721544 -2.976837L7.878456 -5.822167Z'/>
+<path id='eq23-g1-109' d='M2.462765 -3.502864C2.486675 -3.574595 2.785554 -4.172354 3.227895 -4.554919C3.53873 -4.841843 3.945205 -5.033126 4.411457 -5.033126C4.889664 -5.033126 5.057036 -4.674471 5.057036 -4.196264C5.057036 -4.124533 5.057036 -3.88543 4.913574 -3.323537L4.614695 -2.092154C4.519054 -1.733499 4.291905 -0.848817 4.267995 -0.71731C4.220174 -0.537983 4.148443 -0.227148 4.148443 -0.179328C4.148443 -0.011955 4.27995 0.119552 4.459278 0.119552C4.817933 0.119552 4.877709 -0.155417 4.985305 -0.585803L5.702615 -3.443088C5.726526 -3.53873 6.348194 -5.033126 7.663263 -5.033126C8.141469 -5.033126 8.308842 -4.674471 8.308842 -4.196264C8.308842 -3.526775 7.84259 -2.223661 7.579577 -1.506351C7.47198 -1.219427 7.412204 -1.06401 7.412204 -0.848817C7.412204 -0.310834 7.782814 0.119552 8.356663 0.119552C9.468493 0.119552 9.886924 -1.637858 9.886924 -1.709589C9.886924 -1.769365 9.839103 -1.817186 9.767372 -1.817186C9.659776 -1.817186 9.647821 -1.78132 9.588045 -1.578082C9.313076 -0.621669 8.870735 -0.119552 8.392528 -0.119552C8.272976 -0.119552 8.081694 -0.131507 8.081694 -0.514072C8.081694 -0.824907 8.225156 -1.207472 8.272976 -1.338979C8.488169 -1.912827 9.026152 -3.323537 9.026152 -4.016936C9.026152 -4.734247 8.607721 -5.272229 7.699128 -5.272229C6.898132 -5.272229 6.252553 -4.817933 5.774346 -4.112578C5.738481 -4.758157 5.34396 -5.272229 4.447323 -5.272229C3.383313 -5.272229 2.82142 -4.519054 2.606227 -4.220174C2.570361 -4.901619 2.080199 -5.272229 1.554172 -5.272229C1.207472 -5.272229 0.932503 -5.104857 0.705355 -4.65056C0.490162 -4.220174 0.32279 -3.490909 0.32279 -3.443088S0.37061 -3.335492 0.454296 -3.335492C0.549938 -3.335492 0.561893 -3.347447 0.633624 -3.622416C0.812951 -4.327771 1.0401 -5.033126 1.518306 -5.033126C1.793275 -5.033126 1.888917 -4.841843 1.888917 -4.483188C1.888917 -4.220174 1.769365 -3.753923 1.685679 -3.383313L1.350934 -2.092154C1.303113 -1.865006 1.171606 -1.327024 1.111831 -1.111831C1.028144 -0.800996 0.896638 -0.239103 0.896638 -0.179328C0.896638 -0.011955 1.028144 0.119552 1.207472 0.119552C1.350934 0.119552 1.518306 0.047821 1.613948 -0.131507C1.637858 -0.191283 1.745455 -0.609714 1.80523 -0.848817L2.068244 -1.924782L2.462765 -3.502864Z'/>
+<path id='eq23-g2-54' d='M1.470486 -4.160399C1.470486 -7.185056 2.940971 -7.663263 3.58655 -7.663263C4.016936 -7.663263 4.447323 -7.531756 4.674471 -7.173101C4.531009 -7.173101 4.076712 -7.173101 4.076712 -6.682939C4.076712 -6.419925 4.25604 -6.192777 4.566874 -6.192777C4.865753 -6.192777 5.068991 -6.372105 5.068991 -6.718804C5.068991 -7.340473 4.614695 -7.950187 3.574595 -7.950187C2.068244 -7.950187 0.490162 -6.40797 0.490162 -3.777833C0.490162 -0.490162 1.924782 0.251059 2.940971 0.251059C4.244085 0.251059 5.355915 -0.884682 5.355915 -2.438854C5.355915 -4.028892 4.244085 -5.092902 3.048568 -5.092902C1.984558 -5.092902 1.590037 -4.172354 1.470486 -3.837609V-4.160399ZM2.940971 -0.071731C2.187796 -0.071731 1.829141 -0.74122 1.721544 -0.992279C1.613948 -1.303113 1.494396 -1.888917 1.494396 -2.725778C1.494396 -3.670237 1.924782 -4.853798 3.000747 -4.853798C3.658281 -4.853798 4.004981 -4.411457 4.184309 -4.004981C4.375592 -3.56264 4.375592 -2.964882 4.375592 -2.450809C4.375592 -1.841096 4.375592 -1.303113 4.148443 -0.848817C3.849564 -0.274969 3.419178 -0.071731 2.940971 -0.071731Z'/>
+<path id='eq23-g2-61' d='M8.069738 -3.873474C8.237111 -3.873474 8.452304 -3.873474 8.452304 -4.088667C8.452304 -4.315816 8.249066 -4.315816 8.069738 -4.315816H1.028144C0.860772 -4.315816 0.645579 -4.315816 0.645579 -4.100623C0.645579 -3.873474 0.848817 -3.873474 1.028144 -3.873474H8.069738ZM8.069738 -1.649813C8.237111 -1.649813 8.452304 -1.649813 8.452304 -1.865006C8.452304 -2.092154 8.249066 -2.092154 8.069738 -2.092154H1.028144C0.860772 -2.092154 0.645579 -2.092154 0.645579 -1.876961C0.645579 -1.649813 0.848817 -1.649813 1.028144 -1.649813H8.069738Z'/>
+<path id='eq23-g0-0' d='M7.878456 -2.749689C8.081694 -2.749689 8.296887 -2.749689 8.296887 -2.988792S8.081694 -3.227895 7.878456 -3.227895H1.41071C1.207472 -3.227895 0.992279 -3.227895 0.992279 -2.988792S1.207472 -2.749689 1.41071 -2.749689H7.878456Z'/>
+</defs>
+<g id='eq23-page1'>
+<use x='0' y='0' xlink:href='#eq23-g0-0'/>
+<use x='9.298497' y='0' xlink:href='#eq23-g2-54'/>
+<use x='18.472317' y='0' xlink:href='#eq23-g1-60'/>
+<use x='27.576968' y='0' xlink:href='#eq23-g2-61'/>
+<use x='40.002449' y='0' xlink:href='#eq23-g1-109'/>
+<use x='53.562545' y='0' xlink:href='#eq23-g1-60'/>
+<use x='62.667197' y='0' xlink:href='#eq23-g2-61'/>
+<use x='75.092678' y='0' xlink:href='#eq23-g2-54'/>
+</g>
+</svg></td>
+                </tr>
+                <tr>
+                  <td>angles&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The azimuth and polar angles for a particular particle</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>a complex vector, of length <svg class="m-math" style="width: 1.219em; height: 0.803em;" viewBox="0 -7.704442 11.705981 7.704442">
+<title>
+$13$
+</title>
+<defs>
+<path id='eq24-g0-49' d='M3.443088 -7.663263C3.443088 -7.938232 3.443088 -7.950187 3.203985 -7.950187C2.917061 -7.627397 2.319303 -7.185056 1.08792 -7.185056V-6.838356C1.362889 -6.838356 1.960648 -6.838356 2.618182 -7.149191V-0.920548C2.618182 -0.490162 2.582316 -0.3467 1.530262 -0.3467H1.159651V0C1.482441 -0.02391 2.642092 -0.02391 3.036613 -0.02391S4.578829 -0.02391 4.901619 0V-0.3467H4.531009C3.478954 -0.3467 3.443088 -0.490162 3.443088 -0.920548V-7.663263Z'/>
+<path id='eq24-g0-51' d='M2.199751 -4.291905C1.996513 -4.27995 1.948692 -4.267995 1.948692 -4.160399C1.948692 -4.040847 2.008468 -4.040847 2.223661 -4.040847H2.773599C3.789788 -4.040847 4.244085 -3.203985 4.244085 -2.056289C4.244085 -0.490162 3.431133 -0.071731 2.84533 -0.071731C2.271482 -0.071731 1.291158 -0.3467 0.944458 -1.135741C1.327024 -1.075965 1.673724 -1.291158 1.673724 -1.721544C1.673724 -2.068244 1.422665 -2.307347 1.08792 -2.307347C0.800996 -2.307347 0.490162 -2.139975 0.490162 -1.685679C0.490162 -0.621669 1.554172 0.251059 2.881196 0.251059C4.303861 0.251059 5.355915 -0.836862 5.355915 -2.044334C5.355915 -3.144209 4.471233 -4.004981 3.323537 -4.208219C4.363636 -4.507098 5.033126 -5.379826 5.033126 -6.312329C5.033126 -7.256787 4.052802 -7.950187 2.893151 -7.950187C1.697634 -7.950187 0.812951 -7.220922 0.812951 -6.348194C0.812951 -5.869988 1.183562 -5.774346 1.362889 -5.774346C1.613948 -5.774346 1.900872 -5.953674 1.900872 -6.312329C1.900872 -6.694894 1.613948 -6.862267 1.350934 -6.862267C1.279203 -6.862267 1.255293 -6.862267 1.219427 -6.850311C1.673724 -7.663263 2.797509 -7.663263 2.857285 -7.663263C3.251806 -7.663263 4.028892 -7.483935 4.028892 -6.312329C4.028892 -6.085181 3.993026 -5.415691 3.646326 -4.901619C3.287671 -4.375592 2.881196 -4.339726 2.558406 -4.327771L2.199751 -4.291905Z'/>
+</defs>
+<g id='eq24-page1'>
+<use x='0' y='0' xlink:href='#eq24-g0-49'/>
+<use x='5.85299' y='0' xlink:href='#eq24-g0-51'/>
+</g>
+</svg>, calculated using hard-coded values</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Hard-coded calculations for determining <svg class="m-math" style="width: 1.407em; height: 1.093em;" viewBox="0 -8.169366 13.505431 10.493973">
+<title>
+$Q_6$
+</title>
+<defs>
+<path id='eq22-g1-54' d='M1.099875 -2.638107C1.099875 -3.299626 1.155666 -3.881445 1.44259 -4.367621C1.681694 -4.766127 2.088169 -5.092902 2.590286 -5.092902C2.749689 -5.092902 3.116314 -5.068991 3.299626 -4.790037C2.940971 -4.774097 2.909091 -4.503113 2.909091 -4.415442C2.909091 -4.176339 3.092403 -4.040847 3.283686 -4.040847C3.427148 -4.040847 3.658281 -4.128518 3.658281 -4.431382C3.658281 -4.909589 3.299626 -5.300125 2.582316 -5.300125C1.474471 -5.300125 0.350685 -4.24807 0.350685 -2.526526C0.350685 -0.366625 1.354919 0.167372 2.12802 0.167372C2.510585 0.167372 2.925031 0.063761 3.283686 -0.278954C3.602491 -0.589788 3.873474 -0.924533 3.873474 -1.617933C3.873474 -2.662017 3.084433 -3.395268 2.199751 -3.395268C1.625903 -3.395268 1.283188 -3.028643 1.099875 -2.638107ZM2.12802 -0.071731C1.705604 -0.071731 1.44259 -0.366625 1.323039 -0.589788C1.139726 -0.948443 1.123786 -1.490411 1.123786 -1.793275C1.123786 -2.582316 1.554172 -3.172105 2.16787 -3.172105C2.566376 -3.172105 2.805479 -2.964882 2.956912 -2.685928C3.124284 -2.391034 3.124284 -2.032379 3.124284 -1.625903S3.124284 -0.868742 2.964882 -0.581818C2.757659 -0.215193 2.478705 -0.071731 2.12802 -0.071731Z'/>
+<path id='eq22-g0-81' d='M5.092902 -0.071731C7.149191 -0.896638 8.679452 -3.072478 8.679452 -5.236364C8.679452 -7.208966 7.388294 -8.416438 5.71457 -8.416438C3.156164 -8.416438 0.573848 -5.66675 0.573848 -2.905106C0.573848 -1.028144 1.817186 0.251059 3.550685 0.251059C3.957161 0.251059 4.351681 0.191283 4.734247 0.071731C4.662516 0.789041 4.662516 0.848817 4.662516 1.075965C4.662516 1.422665 4.662516 2.319303 5.618929 2.319303C7.041594 2.319303 7.567621 0.083686 7.567621 0.011955S7.519801 -0.107597 7.460025 -0.107597C7.388294 -0.107597 7.364384 -0.047821 7.328518 0.083686C7.065504 0.836862 6.443836 1.267248 5.917808 1.267248C5.308095 1.267248 5.152677 0.848817 5.092902 -0.071731ZM2.940971 -0.131507C1.996513 -0.454296 1.542217 -1.446575 1.542217 -2.546451C1.542217 -3.383313 1.853051 -4.97335 2.642092 -6.180822C3.526775 -7.543711 4.710336 -8.153425 5.642839 -8.153425C6.886177 -8.153425 7.723039 -7.149191 7.723039 -5.595019C7.723039 -4.710336 7.304608 -1.745455 5.057036 -0.430386C4.99726 -1.0401 4.829888 -1.75741 4.040847 -1.75741C3.395268 -1.75741 2.84533 -1.111831 2.84533 -0.526027C2.84533 -0.394521 2.893151 -0.215193 2.940971 -0.131507ZM4.758157 -0.274969C4.327771 -0.083686 3.957161 -0.011955 3.622416 -0.011955C3.502864 -0.011955 3.084433 -0.011955 3.084433 -0.537983C3.084433 -0.968369 3.502864 -1.518306 4.040847 -1.518306C4.638605 -1.518306 4.770112 -1.111831 4.770112 -0.514072C4.770112 -0.442341 4.770112 -0.3467 4.758157 -0.274969Z'/>
+</defs>
+<g id='eq22-page1'>
+<use x='0' y='0' xlink:href='#eq22-g0-81'/>
+<use x='9.271248' y='1.793263' xlink:href='#eq22-g1-54'/>
+</g>
+</svg>.</p><p>It is recommended to use the general Boost version of this function, <a href="group__chill.html#gaa9220b76da7400c9d934fa08ceeeba7a" class="m-doc">sph::<wbr />spheriHarmo</a>, instead.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form action="https://docs.dseams.info/#search">
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript. Enable it or <a href="https://google.com/search?q=site:docs.dseams.info+">use an external search engine</a>.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.<br />Maybe try a full-text <a href="#" id="search-external" data-search-engine="https://google.com/search?q=site:docs.dseams.info+{query}">search with external engine</a>?</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v1.js"></script>
+<script src="searchdata-v1.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <b>(C)
+2018-present</b>
+<a
+href="https://github.com/HaoZeke">Rohit
+Goswami</a>,
+<a
+href="https://github.com/amritagos">Amrita
+Goswami</a>,
+<a
+href="https://github.com/d-Seams">d-SEAMS
+core
+team</a>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rdf2 module | d-SEAMS</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="icon" href="dSeamsLogo.ico" type="image/vnd.microsoft.icon" />
+  <link rel="search" type="application/opensearchdescription+xml" href="opensearch.xml" title="Search d-SEAMS documentation" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m"><img src="dSeamsLogo.png" />d-SEAMS</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="namespaces.html">Namespaces</a></li>
+            <li><a href="modules.html">Modules</a></li>
+            <li><a href="pages.html">Wiki</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          Rdf2 <span class="m-thin">module</span></h1>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#func-members">Functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespacerdf2.html" class="m-doc">rdf2</a></dt>
+            <dd>Defines RDF-specific functions.</dd>
+          </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga8dd6ebd3fe62036e77ed8b0695a9cd59" class="m-doc">rdf2Danalysis_AA</a>(</span><span class="m-doc-wrap">std::string path,
+              std::vector&lt;double&gt;* rdfValues,
+              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              double cutoff,
+              double binwidth,
+              int firstFrame,
+              int finalFrame) -&gt; int</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga2a79018e3e8cd922b49b16fddca98e13" class="m-doc">sampleRDF_AA</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              double cutoff,
+              double binwidth,
+              int nbin) -&gt; std::vector&lt;int&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#gaeb724c0a55ce0d34e33620bd0f74e935" class="m-doc">normalizeRDF</a>(</span><span class="m-doc-wrap">int nopA,
+              std::vector&lt;double&gt;* rdfValues,
+              std::vector&lt;int&gt; histogram,
+              double binwidth,
+              int nbin,
+              std::vector&lt;double&gt; volumeLengths,
+              int nIter) -&gt; int</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga2317aabef0016b5b658cef120c179ecf" class="m-doc">getSystemLengths</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud) -&gt; std::vector&lt;double&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga309f282dffeee8083437a95aab29f51b" class="m-doc">getPlaneArea</a>(</span><span class="m-doc-wrap">std::vector&lt;double&gt; volumeLengths) -&gt; double</span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ga8dd6ebd3fe62036e77ed8b0695a9cd59"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">int </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga8dd6ebd3fe62036e77ed8b0695a9cd59" class="m-doc-self">rdf2Danalysis_AA</a>(</span><span class="m-doc-wrap">std::string path,
+              std::vector&lt;double&gt;* rdfValues,
+              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              double cutoff,
+              double binwidth,
+              int firstFrame,
+              int finalFrame)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="rdf2d_8hpp.html">&lt;src/include/internal/rdf2d.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">path&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The file path of the output directory to which output files will be written.</td>
+                </tr>
+                <tr>
+                  <td>rdfValues&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Vector containing the RDF values.</td>
+                </tr>
+                <tr>
+                  <td>yCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The input PointCloud.</td>
+                </tr>
+                <tr>
+                  <td>cutoff&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Cutoff for the RDF. This should not be greater than half the box length.</td>
+                </tr>
+                <tr>
+                  <td>binwidth&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Width of the bin for histogramming.</td>
+                </tr>
+                <tr>
+                  <td>firstFrame&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The first frame for RDF binning.</td>
+                </tr>
+                <tr>
+                  <td>finalFrame&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The final frame for RDF binning.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Calculates the in-plane RDF for quasi-two-dimensional water, when both the atoms are of the same type. The input PointCloud only has particles of type A in it. This is registered as a Lua function and is accessible to the user. Internally, this function calls the following functions:</p><ul><li><a href="group__rdf2.html#ga2317aabef0016b5b658cef120c179ecf" class="m-doc">rdf2::<wbr />getSystemLengths</a> (Gets the dimensions of the quasi-two-dimensional system).</li><li>ring::rdf2::sampleRDF_AA (Samples the current frame, binning the coordinates).</li><li>ring::rdf2::normalizeRDF (Normalizes the RDF).</li><li>ring::sout::printRDF (Writes out the RDF to the desired output directory, in the form of an ASCII file)</li></ul>
+          </div></section>
+          <section class="m-doc-details" id="ga2a79018e3e8cd922b49b16fddca98e13"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;int&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga2a79018e3e8cd922b49b16fddca98e13" class="m-doc-self">sampleRDF_AA</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              double cutoff,
+              double binwidth,
+              int nbin)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="rdf2d_8hpp.html">&lt;src/include/internal/rdf2d.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">yCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The input PointCloud.</td>
+                </tr>
+                <tr>
+                  <td>cutoff&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Cutoff for the RDF calculation, which should be less than or equal to half the box length.</td>
+                </tr>
+                <tr>
+                  <td>binwidth&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Width of the bin.</td>
+                </tr>
+                <tr>
+                  <td>nbin&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Number of bins.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>RDF histogram for the current frame.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Samples the RDF for a particular frame The input PointCloud only has particles of type A in it.</p><ul><li><a href="group__gen.html#ga881e045598dd517609383d8a3fec5913" class="m-doc">gen::<wbr />periodicDist</a> (Periodic distance between a pair of atoms).</li></ul>
+          </div></section>
+          <section class="m-doc-details" id="gaeb724c0a55ce0d34e33620bd0f74e935"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">int </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gaeb724c0a55ce0d34e33620bd0f74e935" class="m-doc-self">normalizeRDF</a>(</span><span class="m-doc-wrap">int nopA,
+              std::vector&lt;double&gt;* rdfValues,
+              std::vector&lt;int&gt; histogram,
+              double binwidth,
+              int nbin,
+              std::vector&lt;double&gt; volumeLengths,
+              int nIter)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="rdf2d_8hpp.html">&lt;src/include/internal/rdf2d.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">nopA&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The number of particles of type A.</td>
+                </tr>
+                <tr>
+                  <td>rdfValues&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Radial distribution function values for all the frames, in the form of a vector.</td>
+                </tr>
+                <tr>
+                  <td>histogram&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The histogram for the current frame.</td>
+                </tr>
+                <tr>
+                  <td>binwidth&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The width of each bin for the RDF histogram.</td>
+                </tr>
+                <tr>
+                  <td>nbin&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The number of bins for the RDF.</td>
+                </tr>
+                <tr>
+                  <td>volumeLengths&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The confining dimensions of the quasi-two-dimensional system, which may be the slice dimensions or the dimensions of the box.</td>
+                </tr>
+                <tr>
+                  <td>nIter&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The number of iterations for which the coordinates will be binned. This is basically equivalent to the number of frames over which the RDF will be calculated.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Normalizes the histogram and adds it to the RDF. The normalization requires the plane area and height.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga2317aabef0016b5b658cef120c179ecf"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;double&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga2317aabef0016b5b658cef120c179ecf" class="m-doc-self">getSystemLengths</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="rdf2d_8hpp.html">&lt;src/include/internal/rdf2d.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">yCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a> struct for the system.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The length (i.e. the &#x27;height&#x27;) of the smallest dimension of quasi-two-dimensional system.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Calculates the lengths of the quasi-two-dimensional system. The smallest length is the &#x27;height&#x27;.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga309f282dffeee8083437a95aab29f51b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">double </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga309f282dffeee8083437a95aab29f51b" class="m-doc-self">getPlaneArea</a>(</span><span class="m-doc-wrap">std::vector&lt;double&gt; volumeLengths)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="rdf2d_8hpp.html">&lt;src/include/internal/rdf2d.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">volumeLengths&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>A vector of the lengths of the volume slice or simulation box</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The plane area of the two significant dimensions</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Calculates the plane area from the volume lengths. This is the product of the two largest dimensions of the quasi-two-dimensional system.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form action="https://docs.dseams.info/#search">
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript. Enable it or <a href="https://google.com/search?q=site:docs.dseams.info+">use an external search engine</a>.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.<br />Maybe try a full-text <a href="#" id="search-external" data-search-engine="https://google.com/search?q=site:docs.dseams.info+{query}">search with external engine</a>?</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v1.js"></script>
+<script src="searchdata-v1.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <b>(C)
+2018-present</b>
+<a
+href="https://github.com/HaoZeke">Rohit
+Goswami</a>,
+<a
+href="https://github.com/amritagos">Amrita
+Goswami</a>,
+<a
+href="https://github.com/d-Seams">d-SEAMS
+core
+team</a>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

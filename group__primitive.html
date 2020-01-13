@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Primitive module | d-SEAMS</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="icon" href="dSeamsLogo.ico" type="image/vnd.microsoft.icon" />
+  <link rel="search" type="application/opensearchdescription+xml" href="opensearch.xml" title="Search d-SEAMS documentation" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m"><img src="dSeamsLogo.png" />d-SEAMS</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="namespaces.html">Namespaces</a></li>
+            <li><a href="modules.html">Modules</a></li>
+            <li><a href="pages.html">Wiki</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          Primitive <span class="m-thin">module</span></h1>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#func-members">Functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespaceprimitive.html" class="m-doc">primitive</a></dt>
+            <dd>Functions for generating primitive rings. This namespace contains struct definitions and functions that are used for generating primitive (shortest-path) rings (directed cyclic graphs).</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              struct <a href="structprimitive_1_1Vertex.html" class="m-doc">primitive::Vertex</a>
+            </dt>
+            <dd>This is a collection of elements, for each point, required for graph traversal.</dd>
+            <dt>
+              struct <a href="structprimitive_1_1Graph.html" class="m-doc">primitive::Graph</a>
+            </dt>
+            <dd>This is a per-frame object, containing all the vertices for the particular frame, along with the vector of rings generated.</dd>
+          </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga9872b1fd04c72cc53626b882bec4b99f" class="m-doc">ringNetwork</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              int maxDepth) -&gt; std::vector&lt;std::vector&lt;int&gt;&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga3012412b123de9d2d265e20ffe8474c4" class="m-doc">populateGraphFromNListID</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; neighHbondList) -&gt; Graph</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga89752c96a2f3951a33238b5231d33b16" class="m-doc">populateGraphFromIndices</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; nList) -&gt; Graph</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga2948e7d5ac22580945c3bed8b90f4937" class="m-doc">restoreEdgesFromIndices</a>(</span><span class="m-doc-wrap">Graph* fullGraph,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList) -&gt; Graph</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga4a830b09cc9c276bf2f8d80498202cba" class="m-doc">countAllRingsFromIndex</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; neighHbondList,
+              int maxDepth) -&gt; Graph</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga909ca1fa60966421281d40f4ad8cc653" class="m-doc">removeNonSPrings</a>(</span><span class="m-doc-wrap">Graph* fullGraph) -&gt; Graph</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#gae91300e341786a54ce73c0f2e9d4f5d5" class="m-doc">findRings</a>(</span><span class="m-doc-wrap">Graph* fullGraph,
+              int v,
+              std::vector&lt;int&gt;* visited,
+              int maxDepth,
+              int depth,
+              int root = -1) -&gt; int</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#gad5a66be66869860a9bd875535cd2671f" class="m-doc">shortestPath</a>(</span><span class="m-doc-wrap">Graph* fullGraph,
+              int v,
+              int goal,
+              std::vector&lt;int&gt;* path,
+              std::vector&lt;int&gt;* visited,
+              int maxDepth,
+              int depth = 1) -&gt; int</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#gacca66f8ab7f31902d6c7d9a9f63d5c46" class="m-doc">clearGraph</a>(</span><span class="m-doc-wrap">Graph* currentGraph) -&gt; Graph</span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ga9872b1fd04c72cc53626b882bec4b99f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;std::vector&lt;int&gt;&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga9872b1fd04c72cc53626b882bec4b99f" class="m-doc-self">ringNetwork</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              int maxDepth)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="franzblau_8hpp.html">&lt;src/include/internal/franzblau.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">nList&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Row-ordered neighbour list by index (and NOT the atom ID)</td>
+                </tr>
+                <tr>
+                  <td>maxDepth&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The maximum depth upto which rings will be searched. This means that rings larger than maxDepth in length will not be generated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A vector of vectors of the rings; each ring contains the atom indices of the ring members.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The vector of vector of rings, by index, is returned, given a neighbour list (also by index) and the maximum depth upto which rings will be searched, using the Franzblau algorithm for shortest paths. This function is registered in Lua and exposed to the user. This internally calls the functions:</p><ul><li><a href="group__primitive.html#ga4a830b09cc9c276bf2f8d80498202cba" class="m-doc">primitive::<wbr />countAllRingsFromIndex</a> (to generate all rings)</li><li><a href="group__primitive.html#ga909ca1fa60966421281d40f4ad8cc653" class="m-doc">primitive::<wbr />removeNonSPrings</a> (to only get the primitive rings)</li></ul>
+          </div></section>
+          <section class="m-doc-details" id="ga3012412b123de9d2d265e20ffe8474c4"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">Graph </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga3012412b123de9d2d265e20ffe8474c4" class="m-doc-self">populateGraphFromNListID</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; neighHbondList)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="franzblau_8hpp.html">&lt;src/include/internal/franzblau.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">yCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The input PointCloud.</td>
+                </tr>
+                <tr>
+                  <td>neighHbondList&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The row-ordered neighbour list, containing atom IDs, and not the atom indices.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The <a href="structprimitive_1_1Graph.html" class="m-doc">Graph</a> object for the current frame.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Fills a <a href="structprimitive_1_1Graph.html" class="m-doc">Graph</a> object with information from the PointCloud and the neighbour list. The indices in the neighbour list in the <a href="structprimitive_1_1Vertex.html" class="m-doc">Vertex</a> object are NOT the atom IDs (they are the atom indices according to the input PointCloud). The input neighbour list is by atom ID.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga89752c96a2f3951a33238b5231d33b16"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">Graph </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga89752c96a2f3951a33238b5231d33b16" class="m-doc-self">populateGraphFromIndices</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; nList)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="franzblau_8hpp.html">&lt;src/include/internal/franzblau.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">nList&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The row-ordered neighbour list, containing atom indices (according to the input PointCloud).</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The <a href="structprimitive_1_1Graph.html" class="m-doc">Graph</a> object for the current frame.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Fills a <a href="structprimitive_1_1Graph.html" class="m-doc">Graph</a> object with information from the PointCloud and the neighbour list. The indices in the neighbour list in the <a href="structprimitive_1_1Vertex.html" class="m-doc">Vertex</a> object are NOT the atom IDs (they are the atom indices according to the input PointCloud). The input neighbour list is by index NOT atom IDs. Otherwise, this function does the same thing as <a href="group__primitive.html#ga3012412b123de9d2d265e20ffe8474c4" class="m-doc">primitive::<wbr />populateGraphFromNListID</a>. The only difference is that this function takes the neighbour list BY INDEX.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga2948e7d5ac22580945c3bed8b90f4937"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">Graph </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga2948e7d5ac22580945c3bed8b90f4937" class="m-doc-self">restoreEdgesFromIndices</a>(</span><span class="m-doc-wrap">Graph* fullGraph,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="franzblau_8hpp.html">&lt;src/include/internal/franzblau.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fullGraph&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The <a href="structprimitive_1_1Graph.html" class="m-doc">Graph</a> object for the current frame. The neighbour lists of component <a href="structprimitive_1_1Vertex.html" class="m-doc">Vertex</a> objects may have been depleted.</td>
+                </tr>
+                <tr>
+                  <td>nList&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The row-ordered neighbour list, containing atom indices (according to the input PointCloud).</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The <a href="structprimitive_1_1Graph.html" class="m-doc">Graph</a> object for the current frame.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Re-fills the neighbour lists of a <a href="structprimitive_1_1Graph.html" class="m-doc">Graph</a> object from a row-ordered neighbour list (which is BY INDEX not IDs). Some vertices may have been removed while rings were generated using the backtracking algorithm (<a href="group__primitive.html#gae91300e341786a54ce73c0f2e9d4f5d5" class="m-doc">primitive::<wbr />findRings</a>). Also, the indices in the neighbour list in the <a href="structprimitive_1_1Vertex.html" class="m-doc">Vertex</a> object are not the atom IDs.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga4a830b09cc9c276bf2f8d80498202cba"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">Graph </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga4a830b09cc9c276bf2f8d80498202cba" class="m-doc-self">countAllRingsFromIndex</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; neighHbondList,
+              int maxDepth)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="franzblau_8hpp.html">&lt;src/include/internal/franzblau.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">neighHbondList&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Row-ordered neighbour list by atom index (not ID).</td>
+                </tr>
+                <tr>
+                  <td>maxDepth&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The maximum depth upto which rings will be searched. This means that rings larger than maxDepth will not be generated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The <a href="structprimitive_1_1Graph.html" class="m-doc">Graph</a> object for the current frame.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Get all possible rings (only atom indices, not IDs). The input neighbour list is in terms of indices. All possible rings (including non-SP) rings are generated using a recursive backtracking algorithm. This function calls the following functions internally:</p><ul><li><a href="group__primitive.html#ga89752c96a2f3951a33238b5231d33b16" class="m-doc">primitive::<wbr />populateGraphFromIndices</a> (for initializing the <a href="structprimitive_1_1Graph.html" class="m-doc">Graph</a> object)</li><li><a href="group__primitive.html#gae91300e341786a54ce73c0f2e9d4f5d5" class="m-doc">primitive::<wbr />findRings</a> (for getting all rings, using backtracking)</li><li><a href="group__primitive.html#ga2948e7d5ac22580945c3bed8b90f4937" class="m-doc">primitive::<wbr />restoreEdgesFromIndices</a> (restores back-up of the edges since some may have been removed)</li></ul>
+          </div></section>
+          <section class="m-doc-details" id="ga909ca1fa60966421281d40f4ad8cc653"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">Graph </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga909ca1fa60966421281d40f4ad8cc653" class="m-doc-self">removeNonSPrings</a>(</span><span class="m-doc-wrap">Graph* fullGraph)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="franzblau_8hpp.html">&lt;src/include/internal/franzblau.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fullGraph&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The <a href="structprimitive_1_1Graph.html" class="m-doc">Graph</a> object for the current frame. This also contains the rings vector of vectors, which has all possible rings (possibly inclding non-SP rings).</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The <a href="structprimitive_1_1Graph.html" class="m-doc">Graph</a> object for the current frame.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Removes non-SP rings (according to the Franzblau shortest path criterion) from the rings vector of vectors member n the <a href="structprimitive_1_1Graph.html" class="m-doc">Graph</a> object. The rings vector of vectors contains indices and NOT atom IDs. This function calls <a href="group__primitive.html#gad5a66be66869860a9bd875535cd2671f" class="m-doc">primitive::<wbr />shortestPath</a> internally to calculate the shortest path.</p>
+          </div></section>
+          <section class="m-doc-details" id="gae91300e341786a54ce73c0f2e9d4f5d5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">int </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gae91300e341786a54ce73c0f2e9d4f5d5" class="m-doc-self">findRings</a>(</span><span class="m-doc-wrap">Graph* fullGraph,
+              int v,
+              std::vector&lt;int&gt;* visited,
+              int maxDepth,
+              int depth,
+              int root = -1)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="franzblau_8hpp.html">&lt;src/include/internal/franzblau.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fullGraph&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td><a href="structprimitive_1_1Graph.html" class="m-doc">Graph</a> object containing the vertices (and the neighbour lists). Vertices may be &#x27;removed&#x27; from the <a href="structprimitive_1_1Graph.html" class="m-doc">Graph</a>.</td>
+                </tr>
+                <tr>
+                  <td>v&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The current vertex being visited or checked. It is added to the list of all vertices visited.</td>
+                </tr>
+                <tr>
+                  <td>visited&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>A vector containing a list of the vertices visited for book-keeping. If the current visited vector fulfills the condition for being a ring, it is added to the rings vector of vector in the <a href="structprimitive_1_1Graph.html" class="m-doc">Graph</a>.</td>
+                </tr>
+                <tr>
+                  <td>maxDepth&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The maximum depth upto which rings will be searched. This means that rings larger than maxDepth will not be generated.</td>
+                </tr>
+                <tr>
+                  <td>depth&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The current depth. When this function is called for the first time from <a href="group__primitive.html#ga4a830b09cc9c276bf2f8d80498202cba" class="m-doc">primitive::<wbr />countAllRingsFromIndex</a>, the depth is initialized to 0. When the depth is greater than or equal to maxDepth, the function exits.</td>
+                </tr>
+                <tr>
+                  <td>root&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The first vertex, from which the current visited vector (candidate ring) is being grown. This is initialized to a dummy value of -1, when it is called from <a href="group__primitive.html#ga4a830b09cc9c276bf2f8d80498202cba" class="m-doc">primitive::<wbr />countAllRingsFromIndex</a>.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>All possible rings are searched for in this function, which recursively calls itself. The rings are &#x27;grown&#x27; from the root node (which is the first vertex) using the backtracking algorithm. When it is first called (before the root node has been assigned), root is a dummy value (which is equal to -1, a value that can never be legitimate).</p>
+          </div></section>
+          <section class="m-doc-details" id="gad5a66be66869860a9bd875535cd2671f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">int </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gad5a66be66869860a9bd875535cd2671f" class="m-doc-self">shortestPath</a>(</span><span class="m-doc-wrap">Graph* fullGraph,
+              int v,
+              int goal,
+              std::vector&lt;int&gt;* path,
+              std::vector&lt;int&gt;* visited,
+              int maxDepth,
+              int depth = 1)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="franzblau_8hpp.html">&lt;src/include/internal/franzblau.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fullGraph&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The <a href="structprimitive_1_1Graph.html" class="m-doc">Graph</a> object for the current frame.</td>
+                </tr>
+                <tr>
+                  <td>v&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The current vertex being checked.</td>
+                </tr>
+                <tr>
+                  <td>goal&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The first element of the candidate ring being checked (the root node).</td>
+                </tr>
+                <tr>
+                  <td>path&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The path or length of the visited points (This basically contains all the indices in the visited vector, excluding the current vertex).</td>
+                </tr>
+                <tr>
+                  <td>visited&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>This vector contains the indices of the vertices visited or checked (for book-keeping).</td>
+                </tr>
+                <tr>
+                  <td>maxDepth&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The maximum depth or maximum length of the rings.</td>
+                </tr>
+                <tr>
+                  <td>depth&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The current depth. When this function is called from <a href="group__primitive.html#ga909ca1fa60966421281d40f4ad8cc653" class="m-doc">primitive::<wbr />removeNonSPrings</a>, the depth is initialized as 0.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The <a href="structprimitive_1_1Graph.html" class="m-doc">Graph</a> object for the current frame.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Calculates the shortest path for a particular ring. This function uses recursion.</p>
+          </div></section>
+          <section class="m-doc-details" id="gacca66f8ab7f31902d6c7d9a9f63d5c46"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">Graph </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gacca66f8ab7f31902d6c7d9a9f63d5c46" class="m-doc-self">clearGraph</a>(</span><span class="m-doc-wrap">Graph* currentGraph)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="franzblau_8hpp.html">&lt;src/include/internal/franzblau.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">currentGraph&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>The cleared <a href="structprimitive_1_1Graph.html" class="m-doc">Graph</a></td>
+                </tr>
+              </tbody>
+            </table>
+<p>Function for clearing <a href="structprimitive_1_1Graph.html" class="m-doc">Graph</a> if it is already filled. This should be called before every frame is read in.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form action="https://docs.dseams.info/#search">
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript. Enable it or <a href="https://google.com/search?q=site:docs.dseams.info+">use an external search engine</a>.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.<br />Maybe try a full-text <a href="#" id="search-external" data-search-engine="https://google.com/search?q=site:docs.dseams.info+{query}">search with external engine</a>?</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v1.js"></script>
+<script src="searchdata-v1.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <b>(C)
+2018-present</b>
+<a
+href="https://github.com/HaoZeke">Rohit
+Goswami</a>,
+<a
+href="https://github.com/amritagos">Amrita
+Goswami</a>,
+<a
+href="https://github.com/d-Seams">d-SEAMS
+core
+team</a>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

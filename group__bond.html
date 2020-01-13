@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bond module | d-SEAMS</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="icon" href="dSeamsLogo.ico" type="image/vnd.microsoft.icon" />
+  <link rel="search" type="application/opensearchdescription+xml" href="opensearch.xml" title="Search d-SEAMS documentation" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m"><img src="dSeamsLogo.png" />d-SEAMS</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="namespaces.html">Namespaces</a></li>
+            <li><a href="modules.html">Modules</a></li>
+            <li><a href="pages.html">Wiki</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          Bond <span class="m-thin">module</span></h1>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#func-members">Functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespacebond.html" class="m-doc">bond</a></dt>
+            <dd>Functions for bond-related analyses This namespace contains functions that are used for determining the hydrogen bonds, or lists of bonded atoms for write-outs to data files and visualization.</dd>
+          </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga081e4c1f726d5b0bfd9006af2fe3fdee" class="m-doc">populateHbonds</a>(</span><span class="m-doc-wrap">std::string filename,
+              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              int targetFrame,
+              int Htype) -&gt; std::vector&lt;std::vector&lt;int&gt;&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#gad4b0179fc40db64244a9f8a10ea5fc4c" class="m-doc">getHbondDistanceOH</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* oCloud,
+              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* hCloud,
+              int oAtomIndex,
+              int hAtomIndex) -&gt; double</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga99a6b8a519741c767bd8bed063276b5a" class="m-doc">populateBonds</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud) -&gt; std::vector&lt;std::vector&lt;int&gt;&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga8ca8aaf5a0984386dab38e207363f8c2" class="m-doc">populateBonds</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;<a href="group__cage.html#gaaac41828990e32b9d6e7db4426b61529" class="m-doc">cage::<wbr />iceType</a>&gt; atomTypes) -&gt; std::vector&lt;std::vector&lt;int&gt;&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#gaea75576194f28a141cee66548c309e1a" class="m-doc">createBondsFromCages</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; rings,
+              std::vector&lt;<a href="structcage_1_1Cage.html" class="m-doc">cage::<wbr />Cage</a>&gt;* cageList,
+              <a href="group__cage.html#ga5787314f51b5927c213db48b81c21d95" class="m-doc">cage::<wbr />cageType</a> type,
+              int* nRings) -&gt; std::vector&lt;std::vector&lt;int&gt;&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga487c36cc7ddc9079ad59fc645324b20c" class="m-doc">trimBonds</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; bonds) -&gt; std::vector&lt;std::vector&lt;int&gt;&gt;</span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ga081e4c1f726d5b0bfd9006af2fe3fdee"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;std::vector&lt;int&gt;&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga081e4c1f726d5b0bfd9006af2fe3fdee" class="m-doc-self">populateHbonds</a>(</span><span class="m-doc-wrap">std::string filename,
+              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              int targetFrame,
+              int Htype)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bond_8hpp.html">&lt;src/include/internal/bond.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Filename of the trajectory, with the hydrogen and oxygen coordinates</td>
+                </tr>
+                <tr>
+                  <td>yCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The input <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a> for the oxygen atoms only</td>
+                </tr>
+                <tr>
+                  <td>nList&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Row-ordered neighbour list by atom ID</td>
+                </tr>
+                <tr>
+                  <td>targetFrame&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The target or current frame number (starts from 1) and is not the timestep value</td>
+                </tr>
+                <tr>
+                  <td>Htype&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The type ID of the hydrogen atoms</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Create a vector of vectors (similar to the neighbour list conventions). The output vector of vectors is row-ordered. The first element is the atom ID of the particle for which the neighbours are enumerated (the central atom), followed by the central atom&#x27;s neighbour&#x27;s IDs (not indices). Decides the existence of the hydrogen bond depending on the O&ndash;O and O&ndash;H vectors from the neighbour list (by ID) already constructed.</p>
+          </div></section>
+          <section class="m-doc-details" id="gad4b0179fc40db64244a9f8a10ea5fc4c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">double </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gad4b0179fc40db64244a9f8a10ea5fc4c" class="m-doc-self">getHbondDistanceOH</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* oCloud,
+              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* hCloud,
+              int oAtomIndex,
+              int hAtomIndex)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bond_8hpp.html">&lt;src/include/internal/bond.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">oCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a> for the oxygen atoms only</td>
+                </tr>
+                <tr>
+                  <td>hCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a> for the hydrogen atoms only</td>
+                </tr>
+                <tr>
+                  <td>oAtomIndex&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The index (in the oCloud) of the oxygen atom</td>
+                </tr>
+                <tr>
+                  <td>hAtomIndex&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The index (in the hCloud) of the hydrogen atom</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Calculates the bond length between a Hydrogen and Oxygen atom of two different atoms, given their respective pointClouds and the indices to each atom.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga99a6b8a519741c767bd8bed063276b5a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;std::vector&lt;int&gt;&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga99a6b8a519741c767bd8bed063276b5a" class="m-doc-self">populateBonds</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bond_8hpp.html">&lt;src/include/internal/bond.hpp&gt;</a></div>
+            </h3>
+<p>Create a vector of vectors containing bond information (outputs bonded atom IDs, not indices!) from the neighbour list vector of vectors (which contains atom INDICES). Moreover, the first element corresponds to the atom whose neighbours have been found.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga8ca8aaf5a0984386dab38e207363f8c2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;std::vector&lt;int&gt;&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga8ca8aaf5a0984386dab38e207363f8c2" class="m-doc-self">populateBonds</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; nList,
+              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
+              std::vector&lt;<a href="group__cage.html#gaaac41828990e32b9d6e7db4426b61529" class="m-doc">cage::<wbr />iceType</a>&gt; atomTypes)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bond_8hpp.html">&lt;src/include/internal/bond.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">nList&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Row-ordered neighbour list by ID</td>
+                </tr>
+                <tr>
+                  <td>yCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The input <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a></td>
+                </tr>
+                <tr>
+                  <td>atomTypes&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Contains an atom type for each particle in yCloud</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Create a vector of vectors containing bond information (outputs bonded atom IDs, not indices!) from the neighbour list vector of vectors (which contains atom INDICES). Bonds between dummy atoms, and between dummy and ice atoms are not added. Moreover, the first element corresponds to the atom whose neighbours have been found.</p>
+          </div></section>
+          <section class="m-doc-details" id="gaea75576194f28a141cee66548c309e1a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;std::vector&lt;int&gt;&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gaea75576194f28a141cee66548c309e1a" class="m-doc-self">createBondsFromCages</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; rings,
+              std::vector&lt;<a href="structcage_1_1Cage.html" class="m-doc">cage::<wbr />Cage</a>&gt;* cageList,
+              <a href="group__cage.html#ga5787314f51b5927c213db48b81c21d95" class="m-doc">cage::<wbr />cageType</a> type,
+              int* nRings)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bond_8hpp.html">&lt;src/include/internal/bond.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rings&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Row-ordered vector of vectors atom indices of ring information. Each row is a ring, containing the indices of the particles in that ring</td>
+                </tr>
+                <tr>
+                  <td>cageList&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>A vector of <a href="structcage_1_1Cage.html" class="m-doc">cage::<wbr />Cage</a> containing a list of HCs or DDCs</td>
+                </tr>
+                <tr>
+                  <td>type&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The type of cage to get bonds for</td>
+                </tr>
+                <tr>
+                  <td>nRings&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>The total number of rings for all the cages, for the particular cage type</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Create a vector of vectors containing bond information (bonded atom IDs, not vector or array indices!) from the ring vector of vectors and cageList</p>
+          </div></section>
+          <section class="m-doc-details" id="ga487c36cc7ddc9079ad59fc645324b20c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;std::vector&lt;int&gt;&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga487c36cc7ddc9079ad59fc645324b20c" class="m-doc-self">trimBonds</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; bonds)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bond_8hpp.html">&lt;src/include/internal/bond.hpp&gt;</a></div>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">bonds&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Row-ordered vector of vectors of the bond matrix Each row is a ring, containing the indices of the particles in that ring</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The bond 1 2 and 2 1 are the same. To prevent multiple bonds between the same atoms, remove all bonds which are duplicates of the reversed vectors (denoting individual bonds) within the bonds vector of vectors</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form action="https://docs.dseams.info/#search">
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript. Enable it or <a href="https://google.com/search?q=site:docs.dseams.info+">use an external search engine</a>.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.<br />Maybe try a full-text <a href="#" id="search-external" data-search-engine="https://google.com/search?q=site:docs.dseams.info+{query}">search with external engine</a>?</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v1.js"></script>
+<script src="searchdata-v1.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <b>(C)
+2018-present</b>
+<a
+href="https://github.com/HaoZeke">Rohit
+Goswami</a>,
+<a
+href="https://github.com/amritagos">Amrita
+Goswami</a>,
+<a
+href="https://github.com/d-Seams">d-SEAMS
+core
+team</a>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

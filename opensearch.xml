@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>d-SEAMS</ShortName>
+  <Description>Search d-SEAMS documentation</Description>
+  <Image type="image/vnd.microsoft.icon">https://docs.dseams.info/images/dSeamsLogo.ico</Image>
+  <Url type="text/html" template="https://docs.dseams.info/?q={searchTerms}#search"/>
+</OpenSearchDescription>
