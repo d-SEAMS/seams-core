@@ -8,13 +8,9 @@ jobs:
         - "nix-env -iA cachix -f https://cachix.org/api/v1/install"
       script:
         - cachix use dseams
-        # - cachix push dseams --watch-store&
+        - cachix push dseams --watch-store&
         - nix-build .
-      deploy:
-        provider: script
-        edge: true
-        cleanup: false
-        script: cachix push dseams
+        - sleep 30s # wait for the cachix push to complete
     - language: python
       python: "3.6"
       before_install:
