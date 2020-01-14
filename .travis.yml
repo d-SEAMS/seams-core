@@ -1,33 +1,46 @@
-sudo: false
 branches:
   only:
     - master
-language: python
-python:
-  - "3.6"
-before_install:
-  - cp scripts/ci/texlive.profile $HOME/texlive.profile
-install:
-  - "pip install jinja2 Pygments conan"
-  - source ./scripts/ci/texlive_install.sh
-addons:
-  apt:
-    packages:
-      - doxygen
-cache:
-  directories:
-    - /tmp/texlive
-    - $HOME/.texlive
-    - $HOME/.cache/pipenv
-before_script:
-  - git clone https://github.com/mosra/m.css.git
-script:
-  - ./m.css/documentation/doxygen.py Doxyfile-mcss
-  - find docs/ -type f -name "*" -print0 | xargs -0 sed -i '' -e 's/>Pages</>Wiki</g' || true
-deploy:
-  provider: pages
-  skip_cleanup: true
-  local_dir: docs/html
-  github_token: $GH_REPO_TOKEN
-  on:
-    branch: master
+jobs:
+  include:
+    - language: nix
+      install:
+        - "nix-env -iA cachix -f https://cachix.org/api/v1/install"
+      script:
+        - cachix use dseams
+        # - cachix push dseams --watch-store&
+        - nix-build .
+      deploy:
+        provider: script
+        edge: true
+        cleanup: false
+        script: cachix push dseams
+    - language: python
+      python: "3.6"
+      before_install:
+        - cp scripts/ci/texlive.profile $HOME/texlive.profile
+      install:
+        - "pip install jinja2 Pygments conan"
+        - source ./scripts/ci/texlive_install.sh
+      addons:
+        apt:
+          packages:
+            - doxygen
+      cache:
+        directories:
+          - /tmp/texlive
+          - $HOME/.texlive
+          - $HOME/.cache/pipenv
+      before_script:
+        - git clone https://github.com/mosra/m.css.git
+      script:
+        - ./m.css/documentation/doxygen.py Doxyfile-mcss
+        - find docs/ -type f -name "*" -print0 | xargs -0 sed -i '' -e 's/>Pages</>Wiki</g' || true
+      deploy:
+        provider: pages
+        edge: true
+        cleanup: false
+        local_dir: docs/html
+        github_token: $GH_REPO_TOKEN
+        on:
+          branch: master
