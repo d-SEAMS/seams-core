@@ -36,12 +36,27 @@ usage statistics. This also handles the `lua` scripting engine.
 ## Build
 
 Since this project is built with `nix`, we can simply do the following from the
-root directory:
+root directory (longer method):
 
 ```sh
 # Make sure there are no artifacts
 rm -rf build
 # This will take a long time the first time as it builds the dependencies
+nix-build . # Optional
+# Install into your path
+nix-env -if . # Required
+# Run the command anywhere
+yodaStruct -c lua_inputs/config.yml
+```
+
+A faster method of building the software is by using the [cachix binary cache](https://dseams.cachix.org/) as shown:
+
+```bash
+# Install cachix
+nix-env -iA cachix -f https://cachix.org/api/v1/install
+# Use the binary cache
+cachix use dseams
+# Faster with the cache than building from scratch
 nix-build . # Optional
 # Install into your path
 nix-env -if . # Required
