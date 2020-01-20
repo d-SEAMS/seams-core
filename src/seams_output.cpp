@@ -1076,6 +1076,7 @@ int sout::writeTopoBulkData(std::string path, int currentFrame, int numHC,
              << "\n";
 
   outputFile.close();
+  return 0;
 }  // end of function
 
 /********************************************/ /**
