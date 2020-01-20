@@ -1,16 +1,16 @@
 #ifndef __TOPO_TWO_DIM_H_
 #define __TOPO_TWO_DIM_H_
 
-#include <math.h>
-#include <sys/stat.h>
 #include <algorithm>
 #include <array>
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <math.h>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <sys/stat.h>
 #include <vector>
 
 #include <mol_sys.hpp>
@@ -44,6 +44,6 @@ int polygonRingAnalysis(
 int assignPolygonType(std::vector<std::vector<int>> rings,
                       std::vector<int> *atomTypes, std::vector<int> nRings);
 
-}  // namespace ring
+} // namespace ring
 
-#endif  // __TOPOCONFINED_H_
+#endif // __TOPOCONFINED_H_
