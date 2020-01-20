@@ -12,8 +12,8 @@ sliceLowerLimits = {0,0,0}; --- Lower limit of the slice (for box dim, keep the 
 sliceUpperLimits = {0,0,0}; --- Upper limit of the slice   
 
 --- Paths for the output directories and lua scipt
-outDir="../runOne/"; --- The subdirectory used; Keep the slash at the end 
-functionScript="../lua_inputs/iceType/functions.lua" --- This is relative to the binary location
+outDir="runOne/"; --- The subdirectory used; Keep the slash at the end 
+functionScript="lua_inputs/iceType/functions.lua" --- This is relative to the binary location
 
 -- Variable for the topological network criterion
 printCages = false; --- Prints out every cage for every frame if true

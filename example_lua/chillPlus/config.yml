@@ -1,5 +1,5 @@
-trajectory: "../input/traj/mW_cubic.lammpstrj"
-variables: "../lua_inputs/iceType/vars.lua"
+trajectory: "input/traj/mW_cubic.lammpstrj"
+variables: "lua_inputs/iceType/vars.lua"
 bulk:
   use: true  
   topologicalNetworkCriterion: false

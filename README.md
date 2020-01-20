@@ -2,20 +2,22 @@
 
 **Deferred Structural Elucidation Analysis for Molecular Simulations**
 
-[![Docs Status](https://travis-ci.org/d-SEAMS/seams-core.svg?branch=master)](https://travis-ci.org/d-SEAMS/seams-core)
+[![Build Status](https://travis-ci.org/d-SEAMS/seams-core.svg?branch=master)](https://travis-ci.org/d-SEAMS/seams-core)
 [![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
 
-Check our docs build status [here](https://travis-ci.org/d-SEAMS/seams-core).
-The docs themselves are [here](https://d-seams.github.io/seams-core/) and
+Check our build status [here](https://travis-ci.org/d-SEAMS/seams-core).
+The docs themselves are [here](https://docs.dseams.info) and
 development is ongoing [on GitHub](https://github.com/d-SEAMS/seams-core). We
 also have [a Zenodo community](https://zenodo.org/communities/d-seams/) for user-contributions like reviews, testimonials
-and tutorials.
+and tutorials. Trajectories are hosted [on figshare](https://figshare.com/projects/d-SEAMS_Datasets/73545).
 
 \brief The C++ core of d-SEAMS, a molecular dynamics trajectory analysis engine.
 
 \note The <a href="pages.html">wiki</a> describes the examples and how to obtain
 the data-sets (trajectories) <a
 href="https://figshare.com/projects/d-SEAMS_Datasets/73545">from figshare</a>.
+
+\warning **If** you are unwilling to use the `nix` build system, then **please note** that you must manage the dependencies MANUALLY, including the compiler versions.
 
 # Citation
 
@@ -24,78 +26,65 @@ academic capacity, for now please cite [the following preprint](https://arxiv.or
 
     Goswami, R.; Goswami, A.; Singh, J. K. (2019). "d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations". arXiv:1909.09830 [physics.comp-ph].
 
-# Compilation
-
-## Dependency Management
-
-### Lua
-
-Lua v5.3 is used for the scripting engine. It needs to be installed via the
-operating system's normal packaging system for now. If possible, install a
-version compiled with `c++`, not `c`.
-
-```{bash}
-# Ubuntu and derivatives
-sudo apt install lua5.3 liblua5.3
-# ArchLinux
-sudo pacman -S lua
-```
-
-### Lua Modules
-
-Since a major portion of the frontend is in `lua`, the following modules are
-required.[LuaRocks](https://luarocks.org/) is the recommended package manager
-and they are to be installed as root.
-
-```sh
-# For cross-OS filesystem operations
-sudo luarocks install luafilesystem
-```
-
-# Nix Usage
+# Compilation with Nix
 
 We use a deterministic build system to generate both bug reports and uniform
-usage statistics.
+usage statistics. This also handles the `lua` scripting engine.
+
+\note The lua functions are documented on the [wiki](https://docs.dseams.info/md_markdown_luafunctions)
 
 ## Build
 
 Since this project is built with `nix`, we can simply do the following from the
-root directory:
+root directory (longer method):
 
 ```sh
-# This will take a long time the first time since it builds sharkML
-nix-build .
+# Make sure there are no artifacts
+rm -rf build
+# This will take a long time the first time as it builds the dependencies
+nix-build . # Optional
 # Install into your path
-nix-env -if .
-# Use anywhere
-cd lua_inputs/
-yodaStruct -c config.yml
-# Use with lua modules
-nix-shell --run 'bash' --pure
+nix-env -if . # Required
+# Run the command anywhere
+yodaStruct -c lua_inputs/config.yml
 ```
 
-### Caveats
+A faster method of building the software is by using the [cachix binary cache](https://dseams.cachix.org/) as shown:
 
-Though the build itself is guaranteed to be reproducible as the `nixpkgs` are
-also pinned to a particular commit, the `luarocks` dependencies are still local,
-since they are determined at runtime. This means, for example, to use the sample
-file, you need to ensure you have the `luarocks` modules installled in your
-system.
+```bash
+# Install cachix
+nix-env -iA cachix -f https://cachix.org/api/v1/install
+# Use the binary cache
+cachix use dseams
+# Faster with the cache than building from scratch
+nix-build . # Optional
+# Install into your path
+nix-env -if . # Required
+# Run the command anywhere
+yodaStruct -c lua_inputs/config.yml
+```
 
-The above caveats are not relevant when you run it in the shell environment
-defined by `shell.nix`
+\note The paths in the `.yml` should be **relative to the folder from which the binary is called**.
 
-#### Reproducible Lua
+If you're confused about how to handle the relative paths, run the command `yodaStruct -c lua_inputs/config.yml` in the top-level directory, and set the paths relative to the top-level directory. This is the convention used in the examples as well.
 
-For reproducing `lua` we use [luas](https://github.com/limadm/luas). Note that
-this is still an imperfect method and the best way to run this is via the
-`nix-shell --run 'bash' --pure` environment.
+### Language Server Support
+
+To generate a `compile_commands.json` file for working with a language server
+like [ccls](https://github.com/MaskRay/ccls) use the following commands:
 
 ```sh
-luas init 5.2.4
-luas use 5.2.4
-luarocks install luafilesystem
+# Pure environment
+nix-shell --run 'bash' --pure
+mkdir -p build && cd build
+cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES ../
+cp compile_commands.json ../
 ```
+
+Note that there is no need to actually compile the project if you simply need to
+get the compiler database for the language server.
+
+**Do Not** commit the `.json` file.
 
 ## Development
 
@@ -104,45 +93,55 @@ We can simply use the `nix` environment:
 ```sh
 # From the project root
 nix-shell
-# Sanitize and fix the shell
-stty sane
-export TERM="xterm-256color"
 ```
 
 # Running
 
-To run the sample inputs, simply move the binary to the project root, or to a
-directory where `input/` is a child directory.
+This is built completely with nix:
 
 ```{bash}
-# Assuming you are in the build directory
-# Check help with -h
-# --script and --file are optional now
-./yodaStruct --script ../lua_inputs/transition_diff.lua -c ../lua_inputs/config.yml
+# Install systemwide
+nix-env -if .
 ```
 
-This can also now be tested with a single shell script, which will drop into the
-`nix` environment before building and executing the single run test listed
-above:
+To run the sample inputs, simply install the software, and ensure that `input/` is a child directory.
+
+```{bash}
+# Assuming you are in the src directory
+# Check help with -h
+yodaStruct -c lua_inputs/config.yml
+```
+
+## Tests
+
+Apart from the [examples](https://docs.dseams.info/pages.html), the test-suite
+can be run with the `yodaStruct_test` binary, which will drop into the
+`nix` environment before building and executing `gdb`:
 
 ```{bash}
 # Just run this
 ./testBuild.sh
+# quit gdb with quit
+# Go run the test binary
+cd shellBuild
+./yodaStruct_test
 ```
+
+Do note that the regular installation via `nix-env` runs the tests before the installation
 
 # Developer Documentation
 
 <!-- TODO: Move this to some other location. -->
 
-For updates to any of the **bundled** `external libraries` change the commit number and use:
+Test the build with nix:
 
-```{bash}
-$ cd src/external
-# Sol2
- wget https://raw.githubusercontent.com/ThePhD/sol2/develop/single/sol/sol_forward.hpp
- wget https://raw.githubusercontent.com/ThePhD/sol2/develop/single/sol/sol.hpp
-# cxxopts
- wget https://raw.githubusercontent.com/jarro2783/cxxopts/master/include/cxxopts.hpp
+```bash
+nix-build .
+# Outputs are in ./result
+# If you get a CMake error
+rm -rf build
+nix-store --delete /nix/store/$whatever # $whatever is the derivation complaining
+nix-collect-garbage # then try again [worst case scenario]
 ```
 
 ## Leaks and performance
@@ -154,9 +153,17 @@ and
 and the following:
 
 ```{bash}
+# From the developer shell
 export CXX=/usr/bin/clang++ && export CC=/usr/bin/clang
 cmake .. -DCMAKE_CXX_FLAGS="-pg -fsanitize=address " -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg
 ```
+
+# Overview
+
+As of Mon Jan 20 15:57:18 2020, the lines of code calculated by
+[cloc](http://cloc.sourceforge.net/) are as follows:
+
+![Cloc Lines](images/cloc-2020-01-20_15-56.png)
 
 # Contributing
 
@@ -165,8 +172,8 @@ Please ensure that all contributions are formatted according to the
 
 Specifically, consider using the following:
 
--[Sublime Plugin](https://github.com/rosshemsley/SublimeClangFormat) for users
-of Sublime Text
+- [Sublime Plugin](https://github.com/rosshemsley/SublimeClangFormat) for users
+  of Sublime Text
 
 - [format-all](https://github.com/lassik/emacs-format-all-the-code) for Emacs
 - [vim-clang-format](https://github.com/rhysd/vim-clang-format) for Vim

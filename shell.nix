@@ -16,6 +16,8 @@ pkgs.mkShell {
   buildInputs = with pkgs; [
     gdb
     git
+    lua
+    luaPackages.luafilesystem
   ]
   ++ optional stdenv.isLinux glibcLocales # To allow setting consistent locale on linux
   ++ optional stdenv.isLinux inotify-tools # For file_system

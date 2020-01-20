@@ -301,3 +301,5 @@ TSWLatexianTemp*
 # standalone packages
 *.sta
 /result
+/.ccls-cache/
+shellBuild/

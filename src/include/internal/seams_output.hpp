@@ -1,16 +1,16 @@
 #ifndef __SEAMS_OUTPUT_H_
 #define __SEAMS_OUTPUT_H_
 
+#include <errno.h>     // errno, ENOENT, EEXIST
+#include <sys/stat.h>  // stat
 #include <bond.hpp>
 #include <cage.hpp>
-#include <errno.h> // errno, ENOENT, EEXIST
 #include <generic.hpp>
 #include <iostream>
 #include <memory>
 #include <mol_sys.hpp>
-#include <sys/stat.h> // stat
 #if defined(_WIN32)
-#include <direct.h> // _mkdir
+#include <direct.h>  // _mkdir
 #endif
 
 //// Boost
@@ -56,40 +56,38 @@ inline int makePath(const std::string &path) {
   mode_t mode = 0755;
   int ret = mkdir(path.c_str(), mode);
 #endif
-  if (ret == 0)
-    return 0;
+  if (ret == 0) return 0;
 
   switch (errno) {
-  case ENOENT:
-    // parent didn't exist, try to create it
-    {
-      int pos = path.find_last_of('/');
-      if (pos == std::string::npos)
+    case ENOENT:
+      // parent didn't exist, try to create it
+      {
+        int pos = path.find_last_of('/');
+        if (pos == std::string::npos)
 #if defined(_WIN32)
-        pos = path.find_last_of('\\');
-      if (pos == std::string::npos)
+          pos = path.find_last_of('\\');
+        if (pos == std::string::npos)
 #endif
-        return 1;
-      if (!makePath(path.substr(0, pos)))
-        return 1;
-    }
+          return 1;
+        if (!makePath(path.substr(0, pos))) return 1;
+      }
 // now, try to create again
 #if defined(_WIN32)
-    return 0 == _mkdir(path.c_str());
+      return 0 == _mkdir(path.c_str());
 #else
-    return 0 == mkdir(path.c_str(), mode);
+      return 0 == mkdir(path.c_str(), mode);
 #endif
 
-  case EEXIST:
-    // done!
-    if (isDirExist(path)) {
-      return 0;
-    } else {
-      return 1;
-    }
+    case EEXIST:
+      // done!
+      if (isDirExist(path)) {
+        return 0;
+      } else {
+        return 1;
+      }
 
-  default:
-    return 1;
+    default:
+      return 1;
   }
 }
 
@@ -99,16 +97,18 @@ int writeRings(std::vector<std::vector<int>> rings,
 
 // Function for printing out the number of prism blocks, with or without slices.
 // Be careful when using slices!
-int writePrismNum(std::string path, int currentFrame, std::vector<int> nPrisms,
+int writePrismNum(std::string path, std::vector<int> nPrisms,
                   std::vector<int> nDefPrisms,
-                  std::vector<double> heightPercent, int maxDepth);
+                  std::vector<double> heightPercent, int maxDepth,
+                  int currentFrame, int firstFrame);
 
 // Function for printing out the coverage area and the number of rings of each
 // type
 int writeRingNum(std::string path, int currentFrame, std::vector<int> nRings,
                  std::vector<double> coverageAreaXY,
                  std::vector<double> coverageAreaXZ,
-                 std::vector<double> coverageAreaYZ, int maxDepth);
+                 std::vector<double> coverageAreaYZ, int maxDepth,
+                 int firstFrame);
 
 // Function for printing out the RDF, given the filename
 int printRDF(std::string fileName, std::vector<double> *rdfValues,
@@ -117,7 +117,8 @@ int printRDF(std::string fileName, std::vector<double> *rdfValues,
 // Function for printing out the number of DDCs, HCs, mixed rings, basal and
 // prismatic rings
 int writeTopoBulkData(std::string path, int currentFrame, int numHC, int numDDC,
-                      int mixedRings, int basalRings, int prismaticRings);
+                      int mixedRings, int basalRings, int prismaticRings,
+                      int firstFrame);
 
 // Function for writing out each prism
 int writePrisms(std::vector<int> *basal1, std::vector<int> *basal2,
@@ -127,7 +128,7 @@ int writePrisms(std::vector<int> *basal1, std::vector<int> *basal2,
 // Function for writing out cluster statistics
 int writeClusterStats(std::string path, int currentFrame, int largestCluster,
                       int numOfClusters, int smallestCluster,
-                      double avgClusterSize);
+                      double avgClusterSize, int firstFrame);
 
 // Write a data file for rings
 int writeLAMMPSdata(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
@@ -211,5 +212,5 @@ int writeHisto(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 int writeCluster(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                  std::string fileName = "cluster.txt", bool isSlice = false,
                  int largestIceCluster = 0);
-} // namespace sout
-#endif // __SEAMS_OUTPUT_H_
+}  // namespace sout
+#endif  // __SEAMS_OUTPUT_H_

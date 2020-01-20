@@ -1,16 +1,16 @@
 #ifndef __TOPO_ONE_DIM_H_
 #define __TOPO_ONE_DIM_H_
 
+#include <math.h>
+#include <sys/stat.h>
 #include <algorithm>
 #include <array>
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <math.h>
 #include <memory>
 #include <sstream>
 #include <string>
-#include <sys/stat.h>
 #include <vector>
 
 #include <mol_sys.hpp>
@@ -34,12 +34,12 @@ namespace ring {
 
 // Find out which rings are prisms.
 // Returns a vector containing all the ring IDs which are prisms
-std::vector<int>
-findPrisms(std::vector<std::vector<int>> rings,
-           std::vector<strucType> *ringType, int *nPerfectPrisms,
-           int *nImperfectPrisms, std::vector<std::vector<int>> nList,
-           molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-           std::vector<double> *rmsdPerAtom, bool doShapeMatching = false);
+std::vector<int> findPrisms(
+    std::vector<std::vector<int>> rings, std::vector<strucType> *ringType,
+    int *nPerfectPrisms, int *nImperfectPrisms,
+    std::vector<std::vector<int>> nList,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<double> *rmsdPerAtom, bool doShapeMatching = false);
 
 // Tests whether two rings are basal rings (true) or not (false) for a prism
 // (strict criterion)
@@ -58,9 +58,9 @@ bool discardExtraTetragonBlocks(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud);
 
 // Saves only axial rings out of all possible rings
-std::vector<std::vector<int>>
-keepAxialRingsOnly(std::vector<std::vector<int>> rings,
-                   molSys::PointCloud<molSys::Point<double>, double> *yCloud);
+std::vector<std::vector<int>> keepAxialRingsOnly(
+    std::vector<std::vector<int>> rings,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud);
 
 // Find out which rings are prisms, looping through all ring sizes upto the
 // maxDepth The input ringsAllSizes array has rings of every size.
@@ -87,6 +87,6 @@ int rmAxialTranslations(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int *atomID,
     int firstFrame, int currentFrame);
 
-} // namespace ring
+}  // namespace ring
 
-#endif // __TOPOCONFINED_H_
+#endif  // __TOPOCONFINED_H_

@@ -38,7 +38,7 @@ namespace ring {
 int topoBulkAnalysis(std::string path, std::vector<std::vector<int>> rings,
                      std::vector<std::vector<int>> nList,
                      molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                     bool printEachCage = false);
+                     int firstFrame, bool printEachCage = false);
 
 // Find out which hexagonal rings are DDC (Double Diamond Cages) rings.
 // Returns a vector containing all the ring IDs which are DDC rings
