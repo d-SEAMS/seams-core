@@ -158,6 +158,13 @@ export CXX=/usr/bin/clang++ && export CC=/usr/bin/clang
 cmake .. -DCMAKE_CXX_FLAGS="-pg -fsanitize=address " -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg
 ```
 
+# Overview
+
+As of Mon Jan 20 15:57:18 2020, the lines of code calculated by
+[cloc](http://cloc.sourceforge.net/) are as follows:
+
+![Cloc Lines](images/cloc-2020-01-20_15-56.png)
+
 # Contributing
 
 Please ensure that all contributions are formatted according to the
