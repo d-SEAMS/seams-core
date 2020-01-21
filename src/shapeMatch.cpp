@@ -63,14 +63,21 @@ bool match::matchPrism(
                             &scale1); // basal1
   absor::hornAbsOrientation(refPoints, basal2Set, &quat2, &rmsd2, &rmsdList2,
                             &scale2); // basal2
+  // // ------------
+  // // Update the per-atom RMSD for each particle
+  // // Basal1
+  // match::updatePerAtomRMSDRing(matchedBasal1, startingIndex, rmsdList1,
+  //                              rmsdPerAtom);
+  // // Basal2
+  // match::updatePerAtomRMSDRing(matchedBasal2, startingIndex, rmsdList2,
+  //                              rmsdPerAtom);
+  // // ------------
   // ------------
-  // Update the RMSD for each particle
+  // Update the RMSD (obtained for each ring) for each particle
   // Basal1
-  match::updatePerAtomRMSDRing(matchedBasal1, startingIndex, rmsdList1,
-                               rmsdPerAtom);
+  match::updateRMSDRing(matchedBasal1, startingIndex, rmsd1, rmsdPerAtom);
   // Basal2
-  match::updatePerAtomRMSDRing(matchedBasal2, startingIndex, rmsdList2,
-                               rmsdPerAtom);
+  match::updateRMSDRing(matchedBasal2, startingIndex, rmsd2, rmsdPerAtom);
   // ------------
 
   return true;
@@ -87,7 +94,7 @@ int match::updatePerAtomRMSDRing(std::vector<int> basalRing, int startingIndex,
   double iRMSD;                    // Per-particle RMSD
 
   // -----------------
-  // Reorder the basal ring elements
+  // Update the RMSD per particle
   for (int i = 0; i < ringSize; i++) {
     index = i + startingIndex; // Corresponding index in the basal ring
     // Wrap-around
@@ -103,7 +110,38 @@ int match::updatePerAtomRMSDRing(std::vector<int> basalRing, int startingIndex,
       (*rmsdPerAtom)[atomIndex] = iRMSD;
     } // end of update of RMSD
 
-  } // end of reordering and update
+  } // end of updating the RMSD per particle
+  // -----------------
+  // finito
+  return 0;
+} // end of function
+
+// Update the RMSD for each particle with the RMSD of each ring for a prism
+// block basal ring.
+int match::updateRMSDRing(std::vector<int> basalRing, int startingIndex,
+                          double rmsdVal, std::vector<double> *rmsdPerAtom) {
+  //
+  int atomIndex;                   // Atom particle index, in rmsdPerAtom
+  int ringSize = basalRing.size(); // Size of the basal ring
+  int index;                       // Corresponding index in the basal ring
+
+  // -----------------
+  // Update the RMSD per particle
+  for (int i = 0; i < ringSize; i++) {
+    index = i + startingIndex; // Corresponding index in the basal ring
+    // Wrap-around
+    if (index >= ringSize) {
+      index -= ringSize;
+    } // end of wrap-around
+    //
+    // Get the atom index
+    atomIndex = basalRing[index];
+    // The RMSD value to update with is rmsdVal
+    if ((*rmsdPerAtom)[atomIndex] == -1) {
+      (*rmsdPerAtom)[atomIndex] = rmsdVal;
+    } // end of update of RMSD
+
+  } // end of updating the RMSD for each particle
   // -----------------
   // finito
   return 0;

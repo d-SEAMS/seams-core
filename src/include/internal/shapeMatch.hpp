@@ -1,16 +1,16 @@
 #ifndef __SHAPEMATCH_H_
 #define __SHAPEMATCH_H_
 
-#include <math.h>
-#include <sys/stat.h>
 #include <algorithm>
 #include <array>
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <math.h>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <sys/stat.h>
 #include <vector>
 
 #include <absOrientation.hpp>
@@ -42,6 +42,11 @@ int updatePerAtomRMSDRing(std::vector<int> basalRing, int startingIndex,
                           std::vector<double> rmsdFromMatch,
                           std::vector<double> *rmsdPerAtom);
 
-}  // namespace match
+// Update the RMSD of each particle in a prism block basal ring with the RMSD of
+// the ring.
+int updatePerAtomRMSDRing(std::vector<int> basalRing, int startingIndex,
+                          double rmsdVal, std::vector<double> *rmsdPerAtom);
 
-#endif  // __SHAPEMATCH_H_
+} // namespace match
+
+#endif // __SHAPEMATCH_H_
