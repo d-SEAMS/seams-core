@@ -212,7 +212,7 @@ std::vector<int> ring::findPrisms(
       basal2 = rings[jring];  // Assign jring to basal2
       // ------------
       // Put extra check for axial basal rings if shapeMatching is being done
-      if (doShapeMatching) {
+      if (doShapeMatching == true || ringSize == 4) {
         isAxialPair = false;  // init
         isAxialPair =
             ring::discardExtraTetragonBlocks(&basal1, &basal2, yCloud);
