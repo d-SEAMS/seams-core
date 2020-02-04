@@ -44,8 +44,8 @@ int updatePerAtomRMSDRing(std::vector<int> basalRing, int startingIndex,
 
 // Update the RMSD of each particle in a prism block basal ring with the RMSD of
 // the ring.
-int updatePerAtomRMSDRing(std::vector<int> basalRing, int startingIndex,
-                          double rmsdVal, std::vector<double> *rmsdPerAtom);
+int updateRMSDRing(std::vector<int> basalRing, int startingIndex,
+                   double rmsdVal, std::vector<double> *rmsdPerAtom);
 
 } // namespace match
 
