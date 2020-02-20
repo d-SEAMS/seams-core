@@ -16,6 +16,7 @@ pkgs.mkShell {
   buildInputs = with pkgs; [
     gdb
     git
+    lcov
     lua
     luaPackages.luafilesystem
   ]
