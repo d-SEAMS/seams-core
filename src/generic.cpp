@@ -60,9 +60,9 @@ int gen::unwrappedCoordShift(
   //
   double x_iatom, y_iatom, z_iatom;
   double x_jatom, y_jatom, z_jatom;
-  double x_ij, y_ij, z_ij;  // Relative distance
+  double x_ij, y_ij, z_ij; // Relative distance
   std::vector<double> box = yCloud->box;
-  double xPBC, yPBC, zPBC;  // Actual unwrapped distance
+  double xPBC, yPBC, zPBC; // Actual unwrapped distance
 
   // ----------------------------------------------------------------------
   // INIT
@@ -87,11 +87,11 @@ int gen::unwrappedCoordShift(
     xPBC = box[0] - fabs(x_ij);
     if (x_ij < 0) {
       x_jatom = x_iatom - xPBC;
-    }  // To the -x side of currentIndex
+    } // To the -x side of currentIndex
     else {
       x_jatom = x_iatom + xPBC;
-    }  // Add to the + side
-  }    // Shift nextElement
+    } // Add to the + side
+  }   // Shift nextElement
   //
   // Shift y
   if (fabs(y_ij) > 0.5 * box[1]) {
@@ -99,11 +99,11 @@ int gen::unwrappedCoordShift(
     yPBC = box[1] - fabs(y_ij);
     if (y_ij < 0) {
       y_jatom = y_iatom - yPBC;
-    }  // To the -y side of currentIndex
+    } // To the -y side of currentIndex
     else {
       y_jatom = y_iatom + yPBC;
-    }  // Add to the + side
-  }    // Shift nextElement
+    } // Add to the + side
+  }   // Shift nextElement
   //
   // Shift z
   if (fabs(z_ij) > 0.5 * box[2]) {
@@ -111,11 +111,11 @@ int gen::unwrappedCoordShift(
     zPBC = box[2] - fabs(z_ij);
     if (z_ij < 0) {
       z_jatom = z_iatom - zPBC;
-    }  // To the -z side of currentIndex
+    } // To the -z side of currentIndex
     else {
       z_jatom = z_iatom + zPBC;
-    }  // Add to the + side
-  }    // Shift nextElement
+    } // Add to the + side
+  }   // Shift nextElement
   // ----------------------------------------------------------------------
   // Assign values
   *x_i = x_iatom;
@@ -161,15 +161,15 @@ double gen::gslVecAngle(std::vector<double> OO, std::vector<double> OH) {
  ***********************************************/
 double gen::getAverageWithoutOutliers(std::vector<double> inpVec) {
   //
-  double avgVal = 0.0;    // Average value, excluding the outliers
-  double median;          // Median value
-  int n = inpVec.size();  // Number of values
+  double avgVal = 0.0;   // Average value, excluding the outliers
+  double median;         // Median value
+  int n = inpVec.size(); // Number of values
   std::vector<double> lowerRange,
-      upperRange;                        // n/2 smallest and n/2 largest numbers
-  double firstQuartile, thirdQuartile;   // First and third quartiles
-  double iqr;                            // Interquartile range
-  double outlierLimLow, outlierLimHigh;  // Outliers limit
-  int numOfObservations = 0;  // Number of observations used for the average
+      upperRange;                       // n/2 smallest and n/2 largest numbers
+  double firstQuartile, thirdQuartile;  // First and third quartiles
+  double iqr;                           // Interquartile range
+  double outlierLimLow, outlierLimHigh; // Outliers limit
+  int numOfObservations = 0; // Number of observations used for the average
   // ----------------------
   // Calculate the median (the vector is sorted inside the function)
   median = calcMedian(&inpVec);
@@ -182,8 +182,8 @@ double gen::getAverageWithoutOutliers(std::vector<double> inpVec) {
       lowerRange.push_back(inpVec[i]);
       // n/2 largest numbers
       upperRange.push_back(inpVec[n / 2 + i]);
-    }  // end of loop to fill up the n/2 smallest and n/2 largest
-  }    // even
+    } // end of loop to fill up the n/2 smallest and n/2 largest
+  }   // even
   else {
     //
     int halfN = (n + 1) / 2;
@@ -193,8 +193,8 @@ double gen::getAverageWithoutOutliers(std::vector<double> inpVec) {
       lowerRange.push_back(inpVec[i]);
       // (n+1)/2 largest numbers
       upperRange.push_back(inpVec[halfN + i]);
-    }  // end of filling up the smallest and largest half-ranges
-  }    // for odd numbers
+    } // end of filling up the smallest and largest half-ranges
+  }   // for odd numbers
   // ----------------------
   // Calculate the first and third quartiles, and interquartile range
   //
@@ -219,20 +219,32 @@ double gen::getAverageWithoutOutliers(std::vector<double> inpVec) {
     //
     if (inpVec[i] < outlierLimLow) {
       continue;
-    }  // lower limit outlier
+    } // lower limit outlier
     else if (inpVec[i] > outlierLimHigh) {
       continue;
-    }  // higher limit outlier
+    } // higher limit outlier
     else {
       // Number of observations added
       numOfObservations++;
       // Add to the average
       avgVal += inpVec[i];
-    }  // take the average
-  }    // end of loop for getting the average
+    } // take the average
+  }   // end of loop for getting the average
   //
   // Divide by the number of observations used
   avgVal /= numOfObservations;
+  // ----------------------
+  // This fails if there are not enough observations (ring size = 3)
+  if (numOfObservations == 0) {
+    double sumVal = 0.0;
+    // Loop through all the values and sum
+    for (int i = 0; i <= n; i++) {
+      sumVal += inpVec[i];
+    } // end of sum
+    // Normalize
+    avgVal = sumVal / n;
+    return avgVal;
+  } // for triangular prism blocks
   // ----------------------
 
   return avgVal;
@@ -248,7 +260,7 @@ double gen::getAverageWithoutOutliers(std::vector<double> inpVec) {
 double gen::angDistDegQuaternions(std::vector<double> quat1,
                                   std::vector<double> quat2) {
   //
-  double prod;  // Product of quat1 and conjugate of quat2
+  double prod; // Product of quat1 and conjugate of quat2
   // The angular distance is
   // angularDistance = 2*cosInverse(quat1*conj(quat2))
   prod = quat1[0] * quat2[0] - quat1[1] * quat2[1] - quat1[2] * quat2[2] -
