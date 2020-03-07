@@ -32,77 +32,115 @@
  *  @param[in] yCloud The input PointCloud, with respect to which the indices in
  the rings and nList vector of vectors have been saved.
  *  @param[in] firstFrame First frame to be analyzed
- *  @param[in] printEachCage Flag for printing the information of each cage in
- the frame (true) or not printing the coordinates/connectivity of each cage
- (false).
+ *  @param[in] onlyTetrahedral Flag for only finding DDCs and HCs (true) or also
+ finding PNCs (false)
  ***********************************************/
 int ring::topoBulkAnalysis(
     std::string path, std::vector<std::vector<int>> rings,
     std::vector<std::vector<int>> nList,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int firstFrame,
-    bool printEachCage) {
+    bool onlyTetrahedral) {
   //
   // Ring IDs of each type will be saved in these vectors
-  std::vector<int> listDDC;  // Vector for ring indices of DDC
-  std::vector<int> listHC;   // Vector for ring indices of HC
+  std::vector<int> listDDC; // Vector for ring indices of DDC
+  std::vector<int> listHC;  // Vector for ring indices of HC
   std::vector<int>
-      listMixed;  // Vector for ring indices of rings that are both DDC and HC
+      listMixed; // Vector for ring indices of rings that are both DDC and HC
   std::vector<ring::strucType>
-      ringType;  // This vector will have a value for each ring inside
-                 // ringList, of type enum strucType in gen.hpp
+      ringType; // This vector will have a value for each ring inside
+                // ringList, of type enum strucType in gen.hpp
   // Make a list of all the DDCs and HCs
   std::vector<cage::Cage> cageList;
   std::vector<std::vector<int>>
-      ringsOneType;  // Vector of vectors of rings of a single size
-  int ringSize = 6;  // DDCs and HCs are for 6-membered rings
+      ringsOneType;    // Vector of vectors of rings of a single size
+  int initRingSize;    // Todo or not: calculate the PNCs or not
+  int maxRingSize = 6; // DDCs and HCs are for 6-membered rings
   std::vector<cage::iceType>
-      atomTypes;  // This vector will have a value for every atom
+      atomTypes; // This vector will have a value for every atom
   // Number of types
   int numHC, numDDC, mixedRings, prismaticRings, basalRings;
 
+  // TODO: handle shapeMatching
+  bool doShapeMatching = true;
+  // Qualifier for the RMSD per atom:
+  std::vector<double> rmsdPerAtom;
+  //
+
+  // test
+  // std::cout << "rings"
+  //           << "\n";
+  // for (int i = 0; i < rings.size(); i++) {
+  //   for (int j = 0; j < rings[i].size(); j++) {
+  //     std::cout << rings[i][j] << " ";
+  //   }
+  //   std::cout << "\n";
+  // }
+  // std::cout << "\n";
+
+  if (onlyTetrahedral) {
+    initRingSize = 6;
+  } else {
+    initRingSize = 5;
+  }
+
+  // Init the atom type vector
+  atomTypes.resize(yCloud->nop); // Has a value for each atom
+  // Init the rmsd per atom (not used yet)
+  rmsdPerAtom.resize(yCloud->nop); // Has a value for each atom
+
   // ----------------------------------------------
   // Init
-  // Get rings of size 6.
-  // // Clear ringsOneType
-  //   ring::clearRingList(ringsOneType);
-  // Get rings of the current ring size
-  ringsOneType = ring::getSingleRingSize(rings, ringSize);
-  // Init the ringType vector
-  ringType.resize(
-      ringsOneType.size());  // Has a value for each ring. init to zero.
-  // Init the atom type vector
-  atomTypes.resize(yCloud->nop);  // Has a value for each atom
-  // ----------------------------------------------
-  // Get the cages
-  // Find DDC rings, saving the IDs to listDDC
-  listDDC = ring::findDDC(ringsOneType, &ringType, &cageList);
+  // Get rings of size 5 or 6.
+  for (int ringSize = initRingSize; ringSize <= maxRingSize; ringSize++) {
+    // Clear ringsOneType
+    ring::clearRingList(ringsOneType);
+    // Get rings of the current ring size
+    ringsOneType = ring::getSingleRingSize(rings, ringSize);
+    // Skip for zero rings
+    if (ringsOneType.size() == 0) {
+      continue;
+    } // skip for no rings of ringSize
+    //
+    // Init the ringType vector
+    ringType.resize(
+        ringsOneType.size()); // Has a value for each ring. init to zero.
+    // ----------------------------------------------
+    if (ringSize == 6) {
+      // Get the cages
+      // Find DDC rings, saving the IDs to listDDC
+      listDDC = ring::findDDC(ringsOneType, &ringType, &cageList);
 
-  // Find HC rings, saving the ring IDs (starting from 0) to listHC
-  listHC = ring::findHC(ringsOneType, &ringType, nList, &cageList);
+      // Find HC rings, saving the ring IDs (starting from 0) to listHC
+      listHC = ring::findHC(ringsOneType, &ringType, nList, &cageList);
 
-  // Find rings which are both DDCs and HCs (mixed)
-  // A dummy value of -10 in the listDDC and listHC vectors for mixed rings
-  listMixed = ring::findMixedRings(ringsOneType, &ringType, &listDDC, &listHC);
+      // Find rings which are both DDCs and HCs (mixed)
+      // A dummy value of -10 in the listDDC and listHC vectors for mixed rings
+      listMixed =
+          ring::findMixedRings(ringsOneType, &ringType, &listDDC, &listHC);
 
-  // // Print out each cage into a new folder called cages inside output
-  // // if the flag for printing cages is true. TODO: fix
-  // if (printEachCage) {
-  //   io::writeAllCages(&cageList, ringsOneType, nList, yCloud,
-  //                     yCloud->currentFrame);
-  // }  // end of printing each cage
+      // Get the number of structures (DDCs, HCs, mixed rings, basal rings,
+      // prismatic rings)
+      ring::getStrucNumbers(ringType, cageList, &numHC, &numDDC, &mixedRings,
+                            &prismaticRings, &basalRings);
 
-  // Get the number of structures (DDCs, HCs, mixed rings, basal rings,
-  // prismatic rings)
-  ring::getStrucNumbers(ringType, cageList, &numHC, &numDDC, &mixedRings,
-                        &prismaticRings, &basalRings);
-
-  // Write out to a file
-  sout::writeTopoBulkData(path, yCloud->currentFrame, numHC, numDDC, mixedRings,
-                          basalRings, prismaticRings, firstFrame);
-
-  // Gets the atom type for every atom, to be used for printing out the ice
-  // types found
-  ring::getAtomTypesTopoBulk(ringsOneType, ringType, &atomTypes);
+      // Write out to a file
+      sout::writeTopoBulkData(path, yCloud->currentFrame, numHC, numDDC,
+                              mixedRings, basalRings, prismaticRings,
+                              firstFrame);
+      // Gets the atom type for every atom, to be used for printing out the ice
+      // types found
+      ring::getAtomTypesTopoBulk(ringsOneType, ringType, &atomTypes);
+    }
+    // Finding prismatic blocks
+    else {
+      // Get the prism block classifications
+      prism3::findBulkPrisms(ringsOneType, &ringType, nList, yCloud,
+                             &rmsdPerAtom);
+      // Gets the atom type for every atom, to be used for printing out the ice
+      // types found
+      ring::getAtomTypesTopoBulk(ringsOneType, ringType, &atomTypes);
+    }
+  }
 
   // Print out the lammps data file with the bonds
   sout::writeLAMMPSdataTopoBulk(yCloud, nList, atomTypes, path);
@@ -150,12 +188,12 @@ std::vector<int> ring::findDDC(std::vector<std::vector<int>> rings,
                                std::vector<ring::strucType> *ringType,
                                std::vector<cage::Cage> *cageList) {
   std::vector<int> listDDC;
-  int totalRingNum = rings.size();   // Total number of hexagonal rings
-  std::vector<int> peripheralRings;  // Indices which may be peripheral rings
-  bool cond1, cond2, cond3;          // Conditions for DDC
-  int jring;                         // Index for peripheral ring being added
-  std::vector<int> DDCRings;  // Indices of rings which constitute a single DDC,
-                              // with the equatorial ring first
+  int totalRingNum = rings.size();  // Total number of hexagonal rings
+  std::vector<int> peripheralRings; // Indices which may be peripheral rings
+  bool cond1, cond2, cond3;         // Conditions for DDC
+  int jring;                        // Index for peripheral ring being added
+  std::vector<int> DDCRings; // Indices of rings which constitute a single DDC,
+                             // with the equatorial ring first
 
   // To search for equatorial rings, loop through all
   // the hexagonal rings
@@ -212,15 +250,15 @@ std::vector<int> ring::findDDC(std::vector<std::vector<int>> rings,
         (*ringType)[jring] = ring::DDC;
         listDDC.push_back(jring);
       }
-    }  // end of update for peripheral rings
+    } // end of update for peripheral rings
     // Add rings to the cageList vector of struct Cages.
-    DDCRings.clear();           // init
-    DDCRings.push_back(iring);  // Add the equatorial ring first
+    DDCRings.clear();          // init
+    DDCRings.push_back(iring); // Add the equatorial ring first
     DDCRings.insert(std::end(DDCRings), std::begin(peripheralRings),
                     std::end(peripheralRings));
     (*cageList).push_back({cage::DoubleDiaC, DDCRings});
     // ------------
-  }  // end of loop through all hexagonal rings
+  } // end of loop through all hexagonal rings
 
   return listDDC;
 }
@@ -243,20 +281,20 @@ std::vector<int> ring::findDDC(std::vector<std::vector<int>> rings,
  ***********************************************/
 bool ring::conditionOneDDC(std::vector<std::vector<int>> rings,
                            std::vector<int> *peripheralRings, int iring) {
-  int index;  // Atom ID to be compared
+  int index; // Atom ID to be compared
   int noOfCommonRings =
-      0;  // No of rings in which the element to be matched has been found
-  int jElement;  // Atom ID being compared to index
+      0;        // No of rings in which the element to be matched has been found
+  int jElement; // Atom ID being compared to index
 
   // Loop through each element of iring for finding matches
   for (int m = 0; m < 6; m++) {
-    index = rings[iring][m];  // Atom Index to be compared and matched with
-    noOfCommonRings = 0;      // init to zero.
+    index = rings[iring][m]; // Atom Index to be compared and matched with
+    noOfCommonRings = 0;     // init to zero.
     // Loop through every ring except iring
     for (int jring = 0; jring < rings.size(); jring++) {
       if (iring == jring) {
         continue;
-      }  // Skip for iring
+      } // Skip for iring
       // -------
       // Search every element of jring
       for (int k = 0; k < 6; k++) {
@@ -265,27 +303,27 @@ bool ring::conditionOneDDC(std::vector<std::vector<int>> rings,
           noOfCommonRings++;
           (*peripheralRings).push_back(jring);
           break;
-        }  // if index is found inside jring
+        } // if index is found inside jring
         else {
           continue;
         }
-      }  // end of loop through every element of jring
+      } // end of loop through every element of jring
       // -------
-    }  // end of loop through all rings except iring
+    } // end of loop through all rings except iring
     // If less than 3 rings have been found for each element, then this is
     // not an equatorial ring
     if (noOfCommonRings < 3) {
       return false;
-    }  // end of check for common ring number per element in iring
-  }    // end of loop through each element of iring
+    } // end of check for common ring number per element in iring
+  }   // end of loop through each element of iring
 
   // iring is an equatorial ring. The duplicate ring IDs inside
   // peripheralRings should be removed
-  std::vector<int>::iterator ip;  // Iterator to find the last element upto
-                                  // which unique elements are present
+  std::vector<int>::iterator ip; // Iterator to find the last element upto
+                                 // which unique elements are present
   // Duplicate IDs must be removed
   int numElements =
-      (*peripheralRings).size();  // number of elements in peripheralRings
+      (*peripheralRings).size(); // number of elements in peripheralRings
   sort((*peripheralRings).begin(), (*peripheralRings).end());
   ip = std::unique((*peripheralRings).begin(),
                    (*peripheralRings).begin() + numElements);
@@ -315,17 +353,17 @@ bool ring::conditionOneDDC(std::vector<std::vector<int>> rings,
  ***********************************************/
 bool ring::conditionTwoDDC(std::vector<std::vector<int>> rings,
                            std::vector<int> *peripheralRings, int iring) {
-  std::vector<int> triplet;  //  Triplet formed from iring
-  int ringSize = 6;          // Here, all the rings are hexagons
-  int j;                     // Used for making the triplet
-  int jring;                 // Peripheral ring ID to be searched
-  int count;                 // Number of  rings found that match the triplet
+  std::vector<int> triplet; //  Triplet formed from iring
+  int ringSize = 6;         // Here, all the rings are hexagons
+  int j;                    // Used for making the triplet
+  int jring;                // Peripheral ring ID to be searched
+  int count;                // Number of  rings found that match the triplet
   std::vector<int>
-      newPeripherals;  // Vector in which the new peripheral ring IDs are saved.
-                       // This will be swapped with peripheralRings later
+      newPeripherals; // Vector in which the new peripheral ring IDs are saved.
+                      // This will be swapped with peripheralRings later
 
   for (int k = 0; k < ringSize; k++) {
-    triplet.clear();  // Clear the triplet
+    triplet.clear(); // Clear the triplet
     // Get a triplet
     for (int i = k; i < k + 3; i++) {
       j = i;
@@ -333,30 +371,30 @@ bool ring::conditionTwoDDC(std::vector<std::vector<int>> rings,
         j = i - ringSize;
       }
       triplet.push_back(rings[iring][j]);
-    }  // end of getting a triplet from k
+    } // end of getting a triplet from k
     // -------------
     // Compare the triplet with every possible peripheral
     // ring inside peripheralRings.
-    count = 0;  // init to zero
+    count = 0; // init to zero
     // Loop through all possible peripheral rings
     for (int m = 0; m < (*peripheralRings).size(); m++) {
-      jring = (*peripheralRings)[m];  // Ring ID of ring to be searched
+      jring = (*peripheralRings)[m]; // Ring ID of ring to be searched
       // Search inside the ring with index jring for the triplet
       bool foundTriplet = ring::findTripletInRing(rings[jring], triplet);
 
       // If the triplet has been found inside jring
       if (foundTriplet) {
-        newPeripherals.push_back(jring);  // Update new peripheral vector
+        newPeripherals.push_back(jring); // Update new peripheral vector
         count++;
         break;
-      }  // end of ring found
-    }    // end of loop through all possible peripheral rings
+      } // end of ring found
+    }   // end of loop through all possible peripheral rings
     // If count is 0, then the triplet was not found in any peripheral ring
     if (count == 0) {
       return false;
-    }  // Return false since the triplet was not found
+    } // Return false since the triplet was not found
     // -------------
-  }  // end of looping through 0-6 to get triplets
+  } // end of looping through 0-6 to get triplets
 
   // Swap the old peripheral rings vector with the new one
   (*peripheralRings).swap(newPeripherals);
@@ -367,7 +405,7 @@ bool ring::conditionTwoDDC(std::vector<std::vector<int>> rings,
     std::cerr
         << "There are more than 6 peripheral rings. The code will fail. \n";
     return false;
-  }  // end of check for more than 6 peripherals
+  } // end of check for more than 6 peripherals
 
   return true;
 }
@@ -396,9 +434,9 @@ bool ring::conditionTwoDDC(std::vector<std::vector<int>> rings,
 bool ring::conditionThreeDDC(std::vector<std::vector<int>> rings,
                              std::vector<int> *peripheralRings) {
   // New
-  std::vector<int> common;  // Vector containing common elements
-  bool hasCommon;           // true if the rings have a common element
-  int iring, jring;         // Pairs of peripheral rings
+  std::vector<int> common; // Vector containing common elements
+  bool hasCommon;          // true if the rings have a common element
+  int iring, jring;        // Pairs of peripheral rings
   // ----------------------------------------------------------------------------
   // CONDITION 1: Rings corresponding to T1, T3, T5 should have at least one
   // common element.
@@ -409,7 +447,7 @@ bool ring::conditionThreeDDC(std::vector<std::vector<int>> rings,
   // If T1, T3, T5 don't have a common element, return false
   if (!hasCommon) {
     return false;
-  }  // not a DDC
+  } // not a DDC
   // ----------------------------------------------------------------------------
   // CONDITION 2: Rings corresponding to T1, T3, T5 should have at least one
   // common element.
@@ -420,7 +458,7 @@ bool ring::conditionThreeDDC(std::vector<std::vector<int>> rings,
   // If T1, T3, T5 don't have a common element, return false
   if (!hasCommon) {
     return false;
-  }  // not a DDC
+  } // not a DDC
   // ----------------------------------------------------------------------------
   // CONDITION 3: Rings corresponding to {T1, T3}, {T2, T4}, {T3, T5}, {T4,
   // T6}
@@ -428,7 +466,7 @@ bool ring::conditionThreeDDC(std::vector<std::vector<int>> rings,
 
   // Loops to get pairs of rings corresponding to the right triplets
   for (int i = 0; i <= 3; i++) {
-    common.clear();  // init
+    common.clear(); // init
     // Pairs of rings corresponding to triplets.
     iring = (*peripheralRings)[i];
     jring = (*peripheralRings)[i + 2];
@@ -437,8 +475,8 @@ bool ring::conditionThreeDDC(std::vector<std::vector<int>> rings,
     // There should be at least three elements
     if (common.size() < 3) {
       return false;
-    }  // not a DDC
-  }    // end of getting iring and jring
+    } // not a DDC
+  }   // end of getting iring and jring
   // ----------------------------------------------------------------------------
 
   // iring is an equatorial ring and peripheralRings has the 6 peripheral rings
@@ -481,24 +519,24 @@ std::vector<int> ring::findHC(std::vector<std::vector<int>> rings,
                               std::vector<std::vector<int>> nList,
                               std::vector<cage::Cage> *cageList) {
   std::vector<int> listHC;
-  int totalRingNum = rings.size();  // Total number of hexagonal rings
-  std::vector<int> basal1;          // First basal ring
-  std::vector<int> basal2;          // Second basal ring
-  bool cond1, cond2;  // Conditions for rings to be basal (true) or not (false)
+  int totalRingNum = rings.size(); // Total number of hexagonal rings
+  std::vector<int> basal1;         // First basal ring
+  std::vector<int> basal2;         // Second basal ring
+  bool cond1, cond2; // Conditions for rings to be basal (true) or not (false)
   std::vector<int>
-      HCRings;  // Indices of rings which constitute a single HC, with the basal
-                // rings first, followed by prismatic rings
-  std::vector<int> prismaticRings;  // Ring indices of prismatic rings
-  int kring;                        // Ring index of the prismatic rings
+      HCRings; // Indices of rings which constitute a single HC, with the basal
+               // rings first, followed by prismatic rings
+  std::vector<int> prismaticRings; // Ring indices of prismatic rings
+  int kring;                       // Ring index of the prismatic rings
 
   // Two loops through all the rings are required to find pairs of basal rings
   for (int iring = 0; iring < totalRingNum - 1; iring++) {
     cond1 = false;
     cond2 = false;
-    basal1 = rings[iring];  // Assign iring to basal1
+    basal1 = rings[iring]; // Assign iring to basal1
     // Loop through the other rings to get a pair
     for (int jring = iring + 1; jring < totalRingNum; jring++) {
-      basal2 = rings[jring];  // Assign jring to basal2
+      basal2 = rings[jring]; // Assign jring to basal2
       // ------------
       // Step one: Check to see if basal1 and basal2 have common
       // elements or not. If they don't, then they cannot be basal rings
@@ -534,13 +572,13 @@ std::vector<int> ring::findHC(std::vector<std::vector<int>> rings,
         listHC.push_back(jring);
       }
       // Find the prismatic rings
-      prismaticRings.clear();  // Clear the prismatic ring vector first
+      prismaticRings.clear(); // Clear the prismatic ring vector first
       ring::findPrismatic(rings, &listHC, ringType, iring, jring,
                           &prismaticRings);
       // Update the prismatic rings
       for (int k = 0; k < prismaticRings.size(); k++) {
         kring =
-            prismaticRings[k];  // Current ring index of the (3) prismatic rings
+            prismaticRings[k]; // Current ring index of the (3) prismatic rings
         // Update kring
         if ((*ringType)[kring] == ring::unclassified) {
           (*ringType)[kring] = ring::HCprismatic;
@@ -561,8 +599,8 @@ std::vector<int> ring::findHC(std::vector<std::vector<int>> rings,
                      std::end(prismaticRings));
       (*cageList).push_back({cage::HexC, HCRings});
       // -----------
-    }  // end of loop through rest of the rings to get the second basal ring
-  }    // end of loop through all rings for first basal ring
+    } // end of loop through rest of the rings to get the second basal ring
+  }   // end of loop through all rings for first basal ring
 
   sort(listHC.begin(), listHC.end());
   auto ip = std::unique(listHC.begin(), listHC.end());
@@ -594,20 +632,20 @@ std::vector<int> ring::findHC(std::vector<std::vector<int>> rings,
  ***********************************************/
 bool ring::basalConditions(std::vector<std::vector<int>> nList,
                            std::vector<int> *basal1, std::vector<int> *basal2) {
-  int l1 = (*basal1)[0];  // first element of basal1 ring
-  int l2 = (*basal1)[1];  // second element of basal1 ring
-  int ringSize = 6;       // Size of the ring; each ring contains 6 elements
-  int m_k;                // Atom Index (in pointCloud) of element in basal2
-  int kIndex;             // Index of m_k in basal2, corresponding to m_k
-  int currentKindex;  // Current k index when finding alternating elements of
-                      // basal2
-  std::vector<int> evenTriplet;  // contains m_k, m_{k+2}, m_{k+4}
-  std::vector<int> oddTriplet;   // contains m_{k+1}, m_{k+3}, m_{k+5}
-  int compare1, compare2;        // l3 and l5 OR l4 and l6
+  int l1 = (*basal1)[0]; // first element of basal1 ring
+  int l2 = (*basal1)[1]; // second element of basal1 ring
+  int ringSize = 6;      // Size of the ring; each ring contains 6 elements
+  int m_k;               // Atom Index (in pointCloud) of element in basal2
+  int kIndex;            // Index of m_k in basal2, corresponding to m_k
+  int currentKindex;     // Current k index when finding alternating elements of
+                         // basal2
+  std::vector<int> evenTriplet; // contains m_k, m_{k+2}, m_{k+4}
+  std::vector<int> oddTriplet;  // contains m_{k+1}, m_{k+3}, m_{k+5}
+  int compare1, compare2;       // l3 and l5 OR l4 and l6
   int index;
-  bool l1_neighbour, l2_neighbour;  // m_k is a neighbour of l1(true) or not
-                                    // (false); m_k is a neighbour of l2(true)
-  bool isNeigh, notNeigh;  // Used to check if the rings are basal or not
+  bool l1_neighbour, l2_neighbour; // m_k is a neighbour of l1(true) or not
+                                   // (false); m_k is a neighbour of l2(true)
+  bool isNeigh, notNeigh; // Used to check if the rings are basal or not
 
   // ---------------------------------------------
   // SEARCH FOR L1_NEIGHBOUR OR L2_NEIGHBOUR
@@ -623,25 +661,25 @@ bool ring::basalConditions(std::vector<std::vector<int>> nList,
     auto it1 = std::find(nList[l1].begin() + 1, nList[l1].end(), m_k);
     // If m_k was found in l1's nList
     if (it1 != nList[l1].end()) {
-      compare1 = (*basal1)[2];  // l3
-      compare2 = (*basal1)[4];  // l5
-      kIndex = k;               // Saving the array index of m_k
+      compare1 = (*basal1)[2]; // l3
+      compare2 = (*basal1)[4]; // l5
+      kIndex = k;              // Saving the array index of m_k
       l1_neighbour = true;
       break;
-    }  // m_k found in l1's nList
+    } // m_k found in l1's nList
     // ---------------
     // CHECK IF M_K MATCHES L2 NEIGHBOURS
     auto it2 = std::find(nList[l2].begin() + 1, nList[l2].end(), m_k);
     // If m_k was found in l1's nList
     if (it2 != nList[l2].end()) {
-      compare1 = (*basal1)[3];  // l4
-      compare2 = (*basal1)[5];  // l6
-      kIndex = k;               // Saving the array index of m_k
+      compare1 = (*basal1)[3]; // l4
+      compare2 = (*basal1)[5]; // l6
+      kIndex = k;              // Saving the array index of m_k
       l2_neighbour = true;
       break;
-    }  // m_k found in l1's nList
+    } // m_k found in l1's nList
     // ---------------
-  }  // End of search for basal2 elements in l1 or l2's nList
+  } // End of search for basal2 elements in l1 or l2's nList
   // ---------------------------------------------
 
   // Return false if neither l1 nor l2 have any neighbours
@@ -649,27 +687,27 @@ bool ring::basalConditions(std::vector<std::vector<int>> nList,
 
   if (l1_neighbour == false && l2_neighbour == false) {
     return false;
-  }  // basal conditions not fulfilled
+  } // basal conditions not fulfilled
 
   // Get the alternating elements starting with kIndex.
   // 'evenTriplet': m_k, m_{k+2}, m_{k+4} - neighbours of compare1 and compare2.
   // 'oddTriplet': m_{k+1}, m_{k+3}, m_{k+5}- cannot be neighbours of basal1
   for (int k = 0; k <= 5; k++) {
-    currentKindex = kIndex + k;  // k
+    currentKindex = kIndex + k; // k
     // Wrap-around
     if (currentKindex >= ringSize) {
       currentKindex -= ringSize;
-    }  // end of wrap-around of k
+    } // end of wrap-around of k
     //
     // Update 'evenTriplet'
     if (k % 2 == 0) {
       evenTriplet.push_back((*basal2)[currentKindex]);
-    }  // end of update of evenTriplet
+    } // end of update of evenTriplet
     // Update 'oddTriplet'
     else {
       oddTriplet.push_back((*basal2)[currentKindex]);
-    }  // end of update of oddTriplet
-  }    // End of getting alternating triplets
+    } // end of update of oddTriplet
+  }   // End of getting alternating triplets
 
   // ---------------------------------------------
   // CONDITION1: m_{k+2} and m_{k+4} must be bonded to l3 and l5 (if l1 is a
@@ -683,7 +721,7 @@ bool ring::basalConditions(std::vector<std::vector<int>> nList,
   // rings are not part of an HC
   if (!isNeigh) {
     return false;
-  }  // Not an HC
+  } // Not an HC
 
   // ---------------------------------------------
   // CONDITION2: m_{k+1}, m_{k+3} and m_{k+5} must NOT be bonded to any element
@@ -698,12 +736,12 @@ bool ring::basalConditions(std::vector<std::vector<int>> nList,
   // are not part of an HC
   if (!notNeigh) {
     return false;
-  }  // Not an HC
+  } // Not an HC
 
   // Otherwise, all the conditions are true and this is an HC
   return true;
 
-}  // end of function
+} // end of function
 
 /********************************************/ /**
 *  Tests whether the last two elements of a triplet are neighbours of two atom
@@ -722,7 +760,7 @@ bool ring::basalNeighbours(std::vector<std::vector<int>> nList,
   int needle2 = (*triplet)[2];
   bool neighbourFound = false;
   bool neighOne = false,
-       neighTwo = false;  // Neighbour for atomOne, or neighbour for atomTwo
+       neighTwo = false; // Neighbour for atomOne, or neighbour for atomTwo
   // ----------------------------
   // For first element needle1, which must belong to either atomOne's or
   // atomTwo's neighbour list Search atomOne's neighbours
@@ -731,15 +769,15 @@ bool ring::basalNeighbours(std::vector<std::vector<int>> nList,
   if (it != nList[atomOne].end()) {
     neighbourFound = true;
     neighOne = true;
-  }  // atomOne's neighbour
+  } // atomOne's neighbour
   // If it is not atomOne's neighbour, it might be atomTwo's neighbour
   if (!neighOne) {
     it = std::find(nList[atomTwo].begin() + 1, nList[atomTwo].end(), needle1);
     if (it != nList[atomTwo].end()) {
       neighbourFound = true;
       neighTwo = true;
-    }  // end of check to see if neighbour was found
-  }    // End of check to see if needle1 is atomTwo's neighbour
+    } // end of check to see if neighbour was found
+  }   // End of check to see if needle1 is atomTwo's neighbour
   // ----------------------------
   // If needle1 is not a neighbour of atomOne or atomTwo, return false
   if (neighbourFound == false) {
@@ -760,7 +798,7 @@ bool ring::basalNeighbours(std::vector<std::vector<int>> nList,
     else {
       return false;
     }
-  }  // End of check for neighbour of atomTwo
+  } // End of check for neighbour of atomTwo
   // ===============
   // if atomTwo was a neighbour of needle1, needle2 must be a neighbour of
   // atomOne
@@ -790,13 +828,13 @@ bool ring::basalNeighbours(std::vector<std::vector<int>> nList,
 bool ring::notNeighboursOfRing(std::vector<std::vector<int>> nList,
                                std::vector<int> *triplet,
                                std::vector<int> *ring) {
-  int iatom;  // AtomID of the atom to be searched for inside the neighbour
-              // lists
-  int jatom;  // AtomID of in whose neighbour list iatom will be searched for
+  int iatom; // AtomID of the atom to be searched for inside the neighbour
+             // lists
+  int jatom; // AtomID of in whose neighbour list iatom will be searched for
   std::vector<int>::iterator it;
 
   for (int i = 0; i < (*triplet).size(); i++) {
-    iatom = (*triplet)[i];  // AtomID to be searched for
+    iatom = (*triplet)[i]; // AtomID to be searched for
     // iatom must be searched for in the neighbour lists of all elements
     // of the ring vector
     for (int j = 0; j < (*ring).size(); j++) {
@@ -809,8 +847,8 @@ bool ring::notNeighboursOfRing(std::vector<std::vector<int>> nList,
         return false;
       }
       // ------------------
-    }  // end of loop through every element of ring
-  }    // end of loop through all triplet elements
+    } // end of loop through every element of ring
+  }   // end of loop through all triplet elements
 
   return true;
 }
@@ -831,11 +869,11 @@ int ring::findPrismatic(std::vector<std::vector<int>> rings,
                         std::vector<int> *listHC,
                         std::vector<ring::strucType> *ringType, int iring,
                         int jring, std::vector<int> *prismaticRings) {
-  int iIndex, jIndex;              // Used for making rings to be searched
-  int ringSize = rings[0].size();  // This is 6 for hexagons
-  std::vector<int> iTriplet;       // triplet formed from iring
-  std::vector<int> jTriplet;       // triplet formed from jring
-  std::vector<int> common;         // Common elements
+  int iIndex, jIndex;             // Used for making rings to be searched
+  int ringSize = rings[0].size(); // This is 6 for hexagons
+  std::vector<int> iTriplet;      // triplet formed from iring
+  std::vector<int> jTriplet;      // triplet formed from jring
+  std::vector<int> common;        // Common elements
 
   // Make all possible triplets out of iring
   for (int i = 0; i < ringSize; i++) {
@@ -849,7 +887,7 @@ int ring::findPrismatic(std::vector<std::vector<int>> rings,
         iIndex -= ringSize;
       }
       iTriplet.push_back(rings[iring][iIndex]);
-    }  // end of getting a triplet from iring
+    } // end of getting a triplet from iring
 
     // -------------------------------------------
     // Now that a triplet has been found, find all rings with that triplet in
@@ -858,21 +896,21 @@ int ring::findPrismatic(std::vector<std::vector<int>> rings,
       // If this is the same as iring or jring, skip
       if (kring == iring || kring == jring) {
         continue;
-      }  // is not prismatic
-         //
-         // Now find out whether kring has the triplet or not!
+      } // is not prismatic
+      //
+      // Now find out whether kring has the triplet or not!
       common = ring::findsCommonElements(iTriplet, rings[kring]);
 
       // If this triplet is not shared by  kring
       // skip
       if (common.size() != 3) {
         continue;
-      }  // kring does not have iTriplet
+      } // kring does not have iTriplet
 
       // -----------------
       // If kring does have the triplet, check to see if at least three other
       // elements of kring are shared by jring
-      jTriplet.clear();  // init
+      jTriplet.clear(); // init
       // Make jTriplet
       for (int j = 0; j < ringSize; j++) {
         int katom = rings[kring][j];
@@ -881,8 +919,8 @@ int ring::findPrismatic(std::vector<std::vector<int>> rings,
         // If not found, add it to jTriplet
         if (it == iTriplet.end()) {
           jTriplet.push_back(katom);
-        }  // update jTriplet
-      }    // end of making jTriplet out of kring
+        } // update jTriplet
+      }   // end of making jTriplet out of kring
       // -----------------
 
       // Now search for jTriplet inside jring
@@ -891,8 +929,8 @@ int ring::findPrismatic(std::vector<std::vector<int>> rings,
       // Update the prismatic rings
       if (common.size() == 3) {
         //
-        (*listHC).push_back(kring);          // Update listHC vector
-        (*prismaticRings).push_back(kring);  // Update prismatic rings
+        (*listHC).push_back(kring);         // Update listHC vector
+        (*prismaticRings).push_back(kring); // Update prismatic rings
         // Update the type inside ringType
         // If the ring is already a DDC ring, it is a mixed ring
         if ((*ringType)[kring] == ring::DDC) {
@@ -901,11 +939,11 @@ int ring::findPrismatic(std::vector<std::vector<int>> rings,
         // If it is unclassified, it is just a prismatic ring
         if ((*ringType)[kring] == ring::unclassified) {
           (*ringType)[kring] = ring::HCprismatic;
-        }  // end ring update
-      }    // add kring to the list of prismatic rings
-    }      // end of searching through rings for kring
+        } // end ring update
+      }   // add kring to the list of prismatic rings
+    }     // end of searching through rings for kring
     // -------------------------------------------
-  }  // end of getting pairs of triplets
+  } // end of getting pairs of triplets
 
   return 0;
 }
@@ -943,20 +981,20 @@ std::vector<int> ring::findMixedRings(std::vector<std::vector<int>> rings,
       std::sort((*listDDC).begin(), (*listDDC).end());
       auto iter = std::find((*listDDC).begin(), (*listDDC).end(), iring);
       if (iter != (*listDDC).end()) {
-        *iter = dummyValue;  // Assign dummy value to the mixed ring
-      }                      // found in listDDC
+        *iter = dummyValue; // Assign dummy value to the mixed ring
+      }                     // found in listDDC
       //-----------------
       //-----------------
       // Search for iring in listHC
       std::sort((*listHC).begin(), (*listHC).end());
       auto itr = std::find((*listHC).begin(), (*listHC).end(), iring);
       if (itr != (*listHC).end()) {
-        *itr = dummyValue;  // Assign dummy value to the mixed ring
-      }                     // found in listHC
+        *itr = dummyValue; // Assign dummy value to the mixed ring
+      }                    // found in listHC
       //-----------------
 
-    }  // end of check for type
-  }    // end of loop through all every ring
+    } // end of check for type
+  }   // end of loop through all every ring
 
   return listMixed;
 }
@@ -975,9 +1013,9 @@ int ring::getAtomTypesTopoBulk(std::vector<std::vector<int>> rings,
                                std::vector<ring::strucType> ringType,
                                std::vector<cage::iceType> *atomTypes) {
   //
-  cage::iceType iRingType;         // Type of the current ring
-  int iatom;                       // Current ring
-  int ringSize = rings[0].size();  // Size of the ring
+  cage::iceType iRingType;        // Type of the current ring
+  int iatom;                      // Current ring
+  int ringSize = rings[0].size(); // Size of the ring
 
   // Loop through every ring in ringType
   for (int iring = 0; iring < ringType.size(); iring++) {
@@ -985,41 +1023,57 @@ int ring::getAtomTypesTopoBulk(std::vector<std::vector<int>> rings,
     // Skip if the ring is unclassified
     if (ringType[iring] == ring::unclassified) {
       continue;
-    }  // skip for unclassified rings
+    } // skip for unclassified rings
 
     // ------------
     // Get the current ring type
     // DDC
     if (ringType[iring] == ring::DDC) {
       iRingType = cage::ddc;
-    }  // DDC atoms
+    } // DDC atoms
     //
     // HC
     else if (ringType[iring] == ring::HCbasal ||
              ringType[iring] == ring::HCprismatic) {
       iRingType = cage::hc;
-    }  // HC atoms
+    } // HC atoms
     //
     // Mixed
     else if (ringType[iring] == ring::bothBasal ||
              ringType[iring] == ring::bothPrismatic) {
       iRingType = cage::mixed;
-    }  // HC atoms
+    } // HC atoms
+    // Prism
+    else if (ringType[iring] == ring::Prism ||
+             ringType[iring] == ring::deformedPrism ||
+             ringType[iring] == ring::mixedPrismRing) {
+      iRingType = cage::pnc; // 5 membered pnc
+    }                        // prism
     // Should never go here
     else {
       continue;
-    }  // TODO: add prism??
+    } //
     // ------------
     // Otherwise, loop through every inside the ring and assign atomTypes the
     // iRingType
     for (int i = 0; i < ringSize; i++) {
-      iatom = rings[iring][i];  // Atom index in ring
-      if ((*atomTypes)[iatom] == cage::mixed) {
+      iatom = rings[iring][i]; // Atom index in ring
+      if ((*atomTypes)[iatom] == cage::mixed ||
+          (*atomTypes)[iatom] == cage::mixed2) {
         continue;
-      }  // Don't reassign
-      (*atomTypes)[iatom] = iRingType;
-    }  // end of loop thorugh the current ring
-  }    // end of loop through every ring
+      } // Don't reassign
+      // For atoms shared by PNCs and DDCs/HCs
+      if (ringSize == 6) {
+        if ((*atomTypes)[iatom] == cage::pnc) {
+          (*atomTypes)[iatom] = cage::mixed2;
+        } else {
+          (*atomTypes)[iatom] = iRingType;
+        }
+      } else {
+        (*atomTypes)[iatom] = iRingType;
+      }
+    } // end of loop thorugh the current ring
+  }   // end of loop through every ring
 
   return 0;
 }
@@ -1059,13 +1113,13 @@ int ring::getStrucNumbers(std::vector<ring::strucType> ringType,
     // HC
     if (cageList[icage].type == cage::HexC) {
       *numHC += 1;
-    }  // end of updating HC number
+    } // end of updating HC number
     //
     // DDC
     if (cageList[icage].type == cage::DoubleDiaC) {
       *numDDC += 1;
-    }  // end of updating DDC number
-  }    // end of loop through cages
+    } // end of updating DDC number
+  }   // end of loop through cages
   // ------------------------------------
   // GETTING THE RINGSS (Mixed, Prismatic and Basal rings)
   // Loop through the rings
@@ -1077,23 +1131,313 @@ int ring::getStrucNumbers(std::vector<ring::strucType> ringType,
       // Also update basal rings
       if (ringType[iring] == ring::bothBasal) {
         *basalRings += 1;
-      }  // mixed basal rings
+      } // mixed basal rings
       // Also update prismatic rings
       if (ringType[iring] == ring::bothPrismatic) {
         *prismaticRings += 1;
-      }  // mixed prismatic rings
-    }    // end of updating mixed
+      } // mixed prismatic rings
+    }   // end of updating mixed
     //
     // HCs
     if (ringType[iring] == ring::HCprismatic) {
       *prismaticRings += 1;
-    }  // HC prismatic
+    } // HC prismatic
     // basal HCs
     if (ringType[iring] == ring::HCbasal) {
       *basalRings += 1;
-    }  // HC basal
-  }    // end of loop through every ring
+    } // HC basal
+  }   // end of loop through every ring
   // ------------------------------------
 
   return 0;
-}  // end of function
+} // end of function
+
+/********************************************/ /**
+ * Determines which rings are n-sided prisms. This function
+ returns a vector which contains the ring indices of all the rings which are
+ prisms. The ring indices correspond to the index of the rings inside the vector
+ of vector rings, starting from 0. Prism rings can be found using a three-step
+ procedure, in which first two basal rings are found. Prismatic rings are simply
+ rings which share every face made by upper and lower triplets of the basal
+ rings The neighbour list is also required as an input, which is a vector of
+ vectors, containing atom IDs. The first element of the neighbour list is the
+ atom index of
+ the atom for which the other elements are nearest neighbours.\
+ *  @param[in] rings The input vector of vectors containing the primitive rings
+ of a single ring size (number of nodes).
+ *  @param[in] ringType A vector containing a ring::strucType value (a
+ classification type) for each ring.
+ *  @param[in] nPrisms The number of prism blocks identified for the number of
+ nodes.
+ *  @param[in] nList The row-ordered neighbour list (by atom index).
+ *  @param[in] yCloud The input PointCloud.
+ *  \return A vector containing the ring indices of all the rings which have
+ been classified as prisms. The indices are with respect to the input rings
+ vector of vectors.
+ ***********************************************/
+int prism3::findBulkPrisms(
+    std::vector<std::vector<int>> rings, std::vector<ring::strucType> *ringType,
+    std::vector<std::vector<int>> nList,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<double> *rmsdPerAtom, double heightCutoff) {
+  int totalRingNum = rings.size(); // Total number of rings
+  std::vector<int> basal1;         // First basal ring
+  std::vector<int> basal2;         // Second basal ring
+  bool cond1, cond2; // Conditions for rings to be basal (true) or not (false)
+  int ringSize = rings[0].size(); // Number of nodes in each ring
+  // Matrix for the reference ring for a given ringSize.
+  Eigen::MatrixXd refPointSet(ringSize, 3);
+
+  int axialDim = 2; // Default=z
+  refPointSet = pntToPnt::getPointSetRefRing(ringSize, axialDim);
+  //
+
+  // Two loops through all the rings are required to find pairs of basal rings
+  for (int iring = 0; iring < totalRingNum - 1; iring++) {
+    cond1 = false;
+    cond2 = false;
+    basal1 = rings[iring]; // Assign iring to basal1
+    // Loop through the other rings to get a pair
+    for (int jring = iring + 1; jring < totalRingNum; jring++) {
+      basal2 = rings[jring]; // Assign jring to basal2
+      // ------------
+      // Put extra check for axial basal rings if shapeMatching is being done
+      // ------------
+      // Step one: Check to see if basal1 and basal2 have common
+      // elements or not. If they don't, then they cannot be basal rings
+      cond1 = ring::hasCommonElements(basal1, basal2);
+      if (cond1 == true) {
+        continue;
+      }
+
+      // ------------
+      bool smallDist =
+          prism3::basalRingsSeparation(yCloud, basal1, basal2, heightCutoff);
+      if (!smallDist) {
+        continue;
+      } // the basal rings are too far apart
+
+      // Otherwise
+      // Do shape matching here
+      bool isPrism = match::matchUntetheredPrism(yCloud, nList, refPointSet,
+                                                 &basal1, &basal2, rmsdPerAtom);
+
+      // Success! The rings are basal rings of a prism!
+      if (isPrism) {
+        //
+        // Update iring
+        if ((*ringType)[iring] == ring::unclassified) {
+          (*ringType)[iring] = ring::Prism;
+        }
+        // Update jring
+        if ((*ringType)[jring] == ring::unclassified) {
+          (*ringType)[jring] = ring::Prism;
+        }
+      } // end of reduced criteria
+      // Strict criteria
+      else {
+        cond2 = prism3::basalPrismConditions(nList, &basal1, &basal2);
+        // If the condition is false then the strict criterion has not been met
+        if (!cond2) {
+          continue;
+        }
+        // Update iring
+        if ((*ringType)[iring] == ring::unclassified) {
+          (*ringType)[iring] = ring::Prism;
+        }
+        // Update jring
+        if ((*ringType)[jring] == ring::unclassified) {
+          (*ringType)[jring] = ring::Prism;
+        }
+        //
+        // Shape-matching to get the RMSD (if shape-matching is desired)
+
+        // bool isKnownPrism = match::matchPrism(
+        //     yCloud, nList, refPointSet, &basal1, &basal2, rmsdPerAtom, true);
+
+        // -----------
+      } // end of strict criteria
+
+    } // end of loop through rest of the rings to get the second basal ring
+  }   // end of loop through all rings for first basal ring
+
+  return 0;
+}
+
+/********************************************/ /**
+ * A function that checks to see if two basal rings are basal rings of a prism
+ block or not, using the neighbour list information. The neighbour list nList is
+ a row-ordered vector of vectors, containing atom indices (not atom IDs!). The
+ first element of each subvector in nList is the atom index of the particle for
+ which the other elements are the nearest neighbours.
+ *  @param[in] nList Row-ordered neighbour list by atom index.
+ *  @param[in] basal1 The vector for one of the basal rings.
+ *  @param[in] basal2 The vector for the other basal ring.
+ *  \return A value that is true if the basal rings constitute a prism block,
+ and false if they do not make up a prism block.
+ ***********************************************/
+bool prism3::basalPrismConditions(std::vector<std::vector<int>> nList,
+                                  std::vector<int> *basal1,
+                                  std::vector<int> *basal2) {
+  int l1 = (*basal1)[0]; // first element of basal1 ring
+  int ringSize =
+      (*basal1).size(); // Size of the ring; each ring contains n elements
+  int m_k;              // Atom ID of element in basal2
+  bool l1_neighbour;    // m_k is a neighbour of l1(true) or not (false)
+
+  // isNeighbour is initialized to false for all basal2 elements; indication if
+  // basal2 elements are neighbours of basal1
+  std::vector<bool> isNeighbour(ringSize, false);
+  int kIndex;  // m_k index
+  int lAtomID; // atomID of the current element of basal1
+  int kAtomID; // atomID of the current element of basal2
+
+  // ---------------------------------------------
+  // COMPARISON OF basal2 ELEMENTS WITH l1
+  for (int k = 0; k < ringSize; k++) {
+    l1_neighbour = false;
+    m_k = (*basal2)[k];
+    // =================================
+    // Checking to seee if m_k is be a neighbour of l1
+    // Find m_k inside l1 neighbour list
+    auto it = std::find(nList[l1].begin() + 1, nList[l1].end(), m_k);
+
+    // If the element has been found, for l1
+    if (it != nList[l1].end()) {
+      l1_neighbour = true;
+      kIndex = k;
+      break;
+    }
+  } // l1 is a neighbour of m_k
+
+  // If there is no nearest neighbour, then the two rings are not part of the
+  // prism
+  if (!l1_neighbour) {
+    return false;
+  }
+
+  // ---------------------------------------------
+  // NEIGHBOURS of basal1 in basal2
+  isNeighbour[kIndex] = true;
+
+  // All elements of basal1 must be neighbours of basal2
+  for (int i = 1; i < ringSize; i++) {
+    lAtomID = (*basal1)[i]; // element of basal1 ring
+    for (int k = 0; k < ringSize; k++) {
+      // Skip if already a neighbour
+      if (isNeighbour[k]) {
+        continue;
+      }
+      // Get the comparison basal2 element
+      kAtomID = (*basal2)[k]; // element of basal2 ring;
+
+      // Checking to see if kAtomID is a neighbour of lAtomID
+      // Find kAtomID inside lAtomID neighbour list
+      auto it1 =
+          std::find(nList[lAtomID].begin() + 1, nList[lAtomID].end(), kAtomID);
+
+      // If the element has been found, for l1
+      if (it1 != nList[lAtomID].end()) {
+        isNeighbour[k] = true;
+      }
+    } // Loop through basal2
+  }   // end of check for neighbours of basal1
+
+  // ---------------------------------------------
+
+  // They should all be neighbours
+  for (int k = 0; k < ringSize; k++) {
+    // Check to see if any element is false
+    if (!isNeighbour[k]) {
+      return false;
+    }
+  }
+
+  // Everything works out!
+  return true;
+}
+
+/********************************************/ /**
+* Relaxed criteria for deformed
+ prism blocks: at least one bond
+ should exist between the basal
+ rings.
+***********************************************/
+bool prism3::relaxedPrismConditions(std::vector<std::vector<int>> nList,
+                                    std::vector<int> *basal1,
+                                    std::vector<int> *basal2) {
+  int ringSize =
+      (*basal1).size();     // Size of the ring; each ring contains n elements
+  int m_k;                  // Atom ID of element in basal2
+  bool isNeighbour = false; // This is true if there is at least one bond
+                            // between the basal rings
+  int l_k;                  // Atom ID of element in basal1
+
+  // ---------------------------------------------
+  // COMPARISON OF basal2 ELEMENTS (m_k) WITH basal1 ELEMENTS (l_k)
+  // Loop through all the elements of basal1
+  for (int l = 0; l < ringSize; l++) {
+    l_k = (*basal1)[l];
+    // Search for the nearest neighbour of l_k in basal2
+    // Loop through basal2 elements
+    for (int m = 0; m < ringSize; m++) {
+      m_k = (*basal2)[m];
+      // Find m_k inside l_k neighbour list
+      auto it = std::find(nList[l_k].begin() + 1, nList[l_k].end(), m_k);
+
+      // If the element has been found, for l1
+      if (it != nList[l_k].end()) {
+        isNeighbour = true;
+        break;
+      } // found element
+    }   // end of loop through all the elements of basal2
+
+    // If a neighbour has been found then
+    if (isNeighbour) {
+      return true;
+    }
+  } // end of loop through all the elements of basal1
+
+  // If a neighbour has not been found, return false
+  return false;
+}
+
+// Check to see that candidate basal prisms are not really far from each other
+// Return true if the basal rings are within the heightCutoff
+bool prism3::basalRingsSeparation(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<int> basal1, std::vector<int> basal2, double heightCutoff) {
+  //
+  int ringSize = basal1.size();
+  int l_k, m_k; // Atom indices
+  double infHugeNumber = 100000;
+  double leastDist = infHugeNumber;
+  int index = -1; // starting index
+  // For the first element of basal1:
+
+  l_k = basal1[0]; // This is the atom particle C++ index
+
+  // Search for the nearest neighbour of l_k in basal2
+  // Loop through basal2 elements
+  for (int m = 0; m < ringSize; m++) {
+    m_k = basal2[m]; // Atom index to find in the neighbour list of iatom
+
+    // Calculate the distance
+    double dist = gen::periodicDist(yCloud, l_k, m_k);
+
+    // Update the least distance
+    if (leastDist > dist) {
+      leastDist = dist; // This is the new least distance
+      index = m;
+    } // end of update of the least distance
+
+  } // found element
+
+  // If the element has been found, for l1
+  if (leastDist < heightCutoff) {
+    return true;
+  } // end of check
+  else {
+    return false;
+  }
+}
