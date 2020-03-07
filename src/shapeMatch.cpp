@@ -83,6 +83,85 @@ bool match::matchPrism(
   return true;
 } // end of function
 
+// For the pentagonal nanochannels in amorphous ice
+// These must be aligned
+// Shape-matching for a pair of polygon basal rings. Returns true if the pair of
+// basal rings form a prism block.
+bool match::matchUntetheredPrism(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<std::vector<int>> nList, const Eigen::MatrixXd &refPoints,
+    std::vector<int> *basal1, std::vector<int> *basal2,
+    std::vector<double> *rmsdPerAtom) {
+  //
+  int ringSize = (*basal1).size(); // Number of nodes in each basal ring
+  std::vector<int> matchedBasal1,
+      matchedBasal2; // Re-ordered basal rings 1 and 2
+  int dim = 3;       // Number of dimensions
+  // Matrices for the point sets of the target basal rings
+  Eigen::MatrixXd basal1Set(ringSize,
+                            dim); // Point set for the first basal ring
+  Eigen::MatrixXd basal2Set(ringSize,
+                            dim); // Point set for the second basal ring
+  int startingIndex; // Index in the basal rings from which the reference point
+                     // set is matched
+  double angDist;    // Calculated angular distance between the two basal rings
+  // Variables for the absolute orientation
+  std::vector<double> quat1, quat2; // quaternion rotation
+  double rmsd1, rmsd2;              // least total RMSD
+  std::vector<double> rmsdList1,
+      rmsdList2;         // List of RMSD per atom in the order fed in
+  double scale1, scale2; // Scale factor
+  // Deformed block classification
+  bool doAngleCriterion = false; // For deformed blocks
+
+  // Getting the target Eigen vectors
+  // Get the re-ordered matched basal rings, ordered with respect to each other
+  pntToPnt::relOrderPrismBlock(yCloud, *basal1, *basal2, &matchedBasal1,
+                               &matchedBasal2);
+  // -----------------------
+  // Match the basal rings with a complete prism block, given the relatively
+  // ordered basal rings This actually only needs to be done for deformed prism
+  // blocks
+  bool blockMatch = match::matchPrismBlock(
+      yCloud, nList, refPoints, &matchedBasal1, &matchedBasal2, &startingIndex);
+  // -----------------------
+  // Check to see if the prism matches the reference prism block
+  if (!blockMatch) {
+    return blockMatch;
+  }
+
+  // If the deformed prism does not fulfil the shape matching criterion, then do
+  // not calculate the RMSD per atom
+  // -----------------------
+  // Section for RMSD per atom, based on basal ring matching
+
+  basal1Set =
+      pntToPnt::fillPointSetPrismRing(yCloud, matchedBasal1, startingIndex);
+  // Fill up the point set for basal2
+  basal2Set =
+      pntToPnt::fillPointSetPrismRing(yCloud, matchedBasal2, startingIndex);
+  // Use Horn's algorithm to calculate the absolute orientation and RMSD etc.
+  absor::hornAbsOrientation(refPoints, basal1Set, &quat1, &rmsd1, &rmsdList1,
+                            &scale1); // basal1
+  absor::hornAbsOrientation(refPoints, basal2Set, &quat2, &rmsd2, &rmsdList2,
+                            &scale2); // basal2
+  // // Calculate the angular distance between basal1 and basal2
+  // angDist = gen::angDistDegQuaternions(quat1, quat2);
+  // // Check if the shapes are aligned
+  // if (angDist > cutoffAngle) {
+  //   return false;
+  // } // If not aligned, it is not a prism block
+  // ------------
+  // Update the RMSD (obtained for each ring) for each particle
+  // Basal1
+  match::updateRMSDRing(matchedBasal1, startingIndex, rmsd1, rmsdPerAtom);
+  // Basal2
+  match::updateRMSDRing(matchedBasal2, startingIndex, rmsd2, rmsdPerAtom);
+  // ------------
+
+  return true;
+} // end of function
+
 // Update the per-particle RMSD for a prism block basal ring.
 int match::updatePerAtomRMSDRing(std::vector<int> basalRing, int startingIndex,
                                  std::vector<double> rmsdFromMatch,
