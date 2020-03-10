@@ -1,16 +1,16 @@
 #ifndef __TOPO_BULK_H_
 #define __TOPO_BULK_H_
 
+#include <math.h>
+#include <sys/stat.h>
 #include <algorithm>
 #include <array>
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <math.h>
 #include <memory>
 #include <sstream>
 #include <string>
-#include <sys/stat.h>
 #include <vector>
 
 #include <cage.hpp>
@@ -45,6 +45,7 @@ int topoBulkAnalysis(std::string path, std::vector<std::vector<int>> rings,
 // Returns a vector containing all the ring IDs which are DDC rings
 std::vector<int> findDDC(std::vector<std::vector<int>> rings,
                          std::vector<strucType> *ringType,
+                         std::vector<int> listHC,
                          std::vector<cage::Cage> *cageList);
 
 // Find out which hexagonal rings are both DDCs (Double Diamond Cages) and HCs
@@ -107,7 +108,7 @@ int getStrucNumbers(std::vector<ring::strucType> ringType,
                     std::vector<cage::Cage> cageList, int *numHC, int *numDDC,
                     int *mixedRings, int *prismaticRings, int *basalRings);
 
-} // namespace ring
+}  // namespace ring
 
 /*!
  *  \addtogroup prism3
@@ -137,6 +138,6 @@ bool relaxedPrismConditions(std::vector<std::vector<int>> nList,
 bool basalRingsSeparation(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<int> basal1, std::vector<int> basal2, double heightCutoff = 8);
-} // namespace prism3
+}  // namespace prism3
 
-#endif // __TOPO_BULK_H_
+#endif  // __TOPO_BULK_H_
