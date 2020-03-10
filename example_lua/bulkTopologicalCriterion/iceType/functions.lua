@@ -15,5 +15,5 @@ for frame=targetFrame,finalFrame,frameGap do
    ---
    --- Start of analysis using rings (by index from here onwards.)
    rings=getPrimitiveRings(iceNeighbourList,maxDepth); --- Gets every ring (non-primitives included)
-   bulkTopologicalNetworkCriterion(outDir, rings, iceNeighbourList, clusterCloud, targetFrame, printCages); --- Finds DDCs and HCs
+   bulkTopologicalNetworkCriterion(outDir, rings, iceNeighbourList, clusterCloud, targetFrame, onlyTetrahedral); --- Finds DDCs and HCs
 end
