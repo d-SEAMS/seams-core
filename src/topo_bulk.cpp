@@ -196,20 +196,32 @@ std::vector<int> ring::findDDC(std::vector<std::vector<int>> rings,
   int jring;                         // Index for peripheral ring being added
   std::vector<int> DDCRings;  // Indices of rings which constitute a single DDC,
                               // with the equatorial ring first
+  // Vector for checking if a ring is basal, prismatic or peripheral
+  std::vector<bool>
+      notEquatorial;  // true if the ring is prismatic, basal or peripheral.
+  notEquatorial.resize(totalRingNum);  // Initialized to false
+
+  // --------
+  // Set all basal and prismatic rings to true (which are part of an HC)
+  for (int i = 0; i < listHC.size(); i++) {
+    int currentRingIndex = listHC[i];
+    // Set this to true
+    notEquatorial[currentRingIndex] = true;
+  }  // end of update of notEquatorial
+  // --------
 
   // To search for equatorial rings, loop through all
   // the hexagonal rings
   for (int iring = 0; iring < totalRingNum; iring++) {
     // ------------
     // Step zero: If the ring has been classified as a basal or prismatic ring
-    // in an HC, then it cannot be the equatiorial ring in a DDC
+    // in an HC or is a peripheral ring, then it cannot be the equatiorial ring
+    // in a DDC
     //
-    auto it = std::find(listHC.begin(), listHC.end(), iring);
-
-    // If found, then iring cannot be an equatorial ring
-    if (it != listHC.end()) {
+    if (notEquatorial[iring]) {
       continue;
-    }  // skip iring
+    }  // skip for rings which are not equatorial
+    //
     // ------------
     // Init
     peripheralRings.clear();
@@ -272,6 +284,9 @@ std::vector<int> ring::findDDC(std::vector<std::vector<int>> rings,
         (*ringType)[jring] = ring::bothPrismatic;
         listDDC.push_back(jring);
       }
+      //
+      // Update the notEquatorial vector
+      notEquatorial[jring] = true;
     }  // end of update for peripheral rings
     // Add rings to the cageList vector of struct Cages.
     DDCRings.clear();           // init
@@ -550,14 +565,30 @@ std::vector<int> ring::findHC(std::vector<std::vector<int>> rings,
                 // rings first, followed by prismatic rings
   std::vector<int> prismaticRings;  // Ring indices of prismatic rings
   int kring;                        // Ring index of the prismatic rings
+  std::vector<bool>
+      isPrismatic;  // Flag for checking if the ring is prismatic (true) or not
+                    // (false), since the basal rings are checked
+  isPrismatic.resize(totalRingNum);  // Initialized to false
 
   // Two loops through all the rings are required to find pairs of basal rings
   for (int iring = 0; iring < totalRingNum - 1; iring++) {
+    // -----------------------
+    // Skip if iring is prismatic
+    if (isPrismatic[iring]) {
+      continue;
+    }  // Skip if prismatic
+    // -----------------------
     cond1 = false;
     cond2 = false;
     basal1 = rings[iring];  // Assign iring to basal1
     // Loop through the other rings to get a pair
     for (int jring = iring + 1; jring < totalRingNum; jring++) {
+      // -----------------------
+      // Skip if iring is prismatic
+      if (isPrismatic[jring]) {
+        continue;
+      }                       // Skip if prismatic
+                              // -----------------------
       basal2 = rings[jring];  // Assign jring to basal2
       // ------------
       // Step one: Check to see if basal1 and basal2 have common
@@ -609,7 +640,11 @@ std::vector<int> ring::findHC(std::vector<std::vector<int>> rings,
           (*ringType)[kring] = ring::bothPrismatic;
           listHC.push_back(kring);
         }
-      }
+        //
+        // Update the isPrismatic vector
+        isPrismatic[kring] = true;
+        //
+      }  // End of update of prismatic rings in listHC
       // -----------
       // Update the cageList vector of Cages
       // Update the basal rings
