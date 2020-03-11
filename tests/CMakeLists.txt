@@ -11,6 +11,7 @@ add_executable(yodaStruct_test
                ${PROJECT_SOURCE_DIR}/src/mol_sys.cpp
 )
 
+#
 # Standard cmake stuff
 # include(FindBLAS)
 # include(FindLAPACK)
@@ -47,3 +48,15 @@ include_directories(
   )
 # Run unit tests
 add_test(NAME yodaStruct-unit-tests COMMAND $<TARGET_FILE:yodaStruct_test>)
+
+# Coverage
+include(CodeCoverage)
+ setup_target_for_coverage(
+   testCoverage  # Name for custom target.
+    yodaStruct_test         # Name of the test driver executable that runs the tests.
+    # NOTE! This should always have a ZERO as exit code
+    # otherwise the coverage generation will not complete.
+    coverage            # Name of output directory.
+    )
+# target_compile_options(yodaStruct_test PRIVATE -g -O0 -fprofile-arcs -ftest-coverage)
+# target_link_options(yodaStruct_test PRIVATE -lgcov --coverage)
