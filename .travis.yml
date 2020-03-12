@@ -4,12 +4,8 @@
 jobs:
   include:
     - language: nix
-      addons:
-        apt:
-          packages:
-            - lcov
-            - gcov
       install:
+        - nix-env -i lcov
         - if ["$TRAVIS_BRANCH" == "master"]; then  "nix-env -iA cachix -f https://cachix.org/api/v1/install"; fi
       script:
         - if ["$TRAVIS_BRANCH" == "master"]; then cachix use dseams; fi
@@ -20,7 +16,9 @@ jobs:
       after_success:
         - make testCoverage
         - bash <(curl -s https://codecov.io/bash) -f coverage.info.cleaned || echo "Codecov did not collect coverage reports"
-    - language: python
+    - name: docBuilder
+      if: branch = master
+      language: python
       python: "3.6"
       before_install:
         - cp scripts/ci/texlive.profile $HOME/texlive.profile
@@ -42,8 +40,6 @@ jobs:
       script:
         - ./m.css/documentation/doxygen.py Doxyfile-mcss
         - find docs/ -type f -name "*" -print0 | xargs -0 sed -i '' -e 's/>Pages</>Wiki</g' || true
-      on:
-        branch: master
       deploy:
         provider: pages
         edge: true
