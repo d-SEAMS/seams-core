@@ -14,7 +14,7 @@ jobs:
         - if ["$TRAVIS_BRANCH" == "master"]; then sleep 30s; fi # wait for the cachix push to complete
       cache: nix
       after_success:
-        - make testCoverage
+        - nix-shell --pure --run ./scripts/mkCoverage.sh
         - bash <(curl -s https://codecov.io/bash) -f coverage.info.cleaned || echo "Codecov did not collect coverage reports"
     - name: docBuilder
       if: branch = master
