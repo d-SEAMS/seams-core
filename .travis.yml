@@ -13,7 +13,14 @@ jobs:
         - bash <(curl -s https://codecov.io/bash) -f shellBuild/coverage.info.cleaned || echo "Codecov did not collect coverage reports"
       cache:
         directories:
-          - /nix/
+          - $HOME/nix.store
+      before_install:
+        - sudo mkdir -p /etc/nix
+        - echo "substituters = https://cache.nixos.org/ file://$HOME/nix.store" | sudo tee -a /etc/nix/nix.conf > /dev/null
+        - echo 'require-sigs = false' | sudo tee -a /etc/nix/nix.conf > /dev/null
+      before_cache:
+        - mkdir -p $HOME/nix.store
+        - nix copy --to file://$HOME/nix.store -f default.nix buildInputs
     - name: runCachix
       if: branch = master
       language: nix
@@ -25,9 +32,7 @@ jobs:
         - then cachix push dseams --watch-store&
         - nix-build .
         - sleep 30s # wait for the cachix push to complete
-      cache:
-        directories:
-          - /nix/
+      cache: nix
     - name: docBuilder
       if: branch = master
       language: python
