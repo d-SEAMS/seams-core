@@ -1,59 +1,5 @@
 #include <pntCorrespondence.hpp>
 
-// Fills up an eigen matrix point set for an HC, according to an input
-// pointCloud, the relative order given by the basal rings, beginning from the
-// startingIndex
-Eigen::MatrixXd pntToPnt::fillPointSetHC(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> relOrder, int startingIndex) {
-  //
-  int dim = 3;                          // Number of dimensions (3)
-  int ringSize = relOrder[0].size();    // Number of elements in each basal ring
-  int nop = ringSize * relOrder.size(); // Number of particles in the HC
-  Eigen::MatrixXd pointSet(nop, dim);   // Output set of 3D points
-  // Indices for the first and second basal rings being filled
-  int iBasalOne, iBasalTwo; // Indices being filled
-  int currentPosition;      // Current index in the first or second basal rings
-                            // inside relOrder
-  int index;                // Index in yCloud
-
-  // Check
-  if (startingIndex >= ringSize || startingIndex < 0) {
-    startingIndex = 0;
-  } // end of check
-
-  // Beginning from the starting index, get the points such that the first basal
-  // ring is filled up first, followed by the connected second basal ring
-  for (int i = 0; i < ringSize; i++) {
-    //
-    iBasalOne = i;            // basal one ring is filled first
-    iBasalTwo = i + ringSize; // basal two ring is filled after basal one is
-                              // filled in sequential order
-    // Getting currentIndex
-    currentPosition = startingIndex + i;
-    // Wrapping around for the ring
-    if (currentPosition >= ringSize) {
-      currentPosition -= ringSize;
-    } // end of wrap-around
-    //
-    // -------------------
-    // basal one points
-    index = relOrder[0][currentPosition];          // Index of the current point
-    pointSet(iBasalOne, 0) = yCloud->pts[index].x; // x coord
-    pointSet(iBasalOne, 1) = yCloud->pts[index].y; // y coord
-    pointSet(iBasalOne, 2) = yCloud->pts[index].z; // z coord
-    // -------------------
-    // basal two points
-    index = relOrder[1][currentPosition];          // Index of the current point
-    pointSet(iBasalTwo, 0) = yCloud->pts[index].x; // x coord
-    pointSet(iBasalTwo, 1) = yCloud->pts[index].y; // y coord
-    pointSet(iBasalTwo, 2) = yCloud->pts[index].z; // z coord
-  } // end of point filling from the relative ordering vector of vectors
-
-  // Return the set of points
-  return pointSet;
-} // end function
-
 // Fills up an eigen matrix point set a reference ring, which is a regular
 // n-gonal polygon, constructed with radius 1 by default; where n is the number
 // of nodes in the ring
@@ -582,3 +528,250 @@ Eigen::MatrixXd pntToPnt::fillPointSetPrismBlock(
   // Return the set of points
   return pointSet;
 } // end of function
+
+// ---------------------------------------------------
+// REFERENCE POINT SETS FOR BULK ICES
+// Fills up an eigen matrix point set for a reference cage, saved in the
+// templates folder relative to the top-level directory NOT NEEDED MAYBE
+Eigen::MatrixXd pntToPnt::getPointSetCage(ring::strucType type) {
+  //
+  Eigen::MatrixXd pointSet(12, 3); // Reference point set (Eigen matrix)
+  molSys::PointCloud<molSys::Point<double>, double>
+      setCloud; // PointCloud for holding the reference point values
+
+  if (type == ring::HCbasal) {
+    // Read in the XYZ file
+    std::string fileName = "templates/hc.xyz";
+    //
+    sinp::readXYZ(fileName, &setCloud);
+    int n = setCloud.nop; // Number of points in the reference point set
+    Eigen::MatrixXd pointSet(n, 3); // Output point set for a regular polygon
+
+    // Loop through every particle
+    for (int i = 0; i < n; i++) {
+      pointSet(i, 0) = setCloud.pts[i].x; // x
+      pointSet(i, 1) = setCloud.pts[i].y; // y
+      pointSet(i, 2) = setCloud.pts[i].z; // z
+    } // end of looping through every particle
+
+    // Return the filled point set
+    return pointSet;
+  } // end of reference point set for HCs
+  // else {
+  //   // ddc
+  //   Eigen::MatrixXd pointSet(14, 3);  // Output point set for a regular
+  //   polygon return pointSet;
+  // }  // DDCs
+
+  // Eigen::MatrixXd pointSet(14, 3);  // Output point set for a regular polygon
+  // // Never happens
+  return pointSet;
+
+} // end of function
+
+/********************************************/ /**
+ *  Matches the order of the basal rings of an HC
+ or a potential HC. The goal is to find which elements are bonded to which and
+ the relative order
+ ***********************************************/
+int pntToPnt::relOrderHC(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<int> basal1, std::vector<int> basal2,
+    std::vector<std::vector<int>> nList, std::vector<int> *matchedBasal1,
+    std::vector<int> *matchedBasal2) {
+  //
+  int l1 = basal1[0];           // First element of basal1
+  int l2 = basal1[1];           // Second element of basal1
+  int ringSize = basal1.size(); // Number of nodes in the basal rings
+  bool neighOne, neighTwo;      // Basal2 element is the neighbour of l1 or l2
+  bool neighbourFound;          // neighbour found
+  int m_k;               // Element of basal2 which is a neighbour of l1 or l2
+  int m_kIndex;          // Index of basal2 which is a neighbour of l1 or l2
+  int iatom;             // Current element of basal2 being searched for
+  int nextBasal1Element; // Next bonded element of basal1
+  int nextBasal2Element; // Next bonded element of basal2
+  bool isReversedOrder;  // basal2 is reversed wrt basal1
+  int index;
+
+  // Search to see if l1 or l2 is a neighbour
+  // -------------------
+  // Searching for the neighbours of l1 or l2
+  for (int i = 0; i < ringSize; i++) {
+    iatom = basal2[i]; // Element of basal2
+    // Search for the current element in the neighbour list of l1
+    auto it = std::find(nList[l1].begin() + 1, nList[l1].end(), iatom);
+    // If iatom is the neighbour of l1
+    if (it != nList[l1].end()) {
+      neighbourFound = true;
+      neighOne = true;
+      m_k = iatom;  // Element found
+      m_kIndex = i; // Index in basal2
+      nextBasal1Element = basal1[2];
+      break;
+    } // iatom is the neighbour of l1
+    // l2 neighbour check
+    else {
+      auto it1 = std::find(nList[l2].begin() + 1, nList[l2].end(), iatom);
+      // If iatom is the neighbour of l2
+      if (it1 != nList[l2].end()) {
+        neighbourFound = true;
+        neighOne = false;
+        neighTwo = true;
+        nextBasal1Element = basal1[3];
+        m_k = iatom;  // Element found
+        m_kIndex = i; // Index in basal2
+        break;
+      } // iatom is the neighbour of l2
+    }   // Check for the neighbour of l2
+  }     // end of search through basal2 elements
+  //
+  // -------------------
+  // If a neighbour was not found, then there is some mistake
+  if (!neighbourFound) {
+    // std::cerr << "This is not an HC\n";
+    return 1;
+  }
+
+  // ------------------------------
+  // Now that the nearest neighbours have been found, find the reversed order
+  std::vector<int> tempBasal2; // temporary vector for basal2 matched elements
+  tempBasal2.resize(ringSize); // Init to 6 elements
+  //
+  // This element should be the nearest neighbour of the corresponding element
+  // in basal2
+  //
+  // Testing the original order
+  index = m_kIndex + 2;
+  // wrap-around
+  if (index >= ringSize) {
+    index -= ringSize;
+  } // wrap-around
+  nextBasal2Element = basal2[index];
+  // Search for the next basal element
+  auto it = std::find(nList[nextBasal1Element].begin() + 1,
+                      nList[nextBasal1Element].end(), nextBasal2Element);
+  // If this element is found, then the original order is correct
+  if (it != nList[nextBasal1Element].end()) {
+    // Fill up the temporary vector with basal2 elements
+    for (int i = 0; i < ringSize; i++) {
+      index = m_kIndex + i; // index in basal2
+      // wrap-around
+      if (index >= ringSize) {
+        index -= ringSize;
+      }                              // end of wrap-around
+      tempBasal2[i] = basal2[index]; // fill up values
+    }                                // end of filling up tempBasal2
+  }                                  // the original order is correct
+  else {
+    //
+    index = m_kIndex - 2;
+    // wrap-around
+    if (index < 0) {
+      index += ringSize;
+    } // wrap-around
+    nextBasal2Element = basal2[index];
+    // Search for the next basal element
+    auto it = std::find(nList[nextBasal1Element].begin() + 1,
+                        nList[nextBasal1Element].end(), nextBasal2Element);
+    // If this element is found, then the original order is correct
+    if (it != nList[nextBasal1Element].end()) {
+      // Fill up the temporary vector with basal2 elements
+      for (int i = 0; i < ringSize; i++) {
+        index = m_kIndex - i; // index in basal2
+        // wrap-around
+        if (index < 0) {
+          index += ringSize;
+        }                              // end of wrap-around
+        tempBasal2[i] = basal2[index]; // fill up values
+      }                                // end of filling up tempBasal2
+
+    }
+    //
+    else {
+      // std::cerr << "not an HC\n";
+      return 1;
+    }
+    //
+  } // the reversed order is correct!
+  // ------------------------------
+  // If l1 is a neighbour, both basal rings can start from the next element
+  if (neighOne) {
+    for (int i = 0; i < ringSize; i++) {
+      index = 1 + i;
+      if (index >= ringSize) {
+        index -= ringSize;
+      }
+      (*matchedBasal1)[i] = basal1[i];
+      (*matchedBasal2)[i] = tempBasal2[i];
+    } // end of filling of basal1 and basal2
+    return 0;
+  } // offset by 1 for neighOne
+  // No offset
+  else if (neighTwo) {
+    //
+    (*matchedBasal1) = basal1;
+    (*matchedBasal2) = tempBasal2;
+    return 0;
+  } // end of filling
+  //
+
+  // std::cerr << "Function should not reach this point.\n";
+  return 1;
+} // end of the function
+
+/********************************************/ /**
+ *  Fills up an eigen matrix point set using the basal rings basal1 and
+ basal2,
+ changing the order of the point set by filling up from the startingIndex
+ (starting from 0 to 5)
+ ***********************************************/
+Eigen::MatrixXd pntToPnt::changeHexCageOrder(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<int> basal1, std::vector<int> basal2, int startingIndex) {
+  //
+  Eigen::MatrixXd pointSet(12, 3);
+  int iatomIndex, jatomIndex; // Current atom index in yCloud, according to
+                              // basal1 and basal2 respectively
+  int iPnt;                   // Current index in the Eigen matrix pointSet
+  int cageSize = 12;          // Number of points in the cage
+  std::vector<int> newBasal1, newBasal2;
+  //
+  // Checks and balances
+  if (startingIndex > 5 || startingIndex < 0) {
+    startingIndex = 0;
+  } // no invalid starting index
+
+  // Change the order
+  if (startingIndex > 0) {
+    for (int k = 0; k < 6; k++) {
+      iPnt = k + startingIndex;
+      if (iPnt >= 6) {
+        iPnt -= 6;
+      } // wrap-around
+      newBasal1.push_back(basal1[iPnt]);
+      newBasal2.push_back(basal2[iPnt]);
+    } // change the order
+  }   // end of filling for startingIndex>0
+  else {
+    newBasal1 = basal1;
+    newBasal2 = basal2;
+  } // end of filling up the reordered basal rings
+
+  // Loop through the points
+  for (int i = 0; i < 6; i++) {
+    // basal1
+    iatomIndex = newBasal1[i]; // Atom index to be filled
+    pointSet(i, 0) = yCloud->pts[iatomIndex].x;
+    pointSet(i, 1) = yCloud->pts[iatomIndex].y;
+    pointSet(i, 2) = yCloud->pts[iatomIndex].z;
+    //
+    // basal2
+    jatomIndex = newBasal2[i];
+    pointSet(i + 6, 0) = yCloud->pts[jatomIndex].x;
+    pointSet(i + 6, 1) = yCloud->pts[jatomIndex].y;
+    pointSet(i + 6, 2) = yCloud->pts[jatomIndex].z;
+    //
+  } // end of loop
+
+  return pointSet;
+}

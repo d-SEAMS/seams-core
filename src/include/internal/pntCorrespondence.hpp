@@ -23,13 +23,6 @@
 
 namespace pntToPnt {
 
-// Fills up an eigen matrix point set for an HC, according to an input
-// pointCloud, the relative order given by the basal rings, beginning from the
-// startingIndex
-Eigen::MatrixXd
-fillPointSetHC(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-               std::vector<std::vector<int>> relOrder, int startingIndex);
-
 // Fills up an eigen matrix point set a reference ring, which is a regular
 // n-gonal polygon; where n is the number of nodes in the ring
 Eigen::MatrixXd getPointSetRefRing(int n, int axialDim);
@@ -85,6 +78,26 @@ fillPointSetPrismRing(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 Eigen::MatrixXd fillPointSetPrismBlock(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<int> basal1, std::vector<int> basal2, int startingIndex);
+
+// Fills up an eigen matrix point set a reference ring, which is a regular
+// n-gonal polygon, constructed with radius 1 by default; where n is the number
+// of nodes in the ring
+Eigen::MatrixXd getPointSetCage(ring::strucType type);
+
+// Matches the order of the basal rings of an HC or a potential HC
+int relOrderHC(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+               std::vector<int> basal1, std::vector<int> basal2,
+               std::vector<std::vector<int>> nList,
+               std::vector<int> *matchedBasal1,
+               std::vector<int> *matchedBasal2);
+
+// Fills up an eigen matrix point set using the basal rings basal1 and basal2,
+// changing the order of the point set by filling up from the startingIndex
+// (starting from 0 to 5)
+Eigen::MatrixXd
+changeHexCageOrder(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                   std::vector<int> basal1, std::vector<int> basal2,
+                   int startingIndex = 0);
 
 } // namespace pntToPnt
 
