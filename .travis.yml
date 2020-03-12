@@ -15,7 +15,7 @@ jobs:
       cache: nix
       after_success:
         - nix-shell --pure --run ./scripts/mkCoverage.sh
-        - bash <(curl -s https://codecov.io/bash) -f coverage.info.cleaned || echo "Codecov did not collect coverage reports"
+        - bash <(curl -s https://codecov.io/bash) -f shellBuild/coverage.info.cleaned || echo "Codecov did not collect coverage reports"
     - name: docBuilder
       if: branch = master
       language: python
