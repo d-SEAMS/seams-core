@@ -30,7 +30,7 @@ jobs:
         - "nix-env -iA cachix -f https://cachix.org/api/v1/install"
       script:
         - cachix use dseams
-        - then cachix push dseams --watch-store&
+        - cachix push dseams --watch-store&
         - nix-build .
         - sleep 30s # wait for the cachix push to complete
       cache: nix
