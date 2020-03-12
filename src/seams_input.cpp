@@ -66,6 +66,8 @@ int sinp::readXYZ(std::string filename,
   int nop = -1;                     // Number of atoms in targetFrame
   int iatom = 1;  // Current atom being filled into the PointCloud
   molSys::Point<double> iPoint;  // Current point being read in from the file
+  double xLo, xHi, yLo, yHi, zLo,
+      zHi;  // Box lengths extrapolated from the least and greatest coordinates
 
   if (!(gen::file_exists(filename))) {
     std::cout
@@ -122,11 +124,53 @@ int sinp::readXYZ(std::string filename,
       yCloud->idIndexMap[iPoint.atomID] = yCloud->pts.size() - 1;
       iatom++;  // Increase index
 
+      // First point
+      if (iatom == 1) {
+        // Loop through the dimensions
+        xLo = iPoint.x;
+        xHi = iPoint.x;
+        yLo = iPoint.y;
+        yHi = iPoint.y;
+        zLo = iPoint.z;
+        zHi = iPoint.z;
+      }  // first point
+      else {
+        if (iPoint.x < xLo) {
+          xLo = iPoint.x;
+        }  // xLo
+        else if (iPoint.x > xHi) {
+          xHi = iPoint.x;
+        }  // xHi
+        else if (iPoint.y < yLo) {
+          yLo = iPoint.y;
+        }  // yLo
+        else if (iPoint.y > yHi) {
+          yHi = iPoint.y;
+        }  // yHi
+        else if (iPoint.z < zLo) {
+          zLo = iPoint.z;
+        }  // zLo
+        else if (iPoint.z > zHi) {
+          zHi = iPoint.z;
+        }  // zHi
+      }    // update
+
     }  // end of while, looping through lines till EOF
     // ----------------------------------------------------------
   }  // End of if file open statement
 
   xyzFile->close();
+
+  if (yCloud->pts.size() == 1) {
+    xHi = xLo + 10;
+    yHi = yLo + 10;
+    zHi = zLo + 10;
+  }  // for a single point in the system (never happens)
+
+  // Fill up the box lengths
+  yCloud->box.push_back(xHi - xLo);
+  yCloud->box.push_back(yHi - yLo);
+  yCloud->box.push_back(zHi - zLo);
 
   if (yCloud->pts.size() != yCloud->nop) {
     std::cout << "Atoms didn't get filled in properly.\n";
@@ -823,52 +867,4 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
 
   dumpFile->close();
   return *yCloud;
-}
-
-/********************************************/ /**
-*  Function for reading in the connectivity information
-of a reference HC
-***********************************************/
-std::vector<std::vector<int>> sinp::readRefHCdata(std::string filename) {
-  std::unique_ptr<std::ifstream> datFile;
-  datFile = std::make_unique<std::ifstream>(filename);
-  std::string line;                 // Current line being read in
-  std::vector<std::string> tokens;  // Vector containing word tokens
-  std::vector<int> numbers;         // Vector containing type int numbers
-  // The values in the file are according to the index (not ID)
-  std::vector<std::vector<int>> refPntToPnt;  // Vector of vector of ints with
-                                              // the connectivity information
-
-  if (!(gen::file_exists(filename))) {
-    std::cout << "Fatal Error: The template data file does not exist or you "
-                 "gave the wrong path.\n";
-    // Throw exception?
-    return refPntToPnt;
-  }
-
-  // Format of the custom dat file:
-  //  # Particle indices (starting from 0) of the two basal rings
-  // 3 1 5 2 4 0
-  // 6 10 8 11 7 9
-  if (datFile->is_open()) {
-    // ----------------------------------------------------------
-    // At this point we know that the dat file is open
-    //
-    // The first line is a description line
-    std::getline((*datFile), line);  // Skip this line
-    //
-    // First basal ring
-    std::getline((*datFile), line);  // basal ring 1
-    numbers = gen::tokenizerInt(line);
-    refPntToPnt.push_back(numbers);  // First basal ring added
-    //
-    // Second basal ring
-    std::getline((*datFile), line);  // basal ring 2
-    numbers = gen::tokenizerInt(line);
-    refPntToPnt.push_back(numbers);  // Second basal ring added
-  }                                  // End of if file open statement
-
-  datFile->close();
-
-  return refPntToPnt;
 }
