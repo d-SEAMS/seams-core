@@ -11,7 +11,9 @@ jobs:
         # - nix-build .
         - nix-shell --pure --run ./scripts/mkCoverage.sh
         - bash <(curl -s https://codecov.io/bash) -f shellBuild/coverage.info.cleaned || echo "Codecov did not collect coverage reports"
-      cache: nix
+      cache:
+        directories:
+          - /nix/
     - name: runCachix
       if: branch = master
       language: nix
@@ -23,7 +25,9 @@ jobs:
         - then cachix push dseams --watch-store&
         - nix-build .
         - sleep 30s # wait for the cachix push to complete
-      cache: nix
+      cache:
+        directories:
+          - /nix/
     - name: docBuilder
       if: branch = master
       language: python
@@ -42,7 +46,6 @@ jobs:
           - /tmp/texlive
           - $HOME/.texlive
           - $HOME/.cache/pipenv
-          - /nix/
       before_script:
         - git clone https://github.com/mosra/m.css.git
       script:
