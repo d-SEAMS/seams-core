@@ -1,6 +1,12 @@
 // Internal
 #include <absOrientation.hpp>
+#include <bulkTUM.hpp>
+#include <franzblau.hpp>
+#include <mol_sys.hpp>
+#include <neighbours.hpp>
 #include <pntCorrespondence.hpp>
+#include <ring.hpp>
+#include <topo_bulk.hpp>
 
 // Standard
 #include <iostream>
@@ -14,30 +20,27 @@ SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
   GIVEN("A rotated HC (candidate structure)") {
     // --------------------------
     // GETTING THE REFERENCE/TEMPLATE POINT SET
-    molSys::PointCloud<molSys::Point<double>, double>
-        templatePntCloud; // PointCloud for the reference point set
-    std::string refFileXYZ =
-        "../templateStructures/points/hc.xyz"; // XYZ file for the ref HC
-    std::string refFileData =
-        "../templateStructures/connectivity/hc.dat"; // XYZ file for the ref HC
-    std::vector<std::vector<int>> refPntToPnt; // Vector of vector of ints with
-                                               // the connectivity information
-    int nop = templatePntCloud.nop;            // Number of particles in an HC
-    int dim = 3;                               // Number of dimensions
-    // Eigen matrix for the reference (or right pointSet)
-    Eigen::MatrixXd refPointSet(nop, dim);
-    // Read in the XYZ template file
-    sinp::readXYZ(refFileXYZ, &templatePntCloud);
-    // Read in the point-to-point correspondence vector of vectors
-    refPntToPnt = sinp::readRefHCdata(refFileData);
-    // Get the reference point set
-    refPointSet = pntToPnt::fillPointSetHC(&templatePntCloud, refPntToPnt, 0);
-    // --------------------------
+    int nop = 12; // Number of particles in an HC
+    int dim = 3;  // Number of dimensions
+    //
+    std::string filePathXYZ = "../templates/hc.xyz";
+    // Variables for rings
+    std::vector<std::vector<int>> nList; // Neighbour list
+    std::vector<std::vector<int>> rings; // Rings
+    std::vector<ring::strucType>
+        ringType; // This vector will have a value for each ring inside
+    std::vector<int> listHC; // Contains atom indices of atoms making up HCs
+    // Make a list of all the DDCs and HCs
+    std::vector<cage::Cage> cageList;
+    Eigen::MatrixXd refPnts(12, 3); // Reference point set (Eigen matrix)
+    int iring, jring;
+    // -------------------------------------
+    //
+    // REFERENCE POINT SET
+    refPnts = tum3::buildRefHC(filePathXYZ);
+    //
+    // -------------------------------------
     // GETTING THE ROTATED POINT SET
-    std::vector<std::vector<int>>
-        targetPntToPnt; // Vector of vector of ints with
-                        // the connectivity information for the target point
-                        // set
     molSys::PointCloud<molSys::Point<double>, double> targetCloud; // pointCloud
     molSys::Point<double> iPoint;
     Eigen::MatrixXd targetPointSet(nop, dim);
@@ -118,13 +121,42 @@ SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
     targetCloud.pts.push_back(iPoint);
     // Update nop
     targetCloud.nop = targetCloud.pts.size();
+    // box lengths
+    targetCloud.box.push_back(50); // x box length
+    targetCloud.box.push_back(50); // y box length
+    targetCloud.box.push_back(50); // z box length
+    // Update the unordered map
+    for (int iatom = 0; iatom < targetCloud.nop; iatom++) {
+      targetCloud.idIndexMap[iatom] = iatom;
+    } // end of filling the map
     //
     //
-    targetPntToPnt = refPntToPnt; // In this case, they are the same
+    // --------------------------
+    // GETTING THE TARGET POINT SET
+    // Calculate a neighbour list
+    nList = nneigh::neighListO(3.5, &targetCloud, 1);
+    // Neighbour list by index
+    nList = nneigh::neighbourListByIndex(&targetCloud, nList);
+    // Find the vector of vector of rings
+    rings = primitive::ringNetwork(nList, 6);
+    // init the ringType vector
+    ringType.resize(rings.size());
+    // Find the HCs
+    listHC = ring::findHC(rings, &ringType, nList, &cageList);
+    // Get the basal rings from cageList
+    iring = cageList[0].rings[0];
+    jring = cageList[0].rings[1];
     //
+    std::vector<int> matchedBasal1,
+        matchedBasal2; // Re-ordered basal rings 1 and 2
+    // Reordered basal rings
+    // Getting the target Eigen vectors
+    // Get the re-ordered matched basal rings, ordered with respect to each
+    // other
+
+    pntToPnt::relOrderHC(&targetCloud, rings[iring], rings[jring], nList,
+                         &matchedBasal1, &matchedBasal2);
     //
-    // Get the target point set
-    targetPointSet = pntToPnt::fillPointSetHC(&targetCloud, targetPntToPnt, 0);
     // --------------------------
     // Now get the absolute orientation of the left (candidate/target) system
     // with respect to the right (template/reference) system test
@@ -134,17 +166,50 @@ SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
     std::vector<double> rmsdList1, rmsdList2; // List of RMSD per atom
     double scale;                             // Scale factor
     //
+    //
+    // Variables for looping through possible permutations
+    //
+    std::vector<double> currentQuat;     // quaternion rotation
+    double currentRmsd;                  // least RMSD
+    std::vector<double> currentRmsdList; // List of RMSD per atom
+    double currentScale;
     // absolute orientation using Horn's algorithm between the target and test
     // set
-    absor::hornAbsOrientation(refPointSet, targetPointSet, &quaternionRot,
-                              &rmsd1, &rmsdList1, &scale);
-    //
+    int index;
+    for (int i = 0; i < 6; i++) {
+      // Change the order of the target points somehow!
+      //
+      targetPointSet = pntToPnt::changeHexCageOrder(&targetCloud, matchedBasal1,
+                                                    matchedBasal2, i);
+      // Shape-matching
+      absor::hornAbsOrientation(refPnts, targetPointSet, &currentQuat,
+                                &currentRmsd, &currentRmsdList, &currentScale);
+      if (i == 0) {
+        quaternionRot = currentQuat;
+        rmsd1 = currentRmsd;
+        rmsdList1 = currentRmsdList;
+        scale = currentScale;
+        index = 0;
+      } else {
+        if (currentRmsd < rmsd1) {
+          quaternionRot = currentQuat;
+          rmsd1 = currentRmsd;
+          rmsdList1 = currentRmsdList;
+          scale = currentScale;
+          index = i;
+        } // update
+      }   // Update if this is a better match
+    }     // Loop through possible permutations
+    // ---------
     std::vector<double>
         selfQuatRot;  // quaternion for the reference set and itself
     double selfScale; // Scale for the reference set and itself
-    absor::hornAbsOrientation(refPointSet, refPointSet, &selfQuatRot, &rmsd2,
+
+    // Shape-matching
+    absor::hornAbsOrientation(refPnts, refPnts, &selfQuatRot, &rmsd2,
                               &rmsdList2, &selfScale);
 
+    //
     double angDist = gen::angDistDegQuaternions(selfQuatRot, quaternionRot);
     //
     REQUIRE_THAT(angDist, Catch::Matchers::Floating::WithinAbsMatcher(
