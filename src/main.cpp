@@ -33,6 +33,7 @@
 // Newer pointCloud
 #include <bond.hpp>
 #include <bop.hpp>
+#include <bulkTUM.hpp>
 #include <cluster.hpp>
 #include <franzblau.hpp>
 #include <generic.hpp>
