@@ -7,10 +7,10 @@ jobs:
       install:
         - "nix-env -iA cachix -f https://cachix.org/api/v1/install"
       script:
-        - cachix use dseams
-        - cachix push dseams --watch-store&
+        - if ["$TRAVIS_BRANCH" == "master"]; then cachix use dseams; fi
+        - if ["$TRAVIS_BRANCH" == "master"]; then cachix push dseams   --watch-store&; fi
         - nix-build .
-        - sleep 30s # wait for the cachix push to complete
+        - if ["$TRAVIS_BRANCH" == "master"]; then sleep 30s; fi # wait for the cachix push to complete
     - language: python
       python: "3.6"
       before_install:
