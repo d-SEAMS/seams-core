@@ -42,6 +42,8 @@ jobs:
       script:
         - ./m.css/documentation/doxygen.py Doxyfile-mcss
         - find docs/ -type f -name "*" -print0 | xargs -0 sed -i '' -e 's/>Pages</>Wiki</g' || true
+      on:
+        branch: master
       deploy:
         provider: pages
         edge: true
