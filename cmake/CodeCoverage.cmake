@@ -128,13 +128,13 @@ ENDIF() # NOT CMAKE_BUILD_TYPE STREQUAL "Debug"
 #   Pass them in list form, e.g.: "-j;2" for -j 2
 FUNCTION(SETUP_TARGET_FOR_COVERAGE _targetname _testrunner _outputname)
 
-	# IF(NOT LCOV_PATH)
-	# 	MESSAGE(FATAL_ERROR "lcov not found! Aborting...")
-	# ENDIF() # NOT LCOV_PATH
+	IF(NOT LCOV_PATH)
+		MESSAGE(FATAL_ERROR "lcov not found! Aborting...")
+	ENDIF() # NOT LCOV_PATH
 
-	# IF(NOT GENHTML_PATH)
-	# 	MESSAGE(FATAL_ERROR "genhtml not found! Aborting...")
-	# ENDIF() # NOT GENHTML_PATH
+	IF(NOT GENHTML_PATH)
+		MESSAGE(FATAL_ERROR "genhtml not found! Aborting...")
+	ENDIF() # NOT GENHTML_PATH
 
 	SET(coverage_info "${CMAKE_BINARY_DIR}/${_outputname}.info")
 	SET(coverage_cleaned "${coverage_info}.cleaned")
@@ -145,15 +145,15 @@ FUNCTION(SETUP_TARGET_FOR_COVERAGE _targetname _testrunner _outputname)
 	ADD_CUSTOM_TARGET(${_targetname}
 
 		# Cleanup lcov
-		lcov --directory . --zerocounters
+		${LCOV_PATH} --directory . --zerocounters
 
 		# Run tests
 		COMMAND ${test_command} ${ARGV3}
 
 		# Capturing lcov counters and generating report
-		COMMAND lcov --directory . --capture --output-file ${coverage_info}
-		COMMAND lcov --remove ${coverage_info} 'tests/*' '**/tests/*' '**/boost/*' '/nix/*' '/usr/*' ${LCOV_REMOVE_EXTRA} --output-file ${coverage_cleaned}
-		COMMAND genhtml -o ${_outputname} ${coverage_cleaned}
+		COMMAND ${LCOV_PATH} --directory . --capture --output-file ${coverage_info}
+		COMMAND ${LCOV_PATH} --remove ${coverage_info} 'tests/*' '**/tests/*' '**/boost/*' '/nix/*' '/usr/*' ${LCOV_REMOVE_EXTRA} --output-file ${coverage_cleaned}
+		COMMAND ${GENHTML_PATH} -o ${_outputname} ${coverage_cleaned}
 		# COMMAND ${CMAKE_COMMAND} -E remove ${coverage_info} ${coverage_cleaned}
 
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
