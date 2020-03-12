@@ -10,10 +10,10 @@ jobs:
             - lcov
             - gcov
       install:
-        - "nix-env -iA cachix -f https://cachix.org/api/v1/install"
+        - if ["$TRAVIS_BRANCH" == "master"]; then  "nix-env -iA cachix -f https://cachix.org/api/v1/install"; fi
       script:
         - if ["$TRAVIS_BRANCH" == "master"]; then cachix use dseams; fi
-        - if ["$TRAVIS_BRANCH" == "master"]; then cachix push dseams   --watch-store&; fi
+        - if ["$TRAVIS_BRANCH" == "master"]; then cachix push dseams --watch-store& ; fi
         - nix-build .
         - if ["$TRAVIS_BRANCH" == "master"]; then sleep 30s; fi # wait for the cachix push to complete
       cache: nix
