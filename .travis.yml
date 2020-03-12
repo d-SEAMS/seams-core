@@ -3,17 +3,26 @@
 #     - master
 jobs:
   include:
-    - language: nix
+    - name: getCoverage
+      language: nix
       install:
         - nix-env -i lcov
-        - if ["$TRAVIS_BRANCH" == "master"]; then  "nix-env -iA cachix -f https://cachix.org/api/v1/install"; fi
       script:
-        - if ["$TRAVIS_BRANCH" == "master"]; then cachix use dseams; fi
-        - if ["$TRAVIS_BRANCH" == "master"]; then cachix push dseams --watch-store& ; fi
-        - nix-build .
-        # - if ["$TRAVIS_BRANCH" == "master"]; then sleep 30s; fi # wait for the cachix push to complete
+        # - nix-build .
         - nix-shell --pure --run ./scripts/mkCoverage.sh
         - bash <(curl -s https://codecov.io/bash) -f shellBuild/coverage.info.cleaned || echo "Codecov did not collect coverage reports"
+      cache: nix
+    - name: runCachix
+      if: branch = master
+      language: nix
+      install:
+        - nix-env -i lcov
+        - "nix-env -iA cachix -f https://cachix.org/api/v1/install"
+      script:
+        - cachix use dseams
+        - then cachix push dseams --watch-store&
+        - nix-build .
+        - sleep 30s # wait for the cachix push to complete
       cache: nix
     - name: docBuilder
       if: branch = master
