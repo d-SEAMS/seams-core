@@ -70,6 +70,7 @@ add_library(yodaLib SHARED
   rdf2d.cpp
   absOrientation.cpp
   pntCorrespondence.cpp
+  bulkTUM.cpp
   shapeMatch.cpp
 )
 
