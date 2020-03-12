@@ -14,6 +14,7 @@ add_executable(yodaStruct_test
                ${PROJECT_SOURCE_DIR}/src/seams_input.cpp
                ${PROJECT_SOURCE_DIR}/src/seams_output.cpp
                ${PROJECT_SOURCE_DIR}/src/pntCorrespondence.cpp
+               ${PROJECT_SOURCE_DIR}/src/bulkTUM.cpp
 )
 
 # Standard cmake stuff
