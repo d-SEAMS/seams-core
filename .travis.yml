@@ -14,6 +14,7 @@ jobs:
       cache:
         directories:
           - $HOME/nix.store
+          - /nix/
       before_install:
         - sudo mkdir -p /etc/nix
         - echo "substituters = https://cache.nixos.org/ file://$HOME/nix.store" | sudo tee -a /etc/nix/nix.conf > /dev/null
