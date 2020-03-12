@@ -11,6 +11,9 @@ jobs:
         - if ["$TRAVIS_BRANCH" == "master"]; then cachix push dseams   --watch-store&; fi
         - nix-build .
         - if ["$TRAVIS_BRANCH" == "master"]; then sleep 30s; fi # wait for the cachix push to complete
+      after_success:
+        - make testCoverage
+        - bash <(curl -s https://codecov.io/bash) -f coverage.info.cleaned || echo "Codecov did not collect coverage reports"
     - language: python
       python: "3.6"
       before_install:
