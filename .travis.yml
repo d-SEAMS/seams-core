@@ -30,6 +30,7 @@ jobs:
           - /tmp/texlive
           - $HOME/.texlive
           - $HOME/.cache/pipenv
+          - /nix/
       before_script:
         - git clone https://github.com/mosra/m.css.git
       script:
