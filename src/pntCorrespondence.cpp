@@ -715,8 +715,10 @@ Eigen::MatrixXd pntToPnt::changeHexCageOrder(
   int iPnt;                    // Current index in the Eigen matrix pointSet
   int cageSize = 12;           // Number of points in the cage
   std::vector<int> newBasal1, newBasal2;
-  //
+  std::array<double, 3> dr;  // Components of the distance
+
   // Checks and balances
+  //
   if (startingIndex > 5 || startingIndex < 0) {
     startingIndex = 0;
   }  // no invalid starting index
@@ -740,16 +742,19 @@ Eigen::MatrixXd pntToPnt::changeHexCageOrder(
   // Loop through the points
   for (int i = 0; i < 6; i++) {
     // basal1
-    iatomIndex = newBasal1[i];  // Atom index to be filled
+    iatomIndex = newBasal1[i];  // Atom index to be filled for basal1
+    jatomIndex = newBasal2[i];  // Atom index to be filled for basal2
     pointSet(i, 0) = yCloud->pts[iatomIndex].x;
     pointSet(i, 1) = yCloud->pts[iatomIndex].y;
     pointSet(i, 2) = yCloud->pts[iatomIndex].z;
     //
+    // Get the distance from basal1
+    dr = gen::relDist(yCloud, iatomIndex, jatomIndex);
+
     // basal2
-    jatomIndex = newBasal2[i];
-    pointSet(i + 6, 0) = yCloud->pts[jatomIndex].x;
-    pointSet(i + 6, 1) = yCloud->pts[jatomIndex].y;
-    pointSet(i + 6, 2) = yCloud->pts[jatomIndex].z;
+    pointSet(i + 6, 0) = yCloud->pts[iatomIndex].x + dr[0];
+    pointSet(i + 6, 1) = yCloud->pts[iatomIndex].y + dr[1];
+    pointSet(i + 6, 2) = yCloud->pts[iatomIndex].z + dr[2];
     //
   }  // end of loop
 
