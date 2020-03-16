@@ -1,16 +1,16 @@
 #ifndef __PNTCORRESPONDENCE_H_
 #define __PNTCORRESPONDENCE_H_
 
+#include <math.h>
+#include <sys/stat.h>
 #include <algorithm>
 #include <array>
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <math.h>
 #include <memory>
 #include <sstream>
 #include <string>
-#include <sys/stat.h>
 #include <vector>
 
 // External
@@ -30,16 +30,16 @@ Eigen::MatrixXd getPointSetRefRing(int n, int axialDim);
 // Creates an eigen matrix for the points of a prism block, constructed from the
 // points of a perfect polygon of radius 1, given the basal rings and axial
 // dimension
-Eigen::MatrixXd
-createPrismBlock(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                 const Eigen::MatrixXd &refPoints, int ringSize,
-                 std::vector<int> basal1, std::vector<int> basal2);
+Eigen::MatrixXd createPrismBlock(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    const Eigen::MatrixXd &refPoints, int ringSize, std::vector<int> basal1,
+    std::vector<int> basal2);
 
 // Calculate the average radial distance for the basal rings, calculated from
 // the centroid of each basal ring
-double
-getRadiusFromRings(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                   std::vector<int> basal1, std::vector<int> basal2);
+double getRadiusFromRings(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<int> basal1, std::vector<int> basal2);
 
 // Calculate the average height of the prism block, calculated using the basal
 // rings of the prism and the axial dimension
@@ -69,9 +69,9 @@ int relOrderPrismBlock(
 
 // Fill up an Eigen Matrix of a prism basal ring from an input vector of atom
 // indices
-Eigen::MatrixXd
-fillPointSetPrismRing(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                      std::vector<int> basalRing, int startingIndex);
+Eigen::MatrixXd fillPointSetPrismRing(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<int> basalRing, int startingIndex);
 
 // Fill up an Eigen matrix of a prism block (two basal rings) from input vectors
 // for the basal rings
@@ -91,14 +91,23 @@ int relOrderHC(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                std::vector<int> *matchedBasal1,
                std::vector<int> *matchedBasal2);
 
+// Matches the order of the basal rings of an DDC or a potential HC
+std::vector<int> relOrderDDC(int index, std::vector<std::vector<int>> rings,
+                             std::vector<cage::Cage> cageList);
+
 // Fills up an eigen matrix point set using the basal rings basal1 and basal2,
 // changing the order of the point set by filling up from the startingIndex
 // (starting from 0 to 5)
-Eigen::MatrixXd
-changeHexCageOrder(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                   std::vector<int> basal1, std::vector<int> basal2,
-                   int startingIndex = 0);
+Eigen::MatrixXd changeHexCageOrder(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<int> basal1, std::vector<int> basal2, int startingIndex = 0);
 
-} // namespace pntToPnt
+// Fills up an eigen matrix point set using information of the equatorial ring
+// and peripheral rings, embedded in a vector, already filled in relOrderDDC.
+Eigen::MatrixXd changeDiaCageOrder(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<int> ddcOrder, int startingIndex = 0);
 
-#endif // __PNTCORRESPONDENCE_H_
+}  // namespace pntToPnt
+
+#endif  // __PNTCORRESPONDENCE_H_
