@@ -1,16 +1,16 @@
 #ifndef __BULKTUM_H_
 #define __BULKTUM_H_
 
+#include <math.h>
+#include <sys/stat.h>
 #include <algorithm>
 #include <array>
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <math.h>
 #include <memory>
 #include <sstream>
 #include <string>
-#include <sys/stat.h>
 #include <vector>
 
 #include <franzblau.hpp>
@@ -33,6 +33,9 @@ namespace tum3 {
 // Build a reference Hexagonal cage, reading in from a template XYZ file
 Eigen::MatrixXd buildRefHC(std::string fileName);
 
-} // namespace tum
+// Build a reference Double-Diamond cage, reading in from a template XYZ file
+Eigen::MatrixXd buildRefDDC(std::string fileName);
 
-#endif // __BULKTUM_H_
+}  // namespace tum3
+
+#endif  // __BULKTUM_H_
