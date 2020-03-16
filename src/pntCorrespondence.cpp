@@ -716,6 +716,7 @@ Eigen::MatrixXd pntToPnt::changeHexCageOrder(
   int cageSize = 12;           // Number of points in the cage
   std::vector<int> newBasal1, newBasal2;
   std::array<double, 3> dr;  // Components of the distance
+  int iatomOne;              // Index of the first atom
 
   // Checks and balances
   //
@@ -739,23 +740,361 @@ Eigen::MatrixXd pntToPnt::changeHexCageOrder(
     newBasal2 = basal2;
   }  // end of filling up the reordered basal rings
 
-  // Loop through the points
-  for (int i = 0; i < 6; i++) {
+  //
+  // FIRST POINT
+  // basal1
+  iatomOne = newBasal1[0];
+  pointSet(0, 0) = yCloud->pts[iatomOne].x;
+  pointSet(0, 1) = yCloud->pts[iatomOne].y;
+  pointSet(0, 2) = yCloud->pts[iatomOne].z;
+  // basal2
+  jatomIndex = newBasal2[0];
+  // Get the distance from basal1
+  dr = gen::relDist(yCloud, iatomOne, jatomIndex);
+
+  // basal2
+  pointSet(6, 0) = yCloud->pts[iatomOne].x + dr[0];
+  pointSet(6, 1) = yCloud->pts[iatomOne].y + dr[1];
+  pointSet(6, 2) = yCloud->pts[iatomOne].z + dr[2];
+  //
+  // Loop through the rest of the points
+  for (int i = 1; i < 6; i++) {
     // basal1
     iatomIndex = newBasal1[i];  // Atom index to be filled for basal1
     jatomIndex = newBasal2[i];  // Atom index to be filled for basal2
-    pointSet(i, 0) = yCloud->pts[iatomIndex].x;
-    pointSet(i, 1) = yCloud->pts[iatomIndex].y;
-    pointSet(i, 2) = yCloud->pts[iatomIndex].z;
     //
-    // Get the distance from basal1
+    // Get the distance from the first atom
+    dr = gen::relDist(yCloud, iatomOne, iatomIndex);
+    //
+    pointSet(i, 0) = yCloud->pts[iatomOne].x + dr[0];
+    pointSet(i, 1) = yCloud->pts[iatomOne].y + dr[1];
+    pointSet(i, 2) = yCloud->pts[iatomOne].z + dr[2];
+    //
+    // Get the distance from the first atom
+    dr = gen::relDist(yCloud, iatomOne, jatomIndex);
+    // basal2
+    pointSet(i + 6, 0) = yCloud->pts[iatomOne].x + dr[0];
+    pointSet(i + 6, 1) = yCloud->pts[iatomOne].y + dr[1];
+    pointSet(i + 6, 2) = yCloud->pts[iatomOne].z + dr[2];
+    //
+  }  // end of loop
+
+  return pointSet;
+}
+
+/********************************************/ /**
+ *  Reorders the particles of a DDC
+ into a vector, which contains the atom indices of the DDC particles. Here,
+ index is the index in the cageList vector of structs, referring to a specific
+ DDC.
+ The order created is as follows:
+ 1. The first 6 atoms are the atoms of the equatorial ring, such that adjacent
+ particles are bonded to each other (l1, l2, l3, l4, l5, l6).
+ 2. The particles (l1, l3, l5) and (l2, l4, l6) are nearest neighbours of atoms
+ in two different sets of peripheral rings. Each set of three peripheral rings
+ have a second-shell neighbour of the equatorial ring particles (called apex1
+ and apex2 respectively.)
+ 3. The order is such that the next three atoms in the vector are the first
+ nearest neighbours in the peripheral rings of one triplet (peripheral1),
+ followed by apex1, and three nearest neighbours of the other triplet, followed
+ by apex2. Basically: ((6 equatorial ring atoms), (3 nearest neighbours of
+ [l1,l3,l5] in the peripheral rings), (1 second shell neighbour of [l1,l3,l5]),
+ (first nearest neighbours of [l2,l4,l6]), (second nearest neighbour of
+ [l2,l4,l6]) )
+
+ Thus, when you want to change the order of the DDC, this is how the order
+ should be wrapped:
+ 1. The first 6 atoms should be wrapped around (i.e. the sixth atom should
+ become the first and so on)
+ 2. The next 3 atoms should be wrapped but only when moved by multiples of 2.
+ 3. The 9th element should not be changed.
+ 4. The next three elements should be wrapped around (multiples of 2), since
+ alternate elements of the equatorial ring are bonded.
+ ***********************************************/
+std::vector<int> pntToPnt::relOrderDDC(int index,
+                                       std::vector<std::vector<int>> rings,
+                                       std::vector<cage::Cage> cageList) {
+  //
+  std::vector<int> ddcOrder;  // Order of the particles in the DDC.
+  int nop = 14;               // Number of elements in the DDC
+  int ringSize = 6;           // Number of nodes in each ring
+  int iring, jring;           // Ring indices of the DDC rings
+  int iatom;                  // Atom index in the equatorial ring
+  std::vector<int> peripheral1, peripheral2;  // Vectors holding the neighbours
+                                              // of (l1,l3,l5) and (l2,l4,l6)
+  int apex1, apex2;
+  bool neighbourFound;             // Neighbour found
+  int nextI, prevI, nextJ, prevJ;  // elements around iatom and jatom
+  int jatomIndex, atomIndex;
+
+  // Add the equatorial ring particles
+  //
+  iring = cageList[index]
+              .rings[0];  // Equatorial ring index in rings vector of vectors
+  //
+  // Loop through all the atoms of the equatorial ring
+  for (int i = 0; i < ringSize; i++) {
+    ddcOrder.push_back(rings[iring][i]);
+  }  // end of adding equatorial ring particles
+  //
+  // ------------------------------
+  // Find the neighbouring atoms of (l1, l3 and l5) and (l2,l4,l6) by looping
+  // through the peripheral rings
+  //
+  for (int i = 0; i < ringSize; i++) {
+    // Init
+    iatom = ddcOrder[i];  // element of the equatorial ring
+    // Get the next and previous elements of iatom
+    // next element
+    if (i == ringSize - 1) {
+      nextI = ddcOrder[0];
+      prevI = ddcOrder[i - 1];
+    }  // if last element
+    else if (i == 0) {
+      nextI = ddcOrder[i + 1];
+      prevI = ddcOrder[5];  // wrapped
+    } else {
+      nextI = ddcOrder[i + 1];
+      prevI = ddcOrder[i - 1];
+    }
+    // ------------------
+    // Search all the peripheral rings for iatom, get the nearest neighbours and
+    // apex1 and apex2, which are bonded to the nearest neighbours of the
+    // equatorial ring (thus they are second nearest neighbours)
+    for (int j = 1; j <= ringSize; j++) {
+      //
+      jring = cageList[index].rings[j];  // Peripheral ring
+      // Search for iatom
+      //
+      auto it = std::find(rings[jring].begin(), rings[jring].end(), iatom);
+      // If iatom was found in jring peripheral ring
+      if (it != rings[jring].end()) {
+        // ----------------
+        // Atom index for iatom found
+        jatomIndex = std::distance(rings[jring].begin(), it);
+        // ----------------
+        // Get the next and previous element
+        //
+        // Next atom
+        atomIndex = jatomIndex + 1;
+        // wrap-around
+        if (atomIndex >= ringSize) {
+          atomIndex -= ringSize;
+        }  // end of wrap-around
+        nextJ = rings[jring][atomIndex];
+        // Previous atom
+        atomIndex = jatomIndex - 1;
+        if (atomIndex < 0) {
+          atomIndex += ringSize;
+        }  // end of wrap-around
+        prevJ = rings[jring][atomIndex];
+        // ----------------
+        // Check to see if nextJ or prevJ are different from nextI and prevI
+        //
+        // Checking prevJ
+        if (prevJ != nextI && prevJ != prevI) {
+          // Add to the vector
+          // if even peripheral1
+          if (i % 2 == 0) {
+            peripheral1.push_back(prevJ);
+            // Get apex1 for i=0
+            if (i == 0) {
+              // Go back two elements from jatomIndex
+              atomIndex = jatomIndex - 2;
+              // wrap-around
+              if (atomIndex < 0) {
+                atomIndex += ringSize;
+              }  // end of wrap-around
+              apex1 = rings[jring][atomIndex];
+            }  // apex1 for i=0
+          }    // peripheral1
+          // if odd peripheral2
+          else {
+            peripheral2.push_back(prevJ);
+            // Get apex2 for i=0
+            if (i == 1) {
+              // Go back two elements from jatomIndex
+              atomIndex = jatomIndex - 2;
+              // wrap-around
+              if (atomIndex < 0) {
+                atomIndex += ringSize;
+              }  // end of wrap-around
+              apex2 = rings[jring][atomIndex];
+            }  // apex2 for i=1
+          }    // peripheral 2
+          // Get apex1 or apex2 for i=0 or i=1
+          break;
+        }  // check if prevJ is the atom to be added, bonded to iatom
+        // ----------------------
+        //
+        // Checking nextJ
+        if (nextJ != nextI && nextJ != prevI) {
+          // Add to the vector
+          // if even peripheral1
+          if (i % 2 == 0) {
+            peripheral1.push_back(nextJ);
+            // Get apex1 for i=0
+            if (i == 0) {
+              // Go foward two elements from jatomIndex
+              atomIndex = jatomIndex + 2;
+              // wrap-around
+              if (atomIndex >= ringSize) {
+                atomIndex -= ringSize;
+              }  // end of wrap-around
+              apex1 = rings[jring][atomIndex];
+            }  // apex1 for i=0
+          }    // peripheral1
+          // if odd peripheral2
+          else {
+            peripheral2.push_back(prevJ);
+            // Get apex2 for i=0
+            if (i == 1) {
+              // Go foward two elements from jatomIndex
+              atomIndex = jatomIndex + 2;
+              // wrap-around
+              if (atomIndex >= ringSize) {
+                atomIndex -= ringSize;
+              }  // end of wrap-around
+              apex2 = rings[jring][atomIndex];
+            }  // apex2 for i=1
+          }    // peripheral 2
+          // Get apex1 or apex2 for i=0 or i=1
+          break;
+        }  // check if prevJ is the atom to be added, bonded to iatom
+        // ----------------
+      }  // end of check for iatom in jring
+    }    // end of search for the peripheral rings
+    // ------------------
+  }  // end of looping through the elements of the equatorial ring
+  // ------------------------------
+  // Update ddcOrder with peripheral1, followed by apex1, peripheral2 and apex2
+  //
+  // peripheral1
+  for (int i = 0; i < peripheral1.size(); i++) {
+    ddcOrder.push_back(peripheral1[i]);
+  }  // end of adding peripheral1
+  //
+  // apex1
+  ddcOrder.push_back(apex1);
+  //
+  // peripheral2
+  for (int i = 0; i < peripheral2.size(); i++) {
+    ddcOrder.push_back(peripheral2[i]);
+  }  // end of adding peripheral2
+  //
+  // apex2
+  ddcOrder.push_back(apex2);
+  //
+  return ddcOrder;
+}  // end of the function
+
+/********************************************/ /**
+ *  Fills up an eigen matrix point set using information of the equatorial ring
+ and peripheral rings, embedded in a vector, already filled in relOrderDDC.
+ The order is such that the next three atoms in the vector are the first
+ nearest neighbours in the peripheral rings of one triplet (peripheral1),
+ followed by apex1, and three nearest neighbours of the other triplet, followed
+ by apex2. Basically: ((6 equatorial ring atoms), (3 nearest neighbours of
+ [l1,l3,l5] in the peripheral rings), (1 second shell neighbour of [l1,l3,l5]),
+ (first nearest neighbours of [l2,l4,l6]), (second nearest neighbour of
+ [l2,l4,l6]) )
+
+ Thus, when you want to change the order of the DDC, this is how the order
+ should be wrapped:
+ 1. The first 6 atoms should be wrapped around (i.e. the sixth atom should
+ become the first and so on)
+ 2. The next 3 atoms should be wrapped but only when moved by multiples of 2.
+ 3. The 9th element should not be changed.
+ 4. The next three elements should be wrapped around (multiples of 2), since
+ alternate elements of the equatorial ring are bonded.
+ ***********************************************/
+Eigen::MatrixXd pntToPnt::changeDiaCageOrder(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<int> ddcOrder, int startingIndex) {
+  //
+  int nop = 14;                      // Number of elements in the DDC
+  int ringSize = 6;                  // Six nodes in the rings
+  Eigen::MatrixXd pointSet(nop, 3);  // Output point set
+  int peripheralStartingIndex;  // Index using which the elements of peripheral1
+                                // and peripheral2 will be wrapped
+  std::vector<int> wrappedDDC;  // Changed order of the DDC: should be the same
+                                // size as the original ddcOrder vector
+  int currentIndex;             // Current index
+  // Variables for filling the point set
+  int iatomIndex, jatomIndex;
+  std::array<double, 3> dr;  // Components of the distance
+
+  if (startingIndex == 0) {
+    wrappedDDC = ddcOrder;
+  }  // if the order does not have to be changed
+  else {
+    wrappedDDC.resize(nop);  // Should be the same size as ddcOrder
+    // ------------------
+    // EQUATORIAL RING
+    // Change the order of the equatorial ring
+    for (int i = 0; i < ringSize; i++) {
+      currentIndex = startingIndex + i;
+      // Wrap-around
+      if (currentIndex >= ringSize) {
+        currentIndex -= ringSize;
+      }  // end of wrap-around
+      // Update the equatorial ring
+      wrappedDDC[i] = ddcOrder[currentIndex];
+    }  // end of wrapping the equatorial ring
+    // ------------------
+    // PERIPHERAL RINGS
+    //
+    // The index of the peripheral ring starting indices
+    if (startingIndex <= 1) {
+      peripheralStartingIndex = 0;
+    } else if (startingIndex > 1 && startingIndex <= 3) {
+      peripheralStartingIndex = 1;
+    } else {
+      peripheralStartingIndex = 2;
+    }
+    //
+    // Update the portions of the wrappedDDC vector
+    for (int i = 6; i < 9; i++) {
+      currentIndex = i + peripheralStartingIndex;
+      // wrap-around
+      if (currentIndex <= 9) {
+        currentIndex -= 3;
+      }  // end of wrap-around
+      wrappedDDC[i] = ddcOrder[currentIndex];
+    }  // peripheral1
+    //
+    // Update the peripheral2 portions of the wrappedDDC vector
+    for (int i = 10; i < 13; i++) {
+      currentIndex = i + peripheralStartingIndex;
+      // wrap-around
+      if (currentIndex <= 13) {
+        currentIndex -= 3;
+      }  // end of wrap-around
+      wrappedDDC[i] = ddcOrder[currentIndex];
+    }  // peripheral2
+    // ------------------
+    // SECOND-NEAREST NEIGHBOURS
+    wrappedDDC[9] = ddcOrder[9];    // apex1
+    wrappedDDC[13] = ddcOrder[13];  // apex2
+    // ------------------
+  }  // the order of the DDC has to be changed
+
+  // FILL UP THE EIGEN MATRIX
+  iatomIndex = wrappedDDC[0];  // first point
+  pointSet(0, 0) = yCloud->pts[iatomIndex].x;
+  pointSet(0, 1) = yCloud->pts[iatomIndex].y;
+  pointSet(0, 2) = yCloud->pts[iatomIndex].z;
+  // Loop through the rest of the equatorial ring points
+  for (int i = 1; i < 14; i++) {
+    //
+    jatomIndex = wrappedDDC[i];  // Atom index to be filled
+    // Get the distance from iatomIndex
     dr = gen::relDist(yCloud, iatomIndex, jatomIndex);
 
     // basal2
-    pointSet(i + 6, 0) = yCloud->pts[iatomIndex].x + dr[0];
-    pointSet(i + 6, 1) = yCloud->pts[iatomIndex].y + dr[1];
-    pointSet(i + 6, 2) = yCloud->pts[iatomIndex].z + dr[2];
-    //
+    pointSet(i, 0) = yCloud->pts[iatomIndex].x + dr[0];
+    pointSet(i, 1) = yCloud->pts[iatomIndex].y + dr[1];
+    pointSet(i, 2) = yCloud->pts[iatomIndex].z + dr[2];
   }  // end of loop
 
   return pointSet;
