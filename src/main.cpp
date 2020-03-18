@@ -53,8 +53,8 @@
 
 // Managed with Conan
 #include <fmt/core.h>
-#include <rang.hpp>
 #include <yaml-cpp/yaml.h>
+#include <rang.hpp>
 
 int main(int argc, char *argv[]) {
   // Parse Things
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
   // Get the trajectory string
   if (config["trajectory"]) {
     tFile = config["trajectory"].as<std::string>();
-  } // end of getting the trajectory
+  }  // end of getting the trajectory
   // Get variable file string
   std::string vars = config["variables"].as<std::string>();
   // --------------------------------------
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
     std::vector<std::vector<int>> ringsAllSizes;
     std::vector<std::vector<int>> rings;
     // RDF stuff
-    std::vector<double> rdfValues; // RDF vector
+    std::vector<double> rdfValues;  // RDF vector
     // -----------------
     // This section basically only registers functions and handles the rest in
     // lua Use the functions defined here
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
     lua.script_file(lscript);
     // --------------------------
 
-  } // end of two-dimensional ice block
+  }  // end of two-dimensional ice block
   // --------------------------------------
   // Structure determination block for ONE-DIMENSIONAL ICE
   if (config["topoOneDim"]["use"].as<bool>()) {
@@ -191,7 +191,7 @@ int main(int argc, char *argv[]) {
     lua.script_file(lscript);
     // --------------------------
 
-  } // end of one-dimensional ice block
+  }  // end of one-dimensional ice block
   // --------------------------------------
   // Ice Structure Determination for BULK ICE
   if (config["bulk"]["use"].as<bool>()) {
@@ -203,10 +203,10 @@ int main(int argc, char *argv[]) {
     molSys::PointCloud<molSys::Point<double>, double> resCloud, solCloud;
     // Some neighbor
     std::vector<std::vector<int>> nList,
-        hbnList; // Neighbour lists (by cutoff and hydrogen-bonded neighbour
-                 // lists)
+        hbnList;  // Neighbour lists (by cutoff and hydrogen-bonded neighbour
+                  // lists)
     std::vector<std::vector<int>>
-        iceList; // Neighbour list for the largest ice cluster
+        iceList;  // Neighbour list for the largest ice cluster
     // For averaged q6
     std::vector<double> avgQ6;
     // For the list of all rings (of all sizes)
@@ -267,11 +267,15 @@ int main(int argc, char *argv[]) {
     // Bulk ice, using the topological network criterion
     lua.set_function("bulkTopologicalNetworkCriterion", ring::topoBulkAnalysis);
     // --------------------------
+    // Bulk ice, using the TUM (Topological Unit Matching Criterion). No need to
+    // use bulkTopologicalNetworkCriterion if you use this function
+    lua.set_function("bulkTopoUnitMatching", tum3::topoUnitMatchingBulk);
+    // --------------------------
     // Use the script
     lua.script_file(lscript);
     // --------------------------
 
-  } // end of bulk ice structure determination block
+  }  // end of bulk ice structure determination block
   // --------------------------------------
 
   std::cout << rang::style::bold
