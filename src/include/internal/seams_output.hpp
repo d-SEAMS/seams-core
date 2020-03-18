@@ -142,6 +142,12 @@ int writeLAMMPSdumpINT(
     std::vector<double> rmsdPerAtom, std::vector<int> atomTypes, int maxDepth,
     std::string path);
 
+// Write out a LAMMPS dump file containing the RMSD per atom for bulk ice
+int writeLAMMPSdumpCages(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<double> rmsdPerAtom, std::vector<int> atomTypes,
+    std::string path, int firstFrame);
+
 // Write a data file for prisms of every type
 int writeLAMMPSdataAllPrisms(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
