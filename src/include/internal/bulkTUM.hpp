@@ -58,19 +58,16 @@ int shapeMatchDDC(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                   std::vector<std::vector<int>> rings,
                   std::vector<double> *quat, double *rmsd);
 
-// Updates the RMSD per atom for an HC or DDC using the RMSD values calculated
-// per ring
-int updateRMSDatom(std::vector<double> rmsdPerRing,
-                   std::vector<int> noOfCommonRings,
-                   std::vector<double> *rmsdPerAtom,
-                   std::vector<cage::iceType> atomTypes,
-                   std::vector<std::vector<int>> rings);
-
 // Calulate the RMSD for each ring, using RMSD values (rmsd) obtained from the
 // shape-matching of each cage
-int updateRMSDring(cage::Cage cageUnit, double rmsd,
-                   std::vector<double> *rmsdPerRing,
-                   std::vector<int> *noOfCommonRings);
+int updateRMSDatom(std::vector<std::vector<int>> rings, cage::Cage cageUnit,
+                   double rmsd, std::vector<double> *rmsdPerAtom,
+                   std::vector<int> *noOfCommonAtoms,
+                   std::vector<cage::iceType> atomTypes);
+
+// Average the RMSD per atom
+int averageRMSDatom(std::vector<double> *rmsdPerAtom,
+                    std::vector<int> *noOfCommonAtoms);
 
 // Topological network methods
 // Finds the HCs and DDCs for the system

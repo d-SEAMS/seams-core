@@ -68,9 +68,9 @@ int tum3::topoUnitMatchingBulk(
                             3);  // Reference point set (Eigen matrix) for a DDC
 
   // Vector for the RMSD per atom and the RMSD per ring:
-  std::vector<double> rmsdPerAtom, rmsdPerRing;
+  std::vector<double> rmsdPerAtom;
   std::vector<int>
-      noOfCommonRings;  // An atom can belong to more than one ring or shape
+      noOfCommonElements;  // An atom can belong to more than one ring or shape
   //
 
   if (onlyTetrahedral) {
@@ -82,7 +82,8 @@ int tum3::topoUnitMatchingBulk(
   // Init the atom type vector
   atomTypes.resize(yCloud->nop);  // Has a value for each atom
   // Init the rmsd per atom
-  rmsdPerAtom.resize(yCloud->nop, -1);  // Has a value for each atom
+  rmsdPerAtom.resize(yCloud->nop, -1);     // Has a value for each atom
+  noOfCommonElements.resize(yCloud->nop);  // Has a value for each atom
 
   // ----------------------------------------------
   // Init
@@ -134,10 +135,13 @@ int tum3::topoUnitMatchingBulk(
   refPntsDDC = tum3::buildRefDDC(filePathDDC);  // DDC
   //
   // Init
-  noOfCommonRings.resize(ringsOneType.size());  // Initialized to zero
-  rmsdPerRing.resize(
-      ringsOneType.size(),
-      -1);  // Initialized to -1 which is the value for dummy atoms
+  //
+  // Loop through all the atoms and set commonElements to 1 for PNC atoms
+  for (int i = 0; i < yCloud->nop; i++) {
+    if (rmsdPerAtom[i] != -1) {
+      noOfCommonElements[i] = 1;
+    }  // for atoms which have been updated
+  }    // end of updating commonElements
   //
   // Loop through the entire cageList vector of cages to match the HCs and DDCs
   //
@@ -151,7 +155,8 @@ int tum3::topoUnitMatchingBulk(
     // Update the vector of quaternions
     quatList.push_back(quat);
     // Update the RMSD per ring
-    tum3::updateRMSDring(cageList[icage], rmsd, &rmsdPerRing, &noOfCommonRings);
+    tum3::updateRMSDatom(ringsOneType, cageList[icage], rmsd, &rmsdPerAtom,
+                         &noOfCommonElements, atomTypes);
   }  // end of looping through all HCs
   // --------------------------------------------------
   // Go through all the DDCs
@@ -162,14 +167,14 @@ int tum3::topoUnitMatchingBulk(
     // Update the vector of quaternions
     quatList.push_back(quat);
     // Update the RMSD per ring
-    tum3::updateRMSDring(cageList[icage], rmsd, &rmsdPerRing, &noOfCommonRings);
+    tum3::updateRMSDatom(ringsOneType, cageList[icage], rmsd, &rmsdPerAtom,
+                         &noOfCommonElements, atomTypes);
   }  // end of looping through all HCs
 
   // --------------------------------------------------
   // Getting the RMSD per atom
-  // Update the RMSD per atom
-  tum3::updateRMSDatom(rmsdPerRing, noOfCommonRings, &rmsdPerAtom, atomTypes,
-                       ringsOneType);
+  // Average the RMSD per atom
+  tum3::averageRMSDatom(&rmsdPerAtom, &noOfCommonElements);
   // --------------------------------------------------
 
   // Print out the lammps data file with the bonds and types
@@ -457,26 +462,40 @@ Eigen::MatrixXd tum3::buildRefDDC(std::string fileName) {
  for averaging the RMSD per atom depending on the number of cages that share
  that particular ring.
  ***********************************************/
-int tum3::updateRMSDring(cage::Cage cageUnit, double rmsd,
-                         std::vector<double> *rmsdPerRing,
-                         std::vector<int> *noOfCommonRings) {
+int tum3::updateRMSDatom(std::vector<std::vector<int>> rings,
+                         cage::Cage cageUnit, double rmsd,
+                         std::vector<double> *rmsdPerAtom,
+                         std::vector<int> *noOfCommonAtoms,
+                         std::vector<cage::iceType> atomTypes) {
   //
   int nRings = cageUnit.rings.size();  // Number of rings in the current cage
   int iring;  // Index according to the rings vector of vector, for the current
               // ring inside the cage
+  int iatom;  // Current atom index
+  int ringSize = rings[0].size();  // Number of nodes in each ring (6)
 
   // Loop through the rings in each cage
   for (int i = 0; i < nRings; i++) {
     iring = cageUnit.rings[i];  // Current ring
 
-    if ((*rmsdPerRing)[iring] == -1) {
-      (*rmsdPerRing)[iring] = rmsd;
-      (*noOfCommonRings)[iring] = 1;
-    }  // initialization
-    else {
-      (*rmsdPerRing)[iring] += rmsd;
-      (*noOfCommonRings)[iring] += 1;
-    }  // add to the number of shared rings
+    // Loop through all the atoms in the ring
+    for (int j = 0; j < ringSize; j++) {
+      iatom = rings[iring][j];  // Current atom index
+
+      // Skip for PNC atoms
+      if (atomTypes[iatom] == cage::pnc || atomTypes[iatom] == cage::mixed2) {
+        continue;
+      }  // Do not update if the atom is a PNC
+      //
+      // UPDATE
+      if ((*rmsdPerAtom)[iatom] == -1) {
+        (*rmsdPerAtom)[iatom] = rmsd;
+        (*noOfCommonAtoms)[iatom] = 1;
+      } else {
+        (*rmsdPerAtom)[iatom] += rmsd;
+        (*noOfCommonAtoms)[iatom] += 1;
+      }
+    }  // end of looping through all the atoms in the ring
 
   }  // end of looping through the rings in the cage
 
@@ -484,45 +503,25 @@ int tum3::updateRMSDring(cage::Cage cageUnit, double rmsd,
 }
 
 /********************************************/ /**
- *  Update the calculated RMSD per atom using the RMSD values of each ring,
- averaged by, the values in the noOfCommonRings vector.
+ *  Average the RMSD per atom,
+ by the number of common elements
  ***********************************************/
-int tum3::updateRMSDatom(std::vector<double> rmsdPerRing,
-                         std::vector<int> noOfCommonRings,
-                         std::vector<double> *rmsdPerAtom,
-                         std::vector<cage::iceType> atomTypes,
-                         std::vector<std::vector<int>> rings) {
+int tum3::averageRMSDatom(std::vector<double> *rmsdPerAtom,
+                          std::vector<int> *noOfCommonAtoms) {
   //
-  int iatom;                       // Atom index in iring
-  int ringSize = rings[0].size();  // This should be 6
-  double rmsdVal;                  // Current RMSD value
-  //
-  // Loop through the calculated RMSD
-  for (int iring = 0; iring < rings.size(); iring++) {
+  int nop = (*rmsdPerAtom).size();  // Number of particles
+
+  for (int iatom = 0; iatom < nop; iatom++) {
     //
-    if (noOfCommonRings[iring] == 0) {
-      rmsdVal = -1;
-    }  // for a dummy atom
-    else {
-      rmsdVal = rmsdPerRing[iring] / noOfCommonRings[iring];
-    }  // Get the averaged rmsd Value
-    //
-    // Update the atoms
-    // Loop through every atom
-    for (int i = 0; i < ringSize; i++) {
-      iatom = rings[iring][i];  // Atom index
-      // Do not update for PNC atoms
-      if (atomTypes[iatom] == cage::pnc || atomTypes[iatom] == cage::mixed2) {
-        continue;
-      }  // do not update for pnc
-      else {
-        (*rmsdPerAtom)[iatom] = rmsdVal;
-      }
-    }  // end of looping through ring atoms
-  }    // Loop through every ring
+    if ((*noOfCommonAtoms)[iatom] == 0) {
+      (*rmsdPerAtom)[iatom] = -1;  // Dummy atom
+    } else {
+      (*rmsdPerAtom)[iatom] /= (*noOfCommonAtoms)[iatom];
+    }
+  }  // end of averaging
 
   return 0;
-}
+}  // end of function
 
 // -----------------------------------------------------------------
 //
