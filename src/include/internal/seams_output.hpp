@@ -218,5 +218,10 @@ int writeHisto(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 int writeCluster(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                  std::string fileName = "cluster.txt", bool isSlice = false,
                  int largestIceCluster = 0);
+
+// Function for writing out the XYZ files for each cluster
+int writeXYZcluster(std::string path,
+                    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                    std::vector<int> atoms, int clusterID, cage::cageType type);
 }  // namespace sout
 #endif  // __SEAMS_OUTPUT_H_
