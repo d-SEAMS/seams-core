@@ -211,6 +211,14 @@ int tum3::topoUnitMatchingBulk(
   sout::writeLAMMPSdumpCages(yCloud, rmsdPerAtom, dumpAtomTypes, path,
                              firstFrame);
   // --------------------------------------------------
+  //
+  // PRINT THE CLUSTERS
+  //
+  if (printClusters) {
+    // Print the clusters
+    tum3::clusterCages(yCloud, path, ringsOneType, cageList, numHC, numDDC);
+  }  // end of printing individual clusters
+  // --------------------------------------------------
   return 0;
 }
 
@@ -610,4 +618,207 @@ std::vector<cage::Cage> tum3::topoBulkCriteria(
                           mixedRings, basalRings, prismaticRings, firstFrame);
 
   return cageList;
+}
+
+// -----------------------------------------------------------------
+//
+// CLUSTERING ALGORITHMS
+//
+// -----------------------------------------------------------------
+/********************************************/ /**
+ *  Groups cages into clusters and prints
+ out each cluster into an XYZ file
+ ***********************************************/
+int tum3::clusterCages(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, std::string path,
+    std::vector<std::vector<int>> rings, std::vector<cage::Cage> cageList,
+    int numHC, int numDDC) {
+  //
+  std::vector<int> linkedList;  // Linked list for the clustered cages
+  int nCages = numHC + numDDC;  // Number of cages in total
+  int j, temp;                  // Variables used inside the loops
+  bool
+      isNeighbour;  // true if cages are adjacent to each other, false otherwise
+  std::vector<bool>
+      visited;  // To make sure you don't go through the same cages again.
+  int singleDDCs, singleHCs;  // Number of single DDCs and HCs
+  // Units are in Angstrom^3
+  double volDDC = 72.7;           // The calculated alpha volume of a single DDC
+  double volHC = 40.63;           // The calculated alpha volume of a single HC
+  int nextElement;                // value in list
+  int index;                      // starting index value
+  int currentIndex;               // Current cage index
+  int iClusterNumber;             // Number in the current cluster
+  std::vector<int> nClusters;     // Number of cages in each cluster
+  std::vector<int> clusterCages;  // Indices of each cage in the cluster
+  std::vector<int> atoms;  // Vector containing the atom indices of all the
+                           // atoms in the cages
+  cage::cageType type;     // Type of the cages in the cluster
+  // -----------------------------------------------------------
+  // INITIALIZATION
+  linkedList.resize(nCages);  // init to dummy value
+  // Initial values of the list.
+  for (int icage = 0; icage < nCages; icage++) {
+    // Assign the index as the ID
+    linkedList[icage] = icage;  // Index
+  }                             // init of cluster IDs
+  // -----------------------------------------------------------
+  // GETTING THE LINKED LIST
+  //
+  // HCs first
+  for (int i = 0; i < nCages - 1; i++) {
+    // If iatom is already in a cluster, skip it
+    if (linkedList[i] != i) {
+      continue;
+    }  // Already part of a cluster
+    //
+    j = i;  // Init of j
+    // Execute the next part of the loop while j is not equal to i
+    do {
+      //
+      // Go through the rest of the atoms (KLOOP)
+      for (int k = i + 1; k < nCages; k++) {
+        // Skip if already part of a cluster
+        if (linkedList[k] != k) {
+          continue;
+        }  // Already part of a cluster
+        //
+        // k and j must be of the same type
+        if (cageList[k].type != cageList[j].type) {
+          continue;
+        }  // skip if k and j are not of the same type
+        // Check to see if k is a nearest neighbour of j
+        isNeighbour =
+            ring::hasCommonElements(cageList[k].rings, cageList[j].rings);
+        if (isNeighbour) {
+          // Swap!
+          temp = linkedList[j];
+          linkedList[j] = linkedList[k];
+          linkedList[k] = temp;
+        }  // j and k are neighbouring cages
+      }    // end of loop through k (KLOOP)
+      //
+      j = linkedList[j];
+    } while (j != i);  // end of control for j!=i
+  }  // end of getting the linked list (looping through every i)
+  // -----------------------------------------------------------
+  // WRITE-OUTS
+  //
+  // init
+  visited.resize(nCages);
+  singleDDCs = 0;
+  singleHCs = 0;
+
+  for (int i = 0; i < nCages; i++) {
+    //
+    if (visited[i]) {
+      continue;
+    }  // Already counted
+    // Now that the cage has been visited, set it to true
+    visited[i] = true;  // Visited
+    // If only one cage is in the cluster
+    if (linkedList[i] == i) {
+      // Add to the number of single DDCs
+      if (cageList[i].type == cage::DoubleDiaC) {
+        singleDDCs++;
+      }  // add to the single DDCs
+      else {
+        singleHCs++;
+      }  // single HCs
+      continue;
+    }  // cluster has only one cage
+    //
+    // init
+    clusterCages.resize(0);
+    //
+    type = cageList[i].type;
+    currentIndex = i;
+    nextElement = linkedList[currentIndex];
+    index = i;
+    iClusterNumber = 1;         // at least one value
+    clusterCages.push_back(i);  // Add the first cage
+    // Get the other cages in the cluster
+    while (nextElement != index) {
+      iClusterNumber++;
+      currentIndex = nextElement;
+      visited[currentIndex] = true;
+      clusterCages.push_back(currentIndex);  // Add the first cage
+      nextElement = linkedList[currentIndex];
+    }  // get number
+    // Update the number of molecules in the cluster
+    nClusters.push_back(iClusterNumber);
+    // --------------
+    // PRINT OUT
+    atoms = tum3::atomsFromCages(rings, cageList, clusterCages);
+    int clusterID = nClusters.size();
+    // Write out the cluster
+    sout::writeXYZcluster(path, yCloud, atoms, clusterID, type);
+    // Print out the cages into an XYZ file
+    // --------------
+  }  // end of loop through
+  // -----------------------------------------------------------
+  // Write out the stuff for single cages
+  // ----------------
+  std::ofstream outputFile;
+  // Make the output directory if it doesn't exist
+  sout::makePath(path);
+  std::string outputDirName = path + "bulkTopo";
+  sout::makePath(outputDirName);
+  outputDirName = path + "bulkTopo/clusterXYZ/";
+  sout::makePath(outputDirName);
+  outputDirName = path + "bulkTopo/clusterXYZ/frame-" +
+                  std::to_string(yCloud->currentFrame);
+  sout::makePath(outputDirName);
+  // ----------------
+  // Write output to file inside the output directory
+  outputFile.open(path + "bulkTopo/clusterXYZ/frame-" +
+                  std::to_string(yCloud->currentFrame) + "/info.dat");
+  outputFile << "# volDDC volHC in Angstrom^3\n";
+  outputFile << singleDDCs * volDDC << " " << singleHCs * volHC << "\n";
+  outputFile << "There are " << singleDDCs << " single DDCs\n";
+  outputFile << "There are " << singleHCs << " single HCs\n";
+  outputFile.close();  // Close the file
+  // -----------------------------------------------------------
+  return 0;
+}  // end of the function
+
+/********************************************/ /**
+ *  Returns a vector containing the atom indices
+ of all the atoms in a cluster of cages, according to the input cageList vector
+ of Cages
+ ***********************************************/
+std::vector<int> tum3::atomsFromCages(std::vector<std::vector<int>> rings,
+                                      std::vector<cage::Cage> cageList,
+                                      std::vector<int> clusterCages) {
+  //
+  std::vector<int> atoms;  // Contains the atom indices (not IDs) of atoms
+  int ringSize = rings[0].size();  // Number of nodes in each ring
+  int iring;                       // Index of ring in rings vector of vectors
+  int icage;                       // Index of the current cage in cageList
+  int iatom;                       // Atom index
+  //
+  for (int i = 0; i < clusterCages.size(); i++) {
+    //
+    icage = clusterCages[i];
+    // Loop through every ring in the cage
+    for (int j = 0; j < cageList[icage].rings.size(); j++) {
+      iring = cageList[icage].rings[j];  // Current ring index
+      // Loop through every atom in iring
+      for (int k = 0; k < ringSize; k++) {
+        iatom = rings[iring][k];
+        atoms.push_back(iatom);  // Add the atom
+      }                          // Loop through every atom in iring
+    }                            // loop through every ring in the current cage
+  }                              // end of loop through all cages
+
+  // Remove the duplicates in the atoms vector
+  // Duplicate IDs must be removed
+  //
+  sort(atoms.begin(), atoms.end());
+  auto ip = std::unique(atoms.begin(), atoms.end());
+  // Resize peripheral rings to remove undefined terms
+  atoms.resize(std::distance(atoms.begin(), ip));
+  //
+  // Return the vector of atoms
+  return atoms;
 }

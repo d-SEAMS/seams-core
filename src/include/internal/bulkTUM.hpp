@@ -77,6 +77,18 @@ std::vector<cage::Cage> topoBulkCriteria(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int firstFrame,
     int *numHC, int *numDDC, std::vector<ring::strucType> *ringType);
 
+// Clustering
+// Clusters cages using the Stillinger algorithm and prints out individual XYZ
+// files of clusters.
+int clusterCages(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                 std::string path, std::vector<std::vector<int>> rings,
+                 std::vector<cage::Cage> cageList, int numHC, int numDDC);
+
+// Gets the atoms in the cages of a given cluster
+std::vector<int> atomsFromCages(std::vector<std::vector<int>> rings,
+                                std::vector<cage::Cage> cageList,
+                                std::vector<int> clusterCages);
+
 }  // namespace tum3
 
 #endif  // __BULKTUM_H_
