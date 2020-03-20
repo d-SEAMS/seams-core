@@ -24,10 +24,14 @@ href="https://figshare.com/projects/d-SEAMS_Datasets/73545">from figshare</a>.
 
 # Citation
 
-This software is being actively developed and written up. If you do use it in an
-academic capacity, for now please cite [the following preprint](https://arxiv.org/abs/1909.09830):
+- This has been published at the [Journal of Chemical Information and Modeling
+  (JCIM)](https://doi.org/10.1021/acs.jcim.0c00031)
 
-    Goswami, R.; Goswami, A.; Singh, J. K. (2019). "d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations". arXiv:1909.09830 [physics.comp-ph].
+- You may also read [the following preprint](https://arxiv.org/abs/1909.09830)
+
+If you use this software please cite the following:
+
+    Goswami, R., Goswami, A., & Singh, J. K. (2020). d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations. Journal of Chemical Information and Modeling. https://doi.org/10.1021/acs.jcim.0c00031
 
 # Compilation with Nix
 
