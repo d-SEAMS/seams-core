@@ -27,7 +27,7 @@ href="https://figshare.com/projects/d-SEAMS_Datasets/73545">from figshare</a>.
 - This has been published at the [Journal of Chemical Information and Modeling
   (JCIM)](https://doi.org/10.1021/acs.jcim.0c00031)
 
-- You may also read [the following preprint](https://arxiv.org/abs/1909.09830)
+- You may also read [the preprint on arXiv](https://arxiv.org/abs/1909.09830)
 
 If you use this software please cite the following:
 
