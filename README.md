@@ -4,6 +4,7 @@
 
 [![Build Status](https://travis-ci.org/d-SEAMS/seams-core.svg?branch=master)](https://travis-ci.org/d-SEAMS/seams-core)
 [![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
+[![codecov](https://codecov.io/gh/d-SEAMS/seams-core/branch/master/graph/badge.svg)](https://codecov.io/gh/d-SEAMS/seams-core)
 
 - Check our build status [here](https://travis-ci.org/d-SEAMS/seams-core).
 - The docs themselves are [here](https://docs.dseams.info) and development is

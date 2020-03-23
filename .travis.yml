@@ -1,17 +1,42 @@
-branches:
-  only:
-    - master
+# branches:
+#   only:
+#     - master
 jobs:
   include:
-    - language: nix
+    - name: getCoverage
+      language: nix
       install:
+        - nix-env -i lcov
+      script:
+        # - nix-build .
+        - nix-shell --pure --run ./scripts/mkCoverage.sh
+        - bash <(curl -s https://codecov.io/bash) -f shellBuild/coverage.info.cleaned || echo "Codecov did not collect coverage reports"
+      cache:
+        directories:
+          - $HOME/nix.store
+          - /nix/
+      before_install:
+        - sudo mkdir -p /etc/nix
+        - echo "substituters = https://cache.nixos.org/ file://$HOME/nix.store" | sudo tee -a /etc/nix/nix.conf > /dev/null
+        - echo 'require-sigs = false' | sudo tee -a /etc/nix/nix.conf > /dev/null
+      before_cache:
+        - mkdir -p $HOME/nix.store
+        - nix copy --to file://$HOME/nix.store -f default.nix buildInputs
+    - name: runCachix
+      if: branch = master
+      language: nix
+      install:
+        - nix-env -i lcov
         - "nix-env -iA cachix -f https://cachix.org/api/v1/install"
       script:
         - cachix use dseams
         - cachix push dseams --watch-store&
         - nix-build .
         - sleep 30s # wait for the cachix push to complete
-    - language: python
+      cache: nix
+    - name: docBuilder
+      if: branch = master
+      language: python
       python: "3.6"
       before_install:
         - cp scripts/ci/texlive.profile $HOME/texlive.profile

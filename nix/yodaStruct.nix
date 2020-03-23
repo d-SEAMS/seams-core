@@ -10,6 +10,7 @@
 , liblapack
 , blas
 , lib
+, lcov
 , boost
 , gsl
 , rang
