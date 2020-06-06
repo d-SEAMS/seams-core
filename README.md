@@ -155,6 +155,14 @@ Do note that the regular installation via `nix-env` runs the tests before the in
 
 <!-- TODO: Move this to some other location. -->
 
+While developing, it is sometimes expedient to update the packages used. It is
+then useful to note that we use [niv](https://github.com/nmattia/niv/) to handle our pinned packages (apart from
+the ones built from Github). Thus, one might need, say:
+
+```bash
+niv update nixpkgs -b nixpkgs-unstable
+```
+
 Test the build with nix:
 
 ```bash
