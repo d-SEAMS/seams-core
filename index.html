@@ -89,7 +89,7 @@ url={https://doi.org/10.1021/acs.jcim.0c00031}
 <span class="cp"># quit gdb with quit</span>
 <span class="cp"># Go run the test binary</span>
 <span class="n">cd</span> <span class="n">shellBuild</span>
-<span class="p">.</span><span class="o">/</span><span class="n">yodaStruct_test</span></pre><p>Do note that the regular installation via <code>nix-env</code> runs the tests before the installation</p><h2>Developer Documentation</h2><p>Test the build with nix:</p><pre class="m-code"><span class="n">nix</span><span class="o">-</span><span class="n">build</span> <span class="p">.</span>
+<span class="p">.</span><span class="o">/</span><span class="n">yodaStruct_test</span></pre><p>Do note that the regular installation via <code>nix-env</code> runs the tests before the installation</p><h2>Developer Documentation</h2><p>While developing, it is sometimes expedient to update the packages used. It is then useful to note that we use <a href="https://github.com/nmattia/niv/">niv</a> to handle our pinned packages (apart from the ones built from Github). Thus, one might need, say:</p><pre class="m-code"><span class="n">niv</span> <span class="n">update</span> <span class="n">nixpkgs</span> <span class="o">-</span><span class="n">b</span> <span class="n">nixpkgs</span><span class="o">-</span><span class="n">unstable</span></pre><p>Test the build with nix:</p><pre class="m-code"><span class="n">nix</span><span class="o">-</span><span class="n">build</span> <span class="p">.</span>
 <span class="cp"># Outputs are in ./result</span>
 <span class="cp"># If you get a CMake error</span>
 <span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="n">build</span>
