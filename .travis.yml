@@ -4,6 +4,7 @@ branches:
 jobs:
   include:
     - language: nix
+      nix: 2.3.6
       install:
         - "nix-env -iA cachix -f https://cachix.org/api/v1/install"
       script:
