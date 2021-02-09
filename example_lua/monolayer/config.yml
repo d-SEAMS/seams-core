@@ -1,4 +1,4 @@
-trajectory: "input/traj/dump-6-320-310.lammpstrj"
+trajectory: "input/traj/exampleTraj.lammpstrj"
 variables: "lua_inputs/iceType/vars.lua"
 bulk:
   use: false
