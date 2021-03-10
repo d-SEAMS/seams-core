@@ -2,8 +2,8 @@ print("\n Welcome to the Ice Type Determination Module\n");
 cutoffRadius = 3.5; --- This is for H2O
 oxygenAtomType = 1; --- This is assigned by LAMMPS
 hydrogenAtomType = 1; --- Hydrogen atom type assigned (not used here)
-targetFrame=1; --- The first frame
-finalFrame=1; --- This is inclusive
+targetFrame=1302; --- The first frame
+finalFrame=1302; --- This is inclusive
 frameGap=1; --- The gap between frames
 maxDepth = 6; --- The maximum depth upto which rings will be searched.
 --- Slice Information
@@ -16,4 +16,4 @@ outDir="runOne/"; --- The subdirectory used;
 functionScript="lua_inputs/iceType/functions.lua" --- This is relative to the binary location
 
 -- Variable for the topological network criterion
-onlyTetrahedral = false; --- Only finds DDCs and HCs if true; searches for pentagonal defects if false
+onlyTetrahedral = false; --- Only finds DDCs and HCs if true; finds PNCs too if false 
