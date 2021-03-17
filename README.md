@@ -2,7 +2,8 @@
 
 **Deferred Structural Elucidation Analysis for Molecular Simulations**
 
-[![Build Status](https://travis-ci.org/d-SEAMS/seams-core.svg?branch=master)](https://travis-ci.org/d-SEAMS/seams-core)
+[![Build Status](https://github.com/d-SEAMS/seams-core/actions/workflows/build_pkg.yml/badge.svg)](https://github.com/d-SEAMS/seams-core/actions/workflows/build_pkg.yml)
+
 [![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
 
 - Check our build status [here](https://travis-ci.org/d-SEAMS/seams-core).
