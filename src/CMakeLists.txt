@@ -32,8 +32,7 @@ find_package(
   "GSL" REQUIRED
   "Boost" REQUIRED COMPONENTS system filesystem
   "yaml-cpp"
-  "fmt"
-  "rang")
+  "fmt")
 
 link_directories(${Boost_LIBRARY_DIRS})
 # Link everything

@@ -12,7 +12,6 @@
 , lib
 , boost
 , gsl
-, rang
 , cmake }:
   clangStdenv.mkDerivation {
   name = "yodaStruct";
@@ -20,7 +19,6 @@
   enableParallelBuilding=true;
   nativeBuildInputs = [
   fmtlib
-  rang
   cmake
   lua
   luaPackages.luafilesystem

@@ -25,7 +25,6 @@ find_package(
   "GSL" REQUIRED
   "yaml-cpp"
   "fmt"
-  "rang"
   )
 
 # Link everything

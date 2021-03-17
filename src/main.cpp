@@ -49,11 +49,11 @@
 // Externally bundled-input libraries
 // #include <cxxopts.hpp>
 #include <sol.hpp>
+#include <rang.hpp>
 
 // Managed with Conan
 #include <fmt/core.h>
 #include <yaml-cpp/yaml.h>
-#include <rang.hpp>
 
 int main(int argc, char *argv[]) {
   // Parse Things
