@@ -13,5 +13,6 @@ if [[ "$PWD" =~ seams-core ]]; then
 	cp yodaStruct ../
 	cp libyodaLib.so ../
 	cd ../
-	gdb --args yodaStruct -c lua_inputs/config.yml
+	# gdb --args yodaStruct -c lua_inputs/config.yml
+	yodaStruct -c lua_inputs/config.yml
 fi
