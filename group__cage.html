@@ -1,219 +1,252 @@
-<!DOCTYPE html>
-<html lang="en">
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen 1.9.1-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="UTF-8" />
-  <title>Cage module | d-SEAMS</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="icon" href="dSeamsLogo.ico" type="image/vnd.microsoft.icon" />
-  <link rel="search" type="application/opensearchdescription+xml" href="opensearch.xml" title="Search d-SEAMS documentation" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.20"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>d-SEAMS: Cage</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']]
+  },
+  svg: {
+    fontCache: 'global'
+  }
+  loader: { load: ["[tex]/unicode", "[tex]/ams"] },
+  tex: {
+    packages: { "[+]": ["unicode", "ams"] },
+    tags: "ams",
+  },
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+</script>
+<!-- <link href="doxygen.css" rel="stylesheet" type="text/css" /> -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" >
+$(document).ready(function() {
+     $(".fragment").wrap("<details class='code-details'></details>");
+     $(".code-details").append("<summary>Code</summary>");
+ }
+)
+</script>
 </head>
 <body>
-<header><nav id="navigation">
-  <div class="m-container">
-    <div class="m-row">
-      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m"><img src="dSeamsLogo.png" alt="" />d-SEAMS</a>
-      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
-        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
-          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
-        </svg></a>
-        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
-        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
-      </div>
-      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
-        <div class="m-row">
-          <ol class="m-col-t-6 m-col-m-none">
-            <li><a href="namespaces.html">Namespaces</a></li>
-            <li><a href="modules.html">Modules</a></li>
-            <li><a href="pages.html">Wiki</a></li>
-          </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
-            <li><a href="annotated.html">Classes</a></li>
-            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
-              <use href="#m-doc-search-icon-path" />
-            </svg></a></li>
-          </ol>
-        </div>
-      </div>
-    </div>
-  </div>
-</nav></header>
-<main><article>
-  <div class="m-container m-container-inflatable">
-    <div class="m-row">
-      <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          Cage <span class="m-thin">module</span></h1>
-        <div class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#nested-classes">Classes</a></li>
-                <li><a href="#enum-members">Enums</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespacecage.html" class="m-doc">cage</a></dt>
-            <dd>Functions for topological network criteria cage types. This namespace contains structs and enums for cage types.</dd>
-          </dl>
-        </section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              struct <a href="structcage_1_1Cage.html" class="m-doc">cage::Cage</a>
-            </dt>
-            <dd>This contains a cage, with the constituent rings.</dd>
-          </dl>
-        </section>
-        <section id="enum-members">
-          <h2><a href="#enum-members">Enums</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">enum <a href="#ga5787314f51b5927c213db48b81c21d95" class="m-doc">cageType</a> { </span><span class="m-doc-wrap"><a href="#gga5787314f51b5927c213db48b81c21d95a0ff989d0b3eed06750ff06c8bc95c84d" class="m-doc">HexC</a>,
-              <a href="#gga5787314f51b5927c213db48b81c21d95ac5a9e4f20bab07bef66bb6e15c49682d" class="m-doc">DoubleDiaC</a> }</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">enum <a href="#gaaac41828990e32b9d6e7db4426b61529" class="m-doc">iceType</a> { </span><span class="m-doc-wrap"><a href="#ggaaac41828990e32b9d6e7db4426b61529a0a6b4517e93ae19fe8326d2d8747d81c" class="m-doc">dummy</a>,
-              <a href="#ggaaac41828990e32b9d6e7db4426b61529abf805fba4c226956825175c4514f14ce" class="m-doc">hc</a>,
-              <a href="#ggaaac41828990e32b9d6e7db4426b61529a508c36a9ffc7ba85f325a253be11312f" class="m-doc">ddc</a>,
-              <a href="#ggaaac41828990e32b9d6e7db4426b61529a8da31aa983c518632b4a522086415492" class="m-doc">mixed</a> }</span>
-            </dt>
-            <dd></dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Enum documentation</h2>
-          <section class="m-doc-details" id="ga5787314f51b5927c213db48b81c21d95"><div>
-            <h3>
-              enum <a href="#ga5787314f51b5927c213db48b81c21d95" class="m-doc-self">cageType</a>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="cage_8hpp.html">&lt;src/include/internal/cage.hpp&gt;</a></div>
-            </h3>
-<p>Qualifier for a cage. According to the topological network criterion for DDCs and HCs</p>
-            <table class="m-table m-fullwidth m-flat m-doc">
-              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
-              <tbody>
-                <tr>
-                  <td><a href="#gga5787314f51b5927c213db48b81c21d95a0ff989d0b3eed06750ff06c8bc95c84d" class="m-doc-self" id="gga5787314f51b5927c213db48b81c21d95a0ff989d0b3eed06750ff06c8bc95c84d">HexC</a></td>
-                  <td>
-<p>The type for a hexagonal cage</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#gga5787314f51b5927c213db48b81c21d95ac5a9e4f20bab07bef66bb6e15c49682d" class="m-doc-self" id="gga5787314f51b5927c213db48b81c21d95ac5a9e4f20bab07bef66bb6e15c49682d">DoubleDiaC</a></td>
-                  <td>
-<p>The type for a double-diamond cage</p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="gaaac41828990e32b9d6e7db4426b61529"><div>
-            <h3>
-              enum <a href="#gaaac41828990e32b9d6e7db4426b61529" class="m-doc-self">iceType</a>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="cage_8hpp.html">&lt;src/include/internal/cage.hpp&gt;</a></div>
-            </h3>
-<p>Qualifier for an atom, based on whether it is part of cages, according to the topological network criterion for DDCs and HCs</p>
-            <table class="m-table m-fullwidth m-flat m-doc">
-              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
-              <tbody>
-                <tr>
-                  <td><a href="#ggaaac41828990e32b9d6e7db4426b61529a0a6b4517e93ae19fe8326d2d8747d81c" class="m-doc-self" id="ggaaac41828990e32b9d6e7db4426b61529a0a6b4517e93ae19fe8326d2d8747d81c">dummy</a></td>
-                  <td>
-<p>Type for an atom which does not belong to any kind of cage</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#ggaaac41828990e32b9d6e7db4426b61529abf805fba4c226956825175c4514f14ce" class="m-doc-self" id="ggaaac41828990e32b9d6e7db4426b61529abf805fba4c226956825175c4514f14ce">hc</a></td>
-                  <td>
-<p>Type for an atom which belongs to an HC</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#ggaaac41828990e32b9d6e7db4426b61529a508c36a9ffc7ba85f325a253be11312f" class="m-doc-self" id="ggaaac41828990e32b9d6e7db4426b61529a508c36a9ffc7ba85f325a253be11312f">ddc</a></td>
-                  <td>
-<p>Type for an atom which belongs to a DDC</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#ggaaac41828990e32b9d6e7db4426b61529a8da31aa983c518632b4a522086415492" class="m-doc-self" id="ggaaac41828990e32b9d6e7db4426b61529a8da31aa983c518632b4a522086415492">mixed</a></td>
-                  <td>
-<p>Type for an atom which is part of a mixed ring, shared by both a DDC and an HC</p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
-        </section>
-      </div>
-    </div>
-  </div>
-</article></main>
-<div class="m-doc-search" id="search">
-  <a href="#!" onclick="return hideSearch()"></a>
-  <div class="m-container">
-    <div class="m-row">
-      <div class="m-col-m-8 m-push-m-2">
-        <div class="m-doc-search-header m-text m-small">
-          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
-          <div id="search-symbolcount">&hellip;</div>
-        </div>
-        <div class="m-doc-search-content">
-          <form action="https://docs.dseams.info/#search">
-            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
-          </form>
-          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript. Enable it or <a href="https://google.com/search?q=site:docs.dseams.info+">use an external search engine</a>.</noscript>
-          <div id="search-help" class="m-text m-dim m-text-center">
-            <p class="m-noindent">Search for symbols, directories, files, pages or
-            modules. You can omit any prefix from the symbol or file path; adding a
-            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
-            directory.</p>
-            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
-            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
-            <span class="m-label m-dim">Enter</span> to go.
-            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
-            copy a link to the result using <span class="m-label m-dim">⌘</span>
-            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
-            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
-          </div>
-          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.<br />Maybe try a full-text <a href="#" id="search-external" data-search-engine="https://google.com/search?q=site:docs.dseams.info+{query}">search with external engine</a>?</div>
-          <ul id="search-results"></ul>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area">
+<a class="project_logo" href="#">
+<img src="dSeamsLogo.png" width="30" height="30" alt="Logo">
+</a>
+<span class="project_info">d-SEAMS v1.0.0</span>
+</nav>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.8.20 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
 </div>
-<script src="search-v1.js"></script>
-<script src="searchdata-v1.js" async="async"></script>
-<footer><nav>
-  <div class="m-container">
-    <div class="m-row">
-      <div class="m-col-l-10 m-push-l-1">
-        <b>(C)
-2018-present</b>
-<a
-href="https://github.com/HaoZeke">Rohit
-Goswami</a>,
-<a
-href="https://github.com/amritagos">Amrita
-Goswami</a>,
-<a
-href="https://github.com/d-Seams">d-SEAMS
-core
-team</a>
-      </div>
-    </div>
-  </div>
-</nav></footer>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#nested-classes">Data Structures</a> &#124;
+<a href="#enum-members">Enumerations</a> &#124;
+<a href="#enumval-members">Enumerator</a> &#124;
+<a href="#var-members">Variables</a>  </div>
+  <div class="headertitle">
+<div class="title">Cage</div>  </div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:namespacecage"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecage.html">cage</a></td></tr>
+<tr class="memdesc:namespacecage"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functions for topological network criteria cage types. This namespace contains structs and enums for cage types. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Data Structures</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structcage_1_1Cage.html">cage::Cage</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This contains a cage, with the constituent rings.  <a href="structcage_1_1Cage.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:ga5787314f51b5927c213db48b81c21d95"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__cage.html#ga5787314f51b5927c213db48b81c21d95">cage::cageType</a> { <a class="el" href="group__cage.html#gga5787314f51b5927c213db48b81c21d95a0ff989d0b3eed06750ff06c8bc95c84d">cage::HexC</a>, 
+<a class="el" href="group__cage.html#gga5787314f51b5927c213db48b81c21d95ac5a9e4f20bab07bef66bb6e15c49682d">cage::DoubleDiaC</a>
+ }</td></tr>
+<tr class="separator:ga5787314f51b5927c213db48b81c21d95"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaaac41828990e32b9d6e7db4426b61529"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__cage.html#gaaac41828990e32b9d6e7db4426b61529">cage::iceType</a> { <a class="el" href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529a0a6b4517e93ae19fe8326d2d8747d81c">cage::dummy</a>, 
+<a class="el" href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529abf805fba4c226956825175c4514f14ce">cage::hc</a>, 
+<a class="el" href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529a508c36a9ffc7ba85f325a253be11312f">cage::ddc</a>, 
+<a class="el" href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529a8da31aa983c518632b4a522086415492">cage::mixed</a>
+ }</td></tr>
+<tr class="separator:gaaac41828990e32b9d6e7db4426b61529"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:gabcbd2f167fb2ff545280b6180cf25692"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__cage.html#ga5787314f51b5927c213db48b81c21d95">cageType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__cage.html#gabcbd2f167fb2ff545280b6180cf25692">cage::Cage::type</a></td></tr>
+<tr class="separator:gabcbd2f167fb2ff545280b6180cf25692"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5b4c006e8de944ce67f924190123f178"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__cage.html#ga5b4c006e8de944ce67f924190123f178">cage::Cage::rings</a></td></tr>
+<tr class="separator:ga5b4c006e8de944ce67f924190123f178"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="ga5787314f51b5927c213db48b81c21d95"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5787314f51b5927c213db48b81c21d95">&#9670;&nbsp;</a></span>cageType</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__cage.html#ga5787314f51b5927c213db48b81c21d95">cage::cageType</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Qualifier for a cage. According to the topological network criterion for DDCs and HCs </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga5787314f51b5927c213db48b81c21d95a0ff989d0b3eed06750ff06c8bc95c84d"></a>HexC&#160;</td><td class="fielddoc"><p>The type for a hexagonal cage </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga5787314f51b5927c213db48b81c21d95ac5a9e4f20bab07bef66bb6e15c49682d"></a>DoubleDiaC&#160;</td><td class="fielddoc"><p>The type for a double-diamond cage </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="cage_8hpp_source.html#l00040">40</a> of file <a class="el" href="cage_8hpp_source.html">cage.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;{ <a class="code" href="group__cage.html#gga5787314f51b5927c213db48b81c21d95a0ff989d0b3eed06750ff06c8bc95c84d">HexC</a>, <a class="code" href="group__cage.html#gga5787314f51b5927c213db48b81c21d95ac5a9e4f20bab07bef66bb6e15c49682d">DoubleDiaC</a> };</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gaaac41828990e32b9d6e7db4426b61529"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaaac41828990e32b9d6e7db4426b61529">&#9670;&nbsp;</a></span>iceType</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__cage.html#gaaac41828990e32b9d6e7db4426b61529">cage::iceType</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Qualifier for an atom, based on whether it is part of cages, according to the topological network criterion for DDCs and HCs </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaaac41828990e32b9d6e7db4426b61529a0a6b4517e93ae19fe8326d2d8747d81c"></a>dummy&#160;</td><td class="fielddoc"><p>Type for an atom which does not belong to any kind of cage </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaaac41828990e32b9d6e7db4426b61529abf805fba4c226956825175c4514f14ce"></a>hc&#160;</td><td class="fielddoc"><p>Type for an atom which belongs to an HC </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaaac41828990e32b9d6e7db4426b61529a508c36a9ffc7ba85f325a253be11312f"></a>ddc&#160;</td><td class="fielddoc"><p>Type for an atom which belongs to a DDC </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaaac41828990e32b9d6e7db4426b61529a8da31aa983c518632b4a522086415492"></a>mixed&#160;</td><td class="fielddoc"><p>Type for an atom which is part of a mixed ring, shared by both a DDC and an HC </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="cage_8hpp_source.html#l00061">61</a> of file <a class="el" href="cage_8hpp_source.html">cage.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;{ <a class="code" href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529a0a6b4517e93ae19fe8326d2d8747d81c">dummy</a>, <a class="code" href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529abf805fba4c226956825175c4514f14ce">hc</a>, <a class="code" href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529a508c36a9ffc7ba85f325a253be11312f">ddc</a>, <a class="code" href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529a8da31aa983c518632b4a522086415492">mixed</a> };</div>
+</div><!-- fragment -->
+</div>
+</div>
+<h2 class="groupheader">Variable Documentation</h2>
+<a id="ga5b4c006e8de944ce67f924190123f178"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5b4c006e8de944ce67f924190123f178">&#9670;&nbsp;</a></span>rings</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt;int&gt; cage::Cage::rings</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="cage_8hpp_source.html#l00074">74</a> of file <a class="el" href="cage_8hpp_source.html">cage.hpp</a>.</p>
+
+</div>
+</div>
+<a id="gabcbd2f167fb2ff545280b6180cf25692"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gabcbd2f167fb2ff545280b6180cf25692">&#9670;&nbsp;</a></span>type</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__cage.html#ga5787314f51b5927c213db48b81c21d95">cageType</a> cage::Cage::type</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="cage_8hpp_source.html#l00073">73</a> of file <a class="el" href="cage_8hpp_source.html">cage.hpp</a>.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+<div class="ttc" id="agroup__cage_html_ggaaac41828990e32b9d6e7db4426b61529a8da31aa983c518632b4a522086415492"><div class="ttname"><a href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529a8da31aa983c518632b4a522086415492">cage::mixed</a></div><div class="ttdeci">@ mixed</div><div class="ttdef"><b>Definition:</b> <a href="cage_8hpp_source.html#l00061">cage.hpp:61</a></div></div>
+<div class="ttc" id="agroup__cage_html_gga5787314f51b5927c213db48b81c21d95ac5a9e4f20bab07bef66bb6e15c49682d"><div class="ttname"><a href="group__cage.html#gga5787314f51b5927c213db48b81c21d95ac5a9e4f20bab07bef66bb6e15c49682d">cage::DoubleDiaC</a></div><div class="ttdeci">@ DoubleDiaC</div><div class="ttdef"><b>Definition:</b> <a href="cage_8hpp_source.html#l00040">cage.hpp:40</a></div></div>
+<div class="ttc" id="agroup__cage_html_ggaaac41828990e32b9d6e7db4426b61529abf805fba4c226956825175c4514f14ce"><div class="ttname"><a href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529abf805fba4c226956825175c4514f14ce">cage::hc</a></div><div class="ttdeci">@ hc</div><div class="ttdef"><b>Definition:</b> <a href="cage_8hpp_source.html#l00061">cage.hpp:61</a></div></div>
+<div class="ttc" id="agroup__cage_html_ggaaac41828990e32b9d6e7db4426b61529a508c36a9ffc7ba85f325a253be11312f"><div class="ttname"><a href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529a508c36a9ffc7ba85f325a253be11312f">cage::ddc</a></div><div class="ttdeci">@ ddc</div><div class="ttdef"><b>Definition:</b> <a href="cage_8hpp_source.html#l00061">cage.hpp:61</a></div></div>
+<div class="ttc" id="agroup__cage_html_ggaaac41828990e32b9d6e7db4426b61529a0a6b4517e93ae19fe8326d2d8747d81c"><div class="ttname"><a href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529a0a6b4517e93ae19fe8326d2d8747d81c">cage::dummy</a></div><div class="ttdeci">@ dummy</div><div class="ttdef"><b>Definition:</b> <a href="cage_8hpp_source.html#l00061">cage.hpp:61</a></div></div>
+<div class="ttc" id="agroup__cage_html_gga5787314f51b5927c213db48b81c21d95a0ff989d0b3eed06750ff06c8bc95c84d"><div class="ttname"><a href="group__cage.html#gga5787314f51b5927c213db48b81c21d95a0ff989d0b3eed06750ff06c8bc95c84d">cage::HexC</a></div><div class="ttdeci">@ HexC</div><div class="ttdef"><b>Definition:</b> <a href="cage_8hpp_source.html#l00040">cage.hpp:40</a></div></div>
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen 1.9.1-->
+<!-- start footer part -->
+<div class="footer">
+<hr class="footline"/><address class="footline"><small>
+    Generated by&#160;<a href="https://www.doxygen.org/index.html">Doxygen 1.8.20</a> and the <a class="outlink" href="https://github.com/HaoZeke/doxyYoda">doxyYoda theme</a>
+</small></address>
+</div>
+</div>
 </body>
 </html>

@@ -1,54 +1,121 @@
-<!DOCTYPE html>
-<html lang="en">
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen 1.9.1-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="UTF-8" />
-  <title>d-SEAMS</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="icon" href="dSeamsLogo.ico" type="image/vnd.microsoft.icon" />
-  <link rel="search" type="application/opensearchdescription+xml" href="opensearch.xml" title="Search d-SEAMS documentation" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.20"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>d-SEAMS: d-SEAMS</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']]
+  },
+  svg: {
+    fontCache: 'global'
+  }
+  loader: { load: ["[tex]/unicode", "[tex]/ams"] },
+  tex: {
+    packages: { "[+]": ["unicode", "ams"] },
+    tags: "ams",
+  },
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+</script>
+<!-- <link href="doxygen.css" rel="stylesheet" type="text/css" /> -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" >
+$(document).ready(function() {
+     $(".fragment").wrap("<details class='code-details'></details>");
+     $(".code-details").append("<summary>Code</summary>");
+ }
+)
+</script>
 </head>
 <body>
-<header><nav id="navigation">
-  <div class="m-container">
-    <div class="m-row">
-      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m"><img src="dSeamsLogo.png" alt="" />d-SEAMS</a>
-      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
-        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
-          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
-        </svg></a>
-        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
-        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
-      </div>
-      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
-        <div class="m-row">
-          <ol class="m-col-t-6 m-col-m-none">
-            <li><a href="namespaces.html">Namespaces</a></li>
-            <li><a href="modules.html">Modules</a></li>
-            <li><a href="pages.html">Wiki</a></li>
-          </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
-            <li><a href="annotated.html">Classes</a></li>
-            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
-              <use href="#m-doc-search-icon-path" />
-            </svg></a></li>
-          </ol>
-        </div>
-      </div>
-    </div>
-  </div>
-</nav></header>
-<main><article>
-  <div class="m-container m-container-inflatable">
-    <div class="m-row">
-      <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          d-SEAMS
-        </h1>
-<p>The C++ core of d-SEAMS, a molecular dynamics trajectory analysis engine.<strong>Deferred Structural Elucidation Analysis for Molecular Simulations</strong></p><p><a href="https://travis-ci.org/d-SEAMS/seams-core"></a> <a href="https://builtwithnix.org"></a></p><ul><li>Check our build status <a href="https://travis-ci.org/d-SEAMS/seams-core">here</a>.</li><li>The docs themselves are <a href="https://docs.dseams.info">here</a> and development is ongoing <a href="https://github.com/d-SEAMS/seams-core">on GitHub</a></li><li>We also have <a href="https://zenodo.org/communities/d-seams/">a Zenodo community</a> for user-contributions like reviews, testimonials and tutorials</li><li>Trajectories are hosted <a href="https://figshare.com/projects/d-SEAMS_Datasets/73545">on figshare</a>.</li><li>Our <a href="https://wiki.dseams.info">wiki is here</a></li></ul><aside class="m-note m-info"><h4>Note</h4><p>The <a href="pages.html">wiki</a> describes the examples and how to obtain the data-sets (trajectories) <a href="https://figshare.com/projects/d-SEAMS_Datasets/73545">from figshare</a>.</p></aside><aside class="m-note m-danger"><h4>Warning</h4><p><strong>If</strong> you are unwilling to use the <code>nix</code> build system, then <strong>please note</strong> that you must manage the dependencies MANUALLY, including the compiler versions.</p></aside><h2>Citation</h2><ul><li>This has been published at the <a href="https://doi.org/10.1021/acs.jcim.0c00031">Journal of Chemical Information and Modeling (JCIM)</a></li><li>You may also read <a href="https://arxiv.org/abs/1909.09830">the preprint on arXiv</a></li></ul><p>If you use this software please cite the following:</p><pre>Goswami, R., Goswami, A., &amp; Singh, J. K. (2020). d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations. Journal of Chemical Information and Modeling. https://doi.org/10.1021/acs.jcim.0c00031
-</pre><p>The corresponding <code>bibtex</code> entry is:</p><pre>@Article{Goswami2020,
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area">
+<a class="project_logo" href="#">
+<img src="dSeamsLogo.png" width="30" height="30" alt="Logo">
+</a>
+<span class="project_info">d-SEAMS v1.0.0</span>
+</nav>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.8.20 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="PageDoc"><div class="header">
+  <div class="headertitle">
+<div class="title">d-SEAMS </div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><p>The C++ core of d-SEAMS, a molecular dynamics trajectory analysis engine.<a class="anchor" id="md_README"></a> <b>Deferred Structural Elucidation Analysis for Molecular Simulations</b></p>
+<p><a href="https://github.com/d-SEAMS/seams-core/actions/workflows/build_pkg.yml"><img src="https://github.com/d-SEAMS/seams-core/actions/workflows/build_pkg.yml/badge.svg" alt="Build Status" style="pointer-events: none;" class="inline"/></a></p>
+<p><a href="https://builtwithnix.org"><img src="https://builtwithnix.org/badge.svg" alt="built with nix" style="pointer-events: none;" class="inline"/></a></p>
+<ul>
+<li>Check our build status <a href="https://github.com/d-SEAMS/seams-core/actions/workflows/">here</a>.</li>
+<li>The docs themselves are <a href="https://docs.dseams.info">here</a> and development is ongoing <a href="https://github.com/d-SEAMS/seams-core">on GitHub</a></li>
+<li>We also have <a href="https://zenodo.org/communities/d-seams/">a Zenodo community</a> for user-contributions like reviews, testimonials and tutorials</li>
+<li>Trajectories are hosted <a href="https://figshare.com/projects/d-SEAMS_Datasets/73545">on figshare</a>.</li>
+<li>Our <a href="https://wiki.dseams.info">wiki is here</a></li>
+</ul>
+<dl class="section note"><dt>Note</dt><dd>The <a href="pages.html">wiki</a> describes the examples and how to obtain the data-sets (trajectories) <a href="https://figshare.com/projects/d-SEAMS_Datasets/73545">from figshare</a>.</dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd><b>If</b> you are unwilling to use the <code>nix</code> build system, then <b>please note</b> that you must manage the dependencies MANUALLY, including the compiler versions.</dd></dl>
+<h1>Citation</h1>
+<ul>
+<li>This has been published at the <a href="https://doi.org/10.1021/acs.jcim.0c00031">Journal of Chemical Information and Modeling (JCIM)</a></li>
+<li>You may also read <a href="https://arxiv.org/abs/1909.09830">the preprint on arXiv</a></li>
+</ul>
+<p>If you use this software please cite the following: </p><pre class="fragment">Goswami, R., Goswami, A., &amp; Singh, J. K. (2020). d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations. Journal of Chemical Information and Modeling. https://doi.org/10.1021/acs.jcim.0c00031
+</pre><p>The corresponding <code>bibtex</code> entry is: </p><pre class="fragment">@Article{Goswami2020,
 author={Goswami, Rohit and Goswami, Amrita and Singh, Jayant Kumar},
 title={d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations},
 journal={Journal of Chemical Information and Modeling},
@@ -60,102 +127,139 @@ issn={1549-9596},
 doi={10.1021/acs.jcim.0c00031},
 url={https://doi.org/10.1021/acs.jcim.0c00031}
 }
-</pre><h2>Compilation with Nix</h2><p>We use a deterministic build system to generate both bug reports and uniform usage statistics. This also handles the <code>lua</code> scripting engine.</p><aside class="m-note m-info"><h4>Note</h4><p>The lua functions are documented on the <a href="https://docs.dseams.info/md_markdown_luafunctions">wiki</a></p></aside><h3>Build</h3><p>Since this project is built with <code>nix</code>, we can simply do the following from the root directory (longer method):</p><pre class="m-code"><span class="cp"># Make sure there are no artifacts</span>
-<span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="n">build</span>
-<span class="cp"># This will take a long time the first time as it builds the dependencies</span>
-<span class="n">nix</span><span class="o">-</span><span class="n">build</span> <span class="p">.</span> <span class="err">#</span> <span class="n">Optional</span>
-<span class="cp"># Install into your path</span>
-<span class="n">nix</span><span class="o">-</span><span class="n">env</span> <span class="o">-</span><span class="k">if</span> <span class="p">.</span> <span class="err">#</span> <span class="n">Required</span>
-<span class="cp"># Run the command anywhere</span>
-<span class="n">yodaStruct</span> <span class="o">-</span><span class="n">c</span> <span class="n">lua_inputs</span><span class="o">/</span><span class="n">config</span><span class="p">.</span><span class="n">yml</span></pre><p>A faster method of building the software is by using the <a href="https://dseams.cachix.org/">cachix binary cache</a> as shown:</p><pre class="m-code"><span class="cp"># Install cachix</span>
-<span class="n">nix</span><span class="o">-</span><span class="n">env</span> <span class="o">-</span><span class="n">iA</span> <span class="n">cachix</span> <span class="o">-</span><span class="n">f</span> <span class="nl">https</span><span class="p">:</span><span class="c1">//cachix.org/api/v1/install</span>
-<span class="cp"># Use the binary cache</span>
-<span class="n">cachix</span> <span class="n">use</span> <span class="n">dseams</span>
-<span class="cp"># Faster with the cache than building from scratch</span>
-<span class="n">nix</span><span class="o">-</span><span class="n">build</span> <span class="p">.</span> <span class="err">#</span> <span class="n">Optional</span>
-<span class="cp"># Install into your path</span>
-<span class="n">nix</span><span class="o">-</span><span class="n">env</span> <span class="o">-</span><span class="k">if</span> <span class="p">.</span> <span class="err">#</span> <span class="n">Required</span>
-<span class="cp"># Run the command anywhere</span>
-<span class="n">yodaStruct</span> <span class="o">-</span><span class="n">c</span> <span class="n">lua_inputs</span><span class="o">/</span><span class="n">config</span><span class="p">.</span><span class="n">yml</span></pre><aside class="m-note m-info"><h4>Note</h4><p>The paths in the <code>.yml</code> should be <strong>relative to the folder from which the binary is called</strong>.</p></aside><p>If you&#x27;re confused about how to handle the relative paths, run the command <code>yodaStruct -c lua_inputs/config.yml</code> in the top-level directory, and set the paths relative to the top-level directory. This is the convention used in the examples as well.</p><h4>Language Server Support</h4><p>To generate a <code>compile_commands.json</code> file for working with a language server like <a href="https://github.com/MaskRay/ccls">ccls</a> use the following commands:</p><pre class="m-code"><span class="cp"># Pure environment</span>
-<span class="n">nix</span><span class="o">-</span><span class="n">shell</span> <span class="o">--</span><span class="n">run</span> <span class="err">&#39;</span><span class="n">bash</span><span class="err">&#39;</span> <span class="o">--</span><span class="n">pure</span>
-<span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="n">build</span> <span class="o">&amp;&amp;</span> <span class="n">cd</span> <span class="n">build</span>
-<span class="n">cmake</span> <span class="o">-</span><span class="n">DCMAKE_BUILD_TYPE</span><span class="o">=</span><span class="n">Debug</span> <span class="o">-</span><span class="n">DCMAKE_EXPORT_COMPILE_COMMANDS</span><span class="o">=</span><span class="n">YES</span> <span class="p">..</span><span class="o">/</span>
-<span class="n">cp</span> <span class="n">compile_commands</span><span class="p">.</span><span class="n">json</span> <span class="p">..</span><span class="o">/</span></pre><p>Note that there is no need to actually compile the project if you simply need to get the compiler database for the language server.</p><p><strong>Do Not</strong> commit the <code>.json</code> file.</p><h3>Development</h3><p>We can simply use the <code>nix</code> environment:</p><pre class="m-code"><span class="cp"># From the project root</span>
-<span class="n">nix</span><span class="o">-</span><span class="n">shell</span></pre><h2>Running</h2><p>This is built completely with nix:</p><pre class="m-code"><span class="cp"># Install systemwide</span>
-<span class="n">nix</span><span class="o">-</span><span class="n">env</span> <span class="o">-</span><span class="k">if</span> <span class="p">.</span></pre><p>To run the sample inputs, simply install the software, and ensure that <code>input/</code> is a child directory.</p><pre class="m-code"><span class="cp"># Assuming you are in the src directory</span>
-<span class="cp"># Check help with -h</span>
-<span class="n">yodaStruct</span> <span class="o">-</span><span class="n">c</span> <span class="n">lua_inputs</span><span class="o">/</span><span class="n">config</span><span class="p">.</span><span class="n">yml</span></pre><h3>Tests</h3><p>Apart from the <a href="https://docs.dseams.info/pages.html">examples</a>, the test-suite can be run with the <code>yodaStruct_test</code> binary, which will drop into the <code>nix</code> environment before building and executing <code>gdb</code>:</p><pre class="m-code"><span class="cp"># Just run this</span>
-<span class="p">.</span><span class="o">/</span><span class="n">testBuild</span><span class="p">.</span><span class="n">sh</span>
-<span class="cp"># quit gdb with quit</span>
-<span class="cp"># Go run the test binary</span>
-<span class="n">cd</span> <span class="n">shellBuild</span>
-<span class="p">.</span><span class="o">/</span><span class="n">yodaStruct_test</span></pre><p>Do note that the regular installation via <code>nix-env</code> runs the tests before the installation</p><h2>Developer Documentation</h2><p>While developing, it is sometimes expedient to update the packages used. It is then useful to note that we use <a href="https://github.com/nmattia/niv/">niv</a> to handle our pinned packages (apart from the ones built from Github). Thus, one might need, say:</p><pre class="m-code"><span class="n">niv</span> <span class="n">update</span> <span class="n">nixpkgs</span> <span class="o">-</span><span class="n">b</span> <span class="n">nixpkgs</span><span class="o">-</span><span class="n">unstable</span></pre><p>Test the build with nix:</p><pre class="m-code"><span class="n">nix</span><span class="o">-</span><span class="n">build</span> <span class="p">.</span>
-<span class="cp"># Outputs are in ./result</span>
-<span class="cp"># If you get a CMake error</span>
-<span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="n">build</span>
-<span class="n">nix</span><span class="o">-</span><span class="n">store</span> <span class="o">--</span><span class="k">delete</span> <span class="o">/</span><span class="n">nix</span><span class="o">/</span><span class="n">store</span><span class="o">/</span><span class="err">$</span><span class="n">whatever</span> <span class="err">#</span> <span class="err">$</span><span class="n">whatever</span> <span class="n">is</span> <span class="n">the</span> <span class="n">derivation</span> <span class="n">complaining</span>
-<span class="n">nix</span><span class="o">-</span><span class="n">collect</span><span class="o">-</span><span class="n">garbage</span> <span class="err">#</span> <span class="n">then</span> <span class="k">try</span> <span class="n">again</span> <span class="p">[</span><span class="n">worst</span> <span class="k">case</span> <span class="n">scenario</span><span class="p">]</span></pre><h3>Leaks and performance</h3><p>While testing for leaks, use <code>clang</code> (for <a href="https://github.com/google/sanitizers/wiki/AddressSanitizer">AddressSanitizer</a> and <a href="https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer">LeakSanitizer</a>) and the following:</p><pre class="m-code"><span class="cp"># From the developer shell</span>
-<span class="k">export</span> <span class="n">CXX</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">clang</span><span class="o">++</span> <span class="o">&amp;&amp;</span> <span class="k">export</span> <span class="n">CC</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">clang</span>
-<span class="n">cmake</span> <span class="p">..</span> <span class="o">-</span><span class="n">DCMAKE_CXX_FLAGS</span><span class="o">=</span><span class="s">&quot;-pg -fsanitize=address &quot;</span> <span class="o">-</span><span class="n">DCMAKE_EXE_LINKER_FLAGS</span><span class="o">=-</span><span class="n">pg</span> <span class="o">-</span><span class="n">DCMAKE_SHARED_LINKER_FLAGS</span><span class="o">=-</span><span class="n">pg</span></pre><h2>Overview</h2><p>As of Mon Jan 20 15:57:18 2020, the lines of code calculated by <a href="http://cloc.sourceforge.net/">cloc</a> are as follows:</p><img class="m-image" src="cloc-2020-01-20_15-56.png" alt="Image" /><h2>Contributing</h2><p>Please ensure that all contributions are formatted according to the <a href="./clang-format">clang-format</a> configuration file.</p><p>Specifically, consider using the following:</p><ul><li><a href="https://github.com/rosshemsley/SublimeClangFormat">Sublime Plugin</a> for users of Sublime Text</li><li><a href="https://github.com/lassik/emacs-format-all-the-code">format-all</a> for Emacs</li><li><a href="https://github.com/rhysd/vim-clang-format">vim-clang-format</a> for Vim</li><li>Visual Studio: <a href="http://llvm.org/builds/,">http:/<wbr />/<wbr />llvm.org/<wbr />builds/<wbr />,</a> or use the <a href="https://blogs.msdn.microsoft.com/vcblog/2018/03/13/clangformat-support-in-visual-studio-2017-15-7-preview-1/">integrated support in Visual Studio 2017</a></li><li>Xcode: <a href="https://github.com/travisjeffery/ClangFormat-Xcode">https:/<wbr />/<wbr />github.com/<wbr />travisjeffery/<wbr />ClangFormat-Xcode</a></li></ul><p>Where some of the above suggestions are derived from <a href="https://github.com/andrewseidl/githook-clang-format">this depreciated githook</a>.</p><p>Also, do note that we have a <code>CONTRIBUTING</code> file you <strong>need to read</strong> to contribute, for certain reasons, like, common sense.</p><h2>Acknowledgements</h2><p>The following tools are used in this project:</p><ul><li><a href="https://cmake.org/">CMake</a> for compilation (<a href="https://github.com/cginternals/cmake-init">cmake-init</a> was used as a reference)</li><li><a href="https://clang.llvm.org/">Clang</a> because it is more descriptive with better tools</li><li><a href="https://conan.io/">Conan</a> and [<a href="https://pipenv.readthedocs.io/en/latest/">https:/<wbr />/<wbr />pipenv.readthedocs.io/<wbr />en/<wbr />latest/<wbr /></a>](pipenv) for dependency management</li><li><a href="https://www.doxygen.org">Doxygen</a> for the developer API</li><li><a href="https://clang.llvm.org/docs/ClangFormat.html">clang-format</a> for code formatting</li><li><a href="https://www.lua.org">lua</a> for the scripting engine</li><li><a href="http://yaml.org/">yaml</a> for the configuration</li></ul><h3>Third Party Libraries</h3><p>The libraries used are:</p><ul><li><a href="https://github.com/bombela/backward-cpp">backward-cpp</a> for better stacktraces without <code>gdb</code></li><li><a href="https://github.com/jarro2783/cxxopts">cxxopts</a> for parsing command line options</li><li><a href="https://github.com/agauniyal/rang">rang</a> for terminal styles (ANSI)</li><li><a href="https://github.com/ThePhD/sol2">sol2</a> for interfacing with lua</li><li><a href="https://github.com/jbeder/yaml-cpp">yaml-cpp</a> for working with <code>yaml</code></li><li><a href="https://github.com/fmtlib/fmt">fmt</a> for safe and fast formatting</li><li><a href="http://www.netlib.org/lapack/">Linear Algebra PACKage (LAPACK)</a></li><li><a href="http://www.netlib.org/blas/">Basic Linear Algebra Subprograms (BLAS)</a></li><li><a href="https://github.com/yixuan/spectra/">Spectra</a></li><li><a href="https://www.boost.org/doc/libs/1_68_0/libs/geometry/doc/html/index.html">Boost Geometry</a> for working with different coordinates</li><li><a href="https://www.boost.org/doc/libs/?view=category_math">Boost Math</a> for spherical harmonics</li><li><a href="https://bitbucket.org/blaze-lib/blaze/">Blaze</a> for very fast modern linear algebra</li><li><a href="https://github.com/jlblancoc/nanoflann">nanoflann</a> to calculate nearest neighbors</li></ul>
-      </div>
-    </div>
-  </div>
-</article></main>
-<div class="m-doc-search" id="search">
-  <a href="#!" onclick="return hideSearch()"></a>
-  <div class="m-container">
-    <div class="m-row">
-      <div class="m-col-m-8 m-push-m-2">
-        <div class="m-doc-search-header m-text m-small">
-          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
-          <div id="search-symbolcount">&hellip;</div>
-        </div>
-        <div class="m-doc-search-content">
-          <form action="https://docs.dseams.info/#search">
-            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
-          </form>
-          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript. Enable it or <a href="https://google.com/search?q=site:docs.dseams.info+">use an external search engine</a>.</noscript>
-          <div id="search-help" class="m-text m-dim m-text-center">
-            <p class="m-noindent">Search for symbols, directories, files, pages or
-            modules. You can omit any prefix from the symbol or file path; adding a
-            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
-            directory.</p>
-            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
-            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
-            <span class="m-label m-dim">Enter</span> to go.
-            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
-            copy a link to the result using <span class="m-label m-dim">⌘</span>
-            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
-            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
-          </div>
-          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.<br />Maybe try a full-text <a href="#" id="search-external" data-search-engine="https://google.com/search?q=site:docs.dseams.info+{query}">search with external engine</a>?</div>
-          <ul id="search-results"></ul>
-        </div>
-      </div>
-    </div>
-  </div>
+</pre><h1>Compilation with Nix</h1>
+<p>We use a deterministic build system to generate both bug reports and uniform usage statistics. This also handles the <code>lua</code> scripting engine.</p>
+<dl class="section note"><dt>Note</dt><dd>The lua functions are documented on the <a href="https://docs.dseams.info/md_markdown_luafunctions">wiki</a></dd></dl>
+<h2>Build</h2>
+<p>Since this project is built with <code>nix</code>, we can simply do the following from the root directory (longer method):</p>
+<div class="fragment"><div class="line"># Make sure there are no artifacts</div>
+<div class="line">rm -rf build</div>
+<div class="line"># This will take a long time the first time as it builds the dependencies</div>
+<div class="line">nix-build . # Optional</div>
+<div class="line"># Install into your path</div>
+<div class="line">nix-env -if . # Required</div>
+<div class="line"># Run the command anywhere</div>
+<div class="line">yodaStruct -c lua_inputs/config.yml</div>
+</div><!-- fragment --><p>A faster method of building the software is by using the <a href="https://dseams.cachix.org/">cachix binary cache</a> as shown:</p>
+<div class="fragment"><div class="line"># Install cachix</div>
+<div class="line">nix-env -iA cachix -f https://cachix.org/api/v1/install</div>
+<div class="line"># Use the binary cache</div>
+<div class="line">cachix use dseams</div>
+<div class="line"># Faster with the cache than building from scratch</div>
+<div class="line">nix-build . # Optional</div>
+<div class="line"># Install into your path</div>
+<div class="line">nix-env -if . # Required</div>
+<div class="line"># Run the command anywhere</div>
+<div class="line">yodaStruct -c lua_inputs/config.yml</div>
+</div><!-- fragment --><dl class="section note"><dt>Note</dt><dd>The paths in the <code>.yml</code> should be <b>relative to the folder from which the binary is called</b>.</dd></dl>
+<p>If you're confused about how to handle the relative paths, run the command <code>yodaStruct -c lua_inputs/config.yml</code> in the top-level directory, and set the paths relative to the top-level directory. This is the convention used in the examples as well.</p>
+<h3>Language Server Support</h3>
+<p>To generate a <code>compile_commands.json</code> file for working with a language server like <a href="https://github.com/MaskRay/ccls">ccls</a> use the following commands:</p>
+<div class="fragment"><div class="line"># Pure environment</div>
+<div class="line">nix-shell --run &#39;bash&#39; --pure</div>
+<div class="line">mkdir -p build &amp;&amp; cd build</div>
+<div class="line">cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES ../</div>
+<div class="line">cp compile_commands.json ../</div>
+</div><!-- fragment --><p>Note that there is no need to actually compile the project if you simply need to get the compiler database for the language server.</p>
+<p><b>Do Not</b> commit the <code>.json</code> file.</p>
+<h2>Development</h2>
+<p>We can simply use the <code>nix</code> environment:</p>
+<div class="fragment"><div class="line"># From the project root</div>
+<div class="line">nix-shell</div>
+</div><!-- fragment --><h1>Running</h1>
+<p>This is built completely with nix:</p>
+<div class="fragment"><div class="line"># Install systemwide</div>
+<div class="line">nix-env -if .</div>
+</div><!-- fragment --><p>To run the sample inputs, simply install the software, and ensure that <code>input/</code> is a child directory.</p>
+<div class="fragment"><div class="line"># Assuming you are in the src directory</div>
+<div class="line"># Check help with -h</div>
+<div class="line">yodaStruct -c lua_inputs/config.yml</div>
+</div><!-- fragment --><h2>Tests</h2>
+<p>Apart from the <a href="https://docs.dseams.info/pages.html">examples</a>, the test-suite can be run with the <code>yodaStruct_test</code> binary, which will drop into the <code>nix</code> environment before building and executing <code>gdb</code>:</p>
+<div class="fragment"><div class="line"># Just run this</div>
+<div class="line">./testBuild.sh</div>
+<div class="line"># quit gdb with quit</div>
+<div class="line"># Go run the test binary</div>
+<div class="line">cd shellBuild</div>
+<div class="line">./yodaStruct_test</div>
+</div><!-- fragment --><p>Do note that the regular installation via <code>nix-env</code> runs the tests before the installation</p>
+<h1>Developer Documentation</h1>
+<p>While developing, it is sometimes expedient to update the packages used. It is then useful to note that we use <a href="https://github.com/nmattia/niv/">niv</a> to handle our pinned packages (apart from the ones built from Github). Thus, one might need, say:</p>
+<div class="fragment"><div class="line">niv update nixpkgs -b nixpkgs-unstable</div>
+</div><!-- fragment --><p>Test the build with nix:</p>
+<div class="fragment"><div class="line">nix-build .</div>
+<div class="line"># Outputs are in ./result</div>
+<div class="line"># If you get a CMake error</div>
+<div class="line">rm -rf build</div>
+<div class="line">nix-store --delete /nix/store/$whatever # $whatever is the derivation complaining</div>
+<div class="line">nix-collect-garbage # then try again [worst case scenario]</div>
+</div><!-- fragment --><h2>Leaks and performance</h2>
+<p>While testing for leaks, use <code>clang</code> (for <a href="https://github.com/google/sanitizers/wiki/AddressSanitizer">AddressSanitizer</a> and <a href="https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer">LeakSanitizer</a>) and the following:</p>
+<div class="fragment"><div class="line"># From the developer shell</div>
+<div class="line">export CXX=/usr/bin/clang++ &amp;&amp; export CC=/usr/bin/clang</div>
+<div class="line">cmake .. -DCMAKE_CXX_FLAGS=&quot;-pg -fsanitize=address &quot; -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg</div>
+</div><!-- fragment --><h1>Overview</h1>
+<p>As of Mon Jan 20 15:57:18 2020, the lines of code calculated by <a href="http://cloc.sourceforge.net/">cloc</a> are as follows:</p>
+<p><img src="cloc-2020-01-20_15-56.png" alt="" class="inline" title="Cloc Lines"/>   </p>
+<h1>Contributing</h1>
+<p>Please ensure that all contributions are formatted according to the <a href="./clang-format">clang-format</a> configuration file.</p>
+<p>Specifically, consider using the following:</p>
+<ul>
+<li><a href="https://github.com/rosshemsley/SublimeClangFormat">Sublime Plugin</a> for users of Sublime Text</li>
+<li><a href="https://github.com/lassik/emacs-format-all-the-code">format-all</a> for Emacs</li>
+<li><a href="https://github.com/rhysd/vim-clang-format">vim-clang-format</a> for Vim</li>
+<li>Visual Studio: <a href="http://llvm.org/builds/">http://llvm.org/builds/</a>, or use the <a href="https://blogs.msdn.microsoft.com/vcblog/2018/03/13/clangformat-support-in-visual-studio-2017-15-7-preview-1/">integrated support in Visual Studio 2017</a></li>
+<li>Xcode: <a href="https://github.com/travisjeffery/ClangFormat-Xcode">https://github.com/travisjeffery/ClangFormat-Xcode</a></li>
+</ul>
+<p>Where some of the above suggestions are derived from <a href="https://github.com/andrewseidl/githook-clang-format">this depreciated githook</a>.</p>
+<p>Also, do note that we have a <code>CONTRIBUTING</code> file you <b>need to read</b> to contribute, for certain reasons, like, common sense.</p>
+<h1>Acknowledgements</h1>
+<p>The following tools are used in this project:</p>
+<ul>
+<li><a href="https://cmake.org/">CMake</a> for compilation (<a href="https://github.com/cginternals/cmake-init">cmake-init</a> was used as a reference)</li>
+<li><a href="https://clang.llvm.org/">Clang</a> because it is more descriptive with better tools</li>
+<li><a href="https://conan.io/">Conan</a> and [<a href="https://pipenv.readthedocs.io/en/latest/">https://pipenv.readthedocs.io/en/latest/</a>](pipenv) for dependency management</li>
+<li><a href="https://www.doxygen.org">Doxygen</a> for the developer API</li>
+<li><a href="https://clang.llvm.org/docs/ClangFormat.html">clang-format</a> for code formatting</li>
+<li><a href="https://www.lua.org">lua</a> for the scripting engine</li>
+<li><a href="http://yaml.org/">yaml</a> for the configuration</li>
+</ul>
+<h2>Third Party Libraries</h2>
+<p>The libraries used are:</p>
+<ul>
+<li><a href="https://github.com/bombela/backward-cpp">backward-cpp</a> for better stacktraces without <code>gdb</code></li>
+<li><a href="https://github.com/jarro2783/cxxopts">cxxopts</a> for parsing command line options</li>
+<li><a href="https://github.com/agauniyal/rang">rang</a> for terminal styles (ANSI)</li>
+<li><a href="https://github.com/ThePhD/sol2">sol2</a> for interfacing with lua</li>
+<li><a href="https://github.com/jbeder/yaml-cpp">yaml-cpp</a> for working with <code>yaml</code></li>
+<li><a href="https://github.com/fmtlib/fmt">fmt</a> for safe and fast formatting</li>
+<li><a href="http://www.netlib.org/lapack/">Linear Algebra PACKage (LAPACK)</a></li>
+<li><a href="http://www.netlib.org/blas/">Basic Linear Algebra Subprograms (BLAS)</a></li>
+<li><a href="https://github.com/yixuan/spectra/">Spectra</a></li>
+<li><a href="https://www.boost.org/doc/libs/1_68_0/libs/geometry/doc/html/index.html">Boost Geometry</a> for working with different coordinates</li>
+<li><a href="https://www.boost.org/doc/libs/?view=category_math">Boost Math</a> for spherical harmonics</li>
+<li><a href="https://bitbucket.org/blaze-lib/blaze/">Blaze</a> for very fast modern linear algebra</li>
+<li><a href="https://github.com/jlblancoc/nanoflann">nanoflann</a> to calculate nearest neighbors </li>
+</ul>
+</div></div><!-- PageDoc -->
+</div><!-- contents -->
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen 1.9.1-->
+<!-- start footer part -->
+<div class="footer">
+<hr class="footline"/><address class="footline"><small>
+    Generated by&#160;<a href="https://www.doxygen.org/index.html">Doxygen 1.8.20</a> and the <a class="outlink" href="https://github.com/HaoZeke/doxyYoda">doxyYoda theme</a>
+</small></address>
 </div>
-<script src="search-v1.js"></script>
-<script src="searchdata-v1.js" async="async"></script>
-<footer><nav>
-  <div class="m-container">
-    <div class="m-row">
-      <div class="m-col-l-10 m-push-l-1">
-        <b>(C)
-2018-present</b>
-<a
-href="https://github.com/HaoZeke">Rohit
-Goswami</a>,
-<a
-href="https://github.com/amritagos">Amrita
-Goswami</a>,
-<a
-href="https://github.com/d-Seams">d-SEAMS
-core
-team</a>
-      </div>
-    </div>
-  </div>
-</nav></footer>
+</div>
 </body>
 </html>

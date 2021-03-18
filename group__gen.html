@@ -1,821 +1,962 @@
-<!DOCTYPE html>
-<html lang="en">
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen 1.9.1-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="UTF-8" />
-  <title>Gen module | d-SEAMS</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="icon" href="dSeamsLogo.ico" type="image/vnd.microsoft.icon" />
-  <link rel="search" type="application/opensearchdescription+xml" href="opensearch.xml" title="Search d-SEAMS documentation" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.20"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>d-SEAMS: Gen</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']]
+  },
+  svg: {
+    fontCache: 'global'
+  }
+  loader: { load: ["[tex]/unicode", "[tex]/ams"] },
+  tex: {
+    packages: { "[+]": ["unicode", "ams"] },
+    tags: "ams",
+  },
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+</script>
+<!-- <link href="doxygen.css" rel="stylesheet" type="text/css" /> -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" >
+$(document).ready(function() {
+     $(".fragment").wrap("<details class='code-details'></details>");
+     $(".code-details").append("<summary>Code</summary>");
+ }
+)
+</script>
 </head>
 <body>
-<header><nav id="navigation">
-  <div class="m-container">
-    <div class="m-row">
-      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m"><img src="dSeamsLogo.png" alt="" />d-SEAMS</a>
-      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
-        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
-          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
-        </svg></a>
-        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
-        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
-      </div>
-      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
-        <div class="m-row">
-          <ol class="m-col-t-6 m-col-m-none">
-            <li><a href="namespaces.html">Namespaces</a></li>
-            <li><a href="modules.html">Modules</a></li>
-            <li><a href="pages.html">Wiki</a></li>
-          </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
-            <li><a href="annotated.html">Classes</a></li>
-            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
-              <use href="#m-doc-search-icon-path" />
-            </svg></a></li>
-          </ol>
-        </div>
-      </div>
-    </div>
-  </div>
-</nav></header>
-<main><article>
-  <div class="m-container m-container-inflatable">
-    <div class="m-row">
-      <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          Gen <span class="m-thin">module</span></h1>
-        <div class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#func-members">Functions</a></li>
-                <li><a href="#var-members">Variables</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespacegen.html" class="m-doc">gen</a></dt>
-            <dd>Small generic functions that are shared by all namespaces.</dd>
-          </dl>
-        </section>
-        <section id="func-members">
-          <h2><a href="#func-members">Functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#gaeadb5e8ff98078b0007d0def0eaad39d" class="m-doc">radDeg</a>(</span><span class="m-doc-wrap">double angle) -&gt; double</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#gae07e465d5bf7d05248d73d620cd5b9cc" class="m-doc">gslVecAngle</a>(</span><span class="m-doc-wrap">std::vector&lt;double&gt; OO,
-              std::vector&lt;double&gt; OH) -&gt; double</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ga881e045598dd517609383d8a3fec5913" class="m-doc">periodicDist</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
-              int iatom,
-              int jatom) -&gt; double</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ga11feba0acc8858c6a8a4b637b994c60a" class="m-doc">distance</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
-              int iatom,
-              int jatom) -&gt; double</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ga41d115da13ccda44b9231653321dc465" class="m-doc">relDist</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
-              int iatom,
-              int jatom) -&gt; std::array&lt;double, 3&gt;</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#gaed4f2e37c89f319a852355a2b7199147" class="m-doc">compareByAtomID</a>(</span><span class="m-doc-wrap">const <a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;&amp; a,
-              const <a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;&amp; b) -&gt; bool</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#gaf297d0df78effbb9948f7cb91c0ef975" class="m-doc">prettyPrintYoda</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
-              std::string outFile) -&gt; int</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#gac94d5646f5e1585d42df29a5b557288e" class="m-doc">unwrappedCoordShift</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
-              int iatomIndex,
-              int jatomIndex,
-              double* x_i,
-              double* y_i,
-              double* z_i,
-              double* x_j,
-              double* y_j,
-              double* z_j) -&gt; int</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#gaaeb4ae52d25fdc86f1241839aaf65dbc" class="m-doc">tokenizer</a>(</span><span class="m-doc-wrap">std::string line) -&gt; std::vector&lt;std::string&gt;</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#gafc1099a60a6daf115b81a31b109de2d8" class="m-doc">tokenizerDouble</a>(</span><span class="m-doc-wrap">std::string line) -&gt; std::vector&lt;double&gt;</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#gaa49625658169d33851df990c1d62f097" class="m-doc">file_exists</a>(</span><span class="m-doc-wrap">const std::string&amp; name) -&gt; bool</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ga289c2dcd7c8631c21fe99cd419ddc5c8" class="m-doc">avgVector</a>(</span><span class="m-doc-wrap">std::vector&lt;std::complex&lt;double&gt;&gt; v,
-              int l,
-              int neigh) -&gt; std::vector&lt;std::complex&lt;double&gt;&gt;</span>
-            </dt>
-            <dd></dd>
-          </dl>
-        </section>
-        <section id="var-members">
-          <h2><a href="#var-members">Variables</a></h2>
-          <dl class="m-doc">
-            <dt>
-              const double <a href="#gaa59e2feae36f62dfdb0664bd06de8572" class="m-doc">pi</a>
-            </dt>
-            <dd></dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="gaeadb5e8ff98078b0007d0def0eaad39d"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">double </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gaeadb5e8ff98078b0007d0def0eaad39d" class="m-doc-self">radDeg</a>(</span><span class="m-doc-wrap">double angle)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="generic_8hpp.html">&lt;src/include/internal/generic.hpp&gt;</a></div>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">angle&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The input angle, in radians</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>The input angle, in degrees</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>Inline function for converting radians-&gt;degrees.</p>
-          </div></section>
-          <section class="m-doc-details" id="gae07e465d5bf7d05248d73d620cd5b9cc"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">double </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gae07e465d5bf7d05248d73d620cd5b9cc" class="m-doc-self">gslVecAngle</a>(</span><span class="m-doc-wrap">std::vector&lt;double&gt; OO,
-              std::vector&lt;double&gt; OH)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="generic_8hpp.html">&lt;src/include/internal/generic.hpp&gt;</a></div>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">OO&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The O&ndash;O vector (but can be any vector, in general).</td>
-                </tr>
-                <tr>
-                  <td>OH&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The O-H vector (but can be any vector, in general).</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>The output angle between the input vectors, in radians</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>Function for obtaining the angle between two input vectors (std::vector). Internally, the vectors are converted to GSL vectors. The dot product between the input vectors is used to calculate the angle between them.</p>
-          </div></section>
-          <section class="m-doc-details" id="ga881e045598dd517609383d8a3fec5913"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">double </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga881e045598dd517609383d8a3fec5913" class="m-doc-self">periodicDist</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
-              int iatom,
-              int jatom)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="generic_8hpp.html">&lt;src/include/internal/generic.hpp&gt;</a></div>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">yCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The input PointCloud, which contains the particle coordinates, simulation box lengths etc.</td>
-                </tr>
-                <tr>
-                  <td>iatom&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The index of the <svg class="m-math" style="width: 1.243em; height: 1.028em;" viewBox="0 -9.873238 11.931362 9.873238">
-<title>
-$ i^{th} $
-</title>
-<defs>
-<path id='eq1-g0-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
-<path id='eq1-g0-116' d='M1.761395-3.172105H2.542466C2.693898-3.172105 2.789539-3.172105 2.789539-3.323537C2.789539-3.435118 2.685928-3.435118 2.550436-3.435118H1.825156L2.11208-4.566874C2.14396-4.686426 2.14396-4.726276 2.14396-4.734247C2.14396-4.901619 2.016438-4.98132 1.880946-4.98132C1.609963-4.98132 1.554172-4.766127 1.466501-4.407472L1.219427-3.435118H.454296C.302864-3.435118 .199253-3.435118 .199253-3.283686C.199253-3.172105 .302864-3.172105 .438356-3.172105H1.155666L.67746-1.259278C.629639-1.060025 .557908-.781071 .557908-.669489C.557908-.191283 .948443 .079701 1.370859 .079701C2.223661 .079701 2.709838-1.044085 2.709838-1.139726C2.709838-1.227397 2.638107-1.243337 2.590286-1.243337C2.502615-1.243337 2.494645-1.211457 2.438854-1.091905C2.279452-.70934 1.880946-.143462 1.39477-.143462C1.227397-.143462 1.131756-.255044 1.131756-.518057C1.131756-.669489 1.155666-.757161 1.179577-.860772L1.761395-3.172105Z'/>
-<path id='eq1-g1-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
-</defs>
-<g id='eq1-page1'>
-<use x='0' y='0' xlink:href='#eq1-g1-105'/>
-<use x='3.993432' y='-4.338437' xlink:href='#eq1-g0-116'/>
-<use x='7.051453' y='-4.338437' xlink:href='#eq1-g0-104'/>
-</g>
-</svg> atom.</td>
-                </tr>
-                <tr>
-                  <td>jatom&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The index of the <svg class="m-math" style="width: 1.401em; height: 1.271em;" viewBox="0 -9.873238 13.453425 12.197846">
-<title>
-$ j^{th} $
-</title>
-<defs>
-<path id='eq2-g0-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
-<path id='eq2-g0-116' d='M1.761395-3.172105H2.542466C2.693898-3.172105 2.789539-3.172105 2.789539-3.323537C2.789539-3.435118 2.685928-3.435118 2.550436-3.435118H1.825156L2.11208-4.566874C2.14396-4.686426 2.14396-4.726276 2.14396-4.734247C2.14396-4.901619 2.016438-4.98132 1.880946-4.98132C1.609963-4.98132 1.554172-4.766127 1.466501-4.407472L1.219427-3.435118H.454296C.302864-3.435118 .199253-3.435118 .199253-3.283686C.199253-3.172105 .302864-3.172105 .438356-3.172105H1.155666L.67746-1.259278C.629639-1.060025 .557908-.781071 .557908-.669489C.557908-.191283 .948443 .079701 1.370859 .079701C2.223661 .079701 2.709838-1.044085 2.709838-1.139726C2.709838-1.227397 2.638107-1.243337 2.590286-1.243337C2.502615-1.243337 2.494645-1.211457 2.438854-1.091905C2.279452-.70934 1.880946-.143462 1.39477-.143462C1.227397-.143462 1.131756-.255044 1.131756-.518057C1.131756-.669489 1.155666-.757161 1.179577-.860772L1.761395-3.172105Z'/>
-<path id='eq2-g1-106' d='M4.184309-3.789788C4.23213-3.981071 4.23213-4.148443 4.23213-4.196264C4.23213-4.889664 3.718057-5.272229 3.180075-5.272229C1.972603-5.272229 1.327024-3.526775 1.327024-3.443088C1.327024-3.383313 1.374844-3.335492 1.446575-3.335492C1.542217-3.335492 1.554172-3.383313 1.613948-3.502864C2.092154-4.662516 2.689913-5.033126 3.144209-5.033126C3.395268-5.033126 3.526775-4.901619 3.526775-4.483188C3.526775-4.196264 3.490909-4.076712 3.443088-3.861519L2.307347 .645579C2.080199 1.530262 1.518306 2.199751 .860772 2.199751C.812951 2.199751 .561893 2.199751 .334745 2.080199C.621669 2.020423 .848817 1.793275 .848817 1.506351C.848817 1.315068 .705355 1.123786 .442341 1.123786C.131507 1.123786-.155417 1.3868-.155417 1.745455C-.155417 2.235616 .37061 2.438854 .860772 2.438854C1.685679 2.438854 2.773599 1.829141 3.072478 .633624L4.184309-3.789788ZM4.674471-7.460025C4.674471-7.758904 4.423412-7.854545 4.27995-7.854545C3.957161-7.854545 3.682192-7.543711 3.682192-7.280697C3.682192-7.10137 3.825654-6.886177 4.088667-6.886177C4.363636-6.886177 4.674471-7.149191 4.674471-7.460025Z'/>
-</defs>
-<g id='eq2-page1'>
-<use x='0' y='0' xlink:href='#eq2-g1-106'/>
-<use x='5.515495' y='-4.338437' xlink:href='#eq2-g0-116'/>
-<use x='8.573516' y='-4.338437' xlink:href='#eq2-g0-104'/>
-</g>
-</svg> atom.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>The unwrapped periodic distance.</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>Inline generic function for obtaining the unwrapped periodic distance between two particles, whose indices (not IDs) have been given.</p>
-          </div></section>
-          <section class="m-doc-details" id="ga11feba0acc8858c6a8a4b637b994c60a"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">double </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga11feba0acc8858c6a8a4b637b994c60a" class="m-doc-self">distance</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
-              int iatom,
-              int jatom)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="generic_8hpp.html">&lt;src/include/internal/generic.hpp&gt;</a></div>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">yCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The input PointCloud, which contains the particle coordinates, simulation box lengths etc.</td>
-                </tr>
-                <tr>
-                  <td>iatom&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The index of the <svg class="m-math" style="width: 1.243em; height: 1.028em;" viewBox="0 -9.873238 11.931362 9.873238">
-<title>
-$ i^{th} $
-</title>
-<defs>
-<path id='eq3-g0-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
-<path id='eq3-g0-116' d='M1.761395-3.172105H2.542466C2.693898-3.172105 2.789539-3.172105 2.789539-3.323537C2.789539-3.435118 2.685928-3.435118 2.550436-3.435118H1.825156L2.11208-4.566874C2.14396-4.686426 2.14396-4.726276 2.14396-4.734247C2.14396-4.901619 2.016438-4.98132 1.880946-4.98132C1.609963-4.98132 1.554172-4.766127 1.466501-4.407472L1.219427-3.435118H.454296C.302864-3.435118 .199253-3.435118 .199253-3.283686C.199253-3.172105 .302864-3.172105 .438356-3.172105H1.155666L.67746-1.259278C.629639-1.060025 .557908-.781071 .557908-.669489C.557908-.191283 .948443 .079701 1.370859 .079701C2.223661 .079701 2.709838-1.044085 2.709838-1.139726C2.709838-1.227397 2.638107-1.243337 2.590286-1.243337C2.502615-1.243337 2.494645-1.211457 2.438854-1.091905C2.279452-.70934 1.880946-.143462 1.39477-.143462C1.227397-.143462 1.131756-.255044 1.131756-.518057C1.131756-.669489 1.155666-.757161 1.179577-.860772L1.761395-3.172105Z'/>
-<path id='eq3-g1-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
-</defs>
-<g id='eq3-page1'>
-<use x='0' y='0' xlink:href='#eq3-g1-105'/>
-<use x='3.993432' y='-4.338437' xlink:href='#eq3-g0-116'/>
-<use x='7.051453' y='-4.338437' xlink:href='#eq3-g0-104'/>
-</g>
-</svg> atom.</td>
-                </tr>
-                <tr>
-                  <td>jatom&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The index of the <svg class="m-math" style="width: 1.401em; height: 1.271em;" viewBox="0 -9.873238 13.453425 12.197846">
-<title>
-$ j^{th} $
-</title>
-<defs>
-<path id='eq4-g0-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
-<path id='eq4-g0-116' d='M1.761395-3.172105H2.542466C2.693898-3.172105 2.789539-3.172105 2.789539-3.323537C2.789539-3.435118 2.685928-3.435118 2.550436-3.435118H1.825156L2.11208-4.566874C2.14396-4.686426 2.14396-4.726276 2.14396-4.734247C2.14396-4.901619 2.016438-4.98132 1.880946-4.98132C1.609963-4.98132 1.554172-4.766127 1.466501-4.407472L1.219427-3.435118H.454296C.302864-3.435118 .199253-3.435118 .199253-3.283686C.199253-3.172105 .302864-3.172105 .438356-3.172105H1.155666L.67746-1.259278C.629639-1.060025 .557908-.781071 .557908-.669489C.557908-.191283 .948443 .079701 1.370859 .079701C2.223661 .079701 2.709838-1.044085 2.709838-1.139726C2.709838-1.227397 2.638107-1.243337 2.590286-1.243337C2.502615-1.243337 2.494645-1.211457 2.438854-1.091905C2.279452-.70934 1.880946-.143462 1.39477-.143462C1.227397-.143462 1.131756-.255044 1.131756-.518057C1.131756-.669489 1.155666-.757161 1.179577-.860772L1.761395-3.172105Z'/>
-<path id='eq4-g1-106' d='M4.184309-3.789788C4.23213-3.981071 4.23213-4.148443 4.23213-4.196264C4.23213-4.889664 3.718057-5.272229 3.180075-5.272229C1.972603-5.272229 1.327024-3.526775 1.327024-3.443088C1.327024-3.383313 1.374844-3.335492 1.446575-3.335492C1.542217-3.335492 1.554172-3.383313 1.613948-3.502864C2.092154-4.662516 2.689913-5.033126 3.144209-5.033126C3.395268-5.033126 3.526775-4.901619 3.526775-4.483188C3.526775-4.196264 3.490909-4.076712 3.443088-3.861519L2.307347 .645579C2.080199 1.530262 1.518306 2.199751 .860772 2.199751C.812951 2.199751 .561893 2.199751 .334745 2.080199C.621669 2.020423 .848817 1.793275 .848817 1.506351C.848817 1.315068 .705355 1.123786 .442341 1.123786C.131507 1.123786-.155417 1.3868-.155417 1.745455C-.155417 2.235616 .37061 2.438854 .860772 2.438854C1.685679 2.438854 2.773599 1.829141 3.072478 .633624L4.184309-3.789788ZM4.674471-7.460025C4.674471-7.758904 4.423412-7.854545 4.27995-7.854545C3.957161-7.854545 3.682192-7.543711 3.682192-7.280697C3.682192-7.10137 3.825654-6.886177 4.088667-6.886177C4.363636-6.886177 4.674471-7.149191 4.674471-7.460025Z'/>
-</defs>
-<g id='eq4-page1'>
-<use x='0' y='0' xlink:href='#eq4-g1-106'/>
-<use x='5.515495' y='-4.338437' xlink:href='#eq4-g0-116'/>
-<use x='8.573516' y='-4.338437' xlink:href='#eq4-g0-104'/>
-</g>
-</svg> atom.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>The wrapped distance.</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>Inline generic function for obtaining the wrapped distance between two particles WITHOUT applying PBCs, whose indices (not IDs) have been given.</p>
-          </div></section>
-          <section class="m-doc-details" id="ga41d115da13ccda44b9231653321dc465"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">std::array&lt;double, 3&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga41d115da13ccda44b9231653321dc465" class="m-doc-self">relDist</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
-              int iatom,
-              int jatom)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="generic_8hpp.html">&lt;src/include/internal/generic.hpp&gt;</a></div>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">yCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The input PointCloud, which contains the particle coordinates, simulation box lengths etc.</td>
-                </tr>
-                <tr>
-                  <td>iatom&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The index of the <svg class="m-math" style="width: 1.243em; height: 1.028em;" viewBox="0 -9.873238 11.931362 9.873238">
-<title>
-$ i^{th} $
-</title>
-<defs>
-<path id='eq5-g0-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
-<path id='eq5-g0-116' d='M1.761395-3.172105H2.542466C2.693898-3.172105 2.789539-3.172105 2.789539-3.323537C2.789539-3.435118 2.685928-3.435118 2.550436-3.435118H1.825156L2.11208-4.566874C2.14396-4.686426 2.14396-4.726276 2.14396-4.734247C2.14396-4.901619 2.016438-4.98132 1.880946-4.98132C1.609963-4.98132 1.554172-4.766127 1.466501-4.407472L1.219427-3.435118H.454296C.302864-3.435118 .199253-3.435118 .199253-3.283686C.199253-3.172105 .302864-3.172105 .438356-3.172105H1.155666L.67746-1.259278C.629639-1.060025 .557908-.781071 .557908-.669489C.557908-.191283 .948443 .079701 1.370859 .079701C2.223661 .079701 2.709838-1.044085 2.709838-1.139726C2.709838-1.227397 2.638107-1.243337 2.590286-1.243337C2.502615-1.243337 2.494645-1.211457 2.438854-1.091905C2.279452-.70934 1.880946-.143462 1.39477-.143462C1.227397-.143462 1.131756-.255044 1.131756-.518057C1.131756-.669489 1.155666-.757161 1.179577-.860772L1.761395-3.172105Z'/>
-<path id='eq5-g1-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
-</defs>
-<g id='eq5-page1'>
-<use x='0' y='0' xlink:href='#eq5-g1-105'/>
-<use x='3.993432' y='-4.338437' xlink:href='#eq5-g0-116'/>
-<use x='7.051453' y='-4.338437' xlink:href='#eq5-g0-104'/>
-</g>
-</svg> atom.</td>
-                </tr>
-                <tr>
-                  <td>jatom&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The index of the <svg class="m-math" style="width: 1.401em; height: 1.271em;" viewBox="0 -9.873238 13.453425 12.197846">
-<title>
-$ j^{th} $
-</title>
-<defs>
-<path id='eq6-g0-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
-<path id='eq6-g0-116' d='M1.761395-3.172105H2.542466C2.693898-3.172105 2.789539-3.172105 2.789539-3.323537C2.789539-3.435118 2.685928-3.435118 2.550436-3.435118H1.825156L2.11208-4.566874C2.14396-4.686426 2.14396-4.726276 2.14396-4.734247C2.14396-4.901619 2.016438-4.98132 1.880946-4.98132C1.609963-4.98132 1.554172-4.766127 1.466501-4.407472L1.219427-3.435118H.454296C.302864-3.435118 .199253-3.435118 .199253-3.283686C.199253-3.172105 .302864-3.172105 .438356-3.172105H1.155666L.67746-1.259278C.629639-1.060025 .557908-.781071 .557908-.669489C.557908-.191283 .948443 .079701 1.370859 .079701C2.223661 .079701 2.709838-1.044085 2.709838-1.139726C2.709838-1.227397 2.638107-1.243337 2.590286-1.243337C2.502615-1.243337 2.494645-1.211457 2.438854-1.091905C2.279452-.70934 1.880946-.143462 1.39477-.143462C1.227397-.143462 1.131756-.255044 1.131756-.518057C1.131756-.669489 1.155666-.757161 1.179577-.860772L1.761395-3.172105Z'/>
-<path id='eq6-g1-106' d='M4.184309-3.789788C4.23213-3.981071 4.23213-4.148443 4.23213-4.196264C4.23213-4.889664 3.718057-5.272229 3.180075-5.272229C1.972603-5.272229 1.327024-3.526775 1.327024-3.443088C1.327024-3.383313 1.374844-3.335492 1.446575-3.335492C1.542217-3.335492 1.554172-3.383313 1.613948-3.502864C2.092154-4.662516 2.689913-5.033126 3.144209-5.033126C3.395268-5.033126 3.526775-4.901619 3.526775-4.483188C3.526775-4.196264 3.490909-4.076712 3.443088-3.861519L2.307347 .645579C2.080199 1.530262 1.518306 2.199751 .860772 2.199751C.812951 2.199751 .561893 2.199751 .334745 2.080199C.621669 2.020423 .848817 1.793275 .848817 1.506351C.848817 1.315068 .705355 1.123786 .442341 1.123786C.131507 1.123786-.155417 1.3868-.155417 1.745455C-.155417 2.235616 .37061 2.438854 .860772 2.438854C1.685679 2.438854 2.773599 1.829141 3.072478 .633624L4.184309-3.789788ZM4.674471-7.460025C4.674471-7.758904 4.423412-7.854545 4.27995-7.854545C3.957161-7.854545 3.682192-7.543711 3.682192-7.280697C3.682192-7.10137 3.825654-6.886177 4.088667-6.886177C4.363636-6.886177 4.674471-7.149191 4.674471-7.460025Z'/>
-</defs>
-<g id='eq6-page1'>
-<use x='0' y='0' xlink:href='#eq6-g1-106'/>
-<use x='5.515495' y='-4.338437' xlink:href='#eq6-g0-116'/>
-<use x='8.573516' y='-4.338437' xlink:href='#eq6-g0-104'/>
-</g>
-</svg> atom.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>The unwrapped relative distances for each dimension.</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>Inline generic function for getting the relative unwrapped distance between two particles for each dimension. The indices (not IDs) of the particles have been given.</p>
-          </div></section>
-          <section class="m-doc-details" id="gaed4f2e37c89f319a852355a2b7199147"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gaed4f2e37c89f319a852355a2b7199147" class="m-doc-self">compareByAtomID</a>(</span><span class="m-doc-wrap">const <a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;&amp; a,
-              const <a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;&amp; b)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="generic_8hpp.html">&lt;src/include/internal/generic.hpp&gt;</a></div>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">a&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The input Point for A.</td>
-                </tr>
-                <tr>
-                  <td>b&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The input Point for B.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>A bool which is true if the atom ID of A is less than the atom ID of B.</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>Inline generic function for sorting or comparing two particles, according to the atom ID when the entire Point objects have been passed.</p>
-          </div></section>
-          <section class="m-doc-details" id="gaf297d0df78effbb9948f7cb91c0ef975"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">int </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gaf297d0df78effbb9948f7cb91c0ef975" class="m-doc-self">prettyPrintYoda</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
-              std::string outFile)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="generic_8hpp.html">&lt;src/include/internal/generic.hpp&gt;</a></div>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">yCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The input PointCloud to be printed.</td>
-                </tr>
-                <tr>
-                  <td>outFile&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The name of the output file to which the information will be printed.</td>
-                </tr>
-              </tbody>
-            </table>
-<p>Function for printing out info in a PointCloud object.</p>
-          </div></section>
-          <section class="m-doc-details" id="gac94d5646f5e1585d42df29a5b557288e"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">int </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gac94d5646f5e1585d42df29a5b557288e" class="m-doc-self">unwrappedCoordShift</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
-              int iatomIndex,
-              int jatomIndex,
-              double* x_i,
-              double* y_i,
-              double* z_i,
-              double* x_j,
-              double* y_j,
-              double* z_j)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="generic_8hpp.html">&lt;src/include/internal/generic.hpp&gt;</a></div>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">yCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The input PointCloud to be printed.</td>
-                </tr>
-                <tr>
-                  <td>iatomIndex&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Index of the <svg class="m-math" style="width: 1.243em; height: 1.028em;" viewBox="0 -9.873238 11.931362 9.873238">
-<title>
-$ i^{th} $
-</title>
-<defs>
-<path id='eq7-g0-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
-<path id='eq7-g0-116' d='M1.761395-3.172105H2.542466C2.693898-3.172105 2.789539-3.172105 2.789539-3.323537C2.789539-3.435118 2.685928-3.435118 2.550436-3.435118H1.825156L2.11208-4.566874C2.14396-4.686426 2.14396-4.726276 2.14396-4.734247C2.14396-4.901619 2.016438-4.98132 1.880946-4.98132C1.609963-4.98132 1.554172-4.766127 1.466501-4.407472L1.219427-3.435118H.454296C.302864-3.435118 .199253-3.435118 .199253-3.283686C.199253-3.172105 .302864-3.172105 .438356-3.172105H1.155666L.67746-1.259278C.629639-1.060025 .557908-.781071 .557908-.669489C.557908-.191283 .948443 .079701 1.370859 .079701C2.223661 .079701 2.709838-1.044085 2.709838-1.139726C2.709838-1.227397 2.638107-1.243337 2.590286-1.243337C2.502615-1.243337 2.494645-1.211457 2.438854-1.091905C2.279452-.70934 1.880946-.143462 1.39477-.143462C1.227397-.143462 1.131756-.255044 1.131756-.518057C1.131756-.669489 1.155666-.757161 1.179577-.860772L1.761395-3.172105Z'/>
-<path id='eq7-g1-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
-</defs>
-<g id='eq7-page1'>
-<use x='0' y='0' xlink:href='#eq7-g1-105'/>
-<use x='3.993432' y='-4.338437' xlink:href='#eq7-g0-116'/>
-<use x='7.051453' y='-4.338437' xlink:href='#eq7-g0-104'/>
-</g>
-</svg> atom.</td>
-                </tr>
-                <tr>
-                  <td>jatomIndex&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Index of the <svg class="m-math" style="width: 1.401em; height: 1.271em;" viewBox="0 -9.873238 13.453425 12.197846">
-<title>
-$ j^{th} $
-</title>
-<defs>
-<path id='eq8-g0-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
-<path id='eq8-g0-116' d='M1.761395-3.172105H2.542466C2.693898-3.172105 2.789539-3.172105 2.789539-3.323537C2.789539-3.435118 2.685928-3.435118 2.550436-3.435118H1.825156L2.11208-4.566874C2.14396-4.686426 2.14396-4.726276 2.14396-4.734247C2.14396-4.901619 2.016438-4.98132 1.880946-4.98132C1.609963-4.98132 1.554172-4.766127 1.466501-4.407472L1.219427-3.435118H.454296C.302864-3.435118 .199253-3.435118 .199253-3.283686C.199253-3.172105 .302864-3.172105 .438356-3.172105H1.155666L.67746-1.259278C.629639-1.060025 .557908-.781071 .557908-.669489C.557908-.191283 .948443 .079701 1.370859 .079701C2.223661 .079701 2.709838-1.044085 2.709838-1.139726C2.709838-1.227397 2.638107-1.243337 2.590286-1.243337C2.502615-1.243337 2.494645-1.211457 2.438854-1.091905C2.279452-.70934 1.880946-.143462 1.39477-.143462C1.227397-.143462 1.131756-.255044 1.131756-.518057C1.131756-.669489 1.155666-.757161 1.179577-.860772L1.761395-3.172105Z'/>
-<path id='eq8-g1-106' d='M4.184309-3.789788C4.23213-3.981071 4.23213-4.148443 4.23213-4.196264C4.23213-4.889664 3.718057-5.272229 3.180075-5.272229C1.972603-5.272229 1.327024-3.526775 1.327024-3.443088C1.327024-3.383313 1.374844-3.335492 1.446575-3.335492C1.542217-3.335492 1.554172-3.383313 1.613948-3.502864C2.092154-4.662516 2.689913-5.033126 3.144209-5.033126C3.395268-5.033126 3.526775-4.901619 3.526775-4.483188C3.526775-4.196264 3.490909-4.076712 3.443088-3.861519L2.307347 .645579C2.080199 1.530262 1.518306 2.199751 .860772 2.199751C.812951 2.199751 .561893 2.199751 .334745 2.080199C.621669 2.020423 .848817 1.793275 .848817 1.506351C.848817 1.315068 .705355 1.123786 .442341 1.123786C.131507 1.123786-.155417 1.3868-.155417 1.745455C-.155417 2.235616 .37061 2.438854 .860772 2.438854C1.685679 2.438854 2.773599 1.829141 3.072478 .633624L4.184309-3.789788ZM4.674471-7.460025C4.674471-7.758904 4.423412-7.854545 4.27995-7.854545C3.957161-7.854545 3.682192-7.543711 3.682192-7.280697C3.682192-7.10137 3.825654-6.886177 4.088667-6.886177C4.363636-6.886177 4.674471-7.149191 4.674471-7.460025Z'/>
-</defs>
-<g id='eq8-page1'>
-<use x='0' y='0' xlink:href='#eq8-g1-106'/>
-<use x='5.515495' y='-4.338437' xlink:href='#eq8-g0-116'/>
-<use x='8.573516' y='-4.338437' xlink:href='#eq8-g0-104'/>
-</g>
-</svg> atom.</td>
-                </tr>
-                <tr>
-                  <td>x_i&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td>X Coordinate of the <svg class="m-math" style="width: 1.243em; height: 1.028em;" viewBox="0 -9.873238 11.931362 9.873238">
-<title>
-$ i^{th} $
-</title>
-<defs>
-<path id='eq9-g0-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
-<path id='eq9-g0-116' d='M1.761395-3.172105H2.542466C2.693898-3.172105 2.789539-3.172105 2.789539-3.323537C2.789539-3.435118 2.685928-3.435118 2.550436-3.435118H1.825156L2.11208-4.566874C2.14396-4.686426 2.14396-4.726276 2.14396-4.734247C2.14396-4.901619 2.016438-4.98132 1.880946-4.98132C1.609963-4.98132 1.554172-4.766127 1.466501-4.407472L1.219427-3.435118H.454296C.302864-3.435118 .199253-3.435118 .199253-3.283686C.199253-3.172105 .302864-3.172105 .438356-3.172105H1.155666L.67746-1.259278C.629639-1.060025 .557908-.781071 .557908-.669489C.557908-.191283 .948443 .079701 1.370859 .079701C2.223661 .079701 2.709838-1.044085 2.709838-1.139726C2.709838-1.227397 2.638107-1.243337 2.590286-1.243337C2.502615-1.243337 2.494645-1.211457 2.438854-1.091905C2.279452-.70934 1.880946-.143462 1.39477-.143462C1.227397-.143462 1.131756-.255044 1.131756-.518057C1.131756-.669489 1.155666-.757161 1.179577-.860772L1.761395-3.172105Z'/>
-<path id='eq9-g1-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
-</defs>
-<g id='eq9-page1'>
-<use x='0' y='0' xlink:href='#eq9-g1-105'/>
-<use x='3.993432' y='-4.338437' xlink:href='#eq9-g0-116'/>
-<use x='7.051453' y='-4.338437' xlink:href='#eq9-g0-104'/>
-</g>
-</svg> atom corresponding to the unwrapped distance.</td>
-                </tr>
-                <tr>
-                  <td>y_i&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td>Y Coordinate of the <svg class="m-math" style="width: 1.243em; height: 1.028em;" viewBox="0 -9.873238 11.931362 9.873238">
-<title>
-$ i^{th} $
-</title>
-<defs>
-<path id='eq10-g0-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
-<path id='eq10-g0-116' d='M1.761395-3.172105H2.542466C2.693898-3.172105 2.789539-3.172105 2.789539-3.323537C2.789539-3.435118 2.685928-3.435118 2.550436-3.435118H1.825156L2.11208-4.566874C2.14396-4.686426 2.14396-4.726276 2.14396-4.734247C2.14396-4.901619 2.016438-4.98132 1.880946-4.98132C1.609963-4.98132 1.554172-4.766127 1.466501-4.407472L1.219427-3.435118H.454296C.302864-3.435118 .199253-3.435118 .199253-3.283686C.199253-3.172105 .302864-3.172105 .438356-3.172105H1.155666L.67746-1.259278C.629639-1.060025 .557908-.781071 .557908-.669489C.557908-.191283 .948443 .079701 1.370859 .079701C2.223661 .079701 2.709838-1.044085 2.709838-1.139726C2.709838-1.227397 2.638107-1.243337 2.590286-1.243337C2.502615-1.243337 2.494645-1.211457 2.438854-1.091905C2.279452-.70934 1.880946-.143462 1.39477-.143462C1.227397-.143462 1.131756-.255044 1.131756-.518057C1.131756-.669489 1.155666-.757161 1.179577-.860772L1.761395-3.172105Z'/>
-<path id='eq10-g1-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
-</defs>
-<g id='eq10-page1'>
-<use x='0' y='0' xlink:href='#eq10-g1-105'/>
-<use x='3.993432' y='-4.338437' xlink:href='#eq10-g0-116'/>
-<use x='7.051453' y='-4.338437' xlink:href='#eq10-g0-104'/>
-</g>
-</svg> atom corresponding to the unwrapped distance.</td>
-                </tr>
-                <tr>
-                  <td>z_i&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td>Z Coordinate of the <svg class="m-math" style="width: 1.243em; height: 1.028em;" viewBox="0 -9.873238 11.931362 9.873238">
-<title>
-$ i^{th} $
-</title>
-<defs>
-<path id='eq11-g0-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
-<path id='eq11-g0-116' d='M1.761395-3.172105H2.542466C2.693898-3.172105 2.789539-3.172105 2.789539-3.323537C2.789539-3.435118 2.685928-3.435118 2.550436-3.435118H1.825156L2.11208-4.566874C2.14396-4.686426 2.14396-4.726276 2.14396-4.734247C2.14396-4.901619 2.016438-4.98132 1.880946-4.98132C1.609963-4.98132 1.554172-4.766127 1.466501-4.407472L1.219427-3.435118H.454296C.302864-3.435118 .199253-3.435118 .199253-3.283686C.199253-3.172105 .302864-3.172105 .438356-3.172105H1.155666L.67746-1.259278C.629639-1.060025 .557908-.781071 .557908-.669489C.557908-.191283 .948443 .079701 1.370859 .079701C2.223661 .079701 2.709838-1.044085 2.709838-1.139726C2.709838-1.227397 2.638107-1.243337 2.590286-1.243337C2.502615-1.243337 2.494645-1.211457 2.438854-1.091905C2.279452-.70934 1.880946-.143462 1.39477-.143462C1.227397-.143462 1.131756-.255044 1.131756-.518057C1.131756-.669489 1.155666-.757161 1.179577-.860772L1.761395-3.172105Z'/>
-<path id='eq11-g1-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
-</defs>
-<g id='eq11-page1'>
-<use x='0' y='0' xlink:href='#eq11-g1-105'/>
-<use x='3.993432' y='-4.338437' xlink:href='#eq11-g0-116'/>
-<use x='7.051453' y='-4.338437' xlink:href='#eq11-g0-104'/>
-</g>
-</svg> atom corresponding to the unwrapped distance.</td>
-                </tr>
-                <tr>
-                  <td>x_j&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td>X Coordinate of the <svg class="m-math" style="width: 1.401em; height: 1.271em;" viewBox="0 -9.873238 13.453425 12.197846">
-<title>
-$ j^{th} $
-</title>
-<defs>
-<path id='eq12-g0-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
-<path id='eq12-g0-116' d='M1.761395-3.172105H2.542466C2.693898-3.172105 2.789539-3.172105 2.789539-3.323537C2.789539-3.435118 2.685928-3.435118 2.550436-3.435118H1.825156L2.11208-4.566874C2.14396-4.686426 2.14396-4.726276 2.14396-4.734247C2.14396-4.901619 2.016438-4.98132 1.880946-4.98132C1.609963-4.98132 1.554172-4.766127 1.466501-4.407472L1.219427-3.435118H.454296C.302864-3.435118 .199253-3.435118 .199253-3.283686C.199253-3.172105 .302864-3.172105 .438356-3.172105H1.155666L.67746-1.259278C.629639-1.060025 .557908-.781071 .557908-.669489C.557908-.191283 .948443 .079701 1.370859 .079701C2.223661 .079701 2.709838-1.044085 2.709838-1.139726C2.709838-1.227397 2.638107-1.243337 2.590286-1.243337C2.502615-1.243337 2.494645-1.211457 2.438854-1.091905C2.279452-.70934 1.880946-.143462 1.39477-.143462C1.227397-.143462 1.131756-.255044 1.131756-.518057C1.131756-.669489 1.155666-.757161 1.179577-.860772L1.761395-3.172105Z'/>
-<path id='eq12-g1-106' d='M4.184309-3.789788C4.23213-3.981071 4.23213-4.148443 4.23213-4.196264C4.23213-4.889664 3.718057-5.272229 3.180075-5.272229C1.972603-5.272229 1.327024-3.526775 1.327024-3.443088C1.327024-3.383313 1.374844-3.335492 1.446575-3.335492C1.542217-3.335492 1.554172-3.383313 1.613948-3.502864C2.092154-4.662516 2.689913-5.033126 3.144209-5.033126C3.395268-5.033126 3.526775-4.901619 3.526775-4.483188C3.526775-4.196264 3.490909-4.076712 3.443088-3.861519L2.307347 .645579C2.080199 1.530262 1.518306 2.199751 .860772 2.199751C.812951 2.199751 .561893 2.199751 .334745 2.080199C.621669 2.020423 .848817 1.793275 .848817 1.506351C.848817 1.315068 .705355 1.123786 .442341 1.123786C.131507 1.123786-.155417 1.3868-.155417 1.745455C-.155417 2.235616 .37061 2.438854 .860772 2.438854C1.685679 2.438854 2.773599 1.829141 3.072478 .633624L4.184309-3.789788ZM4.674471-7.460025C4.674471-7.758904 4.423412-7.854545 4.27995-7.854545C3.957161-7.854545 3.682192-7.543711 3.682192-7.280697C3.682192-7.10137 3.825654-6.886177 4.088667-6.886177C4.363636-6.886177 4.674471-7.149191 4.674471-7.460025Z'/>
-</defs>
-<g id='eq12-page1'>
-<use x='0' y='0' xlink:href='#eq12-g1-106'/>
-<use x='5.515495' y='-4.338437' xlink:href='#eq12-g0-116'/>
-<use x='8.573516' y='-4.338437' xlink:href='#eq12-g0-104'/>
-</g>
-</svg> atom corresponding to the unwrapped distance.</td>
-                </tr>
-                <tr>
-                  <td>y_j&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td>Y Coordinate of the <svg class="m-math" style="width: 1.401em; height: 1.271em;" viewBox="0 -9.873238 13.453425 12.197846">
-<title>
-$ j^{th} $
-</title>
-<defs>
-<path id='eq13-g0-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
-<path id='eq13-g0-116' d='M1.761395-3.172105H2.542466C2.693898-3.172105 2.789539-3.172105 2.789539-3.323537C2.789539-3.435118 2.685928-3.435118 2.550436-3.435118H1.825156L2.11208-4.566874C2.14396-4.686426 2.14396-4.726276 2.14396-4.734247C2.14396-4.901619 2.016438-4.98132 1.880946-4.98132C1.609963-4.98132 1.554172-4.766127 1.466501-4.407472L1.219427-3.435118H.454296C.302864-3.435118 .199253-3.435118 .199253-3.283686C.199253-3.172105 .302864-3.172105 .438356-3.172105H1.155666L.67746-1.259278C.629639-1.060025 .557908-.781071 .557908-.669489C.557908-.191283 .948443 .079701 1.370859 .079701C2.223661 .079701 2.709838-1.044085 2.709838-1.139726C2.709838-1.227397 2.638107-1.243337 2.590286-1.243337C2.502615-1.243337 2.494645-1.211457 2.438854-1.091905C2.279452-.70934 1.880946-.143462 1.39477-.143462C1.227397-.143462 1.131756-.255044 1.131756-.518057C1.131756-.669489 1.155666-.757161 1.179577-.860772L1.761395-3.172105Z'/>
-<path id='eq13-g1-106' d='M4.184309-3.789788C4.23213-3.981071 4.23213-4.148443 4.23213-4.196264C4.23213-4.889664 3.718057-5.272229 3.180075-5.272229C1.972603-5.272229 1.327024-3.526775 1.327024-3.443088C1.327024-3.383313 1.374844-3.335492 1.446575-3.335492C1.542217-3.335492 1.554172-3.383313 1.613948-3.502864C2.092154-4.662516 2.689913-5.033126 3.144209-5.033126C3.395268-5.033126 3.526775-4.901619 3.526775-4.483188C3.526775-4.196264 3.490909-4.076712 3.443088-3.861519L2.307347 .645579C2.080199 1.530262 1.518306 2.199751 .860772 2.199751C.812951 2.199751 .561893 2.199751 .334745 2.080199C.621669 2.020423 .848817 1.793275 .848817 1.506351C.848817 1.315068 .705355 1.123786 .442341 1.123786C.131507 1.123786-.155417 1.3868-.155417 1.745455C-.155417 2.235616 .37061 2.438854 .860772 2.438854C1.685679 2.438854 2.773599 1.829141 3.072478 .633624L4.184309-3.789788ZM4.674471-7.460025C4.674471-7.758904 4.423412-7.854545 4.27995-7.854545C3.957161-7.854545 3.682192-7.543711 3.682192-7.280697C3.682192-7.10137 3.825654-6.886177 4.088667-6.886177C4.363636-6.886177 4.674471-7.149191 4.674471-7.460025Z'/>
-</defs>
-<g id='eq13-page1'>
-<use x='0' y='0' xlink:href='#eq13-g1-106'/>
-<use x='5.515495' y='-4.338437' xlink:href='#eq13-g0-116'/>
-<use x='8.573516' y='-4.338437' xlink:href='#eq13-g0-104'/>
-</g>
-</svg> atom corresponding to the unwrapped distance.</td>
-                </tr>
-                <tr>
-                  <td>z_j&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td>Z Coordinate of the <svg class="m-math" style="width: 1.401em; height: 1.271em;" viewBox="0 -9.873238 13.453425 12.197846">
-<title>
-$ j^{th} $
-</title>
-<defs>
-<path id='eq14-g0-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
-<path id='eq14-g0-116' d='M1.761395-3.172105H2.542466C2.693898-3.172105 2.789539-3.172105 2.789539-3.323537C2.789539-3.435118 2.685928-3.435118 2.550436-3.435118H1.825156L2.11208-4.566874C2.14396-4.686426 2.14396-4.726276 2.14396-4.734247C2.14396-4.901619 2.016438-4.98132 1.880946-4.98132C1.609963-4.98132 1.554172-4.766127 1.466501-4.407472L1.219427-3.435118H.454296C.302864-3.435118 .199253-3.435118 .199253-3.283686C.199253-3.172105 .302864-3.172105 .438356-3.172105H1.155666L.67746-1.259278C.629639-1.060025 .557908-.781071 .557908-.669489C.557908-.191283 .948443 .079701 1.370859 .079701C2.223661 .079701 2.709838-1.044085 2.709838-1.139726C2.709838-1.227397 2.638107-1.243337 2.590286-1.243337C2.502615-1.243337 2.494645-1.211457 2.438854-1.091905C2.279452-.70934 1.880946-.143462 1.39477-.143462C1.227397-.143462 1.131756-.255044 1.131756-.518057C1.131756-.669489 1.155666-.757161 1.179577-.860772L1.761395-3.172105Z'/>
-<path id='eq14-g1-106' d='M4.184309-3.789788C4.23213-3.981071 4.23213-4.148443 4.23213-4.196264C4.23213-4.889664 3.718057-5.272229 3.180075-5.272229C1.972603-5.272229 1.327024-3.526775 1.327024-3.443088C1.327024-3.383313 1.374844-3.335492 1.446575-3.335492C1.542217-3.335492 1.554172-3.383313 1.613948-3.502864C2.092154-4.662516 2.689913-5.033126 3.144209-5.033126C3.395268-5.033126 3.526775-4.901619 3.526775-4.483188C3.526775-4.196264 3.490909-4.076712 3.443088-3.861519L2.307347 .645579C2.080199 1.530262 1.518306 2.199751 .860772 2.199751C.812951 2.199751 .561893 2.199751 .334745 2.080199C.621669 2.020423 .848817 1.793275 .848817 1.506351C.848817 1.315068 .705355 1.123786 .442341 1.123786C.131507 1.123786-.155417 1.3868-.155417 1.745455C-.155417 2.235616 .37061 2.438854 .860772 2.438854C1.685679 2.438854 2.773599 1.829141 3.072478 .633624L4.184309-3.789788ZM4.674471-7.460025C4.674471-7.758904 4.423412-7.854545 4.27995-7.854545C3.957161-7.854545 3.682192-7.543711 3.682192-7.280697C3.682192-7.10137 3.825654-6.886177 4.088667-6.886177C4.363636-6.886177 4.674471-7.149191 4.674471-7.460025Z'/>
-</defs>
-<g id='eq14-page1'>
-<use x='0' y='0' xlink:href='#eq14-g1-106'/>
-<use x='5.515495' y='-4.338437' xlink:href='#eq14-g0-116'/>
-<use x='8.573516' y='-4.338437' xlink:href='#eq14-g0-104'/>
-</g>
-</svg> atom corresponding to the unwrapped distance.</td>
-                </tr>
-              </tbody>
-            </table>
-<p>Function for getting the unwrapped coordinates of a pair of atoms.</p>
-          </div></section>
-          <section class="m-doc-details" id="gaaeb4ae52d25fdc86f1241839aaf65dbc"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">std::vector&lt;std::string&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gaaeb4ae52d25fdc86f1241839aaf65dbc" class="m-doc-self">tokenizer</a>(</span><span class="m-doc-wrap">std::string line)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="generic_8hpp.html">&lt;src/include/internal/generic.hpp&gt;</a></div>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">line&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The string containing the line to be tokenized</td>
-                </tr>
-              </tbody>
-            </table>
-<p>Function for tokenizing line strings into words (strings) delimited by whitespace. This returns a vector with the words in it.</p>
-          </div></section>
-          <section class="m-doc-details" id="gafc1099a60a6daf115b81a31b109de2d8"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">std::vector&lt;double&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gafc1099a60a6daf115b81a31b109de2d8" class="m-doc-self">tokenizerDouble</a>(</span><span class="m-doc-wrap">std::string line)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="generic_8hpp.html">&lt;src/include/internal/generic.hpp&gt;</a></div>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">line&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The string containing the line to be tokenized</td>
-                </tr>
-              </tbody>
-            </table>
-<p>Function for tokenizing line strings into a vector of doubles.</p>
-          </div></section>
-          <section class="m-doc-details" id="gaa49625658169d33851df990c1d62f097"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gaa49625658169d33851df990c1d62f097" class="m-doc-self">file_exists</a>(</span><span class="m-doc-wrap">const std::string&amp; name)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="generic_8hpp.html">&lt;src/include/internal/generic.hpp&gt;</a></div>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">name&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The name of the file</td>
-                </tr>
-              </tbody>
-            </table>
-<p>Function for checking if a file exists or not.</p>
-          </div></section>
-          <section class="m-doc-details" id="ga289c2dcd7c8631c21fe99cd419ddc5c8"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">std::vector&lt;std::complex&lt;double&gt;&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga289c2dcd7c8631c21fe99cd419ddc5c8" class="m-doc-self">avgVector</a>(</span><span class="m-doc-wrap">std::vector&lt;std::complex&lt;double&gt;&gt; v,
-              int l,
-              int neigh)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="generic_8hpp.html">&lt;src/include/internal/generic.hpp&gt;</a></div>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">v&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The complex vector to be normalized, of length <svg class="m-math" style="width: 3.112em; height: 0.960em;" viewBox="0 -8.302191 29.873767 9.215393">
-<title>
-$2l+1$
-</title>
-<defs>
-<path id='eq16-g0-108' d='M3.036613-7.998007C3.048568-8.045828 3.072478-8.117559 3.072478-8.177335C3.072478-8.296887 2.952927-8.296887 2.929016-8.296887C2.917061-8.296887 2.486675-8.261021 2.271482-8.237111C2.068244-8.225156 1.888917-8.201245 1.673724-8.18929C1.3868-8.16538 1.303113-8.153425 1.303113-7.938232C1.303113-7.81868 1.422665-7.81868 1.542217-7.81868C2.15193-7.81868 2.15193-7.711083 2.15193-7.591532C2.15193-7.543711 2.15193-7.519801 2.092154-7.304608L.609714-1.374844C.573848-1.243337 .549938-1.147696 .549938-.956413C.549938-.358655 .992279 .119552 1.601993 .119552C1.996513 .119552 2.259527-.143462 2.450809-.514072C2.654047-.908593 2.82142-1.661768 2.82142-1.709589C2.82142-1.769365 2.773599-1.817186 2.701868-1.817186C2.594271-1.817186 2.582316-1.75741 2.534496-1.578082C2.319303-.753176 2.10411-.119552 1.625903-.119552C1.267248-.119552 1.267248-.502117 1.267248-.669489C1.267248-.71731 1.267248-.968369 1.350934-1.303113L3.036613-7.998007Z'/>
-<path id='eq16-g1-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
-<path id='eq16-g1-49' d='M3.443088-7.663263C3.443088-7.938232 3.443088-7.950187 3.203985-7.950187C2.917061-7.627397 2.319303-7.185056 1.08792-7.185056V-6.838356C1.362889-6.838356 1.960648-6.838356 2.618182-7.149191V-.920548C2.618182-.490162 2.582316-.3467 1.530262-.3467H1.159651V0C1.482441-.02391 2.642092-.02391 3.036613-.02391S4.578829-.02391 4.901619 0V-.3467H4.531009C3.478954-.3467 3.443088-.490162 3.443088-.920548V-7.663263Z'/>
-<path id='eq16-g1-50' d='M5.260274-2.008468H4.99726C4.961395-1.80523 4.865753-1.147696 4.746202-.956413C4.662516-.848817 3.981071-.848817 3.622416-.848817H1.41071C1.733499-1.123786 2.462765-1.888917 2.773599-2.175841C4.590785-3.849564 5.260274-4.471233 5.260274-5.654795C5.260274-7.029639 4.172354-7.950187 2.785554-7.950187S.585803-6.766625 .585803-5.738481C.585803-5.128767 1.111831-5.128767 1.147696-5.128767C1.398755-5.128767 1.709589-5.308095 1.709589-5.69066C1.709589-6.025405 1.482441-6.252553 1.147696-6.252553C1.0401-6.252553 1.016189-6.252553 .980324-6.240598C1.207472-7.053549 1.853051-7.603487 2.630137-7.603487C3.646326-7.603487 4.267995-6.75467 4.267995-5.654795C4.267995-4.638605 3.682192-3.753923 3.000747-2.988792L.585803-.286924V0H4.94944L5.260274-2.008468Z'/>
-</defs>
-<g id='eq16-page1'>
-<use x='0' y='0' xlink:href='#eq16-g1-50'/>
-<use x='5.85299' y='0' xlink:href='#eq16-g0-108'/>
-<use x='12.259462' y='0' xlink:href='#eq16-g1-43'/>
-<use x='24.020777' y='0' xlink:href='#eq16-g1-49'/>
-</g>
-</svg></td>
-                </tr>
-                <tr>
-                  <td>l&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>A free integer parameter</td>
-                </tr>
-                <tr>
-                  <td>neigh&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The number of nearest neighbours</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>a complex vector, of length <svg class="m-math" style="width: 3.112em; height: 0.960em;" viewBox="0 -8.302191 29.873767 9.215393">
-<title>
-$2l+1$
-</title>
-<defs>
-<path id='eq17-g0-108' d='M3.036613-7.998007C3.048568-8.045828 3.072478-8.117559 3.072478-8.177335C3.072478-8.296887 2.952927-8.296887 2.929016-8.296887C2.917061-8.296887 2.486675-8.261021 2.271482-8.237111C2.068244-8.225156 1.888917-8.201245 1.673724-8.18929C1.3868-8.16538 1.303113-8.153425 1.303113-7.938232C1.303113-7.81868 1.422665-7.81868 1.542217-7.81868C2.15193-7.81868 2.15193-7.711083 2.15193-7.591532C2.15193-7.543711 2.15193-7.519801 2.092154-7.304608L.609714-1.374844C.573848-1.243337 .549938-1.147696 .549938-.956413C.549938-.358655 .992279 .119552 1.601993 .119552C1.996513 .119552 2.259527-.143462 2.450809-.514072C2.654047-.908593 2.82142-1.661768 2.82142-1.709589C2.82142-1.769365 2.773599-1.817186 2.701868-1.817186C2.594271-1.817186 2.582316-1.75741 2.534496-1.578082C2.319303-.753176 2.10411-.119552 1.625903-.119552C1.267248-.119552 1.267248-.502117 1.267248-.669489C1.267248-.71731 1.267248-.968369 1.350934-1.303113L3.036613-7.998007Z'/>
-<path id='eq17-g1-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
-<path id='eq17-g1-49' d='M3.443088-7.663263C3.443088-7.938232 3.443088-7.950187 3.203985-7.950187C2.917061-7.627397 2.319303-7.185056 1.08792-7.185056V-6.838356C1.362889-6.838356 1.960648-6.838356 2.618182-7.149191V-.920548C2.618182-.490162 2.582316-.3467 1.530262-.3467H1.159651V0C1.482441-.02391 2.642092-.02391 3.036613-.02391S4.578829-.02391 4.901619 0V-.3467H4.531009C3.478954-.3467 3.443088-.490162 3.443088-.920548V-7.663263Z'/>
-<path id='eq17-g1-50' d='M5.260274-2.008468H4.99726C4.961395-1.80523 4.865753-1.147696 4.746202-.956413C4.662516-.848817 3.981071-.848817 3.622416-.848817H1.41071C1.733499-1.123786 2.462765-1.888917 2.773599-2.175841C4.590785-3.849564 5.260274-4.471233 5.260274-5.654795C5.260274-7.029639 4.172354-7.950187 2.785554-7.950187S.585803-6.766625 .585803-5.738481C.585803-5.128767 1.111831-5.128767 1.147696-5.128767C1.398755-5.128767 1.709589-5.308095 1.709589-5.69066C1.709589-6.025405 1.482441-6.252553 1.147696-6.252553C1.0401-6.252553 1.016189-6.252553 .980324-6.240598C1.207472-7.053549 1.853051-7.603487 2.630137-7.603487C3.646326-7.603487 4.267995-6.75467 4.267995-5.654795C4.267995-4.638605 3.682192-3.753923 3.000747-2.988792L.585803-.286924V0H4.94944L5.260274-2.008468Z'/>
-</defs>
-<g id='eq17-page1'>
-<use x='0' y='0' xlink:href='#eq17-g1-50'/>
-<use x='5.85299' y='0' xlink:href='#eq17-g0-108'/>
-<use x='12.259462' y='0' xlink:href='#eq17-g1-43'/>
-<use x='24.020777' y='0' xlink:href='#eq17-g1-49'/>
-</g>
-</svg>, normalized by the number of nearest neighbours</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>Calculates the complex vector, normalized by the number of nearest neighbours, of length <svg class="m-math" style="width: 3.112em; height: 0.960em;" viewBox="0 -8.302191 29.873767 9.215393">
-<title>
-$2l+1$
-</title>
-<defs>
-<path id='eq15-g0-108' d='M3.036613-7.998007C3.048568-8.045828 3.072478-8.117559 3.072478-8.177335C3.072478-8.296887 2.952927-8.296887 2.929016-8.296887C2.917061-8.296887 2.486675-8.261021 2.271482-8.237111C2.068244-8.225156 1.888917-8.201245 1.673724-8.18929C1.3868-8.16538 1.303113-8.153425 1.303113-7.938232C1.303113-7.81868 1.422665-7.81868 1.542217-7.81868C2.15193-7.81868 2.15193-7.711083 2.15193-7.591532C2.15193-7.543711 2.15193-7.519801 2.092154-7.304608L.609714-1.374844C.573848-1.243337 .549938-1.147696 .549938-.956413C.549938-.358655 .992279 .119552 1.601993 .119552C1.996513 .119552 2.259527-.143462 2.450809-.514072C2.654047-.908593 2.82142-1.661768 2.82142-1.709589C2.82142-1.769365 2.773599-1.817186 2.701868-1.817186C2.594271-1.817186 2.582316-1.75741 2.534496-1.578082C2.319303-.753176 2.10411-.119552 1.625903-.119552C1.267248-.119552 1.267248-.502117 1.267248-.669489C1.267248-.71731 1.267248-.968369 1.350934-1.303113L3.036613-7.998007Z'/>
-<path id='eq15-g1-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
-<path id='eq15-g1-49' d='M3.443088-7.663263C3.443088-7.938232 3.443088-7.950187 3.203985-7.950187C2.917061-7.627397 2.319303-7.185056 1.08792-7.185056V-6.838356C1.362889-6.838356 1.960648-6.838356 2.618182-7.149191V-.920548C2.618182-.490162 2.582316-.3467 1.530262-.3467H1.159651V0C1.482441-.02391 2.642092-.02391 3.036613-.02391S4.578829-.02391 4.901619 0V-.3467H4.531009C3.478954-.3467 3.443088-.490162 3.443088-.920548V-7.663263Z'/>
-<path id='eq15-g1-50' d='M5.260274-2.008468H4.99726C4.961395-1.80523 4.865753-1.147696 4.746202-.956413C4.662516-.848817 3.981071-.848817 3.622416-.848817H1.41071C1.733499-1.123786 2.462765-1.888917 2.773599-2.175841C4.590785-3.849564 5.260274-4.471233 5.260274-5.654795C5.260274-7.029639 4.172354-7.950187 2.785554-7.950187S.585803-6.766625 .585803-5.738481C.585803-5.128767 1.111831-5.128767 1.147696-5.128767C1.398755-5.128767 1.709589-5.308095 1.709589-5.69066C1.709589-6.025405 1.482441-6.252553 1.147696-6.252553C1.0401-6.252553 1.016189-6.252553 .980324-6.240598C1.207472-7.053549 1.853051-7.603487 2.630137-7.603487C3.646326-7.603487 4.267995-6.75467 4.267995-5.654795C4.267995-4.638605 3.682192-3.753923 3.000747-2.988792L.585803-.286924V0H4.94944L5.260274-2.008468Z'/>
-</defs>
-<g id='eq15-page1'>
-<use x='0' y='0' xlink:href='#eq15-g1-50'/>
-<use x='5.85299' y='0' xlink:href='#eq15-g0-108'/>
-<use x='12.259462' y='0' xlink:href='#eq15-g1-43'/>
-<use x='24.020777' y='0' xlink:href='#eq15-g1-49'/>
-</g>
-</svg>.</p>
-          </div></section>
-        </section>
-        <section>
-          <h2>Variable documentation</h2>
-          <section class="m-doc-details" id="gaa59e2feae36f62dfdb0664bd06de8572"><div>
-            <h3>
-              const double <a href="#gaa59e2feae36f62dfdb0664bd06de8572" class="m-doc-self">pi</a>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="generic_8hpp.html">&lt;src/include/internal/generic.hpp&gt;</a></div>
-            </h3>
-<p>Uses Boost to get the value of pi.</p>
-          </div></section>
-        </section>
-      </div>
-    </div>
-  </div>
-</article></main>
-<div class="m-doc-search" id="search">
-  <a href="#!" onclick="return hideSearch()"></a>
-  <div class="m-container">
-    <div class="m-row">
-      <div class="m-col-m-8 m-push-m-2">
-        <div class="m-doc-search-header m-text m-small">
-          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
-          <div id="search-symbolcount">&hellip;</div>
-        </div>
-        <div class="m-doc-search-content">
-          <form action="https://docs.dseams.info/#search">
-            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
-          </form>
-          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript. Enable it or <a href="https://google.com/search?q=site:docs.dseams.info+">use an external search engine</a>.</noscript>
-          <div id="search-help" class="m-text m-dim m-text-center">
-            <p class="m-noindent">Search for symbols, directories, files, pages or
-            modules. You can omit any prefix from the symbol or file path; adding a
-            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
-            directory.</p>
-            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
-            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
-            <span class="m-label m-dim">Enter</span> to go.
-            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
-            copy a link to the result using <span class="m-label m-dim">⌘</span>
-            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
-            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
-          </div>
-          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.<br />Maybe try a full-text <a href="#" id="search-external" data-search-engine="https://google.com/search?q=site:docs.dseams.info+{query}">search with external engine</a>?</div>
-          <ul id="search-results"></ul>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area">
+<a class="project_logo" href="#">
+<img src="dSeamsLogo.png" width="30" height="30" alt="Logo">
+</a>
+<span class="project_info">d-SEAMS v1.0.0</span>
+</nav>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.8.20 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
 </div>
-<script src="search-v1.js"></script>
-<script src="searchdata-v1.js" async="async"></script>
-<footer><nav>
-  <div class="m-container">
-    <div class="m-row">
-      <div class="m-col-l-10 m-push-l-1">
-        <b>(C)
-2018-present</b>
-<a
-href="https://github.com/HaoZeke">Rohit
-Goswami</a>,
-<a
-href="https://github.com/amritagos">Amrita
-Goswami</a>,
-<a
-href="https://github.com/d-Seams">d-SEAMS
-core
-team</a>
-      </div>
-    </div>
-  </div>
-</nav></footer>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
+  <div class="headertitle">
+<div class="title">Gen</div>  </div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:namespacegen"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegen.html">gen</a></td></tr>
+<tr class="memdesc:namespacegen"><td class="mdescLeft">&#160;</td><td class="mdescRight">Small generic functions that are shared by all namespaces. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:gaeadb5e8ff98078b0007d0def0eaad39d"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gen.html#gaeadb5e8ff98078b0007d0def0eaad39d">gen::radDeg</a> (double angle)</td></tr>
+<tr class="separator:gaeadb5e8ff98078b0007d0def0eaad39d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae07e465d5bf7d05248d73d620cd5b9cc"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gen.html#gae07e465d5bf7d05248d73d620cd5b9cc">gen::gslVecAngle</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; double &gt; OO, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; double &gt; OH)</td></tr>
+<tr class="separator:gae07e465d5bf7d05248d73d620cd5b9cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga881e045598dd517609383d8a3fec5913"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gen.html#ga881e045598dd517609383d8a3fec5913">gen::periodicDist</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, int iatom, int jatom)</td></tr>
+<tr class="separator:ga881e045598dd517609383d8a3fec5913"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga11feba0acc8858c6a8a4b637b994c60a"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gen.html#ga11feba0acc8858c6a8a4b637b994c60a">gen::distance</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, int iatom, int jatom)</td></tr>
+<tr class="separator:ga11feba0acc8858c6a8a4b637b994c60a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga41d115da13ccda44b9231653321dc465"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; double, 3 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gen.html#ga41d115da13ccda44b9231653321dc465">gen::relDist</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, int iatom, int jatom)</td></tr>
+<tr class="separator:ga41d115da13ccda44b9231653321dc465"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaed4f2e37c89f319a852355a2b7199147"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gen.html#gaed4f2e37c89f319a852355a2b7199147">gen::compareByAtomID</a> (const <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt; &amp;a, const <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt; &amp;b)</td></tr>
+<tr class="separator:gaed4f2e37c89f319a852355a2b7199147"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf297d0df78effbb9948f7cb91c0ef975"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gen.html#gaf297d0df78effbb9948f7cb91c0ef975">gen::prettyPrintYoda</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> outFile)</td></tr>
+<tr class="separator:gaf297d0df78effbb9948f7cb91c0ef975"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac94d5646f5e1585d42df29a5b557288e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gen.html#gac94d5646f5e1585d42df29a5b557288e">gen::unwrappedCoordShift</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, int iatomIndex, int jatomIndex, double *x_i, double *y_i, double *z_i, double *x_j, double *y_j, double *z_j)</td></tr>
+<tr class="separator:gac94d5646f5e1585d42df29a5b557288e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaaeb4ae52d25fdc86f1241839aaf65dbc"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gen.html#gaaeb4ae52d25fdc86f1241839aaf65dbc">gen::tokenizer</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> line)</td></tr>
+<tr class="separator:gaaeb4ae52d25fdc86f1241839aaf65dbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafc1099a60a6daf115b81a31b109de2d8"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gen.html#gafc1099a60a6daf115b81a31b109de2d8">gen::tokenizerDouble</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> line)</td></tr>
+<tr class="separator:gafc1099a60a6daf115b81a31b109de2d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa49625658169d33851df990c1d62f097"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gen.html#gaa49625658169d33851df990c1d62f097">gen::file_exists</a> (const <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> &amp;name)</td></tr>
+<tr class="separator:gaa49625658169d33851df990c1d62f097"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga289c2dcd7c8631c21fe99cd419ddc5c8"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/numeric/complex.html">std::complex</a>&lt; double &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gen.html#ga289c2dcd7c8631c21fe99cd419ddc5c8">gen::avgVector</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/numeric/complex.html">std::complex</a>&lt; double &gt;&gt; v, int l, int neigh)</td></tr>
+<tr class="separator:ga289c2dcd7c8631c21fe99cd419ddc5c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:gaa59e2feae36f62dfdb0664bd06de8572"><td class="memItemLeft" align="right" valign="top">const double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gen.html#gaa59e2feae36f62dfdb0664bd06de8572">gen::pi</a> = boost::math::constants::pi&lt;double&gt;()</td></tr>
+<tr class="separator:gaa59e2feae36f62dfdb0664bd06de8572"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<h2 class="groupheader">Function Documentation</h2>
+<a id="ga289c2dcd7c8631c21fe99cd419ddc5c8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga289c2dcd7c8631c21fe99cd419ddc5c8">&#9670;&nbsp;</a></span>avgVector()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/numeric/complex.html">std::complex</a>&lt;double&gt; &gt; gen::avgVector </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/numeric/complex.html">std::complex</a>&lt; double &gt;&gt;&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>l</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>neigh</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Calculates the complex vector, normalized by the number of nearest neighbours, of length <img class="formulaInl" alt="$2l+1$" src="form_1.png"/>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">v</td><td>The complex vector to be normalized, of length <img class="formulaInl" alt="$2l+1$" src="form_1.png"/> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">l</td><td>A free integer parameter </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">neigh</td><td>The number of nearest neighbours </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a complex vector, of length <img class="formulaInl" alt="$2l+1$" src="form_1.png"/>, normalized by the number of nearest neighbours </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00241">241</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;                                                       {</div>
+<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;  <span class="keywordflow">if</span> (neigh == 0) {</div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;    <span class="keywordflow">return</span> v;</div>
+<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;  }</div>
+<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; 2 * l + 1; m++) {</div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;    v[m] = (1.0 / (double)neigh) * v[m];</div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;  }</div>
+<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160; </div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;  <span class="keywordflow">return</span> v;</div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gaed4f2e37c89f319a852355a2b7199147"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaed4f2e37c89f319a852355a2b7199147">&#9670;&nbsp;</a></span>compareByAtomID()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gen::compareByAtomID </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt; &amp;&#160;</td>
+          <td class="paramname"><em>b</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Inline generic function for sorting or comparing two particles, according to the atom ID when the entire Point objects have been passed. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>The input Point for A. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>The input Point for B. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A bool which is true if the atom ID of A is less than the atom ID of B. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00162">162</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;                                                          {</div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;  <span class="keywordflow">return</span> a.<a class="code" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a> &lt; b.<a class="code" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a>;</div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga11feba0acc8858c6a8a4b637b994c60a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga11feba0acc8858c6a8a4b637b994c60a">&#9670;&nbsp;</a></span>distance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::distance </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *&#160;</td>
+          <td class="paramname"><em>yCloud</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>iatom</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>jatom</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Inline generic function for obtaining the wrapped distance between two particles WITHOUT applying PBCs, whose indices (not IDs) have been given. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">yCloud</td><td>The input PointCloud, which contains the particle coordinates, simulation box lengths etc. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">iatom</td><td>The index of the <img class="formulaInl" alt="$ i^{th} $" src="form_13.png"/> atom. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">jatom</td><td>The index of the <img class="formulaInl" alt="$ j^{th} $" src="form_14.png"/> atom. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The wrapped distance. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00096">96</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;               {</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array&lt;double, 3&gt;</a> dr;</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;  <span class="keywordtype">double</span> r2 = 0.0;  <span class="comment">// Squared absolute distance</span></div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160; </div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;  <span class="comment">// Get x1-x2 etc</span></div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;  dr[0] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x);</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;  dr[1] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y);</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;  dr[2] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z);</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160; </div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;  <span class="comment">// Get the squared absolute distance</span></div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;    r2 += <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/pow.html">pow</a>(dr[k], 2.0);</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;  }</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160; </div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;  <span class="keywordflow">return</span> <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/sqrt.html">sqrt</a>(r2);</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gaa49625658169d33851df990c1d62f097"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa49625658169d33851df990c1d62f097">&#9670;&nbsp;</a></span>file_exists()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gen::file_exists </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> &amp;&#160;</td>
+          <td class="paramname"><em>name</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Function for checking if a file exists or not. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>The name of the file </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00218">218</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;                                               {</div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;  <span class="comment">// Replace by boost function later</span></div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;  <span class="keyword">struct </span>stat buffer;</div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;  <span class="keywordflow">return</span> (stat(name.<a class="codeRef" href="http://en.cppreference.com/w/cpp/string/basic_string/c_str.html">c_str</a>(), &amp;buffer) == 0);</div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gae07e465d5bf7d05248d73d620cd5b9cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae07e465d5bf7d05248d73d620cd5b9cc">&#9670;&nbsp;</a></span>gslVecAngle()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::gslVecAngle </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; double &gt;&#160;</td>
+          <td class="paramname"><em>OO</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; double &gt;&#160;</td>
+          <td class="paramname"><em>OH</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Function for obtaining the angle between two input vectors (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html" title="STL class.">std::vector</a>). Internally, the vectors are converted to GSL vectors. The dot product between the input vectors is used to calculate the angle between them. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">OO</td><td>The O&ndash;O vector (but can be any vector, in general). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">OH</td><td>The O-H vector (but can be any vector, in general). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The output angle between the input vectors, in radians </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8cpp_source.html#l00133">133</a> of file <a class="el" href="generic_8cpp_source.html">generic.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;                                                                  {</div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;  gsl_vector *gOO = gsl_vector_alloc(3);</div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;  gsl_vector *gOH = gsl_vector_alloc(3);</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;  <span class="keywordtype">double</span> norm_gOO, norm_gOH, xDummy, angle;</div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 3; i++) {</div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;    gsl_vector_set(gOO, i, OO[i]);</div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;    gsl_vector_set(gOH, i, OH[i]);</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;  }</div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;  norm_gOO = gsl_blas_dnrm2(gOO);</div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;  norm_gOH = gsl_blas_dnrm2(gOH);</div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;  gsl_blas_ddot(gOO, gOH, &amp;xDummy);</div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;  angle = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/acos.html">acos</a>(xDummy / (norm_gOO * norm_gOH));</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;  gsl_vector_free(gOO);</div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;  gsl_vector_free(gOH);</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;  <span class="keywordflow">return</span> angle;</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga881e045598dd517609383d8a3fec5913"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga881e045598dd517609383d8a3fec5913">&#9670;&nbsp;</a></span>periodicDist()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::periodicDist </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *&#160;</td>
+          <td class="paramname"><em>yCloud</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>iatom</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>jatom</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Inline generic function for obtaining the unwrapped periodic distance between two particles, whose indices (not IDs) have been given. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">yCloud</td><td>The input PointCloud, which contains the particle coordinates, simulation box lengths etc. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">iatom</td><td>The index of the <img class="formulaInl" alt="$ i^{th} $" src="form_13.png"/> atom. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">jatom</td><td>The index of the <img class="formulaInl" alt="$ j^{th} $" src="form_14.png"/> atom. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The unwrapped periodic distance. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00064">64</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;               {</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array&lt;double, 3&gt;</a> dr;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;  <span class="keywordtype">double</span> r2 = 0.0;  <span class="comment">// Squared absolute distance</span></div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;  <span class="comment">// Get x1-x2 etc</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;  dr[0] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x);</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  dr[1] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y);</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  dr[2] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z);</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;  <span class="comment">// Get the squared absolute distance</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    <span class="comment">// Correct for periodicity</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    dr[k] -= yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k] * <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/round.html">round</a>(dr[k] / yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k]);</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    r2 += <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/pow.html">pow</a>(dr[k], 2.0);</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;  }</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160; </div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;  <span class="keywordflow">return</span> <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/sqrt.html">sqrt</a>(r2);</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gaf297d0df78effbb9948f7cb91c0ef975"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaf297d0df78effbb9948f7cb91c0ef975">&#9670;&nbsp;</a></span>prettyPrintYoda()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int gen::prettyPrintYoda </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *&#160;</td>
+          <td class="paramname"><em>yCloud</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>&#160;</td>
+          <td class="paramname"><em>outFile</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Function for printing out info in a PointCloud object. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">yCloud</td><td>The input PointCloud to be printed. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">outFile</td><td>The name of the output file to which the information will be printed. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8cpp_source.html#l00011">11</a> of file <a class="el" href="generic_8cpp_source.html">generic.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;                       {</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ofstream.html">std::ofstream</a> outputFile;</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;  <span class="comment">// Create a new file in the output directory</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;  outputFile.<a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ofstream/open.html">open</a>(outFile);</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160; </div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;  <span class="keywordflow">if</span> (outputFile.<a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ofstream/is_open.html">is_open</a>()) {</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    <span class="comment">// First line</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    outputFile &lt;&lt; <span class="stringliteral">&quot;# Frame\tAtomID\tx\ty\tz\tcij\ticeType\n&quot;</span>;</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;    <span class="comment">// Write out all the information out line by line</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a>; i++) {</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;      outputFile &lt;&lt; yCloud-&gt;<a class="code" href="group__molSys.html#gafccb5a0daab40c3ccc83e4494f4176d7">currentFrame</a> &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span> &lt;&lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[i].atomID</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;                 &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span> &lt;&lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[i].x &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span> &lt;&lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[i].y &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;                 &lt;&lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[i].z &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span>;</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;      <span class="comment">// Print out cij</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;      <span class="comment">// for(int c=0; c&lt;yCloud-&gt;pts[i].c_ij.size(); c++){outputFile &lt;&lt;</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;      <span class="comment">// yCloud-&gt;pts[i].c_ij[c]&lt;&lt;&quot;\t&quot;;} Print out the classifier</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;      outputFile &lt;&lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[i].iceType &lt;&lt; <span class="stringliteral">&quot;\n&quot;</span>;</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    }</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;  }</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;  <span class="comment">// Close the file</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  outputFile.<a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ofstream/close.html">close</a>();</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gaeadb5e8ff98078b0007d0def0eaad39d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaeadb5e8ff98078b0007d0def0eaad39d">&#9670;&nbsp;</a></span>radDeg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::radDeg </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>angle</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Inline function for converting radians-&gt;degrees. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">angle</td><td>The input angle, in radians </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The input angle, in degrees </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00048">48</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;{ <span class="keywordflow">return</span> (angle * 180) / <a class="code" href="group__gen.html#gaa59e2feae36f62dfdb0664bd06de8572">gen::pi</a>; }</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga41d115da13ccda44b9231653321dc465"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga41d115da13ccda44b9231653321dc465">&#9670;&nbsp;</a></span>relDist()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt;double, 3&gt; gen::relDist </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *&#160;</td>
+          <td class="paramname"><em>yCloud</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>iatom</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>jatom</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Inline generic function for getting the relative unwrapped distance between two particles for each dimension. The indices (not IDs) of the particles have been given. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">yCloud</td><td>The input PointCloud, which contains the particle coordinates, simulation box lengths etc. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">iatom</td><td>The index of the <img class="formulaInl" alt="$ i^{th} $" src="form_13.png"/> atom. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">jatom</td><td>The index of the <img class="formulaInl" alt="$ j^{th} $" src="form_14.png"/> atom. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The unwrapped relative distances for each dimension. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00126">126</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;               {</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array&lt;double, 3&gt;</a> dr;</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array&lt;double, 3&gt;</a> box = {yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[0], yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[1], yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[2]};</div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;  <span class="keywordtype">double</span> r2 = 0.0;  <span class="comment">// Squared absolute distance</span></div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160; </div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;  <span class="comment">// Get x1-x2 etc</span></div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;  dr[0] = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x;</div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;  dr[1] = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y;</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;  dr[2] = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z;</div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160; </div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;  <span class="comment">// Get the relative distance</span></div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;    <span class="comment">//</span></div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;    <span class="keywordflow">if</span> (dr[k] &lt; -box[k] * 0.5) {</div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;      dr[k] = dr[k] + box[k];</div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;    }</div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;    <span class="keywordflow">if</span> (dr[k] &gt;= box[k] * 0.5) {</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;      dr[k] = dr[k] - box[k];</div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;    }</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;  }</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160; </div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;  <span class="keywordflow">return</span> dr;</div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gaaeb4ae52d25fdc86f1241839aaf65dbc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaaeb4ae52d25fdc86f1241839aaf65dbc">&#9670;&nbsp;</a></span>tokenizer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>&gt; gen::tokenizer </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>&#160;</td>
+          <td class="paramname"><em>line</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Function for tokenizing line strings into words (strings) delimited by whitespace. This returns a vector with the words in it. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">line</td><td>The string containing the line to be tokenized </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00187">187</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;                                                      {</div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_istringstream.html">std::istringstream</a> iss(line);</div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;std::string&gt;</a> tokens{<a class="codeRef" href="http://en.cppreference.com/w/cpp/iterator/istream_iterator.html">std::istream_iterator&lt;std::string&gt;</a>{iss},</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;                                  <a class="codeRef" href="http://en.cppreference.com/w/cpp/iterator/istream_iterator.html">std::istream_iterator&lt;std::string&gt;</a>{}};</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;  <span class="keywordflow">return</span> tokens;</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gafc1099a60a6daf115b81a31b109de2d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafc1099a60a6daf115b81a31b109de2d8">&#9670;&nbsp;</a></span>tokenizerDouble()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt;double&gt; gen::tokenizerDouble </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>&#160;</td>
+          <td class="paramname"><em>line</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Function for tokenizing line strings into a vector of doubles. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">line</td><td>The string containing the line to be tokenized </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00202">202</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;                                                         {</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_istringstream.html">std::istringstream</a> iss(line);</div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a> tokens;</div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;  <span class="keywordtype">double</span> number;  <span class="comment">// Each number being read in from the line</span></div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;  <span class="keywordflow">while</span> (iss &gt;&gt; number) {</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;    tokens.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(number);</div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;  }</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;  <span class="keywordflow">return</span> tokens;</div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gac94d5646f5e1585d42df29a5b557288e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac94d5646f5e1585d42df29a5b557288e">&#9670;&nbsp;</a></span>unwrappedCoordShift()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int gen::unwrappedCoordShift </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *&#160;</td>
+          <td class="paramname"><em>yCloud</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>iatomIndex</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>jatomIndex</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>x_i</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>y_i</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>z_i</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>x_j</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>y_j</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>z_j</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Function for getting the unwrapped coordinates of a pair of atoms. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">yCloud</td><td>The input PointCloud to be printed. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">iatomIndex</td><td>Index of the <img class="formulaInl" alt="$ i^{th} $" src="form_13.png"/> atom. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">jatomIndex</td><td>Index of the <img class="formulaInl" alt="$ j^{th} $" src="form_14.png"/> atom. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">x_i</td><td>X Coordinate of the <img class="formulaInl" alt="$ i^{th} $" src="form_13.png"/> atom corresponding to the unwrapped distance. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">y_i</td><td>Y Coordinate of the <img class="formulaInl" alt="$ i^{th} $" src="form_13.png"/> atom corresponding to the unwrapped distance. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">z_i</td><td>Z Coordinate of the <img class="formulaInl" alt="$ i^{th} $" src="form_13.png"/> atom corresponding to the unwrapped distance. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">x_j</td><td>X Coordinate of the <img class="formulaInl" alt="$ j^{th} $" src="form_14.png"/> atom corresponding to the unwrapped distance. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">y_j</td><td>Y Coordinate of the <img class="formulaInl" alt="$ j^{th} $" src="form_14.png"/> atom corresponding to the unwrapped distance. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">z_j</td><td>Z Coordinate of the <img class="formulaInl" alt="$ j^{th} $" src="form_14.png"/> atom corresponding to the unwrapped distance. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8cpp_source.html#l00050">50</a> of file <a class="el" href="generic_8cpp_source.html">generic.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;                              {</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;  <span class="keywordtype">double</span> x_iatom, y_iatom, z_iatom;</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;  <span class="keywordtype">double</span> x_jatom, y_jatom, z_jatom;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;  <span class="keywordtype">double</span> x_ij, y_ij, z_ij;  <span class="comment">// Relative distance</span></div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a> box = yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;  <span class="keywordtype">double</span> xPBC, yPBC, zPBC;  <span class="comment">// Actual unwrapped distance</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;  <span class="comment">// ----------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;  <span class="comment">// INIT</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  <span class="comment">// iatom</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  x_iatom = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatomIndex].x;</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  y_iatom = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatomIndex].y;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;  z_iatom = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatomIndex].z;</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;  <span class="comment">// jatom</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;  x_jatom = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatomIndex].x;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  y_jatom = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatomIndex].y;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;  z_jatom = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatomIndex].z;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;  <span class="comment">// ----------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  <span class="comment">// GET RELATIVE DISTANCE</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  x_ij = x_iatom - x_jatom;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;  y_ij = y_iatom - y_jatom;</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;  z_ij = z_iatom - z_jatom;</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;  <span class="comment">// ----------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;  <span class="comment">// SHIFT COORDINATES IF REQUIRED</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;  <span class="comment">// Shift x</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  <span class="keywordflow">if</span> (<a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(x_ij) &gt; 0.5 * box[0]) {</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    <span class="comment">// Get the actual distance</span></div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    xPBC = box[0] - <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(x_ij);</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    <span class="keywordflow">if</span> (x_ij &lt; 0) {</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;      x_jatom = x_iatom - xPBC;</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    }  <span class="comment">// To the -x side of currentIndex</span></div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;      x_jatom = x_iatom + xPBC;</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    }  <span class="comment">// Add to the + side</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;  }    <span class="comment">// Shift nextElement</span></div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;  <span class="comment">// Shift y</span></div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;  <span class="keywordflow">if</span> (<a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(y_ij) &gt; 0.5 * box[1]) {</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    <span class="comment">// Get the actual distance</span></div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    yPBC = box[1] - <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(y_ij);</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    <span class="keywordflow">if</span> (y_ij &lt; 0) {</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;      y_jatom = y_iatom - yPBC;</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    }  <span class="comment">// To the -y side of currentIndex</span></div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;    <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;      y_jatom = y_iatom + yPBC;</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    }  <span class="comment">// Add to the + side</span></div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;  }    <span class="comment">// Shift nextElement</span></div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;  <span class="comment">// Shift z</span></div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;  <span class="keywordflow">if</span> (<a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(z_ij) &gt; 0.5 * box[2]) {</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    <span class="comment">// Get the actual distance</span></div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    zPBC = box[2] - <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(z_ij);</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;    <span class="keywordflow">if</span> (z_ij &lt; 0) {</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;      z_jatom = z_iatom - zPBC;</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;    }  <span class="comment">// To the -z side of currentIndex</span></div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;    <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;      z_jatom = z_iatom + zPBC;</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    }  <span class="comment">// Add to the + side</span></div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;  }    <span class="comment">// Shift nextElement</span></div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;  <span class="comment">// ----------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;  <span class="comment">// Assign values</span></div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;  *x_i = x_iatom;</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;  *y_i = y_iatom;</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;  *z_i = z_iatom;</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;  *x_j = x_jatom;</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;  *y_j = y_jatom;</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;  *z_j = z_jatom;</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160; </div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;  <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<h2 class="groupheader">Variable Documentation</h2>
+<a id="gaa59e2feae36f62dfdb0664bd06de8572"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa59e2feae36f62dfdb0664bd06de8572">&#9670;&nbsp;</a></span>pi</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const double gen::pi = boost::math::constants::pi&lt;double&gt;()</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Uses Boost to get the value of pi. </p>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00040">40</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+<div class="ttc" id="afabs_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">std::fabs</a></div><div class="ttdeci">T fabs(T... args)</div></div>
+<div class="ttc" id="avector_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a></div><div class="ttdoc">STL class.</div></div>
+<div class="ttc" id="agroup__molSys_html_gafbcfc945f41267043cddfd9bae8c10a2"><div class="ttname"><a href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">molSys::Point::atomID</a></div><div class="ttdeci">int atomID</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00134">mol_sys.hpp:134</a></div></div>
+<div class="ttc" id="abasic_istringstream_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/io/basic_istringstream.html">std::istringstream</a></div><div class="ttdoc">STL class.</div></div>
+<div class="ttc" id="asqrt_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/numeric/math/sqrt.html">std::sqrt</a></div><div class="ttdeci">T sqrt(T... args)</div></div>
+<div class="ttc" id="apush_back_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">std::vector::push_back</a></div><div class="ttdeci">T push_back(T... args)</div></div>
+<div class="ttc" id="abasic_ofstream_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/io/basic_ofstream.html">std::ofstream</a></div><div class="ttdoc">STL class.</div></div>
+<div class="ttc" id="ac_str_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/string/basic_string/c_str.html">std::string::c_str</a></div><div class="ttdeci">T c_str(T... args)</div></div>
+<div class="ttc" id="agroup__gen_html_gaa59e2feae36f62dfdb0664bd06de8572"><div class="ttname"><a href="group__gen.html#gaa59e2feae36f62dfdb0664bd06de8572">gen::pi</a></div><div class="ttdeci">const double pi</div><div class="ttdef"><b>Definition:</b> <a href="generic_8hpp_source.html#l00040">generic.hpp:40</a></div></div>
+<div class="ttc" id="aarray_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a></div><div class="ttdoc">STL class.</div></div>
+<div class="ttc" id="aclose_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/io/basic_ofstream/close.html">std::ofstream::close</a></div><div class="ttdeci">T close(T... args)</div></div>
+<div class="ttc" id="aopen_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/io/basic_ofstream/open.html">std::ofstream::open</a></div><div class="ttdeci">T open(T... args)</div></div>
+<div class="ttc" id="agroup__molSys_html_gaa7d9b8543780baf4a495c7acdb1f87d8"><div class="ttname"><a href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">molSys::PointCloud::box</a></div><div class="ttdeci">std::vector&lt; T &gt; box</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00159">mol_sys.hpp:159</a></div></div>
+<div class="ttc" id="aacos_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/numeric/math/acos.html">std::acos</a></div><div class="ttdeci">T acos(T... args)</div></div>
+<div class="ttc" id="agroup__molSys_html_gafccb5a0daab40c3ccc83e4494f4176d7"><div class="ttname"><a href="group__molSys.html#gafccb5a0daab40c3ccc83e4494f4176d7">molSys::PointCloud::currentFrame</a></div><div class="ttdeci">int currentFrame</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00157">mol_sys.hpp:157</a></div></div>
+<div class="ttc" id="around_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/numeric/math/round.html">std::round</a></div><div class="ttdeci">T round(T... args)</div></div>
+<div class="ttc" id="aistream_iterator_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/iterator/istream_iterator.html">std::istream_iterator</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga2bdcb9260bd83f313a2d27fcc6437ef1"><div class="ttname"><a href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">molSys::PointCloud::nop</a></div><div class="ttdeci">int nop</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00158">mol_sys.hpp:158</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga67ab89369cd26572878a91afd521ef81"><div class="ttname"><a href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">molSys::PointCloud::pts</a></div><div class="ttdeci">std::vector&lt; S &gt; pts</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00156">mol_sys.hpp:156</a></div></div>
+<div class="ttc" id="ais_open_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/io/basic_ofstream/is_open.html">std::ofstream::is_open</a></div><div class="ttdeci">T is_open(T... args)</div></div>
+<div class="ttc" id="apow_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/numeric/math/pow.html">std::pow</a></div><div class="ttdeci">T pow(T... args)</div></div>
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen 1.9.1-->
+<!-- start footer part -->
+<div class="footer">
+<hr class="footline"/><address class="footline"><small>
+    Generated by&#160;<a href="https://www.doxygen.org/index.html">Doxygen 1.8.20</a> and the <a class="outlink" href="https://github.com/HaoZeke/doxyYoda">doxyYoda theme</a>
+</small></address>
+</div>
+</div>
 </body>
 </html>

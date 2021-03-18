@@ -1,0 +1,17 @@
+digraph "primitive::Graph"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="primitive::Graph",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="This is a per-frame object, containing all the vertices for the particular frame, along with the vect..."];
+  Node2 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" rings" ,fontname="Helvetica"];
+  Node2 [label="std::vector\< std::vector\l\< int \> \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="/home/runner/work/seams-core/seams-core/tags/cppreference-doxygen-web.tag.xml$cpp/container/vector.html",tooltip=" "];
+  Node3 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" elements" ,fontname="Helvetica"];
+  Node3 [label="std::vector\< int \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="/home/runner/work/seams-core/seams-core/tags/cppreference-doxygen-web.tag.xml$cpp/container/vector.html",tooltip=" "];
+  Node4 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" pts" ,fontname="Helvetica"];
+  Node4 [label="std::vector\< primitive\l::Vertex \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="/home/runner/work/seams-core/seams-core/tags/cppreference-doxygen-web.tag.xml$cpp/container/vector.html",tooltip=" "];
+  Node5 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" elements" ,fontname="Helvetica"];
+  Node5 [label="primitive::Vertex",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structprimitive_1_1Vertex.html",tooltip="This is a collection of elements, for each point, required for graph traversal."];
+  Node3 -> Node5 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" neighListIndex" ,fontname="Helvetica"];
+}

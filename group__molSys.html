@@ -1,415 +1,807 @@
-<!DOCTYPE html>
-<html lang="en">
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen 1.9.1-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="UTF-8" />
-  <title>MolSys module | d-SEAMS</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="icon" href="dSeamsLogo.ico" type="image/vnd.microsoft.icon" />
-  <link rel="search" type="application/opensearchdescription+xml" href="opensearch.xml" title="Search d-SEAMS documentation" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.20"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>d-SEAMS: MolSys</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']]
+  },
+  svg: {
+    fontCache: 'global'
+  }
+  loader: { load: ["[tex]/unicode", "[tex]/ams"] },
+  tex: {
+    packages: { "[+]": ["unicode", "ams"] },
+    tags: "ams",
+  },
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+</script>
+<!-- <link href="doxygen.css" rel="stylesheet" type="text/css" /> -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" >
+$(document).ready(function() {
+     $(".fragment").wrap("<details class='code-details'></details>");
+     $(".code-details").append("<summary>Code</summary>");
+ }
+)
+</script>
 </head>
 <body>
-<header><nav id="navigation">
-  <div class="m-container">
-    <div class="m-row">
-      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m"><img src="dSeamsLogo.png" alt="" />d-SEAMS</a>
-      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
-        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
-          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
-        </svg></a>
-        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
-        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
-      </div>
-      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
-        <div class="m-row">
-          <ol class="m-col-t-6 m-col-m-none">
-            <li><a href="namespaces.html">Namespaces</a></li>
-            <li><a href="modules.html">Modules</a></li>
-            <li><a href="pages.html">Wiki</a></li>
-          </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
-            <li><a href="annotated.html">Classes</a></li>
-            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
-              <use href="#m-doc-search-icon-path" />
-            </svg></a></li>
-          </ol>
-        </div>
-      </div>
-    </div>
-  </div>
-</nav></header>
-<main><article>
-  <div class="m-container m-container-inflatable">
-    <div class="m-row">
-      <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          MolSys <span class="m-thin">module</span></h1>
-        <div class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#nested-classes">Classes</a></li>
-                <li><a href="#enum-members">Enums</a></li>
-                <li><a href="#func-members">Functions</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespacemolSys.html" class="m-doc">molSys</a></dt>
-            <dd>Bare-bones structs used throughout the architecture. This namespace defines <a href="structmolSys_1_1Point.html" class="m-doc">Point</a> and <a href="structmolSys_1_1PointCloud.html" class="m-doc">PointCloud</a> structs, alongwith other basic functions and enums.</dd>
-          </dl>
-        </section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              struct <a href="structmolSys_1_1Result.html" class="m-doc">molSys::Result</a>
-            </dt>
-            <dd>This contains the bond classifier of enum type <a href="group__molSys.html#ga1c858200c3d088bf02839453d0f46328" class="m-doc">bond_<wbr />type</a>, and the bond correlation factor.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename T&gt;</div>
-              struct <a href="structmolSys_1_1Point.html" class="m-doc">molSys::Point</a>
-            </dt>
-            <dd>This contains per-particle information.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename S, typename T&gt;</div>
-              struct <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::PointCloud</a>
-            </dt>
-            <dd>This contains a collection of points; contains information for a particular frame.</dd>
-          </dl>
-        </section>
-        <section id="enum-members">
-          <h2><a href="#enum-members">Enums</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">enum <a href="#ga1c858200c3d088bf02839453d0f46328" class="m-doc">bond_type</a> { </span><span class="m-doc-wrap"><a href="#gga1c858200c3d088bf02839453d0f46328afcdf36b254fcbdfc60a9f2c5c0b36a6e" class="m-doc">staggered</a>,
-              <a href="#gga1c858200c3d088bf02839453d0f46328a01528e0909036616db40df89990aec2f" class="m-doc">eclipsed</a>,
-              <a href="#gga1c858200c3d088bf02839453d0f46328a1e1018de3fbdf92f0120a4743587ad53" class="m-doc">out_of_range</a> }</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">enum <a href="#ga13ffe3a39a0816627553f195e102abb5" class="m-doc">atom_state_type</a> { </span><span class="m-doc-wrap"><a href="#gga13ffe3a39a0816627553f195e102abb5a129c76a33f8ebd1a8dedd378543af193" class="m-doc">cubic</a>,
-              <a href="#gga13ffe3a39a0816627553f195e102abb5a22e673e9b130fe029c171fdf2a2e419a" class="m-doc">hexagonal</a>,
-              <a href="#gga13ffe3a39a0816627553f195e102abb5aa701d941ff4dc44b45faa7fd0e1f163f" class="m-doc">water</a>,
-              <a href="#gga13ffe3a39a0816627553f195e102abb5a2a1eeeb73264d00a89f53b3ec3544b2c" class="m-doc">interfacial</a>,
-              <a href="#gga13ffe3a39a0816627553f195e102abb5a9e48b0390667a2a6606fb9bd47752ebd" class="m-doc">clathrate</a>,
-              <a href="#gga13ffe3a39a0816627553f195e102abb5a2307822a42416cc62fcbd5afe887491f" class="m-doc">interClathrate</a>,
-              <a href="#gga13ffe3a39a0816627553f195e102abb5ad19ecf271dba48ef8dd8175326f669b4" class="m-doc">unclassified</a>,
-              <a href="#gga13ffe3a39a0816627553f195e102abb5a5300236c5e45c59840b336b4e735fa0a" class="m-doc">reCubic</a>,
-              <a href="#gga13ffe3a39a0816627553f195e102abb5acbe48f9c31a28c6a0b37e324e6357048" class="m-doc">reHex</a> }</span>
-            </dt>
-            <dd></dd>
-          </dl>
-        </section>
-        <section id="func-members">
-          <h2><a href="#func-members">Functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ga3d2387897322ededb4936d466f74e459" class="m-doc">createIDMolIDmap</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud) -&gt; std::unordered_map&lt;int, int&gt;</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ga34b5cffd59aa8f6701dd919d03706b3f" class="m-doc">hAtomMolList</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* hCloud,
-              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* oCloud) -&gt; std::vector&lt;std::vector&lt;int&gt;&gt;</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ga54bfd35451e9528910f3a2d1078d9e89" class="m-doc">searchMolList</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; molList,
-              int molIDtoFind) -&gt; int</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#gad8acfb41ee6bc0258612e9cac24269b2" class="m-doc">clearPointCloud</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud) -&gt; <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;</span>
-            </dt>
-            <dd></dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Enum documentation</h2>
-          <section class="m-doc-details" id="ga1c858200c3d088bf02839453d0f46328"><div>
-            <h3>
-              enum <a href="#ga1c858200c3d088bf02839453d0f46328" class="m-doc-self">bond_type</a>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="mol__sys_8hpp.html">&lt;src/include/internal/mol_sys.hpp&gt;</a></div>
-            </h3>
-<p>Qualifier for the bond type between two nearest-neighbours, according to the CHILL or CHILL+ classification scheme.</p>
-            <table class="m-table m-fullwidth m-flat m-doc">
-              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
-              <tbody>
-                <tr>
-                  <td><a href="#gga1c858200c3d088bf02839453d0f46328afcdf36b254fcbdfc60a9f2c5c0b36a6e" class="m-doc-self" id="gga1c858200c3d088bf02839453d0f46328afcdf36b254fcbdfc60a9f2c5c0b36a6e">staggered</a></td>
-                  <td>
-<p>The bond is a staggered bond, according to the <svg class="m-math" style="width: 3.125em; height: 1.245em;" viewBox="0 -8.966376 30.002682 11.955168">
-<title>
-$a(i,j)$
-</title>
-<defs>
-<path id='eq1-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
-<path id='eq1-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
-<path id='eq1-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
-<path id='eq1-g0-97' d='M3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665ZM4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.944458 4.27995-1.075965 4.387547-1.542217C4.471233-1.841096 4.531009-2.10411 4.62665-2.450809C5.068991-4.244085 5.176588-4.674471 5.176588-4.746202C5.176588-4.913574 5.045081-5.045081 4.865753-5.045081C4.483188-5.045081 4.387547-4.62665 4.363636-4.483188Z'/>
-<path id='eq1-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
-<path id='eq1-g0-106' d='M4.184309-3.789788C4.23213-3.981071 4.23213-4.148443 4.23213-4.196264C4.23213-4.889664 3.718057-5.272229 3.180075-5.272229C1.972603-5.272229 1.327024-3.526775 1.327024-3.443088C1.327024-3.383313 1.374844-3.335492 1.446575-3.335492C1.542217-3.335492 1.554172-3.383313 1.613948-3.502864C2.092154-4.662516 2.689913-5.033126 3.144209-5.033126C3.395268-5.033126 3.526775-4.901619 3.526775-4.483188C3.526775-4.196264 3.490909-4.076712 3.443088-3.861519L2.307347 .645579C2.080199 1.530262 1.518306 2.199751 .860772 2.199751C.812951 2.199751 .561893 2.199751 .334745 2.080199C.621669 2.020423 .848817 1.793275 .848817 1.506351C.848817 1.315068 .705355 1.123786 .442341 1.123786C.131507 1.123786-.155417 1.3868-.155417 1.745455C-.155417 2.235616 .37061 2.438854 .860772 2.438854C1.685679 2.438854 2.773599 1.829141 3.072478 .633624L4.184309-3.789788ZM4.674471-7.460025C4.674471-7.758904 4.423412-7.854545 4.27995-7.854545C3.957161-7.854545 3.682192-7.543711 3.682192-7.280697C3.682192-7.10137 3.825654-6.886177 4.088667-6.886177C4.363636-6.886177 4.674471-7.149191 4.674471-7.460025Z'/>
-</defs>
-<g id='eq1-page1'>
-<use x='0' y='0' xlink:href='#eq1-g0-97'/>
-<use x='6.144944' y='0' xlink:href='#eq1-g1-40'/>
-<use x='10.69727' y='0' xlink:href='#eq1-g0-105'/>
-<use x='14.690702' y='0' xlink:href='#eq1-g0-59'/>
-<use x='19.934861' y='0' xlink:href='#eq1-g0-106'/>
-<use x='25.450357' y='0' xlink:href='#eq1-g1-41'/>
-</g>
-</svg> or <svg class="m-math" style="width: 3.010em; height: 1.245em;" viewBox="0 -8.966376 28.895727 11.955168">
-<title>
-$c(i,j)$
-</title>
-<defs>
-<path id='eq2-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
-<path id='eq2-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
-<path id='eq2-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
-<path id='eq2-g0-99' d='M4.674471-4.495143C4.447323-4.495143 4.339726-4.495143 4.172354-4.351681C4.100623-4.291905 3.969116-4.112578 3.969116-3.921295C3.969116-3.682192 4.148443-3.53873 4.375592-3.53873C4.662516-3.53873 4.985305-3.777833 4.985305-4.25604C4.985305-4.829888 4.435367-5.272229 3.610461-5.272229C2.044334-5.272229 .478207-3.56264 .478207-1.865006C.478207-.824907 1.123786 .119552 2.343213 .119552C3.969116 .119552 4.99726-1.147696 4.99726-1.303113C4.99726-1.374844 4.925529-1.43462 4.877709-1.43462C4.841843-1.43462 4.829888-1.422665 4.722291-1.315068C3.957161-.298879 2.82142-.119552 2.367123-.119552C1.542217-.119552 1.279203-.836862 1.279203-1.43462C1.279203-1.853051 1.482441-3.012702 1.912827-3.825654C2.223661-4.387547 2.86924-5.033126 3.622416-5.033126C3.777833-5.033126 4.435367-5.009215 4.674471-4.495143Z'/>
-<path id='eq2-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
-<path id='eq2-g0-106' d='M4.184309-3.789788C4.23213-3.981071 4.23213-4.148443 4.23213-4.196264C4.23213-4.889664 3.718057-5.272229 3.180075-5.272229C1.972603-5.272229 1.327024-3.526775 1.327024-3.443088C1.327024-3.383313 1.374844-3.335492 1.446575-3.335492C1.542217-3.335492 1.554172-3.383313 1.613948-3.502864C2.092154-4.662516 2.689913-5.033126 3.144209-5.033126C3.395268-5.033126 3.526775-4.901619 3.526775-4.483188C3.526775-4.196264 3.490909-4.076712 3.443088-3.861519L2.307347 .645579C2.080199 1.530262 1.518306 2.199751 .860772 2.199751C.812951 2.199751 .561893 2.199751 .334745 2.080199C.621669 2.020423 .848817 1.793275 .848817 1.506351C.848817 1.315068 .705355 1.123786 .442341 1.123786C.131507 1.123786-.155417 1.3868-.155417 1.745455C-.155417 2.235616 .37061 2.438854 .860772 2.438854C1.685679 2.438854 2.773599 1.829141 3.072478 .633624L4.184309-3.789788ZM4.674471-7.460025C4.674471-7.758904 4.423412-7.854545 4.27995-7.854545C3.957161-7.854545 3.682192-7.543711 3.682192-7.280697C3.682192-7.10137 3.825654-6.886177 4.088667-6.886177C4.363636-6.886177 4.674471-7.149191 4.674471-7.460025Z'/>
-</defs>
-<g id='eq2-page1'>
-<use x='0' y='0' xlink:href='#eq2-g0-99'/>
-<use x='5.037988' y='0' xlink:href='#eq2-g1-40'/>
-<use x='9.590314' y='0' xlink:href='#eq2-g0-105'/>
-<use x='13.583746' y='0' xlink:href='#eq2-g0-59'/>
-<use x='18.827905' y='0' xlink:href='#eq2-g0-106'/>
-<use x='24.343401' y='0' xlink:href='#eq2-g1-41'/>
-</g>
-</svg> value.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#gga1c858200c3d088bf02839453d0f46328a01528e0909036616db40df89990aec2f" class="m-doc-self" id="gga1c858200c3d088bf02839453d0f46328a01528e0909036616db40df89990aec2f">eclipsed</a></td>
-                  <td>
-<p>The bond is an eclipsed bond.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#gga1c858200c3d088bf02839453d0f46328a1e1018de3fbdf92f0120a4743587ad53" class="m-doc-self" id="gga1c858200c3d088bf02839453d0f46328a1e1018de3fbdf92f0120a4743587ad53">out_of_range</a></td>
-                  <td>
-<p>The bond cannot be classified as either staggered or eclipsed.</p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="ga13ffe3a39a0816627553f195e102abb5"><div>
-            <h3>
-              enum <a href="#ga13ffe3a39a0816627553f195e102abb5" class="m-doc-self">atom_state_type</a>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="mol__sys_8hpp.html">&lt;src/include/internal/mol_sys.hpp&gt;</a></div>
-            </h3>
-<p>Qualifier for the per-particle phase state, according to the CHILL, CHILL+, or <svg class="m-math" style="width: 0.982em; height: 0.778em;" viewBox="0 -5.147373 9.424391 7.47198">
-<title>
-$q_6$
-</title>
-<defs>
-<path id='eq3-g1-54' d='M1.099875-2.638107C1.099875-3.299626 1.155666-3.881445 1.44259-4.367621C1.681694-4.766127 2.088169-5.092902 2.590286-5.092902C2.749689-5.092902 3.116314-5.068991 3.299626-4.790037C2.940971-4.774097 2.909091-4.503113 2.909091-4.415442C2.909091-4.176339 3.092403-4.040847 3.283686-4.040847C3.427148-4.040847 3.658281-4.128518 3.658281-4.431382C3.658281-4.909589 3.299626-5.300125 2.582316-5.300125C1.474471-5.300125 .350685-4.24807 .350685-2.526526C.350685-.366625 1.354919 .167372 2.12802 .167372C2.510585 .167372 2.925031 .063761 3.283686-.278954C3.602491-.589788 3.873474-.924533 3.873474-1.617933C3.873474-2.662017 3.084433-3.395268 2.199751-3.395268C1.625903-3.395268 1.283188-3.028643 1.099875-2.638107ZM2.12802-.071731C1.705604-.071731 1.44259-.366625 1.323039-.589788C1.139726-.948443 1.123786-1.490411 1.123786-1.793275C1.123786-2.582316 1.554172-3.172105 2.16787-3.172105C2.566376-3.172105 2.805479-2.964882 2.956912-2.685928C3.124284-2.391034 3.124284-2.032379 3.124284-1.625903S3.124284-.868742 2.964882-.581818C2.757659-.215193 2.478705-.071731 2.12802-.071731Z'/>
-<path id='eq3-g0-113' d='M5.272229-5.152677C5.272229-5.212453 5.224408-5.260274 5.164633-5.260274C5.068991-5.260274 4.60274-4.829888 4.375592-4.411457C4.160399-4.94944 3.789788-5.272229 3.275716-5.272229C1.924782-5.272229 .466252-3.526775 .466252-1.75741C.466252-.573848 1.159651 .119552 1.972603 .119552C2.606227 .119552 3.132254-.358655 3.383313-.633624L3.395268-.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229-5.152677ZM3.58655-1.422665C3.526775-1.219427 3.526775-1.195517 3.359402-.968369C3.096389-.633624 2.570361-.119552 2.008468-.119552C1.518306-.119552 1.243337-.561893 1.243337-1.267248C1.243337-1.924782 1.613948-3.263761 1.841096-3.765878C2.247572-4.60274 2.809465-5.033126 3.275716-5.033126C4.064757-5.033126 4.220174-4.052802 4.220174-3.957161C4.220174-3.945205 4.184309-3.789788 4.172354-3.765878L3.58655-1.422665Z'/>
-</defs>
-<g id='eq3-page1'>
-<use x='0' y='0' xlink:href='#eq3-g0-113'/>
-<use x='5.190208' y='1.793263' xlink:href='#eq3-g1-54'/>
-</g>
-</svg> order parameter.</p>
-            <table class="m-table m-fullwidth m-flat m-doc">
-              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
-              <tbody>
-                <tr>
-                  <td><a href="#gga13ffe3a39a0816627553f195e102abb5a129c76a33f8ebd1a8dedd378543af193" class="m-doc-self" id="gga13ffe3a39a0816627553f195e102abb5a129c76a33f8ebd1a8dedd378543af193">cubic</a></td>
-                  <td>
-<p>Ic, or particle type signifying Cubic Ice.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#gga13ffe3a39a0816627553f195e102abb5a22e673e9b130fe029c171fdf2a2e419a" class="m-doc-self" id="gga13ffe3a39a0816627553f195e102abb5a22e673e9b130fe029c171fdf2a2e419a">hexagonal</a></td>
-                  <td>
-<p>Ih, or particle type signifying Hexagonal Ice.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#gga13ffe3a39a0816627553f195e102abb5aa701d941ff4dc44b45faa7fd0e1f163f" class="m-doc-self" id="gga13ffe3a39a0816627553f195e102abb5aa701d941ff4dc44b45faa7fd0e1f163f">water</a></td>
-                  <td>
-<p>Liquid/amorphous phase.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#gga13ffe3a39a0816627553f195e102abb5a2a1eeeb73264d00a89f53b3ec3544b2c" class="m-doc-self" id="gga13ffe3a39a0816627553f195e102abb5a2a1eeeb73264d00a89f53b3ec3544b2c">interfacial</a></td>
-                  <td>
-<p>Interfacial ice: ice-like molecules which do not fulfill the strict criteria of the Ic or Ih phases.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#gga13ffe3a39a0816627553f195e102abb5a9e48b0390667a2a6606fb9bd47752ebd" class="m-doc-self" id="gga13ffe3a39a0816627553f195e102abb5a9e48b0390667a2a6606fb9bd47752ebd">clathrate</a></td>
-                  <td>
-<p>Clathrate ice phase.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#gga13ffe3a39a0816627553f195e102abb5a2307822a42416cc62fcbd5afe887491f" class="m-doc-self" id="gga13ffe3a39a0816627553f195e102abb5a2307822a42416cc62fcbd5afe887491f">interClathrate</a></td>
-                  <td>
-<p>Interfacial clathrate ice phase.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#gga13ffe3a39a0816627553f195e102abb5ad19ecf271dba48ef8dd8175326f669b4" class="m-doc-self" id="gga13ffe3a39a0816627553f195e102abb5ad19ecf271dba48ef8dd8175326f669b4">unclassified</a></td>
-                  <td>
-<p>Not classified into any other category.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#gga13ffe3a39a0816627553f195e102abb5a5300236c5e45c59840b336b4e735fa0a" class="m-doc-self" id="gga13ffe3a39a0816627553f195e102abb5a5300236c5e45c59840b336b4e735fa0a">reCubic</a></td>
-                  <td>
-<p>Reclassified as cubic ice, according to the <svg class="m-math" style="width: 0.982em; height: 0.778em;" viewBox="0 -5.147373 9.424391 7.47198">
-<title>
-$q_6$
-</title>
-<defs>
-<path id='eq4-g1-54' d='M1.099875-2.638107C1.099875-3.299626 1.155666-3.881445 1.44259-4.367621C1.681694-4.766127 2.088169-5.092902 2.590286-5.092902C2.749689-5.092902 3.116314-5.068991 3.299626-4.790037C2.940971-4.774097 2.909091-4.503113 2.909091-4.415442C2.909091-4.176339 3.092403-4.040847 3.283686-4.040847C3.427148-4.040847 3.658281-4.128518 3.658281-4.431382C3.658281-4.909589 3.299626-5.300125 2.582316-5.300125C1.474471-5.300125 .350685-4.24807 .350685-2.526526C.350685-.366625 1.354919 .167372 2.12802 .167372C2.510585 .167372 2.925031 .063761 3.283686-.278954C3.602491-.589788 3.873474-.924533 3.873474-1.617933C3.873474-2.662017 3.084433-3.395268 2.199751-3.395268C1.625903-3.395268 1.283188-3.028643 1.099875-2.638107ZM2.12802-.071731C1.705604-.071731 1.44259-.366625 1.323039-.589788C1.139726-.948443 1.123786-1.490411 1.123786-1.793275C1.123786-2.582316 1.554172-3.172105 2.16787-3.172105C2.566376-3.172105 2.805479-2.964882 2.956912-2.685928C3.124284-2.391034 3.124284-2.032379 3.124284-1.625903S3.124284-.868742 2.964882-.581818C2.757659-.215193 2.478705-.071731 2.12802-.071731Z'/>
-<path id='eq4-g0-113' d='M5.272229-5.152677C5.272229-5.212453 5.224408-5.260274 5.164633-5.260274C5.068991-5.260274 4.60274-4.829888 4.375592-4.411457C4.160399-4.94944 3.789788-5.272229 3.275716-5.272229C1.924782-5.272229 .466252-3.526775 .466252-1.75741C.466252-.573848 1.159651 .119552 1.972603 .119552C2.606227 .119552 3.132254-.358655 3.383313-.633624L3.395268-.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229-5.152677ZM3.58655-1.422665C3.526775-1.219427 3.526775-1.195517 3.359402-.968369C3.096389-.633624 2.570361-.119552 2.008468-.119552C1.518306-.119552 1.243337-.561893 1.243337-1.267248C1.243337-1.924782 1.613948-3.263761 1.841096-3.765878C2.247572-4.60274 2.809465-5.033126 3.275716-5.033126C4.064757-5.033126 4.220174-4.052802 4.220174-3.957161C4.220174-3.945205 4.184309-3.789788 4.172354-3.765878L3.58655-1.422665Z'/>
-</defs>
-<g id='eq4-page1'>
-<use x='0' y='0' xlink:href='#eq4-g0-113'/>
-<use x='5.190208' y='1.793263' xlink:href='#eq4-g1-54'/>
-</g>
-</svg> order parameter.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#gga13ffe3a39a0816627553f195e102abb5acbe48f9c31a28c6a0b37e324e6357048" class="m-doc-self" id="gga13ffe3a39a0816627553f195e102abb5acbe48f9c31a28c6a0b37e324e6357048">reHex</a></td>
-                  <td>
-<p>Reclassified as hexagonal ice, according to the <svg class="m-math" style="width: 0.982em; height: 0.778em;" viewBox="0 -5.147373 9.424391 7.47198">
-<title>
-$q_6$
-</title>
-<defs>
-<path id='eq5-g1-54' d='M1.099875-2.638107C1.099875-3.299626 1.155666-3.881445 1.44259-4.367621C1.681694-4.766127 2.088169-5.092902 2.590286-5.092902C2.749689-5.092902 3.116314-5.068991 3.299626-4.790037C2.940971-4.774097 2.909091-4.503113 2.909091-4.415442C2.909091-4.176339 3.092403-4.040847 3.283686-4.040847C3.427148-4.040847 3.658281-4.128518 3.658281-4.431382C3.658281-4.909589 3.299626-5.300125 2.582316-5.300125C1.474471-5.300125 .350685-4.24807 .350685-2.526526C.350685-.366625 1.354919 .167372 2.12802 .167372C2.510585 .167372 2.925031 .063761 3.283686-.278954C3.602491-.589788 3.873474-.924533 3.873474-1.617933C3.873474-2.662017 3.084433-3.395268 2.199751-3.395268C1.625903-3.395268 1.283188-3.028643 1.099875-2.638107ZM2.12802-.071731C1.705604-.071731 1.44259-.366625 1.323039-.589788C1.139726-.948443 1.123786-1.490411 1.123786-1.793275C1.123786-2.582316 1.554172-3.172105 2.16787-3.172105C2.566376-3.172105 2.805479-2.964882 2.956912-2.685928C3.124284-2.391034 3.124284-2.032379 3.124284-1.625903S3.124284-.868742 2.964882-.581818C2.757659-.215193 2.478705-.071731 2.12802-.071731Z'/>
-<path id='eq5-g0-113' d='M5.272229-5.152677C5.272229-5.212453 5.224408-5.260274 5.164633-5.260274C5.068991-5.260274 4.60274-4.829888 4.375592-4.411457C4.160399-4.94944 3.789788-5.272229 3.275716-5.272229C1.924782-5.272229 .466252-3.526775 .466252-1.75741C.466252-.573848 1.159651 .119552 1.972603 .119552C2.606227 .119552 3.132254-.358655 3.383313-.633624L3.395268-.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229-5.152677ZM3.58655-1.422665C3.526775-1.219427 3.526775-1.195517 3.359402-.968369C3.096389-.633624 2.570361-.119552 2.008468-.119552C1.518306-.119552 1.243337-.561893 1.243337-1.267248C1.243337-1.924782 1.613948-3.263761 1.841096-3.765878C2.247572-4.60274 2.809465-5.033126 3.275716-5.033126C4.064757-5.033126 4.220174-4.052802 4.220174-3.957161C4.220174-3.945205 4.184309-3.789788 4.172354-3.765878L3.58655-1.422665Z'/>
-</defs>
-<g id='eq5-page1'>
-<use x='0' y='0' xlink:href='#eq5-g0-113'/>
-<use x='5.190208' y='1.793263' xlink:href='#eq5-g1-54'/>
-</g>
-</svg> order parameter.</p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ga3d2387897322ededb4936d466f74e459"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">std::unordered_map&lt;int, int&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga3d2387897322ededb4936d466f74e459" class="m-doc-self">createIDMolIDmap</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="mol__sys_8hpp.html">&lt;src/include/internal/mol_sys.hpp&gt;</a></div>
-            </h3>
-<p>Function for creating an unordered map with the atomIDs in the pointCloud as the keys and the molecular IDs as the values</p>
-          </div></section>
-          <section class="m-doc-details" id="ga34b5cffd59aa8f6701dd919d03706b3f"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">std::vector&lt;std::vector&lt;int&gt;&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga34b5cffd59aa8f6701dd919d03706b3f" class="m-doc-self">hAtomMolList</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* hCloud,
-              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* oCloud)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="mol__sys_8hpp.html">&lt;src/include/internal/mol_sys.hpp&gt;</a></div>
-            </h3>
-<p>Function that returns a vector of vectors, which contains the hydrogen atoms for each molID in the oxygen atom pointCloud</p>
-          </div></section>
-          <section class="m-doc-details" id="ga54bfd35451e9528910f3a2d1078d9e89"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">int </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga54bfd35451e9528910f3a2d1078d9e89" class="m-doc-self">searchMolList</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; molList,
-              int molIDtoFind)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="mol__sys_8hpp.html">&lt;src/include/internal/mol_sys.hpp&gt;</a></div>
-            </h3>
-<p>Function for searching a vector of vectors for a particular molecular ID, and returns the index found in molList. Returns -1 if not found.</p>
-          </div></section>
-          <section class="m-doc-details" id="gad8acfb41ee6bc0258612e9cac24269b2"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gad8acfb41ee6bc0258612e9cac24269b2" class="m-doc-self">clearPointCloud</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="mol__sys_8hpp.html">&lt;src/include/internal/mol_sys.hpp&gt;</a></div>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">yCloud&nbsp;<span class="m-label m-flat m-warning">out</span></td>
-                  <td>The cleared <a href="structmolSys_1_1PointCloud.html" class="m-doc">PointCloud</a></td>
-                </tr>
-              </tbody>
-            </table>
-<p>Function for clearing <a href="structmolSys_1_1PointCloud.html" class="m-doc">PointCloud</a> if it is already filled. This should be called before every frame is read in.</p>
-          </div></section>
-        </section>
-      </div>
-    </div>
-  </div>
-</article></main>
-<div class="m-doc-search" id="search">
-  <a href="#!" onclick="return hideSearch()"></a>
-  <div class="m-container">
-    <div class="m-row">
-      <div class="m-col-m-8 m-push-m-2">
-        <div class="m-doc-search-header m-text m-small">
-          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
-          <div id="search-symbolcount">&hellip;</div>
-        </div>
-        <div class="m-doc-search-content">
-          <form action="https://docs.dseams.info/#search">
-            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
-          </form>
-          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript. Enable it or <a href="https://google.com/search?q=site:docs.dseams.info+">use an external search engine</a>.</noscript>
-          <div id="search-help" class="m-text m-dim m-text-center">
-            <p class="m-noindent">Search for symbols, directories, files, pages or
-            modules. You can omit any prefix from the symbol or file path; adding a
-            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
-            directory.</p>
-            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
-            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
-            <span class="m-label m-dim">Enter</span> to go.
-            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
-            copy a link to the result using <span class="m-label m-dim">⌘</span>
-            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
-            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
-          </div>
-          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.<br />Maybe try a full-text <a href="#" id="search-external" data-search-engine="https://google.com/search?q=site:docs.dseams.info+{query}">search with external engine</a>?</div>
-          <ul id="search-results"></ul>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area">
+<a class="project_logo" href="#">
+<img src="dSeamsLogo.png" width="30" height="30" alt="Logo">
+</a>
+<span class="project_info">d-SEAMS v1.0.0</span>
+</nav>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.8.20 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
 </div>
-<script src="search-v1.js"></script>
-<script src="searchdata-v1.js" async="async"></script>
-<footer><nav>
-  <div class="m-container">
-    <div class="m-row">
-      <div class="m-col-l-10 m-push-l-1">
-        <b>(C)
-2018-present</b>
-<a
-href="https://github.com/HaoZeke">Rohit
-Goswami</a>,
-<a
-href="https://github.com/amritagos">Amrita
-Goswami</a>,
-<a
-href="https://github.com/d-Seams">d-SEAMS
-core
-team</a>
-      </div>
-    </div>
-  </div>
-</nav></footer>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#nested-classes">Data Structures</a> &#124;
+<a href="#enum-members">Enumerations</a> &#124;
+<a href="#enumval-members">Enumerator</a> &#124;
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
+  <div class="headertitle">
+<div class="title">MolSys</div>  </div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:namespacemolSys"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemolSys.html">molSys</a></td></tr>
+<tr class="memdesc:namespacemolSys"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bare-bones structs used throughout the architecture. This namespace defines <a class="el" href="structmolSys_1_1Point.html" title="This contains per-particle information.">Point</a> and <a class="el" href="structmolSys_1_1PointCloud.html" title="This contains a collection of points; contains information for a particular frame.">PointCloud</a> structs, alongwith other basic functions and enums. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Data Structures</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmolSys_1_1Result.html">molSys::Result</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This contains the bond classifier of enum type <a class="el" href="group__molSys.html#ga1c858200c3d088bf02839453d0f46328">bond_type</a>, and the bond correlation factor.  <a href="structmolSys_1_1Result.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmolSys_1_1Point.html">molSys::Point&lt; T &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This contains per-particle information.  <a href="structmolSys_1_1Point.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud&lt; S, T &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This contains a collection of points; contains information for a particular frame.  <a href="structmolSys_1_1PointCloud.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:ga1c858200c3d088bf02839453d0f46328"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga1c858200c3d088bf02839453d0f46328">molSys::bond_type</a> { <a class="el" href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328afcdf36b254fcbdfc60a9f2c5c0b36a6e">molSys::staggered</a>, 
+<a class="el" href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a01528e0909036616db40df89990aec2f">molSys::eclipsed</a>, 
+<a class="el" href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a1e1018de3fbdf92f0120a4743587ad53">molSys::out_of_range</a>
+ }</td></tr>
+<tr class="separator:ga1c858200c3d088bf02839453d0f46328"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga13ffe3a39a0816627553f195e102abb5"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga13ffe3a39a0816627553f195e102abb5">molSys::atom_state_type</a> { <br />
+&#160;&#160;<a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a129c76a33f8ebd1a8dedd378543af193">molSys::cubic</a>, 
+<a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a22e673e9b130fe029c171fdf2a2e419a">molSys::hexagonal</a>, 
+<a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5aa701d941ff4dc44b45faa7fd0e1f163f">molSys::water</a>, 
+<a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a2a1eeeb73264d00a89f53b3ec3544b2c">molSys::interfacial</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a9e48b0390667a2a6606fb9bd47752ebd">molSys::clathrate</a>, 
+<a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a2307822a42416cc62fcbd5afe887491f">molSys::interClathrate</a>, 
+<a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5ad19ecf271dba48ef8dd8175326f669b4">molSys::unclassified</a>, 
+<a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a5300236c5e45c59840b336b4e735fa0a">molSys::reCubic</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5acbe48f9c31a28c6a0b37e324e6357048">molSys::reHex</a>
+<br />
+ }</td></tr>
+<tr class="separator:ga13ffe3a39a0816627553f195e102abb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ga3d2387897322ededb4936d466f74e459"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/unordered_map.html">std::unordered_map</a>&lt; int, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga3d2387897322ededb4936d466f74e459">molSys::createIDMolIDmap</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud)</td></tr>
+<tr class="separator:ga3d2387897322ededb4936d466f74e459"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga34b5cffd59aa8f6701dd919d03706b3f"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga34b5cffd59aa8f6701dd919d03706b3f">molSys::hAtomMolList</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *hCloud, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *oCloud)</td></tr>
+<tr class="separator:ga34b5cffd59aa8f6701dd919d03706b3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga54bfd35451e9528910f3a2d1078d9e89"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga54bfd35451e9528910f3a2d1078d9e89">molSys::searchMolList</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; molList, int molIDtoFind)</td></tr>
+<tr class="separator:ga54bfd35451e9528910f3a2d1078d9e89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad8acfb41ee6bc0258612e9cac24269b2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#gad8acfb41ee6bc0258612e9cac24269b2">molSys::clearPointCloud</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud)</td></tr>
+<tr class="separator:gad8acfb41ee6bc0258612e9cac24269b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:ga6e96e75b4bca61e9e5fbb5f99263cf3e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__molSys.html#ga1c858200c3d088bf02839453d0f46328">bond_type</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga6e96e75b4bca61e9e5fbb5f99263cf3e">molSys::Result::classifier</a></td></tr>
+<tr class="separator:ga6e96e75b4bca61e9e5fbb5f99263cf3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8e5d024f6bc765d00dc47d65f9d3b6e8"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga8e5d024f6bc765d00dc47d65f9d3b6e8">molSys::Result::c_value</a></td></tr>
+<tr class="separator:ga8e5d024f6bc765d00dc47d65f9d3b6e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4ffe5d88981575daa2adcd36cab0ce9f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga4ffe5d88981575daa2adcd36cab0ce9f">molSys::Point&lt; T &gt;::type</a></td></tr>
+<tr class="separator:ga4ffe5d88981575daa2adcd36cab0ce9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaeed1df09b79527444ceb1bc0836f4f1a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#gaeed1df09b79527444ceb1bc0836f4f1a">molSys::Point&lt; T &gt;::molID</a></td></tr>
+<tr class="separator:gaeed1df09b79527444ceb1bc0836f4f1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafbcfc945f41267043cddfd9bae8c10a2"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">molSys::Point&lt; T &gt;::atomID</a></td></tr>
+<tr class="separator:gafbcfc945f41267043cddfd9bae8c10a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga25dff2dc0e4cd802b9057d90b3c08d76"><td class="memItemLeft" align="right" valign="top">T&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga25dff2dc0e4cd802b9057d90b3c08d76">molSys::Point&lt; T &gt;::x</a></td></tr>
+<tr class="separator:ga25dff2dc0e4cd802b9057d90b3c08d76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga364150fed66ad63fd2d3995909d43fe0"><td class="memItemLeft" align="right" valign="top">T&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga364150fed66ad63fd2d3995909d43fe0">molSys::Point&lt; T &gt;::y</a></td></tr>
+<tr class="separator:ga364150fed66ad63fd2d3995909d43fe0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga47e132eb01596124477945fbe4345d73"><td class="memItemLeft" align="right" valign="top">T&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga47e132eb01596124477945fbe4345d73">molSys::Point&lt; T &gt;::z</a></td></tr>
+<tr class="separator:ga47e132eb01596124477945fbe4345d73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa15249b70d3c7504f751092e3454b4c6"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="el" href="structmolSys_1_1Result.html">Result</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#gaa15249b70d3c7504f751092e3454b4c6">molSys::Point&lt; T &gt;::c_ij</a></td></tr>
+<tr class="separator:gaa15249b70d3c7504f751092e3454b4c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3b139c528b716173634931897dd13f73"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__molSys.html#ga13ffe3a39a0816627553f195e102abb5">atom_state_type</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga3b139c528b716173634931897dd13f73">molSys::Point&lt; T &gt;::iceType</a></td></tr>
+<tr class="separator:ga3b139c528b716173634931897dd13f73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga825e22e4d171aea51998d585c925c897"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga825e22e4d171aea51998d585c925c897">molSys::Point&lt; T &gt;::inSlice</a> = true</td></tr>
+<tr class="separator:ga825e22e4d171aea51998d585c925c897"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga67ab89369cd26572878a91afd521ef81"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; S &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">molSys::PointCloud&lt; S, T &gt;::pts</a></td></tr>
+<tr class="separator:ga67ab89369cd26572878a91afd521ef81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafccb5a0daab40c3ccc83e4494f4176d7"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#gafccb5a0daab40c3ccc83e4494f4176d7">molSys::PointCloud&lt; S, T &gt;::currentFrame</a></td></tr>
+<tr class="separator:gafccb5a0daab40c3ccc83e4494f4176d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga2bdcb9260bd83f313a2d27fcc6437ef1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">molSys::PointCloud&lt; S, T &gt;::nop</a></td></tr>
+<tr class="separator:ga2bdcb9260bd83f313a2d27fcc6437ef1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa7d9b8543780baf4a495c7acdb1f87d8"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; T &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">molSys::PointCloud&lt; S, T &gt;::box</a></td></tr>
+<tr class="separator:gaa7d9b8543780baf4a495c7acdb1f87d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac861daaeb2b1e75a6ac9eb3390bc6105"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; T &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">molSys::PointCloud&lt; S, T &gt;::boxLow</a></td></tr>
+<tr class="separator:gac861daaeb2b1e75a6ac9eb3390bc6105"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8e48a0ae066c2585e7320cdaa0cbc8db"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/unordered_map.html">std::unordered_map</a>&lt; int, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga8e48a0ae066c2585e7320cdaa0cbc8db">molSys::PointCloud&lt; S, T &gt;::idIndexMap</a></td></tr>
+<tr class="separator:ga8e48a0ae066c2585e7320cdaa0cbc8db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="ga13ffe3a39a0816627553f195e102abb5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga13ffe3a39a0816627553f195e102abb5">&#9670;&nbsp;</a></span>atom_state_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__molSys.html#ga13ffe3a39a0816627553f195e102abb5">molSys::atom_state_type</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Qualifier for the per-particle phase state, according to the CHILL, CHILL+, or <img class="formulaInl" alt="$q_6$" src="form_10.png"/> order parameter. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5a129c76a33f8ebd1a8dedd378543af193"></a>cubic&#160;</td><td class="fielddoc"><p>Ic, or particle type signifying Cubic Ice. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5a22e673e9b130fe029c171fdf2a2e419a"></a>hexagonal&#160;</td><td class="fielddoc"><p>Ih, or particle type signifying Hexagonal Ice. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5aa701d941ff4dc44b45faa7fd0e1f163f"></a>water&#160;</td><td class="fielddoc"><p>Liquid/amorphous phase. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5a2a1eeeb73264d00a89f53b3ec3544b2c"></a>interfacial&#160;</td><td class="fielddoc"><p>Interfacial ice: ice-like molecules which do not fulfill the strict criteria of the Ic or Ih phases. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5a9e48b0390667a2a6606fb9bd47752ebd"></a>clathrate&#160;</td><td class="fielddoc"><p>Clathrate ice phase. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5a2307822a42416cc62fcbd5afe887491f"></a>interClathrate&#160;</td><td class="fielddoc"><p>Interfacial clathrate ice phase. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5ad19ecf271dba48ef8dd8175326f669b4"></a>unclassified&#160;</td><td class="fielddoc"><p>Not classified into any other category. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5a5300236c5e45c59840b336b4e735fa0a"></a>reCubic&#160;</td><td class="fielddoc"><p>Reclassified as cubic ice, according to the <img class="formulaInl" alt="$q_6$" src="form_10.png"/> order parameter. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5acbe48f9c31a28c6a0b37e324e6357048"></a>reHex&#160;</td><td class="fielddoc"><p>Reclassified as hexagonal ice, according to the <img class="formulaInl" alt="$q_6$" src="form_10.png"/> order parameter. </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00094">94</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;                     {</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a129c76a33f8ebd1a8dedd378543af193">cubic</a>,</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a22e673e9b130fe029c171fdf2a2e419a">hexagonal</a>,</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5aa701d941ff4dc44b45faa7fd0e1f163f">water</a>,</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a2a1eeeb73264d00a89f53b3ec3544b2c">interfacial</a>,</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a9e48b0390667a2a6606fb9bd47752ebd">clathrate</a>,</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a2307822a42416cc62fcbd5afe887491f">interClathrate</a>,</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5ad19ecf271dba48ef8dd8175326f669b4">unclassified</a>,</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a5300236c5e45c59840b336b4e735fa0a">reCubic</a>,</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5acbe48f9c31a28c6a0b37e324e6357048">reHex</a></div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;};</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga1c858200c3d088bf02839453d0f46328"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga1c858200c3d088bf02839453d0f46328">&#9670;&nbsp;</a></span>bond_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__molSys.html#ga1c858200c3d088bf02839453d0f46328">molSys::bond_type</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Qualifier for the bond type between two nearest-neighbours, according to the CHILL or CHILL+ classification scheme. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga1c858200c3d088bf02839453d0f46328afcdf36b254fcbdfc60a9f2c5c0b36a6e"></a>staggered&#160;</td><td class="fielddoc"><p>The bond is a staggered bond, according to the <img class="formulaInl" alt="$a(i,j)$" src="form_29.png"/> or <img class="formulaInl" alt="$c(i,j)$" src="form_33.png"/> value. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga1c858200c3d088bf02839453d0f46328a01528e0909036616db40df89990aec2f"></a>eclipsed&#160;</td><td class="fielddoc"><p>The bond is an eclipsed bond. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga1c858200c3d088bf02839453d0f46328a1e1018de3fbdf92f0120a4743587ad53"></a>out_of_range&#160;</td><td class="fielddoc"><p>The bond cannot be classified as either staggered or eclipsed. </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00060">60</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;{ <a class="code" href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328afcdf36b254fcbdfc60a9f2c5c0b36a6e">staggered</a>, <a class="code" href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a01528e0909036616db40df89990aec2f">eclipsed</a>, <a class="code" href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a1e1018de3fbdf92f0120a4743587ad53">out_of_range</a> };</div>
+</div><!-- fragment -->
+</div>
+</div>
+<h2 class="groupheader">Function Documentation</h2>
+<a id="gad8acfb41ee6bc0258612e9cac24269b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad8acfb41ee6bc0258612e9cac24269b2">&#9670;&nbsp;</a></span>clearPointCloud()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; molSys::clearPointCloud </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *&#160;</td>
+          <td class="paramname"><em>yCloud</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Function for clearing <a class="el" href="structmolSys_1_1PointCloud.html" title="This contains a collection of points; contains information for a particular frame.">PointCloud</a> if it is already filled. This should be called before every frame is read in. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">yCloud</td><td>The cleared <a class="el" href="structmolSys_1_1PointCloud.html" title="This contains a collection of points; contains information for a particular frame.">PointCloud</a> </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8cpp_source.html#l00010">10</a> of file <a class="el" href="mol__sys_8cpp_source.html">mol_sys.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;                                                           {</div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;molSys::Point&lt;double&gt;</a>&gt; tempPts;</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a> tempBox;</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a> tempBox1;</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160; </div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;  tempPts.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/swap.html">swap</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>);</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;  tempBox.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/swap.html">swap</a>(yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>);</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;  tempBox1.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/swap.html">swap</a>(yCloud-&gt;<a class="code" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>);</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;  yCloud-&gt;<a class="code" href="group__molSys.html#ga8e48a0ae066c2585e7320cdaa0cbc8db">idIndexMap</a>.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/unordered_map/clear.html">clear</a>();</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160; </div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;  <span class="keywordflow">return</span> *yCloud;</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga3d2387897322ededb4936d466f74e459"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3d2387897322ededb4936d466f74e459">&#9670;&nbsp;</a></span>createIDMolIDmap()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/unordered_map.html">std::unordered_map</a>&lt; int, int &gt; molSys::createIDMolIDmap </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *&#160;</td>
+          <td class="paramname"><em>yCloud</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Function for creating an unordered map with the atomIDs in the pointCloud as the keys and the molecular IDs as the values </p>
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8cpp_source.html#l00033">33</a> of file <a class="el" href="mol__sys_8cpp_source.html">mol_sys.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;                                                           {</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/unordered_map.html">std::unordered_map&lt;int, int&gt;</a></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;      idMolIDmap;  <span class="comment">// atom IDs as keys and mol IDs as values</span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;  <span class="keywordtype">int</span> iatomMolID;  <span class="comment">// molID of the current iatom</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;  <span class="keywordtype">int</span> iatomID;     <span class="comment">// atom ID of the current iatom</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  <span class="comment">// Loop through the atoms in yCloud</span></div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iatom = 0; iatom &lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a>; iatom++) {</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    iatomID = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].atomID;    <span class="comment">// atom ID</span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    iatomMolID = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].molID;  <span class="comment">// molecular ID</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="comment">// Update the unordered map</span></div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    idMolIDmap[iatomID] = iatomMolID;</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;  }  <span class="comment">// end of loop through every iatom in pointCloud</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;  <span class="keywordflow">return</span> idMolIDmap;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga34b5cffd59aa8f6701dd919d03706b3f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga34b5cffd59aa8f6701dd919d03706b3f">&#9670;&nbsp;</a></span>hAtomMolList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt; molSys::hAtomMolList </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *&#160;</td>
+          <td class="paramname"><em>hCloud</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *&#160;</td>
+          <td class="paramname"><em>oCloud</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Function that returns a vector of vectors, which contains the hydrogen atoms for each molID in the oxygen atom pointCloud </p>
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8cpp_source.html#l00058">58</a> of file <a class="el" href="mol__sys_8cpp_source.html">mol_sys.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;                                                           {</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;std::vector&lt;int&gt;</a>&gt;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;      hMolList;  <span class="comment">// the first column contains the molecular IDs, and the next</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                 <span class="comment">// two elements in the row are the hydrogen bond atoms in the</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;                 <span class="comment">// molecule</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  <span class="keywordtype">int</span> iMolID;    <span class="comment">// Current molecular ID</span></div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;  <span class="keywordtype">int</span> nHatoms;   <span class="comment">// No. of h atoms found for a particular molID.</span></div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iatom = 0; iatom &lt; oCloud-&gt;<a class="code" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a>; iatom++) {</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    <span class="comment">// Get the molID</span></div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    iMolID = oCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].molID;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    hMolList.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a>());  <span class="comment">// Empty vector for the index iatom</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    <span class="comment">// Fill the first element with the molecular ID</span></div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    hMolList[iatom].<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(iMolID);</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160; </div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    nHatoms = 0;  <span class="comment">// init (no. of h atoms for the particular molID)</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    <span class="comment">// Now search through the hydrogen atom pointCloud for this particular molID</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> jatom = 0; jatom &lt; hCloud-&gt;<a class="code" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a>; jatom++) {</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;      <span class="keywordflow">if</span> (hCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].molID == iMolID) {</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;        hMolList[iatom].<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(jatom);  <span class="comment">// fill the hatom index</span></div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        nHatoms++;</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        <span class="comment">// If the two hydrogens have been found, break out of the loop</span></div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        <span class="keywordflow">if</span> (nHatoms == 2) {</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;          <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        }  <span class="comment">// end of break</span></div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;      }    <span class="comment">// end of check to see if jatom is part of iMolID</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    }      <span class="comment">// end of loop through the hydrogen atom pointCloud</span></div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;  }        <span class="comment">// end of looping through every oxygen atom</span></div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160; </div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;  <span class="keywordflow">return</span> hMolList;</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;}  <span class="comment">// end of function</span></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga54bfd35451e9528910f3a2d1078d9e89"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga54bfd35451e9528910f3a2d1078d9e89">&#9670;&nbsp;</a></span>searchMolList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int molSys::searchMolList </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt;&#160;</td>
+          <td class="paramname"><em>molList</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>molIDtoFind</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Function for searching a vector of vectors for a particular molecular ID, and returns the index found in molList. Returns -1 if not found. </p>
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8cpp_source.html#l00102">102</a> of file <a class="el" href="mol__sys_8cpp_source.html">mol_sys.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;                                           {</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;  <span class="keywordtype">int</span> index = -1;  <span class="comment">// init invalid index</span></div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160; </div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iatom = 0; iatom &lt; molList.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>(); iatom++) {</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    <span class="comment">// If the molecular ID is equal, return the index in the array</span></div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;    <span class="keywordflow">if</span> (molList[iatom][0] == molIDtoFind) {</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;      index = iatom;</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;      <span class="keywordflow">return</span> index;</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    }  <span class="comment">// end of check</span></div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;  }    <span class="comment">// end of looping through iatom</span></div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160; </div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;  <span class="keywordflow">return</span> index;</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<h2 class="groupheader">Variable Documentation</h2>
+<a id="gafbcfc945f41267043cddfd9bae8c10a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafbcfc945f41267043cddfd9bae8c10a2">&#9670;&nbsp;</a></span>atomID</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; T &gt;::atomID</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00134">134</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+
+</div>
+</div>
+<a id="gaa7d9b8543780baf4a495c7acdb1f87d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa7d9b8543780baf4a495c7acdb1f87d8">&#9670;&nbsp;</a></span>box</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename S , typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt;T&gt; <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; S, T &gt;::box</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00159">159</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+
+</div>
+</div>
+<a id="gac861daaeb2b1e75a6ac9eb3390bc6105"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac861daaeb2b1e75a6ac9eb3390bc6105">&#9670;&nbsp;</a></span>boxLow</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename S , typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt;T&gt; <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; S, T &gt;::boxLow</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00160">160</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+
+</div>
+</div>
+<a id="gaa15249b70d3c7504f751092e3454b4c6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa15249b70d3c7504f751092e3454b4c6">&#9670;&nbsp;</a></span>c_ij</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt;<a class="el" href="structmolSys_1_1Result.html">Result</a>&gt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; T &gt;::c_ij</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00136">136</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga8e5d024f6bc765d00dc47d65f9d3b6e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8e5d024f6bc765d00dc47d65f9d3b6e8">&#9670;&nbsp;</a></span>c_value</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double molSys::Result::c_value</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00116">116</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga6e96e75b4bca61e9e5fbb5f99263cf3e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6e96e75b4bca61e9e5fbb5f99263cf3e">&#9670;&nbsp;</a></span>classifier</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__molSys.html#ga1c858200c3d088bf02839453d0f46328">bond_type</a> molSys::Result::classifier</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00115">115</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+
+</div>
+</div>
+<a id="gafccb5a0daab40c3ccc83e4494f4176d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafccb5a0daab40c3ccc83e4494f4176d7">&#9670;&nbsp;</a></span>currentFrame</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename S , typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; S, T &gt;::currentFrame</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00157">157</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga3b139c528b716173634931897dd13f73"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3b139c528b716173634931897dd13f73">&#9670;&nbsp;</a></span>iceType</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__molSys.html#ga13ffe3a39a0816627553f195e102abb5">atom_state_type</a> <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; T &gt;::iceType</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">=</div>
+<div class="line">      <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5ad19ecf271dba48ef8dd8175326f669b4">molSys::unclassified</a></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00137">137</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga8e48a0ae066c2585e7320cdaa0cbc8db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8e48a0ae066c2585e7320cdaa0cbc8db">&#9670;&nbsp;</a></span>idIndexMap</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename S , typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/unordered_map.html">std::unordered_map</a>&lt;int, int&gt; <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; S, T &gt;::idIndexMap</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00161">161</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga825e22e4d171aea51998d585c925c897"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga825e22e4d171aea51998d585c925c897">&#9670;&nbsp;</a></span>inSlice</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; T &gt;::inSlice = true</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00139">139</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+
+</div>
+</div>
+<a id="gaeed1df09b79527444ceb1bc0836f4f1a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaeed1df09b79527444ceb1bc0836f4f1a">&#9670;&nbsp;</a></span>molID</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; T &gt;::molID</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00134">134</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga2bdcb9260bd83f313a2d27fcc6437ef1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga2bdcb9260bd83f313a2d27fcc6437ef1">&#9670;&nbsp;</a></span>nop</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename S , typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; S, T &gt;::nop</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00158">158</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga67ab89369cd26572878a91afd521ef81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga67ab89369cd26572878a91afd521ef81">&#9670;&nbsp;</a></span>pts</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename S , typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt;S&gt; <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; S, T &gt;::pts</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00156">156</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga4ffe5d88981575daa2adcd36cab0ce9f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4ffe5d88981575daa2adcd36cab0ce9f">&#9670;&nbsp;</a></span>type</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; T &gt;::type</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00134">134</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga25dff2dc0e4cd802b9057d90b3c08d76"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga25dff2dc0e4cd802b9057d90b3c08d76">&#9670;&nbsp;</a></span>x</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">T <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; T &gt;::x</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00135">135</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga364150fed66ad63fd2d3995909d43fe0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga364150fed66ad63fd2d3995909d43fe0">&#9670;&nbsp;</a></span>y</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">T <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; T &gt;::y</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00135">135</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga47e132eb01596124477945fbe4345d73"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga47e132eb01596124477945fbe4345d73">&#9670;&nbsp;</a></span>z</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">T <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; T &gt;::z</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00135">135</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5ad19ecf271dba48ef8dd8175326f669b4"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5ad19ecf271dba48ef8dd8175326f669b4">molSys::unclassified</a></div><div class="ttdeci">@ unclassified</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00101">mol_sys.hpp:101</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gac861daaeb2b1e75a6ac9eb3390bc6105"><div class="ttname"><a href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">molSys::PointCloud::boxLow</a></div><div class="ttdeci">std::vector&lt; T &gt; boxLow</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00160">mol_sys.hpp:160</a></div></div>
+<div class="ttc" id="avector_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a></div><div class="ttdoc">STL class.</div></div>
+<div class="ttc" id="asize_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/size.html">std::vector::size</a></div><div class="ttdeci">T size(T... args)</div></div>
+<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5a129c76a33f8ebd1a8dedd378543af193"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a129c76a33f8ebd1a8dedd378543af193">molSys::cubic</a></div><div class="ttdeci">@ cubic</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00095">mol_sys.hpp:95</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5a9e48b0390667a2a6606fb9bd47752ebd"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a9e48b0390667a2a6606fb9bd47752ebd">molSys::clathrate</a></div><div class="ttdeci">@ clathrate</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00099">mol_sys.hpp:99</a></div></div>
+<div class="ttc" id="aclear_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/unordered_map/clear.html">std::unordered_map::clear</a></div><div class="ttdeci">T clear(T... args)</div></div>
+<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5a5300236c5e45c59840b336b4e735fa0a"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a5300236c5e45c59840b336b4e735fa0a">molSys::reCubic</a></div><div class="ttdeci">@ reCubic</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00102">mol_sys.hpp:102</a></div></div>
+<div class="ttc" id="apush_back_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">std::vector::push_back</a></div><div class="ttdeci">T push_back(T... args)</div></div>
+<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5a22e673e9b130fe029c171fdf2a2e419a"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a22e673e9b130fe029c171fdf2a2e419a">molSys::hexagonal</a></div><div class="ttdeci">@ hexagonal</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00096">mol_sys.hpp:96</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gga1c858200c3d088bf02839453d0f46328a01528e0909036616db40df89990aec2f"><div class="ttname"><a href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a01528e0909036616db40df89990aec2f">molSys::eclipsed</a></div><div class="ttdeci">@ eclipsed</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00060">mol_sys.hpp:60</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5acbe48f9c31a28c6a0b37e324e6357048"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5acbe48f9c31a28c6a0b37e324e6357048">molSys::reHex</a></div><div class="ttdeci">@ reHex</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00104">mol_sys.hpp:103</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gaa7d9b8543780baf4a495c7acdb1f87d8"><div class="ttname"><a href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">molSys::PointCloud::box</a></div><div class="ttdeci">std::vector&lt; T &gt; box</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00159">mol_sys.hpp:159</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga8e48a0ae066c2585e7320cdaa0cbc8db"><div class="ttname"><a href="group__molSys.html#ga8e48a0ae066c2585e7320cdaa0cbc8db">molSys::PointCloud::idIndexMap</a></div><div class="ttdeci">std::unordered_map&lt; int, int &gt; idIndexMap</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00161">mol_sys.hpp:161</a></div></div>
+<div class="ttc" id="aswap_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/swap.html">std::vector::swap</a></div><div class="ttdeci">T swap(T... args)</div></div>
+<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5aa701d941ff4dc44b45faa7fd0e1f163f"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5aa701d941ff4dc44b45faa7fd0e1f163f">molSys::water</a></div><div class="ttdeci">@ water</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00097">mol_sys.hpp:97</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga2bdcb9260bd83f313a2d27fcc6437ef1"><div class="ttname"><a href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">molSys::PointCloud::nop</a></div><div class="ttdeci">int nop</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00158">mol_sys.hpp:158</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga67ab89369cd26572878a91afd521ef81"><div class="ttname"><a href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">molSys::PointCloud::pts</a></div><div class="ttdeci">std::vector&lt; S &gt; pts</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00156">mol_sys.hpp:156</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5a2a1eeeb73264d00a89f53b3ec3544b2c"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a2a1eeeb73264d00a89f53b3ec3544b2c">molSys::interfacial</a></div><div class="ttdeci">@ interfacial</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00098">mol_sys.hpp:98</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gga1c858200c3d088bf02839453d0f46328afcdf36b254fcbdfc60a9f2c5c0b36a6e"><div class="ttname"><a href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328afcdf36b254fcbdfc60a9f2c5c0b36a6e">molSys::staggered</a></div><div class="ttdeci">@ staggered</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00060">mol_sys.hpp:60</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gga1c858200c3d088bf02839453d0f46328a1e1018de3fbdf92f0120a4743587ad53"><div class="ttname"><a href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a1e1018de3fbdf92f0120a4743587ad53">molSys::out_of_range</a></div><div class="ttdeci">@ out_of_range</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00060">mol_sys.hpp:60</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5a2307822a42416cc62fcbd5afe887491f"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a2307822a42416cc62fcbd5afe887491f">molSys::interClathrate</a></div><div class="ttdeci">@ interClathrate</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00100">mol_sys.hpp:100</a></div></div>
+<div class="ttc" id="aunordered_map_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/unordered_map.html">std::unordered_map&lt; int, int &gt;</a></div></div>
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen 1.9.1-->
+<!-- start footer part -->
+<div class="footer">
+<hr class="footline"/><address class="footline"><small>
+    Generated by&#160;<a href="https://www.doxygen.org/index.html">Doxygen 1.8.20</a> and the <a class="outlink" href="https://github.com/HaoZeke/doxyYoda">doxyYoda theme</a>
+</small></address>
+</div>
+</div>
 </body>
 </html>

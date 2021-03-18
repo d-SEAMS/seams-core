@@ -1,332 +1,825 @@
-<!DOCTYPE html>
-<html lang="en">
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen 1.9.1-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="UTF-8" />
-  <title>Bond module | d-SEAMS</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="icon" href="dSeamsLogo.ico" type="image/vnd.microsoft.icon" />
-  <link rel="search" type="application/opensearchdescription+xml" href="opensearch.xml" title="Search d-SEAMS documentation" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.20"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>d-SEAMS: Bond</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']]
+  },
+  svg: {
+    fontCache: 'global'
+  }
+  loader: { load: ["[tex]/unicode", "[tex]/ams"] },
+  tex: {
+    packages: { "[+]": ["unicode", "ams"] },
+    tags: "ams",
+  },
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+</script>
+<!-- <link href="doxygen.css" rel="stylesheet" type="text/css" /> -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" >
+$(document).ready(function() {
+     $(".fragment").wrap("<details class='code-details'></details>");
+     $(".code-details").append("<summary>Code</summary>");
+ }
+)
+</script>
 </head>
 <body>
-<header><nav id="navigation">
-  <div class="m-container">
-    <div class="m-row">
-      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m"><img src="dSeamsLogo.png" alt="" />d-SEAMS</a>
-      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
-        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
-          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
-        </svg></a>
-        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
-        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
-      </div>
-      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
-        <div class="m-row">
-          <ol class="m-col-t-6 m-col-m-none">
-            <li><a href="namespaces.html">Namespaces</a></li>
-            <li><a href="modules.html">Modules</a></li>
-            <li><a href="pages.html">Wiki</a></li>
-          </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
-            <li><a href="annotated.html">Classes</a></li>
-            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
-              <use href="#m-doc-search-icon-path" />
-            </svg></a></li>
-          </ol>
-        </div>
-      </div>
-    </div>
-  </div>
-</nav></header>
-<main><article>
-  <div class="m-container m-container-inflatable">
-    <div class="m-row">
-      <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          Bond <span class="m-thin">module</span></h1>
-        <div class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#func-members">Functions</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespacebond.html" class="m-doc">bond</a></dt>
-            <dd>Functions for bond-related analyses This namespace contains functions that are used for determining the hydrogen bonds, or lists of bonded atoms for write-outs to data files and visualization.</dd>
-          </dl>
-        </section>
-        <section id="func-members">
-          <h2><a href="#func-members">Functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ga081e4c1f726d5b0bfd9006af2fe3fdee" class="m-doc">populateHbonds</a>(</span><span class="m-doc-wrap">std::string filename,
-              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
-              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
-              int targetFrame,
-              int Htype) -&gt; std::vector&lt;std::vector&lt;int&gt;&gt;</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#gad4b0179fc40db64244a9f8a10ea5fc4c" class="m-doc">getHbondDistanceOH</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* oCloud,
-              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* hCloud,
-              int oAtomIndex,
-              int hAtomIndex) -&gt; double</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ga99a6b8a519741c767bd8bed063276b5a" class="m-doc">populateBonds</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; nList,
-              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud) -&gt; std::vector&lt;std::vector&lt;int&gt;&gt;</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ga8ca8aaf5a0984386dab38e207363f8c2" class="m-doc">populateBonds</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; nList,
-              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
-              std::vector&lt;<a href="group__cage.html#gaaac41828990e32b9d6e7db4426b61529" class="m-doc">cage::<wbr />iceType</a>&gt; atomTypes) -&gt; std::vector&lt;std::vector&lt;int&gt;&gt;</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#gaea75576194f28a141cee66548c309e1a" class="m-doc">createBondsFromCages</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; rings,
-              std::vector&lt;<a href="structcage_1_1Cage.html" class="m-doc">cage::<wbr />Cage</a>&gt;* cageList,
-              <a href="group__cage.html#ga5787314f51b5927c213db48b81c21d95" class="m-doc">cage::<wbr />cageType</a> type,
-              int* nRings) -&gt; std::vector&lt;std::vector&lt;int&gt;&gt;</span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ga487c36cc7ddc9079ad59fc645324b20c" class="m-doc">trimBonds</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; bonds) -&gt; std::vector&lt;std::vector&lt;int&gt;&gt;</span>
-            </dt>
-            <dd></dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ga081e4c1f726d5b0bfd9006af2fe3fdee"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">std::vector&lt;std::vector&lt;int&gt;&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga081e4c1f726d5b0bfd9006af2fe3fdee" class="m-doc-self">populateHbonds</a>(</span><span class="m-doc-wrap">std::string filename,
-              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
-              std::vector&lt;std::vector&lt;int&gt;&gt; nList,
-              int targetFrame,
-              int Htype)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bond_8hpp.html">&lt;src/include/internal/bond.hpp&gt;</a></div>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Filename of the trajectory, with the hydrogen and oxygen coordinates</td>
-                </tr>
-                <tr>
-                  <td>yCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The input <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a> for the oxygen atoms only</td>
-                </tr>
-                <tr>
-                  <td>nList&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Row-ordered neighbour list by atom ID</td>
-                </tr>
-                <tr>
-                  <td>targetFrame&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The target or current frame number (starts from 1) and is not the timestep value</td>
-                </tr>
-                <tr>
-                  <td>Htype&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The type ID of the hydrogen atoms</td>
-                </tr>
-              </tbody>
-            </table>
-<p>Create a vector of vectors (similar to the neighbour list conventions). The output vector of vectors is row-ordered. The first element is the atom ID of the particle for which the neighbours are enumerated (the central atom), followed by the central atom&#x27;s neighbour&#x27;s IDs (not indices). Decides the existence of the hydrogen bond depending on the O&ndash;O and O&ndash;H vectors from the neighbour list (by ID) already constructed.</p>
-          </div></section>
-          <section class="m-doc-details" id="gad4b0179fc40db64244a9f8a10ea5fc4c"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">double </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gad4b0179fc40db64244a9f8a10ea5fc4c" class="m-doc-self">getHbondDistanceOH</a>(</span><span class="m-doc-wrap"><a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* oCloud,
-              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* hCloud,
-              int oAtomIndex,
-              int hAtomIndex)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bond_8hpp.html">&lt;src/include/internal/bond.hpp&gt;</a></div>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">oCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a> for the oxygen atoms only</td>
-                </tr>
-                <tr>
-                  <td>hCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a> for the hydrogen atoms only</td>
-                </tr>
-                <tr>
-                  <td>oAtomIndex&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The index (in the oCloud) of the oxygen atom</td>
-                </tr>
-                <tr>
-                  <td>hAtomIndex&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The index (in the hCloud) of the hydrogen atom</td>
-                </tr>
-              </tbody>
-            </table>
-<p>Calculates the bond length between a Hydrogen and Oxygen atom of two different atoms, given their respective pointClouds and the indices to each atom.</p>
-          </div></section>
-          <section class="m-doc-details" id="ga99a6b8a519741c767bd8bed063276b5a"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">std::vector&lt;std::vector&lt;int&gt;&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga99a6b8a519741c767bd8bed063276b5a" class="m-doc-self">populateBonds</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; nList,
-              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bond_8hpp.html">&lt;src/include/internal/bond.hpp&gt;</a></div>
-            </h3>
-<p>Create a vector of vectors containing bond information (outputs bonded atom IDs, not indices!) from the neighbour list vector of vectors (which contains atom INDICES). Moreover, the first element corresponds to the atom whose neighbours have been found.</p>
-          </div></section>
-          <section class="m-doc-details" id="ga8ca8aaf5a0984386dab38e207363f8c2"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">std::vector&lt;std::vector&lt;int&gt;&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga8ca8aaf5a0984386dab38e207363f8c2" class="m-doc-self">populateBonds</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; nList,
-              <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a>&lt;<a href="structmolSys_1_1Point.html" class="m-doc">molSys::<wbr />Point</a>&lt;double&gt;, double&gt;* yCloud,
-              std::vector&lt;<a href="group__cage.html#gaaac41828990e32b9d6e7db4426b61529" class="m-doc">cage::<wbr />iceType</a>&gt; atomTypes)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bond_8hpp.html">&lt;src/include/internal/bond.hpp&gt;</a></div>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">nList&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Row-ordered neighbour list by ID</td>
-                </tr>
-                <tr>
-                  <td>yCloud&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The input <a href="structmolSys_1_1PointCloud.html" class="m-doc">molSys::<wbr />PointCloud</a></td>
-                </tr>
-                <tr>
-                  <td>atomTypes&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Contains an atom type for each particle in yCloud</td>
-                </tr>
-              </tbody>
-            </table>
-<p>Create a vector of vectors containing bond information (outputs bonded atom IDs, not indices!) from the neighbour list vector of vectors (which contains atom INDICES). Bonds between dummy atoms, and between dummy and ice atoms are not added. Moreover, the first element corresponds to the atom whose neighbours have been found.</p>
-          </div></section>
-          <section class="m-doc-details" id="gaea75576194f28a141cee66548c309e1a"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">std::vector&lt;std::vector&lt;int&gt;&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gaea75576194f28a141cee66548c309e1a" class="m-doc-self">createBondsFromCages</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; rings,
-              std::vector&lt;<a href="structcage_1_1Cage.html" class="m-doc">cage::<wbr />Cage</a>&gt;* cageList,
-              <a href="group__cage.html#ga5787314f51b5927c213db48b81c21d95" class="m-doc">cage::<wbr />cageType</a> type,
-              int* nRings)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bond_8hpp.html">&lt;src/include/internal/bond.hpp&gt;</a></div>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">rings&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Row-ordered vector of vectors atom indices of ring information. Each row is a ring, containing the indices of the particles in that ring</td>
-                </tr>
-                <tr>
-                  <td>cageList&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>A vector of <a href="structcage_1_1Cage.html" class="m-doc">cage::<wbr />Cage</a> containing a list of HCs or DDCs</td>
-                </tr>
-                <tr>
-                  <td>type&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The type of cage to get bonds for</td>
-                </tr>
-                <tr>
-                  <td>nRings&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td>The total number of rings for all the cages, for the particular cage type</td>
-                </tr>
-              </tbody>
-            </table>
-<p>Create a vector of vectors containing bond information (bonded atom IDs, not vector or array indices!) from the ring vector of vectors and cageList</p>
-          </div></section>
-          <section class="m-doc-details" id="ga487c36cc7ddc9079ad59fc645324b20c"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">std::vector&lt;std::vector&lt;int&gt;&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga487c36cc7ddc9079ad59fc645324b20c" class="m-doc-self">trimBonds</a>(</span><span class="m-doc-wrap">std::vector&lt;std::vector&lt;int&gt;&gt; bonds)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bond_8hpp.html">&lt;src/include/internal/bond.hpp&gt;</a></div>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">bonds&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td>Row-ordered vector of vectors of the bond matrix Each row is a ring, containing the indices of the particles in that ring</td>
-                </tr>
-              </tbody>
-            </table>
-<p>The bond 1 2 and 2 1 are the same. To prevent multiple bonds between the same atoms, remove all bonds which are duplicates of the reversed vectors (denoting individual bonds) within the bonds vector of vectors</p>
-          </div></section>
-        </section>
-      </div>
-    </div>
-  </div>
-</article></main>
-<div class="m-doc-search" id="search">
-  <a href="#!" onclick="return hideSearch()"></a>
-  <div class="m-container">
-    <div class="m-row">
-      <div class="m-col-m-8 m-push-m-2">
-        <div class="m-doc-search-header m-text m-small">
-          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
-          <div id="search-symbolcount">&hellip;</div>
-        </div>
-        <div class="m-doc-search-content">
-          <form action="https://docs.dseams.info/#search">
-            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
-          </form>
-          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript. Enable it or <a href="https://google.com/search?q=site:docs.dseams.info+">use an external search engine</a>.</noscript>
-          <div id="search-help" class="m-text m-dim m-text-center">
-            <p class="m-noindent">Search for symbols, directories, files, pages or
-            modules. You can omit any prefix from the symbol or file path; adding a
-            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
-            directory.</p>
-            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
-            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
-            <span class="m-label m-dim">Enter</span> to go.
-            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
-            copy a link to the result using <span class="m-label m-dim">⌘</span>
-            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
-            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
-          </div>
-          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.<br />Maybe try a full-text <a href="#" id="search-external" data-search-engine="https://google.com/search?q=site:docs.dseams.info+{query}">search with external engine</a>?</div>
-          <ul id="search-results"></ul>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area">
+<a class="project_logo" href="#">
+<img src="dSeamsLogo.png" width="30" height="30" alt="Logo">
+</a>
+<span class="project_info">d-SEAMS v1.0.0</span>
+</nav>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.8.20 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
 </div>
-<script src="search-v1.js"></script>
-<script src="searchdata-v1.js" async="async"></script>
-<footer><nav>
-  <div class="m-container">
-    <div class="m-row">
-      <div class="m-col-l-10 m-push-l-1">
-        <b>(C)
-2018-present</b>
-<a
-href="https://github.com/HaoZeke">Rohit
-Goswami</a>,
-<a
-href="https://github.com/amritagos">Amrita
-Goswami</a>,
-<a
-href="https://github.com/d-Seams">d-SEAMS
-core
-team</a>
-      </div>
-    </div>
-  </div>
-</nav></footer>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#func-members">Functions</a>  </div>
+  <div class="headertitle">
+<div class="title">Bond</div>  </div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:namespacebond"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacebond.html">bond</a></td></tr>
+<tr class="memdesc:namespacebond"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functions for bond-related analyses This namespace contains functions that are used for determining the hydrogen bonds, or lists of bonded atoms for write-outs to data files and visualization. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ga081e4c1f726d5b0bfd9006af2fe3fdee"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bond.html#ga081e4c1f726d5b0bfd9006af2fe3fdee">bond::populateHbonds</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> filename, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; nList, int targetFrame, int Htype)</td></tr>
+<tr class="separator:ga081e4c1f726d5b0bfd9006af2fe3fdee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad4b0179fc40db64244a9f8a10ea5fc4c"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bond.html#gad4b0179fc40db64244a9f8a10ea5fc4c">bond::getHbondDistanceOH</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *oCloud, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *hCloud, int oAtomIndex, int hAtomIndex)</td></tr>
+<tr class="separator:gad4b0179fc40db64244a9f8a10ea5fc4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga99a6b8a519741c767bd8bed063276b5a"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bond.html#ga99a6b8a519741c767bd8bed063276b5a">bond::populateBonds</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud)</td></tr>
+<tr class="separator:ga99a6b8a519741c767bd8bed063276b5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8ca8aaf5a0984386dab38e207363f8c2"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bond.html#ga8ca8aaf5a0984386dab38e207363f8c2">bond::populateBonds</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="el" href="group__cage.html#gaaac41828990e32b9d6e7db4426b61529">cage::iceType</a> &gt; atomTypes)</td></tr>
+<tr class="separator:ga8ca8aaf5a0984386dab38e207363f8c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaea75576194f28a141cee66548c309e1a"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bond.html#gaea75576194f28a141cee66548c309e1a">bond::createBondsFromCages</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; rings, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; *cageList, <a class="el" href="group__cage.html#ga5787314f51b5927c213db48b81c21d95">cage::cageType</a> type, int *nRings)</td></tr>
+<tr class="separator:gaea75576194f28a141cee66548c309e1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga487c36cc7ddc9079ad59fc645324b20c"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bond.html#ga487c36cc7ddc9079ad59fc645324b20c">bond::trimBonds</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; bonds)</td></tr>
+<tr class="separator:ga487c36cc7ddc9079ad59fc645324b20c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<h2 class="groupheader">Function Documentation</h2>
+<a id="gaea75576194f28a141cee66548c309e1a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaea75576194f28a141cee66548c309e1a">&#9670;&nbsp;</a></span>createBondsFromCages()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt; bond::createBondsFromCages </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt;&#160;</td>
+          <td class="paramname"><em>rings</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; *&#160;</td>
+          <td class="paramname"><em>cageList</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__cage.html#ga5787314f51b5927c213db48b81c21d95">cage::cageType</a>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>nRings</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Create a vector of vectors containing bond information (bonded atom IDs, not vector or array indices!) from the ring vector of vectors and cageList </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">rings</td><td>Row-ordered vector of vectors atom indices of ring information. Each row is a ring, containing the indices of the particles in that ring </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">cageList</td><td>A vector of <a class="el" href="structcage_1_1Cage.html" title="This contains a cage, with the constituent rings.">cage::Cage</a> containing a list of HCs or DDCs </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>The type of cage to get bonds for </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">nRings</td><td>The total number of rings for all the cages, for the particular cage type </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="bond_8cpp_source.html#l00348">348</a> of file <a class="el" href="bond_8cpp_source.html">bond.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;                                    {</div>
+<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;std::vector&lt;int&gt;</a>&gt; bonds;  <span class="comment">// Output vector of vectors</span></div>
+<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a> currentBond;         <span class="comment">// Vector for the current bond</span></div>
+<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;  <span class="keywordtype">int</span> ringSize = rings[0].<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>();</div>
+<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;  <span class="keywordtype">int</span> currentRing;  <span class="comment">// (vector) index of the current ring in a particular cage</span></div>
+<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160; </div>
+<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;  <span class="comment">// Error handling</span></div>
+<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;  <span class="keywordflow">if</span> (rings.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>() == 0) {</div>
+<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;    <span class="comment">// There is some problem!</span></div>
+<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;    <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::cerr</a> &lt;&lt; <span class="stringliteral">&quot;There are no rings in the system!\n&quot;</span>;</div>
+<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;    <span class="keywordflow">return</span> bonds;</div>
+<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;  }</div>
+<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160; </div>
+<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;  <span class="comment">// Form of the bonds vector of vectors:</span></div>
+<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;  <span class="comment">// 272    214</span></div>
+<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;  <span class="comment">// 1       2</span></div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;  <span class="comment">// Meaning that 272 and 214 are bonded; similarly 1 and 2 are bonded</span></div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160; </div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;  <span class="comment">// Traverse the cageList vector of Cages</span></div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160; </div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;  *nRings = 0;  <span class="comment">// init</span></div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160; </div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;  <span class="comment">// Loop through all the cages</span></div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> icage = 0; icage &lt; (*cageList).size(); icage++) {</div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;    <span class="comment">// Skip if the cage is of a different type</span></div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;    <span class="keywordflow">if</span> ((*cageList)[icage].type != type) {</div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;      <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;    }</div>
+<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;    *nRings += (*cageList)[icage].rings.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>();  <span class="comment">// Add to the number of rings</span></div>
+<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;    <span class="comment">//</span></div>
+<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;    <span class="comment">// Now loop through a particular ring inside the i^th cage</span></div>
+<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iring = 0; iring &lt; (*cageList)[icage].rings.size(); iring++) {</div>
+<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;      currentRing = (*cageList)[icage].rings[iring];  <span class="comment">// Current ring index</span></div>
+<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;      <span class="comment">// Get the first atom of each pair inside currentRing</span></div>
+<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; rings[currentRing].<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>() - 1; k++) {</div>
+<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;        <span class="comment">// Clear the current bond vector</span></div>
+<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;        currentBond.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/clear.html">clear</a>();</div>
+<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;        <span class="comment">// Fill the current bond vector</span></div>
+<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;        currentBond.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(rings[currentRing][k]);</div>
+<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;        currentBond.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(rings[currentRing][k + 1]);</div>
+<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;        <a class="codeRef" href="http://en.cppreference.com/w/cpp/algorithm/sort.html">std::sort</a>(currentBond.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/begin.html">begin</a>(), currentBond.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/end.html">end</a>());</div>
+<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;        <span class="comment">// Add to the bonds vector of vectors</span></div>
+<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;        bonds.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(currentBond);</div>
+<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;      }  <span class="comment">// end of loop through ring elements, except the last one</span></div>
+<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;      <span class="comment">// The last pair is with the last element and the first element</span></div>
+<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;      <span class="comment">// Fill currentBond and update bonds</span></div>
+<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;      currentBond.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/clear.html">clear</a>();</div>
+<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;      currentBond.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(rings[currentRing][ringSize - 1]);</div>
+<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;      currentBond.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(rings[currentRing][0]);</div>
+<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;      <a class="codeRef" href="http://en.cppreference.com/w/cpp/algorithm/sort.html">std::sort</a>(currentBond.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/begin.html">begin</a>(), currentBond.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/end.html">end</a>());</div>
+<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;      bonds.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(currentBond);</div>
+<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;    }  <span class="comment">// end of loop through a particular ring</span></div>
+<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;  }    <span class="comment">// end of loop through cages</span></div>
+<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160; </div>
+<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;  <span class="comment">// This may have duplicates, so the duplicates should be removed</span></div>
+<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/algorithm/sort.html">std::sort</a>(bonds.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/begin.html">begin</a>(), bonds.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/end.html">end</a>());</div>
+<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;  bonds.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/erase.html">erase</a>(<a class="codeRef" href="http://en.cppreference.com/w/cpp/algorithm/unique.html">std::unique</a>(bonds.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/begin.html">begin</a>(), bonds.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/end.html">end</a>()), bonds.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/end.html">end</a>());</div>
+<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160; </div>
+<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;  <span class="keywordflow">return</span> bonds;</div>
+<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gad4b0179fc40db64244a9f8a10ea5fc4c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad4b0179fc40db64244a9f8a10ea5fc4c">&#9670;&nbsp;</a></span>getHbondDistanceOH()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double bond::getHbondDistanceOH </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *&#160;</td>
+          <td class="paramname"><em>oCloud</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *&#160;</td>
+          <td class="paramname"><em>hCloud</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>oAtomIndex</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>hAtomIndex</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Calculates the bond length between a Hydrogen and Oxygen atom of two different atoms, given their respective pointClouds and the indices to each atom. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">oCloud</td><td>The <a class="el" href="structmolSys_1_1PointCloud.html" title="This contains a collection of points; contains information for a particular frame.">molSys::PointCloud</a> for the oxygen atoms only </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hCloud</td><td>The <a class="el" href="structmolSys_1_1PointCloud.html" title="This contains a collection of points; contains information for a particular frame.">molSys::PointCloud</a> for the hydrogen atoms only </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">oAtomIndex</td><td>The index (in the oCloud) of the oxygen atom </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hAtomIndex</td><td>The index (in the hCloud) of the hydrogen atom </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="bond_8cpp_source.html#l00320">320</a> of file <a class="el" href="bond_8cpp_source.html">bond.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;                    {</div>
+<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array&lt;double, 3&gt;</a> dr;  <span class="comment">// relative distance in the X, Y, Z dimensions</span></div>
+<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;  <span class="keywordtype">double</span> r2 = 0.0;           <span class="comment">// Bond length</span></div>
+<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160; </div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;  dr[0] = oCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[oAtomIndex].x - hCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[hAtomIndex].x;</div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;  dr[1] = oCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[oAtomIndex].y - hCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[hAtomIndex].y;</div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;  dr[2] = oCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[oAtomIndex].z - hCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[hAtomIndex].z;</div>
+<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160; </div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;  <span class="comment">// Apply the PBCs and get the squared area</span></div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;    dr[k] -= oCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k] * <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/round.html">round</a>(dr[k] / oCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k]);</div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;    r2 += <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/pow.html">pow</a>(dr[k], 2.0);</div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;  }  <span class="comment">// end of applying the PBCs and getting the squared area</span></div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;  <span class="keywordflow">return</span> <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/sqrt.html">sqrt</a>(r2);</div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga99a6b8a519741c767bd8bed063276b5a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga99a6b8a519741c767bd8bed063276b5a">&#9670;&nbsp;</a></span>populateBonds() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt; bond::populateBonds </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt;&#160;</td>
+          <td class="paramname"><em>nList</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *&#160;</td>
+          <td class="paramname"><em>yCloud</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Create a vector of vectors containing bond information (outputs bonded atom IDs, not indices!) from the neighbour list vector of vectors (which contains atom INDICES). Moreover, the first element corresponds to the atom whose neighbours have been found. </p>
+
+<p class="definition">Definition at line <a class="el" href="bond_8cpp_source.html#l00011">11</a> of file <a class="el" href="bond_8cpp_source.html">bond.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;                                                           {</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;std::vector&lt;int&gt;</a>&gt; bonds;  <span class="comment">// Output vector of vectors</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a> currentBond;         <span class="comment">// Vector for the current bond</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;  <span class="keywordtype">int</span> first, second;                    <span class="comment">// Indices for the bonds</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;  <span class="keywordtype">int</span> iatom, jatom;                     <span class="comment">// Elements of the bond</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;  <span class="keywordtype">int</span> iatomID, jatomID;  <span class="comment">// Atom IDs of the elements which are bonded</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160; </div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;  <span class="comment">// Error handling</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;  <span class="keywordflow">if</span> (nList.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>() == 0) {</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    <span class="comment">// There is some problem!</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::cerr</a> &lt;&lt; <span class="stringliteral">&quot;There are no bonds in the system!\n&quot;</span>;</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    <span class="keywordflow">return</span> bonds;</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;  }</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160; </div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;  <span class="comment">// Form of the bonds vector of vectors:</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;  <span class="comment">// 214    272</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;  <span class="comment">// 1       2</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;  <span class="comment">// Meaning that 272 and 214 are bonded; similarly 1 and 2 are bonded</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;  <span class="comment">// To avoid repitition, discard bonds whose first value is greater than the</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  <span class="comment">// second value</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;  <span class="comment">// Traverse the neighbour list</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;  <span class="comment">// Loop through every atom in the neighbour list by index</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; nList.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>(); i++) {</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    iatom = nList[i][0];  <span class="comment">// Index of the i^th atom</span></div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <span class="comment">// Get the neighbours of iatom</span></div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 1; j &lt; nList[i].<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>(); j++) {</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;      <span class="comment">//</span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;      jatom = nList[iatom][j];  <span class="comment">// Index of the neighbour</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;      <span class="comment">// To avoid duplicates, skip all bonds such</span></div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;      <span class="comment">// that iatom&gt;jatom</span></div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;      <span class="keywordflow">if</span> (iatom &gt; jatom) {</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;      }  <span class="comment">// Skip to avoid duplicates</span></div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;      <span class="comment">// Clear the current bond vector</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;      currentBond.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/clear.html">clear</a>();</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;      <span class="comment">// Fill the current bond vector with ATOM IDs</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;      iatomID = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].atomID;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;      jatomID = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].atomID;</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;      currentBond.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(iatomID);</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;      currentBond.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(jatomID);</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;      <span class="comment">// Add to the bonds vector of vectors</span></div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;      bonds.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(currentBond);</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    }  <span class="comment">// end of loop the neighbour list</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="comment">// The last pair is with the last element and the first element</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <span class="comment">// Fill currentBond and update bonds</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  }  <span class="comment">// end of loop through rings</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  <span class="keywordflow">return</span> bonds;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga8ca8aaf5a0984386dab38e207363f8c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8ca8aaf5a0984386dab38e207363f8c2">&#9670;&nbsp;</a></span>populateBonds() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt; bond::populateBonds </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt;&#160;</td>
+          <td class="paramname"><em>nList</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *&#160;</td>
+          <td class="paramname"><em>yCloud</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="el" href="group__cage.html#gaaac41828990e32b9d6e7db4426b61529">cage::iceType</a> &gt;&#160;</td>
+          <td class="paramname"><em>atomTypes</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Create a vector of vectors containing bond information (outputs bonded atom IDs, not indices!) from the neighbour list vector of vectors (which contains atom INDICES). Bonds between dummy atoms, and between dummy and ice atoms are not added. Moreover, the first element corresponds to the atom whose neighbours have been found. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">nList</td><td>Row-ordered neighbour list by ID </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yCloud</td><td>The input <a class="el" href="structmolSys_1_1PointCloud.html" title="This contains a collection of points; contains information for a particular frame.">molSys::PointCloud</a> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">atomTypes</td><td>Contains an atom type for each particle in yCloud </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="bond_8cpp_source.html#l00078">78</a> of file <a class="el" href="bond_8cpp_source.html">bond.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;                                      {</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;std::vector&lt;int&gt;</a>&gt; bonds;  <span class="comment">// Output vector of vectors</span></div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a> currentBond;         <span class="comment">// Vector for the current bond</span></div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;  <span class="keywordtype">int</span> first, second;                    <span class="comment">// Indices for the bonds</span></div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;  <span class="keywordtype">int</span> iatom, jatom;                     <span class="comment">// Elements of the bond</span></div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;  <span class="keywordtype">int</span> iatomID, jatomID;  <span class="comment">// Atom IDs of the elements which are bonded</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160; </div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;  <span class="comment">// Error handling</span></div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;  <span class="keywordflow">if</span> (nList.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>() == 0) {</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    <span class="comment">// There is some problem!</span></div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::cerr</a> &lt;&lt; <span class="stringliteral">&quot;There are no bonds in the system!\n&quot;</span>;</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    <span class="keywordflow">return</span> bonds;</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;  }</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160; </div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;  <span class="comment">// Form of the bonds vector of vectors:</span></div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;  <span class="comment">// 214    272</span></div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;  <span class="comment">// 1       2</span></div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;  <span class="comment">// Meaning that 272 and 214 are bonded; similarly 1 and 2 are bonded</span></div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;  <span class="comment">// To avoid repitition, discard bonds whose first value is greater than the</span></div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;  <span class="comment">// second value</span></div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160; </div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;  <span class="comment">// Traverse the neighbour list</span></div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160; </div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;  <span class="comment">// Loop through every atom in the neighbour list by index</span></div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; nList.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>(); i++) {</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    iatom = nList[i][0];  <span class="comment">// Index of the i^th atom</span></div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;    <span class="comment">// Skip for dummy atoms</span></div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;    <span class="keywordflow">if</span> (atomTypes[iatom] == <a class="code" href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529a0a6b4517e93ae19fe8326d2d8747d81c">cage::dummy</a>) {</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;      <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    }  <span class="comment">// Skip for dummy atoms</span></div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    <span class="comment">// Get the neighbours of iatom</span></div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 1; j &lt; nList[i].<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>(); j++) {</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;      <span class="comment">//</span></div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;      jatom = nList[iatom][j];  <span class="comment">// Index of the neighbour</span></div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;      <span class="comment">// Skip for dummy atoms</span></div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;      <span class="keywordflow">if</span> (atomTypes[jatom] == <a class="code" href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529a0a6b4517e93ae19fe8326d2d8747d81c">cage::dummy</a>) {</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;        <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;      }  <span class="comment">// Skip for dummy atoms</span></div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;      <span class="comment">// To avoid duplicates, skip all bonds such</span></div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;      <span class="comment">// that iatom&gt;jatom</span></div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;      <span class="keywordflow">if</span> (iatom &gt; jatom) {</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;        <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;      }  <span class="comment">// Skip to avoid duplicates</span></div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160; </div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;      <span class="comment">// Clear the current bond vector</span></div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;      currentBond.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/clear.html">clear</a>();</div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;      <span class="comment">// Fill the current bond vector with ATOM IDs</span></div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;      iatomID = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].atomID;</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;      jatomID = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].atomID;</div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;      currentBond.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(iatomID);</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;      currentBond.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(jatomID);</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;      <span class="comment">// Add to the bonds vector of vectors</span></div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;      bonds.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(currentBond);</div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;    }  <span class="comment">// end of loop the neighbour list</span></div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;    <span class="comment">// The last pair is with the last element and the first element</span></div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;    <span class="comment">// Fill currentBond and update bonds</span></div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160; </div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;  }  <span class="comment">// end of loop through rings</span></div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160; </div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;  <span class="keywordflow">return</span> bonds;</div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga081e4c1f726d5b0bfd9006af2fe3fdee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga081e4c1f726d5b0bfd9006af2fe3fdee">&#9670;&nbsp;</a></span>populateHbonds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt; bond::populateHbonds </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>&#160;</td>
+          <td class="paramname"><em>filename</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *&#160;</td>
+          <td class="paramname"><em>yCloud</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt;&#160;</td>
+          <td class="paramname"><em>nList</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>targetFrame</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>Htype</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Create a vector of vectors (similar to the neighbour list conventions). The output vector of vectors is row-ordered. The first element is the atom ID of the particle for which the neighbours are enumerated (the central atom), followed by the central atom's neighbour's IDs (not indices). Decides the existence of the hydrogen bond depending on the O&ndash;O and O&ndash;H vectors from the neighbour list (by ID) already constructed. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">filename</td><td>Filename of the trajectory, with the hydrogen and oxygen coordinates </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yCloud</td><td>The input <a class="el" href="structmolSys_1_1PointCloud.html" title="This contains a collection of points; contains information for a particular frame.">molSys::PointCloud</a> for the oxygen atoms only </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">nList</td><td>Row-ordered neighbour list by atom ID </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">targetFrame</td><td>The target or current frame number (starts from 1) and is not the timestep value </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">Htype</td><td>The type ID of the hydrogen atoms </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="bond_8cpp_source.html#l00156">156</a> of file <a class="el" href="bond_8cpp_source.html">bond.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;                                                                 {</div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;std::vector&lt;int&gt;</a>&gt;</div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;      hBondNet;  <span class="comment">// Output vector of vectors containing the HBN</span></div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;  <a class="code" href="structmolSys_1_1PointCloud.html">molSys::PointCloud&lt;molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt;</div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;      hCloud;  <span class="comment">// point Cloud for the hydrogen atoms</span></div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;std::vector&lt;int&gt;</a>&gt;</div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;      molIDlist;  <span class="comment">// Vector of vectors; first element is the molID, and the next</span></div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;                  <span class="comment">// two elements are the hydrogen atom indices</span></div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/unordered_map.html">std::unordered_map&lt;int, int&gt;</a></div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;      idMolIDmap;  <span class="comment">// Unordered map with atom IDs of oxygens as the keys and the</span></div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;                   <span class="comment">// molecular IDs as the values</span></div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a> currentBondList;  <span class="comment">// Current bond list for atom</span></div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;  <span class="keywordtype">int</span> nnumNeighbours;    <span class="comment">// Number of nearest neighbours for the current atom</span></div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;  <span class="keywordtype">int</span> iatomID, jatomID;  <span class="comment">// Atom IDs</span></div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;  <span class="keywordtype">int</span> iatomIndex, jatomIndex;  <span class="comment">// Atomic indices of oxygen atoms</span></div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;  <span class="keywordtype">int</span> hAtomIndex;              <span class="comment">// Atom index of hydrogen</span></div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;  <span class="keywordtype">int</span> listIndex;  <span class="comment">// Index in molIDlist corresponding to a particular molecular</span></div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;                  <span class="comment">// ID</span></div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;  <span class="keywordtype">int</span> jOxyMolID;  <span class="comment">// Molecular ID of the jatom oxygen atom</span></div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;  <span class="keywordtype">double</span> hBondLen;  <span class="comment">// Length of O-H (between the donor O and acceptor H)</span></div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;  <span class="keywordtype">double</span> distCutoff = 2.42;   <span class="comment">// Distance cutoff of O-H, hard-coded</span></div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;  <span class="keywordtype">double</span> angleCutoff = 30;    <span class="comment">// Angle cutoff in degrees</span></div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a> ooVec;  <span class="comment">// Array for the O--O vector</span></div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a> ohVec;  <span class="comment">// Array for the O-H vector</span></div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160; </div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;  <span class="comment">// --------------------</span></div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;  <span class="comment">// Get all the hydrogen atoms in the frame (no slice)</span></div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;  hCloud = <a class="code" href="group__sinp.html#ga30633be4befe606953d55db43d389c7b">sinp::readLammpsTrjreduced</a>(filename, targetFrame, &amp;hCloud, Htype);</div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160; </div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;  <span class="comment">// Get the unordered map of the oxygen atom IDs (keys) and the molecular IDs</span></div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;  <span class="comment">// (values)</span></div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;  idMolIDmap = <a class="code" href="group__molSys.html#ga3d2387897322ededb4936d466f74e459">molSys::createIDMolIDmap</a>(yCloud);</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160; </div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;  <span class="comment">// Get a vector of vectors with the molID in the first column, and the</span></div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;  <span class="comment">// hydrogen atom indices (not ID) in each row</span></div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;  molIDlist = <a class="code" href="group__molSys.html#ga34b5cffd59aa8f6701dd919d03706b3f">molSys::hAtomMolList</a>(&amp;hCloud, yCloud);</div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160; </div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;  <span class="comment">// Initialize the vector of vectors hBondNet</span></div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iatom = 0; iatom &lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a>; iatom++) {</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;    hBondNet.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a>());  <span class="comment">// Empty vector for the index iatom</span></div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;    <span class="comment">// Fill the first element with the atom ID of iatom itself</span></div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;    hBondNet[iatom].<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].atomID);</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;  }  <span class="comment">// end of init of hBondNet</span></div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160; </div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;  <span class="comment">// Loop through the neighbour list</span></div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iatom = 0; iatom &lt; nList.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>(); iatom++) {</div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;    currentBondList.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/clear.html">clear</a>();                   <span class="comment">// Clear the current bond vector</span></div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;    iatomID = nList[iatom][0];                 <span class="comment">// atom ID corresponding to iatom</span></div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;    nnumNeighbours = nList[iatom].<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>() - 1;  <span class="comment">// No. of nearest neighbours</span></div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;    iatomIndex = iatom;                        <span class="comment">// Atomic index</span></div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;    <span class="comment">//</span></div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;    <span class="comment">// Loop through the nearest neighbours</span></div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 1; j &lt;= nnumNeighbours; j++) {</div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;      jatomID = nList[iatom][j];  <span class="comment">// Atom ID of the nearest neighbour</span></div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;      <span class="comment">// Get the hydrogen atom indices corresponding to the molID of jatomID</span></div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;      <span class="comment">// Find jOxyMolID</span></div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;      <span class="keyword">auto</span> it = idMolIDmap.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/unordered_map/find.html">find</a>(jatomID);</div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;      <span class="keywordflow">if</span> (it != idMolIDmap.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/unordered_map/end.html">end</a>()) {</div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;        jOxyMolID = it-&gt;second;</div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;      }  <span class="comment">// found molecular ID of jatom oxygen atom</span></div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;      <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;        <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;      }  <span class="comment">// not found</span></div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160; </div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;      <span class="comment">// Find the index inside the molIDlist corresponding to the molecular ID</span></div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;      <span class="comment">// to look for</span></div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;      listIndex = <a class="code" href="group__molSys.html#ga54bfd35451e9528910f3a2d1078d9e89">molSys::searchMolList</a>(molIDlist, jOxyMolID);</div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160; </div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;      <span class="comment">// Get the atom index of the oxygen atom jatom corresponding jatomID</span></div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;      <span class="keyword">auto</span> gotJ = yCloud-&gt;<a class="code" href="group__molSys.html#ga8e48a0ae066c2585e7320cdaa0cbc8db">idIndexMap</a>.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/unordered_map/find.html">find</a>(jatomID);</div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;      <span class="keywordflow">if</span> (gotJ != yCloud-&gt;<a class="code" href="group__molSys.html#ga8e48a0ae066c2585e7320cdaa0cbc8db">idIndexMap</a>.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/unordered_map/end.html">end</a>()) {</div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;        jatomIndex = gotJ-&gt;second;</div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;      }  <span class="comment">// found atom index of jatomID</span></div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;      <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;        <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::cerr</a> &lt;&lt; <span class="stringliteral">&quot;Something is wrong with the map.\n&quot;</span>;</div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;        <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;      }  <span class="comment">// index not found</span></div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160; </div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;      <span class="comment">// Loop through the hydrogen atoms connected to jatom oxygen atom</span></div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 1; k &lt;= 2; k++) {</div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;        hAtomIndex = molIDlist[listIndex][k];</div>
+<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;        <span class="comment">// --------</span></div>
+<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;        <span class="comment">// Condition One: The O-H length (between the donor hydrogen atom and</span></div>
+<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;        <span class="comment">// the acceptor oxygen atom) should be less than 2.42 Angstrom</span></div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;        <span class="comment">// (hard-coded)</span></div>
+<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;        hBondLen =</div>
+<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;            <a class="code" href="group__bond.html#gad4b0179fc40db64244a9f8a10ea5fc4c">bond::getHbondDistanceOH</a>(yCloud, &amp;hCloud, iatomIndex, hAtomIndex);</div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160; </div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;        <span class="comment">// If O-H distance is greater than or equal to 2.42 then it is not a</span></div>
+<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;        <span class="comment">// hydrogen bond</span></div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;        <span class="keywordflow">if</span> (hBondLen &gt;= distCutoff) {</div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;          <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;        }  <span class="comment">// not a hydrogen bond</span></div>
+<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;        <span class="comment">// --------</span></div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;        <span class="comment">// Condition Two: The angle between the O-H and O--O vectors is less</span></div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;        <span class="comment">// than 30 degrees (hard-coded)</span></div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;        <span class="comment">//</span></div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;        ooVec.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/clear.html">clear</a>();</div>
+<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;        ohVec.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/clear.html">clear</a>();</div>
+<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;        <span class="comment">// Get the O--O and O-H vectors</span></div>
+<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;        <span class="comment">// O--O</span></div>
+<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;        ooVec.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatomIndex].x -</div>
+<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;                        yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatomIndex].x);  <span class="comment">// dx</span></div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;        ooVec.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatomIndex].y -</div>
+<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;                        yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatomIndex].y);  <span class="comment">// dy</span></div>
+<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;        ooVec.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatomIndex].z -</div>
+<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;                        yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatomIndex].z);  <span class="comment">// dz</span></div>
+<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;        <span class="comment">// O-H</span></div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;        ohVec.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatomIndex].x -</div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;                        hCloud.<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[hAtomIndex].x);  <span class="comment">// dx</span></div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;        ohVec.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatomIndex].y -</div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;                        hCloud.<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[hAtomIndex].y);  <span class="comment">// dy</span></div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;        ohVec.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatomIndex].z -</div>
+<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;                        hCloud.<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[hAtomIndex].z);  <span class="comment">// dz</span></div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;        <span class="comment">// Apply PBCs</span></div>
+<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> l = 0; l &lt; 3; l++) {</div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;          ooVec[l] -= yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[l] * <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/round.html">round</a>(ooVec[l] / yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[l]);</div>
+<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;          ohVec[l] -= yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[l] * <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/round.html">round</a>(ohVec[l] / yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[l]);</div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;        }  <span class="comment">// end of applying PBCs to the O-H and O--O vectors</span></div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;        <span class="comment">//</span></div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;        <span class="comment">// Get the angle between the O--O and O-H vectors</span></div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;        <span class="keywordtype">double</span> gslAngle = <a class="code" href="group__gen.html#gae07e465d5bf7d05248d73d620cd5b9cc">gen::gslVecAngle</a>(ooVec, ohVec);</div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;        <span class="keywordtype">double</span> gslAngleDeg = <a class="code" href="group__gen.html#gaeadb5e8ff98078b0007d0def0eaad39d">gen::radDeg</a>(gslAngle);</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160; </div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;        <span class="comment">//</span></div>
+<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;        <span class="comment">// A hydrogen bond is formed if the angle is less than 30 degrees</span></div>
+<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;        <span class="keywordflow">if</span> (gslAngleDeg &gt; angleCutoff) {</div>
+<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;          <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;        }  <span class="comment">// not a hydrogen bond</span></div>
+<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160; </div>
+<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;        <span class="comment">// If you have reached this point, then O and H and indeed</span></div>
+<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;        <span class="comment">// hydrogen-bonded. This means that jatomID should be saved in the new</span></div>
+<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;        <span class="comment">// currentBond</span></div>
+<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;        hBondNet[iatomIndex].<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(jatomID);</div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;        hBondNet[jatomIndex].<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(iatomID);</div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;        <span class="keywordflow">break</span>;  <span class="comment">// No need to test the other hydrogen atom if the first has</span></div>
+<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;        <span class="comment">// been tested</span></div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;      }  <span class="comment">// end of loop through hydrogen atoms</span></div>
+<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160; </div>
+<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;    }  <span class="comment">// end of loop through the nearest neighbours</span></div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160; </div>
+<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;  }  <span class="comment">// end of loop through the neighbour list</span></div>
+<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160; </div>
+<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;  <span class="comment">// --------------------</span></div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160; </div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;  <span class="comment">// Erase all temporary stuff</span></div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;  hCloud = <a class="code" href="group__molSys.html#gad8acfb41ee6bc0258612e9cac24269b2">molSys::clearPointCloud</a>(&amp;hCloud);</div>
+<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160; </div>
+<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;  <span class="keywordflow">return</span> hBondNet;</div>
+<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga487c36cc7ddc9079ad59fc645324b20c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga487c36cc7ddc9079ad59fc645324b20c">&#9670;&nbsp;</a></span>trimBonds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt; bond::trimBonds </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt;&#160;</td>
+          <td class="paramname"><em>bonds</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The bond 1 2 and 2 1 are the same. To prevent multiple bonds between the same atoms, remove all bonds which are duplicates of the reversed vectors (denoting individual bonds) within the bonds vector of vectors </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">bonds</td><td>Row-ordered vector of vectors of the bond matrix Each row is a ring, containing the indices of the particles in that ring </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="bond_8cpp_source.html#l00418">418</a> of file <a class="el" href="bond_8cpp_source.html">bond.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;                                     {</div>
+<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a></div>
+<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;      reversedBond;  <span class="comment">// Vector for the current bond in reversed order</span></div>
+<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;bool&gt;</a> isBondFlag;</div>
+<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;  <span class="keywordtype">int</span> temp = 0;</div>
+<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160; </div>
+<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/algorithm/sort.html">std::sort</a>(bonds.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/begin.html">begin</a>(), bonds.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/end.html">end</a>());</div>
+<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;  bonds.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/erase.html">erase</a>(<a class="codeRef" href="http://en.cppreference.com/w/cpp/algorithm/unique.html">std::unique</a>(bonds.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/begin.html">begin</a>(), bonds.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/end.html">end</a>()), bonds.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/end.html">end</a>());</div>
+<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160; </div>
+<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;  <span class="comment">// // Temp uncommented</span></div>
+<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;  <span class="comment">// // Resize the flag vector and init to true</span></div>
+<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;  <span class="comment">// isBondFlag.resize(bonds.size(), true);</span></div>
+<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;  <span class="comment">// // Form of the bonds vector of vectors:</span></div>
+<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;  <span class="comment">// // 272    214</span></div>
+<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;  <span class="comment">// // 1       2</span></div>
+<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;  <span class="comment">// // Meaning that 272 and 214 are bonded; similarly 1 and 2 are bonded</span></div>
+<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160; </div>
+<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;  <span class="comment">// // Traverse the bonds vector of vectors</span></div>
+<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160; </div>
+<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;  <span class="comment">// // Loop through all the bonds</span></div>
+<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160;  <span class="comment">// for(int ibond=0; ibond&lt;bonds.size(); ibond++){</span></div>
+<div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160; </div>
+<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;  <span class="comment">//   // Skip if the bond has been flagged as false</span></div>
+<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;  <span class="comment">//   if(isBondFlag[ibond] == false){continue;}</span></div>
+<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160; </div>
+<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;  <span class="comment">//   reversedBond.clear();</span></div>
+<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;  <span class="comment">//   reversedBond.push_back( bonds[ibond][1] );</span></div>
+<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;  <span class="comment">//   reversedBond.push_back( bonds[ibond][0] );</span></div>
+<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160; </div>
+<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;  <span class="comment">//   // Compare with other bonds by looping through</span></div>
+<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;  <span class="comment">//   // the rest</span></div>
+<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;  <span class="comment">//   for(int jbond=0; jbond&lt;bonds.size(); jbond++){</span></div>
+<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;  <span class="comment">//     // Skip if jbond has been flagged</span></div>
+<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;  <span class="comment">//     if(isBondFlag[jbond] == false){continue;}</span></div>
+<div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;  <span class="comment">//     // Compare reversed bond and jbond if jbond has not been flagged yet</span></div>
+<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;  <span class="comment">//     if(reversedBond==bonds[jbond]){</span></div>
+<div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;  <span class="comment">//       isBondFlag[jbond] = false;</span></div>
+<div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;  <span class="comment">//       temp++;</span></div>
+<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;  <span class="comment">//     } // end of check of comparison</span></div>
+<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;  <span class="comment">//   } // end of looping through all possible bonds</span></div>
+<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160;  <span class="comment">// } // end of loop through all possible bonds</span></div>
+<div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160;  <span class="comment">// // temp</span></div>
+<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160; </div>
+<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;  <span class="keywordflow">return</span> bonds;</div>
+<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+</div><!-- contents -->
+<div class="ttc" id="avector_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a></div><div class="ttdoc">STL class.</div></div>
+<div class="ttc" id="afind_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/unordered_map/find.html">std::unordered_map::find</a></div><div class="ttdeci">T find(T... args)</div></div>
+<div class="ttc" id="asize_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/size.html">std::vector::size</a></div><div class="ttdeci">T size(T... args)</div></div>
+<div class="ttc" id="agroup__sinp_html_ga30633be4befe606953d55db43d389c7b"><div class="ttname"><a href="group__sinp.html#ga30633be4befe606953d55db43d389c7b">sinp::readLammpsTrjreduced</a></div><div class="ttdeci">molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; readLammpsTrjreduced(std::string filename, int targetFrame, molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, int typeI, bool isSlice=false, std::array&lt; double, 3 &gt; coordLow=std::array&lt; double, 3 &gt;{0, 0, 0}, std::array&lt; double, 3 &gt; coordHigh=std::array&lt; double, 3 &gt;{0, 0, 0})</div><div class="ttdef"><b>Definition:</b> <a href="seams__input_8cpp_source.html#l00611">seams_input.cpp:611</a></div></div>
+<div class="ttc" id="asort_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/algorithm/sort.html">std::sort</a></div><div class="ttdeci">T sort(T... args)</div></div>
+<div class="ttc" id="asqrt_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/numeric/math/sqrt.html">std::sqrt</a></div><div class="ttdeci">T sqrt(T... args)</div></div>
+<div class="ttc" id="aclear_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/clear.html">std::vector::clear</a></div><div class="ttdeci">T clear(T... args)</div></div>
+<div class="ttc" id="apush_back_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">std::vector::push_back</a></div><div class="ttdeci">T push_back(T... args)</div></div>
+<div class="ttc" id="agroup__molSys_html_gad8acfb41ee6bc0258612e9cac24269b2"><div class="ttname"><a href="group__molSys.html#gad8acfb41ee6bc0258612e9cac24269b2">molSys::clearPointCloud</a></div><div class="ttdeci">molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; clearPointCloud(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud)</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8cpp_source.html#l00010">mol_sys.cpp:10</a></div></div>
+<div class="ttc" id="astructmolSys_1_1PointCloud_html"><div class="ttname"><a href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a></div><div class="ttdoc">This contains a collection of points; contains information for a particular frame.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00155">mol_sys.hpp:155</a></div></div>
+<div class="ttc" id="agroup__gen_html_gaeadb5e8ff98078b0007d0def0eaad39d"><div class="ttname"><a href="group__gen.html#gaeadb5e8ff98078b0007d0def0eaad39d">gen::radDeg</a></div><div class="ttdeci">double radDeg(double angle)</div><div class="ttdef"><b>Definition:</b> <a href="generic_8hpp_source.html#l00048">generic.hpp:48</a></div></div>
+<div class="ttc" id="abasic_ostream_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::cerr</a></div></div>
+<div class="ttc" id="agroup__cage_html_ggaaac41828990e32b9d6e7db4426b61529a0a6b4517e93ae19fe8326d2d8747d81c"><div class="ttname"><a href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529a0a6b4517e93ae19fe8326d2d8747d81c">cage::dummy</a></div><div class="ttdeci">@ dummy</div><div class="ttdef"><b>Definition:</b> <a href="cage_8hpp_source.html#l00061">cage.hpp:61</a></div></div>
+<div class="ttc" id="aarray_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a></div><div class="ttdoc">STL class.</div></div>
+<div class="ttc" id="aerase_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/erase.html">std::vector::erase</a></div><div class="ttdeci">T erase(T... args)</div></div>
+<div class="ttc" id="agroup__molSys_html_ga54bfd35451e9528910f3a2d1078d9e89"><div class="ttname"><a href="group__molSys.html#ga54bfd35451e9528910f3a2d1078d9e89">molSys::searchMolList</a></div><div class="ttdeci">int searchMolList(std::vector&lt; std::vector&lt; int &gt;&gt; molList, int molIDtoFind)</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8cpp_source.html#l00102">mol_sys.cpp:102</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gaa7d9b8543780baf4a495c7acdb1f87d8"><div class="ttname"><a href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">molSys::PointCloud::box</a></div><div class="ttdeci">std::vector&lt; T &gt; box</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00159">mol_sys.hpp:159</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga8e48a0ae066c2585e7320cdaa0cbc8db"><div class="ttname"><a href="group__molSys.html#ga8e48a0ae066c2585e7320cdaa0cbc8db">molSys::PointCloud::idIndexMap</a></div><div class="ttdeci">std::unordered_map&lt; int, int &gt; idIndexMap</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00161">mol_sys.hpp:161</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga3d2387897322ededb4936d466f74e459"><div class="ttname"><a href="group__molSys.html#ga3d2387897322ededb4936d466f74e459">molSys::createIDMolIDmap</a></div><div class="ttdeci">std::unordered_map&lt; int, int &gt; createIDMolIDmap(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud)</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8cpp_source.html#l00033">mol_sys.cpp:33</a></div></div>
+<div class="ttc" id="around_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/numeric/math/round.html">std::round</a></div><div class="ttdeci">T round(T... args)</div></div>
+<div class="ttc" id="abegin_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/begin.html">std::vector::begin</a></div><div class="ttdeci">T begin(T... args)</div></div>
+<div class="ttc" id="agroup__molSys_html_ga2bdcb9260bd83f313a2d27fcc6437ef1"><div class="ttname"><a href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">molSys::PointCloud::nop</a></div><div class="ttdeci">int nop</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00158">mol_sys.hpp:158</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga67ab89369cd26572878a91afd521ef81"><div class="ttname"><a href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">molSys::PointCloud::pts</a></div><div class="ttdeci">std::vector&lt; S &gt; pts</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00156">mol_sys.hpp:156</a></div></div>
+<div class="ttc" id="aunique_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/algorithm/unique.html">std::unique</a></div><div class="ttdeci">T unique(T... args)</div></div>
+<div class="ttc" id="aend_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/end.html">std::vector::end</a></div><div class="ttdeci">T end(T... args)</div></div>
+<div class="ttc" id="agroup__molSys_html_ga34b5cffd59aa8f6701dd919d03706b3f"><div class="ttname"><a href="group__molSys.html#ga34b5cffd59aa8f6701dd919d03706b3f">molSys::hAtomMolList</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; hAtomMolList(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *hCloud, molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *oCloud)</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8cpp_source.html#l00058">mol_sys.cpp:58</a></div></div>
+<div class="ttc" id="aunordered_map_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/unordered_map.html">std::unordered_map&lt; int, int &gt;</a></div></div>
+<div class="ttc" id="agroup__gen_html_gae07e465d5bf7d05248d73d620cd5b9cc"><div class="ttname"><a href="group__gen.html#gae07e465d5bf7d05248d73d620cd5b9cc">gen::gslVecAngle</a></div><div class="ttdeci">double gslVecAngle(std::vector&lt; double &gt; OO, std::vector&lt; double &gt; OH)</div><div class="ttdef"><b>Definition:</b> <a href="generic_8cpp_source.html#l00133">generic.cpp:133</a></div></div>
+<div class="ttc" id="agroup__bond_html_gad4b0179fc40db64244a9f8a10ea5fc4c"><div class="ttname"><a href="group__bond.html#gad4b0179fc40db64244a9f8a10ea5fc4c">bond::getHbondDistanceOH</a></div><div class="ttdeci">double getHbondDistanceOH(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *oCloud, molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *hCloud, int oAtomIndex, int hAtomIndex)</div><div class="ttdef"><b>Definition:</b> <a href="bond_8cpp_source.html#l00320">bond.cpp:320</a></div></div>
+<div class="ttc" id="apow_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/numeric/math/pow.html">std::pow</a></div><div class="ttdeci">T pow(T... args)</div></div>
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen 1.9.1-->
+<!-- start footer part -->
+<div class="footer">
+<hr class="footline"/><address class="footline"><small>
+    Generated by&#160;<a href="https://www.doxygen.org/index.html">Doxygen 1.8.20</a> and the <a class="outlink" href="https://github.com/HaoZeke/doxyYoda">doxyYoda theme</a>
+</small></address>
+</div>
+</div>
 </body>
 </html>
