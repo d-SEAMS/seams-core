@@ -15,4 +15,4 @@ jobs:
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - run: nix-env -if .
     - run: yodaStruct -c lua_inputs/config.yml
-    - run: nix-shell --run "echo OK"
+    - run: echo OK
