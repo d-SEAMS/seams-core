@@ -6,7 +6,7 @@
 
 [![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
 
-- Check our build status [here](https://travis-ci.org/d-SEAMS/seams-core).
+- Check our build status [here](https://github.com/d-SEAMS/seams-core/actions/workflows/).
 - The docs themselves are [here](https://docs.dseams.info) and development is
   ongoing [on GitHub](https://github.com/d-SEAMS/seams-core)
 - We also have [a Zenodo community](https://zenodo.org/communities/d-seams/) for user-contributions like reviews, testimonials
