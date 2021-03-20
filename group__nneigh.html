@@ -223,7 +223,7 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160; </div>
 <div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;  <span class="keywordflow">return</span> nList;</div>
 <div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;}  <span class="comment">// end of function</span></div>
-<div class="ttc" id="agroup__gen_html_ga881e045598dd517609383d8a3fec5913"><div class="ttname"><a href="group__gen.html#ga881e045598dd517609383d8a3fec5913">gen::periodicDist</a></div><div class="ttdeci">double periodicDist(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, int iatom, int jatom)</div><div class="ttdef"><b>Definition:</b> <a href="generic_8hpp_source.html#l00064">generic.hpp:64</a></div></div>
+<div class="ttc" id="agroup__gen_html_ga881e045598dd517609383d8a3fec5913"><div class="ttname"><a href="group__gen.html#ga881e045598dd517609383d8a3fec5913">gen::periodicDist</a></div><div class="ttdeci">double periodicDist(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, int iatom, int jatom)</div><div class="ttdef"><b>Definition:</b> <a href="generic_8hpp_source.html#l00095">generic.hpp:95</a></div></div>
 <div class="ttc" id="agroup__molSys_html_ga2bdcb9260bd83f313a2d27fcc6437ef1"><div class="ttname"><a href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">molSys::PointCloud::nop</a></div><div class="ttdeci">int nop</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00158">mol_sys.hpp:158</a></div></div>
 <div class="ttc" id="apush_back_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">std::vector::push_back</a></div><div class="ttdeci">T push_back(T... args)</div></div>
 </div><!-- fragment -->
@@ -260,11 +260,11 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Function for building neighbour lists for each particle of only one type. Inefficient brute-force <img class="formulaInl" alt="$ O(n^2) $" src="form_44.png"/> implementation. This generates the half neighbour list, by ID. This function will only work for building a neighbour list between one type of particles. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Function for building neighbour lists for each particle of only one type. Inefficient brute-force <img class="formulaInl" alt="$ O(n^2) $" src="form_48.png"/> implementation. This generates the half neighbour list, by ID. This function will only work for building a neighbour list between one type of particles. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">rcutoff</td><td>Distance cutoff, within which two atoms are neighbours. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">yCloud</td><td>The input <a class="el" href="structmolSys_1_1PointCloud.html" title="This contains a collection of points; contains information for a particular frame.">molSys::PointCloud</a> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">typeI</td><td>Type ID of the <img class="formulaInl" alt="$ i^{th} $" src="form_13.png"/> particle type. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">typeI</td><td>Type ID of the <img class="formulaInl" alt="$ i^{th} $" src="form_17.png"/> particle type. </td></tr>
   </table>
   </dd>
 </dl>
@@ -473,7 +473,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Function for building neighbour lists for each particle. Inefficient brute-force <img class="formulaInl" alt="$ O(n^2) $" src="form_44.png"/> implementation. This generates the full neighbour list, by ID. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Function for building neighbour lists for each particle. Inefficient brute-force <img class="formulaInl" alt="$ O(n^2) $" src="form_48.png"/> implementation. This generates the full neighbour list, by ID. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">rcutoff</td><td>Distance cutoff, within which two atoms are neighbours. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">yCloud</td><td>The input <a class="el" href="structmolSys_1_1PointCloud.html" title="This contains a collection of points; contains information for a particular frame.">molSys::PointCloud</a> </td></tr>
@@ -593,11 +593,11 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Function for building neighbour lists for each particle of only one type. Inefficient brute-force <img class="formulaInl" alt="$ O(n^2) $" src="form_44.png"/> implementation. This generates the full neighbour list, by ID. This function will only work for building a neighbour list between one type of particles. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Function for building neighbour lists for each particle of only one type. Inefficient brute-force <img class="formulaInl" alt="$ O(n^2) $" src="form_48.png"/> implementation. This generates the full neighbour list, by ID. This function will only work for building a neighbour list between one type of particles. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">rcutoff</td><td>Distance cutoff, within which two atoms are neighbours. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">yCloud</td><td>The input <a class="el" href="structmolSys_1_1PointCloud.html" title="This contains a collection of points; contains information for a particular frame.">molSys::PointCloud</a> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">typeI</td><td>Type ID of the <img class="formulaInl" alt="$ i^{th} $" src="form_13.png"/> particle type. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">typeI</td><td>Type ID of the <img class="formulaInl" alt="$ i^{th} $" src="form_17.png"/> particle type. </td></tr>
   </table>
   </dd>
 </dl>

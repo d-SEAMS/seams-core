@@ -54,16 +54,16 @@ digraph "src/include/internal/seams_output.hpp"
   Node18 -> Node16 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node18 -> Node19 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 [label="ring.hpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$ring_8hpp.html",tooltip="File containing common functions used by bulk and confined topological network critera."];
-  Node19 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node19 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node6 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node7 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node8 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node9 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node10 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node19 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node11 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node12 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node13 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node19 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node14 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node15 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node16 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];

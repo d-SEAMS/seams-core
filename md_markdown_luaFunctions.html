@@ -175,7 +175,7 @@ The input variables are:<ul>
 </ul>
 <h2>Quasi-One-Dimensional Ice</h2>
 <ul>
-<li><b>prismAnalysis</b>: interfaces with <a class="el" href="group__ring.html#ga27cdc3d5895ce3ec40328e8b2f15403c">ring::prismAnalysis</a> <br  />
+<li><b>prismAnalysis</b>: interfaces with <a class="el" href="group__ring.html#ga083a38f83a1a89eba434d64a33986637">ring::prismAnalysis</a> <br  />
 The input variables are:<ul>
 <li><em>outDir</em> - The string to the output directory, in which files will be written out. Defined in <em>vars.lua</em>.</li>
 <li><em>rings</em> - Row-ordered vector of vectors for rings of a single type. Registered on the <code>Lua</code> side.</li>
@@ -256,7 +256,7 @@ The input variables are:<ul>
 <li><em>nList</em> - Row-ordered neighbour list by atom ID. Passed to the <code>Lua</code> side.</li>
 <li><em>iceNeighbourList</em> - Row-ordered neighbour list by atom index, not ID, according to the iceCloud atoms. Defined in <em>vars.lua</em>.</li>
 <li><em>cutoff</em> - Cutoff for the nearest neighbours. Passed to the <code>Lua</code> side.</li>
-<li><em>bopAnalysis</em> - This determines which method to use for determining the ice-like nature of the particles. This can be "q6" or "chill", for using the <img class="formulaInl" alt="$Q_6$" src="form_5.png"/> parameter or CHILL algorithm, respectively. Defined in <em>vars.lua</em>. <br  />
+<li><em>bopAnalysis</em> - This determines which method to use for determining the ice-like nature of the particles. This can be "q6" or "chill", for using the <img class="formulaInl" alt="$Q_6$" src="form_9.png"/> parameter or CHILL algorithm, respectively. Defined in <em>vars.lua</em>. <br  />
  This function returns the <em>iceCloud</em> <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a> for the largest ice cluster.</li>
 </ul>
 </li>
@@ -266,7 +266,7 @@ The input variables are:<ul>
 <li><em>iceNeighbourList</em> - Row-ordered neighbour list by atom index, not ID, according to the iceCloud atoms. Defined in <em>vars.lua</em>.</li>
 </ul>
 </li>
-<li><b>bulkTopologicalNetworkCriterion</b>: interfaces with <a class="el" href="group__ring.html#ga6e3b9b886f8f42a05320b6bf61076ea6">ring::topoBulkAnalysis</a> <br  />
+<li><b>bulkTopologicalNetworkCriterion</b>: interfaces with <a class="el" href="group__prism3.html#gac811a7fb090a75aaf3bca9e56bf92a26">ring::topoBulkAnalysis</a> <br  />
 The input variables are:<ul>
 <li><em>outDir</em> - The string to the output directory, in which files will be written out. Defined in <em>vars.lua</em>.</li>
 <li><em>rings</em> - Row-ordered vector of vectors for rings of a single type. Registered on the <code>Lua</code> side.</li>

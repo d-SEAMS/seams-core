@@ -83,16 +83,16 @@ digraph "src/bop.cpp"
   Node28 -> Node11 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node28 -> Node29 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node29 [label="ring.hpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$ring_8hpp.html",tooltip="File containing common functions used by bulk and confined topological network critera."];
-  Node29 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node29 -> Node18 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node29 -> Node13 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node29 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node29 -> Node14 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node29 -> Node10 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node29 -> Node15 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node29 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node29 -> Node26 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node29 -> Node16 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node29 -> Node17 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node29 -> Node18 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node29 -> Node19 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node29 -> Node27 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node29 -> Node11 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];

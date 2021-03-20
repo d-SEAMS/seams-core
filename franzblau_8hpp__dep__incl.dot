@@ -8,5 +8,10 @@ digraph "src/include/internal/franzblau.hpp"
   Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node2 [label="src/franzblau.cpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$franzblau_8cpp.html",tooltip=" "];
   Node1 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node3 [label="src/main.cpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$main_8cpp.html",tooltip=" "];
+  Node3 [label="src/include/internal\l/bulkTUM.hpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$bulkTUM_8hpp.html",tooltip="File containing functions used specific to bulk topological unit matching (TUM) criterion."];
+  Node3 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="src/bulkTUM.cpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$bulkTUM_8cpp.html",tooltip=" "];
+  Node3 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="src/main.cpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$main_8cpp.html",tooltip=" "];
+  Node1 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
 }
