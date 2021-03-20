@@ -21,7 +21,7 @@ in pkgs.mkShell {
   inputsFrom = [ buildpkgs.yodaStruct pkgs.git ];
   nativeBuildInputs = with pkgs; [ pkgconfig ];
   buildInputs = with pkgs;
-    [ gdb git lua luaPackages.luafilesystem doxygen191 ] ++ optional stdenv.isLinux
+    [ gdb git lua luaPackages.luafilesystem doxygen191 which ] ++ optional stdenv.isLinux
     glibcLocales # To allow setting consistent locale on linux
     ++ optional stdenv.isLinux inotify-tools # For file_system
     ++ optional stdenv.isLinux libnotify # For ExUnit

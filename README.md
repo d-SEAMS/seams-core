@@ -98,7 +98,7 @@ like [ccls](https://github.com/MaskRay/ccls) use the following commands:
 
 ```sh
 # Pure environment
-nix-shell --run 'bash' --pure
+nix-shell --pure
 mkdir -p build && cd build
 cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES ../
 cp compile_commands.json ../
@@ -115,7 +115,7 @@ We can simply use the `nix` environment:
 
 ```sh
 # From the project root
-nix-shell
+nix-shell --pure
 ```
 
 # Running
