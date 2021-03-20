@@ -156,7 +156,7 @@ url={https://doi.org/10.1021/acs.jcim.0c00031}
 <h3>Language Server Support</h3>
 <p>To generate a <code>compile_commands.json</code> file for working with a language server like <a href="https://github.com/MaskRay/ccls">ccls</a> use the following commands:</p>
 <div class="fragment"><div class="line"># Pure environment</div>
-<div class="line">nix-shell --run &#39;bash&#39; --pure</div>
+<div class="line">nix-shell --pure</div>
 <div class="line">mkdir -p build &amp;&amp; cd build</div>
 <div class="line">cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES ../</div>
 <div class="line">cp compile_commands.json ../</div>
@@ -165,7 +165,7 @@ url={https://doi.org/10.1021/acs.jcim.0c00031}
 <h2>Development</h2>
 <p>We can simply use the <code>nix</code> environment:</p>
 <div class="fragment"><div class="line"># From the project root</div>
-<div class="line">nix-shell</div>
+<div class="line">nix-shell --pure</div>
 </div><!-- fragment --><h1>Running</h1>
 <p>This is built completely with nix:</p>
 <div class="fragment"><div class="line"># Install systemwide</div>
