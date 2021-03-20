@@ -107,16 +107,16 @@ $(function() {
 
 <p>File for bond-related analyses (hydrogen bonds, bonded atoms for data file write-outs etc.).  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;math.h&gt;</code><br />
-<code>#include &lt;sys/stat.h&gt;</code><br />
-<code>#include &lt;algorithm&gt;</code><br />
+<div class="textblock"><code>#include &lt;algorithm&gt;</code><br />
 <code>#include &lt;array&gt;</code><br />
 <code>#include &lt;fstream&gt;</code><br />
 <code>#include &lt;iostream&gt;</code><br />
 <code>#include &lt;iterator&gt;</code><br />
+<code>#include &lt;math.h&gt;</code><br />
 <code>#include &lt;memory&gt;</code><br />
 <code>#include &lt;sstream&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
+<code>#include &lt;sys/stat.h&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 <code>#include &lt;<a class="el" href="cage_8hpp_source.html">cage.hpp</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>&gt;</code><br />
@@ -141,7 +141,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacebond"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacebond.html">bond</a></td></tr>
-<tr class="memdesc:namespacebond"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functions for bond-related analyses This namespace contains functions that are used for determining the hydrogen bonds, or lists of bonded atoms for write-outs to data files and visualization. <br /></td></tr>
+<tr class="memdesc:namespacebond"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functions for bond-related analyses. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
@@ -155,13 +155,13 @@ Functions</h2></td></tr>
 <tr class="memitem:ga8ca8aaf5a0984386dab38e207363f8c2"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bond.html#ga8ca8aaf5a0984386dab38e207363f8c2">bond::populateBonds</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="el" href="group__cage.html#gaaac41828990e32b9d6e7db4426b61529">cage::iceType</a> &gt; atomTypes)</td></tr>
 <tr class="separator:ga8ca8aaf5a0984386dab38e207363f8c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaea75576194f28a141cee66548c309e1a"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bond.html#gaea75576194f28a141cee66548c309e1a">bond::createBondsFromCages</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; rings, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; *cageList, <a class="el" href="group__cage.html#ga5787314f51b5927c213db48b81c21d95">cage::cageType</a> type, int *nRings)</td></tr>
+<tr class="memdesc:gaea75576194f28a141cee66548c309e1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove duplicate bonds.  <a href="group__bond.html#gaea75576194f28a141cee66548c309e1a">More...</a><br /></td></tr>
 <tr class="separator:gaea75576194f28a141cee66548c309e1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga487c36cc7ddc9079ad59fc645324b20c"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bond.html#ga487c36cc7ddc9079ad59fc645324b20c">bond::trimBonds</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; bonds)</td></tr>
 <tr class="separator:ga487c36cc7ddc9079ad59fc645324b20c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>File for bond-related analyses (hydrogen bonds, bonded atoms for data file write-outs etc.). </p>
-<p>Details. </p>
 
 <p class="definition">Definition in file <a class="el" href="bond_8hpp_source.html">bond.hpp</a>.</p>
 </div></div><!-- contents -->

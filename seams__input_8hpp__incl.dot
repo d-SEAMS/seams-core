@@ -55,16 +55,16 @@ digraph "src/include/internal/seams_input.hpp"
   Node17 -> Node12 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node17 -> Node19 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 [label="bond.hpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$bond_8hpp.html",tooltip="File for bond-related analyses (hydrogen bonds, bonded atoms for data file write-outs etc...."];
-  Node19 -> Node15 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node19 -> Node12 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node6 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node7 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node8 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node9 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node19 -> Node15 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node10 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node11 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node19 -> Node12 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node13 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node16 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node19 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];

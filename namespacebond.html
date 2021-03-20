@@ -100,7 +100,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Functions for bond-related analyses This namespace contains functions that are used for determining the hydrogen bonds, or lists of bonded atoms for write-outs to data files and visualization.  
+<p>Functions for bond-related analyses.  
 <a href="namespacebond.html#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
@@ -114,12 +114,14 @@ Functions</h2></td></tr>
 <tr class="memitem:ga8ca8aaf5a0984386dab38e207363f8c2"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bond.html#ga8ca8aaf5a0984386dab38e207363f8c2">populateBonds</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="el" href="group__cage.html#gaaac41828990e32b9d6e7db4426b61529">cage::iceType</a> &gt; atomTypes)</td></tr>
 <tr class="separator:ga8ca8aaf5a0984386dab38e207363f8c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaea75576194f28a141cee66548c309e1a"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bond.html#gaea75576194f28a141cee66548c309e1a">createBondsFromCages</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; rings, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; *cageList, <a class="el" href="group__cage.html#ga5787314f51b5927c213db48b81c21d95">cage::cageType</a> type, int *nRings)</td></tr>
+<tr class="memdesc:gaea75576194f28a141cee66548c309e1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove duplicate bonds.  <a href="group__bond.html#gaea75576194f28a141cee66548c309e1a">More...</a><br /></td></tr>
 <tr class="separator:gaea75576194f28a141cee66548c309e1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga487c36cc7ddc9079ad59fc645324b20c"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bond.html#ga487c36cc7ddc9079ad59fc645324b20c">trimBonds</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; bonds)</td></tr>
 <tr class="separator:ga487c36cc7ddc9079ad59fc645324b20c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Functions for bond-related analyses This namespace contains functions that are used for determining the hydrogen bonds, or lists of bonded atoms for write-outs to data files and visualization. </p>
+<div class="textblock"><p>Functions for bond-related analyses. </p>
+<p>This namespace contains functions that are used for determining the hydrogen bonds, or lists of bonded atoms for write-outs to data files and visualization.</p>
 <p>These functions are distinct from the neighbour-list building functions. Bonds can be built from cages, ring lists etc.</p>
 <p>Hydrogen bonds are determined using a strict geometric criterion.</p>
 <p>A hydrogen bond between two water molecules exists when:</p>
@@ -129,7 +131,8 @@ Functions</h2></td></tr>
 </ol>
 <h3>Changelog</h3>
 <ul>
-<li>Amrita Goswami [<a href="#" onclick="location.href='mai'+'lto:'+'amr'+'it'+'a16'+'th'+'aug'+'64'+'6@g'+'ma'+'il.'+'co'+'m'; return false;">amrit<span style="display: none;">.nosp@m.</span>a16t<span style="display: none;">.nosp@m.</span>haug6<span style="display: none;">.nosp@m.</span>46@g<span style="display: none;">.nosp@m.</span>mail.<span style="display: none;">.nosp@m.</span>com</a>]; date modified: Nov 13, 2019 </li>
+<li>Amrita Goswami [<a href="#" onclick="location.href='mai'+'lto:'+'amr'+'it'+'a16'+'th'+'aug'+'64'+'6@g'+'ma'+'il.'+'co'+'m'; return false;">amrit<span style="display: none;">.nosp@m.</span>a16t<span style="display: none;">.nosp@m.</span>haug6<span style="display: none;">.nosp@m.</span>46@g<span style="display: none;">.nosp@m.</span>mail.<span style="display: none;">.nosp@m.</span>com</a>]; date modified: Nov 13, 2019</li>
+<li>Rohit Goswami [<a href="#" onclick="location.href='mai'+'lto:'+'rog'+'32'+'@hi'+'.i'+'s'; return false;">rog32<span style="display: none;">.nosp@m.</span>@hi.<span style="display: none;">.nosp@m.</span>is</a>]; date modified: Mar 20, 2021 </li>
 </ul>
 </div></div><!-- contents -->
 <!-- Copyright 2020 Rohit Goswami <rog32@hi.is>

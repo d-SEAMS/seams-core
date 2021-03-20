@@ -92,16 +92,16 @@ digraph "src/topo_bulk.cpp"
   Node22 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node22 -> Node24 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node24 [label="bond.hpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$bond_8hpp.html",tooltip="File for bond-related analyses (hydrogen bonds, bonded atoms for data file write-outs etc...."];
-  Node24 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node24 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node24 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node24 -> Node6 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node24 -> Node7 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node24 -> Node8 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node24 -> Node9 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node24 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node24 -> Node10 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node24 -> Node11 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node24 -> Node12 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node24 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node24 -> Node13 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node24 -> Node14 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node24 -> Node15 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];

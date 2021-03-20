@@ -97,16 +97,16 @@ digraph "src/shapeMatch.cpp"
   Node26 -> Node12 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node26 -> Node28 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node28 [label="bond.hpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$bond_8hpp.html",tooltip="File for bond-related analyses (hydrogen bonds, bonded atoms for data file write-outs etc...."];
-  Node28 -> Node8 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node28 -> Node12 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node28 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node28 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node28 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node28 -> Node6 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node28 -> Node7 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node28 -> Node8 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node28 -> Node9 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node28 -> Node10 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node28 -> Node11 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node28 -> Node12 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node28 -> Node13 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node28 -> Node22 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node28 -> Node19 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
