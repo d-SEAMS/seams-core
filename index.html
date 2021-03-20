@@ -213,6 +213,9 @@ url={https://doi.org/10.1021/acs.jcim.0c00031}
 </ul>
 <p>Where some of the above suggestions are derived from <a href="https://github.com/andrewseidl/githook-clang-format">this depreciated githook</a>.</p>
 <p>Also, do note that we have a <code>CONTRIBUTING</code> file you <b>need to read</b> to contribute, for certain reasons, like, common sense.</p>
+<h2>Commit Hook</h2>
+<p>Note that we expect compliance with the <code>clang-format</code> as mentioned above, and this may be enforced by using the provided scripts for a pre-commit hook: </p><div class="fragment"><div class="line">./scripts/git-pre-commit-format install</div>
+</div><!-- fragment --><p>This will ensure that new commits are in accordance to the <code>clang-format</code> file.</p>
 <h1>Acknowledgements</h1>
 <p>The following tools are used in this project:</p>
 <ul>
@@ -220,7 +223,10 @@ url={https://doi.org/10.1021/acs.jcim.0c00031}
 <li><a href="https://clang.llvm.org/">Clang</a> because it is more descriptive with better tools</li>
 <li><a href="https://conan.io/">Conan</a> and [<a href="https://pipenv.readthedocs.io/en/latest/">https://pipenv.readthedocs.io/en/latest/</a>](pipenv) for dependency management</li>
 <li><a href="https://www.doxygen.org">Doxygen</a> for the developer API</li>
-<li><a href="https://clang.llvm.org/docs/ClangFormat.html">clang-format</a> for code formatting</li>
+<li><a href="https://clang.llvm.org/docs/ClangFormat.html">clang-format</a> for code formatting<ul>
+<li><a href="https://github.com/barisione/clang-format-hooks">clang-format-hooks</a> for <code>git</code> hooks to enforce formatting</li>
+</ul>
+</li>
 <li><a href="https://www.lua.org">lua</a> for the scripting engine</li>
 <li><a href="http://yaml.org/">yaml</a> for the configuration</li>
 </ul>
