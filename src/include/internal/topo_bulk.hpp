@@ -19,6 +19,7 @@
 #include <ring.hpp>
 #include <seams_input.hpp>
 #include <seams_output.hpp>
+#include <shapeMatch.hpp>
 
 /*! \file topo_bulk.hpp
     \brief File containing functions used specific to bulk topological
@@ -38,12 +39,13 @@ namespace ring {
 int topoBulkAnalysis(std::string path, std::vector<std::vector<int>> rings,
                      std::vector<std::vector<int>> nList,
                      molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                     int firstFrame, bool printEachCage = false);
+                     int firstFrame, bool onlyTetrahedral = true);
 
 // Find out which hexagonal rings are DDC (Double Diamond Cages) rings.
 // Returns a vector containing all the ring IDs which are DDC rings
 std::vector<int> findDDC(std::vector<std::vector<int>> rings,
                          std::vector<strucType> *ringType,
+                         std::vector<int> listHC,
                          std::vector<cage::Cage> *cageList);
 
 // Find out which hexagonal rings are both DDCs (Double Diamond Cages) and HCs
@@ -107,5 +109,35 @@ int getStrucNumbers(std::vector<ring::strucType> ringType,
                     int *mixedRings, int *prismaticRings, int *basalRings);
 
 }  // namespace ring
+
+/*!
+ *  \addtogroup prism3
+ *  @{
+ */
+
+namespace prism3 {
+//
+// Find out which rings are prisms.
+int findBulkPrisms(std::vector<std::vector<int>> rings,
+                   std::vector<ring::strucType> *ringType,
+                   std::vector<std::vector<int>> nList,
+                   molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                   std::vector<double> *rmsdPerAtom, double heightCutoff = 8);
+
+// Tests whether two rings are basal rings (true) or not (false) for a prism
+// (strict criterion)
+bool basalPrismConditions(std::vector<std::vector<int>> nList,
+                          std::vector<int> *basal1, std::vector<int> *basal2);
+
+// Reduced criterion: Two candidate basal rings of a prism block should have at
+// least one bond between them
+bool relaxedPrismConditions(std::vector<std::vector<int>> nList,
+                            std::vector<int> *basal1, std::vector<int> *basal2);
+
+// Check to see that candidate basal prisms are not really far from each other
+bool basalRingsSeparation(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<int> basal1, std::vector<int> basal2, double heightCutoff = 8);
+}  // namespace prism3
 
 #endif  // __TOPO_BULK_H_

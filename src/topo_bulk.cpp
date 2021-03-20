@@ -32,15 +32,14 @@
  *  @param[in] yCloud The input PointCloud, with respect to which the indices in
  the rings and nList vector of vectors have been saved.
  *  @param[in] firstFrame First frame to be analyzed
- *  @param[in] printEachCage Flag for printing the information of each cage in
- the frame (true) or not printing the coordinates/connectivity of each cage
- (false).
+ *  @param[in] onlyTetrahedral Flag for only finding DDCs and HCs (true) or also
+ finding PNCs (false)
  ***********************************************/
 int ring::topoBulkAnalysis(
     std::string path, std::vector<std::vector<int>> rings,
     std::vector<std::vector<int>> nList,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int firstFrame,
-    bool printEachCage) {
+    bool onlyTetrahedral) {
   //
   // Ring IDs of each type will be saved in these vectors
   std::vector<int> listDDC;  // Vector for ring indices of DDC
@@ -53,56 +52,96 @@ int ring::topoBulkAnalysis(
   // Make a list of all the DDCs and HCs
   std::vector<cage::Cage> cageList;
   std::vector<std::vector<int>>
-      ringsOneType;  // Vector of vectors of rings of a single size
-  int ringSize = 6;  // DDCs and HCs are for 6-membered rings
+      ringsOneType;     // Vector of vectors of rings of a single size
+  int initRingSize;     // Todo or not: calculate the PNCs or not
+  int maxRingSize = 6;  // DDCs and HCs are for 6-membered rings
   std::vector<cage::iceType>
       atomTypes;  // This vector will have a value for every atom
   // Number of types
   int numHC, numDDC, mixedRings, prismaticRings, basalRings;
 
-  // ----------------------------------------------
-  // Init
-  // Get rings of size 6.
-  // // Clear ringsOneType
-  //   ring::clearRingList(ringsOneType);
-  // Get rings of the current ring size
-  ringsOneType = ring::getSingleRingSize(rings, ringSize);
-  // Init the ringType vector
-  ringType.resize(
-      ringsOneType.size());  // Has a value for each ring. init to zero.
+  // TODO: handle shapeMatching
+  bool doShapeMatching = true;
+  // Qualifier for the RMSD per atom:
+  std::vector<double> rmsdPerAtom;
+  //
+
+  // test
+  // std::cout << "rings"
+  //           << "\n";
+  // for (int i = 0; i < rings.size(); i++) {
+  //   for (int j = 0; j < rings[i].size(); j++) {
+  //     std::cout << rings[i][j] << " ";
+  //   }
+  //   std::cout << "\n";
+  // }
+  // std::cout << "\n";
+
+  if (onlyTetrahedral) {
+    initRingSize = 6;
+  } else {
+    initRingSize = 5;
+  }
+
   // Init the atom type vector
   atomTypes.resize(yCloud->nop);  // Has a value for each atom
+  // Init the rmsd per atom (not used yet)
+  rmsdPerAtom.resize(yCloud->nop);  // Has a value for each atom
+
   // ----------------------------------------------
-  // Get the cages
-  // Find DDC rings, saving the IDs to listDDC
-  listDDC = ring::findDDC(ringsOneType, &ringType, &cageList);
+  // Init
+  // Get rings of size 5 or 6.
+  for (int ringSize = initRingSize; ringSize <= maxRingSize; ringSize++) {
+    // Clear ringsOneType
+    ring::clearRingList(ringsOneType);
+    // Get rings of the current ring size
+    ringsOneType = ring::getSingleRingSize(rings, ringSize);
+    // Skip for zero rings
+    if (ringsOneType.size() == 0) {
+      continue;
+    }  // skip for no rings of ringSize
+    //
+    // Init the ringType vector
+    ringType.resize(
+        ringsOneType.size());  // Has a value for each ring. init to zero.
+    // ----------------------------------------------
+    if (ringSize == 6) {
+      // Get the cages
 
-  // Find HC rings, saving the ring IDs (starting from 0) to listHC
-  listHC = ring::findHC(ringsOneType, &ringType, nList, &cageList);
+      // Find HC rings, saving the ring IDs (starting from 0) to listHC
+      listHC = ring::findHC(ringsOneType, &ringType, nList, &cageList);
 
-  // Find rings which are both DDCs and HCs (mixed)
-  // A dummy value of -10 in the listDDC and listHC vectors for mixed rings
-  listMixed = ring::findMixedRings(ringsOneType, &ringType, &listDDC, &listHC);
+      // Find DDC rings, saving the IDs to listDDC
+      listDDC = ring::findDDC(ringsOneType, &ringType, listHC, &cageList);
 
-  // // Print out each cage into a new folder called cages inside output
-  // // if the flag for printing cages is true. TODO: fix
-  // if (printEachCage) {
-  //   io::writeAllCages(&cageList, ringsOneType, nList, yCloud,
-  //                     yCloud->currentFrame);
-  // }  // end of printing each cage
+      // Find rings which are both DDCs and HCs (mixed)
+      // A dummy value of -10 in the listDDC and listHC vectors for mixed rings
+      listMixed =
+          ring::findMixedRings(ringsOneType, &ringType, &listDDC, &listHC);
 
-  // Get the number of structures (DDCs, HCs, mixed rings, basal rings,
-  // prismatic rings)
-  ring::getStrucNumbers(ringType, cageList, &numHC, &numDDC, &mixedRings,
-                        &prismaticRings, &basalRings);
+      // Get the number of structures (DDCs, HCs, mixed rings, basal rings,
+      // prismatic rings)
+      ring::getStrucNumbers(ringType, cageList, &numHC, &numDDC, &mixedRings,
+                            &prismaticRings, &basalRings);
 
-  // Write out to a file
-  sout::writeTopoBulkData(path, yCloud->currentFrame, numHC, numDDC, mixedRings,
-                          basalRings, prismaticRings, firstFrame);
-
-  // Gets the atom type for every atom, to be used for printing out the ice
-  // types found
-  ring::getAtomTypesTopoBulk(ringsOneType, ringType, &atomTypes);
+      // Write out to a file
+      sout::writeTopoBulkData(path, yCloud->currentFrame, numHC, numDDC,
+                              mixedRings, basalRings, prismaticRings,
+                              firstFrame);
+      // Gets the atom type for every atom, to be used for printing out the ice
+      // types found
+      ring::getAtomTypesTopoBulk(ringsOneType, ringType, &atomTypes);
+    }
+    // Finding prismatic blocks
+    else {
+      // Get the prism block classifications
+      prism3::findBulkPrisms(ringsOneType, &ringType, nList, yCloud,
+                             &rmsdPerAtom);
+      // Gets the atom type for every atom, to be used for printing out the ice
+      // types found
+      ring::getAtomTypesTopoBulk(ringsOneType, ringType, &atomTypes);
+    }
+  }
 
   // Print out the lammps data file with the bonds
   sout::writeLAMMPSdataTopoBulk(yCloud, nList, atomTypes, path);
@@ -148,6 +187,7 @@ int ring::topoBulkAnalysis(
  ***********************************************/
 std::vector<int> ring::findDDC(std::vector<std::vector<int>> rings,
                                std::vector<ring::strucType> *ringType,
+                               std::vector<int> listHC,
                                std::vector<cage::Cage> *cageList) {
   std::vector<int> listDDC;
   int totalRingNum = rings.size();   // Total number of hexagonal rings
@@ -156,10 +196,34 @@ std::vector<int> ring::findDDC(std::vector<std::vector<int>> rings,
   int jring;                         // Index for peripheral ring being added
   std::vector<int> DDCRings;  // Indices of rings which constitute a single DDC,
                               // with the equatorial ring first
+  // Vector for checking if a ring is basal, prismatic or peripheral
+  std::vector<bool>
+      notEquatorial;  // true if the ring is prismatic, basal or peripheral.
+  notEquatorial.resize(totalRingNum);  // Initialized to false
+
+  // --------
+  // Set all basal and prismatic rings to true (which are part of an HC)
+  for (int i = 0; i < listHC.size(); i++) {
+    int currentRingIndex = listHC[i];
+    // Set this to true
+    notEquatorial[currentRingIndex] = true;
+  }  // end of update of notEquatorial
+  // --------
 
   // To search for equatorial rings, loop through all
   // the hexagonal rings
   for (int iring = 0; iring < totalRingNum; iring++) {
+    // ------------
+    // Step zero: If the ring has been classified as a basal or prismatic ring
+    // in an HC or is a peripheral ring, then it cannot be the equatiorial ring
+    // in a DDC
+    //
+    if (notEquatorial[iring]) {
+      continue;
+    }  // skip for rings which are not equatorial
+    //
+    // ------------
+    // Init
     peripheralRings.clear();
     // ------------
     // Step one: Find all rings which contain each index (m_k) of the equatorial
@@ -211,7 +275,18 @@ std::vector<int> ring::findDDC(std::vector<std::vector<int>> rings,
       if ((*ringType)[jring] == ring::unclassified) {
         (*ringType)[jring] = ring::DDC;
         listDDC.push_back(jring);
+      } else if ((*ringType)[jring] == ring::HCbasal) {
+        (*ringType)[jring] = ring::bothBasal;
+        listDDC.push_back(jring);
+      }  // end of update
+      // never true
+      else if ((*ringType)[jring] == ring::HCprismatic) {
+        (*ringType)[jring] = ring::bothPrismatic;
+        listDDC.push_back(jring);
       }
+      //
+      // Update the notEquatorial vector
+      notEquatorial[jring] = true;
     }  // end of update for peripheral rings
     // Add rings to the cageList vector of struct Cages.
     DDCRings.clear();           // init
@@ -490,14 +565,30 @@ std::vector<int> ring::findHC(std::vector<std::vector<int>> rings,
                 // rings first, followed by prismatic rings
   std::vector<int> prismaticRings;  // Ring indices of prismatic rings
   int kring;                        // Ring index of the prismatic rings
+  std::vector<bool>
+      isPrismatic;  // Flag for checking if the ring is prismatic (true) or not
+                    // (false), since the basal rings are checked
+  isPrismatic.resize(totalRingNum);  // Initialized to false
 
   // Two loops through all the rings are required to find pairs of basal rings
   for (int iring = 0; iring < totalRingNum - 1; iring++) {
+    // -----------------------
+    // Skip if iring is prismatic
+    if (isPrismatic[iring]) {
+      continue;
+    }  // Skip if prismatic
+    // -----------------------
     cond1 = false;
     cond2 = false;
     basal1 = rings[iring];  // Assign iring to basal1
     // Loop through the other rings to get a pair
     for (int jring = iring + 1; jring < totalRingNum; jring++) {
+      // -----------------------
+      // Skip if iring is prismatic
+      if (isPrismatic[jring]) {
+        continue;
+      }                       // Skip if prismatic
+                              // -----------------------
       basal2 = rings[jring];  // Assign jring to basal2
       // ------------
       // Step one: Check to see if basal1 and basal2 have common
@@ -549,7 +640,11 @@ std::vector<int> ring::findHC(std::vector<std::vector<int>> rings,
           (*ringType)[kring] = ring::bothPrismatic;
           listHC.push_back(kring);
         }
-      }
+        //
+        // Update the isPrismatic vector
+        isPrismatic[kring] = true;
+        //
+      }  // End of update of prismatic rings in listHC
       // -----------
       // Update the cageList vector of Cages
       // Update the basal rings
@@ -859,8 +954,8 @@ int ring::findPrismatic(std::vector<std::vector<int>> rings,
       if (kring == iring || kring == jring) {
         continue;
       }  // is not prismatic
-         //
-         // Now find out whether kring has the triplet or not!
+      //
+      // Now find out whether kring has the triplet or not!
       common = ring::findsCommonElements(iTriplet, rings[kring]);
 
       // If this triplet is not shared by  kring
@@ -1005,19 +1100,35 @@ int ring::getAtomTypesTopoBulk(std::vector<std::vector<int>> rings,
              ringType[iring] == ring::bothPrismatic) {
       iRingType = cage::mixed;
     }  // HC atoms
+    // Prism
+    else if (ringType[iring] == ring::Prism ||
+             ringType[iring] == ring::deformedPrism ||
+             ringType[iring] == ring::mixedPrismRing) {
+      iRingType = cage::pnc;  // 5 membered pnc
+    }                         // prism
     // Should never go here
     else {
       continue;
-    }  // TODO: add prism??
+    }  //
     // ------------
     // Otherwise, loop through every inside the ring and assign atomTypes the
     // iRingType
     for (int i = 0; i < ringSize; i++) {
       iatom = rings[iring][i];  // Atom index in ring
-      if ((*atomTypes)[iatom] == cage::mixed) {
+      if ((*atomTypes)[iatom] == cage::mixed ||
+          (*atomTypes)[iatom] == cage::mixed2) {
         continue;
       }  // Don't reassign
-      (*atomTypes)[iatom] = iRingType;
+      // For atoms shared by PNCs and DDCs/HCs
+      if (ringSize == 6) {
+        if ((*atomTypes)[iatom] == cage::pnc) {
+          (*atomTypes)[iatom] = cage::mixed2;
+        } else {
+          (*atomTypes)[iatom] = iRingType;
+        }
+      } else {
+        (*atomTypes)[iatom] = iRingType;
+      }
     }  // end of loop thorugh the current ring
   }    // end of loop through every ring
 
@@ -1097,3 +1208,293 @@ int ring::getStrucNumbers(std::vector<ring::strucType> ringType,
 
   return 0;
 }  // end of function
+
+/********************************************/ /**
+ * Determines which rings are n-sided prisms. This function
+ returns a vector which contains the ring indices of all the rings which are
+ prisms. The ring indices correspond to the index of the rings inside the vector
+ of vector rings, starting from 0. Prism rings can be found using a three-step
+ procedure, in which first two basal rings are found. Prismatic rings are simply
+ rings which share every face made by upper and lower triplets of the basal
+ rings The neighbour list is also required as an input, which is a vector of
+ vectors, containing atom IDs. The first element of the neighbour list is the
+ atom index of
+ the atom for which the other elements are nearest neighbours.\
+ *  @param[in] rings The input vector of vectors containing the primitive rings
+ of a single ring size (number of nodes).
+ *  @param[in] ringType A vector containing a ring::strucType value (a
+ classification type) for each ring.
+ *  @param[in] nPrisms The number of prism blocks identified for the number of
+ nodes.
+ *  @param[in] nList The row-ordered neighbour list (by atom index).
+ *  @param[in] yCloud The input PointCloud.
+ *  \return A vector containing the ring indices of all the rings which have
+ been classified as prisms. The indices are with respect to the input rings
+ vector of vectors.
+ ***********************************************/
+int prism3::findBulkPrisms(
+    std::vector<std::vector<int>> rings, std::vector<ring::strucType> *ringType,
+    std::vector<std::vector<int>> nList,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<double> *rmsdPerAtom, double heightCutoff) {
+  int totalRingNum = rings.size();  // Total number of rings
+  std::vector<int> basal1;          // First basal ring
+  std::vector<int> basal2;          // Second basal ring
+  bool cond1, cond2;  // Conditions for rings to be basal (true) or not (false)
+  int ringSize = rings[0].size();  // Number of nodes in each ring
+  // Matrix for the reference ring for a given ringSize.
+  Eigen::MatrixXd refPointSet(ringSize, 3);
+
+  int axialDim = 2;  // Default=z
+  refPointSet = pntToPnt::getPointSetRefRing(ringSize, axialDim);
+  //
+
+  // Two loops through all the rings are required to find pairs of basal rings
+  for (int iring = 0; iring < totalRingNum - 1; iring++) {
+    cond1 = false;
+    cond2 = false;
+    basal1 = rings[iring];  // Assign iring to basal1
+    // Loop through the other rings to get a pair
+    for (int jring = iring + 1; jring < totalRingNum; jring++) {
+      basal2 = rings[jring];  // Assign jring to basal2
+      // ------------
+      // Put extra check for axial basal rings if shapeMatching is being done
+      // ------------
+      // Step one: Check to see if basal1 and basal2 have common
+      // elements or not. If they don't, then they cannot be basal rings
+      cond1 = ring::hasCommonElements(basal1, basal2);
+      if (cond1 == true) {
+        continue;
+      }
+
+      // ------------
+      bool smallDist =
+          prism3::basalRingsSeparation(yCloud, basal1, basal2, heightCutoff);
+      if (!smallDist) {
+        continue;
+      }  // the basal rings are too far apart
+
+      // Otherwise
+      // Do shape matching here
+      bool isPrism = match::matchUntetheredPrism(yCloud, nList, refPointSet,
+                                                 &basal1, &basal2, rmsdPerAtom);
+
+      // Success! The rings are basal rings of a prism!
+      if (isPrism) {
+        //
+        // Update iring
+        if ((*ringType)[iring] == ring::unclassified) {
+          (*ringType)[iring] = ring::Prism;
+        }
+        // Update jring
+        if ((*ringType)[jring] == ring::unclassified) {
+          (*ringType)[jring] = ring::Prism;
+        }
+      }  // end of reduced criteria
+      // Strict criteria
+      else {
+        cond2 = prism3::basalPrismConditions(nList, &basal1, &basal2);
+        // If the condition is false then the strict criterion has not been met
+        if (!cond2) {
+          continue;
+        }
+        // Update iring
+        if ((*ringType)[iring] == ring::unclassified) {
+          (*ringType)[iring] = ring::Prism;
+        }
+        // Update jring
+        if ((*ringType)[jring] == ring::unclassified) {
+          (*ringType)[jring] = ring::Prism;
+        }
+        //
+        // Shape-matching to get the RMSD (if shape-matching is desired)
+
+        // bool isKnownPrism = match::matchPrism(
+        //     yCloud, nList, refPointSet, &basal1, &basal2, rmsdPerAtom, true);
+
+        // -----------
+      }  // end of strict criteria
+
+    }  // end of loop through rest of the rings to get the second basal ring
+  }    // end of loop through all rings for first basal ring
+
+  return 0;
+}
+
+/********************************************/ /**
+ * A function that checks to see if two basal rings are basal rings of a prism
+ block or not, using the neighbour list information. The neighbour list nList is
+ a row-ordered vector of vectors, containing atom indices (not atom IDs!). The
+ first element of each subvector in nList is the atom index of the particle for
+ which the other elements are the nearest neighbours.
+ *  @param[in] nList Row-ordered neighbour list by atom index.
+ *  @param[in] basal1 The vector for one of the basal rings.
+ *  @param[in] basal2 The vector for the other basal ring.
+ *  \return A value that is true if the basal rings constitute a prism block,
+ and false if they do not make up a prism block.
+ ***********************************************/
+bool prism3::basalPrismConditions(std::vector<std::vector<int>> nList,
+                                  std::vector<int> *basal1,
+                                  std::vector<int> *basal2) {
+  int l1 = (*basal1)[0];  // first element of basal1 ring
+  int ringSize =
+      (*basal1).size();  // Size of the ring; each ring contains n elements
+  int m_k;               // Atom ID of element in basal2
+  bool l1_neighbour;     // m_k is a neighbour of l1(true) or not (false)
+
+  // isNeighbour is initialized to false for all basal2 elements; indication if
+  // basal2 elements are neighbours of basal1
+  std::vector<bool> isNeighbour(ringSize, false);
+  int kIndex;   // m_k index
+  int lAtomID;  // atomID of the current element of basal1
+  int kAtomID;  // atomID of the current element of basal2
+
+  // ---------------------------------------------
+  // COMPARISON OF basal2 ELEMENTS WITH l1
+  for (int k = 0; k < ringSize; k++) {
+    l1_neighbour = false;
+    m_k = (*basal2)[k];
+    // =================================
+    // Checking to seee if m_k is be a neighbour of l1
+    // Find m_k inside l1 neighbour list
+    auto it = std::find(nList[l1].begin() + 1, nList[l1].end(), m_k);
+
+    // If the element has been found, for l1
+    if (it != nList[l1].end()) {
+      l1_neighbour = true;
+      kIndex = k;
+      break;
+    }
+  }  // l1 is a neighbour of m_k
+
+  // If there is no nearest neighbour, then the two rings are not part of the
+  // prism
+  if (!l1_neighbour) {
+    return false;
+  }
+
+  // ---------------------------------------------
+  // NEIGHBOURS of basal1 in basal2
+  isNeighbour[kIndex] = true;
+
+  // All elements of basal1 must be neighbours of basal2
+  for (int i = 1; i < ringSize; i++) {
+    lAtomID = (*basal1)[i];  // element of basal1 ring
+    for (int k = 0; k < ringSize; k++) {
+      // Skip if already a neighbour
+      if (isNeighbour[k]) {
+        continue;
+      }
+      // Get the comparison basal2 element
+      kAtomID = (*basal2)[k];  // element of basal2 ring;
+
+      // Checking to see if kAtomID is a neighbour of lAtomID
+      // Find kAtomID inside lAtomID neighbour list
+      auto it1 =
+          std::find(nList[lAtomID].begin() + 1, nList[lAtomID].end(), kAtomID);
+
+      // If the element has been found, for l1
+      if (it1 != nList[lAtomID].end()) {
+        isNeighbour[k] = true;
+      }
+    }  // Loop through basal2
+  }    // end of check for neighbours of basal1
+
+  // ---------------------------------------------
+
+  // They should all be neighbours
+  for (int k = 0; k < ringSize; k++) {
+    // Check to see if any element is false
+    if (!isNeighbour[k]) {
+      return false;
+    }
+  }
+
+  // Everything works out!
+  return true;
+}
+
+/********************************************/ /**
+* Relaxed criteria for deformed
+ prism blocks: at least one bond
+ should exist between the basal
+ rings.
+***********************************************/
+bool prism3::relaxedPrismConditions(std::vector<std::vector<int>> nList,
+                                    std::vector<int> *basal1,
+                                    std::vector<int> *basal2) {
+  int ringSize =
+      (*basal1).size();      // Size of the ring; each ring contains n elements
+  int m_k;                   // Atom ID of element in basal2
+  bool isNeighbour = false;  // This is true if there is at least one bond
+                             // between the basal rings
+  int l_k;                   // Atom ID of element in basal1
+
+  // ---------------------------------------------
+  // COMPARISON OF basal2 ELEMENTS (m_k) WITH basal1 ELEMENTS (l_k)
+  // Loop through all the elements of basal1
+  for (int l = 0; l < ringSize; l++) {
+    l_k = (*basal1)[l];
+    // Search for the nearest neighbour of l_k in basal2
+    // Loop through basal2 elements
+    for (int m = 0; m < ringSize; m++) {
+      m_k = (*basal2)[m];
+      // Find m_k inside l_k neighbour list
+      auto it = std::find(nList[l_k].begin() + 1, nList[l_k].end(), m_k);
+
+      // If the element has been found, for l1
+      if (it != nList[l_k].end()) {
+        isNeighbour = true;
+        break;
+      }  // found element
+    }    // end of loop through all the elements of basal2
+
+    // If a neighbour has been found then
+    if (isNeighbour) {
+      return true;
+    }
+  }  // end of loop through all the elements of basal1
+
+  // If a neighbour has not been found, return false
+  return false;
+}
+
+// Check to see that candidate basal prisms are not really far from each other
+// Return true if the basal rings are within the heightCutoff
+bool prism3::basalRingsSeparation(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<int> basal1, std::vector<int> basal2, double heightCutoff) {
+  //
+  int ringSize = basal1.size();
+  int l_k, m_k;  // Atom indices
+  double infHugeNumber = 100000;
+  double leastDist = infHugeNumber;
+  int index = -1;  // starting index
+  // For the first element of basal1:
+
+  l_k = basal1[0];  // This is the atom particle C++ index
+
+  // Search for the nearest neighbour of l_k in basal2
+  // Loop through basal2 elements
+  for (int m = 0; m < ringSize; m++) {
+    m_k = basal2[m];  // Atom index to find in the neighbour list of iatom
+
+    // Calculate the distance
+    double dist = gen::periodicDist(yCloud, l_k, m_k);
+
+    // Update the least distance
+    if (leastDist > dist) {
+      leastDist = dist;  // This is the new least distance
+      index = m;
+    }  // end of update of the least distance
+
+  }  // found element
+
+  // If the element has been found, for l1
+  if (leastDist < heightCutoff) {
+    return true;
+  }  // end of check
+  else {
+    return false;
+  }
+}

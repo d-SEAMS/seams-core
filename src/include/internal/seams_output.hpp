@@ -98,6 +98,7 @@ int writeRings(std::vector<std::vector<int>> rings,
 // Function for printing out the number of prism blocks, with or without slices.
 // Be careful when using slices!
 int writePrismNum(std::string path, std::vector<int> nPrisms,
+                  std::vector<int> nDefPrisms,
                   std::vector<double> heightPercent, int maxDepth,
                   int currentFrame, int firstFrame);
 
@@ -135,11 +136,23 @@ int writeLAMMPSdata(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                     std::vector<std::vector<int>> bonds,
                     std::string filename = "system-rings.data");
 
+// Write out a LAMMPS dump file containing the RMSD per atom
+int writeLAMMPSdumpINT(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<double> rmsdPerAtom, std::vector<int> atomTypes, int maxDepth,
+    std::string path);
+
+// Write out a LAMMPS dump file containing the RMSD per atom for bulk ice
+int writeLAMMPSdumpCages(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::vector<double> rmsdPerAtom, std::vector<int> atomTypes,
+    std::string path, int firstFrame);
+
 // Write a data file for prisms of every type
 int writeLAMMPSdataAllPrisms(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
-    int maxDepth, std::string path);
+    int maxDepth, std::string path, bool doShapeMatching = false);
 
 // Write a data file for rings of every type for a monolayer
 int writeLAMMPSdataAllRings(
@@ -205,5 +218,10 @@ int writeHisto(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 int writeCluster(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                  std::string fileName = "cluster.txt", bool isSlice = false,
                  int largestIceCluster = 0);
+
+// Function for writing out the XYZ files for each cluster
+int writeXYZcluster(std::string path,
+                    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                    std::vector<int> atoms, int clusterID, cage::cageType type);
 }  // namespace sout
 #endif  // __SEAMS_OUTPUT_H_

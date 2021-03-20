@@ -58,7 +58,7 @@ enum cageType { HexC, DoubleDiaC };
  * Type for an atom which is part of a mixed ring, shared by both a DDC and an
  * HC
  */
-enum iceType { dummy, hc, ddc, mixed };
+enum iceType { dummy, hc, ddc, mixed, pnc, mixed2 };
 
 // Each DDC has one equatorial ring and 6 peripheral rings
 // Each HC has two basal planes and 3 prismatic planes
@@ -70,10 +70,10 @@ enum iceType { dummy, hc, ddc, mixed };
  * - Vector of rings in the cage
  */
 struct Cage {
-  cageType type;           // type of the cage : can be DDC or HC
-  std::vector<int> rings;  // coordinates
+  cageType type;          // type of the cage : can be DDC or HC
+  std::vector<int> rings; // coordinates
 };
 
-}  // namespace cage
+} // namespace cage
 
-#endif  // __CAGE_H_
+#endif // __CAGE_H_

@@ -148,6 +148,7 @@ SCENARIO("Test the DDC algorithm for a single double-diamond cage.", "[topo]") {
     std::vector<int> listDDC;  // Contains atom indices of atoms making up HCs
     // Make a list of all the DDCs and HCs
     std::vector<cage::Cage> cageList;
+    std::vector<int> listHC;  // Empty
     // --------------------
     // Building the double-diamond cage
     //
@@ -254,7 +255,7 @@ SCENARIO("Test the DDC algorithm for a single double-diamond cage.", "[topo]") {
         ringType.resize(
             rings.size());  // Has a value for each ring. init to zero.
         // Find the number of hexagonal cages
-        listDDC = ring::findDDC(rings, &ringType, &cageList);
+        listDDC = ring::findDDC(rings, &ringType, listHC, &cageList);
         // Assert the number of cages
         REQUIRE(cageList.size() ==
                 1);  // Evaluate condition for a single tetragonal prism

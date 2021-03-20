@@ -33,6 +33,7 @@
 // Newer pointCloud
 #include <bond.hpp>
 #include <bop.hpp>
+#include <bulkTUM.hpp>
 #include <cluster.hpp>
 #include <franzblau.hpp>
 #include <generic.hpp>
@@ -150,6 +151,7 @@ int main(int argc, char *argv[]) {
     // For the list of all rings (of all sizes)
     std::vector<std::vector<int>> ringsAllSizes;
     std::vector<std::vector<int>> rings;
+    int atomID;
     // -----------------
     // This section basically only registers functions and handles the rest in
     // lua Use the functions defined here
@@ -166,6 +168,7 @@ int main(int argc, char *argv[]) {
     lua["trajectory"] = tFile;
     // Confined ice stuff
     lua["ringsAllSizes"] = &rings;
+    lua["lowestAtomID"] = &atomID;
     // Register functions
     //
     // Writing stuff
@@ -263,6 +266,10 @@ int main(int argc, char *argv[]) {
     // -----------------
     // Bulk ice, using the topological network criterion
     lua.set_function("bulkTopologicalNetworkCriterion", ring::topoBulkAnalysis);
+    // --------------------------
+    // Bulk ice, using the TUM (Topological Unit Matching Criterion). No need to
+    // use bulkTopologicalNetworkCriterion if you use this function
+    lua.set_function("bulkTopoUnitMatching", tum3::topoUnitMatchingBulk);
     // --------------------------
     // Use the script
     lua.script_file(lscript);

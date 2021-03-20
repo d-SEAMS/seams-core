@@ -16,4 +16,4 @@ outDir="runOne/"; --- The subdirectory used;
 functionScript="lua_inputs/iceType/functions.lua" --- This is relative to the binary location
 
 -- Variable for the topological network criterion
-printCages = false; --- Prints out every cage for every frame if true 
+onlyTetrahedral = false; --- Only finds DDCs and HCs if true; searches for pentagonal defects if false

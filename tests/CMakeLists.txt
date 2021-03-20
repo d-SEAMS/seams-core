@@ -3,12 +3,18 @@ add_executable(yodaStruct_test
                franzblau-test.cpp
                topo_one_dim-test.cpp
                topo_bulk-test.cpp
+               absor-test.cpp
                ${PROJECT_SOURCE_DIR}/src/franzblau.cpp
                ${PROJECT_SOURCE_DIR}/src/topo_one_dim.cpp
                ${PROJECT_SOURCE_DIR}/src/topo_bulk.cpp
                ${PROJECT_SOURCE_DIR}/src/ring.cpp
                ${PROJECT_SOURCE_DIR}/src/neighbours.cpp
                ${PROJECT_SOURCE_DIR}/src/mol_sys.cpp
+               ${PROJECT_SOURCE_DIR}/src/absOrientation.cpp
+               ${PROJECT_SOURCE_DIR}/src/seams_input.cpp
+               ${PROJECT_SOURCE_DIR}/src/seams_output.cpp
+               ${PROJECT_SOURCE_DIR}/src/pntCorrespondence.cpp
+               ${PROJECT_SOURCE_DIR}/src/bulkTUM.cpp
 )
 
 # Standard cmake stuff
@@ -21,6 +27,7 @@ include(FindGSL)
 find_package(
   "Lua" REQUIRED
   "Boost" REQUIRED
+  "Eigen3 3.3" REQUIRED
   "Catch2" REQUIRED
   "GSL" REQUIRED
   "yaml-cpp"
@@ -30,6 +37,7 @@ find_package(
 # Link everything
 target_link_libraries(yodaStruct_test
   ${Boost_LIBRARIES}
+  ${Eigen3_LIBRARIES}
   ${LUA_LIBRARIES}
   ${GSL_LIBRARIES}
   fmt
@@ -43,6 +51,7 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/src/include/internal
   ${PROJECT_SOURCE_DIR}/src/include/external
   ${GSL_INCLUDE_DIRS}
+  ${Eigen3_INCLUDE_DIRS}
   )
 # Run unit tests
 add_test(NAME yodaStruct-unit-tests COMMAND $<TARGET_FILE:yodaStruct_test>)
