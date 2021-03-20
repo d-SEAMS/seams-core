@@ -303,3 +303,6 @@ TSWLatexianTemp*
 /result
 /.ccls-cache/
 shellBuild/
+doxyYoda
+doxyYoda_*
+run*
