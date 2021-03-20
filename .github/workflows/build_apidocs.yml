@@ -23,7 +23,8 @@ jobs:
     - run: nix-shell --run "doxygen Doxyfile-prj.cfg"
     - run: |
         find docs/ -type f -name "*" -print0 | xargs -0 sed -i '' -e 's/>Pages</>Wiki</g' || true
-    - name: Deploy
+    - name: Deploy Documentation
+      if: ${{ (github.ref == 'refs/heads/main' && github.repository == 'd-SEAMS/seams-core') || (github.ref == 'refs/heads/master' && github.repository == 'd-SEAMS/seams-core')}}
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
