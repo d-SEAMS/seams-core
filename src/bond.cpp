@@ -3,10 +3,10 @@
 #include <generic.hpp>
 
 /**
- *  Create a vector of vectors containing bond information (outputs bonded atom
- IDs, not indices!) from the neighbour list vector of vectors (which contains
- atom INDICES). Moreover, the first element corresponds to the atom whose
- neighbours have been found.
+ * @details Create a vector of vectors containing bond information (outputs
+ * bonded atom IDs, not indices!) from the neighbour list vector of vectors
+ * (which contains atom INDICES). Moreover, the first element corresponds to the
+ * atom whose neighbours have been found.
  */
 std::vector<std::vector<int>>
 bond::populateBonds(std::vector<std::vector<int>> nList,
@@ -65,16 +65,16 @@ bond::populateBonds(std::vector<std::vector<int>> nList,
   return bonds;
 }
 
-/********************************************/ /**
- *  Create a vector of vectors containing bond information (outputs bonded atom
- IDs, not indices!) from the neighbour list vector of vectors (which contains
- atom INDICES). Bonds between dummy atoms, and between dummy and ice atoms are
- not added. Moreover, the first element corresponds to the atom whose neighbours
- have been found.
+/**
+ *  @details Create a vector of vectors containing bond information (outputs
+ * bonded atom IDs, not indices!) from the neighbour list vector of vectors
+ * (which contains atom INDICES). Bonds between dummy atoms, and between dummy
+ * and ice atoms are not added. Moreover, the first element corresponds to the
+ * atom whose neighbours have been found.
  *  @param[in] nList Row-ordered neighbour list by ID
  *  @param[in] yCloud The input molSys::PointCloud
  *  @param[in] atomTypes Contains an atom type for each particle in yCloud
- ***********************************************/
+ */
 std::vector<std::vector<int>>
 bond::populateBonds(std::vector<std::vector<int>> nList,
                     molSys::PointCloud<molSys::Point<double>, double> *yCloud,

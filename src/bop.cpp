@@ -28,29 +28,22 @@ namespace bg = boost::geometry;
 //   return result;
 // }
 
-/********************************************/ /**
-                                                *  Function for calculating
-                                                *spherical harmonics, that works
-                                                *for a general \f$l\f$.
-                                                *
-                                                * This function uses the <a
-                                                *href="https://www.boost.org/">Boost</a>
-                                                *libraries.
-                                                *
-                                                *  @param[in] orderL The int
-                                                *value of \f$l\f$
-                                                *  @param[in] radialCoord Array
-                                                *containing the polar and
-                                                *azimuth angles \return a
-                                                *complex vector, holding the
-                                                *complex spherical harmonics
-                                                *values, of length \f$2l+1\f$
-                                                ***********************************************/
-std::vector<std::complex<double>> sph::spheriHarmo(
-    int orderL, std::array<double, 2> radialCoord) {
+/**
+ * @details Function for calculating spherical harmonics, that works for a
+ *  general @f$l@f$.
+ *
+ *  This function uses the [Boost libraries](https://www.boost.org/).
+ *
+ *  @param[in] orderL The int value of @f$l@f$
+ *  @param[in] radialCoord Array containing the polar and azimuth angles
+ *  @return a complex vector, holding the complex spherical harmonics values,
+ *    of length @f$2l+1@f$
+ */
+std::vector<std::complex<double>>
+sph::spheriHarmo(int orderL, std::array<double, 2> radialCoord) {
   // For keeping track of the index of the output vector
   std::vector<std::complex<double>> result;
-  std::complex<double> b;  // Boost temp value
+  std::complex<double> b; // Boost temp value
   int m;
 
   result.resize(2 * orderL + 1);
@@ -65,21 +58,12 @@ std::vector<std::complex<double>> sph::spheriHarmo(
   return result;
 }
 
-/********************************************/ /**
-                                                *  Function for the azimuth and
-                                                *polar angles, given the
-                                                *Cartesian coordinates
-                                                *
-                                                * This function uses the <a
-                                                *href="https://www.boost.org/">Boost</a>
-                                                *libraries.
-                                                *
-                                                *  @param[in] cartCoord The
-                                                *Cartesian coordinates of a
-                                                *particular point \return a
-                                                *double array, holding the
-                                                *azimuth and polar angles
-                                                ***********************************************/
+/**
+ * @details Function for the azimuth and polar angles, given the Cartesian
+ * coordinates This function uses the [Boost](https://www.boost.org/) libraries.
+ * @param[in] cartCoord The Cartesian coordinates of a particular point \return
+ * a double array, holding the azimuth and polar angles
+ */
 std::array<double, 2> sph::radialCoord(std::array<double, 3> cartCoord) {
   // The output
   std::array<double, 2> result;
@@ -97,23 +81,16 @@ std::array<double, 2> sph::radialCoord(std::array<double, 3> cartCoord) {
   return result;
 }
 
-/********************************************/ /**
-                                                *  Calculates \f$Q_3\f$ using
-                                                *hard-coded look-up values.
-                                                *
-                                                * It is recommended to use the
-                                                *Boost version of this function,
-                                                *sph::spheriHarmo, instead.
-                                                *
-                                                *  @param[in] angles The azimuth
-                                                *and polar angles of a
-                                                *particular point \return a
-                                                *complex vector, of length
-                                                *\f$7\f$, calculated using
-                                                *spherical harmonics
-                                                ***********************************************/
-std::vector<std::complex<double>> sph::lookupTableQ3Vec(
-    std::array<double, 2> angles) {
+/**
+ * @details Calculates @f$Q_3@f$ using hard-coded look-up values.
+ * @deprecated It is recommended to use the Boost version of this function,
+ * sph::spheriHarmo, instead.
+ * @param[in] angles The azimuth and polar angles of a particular point
+ * @return a complex vector, of length @f$7@f$, calculated using spherical
+ * harmonics
+ */
+std::vector<std::complex<double>>
+sph::lookupTableQ3Vec(std::array<double, 2> angles) {
   // For keeping track of the index of the output vector
   std::vector<std::complex<double>> result;
   double theta = angles[1];
@@ -128,23 +105,17 @@ std::vector<std::complex<double>> sph::lookupTableQ3Vec(
   return result;
 }
 
-/********************************************/ /**
-                                                *  Look-up hard-coded values for
-                                                *\f$Q_3\f$
-                                                *
-                                                * It is recommended to use the
-                                                *Boost version of this function,
-                                                *sph::spheriHarmo, instead.
-                                                *
-                                                *  @param[in] m An int such that
-                                                *\f$-3<=m<=3\f$
-                                                *  @param[in] angles The azimuth
-                                                *and polar angles for a
-                                                *particular particle \return a
-                                                *complex vector, of length
-                                                *\f$7\f$, calculated using
-                                                *hard-coded values
-                                                ***********************************************/
+/**
+ *  @details Look-up hard-coded values for @f$Q_3@f$
+ *
+ * It is recommended to use the Boost version of this function,
+ * sph::spheriHarmo, instead.
+ *
+ *  @param[in] m An int such that @f$-3<=m<=3@f$
+ *  @param[in] angles The azimuth and polar angles for a particular particle
+ *  @return a complex vector, of length @f$7@f$, calculated using hard-coded
+ *   values
+ */
 std::complex<double> sph::lookupTableQ3(int m, std::array<double, 2> angles) {
   std::complex<double> result(0.0, 0.0);
   const double pi = std::acos(-1);
@@ -190,23 +161,18 @@ std::complex<double> sph::lookupTableQ3(int m, std::array<double, 2> angles) {
   return result;
 }
 
-/********************************************/ /**
-                                                *  Calculates \f$Q_6\f$ using
-                                                *hard-coded values.
-                                                *
-                                                * It is recommended to use the
-                                                *Boost version of this function,
-                                                *sph::spheriHarmo, instead.
-                                                *
-                                                *  @param[in] angles The azimuth
-                                                *and polar angles for a
-                                                *particular particle \return a
-                                                *complex vector, of length
-                                                *\f$13\f$, calculated using
-                                                *hard-coded values
-                                                ***********************************************/
-std::vector<std::complex<double>> sph::lookupTableQ6Vec(
-    std::array<double, 2> angles) {
+/**
+ * @details Calculates @f$Q_6@f$ using hard-coded values.
+ *
+ * It is recommended to use the Boost version of this function,
+ * sph::spheriHarmo, instead.
+ *
+ *  @param[in] angles The azimuth and polar angles for a particular particle
+ *  @return a complex vector, of length @f$13@f$, calculated using hard-coded
+ *   values
+ */
+std::vector<std::complex<double>>
+sph::lookupTableQ6Vec(std::array<double, 2> angles) {
   // For keeping track of the index of the output vector
   std::vector<std::complex<double>> result;
   double theta = angles[1];
@@ -221,24 +187,17 @@ std::vector<std::complex<double>> sph::lookupTableQ6Vec(
   return result;
 }
 
-/********************************************/ /**
-                                                *  Hard-coded calculations for
-                                                *determining \f$Q_6\f$.
-                                                *
-                                                * It is recommended to use the
-                                                *general Boost version of this
-                                                *function, sph::spheriHarmo,
-                                                *instead.
-                                                *
-                                                *  @param[in] m An int such that
-                                                *\f$-6<=m<=6\f$
-                                                *  @param[in] angles The azimuth
-                                                *and polar angles for a
-                                                *particular particle \return a
-                                                *complex vector, of length
-                                                *\f$13\f$, calculated using
-                                                *hard-coded values
-                                                ***********************************************/
+/**
+ * @details Hard-coded calculations for determining @f$Q_6@f$.
+ *
+ * It is recommended to use the general Boost version of this function,
+ * sph::spheriHarmo, instead.
+ *
+ *  @param[in] m An int such that @f$-6<=m<=6@f$
+ *  @param[in] angles The azimuth and polar angles for a particular particle
+ *  @return a complex vector, of length @f$13@f$, calculated using hard-coded
+ *   values
+ */
 std::complex<double> sph::lookupTableQ6(int m, std::array<double, 2> angles) {
   std::complex<double> result(0.0, 0.0);
   const double pi = std::acos(-1);
@@ -320,22 +279,22 @@ std::complex<double> sph::lookupTableQ6(int m, std::array<double, 2> angles) {
   return result;
 }
 
-// Uses Boost for spherical harmonics, and gets c_ij according to the CHILL
-// algorithm
-molSys::PointCloud<molSys::Point<double>, double> chill::getCorrel(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, bool isSlice) {
+//! Uses Boost for spherical harmonics, and gets c_ij according to the CHILL
+//! algorithm
+molSys::PointCloud<molSys::Point<double>, double>
+chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                 std::vector<std::vector<int>> nList, bool isSlice) {
   //
-  int l = 3;       // Don't hard-code this; change later
-  int iatomID;     // Atom ID (key) of iatom
-  int iatomIndex;  // Index (value) of iatom
-  int jatomID;     // Atom ID (key) of jatom
-  int jatomIndex;  // Index (value) of nearest neighbour
+  int l = 3;      // TODO: Don't hard-code this; change later
+  int iatomID;    // Atom ID (key) of iatom
+  int iatomIndex; // Index (value) of iatom
+  int jatomID;    // Atom ID (key) of jatom
+  int jatomIndex; // Index (value) of nearest neighbour
   std::array<double, 3> delta;
   std::array<double, 2> angles;
-  chill::QlmAtom QlmTotal;  // Qlm for each iatom
+  chill::QlmAtom QlmTotal; // Qlm for each iatom
   std::vector<std::complex<double>>
-      yl;  // temp q_lm for each pair of iatom and jatom
+      yl; // temp q_lm for each pair of iatom and jatom
   std::complex<double> dot_product = {0, 0};
   std::complex<double> qI = {0, 0};
   std::complex<double> qJ = {0, 0};
@@ -343,9 +302,9 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getCorrel(
   std::complex<double> Jnorm = {0, 0};
   std::complex<double> complexDenominator = {0, 0};
   std::complex<double> complexCij = {0, 0};
-  molSys::Result temp_cij;  // Holds the c_ij value
+  molSys::Result temp_cij; // Holds the c_ij value
   double cij_real;
-  int nnumNeighbours;  // Number of nearest neighbours for iatom
+  int nnumNeighbours; // Number of nearest neighbours for iatom
 
   QlmTotal.ptq.resize(yCloud->nop);
 
@@ -354,7 +313,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getCorrel(
     // The atom index is iatom
     iatomIndex = iatom;
     iatomID =
-        nList[iatomIndex][0];  // The first element in nList is the ID of iatom
+        nList[iatomIndex][0]; // The first element in nList is the ID of iatom
     nnumNeighbours = nList[iatomIndex].size() - 1;
     // Now loop over the first four neighbours
     for (int j = 1; j <= nnumNeighbours; j++) {
@@ -366,18 +325,18 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getCorrel(
 
       if (it != yCloud->idIndexMap.end()) {
         jatomIndex = it->second;
-      }  // found jatom
+      } // found jatom
       else {
         std::cerr << "Something is wrong with the ID and index map.\n";
         return *yCloud;
-      }  // error handling
+      } // error handling
 
       // Get the relative distance now that the index values are known
       delta = gen::relDist(yCloud, iatomIndex, jatomIndex);
       double r = std::sqrt(std::pow(delta[0], 2.0) + std::pow(delta[1], 2.0) +
                            std::pow(delta[2], 2.0));
-      angles[1] = acos(delta[2] / r);         // theta
-      angles[0] = atan2(delta[0], delta[1]);  // phi
+      angles[1] = acos(delta[2] / r);        // theta
+      angles[0] = atan2(delta[0], delta[1]); // phi
 
       // Now add over all nearest neighbours
       if (j == 1) {
@@ -391,12 +350,12 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getCorrel(
         QlmTotal.ptq[iatomIndex].ylm[m] += yl[m];
         // QlmTotal.ptq[iatom].ylm[m] += sph::lookupTableQ3(m, angles);
       }
-    }  // End of loop over 4 nearest neighbours
+    } // End of loop over 4 nearest neighbours
 
     // Divide by 4
     QlmTotal.ptq[iatomIndex].ylm =
         gen::avgVector(QlmTotal.ptq[iatom].ylm, l, nnumNeighbours);
-  }  // End of looping over all iatom
+  } // End of looping over all iatom
 
   // ------------------------------------------------
   // Now that you have all qlm for the particles,
@@ -427,19 +386,19 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getCorrel(
 
       if (it != yCloud->idIndexMap.end()) {
         jatomIndex = it->second;
-      }  // found jatom
+      } // found jatom
       else {
         std::cerr << "Something is wrong with the ID and index map.\n";
         return *yCloud;
-      }  // error handling
+      } // error handling
       // Spherical harmonics
       for (int m = 0; m < 2 * l + 1; m++) {
         qI = QlmTotal.ptq[iatomIndex].ylm[m];
         qJ = QlmTotal.ptq[jatomIndex].ylm[m];
-        dot_product = dot_product + (qI * std::conj(qJ));  // unnormalized
+        dot_product = dot_product + (qI * std::conj(qJ)); // unnormalized
         Inorm = Inorm + (qI * std::conj(qI));
         Jnorm = Jnorm + (qJ * std::conj(qJ));
-      }  // end loop over m components
+      } // end loop over m components
       // Get the denominator
       complexDenominator = std::sqrt(Inorm * Jnorm);
       complexCij = dot_product / complexDenominator;
@@ -454,21 +413,21 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getCorrel(
         temp_cij.classifier = molSys::out_of_range;
       }
       yCloud->pts[iatomIndex].c_ij.push_back(temp_cij);
-    }  // end loop over nearest neighbours
+    } // end loop over nearest neighbours
   }
 
   return *yCloud;
 }
 
-// Classifies each atom according to the CHILL algorithm without printing
+//! Classifies each atom according to the CHILL algorithm without printing
 molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypeNoPrint(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, bool isSlice) {
-  int ih, ic, water, interIce, unknown, total;  // No. of particles of each type
+  int ih, ic, water, interIce, unknown, total; // No. of particles of each type
   ih = ic = water = unknown = interIce = total = 0;
   int num_staggrd, num_eclipsd, na;
   molSys::bond_type bondType;
-  int nnumNeighbours;  // Number of nearest neighbours
+  int nnumNeighbours; // Number of nearest neighbours
 
   for (int iatom = 0; iatom < yCloud->nop; iatom++) {
     // if(yCloud->pts[iatom].type!=typeO){continue;}
@@ -479,10 +438,10 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypeNoPrint(
         continue;
       }
     }
-    total++;  // Update the total number of atoms considered. Change this to
+    total++; // Update the total number of atoms considered. Change this to
     // check for slices
     num_staggrd = num_eclipsd = na =
-        0;  // init to zero before loop through neighbours
+        0; // init to zero before loop through neighbours
 
     nnumNeighbours = nList[iatom].size() - 1;
     // Loop through the bond cij and get the number of staggered, eclipsed bonds
@@ -495,10 +454,10 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypeNoPrint(
       } else {
         na++;
       }
-    }  // End of loop through neighbours
+    } // End of loop through neighbours
 
     // Add more tests later
-    yCloud->pts[iatom].iceType = molSys::unclassified;  // default
+    yCloud->pts[iatom].iceType = molSys::unclassified; // default
     // Cubic ice
     // if (num_eclipsd==0 && num_staggrd==4){
     //  yCloud->pts[iatom].iceType = molSys::cubic;
@@ -522,21 +481,21 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypeNoPrint(
       water++;
     }
 
-  }  // End of loop through every iatom
+  } // End of loop through every iatom
 
   return *yCloud;
 }
 
-// Classifies each atom according to the CHILL algorithm
-molSys::PointCloud<molSys::Point<double>, double> chill::getIceType(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, std::string path, int firstFrame,
-    bool isSlice, std::string outputFileName) {
-  int ih, ic, water, interIce, unknown, total;  // No. of particles of each type
+//! Classifies each atom according to the CHILL algorithm
+molSys::PointCloud<molSys::Point<double>, double>
+chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                  std::vector<std::vector<int>> nList, std::string path,
+                  int firstFrame, bool isSlice, std::string outputFileName) {
+  int ih, ic, water, interIce, unknown, total; // No. of particles of each type
   ih = ic = water = unknown = interIce = total = 0;
   int num_staggrd, num_eclipsd, na;
   molSys::bond_type bondType;
-  int nnumNeighbours;  // Number of nearest neighbours
+  int nnumNeighbours; // Number of nearest neighbours
 
   for (int iatom = 0; iatom < yCloud->nop; iatom++) {
     // if(yCloud->pts[iatom].type!=typeO){continue;}
@@ -547,10 +506,10 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceType(
         continue;
       }
     }
-    total++;  // Update the total number of atoms considered. Change this to
+    total++; // Update the total number of atoms considered. Change this to
     // check for slices
     num_staggrd = num_eclipsd = na =
-        0;  // init to zero before loop through neighbours
+        0; // init to zero before loop through neighbours
 
     nnumNeighbours = nList[iatom].size() - 1;
     // Loop through the bond cij and get the number of staggered, eclipsed bonds
@@ -563,10 +522,10 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceType(
       } else {
         na++;
       }
-    }  // End of loop through neighbours
+    } // End of loop through neighbours
 
     // Add more tests later
-    yCloud->pts[iatom].iceType = molSys::unclassified;  // default
+    yCloud->pts[iatom].iceType = molSys::unclassified; // default
     // Cubic ice
     // if (num_eclipsd==0 && num_staggrd==4){
     // 	yCloud->pts[iatom].iceType = molSys::cubic;
@@ -590,7 +549,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceType(
       water++;
     }
 
-  }  // End of loop through every iatom
+  } // End of loop through every iatom
 
   // water = total - ic -ih;
 
@@ -617,27 +576,28 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceType(
   return *yCloud;
 }
 
-/********************************************/ /**
- *  Function for getting the bond order correlations \f$c_{ij}\f$ (alternatively
- \f$a_{ij}\f$ in certain texts) using the CHILL+ algorithm
+/**
+ *  @details Function for getting the bond order correlations @f$c_{ij}@f$
+ * (alternatively
+ *   @f$a_{ij}@f$ in certain texts) using the CHILL+ algorithm
  *  @param[in,out] yCloud The output molSys::PointCloud
  *  @param[in] nList Row-ordered neighbour list by atom ID
  *  @param[in] isSlice This decides whether there is a slice or not
- ***********************************************/
-molSys::PointCloud<molSys::Point<double>, double> chill::getCorrelPlus(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, bool isSlice) {
+ */
+molSys::PointCloud<molSys::Point<double>, double>
+chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                     std::vector<std::vector<int>> nList, bool isSlice) {
   //
-  int l = 3;       // Don't hard-code this; change later
-  int iatomID;     // Atom ID (key) of iatom
-  int iatomIndex;  // Index (value) of iatom
-  int jatomID;     // Atom ID (key) of jatom
-  int jatomIndex;  // Index (value) of nearest neighbour
+  int l = 3;      // TODO: Don't hard-code this; change later
+  int iatomID;    // Atom ID (key) of iatom
+  int iatomIndex; // Index (value) of iatom
+  int jatomID;    // Atom ID (key) of jatom
+  int jatomIndex; // Index (value) of nearest neighbour
   std::array<double, 3> delta;
   std::array<double, 2> angles;
-  chill::QlmAtom QlmTotal;  // Qlm for each iatom
+  chill::QlmAtom QlmTotal; // Qlm for each iatom
   std::vector<std::complex<double>>
-      yl;  // temp q_lm for each pair of iatom and jatom
+      yl; // temp q_lm for each pair of iatom and jatom
   std::complex<double> dot_product = {0, 0};
   std::complex<double> qI = {0, 0};
   std::complex<double> qJ = {0, 0};
@@ -645,9 +605,9 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getCorrelPlus(
   std::complex<double> Jnorm = {0, 0};
   std::complex<double> complexDenominator = {0, 0};
   std::complex<double> complexCij = {0, 0};
-  molSys::Result temp_cij;  // Holds the c_ij value
+  molSys::Result temp_cij; // Holds the c_ij value
   double cij_real;
-  int nnumNeighbours;  // Number of nearest neighbours for iatom
+  int nnumNeighbours; // Number of nearest neighbours for iatom
 
   QlmTotal.ptq.resize(yCloud->nop);
 
@@ -656,7 +616,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getCorrelPlus(
     // The atom index is iatom
     iatomIndex = iatom;
     iatomID =
-        nList[iatomIndex][0];  // The first element in nList is the ID of iatom
+        nList[iatomIndex][0]; // The first element in nList is the ID of iatom
     nnumNeighbours = nList[iatomIndex].size() - 1;
     // Now loop over the first four neighbours
     for (int j = 1; j <= nnumNeighbours; j++) {
@@ -668,18 +628,18 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getCorrelPlus(
 
       if (it != yCloud->idIndexMap.end()) {
         jatomIndex = it->second;
-      }  // found jatom
+      } // found jatom
       else {
         std::cerr << "Something is wrong with the ID and index map.\n";
         return *yCloud;
-      }  // error handling
+      } // error handling
 
       // Get the relative distance now that the index values are known
       delta = gen::relDist(yCloud, iatomIndex, jatomIndex);
       double r = std::sqrt(std::pow(delta[0], 2.0) + std::pow(delta[1], 2.0) +
                            std::pow(delta[2], 2.0));
-      angles[1] = acos(delta[2] / r);         // theta
-      angles[0] = atan2(delta[0], delta[1]);  // phi
+      angles[1] = acos(delta[2] / r);        // theta
+      angles[0] = atan2(delta[0], delta[1]); // phi
 
       // Now add over all nearest neighbours
       if (j == 1) {
@@ -693,12 +653,12 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getCorrelPlus(
         QlmTotal.ptq[iatomIndex].ylm[m] += yl[m];
         // QlmTotal.ptq[iatom].ylm[m] += sph::lookupTableQ3(m, angles);
       }
-    }  // End of loop over 4 nearest neighbours
+    } // End of loop over 4 nearest neighbours
 
     // Divide by 4
     QlmTotal.ptq[iatomIndex].ylm =
         gen::avgVector(QlmTotal.ptq[iatom].ylm, l, nnumNeighbours);
-  }  // End of looping over all iatom
+  } // End of looping over all iatom
 
   // ------------------------------------------------
   // Now that you have all qlm for the particles,
@@ -729,19 +689,19 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getCorrelPlus(
 
       if (it != yCloud->idIndexMap.end()) {
         jatomIndex = it->second;
-      }  // found jatom
+      } // found jatom
       else {
         std::cerr << "Something is wrong with the ID and index map.\n";
         return *yCloud;
-      }  // error handling
+      } // error handling
       // Spherical harmonics
       for (int m = 0; m < 2 * l + 1; m++) {
         qI = QlmTotal.ptq[iatomIndex].ylm[m];
         qJ = QlmTotal.ptq[jatomIndex].ylm[m];
-        dot_product = dot_product + (qI * std::conj(qJ));  // unnormalized
+        dot_product = dot_product + (qI * std::conj(qJ)); // unnormalized
         Inorm = Inorm + (qI * std::conj(qI));
         Jnorm = Jnorm + (qJ * std::conj(qJ));
-      }  // end loop over m components
+      } // end loop over m components
       // Get the denominator
       complexDenominator = std::sqrt(Inorm * Jnorm);
       complexCij = dot_product / complexDenominator;
@@ -756,7 +716,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getCorrelPlus(
         temp_cij.classifier = molSys::out_of_range;
       }
       yCloud->pts[iatomIndex].c_ij.push_back(temp_cij);
-    }  // end loop over nearest neighbours
+    } // end loop over nearest neighbours
   }
 
   // ------------------------------------------------
@@ -764,30 +724,31 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getCorrelPlus(
   return *yCloud;
 }
 
-/********************************************/ /**
- *  Function that classifies the #molSys::atom_state_type ice type of each
- particle, according to the CHILL+ algorithm.
+/**
+ *  @details Function that classifies the #molSys::atom_state_type ice type of
+ * each particle, according to the CHILL+ algorithm.
  *  @param[in,out] yCloud The output molSys::PointCloud
  *  @param[in] nList Row-ordered neighbour list by atom ID
  *  @param[in] path Path to the output directory to which ice types are written
- out to
+ *   out to
  *  @param[in] firstFrame The first frame to be analyzed
  *  @param[in] isSlice This decides whether there is a slice or not
  *  @param[in] outputFileName Name of the output file, to which the ice types
- will be written out.
- * The default file name is "chillPlus.txt"
- ***********************************************/
-molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypePlus(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, std::string path, int firstFrame,
-    bool isSlice, std::string outputFileName) {
+ *   will be written out.
+ *   The default file name is "chillPlus.txt"
+ */
+molSys::PointCloud<molSys::Point<double>, double>
+chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                      std::vector<std::vector<int>> nList, std::string path,
+                      int firstFrame, bool isSlice,
+                      std::string outputFileName) {
   int ih, ic, interIce, water, unknown, clath, interClath,
-      total;  // No. of particles of each type
+      total; // No. of particles of each type
   ih = ic = water = unknown = interIce = total = 0;
   clath = interClath = 0;
   int num_staggrd, num_eclipsd, na;
   molSys::bond_type bondType;
-  int nnumNeighbours;  // number of nearest neighbours
+  int nnumNeighbours; // number of nearest neighbours
 
   for (int iatom = 0; iatom < yCloud->nop; iatom++) {
     // if(yCloud->pts[iatom].type!=typeO){continue;}
@@ -798,12 +759,12 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypePlus(
         continue;
       }
     }
-    total++;  // Update the total number of atoms considered. Change this to a
-              // check for slices
+    total++; // Update the total number of atoms considered. Change this to a
+             // check for slices
     nnumNeighbours =
-        nList[iatom].size() - 1;  // number of nearest neighbours (total -1)
+        nList[iatom].size() - 1; // number of nearest neighbours (total -1)
     num_staggrd = num_eclipsd = na =
-        0;  // init to zero before loop through neighbours
+        0; // init to zero before loop through neighbours
     // Loop through the bond cij and get the number of staggered, eclipsed bonds
     for (int j = 0; j < nnumNeighbours; j++) {
       bondType = yCloud->pts[iatom].c_ij[j].classifier;
@@ -814,10 +775,10 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypePlus(
       } else {
         na++;
       }
-    }  // End of loop through neighbours
+    } // End of loop through neighbours
 
     // Add more tests later
-    yCloud->pts[iatom].iceType = molSys::unclassified;  // default
+    yCloud->pts[iatom].iceType = molSys::unclassified; // default
     if (nnumNeighbours == 4) {
       // Cubic ice
       if (num_eclipsd == 0 && num_staggrd == 4) {
@@ -854,7 +815,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypePlus(
       water++;
     }
 
-  }  // End of loop through every iatom
+  } // End of loop through every iatom
 
   // water = total - ic -ih;
 
@@ -882,32 +843,25 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypePlus(
 }
 
 // TODO: Add code for slices!
-/********************************************/ /**
-                                                *  Function for getting the
-                                                *averaged \f$q_6\f$ parameter.
-                                                *
-                                                *  @param[in,out] yCloud The
-                                                *output molSys::PointCloud
-                                                *  @param[in] nList Row-ordered
-                                                *neighbour list by atom ID
-                                                *  @param[in] isSlice This
-                                                *decides whether there is a
-                                                *slice or not \return a double
-                                                *vector of the averaged
-                                                *\f$q_6\f$ values.
-                                                ***********************************************/
-std::vector<double> chill::getq6(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, bool isSlice) {
+/**
+ * @details Function for getting the averaged @f$q_6@f$ parameter.
+ *  @param[in,out] yCloud The output molSys::PointCloud
+ *  @param[in] nList Row-ordered neighbour list by atom ID
+ *  @param[in] isSlice This decides whether there is a slice or not
+ *  @return a double vector of the averaged @f$q_6@f$ values.
+ */
+std::vector<double>
+chill::getq6(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+             std::vector<std::vector<int>> nList, bool isSlice) {
   //
-  int l = 6;       // We're using q6 here
-  int jatomID;     // Atom ID of the nearest neighbour
-  int jatomIndex;  // Index of nearest neighbour
+  int l = 6;      // We're using q6 here
+  int jatomID;    // Atom ID of the nearest neighbour
+  int jatomIndex; // Index of nearest neighbour
   std::array<double, 3> delta;
   std::array<double, 2> angles;
-  chill::QlmAtom QlmTotal;  // Qlm for each iatom
+  chill::QlmAtom QlmTotal; // Qlm for each iatom
   std::vector<std::complex<double>>
-      yl;  // temp q_lm for each pair of iatom and jatom
+      yl; // temp q_lm for each pair of iatom and jatom
   std::complex<double> dot_product = {0, 0};
   std::complex<double> qI = {0, 0};
   std::complex<double> qJ = {0, 0};
@@ -917,8 +871,8 @@ std::vector<double> chill::getq6(
   std::complex<double> complexCij = {0, 0};
   double cij_real;
   int nnumNeighbours;
-  std::vector<double> resultQ;  // Vector with averaged q values
-  double q_value = 0.0;         // Averaged q value per neighbour pair
+  std::vector<double> resultQ; // Vector with averaged q values
+  double q_value = 0.0;        // Averaged q value per neighbour pair
 
   QlmTotal.ptq.resize(yCloud->nop);
   resultQ.resize(yCloud->nop);
@@ -927,12 +881,11 @@ std::vector<double> chill::getq6(
   for (int iatom = 0; iatom < yCloud->nop; iatom++) {
     // if(yCloud->pts[iatom].type!=typeO){continue;}
 
-    nnumNeighbours =
-        nList[iatom].size() - 1;  // One less than the actual length
+    nnumNeighbours = nList[iatom].size() - 1; // One less than the actual length
     // Now loop over the first four neighbours
     for (int j = 1; j <= nnumNeighbours; j++) {
       // Get the atom ID
-      jatomID = nList[iatom][j];  // Atom ID (key)
+      jatomID = nList[iatom][j]; // Atom ID (key)
 
       // Get the atom index (value) from the atom ID (key)
       auto it = yCloud->idIndexMap.find(jatomID);
@@ -941,7 +894,7 @@ std::vector<double> chill::getq6(
         jatomIndex = it->second;
       } else {
         std::cerr << "Your map must be wrong.\n";
-        return resultQ;  // return with error
+        return resultQ; // return with error
       }
 
       // Get the relative distances
@@ -950,8 +903,8 @@ std::vector<double> chill::getq6(
       // angles = sph::radialCoord(delta);
       double r = std::sqrt(std::pow(delta[0], 2.0) + std::pow(delta[1], 2.0) +
                            std::pow(delta[2], 2.0));
-      angles[1] = acos(delta[2] / r);         // theta
-      angles[0] = atan2(delta[0], delta[1]);  // phi
+      angles[1] = acos(delta[2] / r);        // theta
+      angles[0] = atan2(delta[0], delta[1]); // phi
 
       // Now add over all nearest neighbours
       if (j == 1) {
@@ -965,12 +918,12 @@ std::vector<double> chill::getq6(
         QlmTotal.ptq[iatom].ylm[m] += yl[m];
         // QlmTotal.ptq[iatom].ylm[m] += sph::lookupTableQ6(m, angles);
       }
-    }  // End of loop over 4 nearest neighbours
+    } // End of loop over 4 nearest neighbours
 
     // Divide by 4
     QlmTotal.ptq[iatom].ylm =
         gen::avgVector(QlmTotal.ptq[iatom].ylm, l, nnumNeighbours);
-  }  // End of looping over all iatom
+  } // End of looping over all iatom
 
   // ------------------------------------------------
   // Now that you have all qlm for the particles,
@@ -983,8 +936,8 @@ std::vector<double> chill::getq6(
     // 	if(yCloud->pts[iatom].inSlice==false){continue;}
     // }
 
-    nnumNeighbours = nList[iatom].size() - 1;  // Number of nearest neighbours
-    q_value = 0.0;                             // initialize to zero
+    nnumNeighbours = nList[iatom].size() - 1; // Number of nearest neighbours
+    q_value = 0.0;                            // initialize to zero
     // yCloud->pts[iatom].c_ij.reserve(nnumNeighbours);
     // loop over the 4 nearest neighbours
     for (int j = 1; j <= nnumNeighbours; j++) {
@@ -993,22 +946,22 @@ std::vector<double> chill::getq6(
       Inorm = {0, 0};
       Jnorm = {0, 0};
       // Get index of the nearest neighbour!
-      jatomID = nList[iatom][j];  // Atom ID (key)
+      jatomID = nList[iatom][j]; // Atom ID (key)
 
       // Get the index jatomIndex
       auto it = yCloud->idIndexMap.find(jatomID);
 
       if (it != yCloud->idIndexMap.end()) {
         jatomIndex = it->second;
-      }  // end of getting the index of jatom
+      } // end of getting the index of jatom
 
       for (int m = 0; m < 2 * l + 1; m++) {
         qI = QlmTotal.ptq[iatom].ylm[m];
         qJ = QlmTotal.ptq[jatomIndex].ylm[m];
-        dot_product = dot_product + (qI * std::conj(qJ));  // unnormalized
+        dot_product = dot_product + (qI * std::conj(qJ)); // unnormalized
         Inorm = Inorm + (qI * std::conj(qI));
         Jnorm = Jnorm + (qJ * std::conj(qJ));
-      }  // end loop over m components
+      } // end loop over m components
       // Get the denominator
       complexDenominator = std::sqrt(Inorm * Jnorm);
       complexCij = dot_product / complexDenominator;
@@ -1017,12 +970,12 @@ std::vector<double> chill::getq6(
 
       q_value += cij_real;
 
-    }  // end loop over nearest neighbours
+    } // end loop over nearest neighbours
 
     // Average q_value over all nearest neighbours
     q_value /= (double)nnumNeighbours;
 
-    resultQ[iatom] = q_value;  // Update the vector of averaged q6
+    resultQ[iatom] = q_value; // Update the vector of averaged q6
   }
 
   // ------------------------------------------------
@@ -1030,19 +983,17 @@ std::vector<double> chill::getq6(
   return resultQ;
 }
 
-/********************************************/ /**
- *  Reclassifies atoms which may have been mis-classified
- as water using the averaged \f$q_6\f$ and \f$q_3\f$ parameters.
- * This function can be called after both averaged \f$q_6\f$ and bond order
- correlation function
- * \f$c_{ij}\f$ have been <a
- href="https://pubs.rsc.org/en/content/articlehtml/2011/cp/c1cp22167a">calculated</a>
- .
+/**
+ * @details Reclassifies atoms which may have been mis-classified
+ *  as water using the averaged @f$q_6@f$ and @f$q_3@f$ parameters.
+ *  This function can be called after both averaged @f$q_6@f$ and bond order
+ *  correlation function @f$c_{ij}@f$ have been [calculated as described
+ *  here](https://pubs.rsc.org/en/content/articlehtml/2011/cp/c1cp22167a).
  *
  *  @param[in,out] yCloud The output molSys::PointCloud
- *  @param[in] q6 Vector containing the previously calculated averaged \f$q_6\f$
- values (using chill::getq6)
- ***********************************************/
+ *  @param[in] q6 Vector containing the previously calculated averaged @f$q_6@f$
+ *   values (using chill::getq6)
+ */
 molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<double> *q6) {
@@ -1056,7 +1007,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
     // Check if it has been classified as water
     if (yCloud->pts[iatom].iceType == molSys::water) {
       if ((*q6)[iatom] > 0.5) {
-        avgQ3 = 0.0;  // init to zero
+        avgQ3 = 0.0; // init to zero
         // Loop through all c_ij
         nnumNeighbours = yCloud->pts[iatom].c_ij.size();
         for (int j = 0; j < nnumNeighbours; j++) {
@@ -1068,45 +1019,35 @@ molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
         if (avgQ3 <= -0.75) {
           if (avgQ3 < -0.85) {
             yCloud->pts[iatom].iceType = molSys::reCubic;
-          }  // molSys::cubic
+          } // molSys::cubic
           else {
             yCloud->pts[iatom].iceType = molSys::reHex;
-          }  // molSys::hexagonal
-        }    // end of reclassification
-      }      // check for solid atom!
-    }        // end of check for water
-  }          // End loop through every iatom
+          } // molSys::hexagonal
+        }   // end of reclassification
+      }     // check for solid atom!
+    }       // end of check for water
+  }         // End loop through every iatom
 
   return *yCloud;
 }
 
-/********************************************/ /**
-                                                *  Prints out the
-                                                *#molSys::atom_state_type
-                                                *per-particle ice type, for a
-                                                *particular frame, to a file.
-                                                *  @param[in] yCloud The input
-                                                *molSys::PointCloud for the
-                                                *current frame
-                                                *  @param[in] path Path to the
-                                                *output directory to which ice
-                                                *types are written out to
-                                                *  @param[in] firstFrame First
-                                                *frame to be analyzed
-                                                *  @param[in] isSlice Determines
-                                                *whether there is a slice or not
-                                                *  @param[in] outputFileName
-                                                *File name of the output file,
-                                                *to which the per-particle ice
-                                                *types will be written out. The
-                                                *default file name is
-                                                *"superChill.txt"
-                                                ***********************************************/
+/**
+ * @details Prints out the molSys::atom_state_type per-particle ice type, for a
+ *  particular frame, to a file.
+ *  @param[in] yCloud The input molSys::PointCloud for the current frame
+ *  @param[in] path Path to the output directory to which ice types are written
+ *   out to
+ *  @param[in] firstFrame First frame to be analyzed
+ *  @param[in] isSlice Determines whether there is a slice or not
+ *  @param[in] outputFileName File name of the output file, to which the
+ *   per-particle ice types will be written out. The default file name is
+ *   "superChill.txt"
+ */
 int chill::printIceType(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, std::string path,
     int firstFrame, bool isSlice, std::string outputFileName) {
   int ih, ic, interIce, water, unknown, clath, interClath,
-      total;  // No. of particles of each type
+      total; // No. of particles of each type
   ih = ic = water = unknown = interIce = total = 0;
   clath = interClath = 0;
 
@@ -1159,28 +1100,28 @@ int chill::printIceType(
   return 0;
 }
 
-/********************************************/ /**
- *  Function that checks if the particle with the given atom index
-  is interfacial or not.
+/**
+ *  @details Function that checks if the particle with the given atom index
+ *   is interfacial or not.
  *  @param[in] yCloud The input molSys::PointCloud
  *  @param[in] nList Row-ordered neighbour list by atom ID
  *  @param[in] iatom The vector index of the current particle
  *  @param[in] num_staggrd The number of staggered bonds that the current
- particle participates in
+ *   particle participates in
  *  @param[in] num_eclipsd The number of eclipsed bonds that the current
- particle participates in
- *  \return a bool; true if the particle is interfacial and otherwise false
- ***********************************************/
+ *   particle participates in
+ *  @return a bool; true if the particle is interfacial and otherwise false
+ */
 bool chill::isInterfacial(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, int iatom, int num_staggrd,
     int num_eclipsd) {
   int nnumNeighbours =
-      nList[iatom].size() - 1;  // number of nearest neighbours of iatom
+      nList[iatom].size() - 1; // number of nearest neighbours of iatom
   int neighStaggered =
-      0;           // number of staggered bonds in the neighbours of iatom
-  int jatomID;     // ID of the nearest neighbour
-  int jatomIndex;  // Index (value) of nearest neighbour
+      0;          // number of staggered bonds in the neighbours of iatom
+  int jatomID;    // ID of the nearest neighbour
+  int jatomIndex; // Index (value) of nearest neighbour
 
   // INTERFACIAL
   // Condition 1 : only two staggered bonds and at least
@@ -1204,8 +1145,8 @@ bool chill::isInterfacial(
       if (neighStaggered > 2) {
         return true;
       }
-    }  // End loop over nearest neighbours
-  }    // end condition 1
+    } // End loop over nearest neighbours
+  }   // end condition 1
   // Condition 2 : three staggered bonds, no eclipsed bond,
   // and at least one neighbor with two staggered bonds
   if (num_staggrd == 3 && num_eclipsd == 0) {
@@ -1234,23 +1175,23 @@ bool chill::isInterfacial(
   return false;
 }
 
-/********************************************/ /**
- *  Calculates the number of staggered bonds of an atom
- with the given index.
+/**
+ *  @details Calculates the number of staggered bonds of an atom
+ *   with the given index.
  *  @param[in] yCloud The input molSys::PointCloud
  *  @param[in] nList Row-ordered neighbour list by atom ID
  *  @param[in] jatom The vector index of the current particle
- *  \return an int value, holding the number of staggered bonds of the given
- particle
- ***********************************************/
+ *  @return an int value, holding the number of staggered bonds of the given
+ *   particle
+ */
 int chill::numStaggered(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, int jatom) {
-  int num_staggrd = 0;         // Number of staggered bonds
-  molSys::bond_type bondType;  // Bond type
-  int num_bonds;               // No. of bonds of the jatom
+  int num_staggrd = 0;        // Number of staggered bonds
+  molSys::bond_type bondType; // Bond type
+  int num_bonds;              // No. of bonds of the jatom
   int nnumNeighbours =
-      nList[jatom].size() - 1;  // No. of nearest neighbours of index jatom
+      nList[jatom].size() - 1; // No. of nearest neighbours of index jatom
 
   // Loop over all bonds
   for (int i = 0; i < nnumNeighbours; i++) {
@@ -1259,7 +1200,7 @@ int chill::numStaggered(
     if (bondType == molSys::staggered) {
       num_staggrd++;
     }
-  }  // end of loop over c_ij
+  } // end of loop over c_ij
 
   return num_staggrd;
 }

@@ -1,18 +1,19 @@
 #include <generic.hpp>
 #include <seams_input.hpp>
 
-/********************************************/ /**
- *  Get all the ring information, from the R.I.N.G.S. file. Each line contains
- the IDs of the atoms in the ring. This is saved inside a vector of vectors.
- Rings which have more than three consecutive water molecules are discarded.
- ***********************************************/
+/**
+ * @details Get all the ring information, from the R.I.N.G.S. file. Each line
+ * contains the IDs of the atoms in the ring. This is saved inside a vector of
+ * vectors. Rings which have more than three consecutive water molecules are
+ * discarded.
+ */
 std::vector<std::vector<int>> sinp::readBonds(std::string filename) {
   std::unique_ptr<std::ifstream> inpFile;
   inpFile = std::make_unique<std::ifstream>(filename);
   std::vector<std::vector<int>> bonds;
-  std::string line;                 // Current line being read in
-  std::vector<std::string> tokens;  // Vector containing word tokens
-  std::vector<int> id;              // Vector for the IDs in the ring
+  std::string line;                // Current line being read in
+  std::vector<std::string> tokens; // Vector containing word tokens
+  std::vector<int> id;             // Vector for the IDs in the ring
 
   if (!(gen::file_exists(filename))) {
     std::cout << "Fatal Error: The bond file does not exist or you gave the "
@@ -30,7 +31,7 @@ std::vector<std::vector<int>> sinp::readBonds(std::string filename) {
   if (inpFile->is_open()) {
     // ----------------------------------------------------------
     // At this point we know that the file is open
-    std::getline((*inpFile), line);  // Read in bonds
+    std::getline((*inpFile), line); // Read in bonds
     // Run this until EOF or you reach the next timestep
     while (std::getline((*inpFile), line)) {
       // Read in lines and tokenize them into std::string words
@@ -40,34 +41,33 @@ std::vector<std::vector<int>> sinp::readBonds(std::string filename) {
 
       for (int i = 0; i < tokens.size(); i++) {
         id.push_back(std::stoi(tokens[i]));
-      }  // end of for, assigning values to id
+      } // end of for, assigning values to id
 
       bonds.push_back(id);
 
-    }  // end of while, till EOF
+    } // end of while, till EOF
     // ----------------------------------------------------------
-  }  // End of if file open statement
+  } // End of if file open statement
 
   inpFile->close();
 
   return bonds;
 }
-/********************************************/ /**
-                                                *  Function for reading in an
-                                                *XYZ file
-                                                ***********************************************/
+/**
+ * @details Function for reading in an XYZ file
+ */
 int sinp::readXYZ(std::string filename,
                   molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
   std::unique_ptr<std::ifstream> xyzFile;
   xyzFile = std::make_unique<std::ifstream>(filename);
-  std::string line;                 // Current line being read in
-  std::vector<std::string> tokens;  // Vector containing word tokens
-  std::vector<double> numbers;      // Vector containing type double numbers
-  int nop = -1;                     // Number of atoms in targetFrame
-  int iatom = 1;  // Current atom being filled into the PointCloud
-  molSys::Point<double> iPoint;  // Current point being read in from the file
+  std::string line;                // Current line being read in
+  std::vector<std::string> tokens; // Vector containing word tokens
+  std::vector<double> numbers;     // Vector containing type double numbers
+  int nop = -1;                    // Number of atoms in targetFrame
+  int iatom = 1;                // Current atom being filled into the PointCloud
+  molSys::Point<double> iPoint; // Current point being read in from the file
   double xLo, xHi, yLo, yHi, zLo,
-      zHi;  // Box lengths extrapolated from the least and greatest coordinates
+      zHi; // Box lengths extrapolated from the least and greatest coordinates
 
   if (!(gen::file_exists(filename))) {
     std::cout
@@ -113,7 +113,7 @@ int sinp::readXYZ(std::string filename,
       }
 
       // Put logic for checking atom type here later
-      iPoint.type = 1;  // Oxygen type; hard-coded!
+      iPoint.type = 1; // Oxygen type; hard-coded!
       iPoint.molID = iatom;
       iPoint.atomID = iatom;
       iPoint.x = std::stod(tokens[1]);
@@ -122,7 +122,7 @@ int sinp::readXYZ(std::string filename,
 
       yCloud->pts.push_back(iPoint);
       yCloud->idIndexMap[iPoint.atomID] = yCloud->pts.size() - 1;
-      iatom++;  // Increase index
+      iatom++; // Increase index
 
       // First point
       if (iatom == 1) {
@@ -133,31 +133,31 @@ int sinp::readXYZ(std::string filename,
         yHi = iPoint.y;
         zLo = iPoint.z;
         zHi = iPoint.z;
-      }  // first point
+      } // first point
       else {
         if (iPoint.x < xLo) {
           xLo = iPoint.x;
-        }  // xLo
+        } // xLo
         else if (iPoint.x > xHi) {
           xHi = iPoint.x;
-        }  // xHi
+        } // xHi
         else if (iPoint.y < yLo) {
           yLo = iPoint.y;
-        }  // yLo
+        } // yLo
         else if (iPoint.y > yHi) {
           yHi = iPoint.y;
-        }  // yHi
+        } // yHi
         else if (iPoint.z < zLo) {
           zLo = iPoint.z;
-        }  // zLo
+        } // zLo
         else if (iPoint.z > zHi) {
           zHi = iPoint.z;
-        }  // zHi
-      }    // update
+        } // zHi
+      }   // update
 
-    }  // end of while, looping through lines till EOF
+    } // end of while, looping through lines till EOF
     // ----------------------------------------------------------
-  }  // End of if file open statement
+  } // End of if file open statement
 
   xyzFile->close();
 
@@ -165,7 +165,7 @@ int sinp::readXYZ(std::string filename,
     xHi = xLo + 10;
     yHi = yLo + 10;
     zHi = zLo + 10;
-  }  // for a single point in the system (never happens)
+  } // for a single point in the system (never happens)
 
   // Fill up the box lengths
   yCloud->box.push_back(xHi - xLo);
@@ -181,54 +181,43 @@ int sinp::readXYZ(std::string filename,
 
 // External Libraries
 
-/********************************************/ /**
-                                                *  Function for reading in a
-                                                *lammps file. Reads in a
-                                                *specified frame (frame number
-                                                *and not timestep value).
-                                                *  @param[in] filename The name
-                                                *of the lammps trajectory file
-                                                *to be read in
-                                                *  @param[in] targetFrame The
-                                                *frame number whose information
-                                                *will be read in
-                                                *  @param[out] yCloud The
-                                                *outputted PointCloud
-                                                *  @param[in] isSlice This
-                                                *decides whether a slice will be
-                                                *created or not
-                                                *  @param[in] coordLow Contains
-                                                *the lower limits of the slice,
-                                                *if a slice is to be created
-                                                *  @param[in] coordHigh Contains
-                                                *the upper limits of the slice,
-                                                *if a slice is to be created
-                                                ***********************************************/
-molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrj(
-    std::string filename, int targetFrame,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, bool isSlice,
-    std::array<double, 3> coordLow, std::array<double, 3> coordHigh) {
+/**
+ * @details  Function for reading in a lammps file. Reads in a specified frame
+ *  (frame number and not timestep value).
+ * @param[in] filename The name of the lammps trajectory file to be read in
+ * @param[in] targetFrame The frame number whose information will be read in
+ * @param[out] yCloud The outputted PointCloud
+ * @param[in] isSlice This decides whether a slice will be created or not
+ * @param[in] coordLow Contains the lower limits of the slice, if a slice is to
+ *  be created
+ * @param[in] coordHigh Contains the upper limits of the slice, if a slice is to
+ *  be created
+ */
+molSys::PointCloud<molSys::Point<double>, double>
+sinp::readLammpsTrj(std::string filename, int targetFrame,
+                    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                    bool isSlice, std::array<double, 3> coordLow,
+                    std::array<double, 3> coordHigh) {
   std::unique_ptr<std::ifstream> dumpFile;
   dumpFile = std::make_unique<std::ifstream>(filename);
-  std::string line;                 // Current line being read in
-  std::vector<std::string> tokens;  // Vector containing word tokens
-  std::vector<double> numbers;      // Vector containing type double numbers
-  std::vector<double> tilt;         // Vector containing tilt factors
-  int currentFrame = 0;             // Current frame being read in
-  int nop = -1;                     // Number of atoms in targetFrame
+  std::string line;                // Current line being read in
+  std::vector<std::string> tokens; // Vector containing word tokens
+  std::vector<double> numbers;     // Vector containing type double numbers
+  std::vector<double> tilt;        // Vector containing tilt factors
+  int currentFrame = 0;            // Current frame being read in
+  int nop = -1;                    // Number of atoms in targetFrame
   bool foundFrame =
-      false;             // Determines whether targetFrame has been found or not
-  bool readNOP = false;  // Flag for reading in the number of atoms
-  bool readBox = false;  // Flag for reading in the box lengths
-  bool readAtoms = false;  // Flag for reading in the atoms
+      false;            // Determines whether targetFrame has been found or not
+  bool readNOP = false; // Flag for reading in the number of atoms
+  bool readBox = false; // Flag for reading in the box lengths
+  bool readAtoms = false; // Flag for reading in the atoms
   int xIndex, yIndex, zIndex,
       typeIndex;     // Indices for x,y,z coordinates, and LAMMPS type ID
   int molIndex = 0;  // Index for molecular ID
-  int atomIndex =
-      0;  // Index for atom ID (Only used if mol ID has not been set)
-  molSys::Point<double> iPoint;  // Current point being read in from the file
-  xIndex = yIndex = zIndex = typeIndex = -1;  // Default values
-  bool isTriclinic = false;  // Flag for an orthogonal or triclinic box
+  int atomIndex = 0; // Index for atom ID (Only used if mol ID has not been set)
+  molSys::Point<double> iPoint; // Current point being read in from the file
+  xIndex = yIndex = zIndex = typeIndex = -1; // Default values
+  bool isTriclinic = false; // Flag for an orthogonal or triclinic box
 
   if (!(gen::file_exists(filename))) {
     std::cout
@@ -268,9 +257,9 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrj(
       // break out of the while loop
       if (currentFrame == targetFrame) {
         foundFrame = true;
-        break;  // Exit the while loop
+        break; // Exit the while loop
       }
-    }  // End of while loop searching for targetFrame
+    } // End of while loop searching for targetFrame
     // ----------------------------------------------------------
     // Before filling up the PointCloud, if the vectors are filled
     // empty them
@@ -316,14 +305,13 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrj(
               for (int k = 0; k < tilt.size(); k++) {
                 yCloud->box.push_back(tilt[k]);
               }
-            }  // end of check for triclinic
+            } // end of check for triclinic
           }
           // Or else fill up the box lengths
           else {
-            yCloud->box.push_back(numbers[1] -
-                                  numbers[0]);  // Update box length
+            yCloud->box.push_back(numbers[1] - numbers[0]); // Update box length
             yCloud->boxLow.push_back(
-                numbers[0]);  // Update the lower box coordinate
+                numbers[0]); // Update the lower box coordinate
             // Do this for a triclinic box only
             if (numbers.size() == 3) {
               isTriclinic = true;
@@ -341,7 +329,7 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrj(
           iPoint.z = numbers[zIndex];
           // Check if the particle is inside the volume Slice
           // or not
-          if (isSlice) {  // only if a slice has been requested
+          if (isSlice) { // only if a slice has been requested
             iPoint.inSlice = sinp::atomInSlice(iPoint.x, iPoint.y, iPoint.z,
                                                coordLow, coordHigh);
           }
@@ -384,73 +372,72 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrj(
               if (tokens[i].compare("id") == 0) {
                 atomIndex = i - 2;
               }
-            }  // End of for loop over tokens
+            } // End of for loop over tokens
             if (molIndex == 0) {
               molIndex = atomIndex;
-            }  // Set mol ID=atomID if not given
+            } // Set mol ID=atomID if not given
           }
-        }  // End of nested if loops for checking atom
+        } // End of nested if loops for checking atom
 
-      }  // End of while
-    }    // End of targetFrame found
+      } // End of while
+    }   // End of targetFrame found
     // ----------------------------------------------------------
-  }  // End of if file open statement
+  } // End of if file open statement
 
   // Check if you filled in the frame correctly
   if (!(foundFrame)) {
     std::cout << "You entered a frame that doesn't exist.\n";
-  }  // Throw exception
+  } // Throw exception
   if (foundFrame) {
     if (yCloud->pts.size() != yCloud->nop) {
       std::cout << "Atoms didn't get filled in properly.\n";
     }
-  }  // Throw exception
+  } // Throw exception
   yCloud->currentFrame = targetFrame;
 
   dumpFile->close();
   return *yCloud;
 }
 
-/********************************************/ /**
- *  Function for reading in a lammps file; and saves only the Oxygen atoms.
- This is an overloaded function. The Oxygen atom ID must be specified.
- *  @param[in] filename The name of the lammps trajectory file to be read in
- *  @param[in] targetFrame The frame number whose information will be read in
- *  @param[out] yCloud The outputted PointCloud
- *  @param[in] typeO The type ID of the Oxygen atoms
- *  @param[in] isSlice This decides whether a slice will be created or not
- *  @param[in] coordLow Contains the lower limits of the slice, if a slice is to
- be created
- *  @param[in] coordHigh Contains the upper limits of the slice, if a slice is
- to be created
- ***********************************************/
-molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjO(
-    std::string filename, int targetFrame,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int typeO,
-    bool isSlice, std::array<double, 3> coordLow,
-    std::array<double, 3> coordHigh) {
+/**
+ * @details Function for reading in a lammps file; and saves only the Oxygen
+ * atoms. This is an overloaded function. The Oxygen atom ID must be specified.
+ * @param[in] filename The name of the lammps trajectory file to be read in
+ * @param[in] targetFrame The frame number whose information will be read in
+ * @param[out] yCloud The outputted PointCloud
+ * @param[in] typeO The type ID of the Oxygen atoms
+ * @param[in] isSlice This decides whether a slice will be created or not
+ * @param[in] coordLow Contains the lower limits of the slice, if a slice is to
+ *  be created
+ * @param[in] coordHigh Contains the upper limits of the slice, if a slice is
+ *  to be created
+ */
+molSys::PointCloud<molSys::Point<double>, double>
+sinp::readLammpsTrjO(std::string filename, int targetFrame,
+                     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                     int typeO, bool isSlice, std::array<double, 3> coordLow,
+                     std::array<double, 3> coordHigh) {
   std::unique_ptr<std::ifstream> dumpFile;
   dumpFile = std::make_unique<std::ifstream>(filename);
-  std::string line;                 // Current line being read in
-  std::vector<std::string> tokens;  // Vector containing word tokens
-  std::vector<double> numbers;      // Vector containing type double numbers
-  std::vector<double> tilt;         // Vector containing tilt factors
-  int currentFrame = 0;             // Current frame being read in
-  int nop = -1;                     // Number of atoms in targetFrame
+  std::string line;                // Current line being read in
+  std::vector<std::string> tokens; // Vector containing word tokens
+  std::vector<double> numbers;     // Vector containing type double numbers
+  std::vector<double> tilt;        // Vector containing tilt factors
+  int currentFrame = 0;            // Current frame being read in
+  int nop = -1;                    // Number of atoms in targetFrame
   bool foundFrame =
-      false;             // Determines whether targetFrame has been found or not
-  bool readNOP = false;  // Flag for reading in the number of atoms
-  bool readBox = false;  // Flag for reading in the box lengths
-  bool readAtoms = false;  // Flag for reading in the atoms
+      false;            // Determines whether targetFrame has been found or not
+  bool readNOP = false; // Flag for reading in the number of atoms
+  bool readBox = false; // Flag for reading in the box lengths
+  bool readAtoms = false; // Flag for reading in the atoms
   int xIndex, yIndex, zIndex,
       typeIndex;     // Indices for x,y,z coordinates, and LAMMPS type ID
   int molIndex = 0;  // Index for molecular ID
-  int atomIndex =
-      0;  // Index for atom ID (Only used if mol ID has not been set)
-  molSys::Point<double> iPoint;  // Current point being read in from the file
-  xIndex = yIndex = zIndex = typeIndex = -1;  // Default values
-  bool isTriclinic = false;  // Flag for an orthogonal or triclinic box
-  int nOxy = 0;              // Number of oxygen atoms
+  int atomIndex = 0; // Index for atom ID (Only used if mol ID has not been set)
+  molSys::Point<double> iPoint; // Current point being read in from the file
+  xIndex = yIndex = zIndex = typeIndex = -1; // Default values
+  bool isTriclinic = false; // Flag for an orthogonal or triclinic box
+  int nOxy = 0;             // Number of oxygen atoms
 
   if (!(gen::file_exists(filename))) {
     std::cout
@@ -490,9 +477,9 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjO(
       // break out of the while loop
       if (currentFrame == targetFrame) {
         foundFrame = true;
-        break;  // Exit the while loop
+        break; // Exit the while loop
       }
-    }  // End of while loop searching for targetFrame
+    } // End of while loop searching for targetFrame
     // ----------------------------------------------------------
     // Before filling up the PointCloud, if the vectors are filled
     // empty them
@@ -536,14 +523,13 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjO(
               for (int k = 0; k < tilt.size(); k++) {
                 yCloud->box.push_back(tilt[k]);
               }
-            }  // end of check for triclinic
+            } // end of check for triclinic
           }
           // Or else fill up the box lengths
           else {
-            yCloud->box.push_back(numbers[1] -
-                                  numbers[0]);  // Update box length
+            yCloud->box.push_back(numbers[1] - numbers[0]); // Update box length
             yCloud->boxLow.push_back(
-                numbers[0]);  // Update the lower box coordinate
+                numbers[0]); // Update the lower box coordinate
             // Do this for a triclinic box only
             if (numbers.size() == 3) {
               isTriclinic = true;
@@ -561,7 +547,7 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjO(
           iPoint.z = numbers[zIndex];
           // Check if the particle is inside the volume Slice
           // or not
-          if (isSlice) {  // only if a slice has been requested
+          if (isSlice) { // only if a slice has been requested
             iPoint.inSlice = sinp::atomInSlice(iPoint.x, iPoint.y, iPoint.z,
                                                coordLow, coordHigh);
           }
@@ -609,49 +595,49 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjO(
               if (tokens[i].compare("id") == 0) {
                 atomIndex = i - 2;
               }
-            }  // End of for loop over tokens
+            } // End of for loop over tokens
             if (molIndex == 0) {
               molIndex = atomIndex;
-            }  // Set mol ID=atomID if not given
+            } // Set mol ID=atomID if not given
           }
-        }  // End of nested if loops for checking atom
+        } // End of nested if loops for checking atom
 
-      }  // End of while
-    }    // End of targetFrame found
+      } // End of while
+    }   // End of targetFrame found
     // ----------------------------------------------------------
-  }  // End of if file open statement
+  } // End of if file open statement
 
   // Check if you filled in the frame correctly
   if (!(foundFrame)) {
     std::cout << "You entered a frame that doesn't exist.\n";
-  }  // Throw exception
+  } // Throw exception
   if (foundFrame) {
     yCloud->nop = yCloud->pts.size();
     if (yCloud->pts.size() != nOxy) {
       std::cout << "Atoms didn't get filled in properly.\n";
     }
-  }  // Throw exception
+  } // Throw exception
   yCloud->currentFrame = targetFrame;
 
   dumpFile->close();
   return *yCloud;
 }
 
-/********************************************/ /**
- *  Function for reading in a lammps file; and saves only the atoms of the
- desired type. Atoms which are not inside the slice or not of type I are not
- saved at all This is an overloaded function. The type atom ID must be
- specified.
- *  @param[in] filename The name of the lammps trajectory file to be read in
- *  @param[in] targetFrame The frame number whose information will be read in
- *  @param[out] yCloud The outputted PointCloud
- *  @param[in] typeI The type ID of the desired type of atoms
- *  @param[in] isSlice This decides whether a slice will be created or not
- *  @param[in] coordLow Contains the lower limits of the slice, if a slice is to
- be created
+/**
+ * @details Function for reading in a lammps file; and saves only the atoms of
+ * the desired type. Atoms which are not inside the slice or not of type I are
+ * not saved at all This is an overloaded function. The type atom ID must be
+ *  specified.
+ * @param[in] filename The name of the lammps trajectory file to be read in
+ * @param[in] targetFrame The frame number whose information will be read in
+ * @param[out] yCloud The outputted PointCloud
+ * @param[in] typeI The type ID of the desired type of atoms
+ * @param[in] isSlice This decides whether a slice will be created or not
+ * @param[in] coordLow Contains the lower limits of the slice, if a slice is to
+ *  be created
  *  @param[in] coordHigh Contains the upper limits of the slice, if a slice is
- to be created
- ***********************************************/
+ *  to be created
+ */
 molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
     std::string filename, int targetFrame,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int typeI,
@@ -659,26 +645,25 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
     std::array<double, 3> coordHigh) {
   std::unique_ptr<std::ifstream> dumpFile;
   dumpFile = std::make_unique<std::ifstream>(filename);
-  std::string line;                 // Current line being read in
-  std::vector<std::string> tokens;  // Vector containing word tokens
-  std::vector<double> numbers;      // Vector containing type double numbers
-  std::vector<double> tilt;         // Vector containing tilt factors
-  int currentFrame = 0;             // Current frame being read in
-  int nop = -1;                     // Number of atoms in targetFrame
+  std::string line;                // Current line being read in
+  std::vector<std::string> tokens; // Vector containing word tokens
+  std::vector<double> numbers;     // Vector containing type double numbers
+  std::vector<double> tilt;        // Vector containing tilt factors
+  int currentFrame = 0;            // Current frame being read in
+  int nop = -1;                    // Number of atoms in targetFrame
   bool foundFrame =
-      false;             // Determines whether targetFrame has been found or not
-  bool readNOP = false;  // Flag for reading in the number of atoms
-  bool readBox = false;  // Flag for reading in the box lengths
-  bool readAtoms = false;  // Flag for reading in the atoms
+      false;            // Determines whether targetFrame has been found or not
+  bool readNOP = false; // Flag for reading in the number of atoms
+  bool readBox = false; // Flag for reading in the box lengths
+  bool readAtoms = false; // Flag for reading in the atoms
   int xIndex, yIndex, zIndex,
       typeIndex;     // Indices for x,y,z coordinates, and LAMMPS type ID
   int molIndex = 0;  // Index for molecular ID
-  int atomIndex =
-      0;  // Index for atom ID (Only used if mol ID has not been set)
-  molSys::Point<double> iPoint;  // Current point being read in from the file
-  xIndex = yIndex = zIndex = typeIndex = -1;  // Default values
-  bool isTriclinic = false;  // Flag for an orthogonal or triclinic box
-  int nOxy = 0;              // Number of oxygen atoms
+  int atomIndex = 0; // Index for atom ID (Only used if mol ID has not been set)
+  molSys::Point<double> iPoint; // Current point being read in from the file
+  xIndex = yIndex = zIndex = typeIndex = -1; // Default values
+  bool isTriclinic = false; // Flag for an orthogonal or triclinic box
+  int nOxy = 0;             // Number of oxygen atoms
 
   if (!(gen::file_exists(filename))) {
     std::cout
@@ -718,9 +703,9 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
       // break out of the while loop
       if (currentFrame == targetFrame) {
         foundFrame = true;
-        break;  // Exit the while loop
+        break; // Exit the while loop
       }
-    }  // End of while loop searching for targetFrame
+    } // End of while loop searching for targetFrame
     // ----------------------------------------------------------
     // Before filling up the PointCloud, if the vectors are filled
     // empty them
@@ -764,14 +749,13 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
               for (int k = 0; k < tilt.size(); k++) {
                 yCloud->box.push_back(tilt[k]);
               }
-            }  // end of check for triclinic
+            } // end of check for triclinic
           }
           // Or else fill up the box lengths
           else {
-            yCloud->box.push_back(numbers[1] -
-                                  numbers[0]);  // Update box length
+            yCloud->box.push_back(numbers[1] - numbers[0]); // Update box length
             yCloud->boxLow.push_back(
-                numbers[0]);  // Update the lower box coordinate
+                numbers[0]); // Update the lower box coordinate
             // Do this for a triclinic box only
             if (numbers.size() == 3) {
               isTriclinic = true;
@@ -789,13 +773,13 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
           iPoint.z = numbers[zIndex];
           // Check if the particle is inside the volume Slice
           // or not
-          if (isSlice) {  // only if a slice has been requested
+          if (isSlice) { // only if a slice has been requested
             iPoint.inSlice = sinp::atomInSlice(iPoint.x, iPoint.y, iPoint.z,
                                                coordLow, coordHigh);
             // Skip if the atom is not part of the slice
             if (!iPoint.inSlice) {
               continue;
-            }  // do not save if not inside the slice
+            } // do not save if not inside the slice
           }
           // Save only atoms of the desired type
           if (iPoint.type == typeI) {
@@ -803,7 +787,7 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
             // yCloud->pts.resize(yCloud->pts.size()+1);
             yCloud->pts.push_back(iPoint);
             yCloud->idIndexMap[iPoint.atomID] =
-                yCloud->pts.size() - 1;  // array index
+                yCloud->pts.size() - 1; // array index
           }
         }
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -842,22 +826,22 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
               if (tokens[i].compare("id") == 0) {
                 atomIndex = i - 2;
               }
-            }  // End of for loop over tokens
+            } // End of for loop over tokens
             if (molIndex == 0) {
               molIndex = atomIndex;
-            }  // Set mol ID=atomID if not given
+            } // Set mol ID=atomID if not given
           }
-        }  // End of nested if loops for checking atom
+        } // End of nested if loops for checking atom
 
-      }  // End of while
-    }    // End of targetFrame found
+      } // End of while
+    }   // End of targetFrame found
     // ----------------------------------------------------------
-  }  // End of if file open statement
+  } // End of if file open statement
 
   // Check if you filled in the frame correctly
   if (!(foundFrame)) {
     std::cout << "You entered a frame that doesn't exist.\n";
-  }  // Throw exception
+  } // Throw exception
 
   // Update the number of particles
   yCloud->nop = yCloud->pts.size();
