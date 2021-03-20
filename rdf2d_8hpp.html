@@ -107,16 +107,16 @@ $(function() {
 
 <p>File containing functions used to calculate the in-plane radial distribution functions.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;math.h&gt;</code><br />
-<code>#include &lt;sys/stat.h&gt;</code><br />
-<code>#include &lt;algorithm&gt;</code><br />
+<div class="textblock"><code>#include &lt;algorithm&gt;</code><br />
 <code>#include &lt;array&gt;</code><br />
 <code>#include &lt;fstream&gt;</code><br />
 <code>#include &lt;iostream&gt;</code><br />
 <code>#include &lt;iterator&gt;</code><br />
+<code>#include &lt;math.h&gt;</code><br />
 <code>#include &lt;memory&gt;</code><br />
 <code>#include &lt;sstream&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
+<code>#include &lt;sys/stat.h&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 <code>#include &lt;<a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="order__parameter_8hpp_source.html">order_parameter.hpp</a>&gt;</code><br />
@@ -151,12 +151,16 @@ Functions</h2></td></tr>
 <tr class="memitem:ga8dd6ebd3fe62036e77ed8b0695a9cd59"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rdf2.html#ga8dd6ebd3fe62036e77ed8b0695a9cd59">rdf2::rdf2Danalysis_AA</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> path, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; double &gt; *rdfValues, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, double cutoff, double binwidth, int firstFrame, int finalFrame)</td></tr>
 <tr class="separator:ga8dd6ebd3fe62036e77ed8b0695a9cd59"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2a79018e3e8cd922b49b16fddca98e13"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rdf2.html#ga2a79018e3e8cd922b49b16fddca98e13">rdf2::sampleRDF_AA</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, double cutoff, double binwidth, int nbin)</td></tr>
+<tr class="memdesc:ga2a79018e3e8cd922b49b16fddca98e13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Samples the RDF histogram at every step.  <a href="group__rdf2.html#ga2a79018e3e8cd922b49b16fddca98e13">More...</a><br /></td></tr>
 <tr class="separator:ga2a79018e3e8cd922b49b16fddca98e13"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaeb724c0a55ce0d34e33620bd0f74e935"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rdf2.html#gaeb724c0a55ce0d34e33620bd0f74e935">rdf2::normalizeRDF</a> (int nopA, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; double &gt; *rdfValues, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; histogram, double binwidth, int nbin, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; double &gt; volumeLengths, int nIter)</td></tr>
+<tr class="memdesc:gaeb724c0a55ce0d34e33620bd0f74e935"><td class="mdescLeft">&#160;</td><td class="mdescRight">Normalize the histogram.  <a href="group__rdf2.html#gaeb724c0a55ce0d34e33620bd0f74e935">More...</a><br /></td></tr>
 <tr class="separator:gaeb724c0a55ce0d34e33620bd0f74e935"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2317aabef0016b5b658cef120c179ecf"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rdf2.html#ga2317aabef0016b5b658cef120c179ecf">rdf2::getSystemLengths</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud)</td></tr>
+<tr class="memdesc:ga2317aabef0016b5b658cef120c179ecf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the lengths of the volume slice of the quasi-two-dimensional system.  <a href="group__rdf2.html#ga2317aabef0016b5b658cef120c179ecf">More...</a><br /></td></tr>
 <tr class="separator:ga2317aabef0016b5b658cef120c179ecf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga309f282dffeee8083437a95aab29f51b"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rdf2.html#ga309f282dffeee8083437a95aab29f51b">rdf2::getPlaneArea</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; double &gt; volumeLengths)</td></tr>
+<tr class="memdesc:ga309f282dffeee8083437a95aab29f51b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the plane area from the volume lengths vector.  <a href="group__rdf2.html#ga309f282dffeee8083437a95aab29f51b">More...</a><br /></td></tr>
 <tr class="separator:ga309f282dffeee8083437a95aab29f51b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>

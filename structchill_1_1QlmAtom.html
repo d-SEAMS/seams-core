@@ -104,7 +104,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>This is the local orientational bond order parameter <img class="formulaInl" alt="$q_{lm}$" src="form_32.png"/>, of length <img class="formulaInl" alt="$2l+1$" src="form_5.png"/>.  
+<p>This is the local orientational bond order parameter \(q_{lm}\), of length \(2l+1\).  
  <a href="structchill_1_1QlmAtom.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="bop_8hpp_source.html">bop.hpp</a>&gt;</code></p>
@@ -122,16 +122,16 @@ Data Fields</h2></td></tr>
 <tr class="separator:ga4449b8cb7345b6dec04dcb5aa155e676"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>This is the local orientational bond order parameter <img class="formulaInl" alt="$q_{lm}$" src="form_32.png"/>, of length <img class="formulaInl" alt="$2l+1$" src="form_5.png"/>. </p>
+<div class="textblock"><p>This is the local orientational bond order parameter \(q_{lm}\), of length \(2l+1\). </p>
 <p>This complex vector is averaged over the four nearest neighbours, according to the following equation:</p>
 <p class="formulaDsp">
-<img class="formulaDsp" alt="\[ q_{lm}(i) = \frac{1}{N_b(i)} \Sigma_{j=1}^{N_b(i)} Y_{lm}(r_{ij}) \]" src="form_22.png"/>
+\[ q_{lm}(i) = \frac{1}{N_b(i)} \Sigma_{j=1}^{N_b(i)} Y_{lm}(r_{ij}) \]
 </p>
-<p>Here, <img class="formulaInl" alt="$N_b(i)=4$" src="form_23.png"/> is the number of nearest neighbours for the molecule <img class="formulaInl" alt="$i$" src="form_19.png"/>. This struct contains specifically:</p><ul>
-<li>A complex vector of length <img class="formulaInl" alt="$2l+1$" src="form_5.png"/>, calculated according to the equation above </li>
+<p>Here, \(N_b(i)=4\) is the number of nearest neighbours for the molecule \(i\). This struct contains specifically:</p><ul>
+<li>A complex vector of length \(2l+1\), calculated according to the equation above </li>
 </ul>
 
-<p class="definition">Definition at line <a class="el" href="bop_8hpp_source.html#l00157">157</a> of file <a class="el" href="bop_8hpp_source.html">bop.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="bop_8hpp_source.html#l00155">155</a> of file <a class="el" href="bop_8hpp_source.html">bop.hpp</a>.</p>
 </div><hr/>The documentation for this struct was generated from the following file:<ul>
 <li>src/include/internal/<a class="el" href="bop_8hpp_source.html">bop.hpp</a></li>
 </ul>

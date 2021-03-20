@@ -107,8 +107,7 @@ $(function() {
 
 <p>File for the bond order parameter analysis.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;math.h&gt;</code><br />
-<code>#include &lt;array&gt;</code><br />
+<div class="textblock"><code>#include &lt;array&gt;</code><br />
 <code>#include &lt;boost/geometry.hpp&gt;</code><br />
 <code>#include &lt;boost/math/special_functions/spherical_harmonic.hpp&gt;</code><br />
 <code>#include &lt;<a class="el" href="bop_8hpp_source.html">bop.hpp</a>&gt;</code><br />
@@ -116,6 +115,7 @@ $(function() {
 <code>#include &lt;complex&gt;</code><br />
 <code>#include &lt;<a class="el" href="generic_8hpp_source.html">generic.hpp</a>&gt;</code><br />
 <code>#include &lt;iostream&gt;</code><br />
+<code>#include &lt;math.h&gt;</code><br />
 <code>#include &lt;<a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="seams__output_8hpp_source.html">seams_output.hpp</a>&gt;</code><br />
@@ -145,17 +145,18 @@ Namespaces</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gad4824638fa14ec355ab99804c9119e35"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__clump.html#gad4824638fa14ec355ab99804c9119e35">clump::largestIceCluster</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> path, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *iceCloud, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; nList, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; bool &gt; *isIce, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; *clusterID, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; *nClusters, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/unordered_map.html">std::unordered_map</a>&lt; int, int &gt; *indexNumber, int firstFrame)</td></tr>
+<tr class="memdesc:gad4824638fa14ec355ab99804c9119e35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds the largest ice cluster.  <a href="group__clump.html#gad4824638fa14ec355ab99804c9119e35">More...</a><br /></td></tr>
 <tr class="separator:gad4824638fa14ec355ab99804c9119e35"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gab83fbf0e06856cbcce3c4279598bd15f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__clump.html#gab83fbf0e06856cbcce3c4279598bd15f">clump::singleClusterLinkedList</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *iceCloud, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; nList, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; *linkedList)</td></tr>
 <tr class="separator:gab83fbf0e06856cbcce3c4279598bd15f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gae3705e982771b2719016d3c6f237515f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__clump.html#gae3705e982771b2719016d3c6f237515f">clump::clusterAnalysis</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> path, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *iceCloud, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; nList, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; &amp;iceNeighbourList, double cutoff, int firstFrame, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> bopAnalysis=&quot;q6&quot;)</td></tr>
 <tr class="separator:gae3705e982771b2719016d3c6f237515f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga05192f1f3166d0a19744345f641da360"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__clump.html#ga05192f1f3166d0a19744345f641da360">clump::recenterClusterCloud</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *iceCloud, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; nList)</td></tr>
+<tr class="memdesc:ga05192f1f3166d0a19744345f641da360"><td class="mdescLeft">&#160;</td><td class="mdescRight">Recenters the coordinates of a pointCloud.  <a href="group__clump.html#ga05192f1f3166d0a19744345f641da360">More...</a><br /></td></tr>
 <tr class="separator:ga05192f1f3166d0a19744345f641da360"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>File for the bond order parameter analysis. </p>
-<p>Details. </p>
 
 <p class="definition">Definition in file <a class="el" href="cluster_8hpp_source.html">cluster.hpp</a>.</p>
 </div></div><!-- contents -->

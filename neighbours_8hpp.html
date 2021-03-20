@@ -129,12 +129,13 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacenneigh"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenneigh.html">nneigh</a></td></tr>
-<tr class="memdesc:namespacenneigh"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functions for building neighbour lists. This namespace contains functions that build neighbour lists (using brute-force), saving either the atom IDs or atom indices (according to a PointCloud) in a row-ordered vector of vectors. <br /></td></tr>
+<tr class="memdesc:namespacenneigh"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functions for building neighbour lists. This namespace contains functions that build neighbour lists (using brute-force), saving either the atom IDs or atom indices (according to a PointCloud) in a row-ordered vector of vectors. Whether the atom IDs or atom indices (i.e. the indices of the elements in the vector pts inside the PointCloud) are saved, the neighbour lists are constructed such that the first element is the 'central atom', whose neighbours are being saved on that particular line. The central atom is followed by the atom IDs or indices of the nearest neighbours. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga17027fd5c55cdca40c0d07137ecddfc2"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__nneigh.html#ga17027fd5c55cdca40c0d07137ecddfc2">nneigh::neighList</a> (double rcutoff, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, int typeI, int typeJ)</td></tr>
+<tr class="memdesc:ga17027fd5c55cdca40c0d07137ecddfc2"><td class="mdescLeft">&#160;</td><td class="mdescRight">All these functions use atom IDs and not indices.  <a href="group__nneigh.html#ga17027fd5c55cdca40c0d07137ecddfc2">More...</a><br /></td></tr>
 <tr class="separator:ga17027fd5c55cdca40c0d07137ecddfc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaaaaf74d25014d1c08bb73b8be0a6fe74"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__nneigh.html#gaaaaf74d25014d1c08bb73b8be0a6fe74">nneigh::neighListO</a> (double rcutoff, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, int typeI)</td></tr>
 <tr class="separator:gaaaaf74d25014d1c08bb73b8be0a6fe74"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -145,11 +146,11 @@ Functions</h2></td></tr>
 <tr class="memitem:gaf1f3bc572fb2feaca38f59362af681c6"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__nneigh.html#gaf1f3bc572fb2feaca38f59362af681c6">nneigh::getNewNeighbourListByIndex</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, double cutoff)</td></tr>
 <tr class="separator:gaf1f3bc572fb2feaca38f59362af681c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad15a56db7bd85332af86936e51cce9fa"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__nneigh.html#gad15a56db7bd85332af86936e51cce9fa">nneigh::clearNeighbourList</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; &amp;nList)</td></tr>
+<tr class="memdesc:gad15a56db7bd85332af86936e51cce9fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Erases memory for a vector of vectors for the neighbour list.  <a href="group__nneigh.html#gad15a56db7bd85332af86936e51cce9fa">More...</a><br /></td></tr>
 <tr class="separator:gad15a56db7bd85332af86936e51cce9fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Header file for neighbour list generation. </p>
-<p>Details. </p>
 
 <p class="definition">Definition in file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
 </div></div><!-- contents -->

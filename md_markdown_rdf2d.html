@@ -98,9 +98,9 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>The trajectory file for this example is <a href="https://figshare.com/articles/In_plane_2D_RDF_LAMMPS_Trajectory/11448711">here on figshare</a>. The trajectory file details the fMSI (flat Monolayer Square Ice) formed when quasi-one-dimensional water at 320 K. In this example, the in-plane RDF of the quasi-two-dimensional fMSI is determined.</p>
-<p>The radial distribution function <img class="formulaInl" alt="$g(r)$" src="form_38.png"/>, or pair distribution function. It can be used to illuminate features of short-range and long-range order. The RDF is the probability of finding a particle at a distance of <img class="formulaInl" alt="$r$" src="form_39.png"/> from a tagged reference particle, relative to that of an ideal gas. For a system of <img class="formulaInl" alt="$N$" src="form_40.png"/> particles, the pair correlation function for <img class="formulaInl" alt="$N(N-1)$" src="form_41.png"/> pairs is:</p>
+<p>The radial distribution function \(g(r)\), or pair distribution function. It can be used to illuminate features of short-range and long-range order. The RDF is the probability of finding a particle at a distance of \(r\) from a tagged reference particle, relative to that of an ideal gas. For a system of \(N\) particles, the pair correlation function for \(N(N-1)\) pairs is:</p>
 <p class="formulaDsp">
-<img class="formulaDsp" alt="\[ \rho_N^{(2)}(r,r') = ⟨\sum_{i=1}^{N} \sum_{j=1,j \neq i}^{N} \delta (r-r_i) \delta (r'-r_j) \langle \]" src="form_42.png"/>
+\[ \rho_N^{(2)}(r,r&#39;) = ⟨\sum_{i=1}^{N} \sum_{j=1,j \neq i}^{N} \delta (r-r_i) \delta (r&#39;-r_j) \langle \]
 </p>
 <p>The C++ backend code essentially bins distances between pairs of particles, and normalizes the resulting histogram. The normalization is done with respect to an ideal gas.</p>
 <p>On running the example, an output top-level directory named <em>runOne</em> is created.</p>

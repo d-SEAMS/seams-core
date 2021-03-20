@@ -122,14 +122,19 @@ Functions</h2></td></tr>
 <tr class="memitem:ga2948e7d5ac22580945c3bed8b90f4937"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structprimitive_1_1Graph.html">Graph</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__primitive.html#ga2948e7d5ac22580945c3bed8b90f4937">primitive::restoreEdgesFromIndices</a> (<a class="el" href="structprimitive_1_1Graph.html">Graph</a> *fullGraph, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; nList)</td></tr>
 <tr class="separator:ga2948e7d5ac22580945c3bed8b90f4937"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga4a830b09cc9c276bf2f8d80498202cba"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structprimitive_1_1Graph.html">Graph</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__primitive.html#ga4a830b09cc9c276bf2f8d80498202cba">primitive::countAllRingsFromIndex</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; neighHbondList, int maxDepth)</td></tr>
+<tr class="memdesc:ga4a830b09cc9c276bf2f8d80498202cba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a vector of vectors of all possible rings.  <a href="group__primitive.html#ga4a830b09cc9c276bf2f8d80498202cba">More...</a><br /></td></tr>
 <tr class="separator:ga4a830b09cc9c276bf2f8d80498202cba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga909ca1fa60966421281d40f4ad8cc653"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structprimitive_1_1Graph.html">Graph</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__primitive.html#ga909ca1fa60966421281d40f4ad8cc653">primitive::removeNonSPrings</a> (<a class="el" href="structprimitive_1_1Graph.html">Graph</a> *fullGraph)</td></tr>
+<tr class="memdesc:ga909ca1fa60966421281d40f4ad8cc653"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes the non-SP rings, using the Franzblau shortest path criterion.  <a href="group__primitive.html#ga909ca1fa60966421281d40f4ad8cc653">More...</a><br /></td></tr>
 <tr class="separator:ga909ca1fa60966421281d40f4ad8cc653"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gae91300e341786a54ce73c0f2e9d4f5d5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__primitive.html#gae91300e341786a54ce73c0f2e9d4f5d5">primitive::findRings</a> (<a class="el" href="structprimitive_1_1Graph.html">Graph</a> *fullGraph, int v, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; *visited, int maxDepth, int depth, int root=-1)</td></tr>
+<tr class="memdesc:gae91300e341786a54ce73c0f2e9d4f5d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Main function that searches for all rings.  <a href="group__primitive.html#gae91300e341786a54ce73c0f2e9d4f5d5">More...</a><br /></td></tr>
 <tr class="separator:gae91300e341786a54ce73c0f2e9d4f5d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad5a66be66869860a9bd875535cd2671f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__primitive.html#gad5a66be66869860a9bd875535cd2671f">primitive::shortestPath</a> (<a class="el" href="structprimitive_1_1Graph.html">Graph</a> *fullGraph, int v, int goal, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; *path, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; *visited, int maxDepth, int depth=1)</td></tr>
+<tr class="memdesc:gad5a66be66869860a9bd875535cd2671f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the shortest path.  <a href="group__primitive.html#gad5a66be66869860a9bd875535cd2671f">More...</a><br /></td></tr>
 <tr class="separator:gad5a66be66869860a9bd875535cd2671f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gacca66f8ab7f31902d6c7d9a9f63d5c46"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structprimitive_1_1Graph.html">Graph</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__primitive.html#gacca66f8ab7f31902d6c7d9a9f63d5c46">primitive::clearGraph</a> (<a class="el" href="structprimitive_1_1Graph.html">Graph</a> *currentGraph)</td></tr>
+<tr class="memdesc:gacca66f8ab7f31902d6c7d9a9f63d5c46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for clearing vectors in <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> after multiple usage.  <a href="group__primitive.html#gacca66f8ab7f31902d6c7d9a9f63d5c46">More...</a><br /></td></tr>
 <tr class="separator:gacca66f8ab7f31902d6c7d9a9f63d5c46"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
@@ -137,6 +142,7 @@ Variables</h2></td></tr>
 <tr class="memitem:gaead86b6d47e9f9a77949fef59b8de27f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__primitive.html#gaead86b6d47e9f9a77949fef59b8de27f">primitive::Vertex::atomIndex</a></td></tr>
 <tr class="separator:gaead86b6d47e9f9a77949fef59b8de27f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gabbf40e41b84205035d4053be2180f6b2"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__primitive.html#gabbf40e41b84205035d4053be2180f6b2">primitive::Vertex::neighListIndex</a></td></tr>
+<tr class="memdesc:gabbf40e41b84205035d4053be2180f6b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is the index according to pointCloud.  <a href="group__primitive.html#gabbf40e41b84205035d4053be2180f6b2">More...</a><br /></td></tr>
 <tr class="separator:gabbf40e41b84205035d4053be2180f6b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga932b6ae4efc838d407deed5ee11b8afe"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__primitive.html#ga932b6ae4efc838d407deed5ee11b8afe">primitive::Vertex::inGraph</a></td></tr>
 <tr class="separator:ga932b6ae4efc838d407deed5ee11b8afe"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -162,6 +168,8 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Function for clearing vectors in <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> after multiple usage. </p>
 <p>Function for clearing <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> if it is already filled. This should be called before every frame is read in. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">currentGraph</td><td>The cleared <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> </td></tr>
@@ -169,15 +177,15 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8cpp_source.html#l00444">444</a> of file <a class="el" href="franzblau_8cpp_source.html">franzblau.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;                                                        {</div>
-<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;primitive::Vertex&gt;</a> tempPts;</div>
-<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;std::vector&lt;int&gt;</a>&gt; tempRings;</div>
-<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;  tempPts.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/swap.html">swap</a>(currentGraph-&gt;pts);</div>
-<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;  tempRings.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/swap.html">swap</a>(currentGraph-&gt;rings);</div>
-<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;  <span class="keywordflow">return</span> *currentGraph;</div>
-<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="franzblau_8cpp_source.html#l00430">430</a> of file <a class="el" href="franzblau_8cpp_source.html">franzblau.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;                                                        {</div>
+<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;primitive::Vertex&gt;</a> tempPts;</div>
+<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;std::vector&lt;int&gt;</a>&gt; tempRings;</div>
+<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;  tempPts.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/swap.html">swap</a>(currentGraph-&gt;pts);</div>
+<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;  tempRings.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/swap.html">swap</a>(currentGraph-&gt;rings);</div>
+<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;  <span class="keywordflow">return</span> *currentGraph;</div>
+<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;}</div>
 <div class="ttc" id="aswap_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/swap.html">std::vector::swap</a></div><div class="ttdeci">T swap(T... args)</div></div>
 <div class="ttc" id="avector_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt; primitive::Vertex &gt;</a></div></div>
 </div><!-- fragment -->
@@ -208,9 +216,11 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Creates a vector of vectors of all possible rings. </p>
 <p>Get all possible rings (only atom indices, not IDs). The input neighbour list is in terms of indices. All possible rings (including non-SP) rings are generated using a recursive backtracking algorithm. This function calls the following functions internally:</p><ul>
 <li><a class="el" href="group__primitive.html#ga89752c96a2f3951a33238b5231d33b16">primitive::populateGraphFromIndices</a> (for initializing the <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> object)</li>
-<li><a class="el" href="group__primitive.html#gae91300e341786a54ce73c0f2e9d4f5d5">primitive::findRings</a> (for getting all rings, using backtracking)</li>
+<li><a class="el" href="group__primitive.html#gae91300e341786a54ce73c0f2e9d4f5d5" title="Main function that searches for all rings.">primitive::findRings</a> (for getting all rings, using backtracking)</li>
 <li><a class="el" href="group__primitive.html#ga2948e7d5ac22580945c3bed8b90f4937">primitive::restoreEdgesFromIndices</a> (restores back-up of the edges since some may have been removed) <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">neighHbondList</td><td>Row-ordered neighbour list by atom index (not ID). </td></tr>
@@ -222,40 +232,40 @@ Variables</h2></td></tr>
 </li>
 </ul>
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8cpp_source.html#l00067">67</a> of file <a class="el" href="franzblau_8cpp_source.html">franzblau.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                                                            {</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;  <a class="code" href="structprimitive_1_1Graph.html">primitive::Graph</a> fullGraph;  <span class="comment">// Graph object</span></div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a></div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;      visited;  <span class="comment">// Contains the indices (NOT IDs) visited for a particular node</span></div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  <span class="keywordtype">int</span> depth;    <span class="comment">// Current depth</span></div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;  <span class="comment">// ------------------------------</span></div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;  <span class="comment">// Init</span></div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;  <span class="comment">// Initialize the graph object with all the information from the neighbour</span></div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;  <span class="comment">// list (of indices only)</span></div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  fullGraph = <a class="code" href="group__primitive.html#ga89752c96a2f3951a33238b5231d33b16">primitive::populateGraphFromIndices</a>(neighHbondList);</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;  <span class="comment">// ------------------------------</span></div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;  <span class="comment">// Loop through every vertex</span></div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iatom = 0; iatom &lt; neighHbondList.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>(); iatom++) {</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    visited.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/clear.html">clear</a>();</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    depth = 0;</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    <span class="comment">// Call the function for getting rings</span></div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    <a class="code" href="group__primitive.html#gae91300e341786a54ce73c0f2e9d4f5d5">primitive::findRings</a>(&amp;fullGraph, iatom, &amp;visited, maxDepth, depth);</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;  }  <span class="comment">// loop through every vertex</span></div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;  <span class="comment">// ------------------------------</span></div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;  <span class="comment">// Restore back-up of the edges (some may have been removed)</span></div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;  fullGraph = <a class="code" href="group__primitive.html#ga2948e7d5ac22580945c3bed8b90f4937">primitive::restoreEdgesFromIndices</a>(&amp;fullGraph, neighHbondList);</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;  <span class="comment">// ------------------------------</span></div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160; </div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;  <span class="keywordflow">return</span> fullGraph;</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="franzblau_8cpp_source.html#l00050">50</a> of file <a class="el" href="franzblau_8cpp_source.html">franzblau.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;                                                {</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  <a class="code" href="structprimitive_1_1Graph.html">primitive::Graph</a> fullGraph; <span class="comment">// Graph object</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a></div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;      visited; <span class="comment">// Contains the indices (NOT IDs) visited for a particular node</span></div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;  <span class="keywordtype">int</span> depth;   <span class="comment">// Current depth</span></div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;  <span class="comment">// ------------------------------</span></div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;  <span class="comment">// Init</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;  <span class="comment">// Initialize the graph object with all the information from the neighbour</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;  <span class="comment">// list (of indices only)</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;  fullGraph = <a class="code" href="group__primitive.html#ga89752c96a2f3951a33238b5231d33b16">primitive::populateGraphFromIndices</a>(neighHbondList);</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  <span class="comment">// ------------------------------</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  <span class="comment">// Loop through every vertex</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iatom = 0; iatom &lt; neighHbondList.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>(); iatom++) {</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    visited.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/clear.html">clear</a>();</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    depth = 0;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    <span class="comment">// Call the function for getting rings</span></div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    <a class="code" href="group__primitive.html#gae91300e341786a54ce73c0f2e9d4f5d5">primitive::findRings</a>(&amp;fullGraph, iatom, &amp;visited, maxDepth, depth);</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;  } <span class="comment">// loop through every vertex</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;  <span class="comment">// ------------------------------</span></div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  <span class="comment">// Restore back-up of the edges (some may have been removed)</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  fullGraph = <a class="code" href="group__primitive.html#ga2948e7d5ac22580945c3bed8b90f4937">primitive::restoreEdgesFromIndices</a>(&amp;fullGraph, neighHbondList);</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;  <span class="comment">// ------------------------------</span></div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160; </div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;  <span class="keywordflow">return</span> fullGraph;</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;}</div>
 <div class="ttc" id="aclear_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/clear.html">std::vector::clear</a></div><div class="ttdeci">T clear(T... args)</div></div>
-<div class="ttc" id="agroup__primitive_html_ga2948e7d5ac22580945c3bed8b90f4937"><div class="ttname"><a href="group__primitive.html#ga2948e7d5ac22580945c3bed8b90f4937">primitive::restoreEdgesFromIndices</a></div><div class="ttdeci">Graph restoreEdgesFromIndices(Graph *fullGraph, std::vector&lt; std::vector&lt; int &gt;&gt; nList)</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8cpp_source.html#l00284">franzblau.cpp:284</a></div></div>
-<div class="ttc" id="agroup__primitive_html_ga89752c96a2f3951a33238b5231d33b16"><div class="ttname"><a href="group__primitive.html#ga89752c96a2f3951a33238b5231d33b16">primitive::populateGraphFromIndices</a></div><div class="ttdeci">Graph populateGraphFromIndices(std::vector&lt; std::vector&lt; int &gt;&gt; nList)</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8cpp_source.html#l00249">franzblau.cpp:249</a></div></div>
-<div class="ttc" id="agroup__primitive_html_gae91300e341786a54ce73c0f2e9d4f5d5"><div class="ttname"><a href="group__primitive.html#gae91300e341786a54ce73c0f2e9d4f5d5">primitive::findRings</a></div><div class="ttdeci">int findRings(Graph *fullGraph, int v, std::vector&lt; int &gt; *visited, int maxDepth, int depth, int root=-1)</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8cpp_source.html#l00118">franzblau.cpp:118</a></div></div>
+<div class="ttc" id="agroup__primitive_html_ga2948e7d5ac22580945c3bed8b90f4937"><div class="ttname"><a href="group__primitive.html#ga2948e7d5ac22580945c3bed8b90f4937">primitive::restoreEdgesFromIndices</a></div><div class="ttdeci">Graph restoreEdgesFromIndices(Graph *fullGraph, std::vector&lt; std::vector&lt; int &gt;&gt; nList)</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8cpp_source.html#l00269">franzblau.cpp:269</a></div></div>
+<div class="ttc" id="agroup__primitive_html_ga89752c96a2f3951a33238b5231d33b16"><div class="ttname"><a href="group__primitive.html#ga89752c96a2f3951a33238b5231d33b16">primitive::populateGraphFromIndices</a></div><div class="ttdeci">Graph populateGraphFromIndices(std::vector&lt; std::vector&lt; int &gt;&gt; nList)</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8cpp_source.html#l00234">franzblau.cpp:234</a></div></div>
+<div class="ttc" id="agroup__primitive_html_gae91300e341786a54ce73c0f2e9d4f5d5"><div class="ttname"><a href="group__primitive.html#gae91300e341786a54ce73c0f2e9d4f5d5">primitive::findRings</a></div><div class="ttdeci">int findRings(Graph *fullGraph, int v, std::vector&lt; int &gt; *visited, int maxDepth, int depth, int root=-1)</div><div class="ttdoc">Main function that searches for all rings.</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8cpp_source.html#l00102">franzblau.cpp:102</a></div></div>
 <div class="ttc" id="asize_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/size.html">std::vector::size</a></div><div class="ttdeci">T size(T... args)</div></div>
-<div class="ttc" id="astructprimitive_1_1Graph_html"><div class="ttname"><a href="structprimitive_1_1Graph.html">primitive::Graph</a></div><div class="ttdoc">This is a per-frame object, containing all the vertices for the particular frame, along with the vect...</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8hpp_source.html#l00095">franzblau.hpp:95</a></div></div>
+<div class="ttc" id="astructprimitive_1_1Graph_html"><div class="ttname"><a href="structprimitive_1_1Graph.html">primitive::Graph</a></div><div class="ttdoc">This is a per-frame object, containing all the vertices for the particular frame, along with the vect...</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8hpp_source.html#l00094">franzblau.hpp:94</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -308,83 +318,85 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Main function that searches for all rings. </p>
 <p>All possible rings are searched for in this function, which recursively calls itself. The rings are 'grown' from the root node (which is the first vertex) using the backtracking algorithm. When it is first called (before the root node has been assigned), root is a dummy value (which is equal to -1, a value that can never be legitimate). </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">fullGraph</td><td><a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> object containing the vertices (and the neighbour lists). Vertices may be 'removed' from the <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">v</td><td>The current vertex being visited or checked. It is added to the list of all vertices visited. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">visited</td><td>A vector containing a list of the vertices visited for book-keeping. If the current visited vector fulfills the condition for being a ring, it is added to the rings vector of vector in the <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">maxDepth</td><td>The maximum depth upto which rings will be searched. This means that rings larger than maxDepth will not be generated. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">depth</td><td>The current depth. When this function is called for the first time from <a class="el" href="group__primitive.html#ga4a830b09cc9c276bf2f8d80498202cba">primitive::countAllRingsFromIndex</a>, the depth is initialized to 0. When the depth is greater than or equal to maxDepth, the function exits. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">root</td><td>The first vertex, from which the current visited vector (candidate ring) is being grown. This is initialized to a dummy value of -1, when it is called from <a class="el" href="group__primitive.html#ga4a830b09cc9c276bf2f8d80498202cba">primitive::countAllRingsFromIndex</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">depth</td><td>The current depth. When this function is called for the first time from <a class="el" href="group__primitive.html#ga4a830b09cc9c276bf2f8d80498202cba" title="Creates a vector of vectors of all possible rings.">primitive::countAllRingsFromIndex</a>, the depth is initialized to 0. When the depth is greater than or equal to maxDepth, the function exits. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">root</td><td>The first vertex, from which the current visited vector (candidate ring) is being grown. This is initialized to a dummy value of -1, when it is called from <a class="el" href="group__primitive.html#ga4a830b09cc9c276bf2f8d80498202cba" title="Creates a vector of vectors of all possible rings.">primitive::countAllRingsFromIndex</a>. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8cpp_source.html#l00118">118</a> of file <a class="el" href="franzblau_8cpp_source.html">franzblau.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;                                                            {</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;  <span class="keywordtype">int</span> nnumNeighbours;  <span class="comment">// Number of nearest neighbours for iNode</span></div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;  <span class="keywordtype">int</span> n;               <span class="comment">// Node of a neighbour (index)</span></div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;  <span class="comment">// -------------</span></div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;  <span class="comment">// For the first call:</span></div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;  <span class="keywordflow">if</span> (root == -1) {</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;    root = v;                           <span class="comment">// Init the root as the current node</span></div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;    fullGraph-&gt;pts[v].inGraph = <span class="keyword">false</span>;  <span class="comment">// Remove the root from the graph</span></div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;  }                                     <span class="comment">// first call</span></div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;  <span class="comment">// Checks</span></div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;  <span class="keywordflow">if</span> (depth &gt;= maxDepth) {</div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;    <span class="keywordflow">return</span> 1;  <span class="comment">// false?</span></div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;  }            <span class="comment">// searched until the maximum length specified</span></div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;  <span class="comment">// Add the current node to the visited vector</span></div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;  visited-&gt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(v);</div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;  <span class="comment">// -------------</span></div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;  <span class="comment">// Depth-first search</span></div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;  <span class="comment">// 1. Pick a root node (above)</span></div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;  <span class="comment">// 2. Search all the neighbouring nodes</span></div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;  <span class="comment">// 3. Start a recursion call, from the second nearest neighbours</span></div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;  <span class="comment">// 3(i) If the neighbour equals the root (selected in 1), ring has been found!</span></div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;  <span class="comment">// 3(ii) Or else search for all the unvisited neighbours</span></div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;  <span class="comment">// 4. Remove the root node from the graph</span></div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;  <span class="comment">// 5. Update the vector of vectors containing all rings</span></div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;  <span class="comment">// -------------</span></div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;  <span class="comment">// Start the search</span></div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;  depth += 1;  <span class="comment">// Go to the next layer</span></div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;  nnumNeighbours = fullGraph-&gt;pts[v].neighListIndex.size();</div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;  <span class="comment">// Loop through the neighbours of iNode</span></div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; nnumNeighbours; j++) {</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;    n = fullGraph-&gt;pts[v].neighListIndex[j];  <span class="comment">// Neighbour index</span></div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    <span class="comment">// Has a ring been found?!</span></div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;    <span class="keywordflow">if</span> (depth &gt; 2 &amp;&amp; n == root) {</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;      <span class="comment">// Add the visited vector to the rings vector of vector</span></div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;      fullGraph-&gt;rings.push_back(*visited);</div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;    }  <span class="comment">// A ring has been found!</span></div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;    <span class="comment">// Otherwise search all the neighbours which have not been searched already</span></div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (fullGraph-&gt;pts[n].inGraph) {</div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;      fullGraph-&gt;pts[n].inGraph = <span class="keyword">false</span>;  <span class="comment">// Set to false now</span></div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;      <span class="comment">// Recursive call</span></div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;      <a class="code" href="group__primitive.html#gae91300e341786a54ce73c0f2e9d4f5d5">primitive::findRings</a>(fullGraph, n, visited, maxDepth, depth, root);</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;      fullGraph-&gt;pts[n].inGraph = <span class="keyword">true</span>;  <span class="comment">// Put n back in the graph</span></div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;    }  <span class="comment">// Search the other unsearched neighbours</span></div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;  }    <span class="comment">// end of search through all neighbours</span></div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;  <span class="comment">// -------------</span></div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;  <span class="comment">// When the depth is 2, remove just the root from the neighbours of iNode</span></div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;  <span class="keywordflow">if</span> (depth == 2) {</div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;    <span class="comment">// Search for root in the neighbour list of v</span></div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; fullGraph-&gt;pts[v].neighListIndex.size(); j++) {</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;      <span class="keywordflow">if</span> (root == fullGraph-&gt;pts[v].neighListIndex[j]) {</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;        fullGraph-&gt;pts[v].neighListIndex.erase(</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;            fullGraph-&gt;pts[v].neighListIndex.begin() + j);</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;      }  <span class="comment">// end of erase</span></div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;    }    <span class="comment">// end of search</span></div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;  }      <span class="comment">// remove root not edges</span></div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160; </div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;  (*visited).pop_back();</div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;  <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="franzblau_8cpp_source.html#l00102">102</a> of file <a class="el" href="franzblau_8cpp_source.html">franzblau.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;                                                            {</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;  <span class="keywordtype">int</span> nnumNeighbours; <span class="comment">// Number of nearest neighbours for iNode</span></div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;  <span class="keywordtype">int</span> n;              <span class="comment">// Node of a neighbour (index)</span></div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;  <span class="comment">// -------------</span></div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;  <span class="comment">// For the first call:</span></div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;  <span class="keywordflow">if</span> (root == -1) {</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    root = v;                          <span class="comment">// Init the root as the current node</span></div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    fullGraph-&gt;pts[v].inGraph = <span class="keyword">false</span>; <span class="comment">// Remove the root from the graph</span></div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;  }                                    <span class="comment">// first call</span></div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;  <span class="comment">// Checks</span></div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;  <span class="keywordflow">if</span> (depth &gt;= maxDepth) {</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    <span class="keywordflow">return</span> 1; <span class="comment">// false?</span></div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;  }           <span class="comment">// searched until the maximum length specified</span></div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;  <span class="comment">// Add the current node to the visited vector</span></div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;  visited-&gt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(v);</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;  <span class="comment">// -------------</span></div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;  <span class="comment">// Depth-first search</span></div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;  <span class="comment">// 1. Pick a root node (above)</span></div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;  <span class="comment">// 2. Search all the neighbouring nodes</span></div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;  <span class="comment">// 3. Start a recursion call, from the second nearest neighbours</span></div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;  <span class="comment">// 3(i) If the neighbour equals the root (selected in 1), ring has been found!</span></div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;  <span class="comment">// 3(ii) Or else search for all the unvisited neighbours</span></div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;  <span class="comment">// 4. Remove the root node from the graph</span></div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;  <span class="comment">// 5. Update the vector of vectors containing all rings</span></div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;  <span class="comment">// -------------</span></div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;  <span class="comment">// Start the search</span></div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;  depth += 1; <span class="comment">// Go to the next layer</span></div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;  nnumNeighbours = fullGraph-&gt;pts[v].neighListIndex.size();</div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;  <span class="comment">// Loop through the neighbours of iNode</span></div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; nnumNeighbours; j++) {</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;    n = fullGraph-&gt;pts[v].neighListIndex[j]; <span class="comment">// Neighbour index</span></div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;    <span class="comment">// Has a ring been found?!</span></div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;    <span class="keywordflow">if</span> (depth &gt; 2 &amp;&amp; n == root) {</div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;      <span class="comment">// Add the visited vector to the rings vector of vector</span></div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;      fullGraph-&gt;rings.push_back(*visited);</div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;    } <span class="comment">// A ring has been found!</span></div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;    <span class="comment">// Otherwise search all the neighbours which have not been searched already</span></div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (fullGraph-&gt;pts[n].inGraph) {</div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;      fullGraph-&gt;pts[n].inGraph = <span class="keyword">false</span>; <span class="comment">// Set to false now</span></div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;      <span class="comment">// Recursive call</span></div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;      <a class="code" href="group__primitive.html#gae91300e341786a54ce73c0f2e9d4f5d5">primitive::findRings</a>(fullGraph, n, visited, maxDepth, depth, root);</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;      fullGraph-&gt;pts[n].inGraph = <span class="keyword">true</span>; <span class="comment">// Put n back in the graph</span></div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;    } <span class="comment">// Search the other unsearched neighbours</span></div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;  }   <span class="comment">// end of search through all neighbours</span></div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;  <span class="comment">// -------------</span></div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;  <span class="comment">// When the depth is 2, remove just the root from the neighbours of iNode</span></div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;  <span class="keywordflow">if</span> (depth == 2) {</div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    <span class="comment">// Search for root in the neighbour list of v</span></div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; fullGraph-&gt;pts[v].neighListIndex.size(); j++) {</div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;      <span class="keywordflow">if</span> (root == fullGraph-&gt;pts[v].neighListIndex[j]) {</div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;        fullGraph-&gt;pts[v].neighListIndex.erase(</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;            fullGraph-&gt;pts[v].neighListIndex.begin() + j);</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;      } <span class="comment">// end of erase</span></div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;    }   <span class="comment">// end of search</span></div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;  }     <span class="comment">// remove root not edges</span></div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160; </div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;  (*visited).pop_back();</div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;  <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;}</div>
 <div class="ttc" id="apush_back_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">std::vector::push_back</a></div><div class="ttdeci">T push_back(T... args)</div></div>
 </div><!-- fragment -->
 </div>
@@ -404,6 +416,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Creates a graph object and fills it with the information from a neighbour list of INDICES NOT ATOM IDs created before. NOTE: the neighbourListIndex contains the indices and NOT the atom IDs as in the neighbour list</p>
 <p>Fills a <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> object with information from the PointCloud and the neighbour list. The indices in the neighbour list in the <a class="el" href="structprimitive_1_1Vertex.html" title="This is a collection of elements, for each point, required for graph traversal.">Vertex</a> object are NOT the atom IDs (they are the atom indices according to the input PointCloud). The input neighbour list is by index NOT atom IDs. Otherwise, this function does the same thing as <a class="el" href="group__primitive.html#ga3012412b123de9d2d265e20ffe8474c4">primitive::populateGraphFromNListID</a>. The only difference is that this function takes the neighbour list BY INDEX. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">nList</td><td>The row-ordered neighbour list, containing atom indices (according to the input PointCloud). </td></tr>
@@ -412,32 +425,32 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> object for the current frame. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8cpp_source.html#l00249">249</a> of file <a class="el" href="franzblau_8cpp_source.html">franzblau.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;                                     {</div>
-<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;  <a class="code" href="structprimitive_1_1Graph.html">primitive::Graph</a> fullGraph;  <span class="comment">// Contains all the information of the pointCloud</span></div>
-<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;  <a class="code" href="structprimitive_1_1Vertex.html">primitive::Vertex</a> iVertex;   <span class="comment">// The vertex corresponding to a particular point</span></div>
-<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;  <span class="keywordtype">int</span> nnumNeighbours;          <span class="comment">// Number of nearest neighbours for iatom</span></div>
-<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;  <span class="keywordtype">int</span> iatom, jatom;            <span class="comment">// Atom index being saved</span></div>
-<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;  <span class="comment">// ------------------------------</span></div>
-<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;  <span class="comment">// Loop through every point in nList</span></div>
-<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; nList.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>(); i++) {</div>
-<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;    iatom = nList[i][0];  <span class="comment">// Atom index of i</span></div>
-<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;    <span class="comment">// neighListIndex is simply the i^th row of nList</span></div>
-<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;    <span class="comment">//</span></div>
-<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;    <span class="comment">// Update iVertex</span></div>
-<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;    iVertex.<a class="code" href="group__primitive.html#gaead86b6d47e9f9a77949fef59b8de27f">atomIndex</a> = iatom;</div>
-<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;    iVertex.<a class="code" href="group__primitive.html#gabbf40e41b84205035d4053be2180f6b2">neighListIndex</a> = nList[i];</div>
-<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;    <span class="comment">// Add to the Graph object</span></div>
-<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;    fullGraph.<a class="code" href="group__primitive.html#gaf6aaf0f3cc1ab4d32e6095ff38398df9">pts</a>.push_back(iVertex);</div>
-<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;  }  <span class="comment">// end of loop through iatom</span></div>
-<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160; </div>
-<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;  <span class="keywordflow">return</span> fullGraph;</div>
-<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;}</div>
-<div class="ttc" id="agroup__primitive_html_gabbf40e41b84205035d4053be2180f6b2"><div class="ttname"><a href="group__primitive.html#gabbf40e41b84205035d4053be2180f6b2">primitive::Vertex::neighListIndex</a></div><div class="ttdeci">std::vector&lt; int &gt; neighListIndex</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8hpp_source.html#l00079">franzblau.hpp:79</a></div></div>
-<div class="ttc" id="agroup__primitive_html_gaead86b6d47e9f9a77949fef59b8de27f"><div class="ttname"><a href="group__primitive.html#gaead86b6d47e9f9a77949fef59b8de27f">primitive::Vertex::atomIndex</a></div><div class="ttdeci">int atomIndex</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8hpp_source.html#l00078">franzblau.hpp:78</a></div></div>
-<div class="ttc" id="agroup__primitive_html_gaf6aaf0f3cc1ab4d32e6095ff38398df9"><div class="ttname"><a href="group__primitive.html#gaf6aaf0f3cc1ab4d32e6095ff38398df9">primitive::Graph::pts</a></div><div class="ttdeci">std::vector&lt; Vertex &gt; pts</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8hpp_source.html#l00096">franzblau.hpp:96</a></div></div>
-<div class="ttc" id="astructprimitive_1_1Vertex_html"><div class="ttname"><a href="structprimitive_1_1Vertex.html">primitive::Vertex</a></div><div class="ttdoc">This is a collection of elements, for each point, required for graph traversal.</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8hpp_source.html#l00077">franzblau.hpp:77</a></div></div>
+<p class="definition">Definition at line <a class="el" href="franzblau_8cpp_source.html#l00234">234</a> of file <a class="el" href="franzblau_8cpp_source.html">franzblau.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;                                                                   {</div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;  <a class="code" href="structprimitive_1_1Graph.html">primitive::Graph</a> fullGraph; <span class="comment">// Contains all the information of the pointCloud</span></div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;  <a class="code" href="structprimitive_1_1Vertex.html">primitive::Vertex</a> iVertex;  <span class="comment">// The vertex corresponding to a particular point</span></div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;  <span class="keywordtype">int</span> nnumNeighbours;         <span class="comment">// Number of nearest neighbours for iatom</span></div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;  <span class="keywordtype">int</span> iatom, jatom;           <span class="comment">// Atom index being saved</span></div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;  <span class="comment">// ------------------------------</span></div>
+<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;  <span class="comment">// Loop through every point in nList</span></div>
+<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; nList.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>(); i++) {</div>
+<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;    iatom = nList[i][0]; <span class="comment">// Atom index of i</span></div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;    <span class="comment">// neighListIndex is simply the i^th row of nList</span></div>
+<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;    <span class="comment">//</span></div>
+<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;    <span class="comment">// Update iVertex</span></div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;    iVertex.<a class="code" href="group__primitive.html#gaead86b6d47e9f9a77949fef59b8de27f">atomIndex</a> = iatom;</div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;    iVertex.<a class="code" href="group__primitive.html#gabbf40e41b84205035d4053be2180f6b2">neighListIndex</a> = nList[i];</div>
+<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;    <span class="comment">// Add to the Graph object</span></div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;    fullGraph.<a class="code" href="group__primitive.html#gaf6aaf0f3cc1ab4d32e6095ff38398df9">pts</a>.push_back(iVertex);</div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;  } <span class="comment">// end of loop through iatom</span></div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160; </div>
+<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;  <span class="keywordflow">return</span> fullGraph;</div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;}</div>
+<div class="ttc" id="agroup__primitive_html_gabbf40e41b84205035d4053be2180f6b2"><div class="ttname"><a href="group__primitive.html#gabbf40e41b84205035d4053be2180f6b2">primitive::Vertex::neighListIndex</a></div><div class="ttdeci">std::vector&lt; int &gt; neighListIndex</div><div class="ttdoc">This is the index according to pointCloud.</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8hpp_source.html#l00078">franzblau.hpp:78</a></div></div>
+<div class="ttc" id="agroup__primitive_html_gaead86b6d47e9f9a77949fef59b8de27f"><div class="ttname"><a href="group__primitive.html#gaead86b6d47e9f9a77949fef59b8de27f">primitive::Vertex::atomIndex</a></div><div class="ttdeci">int atomIndex</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8hpp_source.html#l00077">franzblau.hpp:77</a></div></div>
+<div class="ttc" id="agroup__primitive_html_gaf6aaf0f3cc1ab4d32e6095ff38398df9"><div class="ttname"><a href="group__primitive.html#gaf6aaf0f3cc1ab4d32e6095ff38398df9">primitive::Graph::pts</a></div><div class="ttdeci">std::vector&lt; Vertex &gt; pts</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8hpp_source.html#l00095">franzblau.hpp:95</a></div></div>
+<div class="ttc" id="astructprimitive_1_1Vertex_html"><div class="ttname"><a href="structprimitive_1_1Vertex.html">primitive::Vertex</a></div><div class="ttdoc">This is a collection of elements, for each point, required for graph traversal.</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8hpp_source.html#l00076">franzblau.hpp:76</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -466,6 +479,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Creates a graph object and fills it with the information from a neighbour list and pointCloud created before. NOTE: the neighbourListIndex contains the indices and NOT the atom IDs as in the neighbour list</p>
 <p>Fills a <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> object with information from the PointCloud and the neighbour list. The indices in the neighbour list in the <a class="el" href="structprimitive_1_1Vertex.html" title="This is a collection of elements, for each point, required for graph traversal.">Vertex</a> object are NOT the atom IDs (they are the atom indices according to the input PointCloud). The input neighbour list is by atom ID. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">yCloud</td><td>The input PointCloud. </td></tr>
@@ -475,53 +489,53 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> object for the current frame. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8cpp_source.html#l00194">194</a> of file <a class="el" href="franzblau_8cpp_source.html">franzblau.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;                                              {</div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;  <a class="code" href="structprimitive_1_1Graph.html">primitive::Graph</a> fullGraph;  <span class="comment">// Contains all the information of the pointCloud</span></div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;  <a class="code" href="structprimitive_1_1Vertex.html">primitive::Vertex</a> iVertex;   <span class="comment">// The vertex corresponding to a particular point</span></div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;  <span class="keywordtype">int</span> nnumNeighbours;          <span class="comment">// Number of nearest neighbours for iatom</span></div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a> iNeigh;     <span class="comment">// Neighbours of the current iatom</span></div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;  <span class="keywordtype">int</span> jatomID;                 <span class="comment">// Atom ID of the nearest neighbour</span></div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;  <span class="keywordtype">int</span> jatomIndex;              <span class="comment">// Atom index of the nearest neighbour</span></div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;  <span class="comment">// ------------------------------</span></div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;  <span class="comment">// Loop through every point in yCloud</span></div>
-<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iatom = 0; iatom &lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a>; iatom++) {</div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;    <span class="comment">// -----</span></div>
-<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;    <span class="comment">// Update the neighbours of iatom (only the indices!)</span></div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;    iNeigh.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/clear.html">clear</a>();  <span class="comment">// init</span></div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;    nnumNeighbours = neighHbondList[iatom].<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>() -</div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;                     1;  <span class="comment">// The first element is atomID of iatom</span></div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 1; j &lt;= nnumNeighbours; j++) {</div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;      jatomID = neighHbondList[iatom][j];  <span class="comment">// Atom ID</span></div>
-<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;      <span class="comment">// Get the atom index for the vector nearest neighbour list</span></div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;      <span class="keyword">auto</span> it = yCloud-&gt;<a class="code" href="group__molSys.html#ga8e48a0ae066c2585e7320cdaa0cbc8db">idIndexMap</a>.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/unordered_map/find.html">find</a>(jatomID);</div>
-<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;      <span class="keywordflow">if</span> (it != yCloud-&gt;<a class="code" href="group__molSys.html#ga8e48a0ae066c2585e7320cdaa0cbc8db">idIndexMap</a>.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/unordered_map/end.html">end</a>()) {</div>
-<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;        jatomIndex = it-&gt;second;</div>
-<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;      }  <span class="comment">// found jatomIndex</span></div>
-<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;      <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;        <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::cerr</a> &lt;&lt; <span class="stringliteral">&quot;Panic induced!\n&quot;</span>;</div>
-<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;        <span class="keywordflow">return</span> fullGraph;</div>
-<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;      }  <span class="comment">// jatomIndex not found</span></div>
-<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;      <span class="comment">// Update iNeigh</span></div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;      iNeigh.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(jatomIndex);</div>
-<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;    }  <span class="comment">// end of loop through nearest neighbours</span></div>
-<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;    <span class="comment">// -----</span></div>
-<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;    <span class="comment">// Update iVertex</span></div>
-<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;    iVertex.<a class="code" href="group__primitive.html#gaead86b6d47e9f9a77949fef59b8de27f">atomIndex</a> = iatom;</div>
-<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;    iVertex.<a class="code" href="group__primitive.html#gabbf40e41b84205035d4053be2180f6b2">neighListIndex</a> = iNeigh;</div>
-<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;    <span class="comment">// Add to the Graph object</span></div>
-<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;    fullGraph.<a class="code" href="group__primitive.html#gaf6aaf0f3cc1ab4d32e6095ff38398df9">pts</a>.push_back(iVertex);</div>
-<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;  }  <span class="comment">// end of loop through every iatom</span></div>
-<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;  <span class="comment">// ------------------------------</span></div>
-<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160; </div>
-<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;  <span class="keywordflow">return</span> fullGraph;</div>
-<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="franzblau_8cpp_source.html#l00178">178</a> of file <a class="el" href="franzblau_8cpp_source.html">franzblau.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;                                              {</div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;  <a class="code" href="structprimitive_1_1Graph.html">primitive::Graph</a> fullGraph; <span class="comment">// Contains all the information of the pointCloud</span></div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;  <a class="code" href="structprimitive_1_1Vertex.html">primitive::Vertex</a> iVertex;  <span class="comment">// The vertex corresponding to a particular point</span></div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;  <span class="keywordtype">int</span> nnumNeighbours;         <span class="comment">// Number of nearest neighbours for iatom</span></div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a> iNeigh;    <span class="comment">// Neighbours of the current iatom</span></div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;  <span class="keywordtype">int</span> jatomID;                <span class="comment">// Atom ID of the nearest neighbour</span></div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;  <span class="keywordtype">int</span> jatomIndex;             <span class="comment">// Atom index of the nearest neighbour</span></div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;  <span class="comment">// ------------------------------</span></div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;  <span class="comment">// Loop through every point in yCloud</span></div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iatom = 0; iatom &lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a>; iatom++) {</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;    <span class="comment">// -----</span></div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;    <span class="comment">// Update the neighbours of iatom (only the indices!)</span></div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;    iNeigh.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/clear.html">clear</a>(); <span class="comment">// init</span></div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;    nnumNeighbours = neighHbondList[iatom].<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>() -</div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;                     1; <span class="comment">// The first element is atomID of iatom</span></div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 1; j &lt;= nnumNeighbours; j++) {</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;      jatomID = neighHbondList[iatom][j]; <span class="comment">// Atom ID</span></div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;      <span class="comment">// Get the atom index for the vector nearest neighbour list</span></div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;      <span class="keyword">auto</span> it = yCloud-&gt;<a class="code" href="group__molSys.html#ga8e48a0ae066c2585e7320cdaa0cbc8db">idIndexMap</a>.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/unordered_map/find.html">find</a>(jatomID);</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;      <span class="keywordflow">if</span> (it != yCloud-&gt;<a class="code" href="group__molSys.html#ga8e48a0ae066c2585e7320cdaa0cbc8db">idIndexMap</a>.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/unordered_map/end.html">end</a>()) {</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;        jatomIndex = it-&gt;second;</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;      } <span class="comment">// found jatomIndex</span></div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;      <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;        <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::cerr</a> &lt;&lt; <span class="stringliteral">&quot;Panic induced!\n&quot;</span>;</div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;        <span class="keywordflow">return</span> fullGraph;</div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;      } <span class="comment">// jatomIndex not found</span></div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;      <span class="comment">// Update iNeigh</span></div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;      iNeigh.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(jatomIndex);</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;    } <span class="comment">// end of loop through nearest neighbours</span></div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;    <span class="comment">// -----</span></div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;    <span class="comment">// Update iVertex</span></div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;    iVertex.<a class="code" href="group__primitive.html#gaead86b6d47e9f9a77949fef59b8de27f">atomIndex</a> = iatom;</div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;    iVertex.<a class="code" href="group__primitive.html#gabbf40e41b84205035d4053be2180f6b2">neighListIndex</a> = iNeigh;</div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;    <span class="comment">// Add to the Graph object</span></div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;    fullGraph.<a class="code" href="group__primitive.html#gaf6aaf0f3cc1ab4d32e6095ff38398df9">pts</a>.push_back(iVertex);</div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;  } <span class="comment">// end of loop through every iatom</span></div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;  <span class="comment">// ------------------------------</span></div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160; </div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;  <span class="keywordflow">return</span> fullGraph;</div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;}</div>
 <div class="ttc" id="abasic_ostream_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::cerr</a></div></div>
 <div class="ttc" id="aend_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/unordered_map/end.html">std::unordered_map::end</a></div><div class="ttdeci">T end(T... args)</div></div>
 <div class="ttc" id="afind_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/unordered_map/find.html">std::unordered_map::find</a></div><div class="ttdeci">T find(T... args)</div></div>
-<div class="ttc" id="agroup__molSys_html_ga2bdcb9260bd83f313a2d27fcc6437ef1"><div class="ttname"><a href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">molSys::PointCloud::nop</a></div><div class="ttdeci">int nop</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00158">mol_sys.hpp:158</a></div></div>
-<div class="ttc" id="agroup__molSys_html_ga8e48a0ae066c2585e7320cdaa0cbc8db"><div class="ttname"><a href="group__molSys.html#ga8e48a0ae066c2585e7320cdaa0cbc8db">molSys::PointCloud::idIndexMap</a></div><div class="ttdeci">std::unordered_map&lt; int, int &gt; idIndexMap</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00161">mol_sys.hpp:161</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga2bdcb9260bd83f313a2d27fcc6437ef1"><div class="ttname"><a href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">molSys::PointCloud::nop</a></div><div class="ttdeci">int nop</div><div class="ttdoc">Current frame number.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00158">mol_sys.hpp:158</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga8e48a0ae066c2585e7320cdaa0cbc8db"><div class="ttname"><a href="group__molSys.html#ga8e48a0ae066c2585e7320cdaa0cbc8db">molSys::PointCloud::idIndexMap</a></div><div class="ttdeci">std::unordered_map&lt; int, int &gt; idIndexMap</div><div class="ttdoc">xlo, ylo, zlo</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00161">mol_sys.hpp:161</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -540,7 +554,9 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Removes non-SP rings (according to the Franzblau shortest path criterion) from the rings vector of vectors member n the <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> object. The rings vector of vectors contains indices and NOT atom IDs. This function calls <a class="el" href="group__primitive.html#gad5a66be66869860a9bd875535cd2671f">primitive::shortestPath</a> internally to calculate the shortest path. </p><dl class="params"><dt>Parameters</dt><dd>
+
+<p>Removes the non-SP rings, using the Franzblau shortest path criterion. </p>
+<p>Removes non-SP rings (according to the Franzblau shortest path criterion) from the rings vector of vectors member n the <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> object. The rings vector of vectors contains indices and NOT atom IDs. This function calls <a class="el" href="group__primitive.html#gad5a66be66869860a9bd875535cd2671f" title="Calculates the shortest path.">primitive::shortestPath</a> internally to calculate the shortest path. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">fullGraph</td><td>The <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> object for the current frame. This also contains the rings vector of vectors, which has all possible rings (possibly inclding non-SP rings). </td></tr>
   </table>
@@ -548,81 +564,81 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> object for the current frame. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8cpp_source.html#l00308">308</a> of file <a class="el" href="franzblau_8cpp_source.html">franzblau.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;                                                                    {</div>
-<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;  <span class="keywordtype">int</span> nVertices = fullGraph-&gt;<a class="code" href="group__primitive.html#gaf6aaf0f3cc1ab4d32e6095ff38398df9">pts</a>.size();  <span class="comment">// Number of vertices in the graph</span></div>
-<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;  <span class="keywordtype">int</span> nRings = fullGraph-&gt;<a class="code" href="group__primitive.html#gac591e6693cef9a022fdbc24b8596bfd3">rings</a>.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>();   <span class="comment">// Number of rings</span></div>
-<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;bool&gt;</a> ringsToRemove;  <span class="comment">// Vector containing the logical values for</span></div>
-<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;                                    <span class="comment">// removal of the current ring index</span></div>
-<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a> currentRing;     <span class="comment">// Current ring being evaluated</span></div>
-<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;  <span class="keywordtype">int</span> ringSize;                     <span class="comment">// Length of the current ring</span></div>
-<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;  <span class="keywordtype">bool</span> removeRing;  <span class="comment">// Logical for removing the current ring (true) or not</span></div>
-<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;std::vector&lt;int&gt;</a>&gt;</div>
-<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;      emptyTempRings;  <span class="comment">// Empty vector of vectors to swap</span></div>
-<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;std::vector&lt;int&gt;</a>&gt;</div>
-<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;      primitiveRings;  <span class="comment">// Vector of vectors of rings after removing non SP rings</span></div>
-<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;  <span class="keywordtype">int</span> currentV;        <span class="comment">// Current vertex</span></div>
-<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;  <span class="keywordtype">int</span> currentN;        <span class="comment">// Current neighbour</span></div>
-<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;  <span class="keywordtype">int</span> dist_r;          <span class="comment">// Distance over ring</span></div>
-<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;  <span class="keywordtype">int</span> dist_g;          <span class="comment">// Distance over the entire graph</span></div>
-<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;  <span class="keywordtype">int</span> d_jk;            <span class="comment">// Absolute difference between j and k</span></div>
-<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a> path;     <span class="comment">// Vector containing a path</span></div>
-<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a> visited;  <span class="comment">// Vector containing the visited points</span></div>
-<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;  <span class="comment">// -------------------</span></div>
-<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;  <span class="comment">// Make sure all the vertices are in the graph before removing non-SP rings</span></div>
-<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iVer = 0; iVer &lt; nVertices; iVer++) {</div>
-<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;    fullGraph-&gt;<a class="code" href="group__primitive.html#gaf6aaf0f3cc1ab4d32e6095ff38398df9">pts</a>[iVer].inGraph = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;  }  <span class="comment">// end of loop through every vertex</span></div>
-<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;  <span class="comment">// -------------------</span></div>
-<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;  <span class="comment">// Loop through every ring</span></div>
-<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iRing = 0; iRing &lt; nRings; iRing++) {</div>
-<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;    currentRing = fullGraph-&gt;<a class="code" href="group__primitive.html#gac591e6693cef9a022fdbc24b8596bfd3">rings</a>[iRing];  <span class="comment">// Current ring</span></div>
-<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;    ringSize = currentRing.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>();          <span class="comment">// Length of the current ring</span></div>
-<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;    removeRing = <span class="keyword">false</span>;                     <span class="comment">// init</span></div>
-<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;    <span class="comment">// Loop through every j^th vertex</span></div>
-<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> jVer = 0; jVer &lt; ringSize; jVer++) {</div>
-<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;      <span class="comment">// connect with all other, skip j-j (distance=0) and j-(j+1) (nearest</span></div>
-<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;      <span class="comment">// neighbors)</span></div>
-<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> kVer = jVer + 2; kVer &lt; ringSize; kVer++) {</div>
-<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;        <span class="comment">// If not remove</span></div>
-<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;        <span class="keywordflow">if</span> (!removeRing) {</div>
-<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;          currentV = currentRing[jVer];  <span class="comment">// current &#39;vertex&#39;</span></div>
-<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;          currentN = currentRing[kVer];  <span class="comment">// Current &#39;neighbour&#39;</span></div>
-<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;          d_jk = std::abs(jVer - kVer);</div>
-<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;          dist_r = <a class="codeRef" href="http://en.cppreference.com/w/cpp/algorithm/min.html">std::min</a>(d_jk, std::abs(d_jk - ringSize)) +</div>
-<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;                   1;    <span class="comment">// Distance over the ring</span></div>
-<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;          path.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/clear.html">clear</a>();  <span class="comment">// init</span></div>
-<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;          visited.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/clear.html">clear</a>();</div>
-<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;          <span class="comment">// Call shortest path function</span></div>
-<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;          <a class="code" href="group__primitive.html#gad5a66be66869860a9bd875535cd2671f">primitive::shortestPath</a>(fullGraph, currentV, currentN, &amp;path,</div>
-<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;                                  &amp;visited, dist_r, 0);</div>
-<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;          dist_g = path.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>();  <span class="comment">// Length of the path over the graph</span></div>
-<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;          <span class="keywordflow">if</span> (dist_g &lt; dist_r) {</div>
-<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;            removeRing = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;          }  <span class="comment">// Decide whether to keep or remove the ring</span></div>
-<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;        }    <span class="comment">// If ring is not to be removed</span></div>
-<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;      }      <span class="comment">// end of loop through k^th vertex</span></div>
-<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;    }        <span class="comment">// end of loop through j^th vertex</span></div>
-<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;    <span class="comment">// Update bool value for removal of currentRing</span></div>
-<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;    ringsToRemove.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(removeRing);</div>
-<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;  }  <span class="comment">// end of loop through rings</span></div>
-<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;  <span class="comment">// -------------------</span></div>
-<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;  <span class="comment">// Remove all the rings whose indices are given in the ringsToRemove vector</span></div>
-<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; ringsToRemove.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>(); i++) {</div>
-<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;    <span class="keywordflow">if</span> (!ringsToRemove[i]) {</div>
-<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;      primitiveRings.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(fullGraph-&gt;<a class="code" href="group__primitive.html#gac591e6693cef9a022fdbc24b8596bfd3">rings</a>[i]);</div>
-<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;    }  <span class="comment">// updates new copy</span></div>
-<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;  }    <span class="comment">// end of loop through ringsToRemove</span></div>
-<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;  <span class="comment">// -------------------</span></div>
-<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;  <span class="comment">// Update the graph rings with the primitiveRings</span></div>
-<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;  emptyTempRings.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/swap.html">swap</a>(fullGraph-&gt;<a class="code" href="group__primitive.html#gac591e6693cef9a022fdbc24b8596bfd3">rings</a>);</div>
-<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;  fullGraph-&gt;<a class="code" href="group__primitive.html#gac591e6693cef9a022fdbc24b8596bfd3">rings</a> = primitiveRings;</div>
-<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;  <span class="comment">// -------------------</span></div>
-<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;  <span class="keywordflow">return</span> *fullGraph;</div>
-<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;}</div>
-<div class="ttc" id="agroup__primitive_html_gac591e6693cef9a022fdbc24b8596bfd3"><div class="ttname"><a href="group__primitive.html#gac591e6693cef9a022fdbc24b8596bfd3">primitive::Graph::rings</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; rings</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8hpp_source.html#l00099">franzblau.hpp:99</a></div></div>
-<div class="ttc" id="agroup__primitive_html_gad5a66be66869860a9bd875535cd2671f"><div class="ttname"><a href="group__primitive.html#gad5a66be66869860a9bd875535cd2671f">primitive::shortestPath</a></div><div class="ttdeci">int shortestPath(Graph *fullGraph, int v, int goal, std::vector&lt; int &gt; *path, std::vector&lt; int &gt; *visited, int maxDepth, int depth=1)</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8cpp_source.html#l00397">franzblau.cpp:397</a></div></div>
+<p class="definition">Definition at line <a class="el" href="franzblau_8cpp_source.html#l00293">293</a> of file <a class="el" href="franzblau_8cpp_source.html">franzblau.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;                                                                    {</div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;  <span class="keywordtype">int</span> nVertices = fullGraph-&gt;<a class="code" href="group__primitive.html#gaf6aaf0f3cc1ab4d32e6095ff38398df9">pts</a>.size(); <span class="comment">// Number of vertices in the graph</span></div>
+<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;  <span class="keywordtype">int</span> nRings = fullGraph-&gt;<a class="code" href="group__primitive.html#gac591e6693cef9a022fdbc24b8596bfd3">rings</a>.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>();  <span class="comment">// Number of rings</span></div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;bool&gt;</a> ringsToRemove; <span class="comment">// Vector containing the logical values for</span></div>
+<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;                                   <span class="comment">// removal of the current ring index</span></div>
+<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a> currentRing;    <span class="comment">// Current ring being evaluated</span></div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;  <span class="keywordtype">int</span> ringSize;                    <span class="comment">// Length of the current ring</span></div>
+<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;  <span class="keywordtype">bool</span> removeRing; <span class="comment">// Logical for removing the current ring (true) or not</span></div>
+<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;std::vector&lt;int&gt;</a>&gt;</div>
+<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;      emptyTempRings; <span class="comment">// Empty vector of vectors to swap</span></div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;std::vector&lt;int&gt;</a>&gt;</div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;      primitiveRings; <span class="comment">// Vector of vectors of rings after removing non SP rings</span></div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;  <span class="keywordtype">int</span> currentV;       <span class="comment">// Current vertex</span></div>
+<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;  <span class="keywordtype">int</span> currentN;       <span class="comment">// Current neighbour</span></div>
+<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;  <span class="keywordtype">int</span> dist_r;         <span class="comment">// Distance over ring</span></div>
+<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;  <span class="keywordtype">int</span> dist_g;         <span class="comment">// Distance over the entire graph</span></div>
+<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;  <span class="keywordtype">int</span> d_jk;           <span class="comment">// Absolute difference between j and k</span></div>
+<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a> path;    <span class="comment">// Vector containing a path</span></div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a> visited; <span class="comment">// Vector containing the visited points</span></div>
+<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;  <span class="comment">// -------------------</span></div>
+<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;  <span class="comment">// Make sure all the vertices are in the graph before removing non-SP rings</span></div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iVer = 0; iVer &lt; nVertices; iVer++) {</div>
+<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;    fullGraph-&gt;<a class="code" href="group__primitive.html#gaf6aaf0f3cc1ab4d32e6095ff38398df9">pts</a>[iVer].inGraph = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;  } <span class="comment">// end of loop through every vertex</span></div>
+<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;  <span class="comment">// -------------------</span></div>
+<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;  <span class="comment">// Loop through every ring</span></div>
+<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iRing = 0; iRing &lt; nRings; iRing++) {</div>
+<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;    currentRing = fullGraph-&gt;<a class="code" href="group__primitive.html#gac591e6693cef9a022fdbc24b8596bfd3">rings</a>[iRing]; <span class="comment">// Current ring</span></div>
+<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;    ringSize = currentRing.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>();         <span class="comment">// Length of the current ring</span></div>
+<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;    removeRing = <span class="keyword">false</span>;                    <span class="comment">// init</span></div>
+<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;    <span class="comment">// Loop through every j^th vertex</span></div>
+<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> jVer = 0; jVer &lt; ringSize; jVer++) {</div>
+<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;      <span class="comment">// connect with all other, skip j-j (distance=0) and j-(j+1) (nearest</span></div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;      <span class="comment">// neighbors)</span></div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> kVer = jVer + 2; kVer &lt; ringSize; kVer++) {</div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;        <span class="comment">// If not remove</span></div>
+<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;        <span class="keywordflow">if</span> (!removeRing) {</div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;          currentV = currentRing[jVer]; <span class="comment">// current &#39;vertex&#39;</span></div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;          currentN = currentRing[kVer]; <span class="comment">// Current &#39;neighbour&#39;</span></div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;          d_jk = std::abs(jVer - kVer);</div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;          dist_r = <a class="codeRef" href="http://en.cppreference.com/w/cpp/algorithm/min.html">std::min</a>(d_jk, std::abs(d_jk - ringSize)) +</div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;                   1;   <span class="comment">// Distance over the ring</span></div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;          path.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/clear.html">clear</a>(); <span class="comment">// init</span></div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;          visited.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/clear.html">clear</a>();</div>
+<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;          <span class="comment">// Call shortest path function</span></div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;          <a class="code" href="group__primitive.html#gad5a66be66869860a9bd875535cd2671f">primitive::shortestPath</a>(fullGraph, currentV, currentN, &amp;path,</div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;                                  &amp;visited, dist_r, 0);</div>
+<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;          dist_g = path.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>(); <span class="comment">// Length of the path over the graph</span></div>
+<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;          <span class="keywordflow">if</span> (dist_g &lt; dist_r) {</div>
+<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;            removeRing = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;          } <span class="comment">// Decide whether to keep or remove the ring</span></div>
+<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;        }   <span class="comment">// If ring is not to be removed</span></div>
+<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;      }     <span class="comment">// end of loop through k^th vertex</span></div>
+<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;    }       <span class="comment">// end of loop through j^th vertex</span></div>
+<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;    <span class="comment">// Update bool value for removal of currentRing</span></div>
+<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;    ringsToRemove.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(removeRing);</div>
+<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;  } <span class="comment">// end of loop through rings</span></div>
+<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;  <span class="comment">// -------------------</span></div>
+<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;  <span class="comment">// Remove all the rings whose indices are given in the ringsToRemove vector</span></div>
+<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; ringsToRemove.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>(); i++) {</div>
+<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;    <span class="keywordflow">if</span> (!ringsToRemove[i]) {</div>
+<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;      primitiveRings.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(fullGraph-&gt;<a class="code" href="group__primitive.html#gac591e6693cef9a022fdbc24b8596bfd3">rings</a>[i]);</div>
+<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;    } <span class="comment">// updates new copy</span></div>
+<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;  }   <span class="comment">// end of loop through ringsToRemove</span></div>
+<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;  <span class="comment">// -------------------</span></div>
+<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;  <span class="comment">// Update the graph rings with the primitiveRings</span></div>
+<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;  emptyTempRings.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/swap.html">swap</a>(fullGraph-&gt;<a class="code" href="group__primitive.html#gac591e6693cef9a022fdbc24b8596bfd3">rings</a>);</div>
+<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;  fullGraph-&gt;<a class="code" href="group__primitive.html#gac591e6693cef9a022fdbc24b8596bfd3">rings</a> = primitiveRings;</div>
+<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;  <span class="comment">// -------------------</span></div>
+<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;  <span class="keywordflow">return</span> *fullGraph;</div>
+<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;}</div>
+<div class="ttc" id="agroup__primitive_html_gac591e6693cef9a022fdbc24b8596bfd3"><div class="ttname"><a href="group__primitive.html#gac591e6693cef9a022fdbc24b8596bfd3">primitive::Graph::rings</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; rings</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8hpp_source.html#l00098">franzblau.hpp:98</a></div></div>
+<div class="ttc" id="agroup__primitive_html_gad5a66be66869860a9bd875535cd2671f"><div class="ttname"><a href="group__primitive.html#gad5a66be66869860a9bd875535cd2671f">primitive::shortestPath</a></div><div class="ttdeci">int shortestPath(Graph *fullGraph, int v, int goal, std::vector&lt; int &gt; *path, std::vector&lt; int &gt; *visited, int maxDepth, int depth=1)</div><div class="ttdoc">Calculates the shortest path.</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8cpp_source.html#l00383">franzblau.cpp:383</a></div></div>
 <div class="ttc" id="amin_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/algorithm/min.html">std::min</a></div><div class="ttdeci">T min(T... args)</div></div>
 </div><!-- fragment -->
 </div>
@@ -652,7 +668,8 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Re-fills the neighbour lists of a <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> object from a row-ordered neighbour list (which is BY INDEX not IDs). Some vertices may have been removed while rings were generated using the backtracking algorithm (<a class="el" href="group__primitive.html#gae91300e341786a54ce73c0f2e9d4f5d5">primitive::findRings</a>). Also, the indices in the neighbour list in the <a class="el" href="structprimitive_1_1Vertex.html" title="This is a collection of elements, for each point, required for graph traversal.">Vertex</a> object are not the atom IDs. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Re-fills the neighbour lists of a graph object from a neighbour list of INDICES NOT ATOM IDs created before. NOTE: the neighbourListIndex contains the indices and NOT the atom IDs as in the neighbour list</p>
+<p>Re-fills the neighbour lists of a <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> object from a row-ordered neighbour list (which is BY INDEX not IDs). Some vertices may have been removed while rings were generated using the backtracking algorithm (<a class="el" href="group__primitive.html#gae91300e341786a54ce73c0f2e9d4f5d5" title="Main function that searches for all rings.">primitive::findRings</a>). Also, the indices in the neighbour list in the <a class="el" href="structprimitive_1_1Vertex.html" title="This is a collection of elements, for each point, required for graph traversal.">Vertex</a> object are not the atom IDs. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">fullGraph</td><td>The <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> object for the current frame. The neighbour lists of component <a class="el" href="structprimitive_1_1Vertex.html" title="This is a collection of elements, for each point, required for graph traversal.">Vertex</a> objects may have been depleted. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">nList</td><td>The row-ordered neighbour list, containing atom indices (according to the input PointCloud). </td></tr>
@@ -661,19 +678,19 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> object for the current frame. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8cpp_source.html#l00284">284</a> of file <a class="el" href="franzblau_8cpp_source.html">franzblau.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;                                                       {</div>
-<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;  <span class="comment">// ------------------------------</span></div>
-<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;  <span class="comment">// Loop through every point in nList</span></div>
-<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; nList.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>(); i++) {</div>
-<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;    <span class="comment">// neighListIndex is simply the i^th row of nList</span></div>
-<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;    <span class="comment">// Update the neighListIndex list in the graph object</span></div>
-<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;    fullGraph-&gt;pts[i].neighListIndex = nList[i];</div>
-<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;  }  <span class="comment">// end of loop through iatom</span></div>
-<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160; </div>
-<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;  <span class="keywordflow">return</span> *fullGraph;</div>
-<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="franzblau_8cpp_source.html#l00269">269</a> of file <a class="el" href="franzblau_8cpp_source.html">franzblau.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;                                                                    {</div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;  <span class="comment">// ------------------------------</span></div>
+<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;  <span class="comment">// Loop through every point in nList</span></div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; nList.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>(); i++) {</div>
+<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;    <span class="comment">// neighListIndex is simply the i^th row of nList</span></div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;    <span class="comment">// Update the neighListIndex list in the graph object</span></div>
+<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;    fullGraph-&gt;pts[i].neighListIndex = nList[i];</div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;  } <span class="comment">// end of loop through iatom</span></div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160; </div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;  <span class="keywordflow">return</span> *fullGraph;</div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -702,9 +719,10 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Returns a vector of vectors containing the rings (of all sizes), by atom index, given the neighbour list also by index (preferably the hydrogen-bonded neighbour list). Internally uses the <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> and <a class="el" href="structprimitive_1_1Vertex.html" title="This is a collection of elements, for each point, required for graph traversal.">Vertex</a> objects.</p>
 <p>The vector of vector of rings, by index, is returned, given a neighbour list (also by index) and the maximum depth upto which rings will be searched, using the Franzblau algorithm for shortest paths. This function is registered in Lua and exposed to the user. This internally calls the functions:</p><ul>
-<li><a class="el" href="group__primitive.html#ga4a830b09cc9c276bf2f8d80498202cba">primitive::countAllRingsFromIndex</a> (to generate all rings)</li>
-<li><a class="el" href="group__primitive.html#ga909ca1fa60966421281d40f4ad8cc653">primitive::removeNonSPrings</a> (to only get the primitive rings) <dl class="params"><dt>Parameters</dt><dd>
+<li><a class="el" href="group__primitive.html#ga4a830b09cc9c276bf2f8d80498202cba" title="Creates a vector of vectors of all possible rings.">primitive::countAllRingsFromIndex</a> (to generate all rings)</li>
+<li><a class="el" href="group__primitive.html#ga909ca1fa60966421281d40f4ad8cc653" title="Removes the non-SP rings, using the Franzblau shortest path criterion.">primitive::removeNonSPrings</a> (to only get the primitive rings) <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">nList</td><td>Row-ordered neighbour list by index (and NOT the atom ID) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">maxDepth</td><td>The maximum depth upto which rings will be searched. This means that rings larger than maxDepth in length will not be generated. </td></tr>
@@ -715,25 +733,25 @@ Variables</h2></td></tr>
 </li>
 </ul>
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8cpp_source.html#l00035">35</a> of file <a class="el" href="franzblau_8cpp_source.html">franzblau.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;                                                   {</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;  <a class="code" href="structprimitive_1_1Graph.html">primitive::Graph</a> fullGraph;  <span class="comment">// Graph object, contains the connectivity</span></div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;                               <span class="comment">// information from the neighbourlist</span></div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;  <span class="comment">// Find all possible rings, using backtracking. This may contain non-primitive</span></div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;  <span class="comment">// rings as well.</span></div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;  fullGraph = <a class="code" href="group__primitive.html#ga4a830b09cc9c276bf2f8d80498202cba">primitive::countAllRingsFromIndex</a>(nList, maxDepth);</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160; </div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;  <span class="comment">// Remove all non-SP rings using the Franzblau algorithm.</span></div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;  fullGraph = <a class="code" href="group__primitive.html#ga909ca1fa60966421281d40f4ad8cc653">primitive::removeNonSPrings</a>(&amp;fullGraph);</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;  <span class="comment">// The rings vector of vectors inside the fullGraph graph object is the ring</span></div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;  <span class="comment">// network information we want</span></div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;  <span class="keywordflow">return</span> fullGraph.<a class="code" href="group__primitive.html#gac591e6693cef9a022fdbc24b8596bfd3">rings</a>;</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;}</div>
-<div class="ttc" id="agroup__primitive_html_ga4a830b09cc9c276bf2f8d80498202cba"><div class="ttname"><a href="group__primitive.html#ga4a830b09cc9c276bf2f8d80498202cba">primitive::countAllRingsFromIndex</a></div><div class="ttdeci">Graph countAllRingsFromIndex(std::vector&lt; std::vector&lt; int &gt;&gt; neighHbondList, int maxDepth)</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8cpp_source.html#l00067">franzblau.cpp:67</a></div></div>
-<div class="ttc" id="agroup__primitive_html_ga909ca1fa60966421281d40f4ad8cc653"><div class="ttname"><a href="group__primitive.html#ga909ca1fa60966421281d40f4ad8cc653">primitive::removeNonSPrings</a></div><div class="ttdeci">Graph removeNonSPrings(Graph *fullGraph)</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8cpp_source.html#l00308">franzblau.cpp:308</a></div></div>
+<p class="definition">Definition at line <a class="el" href="franzblau_8cpp_source.html#l00018">18</a> of file <a class="el" href="franzblau_8cpp_source.html">franzblau.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;                                                                    {</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;  <a class="code" href="structprimitive_1_1Graph.html">primitive::Graph</a> fullGraph; <span class="comment">// Graph object, contains the connectivity</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;                              <span class="comment">// information from the neighbourlist</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160; </div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;  <span class="comment">// Find all possible rings, using backtracking. This may contain non-primitive</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;  <span class="comment">// rings as well.</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;  fullGraph = <a class="code" href="group__primitive.html#ga4a830b09cc9c276bf2f8d80498202cba">primitive::countAllRingsFromIndex</a>(nList, maxDepth);</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;  <span class="comment">// Remove all non-SP rings using the Franzblau algorithm.</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;  fullGraph = <a class="code" href="group__primitive.html#ga909ca1fa60966421281d40f4ad8cc653">primitive::removeNonSPrings</a>(&amp;fullGraph);</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;  <span class="comment">// The rings vector of vectors inside the fullGraph graph object is the ring</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;  <span class="comment">// network information we want</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;  <span class="keywordflow">return</span> fullGraph.<a class="code" href="group__primitive.html#gac591e6693cef9a022fdbc24b8596bfd3">rings</a>;</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;}</div>
+<div class="ttc" id="agroup__primitive_html_ga4a830b09cc9c276bf2f8d80498202cba"><div class="ttname"><a href="group__primitive.html#ga4a830b09cc9c276bf2f8d80498202cba">primitive::countAllRingsFromIndex</a></div><div class="ttdeci">Graph countAllRingsFromIndex(std::vector&lt; std::vector&lt; int &gt;&gt; neighHbondList, int maxDepth)</div><div class="ttdoc">Creates a vector of vectors of all possible rings.</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8cpp_source.html#l00050">franzblau.cpp:50</a></div></div>
+<div class="ttc" id="agroup__primitive_html_ga909ca1fa60966421281d40f4ad8cc653"><div class="ttname"><a href="group__primitive.html#ga909ca1fa60966421281d40f4ad8cc653">primitive::removeNonSPrings</a></div><div class="ttdeci">Graph removeNonSPrings(Graph *fullGraph)</div><div class="ttdoc">Removes the non-SP rings, using the Franzblau shortest path criterion.</div><div class="ttdef"><b>Definition:</b> <a href="franzblau_8cpp_source.html#l00293">franzblau.cpp:293</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -792,6 +810,8 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Calculates the shortest path. </p>
 <p>Calculates the shortest path for a particular ring. This function uses recursion. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">fullGraph</td><td>The <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> object for the current frame. </td></tr>
@@ -800,52 +820,52 @@ Variables</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>The path or length of the visited points (This basically contains all the indices in the visited vector, excluding the current vertex). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">visited</td><td>This vector contains the indices of the vertices visited or checked (for book-keeping). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">maxDepth</td><td>The maximum depth or maximum length of the rings. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">depth</td><td>The current depth. When this function is called from <a class="el" href="group__primitive.html#ga909ca1fa60966421281d40f4ad8cc653">primitive::removeNonSPrings</a>, the depth is initialized as 0. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">depth</td><td>The current depth. When this function is called from <a class="el" href="group__primitive.html#ga909ca1fa60966421281d40f4ad8cc653" title="Removes the non-SP rings, using the Franzblau shortest path criterion.">primitive::removeNonSPrings</a>, the depth is initialized as 0. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> object for the current frame. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8cpp_source.html#l00397">397</a> of file <a class="el" href="franzblau_8cpp_source.html">franzblau.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;                                                     {</div>
-<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;  <span class="keywordtype">int</span> len_path = 0;    <span class="comment">// Length of the path</span></div>
-<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;  <span class="keywordtype">int</span> nnumNeighbours;  <span class="comment">// Number of neighbours for a particular v</span></div>
-<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;  <span class="keywordtype">int</span> n;               <span class="comment">// Index of the nearest neighbour of v</span></div>
-<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;  <span class="comment">// Start the search for the shortest path</span></div>
-<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;  <span class="keywordflow">if</span> (depth &lt; maxDepth) {</div>
-<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;    depth += 1;  <span class="comment">// One layer below</span></div>
-<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;    (*visited).push_back(</div>
-<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;        v);  <span class="comment">// Add the current vertex to the path (visited points)</span></div>
-<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;    <span class="comment">//</span></div>
-<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;    <span class="keywordflow">if</span> (v == goal) {</div>
-<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;      len_path = (*path).size();  <span class="comment">// Path of the length of visited points</span></div>
-<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;      <span class="comment">// If the current path is shorter OR this is the first path found</span></div>
-<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;      <span class="keywordflow">if</span> (depth &lt; len_path || len_path == 0) {</div>
-<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;        (*path) = (*visited);</div>
-<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;        maxDepth = depth;</div>
-<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;      }  <span class="comment">// Current path is the shortest</span></div>
-<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;    }    <span class="comment">// Goal reached</span></div>
-<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;    <span class="comment">// Recursive calls to function</span></div>
-<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;    <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;      nnumNeighbours = fullGraph-&gt;pts[v].neighListIndex.size();</div>
-<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;      <span class="comment">// Search all the neighbours</span></div>
-<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; nnumNeighbours; j++) {</div>
-<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;        n = fullGraph-&gt;pts[v].neighListIndex[j];  <span class="comment">// Index of nearest neighbour</span></div>
-<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;        <span class="comment">// If n has not already been searched:</span></div>
-<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;        <span class="keywordflow">if</span> (fullGraph-&gt;pts[n].inGraph == <span class="keyword">true</span>) {</div>
-<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;          fullGraph-&gt;pts[n].inGraph = <span class="keyword">false</span>;  <span class="comment">// Set to false</span></div>
-<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;          <a class="code" href="group__primitive.html#gad5a66be66869860a9bd875535cd2671f">primitive::shortestPath</a>(fullGraph, n, goal, path, visited, maxDepth,</div>
-<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;                                  depth);    <span class="comment">// Recursive call</span></div>
-<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;          fullGraph-&gt;pts[n].inGraph = <span class="keyword">true</span>;  <span class="comment">// Put back in the graph</span></div>
-<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;        }  <span class="comment">// If n is in the graph, call recursively</span></div>
-<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;      }    <span class="comment">// End of loop over all neighbours</span></div>
-<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;    }      <span class="comment">// Goal not reached</span></div>
-<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;    <span class="comment">//</span></div>
-<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;    <span class="comment">// Pop the vector</span></div>
-<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;    (*visited).pop_back();</div>
-<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;  }  <span class="comment">// for depth less than maxDepth</span></div>
-<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;  <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="franzblau_8cpp_source.html#l00383">383</a> of file <a class="el" href="franzblau_8cpp_source.html">franzblau.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;                                                     {</div>
+<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;  <span class="keywordtype">int</span> len_path = 0;   <span class="comment">// Length of the path</span></div>
+<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;  <span class="keywordtype">int</span> nnumNeighbours; <span class="comment">// Number of neighbours for a particular v</span></div>
+<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;  <span class="keywordtype">int</span> n;              <span class="comment">// Index of the nearest neighbour of v</span></div>
+<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;  <span class="comment">// Start the search for the shortest path</span></div>
+<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;  <span class="keywordflow">if</span> (depth &lt; maxDepth) {</div>
+<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;    depth += 1; <span class="comment">// One layer below</span></div>
+<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;    (*visited).push_back(</div>
+<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;        v); <span class="comment">// Add the current vertex to the path (visited points)</span></div>
+<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;    <span class="comment">//</span></div>
+<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;    <span class="keywordflow">if</span> (v == goal) {</div>
+<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;      len_path = (*path).size(); <span class="comment">// Path of the length of visited points</span></div>
+<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;      <span class="comment">// If the current path is shorter OR this is the first path found</span></div>
+<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;      <span class="keywordflow">if</span> (depth &lt; len_path || len_path == 0) {</div>
+<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;        (*path) = (*visited);</div>
+<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;        maxDepth = depth;</div>
+<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;      } <span class="comment">// Current path is the shortest</span></div>
+<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;    }   <span class="comment">// Goal reached</span></div>
+<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;    <span class="comment">// Recursive calls to function</span></div>
+<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;    <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;      nnumNeighbours = fullGraph-&gt;pts[v].neighListIndex.size();</div>
+<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;      <span class="comment">// Search all the neighbours</span></div>
+<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; nnumNeighbours; j++) {</div>
+<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;        n = fullGraph-&gt;pts[v].neighListIndex[j]; <span class="comment">// Index of nearest neighbour</span></div>
+<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;        <span class="comment">// If n has not already been searched:</span></div>
+<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;        <span class="keywordflow">if</span> (fullGraph-&gt;pts[n].inGraph == <span class="keyword">true</span>) {</div>
+<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;          fullGraph-&gt;pts[n].inGraph = <span class="keyword">false</span>; <span class="comment">// Set to false</span></div>
+<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;          <a class="code" href="group__primitive.html#gad5a66be66869860a9bd875535cd2671f">primitive::shortestPath</a>(fullGraph, n, goal, path, visited, maxDepth,</div>
+<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;                                  depth);   <span class="comment">// Recursive call</span></div>
+<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;          fullGraph-&gt;pts[n].inGraph = <span class="keyword">true</span>; <span class="comment">// Put back in the graph</span></div>
+<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;        } <span class="comment">// If n is in the graph, call recursively</span></div>
+<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;      }   <span class="comment">// End of loop over all neighbours</span></div>
+<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;    }     <span class="comment">// Goal not reached</span></div>
+<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;    <span class="comment">//</span></div>
+<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;    <span class="comment">// Pop the vector</span></div>
+<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;    (*visited).pop_back();</div>
+<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;  } <span class="comment">// for depth less than maxDepth</span></div>
+<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;  <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -862,7 +882,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00078">78</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00077">77</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
 
 </div>
 </div>
@@ -879,8 +899,9 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <b>Initial value:</b><div class="fragment"><div class="line">=</div>
 <div class="line">      <span class="keyword">true</span></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00081">81</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
+</div><!-- fragment --><p>Contains the INDICES (not the atomIDs) of the neighbouring vertices </p>
+
+<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00080">80</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
 
 </div>
 </div>
@@ -896,7 +917,9 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00079">79</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
+<p>This is the index according to pointCloud. </p>
+
+<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00078">78</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
 
 </div>
 </div>
@@ -912,7 +935,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00096">96</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00095">95</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
 
 </div>
 </div>
@@ -927,8 +950,9 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Collection of vertices. The index of each should be the same as that in pointCloud </p>
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00099">99</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00098">98</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
 
 </div>
 </div>

@@ -104,16 +104,16 @@ $(function() {
 <div class="title">pntCorrespondence.hpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;math.h&gt;</code><br />
-<code>#include &lt;sys/stat.h&gt;</code><br />
-<code>#include &lt;algorithm&gt;</code><br />
+<div class="textblock"><code>#include &lt;algorithm&gt;</code><br />
 <code>#include &lt;array&gt;</code><br />
 <code>#include &lt;fstream&gt;</code><br />
 <code>#include &lt;iostream&gt;</code><br />
 <code>#include &lt;iterator&gt;</code><br />
+<code>#include &lt;math.h&gt;</code><br />
 <code>#include &lt;memory&gt;</code><br />
 <code>#include &lt;sstream&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
+<code>#include &lt;sys/stat.h&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 <code>#include &lt;eigen3/Eigen/Core&gt;</code><br />
 <code>#include &lt;<a class="el" href="cage_8hpp_source.html">cage.hpp</a>&gt;</code><br />
@@ -163,8 +163,10 @@ Functions</h2></td></tr>
 <tr class="memitem:a332141ec965df89d231a1def4dc3f5d7"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepntToPnt.html#a332141ec965df89d231a1def4dc3f5d7">pntToPnt::getPointSetCage</a> (<a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">ring::strucType</a> type)</td></tr>
 <tr class="separator:a332141ec965df89d231a1def4dc3f5d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8140eb2ad1dfb9d08e4e917dd14d5424"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepntToPnt.html#a8140eb2ad1dfb9d08e4e917dd14d5424">pntToPnt::relOrderHC</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; basal1, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; basal2, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; nList, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; *matchedBasal1, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; *matchedBasal2)</td></tr>
+<tr class="memdesc:a8140eb2ad1dfb9d08e4e917dd14d5424"><td class="mdescLeft">&#160;</td><td class="mdescRight">Matches the order of the basal rings of an HC or a potential HC.  <a href="namespacepntToPnt.html#a8140eb2ad1dfb9d08e4e917dd14d5424">More...</a><br /></td></tr>
 <tr class="separator:a8140eb2ad1dfb9d08e4e917dd14d5424"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a804eb495f58fd5868858cc46480c3425"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepntToPnt.html#a804eb495f58fd5868858cc46480c3425">pntToPnt::relOrderDDC</a> (int index, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; rings, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; cageList)</td></tr>
+<tr class="memdesc:a804eb495f58fd5868858cc46480c3425"><td class="mdescLeft">&#160;</td><td class="mdescRight">Matches the order of the basal rings of an DDC or a potential HC.  <a href="namespacepntToPnt.html#a804eb495f58fd5868858cc46480c3425">More...</a><br /></td></tr>
 <tr class="separator:a804eb495f58fd5868858cc46480c3425"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a896e8ed3ac4436156eac99b12e12c255"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepntToPnt.html#a896e8ed3ac4436156eac99b12e12c255">pntToPnt::changeHexCageOrder</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; basal1, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; basal2, int startingIndex=0)</td></tr>
 <tr class="separator:a896e8ed3ac4436156eac99b12e12c255"><td class="memSeparator" colspan="2">&#160;</td></tr>

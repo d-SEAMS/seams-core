@@ -108,16 +108,16 @@ $(function() {
 
 <p>File for generating shortest-path rings according to the Franzblau algorithm.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;math.h&gt;</code><br />
-<code>#include &lt;sys/stat.h&gt;</code><br />
-<code>#include &lt;algorithm&gt;</code><br />
+<div class="textblock"><code>#include &lt;algorithm&gt;</code><br />
 <code>#include &lt;array&gt;</code><br />
 <code>#include &lt;fstream&gt;</code><br />
 <code>#include &lt;iostream&gt;</code><br />
 <code>#include &lt;iterator&gt;</code><br />
+<code>#include &lt;math.h&gt;</code><br />
 <code>#include &lt;memory&gt;</code><br />
 <code>#include &lt;sstream&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
+<code>#include &lt;sys/stat.h&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 <code>#include &lt;<a class="el" href="cage_8hpp_source.html">cage.hpp</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>&gt;</code><br />
@@ -166,19 +166,23 @@ Functions</h2></td></tr>
 <tr class="memitem:ga2948e7d5ac22580945c3bed8b90f4937"><td class="memItemLeft" align="right" valign="top">Graph&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__primitive.html#ga2948e7d5ac22580945c3bed8b90f4937">primitive::restoreEdgesFromIndices</a> (Graph *fullGraph, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; nList)</td></tr>
 <tr class="separator:ga2948e7d5ac22580945c3bed8b90f4937"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga4a830b09cc9c276bf2f8d80498202cba"><td class="memItemLeft" align="right" valign="top">Graph&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__primitive.html#ga4a830b09cc9c276bf2f8d80498202cba">primitive::countAllRingsFromIndex</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; neighHbondList, int maxDepth)</td></tr>
+<tr class="memdesc:ga4a830b09cc9c276bf2f8d80498202cba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a vector of vectors of all possible rings.  <a href="group__primitive.html#ga4a830b09cc9c276bf2f8d80498202cba">More...</a><br /></td></tr>
 <tr class="separator:ga4a830b09cc9c276bf2f8d80498202cba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga909ca1fa60966421281d40f4ad8cc653"><td class="memItemLeft" align="right" valign="top">Graph&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__primitive.html#ga909ca1fa60966421281d40f4ad8cc653">primitive::removeNonSPrings</a> (Graph *fullGraph)</td></tr>
+<tr class="memdesc:ga909ca1fa60966421281d40f4ad8cc653"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes the non-SP rings, using the Franzblau shortest path criterion.  <a href="group__primitive.html#ga909ca1fa60966421281d40f4ad8cc653">More...</a><br /></td></tr>
 <tr class="separator:ga909ca1fa60966421281d40f4ad8cc653"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gae91300e341786a54ce73c0f2e9d4f5d5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__primitive.html#gae91300e341786a54ce73c0f2e9d4f5d5">primitive::findRings</a> (Graph *fullGraph, int v, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; *visited, int maxDepth, int depth, int root=-1)</td></tr>
+<tr class="memdesc:gae91300e341786a54ce73c0f2e9d4f5d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Main function that searches for all rings.  <a href="group__primitive.html#gae91300e341786a54ce73c0f2e9d4f5d5">More...</a><br /></td></tr>
 <tr class="separator:gae91300e341786a54ce73c0f2e9d4f5d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad5a66be66869860a9bd875535cd2671f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__primitive.html#gad5a66be66869860a9bd875535cd2671f">primitive::shortestPath</a> (Graph *fullGraph, int v, int goal, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; *path, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; *visited, int maxDepth, int depth=1)</td></tr>
+<tr class="memdesc:gad5a66be66869860a9bd875535cd2671f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the shortest path.  <a href="group__primitive.html#gad5a66be66869860a9bd875535cd2671f">More...</a><br /></td></tr>
 <tr class="separator:gad5a66be66869860a9bd875535cd2671f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gacca66f8ab7f31902d6c7d9a9f63d5c46"><td class="memItemLeft" align="right" valign="top">Graph&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__primitive.html#gacca66f8ab7f31902d6c7d9a9f63d5c46">primitive::clearGraph</a> (Graph *currentGraph)</td></tr>
+<tr class="memdesc:gacca66f8ab7f31902d6c7d9a9f63d5c46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for clearing vectors in <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> after multiple usage.  <a href="group__primitive.html#gacca66f8ab7f31902d6c7d9a9f63d5c46">More...</a><br /></td></tr>
 <tr class="separator:gacca66f8ab7f31902d6c7d9a9f63d5c46"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>File for generating shortest-path rings according to the Franzblau algorithm. </p>
-<p>Details. </p>
 
 <p class="definition">Definition in file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
 </div></div><!-- contents -->
