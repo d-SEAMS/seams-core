@@ -8,7 +8,6 @@
 // Standard
 #include <iostream>
 
-// Conan
 #include <catch2/catch.hpp>
 #include <rang.hpp>
 

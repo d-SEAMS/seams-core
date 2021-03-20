@@ -23,7 +23,7 @@ add_executable(yodaStruct_test
 # include(FindBoost)
 include(FindGSL)
 
-# Find packages, including conan packages
+# Find packages
 find_package(
   "Lua" REQUIRED
   "Boost" REQUIRED

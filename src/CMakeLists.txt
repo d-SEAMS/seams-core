@@ -27,7 +27,6 @@ include_directories(
   ${GSL_INCLUDE_DIRS}
   )
 add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
-# Find packages, including conan packages
 find_package(
   "Lua" REQUIRED
   "GSL" REQUIRED

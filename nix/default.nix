@@ -13,7 +13,6 @@
   fetchJSON = import ./fetchJSON.nix { inherit (buildpkgs) fetchFromGitHub; };
   # Package for testing
   catch2 = callPackage ./pkgs/catch2.nix { };
-  conan = callPackage ./pkgs/conan/conan.nix { };
   # Package for testing
   fmtlib = callPackage ./pkgs/fmtlib/fmt.nix { };
   # Package for testing

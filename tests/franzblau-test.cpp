@@ -4,7 +4,6 @@
 // Standard
 #include <iostream>
 
-// Conan
 #include <catch2/catch.hpp>
 #include <rang.hpp>
 
@@ -183,4 +182,4 @@ SCENARIO(
       }
     }  // End of getting all the rings (non-primitive included)
   }    // End of given
-}  // End of scenario
+} // End of scenario

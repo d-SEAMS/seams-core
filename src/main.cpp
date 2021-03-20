@@ -51,7 +51,6 @@
 #include <rang.hpp>
 #include <sol.hpp>
 
-// Managed with Conan
 #include <fmt/core.h>
 #include <yaml-cpp/yaml.h>
 

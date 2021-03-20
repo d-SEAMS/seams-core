@@ -9,7 +9,6 @@
 // Standard
 #include <iostream>
 
-// Conan
 #include <catch2/catch.hpp>
 #include <rang.hpp>
 
@@ -262,4 +261,4 @@ SCENARIO("Test the DDC algorithm for a single double-diamond cage.", "[topo]") {
       }
     }  // End of getting the neighbour list
   }    // End of given
-}  // End of scenario
+} // End of scenario

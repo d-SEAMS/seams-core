@@ -11,7 +11,6 @@
 // Standard
 #include <iostream>
 
-// Conan
 #include <catch2/catch.hpp>
 #include <rang.hpp>
 
@@ -423,4 +422,4 @@ SCENARIO("Test the shape-matching of a perfect DDC rotated by 30 degrees",
     // --------------------------
     // --------------------------
   }  // End of given
-}  // End of scenario
+} // End of scenario

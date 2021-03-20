@@ -17,7 +17,7 @@
 
 \brief The C++ core of d-SEAMS, a molecular dynamics trajectory analysis engine.
 
-\note The <a href="pages.html">wiki</a> describes the examples and how to obtain
+\note The <a href="pages.html">related pages</a> describe the examples and how to obtain
 the data-sets (trajectories) <a
 href="https://figshare.com/projects/d-SEAMS_Datasets/73545">from figshare</a>.
 
@@ -54,7 +54,7 @@ The corresponding `bibtex` entry is:
 We use a deterministic build system to generate both bug reports and uniform
 usage statistics. This also handles the `lua` scripting engine.
 
-\note The lua functions are documented on the [wiki](https://docs.dseams.info/md_markdown_luafunctions)
+\note The lua functions are documented on the [on the API Docs](https://docs.dseams.info/md_markdown_luafunctions)
 
 ## Build
 
@@ -230,7 +230,6 @@ The following tools are used in this project:
 
 - [CMake](https://cmake.org/) for compilation ([cmake-init](https://github.com/cginternals/cmake-init) was used as a reference)
 - [Clang](https://clang.llvm.org/) because it is more descriptive with better tools
-- [Conan](https://conan.io/) and [https://pipenv.readthedocs.io/en/latest/](pipenv) for dependency management
 - [Doxygen](https://www.doxygen.org) for the developer API
 - [clang-format](https://clang.llvm.org/docs/ClangFormat.html) for code formatting
   - [clang-format-hooks](https://github.com/barisione/clang-format-hooks) for `git` hooks to enforce formatting
