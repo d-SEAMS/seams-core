@@ -107,7 +107,7 @@ $(function() {
 <li>Trajectories are hosted <a href="https://figshare.com/projects/d-SEAMS_Datasets/73545">on figshare</a>.</li>
 <li>Our <a href="https://wiki.dseams.info">wiki is here</a></li>
 </ul>
-<dl class="section note"><dt>Note</dt><dd>The <a href="pages.html">wiki</a> describes the examples and how to obtain the data-sets (trajectories) <a href="https://figshare.com/projects/d-SEAMS_Datasets/73545">from figshare</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The <a href="pages.html">related pages</a> describe the examples and how to obtain the data-sets (trajectories) <a href="https://figshare.com/projects/d-SEAMS_Datasets/73545">from figshare</a>.</dd></dl>
 <dl class="section warning"><dt>Warning</dt><dd><b>If</b> you are unwilling to use the <code>nix</code> build system, then <b>please note</b> that you must manage the dependencies MANUALLY, including the compiler versions.</dd></dl>
 <h1>Citation</h1>
 <ul>
@@ -129,7 +129,7 @@ url={https://doi.org/10.1021/acs.jcim.0c00031}
 }
 </pre> <h1>Compilation with Nix</h1>
 <p>We use a deterministic build system to generate both bug reports and uniform usage statistics. This also handles the <code>lua</code> scripting engine.</p>
-<dl class="section note"><dt>Note</dt><dd>The lua functions are documented on the <a href="https://docs.dseams.info/md_markdown_luafunctions">wiki</a></dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The lua functions are documented on the <a href="https://docs.dseams.info/md_markdown_luafunctions">on the API Docs</a></dd></dl>
 <h2>Build</h2>
 <p>Since this project is built with <code>nix</code>, we can simply do the following from the root directory (longer method):</p>
 <div class="fragment"><div class="line"># Make sure there are no artifacts</div>
@@ -221,7 +221,6 @@ url={https://doi.org/10.1021/acs.jcim.0c00031}
 <ul>
 <li><a href="https://cmake.org/">CMake</a> for compilation (<a href="https://github.com/cginternals/cmake-init">cmake-init</a> was used as a reference)</li>
 <li><a href="https://clang.llvm.org/">Clang</a> because it is more descriptive with better tools</li>
-<li><a href="https://conan.io/">Conan</a> and [<a href="https://pipenv.readthedocs.io/en/latest/">https://pipenv.readthedocs.io/en/latest/</a>](pipenv) for dependency management</li>
 <li><a href="https://www.doxygen.org">Doxygen</a> for the developer API</li>
 <li><a href="https://clang.llvm.org/docs/ClangFormat.html">clang-format</a> for code formatting<ul>
 <li><a href="https://github.com/barisione/clang-format-hooks">clang-format-hooks</a> for <code>git</code> hooks to enforce formatting</li>
