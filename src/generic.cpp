@@ -1,13 +1,13 @@
 #include <generic.hpp>
 #include <iostream>
 
-/********************************************/ /**
-*  Function for printing out
- info in a PointCloud object.
- *  @param[in] yCloud The input PointCloud to be printed.
- *  @param[in] outFile The name of the output file to which the information will
-be printed.
-***********************************************/
+/**
+ * @details Function for printing out
+ *  info in a PointCloud object.
+ * @param[in] yCloud The input PointCloud to be printed.
+ * @param[in] outFile The name of the output file to which the information will
+ *  be printed.
+ */
 int gen::prettyPrintYoda(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::string outFile) {
@@ -34,25 +34,25 @@ int gen::prettyPrintYoda(
   return 0;
 }
 
-/********************************************/ /**
-*  Function for getting the unwrapped coordinates
- of a pair of atoms.
+/**
+ *  @details Function for getting the unwrapped coordinates
+ *   of a pair of atoms.
  *  @param[in] yCloud The input PointCloud to be printed.
  *  @param[in] iatomIndex Index of the \f$ i^{th} \f$ atom.
  *  @param[in] jatomIndex Index of the \f$ j^{th} \f$ atom.
  *  @param[in, out] x_i X Coordinate of the \f$ i^{th} \f$ atom corresponding to
-the unwrapped distance.
+ *   the unwrapped distance.
  *  @param[in, out] y_i Y Coordinate of the \f$ i^{th} \f$ atom corresponding to
-the unwrapped distance.
+ *   the unwrapped distance.
  *  @param[in, out] z_i Z Coordinate of the \f$ i^{th} \f$ atom corresponding to
-the unwrapped distance.
+ *   the unwrapped distance.
  *  @param[in, out] x_j X Coordinate of the \f$ j^{th} \f$ atom corresponding to
-the unwrapped distance.
+ *   the unwrapped distance.
  *  @param[in, out] y_j Y Coordinate of the \f$ j^{th} \f$ atom corresponding to
-the unwrapped distance.
+ *   the unwrapped distance.
  *  @param[in, out] z_j Z Coordinate of the \f$ j^{th} \f$ atom corresponding to
-the unwrapped distance.
-***********************************************/
+ *   the unwrapped distance.
+ */
 int gen::unwrappedCoordShift(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatomIndex,
     int jatomIndex, double *x_i, double *y_i, double *z_i, double *x_j,
@@ -128,14 +128,15 @@ int gen::unwrappedCoordShift(
   return 0;
 }
 
-/********************************************/ /**
- *  Function for obtaining the angle between two input vectors (std::vector).
- Internally, the vectors are converted to GSL vectors. The dot product between
- the input vectors is used to calculate the angle between them.
- *  @param[in] OO The O--O vector (but can be any vector, in general).
- *  @param[in] OH The O-H vector (but can be any vector, in general).
- *  \return The output angle between the input vectors, in radians
- ***********************************************/
+/**
+ * @details Function for obtaining the angle between two input vectors
+ * (std::vector). Internally, the vectors are converted to GSL vectors. The dot
+ * product between the input vectors is used to calculate the angle between
+ * them.
+ * @param[in] OO The O--O vector (but can be any vector, in general).
+ * @param[in] OH The O-H vector (but can be any vector, in general).
+ * @return The output angle between the input vectors, in radians
+ */
 double gen::gslVecAngle(std::vector<double> OO, std::vector<double> OH) {
   gsl_vector *gOO = gsl_vector_alloc(3);
   gsl_vector *gOH = gsl_vector_alloc(3);
@@ -153,12 +154,12 @@ double gen::gslVecAngle(std::vector<double> OO, std::vector<double> OH) {
   return angle;
 }
 
-/********************************************/ /**
- *  Get the average, after excluding
- the outliers, using quartiles
- *  @param[in] inpVec The vector containing values whose average is desired
- *  \return The desired average value
- ***********************************************/
+/**
+ * @details Get the average, after excluding
+ *  the outliers, using quartiles
+ * @param[in] inpVec The vector containing values whose average is desired
+ * @return The desired average value
+ */
 double gen::getAverageWithoutOutliers(std::vector<double> inpVec) {
   //
   double avgVal = 0.0;   // Average value, excluding the outliers
@@ -250,13 +251,13 @@ double gen::getAverageWithoutOutliers(std::vector<double> inpVec) {
   return avgVal;
 }
 
-/********************************************/ /**
- *  Function for getting the angular distance between two quaternions. Returns
- the result in degrees.
- *  @param[in] quat1 The first quaternion
- *  @param[in] quat2 The second quaternion
- *  \return The output angle between the input quaternions, in degrees
- ***********************************************/
+/**
+ * @details Function for getting the angular distance between two quaternions.
+ * Returns the result in degrees.
+ * @param[in] quat1 The first quaternion
+ * @param[in] quat2 The second quaternion
+ * @return The output angle between the input quaternions, in degrees
+ */
 double gen::angDistDegQuaternions(std::vector<double> quat1,
                                   std::vector<double> quat2) {
   //

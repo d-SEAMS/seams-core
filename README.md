@@ -216,6 +216,14 @@ Where some of the above suggestions are derived from [this depreciated githook](
 Also, do note that we have a `CONTRIBUTING` file you **need to read** to
 contribute, for certain reasons, like, common sense.
 
+## Commit Hook
+Note that we expect compliance with the `clang-format` as mentioned above, and this may be enforced by using the provided scripts for a pre-commit hook:
+```bash
+./scripts/git-pre-commit-format install
+```
+
+This will ensure that new commits are in accordance to the `clang-format` file.
+
 # Acknowledgements
 
 The following tools are used in this project:
@@ -225,6 +233,7 @@ The following tools are used in this project:
 - [Conan](https://conan.io/) and [https://pipenv.readthedocs.io/en/latest/](pipenv) for dependency management
 - [Doxygen](https://www.doxygen.org) for the developer API
 - [clang-format](https://clang.llvm.org/docs/ClangFormat.html) for code formatting
+  - [clang-format-hooks](https://github.com/barisione/clang-format-hooks) for `git` hooks to enforce formatting
 - [lua](https://www.lua.org) for the scripting engine
 - [yaml](http://yaml.org/) for the configuration
 

@@ -1,7 +1,9 @@
 #include <shapeMatch.hpp>
 
-// Shape-matching for a pair of polygon basal rings. Returns true if the pair of
-// basal rings form a prism block.
+/**
+ * @details Shape-matching for a pair of polygon basal rings. Returns true if
+ * the pair of basal rings form a prism block.
+ */
 bool match::matchPrism(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, const Eigen::MatrixXd &refPoints,
@@ -83,10 +85,14 @@ bool match::matchPrism(
   return true;
 } // end of function
 
-// For the pentagonal nanochannels in amorphous ice
-// These must be aligned
-// Shape-matching for a pair of polygon basal rings. Returns true if the pair of
-// basal rings form a prism block.
+/**
+ * @details For the pentagonal nanochannels in amorphous ice.
+ *
+ * These must be aligned.
+ *
+ * Shape-matching for a pair of polygon basal rings.
+ * Returns true if the pair of  basal rings form a prism block.
+ */
 bool match::matchUntetheredPrism(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, const Eigen::MatrixXd &refPoints,
@@ -162,7 +168,7 @@ bool match::matchUntetheredPrism(
   return true;
 } // end of function
 
-// Update the per-particle RMSD for a prism block basal ring.
+//! Update the per-particle RMSD for a prism block basal ring.
 int match::updatePerAtomRMSDRing(std::vector<int> basalRing, int startingIndex,
                                  std::vector<double> rmsdFromMatch,
                                  std::vector<double> *rmsdPerAtom) {
@@ -195,8 +201,8 @@ int match::updatePerAtomRMSDRing(std::vector<int> basalRing, int startingIndex,
   return 0;
 } // end of function
 
-// Update the RMSD for each particle with the RMSD of each ring for a prism
-// block basal ring.
+//! Update the RMSD for each particle with the RMSD of each ring for a prism
+//! block basal ring.
 int match::updateRMSDRing(std::vector<int> basalRing, int startingIndex,
                           double rmsdVal, std::vector<double> *rmsdPerAtom) {
   //
@@ -226,8 +232,8 @@ int match::updateRMSDRing(std::vector<int> basalRing, int startingIndex,
   return 0;
 } // end of function
 
-// Shape-matching for a pair of polygon basal rings, comparing with a complete
-// prism block. Returns true if the pair of basal rings form a prism block.
+//! Shape-matching for a pair of polygon basal rings, comparing with a complete
+//! prism block. Returns true if the pair of basal rings form a prism block.
 bool match::matchPrismBlock(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, const Eigen::MatrixXd &refPoints,

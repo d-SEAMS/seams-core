@@ -22,36 +22,36 @@
 
 namespace match {
 
-// Shape-matching for a pair of polygon basal rings. Returns true if the pair of
-// basal rings form a prism block.
+//! Shape-matching for a pair of polygon basal rings. Returns true if the pair
+//! of basal rings form a prism block.
 bool matchPrism(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                 std::vector<std::vector<int>> nList,
                 const Eigen::MatrixXd &refPoints, std::vector<int> *basal1,
                 std::vector<int> *basal2, std::vector<double> *rmsdPerAtom,
                 bool isPerfect = true);
 
-// Shape-matching for a pair of polygon basal rings. Returns true if the pair of
-// basal rings form a prism block.
+//! Shape-matching for a pair of polygon basal rings. Returns true if the pair
+//! of basal rings form a prism block.
 bool matchUntetheredPrism(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, const Eigen::MatrixXd &refPoints,
     std::vector<int> *basal1, std::vector<int> *basal2,
     std::vector<double> *rmsdPerAtom);
 
-// Shape-matching for a pair of polygon basal rings, comparing with a complete
-// prism block. Returns true if the pair of basal rings form a prism block.
+//! Shape-matching for a pair of polygon basal rings, comparing with a complete
+//! prism block. Returns true if the pair of basal rings form a prism block.
 bool matchPrismBlock(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                      std::vector<std::vector<int>> nList,
                      const Eigen::MatrixXd &refPoints, std::vector<int> *basal1,
                      std::vector<int> *basal2, int *beginIndex);
 
-// Update the per-particle RMSD for a prism block basal ring.
+//! Update the per-particle RMSD for a prism block basal ring.
 int updatePerAtomRMSDRing(std::vector<int> basalRing, int startingIndex,
                           std::vector<double> rmsdFromMatch,
                           std::vector<double> *rmsdPerAtom);
 
-// Update the RMSD of each particle in a prism block basal ring with the RMSD of
-// the ring.
+//! Update the RMSD of each particle in a prism block basal ring with the RMSD
+//! of the ring.
 int updateRMSDRing(std::vector<int> basalRing, int startingIndex,
                    double rmsdVal, std::vector<double> *rmsdPerAtom);
 
