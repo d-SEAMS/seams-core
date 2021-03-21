@@ -101,71 +101,81 @@ $(function() {
 <div class="title">absOrientation.hpp</div>  </div>
 </div><!--header-->
 <div class="contents">
-<a href="absOrientation_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef __ABSORIENTATION_H_</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define __ABSORIENTATION_H_</span></div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160; </div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;algorithm&gt;</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;array&gt;</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;fstream&gt;</span></div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;iostream&gt;</span></div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &lt;iterator&gt;</span></div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &lt;math.h&gt;</span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &lt;sstream&gt;</span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor">#include &lt;sys/stat.h&gt;</span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160; </div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment">// External</span></div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor">#include &lt;Spectra/SymEigsShiftSolver.h&gt;</span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="preprocessor">#include &lt;Spectra/SymEigsSolver.h&gt;</span></div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="preprocessor">#include &lt;eigen3/Eigen/Core&gt;</span></div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#include &lt;eigen3/Eigen/Dense&gt;</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160; </div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="mol__sys_8hpp.html">mol_sys.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="ring_8hpp.html">ring.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="seams__input_8hpp.html">seams_input.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="seams__output_8hpp.html">seams_output.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="comment">// Inspired by AStar_Dual_Tree_HandPose by jsupancic</span></div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160; </div>
-<div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="namespaceabsor.html">   29</a></span>&#160;<span class="keyword">namespace </span><a class="code" href="namespaceabsor.html">absor</a> {</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="keywordtype">int</span> <a class="code" href="namespaceabsor.html#ad4f0741af9784817b44df6883888d9a3">hornAbsOrientation</a>(<span class="keyword">const</span> Eigen::MatrixXd &amp;refPoints,</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;                       <span class="keyword">const</span> Eigen::MatrixXd &amp;targetPoints,</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;                       <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a> *quat, <span class="keywordtype">double</span> *rmsd,</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;                       <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a> *rmsdList, <span class="keywordtype">double</span> *scale);</div>
+<a href="absOrientation_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment">// d-SEAMS is free software: you can redistribute it and/or modify</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment">// it under the terms of the GNU General Public License as published by</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment">// the Free Software Foundation, either version 3 of the License, or</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment">// (at your option) any later version.</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment">//</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment">// A copy of the GNU General Public License is available at</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="comment">// http://www.gnu.org/licenses/</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160; </div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#ifndef __ABSORIENTATION_H_</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#define __ABSORIENTATION_H_</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160; </div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &lt;algorithm&gt;</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#include &lt;array&gt;</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="preprocessor">#include &lt;fstream&gt;</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="preprocessor">#include &lt;iterator&gt;</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="preprocessor">#include &lt;math.h&gt;</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="preprocessor">#include &lt;sstream&gt;</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="preprocessor">#include &lt;sys/stat.h&gt;</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160; </div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment">// External</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#include &lt;Spectra/SymEigsShiftSolver.h&gt;</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#include &lt;Spectra/SymEigsSolver.h&gt;</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#include &lt;eigen3/Eigen/Core&gt;</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#include &lt;eigen3/Eigen/Dense&gt;</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160; </div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="mol__sys_8hpp.html">mol_sys.hpp</a>&gt;</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="ring_8hpp.html">ring.hpp</a>&gt;</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="seams__input_8hpp.html">seams_input.hpp</a>&gt;</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="seams__output_8hpp.html">seams_output.hpp</a>&gt;</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="comment">// Inspired by AStar_Dual_Tree_HandPose by jsupancic</span></div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160; </div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;Eigen::MatrixXd <a class="code" href="namespaceabsor.html#a16e1d855167323dabd3dbfcd8f1290af">calcMatrixS</a>(<span class="keyword">const</span> Eigen::MatrixXd &amp;centeredRefPnts,</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;                            <span class="keyword">const</span> Eigen::MatrixXd &amp;centeredTargetPnts, <span class="keywordtype">int</span> nop,</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;                            <span class="keywordtype">int</span> dim);</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160; </div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;Eigen::MatrixXd <a class="code" href="namespaceabsor.html#af2d549df95a889e345c6ce1c86155c12">calcMatrixN</a>(<span class="keyword">const</span> Eigen::MatrixXd &amp;S);</div>
+<div class="line"><a name="l00039"></a><span class="lineno"><a class="line" href="namespaceabsor.html">   39</a></span>&#160;<span class="keyword">namespace </span><a class="code" href="namespaceabsor.html">absor</a> {</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="keywordtype">int</span> <a class="code" href="namespaceabsor.html#ad4f0741af9784817b44df6883888d9a3">hornAbsOrientation</a>(<span class="keyword">const</span> Eigen::MatrixXd &amp;refPoints,</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;                       <span class="keyword">const</span> Eigen::MatrixXd &amp;targetPoints,</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;                       <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a> *quat, <span class="keywordtype">double</span> *rmsd,</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;                       <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a> *rmsdList, <span class="keywordtype">double</span> *scale);</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160; </div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;Eigen::MatrixXd <a class="code" href="namespaceabsor.html#a446b8553f6f2e4c8aeba3b663d257f4c">centerWRTcentroid</a>(<span class="keyword">const</span> Eigen::MatrixXd &amp;pointSet);</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="keywordtype">double</span> <a class="code" href="namespaceabsor.html#a187318f48da3c9f095806f282a9fd73f">calcScaleFactor</a>(<span class="keyword">const</span> Eigen::MatrixXd &amp;rightSys,</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;                       <span class="keyword">const</span> Eigen::MatrixXd &amp;leftSys, <span class="keywordtype">int</span> n);</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160; </div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;Eigen::MatrixXd <a class="code" href="namespaceabsor.html#af4cf6d8d2d3c0041e995922c3569fc95">quat2RotMatrix</a>(<span class="keyword">const</span> Eigen::VectorXd &amp;quat);</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;Eigen::MatrixXd <a class="code" href="namespaceabsor.html#a16e1d855167323dabd3dbfcd8f1290af">calcMatrixS</a>(<span class="keyword">const</span> Eigen::MatrixXd &amp;centeredRefPnts,</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;                            <span class="keyword">const</span> Eigen::MatrixXd &amp;centeredTargetPnts, <span class="keywordtype">int</span> nop,</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;                            <span class="keywordtype">int</span> dim);</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;Eigen::MatrixXd <a class="code" href="namespaceabsor.html#af2d549df95a889e345c6ce1c86155c12">calcMatrixN</a>(<span class="keyword">const</span> Eigen::MatrixXd &amp;S);</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160; </div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="keywordtype">double</span> <a class="code" href="namespaceabsor.html#a09fbc9d47274eb528793b998531fe94e">getRMSD</a>(<span class="keyword">const</span> Eigen::MatrixXd &amp;centeredRefPnts,</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;               <span class="keyword">const</span> Eigen::MatrixXd &amp;centeredTargetPnts,</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;               <span class="keyword">const</span> Eigen::VectorXd &amp;quat, <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a> *rmsdList,</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;               <span class="keywordtype">int</span> nop, <span class="keywordtype">double</span> scale);</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;} <span class="comment">// namespace absor</span></div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="preprocessor">#endif </span><span class="comment">// __ABSORIENTATION_H_</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;Eigen::MatrixXd <a class="code" href="namespaceabsor.html#a446b8553f6f2e4c8aeba3b663d257f4c">centerWRTcentroid</a>(<span class="keyword">const</span> Eigen::MatrixXd &amp;pointSet);</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="keywordtype">double</span> <a class="code" href="namespaceabsor.html#a187318f48da3c9f095806f282a9fd73f">calcScaleFactor</a>(<span class="keyword">const</span> Eigen::MatrixXd &amp;rightSys,</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;                       <span class="keyword">const</span> Eigen::MatrixXd &amp;leftSys, <span class="keywordtype">int</span> n);</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;Eigen::MatrixXd <a class="code" href="namespaceabsor.html#af4cf6d8d2d3c0041e995922c3569fc95">quat2RotMatrix</a>(<span class="keyword">const</span> Eigen::VectorXd &amp;quat);</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160; </div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="keywordtype">double</span> <a class="code" href="namespaceabsor.html#a09fbc9d47274eb528793b998531fe94e">getRMSD</a>(<span class="keyword">const</span> Eigen::MatrixXd &amp;centeredRefPnts,</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;               <span class="keyword">const</span> Eigen::MatrixXd &amp;centeredTargetPnts,</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;               <span class="keyword">const</span> Eigen::VectorXd &amp;quat, <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a> *rmsdList,</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;               <span class="keywordtype">int</span> nop, <span class="keywordtype">double</span> scale);</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;} <span class="comment">// namespace absor</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160; </div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="preprocessor">#endif </span><span class="comment">// __ABSORIENTATION_H_</span></div>
 <div class="ttc" id="amol__sys_8hpp_html"><div class="ttname"><a href="mol__sys_8hpp.html">mol_sys.hpp</a></div><div class="ttdoc">The main molecular system handler.</div></div>
-<div class="ttc" id="anamespaceabsor_html"><div class="ttname"><a href="namespaceabsor.html">absor</a></div><div class="ttdef"><b>Definition:</b> <a href="absOrientation_8hpp_source.html#l00029">absOrientation.hpp:29</a></div></div>
-<div class="ttc" id="anamespaceabsor_html_a09fbc9d47274eb528793b998531fe94e"><div class="ttname"><a href="namespaceabsor.html#a09fbc9d47274eb528793b998531fe94e">absor::getRMSD</a></div><div class="ttdeci">double getRMSD(const Eigen::MatrixXd &amp;centeredRefPnts, const Eigen::MatrixXd &amp;centeredTargetPnts, const Eigen::VectorXd &amp;quat, std::vector&lt; double &gt; *rmsdList, int nop, double scale)</div><div class="ttdoc">Calculate the RMSD.</div><div class="ttdef"><b>Definition:</b> <a href="absOrientation_8cpp_source.html#l00345">absOrientation.cpp:345</a></div></div>
-<div class="ttc" id="anamespaceabsor_html_a16e1d855167323dabd3dbfcd8f1290af"><div class="ttname"><a href="namespaceabsor.html#a16e1d855167323dabd3dbfcd8f1290af">absor::calcMatrixS</a></div><div class="ttdeci">Eigen::MatrixXd calcMatrixS(const Eigen::MatrixXd &amp;centeredRefPnts, const Eigen::MatrixXd &amp;centeredTargetPnts, int nop, int dim)</div><div class="ttdef"><b>Definition:</b> <a href="absOrientation_8cpp_source.html#l00117">absOrientation.cpp:117</a></div></div>
-<div class="ttc" id="anamespaceabsor_html_a187318f48da3c9f095806f282a9fd73f"><div class="ttname"><a href="namespaceabsor.html#a187318f48da3c9f095806f282a9fd73f">absor::calcScaleFactor</a></div><div class="ttdeci">double calcScaleFactor(const Eigen::MatrixXd &amp;rightSys, const Eigen::MatrixXd &amp;leftSys, int n)</div><div class="ttdoc">Calculate the scale factor from the centered left and right point sets.</div><div class="ttdef"><b>Definition:</b> <a href="absOrientation_8cpp_source.html#l00262">absOrientation.cpp:262</a></div></div>
-<div class="ttc" id="anamespaceabsor_html_a446b8553f6f2e4c8aeba3b663d257f4c"><div class="ttname"><a href="namespaceabsor.html#a446b8553f6f2e4c8aeba3b663d257f4c">absor::centerWRTcentroid</a></div><div class="ttdeci">Eigen::MatrixXd centerWRTcentroid(const Eigen::MatrixXd &amp;pointSet)</div><div class="ttdoc">Center a point set wrt the centroid.</div><div class="ttdef"><b>Definition:</b> <a href="absOrientation_8cpp_source.html#l00214">absOrientation.cpp:214</a></div></div>
-<div class="ttc" id="anamespaceabsor_html_ad4f0741af9784817b44df6883888d9a3"><div class="ttname"><a href="namespaceabsor.html#ad4f0741af9784817b44df6883888d9a3">absor::hornAbsOrientation</a></div><div class="ttdeci">int hornAbsOrientation(const Eigen::MatrixXd &amp;refPoints, const Eigen::MatrixXd &amp;targetPoints, std::vector&lt; double &gt; *quat, double *rmsd, std::vector&lt; double &gt; *rmsdList, double *scale)</div><div class="ttdoc">Get the absolute orientation using Horn's algorithm (with quaternions)</div><div class="ttdef"><b>Definition:</b> <a href="absOrientation_8cpp_source.html#l00016">absOrientation.cpp:16</a></div></div>
-<div class="ttc" id="anamespaceabsor_html_af2d549df95a889e345c6ce1c86155c12"><div class="ttname"><a href="namespaceabsor.html#af2d549df95a889e345c6ce1c86155c12">absor::calcMatrixN</a></div><div class="ttdeci">Eigen::MatrixXd calcMatrixN(const Eigen::MatrixXd &amp;S)</div><div class="ttdef"><b>Definition:</b> <a href="absOrientation_8cpp_source.html#l00158">absOrientation.cpp:158</a></div></div>
-<div class="ttc" id="anamespaceabsor_html_af4cf6d8d2d3c0041e995922c3569fc95"><div class="ttname"><a href="namespaceabsor.html#af4cf6d8d2d3c0041e995922c3569fc95">absor::quat2RotMatrix</a></div><div class="ttdeci">Eigen::MatrixXd quat2RotMatrix(const Eigen::VectorXd &amp;quat)</div><div class="ttdoc">Get a rotation matrix from a unit quaternion.</div><div class="ttdef"><b>Definition:</b> <a href="absOrientation_8cpp_source.html#l00295">absOrientation.cpp:295</a></div></div>
+<div class="ttc" id="anamespaceabsor_html"><div class="ttname"><a href="namespaceabsor.html">absor</a></div><div class="ttdef"><b>Definition:</b> <a href="absOrientation_8hpp_source.html#l00039">absOrientation.hpp:39</a></div></div>
+<div class="ttc" id="anamespaceabsor_html_a09fbc9d47274eb528793b998531fe94e"><div class="ttname"><a href="namespaceabsor.html#a09fbc9d47274eb528793b998531fe94e">absor::getRMSD</a></div><div class="ttdeci">double getRMSD(const Eigen::MatrixXd &amp;centeredRefPnts, const Eigen::MatrixXd &amp;centeredTargetPnts, const Eigen::VectorXd &amp;quat, std::vector&lt; double &gt; *rmsdList, int nop, double scale)</div><div class="ttdoc">Calculate the RMSD.</div><div class="ttdef"><b>Definition:</b> <a href="absOrientation_8cpp_source.html#l00355">absOrientation.cpp:355</a></div></div>
+<div class="ttc" id="anamespaceabsor_html_a16e1d855167323dabd3dbfcd8f1290af"><div class="ttname"><a href="namespaceabsor.html#a16e1d855167323dabd3dbfcd8f1290af">absor::calcMatrixS</a></div><div class="ttdeci">Eigen::MatrixXd calcMatrixS(const Eigen::MatrixXd &amp;centeredRefPnts, const Eigen::MatrixXd &amp;centeredTargetPnts, int nop, int dim)</div><div class="ttdef"><b>Definition:</b> <a href="absOrientation_8cpp_source.html#l00127">absOrientation.cpp:127</a></div></div>
+<div class="ttc" id="anamespaceabsor_html_a187318f48da3c9f095806f282a9fd73f"><div class="ttname"><a href="namespaceabsor.html#a187318f48da3c9f095806f282a9fd73f">absor::calcScaleFactor</a></div><div class="ttdeci">double calcScaleFactor(const Eigen::MatrixXd &amp;rightSys, const Eigen::MatrixXd &amp;leftSys, int n)</div><div class="ttdoc">Calculate the scale factor from the centered left and right point sets.</div><div class="ttdef"><b>Definition:</b> <a href="absOrientation_8cpp_source.html#l00272">absOrientation.cpp:272</a></div></div>
+<div class="ttc" id="anamespaceabsor_html_a446b8553f6f2e4c8aeba3b663d257f4c"><div class="ttname"><a href="namespaceabsor.html#a446b8553f6f2e4c8aeba3b663d257f4c">absor::centerWRTcentroid</a></div><div class="ttdeci">Eigen::MatrixXd centerWRTcentroid(const Eigen::MatrixXd &amp;pointSet)</div><div class="ttdoc">Center a point set wrt the centroid.</div><div class="ttdef"><b>Definition:</b> <a href="absOrientation_8cpp_source.html#l00224">absOrientation.cpp:224</a></div></div>
+<div class="ttc" id="anamespaceabsor_html_ad4f0741af9784817b44df6883888d9a3"><div class="ttname"><a href="namespaceabsor.html#ad4f0741af9784817b44df6883888d9a3">absor::hornAbsOrientation</a></div><div class="ttdeci">int hornAbsOrientation(const Eigen::MatrixXd &amp;refPoints, const Eigen::MatrixXd &amp;targetPoints, std::vector&lt; double &gt; *quat, double *rmsd, std::vector&lt; double &gt; *rmsdList, double *scale)</div><div class="ttdoc">Get the absolute orientation using Horn's algorithm (with quaternions)</div><div class="ttdef"><b>Definition:</b> <a href="absOrientation_8cpp_source.html#l00026">absOrientation.cpp:26</a></div></div>
+<div class="ttc" id="anamespaceabsor_html_af2d549df95a889e345c6ce1c86155c12"><div class="ttname"><a href="namespaceabsor.html#af2d549df95a889e345c6ce1c86155c12">absor::calcMatrixN</a></div><div class="ttdeci">Eigen::MatrixXd calcMatrixN(const Eigen::MatrixXd &amp;S)</div><div class="ttdef"><b>Definition:</b> <a href="absOrientation_8cpp_source.html#l00168">absOrientation.cpp:168</a></div></div>
+<div class="ttc" id="anamespaceabsor_html_af4cf6d8d2d3c0041e995922c3569fc95"><div class="ttname"><a href="namespaceabsor.html#af4cf6d8d2d3c0041e995922c3569fc95">absor::quat2RotMatrix</a></div><div class="ttdeci">Eigen::MatrixXd quat2RotMatrix(const Eigen::VectorXd &amp;quat)</div><div class="ttdoc">Get a rotation matrix from a unit quaternion.</div><div class="ttdef"><b>Definition:</b> <a href="absOrientation_8cpp_source.html#l00305">absOrientation.cpp:305</a></div></div>
 <div class="ttc" id="aring_8hpp_html"><div class="ttname"><a href="ring_8hpp.html">ring.hpp</a></div><div class="ttdoc">File containing common functions used by bulk and confined topological network critera.</div></div>
 <div class="ttc" id="aseams__input_8hpp_html"><div class="ttname"><a href="seams__input_8hpp.html">seams_input.hpp</a></div><div class="ttdoc">File for functions that read in files).</div></div>
 <div class="ttc" id="aseams__output_8hpp_html"><div class="ttname"><a href="seams__output_8hpp.html">seams_output.hpp</a></div></div>

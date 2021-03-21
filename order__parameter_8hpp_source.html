@@ -101,56 +101,66 @@ $(function() {
 <div class="title">order_parameter.hpp</div>  </div>
 </div><!--header-->
 <div class="contents">
-<a href="order__parameter_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef __ORDER_PARAMETER_H_</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define __ORDER_PARAMETER_H_</span></div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160; </div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;algorithm&gt;</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;array&gt;</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;fstream&gt;</span></div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;iostream&gt;</span></div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &lt;iterator&gt;</span></div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &lt;math.h&gt;</span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &lt;sstream&gt;</span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor">#include &lt;sys/stat.h&gt;</span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160; </div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="cage_8hpp.html">cage.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="mol__sys_8hpp.html">mol_sys.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="ring_8hpp.html">ring.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="seams__input_8hpp.html">seams_input.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="seams__output_8hpp.html">seams_output.hpp</a>&gt;</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160; </div>
-<div class="line"><a name="l00022"></a><span class="lineno"><a class="line" href="namespacetopoparam.html">   22</a></span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacetopoparam.html">topoparam</a> {</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160; </div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="keywordtype">double</span></div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<a class="code" href="namespacetopoparam.html#ae31b7c89d7555d2cdea139a838b8b40b">normHeightPercent</a>(<a class="code" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; *yCloud,</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;                  <span class="keywordtype">int</span> nPrisms, <span class="keywordtype">double</span> avgPrismHeight);</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<a class="code" href="namespacetopoparam.html#af43f5a98cbe437620167c8d9ea078b56">calcCoverageArea</a>(<a class="code" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; *yCloud,</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;                 <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a>&gt; rings, <span class="keywordtype">double</span> sheetArea);</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a></div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<a class="code" href="namespacetopoparam.html#aa3627cf7b17ab94d612b32c646b11217">projAreaSingleRing</a>(<a class="code" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; *yCloud,</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;                   <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a> <a class="code" href="namespacering.html">ring</a>);</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160; </div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;} <span class="comment">// namespace topoparam</span></div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="preprocessor">#endif </span><span class="comment">// __ORDER_PARAMETER_H_</span></div>
+<a href="order__parameter_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment">// d-SEAMS is free software: you can redistribute it and/or modify</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment">// it under the terms of the GNU General Public License as published by</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment">// the Free Software Foundation, either version 3 of the License, or</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment">// (at your option) any later version.</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment">//</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment">// A copy of the GNU General Public License is available at</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="comment">// http://www.gnu.org/licenses/</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160; </div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#ifndef __ORDER_PARAMETER_H_</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#define __ORDER_PARAMETER_H_</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160; </div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &lt;algorithm&gt;</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#include &lt;array&gt;</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="preprocessor">#include &lt;fstream&gt;</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="preprocessor">#include &lt;iterator&gt;</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="preprocessor">#include &lt;math.h&gt;</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="preprocessor">#include &lt;sstream&gt;</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="preprocessor">#include &lt;sys/stat.h&gt;</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160; </div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="cage_8hpp.html">cage.hpp</a>&gt;</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="mol__sys_8hpp.html">mol_sys.hpp</a>&gt;</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="ring_8hpp.html">ring.hpp</a>&gt;</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="seams__input_8hpp.html">seams_input.hpp</a>&gt;</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="seams__output_8hpp.html">seams_output.hpp</a>&gt;</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160; </div>
+<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="namespacetopoparam.html">   32</a></span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacetopoparam.html">topoparam</a> {</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160; </div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="keywordtype">double</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<a class="code" href="namespacetopoparam.html#ae31b7c89d7555d2cdea139a838b8b40b">normHeightPercent</a>(<a class="code" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; *yCloud,</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;                  <span class="keywordtype">int</span> nPrisms, <span class="keywordtype">double</span> avgPrismHeight);</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<a class="code" href="namespacetopoparam.html#af43f5a98cbe437620167c8d9ea078b56">calcCoverageArea</a>(<a class="code" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; *yCloud,</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;                 <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a>&gt; rings, <span class="keywordtype">double</span> sheetArea);</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a></div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<a class="code" href="namespacetopoparam.html#aa3627cf7b17ab94d612b32c646b11217">projAreaSingleRing</a>(<a class="code" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; *yCloud,</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;                   <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a> <a class="code" href="namespacering.html">ring</a>);</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;} <span class="comment">// namespace topoparam</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160; </div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="preprocessor">#endif </span><span class="comment">// __ORDER_PARAMETER_H_</span></div>
 <div class="ttc" id="acage_8hpp_html"><div class="ttname"><a href="cage_8hpp.html">cage.hpp</a></div><div class="ttdoc">File for cage types for topological network criteria.</div></div>
 <div class="ttc" id="amol__sys_8hpp_html"><div class="ttname"><a href="mol__sys_8hpp.html">mol_sys.hpp</a></div><div class="ttdoc">The main molecular system handler.</div></div>
-<div class="ttc" id="anamespacering_html"><div class="ttname"><a href="namespacering.html">ring</a></div><div class="ttdoc">Topological network criteria functions.</div><div class="ttdef"><b>Definition:</b> <a href="ring_8hpp_source.html#l00050">ring.hpp:50</a></div></div>
-<div class="ttc" id="anamespacetopoparam_html"><div class="ttname"><a href="namespacetopoparam.html">topoparam</a></div><div class="ttdef"><b>Definition:</b> <a href="order__parameter_8hpp_source.html#l00022">order_parameter.hpp:22</a></div></div>
-<div class="ttc" id="anamespacetopoparam_html_aa3627cf7b17ab94d612b32c646b11217"><div class="ttname"><a href="namespacetopoparam.html#aa3627cf7b17ab94d612b32c646b11217">topoparam::projAreaSingleRing</a></div><div class="ttdeci">std::vector&lt; double &gt; projAreaSingleRing(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, std::vector&lt; int &gt; ring)</div><div class="ttdoc">Calculates the projected area on the XY, YZ and XZ planes.</div><div class="ttdef"><b>Definition:</b> <a href="order__parameter_8cpp_source.html#l00091">order_parameter.cpp:91</a></div></div>
-<div class="ttc" id="anamespacetopoparam_html_ae31b7c89d7555d2cdea139a838b8b40b"><div class="ttname"><a href="namespacetopoparam.html#ae31b7c89d7555d2cdea139a838b8b40b">topoparam::normHeightPercent</a></div><div class="ttdeci">double normHeightPercent(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, int nPrisms, double avgPrismHeight)</div><div class="ttdef"><b>Definition:</b> <a href="order__parameter_8cpp_source.html#l00018">order_parameter.cpp:18</a></div></div>
-<div class="ttc" id="anamespacetopoparam_html_af43f5a98cbe437620167c8d9ea078b56"><div class="ttname"><a href="namespacetopoparam.html#af43f5a98cbe437620167c8d9ea078b56">topoparam::calcCoverageArea</a></div><div class="ttdeci">std::vector&lt; double &gt; calcCoverageArea(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, std::vector&lt; std::vector&lt; int &gt;&gt; rings, double sheetArea)</div><div class="ttdef"><b>Definition:</b> <a href="order__parameter_8cpp_source.html#l00056">order_parameter.cpp:56</a></div></div>
+<div class="ttc" id="anamespacering_html"><div class="ttname"><a href="namespacering.html">ring</a></div><div class="ttdoc">Topological network criteria functions.</div><div class="ttdef"><b>Definition:</b> <a href="ring_8hpp_source.html#l00060">ring.hpp:60</a></div></div>
+<div class="ttc" id="anamespacetopoparam_html"><div class="ttname"><a href="namespacetopoparam.html">topoparam</a></div><div class="ttdef"><b>Definition:</b> <a href="order__parameter_8hpp_source.html#l00032">order_parameter.hpp:32</a></div></div>
+<div class="ttc" id="anamespacetopoparam_html_aa3627cf7b17ab94d612b32c646b11217"><div class="ttname"><a href="namespacetopoparam.html#aa3627cf7b17ab94d612b32c646b11217">topoparam::projAreaSingleRing</a></div><div class="ttdeci">std::vector&lt; double &gt; projAreaSingleRing(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, std::vector&lt; int &gt; ring)</div><div class="ttdoc">Calculates the projected area on the XY, YZ and XZ planes.</div><div class="ttdef"><b>Definition:</b> <a href="order__parameter_8cpp_source.html#l00101">order_parameter.cpp:101</a></div></div>
+<div class="ttc" id="anamespacetopoparam_html_ae31b7c89d7555d2cdea139a838b8b40b"><div class="ttname"><a href="namespacetopoparam.html#ae31b7c89d7555d2cdea139a838b8b40b">topoparam::normHeightPercent</a></div><div class="ttdeci">double normHeightPercent(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, int nPrisms, double avgPrismHeight)</div><div class="ttdef"><b>Definition:</b> <a href="order__parameter_8cpp_source.html#l00028">order_parameter.cpp:28</a></div></div>
+<div class="ttc" id="anamespacetopoparam_html_af43f5a98cbe437620167c8d9ea078b56"><div class="ttname"><a href="namespacetopoparam.html#af43f5a98cbe437620167c8d9ea078b56">topoparam::calcCoverageArea</a></div><div class="ttdeci">std::vector&lt; double &gt; calcCoverageArea(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, std::vector&lt; std::vector&lt; int &gt;&gt; rings, double sheetArea)</div><div class="ttdef"><b>Definition:</b> <a href="order__parameter_8cpp_source.html#l00066">order_parameter.cpp:66</a></div></div>
 <div class="ttc" id="aring_8hpp_html"><div class="ttname"><a href="ring_8hpp.html">ring.hpp</a></div><div class="ttdoc">File containing common functions used by bulk and confined topological network critera.</div></div>
 <div class="ttc" id="aseams__input_8hpp_html"><div class="ttname"><a href="seams__input_8hpp.html">seams_input.hpp</a></div><div class="ttdoc">File for functions that read in files).</div></div>
 <div class="ttc" id="aseams__output_8hpp_html"><div class="ttname"><a href="seams__output_8hpp.html">seams_output.hpp</a></div></div>
-<div class="ttc" id="astructmolSys_1_1PointCloud_html"><div class="ttname"><a href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a></div><div class="ttdoc">This contains a collection of points; contains information for a particular frame.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00155">mol_sys.hpp:155</a></div></div>
-<div class="ttc" id="astructmolSys_1_1Point_html"><div class="ttname"><a href="structmolSys_1_1Point.html">molSys::Point</a></div><div class="ttdoc">This contains per-particle information.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00134">mol_sys.hpp:134</a></div></div>
+<div class="ttc" id="astructmolSys_1_1PointCloud_html"><div class="ttname"><a href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a></div><div class="ttdoc">This contains a collection of points; contains information for a particular frame.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00165">mol_sys.hpp:165</a></div></div>
+<div class="ttc" id="astructmolSys_1_1Point_html"><div class="ttname"><a href="structmolSys_1_1Point.html">molSys::Point</a></div><div class="ttdoc">This contains per-particle information.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00144">mol_sys.hpp:144</a></div></div>
 <div class="ttc" id="avector_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- Copyright 2020 Rohit Goswami <rog32@hi.is>

@@ -191,21 +191,21 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The output angle between the input quaternions, in degrees </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8cpp_source.html#l00261">261</a> of file <a class="el" href="generic_8cpp_source.html">generic.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;                                                           {</div>
-<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;  <span class="keywordtype">double</span> prod; <span class="comment">// Product of quat1 and conjugate of quat2</span></div>
-<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;  <span class="comment">// The angular distance is</span></div>
-<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;  <span class="comment">// angularDistance = 2*cosInverse(quat1*conj(quat2))</span></div>
-<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;  prod = quat1[0] * quat2[0] - quat1[1] * quat2[1] - quat1[2] * quat2[2] -</div>
-<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;         quat1[3] * quat2[3];</div>
-<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;  <span class="comment">// The angular distance is:</span></div>
-<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;  <span class="keywordtype">double</span> angDist = 2 * <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/acos.html">acos</a>(prod) * 180.0 / (<a class="code" href="group__gen.html#gaa59e2feae36f62dfdb0664bd06de8572">gen::pi</a>);</div>
-<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;  <span class="comment">// Return the angular distance</span></div>
-<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;  <span class="keywordflow">return</span> angDist;</div>
-<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8cpp_source.html#l00271">271</a> of file <a class="el" href="generic_8cpp_source.html">generic.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;                                                           {</div>
+<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;  <span class="keywordtype">double</span> prod; <span class="comment">// Product of quat1 and conjugate of quat2</span></div>
+<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;  <span class="comment">// The angular distance is</span></div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;  <span class="comment">// angularDistance = 2*cosInverse(quat1*conj(quat2))</span></div>
+<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;  prod = quat1[0] * quat2[0] - quat1[1] * quat2[1] - quat1[2] * quat2[2] -</div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;         quat1[3] * quat2[3];</div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;  <span class="comment">// The angular distance is:</span></div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;  <span class="keywordtype">double</span> angDist = 2 * <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/acos.html">acos</a>(prod) * 180.0 / (<a class="code" href="group__gen.html#gaa59e2feae36f62dfdb0664bd06de8572">gen::pi</a>);</div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;  <span class="comment">// Return the angular distance</span></div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;  <span class="keywordflow">return</span> angDist;</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;}</div>
 <div class="ttc" id="aacos_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/numeric/math/acos.html">std::acos</a></div><div class="ttdeci">T acos(T... args)</div></div>
-<div class="ttc" id="agroup__gen_html_gaa59e2feae36f62dfdb0664bd06de8572"><div class="ttname"><a href="group__gen.html#gaa59e2feae36f62dfdb0664bd06de8572">gen::pi</a></div><div class="ttdeci">const double pi</div><div class="ttdef"><b>Definition:</b> <a href="generic_8hpp_source.html#l00038">generic.hpp:38</a></div></div>
+<div class="ttc" id="agroup__gen_html_gaa59e2feae36f62dfdb0664bd06de8572"><div class="ttname"><a href="group__gen.html#gaa59e2feae36f62dfdb0664bd06de8572">gen::pi</a></div><div class="ttdeci">const double pi</div><div class="ttdef"><b>Definition:</b> <a href="generic_8hpp_source.html#l00048">generic.hpp:48</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -258,17 +258,17 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>length \(2l+1\), normalized by the number of nearest neighbours </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00297">297</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;                                                             {</div>
-<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;  <span class="keywordflow">if</span> (neigh == 0) {</div>
-<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;    <span class="keywordflow">return</span> v;</div>
-<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;  }</div>
-<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; 2 * l + 1; m++) {</div>
-<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;    v[m] = (1.0 / (double)neigh) * v[m];</div>
-<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;  }</div>
-<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160; </div>
-<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;  <span class="keywordflow">return</span> v;</div>
-<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00307">307</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;                                                             {</div>
+<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;  <span class="keywordflow">if</span> (neigh == 0) {</div>
+<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;    <span class="keywordflow">return</span> v;</div>
+<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;  }</div>
+<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; 2 * l + 1; m++) {</div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;    v[m] = (1.0 / (double)neigh) * v[m];</div>
+<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;  }</div>
+<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160; </div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;  <span class="keywordflow">return</span> v;</div>
+<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -306,26 +306,26 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The median value </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00061">61</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                                                   {</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;  <span class="keywordtype">int</span> n = (*input).size(); <span class="comment">// Number of elements</span></div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  <span class="keywordtype">double</span> median;           <span class="comment">// Output median value</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  <span class="comment">// Sort the vector</span></div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/algorithm/sort.html">std::sort</a>((*input).begin(), (*input).end());</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;  <span class="comment">// Calculate the median</span></div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  <span class="comment">// For even values, the median is the average of the two middle values</span></div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;  <span class="keywordflow">if</span> (n % 2 == 0) {</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    median = 0.5 * ((*input)[n / 2] + (*input)[n / 2 - 1]); <span class="comment">// n/2+n/2-1</span></div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  } <span class="comment">// median is average of middle values</span></div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    median = (*input)[(n + 1) / 2 -</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;                      1]; <span class="comment">// middle value of 7 elements is the 4th element</span></div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;  }                       <span class="comment">// if odd, it is the middle value</span></div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00071">71</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                                                   {</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  <span class="keywordtype">int</span> n = (*input).size(); <span class="comment">// Number of elements</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  <span class="keywordtype">double</span> median;           <span class="comment">// Output median value</span></div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;  <span class="comment">// Sort the vector</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/algorithm/sort.html">std::sort</a>((*input).begin(), (*input).end());</div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;  <span class="keywordflow">return</span> median;</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;}</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;  <span class="comment">// Calculate the median</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  <span class="comment">// For even values, the median is the average of the two middle values</span></div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;  <span class="keywordflow">if</span> (n % 2 == 0) {</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    median = 0.5 * ((*input)[n / 2] + (*input)[n / 2 - 1]); <span class="comment">// n/2+n/2-1</span></div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;  } <span class="comment">// median is average of middle values</span></div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;  <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    median = (*input)[(n + 1) / 2 -</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;                      1]; <span class="comment">// middle value of 7 elements is the 4th element</span></div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;  }                       <span class="comment">// if odd, it is the middle value</span></div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160; </div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;  <span class="keywordflow">return</span> median;</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;}</div>
 <div class="ttc" id="asort_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/algorithm/sort.html">std::sort</a></div><div class="ttdeci">T sort(T... args)</div></div>
 </div><!-- fragment -->
 </div>
@@ -372,11 +372,11 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if the atom ID of A is less than the atom ID of B </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00218">218</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;                                                          {</div>
-<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;  <span class="keywordflow">return</span> a.<a class="code" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a> &lt; b.<a class="code" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a>;</div>
-<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;}</div>
-<div class="ttc" id="agroup__molSys_html_gafbcfc945f41267043cddfd9bae8c10a2"><div class="ttname"><a href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">molSys::Point::atomID</a></div><div class="ttdeci">int atomID</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00135">mol_sys.hpp:135</a></div></div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00228">228</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;                                                          {</div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;  <span class="keywordflow">return</span> a.<a class="code" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a> &lt; b.<a class="code" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a>;</div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;}</div>
+<div class="ttc" id="agroup__molSys_html_gafbcfc945f41267043cddfd9bae8c10a2"><div class="ttname"><a href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">molSys::Point::atomID</a></div><div class="ttdeci">int atomID</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00145">mol_sys.hpp:145</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -431,26 +431,26 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The wrapped distance. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00154">154</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;                    {</div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array&lt;double, 3&gt;</a> dr;</div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;  <span class="keywordtype">double</span> r2 = 0.0; <span class="comment">// Squared absolute distance</span></div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160; </div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;  <span class="comment">// Get x1-x2 etc</span></div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;  dr[0] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x);</div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;  dr[1] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y);</div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;  dr[2] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z);</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160; </div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;  <span class="comment">// Get the squared absolute distance</span></div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;    r2 += <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/pow.html">pow</a>(dr[k], 2.0);</div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;  }</div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00164">164</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;                    {</div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array&lt;double, 3&gt;</a> dr;</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;  <span class="keywordtype">double</span> r2 = 0.0; <span class="comment">// Squared absolute distance</span></div>
 <div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160; </div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;  <span class="keywordflow">return</span> <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/sqrt.html">sqrt</a>(r2);</div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;}</div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;  <span class="comment">// Get x1-x2 etc</span></div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;  dr[0] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x);</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;  dr[1] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y);</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;  dr[2] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z);</div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160; </div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;  <span class="comment">// Get the squared absolute distance</span></div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;    r2 += <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/pow.html">pow</a>(dr[k], 2.0);</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;  }</div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160; </div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;  <span class="keywordflow">return</span> <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/sqrt.html">sqrt</a>(r2);</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;}</div>
 <div class="ttc" id="aarray_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a></div></div>
 <div class="ttc" id="afabs_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">std::fabs</a></div><div class="ttdeci">T fabs(T... args)</div></div>
-<div class="ttc" id="agroup__molSys_html_ga67ab89369cd26572878a91afd521ef81"><div class="ttname"><a href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">molSys::PointCloud::pts</a></div><div class="ttdeci">std::vector&lt; S &gt; pts</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00156">mol_sys.hpp:156</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga67ab89369cd26572878a91afd521ef81"><div class="ttname"><a href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">molSys::PointCloud::pts</a></div><div class="ttdeci">std::vector&lt; S &gt; pts</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00166">mol_sys.hpp:166</a></div></div>
 <div class="ttc" id="apow_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/numeric/math/pow.html">std::pow</a></div><div class="ttdeci">T pow(T... args)</div></div>
 <div class="ttc" id="asqrt_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/numeric/math/sqrt.html">std::sqrt</a></div><div class="ttdeci">T sqrt(T... args)</div></div>
 </div><!-- fragment -->
@@ -488,12 +488,12 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00282">282</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;                                               {</div>
-<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;  <span class="comment">// Replace by boost function later</span></div>
-<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;  <span class="keyword">struct </span>stat buffer;</div>
-<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;  <span class="keywordflow">return</span> (stat(name.<a class="codeRef" href="http://en.cppreference.com/w/cpp/string/basic_string/c_str.html">c_str</a>(), &amp;buffer) == 0);</div>
-<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00292">292</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;                                               {</div>
+<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;  <span class="comment">// Replace by boost function later</span></div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;  <span class="keyword">struct </span>stat buffer;</div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;  <span class="keywordflow">return</span> (stat(name.<a class="codeRef" href="http://en.cppreference.com/w/cpp/string/basic_string/c_str.html">c_str</a>(), &amp;buffer) == 0);</div>
+<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;}</div>
 <div class="ttc" id="ac_str_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/string/basic_string/c_str.html">std::string::c_str</a></div><div class="ttdeci">T c_str(T... args)</div></div>
 </div><!-- fragment -->
 </div>
@@ -523,98 +523,98 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The desired average value </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8cpp_source.html#l00163">163</a> of file <a class="el" href="generic_8cpp_source.html">generic.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;                                                              {</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;  <span class="keywordtype">double</span> avgVal = 0.0;   <span class="comment">// Average value, excluding the outliers</span></div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;  <span class="keywordtype">double</span> median;         <span class="comment">// Median value</span></div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;  <span class="keywordtype">int</span> n = inpVec.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>(); <span class="comment">// Number of values</span></div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a> lowerRange,</div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;      upperRange;                       <span class="comment">// n/2 smallest and n/2 largest numbers</span></div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;  <span class="keywordtype">double</span> firstQuartile, thirdQuartile;  <span class="comment">// First and third quartiles</span></div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;  <span class="keywordtype">double</span> iqr;                           <span class="comment">// Interquartile range</span></div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;  <span class="keywordtype">double</span> outlierLimLow, outlierLimHigh; <span class="comment">// Outliers limit</span></div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;  <span class="keywordtype">int</span> numOfObservations = 0; <span class="comment">// Number of observations used for the average</span></div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;  <span class="comment">// ----------------------</span></div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;  <span class="comment">// Calculate the median (the vector is sorted inside the function)</span></div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;  median = <a class="code" href="group__gen.html#ga6046c3c9db73fbf420ad07834047942e">calcMedian</a>(&amp;inpVec);</div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;  <span class="comment">// ----------------------</span></div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;  <span class="comment">// Get the n/2 smallest and largest numbers</span></div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;  <span class="keywordflow">if</span> (n % 2 == 0) {</div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; n / 2; i++) {</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;      <span class="comment">// n/2 smallest numbers</span></div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;      lowerRange.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(inpVec[i]);</div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;      <span class="comment">// n/2 largest numbers</span></div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;      upperRange.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(inpVec[n / 2 + i]);</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;    } <span class="comment">// end of loop to fill up the n/2 smallest and n/2 largest</span></div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;  }   <span class="comment">// even</span></div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;  <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;    <span class="comment">//</span></div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;    <span class="keywordtype">int</span> halfN = (n + 1) / 2;</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;    <span class="comment">// Exclude the median</span></div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; halfN; i++) {</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;      <span class="comment">// (n+1)/2 smallest numbers</span></div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;      lowerRange.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(inpVec[i]);</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;      <span class="comment">// (n+1)/2 largest numbers</span></div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;      upperRange.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(inpVec[halfN + i]);</div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;    } <span class="comment">// end of filling up the smallest and largest half-ranges</span></div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;  }   <span class="comment">// for odd numbers</span></div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;  <span class="comment">// ----------------------</span></div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;  <span class="comment">// Calculate the first and third quartiles, and interquartile range</span></div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;  <span class="comment">// First quartile</span></div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;  firstQuartile = <a class="code" href="group__gen.html#ga6046c3c9db73fbf420ad07834047942e">calcMedian</a>(&amp;lowerRange);</div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;  <span class="comment">// Third quartile</span></div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;  thirdQuartile = <a class="code" href="group__gen.html#ga6046c3c9db73fbf420ad07834047942e">calcMedian</a>(&amp;upperRange);</div>
-<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;  <span class="comment">// Interquartile range</span></div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;  iqr = thirdQuartile - firstQuartile;</div>
-<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;  <span class="comment">// ----------------------</span></div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;  <span class="comment">// Calculate the average without outliers</span></div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;  <span class="comment">// Outliers are defined as values which</span></div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;  <span class="comment">// are less than Q1 - 1.5IQR</span></div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;  <span class="comment">// or greater than Q3 + 1.5IQR</span></div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;  <span class="comment">// Get the limits for the outliers</span></div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;  outlierLimLow = firstQuartile - 1.5 * iqr;</div>
-<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;  outlierLimHigh = thirdQuartile + 1.5 * iqr;</div>
-<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;  <span class="comment">// Loop through the values in inpVec to get the average, excluding outliers</span></div>
-<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; n; i++) {</div>
-<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;    <span class="comment">//</span></div>
-<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;    <span class="keywordflow">if</span> (inpVec[i] &lt; outlierLimLow) {</div>
-<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;      <span class="keywordflow">continue</span>;</div>
-<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;    } <span class="comment">// lower limit outlier</span></div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (inpVec[i] &gt; outlierLimHigh) {</div>
-<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;      <span class="keywordflow">continue</span>;</div>
-<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;    } <span class="comment">// higher limit outlier</span></div>
-<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;    <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;      <span class="comment">// Number of observations added</span></div>
-<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;      numOfObservations++;</div>
-<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;      <span class="comment">// Add to the average</span></div>
-<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;      avgVal += inpVec[i];</div>
-<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;    } <span class="comment">// take the average</span></div>
-<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;  }   <span class="comment">// end of loop for getting the average</span></div>
-<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;  <span class="comment">// Divide by the number of observations used</span></div>
-<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;  avgVal /= numOfObservations;</div>
-<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;  <span class="comment">// ----------------------</span></div>
-<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;  <span class="comment">// This fails if there are not enough observations (ring size = 3)</span></div>
-<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;  <span class="keywordflow">if</span> (numOfObservations == 0) {</div>
-<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;    <span class="keywordtype">double</span> sumVal = 0.0;</div>
-<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;    <span class="comment">// Loop through all the values and sum</span></div>
-<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt;= n; i++) {</div>
-<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;      sumVal += inpVec[i];</div>
-<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;    } <span class="comment">// end of sum</span></div>
-<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;    <span class="comment">// Normalize</span></div>
-<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;    avgVal = sumVal / n;</div>
-<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;    <span class="keywordflow">return</span> avgVal;</div>
-<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;  } <span class="comment">// for triangular prism blocks</span></div>
-<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;  <span class="comment">// ----------------------</span></div>
-<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160; </div>
-<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;  <span class="keywordflow">return</span> avgVal;</div>
-<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;}</div>
-<div class="ttc" id="agroup__gen_html_ga6046c3c9db73fbf420ad07834047942e"><div class="ttname"><a href="group__gen.html#ga6046c3c9db73fbf420ad07834047942e">gen::calcMedian</a></div><div class="ttdeci">double calcMedian(std::vector&lt; double &gt; *input)</div><div class="ttdoc">Inline generic function for calculating the median given a vector of the values.</div><div class="ttdef"><b>Definition:</b> <a href="generic_8hpp_source.html#l00061">generic.hpp:61</a></div></div>
+<p class="definition">Definition at line <a class="el" href="generic_8cpp_source.html#l00173">173</a> of file <a class="el" href="generic_8cpp_source.html">generic.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;                                                              {</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;  <span class="keywordtype">double</span> avgVal = 0.0;   <span class="comment">// Average value, excluding the outliers</span></div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;  <span class="keywordtype">double</span> median;         <span class="comment">// Median value</span></div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;  <span class="keywordtype">int</span> n = inpVec.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>(); <span class="comment">// Number of values</span></div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a> lowerRange,</div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;      upperRange;                       <span class="comment">// n/2 smallest and n/2 largest numbers</span></div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;  <span class="keywordtype">double</span> firstQuartile, thirdQuartile;  <span class="comment">// First and third quartiles</span></div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;  <span class="keywordtype">double</span> iqr;                           <span class="comment">// Interquartile range</span></div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;  <span class="keywordtype">double</span> outlierLimLow, outlierLimHigh; <span class="comment">// Outliers limit</span></div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;  <span class="keywordtype">int</span> numOfObservations = 0; <span class="comment">// Number of observations used for the average</span></div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;  <span class="comment">// ----------------------</span></div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;  <span class="comment">// Calculate the median (the vector is sorted inside the function)</span></div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;  median = <a class="code" href="group__gen.html#ga6046c3c9db73fbf420ad07834047942e">calcMedian</a>(&amp;inpVec);</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;  <span class="comment">// ----------------------</span></div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;  <span class="comment">// Get the n/2 smallest and largest numbers</span></div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;  <span class="keywordflow">if</span> (n % 2 == 0) {</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; n / 2; i++) {</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;      <span class="comment">// n/2 smallest numbers</span></div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;      lowerRange.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(inpVec[i]);</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;      <span class="comment">// n/2 largest numbers</span></div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;      upperRange.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(inpVec[n / 2 + i]);</div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;    } <span class="comment">// end of loop to fill up the n/2 smallest and n/2 largest</span></div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;  }   <span class="comment">// even</span></div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;  <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;    <span class="comment">//</span></div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;    <span class="keywordtype">int</span> halfN = (n + 1) / 2;</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;    <span class="comment">// Exclude the median</span></div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; halfN; i++) {</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;      <span class="comment">// (n+1)/2 smallest numbers</span></div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;      lowerRange.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(inpVec[i]);</div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;      <span class="comment">// (n+1)/2 largest numbers</span></div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;      upperRange.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(inpVec[halfN + i]);</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;    } <span class="comment">// end of filling up the smallest and largest half-ranges</span></div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;  }   <span class="comment">// for odd numbers</span></div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;  <span class="comment">// ----------------------</span></div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;  <span class="comment">// Calculate the first and third quartiles, and interquartile range</span></div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;  <span class="comment">// First quartile</span></div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;  firstQuartile = <a class="code" href="group__gen.html#ga6046c3c9db73fbf420ad07834047942e">calcMedian</a>(&amp;lowerRange);</div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;  <span class="comment">// Third quartile</span></div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;  thirdQuartile = <a class="code" href="group__gen.html#ga6046c3c9db73fbf420ad07834047942e">calcMedian</a>(&amp;upperRange);</div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;  <span class="comment">// Interquartile range</span></div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;  iqr = thirdQuartile - firstQuartile;</div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;  <span class="comment">// ----------------------</span></div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;  <span class="comment">// Calculate the average without outliers</span></div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;  <span class="comment">// Outliers are defined as values which</span></div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;  <span class="comment">// are less than Q1 - 1.5IQR</span></div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;  <span class="comment">// or greater than Q3 + 1.5IQR</span></div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;  <span class="comment">// Get the limits for the outliers</span></div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;  outlierLimLow = firstQuartile - 1.5 * iqr;</div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;  outlierLimHigh = thirdQuartile + 1.5 * iqr;</div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;  <span class="comment">// Loop through the values in inpVec to get the average, excluding outliers</span></div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; n; i++) {</div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;    <span class="comment">//</span></div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;    <span class="keywordflow">if</span> (inpVec[i] &lt; outlierLimLow) {</div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;      <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;    } <span class="comment">// lower limit outlier</span></div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (inpVec[i] &gt; outlierLimHigh) {</div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;      <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;    } <span class="comment">// higher limit outlier</span></div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;    <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;      <span class="comment">// Number of observations added</span></div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;      numOfObservations++;</div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;      <span class="comment">// Add to the average</span></div>
+<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;      avgVal += inpVec[i];</div>
+<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;    } <span class="comment">// take the average</span></div>
+<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;  }   <span class="comment">// end of loop for getting the average</span></div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;  <span class="comment">// Divide by the number of observations used</span></div>
+<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;  avgVal /= numOfObservations;</div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;  <span class="comment">// ----------------------</span></div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;  <span class="comment">// This fails if there are not enough observations (ring size = 3)</span></div>
+<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;  <span class="keywordflow">if</span> (numOfObservations == 0) {</div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;    <span class="keywordtype">double</span> sumVal = 0.0;</div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;    <span class="comment">// Loop through all the values and sum</span></div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt;= n; i++) {</div>
+<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;      sumVal += inpVec[i];</div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;    } <span class="comment">// end of sum</span></div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;    <span class="comment">// Normalize</span></div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;    avgVal = sumVal / n;</div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;    <span class="keywordflow">return</span> avgVal;</div>
+<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;  } <span class="comment">// for triangular prism blocks</span></div>
+<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;  <span class="comment">// ----------------------</span></div>
+<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160; </div>
+<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;  <span class="keywordflow">return</span> avgVal;</div>
+<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;}</div>
+<div class="ttc" id="agroup__gen_html_ga6046c3c9db73fbf420ad07834047942e"><div class="ttname"><a href="group__gen.html#ga6046c3c9db73fbf420ad07834047942e">gen::calcMedian</a></div><div class="ttdeci">double calcMedian(std::vector&lt; double &gt; *input)</div><div class="ttdoc">Inline generic function for calculating the median given a vector of the values.</div><div class="ttdef"><b>Definition:</b> <a href="generic_8hpp_source.html#l00071">generic.hpp:71</a></div></div>
 <div class="ttc" id="apush_back_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">std::vector::push_back</a></div><div class="ttdeci">T push_back(T... args)</div></div>
 <div class="ttc" id="asize_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/size.html">std::vector::size</a></div><div class="ttdeci">T size(T... args)</div></div>
 <div class="ttc" id="avector_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a></div></div>
@@ -657,23 +657,23 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The output angle between the input vectors, in radians </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8cpp_source.html#l00140">140</a> of file <a class="el" href="generic_8cpp_source.html">generic.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;                                                                  {</div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;  gsl_vector *gOO = gsl_vector_alloc(3);</div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;  gsl_vector *gOH = gsl_vector_alloc(3);</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;  <span class="keywordtype">double</span> norm_gOO, norm_gOH, xDummy, angle;</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 3; i++) {</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;    gsl_vector_set(gOO, i, OO[i]);</div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;    gsl_vector_set(gOH, i, OH[i]);</div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;  }</div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;  norm_gOO = gsl_blas_dnrm2(gOO);</div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;  norm_gOH = gsl_blas_dnrm2(gOH);</div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;  gsl_blas_ddot(gOO, gOH, &amp;xDummy);</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;  angle = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/acos.html">acos</a>(xDummy / (norm_gOO * norm_gOH));</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;  gsl_vector_free(gOO);</div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;  gsl_vector_free(gOH);</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;  <span class="keywordflow">return</span> angle;</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8cpp_source.html#l00150">150</a> of file <a class="el" href="generic_8cpp_source.html">generic.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;                                                                  {</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;  gsl_vector *gOO = gsl_vector_alloc(3);</div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;  gsl_vector *gOH = gsl_vector_alloc(3);</div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;  <span class="keywordtype">double</span> norm_gOO, norm_gOH, xDummy, angle;</div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 3; i++) {</div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;    gsl_vector_set(gOO, i, OO[i]);</div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;    gsl_vector_set(gOH, i, OH[i]);</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;  }</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;  norm_gOO = gsl_blas_dnrm2(gOO);</div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;  norm_gOH = gsl_blas_dnrm2(gOH);</div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;  gsl_blas_ddot(gOO, gOH, &amp;xDummy);</div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;  angle = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/acos.html">acos</a>(xDummy / (norm_gOO * norm_gOH));</div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;  gsl_vector_free(gOO);</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;  gsl_vector_free(gOH);</div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;  <span class="keywordflow">return</span> angle;</div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -728,26 +728,26 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The unwrapped periodic distance. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00092">92</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;                                   {</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array&lt;double, 3&gt;</a> dr;</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;  <span class="keywordtype">double</span> r2 = 0.0; <span class="comment">// Squared absolute distance</span></div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160; </div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;  <span class="comment">// Get x1-x2 etc</span></div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;  dr[0] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x);</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;  dr[1] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y);</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;  dr[2] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z);</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160; </div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;  <span class="comment">// Get the squared absolute distance</span></div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    <span class="comment">// Correct for periodicity</span></div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    dr[k] -= yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k] * <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/round.html">round</a>(dr[k] / yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k]);</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;    r2 += <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/pow.html">pow</a>(dr[k], 2.0);</div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;  }</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160; </div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;  <span class="keywordflow">return</span> <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/sqrt.html">sqrt</a>(r2);</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;}</div>
-<div class="ttc" id="agroup__molSys_html_gaa7d9b8543780baf4a495c7acdb1f87d8"><div class="ttname"><a href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">molSys::PointCloud::box</a></div><div class="ttdeci">std::vector&lt; T &gt; box</div><div class="ttdoc">Number of atoms.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00159">mol_sys.hpp:159</a></div></div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00102">102</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;                                   {</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array&lt;double, 3&gt;</a> dr;</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;  <span class="keywordtype">double</span> r2 = 0.0; <span class="comment">// Squared absolute distance</span></div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160; </div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;  <span class="comment">// Get x1-x2 etc</span></div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;  dr[0] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x);</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;  dr[1] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y);</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;  dr[2] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z);</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160; </div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;  <span class="comment">// Get the squared absolute distance</span></div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    <span class="comment">// Correct for periodicity</span></div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;    dr[k] -= yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k] * <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/round.html">round</a>(dr[k] / yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k]);</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    r2 += <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/pow.html">pow</a>(dr[k], 2.0);</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;  }</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160; </div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;  <span class="keywordflow">return</span> <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/sqrt.html">sqrt</a>(r2);</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;}</div>
+<div class="ttc" id="agroup__molSys_html_gaa7d9b8543780baf4a495c7acdb1f87d8"><div class="ttname"><a href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">molSys::PointCloud::box</a></div><div class="ttdeci">std::vector&lt; T &gt; box</div><div class="ttdoc">Number of atoms.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00169">mol_sys.hpp:169</a></div></div>
 <div class="ttc" id="around_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/numeric/math/round.html">std::round</a></div><div class="ttdeci">T round(T... args)</div></div>
 </div><!-- fragment -->
 </div>
@@ -787,34 +787,34 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8cpp_source.html#l00011">11</a> of file <a class="el" href="generic_8cpp_source.html">generic.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;                       {</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ofstream.html">std::ofstream</a> outputFile;</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;  <span class="comment">// Create a new file in the output directory</span></div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;  outputFile.<a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ofstream/open.html">open</a>(outFile);</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160; </div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;  <span class="keywordflow">if</span> (outputFile.<a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ofstream/is_open.html">is_open</a>()) {</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    <span class="comment">// First line</span></div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    outputFile &lt;&lt; <span class="stringliteral">&quot;# Frame\tAtomID\tx\ty\tz\tcij\ticeType\n&quot;</span>;</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;    <span class="comment">// Write out all the information out line by line</span></div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a>; i++) {</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;      outputFile &lt;&lt; yCloud-&gt;<a class="code" href="group__molSys.html#gafccb5a0daab40c3ccc83e4494f4176d7">currentFrame</a> &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span> &lt;&lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[i].atomID</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;                 &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span> &lt;&lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[i].x &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span> &lt;&lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[i].y &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span></div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;                 &lt;&lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[i].z &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span>;</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;      <span class="comment">// Print out cij</span></div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;      <span class="comment">// for(int c=0; c&lt;yCloud-&gt;pts[i].c_ij.size(); c++){outputFile &lt;&lt;</span></div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;      <span class="comment">// yCloud-&gt;pts[i].c_ij[c]&lt;&lt;&quot;\t&quot;;} Print out the classifier</span></div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;      outputFile &lt;&lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[i].iceType &lt;&lt; <span class="stringliteral">&quot;\n&quot;</span>;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    }</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;  }</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;  <span class="comment">// Close the file</span></div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  outputFile.<a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ofstream/close.html">close</a>();</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8cpp_source.html#l00021">21</a> of file <a class="el" href="generic_8cpp_source.html">generic.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;                       {</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ofstream.html">std::ofstream</a> outputFile;</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;  <span class="comment">// Create a new file in the output directory</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;  outputFile.<a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ofstream/open.html">open</a>(outFile);</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160; </div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;  <span class="keywordflow">if</span> (outputFile.<a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ofstream/is_open.html">is_open</a>()) {</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    <span class="comment">// First line</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    outputFile &lt;&lt; <span class="stringliteral">&quot;# Frame\tAtomID\tx\ty\tz\tcij\ticeType\n&quot;</span>;</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    <span class="comment">// Write out all the information out line by line</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a>; i++) {</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;      outputFile &lt;&lt; yCloud-&gt;<a class="code" href="group__molSys.html#gafccb5a0daab40c3ccc83e4494f4176d7">currentFrame</a> &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span> &lt;&lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[i].atomID</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;                 &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span> &lt;&lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[i].x &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span> &lt;&lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[i].y &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;                 &lt;&lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[i].z &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span>;</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;      <span class="comment">// Print out cij</span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;      <span class="comment">// for(int c=0; c&lt;yCloud-&gt;pts[i].c_ij.size(); c++){outputFile &lt;&lt;</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;      <span class="comment">// yCloud-&gt;pts[i].c_ij[c]&lt;&lt;&quot;\t&quot;;} Print out the classifier</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;      outputFile &lt;&lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[i].iceType &lt;&lt; <span class="stringliteral">&quot;\n&quot;</span>;</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    }</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;  }</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;  <span class="comment">// Close the file</span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;  outputFile.<a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ofstream/close.html">close</a>();</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;  <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;}</div>
 <div class="ttc" id="abasic_ofstream_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/io/basic_ofstream.html">std::ofstream</a></div></div>
 <div class="ttc" id="aclose_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/io/basic_ofstream/close.html">std::ofstream::close</a></div><div class="ttdeci">T close(T... args)</div></div>
-<div class="ttc" id="agroup__molSys_html_ga2bdcb9260bd83f313a2d27fcc6437ef1"><div class="ttname"><a href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">molSys::PointCloud::nop</a></div><div class="ttdeci">int nop</div><div class="ttdoc">Current frame number.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00158">mol_sys.hpp:158</a></div></div>
-<div class="ttc" id="agroup__molSys_html_gafccb5a0daab40c3ccc83e4494f4176d7"><div class="ttname"><a href="group__molSys.html#gafccb5a0daab40c3ccc83e4494f4176d7">molSys::PointCloud::currentFrame</a></div><div class="ttdeci">int currentFrame</div><div class="ttdoc">Collection of points.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00157">mol_sys.hpp:157</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga2bdcb9260bd83f313a2d27fcc6437ef1"><div class="ttname"><a href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">molSys::PointCloud::nop</a></div><div class="ttdeci">int nop</div><div class="ttdoc">Current frame number.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00168">mol_sys.hpp:168</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gafccb5a0daab40c3ccc83e4494f4176d7"><div class="ttname"><a href="group__molSys.html#gafccb5a0daab40c3ccc83e4494f4176d7">molSys::PointCloud::currentFrame</a></div><div class="ttdeci">int currentFrame</div><div class="ttdoc">Collection of points.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00167">mol_sys.hpp:167</a></div></div>
 <div class="ttc" id="ais_open_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/io/basic_ofstream/is_open.html">std::ofstream::is_open</a></div><div class="ttdeci">T is_open(T... args)</div></div>
 <div class="ttc" id="aopen_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/io/basic_ofstream/open.html">std::ofstream::open</a></div><div class="ttdeci">T open(T... args)</div></div>
 </div><!-- fragment -->
@@ -851,8 +851,8 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The input angle, in degrees </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00045">45</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;{ <span class="keywordflow">return</span> (angle * 180) / <a class="code" href="group__gen.html#gaa59e2feae36f62dfdb0664bd06de8572">gen::pi</a>; }</div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00055">55</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;{ <span class="keywordflow">return</span> (angle * 180) / <a class="code" href="group__gen.html#gaa59e2feae36f62dfdb0664bd06de8572">gen::pi</a>; }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -905,30 +905,30 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The unwrapped relative distances for each dimension. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00184">184</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;                   {</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array&lt;double, 3&gt;</a> dr;</div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array&lt;double, 3&gt;</a> box = {yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[0], yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[1], yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[2]};</div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;  <span class="keywordtype">double</span> r2 = 0.0; <span class="comment">// Squared absolute distance</span></div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160; </div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;  <span class="comment">// Get x1-x2 etc</span></div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;  dr[0] = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x;</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;  dr[1] = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y;</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;  dr[2] = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z;</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160; </div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;  <span class="comment">// Get the relative distance</span></div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;    <span class="comment">//</span></div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;    <span class="keywordflow">if</span> (dr[k] &lt; -box[k] * 0.5) {</div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;      dr[k] = dr[k] + box[k];</div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;    }</div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;    <span class="keywordflow">if</span> (dr[k] &gt;= box[k] * 0.5) {</div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;      dr[k] = dr[k] - box[k];</div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;    }</div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;  }</div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160; </div>
-<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;  <span class="keywordflow">return</span> dr;</div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00194">194</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;                   {</div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array&lt;double, 3&gt;</a> dr;</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array&lt;double, 3&gt;</a> box = {yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[0], yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[1], yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[2]};</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;  <span class="keywordtype">double</span> r2 = 0.0; <span class="comment">// Squared absolute distance</span></div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160; </div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;  <span class="comment">// Get x1-x2 etc</span></div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;  dr[0] = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x;</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;  dr[1] = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y;</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;  dr[2] = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z - yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z;</div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160; </div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;  <span class="comment">// Get the relative distance</span></div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;    <span class="comment">//</span></div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;    <span class="keywordflow">if</span> (dr[k] &lt; -box[k] * 0.5) {</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;      dr[k] = dr[k] + box[k];</div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;    }</div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;    <span class="keywordflow">if</span> (dr[k] &gt;= box[k] * 0.5) {</div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;      dr[k] = dr[k] - box[k];</div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;    }</div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;  }</div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160; </div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;  <span class="keywordflow">return</span> dr;</div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -964,13 +964,13 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00243">243</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;                                                      {</div>
-<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_istringstream.html">std::istringstream</a> iss(line);</div>
-<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;std::string&gt;</a> tokens{<a class="codeRef" href="http://en.cppreference.com/w/cpp/iterator/istream_iterator.html">std::istream_iterator&lt;std::string&gt;</a>{iss},</div>
-<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;                                  <a class="codeRef" href="http://en.cppreference.com/w/cpp/iterator/istream_iterator.html">std::istream_iterator&lt;std::string&gt;</a>{}};</div>
-<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;  <span class="keywordflow">return</span> tokens;</div>
-<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00253">253</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;                                                      {</div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_istringstream.html">std::istringstream</a> iss(line);</div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;std::string&gt;</a> tokens{<a class="codeRef" href="http://en.cppreference.com/w/cpp/iterator/istream_iterator.html">std::istream_iterator&lt;std::string&gt;</a>{iss},</div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;                                  <a class="codeRef" href="http://en.cppreference.com/w/cpp/iterator/istream_iterator.html">std::istream_iterator&lt;std::string&gt;</a>{}};</div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;  <span class="keywordflow">return</span> tokens;</div>
+<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;}</div>
 <div class="ttc" id="abasic_istringstream_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/io/basic_istringstream.html">std::istringstream</a></div></div>
 <div class="ttc" id="aistream_iterator_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/iterator/istream_iterator.html">std::istream_iterator</a></div></div>
 </div><!-- fragment -->
@@ -1008,16 +1008,16 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00254">254</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;                                                         {</div>
-<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_istringstream.html">std::istringstream</a> iss(line);</div>
-<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a> tokens;</div>
-<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;  <span class="keywordtype">double</span> number; <span class="comment">// Each number being read in from the line</span></div>
-<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;  <span class="keywordflow">while</span> (iss &gt;&gt; number) {</div>
-<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;    tokens.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(number);</div>
-<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;  }</div>
-<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;  <span class="keywordflow">return</span> tokens;</div>
-<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00264">264</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;                                                         {</div>
+<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_istringstream.html">std::istringstream</a> iss(line);</div>
+<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a> tokens;</div>
+<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;  <span class="keywordtype">double</span> number; <span class="comment">// Each number being read in from the line</span></div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;  <span class="keywordflow">while</span> (iss &gt;&gt; number) {</div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;    tokens.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(number);</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;  }</div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;  <span class="keywordflow">return</span> tokens;</div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1053,16 +1053,16 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00268">268</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;                                                   {</div>
-<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_istringstream.html">std::istringstream</a> iss(line);</div>
-<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a> tokens;</div>
-<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;  <span class="keywordtype">int</span> number; <span class="comment">// Each number being read in from the line</span></div>
-<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;  <span class="keywordflow">while</span> (iss &gt;&gt; number) {</div>
-<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;    tokens.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(number);</div>
-<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;  }</div>
-<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;  <span class="keywordflow">return</span> tokens;</div>
-<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00278">278</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;                                                   {</div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_istringstream.html">std::istringstream</a> iss(line);</div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a> tokens;</div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;  <span class="keywordtype">int</span> number; <span class="comment">// Each number being read in from the line</span></div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;  <span class="keywordflow">while</span> (iss &gt;&gt; number) {</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;    tokens.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(number);</div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;  }</div>
+<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;  <span class="keywordflow">return</span> tokens;</div>
+<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1150,78 +1150,78 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8cpp_source.html#l00056">56</a> of file <a class="el" href="generic_8cpp_source.html">generic.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                              {</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;  <span class="keywordtype">double</span> x_iatom, y_iatom, z_iatom;</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;  <span class="keywordtype">double</span> x_jatom, y_jatom, z_jatom;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  <span class="keywordtype">double</span> x_ij, y_ij, z_ij; <span class="comment">// Relative distance</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a> box = yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>;</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  <span class="keywordtype">double</span> xPBC, yPBC, zPBC; <span class="comment">// Actual unwrapped distance</span></div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;  <span class="comment">// ----------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;  <span class="comment">// INIT</span></div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  <span class="comment">// iatom</span></div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;  x_iatom = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatomIndex].x;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;  y_iatom = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatomIndex].y;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  z_iatom = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatomIndex].z;</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  <span class="comment">// jatom</span></div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;  x_jatom = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatomIndex].x;</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;  y_jatom = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatomIndex].y;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;  z_jatom = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatomIndex].z;</div>
+<p class="definition">Definition at line <a class="el" href="generic_8cpp_source.html#l00066">66</a> of file <a class="el" href="generic_8cpp_source.html">generic.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                              {</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;  <span class="keywordtype">double</span> x_iatom, y_iatom, z_iatom;</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  <span class="keywordtype">double</span> x_jatom, y_jatom, z_jatom;</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  <span class="keywordtype">double</span> x_ij, y_ij, z_ij; <span class="comment">// Relative distance</span></div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;double&gt;</a> box = yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>;</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;  <span class="keywordtype">double</span> xPBC, yPBC, zPBC; <span class="comment">// Actual unwrapped distance</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160; </div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;  <span class="comment">// ----------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;  <span class="comment">// GET RELATIVE DISTANCE</span></div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  x_ij = x_iatom - x_jatom;</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;  y_ij = y_iatom - y_jatom;</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;  z_ij = z_iatom - z_jatom;</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;  <span class="comment">// ----------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;  <span class="comment">// SHIFT COORDINATES IF REQUIRED</span></div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;  <span class="comment">// Shift x</span></div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;  <span class="keywordflow">if</span> (<a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(x_ij) &gt; 0.5 * box[0]) {</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    <span class="comment">// Get the actual distance</span></div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    xPBC = box[0] - <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(x_ij);</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    <span class="keywordflow">if</span> (x_ij &lt; 0) {</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;      x_jatom = x_iatom - xPBC;</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    } <span class="comment">// To the -x side of currentIndex</span></div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;      x_jatom = x_iatom + xPBC;</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    } <span class="comment">// Add to the + side</span></div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;  }   <span class="comment">// Shift nextElement</span></div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;  <span class="comment">// Shift y</span></div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;  <span class="keywordflow">if</span> (<a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(y_ij) &gt; 0.5 * box[1]) {</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    <span class="comment">// Get the actual distance</span></div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    yPBC = box[1] - <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(y_ij);</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    <span class="keywordflow">if</span> (y_ij &lt; 0) {</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;      y_jatom = y_iatom - yPBC;</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    } <span class="comment">// To the -y side of currentIndex</span></div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;      y_jatom = y_iatom + yPBC;</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    } <span class="comment">// Add to the + side</span></div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;  }   <span class="comment">// Shift nextElement</span></div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;  <span class="comment">// Shift z</span></div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;  <span class="keywordflow">if</span> (<a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(z_ij) &gt; 0.5 * box[2]) {</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    <span class="comment">// Get the actual distance</span></div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    zPBC = box[2] - <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(z_ij);</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    <span class="keywordflow">if</span> (z_ij &lt; 0) {</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;      z_jatom = z_iatom - zPBC;</div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    } <span class="comment">// To the -z side of currentIndex</span></div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;    <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;      z_jatom = z_iatom + zPBC;</div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;    } <span class="comment">// Add to the + side</span></div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;  }   <span class="comment">// Shift nextElement</span></div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;  <span class="comment">// ----------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;  <span class="comment">// Assign values</span></div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;  *x_i = x_iatom;</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;  *y_i = y_iatom;</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;  *z_i = z_iatom;</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;  *x_j = x_jatom;</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;  *y_j = y_jatom;</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;  *z_j = z_jatom;</div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160; </div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;  <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;}</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;  <span class="comment">// INIT</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  <span class="comment">// iatom</span></div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;  x_iatom = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatomIndex].x;</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;  y_iatom = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatomIndex].y;</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;  z_iatom = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatomIndex].z;</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;  <span class="comment">// jatom</span></div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;  x_jatom = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatomIndex].x;</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;  y_jatom = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatomIndex].y;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;  z_jatom = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatomIndex].z;</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;  <span class="comment">// ----------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;  <span class="comment">// GET RELATIVE DISTANCE</span></div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;  x_ij = x_iatom - x_jatom;</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;  y_ij = y_iatom - y_jatom;</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;  z_ij = z_iatom - z_jatom;</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;  <span class="comment">// ----------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;  <span class="comment">// SHIFT COORDINATES IF REQUIRED</span></div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;  <span class="comment">// Shift x</span></div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;  <span class="keywordflow">if</span> (<a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(x_ij) &gt; 0.5 * box[0]) {</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    <span class="comment">// Get the actual distance</span></div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;    xPBC = box[0] - <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(x_ij);</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    <span class="keywordflow">if</span> (x_ij &lt; 0) {</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;      x_jatom = x_iatom - xPBC;</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    } <span class="comment">// To the -x side of currentIndex</span></div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;    <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;      x_jatom = x_iatom + xPBC;</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    } <span class="comment">// Add to the + side</span></div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;  }   <span class="comment">// Shift nextElement</span></div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;  <span class="comment">// Shift y</span></div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;  <span class="keywordflow">if</span> (<a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(y_ij) &gt; 0.5 * box[1]) {</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;    <span class="comment">// Get the actual distance</span></div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;    yPBC = box[1] - <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(y_ij);</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    <span class="keywordflow">if</span> (y_ij &lt; 0) {</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;      y_jatom = y_iatom - yPBC;</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    } <span class="comment">// To the -y side of currentIndex</span></div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;      y_jatom = y_iatom + yPBC;</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;    } <span class="comment">// Add to the + side</span></div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;  }   <span class="comment">// Shift nextElement</span></div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;  <span class="comment">// Shift z</span></div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;  <span class="keywordflow">if</span> (<a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(z_ij) &gt; 0.5 * box[2]) {</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;    <span class="comment">// Get the actual distance</span></div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;    zPBC = box[2] - <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(z_ij);</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;    <span class="keywordflow">if</span> (z_ij &lt; 0) {</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;      z_jatom = z_iatom - zPBC;</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;    } <span class="comment">// To the -z side of currentIndex</span></div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;      z_jatom = z_iatom + zPBC;</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;    } <span class="comment">// Add to the + side</span></div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;  }   <span class="comment">// Shift nextElement</span></div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;  <span class="comment">// ----------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;  <span class="comment">// Assign values</span></div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;  *x_i = x_iatom;</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;  *y_i = y_iatom;</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;  *z_i = z_iatom;</div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;  *x_j = x_jatom;</div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;  *y_j = y_jatom;</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;  *z_j = z_jatom;</div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160; </div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;  <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1274,25 +1274,25 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The unwrapped periodic distance. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00122">122</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;                                   {</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array&lt;double, 3&gt;</a> dr;</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;  <span class="keywordtype">double</span> r2 = 0.0; <span class="comment">// Squared absolute distance</span></div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160; </div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;  <span class="comment">// Get x1-x2 etc</span></div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;  dr[0] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x - singlePoint[0]);</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;  dr[1] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y - singlePoint[1]);</div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;  dr[2] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z - singlePoint[2]);</div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160; </div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;  <span class="comment">// Get the squared absolute distance</span></div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;    <span class="comment">// Correct for periodicity</span></div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;    dr[k] -= yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k] * <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/round.html">round</a>(dr[k] / yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k]);</div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;    r2 += <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/pow.html">pow</a>(dr[k], 2.0);</div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;  }</div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160; </div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;  <span class="keywordflow">return</span> <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/sqrt.html">sqrt</a>(r2);</div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00132">132</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;                                   {</div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array&lt;double, 3&gt;</a> dr;</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;  <span class="keywordtype">double</span> r2 = 0.0; <span class="comment">// Squared absolute distance</span></div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160; </div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;  <span class="comment">// Get x1-x2 etc</span></div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;  dr[0] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x - singlePoint[0]);</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;  dr[1] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y - singlePoint[1]);</div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;  dr[2] = <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/fabs.html">fabs</a>(yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z - singlePoint[2]);</div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160; </div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;  <span class="comment">// Get the squared absolute distance</span></div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;    <span class="comment">// Correct for periodicity</span></div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;    dr[k] -= yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k] * <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/round.html">round</a>(dr[k] / yCloud-&gt;<a class="code" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k]);</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;    r2 += <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/pow.html">pow</a>(dr[k], 2.0);</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;  }</div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160; </div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;  <span class="keywordflow">return</span> <a class="codeRef" href="http://en.cppreference.com/w/cpp/numeric/math/sqrt.html">sqrt</a>(r2);</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1310,7 +1310,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <p>Uses Boost to get the value of pi. </p>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00038">38</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00048">48</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
 
 </div>
 </div>
