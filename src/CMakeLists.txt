@@ -1,3 +1,13 @@
+#-----------------------------------------------------------------------------------
+# d-SEAMS is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# A copy of the GNU General Public License is available at
+# http://www.gnu.org/licenses/
+#-----------------------------------------------------------------------------------
+
 # Set the output folder where your program will be created
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
