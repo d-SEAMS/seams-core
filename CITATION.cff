@@ -1,0 +1,49 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Goswami
+    given-names: Amrita
+    orcid: http://orcid.org/0000-0001-8706-2383
+    affiliation: "Indian Institute of Technology Kanpur"
+  - family-names: Goswami
+    given-names: Rohit
+    orcid: http://orcid.org/0000-0002-2393-8056
+    affiliation: "University of Iceland"
+    email: "rgoswami@ieee.org"
+    website: https://rgoswami.me
+title: "d-SEAMS (Deferred Structural Elucidation Analysis for Molecular Simulations)"
+version: 1.0.1
+doi: 10.5281/zenodo.3874292
+date-released: 2020-06-03
+license: GPL-3.0-or-later
+abstract: |
+  d-SEAMS is a collection of analysis tools for molecular simulations. It has
+  been implemented as a High Performance Cluster enabled engine in C++, with
+  extensions via the Lua scripting interface. The code sheds light on the
+  structures from simulation trajectories, in terms of their topology and it has
+  been tailored for the analysis of nucleating systems.
+repository-code: https://github.com/d-SEAMS/seams-core/
+url: https://dseams.info
+references:
+  - type: article
+    title: "d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations"
+    doi: 10.1021/acs.jcim.0c00031
+    authors:
+      - family-names: Goswami
+        given-names: Amrita
+        orcid: http://orcid.org/0000-0001-8706-2383
+        affiliation: "Indian Institute of Technology Kanpur"
+      - family-names: Goswami
+        given-names: Rohit
+        orcid: http://orcid.org/0000-0002-2393-8056
+        affiliation: "Indian Institute of Technology"
+        email: "rgoswami@ieee.org"
+        website: https://rgoswami.me
+      - family-names: Singh
+        name-particle: K.
+        given-names: Jayant
+        orcid: http://orcid.org/0000-0001-8056-2115
+        affiliation: "Indian Institute of Technology"
+  - type: data
+    title: "Sample Trajectories"
+    url: https://figshare.com/projects/d-SEAMS_Datasets/73545
