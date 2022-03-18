@@ -15,6 +15,6 @@ for frame=targetFrame,finalFrame,frameGap do
    --- Get the largest ice cluster. Here, iceNeighbourList is the neighbour list by index.
    clusterAnalysis(outDir, clusterCloud, resCloud, nList, iceNeighbourList, cutoffRadius, targetFrame, "q6");
    --- Recenter the cluster such that the centroid is at the center of the simulation box 
-   recenterCluster(clusterCloud);
+   recenterCluster(clusterCloud, iceNeighbourList);
    writeDump(resCloud,outDir,largestClusterDump); --- Dump the recentered largest ice cluster
 end
