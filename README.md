@@ -21,7 +21,7 @@
 the data-sets (trajectories) <a
 href="https://figshare.com/projects/d-SEAMS_Datasets/73545">from figshare</a>.
 
-\warning **If** you are unwilling to use the `nix` build system, then **please note** that you must manage the dependencies MANUALLY, including the compiler versions.
+\warning **If** you are unwilling to use the `nix` build system, then **please note** that you must manage the dependencies MANUALLY, including the compiler versions. Optionally, use the provided `conda` environment.
 
 # Citation
 
@@ -49,14 +49,43 @@ The corresponding `bibtex` entry is:
     url={https://doi.org/10.1021/acs.jcim.0c00031}
     }
 
-# Compilation with Nix
+# Compilation
 
 We use a deterministic build system to generate both bug reports and uniform
 usage statistics. This also handles the `lua` scripting engine.
 
 \note The lua functions are documented on the [on the API Docs](https://docs.dseams.info/md_markdown_luafunctions)
 
+We also provide a `conda` environment as a fallback, which is also recommended for MacOS users.
+
 ## Build
+
+### Conda
+
+Although we strongly suggest using `nix`, for MacOS systems, the following
+instructions may be more suitable. We will assume the presence of [micromamba](https://mamba.readthedocs.io/en/latest/installation.html):
+
+```bash
+micromamba create -f environment.yml
+micromamba activate dseams
+```
+
+Now the installation can proceed.
+
+\note we do not install a new version of `cmake` within the `conda` environment because of conflicts with `lua`
+
+```bash
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -DCMAKE_INSTALL_PREFIX:PATH=$CONDA_PREFIX ../
+make -j$(nproc)
+make install
+```
+
+We have opted to install into the `conda` environment, if this is not the
+intended behavior, use `/usr/local` instead.
+
+### Nix
 
 Since this project is built with `nix`, we can simply do the following from the
 root directory (longer method):
@@ -84,6 +113,14 @@ nix-build . # Optional
 # Install into your path
 nix-env -if . # Required
 # Run the command anywhere
+yodaStruct -c lua_inputs/config.yml
+```
+
+### Usage
+
+Having installed the `yodaStruct` binary and library, we can now use it.
+
+```bash
 yodaStruct -c lua_inputs/config.yml
 ```
 
