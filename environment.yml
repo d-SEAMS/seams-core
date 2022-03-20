@@ -1,0 +1,23 @@
+# To use:
+#
+#   $ micromamba create -f environment.yml
+#   $ micromamba activate dseams
+#
+name: dseams
+channels:
+  - conda-forge
+dependencies:
+  - compilers
+  - gfortran
+  - catch2
+  - fmt
+  - yaml-cpp
+  - liblapack
+  - libblas
+  - boost-cpp
+  - gsl
+  - cmake
+  - lua-luafilesystem
+  # Pinned
+  - eigen==3.3.9
+  - lua==5.2.*
