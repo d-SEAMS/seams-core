@@ -108,7 +108,7 @@ $(function() {
 <li>Our <a href="https://wiki.dseams.info">wiki is here</a></li>
 </ul>
 <dl class="section note"><dt>Note</dt><dd>The <a href="pages.html">related pages</a> describe the examples and how to obtain the data-sets (trajectories) <a href="https://figshare.com/projects/d-SEAMS_Datasets/73545">from figshare</a>.</dd></dl>
-<dl class="section warning"><dt>Warning</dt><dd><b>If</b> you are unwilling to use the <code>nix</code> build system, then <b>please note</b> that you must manage the dependencies MANUALLY, including the compiler versions.</dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd><b>If</b> you are unwilling to use the <code>nix</code> build system, then <b>please note</b> that you must manage the dependencies MANUALLY, including the compiler versions. Optionally, use the provided <code>conda</code> environment.</dd></dl>
 <h1>Citation</h1>
 <ul>
 <li>This has been published at the <a href="https://doi.org/10.1021/acs.jcim.0c00031">Journal of Chemical Information and Modeling (JCIM)</a></li>
@@ -127,10 +127,24 @@ issn={1549-9596},
 doi={10.1021/acs.jcim.0c00031},
 url={https://doi.org/10.1021/acs.jcim.0c00031}
 }
-</pre> <h1>Compilation with Nix</h1>
+</pre> <h1>Compilation</h1>
 <p>We use a deterministic build system to generate both bug reports and uniform usage statistics. This also handles the <code>lua</code> scripting engine.</p>
 <dl class="section note"><dt>Note</dt><dd>The lua functions are documented on the <a href="https://docs.dseams.info/md_markdown_luafunctions">on the API Docs</a></dd></dl>
+<p>We also provide a <code>conda</code> environment as a fallback, which is also recommended for MacOS users.</p>
 <h2>Build</h2>
+<h3>Conda</h3>
+<p>Although we strongly suggest using <code>nix</code>, for MacOS systems, the following instructions may be more suitable. We will assume the presence of <a href="https://mamba.readthedocs.io/en/latest/installation.html">micromamba</a>:</p>
+<div class="fragment"><div class="line">micromamba create -f environment.yml</div>
+<div class="line">micromamba activate dseams</div>
+</div><!-- fragment --><p>Now the installation can proceed.</p>
+<dl class="section note"><dt>Note</dt><dd>we do not install a new version of <code>cmake</code> within the <code>conda</code> environment because of conflicts with <code>lua</code></dd></dl>
+<div class="fragment"><div class="line">mkdir build</div>
+<div class="line">cd build</div>
+<div class="line">cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -DCMAKE_INSTALL_PREFIX:PATH=$CONDA_PREFIX ../</div>
+<div class="line">make -j$(nproc)</div>
+<div class="line">make install</div>
+</div><!-- fragment --><p>We have opted to install into the <code>conda</code> environment, if this is not the intended behavior, use <code>/usr/local</code> instead.</p>
+<h3>Nix</h3>
 <p>Since this project is built with <code>nix</code>, we can simply do the following from the root directory (longer method):</p>
 <div class="fragment"><div class="line"># Make sure there are no artifacts</div>
 <div class="line">rm -rf build</div>
@@ -151,6 +165,9 @@ url={https://doi.org/10.1021/acs.jcim.0c00031}
 <div class="line">nix-env -if . # Required</div>
 <div class="line"># Run the command anywhere</div>
 <div class="line">yodaStruct -c lua_inputs/config.yml</div>
+</div><!-- fragment --><h3>Usage</h3>
+<p>Having installed the <code>yodaStruct</code> binary and library, we can now use it.</p>
+<div class="fragment"><div class="line">yodaStruct -c lua_inputs/config.yml</div>
 </div><!-- fragment --><dl class="section note"><dt>Note</dt><dd>The paths in the <code>.yml</code> should be <b>relative to the folder from which the binary is called</b>.</dd></dl>
 <p>If you're confused about how to handle the relative paths, run the command <code>yodaStruct -c lua_inputs/config.yml</code> in the top-level directory, and set the paths relative to the top-level directory. This is the convention used in the examples as well.</p>
 <h3>Language Server Support</h3>
