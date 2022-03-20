@@ -292,12 +292,12 @@ bond::populateHbonds(std::string filename,
         } // end of applying PBCs to the O-H and O--O vectors
         //
         // Get the angle between the O--O and O-H vectors
-        double gslAngle = gen::gslVecAngle(ooVec, ohVec);
-        double gslAngleDeg = gen::radDeg(gslAngle);
+        double eigenAngle = gen::eigenVecAngle(ooVec, ohVec);
+        double eigenAngleDeg = gen::radDeg(eigenAngle);
 
         //
         // A hydrogen bond is formed if the angle is less than 30 degrees
-        if (gslAngleDeg > angleCutoff) {
+        if (eigenAngleDeg > angleCutoff) {
           continue;
         } // not a hydrogen bond
 

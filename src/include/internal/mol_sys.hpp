@@ -20,6 +20,7 @@
 #include <string>
 #include <sys/stat.h>
 #include <vector>
+#include<unordered_map>
 
 // For debugging, instantiate the unordered map [consider removal for
 // production]

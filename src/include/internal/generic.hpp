@@ -18,7 +18,9 @@
 
 // Boost
 #include <boost/math/constants/constants.hpp>
-#include <gsl/gsl_blas.h>
+// Eigen
+#include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Dense>
 
 /** @file generic.hpp
  *   @brief File for containing generic or common functions.
@@ -54,8 +56,8 @@ const double pi = boost::math::constants::pi<double>();
  */
 inline double radDeg(double angle) { return (angle * 180) / gen::pi; }
 
-//! GSL for getting the angle (in radians) between the O--O and O-H vectors
-double gslVecAngle(std::vector<double> OO, std::vector<double> OH);
+//! Eigen function for getting the angle (in radians) between the O--O and O-H vectors
+double eigenVecAngle(std::vector<double> OO, std::vector<double> OH);
 
 //! Get the average, after excluding the outliers, using quartiles
 double getAverageWithoutOutliers(std::vector<double> inpVec);

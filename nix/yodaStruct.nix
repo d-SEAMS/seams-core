@@ -21,7 +21,6 @@
 , blas
 , lib
 , boost
-, gsl
 , cmake }:
   clangStdenv.mkDerivation {
   name = "yodaStruct";
@@ -38,7 +37,6 @@
   eigen
   catch2
   boost
-  gsl
   liblapack
   blas
   lua

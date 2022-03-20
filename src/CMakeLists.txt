@@ -17,7 +17,6 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 include(FindBLAS)
 include(FindLAPACK)
 include(FindBoost)
-include(FindGSL)
 add_compile_options(
   # "-Wall" "-Wpedantic" "-Wextra" "-fexceptions"
   "$<$<CONFIG:Debug>:-O0;-g3;-ggdb>"
@@ -34,12 +33,10 @@ include_directories(
   ${LUA_INCLUDE_DIR}
   ${Boost_INCLUDE_DIRS}
   ${Eigen3_INCLUDE_DIRS}
-  ${GSL_INCLUDE_DIRS}
   )
 add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
 find_package(
   "Lua" REQUIRED
-  "GSL" REQUIRED
   "Boost" REQUIRED COMPONENTS system filesystem
   "Eigen3 3.3" REQUIRED
   "yaml-cpp"
@@ -52,8 +49,6 @@ target_link_libraries(
   ${Boost_LIBRARIES}
   ${Eigen3_LIBRARIES}
   ${LUA_LIBRARIES}
-  ${GSL_LIBRARIES}
-  stdc++fs
   fmt
   yaml-cpp
   yodaLib
