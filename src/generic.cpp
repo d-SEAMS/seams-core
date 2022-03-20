@@ -140,27 +140,18 @@ int gen::unwrappedCoordShift(
 
 /**
  * @details Function for obtaining the angle between two input vectors
- * (std::vector). Internally, the vectors are converted to GSL vectors. The dot
- * product between the input vectors is used to calculate the angle between
+ * (std::vector). Internally, the vectors are converted to Eigen vectors. The
+ * dot product between the input vectors is used to calculate the angle between
  * them.
  * @param[in] OO The O--O vector (but can be any vector, in general).
  * @param[in] OH The O-H vector (but can be any vector, in general).
  * @return The output angle between the input vectors, in radians
  */
-double gen::gslVecAngle(std::vector<double> OO, std::vector<double> OH) {
-  gsl_vector *gOO = gsl_vector_alloc(3);
-  gsl_vector *gOH = gsl_vector_alloc(3);
-  double norm_gOO, norm_gOH, xDummy, angle;
-  for (int i = 0; i < 3; i++) {
-    gsl_vector_set(gOO, i, OO[i]);
-    gsl_vector_set(gOH, i, OH[i]);
-  }
-  norm_gOO = gsl_blas_dnrm2(gOO);
-  norm_gOH = gsl_blas_dnrm2(gOH);
-  gsl_blas_ddot(gOO, gOH, &xDummy);
-  angle = acos(xDummy / (norm_gOO * norm_gOH));
-  gsl_vector_free(gOO);
-  gsl_vector_free(gOH);
+double gen::eigenVecAngle(std::vector<double> OO, std::vector<double> OH) {
+  Eigen::Vector3d eigOO = Eigen::Map<Eigen::Vector3d>(OO.data(), OO.size());
+  Eigen::Vector3d eigOH = Eigen::Map<Eigen::Vector3d>(OH.data(), OH.size());
+  double angle;
+  angle = acos(eigOO.dot(eigOH) / (eigOO.norm() * eigOH.norm()));
   return angle;
 }
 

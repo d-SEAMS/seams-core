@@ -31,7 +31,6 @@ add_executable(yodaStruct_test
 # include(FindBLAS)
 # include(FindLAPACK)
 # include(FindBoost)
-include(FindGSL)
 
 # Find packages
 find_package(
@@ -39,7 +38,6 @@ find_package(
   "Boost" REQUIRED
   "Eigen3 3.3" REQUIRED
   "Catch2" REQUIRED
-  "GSL" REQUIRED
   "yaml-cpp"
   "fmt"
   )
@@ -49,7 +47,6 @@ target_link_libraries(yodaStruct_test
   ${Boost_LIBRARIES}
   ${Eigen3_LIBRARIES}
   ${LUA_LIBRARIES}
-  ${GSL_LIBRARIES}
   fmt
   yaml-cpp
   yodaLib
@@ -60,7 +57,6 @@ target_link_libraries(yodaStruct_test
 include_directories(
   ${PROJECT_SOURCE_DIR}/src/include/internal
   ${PROJECT_SOURCE_DIR}/src/include/external
-  ${GSL_INCLUDE_DIRS}
   ${Eigen3_INCLUDE_DIRS}
   )
 # Run unit tests
