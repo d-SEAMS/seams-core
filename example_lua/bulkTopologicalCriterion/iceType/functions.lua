@@ -10,10 +10,12 @@ for frame=targetFrame,finalFrame,frameGap do
    --- and use resCloud as the pointCloud for the ring analyses. 
    clusterAnalysis(outDir, clusterCloud, resCloud, nList, iceNeighbourList, cutoffRadius, targetFrame, "q6");
    --- Recenter the cluster such that the centroid is at the center of the simulation box 
-   recenterCluster(clusterCloud, iceNeighbourList);
+   -- recenterCluster(clusterCloud);
    --- End of getting the largest ice cluster
    ---
+   -- nList=bondNetworkByIndex(resCloud,nList) --- Bonded network using indices not IDs
    --- Start of analysis using rings (by index from here onwards.)
    rings=getPrimitiveRings(iceNeighbourList,maxDepth); --- Gets every ring (non-primitives included)
-   bulkTopologicalNetworkCriterion(outDir, rings, iceNeighbourList, clusterCloud, targetFrame, onlyTetrahedral); --- Finds DDCs and HCs
+   -- bulkTopologicalNetworkCriterion(outDir, rings, iceNeighbourList, clusterCloud, targetFrame, onlyTetrahedral); --- Finds DDCs and HCs
+   bulkTopoUnitMatching(outDir, rings, iceNeighbourList, clusterCloud, targetFrame, true, true);
 end

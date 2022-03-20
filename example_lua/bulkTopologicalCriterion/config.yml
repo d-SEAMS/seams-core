@@ -1,4 +1,4 @@
-trajectory: "input/traj/nucleation.lammpstrj"
+trajectory: "input/traj/cluster-417.lammpstrj"
 variables: "lua_inputs/iceType/vars.lua"
 bulk:
   use: true  
