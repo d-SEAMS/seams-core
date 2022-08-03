@@ -2,8 +2,8 @@ print("\n Welcome to the Ice Type Determination Module\n");
 cutoffRadius = 3.5; --- This is for H2O
 oxygenAtomType = 2; --- This is assigned by LAMMPS
 hydrogenAtomType = 1; --- Hydrogen atom type assigned
-targetFrame=1000; --- The first frame
-finalFrame=1000; --- This is inclusive
+targetFrame=1; --- The first frame
+finalFrame=1; --- This is inclusive
 frameGap=1; --- The gap between frames
 maxDepth = 4; --- The maximum depth upto which rings will be searched.
 --- Slice Information
