@@ -261,6 +261,8 @@ int main(int argc, char *argv[]) {
     // -----------------
     // Primitive rings
     lua.set_function("getPrimitiveRings", primitive::ringNetwork);
+    // Function for just getting and writing out the ring numbers
+    lua.set_function("bulkRingNumberAnalysis", ring::bulkPolygonRingAnalysis);
     // -----------------
     // Bulk ice, using the topological network criterion
     lua.set_function("bulkTopologicalNetworkCriterion", ring::topoBulkAnalysis);
