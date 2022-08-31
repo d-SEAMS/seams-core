@@ -148,6 +148,11 @@ std::vector<int> findsCommonElements(std::vector<int> ring1,
 //! Erases memory for a vector of vectors for a list of rings
 int clearRingList(std::vector<std::vector<int>> &rings);
 
+//! Assign an atomType (equal to the number of nodes in the ring)
+//! given n-membered rings.
+int assignPolygonType(std::vector<std::vector<int>> rings,
+                      std::vector<int> *atomTypes, std::vector<int> nRings);
+
 } // namespace ring
 
 #endif // __RINGS_H_
