@@ -11,6 +11,88 @@
 #include <topo_bulk.hpp>
 
 // -----------------------------------------------------------------------------------------------------
+// BULK RING SEARCH ONLY
+// -----------------------------------------------------------------------------------------------------
+
+/**
+ * @details Function that loops through the primitive rings (which is a vector
+ * of vectors) of all sizes, upto maxDepth (the largest ring size). 
+ * - ring::clearRingList (Clears the vector of vectors for rings of a single
+ * type, to prevent excessive memory being blocked).
+ * - ring::getSingleRingSize (Fill a vector of vectors for rings of a particular
+ * ring size).
+ * - ring::findPrisms (Now that rings of a particular size have been obtained,
+ * prism blocks are found and saved).
+ * - topoparam::normHeightPercent (Gets the height% for the prism blocks).
+ * - ring::assignPrismType (Assigns a prism type to each atom type).
+ * - sout::writePrismNum (Write out the prism information for the current
+ * frame).
+ * - sout::writeLAMMPSdataAllPrisms (Writes out a LAMMPS data file for the
+ * current frame, which can be visualized in OVITO).
+ * @param[in] path The string to the output directory, in which files will be
+ *  written out.
+ * @param[in] rings Row-ordered vector of vectors for rings of a single type.
+ * @param[in] nList Row-ordered neighbour list by index.
+ * @param[in] yCloud The input PointCloud.
+ * @param[in] maxDepth The maximum possible size of the primitive rings.
+ * @param[in] firstFrame The first frame to be analyzed
+ */
+int ring::bulkPolygonRingAnalysis(
+    std::string path, std::vector<std::vector<int>> rings,
+    std::vector<std::vector<int>> nList,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int maxDepth,
+    int firstFrame) {
+  //
+  std::vector<std::vector<int>>
+      ringsOneType;           // Vector of vectors of rings of a single size
+  int nRings;                 // Number of rings of the current type
+  std::vector<int> nRingList; // Vector of the values of the number of rings
+                              // for a particular frame
+  std::vector<int>
+      atomTypes; // contains int values for each ring type considered
+  // -------------------------------------------------------------------------------
+  // Init
+  nRingList.resize(
+      maxDepth -
+      2); // Has a value for every value of ringSize from 3, upto maxDepth
+  // The atomTypes vector is the same size as the pointCloud atoms
+  atomTypes.resize(yCloud->nop, 1); // The dummy or unclassified value is 1
+  // -------------------------------------------------------------------------------
+  // Run this loop for rings of sizes upto maxDepth
+  // The smallest possible ring is of size 3
+  for (int ringSize = 3; ringSize <= maxDepth; ringSize++) {
+    // Clear ringsOneType
+    ring::clearRingList(ringsOneType);
+    // Get rings of the current ring size
+    ringsOneType = ring::getSingleRingSize(rings, ringSize);
+    //
+    // Continue if there are zero rings of ringSize
+    if (ringsOneType.size() == 0) {
+      nRingList[ringSize - 3] = 0; // Update the number of prisms
+      continue;
+    } // skip if there are no rings
+    //
+    // -------------
+    // Number of rings with n nodes
+    nRings = ringsOneType.size();
+    // -------------
+    // Now that you have rings of a certain size:
+    nRingList[ringSize - 3] = nRings; // Update the number of n-membered rings
+    // -------------
+  } // end of loop through every possible ringSize
+
+  // Get the atom types for all the ring types
+  ring::assignPolygonType(rings, &atomTypes, nRingList);
+
+  // Write out the ring information
+  sout::writeRingNumBulk(path, yCloud->currentFrame, nRingList, maxDepth, firstFrame);
+  // Write out the lammps data file for the particular frame
+  sout::writeLAMMPSdataAllRings(yCloud, nList, atomTypes, maxDepth, path, false);
+
+  return 0;
+}
+
+// -----------------------------------------------------------------------------------------------------
 // DDC / HC ALGORITHMS
 // -----------------------------------------------------------------------------------------------------
 
