@@ -1018,6 +1018,49 @@ int sout::writeRingNum(std::string path, int currentFrame,
 }
 
 /**
+ * @details Function for printing out ring info, for a bulk system
+ */
+int sout::writeRingNumBulk(std::string path, int currentFrame,
+                       std::vector<int> nRings,
+                       int maxDepth,
+                       int firstFrame) {
+  std::ofstream outputFile;
+  // ----------------
+  // Make the output directory if it doesn't exist
+  sout::makePath(path);
+  std::string outputDirName = path + "bulkTopo";
+  sout::makePath(outputDirName);
+  // ----------------
+  // Ring output file
+  // Write output to file inside the output directory
+  outputFile.open(path + "bulkTopo/num_rings.dat",
+                    std::ios_base::app | std::ios_base::out);
+
+  // Format:
+  // Comment line
+  // 1 3 0 4 35 ....
+
+  // ----------------
+  // Add comment for the first frame
+  if (currentFrame == firstFrame) {
+    outputFile << "Frame RingSize Num_of_rings RingSize Num_of_rings...\n";
+  }
+  // ----------------
+
+  outputFile << currentFrame << " ";
+
+  for (int ringSize = 3; ringSize <= maxDepth; ringSize++) {
+    outputFile << ringSize << " " << nRings[ringSize - 3] << " ";
+  }
+
+  outputFile << "\n";
+
+  outputFile.close();
+
+  return 0;
+}
+
+/**
  * @details Function for printing out the RDF to a file, given that the file
  * already exists and given the filename.
  */
@@ -1385,7 +1428,7 @@ int sout::writeLAMMPSdataAllPrisms(
 int sout::writeLAMMPSdataAllRings(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
-    int maxDepth, std::string path) {
+    int maxDepth, std::string path, bool isMonolayer) {
   //
   std::ofstream outputFile;
   int iatom; // Index, not atom ID
@@ -1395,6 +1438,7 @@ int sout::writeLAMMPSdataAllRings(
                                        // containing the atom IDs of each bond
   std::string filename =
       "system-rings-" + std::to_string(yCloud->currentFrame) + ".data";
+  std::string pathName, pathFolder;
 
   // ---------------
   // Get the bonds
@@ -1402,14 +1446,23 @@ int sout::writeLAMMPSdataAllRings(
   //
   // ----------------
   // Make the output directory if it doesn't exist
+  if (isMonolayer)
+  {
+    pathFolder = "topoMonolayer";
+    pathName = "topoMonolayer/dataFiles/";
+  } else{
+    pathFolder = "bulkTopo";
+    pathName = "bulkTopo/dataFiles/";
+  }
+  
   sout::makePath(path);
-  std::string outputDirName = path + "topoMonolayer";
+  std::string outputDirName = path + pathFolder;
   sout::makePath(outputDirName);
-  outputDirName = path + "topoMonolayer/dataFiles/";
+  outputDirName = path + pathName;
   sout::makePath(outputDirName);
 
   // Write output to file inside the output directory
-  outputFile.open(path + "topoMonolayer/dataFiles/" + filename);
+  outputFile.open(path + pathName + filename);
 
   // FORMAT:
   //  Comment Line

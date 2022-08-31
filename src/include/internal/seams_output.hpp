@@ -120,6 +120,11 @@ int writeRingNum(std::string path, int currentFrame, std::vector<int> nRings,
                  std::vector<double> coverageAreaYZ, int maxDepth,
                  int firstFrame);
 
+//! Function for printing out the number of rings of each
+//! type in a bulk system 
+int writeRingNumBulk(std::string path, int currentFrame, std::vector<int> nRings, int maxDepth,
+                 int firstFrame);
+
 //! Function for printing out the RDF, given the filename
 int printRDF(std::string fileName, std::vector<double> *rdfValues,
              double binwidth, int nbin);
@@ -168,7 +173,7 @@ int writeLAMMPSdataAllPrisms(
 int writeLAMMPSdataAllRings(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
-    int maxDepth, std::string path);
+    int maxDepth, std::string path, bool isMonolayer = true);
 
 //! Write a data file for a particular frame, writing out topological bulk ice
 //! structures (DDCs/HCs)
