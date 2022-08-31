@@ -49,11 +49,6 @@ int polygonRingAnalysis(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int maxDepth,
     double sheetArea, int firstFrame);
 
-//! Assign an atomType (equal to the number of nodes in the ring)
-//! given n-membered rings.
-int assignPolygonType(std::vector<std::vector<int>> rings,
-                      std::vector<int> *atomTypes, std::vector<int> nRings);
-
 } // namespace ring
 
 #endif // __TOPOCONFINED_H_
