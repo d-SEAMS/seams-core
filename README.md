@@ -261,6 +261,24 @@ Note that we expect compliance with the `clang-format` as mentioned above, and t
 
 This will ensure that new commits are in accordance to the `clang-format` file.
 
+## Development Builds
+
+The general idea is to drop into an interactive shell with the dependencies and then use `cmake` as usual.
+
+```bash
+nix-shell --pure --run bash --show-trace --verbose
+cmake .. -DCMAKE_BUILD_TYPE=Debug -DNO_WARN=TRUE \
+ -DFIND_EIGEN=TRUE \
+ -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
+ -G "Ninja"
+ninja
+# Test
+cd ../
+yodaStruct -c lua_inputs/config.yml
+# Debug
+gdb --args yodaStruct -c lua_inputs/config.yml
+```
+
 # Acknowledgements
 
 The following tools are used in this project:
