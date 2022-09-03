@@ -313,6 +313,7 @@ The general idea is to drop into an interactive shell with the dependencies and 
 
 ```bash
 nix-shell --pure --run bash --show-trace --verbose
+cd build
 cmake .. -DCMAKE_BUILD_TYPE=Debug -DNO_WARN=TRUE \
  -DFIND_EIGEN=TRUE \
  -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
@@ -323,6 +324,16 @@ cd ../
 yodaStruct -c lua_inputs/config.yml
 # Debug
 gdb --args yodaStruct -c lua_inputs/config.yml
+```
+To load debugging symbols from the shared library, when you are inside `gdb` (from the top-level directory, for instance), use the following command:
+
+```bash
+add-symbol-file build/libyodaLib.so
+```
+Then you can set breakpoints in the C++ code; for instance: 
+
+```bash
+b seams_input.cpp:408
 ```
 
 # Acknowledgements
