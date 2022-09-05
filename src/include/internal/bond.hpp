@@ -73,6 +73,16 @@ populateHbonds(std::string filename,
                molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                std::vector<std::vector<int>> nList, int targetFrame, int Htype);
 
+//! Create a vector of vectors (similar to the neighbour list conventions)
+//! containing the hydrogen bond connectivity information. Decides the
+//! existence of the hydrogen bond depending on the O--O and O--H vectors from
+//! the neighbour list already constructed, taking a PointCloud for the H atoms as input
+// ! The H atom PointCloud should be for the entire system 
+std::vector<std::vector<int>>
+populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+               molSys::PointCloud<molSys::Point<double>, double> *hCloud,
+               std::vector<std::vector<int>> nList);
+
 //! Calculates the distance of the hydrogen bond between O and H (of different
 //! atoms), given the respective pointClouds and the indices to each atom
 double
