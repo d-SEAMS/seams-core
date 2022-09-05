@@ -273,6 +273,7 @@ int main(int argc, char *argv[]) {
     lua.set_function("readFrameOnlyOne", sinp::readLammpsTrjreduced);
     lua.set_function("readFrameOnlyOneAllAtoms", sinp::readLammpsTrj); // reads in all atoms regardless of type  
     lua.set_function("getHbondNetwork", bond::populateHbonds);
+    lua.set_function("getHbondNetworkFromClouds", bond::populateHbondsWithInputClouds);
     lua.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);
     // -----------------
     // Primitive rings

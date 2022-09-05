@@ -9,6 +9,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <selection.hpp>
+#include <icecream.hpp>
 
 // -----------------------------------------------------------------------------------------------------
 // FUNCTIONS FOR SELECTIONS
@@ -32,6 +33,7 @@
  * - sout::writeLAMMPSdataAllPrisms (Writes out a LAMMPS data file for the
  * current frame, which can be visualized in OVITO).
  * @param[in] yCloud The given input PointCloud
+ * @param[out] outCloud The output PointCloud
  * @param[in] atomTypeI The type ID of the atoms to save in the output PointCloud
  * @param[in] isSlice This decides whether a slice will be used or not
  * @param[in] coordLow Contains the lower limits of the slice, if a slice is to
@@ -42,12 +44,18 @@
 molSys::PointCloud<molSys::Point<double>, double>
 gen::getPointCloudOneAtomType(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> *outCloud,
     int atomTypeI, bool isSlice, std::array<double, 3> coordLow,
     std::array<double, 3> coordHigh) {
   //
-  molSys::PointCloud<molSys::Point<double>, double> outCloud; // Output PointCloud
   int natoms = 0;             // Number of atoms of the desired type 
   bool pointInSlice = true; // If the current point is in the slice, this is true (otherwise this is false)
+
+  // --------
+  // Before filling up the PointCloud, if the vectors are filled
+  // empty them
+  *outCloud = molSys::clearPointCloud(outCloud);
+  // --------
 
   // Loop through every iatom and check the type
   for (int iatom = 0; iatom < yCloud->nop; iatom++) {
@@ -68,18 +76,20 @@ gen::getPointCloudOneAtomType(
     //
     // Actually add the atoms to the outCloud
     natoms++; // Update the number of atoms in outCloud
-    outCloud.pts.push_back(yCloud->pts[iatom]); // Update the pts vector
-    outCloud.idIndexMap[yCloud->pts[iatom].atomID] =
-                outCloud.pts.size() - 1; // array index
+    outCloud->pts.push_back(yCloud->pts[iatom]); // Update the pts vector
+    outCloud->idIndexMap[yCloud->pts[iatom].atomID] =
+                outCloud->pts.size() - 1; // array index
   }
 
   // Update the number of particles in the PointCloud
-  outCloud.nop = outCloud.pts.size();
+  outCloud->nop = outCloud->pts.size();
+
+  // Box and box lengths 
+  outCloud->box = yCloud->box;
+  outCloud->boxLow = yCloud->boxLow;
 
   // Update the frame number
-  outCloud.currentFrame = yCloud->currentFrame; 
+  outCloud->currentFrame = yCloud->currentFrame; 
 
-  // nop should be the same as natoms
-
-  return outCloud;
+  return *outCloud;
 }
