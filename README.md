@@ -227,6 +227,12 @@ can be run with the `yodaStruct_test` binary, which will drop into the
 ```{bash}
 # Just run this
 ./testBuild.sh
+# At this point the binary and library are copied into the root
+# One might, in a foolhardy attempt, use gdb at this point
+# Here be dragons :)
+# USE NIX
+# Anyway
+gdb --args ./yodaStruct -c lua_inputs/config.yml
 # quit gdb with quit
 # Go run the test binary
 cd shellBuild
@@ -365,3 +371,4 @@ The libraries used are:
 - [Boost Math](https://www.boost.org/doc/libs/?view=category_math) for spherical harmonics
 - [Blaze](https://bitbucket.org/blaze-lib/blaze/) for very fast modern linear algebra
 - [nanoflann](https://github.com/jlblancoc/nanoflann) to calculate nearest neighbors
+- [icecream-cpp](https://github.com/renatoGarcia/icecream-cpp) for pretty-printing and debugging
