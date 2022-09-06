@@ -11,7 +11,6 @@
 #include <iostream>
 #include <math.h>
 #include <neighbours.hpp>
-#include <icecream.hpp>
 
 /**
  * @details Function for building neighbour lists for each
@@ -122,8 +121,6 @@ nneigh::neighListO(double rcutoff,
   int jatomIndex; // Atomic ID of the atom with index jatom
   int indexYay;
   std::vector<int> tempListIatom;
-
-  IC(yCloud);
 
   // Initialize and fill the first element with the current atom ID whose
   // neighbour list will be filled
