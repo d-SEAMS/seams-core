@@ -51,6 +51,16 @@ getPointCloudOneAtomType(
     std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
     std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
 
+//! Given a pointCloud set the inSlice bool for every atom,
+//! if the molecules are inside the specified (single) region. 
+//! If even one atom of a molecule is inside the region, then all
+//! atoms of that molecule will be inside the region (irrespective of type)
+molSys::PointCloud<molSys::Point<double>, double>
+moleculesInSingleSlice(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
+    std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
+
 }  // namespace gen
 
 /**
