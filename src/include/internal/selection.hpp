@@ -58,6 +58,7 @@ getPointCloudOneAtomType(
 molSys::PointCloud<molSys::Point<double>, double>
 moleculesInSingleSlice(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    bool clearPreviousSliceSelection=true,
     std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
     std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
 

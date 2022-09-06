@@ -88,6 +88,8 @@ gen::getPointCloudOneAtomType(
  * is inside the region, then all atoms belonging to that molecule should be
  * inside the slice as well (therefore, inSlice would be set to true)
  * @param[in] yCloud The given input PointCloud
+ * @param[in] clearPreviousSliceSelection sets all inSlice bool values to false before 
+ * adding Points to the slice
  * @param[in] coordLow Contains the lower limits of the slice, if a slice is to
  *  be created
  * @param[in] coordHigh Contains the upper limits of the slice, if a slice is
@@ -96,6 +98,7 @@ gen::getPointCloudOneAtomType(
 molSys::PointCloud<molSys::Point<double>, double>
 gen::moleculesInSingleSlice(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    bool clearPreviousSliceSelection,
     std::array<double, 3> coordLow,
     std::array<double, 3> coordHigh) {
   //
@@ -113,9 +116,12 @@ gen::moleculesInSingleSlice(
   molIDAtomIDmap = molSys::createMolIDAtomIDMultiMap(yCloud);
   // --------------------
   // Set inSlice to false for every atom first
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-    yCloud->pts[iatom].inSlice = false;
-  } // end of init 
+  if (clearPreviousSliceSelection)
+  {
+    for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+      yCloud->pts[iatom].inSlice = false;
+    }
+  } // end of init
   // --------------------
 
   // Loop through every iatom and check if the atom is in the slice or not 
