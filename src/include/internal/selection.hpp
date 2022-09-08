@@ -62,6 +62,14 @@ moleculesInSingleSlice(
     std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
     std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
 
+//! Given a particular molecule ID and a pointCloud set the inSlice bool for all atoms,
+//! with that molecule ID 
+molSys::PointCloud<molSys::Point<double>, double>
+setAtomsWithSameMolID(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::unordered_multimap<int,int> molIDAtomIDmap,
+    int molID, bool inSliceValue=true);
+
 }  // namespace gen
 
 /**
@@ -69,17 +77,22 @@ moleculesInSingleSlice(
  *  @{
  */
 
-// namespace ring {
+namespace ring {
 
-// //! Find out which rings are prisms.
-// //! Returns a vector containing all the ring IDs which are prisms
-// std::vector<int> findPrisms(
-//     std::vector<std::vector<int>> rings, std::vector<strucType> *ringType,
-//     int *nPerfectPrisms, int *nImperfectPrisms,
-//     std::vector<std::vector<int>> nList,
-//     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-//     std::vector<double> *rmsdPerAtom, bool doShapeMatching = false);
+//! Select edge molecules and atoms which are part of rings, such that rings
+//! formed with even one atom in the slice will be included in the selection
+//! Modifies the inSlice bool of a given PointCloud (this may be the same)
+//! as the given oxygen atom PointCloud which was used to construct the 
+//! neighbour list used to construct the rings vector of vectors.
+//! We assume that the PointCloud structs have the inSlice bool values set according
+//! to the presence of the atom in the slice 
+//! (this can be done using the gen::moleculesInSingleSlice function. 
+molSys::PointCloud<molSys::Point<double>, double> getEdgeMoleculesInRings(
+    std::vector<std::vector<int>> rings, molSys::PointCloud<molSys::Point<double>, double> *oCloud,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, 
+    std::array<double, 3> coordLow, std::array<double, 3> coordHigh,
+    bool identicalCloud=false);
 
-// }  // namespace ring
+}  // namespace ring
 
 #endif  // __SELECTION_H_
