@@ -267,7 +267,8 @@ int main(int argc, char *argv[]) {
     // Selection Functions
     // Function for getting an output PointCloud of a particular atom type from an existing PointCloud
     lua.set_function("getPointCloudAtomsOfOneAtomType", gen::getPointCloudOneAtomType);
-    lua.set_function("selectInSingleSlice",gen::moleculesInSingleSlice);
+    lua.set_function("selectInSingleSlice", gen::moleculesInSingleSlice);
+    lua.set_function("selectEdgeAtomsInRingsWithinSlice", ring::getEdgeMoleculesInRings);
     // -----------------
     // Topological Network Methods
     // Generic requirements (read in only inside the slice)
