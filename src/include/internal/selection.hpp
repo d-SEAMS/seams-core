@@ -93,6 +93,20 @@ molSys::PointCloud<molSys::Point<double>, double> getEdgeMoleculesInRings(
     std::array<double, 3> coordLow, std::array<double, 3> coordHigh,
     bool identicalCloud=false);
 
+//! Master function for selecting edge molecules and atoms which are part of rings, such that rings
+//! formed with even one atom in the slice will be included in the selection
+//! Modifies the inSlice bool of a given PointCloud (this may be the same)
+//! as the given oxygen atom PointCloud which was used to construct the 
+//! neighbour list used to construct the rings vector of vectors (calls ring::getEdgeMoleculesInRings)
+//! Prints out molecule IDs individually of molecules in the slice, and also prints out a LAMMPS
+//! data file of just the molecules and atoms in the slice  
+int printSliceGetEdgeMoleculesInRings(
+    std::string path, std::vector<std::vector<int>> rings, 
+    molSys::PointCloud<molSys::Point<double>, double> *oCloud,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, 
+    std::array<double, 3> coordLow, std::array<double, 3> coordHigh,
+    bool identicalCloud=false);
+
 }  // namespace ring
 
 #endif  // __SELECTION_H_
