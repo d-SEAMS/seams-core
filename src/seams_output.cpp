@@ -1287,6 +1287,80 @@ int sout::writeLAMMPSdumpINT(
 } // end of function
 
 /**
+ * @details Prints out a LAMMPS dump file for all atoms, for every frame,
+ * printing the inSlice attribute for a user-defined slice in a separate column 
+ */
+int sout::writeLAMMPSdumpSlice(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::string path) {
+  //
+  std::ofstream outputFile;
+  int iatom; // Index, not atom ID
+  std::string filename =
+      "dump-" + std::to_string(yCloud->currentFrame) + ".lammpstrj";
+  // ----------------
+  // Make the output directory if it doesn't exist
+  sout::makePath(path+"selection");
+  std::string outputDirName = path + "selection/dumpFiles";
+  sout::makePath(outputDirName);
+  // ----------------
+  // Write output to file inside the output directory
+  outputFile.open(path + "selection/dumpFiles/" + filename);
+  // ----------------------------------------------------
+  // Header Format
+
+  // ITEM: TIMESTEP
+  // 0
+  // ITEM: NUMBER OF ATOMS
+  // 500
+  // ITEM: BOX BOUNDS pp pp pp
+  // -9.0400100000000005e-01 1.7170999999999999e+01
+  // -9.0400100000000005e-01 1.7170999999999999e+01
+  // -9.0400100000000005e-01 1.7170999999999999e+01
+  // ITEM: ATOMS id mol type x y z rmsd
+
+  // -----------------
+  // -------
+  // Write the header
+  // ITEM: TIMESTEP
+  outputFile << "ITEM: TIMESTEP\n";
+  // Write out frame number
+  outputFile << yCloud->currentFrame << "\n";
+  // ITEM: NUMBER OF ATOMS
+  outputFile << "ITEM: NUMBER OF ATOMS\n";
+  // Number of atoms
+  outputFile << yCloud->pts.size() << "\n";
+  // ITEM: BOX BOUNDS pp pp pp
+  outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
+  // Box lengths
+  outputFile << yCloud->boxLow[0] << " " << yCloud->boxLow[0] + yCloud->box[0]
+             << "\n";
+  outputFile << yCloud->boxLow[1] << " " << yCloud->boxLow[1] + yCloud->box[1]
+             << "\n";
+  outputFile << yCloud->boxLow[2] << " " << yCloud->boxLow[2] + yCloud->box[2]
+             << "\n";
+  // ITEM: ATOMS id mol type x y z rmsd
+  outputFile << "ITEM: ATOMS id mol type x y z inSlice\n";
+  // -------
+  // Write out the atom coordinates
+  // Format
+  // ITEM: ATOMS id mol type x y z rmsd
+  //
+  // Loop through atoms
+  for (int i = 0; i < yCloud->pts.size(); i++) {
+    iatom =
+        yCloud->pts[i].atomID; // The actual ID can be different from the index
+    // Write out coordinates
+    outputFile << iatom << " " << yCloud->pts[i].molID << " " << yCloud->pts[i].type
+               << " " << yCloud->pts[i].x << " " << yCloud->pts[i].y << " "
+               << yCloud->pts[i].z << " " << yCloud->pts[i].inSlice << "\n";
+
+  } // end of loop through all atoms in pointCloud
+  // -----------------------------------------------------
+  return 0;
+} // end of function
+
+/**
  * @details Prints out a LAMMPS data file for all the prisms for a single frame,
  * with some default options. Only Oxygen atoms are printed out. Bonds are
  * inferred from the rings vector of vectors

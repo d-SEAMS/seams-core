@@ -284,8 +284,8 @@ ring::getEdgeMoleculesInRings(
           // Set the jatom inSlice bool to true
           yCloud->pts[jatomIndex1].inSlice = true; // jatomIndex is inside the slice 
           // set the inSlice value of all atoms in yCloud with the current molecule ID 
-          *yCloud = gen::setAtomsWithSameMolID(yCloud, molIDAtomIDmap, 
-            yCloud->pts[jatomIndex1].molID, true);
+          // *yCloud = gen::setAtomsWithSameMolID(yCloud, molIDAtomIDmap, 
+          //   yCloud->pts[jatomIndex1].molID, true);
           } // end of setting values in yCloud 
         } // end of loop through the elements of the current ring 
         // --------------------------
@@ -300,4 +300,48 @@ ring::getEdgeMoleculesInRings(
   // Some other bool?  
 
   return *yCloud;
+}
+
+// -----------------------------------------------------------------------------------------------------
+// FUNCTIONS FOR SELECTIONS (RINGS)
+// -----------------------------------------------------------------------------------------------------
+
+/**
+ * @details Function that loops through the PointCloud used to construct the
+ * neighbour list (used to generate primitive rings) and sets the inSlice bool values
+ * of edge atoms which belong to rings that are formed by atoms in the slice. 
+ * The selected molecule IDs are printed to a separate file, and the molecules and 
+ * atoms in the slice will be output to a LAMMPS data file (with the original box volume)
+ * The output PointCloud may not be the same as the PointCloud used to 
+ * construct the nList, and the inSlice bool value can be set for both.
+ * @param[in] rings Vector of vectors of the primitive rings (by index) according to oCloud
+ * @param[in] oCloud PointCloud of O atoms, used to construct the rings vector of vectors
+ * @param[in] yCloud The output PointCloud (may contain more than just the O atoms)
+ * @param[in] identicalCloud bool value; if this is true then oCloud and yCloud are the same
+ * @param[in] coordLow Contains the lower limits of the slice (needed to find all the molecules of oCloud
+ * in the slice)
+ * @param[in] coordHigh Contains the upper limits of the slice
+ */
+int ring::printSliceGetEdgeMoleculesInRings(
+    std::string path, std::vector<std::vector<int>> rings, 
+    molSys::PointCloud<molSys::Point<double>, double> *oCloud,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::array<double, 3> coordLow, std::array<double, 3> coordHigh, bool identicalCloud) {
+  //
+
+  //Given the full yCloud PointCloud, set the inSlice bool for every atom,
+  // if the molecules are inside the specified (single) region. 
+  *yCloud = gen::moleculesInSingleSlice(yCloud, true, coordLow, coordHigh);
+
+  // Make sure that molecules which participate in the rings inside the slice are also 
+  // in the selection 
+  *yCloud = ring::getEdgeMoleculesInRings(rings, oCloud, yCloud, coordLow, coordHigh, identicalCloud);
+
+  // Print out the molecule IDs of all the atoms in the slice
+
+  // Print out the dump of all atoms and molecules, with an inSlice value printed in a separate column
+  // H atoms not included in the slice (TODO: fix)
+  sout::writeLAMMPSdumpSlice(yCloud, path); 
+
+  return 0;
 }
