@@ -269,6 +269,7 @@ int main(int argc, char *argv[]) {
     lua.set_function("getPointCloudAtomsOfOneAtomType", gen::getPointCloudOneAtomType);
     lua.set_function("selectInSingleSlice", gen::moleculesInSingleSlice);
     lua.set_function("selectEdgeAtomsInRingsWithinSlice", ring::getEdgeMoleculesInRings);
+    lua.set_function("selectAtomsInSliceWithRingEdgeAtoms", ring::printSliceGetEdgeMoleculesInRings);
     // -----------------
     // Topological Network Methods
     // Generic requirements (read in only inside the slice)
