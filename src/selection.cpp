@@ -338,6 +338,7 @@ int ring::printSliceGetEdgeMoleculesInRings(
   *yCloud = ring::getEdgeMoleculesInRings(rings, oCloud, yCloud, coordLow, coordHigh, identicalCloud);
 
   // Print out the molecule IDs of all the atoms in the slice
+  sout::writeMoleculeIDsInSlice(path, yCloud);
 
   // Print out the dump of all atoms and molecules, with an inSlice value printed in a separate column
   // H atoms not included in the slice (TODO: fix)

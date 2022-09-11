@@ -145,6 +145,10 @@ int writeClusterStats(std::string path, int currentFrame, int largestCluster,
                       int numOfClusters, int smallestCluster,
                       double avgClusterSize, int firstFrame);
 
+//! Function for printing out the molecule IDs present in the slice (compatible with 
+//! the LAMMPS group command 
+int writeMoleculeIDsInSlice(std::string path, molSys::PointCloud<molSys::Point<double>, double> *yCloud);
+
 //! Write a data file for rings
 int writeLAMMPSdata(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                     std::vector<std::vector<int>> rings,
