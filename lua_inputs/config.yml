@@ -1,10 +1,10 @@
-trajectory: "input/traj/clathrate-thf.lammpstrj"
+trajectory: "input/traj/exampleTraj.lammpstrj"
 variables: "lua_inputs/iceType/vars.lua"
 bulk:
-  use: true
+  use: false
   topologicalNetworkCriterion: false
   bondOrderParameters: false
 topoOneDim:
-  use: false
+  use: true
 topoTwoDim:
   use: false
