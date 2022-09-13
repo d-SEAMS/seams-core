@@ -62,6 +62,16 @@ moleculesInSingleSlice(
     std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
     std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
 
+//! Given a pointCloud set the inSlice bool for every atom,
+//! if the atoms are inside the specified (single) region. 
+//! Does not handle atoms in molecules straddling the boundary
+molSys::PointCloud<molSys::Point<double>, double>
+atomsInSingleSlice(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    bool clearPreviousSliceSelection=true,
+    std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
+    std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
+
 //! Given a particular molecule ID and a pointCloud set the inSlice bool for all atoms,
 //! with that molecule ID 
 molSys::PointCloud<molSys::Point<double>, double>

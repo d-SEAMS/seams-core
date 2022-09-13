@@ -83,10 +83,55 @@ gen::getPointCloudOneAtomType(
 
 /**
  * @details Function that loops through a given input PointCloud and 
+ * sets the inSlice bool for every Point according to whether the atom  
+ * is in the specified (single) slice or not. Not inclusive of atoms in molecules 
+ * @param[in] yCloud The given input PointCloud
+ * @param[in] clearPreviousSliceSelection sets all inSlice bool values to false before 
+ * adding Points to the slice
+ * @param[in] coordLow Contains the lower limits of the slice, if a slice is to
+ *  be created
+ * @param[in] coordHigh Contains the upper limits of the slice, if a slice is
+ *  to be created
+ */
+molSys::PointCloud<molSys::Point<double>, double>
+gen::atomsInSingleSlice(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    bool clearPreviousSliceSelection,
+    std::array<double, 3> coordLow,
+    std::array<double, 3> coordHigh) {
+  //
+  bool pointInSlice = true; // If the current point is in the slice, this is true (otherwise this is false)
+
+  // --------------------
+  // Set inSlice to false for every atom first
+  if (clearPreviousSliceSelection)
+  {
+    for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+      yCloud->pts[iatom].inSlice = false;
+    }
+  } // end of init
+  // --------------------
+
+  // Loop through every iatom and check if the atom is in the slice or not 
+  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+    // Check if the current atom is in the slice 
+    pointInSlice = sinp::atomInSlice(yCloud->pts[iatom].x, yCloud->pts[iatom].y, yCloud->pts[iatom].z,
+                                               coordLow, coordHigh);
+
+    yCloud->pts[iatom].inSlice = pointInSlice; // iatom is inside the slice
+    //
+  }
+
+  return *yCloud;
+}
+
+/**
+ * @details Function that loops through a given input PointCloud and 
  * sets the inSlice bool for every Point according to whether the molecule  
  * is in the specified (single) slice or not. If even one atom of a molecule 
  * is inside the region, then all atoms belonging to that molecule should be
  * inside the slice as well (therefore, inSlice would be set to true)
+ * NOTE: THIS DOES NOT WORK. ERROR
  * @param[in] yCloud The given input PointCloud
  * @param[in] clearPreviousSliceSelection sets all inSlice bool values to false before 
  * adding Points to the slice
@@ -331,7 +376,7 @@ int ring::printSliceGetEdgeMoleculesInRings(
 
   //Given the full yCloud PointCloud, set the inSlice bool for every atom,
   // if the molecules are inside the specified (single) region. 
-  *yCloud = gen::moleculesInSingleSlice(yCloud, true, coordLow, coordHigh);
+  *yCloud = gen::atomsInSingleSlice(yCloud, true, coordLow, coordHigh);
 
   // Make sure that molecules which participate in the rings inside the slice are also 
   // in the selection 
