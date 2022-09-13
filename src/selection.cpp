@@ -93,8 +93,7 @@ gen::getPointCloudOneAtomType(
  * @param[in] coordHigh Contains the upper limits of the slice, if a slice is
  *  to be created
  */
-molSys::PointCloud<molSys::Point<double>, double>
-gen::atomsInSingleSlice(
+void gen::atomsInSingleSlice(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     bool clearPreviousSliceSelection,
     std::array<double, 3> coordLow,
@@ -122,7 +121,7 @@ gen::atomsInSingleSlice(
     //
   }
 
-  return *yCloud;
+  return;
 }
 
 /**
@@ -140,8 +139,7 @@ gen::atomsInSingleSlice(
  * @param[in] coordHigh Contains the upper limits of the slice, if a slice is
  *  to be created
  */
-molSys::PointCloud<molSys::Point<double>, double>
-gen::moleculesInSingleSlice(
+void gen::moleculesInSingleSlice(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     bool clearPreviousSliceSelection,
     std::array<double, 3> coordLow,
@@ -202,7 +200,7 @@ gen::moleculesInSingleSlice(
     } // atom is not in the slice
   }
 
-  return *yCloud;
+  return;
 }
 
 /**
@@ -258,8 +256,7 @@ gen::setAtomsWithSameMolID(
  * in the slice)
  * @param[in] coordHigh Contains the upper limits of the slice
  */
-molSys::PointCloud<molSys::Point<double>, double>
-ring::getEdgeMoleculesInRings(
+void ring::getEdgeMoleculesInRings(
     std::vector<std::vector<int>> rings, molSys::PointCloud<molSys::Point<double>, double> *oCloud,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::array<double, 3> coordLow, std::array<double, 3> coordHigh, bool identicalCloud) {
@@ -275,7 +272,7 @@ ring::getEdgeMoleculesInRings(
   // --------------------
   // Sets all O atoms within the slice to an inSlice bool value of true. If a single atom of a molecule is in the
   // slice, then all atoms in the molecule will also be inside the slice 
-  *oCloud = gen::moleculesInSingleSlice(oCloud, true, coordLow, coordHigh);
+  gen::moleculesInSingleSlice(oCloud, true, coordLow, coordHigh);
   // --------------------
   // Get the unordered map of the atom IDs (keys) and the molecular IDs
   // (values)
@@ -344,7 +341,7 @@ ring::getEdgeMoleculesInRings(
   // Optionally add support for molecule slice update if yCloud and oCloud are not identical?
   // Some other bool?  
 
-  return *yCloud;
+  return;
 }
 
 // -----------------------------------------------------------------------------------------------------
@@ -367,7 +364,7 @@ ring::getEdgeMoleculesInRings(
  * in the slice)
  * @param[in] coordHigh Contains the upper limits of the slice
  */
-int ring::printSliceGetEdgeMoleculesInRings(
+void ring::printSliceGetEdgeMoleculesInRings(
     std::string path, std::vector<std::vector<int>> rings, 
     molSys::PointCloud<molSys::Point<double>, double> *oCloud,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
@@ -376,11 +373,12 @@ int ring::printSliceGetEdgeMoleculesInRings(
 
   //Given the full yCloud PointCloud, set the inSlice bool for every atom,
   // if the molecules are inside the specified (single) region. 
-  *yCloud = gen::atomsInSingleSlice(yCloud, true, coordLow, coordHigh);
+  gen::atomsInSingleSlice(yCloud, true, coordLow, coordHigh);
+  // gen::moleculesInSingleSlice(yCloud, true, coordLow, coordHigh);
 
   // Make sure that molecules which participate in the rings inside the slice are also 
   // in the selection 
-  *yCloud = ring::getEdgeMoleculesInRings(rings, oCloud, yCloud, coordLow, coordHigh, identicalCloud);
+  ring::getEdgeMoleculesInRings(rings, oCloud, yCloud, coordLow, coordHigh, identicalCloud);
 
   // Print out the molecule IDs of all the atoms in the slice
   sout::writeMoleculeIDsInSlice(path, yCloud);
@@ -389,5 +387,5 @@ int ring::printSliceGetEdgeMoleculesInRings(
   // H atoms not included in the slice (TODO: fix)
   sout::writeLAMMPSdumpSlice(yCloud, path); 
 
-  return 0;
+  return;
 }
