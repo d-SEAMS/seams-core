@@ -55,8 +55,7 @@ getPointCloudOneAtomType(
 //! if the molecules are inside the specified (single) region. 
 //! If even one atom of a molecule is inside the region, then all
 //! atoms of that molecule will be inside the region (irrespective of type)
-molSys::PointCloud<molSys::Point<double>, double>
-moleculesInSingleSlice(
+void moleculesInSingleSlice(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     bool clearPreviousSliceSelection=true,
     std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
@@ -65,8 +64,7 @@ moleculesInSingleSlice(
 //! Given a pointCloud set the inSlice bool for every atom,
 //! if the atoms are inside the specified (single) region. 
 //! Does not handle atoms in molecules straddling the boundary
-molSys::PointCloud<molSys::Point<double>, double>
-atomsInSingleSlice(
+void atomsInSingleSlice(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     bool clearPreviousSliceSelection=true,
     std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
@@ -97,7 +95,7 @@ namespace ring {
 //! We assume that the PointCloud structs have the inSlice bool values set according
 //! to the presence of the atom in the slice 
 //! (this can be done using the gen::moleculesInSingleSlice function. 
-molSys::PointCloud<molSys::Point<double>, double> getEdgeMoleculesInRings(
+void getEdgeMoleculesInRings(
     std::vector<std::vector<int>> rings, molSys::PointCloud<molSys::Point<double>, double> *oCloud,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, 
     std::array<double, 3> coordLow, std::array<double, 3> coordHigh,
@@ -110,7 +108,7 @@ molSys::PointCloud<molSys::Point<double>, double> getEdgeMoleculesInRings(
 //! neighbour list used to construct the rings vector of vectors (calls ring::getEdgeMoleculesInRings)
 //! Prints out molecule IDs individually of molecules in the slice, and also prints out a LAMMPS
 //! data file of just the molecules and atoms in the slice  
-int printSliceGetEdgeMoleculesInRings(
+void printSliceGetEdgeMoleculesInRings(
     std::string path, std::vector<std::vector<int>> rings, 
     molSys::PointCloud<molSys::Point<double>, double> *oCloud,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, 
