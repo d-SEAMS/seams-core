@@ -9,7 +9,6 @@
 //-----------------------------------------------------------------------------------
 
 #include <selection.hpp>
-#include <icecream.hpp>
 
 // -----------------------------------------------------------------------------------------------------
 // FUNCTIONS FOR SELECTIONS
@@ -217,8 +216,7 @@ void gen::moleculesInSingleSlice(
  * @param[in] coordHigh Contains the upper limits of the slice, if a slice is
  *  to be created
  */
-molSys::PointCloud<molSys::Point<double>, double>
-gen::setAtomsWithSameMolID(
+void gen::setAtomsWithSameMolID(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::unordered_multimap<int,int> molIDAtomIDmap,
     int molID, bool inSliceValue) {
@@ -239,7 +237,9 @@ gen::setAtomsWithSameMolID(
     yCloud->pts[jatomIndex].inSlice = inSliceValue; // jatomIndex is assigned inSliceValue
   } // end of loop through all atoms with molID
 
-  return *yCloud;
+  // IC(yCloud->pts[jatomIndex]);
+
+  return;
 }
 
 /**
@@ -318,17 +318,18 @@ void ring::getEdgeMoleculesInRings(
           jatomID = oCloud->pts[jatomIndex].atomID; // Atom ID 
           // Now if oCloud and yCloud are not the same, use the
           // atom ID to set the inSlice bool value in yCloud 
-          if (!identicalCloud)
-          {
+          // if (!identicalCloud)
+          // {
             // Find the index corresponding to the same atom in yCloud 
             auto gotJ = yCloud->idIndexMap.find(jatomID);
-          jatomIndex1 = gotJ->second;
-          // Set the jatom inSlice bool to true
-          yCloud->pts[jatomIndex1].inSlice = true; // jatomIndex is inside the slice 
-          // set the inSlice value of all atoms in yCloud with the current molecule ID 
-          // *yCloud = gen::setAtomsWithSameMolID(yCloud, molIDAtomIDmap, 
-          //   yCloud->pts[jatomIndex1].molID, true);
-          } // end of setting values in yCloud 
+            jatomIndex1 = gotJ->second;
+            // throw if not found ?
+            // Set the jatom inSlice bool to true
+            yCloud->pts[jatomIndex1].inSlice = true; // jatomIndex is inside the slice 
+            // set the inSlice value of all atoms in yCloud with the current molecule ID 
+            gen::setAtomsWithSameMolID(yCloud, molIDAtomIDmap, 
+              yCloud->pts[jatomIndex1].molID, true);
+          // } // end of setting values in yCloud 
         } // end of loop through the elements of the current ring 
         // --------------------------
       } // found iatom in the ring
@@ -340,6 +341,7 @@ void ring::getEdgeMoleculesInRings(
 
   // Optionally add support for molecule slice update if yCloud and oCloud are not identical?
   // Some other bool?  
+  // IC(ringInSlice);
 
   return;
 }
@@ -373,8 +375,8 @@ void ring::printSliceGetEdgeMoleculesInRings(
 
   //Given the full yCloud PointCloud, set the inSlice bool for every atom,
   // if the molecules are inside the specified (single) region. 
-  gen::atomsInSingleSlice(yCloud, true, coordLow, coordHigh);
-  // gen::moleculesInSingleSlice(yCloud, true, coordLow, coordHigh);
+  // gen::atomsInSingleSlice(yCloud, true, coordLow, coordHigh);
+  gen::moleculesInSingleSlice(yCloud, true, coordLow, coordHigh);
 
   // Make sure that molecules which participate in the rings inside the slice are also 
   // in the selection 

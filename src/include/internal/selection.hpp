@@ -72,8 +72,7 @@ void atomsInSingleSlice(
 
 //! Given a particular molecule ID and a pointCloud set the inSlice bool for all atoms,
 //! with that molecule ID 
-molSys::PointCloud<molSys::Point<double>, double>
-setAtomsWithSameMolID(
+void setAtomsWithSameMolID(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::unordered_multimap<int,int> molIDAtomIDmap,
     int molID, bool inSliceValue=true);
