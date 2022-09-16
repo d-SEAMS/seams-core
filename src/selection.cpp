@@ -318,8 +318,8 @@ void ring::getEdgeMoleculesInRings(
           jatomID = oCloud->pts[jatomIndex].atomID; // Atom ID 
           // Now if oCloud and yCloud are not the same, use the
           // atom ID to set the inSlice bool value in yCloud 
-          // if (!identicalCloud)
-          // {
+          if (!identicalCloud)
+          {
             // Find the index corresponding to the same atom in yCloud 
             auto gotJ = yCloud->idIndexMap.find(jatomID);
             jatomIndex1 = gotJ->second;
@@ -329,7 +329,7 @@ void ring::getEdgeMoleculesInRings(
             // set the inSlice value of all atoms in yCloud with the current molecule ID 
             gen::setAtomsWithSameMolID(yCloud, molIDAtomIDmap, 
               yCloud->pts[jatomIndex1].molID, true);
-          // } // end of setting values in yCloud 
+          } // end of setting values in yCloud 
         } // end of loop through the elements of the current ring 
         // --------------------------
       } // found iatom in the ring
@@ -384,6 +384,8 @@ void ring::printSliceGetEdgeMoleculesInRings(
 
   // Print out the molecule IDs of all the atoms in the slice
   sout::writeMoleculeIDsInSlice(path, yCloud);
+  // Print out a command that could be used for an expression select command in OVITO
+  sout::writeMoleculeIDsExpressionSelectOVITO(path, yCloud);
 
   // Print out the dump of all atoms and molecules, with an inSlice value printed in a separate column
   // H atoms not included in the slice (TODO: fix)
