@@ -2,8 +2,8 @@ print("\n Welcome to the Ice Type Determination Module\n");
 cutoffRadius = 3.5; --- This is for H2O
 oxygenAtomType = 2; --- This is assigned by LAMMPS
 hydrogenAtomType = 1; --- Hydrogen atom type assigned
-targetFrame=100; --- The first frame
-finalFrame=100; --- This is inclusive
+targetFrame=1; --- The first frame
+finalFrame=1; --- This is inclusive
 frameGap=1; --- The gap between frames
 maxDepth = 6; --- The maximum depth upto which rings will be searched.
 --- Slice Information
@@ -12,5 +12,5 @@ sliceLowerLimits = {0,0,0}; --- Lower limit of the slice (for box dim, keep the 
 sliceUpperLimits = {0,0,0}; --- Upper limit of the slice 
 
 --- Paths for the output directories and lua scipt
-outDir="../runOne/"; --- The subdirectory used; 
-functionScript="../lua_inputs/iceType/functions.lua" --- This is relative to the binary location 
+outDir="runOne/"; --- The subdirectory used; 
+functionScript="lua_inputs/iceType/functions.lua" --- This is relative to the binary location 
