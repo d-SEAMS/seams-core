@@ -954,6 +954,74 @@ int sout::writeMoleculeIDsInSlice(std::string path,
 }
 
 /**
+ * @details Function for printing out the molecule IDs present in the slice.
+ The format should be compatible with the group command in LAMMPS 
+ */
+int sout::writeMoleculeIDsExpressionSelectOVITO(std::string path,
+                            molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
+  std::ofstream outputFile;
+  std::string filename =
+      "ovito-molIDSelect-" + std::to_string(yCloud->currentFrame) + ".dat";
+  std::vector<int> idVec; // Vector which will contain all molecule IDs present in the slice
+  // Eventually we will sort this and only keep unique molecule IDs. 
+  int prevElem, currentElem; // previous and current mol ID in the sequence
+  int lastPrintedElemSeries; // Last element printed 
+  // ----------------
+  // Make the output directory if it doesn't exist
+  sout::makePath(path);
+  sout::makePath(path+"selection");
+  sout::makePath(path+"selection/IDovitoFiles");
+  // ----------------
+  // Write output to file inside the output directory
+  outputFile.open(path + "selection/IDovitoFiles/" + filename);
+
+  // ----------------
+  // Find all molecule IDs from yCloud 
+  // Loop through all iatom in yCloud
+  for (int iatom = 0; iatom < yCloud->nop; iatom++)
+  {
+    // If iatom is in the slice, add the molecule ID to idVec
+    if (yCloud->pts[iatom].inSlice)
+    {
+      idVec.push_back(yCloud->pts[iatom].molID);
+    } // end of adding molecule ID to vector for slice 
+  } // end of loop through iatom
+  // ----------------
+  // Sort in ascending order
+  std::sort(idVec.begin(), idVec.end());
+  auto it = std::unique(idVec.begin(), idVec.end());
+  // Get rid of undefined elements
+  idVec.resize(std::distance(idVec.begin(), it));
+  // ----------------
+
+  // Format:
+  // Comment line
+  // 1 2 3 4 6 7
+
+  // ----------------
+  // Comment line 
+  outputFile << "# Molecule IDs in slice\n";
+  outputFile << "# OVITO Expression select command \n";
+  // ----------------
+
+  // Print other molecule IDs to the file
+  for (int i=0; i<idVec.size()-1; i++)
+  {
+    currentElem = idVec[i]; // current mol ID
+
+    outputFile << "MoleculeIdentifier == " << currentElem << " || ";
+
+  } // end of printing all elements to file except the last one 
+
+  // Print the last element
+  outputFile << "MoleculeIdentifier == " << idVec.back();
+
+  outputFile.close();
+
+  return 0;
+}
+
+/**
  * @details Function for printing out prism info, when there is no  volume slice
  */
 int sout::writePrismNum(std::string path, std::vector<int> nPrisms,
