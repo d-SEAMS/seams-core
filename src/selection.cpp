@@ -10,6 +10,8 @@
 
 #include <selection.hpp>
 
+#include <icecream.hpp>
+
 // -----------------------------------------------------------------------------------------------------
 // FUNCTIONS FOR SELECTIONS
 // -----------------------------------------------------------------------------------------------------
@@ -390,6 +392,8 @@ void ring::printSliceGetEdgeMoleculesInRings(
   // Print out the dump of all atoms and molecules, with an inSlice value printed in a separate column
   // H atoms not included in the slice (TODO: fix)
   sout::writeLAMMPSdumpSlice(yCloud, path); 
+  
+  IC(rings[0]);
 
   return;
 }
