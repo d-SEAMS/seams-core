@@ -76,6 +76,7 @@ add_library(yodaLib SHARED
   bulkTUM.cpp
   shapeMatch.cpp
   selection.cpp
+  bulkClathrate.cpp
 )
 
 install(TARGETS yodaStruct yodaLib LIBRARY DESTINATION "lib"
