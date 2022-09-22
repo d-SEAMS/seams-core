@@ -31,7 +31,6 @@ clath::buildRefS2CageLammpsTrj(std::string filename, std::string filenameO, int 
   //
   // read in all the water molecules into the pointCloud setCloud
   //
-  sinp::readXYZ(fileName, &waterCloud);
   // All water molecules 
   waterCloud = sinp::readLammpsTrj(filename, 1, &waterCloud);
   oCloud = sinp::readLammpsTrjO(filenameO, 1, &oCloud, oxygenAtomType);
