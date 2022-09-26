@@ -45,8 +45,8 @@
  */
 void clath::shapeMatchS2ClathrateSystem(std::string templateFileName, std::string templateFileO, int oxygenAtomType){
   //
-  Eigen::MatrixXd refPntsO(28, 3); // Reference point set of just O atoms (Eigen matrix)
-  Eigen::MatrixXd refPntsWat(84, 3); // Reference point set of O H H water atoms (Eigen matrix)
+  Eigen::MatrixXdRowMajor refPntsO(28, 3); // Reference point set of just O atoms (Eigen matrix)
+  Eigen::MatrixXdRowMajor refPntsWat(84, 3); // Reference point set of O H H water atoms (Eigen matrix)
   // -----------------------------------
   // Build the reference point sets 
   std::tie(refPntsO, refPntsWat) = clath::buildRefS2CageLammpsTrj(templateFileName, templateFileO, oxygenAtomType);
@@ -60,13 +60,13 @@ void clath::shapeMatchS2ClathrateSystem(std::string templateFileName, std::strin
  * file saved in the templates directory 
  * In the reference structure with O H H atoms, H atoms follow the O atoms in the same molecule
  */
-std::pair<Eigen::MatrixXd, Eigen::MatrixXd> 
+std::pair<Eigen::MatrixXdRowMajor, Eigen::MatrixXdRowMajor> 
 clath::buildRefS2CageLammpsTrj(std::string filename, std::string filenameO, int oxygenAtomType) {
   //
   // Get the reference point set
-  // Column major 
-  Eigen::MatrixXd refPntsO(3, 28); // Reference point set of just O atoms (Eigen matrix)
-  Eigen::MatrixXd refPntsWat(3, 84); // Reference point set of O H H water atoms (Eigen matrix)
+  // Row major 
+  Eigen::MatrixXdRowMajor refPntsO(28, 3); // Reference point set of just O atoms (Eigen matrix)
+  Eigen::MatrixXdRowMajor refPntsWat(84, 3); // Reference point set of O H H water atoms (Eigen matrix)
   molSys::PointCloud<molSys::Point<double>, double>
       waterCloud; // PointCloud for holding the reference point values for all the water molecules
       molSys::PointCloud<molSys::Point<double>, double>
@@ -98,9 +98,9 @@ clath::buildRefS2CageLammpsTrj(std::string filename, std::string filenameO, int 
     // Add to the vector 
     oxyIDorder.push_back(iatomID);
     // Update the Eigen matrix for the reference points of O 
-    refPntsO(0, iatom) = oCloud.pts[iatom].x;
-    refPntsO(1, iatom) = oCloud.pts[iatom].y;
-    refPntsO(2, iatom) = oCloud.pts[iatom].z;
+    refPntsO(iatom, 0) = oCloud.pts[iatom].x;
+    refPntsO(iatom, 1) = oCloud.pts[iatom].y;
+    refPntsO(iatom, 2) = oCloud.pts[iatom].z;
   } // order of oxygen atoms; update of oxyIDorder
 
   // --------------
@@ -139,9 +139,9 @@ clath::buildRefS2CageLammpsTrj(std::string filename, std::string filenameO, int 
   {
     iatomIndex = watIndexOrder[i]; // Atom index in waterCloud 
     // Update the Eigen matrix for the reference points of water 
-    refPntsWat(0, i) = waterCloud.pts[iatomIndex].x;
-    refPntsWat(1, i) = waterCloud.pts[iatomIndex].y;
-    refPntsWat(2, i) = waterCloud.pts[iatomIndex].z;
+    refPntsWat(i, 0) = waterCloud.pts[iatomIndex].x;
+    refPntsWat(i, 1) = waterCloud.pts[iatomIndex].y;
+    refPntsWat(i, 2) = waterCloud.pts[iatomIndex].z;
   } // end of building the Eigen vector for refPntsWat
   // --------------
   return std::make_pair (refPntsO, refPntsWat);
