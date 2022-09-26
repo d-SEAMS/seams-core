@@ -272,3 +272,33 @@ double gen::angDistDegQuaternions(std::vector<double> quat1,
   // Return the angular distance
   return angDist;
 }
+
+/**
+ * @details Function for returning a vector of atom index values, 
+ * with the same molecule ID, given a PointCloud and an unordered multimap.
+ * @param[in] yCloud The given PointCloud
+ * @param[in] molID The molecule ID for which atom index values will be returned
+ * @param[in] molIDAtomIDmap Unordered multimap mapping the molecule IDs to the atom IDs for the PointCloud
+ * @return A vector containing atom indices with the molID molecule ID, corresponding to the given PointCloud
+ */
+std::vector<int> 
+gen::atomIndexWithMolID(molSys::PointCloud<molSys::Point<double>, double> yCloud,
+  int molID, std::unordered_multimap<int, int> molIDAtomIDmap) {
+  //
+  std::vector<int> atomIndexList; // list of atom indices in yCloud with the same molecule ID 
+  int jatomID, jatomIndex;
+
+  auto range = molIDAtomIDmap.equal_range(molID);
+  // Loop through all atoms with iatomMolID
+  for (auto itr = range.first; itr != range.second; ++itr){
+  // itr->second gives the value (in this case, the atom ID)
+  jatomID = itr->second; // Atom ID with molecule ID equal to iatomMolID
+  auto gotJ = yCloud.idIndexMap.find(jatomID);
+  jatomIndex = gotJ->second;
+  // Update the atomIndexList vector 
+  atomIndexList.push_back(jatomIndex);
+  } // get atoms with molID
+
+  // Return the angular distance
+  return atomIndexList;
+}
