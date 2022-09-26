@@ -14,6 +14,7 @@ add_executable(yodaStruct_test
                topo_one_dim-test.cpp
                topo_bulk-test.cpp
                absor-test.cpp
+               clathrate-test.cpp
                ${PROJECT_SOURCE_DIR}/src/franzblau.cpp
                ${PROJECT_SOURCE_DIR}/src/topo_one_dim.cpp
                ${PROJECT_SOURCE_DIR}/src/topo_bulk.cpp
@@ -25,6 +26,7 @@ add_executable(yodaStruct_test
                ${PROJECT_SOURCE_DIR}/src/seams_output.cpp
                ${PROJECT_SOURCE_DIR}/src/pntCorrespondence.cpp
                ${PROJECT_SOURCE_DIR}/src/bulkTUM.cpp
+               ${PROJECT_SOURCE_DIR}/src/bulkClathrate.cpp
 )
 
 # Standard cmake stuff
