@@ -119,6 +119,18 @@ Eigen::MatrixXd
 changeDiaCageOrder(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                    std::vector<int> ddcOrder, int startingIndex = 0);
 
+//! Fills up an eigen matrix point set (in column major format) using a vector of
+//! atom indices, with respect to an input PointCloud 
+Eigen::MatrixXd
+fillTargetEigenPointSetColMajor(molSys::PointCloud<molSys::Point<double>, double> yCloud,
+                   std::vector<int> atomIndexList, int nop, int dim);
+
+//! Fills up an eigen matrix point set (in row major format) using a vector of
+//! atom indices, with respect to an input PointCloud 
+Eigen::MatrixXdRowMajor
+fillTargetEigenPointSet(molSys::PointCloud<molSys::Point<double>, double> yCloud,
+                   std::vector<int> atomIndexList, int nop, int dim);
+
 } // namespace pntToPnt
 
 #endif // __PNTCORRESPONDENCE_H_

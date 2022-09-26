@@ -1125,3 +1125,61 @@ Eigen::MatrixXd pntToPnt::changeDiaCageOrder(
 
   return pointSet;
 }
+
+/**
+ * @details Fills up an eigen matrix point set in column major format, 
+ * given a vector of the atom indices, and the PointCloud with the x y z information. 
+ */
+Eigen::MatrixXd pntToPnt::fillTargetEigenPointSetColMajor(
+    molSys::PointCloud<molSys::Point<double>, double> yCloud,
+    std::vector<int> atomIndexList, int nop, int dim) {
+  //
+  Eigen::MatrixXd pointSet(dim, nop); // Output point set (column major)
+  int iatomIndex; // current atom index 
+  int iatom=0; 
+
+  // Some error handling: 
+  // The length of atomIndexList should be the same as nop
+
+  // Fill up the Eigen matrix
+  for (auto it = atomIndexList.begin(); it != atomIndexList.end(); ++it)
+  {
+    iatomIndex = *it; 
+    // Fill up the pointSet 
+    pointSet(0, iatom) = yCloud.pts[iatomIndex].x;
+    pointSet(1, iatom) = yCloud.pts[iatomIndex].y;
+    pointSet(2, iatom) = yCloud.pts[iatomIndex].z;
+    iatom++; 
+  } // end of filling up the Eigen matrix 
+
+  return pointSet;
+}
+
+/**
+ * @details Fills up an eigen matrix point set in row major format, 
+ * given a vector of the atom indices, and the PointCloud with the x y z information. 
+ */
+Eigen::MatrixXdRowMajor pntToPnt::fillTargetEigenPointSet(
+    molSys::PointCloud<molSys::Point<double>, double> yCloud,
+    std::vector<int> atomIndexList, int nop, int dim) {
+  //
+  Eigen::MatrixXdRowMajor pointSet(nop, dim); // Output point set (column major)
+  int iatomIndex; // current atom index 
+  int iatom=0; 
+
+  // Some error handling: 
+  // The length of atomIndexList should be the same as nop
+
+  // Fill up the Eigen matrix
+  for (auto it = atomIndexList.begin(); it != atomIndexList.end(); ++it)
+  {
+    iatomIndex = *it; 
+    // Fill up the pointSet 
+    pointSet(iatom, 0) = yCloud.pts[iatomIndex].x;
+    pointSet(iatom, 1) = yCloud.pts[iatomIndex].y;
+    pointSet(iatom, 2) = yCloud.pts[iatomIndex].z;
+    iatom++; 
+  } // end of filling up the Eigen matrix 
+
+  return pointSet;
+}
