@@ -41,9 +41,12 @@
 
 namespace clath {
 
-//! Build a reference SII large cage (5^12 6^4) reading in from a template trajectory file
-std::pair<Eigen::MatrixXd, Eigen::MatrixXd>
- buildRefS2CageLammpsTrj(std::string filename, std::string filenameO, int oxygenAtomType);
+  //! Shape-matching algorithms for S2 clathrates
+  void shapeMatchS2ClathrateSystem(std::string templateFileName, std::string templateFileO, int oxygenAtomType);
+
+  //! Build a reference SII large cage (5^12 6^4) reading in from a template trajectory file
+  std::pair<Eigen::MatrixXd, Eigen::MatrixXd>
+  buildRefS2CageLammpsTrj(std::string filename, std::string filenameO, int oxygenAtomType);
 
 } // namespace clath
 
