@@ -46,6 +46,15 @@ int hornAbsOrientation(const Eigen::MatrixXd &refPoints,
                        std::vector<double> *quat, double *rmsd,
                        std::vector<double> *rmsdList, double *scale);
 
+/**
+ * @brief Get the absolute orientation using Horn's algorithm (with quaternions)
+ * Row major Eigen matrices taken as input
+ */
+int hornAbsOrientationRowMajor(const Eigen::MatrixXdRowMajor &refPoints,
+                       const Eigen::MatrixXdRowMajor &targetPoints,
+                       std::vector<double> *quat, double *rmsd,
+                       std::vector<double> *rmsdList, double *scale);
+
 //! Compute the matrix S, or M, whose elements are the sums of products of
 //! coordinates measured in the left and right systems
 Eigen::MatrixXd calcMatrixS(const Eigen::MatrixXd &centeredRefPnts,
@@ -58,6 +67,9 @@ Eigen::MatrixXd calcMatrixN(const Eigen::MatrixXd &S);
 
 //! Center a point set wrt the centroid
 Eigen::MatrixXd centerWRTcentroid(const Eigen::MatrixXd &pointSet);
+
+//! Center a point set (row-major) wrt the centroid
+Eigen::MatrixXd centerWRTcentroid(const Eigen::MatrixXdRowMajor &pointSet);
 
 //! Calculate the scale factor from the centered left and right point sets
 double calcScaleFactor(const Eigen::MatrixXd &rightSys,
