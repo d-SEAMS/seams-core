@@ -324,4 +324,8 @@ avgVector(std::vector<std::complex<double>> v, int l, int neigh) {
 
 } // namespace gen
 
+namespace Eigen{ 
+    typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> MatrixXdRowMajor;
+}
+
 #endif // __NEIGHBOURS_H_
