@@ -247,6 +247,11 @@ int unwrappedCoordShift(
 double angDistDegQuaternions(std::vector<double> quat1,
                              std::vector<double> quat2);
 
+//! Function for returning a vector of atom IDs given molecule IDs
+//! a PointCloud and an unordered multimap 
+std::vector<int> atomIndexWithMolID(molSys::PointCloud<molSys::Point<double>, double> yCloud,
+                             int molID, std::unordered_multimap<int, int> molIDAtomIDmap);
+
 /**
  * @brief Function for tokenizing line strings into words (strings) delimited by
  * whitespace. This returns a vector with the words in it.
