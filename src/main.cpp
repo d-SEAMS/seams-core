@@ -46,6 +46,7 @@
 #include <topo_one_dim.hpp>
 #include <topo_two_dim.hpp>
 #include <selection.hpp>
+#include <bulkClathrate.hpp>
 
 // Externally bundled-input libraries
 // #include <cxxopts.hpp>
@@ -263,6 +264,9 @@ int main(int argc, char *argv[]) {
     // Largest ice cluster
     lua.set_function("clusterAnalysis", clump::clusterAnalysis);
     lua.set_function("recenterCluster", clump::recenterClusterCloud);
+    // -----------------
+    // Functions for clathrate shape-matching
+    lua.set_function("bulkClathrateS2shapeMatchingSystem", clath::shapeMatchS2ClathrateSystem);
     // -----------------
     // Selection Functions
     // Function for getting an output PointCloud of a particular atom type from an existing PointCloud
