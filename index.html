@@ -144,7 +144,25 @@ url={https://doi.org/10.1021/acs.jcim.0c00031}
 <div class="line">make -j$(nproc)</div>
 <div class="line">make install</div>
 </div><!-- fragment --><p>We have opted to install into the <code>conda</code> environment, if this is not the intended behavior, use <code>/usr/local</code> instead.</p>
-<h3>Nix</h3>
+<h3>Spack</h3>
+<p>Manually this can be done in a painful way as follows:</p>
+<div class="fragment"><div class="line">spack install eigen@3.3.9 lua@5.2</div>
+<div class="line">spack install catch2 fmt yaml-cpp openblas boost cmake ninja meson</div>
+<div class="line">spack load catch2 fmt yaml-cpp openblas boost cmake ninja meson eigen@3.3.9 lua@5.2</div>
+<div class="line">luarocks install luafilesystem</div>
+</div><!-- fragment --><p>Or better:</p>
+<div class="fragment"><div class="line">spack env activate $(pwd)</div>
+<div class="line"># After loading the packages</div>
+<div class="line">luarocks install luafilesystem</div>
+</div><!-- fragment --><p>Now we can build and install as usual.</p>
+<div class="fragment"><div class="line">cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo \</div>
+<div class="line"> -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -GNinja \</div>
+<div class="line"> -DCMAKE_INSTALL_PREFIX=$HOME/.local \</div>
+<div class="line"> -DCMAKE_CXX_FLAGS=&quot;-pg -fsanitize=address &quot; \</div>
+<div class="line"> -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg \</div>
+<div class="line"> -DBUILD_TESTING=NO</div>
+<div class="line">cmake --build build</div>
+</div><!-- fragment --><h3>Nix</h3>
 <p>Since this project is built with <code>nix</code>, we can simply do the following from the root directory (longer method):</p>
 <div class="fragment"><div class="line"># Make sure there are no artifacts</div>
 <div class="line">rm -rf build</div>
