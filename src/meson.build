@@ -37,13 +37,20 @@ fmt_dep = dependency('fmt', method : 'cmake',  modules : ['fmt::fmt'],  required
 libyamlcpp = dependency('yaml-cpp',
                         fallback: ['yaml-cpp', 'libyamlcpp_dep'])
 
-# lua_dep = dependency('lua', required : true)
+lua_dep = dependency('lua',
+                     version : '<5.3',
+                     required : false)
+if lua_dep.found()
+  yds_deps += [ lua_dep ]
+else
+  # Assume spack
+  lua_spack_dep = cppc.find_library('lua', dirs:
+       meson.source_root()+'/../.spack-env/view/lib',
+                                    required: true)
+  yds_deps += [lua_spack_dep]
+endif
 
-cpp = meson.get_compiler('cpp')
-lua_dep = cpp.find_library('lua', dirs:
-	meson.source_root()+'/../.spack-env/view/lib', required: true)
-
-yds_deps += [ boost_dep, fmt_dep, libyamlcpp, lua_dep ]
+yds_deps += [ boost_dep, fmt_dep, libyamlcpp ]
 
 incdir = include_directories([ 'include/internal', 'include/external' ])
 
