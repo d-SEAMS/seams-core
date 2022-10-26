@@ -21,7 +21,7 @@ if host_system == 'darwin'
 endif
 
 # Dependencies
-eigen_dep = dependency('Eigen3')
+eigen_dep = dependency('Eigen3', modules : ['Eigen3::Eigen'])
 yds_deps = [ eigen_dep ]
 
 boost_dep = dependency('boost',
@@ -37,7 +37,11 @@ fmt_dep = dependency('fmt', method : 'cmake',  modules : ['fmt::fmt'],  required
 libyamlcpp = dependency('yaml-cpp',
                         fallback: ['yaml-cpp', 'libyamlcpp_dep'])
 
-lua_dep = dependency('lua')
+# lua_dep = dependency('lua', required : true)
+
+cpp = meson.get_compiler('cpp')
+lua_dep = cpp.find_library('lua', dirs:
+	meson.source_root()+'/../.spack-env/view/lib', required: true)
 
 yds_deps += [ boost_dep, fmt_dep, libyamlcpp, lua_dep ]
 
