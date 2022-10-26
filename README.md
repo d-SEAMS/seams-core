@@ -116,6 +116,21 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 cmake --build build
 ```
 
+Or more reasonably:
+
+```bash
+export INST_DIR=$HOME/.local
+cd src
+meson setup bbdir --prefix $INST_DIR
+meson compile -C bbdir
+meson install -C bbdir
+# if not done
+export PATH=$PATH:$INST_DIR/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INST_DIR/lib
+cd ../
+yodaStruct -c lua_inputs/config.yml
+```
+
 ### Nix
 
 Since this project is built with `nix`, we can simply do the following from the
