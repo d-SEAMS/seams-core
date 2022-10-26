@@ -162,6 +162,17 @@ url={https://doi.org/10.1021/acs.jcim.0c00031}
 <div class="line"> -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg \</div>
 <div class="line"> -DBUILD_TESTING=NO</div>
 <div class="line">cmake --build build</div>
+</div><!-- fragment --><p>Or more reasonably:</p>
+<div class="fragment"><div class="line">export INST_DIR=$HOME/.local</div>
+<div class="line">cd src</div>
+<div class="line">meson setup bbdir --prefix $INST_DIR</div>
+<div class="line">meson compile -C bbdir</div>
+<div class="line">meson install -C bbdir</div>
+<div class="line"># if not done</div>
+<div class="line">export PATH=$PATH:$INST_DIR/bin</div>
+<div class="line">export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INST_DIR/lib</div>
+<div class="line">cd ../</div>
+<div class="line">yodaStruct -c lua_inputs/config.yml</div>
 </div><!-- fragment --><h3>Nix</h3>
 <p>Since this project is built with <code>nix</code>, we can simply do the following from the root directory (longer method):</p>
 <div class="fragment"><div class="line"># Make sure there are no artifacts</div>
