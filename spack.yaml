@@ -4,7 +4,7 @@
 # configuration settings.
 spack:
   # add package specs to the `specs` list
-  specs: [lua@5.2, eigen@3.3.9, openblas, boost, cmake, ninja, meson, fmt]
+  specs: [lua@5.2, eigen@3.3.9, openblas, boost, cmake, ninja, meson, fmt, yaml-cpp]
   view: true
   concretizer:
     unify: true
