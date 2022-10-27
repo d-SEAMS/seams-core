@@ -4,6 +4,8 @@
 # configuration settings.
 spack:
   # add package specs to the `specs` list
+  # use gcc or something local with spack install if needed
+  # Typically not going to work on MacOS, remove that locally
   specs: [lua@5.2, eigen@3.3.9, openblas, boost, cmake, ninja, meson, fmt, yaml-cpp,
     pkg-config, gcc@12.2]
   view: true
