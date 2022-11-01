@@ -131,6 +131,12 @@ Eigen::MatrixXdRowMajor
 fillTargetEigenPointSet(molSys::PointCloud<molSys::Point<double>, double> yCloud,
                    std::vector<int> atomIndexList, int nop, int dim);
 
+//! Fills up an eigen matrix point set (in row major format) using a vector of vectors
+//! of atom indices (corresponding to rings), with respect to an input PointCloud 
+Eigen::MatrixXdRowMajor
+fillTargetEigenPointSetFromRings(molSys::PointCloud<molSys::Point<double>, double> yCloud,
+                   std::vector<std::vector<int> > rings, int nop, int dim);
+
 } // namespace pntToPnt
 
 #endif // __PNTCORRESPONDENCE_H_
