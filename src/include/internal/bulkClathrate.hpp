@@ -48,6 +48,18 @@ namespace clath {
   std::pair<Eigen::MatrixXdRowMajor, Eigen::MatrixXdRowMajor>
   buildRefS2CageLammpsTrj(std::string filename, std::string filenameO, int oxygenAtomType);
 
+  //! Build a reference SII large cage (5^12 6^4) reading in from a template trajectory file
+  std::tuple<molSys::PointCloud<molSys::Point<double>, double>,std::vector<std::vector<int>> , Eigen::MatrixXdRowMajor>
+  buildRefS2Cage(std::string filename, int oxygenAtomType);
+
+  //! Add a given vector to the current rings vector of vectors for a 
+  //! target clathrate structure. Match the reference and target structures.
+  void matchClathrateLastRing(std::vector<std::vector<int>> targetRings, std::vector<int> lastTargetVec,
+  std::vector<std::vector<int>> refRings, molSys::PointCloud<molSys::Point<double>, double> targetCloud,
+  molSys::PointCloud<molSys::Point<double>, double> refCloud,
+  std::vector<double> *quat, double *rmsd,
+  std::vector<double> *rmsdList, double *scale);
+
 } // namespace clath
 
 #endif // __BULKCLATHRATE_H_

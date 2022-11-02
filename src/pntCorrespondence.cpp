@@ -1183,3 +1183,36 @@ Eigen::MatrixXdRowMajor pntToPnt::fillTargetEigenPointSet(
 
   return pointSet;
 }
+
+/**
+ * @details Fills up an eigen matrix point set in row major format, 
+ * given a vector of vector of the atom indices (corresponding to rings),
+ * and the PointCloud with the x y z information. 
+ */
+Eigen::MatrixXdRowMajor pntToPnt::fillTargetEigenPointSetFromRings(
+    molSys::PointCloud<molSys::Point<double>, double> yCloud,
+    std::vector<std::vector<int> > rings, int nop, int dim) {
+  //
+  Eigen::MatrixXdRowMajor pointSet(nop, dim); // Output point set (column major)
+  int iatom=0; 
+  int totalRingNum = rings.size(); // Total number of rings
+
+  // Some error handling: 
+  // The number of atom indices in rings should be the same as nop
+
+  // Fill up the Eigen matrix
+  for (auto& iring : rings)
+  {
+    // iring is a reference to the element (vector) of rings
+    for (auto& iatomIndex: iring)
+    {
+      // iatomIndex is a reference to the element of iring
+      pointSet(iatom, 0) = yCloud.pts[iatomIndex].x;
+      pointSet(iatom, 1) = yCloud.pts[iatomIndex].y;
+      pointSet(iatom, 2) = yCloud.pts[iatomIndex].z;
+      iatom++;
+    }
+  }
+
+  return pointSet;
+}

@@ -146,3 +146,84 @@ clath::buildRefS2CageLammpsTrj(std::string filename, std::string filenameO, int 
   // --------------
   return std::make_pair (refPntsO, refPntsWat);
 }
+
+/**
+ * @details Build a reference SII cage, consisting of 28 water molecules, reading it in from a template
+ * file saved in the templates directory. Only the O atoms are read in.
+ * Give the file path for the O atom trajectory 
+ * Returns a tuple of a PointCloud of the reference structure, vector of vectors of six-membered rings
+ * and the 4 other molecules not part of the 6-membered rings, and an Eigen row matrix of (28,3) dimensions
+ * with the coordinates. The 6-membered rings are mutually exclusive and share no common elements.
+ * The rings contain atom index values and not atom IDs. 
+ * The order in the reference matrix is: 
+ * Ring 1, Ring 2, Ring 3, Ring 4, 4 elements not part of the 6-membered rings  
+ */
+std::tuple<molSys::PointCloud<molSys::Point<double>, double>,std::vector<std::vector<int>> , Eigen::MatrixXdRowMajor> 
+clath::buildRefS2Cage(std::string filename, int oxygenAtomType) {
+  //
+  int nop = 28; // No. of O atoms 
+  int dim = 3;
+  // Get the reference point set
+  // Row major   
+  Eigen::MatrixXdRowMajor refPntsO(nop, dim); // Reference point set of just O atoms (Eigen matrix)
+  molSys::PointCloud<molSys::Point<double>, double>
+      refCloud; // PointCloud for holding the reference point values for the O atoms 
+  std::vector<std::vector<int> > rings{ {2, 26, 22, 21, 5, 1},
+   {3, 4, 9, 17, 16, 25}, {8, 14, 13, 19, 6, 7}, {12, 20, 23, 27, 15, 11}, {24, 18, 0, 10} }; // Rings (predefined for the reference structure)
+  // --------------
+  // Get the reference PointCloud 
+  refCloud = sinp::readLammpsTrjO(filename, 1, &refCloud, oxygenAtomType);
+  // --------------
+  // Fill in the Eigen matrix, given the rings vector of vector 
+  refPntsO = pntToPnt::fillTargetEigenPointSetFromRings(
+    refCloud, rings, nop, dim);
+  // --------------
+  return std::make_tuple (refCloud, rings, refPntsO);
+}
+
+/**
+ * @details Add a given vector to the current rings vector of vectors for a 
+ * target clathrate structure. Match the reference and target structures. 
+ */
+void clath::matchClathrateLastRing(std::vector<std::vector<int>> targetRings, std::vector<int> lastTargetVec,
+  std::vector<std::vector<int>> refRings, molSys::PointCloud<molSys::Point<double>, double> targetCloud,
+  molSys::PointCloud<molSys::Point<double>, double> refCloud,
+  std::vector<double> *quat, double *rmsd,
+  std::vector<double> *rmsdList, double *scale) {
+  //
+  int numRings; // Number of rings/vectors to match
+  int nop=0; // No. of water molecules/ no. of O atoms; points to match
+  int dim = 3; // No. of dimensions 
+  // Contains only the number of rings corresponding to the target rings
+  std::vector<std::vector<int>> reducedRefRings; 
+  // --------------
+  // Add the last vector to the target rings vector of vectors
+  targetRings.push_back(lastTargetVec);
+  // Get the number of elements and rings to match
+  numRings = targetRings.size(); // No. of rings to match
+  for (auto& iring : targetRings){
+    // Number of elements in this ring
+    nop += iring.size();
+  } // loop through the vector of vectors 
+  // 
+  // Get the reduced reference rings 
+  for (int i = 0; i < numRings; ++i)
+  {
+    reducedRefRings.push_back(refRings[i]);
+  } // building reduced reference rings 
+  // --------------
+  // Get the Eigen row-major matrices of the target and reference point set 
+  Eigen::MatrixXdRowMajor refPnts(nop, dim); // Reference point set (Eigen matrix) 
+  Eigen::MatrixXdRowMajor targetPnts(nop, dim); // Target point set (Eigen matrix)
+  // Fill in the Eigen matrices, given the rings vectors of vector
+  // Reference point set  
+  refPnts = pntToPnt::fillTargetEigenPointSetFromRings(refCloud, reducedRefRings, nop, dim);
+  // Target point set 
+  targetPnts = pntToPnt::fillTargetEigenPointSetFromRings(targetCloud, targetRings, nop, dim);
+  // --------------
+  // SHAPE-MATCHING 
+  absor::hornAbsOrientationRowMajor(refPnts, targetPnts, quat,
+            rmsd, rmsdList, scale);
+  // --------------
+  return;
+}
