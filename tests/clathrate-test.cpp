@@ -738,6 +738,50 @@ SCENARIO("Test the shape-matching of a perfect 5^12 6^4 clathrate cage with one 
         flattenedRingsVec.begin(), flattenedRingsVec.end(),
         std::back_inserter(lastTargetRing));
 
+    // Get all possible permutations and do shape-matching
+    // of the last ring 
+    std::sort(lastTargetRing); // should be in ascending order
+    int count=0; // for looping through all permutations
+
+    // Go through all the permutations 
+    do {
+        // reordered lastTargetRing
+        if (count==0)
+        {
+            // -------------------
+            clath::matchClathrateLastRing(rings, lastTargetRing, ringsRef, 
+                targetCloud, refCloud,&currentQuat,
+                &currentRmsd, &currentRmsdList, &currentScale);
+            // Update for the first time 
+            quaternionRot = currentQuat;
+            rmsd1 = currentRmsd;
+            rmsdList1 = currentRmsdList;
+            scale = currentScale;
+            currentLastRing = lastTargetRing;
+            // -------------------
+        } // first permutation
+        else{
+            // Shape-matching 
+            clath::matchClathrateLastRing(rings, lastTargetRing, ringsRef, 
+                targetCloud, refCloud,&currentQuat,
+                &currentRmsd, &currentRmsdList, &currentScale);
+            // Update if currentRmsd is less than rmsd1
+            if (currentRmsd < rmsd1)
+            {
+                quaternionRot = currentQuat;
+                rmsd1 = currentRmsd;
+                rmsdList1 = currentRmsdList;
+                scale = currentScale;
+                currentLastRing = lastTargetRing;
+            } // end of update
+        } // subsequent permutations after the first  
+
+        count++; // update the number of times the loop has run 
+    } while (std::next_permutation(lastTargetRing.begin(), lastTargetRing.end()));
+
+    // Presumably currentLastRing is the best match 
+    rings.push_back(currentLastRing);
+
     // BREAK HERE AND TEST 
     // -------------------------
     std::vector<double>
