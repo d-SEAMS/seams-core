@@ -76,6 +76,8 @@ ydsl_sources = [
 'topo_bulk.cpp',
 'topo_one_dim.cpp',
 'topo_two_dim.cpp',
+'bulkClathrate.cpp',
+'selection.cpp'
 ]
 
 # ---------------------- Executable
