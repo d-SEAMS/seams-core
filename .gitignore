@@ -306,3 +306,7 @@ shellBuild/
 doxyYoda
 doxyYoda_*
 run*
+# Manual updates ONLY
+spack.yml
+/.spack-env/
+*.lock
