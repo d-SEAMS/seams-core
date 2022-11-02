@@ -85,6 +85,52 @@ make install
 We have opted to install into the `conda` environment, if this is not the
 intended behavior, use `/usr/local` instead.
 
+### Spack
+
+Manually this can be done in a painful way as follows:
+
+```bash
+spack install eigen@3.3.9 lua@5.2
+spack install catch2 fmt yaml-cpp openblas boost cmake ninja meson
+spack load catch2 fmt yaml-cpp openblas boost cmake ninja meson eigen@3.3.9 lua@5.2
+luarocks install luafilesystem
+```
+
+Or better:
+
+```bash
+spack env activate $(pwd)
+# After loading the packages
+luarocks install luafilesystem
+```
+
+Now we can build and install as usual.
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+ -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -GNinja \
+ -DCMAKE_INSTALL_PREFIX=$HOME/.local \
+ -DCMAKE_CXX_FLAGS="-pg -fsanitize=address " \
+ -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg \
+ -DBUILD_TESTING=NO
+cmake --build build
+```
+
+Or more reasonably:
+
+```bash
+export INST_DIR=$HOME/.local
+cd src
+meson setup bbdir --prefix $INST_DIR
+meson compile -C bbdir
+meson install -C bbdir
+# if not done
+export PATH=$PATH:$INST_DIR/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INST_DIR/lib
+cd ../
+yodaStruct -c lua_inputs/config.yml
+```
+
 ### Nix
 
 Since this project is built with `nix`, we can simply do the following from the
