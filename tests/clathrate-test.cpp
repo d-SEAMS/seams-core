@@ -8,6 +8,7 @@
 #include <ring.hpp>
 #include <topo_bulk.hpp>
 #include <bulkClathrate.hpp>
+#include <numeric>
 
 // Standard
 #include <iostream>
@@ -701,6 +702,42 @@ SCENARIO("Test the shape-matching of a perfect 5^12 6^4 clathrate cage with one 
         rings.push_back(currentLastRing);
 
     } // end of loop through ringsHex
+    // ---------
+    // Get the last 4 elements, corresponding to the 5th ring in ringsRef
+    // ringsRef[4]
+
+    // 28 atom indices in targetCloud
+    std::vector<int> targetAtomIndices; 
+
+    // Get all the 28 indices of the atoms in targetCloud
+    // This could be more complicated in a large system, where
+    // the closest 28 water molecules to the THF center of mass might 
+    // be chosen 
+    for (int iatom = 0; iatom < targetCloud.nop; iatom++)
+    {
+        targetAtomIndices.push_back(iatom);
+    } // overkill!
+
+    // Flattened rings vector, which will contain all the indices
+    // in the rings vector for the targetCloud
+    auto flattenedRingsVec = std::accumulate(rings.begin(), rings.end(), decltype(rings)::value_type{},
+            [](auto &x, auto &y) {
+        x.insert(x.end(), y.begin(), y.end());
+        return x;
+    });
+
+    // Sort the flattened rings vector and targetAtomIndices
+    std::sort(targetAtomIndices.begin(), targetAtomIndices.end());
+    std::sort(flattenedRingsVec.begin(), flattenedRingsVec.end());
+
+    std::vector<int> lastTargetRing; // The last ring with 4 elements
+
+    // Elements not in common 
+    std::set_symmetric_difference(
+        targetAtomIndices.begin(), targetAtomIndices.end(),
+        flattenedRingsVec.begin(), flattenedRingsVec.end(),
+        std::back_inserter(lastTargetRing));
+
     // BREAK HERE AND TEST 
     // -------------------------
     std::vector<double>
