@@ -740,7 +740,7 @@ SCENARIO("Test the shape-matching of a perfect 5^12 6^4 clathrate cage with one 
 
     // Get all possible permutations and do shape-matching
     // of the last ring 
-    std::sort(lastTargetRing); // should be in ascending order
+    std::sort(lastTargetRing.begin(), lastTargetRing.end()); // should be in ascending order
     int count=0; // for looping through all permutations
 
     // Go through all the permutations 
