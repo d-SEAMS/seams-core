@@ -360,6 +360,8 @@ SCENARIO("Test the shape-matching of a perfect 5^12 6^4 clathrate cage with one 
     //
     // Row major (reference point sets)
     Eigen::MatrixXdRowMajor refPntsO(nOxy, dim); // Reference point set of just O atoms (Eigen matrix)
+    // Row major (target point sets)
+    Eigen::MatrixXdRowMajor targetPnts(nOxy, dim); // Target point set of just O atoms (Eigen matrix)
     // Row ordered Eigen matrix for the rotated O atom point set 
     Eigen::MatrixXd targetPointSet(nOxy, dim);
     // PointClouds 
@@ -782,6 +784,15 @@ SCENARIO("Test the shape-matching of a perfect 5^12 6^4 clathrate cage with one 
     // Presumably currentLastRing is the best match 
     rings.push_back(currentLastRing);
 
+    // Now get a row-ordered Eigen matrix of points (n x 3)
+    // from the rings vector of vectors
+
+    targetPnts = pntToPnt::fillTargetEigenPointSetFromRings(targetCloud, rings, nOxy, dim); 
+
+    // Shape-matching with the reference point set 
+    absor::hornAbsOrientationRowMajor(refPntsO, targetPnts, &quaternionRot, &rmsd1,
+                              &rmsdList1, &scale);
+
     // BREAK HERE AND TEST 
     // -------------------------
     std::vector<double>
@@ -793,10 +804,10 @@ SCENARIO("Test the shape-matching of a perfect 5^12 6^4 clathrate cage with one 
                               &rmsdList2, &selfScale);
 
     //
-    double angDist = gen::angDistDegQuaternions(selfQuatRot, selfQuatRot);
+    double angDist = gen::angDistDegQuaternions(selfQuatRot, quaternionRot);
     //
     REQUIRE_THAT(angDist, Catch::Matchers::Floating::WithinAbsMatcher(
-                              0.0, 0.01));  // Evaluate condition
+                              30.0, 0.01));  // Evaluate condition
     // --------------------------
   }  // End of given
 }  // End of scenario
