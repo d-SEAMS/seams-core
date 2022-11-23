@@ -61,6 +61,8 @@ void clath::shapeMatchS2ClathrateSystem(std::string path, std::vector<std::vecto
   std::vector<std::vector<int>>
       ringsHex;    // Vector of vectors of rings of just 6-membered rings
   std::vector<std::vector<double>> centroidCoord; // Coordinates of the centroid of the molecules
+  std::vector<int> cageOAtomIndices; // List of indices of water O atoms which are closest to a THF molecule 
+  double maxCutoff = 30.0; // in Angstroms; TODO change 
   // -----------------------------------
   // Build the reference point set
   // This is row-ordered 
@@ -70,9 +72,13 @@ void clath::shapeMatchS2ClathrateSystem(std::string path, std::vector<std::vecto
   // where you want to do shape-matching 
   centroidCoord = misc::getCentroidMolecules(filename, targetFrame, atomTypeI, isSlice, coordLow, coordHigh);
 
-  // Loop through the molecules
+  // Loop through the THF centroids
+  for (auto& centroidPnt : centroidCoord){
+    // Find the 28 closest water molecules 
+    cageOAtomIndices = misc::kClosestPoints(yCloud, oxygenAtomType, 
+      centroidPnt, nOxy, maxCutoff);
+  } // loop through the THF centroid points 
   // Find a test template structure (28 closest water molecules)
-  // to a given COM of an encapsulated molecule
   // Find the primitive rings for the candidate cage 
 
   // Get just the 6-membered rings for a given test template structure 
@@ -289,7 +295,7 @@ misc::getCentroidMolecules(std::string filename, int targetFrame,
   molIDAtomIDmap = molSys::createMolIDAtomIDMultiMap(&yCloud);
 
   // Loop through all the atoms of atom type atomTypeI 
-  // Calculate the COM for those molecules 
+  // Calculate the centroid for those molecules 
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     // Skip if the atom is not of type or if COM flag is true 
     if (yCloud.pts[iatom].type != atomTypeI || calcCentroidFlag[iatom])
@@ -321,7 +327,7 @@ misc::getCentroidMolecules(std::string filename, int targetFrame,
       {
         continue;
       }
-      // Add jatom coordinates to COM
+      // Add jatom coordinates to centroid
       currentCoord[0] += yCloud.pts[jatomIndex].x; // x 
       currentCoord[1] += yCloud.pts[jatomIndex].y; // y 
       currentCoord[2] += yCloud.pts[jatomIndex].z; // z 
@@ -344,4 +350,60 @@ misc::getCentroidMolecules(std::string filename, int targetFrame,
   // Return the coordinates of the centers of masses of the molecules
   // with the same molecule ID, for the given atom type 
   return centroidCoord;
+}
+
+/**
+ * @details Function for finding the k closest points (of type atomType) in a pointCloud, 
+ * from a given target point (x y z coordinates).
+ * @param[in] yCloud The given PointCloud
+ * @param[in] molID The molecule ID for which atom index values will be returned
+ * @param[in] maxCutoff Maximum cutoff distance in which to calculate the k closest points 
+ * @return A vector of k atom indices in yCloud corresponding to the k closest points 
+ */
+std::vector<int> misc::kClosestPoints(molSys::PointCloud<molSys::Point<double>, double> yCloud, 
+  int atomType, std::vector<double> targetPointCoord, int k, double maxCutoff) {
+  //
+  std::vector<int> pntIndices; // Vector of the closest points indices
+  double dist; // Distance of iatom from the target point 
+  std::vector< std::pair<double, int> > dIndVec; // Vector of distances and indices   
+
+  // ----------------
+  // Loop through all atoms in yCloud 
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+    // Skip for atoms which are not of type atomType 
+    if (yCloud.pts[iatom].type != atomType)
+    {
+      continue;
+    } // exclude atoms which are not of atomType
+    // ----
+    // Get the unwrapped distance from the target point 
+    dist = gen::unWrappedDistFromPoint(&yCloud, iatom, targetPointCoord);
+    //
+    // Skip this if the distance is larger than maxCutoff
+    if (dist > maxCutoff)
+    {
+      continue;
+    } // skip for dist>maxCutoff
+    //
+    // ------
+    // Otherwise, add to the vector of distances and indices 
+    dIndVec.push_back(
+      std::make_pair(dist, iatom)
+      );
+  } // end of loop through iatom
+  // ----------------
+
+  // Sort through the dIndVec using the distance 
+  std::sort(dIndVec.begin(), dIndVec.end());
+
+  // Error handling: if k is greater than dIndVec then something is 
+  // wrong (TODO)
+
+  // Loop through dIndVec and add the first k to pntIndices
+  for (int i = 0; i < k; i++) {
+    pntIndices.push_back(dIndVec[i].second);
+  } // end of loop through first k points  
+
+  // Return the indices of the k closest particles to the target point
+  return pntIndices;
 }

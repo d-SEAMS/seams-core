@@ -68,11 +68,16 @@ namespace clath {
 
 namespace misc {
   
-  //! Function for getting the COM of molecules given a particular atom type 
-std::vector<std::vector<double>> 
-getCentroidMolecules(std::string filename, int targetFrame,
-  int atomTypeI, bool isSlice = false, std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
-              std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
+  //! Function for getting the centroid of molecules given a particular atom type 
+  std::vector<std::vector<double>> 
+  getCentroidMolecules(std::string filename, int targetFrame,
+    int atomTypeI, bool isSlice = false, std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
+                std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
+
+  //! Function for finding the k closest points (of type atomType) in a pointCloud, from a given target point (x y z coordinates).
+  //! Returns a vector of k atom indices in yCloud corresponding to the k closest points 
+  std::vector<int> kClosestPoints(molSys::PointCloud<molSys::Point<double>, double> yCloud, int atomType, 
+    std::vector<double> targetPointCoord, int k, double maxCutoff);
 
 } // namespace misc 
 
