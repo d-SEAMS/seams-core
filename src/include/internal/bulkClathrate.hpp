@@ -42,7 +42,11 @@
 namespace clath {
 
   //! Shape-matching algorithms for S2 clathrates
-  void shapeMatchS2ClathrateSystem(std::string templateFileName, std::string templateFileO, int oxygenAtomType);
+  void shapeMatchS2ClathrateSystem(std::string path,
+    std::vector<std::vector<int>> nList, molSys::PointCloud<molSys::Point<double>, double> yCloud, 
+    std::string filename, int targetFrame,
+    int atomTypeI, bool isSlice, std::array<double, 3> coordLow, std::array<double, 3> coordHigh,
+    std::string templateFileO, int oxygenAtomType);
 
   //! Build a reference SII large cage (5^12 6^4) reading in from a template trajectory file
   std::pair<Eigen::MatrixXdRowMajor, Eigen::MatrixXdRowMajor>
@@ -61,5 +65,15 @@ namespace clath {
   std::vector<double> *rmsdList, double *scale);
 
 } // namespace clath
+
+namespace misc {
+  
+  //! Function for getting the COM of molecules given a particular atom type 
+std::vector<std::vector<double>> 
+getCentroidMolecules(std::string filename, int targetFrame,
+  int atomTypeI, bool isSlice = false, std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
+              std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
+
+} // namespace misc 
 
 #endif // __BULKCLATHRATE_H_

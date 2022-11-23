@@ -39,18 +39,46 @@
  *  @param[in] nList Row-ordered neighbour list, by index.
  *  @param[in] yCloud The input PointCloud, with respect to which the indices in
  *   the rings and nList vector of vectors have been saved.
- *  @param[in] firstFrame First frame to be analyzed
- *  @param[in] onlyTetrahedral Flag for only finding DDCs and HCs (true) or also
- *   finding PNCs (false)
+ *  @param[in] templateFileO Path to the LAMMPS trajectory file containing the template
+ *   reference structure of the S2 clathrate. 
+  *  @param[in] oxygenAtomType Type ID for the oxygen atoms. 
  */
-void clath::shapeMatchS2ClathrateSystem(std::string templateFileName, std::string templateFileO, int oxygenAtomType){
+void clath::shapeMatchS2ClathrateSystem(std::string path, std::vector<std::vector<int>> nList, molSys::PointCloud<molSys::Point<double>, double> yCloud, 
+  std::string filename, int targetFrame,
+  int atomTypeI, bool isSlice, std::array<double, 3> coordLow, std::array<double, 3> coordHigh,
+  std::string templateFileO, int oxygenAtomType){
+  // Reference structure stuff 
+  int dim = 3;   // Number of dimensions
+  int nOxy = 28; // Number of O atoms in the clathrate hexadecahedron
+  Eigen::MatrixXdRowMajor refPntsO(nOxy, dim); // Reference point set of just O atoms (Eigen matrix)
+  molSys::PointCloud<molSys::Point<double>, double>
+        refCloud;  // pointCloud for the reference template S2 cage 
+  std::vector<std::vector<int>> ringsRef;  // Rings for the reference structure 
+  // Candidate structure stuff
+  molSys::PointCloud<molSys::Point<double>, double>
+        targetCloud;  // pointCloud for the target/candidate S2 cage
   //
-  Eigen::MatrixXdRowMajor refPntsO(28, 3); // Reference point set of just O atoms (Eigen matrix)
-  Eigen::MatrixXdRowMajor refPntsWat(84, 3); // Reference point set of O H H water atoms (Eigen matrix)
+  std::vector<std::vector<int>>
+      ringsHex;    // Vector of vectors of rings of just 6-membered rings
+  std::vector<std::vector<double>> centroidCoord; // Coordinates of the centroid of the molecules
   // -----------------------------------
-  // Build the reference point sets 
-  std::tie(refPntsO, refPntsWat) = clath::buildRefS2CageLammpsTrj(templateFileName, templateFileO, oxygenAtomType);
+  // Build the reference point set
+  // This is row-ordered 
+  std::tie(refCloud, ringsRef, refPntsO) = clath::buildRefS2Cage(templateFileO, oxygenAtomType);
   // -----------------------------------
+  // Get the COM of the encapsulated molecules in the region 
+  // where you want to do shape-matching 
+  centroidCoord = misc::getCentroidMolecules(filename, targetFrame, atomTypeI, isSlice, coordLow, coordHigh);
+
+  // Loop through the molecules
+  // Find a test template structure (28 closest water molecules)
+  // to a given COM of an encapsulated molecule
+  // Find the primitive rings for the candidate cage 
+
+  // Get just the 6-membered rings for a given test template structure 
+  // ringsHex = ring::getSingleRingSize(rings, 6);
+
+  // Shape-matching of test cage to the reference cage 
 
   return;
 } // end of function 
@@ -226,4 +254,94 @@ void clath::matchClathrateLastRing(std::vector<std::vector<int>> targetRings, st
             rmsd, rmsdList, scale);
   // --------------
   return;
+}
+
+/**
+ * @details Function for returning a vector of vectors of the centroid x y z values for molecules, 
+ * given a constituent atom type. 
+ * @param[in] yCloud The given PointCloud
+ * @param[in] molID The molecule ID for which atom index values will be returned
+ * @param[in] molIDAtomIDmap Unordered multimap mapping the molecule IDs to the atom IDs for the PointCloud
+ * @return A vector containing atom indices with the molID molecule ID, corresponding to the given PointCloud
+ */
+std::vector<std::vector<double>> 
+misc::getCentroidMolecules(std::string filename, int targetFrame,
+  int atomTypeI, bool isSlice, std::array<double, 3> coordLow, std::array<double, 3> coordHigh) {
+  //
+  std::vector<std::vector<double>> centroidCoord; // Coordinates of the centroid of the molecules
+  molSys::PointCloud<molSys::Point<double>, double> yCloud; // PointCloud of all atoms 
+  std::vector<double> currentCoord(3,0.0); // Coordinates of the current COM
+  int numAtomsMol; // Number of atoms in the molecule 
+  std::vector<bool> calcCentroidFlag; // Flag to make sure COM is not calculated twice 
+  int iatomMolID; // Molecule ID of current molecule 
+  int jatomID, jatomIndex; // Atoms belonging to the molecule iatomMolID
+  std::unordered_multimap<int, int>
+      molIDAtomIDmap; // atom IDs as keys and mol IDs as values
+
+  // Get the pointCloud for all atoms in the system 
+  yCloud = sinp::readLammpsTrj(filename, targetFrame, &yCloud, isSlice,coordLow,coordHigh);
+  // Flags for calculating the COM for every atom
+  // Set to true if the centroid has been calculated 
+  calcCentroidFlag.resize(yCloud.nop, false);
+  
+  // Get the unordered map of the atom IDs (keys) and the molecular IDs
+  // (values)
+  molIDAtomIDmap = molSys::createMolIDAtomIDMultiMap(&yCloud);
+
+  // Loop through all the atoms of atom type atomTypeI 
+  // Calculate the COM for those molecules 
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+    // Skip if the atom is not of type or if COM flag is true 
+    if (yCloud.pts[iatom].type != atomTypeI || calcCentroidFlag[iatom])
+    {
+      continue;
+    } // skip for other molecules or if COM is true 
+    // --------
+    // Find the COM for the molecule containing iatom
+    calcCentroidFlag[iatom] = true; // set flag to true for COM calculation 
+    // Find mol ID and atoms with that particular molecular ID 
+    iatomMolID = yCloud.pts[iatom].molID; // molecule ID
+    // Set currentCoord to iatom coordinates 
+    currentCoord[0] = yCloud.pts[iatom].x; // x 
+    currentCoord[1] = yCloud.pts[iatom].y; // y 
+    currentCoord[2] = yCloud.pts[iatom].z; // z 
+    numAtomsMol = 1;
+    // --------
+    // Find all atoms with iatomMolID and calculate the COM
+    auto range = molIDAtomIDmap.equal_range(iatomMolID); 
+    // Loop through all atoms with iatomMolID
+    for (auto it = range.first; it != range.second; it++)
+    {
+      // it->second gives the value (in this case, the atom ID)
+      jatomID = it->second; // Atom ID with molecule ID equal to iatomMolID
+      auto gotJ = yCloud.idIndexMap.find(jatomID);
+      jatomIndex = gotJ->second;
+      // If jatomIndex has already been added, skip it
+      if (calcCentroidFlag[jatomIndex])
+      {
+        continue;
+      }
+      // Add jatom coordinates to COM
+      currentCoord[0] += yCloud.pts[jatomIndex].x; // x 
+      currentCoord[1] += yCloud.pts[jatomIndex].y; // y 
+      currentCoord[2] += yCloud.pts[jatomIndex].z; // z 
+      // Add to the number of atoms in the molecule 
+      numAtomsMol++; 
+      // Set the jatom calcCentroidFlag bool to true
+      calcCentroidFlag[jatomIndex] = true; // jatomIndex COM has been calculated 
+    } // end of loop with all atoms with iatomMolID
+    // Divide the COM coordinates by numAtomsMol
+    for (int k = 0; k < 3; ++k)
+    {
+      currentCoord[k] /= numAtomsMol; 
+    } // divide by numAtomsMol
+    // TODO: Do some error handling to avoid dividing by 0
+    // Add to the vector of vectors
+    centroidCoord.push_back(currentCoord); 
+    // -----------
+  } // end of loop through all atoms in yCloud 
+
+  // Return the coordinates of the centers of masses of the molecules
+  // with the same molecule ID, for the given atom type 
+  return centroidCoord;
 }
