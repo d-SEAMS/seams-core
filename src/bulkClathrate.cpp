@@ -61,7 +61,6 @@ void clath::shapeMatchS2ClathrateSystem(std::string path, std::vector<std::vecto
   std::vector<std::vector<int>>
       ringsHex;    // Vector of vectors of rings of just 6-membered rings
   std::vector<std::vector<double>> centroidCoord; // Coordinates of the centroid of the molecules
-  std::vector<int> cageOAtomIndices; // List of indices of water O atoms which are closest to a THF molecule 
   double maxCutoff = 30.0; // in Angstroms; TODO change 
   // -----------------------------------
   // Build the reference point set
@@ -74,8 +73,8 @@ void clath::shapeMatchS2ClathrateSystem(std::string path, std::vector<std::vecto
 
   // Loop through the THF centroids
   for (auto& centroidPnt : centroidCoord){
-    // Find the 28 closest water molecules 
-    cageOAtomIndices = misc::kClosestPoints(yCloud, oxygenAtomType, 
+    // Find the 28 closest water molecules and save it in a pointCloud
+    targetCloud = misc::kClosestPoints(yCloud, oxygenAtomType, 
       centroidPnt, nOxy, maxCutoff);
   } // loop through the THF centroid points 
   // Find a test template structure (28 closest water molecules)
@@ -358,14 +357,16 @@ misc::getCentroidMolecules(std::string filename, int targetFrame,
  * @param[in] yCloud The given PointCloud
  * @param[in] molID The molecule ID for which atom index values will be returned
  * @param[in] maxCutoff Maximum cutoff distance in which to calculate the k closest points 
- * @return A vector of k atom indices in yCloud corresponding to the k closest points 
+ * @return A pointCloud of k atoms in yCloud corresponding to the k closest points 
  */
-std::vector<int> misc::kClosestPoints(molSys::PointCloud<molSys::Point<double>, double> yCloud, 
+molSys::PointCloud<molSys::Point<double>, double> misc::kClosestPoints(molSys::PointCloud<molSys::Point<double>, double> yCloud, 
   int atomType, std::vector<double> targetPointCoord, int k, double maxCutoff) {
   //
-  std::vector<int> pntIndices; // Vector of the closest points indices
+  molSys::PointCloud<molSys::Point<double>, double>
+        outCloud;  // pointCloud for the closest points
   double dist; // Distance of iatom from the target point 
-  std::vector< std::pair<double, int> > dIndVec; // Vector of distances and indices   
+  std::vector< std::pair<double, int> > dIndVec; // Vector of distances and indices  
+  int iatom; // Atom index in yCloud  
 
   // ----------------
   // Loop through all atoms in yCloud 
@@ -401,9 +402,16 @@ std::vector<int> misc::kClosestPoints(molSys::PointCloud<molSys::Point<double>, 
 
   // Loop through dIndVec and add the first k to pntIndices
   for (int i = 0; i < k; i++) {
-    pntIndices.push_back(dIndVec[i].second);
+    iatom = dIndVec[i].second;
+    outCloud.pts.push_back(yCloud.pts[iatom]);
+    outCloud.idIndexMap[yCloud.pts[iatom].atomID] = outCloud.pts.size() - 1;
   } // end of loop through first k points  
 
+  // Set the number of particles and the current frame number
+  outCloud.nop = outCloud.pts.size(); // This should be the same as k 
+  // TODO: error handling here.  
+  outCloud.currentFrame = yCloud.currentFrame; // Current frame number 
+
   // Return the indices of the k closest particles to the target point
-  return pntIndices;
+  return outCloud;
 }

@@ -76,7 +76,7 @@ namespace misc {
 
   //! Function for finding the k closest points (of type atomType) in a pointCloud, from a given target point (x y z coordinates).
   //! Returns a vector of k atom indices in yCloud corresponding to the k closest points 
-  std::vector<int> kClosestPoints(molSys::PointCloud<molSys::Point<double>, double> yCloud, int atomType, 
+  molSys::PointCloud<molSys::Point<double>, double> kClosestPoints(molSys::PointCloud<molSys::Point<double>, double> yCloud, int atomType, 
     std::vector<double> targetPointCoord, int k, double maxCutoff);
 
 } // namespace misc 
