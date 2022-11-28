@@ -41,12 +41,14 @@
  *   the rings and nList vector of vectors have been saved.
  *  @param[in] templateFileO Path to the LAMMPS trajectory file containing the template
  *   reference structure of the S2 clathrate. 
-  *  @param[in] oxygenAtomType Type ID for the oxygen atoms. 
+ *  @param[in] oxygenAtomType Type ID for the oxygen atoms. 
+ *  @param[in] rcutoff Distance cutoff for building neighbour lists for the target cages. 
+ *   (3.5 Angstrom is generally a good value)
  */
-void clath::shapeMatchS2ClathrateSystem(std::string path, std::vector<std::vector<int>> nList, molSys::PointCloud<molSys::Point<double>, double> yCloud, 
+void clath::shapeMatchS2ClathrateSystem(std::string path, molSys::PointCloud<molSys::Point<double>, double> yCloud, 
   std::string filename, int targetFrame,
   int atomTypeI, bool isSlice, std::array<double, 3> coordLow, std::array<double, 3> coordHigh,
-  std::string templateFileO, int oxygenAtomType){
+  std::string templateFileO, int oxygenAtomType, double rcutoff){
   // Reference structure stuff 
   int dim = 3;   // Number of dimensions
   int nOxy = 28; // Number of O atoms in the clathrate hexadecahedron
@@ -57,9 +59,11 @@ void clath::shapeMatchS2ClathrateSystem(std::string path, std::vector<std::vecto
   // Candidate structure stuff
   molSys::PointCloud<molSys::Point<double>, double>
         targetCloud;  // pointCloud for the target/candidate S2 cage
+  Eigen::MatrixXdRowMajor targetPnts(nOxy, dim); // Target point set of just O atoms (Eigen matrix)
   //
+  std::vector<int> atomIndices; // List of atom indices in yCloud 
   std::vector<std::vector<int>>
-      ringsHex;    // Vector of vectors of rings of just 6-membered rings
+      rings;    // Vector of vectors of rings of 4 6-membered rings and 4 other atoms 
   std::vector<std::vector<double>> centroidCoord; // Coordinates of the centroid of the molecules
   double maxCutoff = 30.0; // in Angstroms; TODO change 
   // -----------------------------------
@@ -73,9 +77,24 @@ void clath::shapeMatchS2ClathrateSystem(std::string path, std::vector<std::vecto
 
   // Loop through the THF centroids
   for (auto& centroidPnt : centroidCoord){
-    // Find the 28 closest water molecules and save it in a pointCloud
-    targetCloud = misc::kClosestPoints(yCloud, oxygenAtomType, 
+    // Find the 28 closest water molecules
+    // output it into a vector of atom indices
+    // and save it in a pointCloud
+    std::tie(atomIndices,targetCloud) = misc::kClosestPoints(yCloud, oxygenAtomType, 
       centroidPnt, nOxy, maxCutoff);
+    // The shape-matching with the S2 clathrate reference structure
+    // is achieved by generating a vector of vectors corresponding to 
+    // 4 6-membered rings with no elements in common, and 4 other 
+    // O atoms corresponding to nexus points connecting the 6-membered 
+    // rings via 5-membered rings.
+    // These ordered arrangements are obtained by shape-matching individual
+    // rings, added up together tp get the closest permutation 
+    // TODO: periodic distance check??
+    rings = clath::getShapeMatchedRingsInCage(targetCloud, refCloud, ringsRef, 
+      rcutoff, oxygenAtomType);
+    // Now get a row-ordered Eigen matrix of points (n x 3)
+    // from the rings vector of vectors
+    targetPnts = pntToPnt::fillTargetEigenPointSetFromRings(targetCloud, rings, nOxy, dim); 
   } // loop through the THF centroid points 
   // Find a test template structure (28 closest water molecules)
   // Find the primitive rings for the candidate cage 
@@ -86,7 +105,224 @@ void clath::shapeMatchS2ClathrateSystem(std::string path, std::vector<std::vecto
   // Shape-matching of test cage to the reference cage 
 
   return;
-} // end of function 
+} // end of function
+
+/**
+ * @details Builds a vector of vectors with atom indices, corresponding to the arrangements
+ * of 28 water molecules. 
+ * This algorithm takes advantage of the connectivity information encoded in the 
+ * constituent 6-membered and 5-membered rings in the candidate cage, thereby significantly reducing 
+ * the number of possible point-to-point correspondence arrangements.
+ * A typical $5^{12} 6^4$ cage, has 4 non-overlapping 6-membered rings and 4 water molecules which
+ *  span between the rings, only participating in 5-membered rings.
+ * 1. In the candidate $5^{12} 6^4$ cage, first find all the 6-membered primitive rings. If 4 6-membered rings are present, then proceed to the next steps. 
+ * 2. The first ring should be matched with the first ring of the reference cage, which corresponds to finding the least RMSD of 12 arrangements. 
+ * 3. Once the optimal point-to-point correspondence of the first ring has been obtained, add the second ring to the list of indices, and change the order of the last ring until the optimal arrangement has been found (12 arrangements). 
+ * 4. Repeat this process for the third and fourth rings (24 arrangements). 
+ * 5. The 4 remaining water molecules which are not part of the 6-membered rings can be tested with all possible permutations (24 arrangements). 
+
+ * Therefore, this entire procedure only requires 72 arrangements to be tested, instead of $28!$ or $3E+29$ permutations. 
+ * TODO: This can possibly be modified if $3$ or $2$ $6$-membered rings are found instead of $4$, but this would increase the number of arrangements to test. 
+ */
+std::vector<std::vector<int>>
+clath::getShapeMatchedRingsInCage(molSys::PointCloud<molSys::Point<double>, double> targetCloud, molSys::PointCloud<molSys::Point<double>, double> refCloud, 
+  std::vector<std::vector<int>> ringsRef, double rcutoff, int oxygenAtomType) {
+  //
+  std::vector<std::vector<int>> rings; // Output vector of vectors
+  // which will contain the indices of targetCloud matched in the best arrangement
+  // Target cage stuff
+  std::vector<std::vector<int>> nList;  // Neighbour list for targetCloud
+  std::vector<std::vector<int>> ringsHex, ringsAll;    // Vector of vectors of 
+  // 28 atom indices in targetCloud
+  std::vector<int> targetAtomIndices; // atom indices in targetCloud (0-27)
+  // Vectors and variables for ring shape-matching 
+  std::vector<int> tempRing, revRing; // 6-membered rings 
+  std::vector<int> currentLastRing; // Current last ring for targetCloud
+  std::vector<int> lastTargetRing; // The last ring for targetCloud with 4 elements 
+  // RMSD stuff 
+  std::vector<double> quaternionRot;         // quaternion rotation
+  double rmsd1, rmsd2;                       // least RMSD
+  std::vector<double> rmsdList1, rmsdList2;  // List of RMSD per atom
+  double scale;                              // Scale factor
+  // Variables for looping through possible permutations
+  std::vector<double> currentQuat;      // quaternion rotation
+  double currentRmsd;                   // least RMSD
+  std::vector<double> currentRmsdList;  // List of RMSD per atom
+  double currentScale;
+  // --------------
+  // Get 6-membered rings and neighbour list for the target cage 
+  //
+  // For the target point set 
+  // Calculate a neighbour list
+  nList = nneigh::neighListO(rcutoff, &targetCloud, oxygenAtomType);
+  // Neighbour list by index
+  nList = nneigh::neighbourListByIndex(&targetCloud, nList);
+  // Find the vector of vector of rings
+  ringsAll = primitive::ringNetwork(nList, 6); 
+  // Get just the 6-membered rings 
+  ringsHex = ring::getSingleRingSize(ringsAll, 6);
+  // --------------
+  // Shape-matching rings 
+  //
+  // Loop through the targetCloud rings 
+  for (auto& iring : ringsHex)
+  {
+    tempRing = iring;
+    revRing = iring;
+    // Reverse the ring
+    std::reverse(revRing.begin(), revRing.end());
+    // No reversal 
+    for (int i = 0; i < ringsHex[0].size(); ++i)
+    {
+      if (i==0)
+      {
+        // -------------------
+        clath::matchClathrateLastRing(rings, tempRing, ringsRef, 
+            targetCloud, refCloud,&currentQuat,
+            &currentRmsd, &currentRmsdList, &currentScale);
+        // Update for the first time 
+        quaternionRot = currentQuat;
+        rmsd1 = currentRmsd;
+        rmsdList1 = currentRmsdList;
+        scale = currentScale;
+        currentLastRing = tempRing;
+        // -------------------
+      } // first step 
+      else
+      {
+        // Change the order of the ring 
+        rotate(tempRing.begin(), tempRing.begin()+1, tempRing.end());
+        // Shape-matching 
+        clath::matchClathrateLastRing(rings, tempRing, ringsRef, 
+            targetCloud, refCloud,&currentQuat,
+            &currentRmsd, &currentRmsdList, &currentScale);
+        // Update if currentRmsd is less than rmsd1
+        if (currentRmsd < rmsd1)
+        {
+          quaternionRot = currentQuat;
+          rmsd1 = currentRmsd;
+          rmsdList1 = currentRmsdList;
+          scale = currentScale;
+          currentLastRing = tempRing;
+        } // end of update 
+      } // all other steps apart from the first 
+    } // go through 12 arrangements of the ring 
+
+    // Reversed ring  
+    for (int i = 0; i < ringsHex[0].size(); ++i)
+    {
+      if (i==0)
+      {
+        // -------------------
+        clath::matchClathrateLastRing(rings, revRing, ringsRef, 
+            targetCloud, refCloud,&currentQuat,
+            &currentRmsd, &currentRmsdList, &currentScale);
+        if (currentRmsd < rmsd1)
+        {
+          quaternionRot = currentQuat;
+          rmsd1 = currentRmsd;
+          rmsdList1 = currentRmsdList;
+          scale = currentScale;
+          currentLastRing = revRing;
+        } // end of update 
+        // -------------------
+      } // first step 
+      else{
+        // Change the order of the ring 
+        rotate(revRing.begin(), revRing.begin()+1, revRing.end());
+        // Shape-matching 
+        clath::matchClathrateLastRing(rings, revRing, ringsRef, 
+            targetCloud, refCloud,&currentQuat,
+            &currentRmsd, &currentRmsdList, &currentScale);
+        // Update if currentRmsd is less than rmsd1
+        if (currentRmsd < rmsd1)
+        {
+          quaternionRot = currentQuat;
+          rmsd1 = currentRmsd;
+          rmsdList1 = currentRmsdList;
+          scale = currentScale;
+          currentLastRing = revRing;
+        } // end of update 
+      } // all other steps apart from the first 
+    } // go through 12 arrangements of the ring 
+
+    rings.push_back(currentLastRing);
+
+  } // end of loop through ringsHex
+  // --------------
+  // Get the last 4 elements, corresponding to the 5th ring in ringsRef
+  // ringsRef[4]
+  // Get all the 28 indices of the atoms in targetCloud
+  for (int iatom = 0; iatom < targetCloud.nop; iatom++)
+  {
+      targetAtomIndices.push_back(iatom);
+  } // overkill!
+  // Flattened rings vector, which will contain all the indices
+  // in the rings vector for the targetCloud
+  auto flattenedRingsVec = std::accumulate(rings.begin(), rings.end(), decltype(rings)::value_type{},
+          [](auto &x, auto &y) {
+      x.insert(x.end(), y.begin(), y.end());
+      return x;
+  });
+  // Sort the flattened rings vector and targetAtomIndices
+  std::sort(targetAtomIndices.begin(), targetAtomIndices.end());
+  std::sort(flattenedRingsVec.begin(), flattenedRingsVec.end());
+  // --------------
+  // Elements not in common 
+  std::set_symmetric_difference(
+      targetAtomIndices.begin(), targetAtomIndices.end(),
+      flattenedRingsVec.begin(), flattenedRingsVec.end(),
+      std::back_inserter(lastTargetRing));
+
+  // Get all possible permutations and do shape-matching
+  // of the last ring 
+  std::sort(lastTargetRing.begin(), lastTargetRing.end()); // should be in ascending order
+  int count=0; // for looping through all permutations
+  //
+  // Go through all the permutations 
+  do {
+    // reordered lastTargetRing
+    if (count==0)
+    {
+      // -------------------
+      clath::matchClathrateLastRing(rings, lastTargetRing, ringsRef, 
+          targetCloud, refCloud,&currentQuat,
+          &currentRmsd, &currentRmsdList, &currentScale);
+      // Update for the first time 
+      quaternionRot = currentQuat;
+      rmsd1 = currentRmsd;
+      rmsdList1 = currentRmsdList;
+      scale = currentScale;
+      currentLastRing = lastTargetRing;
+      // -------------------
+    } // first permutation
+    else
+    {
+      // Shape-matching 
+      clath::matchClathrateLastRing(rings, lastTargetRing, ringsRef, 
+          targetCloud, refCloud,&currentQuat,
+          &currentRmsd, &currentRmsdList, &currentScale);
+      // Update if currentRmsd is less than rmsd1
+      if (currentRmsd < rmsd1)
+      {
+        quaternionRot = currentQuat;
+        rmsd1 = currentRmsd;
+        rmsdList1 = currentRmsdList;
+        scale = currentScale;
+        currentLastRing = lastTargetRing;
+      } // end of update
+    } // subsequent permutations after the first  
+
+    count++; // update the number of times the loop has run 
+  } while (std::next_permutation(lastTargetRing.begin(), lastTargetRing.end()));
+
+  // Presumably currentLastRing is the best match 
+  rings.push_back(currentLastRing);
+  // --------------
+  // Return the rings for targetCloud, corresponding to the
+  // best match to the reference S2 cage structure. 
+  return rings;
+} 
 
 /**
  * @details Build a reference SII cage, consisting of 28 water molecules, reading it in from a template
@@ -357,15 +593,16 @@ misc::getCentroidMolecules(std::string filename, int targetFrame,
  * @param[in] yCloud The given PointCloud
  * @param[in] molID The molecule ID for which atom index values will be returned
  * @param[in] maxCutoff Maximum cutoff distance in which to calculate the k closest points 
- * @return A pointCloud of k atoms in yCloud corresponding to the k closest points 
+ * @return Vector of atom indices in yCloud and a pointCloud of k atoms in yCloud corresponding to the k closest points 
  */
-molSys::PointCloud<molSys::Point<double>, double> misc::kClosestPoints(molSys::PointCloud<molSys::Point<double>, double> yCloud, 
+std::pair<std::vector<int>, molSys::PointCloud<molSys::Point<double>, double>> misc::kClosestPoints(molSys::PointCloud<molSys::Point<double>, double> yCloud, 
   int atomType, std::vector<double> targetPointCoord, int k, double maxCutoff) {
   //
   molSys::PointCloud<molSys::Point<double>, double>
         outCloud;  // pointCloud for the closest points
   double dist; // Distance of iatom from the target point 
   std::vector< std::pair<double, int> > dIndVec; // Vector of distances and indices  
+  std::vector<int> atomIndices; // atom indices according to yCloud 
   int iatom; // Atom index in yCloud  
 
   // ----------------
@@ -403,6 +640,9 @@ molSys::PointCloud<molSys::Point<double>, double> misc::kClosestPoints(molSys::P
   // Loop through dIndVec and add the first k to pntIndices
   for (int i = 0; i < k; i++) {
     iatom = dIndVec[i].second;
+    // Add to the atom index vector (according to yCloud)
+    atomIndices.push_back(iatom);
+    // Add to the output pointCloud 
     outCloud.pts.push_back(yCloud.pts[iatom]);
     outCloud.idIndexMap[yCloud.pts[iatom].atomID] = outCloud.pts.size() - 1;
   } // end of loop through first k points  
@@ -413,5 +653,5 @@ molSys::PointCloud<molSys::Point<double>, double> misc::kClosestPoints(molSys::P
   outCloud.currentFrame = yCloud.currentFrame; // Current frame number 
 
   // Return the indices of the k closest particles to the target point
-  return outCloud;
+  return std::make_pair(atomIndices, outCloud);
 }

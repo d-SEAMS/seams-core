@@ -43,10 +43,10 @@ namespace clath {
 
   //! Shape-matching algorithms for S2 clathrates
   void shapeMatchS2ClathrateSystem(std::string path,
-    std::vector<std::vector<int>> nList, molSys::PointCloud<molSys::Point<double>, double> yCloud, 
+    molSys::PointCloud<molSys::Point<double>, double> yCloud, 
     std::string filename, int targetFrame,
     int atomTypeI, bool isSlice, std::array<double, 3> coordLow, std::array<double, 3> coordHigh,
-    std::string templateFileO, int oxygenAtomType);
+    std::string templateFileO, int oxygenAtomType, double rcutoff=3.5);
 
   //! Build a reference SII large cage (5^12 6^4) reading in from a template trajectory file
   std::pair<Eigen::MatrixXdRowMajor, Eigen::MatrixXdRowMajor>
@@ -64,6 +64,12 @@ namespace clath {
   std::vector<double> *quat, double *rmsd,
   std::vector<double> *rmsdList, double *scale);
 
+  //! Generate a vector of vectors containing ordered 6-membered rings and a last ring with
+  //! 4 water molecules corresponding to the 4 water molecules not present in the 6-membered rings 
+  std::vector<std::vector<int>>
+  getShapeMatchedRingsInCage(molSys::PointCloud<molSys::Point<double>, double> targetCloud, molSys::PointCloud<molSys::Point<double>, double> refCloud, 
+  std::vector<std::vector<int>> ringsRef, double rcutoff, int oxygenAtomType);
+
 } // namespace clath
 
 namespace misc {
@@ -76,7 +82,8 @@ namespace misc {
 
   //! Function for finding the k closest points (of type atomType) in a pointCloud, from a given target point (x y z coordinates).
   //! Returns a vector of k atom indices in yCloud corresponding to the k closest points 
-  molSys::PointCloud<molSys::Point<double>, double> kClosestPoints(molSys::PointCloud<molSys::Point<double>, double> yCloud, int atomType, 
+  std::pair<std::vector<int>, molSys::PointCloud<molSys::Point<double>, double>>
+  kClosestPoints(molSys::PointCloud<molSys::Point<double>, double> yCloud, int atomType, 
     std::vector<double> targetPointCoord, int k, double maxCutoff);
 
 } // namespace misc 
