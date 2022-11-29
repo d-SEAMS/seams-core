@@ -58,17 +58,27 @@ enum cageType { HexC, DoubleDiaC };
  * @var cage::iceType dummy
  * Type for an atom which does not belong to any kind of cage
  *
- * @var molSys::iceType hc
+ * @var cage::iceType hc
  * Type for an atom which belongs to an HC
  *
- * @var molSys::iceType ddc
+ * @var cage::iceType ddc
  * Type for an atom which belongs to a DDC
  *
- * @var molSys::iceType mixed
+ * @var cage::iceType mixed
  * Type for an atom which is part of a mixed ring, shared by both a DDC and an
  * HC
+ *
+ * @var cage::iceType pnc
+ * Type for an atom which is part of a PNC
+ *
+ * @var cage::iceType mixed2
+ * Type for an atom which is part of a mixed ring, shared by PNCs and DDCs/HCs
+ *
+ * @var cage::iceType clathS2
+ * Type for an atom which is part of a clathrate S2 type cage 
+ *
  */
-enum iceType { dummy, hc, ddc, mixed, pnc, mixed2 };
+enum iceType { dummy, hc, ddc, mixed, pnc, mixed2, clathS2 };
 
 // Each DDC has one equatorial ring and 6 peripheral rings
 // Each HC has two basal planes and 3 prismatic planes
