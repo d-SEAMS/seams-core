@@ -28,6 +28,7 @@
 #include <neighbours.hpp>
 #include <pntCorrespondence.hpp>
 #include <topo_bulk.hpp>
+#include <cage.hpp>
 
 /** @file bulkClathrate.hpp
  *   @brief File containing functions used specific to criteria for clathrates
@@ -70,6 +71,11 @@ namespace clath {
   getShapeMatchedRingsInCage(molSys::PointCloud<molSys::Point<double>, double> targetCloud, molSys::PointCloud<molSys::Point<double>, double> refCloud, 
   std::vector<std::vector<int>> ringsRef, double rcutoff, int oxygenAtomType);
 
+  //! Update the atom types of Clathrate S2 cage atoms 
+  void assignAtomTypes(std::vector<int> atomIndices,
+                               std::vector<cage::iceType> *atomTypes,
+                               cage::iceType clathType = cage::clathS2);
+
 } // namespace clath
 
 namespace misc {
@@ -85,6 +91,18 @@ namespace misc {
   std::pair<std::vector<int>, molSys::PointCloud<molSys::Point<double>, double>>
   kClosestPoints(molSys::PointCloud<molSys::Point<double>, double> yCloud, int atomType, 
     std::vector<double> targetPointCoord, int k, double maxCutoff);
+
+  //! Function for reordering a vector of atomIndices given a
+  //! vector of vectors corresponding to the rings 
+  std::vector<int> reorderAtomIndices(std::vector<int> atomIndices, 
+    std::vector<std::vector<int>> rings);
+
+  //! Function for updating the RMSD per atom for every O atom in a
+  //! clathrate cage. 
+  void updateRMSDatom(std::vector<int> atomIndices, 
+  std::vector<std::vector<int>> rings,
+  std::vector<double> rmsdList, std::vector<double> *rmsdPerAtom,
+  std::vector<int> *noOfCommonAtoms);
 
 } // namespace misc 
 
