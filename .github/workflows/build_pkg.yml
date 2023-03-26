@@ -12,6 +12,7 @@ jobs:
       - name: Build application with cmake
         shell: bash -l {0}
         run: |
+          luarocks install luafilesystem
           mkdir bbdir
           cd bbdir
           cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -DCMAKE_INSTALL_PREFIX:PATH=$CONDA_PREFIX ../
