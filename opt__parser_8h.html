@@ -153,33 +153,33 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="opt__parser_8cpp_source.html#l00014">14</a> of file <a class="el" href="opt__parser_8cpp_source.html">opt_parser.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;                                                 {</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;  <span class="keywordflow">try</span> {</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;    cxxopts::Options options(</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;        argv[0], <span class="stringliteral">&quot;Structure calculations for molecular simulations&quot;</span>);</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    options.positional_help(<span class="stringliteral">&quot;[optional args]&quot;</span>).show_positional_help();</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    options.allow_unrecognised_options().add_options()(</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;        <span class="stringliteral">&quot;c,config&quot;</span>, <span class="stringliteral">&quot;Yaml Config&quot;</span>,</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;        cxxopts::value&lt;std::string&gt;()-&gt;default_value(<span class="stringliteral">&quot;conf.yml&quot;</span>))</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160; </div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;        (<span class="stringliteral">&quot;h,help&quot;</span>, <span class="stringliteral">&quot;Print help&quot;</span>);</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    <span class="keyword">auto</span> result = options.parse(argc, argv);</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160; </div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    <span class="keywordflow">if</span> (result.count(<span class="stringliteral">&quot;help&quot;</span>)) {</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;      <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::cout</a> &lt;&lt; options.help({<span class="stringliteral">&quot;&quot;</span>, <span class="stringliteral">&quot;Group&quot;</span>}) &lt;&lt; <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/manip/endl.html">std::endl</a>;</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;      <a class="codeRef" href="http://en.cppreference.com/w/cpp/utility/program/exit.html">exit</a>(0);</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    }</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    <span class="comment">// No options</span></div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    <span class="keywordflow">if</span> (result.arguments().size() == 0) {</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;      <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::cout</a> &lt;&lt; <span class="stringliteral">&quot;DO error handling&quot;</span> &lt;&lt; <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/manip/endl.html">std::endl</a>;</div>
+<p class="definition">Definition at line <a class="el" href="opt__parser_8cpp_source.html#l00018">18</a> of file <a class="el" href="opt__parser_8cpp_source.html">opt_parser.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;                                                 {</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;  <span class="keywordflow">try</span> {</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    cxxopts::Options options(</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;        argv[0], <span class="stringliteral">&quot;Structure calculations for molecular simulations&quot;</span>);</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    options.positional_help(<span class="stringliteral">&quot;[optional args]&quot;</span>).show_positional_help();</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    options.allow_unrecognised_options().add_options()(</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;        <span class="stringliteral">&quot;c,config&quot;</span>, <span class="stringliteral">&quot;Yaml Config&quot;</span>,</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;        cxxopts::value&lt;std::string&gt;()-&gt;default_value(<span class="stringliteral">&quot;conf.yml&quot;</span>))</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;        (<span class="stringliteral">&quot;h,help&quot;</span>, <span class="stringliteral">&quot;Print help&quot;</span>);</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    <span class="keyword">auto</span> result = options.parse(argc, argv);</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    <span class="keywordflow">if</span> (result.count(<span class="stringliteral">&quot;help&quot;</span>)) {</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;      <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::cout</a> &lt;&lt; options.help({<span class="stringliteral">&quot;&quot;</span>, <span class="stringliteral">&quot;Group&quot;</span>}) &lt;&lt; <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/manip/endl.html">std::endl</a>;</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;      <a class="codeRef" href="http://en.cppreference.com/w/cpp/utility/program/exit.html">exit</a>(0);</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    }</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="keywordflow">return</span> result;</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;  } <span class="keywordflow">catch</span> (<span class="keyword">const</span> cxxopts::OptionException &amp;e) {</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::cout</a> &lt;&lt; <span class="stringliteral">&quot;error parsing options: &quot;</span> &lt;&lt; e.what() &lt;&lt; <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/manip/endl.html">std::endl</a>;</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <a class="codeRef" href="http://en.cppreference.com/w/cpp/utility/program/exit.html">exit</a>(1);</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;  }</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;}</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="comment">// No options</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <span class="keywordflow">if</span> (result.arguments().size() == 0) {</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;      <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::cout</a> &lt;&lt; <span class="stringliteral">&quot;DO error handling&quot;</span> &lt;&lt; <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/manip/endl.html">std::endl</a>;</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    }</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="keywordflow">return</span> result;</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;  } <span class="keywordflow">catch</span> (<span class="keyword">const</span> cxxopts::OptionException &amp;e) {</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::cout</a> &lt;&lt; <span class="stringliteral">&quot;error parsing options: &quot;</span> &lt;&lt; e.what() &lt;&lt; <a class="codeRef" href="http://en.cppreference.com/w/cpp/io/manip/endl.html">std::endl</a>;</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <a class="codeRef" href="http://en.cppreference.com/w/cpp/utility/program/exit.html">exit</a>(1);</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;  }</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;}</div>
 <div class="ttc" id="abasic_ostream_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::cout</a></div></div>
 <div class="ttc" id="aendl_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/io/manip/endl.html">std::endl</a></div><div class="ttdeci">T endl(T... args)</div></div>
 <div class="ttc" id="aexit_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/utility/program/exit.html">std::exit</a></div><div class="ttdeci">T exit(T... args)</div></div>
