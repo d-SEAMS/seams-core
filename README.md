@@ -68,11 +68,12 @@ instructions may be more suitable. We will assume the presence of [micromamba](h
 ```bash
 micromamba create -f environment.yml
 micromamba activate dseams
+luarocks install luafilesystem
 ```
 
 Now the installation can proceed.
 
-\note we do not install a new version of `cmake` within the `conda` environment because of conflicts with `lua`
+\note we do not install `lua-luafilesystem` within the `conda` environment because it is outdated on `osx`
 
 ```bash
 mkdir build
@@ -80,6 +81,7 @@ cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -DCMAKE_INSTALL_PREFIX:PATH=$CONDA_PREFIX ../
 make -j$(nproc)
 make install
+$CONDA_PREFIX/bin/yodaStruct -c lua_inputs/config.yml
 ```
 
 We have opted to install into the `conda` environment, if this is not the
