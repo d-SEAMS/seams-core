@@ -143,6 +143,8 @@ Enumerations</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:ga3d2387897322ededb4936d466f74e459"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/unordered_map.html">std::unordered_map</a>&lt; int, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga3d2387897322ededb4936d466f74e459">molSys::createIDMolIDmap</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud)</td></tr>
 <tr class="separator:ga3d2387897322ededb4936d466f74e459"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4b864398cbcf013fa20a59e597e6e667"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/unordered_multimap.html">std::unordered_multimap</a>&lt; int, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga4b864398cbcf013fa20a59e597e6e667">molSys::createMolIDAtomIDMultiMap</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud)</td></tr>
+<tr class="separator:ga4b864398cbcf013fa20a59e597e6e667"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga34b5cffd59aa8f6701dd919d03706b3f"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga34b5cffd59aa8f6701dd919d03706b3f">molSys::hAtomMolList</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *hCloud, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *oCloud)</td></tr>
 <tr class="separator:ga34b5cffd59aa8f6701dd919d03706b3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga54bfd35451e9528910f3a2d1078d9e89"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga54bfd35451e9528910f3a2d1078d9e89">molSys::searchMolList</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; int &gt;&gt; molList, int molIDtoFind)</td></tr>
@@ -374,6 +376,46 @@ Variables</h2></td></tr>
 </div><!-- fragment -->
 </div>
 </div>
+<a id="ga4b864398cbcf013fa20a59e597e6e667"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4b864398cbcf013fa20a59e597e6e667">&#9670;&nbsp;</a></span>createMolIDAtomIDMultiMap()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/unordered_multimap.html">std::unordered_multimap</a>&lt; int, int &gt; molSys::createMolIDAtomIDMultiMap </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *&#160;</td>
+          <td class="paramname"><em>yCloud</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Creates an multimap with molecule IDs of the atoms as the keys and the atom IDs as the values. More than one atom can have the same molecule ID</p>
+<p>Function for creating an unordered map with the atomIDs in the pointCloud as the keys and the molecular IDs as the values. More than one atom can have the same molecule ID. </p>
+
+<p class="definition">Definition at line <a class="el" href="mol__sys_8cpp_source.html#l00067">67</a> of file <a class="el" href="mol__sys_8cpp_source.html">mol_sys.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                                                           {</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/unordered_multimap.html">std::unordered_multimap&lt;int, int&gt;</a></div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;      molIDAtomIDmap; <span class="comment">// atom IDs as keys and mol IDs as values</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;  <span class="keywordtype">int</span> iatomMolID; <span class="comment">// molID of the current iatom</span></div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  <span class="keywordtype">int</span> iatomID;    <span class="comment">// atom ID of the current iatom</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;  <span class="comment">// Loop through the atoms in yCloud</span></div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iatom = 0; iatom &lt; yCloud-&gt;<a class="code" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a>; iatom++) {</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    iatomID = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].atomID;   <span class="comment">// atom ID</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    iatomMolID = yCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].molID; <span class="comment">// molecular ID</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    <span class="comment">// Update the unordered multimap</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    molIDAtomIDmap.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/unordered_multimap/emplace.html">emplace</a>(iatomMolID,iatomID);</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;  } <span class="comment">// end of loop through every iatom in pointCloud</span></div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160; </div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;  <span class="keywordflow">return</span> molIDAtomIDmap;</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;}</div>
+<div class="ttc" id="aemplace_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/unordered_multimap/emplace.html">std::unordered_multimap::emplace</a></div><div class="ttdeci">T emplace(T... args)</div></div>
+<div class="ttc" id="aunordered_multimap_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/unordered_multimap.html">std::unordered_multimap</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
 <a id="ga34b5cffd59aa8f6701dd919d03706b3f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga34b5cffd59aa8f6701dd919d03706b3f">&#9670;&nbsp;</a></span>hAtomMolList()</h2>
 
@@ -402,40 +444,40 @@ Variables</h2></td></tr>
 <p>Returns a vector of vectors, which contains the molIDs in the first column, and the hydrogen atom indices (not atom IDs) in the row</p>
 <p>Function that returns a vector of vectors, which contains the hydrogen atoms for each molID in the oxygen atom pointCloud </p>
 
-<p class="definition">Definition at line <a class="el" href="mol__sys_8cpp_source.html#l00066">66</a> of file <a class="el" href="mol__sys_8cpp_source.html">mol_sys.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                                                           {</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;std::vector&lt;int&gt;</a>&gt;</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;      hMolList; <span class="comment">// the first column contains the molecular IDs, and the next</span></div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                <span class="comment">// two elements in the row are the hydrogen bond atoms in the</span></div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;                <span class="comment">// molecule</span></div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  <span class="keywordtype">int</span> iMolID;   <span class="comment">// Current molecular ID</span></div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;  <span class="keywordtype">int</span> nHatoms;  <span class="comment">// No. of h atoms found for a particular molID.</span></div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160; </div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iatom = 0; iatom &lt; oCloud-&gt;<a class="code" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a>; iatom++) {</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    <span class="comment">// Get the molID</span></div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    iMolID = oCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].molID;</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160; </div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    hMolList.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a>()); <span class="comment">// Empty vector for the index iatom</span></div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    <span class="comment">// Fill the first element with the molecular ID</span></div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    hMolList[iatom].<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(iMolID);</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160; </div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    nHatoms = 0; <span class="comment">// init (no. of h atoms for the particular molID)</span></div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160; </div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    <span class="comment">// Now search through the hydrogen atom pointCloud for this particular molID</span></div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> jatom = 0; jatom &lt; hCloud-&gt;<a class="code" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a>; jatom++) {</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;      <span class="keywordflow">if</span> (hCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].molID == iMolID) {</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        hMolList[iatom].<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(jatom); <span class="comment">// fill the hatom index</span></div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        nHatoms++;</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;        <span class="comment">// If the two hydrogens have been found, break out of the loop</span></div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;        <span class="keywordflow">if</span> (nHatoms == 2) {</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;          <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        } <span class="comment">// end of break</span></div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;      }   <span class="comment">// end of check to see if jatom is part of iMolID</span></div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    }     <span class="comment">// end of loop through the hydrogen atom pointCloud</span></div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;  }       <span class="comment">// end of looping through every oxygen atom</span></div>
+<p class="definition">Definition at line <a class="el" href="mol__sys_8cpp_source.html#l00089">89</a> of file <a class="el" href="mol__sys_8cpp_source.html">mol_sys.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;                                                           {</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;  <a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;std::vector&lt;int&gt;</a>&gt;</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;      hMolList; <span class="comment">// the first column contains the molecular IDs, and the next</span></div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;                <span class="comment">// two elements in the row are the hydrogen bond atoms in the</span></div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;                <span class="comment">// molecule</span></div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;  <span class="keywordtype">int</span> iMolID;   <span class="comment">// Current molecular ID</span></div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;  <span class="keywordtype">int</span> nHatoms;  <span class="comment">// No. of h atoms found for a particular molID.</span></div>
 <div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160; </div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;  <span class="keywordflow">return</span> hMolList;</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;} <span class="comment">// end of function</span></div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iatom = 0; iatom &lt; oCloud-&gt;<a class="code" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a>; iatom++) {</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    <span class="comment">// Get the molID</span></div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;    iMolID = oCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].molID;</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160; </div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    hMolList.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector&lt;int&gt;</a>()); <span class="comment">// Empty vector for the index iatom</span></div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    <span class="comment">// Fill the first element with the molecular ID</span></div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    hMolList[iatom].<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(iMolID);</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160; </div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    nHatoms = 0; <span class="comment">// init (no. of h atoms for the particular molID)</span></div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160; </div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;    <span class="comment">// Now search through the hydrogen atom pointCloud for this particular molID</span></div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> jatom = 0; jatom &lt; hCloud-&gt;<a class="code" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a>; jatom++) {</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;      <span class="keywordflow">if</span> (hCloud-&gt;<a class="code" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].molID == iMolID) {</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;        hMolList[iatom].<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">push_back</a>(jatom); <span class="comment">// fill the hatom index</span></div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;        nHatoms++;</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;        <span class="comment">// If the two hydrogens have been found, break out of the loop</span></div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        <span class="keywordflow">if</span> (nHatoms == 2) {</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;          <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;        } <span class="comment">// end of break</span></div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;      }   <span class="comment">// end of check to see if jatom is part of iMolID</span></div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    }     <span class="comment">// end of loop through the hydrogen atom pointCloud</span></div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;  }       <span class="comment">// end of looping through every oxygen atom</span></div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160; </div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;  <span class="keywordflow">return</span> hMolList;</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;} <span class="comment">// end of function</span></div>
 <div class="ttc" id="apush_back_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">std::vector::push_back</a></div><div class="ttdeci">T push_back(T... args)</div></div>
 </div><!-- fragment -->
 </div>
@@ -470,20 +512,20 @@ Variables</h2></td></tr>
 <dd>
 -1 if not found </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="mol__sys_8cpp_source.html#l00108">108</a> of file <a class="el" href="mol__sys_8cpp_source.html">mol_sys.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;                                           {</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;  <span class="keywordtype">int</span> index = -1; <span class="comment">// init invalid index</span></div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160; </div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iatom = 0; iatom &lt; molList.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>(); iatom++) {</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    <span class="comment">// If the molecular ID is equal, return the index in the array</span></div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    <span class="keywordflow">if</span> (molList[iatom][0] == molIDtoFind) {</div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;      index = iatom;</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;      <span class="keywordflow">return</span> index;</div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;    } <span class="comment">// end of check</span></div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;  }   <span class="comment">// end of looping through iatom</span></div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160; </div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;  <span class="keywordflow">return</span> index;</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="mol__sys_8cpp_source.html#l00131">131</a> of file <a class="el" href="mol__sys_8cpp_source.html">mol_sys.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;                                           {</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;  <span class="keywordtype">int</span> index = -1; <span class="comment">// init invalid index</span></div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160; </div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iatom = 0; iatom &lt; molList.<a class="codeRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>(); iatom++) {</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;    <span class="comment">// If the molecular ID is equal, return the index in the array</span></div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;    <span class="keywordflow">if</span> (molList[iatom][0] == molIDtoFind) {</div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;      index = iatom;</div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;      <span class="keywordflow">return</span> index;</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;    } <span class="comment">// end of check</span></div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;  }   <span class="comment">// end of looping through iatom</span></div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160; </div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;  <span class="keywordflow">return</span> index;</div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;}</div>
 <div class="ttc" id="asize_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/size.html">std::vector::size</a></div><div class="ttdeci">T size(T... args)</div></div>
 </div><!-- fragment -->
 </div>

@@ -88,7 +88,8 @@ var searchData=
   ['atomindex_86',['atomIndex',['../group__primitive.html#gaead86b6d47e9f9a77949fef59b8de27f',1,'primitive::Vertex']]],
   ['atominslice_87',['atomInSlice',['../group__sinp.html#gad5a8c377d8ed78c413c13d80ac8261ac',1,'sinp']]],
   ['atomsfromcages_88',['atomsFromCages',['../group__ring.html#ga2a339a36e85ff35c64fa3908936faf6c',1,'tum3']]],
-  ['auto_5fptr_89',['auto_ptr',['http://en.cppreference.com/w/cpp/memory/auto_ptr/auto_ptr.html',1,'std::auto_ptr::auto_ptr()'],['http://en.cppreference.com/w/cpp/memory/auto_ptr.html',1,'std::auto_ptr&lt; T &gt;']]],
-  ['averagermsdatom_90',['averageRMSDatom',['../group__ring.html#ga390a8ecb9b86c18c3802fcbdcf37cd83',1,'tum3']]],
-  ['avgvector_91',['avgVector',['../group__gen.html#ga289c2dcd7c8631c21fe99cd419ddc5c8',1,'gen']]]
+  ['atomsinsingleslice_89',['atomsInSingleSlice',['../group__ring.html#ga336353070302bc293ed5261838ee979e',1,'gen']]],
+  ['auto_5fptr_90',['auto_ptr',['http://en.cppreference.com/w/cpp/memory/auto_ptr/auto_ptr.html',1,'std::auto_ptr::auto_ptr()'],['http://en.cppreference.com/w/cpp/memory/auto_ptr.html',1,'std::auto_ptr&lt; T &gt;']]],
+  ['averagermsdatom_91',['averageRMSDatom',['../group__ring.html#ga390a8ecb9b86c18c3802fcbdcf37cd83',1,'tum3']]],
+  ['avgvector_92',['avgVector',['../group__gen.html#ga289c2dcd7c8631c21fe99cd419ddc5c8',1,'gen']]]
 ];

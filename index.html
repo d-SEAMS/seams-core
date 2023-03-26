@@ -224,6 +224,12 @@ url={https://doi.org/10.1021/acs.jcim.0c00031}
 <p>Apart from the <a href="https://docs.dseams.info/pages.html">examples</a>, the test-suite can be run with the <code>yodaStruct_test</code> binary, which will drop into the <code>nix</code> environment before building and executing <code>gdb</code>:</p>
 <div class="fragment"><div class="line"># Just run this</div>
 <div class="line">./testBuild.sh</div>
+<div class="line"># At this point the binary and library are copied into the root</div>
+<div class="line"># One might, in a foolhardy attempt, use gdb at this point</div>
+<div class="line"># Here be dragons :)</div>
+<div class="line"># USE NIX</div>
+<div class="line"># Anyway</div>
+<div class="line">gdb --args ./yodaStruct -c lua_inputs/config.yml</div>
 <div class="line"># quit gdb with quit</div>
 <div class="line"># Go run the test binary</div>
 <div class="line">cd shellBuild</div>
@@ -262,7 +268,25 @@ url={https://doi.org/10.1021/acs.jcim.0c00031}
 <h2>Commit Hook</h2>
 <p>Note that we expect compliance with the <code>clang-format</code> as mentioned above, and this may be enforced by using the provided scripts for a pre-commit hook: </p><div class="fragment"><div class="line">./scripts/git-pre-commit-format install</div>
 </div><!-- fragment --><p>This will ensure that new commits are in accordance to the <code>clang-format</code> file.</p>
-<h1>Acknowledgements</h1>
+<h2>Development Builds</h2>
+<p>The general idea is to drop into an interactive shell with the dependencies and then use <code>cmake</code> as usual.</p>
+<div class="fragment"><div class="line">nix-shell --pure --run bash --show-trace --verbose</div>
+<div class="line">cd build</div>
+<div class="line">cmake .. -DCMAKE_BUILD_TYPE=Debug -DNO_WARN=TRUE \</div>
+<div class="line"> -DFIND_EIGEN=TRUE \</div>
+<div class="line"> -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \</div>
+<div class="line"> -G &quot;Ninja&quot;</div>
+<div class="line">ninja</div>
+<div class="line"># Test</div>
+<div class="line">cd ../</div>
+<div class="line">yodaStruct -c lua_inputs/config.yml</div>
+<div class="line"># Debug</div>
+<div class="line">gdb --args yodaStruct -c lua_inputs/config.yml</div>
+</div><!-- fragment --><p> To load debugging symbols from the shared library, when you are inside <code>gdb</code> (from the top-level directory, for instance), use the following command:</p>
+<div class="fragment"><div class="line">add-symbol-file build/libyodaLib.so</div>
+</div><!-- fragment --><p> Then you can set breakpoints in the C++ code; for instance:</p>
+<div class="fragment"><div class="line">b seams_input.cpp:408</div>
+</div><!-- fragment --><h1>Acknowledgements</h1>
 <p>The following tools are used in this project:</p>
 <ul>
 <li><a href="https://cmake.org/">CMake</a> for compilation (<a href="https://github.com/cginternals/cmake-init">cmake-init</a> was used as a reference)</li>
@@ -290,7 +314,8 @@ url={https://doi.org/10.1021/acs.jcim.0c00031}
 <li><a href="https://www.boost.org/doc/libs/1_68_0/libs/geometry/doc/html/index.html">Boost Geometry</a> for working with different coordinates</li>
 <li><a href="https://www.boost.org/doc/libs/?view=category_math">Boost Math</a> for spherical harmonics</li>
 <li><a href="https://bitbucket.org/blaze-lib/blaze/">Blaze</a> for very fast modern linear algebra</li>
-<li><a href="https://github.com/jlblancoc/nanoflann">nanoflann</a> to calculate nearest neighbors </li>
+<li><a href="https://github.com/jlblancoc/nanoflann">nanoflann</a> to calculate nearest neighbors</li>
+<li><a href="https://github.com/renatoGarcia/icecream-cpp">icecream-cpp</a> for pretty-printing and debugging </li>
 </ul>
 </div></div><!-- PageDoc -->
 </div><!-- contents -->
