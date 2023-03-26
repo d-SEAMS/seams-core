@@ -1,0 +1,2 @@
+# Booleans
+option('with_lua', type : 'boolean', value : false)

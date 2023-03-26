@@ -16,6 +16,7 @@ dependencies:
   - libblas
   - boost-cpp
   - cmake
+  - meson
   - lua-luafilesystem
   # Pinned
   - eigen==3.3.9
