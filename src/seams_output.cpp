@@ -871,6 +871,161 @@ int sout::writeClusterStats(std::string path, int currentFrame,
 }
 
 /**
+ * @details Function for printing out the molecule IDs present in the slice.
+ The format should be compatible with the group command in LAMMPS 
+ */
+int sout::writeMoleculeIDsInSlice(std::string path,
+                            molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
+  std::ofstream outputFile;
+  std::string filename =
+      "molID-" + std::to_string(yCloud->currentFrame) + ".dat";
+  std::vector<int> idVec; // Vector which will contain all molecule IDs present in the slice
+  // Eventually we will sort this and only keep unique molecule IDs. 
+  int prevElem, currentElem; // previous and current mol ID in the sequence
+  int lastPrintedElemSeries; // Last element printed 
+  // ----------------
+  // Make the output directory if it doesn't exist
+  sout::makePath(path);
+  sout::makePath(path+"selection");
+  sout::makePath(path+"selection/IDtextFiles");
+  // ----------------
+  // Write output to file inside the output directory
+  outputFile.open(path + "selection/IDtextFiles/" + filename);
+
+  // ----------------
+  // Find all molecule IDs from yCloud 
+  // Loop through all iatom in yCloud
+  for (int iatom = 0; iatom < yCloud->nop; iatom++)
+  {
+    // If iatom is in the slice, add the molecule ID to idVec
+    if (yCloud->pts[iatom].inSlice)
+    {
+      idVec.push_back(yCloud->pts[iatom].molID);
+    } // end of adding molecule ID to vector for slice 
+  } // end of loop through iatom
+  // ----------------
+  // Sort in ascending order
+  std::sort(idVec.begin(), idVec.end());
+  auto it = std::unique(idVec.begin(), idVec.end());
+  // Get rid of undefined elements
+  idVec.resize(std::distance(idVec.begin(), it));
+  // ----------------
+
+  // Format:
+  // Comment line
+  // 1 2 3 4 6 7
+
+  // ----------------
+  // Comment line 
+  outputFile << "# Molecule IDs in slice\n";
+  outputFile << "# LAMMPS command : group groupName molecule 100:10000 \n";
+  // Format
+  // In LAMMPS, groups can be assigned by ID using the following command 
+  // group groupName molecule 100:10000 
+  // ----------------
+  // First element 
+  outputFile << idVec[0];
+  prevElem = idVec[0];
+  lastPrintedElemSeries = idVec[0];
+  // ----------------
+
+  // Print other molecule IDs to the file
+  for (int i=1; i<idVec.size(); i++)
+  {
+    currentElem = idVec[i]; // current mol ID
+    // prevElem is the previous mol ID
+    // if the currentElem-prevElem>1
+    if (currentElem-prevElem>1 || i==idVec.size()-1)
+    {
+      if (lastPrintedElemSeries!=prevElem)
+      {
+        outputFile << ":" << prevElem << " " << currentElem;
+        lastPrintedElemSeries = currentElem;
+      } // the previous element has not been printed
+      else{
+        outputFile << " " << currentElem;
+        lastPrintedElemSeries = currentElem;
+      } // the previous element has already been printed 
+      //
+    } // print currentElem
+    //
+    prevElem = currentElem;
+  } // end of printing all elements to file 
+
+  outputFile.close();
+
+  return 0;
+}
+
+/**
+ * @details Function for printing out the molecule IDs present in the slice.
+ The format should be compatible with the group command in LAMMPS 
+ */
+int sout::writeMoleculeIDsExpressionSelectOVITO(std::string path,
+                            molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
+  std::ofstream outputFile;
+  std::string filename =
+      "ovito-molIDSelect-" + std::to_string(yCloud->currentFrame) + ".dat";
+  std::vector<int> idVec; // Vector which will contain all molecule IDs present in the slice
+  // Eventually we will sort this and only keep unique molecule IDs. 
+  int prevElem, currentElem; // previous and current mol ID in the sequence
+  int lastPrintedElemSeries; // Last element printed 
+  // ----------------
+  // Make the output directory if it doesn't exist
+  sout::makePath(path);
+  sout::makePath(path+"selection");
+  sout::makePath(path+"selection/IDovitoFiles");
+  // ----------------
+  // Write output to file inside the output directory
+  outputFile.open(path + "selection/IDovitoFiles/" + filename);
+
+  // ----------------
+  // Find all molecule IDs from yCloud 
+  // Loop through all iatom in yCloud
+  for (int iatom = 0; iatom < yCloud->nop; iatom++)
+  {
+    // If iatom is in the slice, add the molecule ID to idVec
+    if (yCloud->pts[iatom].inSlice)
+    {
+      idVec.push_back(yCloud->pts[iatom].molID);
+    } // end of adding molecule ID to vector for slice 
+  } // end of loop through iatom
+  // ----------------
+  // Sort in ascending order
+  std::sort(idVec.begin(), idVec.end());
+  auto it = std::unique(idVec.begin(), idVec.end());
+  // Get rid of undefined elements
+  idVec.resize(std::distance(idVec.begin(), it));
+  // ----------------
+
+  // Format:
+  // Comment line
+  // 1 2 3 4 6 7
+
+  // ----------------
+  // Comment line 
+  outputFile << "# Molecule IDs in slice\n";
+  outputFile << "# OVITO Expression select command \n";
+  // ----------------
+
+  // Print other molecule IDs to the file
+  for (int i=0; i<idVec.size()-1; i++)
+  {
+    currentElem = idVec[i]; // current mol ID
+
+    outputFile << "MoleculeIdentifier == " << currentElem << " || ";
+
+  } // end of printing all elements to file except the last one 
+
+  // Print the last element
+  outputFile << "MoleculeIdentifier == " << idVec.back();
+
+  outputFile.close();
+
+  return 0;
+}
+
+/**
  * @details Function for printing out prism info, when there is no  volume slice
  */
 int sout::writePrismNum(std::string path, std::vector<int> nPrisms,
@@ -1017,6 +1172,49 @@ int sout::writeRingNum(std::string path, int currentFrame,
   outputFileYZ << "\n";
 
   outputFileYZ.close();
+
+  return 0;
+}
+
+/**
+ * @details Function for printing out ring info, for a bulk system
+ */
+int sout::writeRingNumBulk(std::string path, int currentFrame,
+                       std::vector<int> nRings,
+                       int maxDepth,
+                       int firstFrame) {
+  std::ofstream outputFile;
+  // ----------------
+  // Make the output directory if it doesn't exist
+  sout::makePath(path);
+  std::string outputDirName = path + "bulkTopo";
+  sout::makePath(outputDirName);
+  // ----------------
+  // Ring output file
+  // Write output to file inside the output directory
+  outputFile.open(path + "bulkTopo/num_rings.dat",
+                    std::ios_base::app | std::ios_base::out);
+
+  // Format:
+  // Comment line
+  // 1 3 0 4 35 ....
+
+  // ----------------
+  // Add comment for the first frame
+  if (currentFrame == firstFrame) {
+    outputFile << "Frame RingSize Num_of_rings RingSize Num_of_rings...\n";
+  }
+  // ----------------
+
+  outputFile << currentFrame << " ";
+
+  for (int ringSize = 3; ringSize <= maxDepth; ringSize++) {
+    outputFile << ringSize << " " << nRings[ringSize - 3] << " ";
+  }
+
+  outputFile << "\n";
+
+  outputFile.close();
 
   return 0;
 }
@@ -1248,6 +1446,80 @@ int sout::writeLAMMPSdumpINT(
 } // end of function
 
 /**
+ * @details Prints out a LAMMPS dump file for all atoms, for every frame,
+ * printing the inSlice attribute for a user-defined slice in a separate column 
+ */
+int sout::writeLAMMPSdumpSlice(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::string path) {
+  //
+  std::ofstream outputFile;
+  int iatom; // Index, not atom ID
+  std::string filename =
+      "dump-" + std::to_string(yCloud->currentFrame) + ".lammpstrj";
+  // ----------------
+  // Make the output directory if it doesn't exist
+  sout::makePath(path+"selection");
+  std::string outputDirName = path + "selection/dumpFiles";
+  sout::makePath(outputDirName);
+  // ----------------
+  // Write output to file inside the output directory
+  outputFile.open(path + "selection/dumpFiles/" + filename);
+  // ----------------------------------------------------
+  // Header Format
+
+  // ITEM: TIMESTEP
+  // 0
+  // ITEM: NUMBER OF ATOMS
+  // 500
+  // ITEM: BOX BOUNDS pp pp pp
+  // -9.0400100000000005e-01 1.7170999999999999e+01
+  // -9.0400100000000005e-01 1.7170999999999999e+01
+  // -9.0400100000000005e-01 1.7170999999999999e+01
+  // ITEM: ATOMS id mol type x y z rmsd
+
+  // -----------------
+  // -------
+  // Write the header
+  // ITEM: TIMESTEP
+  outputFile << "ITEM: TIMESTEP\n";
+  // Write out frame number
+  outputFile << yCloud->currentFrame << "\n";
+  // ITEM: NUMBER OF ATOMS
+  outputFile << "ITEM: NUMBER OF ATOMS\n";
+  // Number of atoms
+  outputFile << yCloud->pts.size() << "\n";
+  // ITEM: BOX BOUNDS pp pp pp
+  outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
+  // Box lengths
+  outputFile << yCloud->boxLow[0] << " " << yCloud->boxLow[0] + yCloud->box[0]
+             << "\n";
+  outputFile << yCloud->boxLow[1] << " " << yCloud->boxLow[1] + yCloud->box[1]
+             << "\n";
+  outputFile << yCloud->boxLow[2] << " " << yCloud->boxLow[2] + yCloud->box[2]
+             << "\n";
+  // ITEM: ATOMS id mol type x y z rmsd
+  outputFile << "ITEM: ATOMS id mol type x y z inSlice\n";
+  // -------
+  // Write out the atom coordinates
+  // Format
+  // ITEM: ATOMS id mol type x y z rmsd
+  //
+  // Loop through atoms
+  for (int i = 0; i < yCloud->pts.size(); i++) {
+    iatom =
+        yCloud->pts[i].atomID; // The actual ID can be different from the index
+    // Write out coordinates
+    outputFile << iatom << " " << yCloud->pts[i].molID << " " << yCloud->pts[i].type
+               << " " << yCloud->pts[i].x << " " << yCloud->pts[i].y << " "
+               << yCloud->pts[i].z << " " << yCloud->pts[i].inSlice << "\n";
+
+  } // end of loop through all atoms in pointCloud
+  // -----------------------------------------------------
+  return 0;
+} // end of function
+
+/**
  * @details Prints out a LAMMPS data file for all the prisms for a single frame,
  * with some default options. Only Oxygen atoms are printed out. Bonds are
  * inferred from the rings vector of vectors
@@ -1389,7 +1661,7 @@ int sout::writeLAMMPSdataAllPrisms(
 int sout::writeLAMMPSdataAllRings(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
-    int maxDepth, std::string path) {
+    int maxDepth, std::string path, bool isMonolayer) {
   //
   std::ofstream outputFile;
   int iatom; // Index, not atom ID
@@ -1399,6 +1671,7 @@ int sout::writeLAMMPSdataAllRings(
                                        // containing the atom IDs of each bond
   std::string filename =
       "system-rings-" + std::to_string(yCloud->currentFrame) + ".data";
+  std::string pathName, pathFolder;
 
   // ---------------
   // Get the bonds
@@ -1406,14 +1679,23 @@ int sout::writeLAMMPSdataAllRings(
   //
   // ----------------
   // Make the output directory if it doesn't exist
+  if (isMonolayer)
+  {
+    pathFolder = "topoMonolayer";
+    pathName = "topoMonolayer/dataFiles/";
+  } else{
+    pathFolder = "bulkTopo";
+    pathName = "bulkTopo/dataFiles/";
+  }
+  
   sout::makePath(path);
-  std::string outputDirName = path + "topoMonolayer";
+  std::string outputDirName = path + pathFolder;
   sout::makePath(outputDirName);
-  outputDirName = path + "topoMonolayer/dataFiles/";
+  outputDirName = path + pathName;
   sout::makePath(outputDirName);
 
   // Write output to file inside the output directory
-  outputFile.open(path + "topoMonolayer/dataFiles/" + filename);
+  outputFile.open(path + pathName + filename);
 
   // FORMAT:
   //  Comment Line

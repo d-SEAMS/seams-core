@@ -47,6 +47,16 @@
 
 namespace ring {
 
+//! Find out rings in the bulk, looping through all ring sizes upto the
+//! maxDepth The input ringsAllSizes array has rings of every size.
+int bulkPolygonRingAnalysis(
+    std::string path, std::vector<std::vector<int>> rings,
+    std::vector<std::vector<int>> nList,
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int maxDepth,
+    int firstFrame);
+
+// DDC HC Ring functions
+
 //! Find out which rings are DDCs or HCs, which are comprised of 6-membered
 //! primitive rings. Start with a neighbour list (by index) and a vector of
 //! vectors of rings (also by index). TODO: try 'square' ice and ice0

@@ -1,5 +1,5 @@
-trajectory: "../input/traj/dump-240-square.lammpstrj"
-variables: "../lua_inputs/iceType/vars.lua"
+trajectory: "input/traj/exampleTraj.lammpstrj"
+variables: "lua_inputs/iceType/vars.lua"
 bulk:
   use: false
   topologicalNetworkCriterion: false

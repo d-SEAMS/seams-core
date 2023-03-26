@@ -79,6 +79,7 @@ add_library(yodaLib SHARED
   pntCorrespondence.cpp
   bulkTUM.cpp
   shapeMatch.cpp
+  selection.cpp
 )
 
 install(TARGETS yodaStruct yodaLib LIBRARY DESTINATION "lib"

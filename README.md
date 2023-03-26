@@ -227,6 +227,12 @@ can be run with the `yodaStruct_test` binary, which will drop into the
 ```{bash}
 # Just run this
 ./testBuild.sh
+# At this point the binary and library are copied into the root
+# One might, in a foolhardy attempt, use gdb at this point
+# Here be dragons :)
+# USE NIX
+# Anyway
+gdb --args ./yodaStruct -c lua_inputs/config.yml
 # quit gdb with quit
 # Go run the test binary
 cd shellBuild
@@ -307,6 +313,35 @@ Note that we expect compliance with the `clang-format` as mentioned above, and t
 
 This will ensure that new commits are in accordance to the `clang-format` file.
 
+## Development Builds
+
+The general idea is to drop into an interactive shell with the dependencies and then use `cmake` as usual.
+
+```bash
+nix-shell --pure --run bash --show-trace --verbose
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Debug -DNO_WARN=TRUE \
+ -DFIND_EIGEN=TRUE \
+ -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
+ -G "Ninja"
+ninja
+# Test
+cd ../
+yodaStruct -c lua_inputs/config.yml
+# Debug
+gdb --args yodaStruct -c lua_inputs/config.yml
+```
+To load debugging symbols from the shared library, when you are inside `gdb` (from the top-level directory, for instance), use the following command:
+
+```bash
+add-symbol-file build/libyodaLib.so
+```
+Then you can set breakpoints in the C++ code; for instance: 
+
+```bash
+b seams_input.cpp:408
+```
+
 # Acknowledgements
 
 The following tools are used in this project:
@@ -336,3 +371,4 @@ The libraries used are:
 - [Boost Math](https://www.boost.org/doc/libs/?view=category_math) for spherical harmonics
 - [Blaze](https://bitbucket.org/blaze-lib/blaze/) for very fast modern linear algebra
 - [nanoflann](https://github.com/jlblancoc/nanoflann) to calculate nearest neighbors
+- [icecream-cpp](https://github.com/renatoGarcia/icecream-cpp) for pretty-printing and debugging

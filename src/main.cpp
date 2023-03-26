@@ -40,6 +40,7 @@
 #include <topo_bulk.hpp>
 #include <topo_one_dim.hpp>
 #include <topo_two_dim.hpp>
+#include <selection.hpp>
 
 // Externally bundled-input libraries
 // #include <cxxopts.hpp>
@@ -108,6 +109,7 @@ int main(int argc, char *argv[]) {
     // Writing stuff
     // Generic requirements
     lua.set_function("readFrameOnlyOne", sinp::readLammpsTrjreduced);
+    lua.set_function("readFrameOnlyOneAllAtoms", sinp::readLammpsTrj); // reads in all atoms regardless of type  
     lua.set_function("neighborList", nneigh::neighListO);
     // -----------------
     // Topological Network Method Specific Functions
@@ -139,6 +141,8 @@ int main(int argc, char *argv[]) {
     //
     // Newer pointCloud (rescloud -> ice structure, solcloud -> largest cluster)
     molSys::PointCloud<molSys::Point<double>, double> resCloud;
+    molSys::PointCloud<molSys::Point<double>, double> oCloud; // O atom pointCloud 
+    molSys::PointCloud<molSys::Point<double>, double> hCloud; // H atom pointCloud
     // Some neighbor
     std::vector<std::vector<int>> nList, hbnList;
     // For the list of all rings (of all sizes)
@@ -158,6 +162,8 @@ int main(int argc, char *argv[]) {
     lua["nList"] = &nList;
     lua["hbnList"] = &hbnList;
     lua["resCloud"] = &resCloud;
+    lua["oCloud"] = &oCloud;
+    lua["hCloud"] = &hCloud;
     lua["trajectory"] = tFile;
     // Confined ice stuff
     lua["ringsAllSizes"] = &rings;
@@ -167,6 +173,7 @@ int main(int argc, char *argv[]) {
     // Writing stuff
     // Generic requirements
     lua.set_function("readFrameOnlyOne", sinp::readLammpsTrjreduced);
+    lua.set_function("readFrameOnlyOneAllAtoms", sinp::readLammpsTrj); // reads in all atoms regardless of type  
     lua.set_function("neighborList", nneigh::neighListO);
     // -----------------
     // Topological Network Method Specific Functions
@@ -194,6 +201,8 @@ int main(int argc, char *argv[]) {
     //
     // Newer pointCloud (rescloud -> ice structure, solcloud -> largest
     molSys::PointCloud<molSys::Point<double>, double> resCloud, solCloud;
+    // PointCloud for O atoms and H atoms separately 
+    molSys::PointCloud<molSys::Point<double>, double> oCloud, hCloud;
     // Some neighbor
     std::vector<std::vector<int>> nList,
         hbnList; // Neighbour lists (by cutoff and hydrogen-bonded neighbour
@@ -221,6 +230,8 @@ int main(int argc, char *argv[]) {
     lua["hbnList"] = &hbnList;
     lua["iceNeighbourList"] = &iceList;
     lua["resCloud"] = &resCloud;
+    lua["oCloud"] = &oCloud;
+    lua["hCloud"] = &hCloud;
     lua["clusterCloud"] = &solCloud;
     lua["avgQ6"] = &avgQ6;
     lua["trajectory"] = tFile;
@@ -248,14 +259,25 @@ int main(int argc, char *argv[]) {
     lua.set_function("clusterAnalysis", clump::clusterAnalysis);
     lua.set_function("recenterCluster", clump::recenterClusterCloud);
     // -----------------
+    // Selection Functions
+    // Function for getting an output PointCloud of a particular atom type from an existing PointCloud
+    lua.set_function("getPointCloudAtomsOfOneAtomType", gen::getPointCloudOneAtomType);
+    lua.set_function("selectInSingleSlice", gen::moleculesInSingleSlice);
+    lua.set_function("selectEdgeAtomsInRingsWithinSlice", ring::getEdgeMoleculesInRings);
+    lua.set_function("selectAtomsInSliceWithRingEdgeAtoms", ring::printSliceGetEdgeMoleculesInRings);
+    // -----------------
     // Topological Network Methods
     // Generic requirements (read in only inside the slice)
     lua.set_function("readFrameOnlyOne", sinp::readLammpsTrjreduced);
+    lua.set_function("readFrameOnlyOneAllAtoms", sinp::readLammpsTrj); // reads in all atoms regardless of type  
     lua.set_function("getHbondNetwork", bond::populateHbonds);
+    lua.set_function("getHbondNetworkFromClouds", bond::populateHbondsWithInputClouds);
     lua.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);
     // -----------------
     // Primitive rings
     lua.set_function("getPrimitiveRings", primitive::ringNetwork);
+    // Function for just getting and writing out the ring numbers
+    lua.set_function("bulkRingNumberAnalysis", ring::bulkPolygonRingAnalysis);
     // -----------------
     // Bulk ice, using the topological network criterion
     lua.set_function("bulkTopologicalNetworkCriterion", ring::topoBulkAnalysis);

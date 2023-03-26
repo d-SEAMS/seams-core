@@ -5,14 +5,11 @@ hydrogenAtomType = 1; --- Hydrogen atom type assigned
 targetFrame=1; --- The first frame
 finalFrame=1; --- This is inclusive
 frameGap=1; --- The gap between frames
-maxDepth = 4; --- The maximum depth upto which rings will be searched.
+maxDepth = 6; --- The maximum depth upto which rings will be searched.
 --- Slice Information
 isSlice = false; --- This is true if the analysis is to be done only for a volume slice
 sliceLowerLimits = {0,0,0}; --- Lower limit of the slice (for box dim, keep the values the same as 0)
 sliceUpperLimits = {0,0,0}; --- Upper limit of the slice 
-
---- Variable for shapeMatching
-doShapeMatching = true; 
 
 --- Paths for the output directories and lua scipt
 outDir="runOne/"; --- The subdirectory used; 

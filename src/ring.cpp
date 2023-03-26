@@ -29,6 +29,53 @@ int ring::clearRingList(std::vector<std::vector<int>> &rings) {
 }
 
 /**
+ * @details Assign an atomType (equal to the number of nodes in the ring) given
+ * the rings vector.
+ * @param[in] rings The vector of vectors containing the primitive rings, of a
+ *  particular ring size.
+ * @param[in, out] atomTypes A vector which contains a type for each atom,
+ *  depending on it's type as classified by the prism identification scheme.
+ * @param[in] nRings Number of rings.
+ */
+int ring::assignPolygonType(std::vector<std::vector<int>> rings,
+                            std::vector<int> *atomTypes,
+                            std::vector<int> nRings) {
+  // Every value in listPrism corresponds to an index in rings.
+  // Every ring contains atom indices, corresponding to the indices (not atom
+  // IDs) in rings
+  int iring;        // Index of current ring
+  int iatom;        // Index of current atom
+  int ringSize;     // Ring size of the current ring
+  int prevRingSize; // Ring size previously assigned to a point
+
+  // Dummy value corresponds to a value of 1.
+  // If an atom is shared by more than one ring type, it is assigned the
+  // value 2.
+
+  // Loop through every ring in rings
+  for (int iring = 0; iring < rings.size(); iring++) {
+    ringSize = rings[iring].size();
+    // Loop through every element in iring
+    for (int j = 0; j < ringSize; j++) {
+      iatom = rings[iring][j]; // Atom index
+      // Update the atom type
+      if ((*atomTypes)[iatom] == 1) {
+        (*atomTypes)[iatom] = ringSize;
+      } // The atom is unclassified
+      else {
+        // Only update the ring type if the number is higher
+        prevRingSize = (*atomTypes)[iatom]; // Previously assigned ring size
+        if (ringSize > prevRingSize) {
+          (*atomTypes)[iatom] = ringSize;
+        } // end of assigning the new ring size
+      }   // only update if the number is higher
+    }     // end of loop through every atom in iring
+  }       // end of loop through every ring
+
+  return 0;
+} // end of function
+
+/**
  *  @details Function that finds and returns a vector containing the elements
  *   shared by two input rings (each ring is a vector).
  *  @param[in] ring1 The first ring.

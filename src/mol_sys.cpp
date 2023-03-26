@@ -60,6 +60,29 @@ std::unordered_map<int, int> molSys::createIDMolIDmap(
 }
 
 /**
+ * @details Function for creating an unordered map with the atomIDs in the
+ *  pointCloud as the keys and the molecular IDs as the values. More than one atom
+ * can have the same molecule ID. 
+ */
+std::unordered_multimap<int, int> molSys::createMolIDAtomIDMultiMap(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
+  std::unordered_multimap<int, int>
+      molIDAtomIDmap; // atom IDs as keys and mol IDs as values
+  int iatomMolID; // molID of the current iatom
+  int iatomID;    // atom ID of the current iatom
+
+  // Loop through the atoms in yCloud
+  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+    iatomID = yCloud->pts[iatom].atomID;   // atom ID
+    iatomMolID = yCloud->pts[iatom].molID; // molecular ID
+    // Update the unordered multimap
+    molIDAtomIDmap.emplace(iatomMolID,iatomID);
+  } // end of loop through every iatom in pointCloud
+
+  return molIDAtomIDmap;
+}
+
+/**
  * @details Function that returns a vector of vectors, which contains the
  *  hydrogen atoms for each molID in the oxygen atom pointCloud
  */

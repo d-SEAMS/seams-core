@@ -124,6 +124,11 @@ int writeRingNum(std::string path, int currentFrame, std::vector<int> nRings,
                  std::vector<double> coverageAreaYZ, int maxDepth,
                  int firstFrame);
 
+//! Function for printing out the number of rings of each
+//! type in a bulk system 
+int writeRingNumBulk(std::string path, int currentFrame, std::vector<int> nRings, int maxDepth,
+                 int firstFrame);
+
 //! Function for printing out the RDF, given the filename
 int printRDF(std::string fileName, std::vector<double> *rdfValues,
              double binwidth, int nbin);
@@ -144,6 +149,14 @@ int writeClusterStats(std::string path, int currentFrame, int largestCluster,
                       int numOfClusters, int smallestCluster,
                       double avgClusterSize, int firstFrame);
 
+//! Function for printing out the molecule IDs present in the slice (compatible with 
+//! the LAMMPS group command 
+int writeMoleculeIDsInSlice(std::string path, molSys::PointCloud<molSys::Point<double>, double> *yCloud);
+
+//! Function for printing out the molecule IDs present in the slice (compatible with 
+//! the OVITO Expression Select command 
+int writeMoleculeIDsExpressionSelectOVITO(std::string path, molSys::PointCloud<molSys::Point<double>, double> *yCloud);
+
 //! Write a data file for rings
 int writeLAMMPSdata(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                     std::vector<std::vector<int>> rings,
@@ -155,6 +168,11 @@ int writeLAMMPSdumpINT(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<double> rmsdPerAtom, std::vector<int> atomTypes, int maxDepth,
     std::string path);
+
+//! Write out a LAMMPS dump file containing the inSlice value for each atom
+//! for a user-defined slice 
+int writeLAMMPSdumpSlice(
+    molSys::PointCloud<molSys::Point<double>, double> *yCloud, std::string path);
 
 //! Write out a LAMMPS dump file containing the RMSD per atom for bulk ice
 int writeLAMMPSdumpCages(
@@ -172,7 +190,7 @@ int writeLAMMPSdataAllPrisms(
 int writeLAMMPSdataAllRings(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
-    int maxDepth, std::string path);
+    int maxDepth, std::string path, bool isMonolayer = true);
 
 //! Write a data file for a particular frame, writing out topological bulk ice
 //! structures (DDCs/HCs)
