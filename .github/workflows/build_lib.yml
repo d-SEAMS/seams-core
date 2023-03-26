@@ -9,8 +9,7 @@ jobs:
       - name: Install Conda environment from environment.yml
         uses: mamba-org/provision-with-micromamba@main
 
-      # Linux and macOS
-      - name: Run Python
+      - name: Build library with meson
         shell: bash -l {0}
         run: |
           cd src

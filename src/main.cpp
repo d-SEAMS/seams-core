@@ -45,7 +45,7 @@
 // Externally bundled-input libraries
 // #include <cxxopts.hpp>
 #include <rang.hpp>
-#include <sol.hpp>
+#include <sol/sol.hpp>
 
 #include <fmt/core.h>
 #include <yaml-cpp/yaml.h>
