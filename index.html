@@ -136,13 +136,15 @@ url={https://doi.org/10.1021/acs.jcim.0c00031}
 <p>Although we strongly suggest using <code>nix</code>, for MacOS systems, the following instructions may be more suitable. We will assume the presence of <a href="https://mamba.readthedocs.io/en/latest/installation.html">micromamba</a>:</p>
 <div class="fragment"><div class="line">micromamba create -f environment.yml</div>
 <div class="line">micromamba activate dseams</div>
+<div class="line">luarocks install luafilesystem</div>
 </div><!-- fragment --><p>Now the installation can proceed.</p>
-<dl class="section note"><dt>Note</dt><dd>we do not install a new version of <code>cmake</code> within the <code>conda</code> environment because of conflicts with <code>lua</code></dd></dl>
+<dl class="section note"><dt>Note</dt><dd>we do not install <code>lua-luafilesystem</code> within the <code>conda</code> environment because it is outdated on <code>osx</code></dd></dl>
 <div class="fragment"><div class="line">mkdir build</div>
 <div class="line">cd build</div>
 <div class="line">cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -DCMAKE_INSTALL_PREFIX:PATH=$CONDA_PREFIX ../</div>
 <div class="line">make -j$(nproc)</div>
 <div class="line">make install</div>
+<div class="line">$CONDA_PREFIX/bin/yodaStruct -c lua_inputs/config.yml</div>
 </div><!-- fragment --><p>We have opted to install into the <code>conda</code> environment, if this is not the intended behavior, use <code>/usr/local</code> instead.</p>
 <h3>Spack</h3>
 <p>Manually this can be done in a painful way as follows:</p>

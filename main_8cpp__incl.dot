@@ -306,7 +306,7 @@ digraph "src/main.cpp"
   Node1 -> Node52 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node52 [label="rang.hpp",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
   Node1 -> Node53 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node53 [label="sol.hpp",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node53 [label="sol/sol.hpp",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
   Node1 -> Node54 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node54 [label="fmt/core.h",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
   Node1 -> Node55 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
