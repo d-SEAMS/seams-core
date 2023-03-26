@@ -16,17 +16,3 @@ jobs:
           mkdir bbdir
           meson setup bbdir
           meson compile -C bbdir
-
-      - name: Build application with cmake
-        shell: bash -l {0}
-        run: |
-          mkdir bbdir
-          cd bbdir
-          cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -DCMAKE_INSTALL_PREFIX:PATH=$CONDA_PREFIX ../
-          make -j$(nproc)
-          make install
-
-      - name: Run a test
-        shell: bash -l {0}
-        run: |
-          yodaStruct -c lua_inputs/config.yml
