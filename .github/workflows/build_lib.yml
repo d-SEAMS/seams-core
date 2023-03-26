@@ -1,0 +1,19 @@
+name: "Build d-SEAMS yodaLib"
+on: [push, pull_request]
+jobs:
+  build_lib:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Conda environment from environment.yml
+        uses: mamba-org/provision-with-micromamba@main
+
+      # Linux and macOS
+      - name: Run Python
+        shell: bash -l {0}
+        run: |
+          cd src
+          mkdir bbdir
+          meson setup bbdir
+          meson compile -C bbdir
