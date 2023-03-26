@@ -1,11 +1,15 @@
 //-----------------------------------------------------------------------------------
-// d-SEAMS is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations
 //
-// A copy of the GNU General Public License is available at
-// http://www.gnu.org/licenses/
+// Copyright (c) 2018--present d-SEAMS core team
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the MIT License as published by
+// the Open Source Initiative.
+//
+// A copy of the MIT License is included in the LICENSE file of this repository.
+// You should have received a copy of the MIT License along with this program.
+// If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
 #ifndef __GENERIC_H_
