@@ -15,7 +15,7 @@ title: "d-SEAMS (Deferred Structural Elucidation Analysis for Molecular Simulati
 version: 1.0.1
 doi: 10.5281/zenodo.3874292
 date-released: 2020-06-03
-license: GPL-3.0-or-later
+license: MIT
 abstract: |
   d-SEAMS is a collection of analysis tools for molecular simulations. It has
   been implemented as a High Performance Cluster enabled engine in C++, with
