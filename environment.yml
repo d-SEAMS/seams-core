@@ -17,7 +17,9 @@ dependencies:
   - boost-cpp
   - cmake
   - meson
-  - lua-luafilesystem
+  - cmake
+  # - lua-luafilesystem
+  - luarocks
   # Pinned
   - eigen==3.3.9
-  - lua==5.2.*
+  - lua==5.4.4
