@@ -60,12 +60,13 @@ We also provide a `conda` environment as a fallback, which is also recommended f
 
 ## Build
 
-### Conda
+### Conda (working now)
 
 Although we strongly suggest using `nix`, for MacOS systems, the following
 instructions may be more suitable. We will assume the presence of [micromamba](https://mamba.readthedocs.io/en/latest/installation.html):
 
 ```bash
+cd ~/seams-core
 micromamba create -f environment.yml
 micromamba activate dseams
 luarocks install luafilesystem
@@ -87,7 +88,7 @@ $CONDA_PREFIX/bin/yodaStruct -c lua_inputs/config.yml
 We have opted to install into the `conda` environment, if this is not the
 intended behavior, use `/usr/local` instead.
 
-### Spack
+### Spack (not working at the moment)
 
 Manually this can be done in a painful way as follows:
 
@@ -133,7 +134,7 @@ cd ../
 yodaStruct -c lua_inputs/config.yml
 ```
 
-### Nix
+### Nix (not working at the moment)
 
 Since this project is built with `nix`, we can simply do the following from the
 root directory (longer method):
