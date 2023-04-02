@@ -132,9 +132,10 @@ url={https://doi.org/10.1021/acs.jcim.0c00031}
 <dl class="section note"><dt>Note</dt><dd>The lua functions are documented on the <a href="https://docs.dseams.info/md_markdown_luafunctions">on the API Docs</a></dd></dl>
 <p>We also provide a <code>conda</code> environment as a fallback, which is also recommended for MacOS users.</p>
 <h2>Build</h2>
-<h3>Conda</h3>
+<h3>Conda (working now)</h3>
 <p>Although we strongly suggest using <code>nix</code>, for MacOS systems, the following instructions may be more suitable. We will assume the presence of <a href="https://mamba.readthedocs.io/en/latest/installation.html">micromamba</a>:</p>
-<div class="fragment"><div class="line">micromamba create -f environment.yml</div>
+<div class="fragment"><div class="line">cd ~/seams-core</div>
+<div class="line">micromamba create -f environment.yml</div>
 <div class="line">micromamba activate dseams</div>
 <div class="line">luarocks install luafilesystem</div>
 </div><!-- fragment --><p>Now the installation can proceed.</p>
@@ -146,7 +147,7 @@ url={https://doi.org/10.1021/acs.jcim.0c00031}
 <div class="line">make install</div>
 <div class="line">$CONDA_PREFIX/bin/yodaStruct -c lua_inputs/config.yml</div>
 </div><!-- fragment --><p>We have opted to install into the <code>conda</code> environment, if this is not the intended behavior, use <code>/usr/local</code> instead.</p>
-<h3>Spack</h3>
+<h3>Spack (not working at the moment)</h3>
 <p>Manually this can be done in a painful way as follows:</p>
 <div class="fragment"><div class="line">spack install eigen@3.3.9 lua@5.2</div>
 <div class="line">spack install catch2 fmt yaml-cpp openblas boost cmake ninja meson</div>
@@ -175,7 +176,7 @@ url={https://doi.org/10.1021/acs.jcim.0c00031}
 <div class="line">export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INST_DIR/lib</div>
 <div class="line">cd ../</div>
 <div class="line">yodaStruct -c lua_inputs/config.yml</div>
-</div><!-- fragment --><h3>Nix</h3>
+</div><!-- fragment --><h3>Nix (not working at the moment)</h3>
 <p>Since this project is built with <code>nix</code>, we can simply do the following from the root directory (longer method):</p>
 <div class="fragment"><div class="line"># Make sure there are no artifacts</div>
 <div class="line">rm -rf build</div>
