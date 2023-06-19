@@ -10,7 +10,6 @@ dependencies:
   - compilers
   - gfortran
   - catch2
-  - fmt
   - yaml-cpp
   - liblapack
   - libblas
@@ -21,5 +20,6 @@ dependencies:
   # - lua-luafilesystem
   - luarocks
   # Pinned
+  - fmt==9.0.0
   - eigen==3.3.9
   - lua==5.4.4
