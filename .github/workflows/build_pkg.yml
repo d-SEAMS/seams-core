@@ -15,6 +15,7 @@ jobs:
           luarocks install luafilesystem
           mkdir bbdir
           cd bbdir
+          export CXXFLAGS="-I$CONDA_PREFIX/include/eigen3 -I$CONDA_PREFIX/include/"
           cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -DCMAKE_INSTALL_PREFIX:PATH=$CONDA_PREFIX ../
           make -j$(nproc)
           make install
