@@ -12,7 +12,6 @@ jobs:
       - name: Build library with meson
         shell: bash -l {0}
         run: |
-          cd src
           mkdir bbdir
           meson setup bbdir
           meson compile -C bbdir

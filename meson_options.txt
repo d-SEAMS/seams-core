@@ -1,0 +1,5 @@
+# Booleans
+# TODO: Tests can't be run right now
+option('with_tests', type : 'boolean', value : false)
+option('with_lua', type : 'boolean', value : false)
+# Lua only works with spack

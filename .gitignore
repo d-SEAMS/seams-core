@@ -1,3 +1,16 @@
+# Additions
+/result
+/.ccls-cache/
+shellBuild/
+doxyYoda
+doxyYoda_*
+run*
+# Manual updates ONLY
+spack.yml
+/.spack-env/
+*.lock
+subprojects
+
 # Prerequisites
 *.d
 
@@ -300,13 +313,3 @@ TSWLatexianTemp*
 
 # standalone packages
 *.sta
-/result
-/.ccls-cache/
-shellBuild/
-doxyYoda
-doxyYoda_*
-run*
-# Manual updates ONLY
-spack.yml
-/.spack-env/
-*.lock
