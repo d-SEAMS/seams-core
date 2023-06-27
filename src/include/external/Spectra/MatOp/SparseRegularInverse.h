@@ -7,9 +7,9 @@
 #ifndef SPARSE_REGULAR_INVERSE_H
 #define SPARSE_REGULAR_INVERSE_H
 
-#include <eigen3/Eigen/Core>
-#include <eigen3/Eigen/IterativeLinearSolvers>
-#include <eigen3/Eigen/SparseCore>
+#include <Eigen/Core>
+#include <Eigen/IterativeLinearSolvers>
+#include <Eigen/SparseCore>
 #include <stdexcept>
 
 namespace Spectra {

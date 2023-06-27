@@ -7,7 +7,7 @@
 #ifndef GEN_EIGS_SOLVER_H
 #define GEN_EIGS_SOLVER_H
 
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 
 #include "GenEigsBase.h"
 #include "MatOp/DenseGenMatProd.h"

@@ -7,8 +7,8 @@
 #ifndef DENSE_CHOLESKY_H
 #define DENSE_CHOLESKY_H
 
-#include <eigen3/Eigen/Cholesky>
-#include <eigen3/Eigen/Core>
+#include <Eigen/Cholesky>
+#include <Eigen/Core>
 #include <stdexcept>
 #include "../Util/CompInfo.h"
 

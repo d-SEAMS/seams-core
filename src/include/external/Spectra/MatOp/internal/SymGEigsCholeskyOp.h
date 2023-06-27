@@ -7,7 +7,7 @@
 #ifndef SYM_GEIGS_CHOLESKY_OP_H
 #define SYM_GEIGS_CHOLESKY_OP_H
 
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include "../DenseCholesky.h"
 #include "../DenseSymMatProd.h"
 

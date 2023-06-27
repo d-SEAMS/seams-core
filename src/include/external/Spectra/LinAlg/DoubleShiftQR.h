@@ -9,7 +9,7 @@
 
 #include <algorithm>  // std::min, std::fill, std::copy
 #include <cmath>      // std::abs, std::sqrt, std::pow
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include <stdexcept>  // std::invalid_argument, std::logic_error
 #include <vector>     // std::vector
 

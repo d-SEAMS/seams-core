@@ -7,7 +7,7 @@
 #ifndef TYPE_TRAITS_H
 #define TYPE_TRAITS_H
 
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include <limits>
 
 /// \cond

@@ -7,7 +7,7 @@
 #ifndef DENSE_SYM_SHIFT_SOLVE_H
 #define DENSE_SYM_SHIFT_SOLVE_H
 
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include <stdexcept>
 
 #include "../LinAlg/BKLDLT.h"

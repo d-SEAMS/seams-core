@@ -11,8 +11,8 @@
 #ifndef UPPER_HESSENBERG_EIGEN_H
 #define UPPER_HESSENBERG_EIGEN_H
 
-#include <eigen3/Eigen/Core>
-#include <eigen3/Eigen/Eigenvalues>
+#include <Eigen/Core>
+#include <Eigen/Eigenvalues>
 #include <stdexcept>
 
 namespace Spectra {

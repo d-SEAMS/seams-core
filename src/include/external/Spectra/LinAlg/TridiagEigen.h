@@ -11,8 +11,8 @@
 #ifndef TRIDIAG_EIGEN_H
 #define TRIDIAG_EIGEN_H
 
-#include <eigen3/Eigen/Core>
-#include <eigen3/Eigen/Jacobi>
+#include <Eigen/Core>
+#include <Eigen/Jacobi>
 #include <stdexcept>
 
 #include "../Util/TypeTraits.h"

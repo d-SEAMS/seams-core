@@ -7,7 +7,7 @@
 #ifndef SYM_GEIGS_REG_INV_OP_H
 #define SYM_GEIGS_REG_INV_OP_H
 
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include "../SparseRegularInverse.h"
 #include "../SparseSymMatProd.h"
 
