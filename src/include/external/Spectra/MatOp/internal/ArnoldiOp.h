@@ -8,7 +8,7 @@
 #define ARNOLDI_OP_H
 
 #include <cmath>  // std::sqrt
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 
 namespace Spectra {
 

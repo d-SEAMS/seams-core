@@ -7,9 +7,9 @@
 #ifndef SPARSE_CHOLESKY_H
 #define SPARSE_CHOLESKY_H
 
-#include <eigen3/Eigen/Core>
-#include <eigen3/Eigen/SparseCholesky>
-#include <eigen3/Eigen/SparseCore>
+#include <Eigen/Core>
+#include <Eigen/SparseCholesky>
+#include <Eigen/SparseCore>
 #include <stdexcept>
 #include "../Util/CompInfo.h"
 

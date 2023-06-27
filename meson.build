@@ -39,6 +39,11 @@ endif
 cppc = meson.get_compiler('cpp')
 
 # Dependencies
+# libm for Unix systems
+m_dep = cppc.find_library('m', required: false)
+_deps += m_dep
+_deps += [declare_dependency(link_args: '-lstdc++')]
+
 # All of which can be installed with meson wrap install <blah> originally
 subproject('eigen')
 eigen_dep = dependency('eigen3',
@@ -46,8 +51,9 @@ eigen_dep = dependency('eigen3',
                        required: true)
 _deps += [ eigen_dep ]
 
-subproject('fmt')
-fmt_dep = dependency('fmt', required: true)
+fmt_dep = dependency('fmt',
+                     version: '9.0.0',
+                     required: true)
 _deps += [ fmt_dep ]
 
 boost_dep = dependency('boost',
@@ -66,7 +72,7 @@ _deps += [ libyamlcpp_dep ]
 
 # Include Sources
 
-incdir = include_directories([ 'src/include/internal',
+_incdirs += include_directories([ 'src/include/internal',
                                'src/include/external' ])
 
 # --------------------- Library
@@ -99,7 +105,7 @@ ydslib = library('yodaLib',
                 ydsl_sources,
                 dependencies: _deps,
                 cpp_args: _args,
-                include_directories : incdir,
+                include_directories : _incdirs,
                 install: true
                )
 
@@ -138,7 +144,7 @@ if (not meson.is_subproject())
                        link_with : _linkto,
                        dependencies: _deps,
                        cpp_args : _args,
-                       include_directories : incdir,
+                       include_directories : _incdirs,
                        install : true)
     endif
 endif

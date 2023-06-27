@@ -7,7 +7,7 @@
 #ifndef SYM_EIGS_SOLVER_H
 #define SYM_EIGS_SOLVER_H
 
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 
 #include "MatOp/DenseSymMatProd.h"
 #include "SymEigsBase.h"

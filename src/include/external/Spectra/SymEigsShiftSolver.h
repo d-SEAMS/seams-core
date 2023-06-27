@@ -7,7 +7,7 @@
 #ifndef SYM_EIGS_SHIFT_SOLVER_H
 #define SYM_EIGS_SHIFT_SOLVER_H
 
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 
 #include "MatOp/DenseSymShiftSolve.h"
 #include "SymEigsBase.h"

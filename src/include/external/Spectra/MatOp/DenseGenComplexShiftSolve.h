@@ -7,8 +7,8 @@
 #ifndef DENSE_GEN_COMPLEX_SHIFT_SOLVE_H
 #define DENSE_GEN_COMPLEX_SHIFT_SOLVE_H
 
-#include <eigen3/Eigen/Core>
-#include <eigen3/Eigen/LU>
+#include <Eigen/Core>
+#include <Eigen/LU>
 #include <stdexcept>
 
 namespace Spectra {

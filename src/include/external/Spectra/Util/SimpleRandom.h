@@ -7,7 +7,7 @@
 #ifndef SIMPLE_RANDOM_H
 #define SIMPLE_RANDOM_H
 
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 
 /// \cond
 

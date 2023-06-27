@@ -7,9 +7,9 @@
 #ifndef SPARSE_GEN_REAL_SHIFT_SOLVE_H
 #define SPARSE_GEN_REAL_SHIFT_SOLVE_H
 
-#include <eigen3/Eigen/Core>
-#include <eigen3/Eigen/SparseCore>
-#include <eigen3/Eigen/SparseLU>
+#include <Eigen/Core>
+#include <Eigen/SparseCore>
+#include <Eigen/SparseLU>
 #include <stdexcept>
 
 namespace Spectra {

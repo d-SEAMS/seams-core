@@ -30,8 +30,8 @@
 // External
 #include <Spectra/SymEigsShiftSolver.h>
 #include <Spectra/SymEigsSolver.h>
-#include <eigen3/Eigen/Core>
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Core>
+#include <Eigen/Dense>
 
 #include <mol_sys.hpp>
 #include <ring.hpp>

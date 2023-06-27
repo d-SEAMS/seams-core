@@ -28,7 +28,7 @@
 #include <vector>
 
 // External
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 
 #include <cage.hpp>
 #include <mol_sys.hpp>

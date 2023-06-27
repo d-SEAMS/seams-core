@@ -9,7 +9,7 @@
 
 #include <algorithm>  // std::fill, std::copy
 #include <cmath>      // std::sqrt
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include <stdexcept>  // std::logic_error
 
 namespace Spectra {

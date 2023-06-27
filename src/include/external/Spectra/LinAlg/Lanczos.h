@@ -8,7 +8,7 @@
 #define LANCZOS_H
 
 #include <cmath>  // std::sqrt
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include <sstream>    // std::stringstream
 #include <stdexcept>  // std::invalid_argument
 

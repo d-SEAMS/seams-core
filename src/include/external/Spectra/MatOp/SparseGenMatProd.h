@@ -7,8 +7,8 @@
 #ifndef SPARSE_GEN_MAT_PROD_H
 #define SPARSE_GEN_MAT_PROD_H
 
-#include <eigen3/Eigen/Core>
-#include <eigen3/Eigen/SparseCore>
+#include <Eigen/Core>
+#include <Eigen/SparseCore>
 
 namespace Spectra {
 

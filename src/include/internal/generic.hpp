@@ -23,8 +23,8 @@
 // Boost
 #include <boost/math/constants/constants.hpp>
 // Eigen
-#include <eigen3/Eigen/Core>
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Core>
+#include <Eigen/Dense>
 
 /** @file generic.hpp
  *   @brief File for containing generic or common functions.

@@ -7,7 +7,7 @@
 #ifndef BK_LDLT_H
 #define BK_LDLT_H
 
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include <stdexcept>
 #include <vector>
 
