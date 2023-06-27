@@ -117,9 +117,9 @@ digraph "src/topo_bulk.cpp"
   Node26 -> Node27 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node27 [label="boost/math/constants\l/constants.hpp",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
   Node26 -> Node28 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node28 [label="eigen3/Eigen/Core",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node28 [label="Eigen/Core",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
   Node26 -> Node29 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node29 [label="eigen3/Eigen/Dense",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node29 [label="Eigen/Dense",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
   Node23 -> Node6 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node23 -> Node9 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node23 -> Node15 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];

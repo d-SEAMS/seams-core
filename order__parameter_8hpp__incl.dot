@@ -100,9 +100,9 @@ digraph "src/include/internal/order_parameter.hpp"
   Node24 -> Node25 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node25 [label="boost/math/constants\l/constants.hpp",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
   Node24 -> Node26 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node26 [label="eigen3/Eigen/Core",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node26 [label="Eigen/Core",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
   Node24 -> Node27 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node27 [label="eigen3/Eigen/Dense",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node27 [label="Eigen/Dense",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
   Node21 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node21 -> Node8 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node21 -> Node14 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];

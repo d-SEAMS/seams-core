@@ -48,9 +48,9 @@ digraph "src/bop.cpp"
   Node8 -> Node21 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node21 [label="boost/math/constants\l/constants.hpp",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
   Node8 -> Node22 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node22 [label="eigen3/Eigen/Core",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node22 [label="Eigen/Core",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
   Node8 -> Node23 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node23 [label="eigen3/Eigen/Dense",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node23 [label="Eigen/Dense",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
   Node2 -> Node10 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node2 -> Node11 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
   Node2 -> Node24 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
