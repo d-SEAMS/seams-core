@@ -41,7 +41,7 @@
 namespace cage {
 
 // Type of a cage (a group of rings)
-/** @enum cage::cageType
+/** @enum class cage::cageType
  * Qualifier for a cage.
  * According to the topological network criterion for DDCs and HCs
  *
@@ -51,11 +51,11 @@ namespace cage {
  * @var molSys::cageType DoubleDiaC
  * The type for a double-diamond cage
  */
-enum cageType { HexC, DoubleDiaC };
+enum class cageType { HexC, DoubleDiaC };
 
 // Type of ice for a particular atom. Dummy means that the atom is unclassified
 // and is most probably water
-/** @enum cage::iceType
+/** @enum class cage::iceType
  * Qualifier for an atom, based on whether it is part of cages,
  * according to the topological network criterion for DDCs and HCs
  *
@@ -72,7 +72,7 @@ enum cageType { HexC, DoubleDiaC };
  * Type for an atom which is part of a mixed ring, shared by both a DDC and an
  * HC
  */
-enum iceType { dummy, hc, ddc, mixed, pnc, mixed2 };
+enum class iceType { dummy, hc, ddc, mixed, pnc, mixed2 };
 
 // Each DDC has one equatorial ring and 6 peripheral rings
 // Each HC has two basal planes and 3 prismatic planes

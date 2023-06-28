@@ -420,11 +420,11 @@ chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
       cij_real = complexCij.real();
       temp_cij.c_value = cij_real;
       if (cij_real < -0.8) {
-        temp_cij.classifier = molSys::staggered;
+        temp_cij.classifier = molSys::bond_type::staggered;
       } else if (cij_real > -0.2 && cij_real < -0.05) {
-        temp_cij.classifier = molSys::eclipsed;
+        temp_cij.classifier = molSys::bond_type::eclipsed;
       } else {
-        temp_cij.classifier = molSys::out_of_range;
+        temp_cij.classifier = molSys::bond_type::out_of_range;
       }
       yCloud->pts[iatomIndex].c_ij.push_back(temp_cij);
     } // end loop over nearest neighbours
@@ -461,9 +461,9 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypeNoPrint(
     // Loop through the bond cij and get the number of staggered, eclipsed bonds
     for (int j = 0; j < nnumNeighbours; j++) {
       bondType = yCloud->pts[iatom].c_ij[j].classifier;
-      if (bondType == molSys::eclipsed) {
+      if (bondType == molSys::bond_type::eclipsed) {
         num_eclipsd++;
-      } else if (bondType == molSys::staggered) {
+      } else if (bondType == molSys::bond_type::staggered) {
         num_staggrd++;
       } else {
         na++;
@@ -471,27 +471,27 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypeNoPrint(
     } // End of loop through neighbours
 
     // Add more tests later
-    yCloud->pts[iatom].iceType = molSys::unclassified; // default
+    yCloud->pts[iatom].iceType = molSys::atom_state_type::unclassified; // default
     // Cubic ice
     // if (num_eclipsd==0 && num_staggrd==4){
     //  yCloud->pts[iatom].iceType = molSys::cubic;
     //  ic++;
     // }
     if (num_staggrd >= 4) {
-      yCloud->pts[iatom].iceType = molSys::cubic;
+      yCloud->pts[iatom].iceType = molSys::atom_state_type::cubic;
       ic++;
     }
     // Hexagonal
     else if (num_eclipsd == 1 && num_staggrd == 3) {
-      yCloud->pts[iatom].iceType = molSys::hexagonal;
+      yCloud->pts[iatom].iceType = molSys::atom_state_type::hexagonal;
       ih++;
     }
     // Interfacial
     else if (isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd)) {
-      yCloud->pts[iatom].iceType = molSys::interfacial;
+      yCloud->pts[iatom].iceType = molSys::atom_state_type::interfacial;
       interIce++;
     } else {
-      yCloud->pts[iatom].iceType = molSys::water;
+      yCloud->pts[iatom].iceType = molSys::atom_state_type::water;
       water++;
     }
 
@@ -529,9 +529,9 @@ chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     // Loop through the bond cij and get the number of staggered, eclipsed bonds
     for (int j = 0; j < nnumNeighbours; j++) {
       bondType = yCloud->pts[iatom].c_ij[j].classifier;
-      if (bondType == molSys::eclipsed) {
+      if (bondType == molSys::bond_type::eclipsed) {
         num_eclipsd++;
-      } else if (bondType == molSys::staggered) {
+      } else if (bondType == molSys::bond_type::staggered) {
         num_staggrd++;
       } else {
         na++;
@@ -539,27 +539,27 @@ chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     } // End of loop through neighbours
 
     // Add more tests later
-    yCloud->pts[iatom].iceType = molSys::unclassified; // default
+    yCloud->pts[iatom].iceType = molSys::atom_state_type::unclassified; // default
     // Cubic ice
     // if (num_eclipsd==0 && num_staggrd==4){
     // 	yCloud->pts[iatom].iceType = molSys::cubic;
     // 	ic++;
     // }
     if (num_staggrd >= 4) {
-      yCloud->pts[iatom].iceType = molSys::cubic;
+      yCloud->pts[iatom].iceType = molSys::atom_state_type::cubic;
       ic++;
     }
     // Hexagonal
     else if (num_eclipsd == 1 && num_staggrd == 3) {
-      yCloud->pts[iatom].iceType = molSys::hexagonal;
+      yCloud->pts[iatom].iceType = molSys::atom_state_type::hexagonal;
       ih++;
     }
     // Interfacial
     else if (isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd)) {
-      yCloud->pts[iatom].iceType = molSys::interfacial;
+      yCloud->pts[iatom].iceType = molSys::atom_state_type::interfacial;
       interIce++;
     } else {
-      yCloud->pts[iatom].iceType = molSys::water;
+      yCloud->pts[iatom].iceType = molSys::atom_state_type::water;
       water++;
     }
 
@@ -723,11 +723,11 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
       cij_real = complexCij.real();
       temp_cij.c_value = cij_real;
       if (cij_real <= -0.8) {
-        temp_cij.classifier = molSys::staggered;
+        temp_cij.classifier = molSys::bond_type::staggered;
       } else if (cij_real >= -0.35 && cij_real <= 0.25) {
-        temp_cij.classifier = molSys::eclipsed;
+        temp_cij.classifier = molSys::bond_type::eclipsed;
       } else {
-        temp_cij.classifier = molSys::out_of_range;
+        temp_cij.classifier = molSys::bond_type::out_of_range;
       }
       yCloud->pts[iatomIndex].c_ij.push_back(temp_cij);
     } // end loop over nearest neighbours
@@ -782,9 +782,9 @@ chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     // Loop through the bond cij and get the number of staggered, eclipsed bonds
     for (int j = 0; j < nnumNeighbours; j++) {
       bondType = yCloud->pts[iatom].c_ij[j].classifier;
-      if (bondType == molSys::eclipsed) {
+      if (bondType == molSys::bond_type::eclipsed) {
         num_eclipsd++;
-      } else if (bondType == molSys::staggered) {
+      } else if (bondType == molSys::bond_type::staggered) {
         num_staggrd++;
       } else {
         na++;
@@ -792,40 +792,40 @@ chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     } // End of loop through neighbours
 
     // Add more tests later
-    yCloud->pts[iatom].iceType = molSys::unclassified; // default
+    yCloud->pts[iatom].iceType = molSys::atom_state_type::unclassified; // default
     if (nnumNeighbours == 4) {
       // Cubic ice
       if (num_eclipsd == 0 && num_staggrd == 4) {
-        yCloud->pts[iatom].iceType = molSys::cubic;
+        yCloud->pts[iatom].iceType = molSys::atom_state_type::cubic;
         ic++;
       }
       // Hexagonal
       else if (num_eclipsd == 1 && num_staggrd == 3) {
-        yCloud->pts[iatom].iceType = molSys::hexagonal;
+        yCloud->pts[iatom].iceType = molSys::atom_state_type::hexagonal;
         ih++;
       }
       // Interfacial
       else if (isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd)) {
-        yCloud->pts[iatom].iceType = molSys::interfacial;
+        yCloud->pts[iatom].iceType = molSys::atom_state_type::interfacial;
         interIce++;
       }
       // Clathrate
       else if (num_eclipsd == 4 && num_staggrd == 0) {
-        yCloud->pts[iatom].iceType = molSys::clathrate;
+        yCloud->pts[iatom].iceType = molSys::atom_state_type::clathrate;
         clath++;
       }
       // Interfacial clathrate
       else if (num_eclipsd == 3) {
-        yCloud->pts[iatom].iceType = molSys::interClathrate;
+        yCloud->pts[iatom].iceType = molSys::atom_state_type::interClathrate;
         interClath++;
       }
       // Water
       else {
-        yCloud->pts[iatom].iceType = molSys::water;
+        yCloud->pts[iatom].iceType = molSys::atom_state_type::water;
         water++;
       }
     } else {
-      yCloud->pts[iatom].iceType = molSys::water;
+      yCloud->pts[iatom].iceType = molSys::atom_state_type::water;
       water++;
     }
 
@@ -1019,7 +1019,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
 
   for (int iatom = 0; iatom < yCloud->nop; iatom++) {
     // Check if it has been classified as water
-    if (yCloud->pts[iatom].iceType == molSys::water) {
+    if (yCloud->pts[iatom].iceType == molSys::atom_state_type::water) {
       if ((*q6)[iatom] > 0.5) {
         avgQ3 = 0.0; // init to zero
         // Loop through all c_ij
@@ -1032,10 +1032,10 @@ molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
         // If averaged q3 < -0.75, then reclassify
         if (avgQ3 <= -0.75) {
           if (avgQ3 < -0.85) {
-            yCloud->pts[iatom].iceType = molSys::reCubic;
+            yCloud->pts[iatom].iceType = molSys::atom_state_type::reCubic;
           } // molSys::cubic
           else {
-            yCloud->pts[iatom].iceType = molSys::reHex;
+            yCloud->pts[iatom].iceType = molSys::atom_state_type::reHex;
           } // molSys::hexagonal
         }   // end of reclassification
       }     // check for solid atom!
@@ -1074,17 +1074,17 @@ int chill::printIceType(
       }
     }
     total++;
-    if (yCloud->pts[iatom].iceType == molSys::cubic) {
+    if (yCloud->pts[iatom].iceType == molSys::atom_state_type::cubic) {
       ic++;
-    } else if (yCloud->pts[iatom].iceType == molSys::hexagonal) {
+    } else if (yCloud->pts[iatom].iceType == molSys::atom_state_type::hexagonal) {
       ih++;
-    } else if (yCloud->pts[iatom].iceType == molSys::water) {
+    } else if (yCloud->pts[iatom].iceType == molSys::atom_state_type::water) {
       water++;
-    } else if (yCloud->pts[iatom].iceType == molSys::interfacial) {
+    } else if (yCloud->pts[iatom].iceType == molSys::atom_state_type::interfacial) {
       interIce++;
-    } else if (yCloud->pts[iatom].iceType == molSys::clathrate) {
+    } else if (yCloud->pts[iatom].iceType == molSys::atom_state_type::clathrate) {
       clath++;
-    } else if (yCloud->pts[iatom].iceType == molSys::interClathrate) {
+    } else if (yCloud->pts[iatom].iceType == molSys::atom_state_type::interClathrate) {
       interClath++;
     } else {
       unknown++;
@@ -1211,7 +1211,7 @@ int chill::numStaggered(
   for (int i = 0; i < nnumNeighbours; i++) {
     bondType = yCloud->pts[jatom].c_ij[i].classifier;
     // If the bond is staggered increment the number of staggered bonds
-    if (bondType == molSys::staggered) {
+    if (bondType == molSys::bond_type::staggered) {
       num_staggrd++;
     }
   } // end of loop over c_ij

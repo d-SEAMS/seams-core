@@ -363,10 +363,10 @@ int clump::clusterAnalysis(
     // Assign values to isIce according to the CHILL algorithm
     for (int iatom = 0; iatom < yCloud->nop; iatom++) {
       // If it is an ice-like molecule, add it, otherwise skip
-      if (yCloud->pts[iatom].iceType == molSys::water) {
+      if (yCloud->pts[iatom].iceType == molSys::atom_state_type::water) {
         continue;
       } // water
-      if (yCloud->pts[iatom].iceType == molSys::unclassified) {
+      if (yCloud->pts[iatom].iceType == molSys::atom_state_type::unclassified) {
         continue;
       }                    // unclassified
       isIce[iatom] = true; // is ice-like; by default false

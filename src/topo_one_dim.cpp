@@ -272,18 +272,18 @@ ring::findPrisms(std::vector<std::vector<int>> rings,
           // // Update the number of prism blocks
           *nImperfectPrisms += 1;
           // Update iring
-          if ((*ringType)[iring] == ring::unclassified) {
-            (*ringType)[iring] = ring::deformedPrism;
+          if ((*ringType)[iring] == ring::strucType::unclassified) {
+            (*ringType)[iring] = ring::strucType::deformedPrism;
             listPrism.push_back(iring);
-          } else if ((*ringType)[iring] == ring::Prism) {
-            (*ringType)[iring] = ring::mixedPrismRing;
+          } else if ((*ringType)[iring] == ring::strucType::Prism) {
+            (*ringType)[iring] = ring::strucType::mixedPrismRing;
           } // if it is deformed
           // Update jring
-          if ((*ringType)[jring] == ring::unclassified) {
-            (*ringType)[jring] = ring::deformedPrism;
+          if ((*ringType)[jring] == ring::strucType::unclassified) {
+            (*ringType)[jring] = ring::strucType::deformedPrism;
             listPrism.push_back(jring);
-          } else if ((*ringType)[jring] == ring::Prism) {
-            (*ringType)[jring] = ring::mixedPrismRing;
+          } else if ((*ringType)[jring] == ring::strucType::Prism) {
+            (*ringType)[jring] = ring::strucType::mixedPrismRing;
           } // if it is deformed
         }   // end of update of ring types
 
@@ -297,18 +297,18 @@ ring::findPrisms(std::vector<std::vector<int>> rings,
         // Update the number of prism blocks
         *nPerfectPrisms += 1;
         // Update iring
-        if ((*ringType)[iring] == ring::unclassified) {
-          (*ringType)[iring] = ring::Prism;
+        if ((*ringType)[iring] == ring::strucType::unclassified) {
+          (*ringType)[iring] = ring::strucType::Prism;
           listPrism.push_back(iring);
-        } else if ((*ringType)[iring] == ring::deformedPrism) {
-          (*ringType)[iring] = ring::mixedPrismRing;
+        } else if ((*ringType)[iring] == ring::strucType::deformedPrism) {
+          (*ringType)[iring] = ring::strucType::mixedPrismRing;
         } // if it is deformed
         // Update jring
-        if ((*ringType)[jring] == ring::unclassified) {
-          (*ringType)[jring] = ring::Prism;
+        if ((*ringType)[jring] == ring::strucType::unclassified) {
+          (*ringType)[jring] = ring::strucType::Prism;
           listPrism.push_back(jring);
-        } else if ((*ringType)[jring] == ring::deformedPrism) {
-          (*ringType)[jring] = ring::mixedPrismRing;
+        } else if ((*ringType)[jring] == ring::strucType::deformedPrism) {
+          (*ringType)[jring] = ring::strucType::mixedPrismRing;
         } // if it is deformed
         //
         // Shape-matching to get the RMSD (if shape-matching is desired)
@@ -720,21 +720,21 @@ int ring::assignPrismType(std::vector<std::vector<int>> rings,
       (*atomTypes)[iatom] = ringSize;
       //
       // Update the state of the atom
-      if ((*atomState)[iatom] == ring::unclassified) {
+      if ((*atomState)[iatom] == ring::strucType::unclassified) {
         (*atomState)[iatom] = currentState;
       } // Update the unclassified atom
       else {
         if ((*atomState)[iatom] != currentState) {
           // For mixed, there is a preference
-          if (currentState == ring::mixedPrismRing) {
+          if (currentState == ring::strucType::mixedPrismRing) {
             (*atomState)[iatom] = currentState;
           } // fill
-          else if ((*atomState)[iatom] == ring::deformedPrism &&
-                   currentState == ring::Prism) {
-            (*atomState)[iatom] = ring::mixedPrismRing;
-          } else if ((*atomState)[iatom] == ring::Prism &&
-                     currentState == ring::deformedPrism) {
-            (*atomState)[iatom] = ring::mixedPrismRing;
+          else if ((*atomState)[iatom] == ring::strucType::deformedPrism &&
+                   currentState == ring::strucType::Prism) {
+            (*atomState)[iatom] = ring::strucType::mixedPrismRing;
+          } else if ((*atomState)[iatom] == ring::strucType::Prism &&
+                     currentState == ring::strucType::deformedPrism) {
+            (*atomState)[iatom] = ring::strucType::mixedPrismRing;
           }
         } //
       }   // already filled?
@@ -765,10 +765,10 @@ int ring::deformedPrismTypes(std::vector<ring::strucType> atomState,
   for (int iatom = 0; iatom < nop; iatom++) {
     // Check the atom state
     // Deformed
-    if (atomState[iatom] == ring::deformedPrism) {
+    if (atomState[iatom] == ring::strucType::deformedPrism) {
       (*atomTypes)[iatom] += maxDepth - 2;
     } // type for a deformed prism atom
-    else if (atomState[iatom] == ring::mixedPrismRing) {
+    else if (atomState[iatom] == ring::strucType::mixedPrismRing) {
       (*atomTypes)[iatom] = 2;
     } // type for a mixed prism ring
   }   // end of reassignation

@@ -120,7 +120,7 @@ bond::populateBonds(std::vector<std::vector<int>> nList,
   for (int i = 0; i < nList.size(); i++) {
     iatom = nList[i][0]; // Index of the i^th atom
     // Skip for dummy atoms
-    if (atomTypes[iatom] == cage::dummy) {
+    if (atomTypes[iatom] == cage::iceType::dummy) {
       continue;
     } // Skip for dummy atoms
     // Get the neighbours of iatom
@@ -128,7 +128,7 @@ bond::populateBonds(std::vector<std::vector<int>> nList,
       //
       jatom = nList[iatom][j]; // Index of the neighbour
       // Skip for dummy atoms
-      if (atomTypes[jatom] == cage::dummy) {
+      if (atomTypes[jatom] == cage::iceType::dummy) {
         continue;
       } // Skip for dummy atoms
       // To avoid duplicates, skip all bonds such
