@@ -96,7 +96,6 @@ $(function() {
   <div class="summary">
 <a href="#nested-classes">Data Structures</a> &#124;
 <a href="#enum-members">Enumerations</a> &#124;
-<a href="#enumval-members">Enumerator</a> &#124;
 <a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
@@ -107,7 +106,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Data Structures</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmolSys_1_1Result.html">molSys::Result</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This contains the bond classifier of enum type <a class="el" href="group__molSys.html#ga1c858200c3d088bf02839453d0f46328">bond_type</a>, and the bond correlation factor.  <a href="structmolSys_1_1Result.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This contains the bond classifier of enum class type <a class="el" href="group__molSys.html#ga1c858200c3d088bf02839453d0f46328">bond_type</a>, and the bond correlation factor.  <a href="structmolSys_1_1Result.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmolSys_1_1Point.html">molSys::Point&lt; T &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This contains per-particle information.  <a href="structmolSys_1_1Point.html#details">More...</a><br /></td></tr>
@@ -118,23 +117,23 @@ Data Structures</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:ga1c858200c3d088bf02839453d0f46328"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga1c858200c3d088bf02839453d0f46328">molSys::bond_type</a> { <a class="el" href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328afcdf36b254fcbdfc60a9f2c5c0b36a6e">molSys::staggered</a>
-, <a class="el" href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a01528e0909036616db40df89990aec2f">molSys::eclipsed</a>
-, <a class="el" href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a1e1018de3fbdf92f0120a4743587ad53">molSys::out_of_range</a>
+<tr class="memitem:ga1c858200c3d088bf02839453d0f46328"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga1c858200c3d088bf02839453d0f46328">molSys::bond_type</a> { <a class="el" href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a6012b5293d0c7397efd784be681cd35c">molSys::staggered</a>
+, <a class="el" href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a1a0a99de3ad872b51a234d16055d14df">molSys::eclipsed</a>
+, <a class="el" href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a4fb901c70a0fdc05b55d95985f3300b0">molSys::out_of_range</a>
  }</td></tr>
 <tr class="separator:ga1c858200c3d088bf02839453d0f46328"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga13ffe3a39a0816627553f195e102abb5"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga13ffe3a39a0816627553f195e102abb5">molSys::atom_state_type</a> { <br />
-&#160;&#160;<a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a129c76a33f8ebd1a8dedd378543af193">molSys::cubic</a>
-, <a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a22e673e9b130fe029c171fdf2a2e419a">molSys::hexagonal</a>
-, <a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5aa701d941ff4dc44b45faa7fd0e1f163f">molSys::water</a>
-, <a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a2a1eeeb73264d00a89f53b3ec3544b2c">molSys::interfacial</a>
+<tr class="memitem:ga13ffe3a39a0816627553f195e102abb5"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__molSys.html#ga13ffe3a39a0816627553f195e102abb5">molSys::atom_state_type</a> { <br />
+&#160;&#160;<a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a7ab93feeb36d98e584d10de2e2f68843">molSys::cubic</a>
+, <a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a1839c642bbb4a69963fcb822d209d5ac">molSys::hexagonal</a>
+, <a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a9460370bb0ca1c98a779b1bcc6861c2c">molSys::water</a>
+, <a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a59efaf6a5e576d4e93fb285c00dbd428">molSys::interfacial</a>
 , <br />
-&#160;&#160;<a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a9e48b0390667a2a6606fb9bd47752ebd">molSys::clathrate</a>
-, <a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a2307822a42416cc62fcbd5afe887491f">molSys::interClathrate</a>
-, <a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5ad19ecf271dba48ef8dd8175326f669b4">molSys::unclassified</a>
-, <a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a5300236c5e45c59840b336b4e735fa0a">molSys::reCubic</a>
+&#160;&#160;<a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5abf2e20bcb148b586d01ecb98cc701fb5">molSys::clathrate</a>
+, <a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a7cc309cdf3bce661fa160b370b7bd8fa">molSys::interClathrate</a>
+, <a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5af8c13bb601e2113b166ef926763585b4">molSys::unclassified</a>
+, <a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a4d7144359266dc2d0eb957ddeaed8b9b">molSys::reCubic</a>
 , <br />
-&#160;&#160;<a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5acbe48f9c31a28c6a0b37e324e6357048">molSys::reHex</a>
+&#160;&#160;<a class="el" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5aba57d7df3e2abf6f2b88fa8e278db9c5">molSys::reHex</a>
 <br />
  }</td></tr>
 <tr class="separator:ga13ffe3a39a0816627553f195e102abb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -207,54 +206,62 @@ Variables</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">enum <a class="el" href="group__molSys.html#ga13ffe3a39a0816627553f195e102abb5">molSys::atom_state_type</a></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5a129c76a33f8ebd1a8dedd378543af193"></a>cubic&#160;</td><td class="fielddoc"><p>Ic, or particle type signifying Cubic Ice. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5a7ab93feeb36d98e584d10de2e2f68843"></a>cubic&#160;</td><td class="fielddoc"><p>Ic, or particle type signifying Cubic Ice. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5a22e673e9b130fe029c171fdf2a2e419a"></a>hexagonal&#160;</td><td class="fielddoc"><p>Ih, or particle type signifying Hexagonal Ice. </p>
+<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5a1839c642bbb4a69963fcb822d209d5ac"></a>hexagonal&#160;</td><td class="fielddoc"><p>Ih, or particle type signifying Hexagonal Ice. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5aa701d941ff4dc44b45faa7fd0e1f163f"></a>water&#160;</td><td class="fielddoc"><p>Liquid/amorphous phase. </p>
+<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5a9460370bb0ca1c98a779b1bcc6861c2c"></a>water&#160;</td><td class="fielddoc"><p>Liquid/amorphous phase. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5a2a1eeeb73264d00a89f53b3ec3544b2c"></a>interfacial&#160;</td><td class="fielddoc"><p>Interfacial ice: ice-like molecules which do not fulfill the strict criteria of the Ic or Ih phases. </p>
+<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5a59efaf6a5e576d4e93fb285c00dbd428"></a>interfacial&#160;</td><td class="fielddoc"><p>Interfacial ice: ice-like molecules which do not fulfill the strict criteria of the Ic or Ih phases. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5a9e48b0390667a2a6606fb9bd47752ebd"></a>clathrate&#160;</td><td class="fielddoc"><p>Clathrate ice phase. </p>
+<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5abf2e20bcb148b586d01ecb98cc701fb5"></a>clathrate&#160;</td><td class="fielddoc"><p>Clathrate ice phase. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5a2307822a42416cc62fcbd5afe887491f"></a>interClathrate&#160;</td><td class="fielddoc"><p>Interfacial clathrate ice phase. </p>
+<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5a7cc309cdf3bce661fa160b370b7bd8fa"></a>interClathrate&#160;</td><td class="fielddoc"><p>Interfacial clathrate ice phase. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5ad19ecf271dba48ef8dd8175326f669b4"></a>unclassified&#160;</td><td class="fielddoc"><p>Not classified into any other category. </p>
+<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5af8c13bb601e2113b166ef926763585b4"></a>unclassified&#160;</td><td class="fielddoc"><p>Not classified into any other category. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5a5300236c5e45c59840b336b4e735fa0a"></a>reCubic&#160;</td><td class="fielddoc"><p>Reclassified as cubic ice, according to the \(q_6\) order parameter. </p>
+<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5a4d7144359266dc2d0eb957ddeaed8b9b"></a>reCubic&#160;</td><td class="fielddoc"><p>Reclassified as cubic ice, according to the \(q_6\) order parameter. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5acbe48f9c31a28c6a0b37e324e6357048"></a>reHex&#160;</td><td class="fielddoc"><p>Reclassified as hexagonal ice, according to the \(q_6\) order parameter. </p>
+<tr><td class="fieldname"><a id="gga13ffe3a39a0816627553f195e102abb5aba57d7df3e2abf6f2b88fa8e278db9c5"></a>reHex&#160;</td><td class="fielddoc"><p>Reclassified as hexagonal ice, according to the \(q_6\) order parameter. </p>
 </td></tr>
 </table>
 
 <p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00113">113</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;                     {</div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a129c76a33f8ebd1a8dedd378543af193">cubic</a>,</div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a22e673e9b130fe029c171fdf2a2e419a">hexagonal</a>,</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5aa701d941ff4dc44b45faa7fd0e1f163f">water</a>,</div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a2a1eeeb73264d00a89f53b3ec3544b2c">interfacial</a>,</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a9e48b0390667a2a6606fb9bd47752ebd">clathrate</a>,</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a2307822a42416cc62fcbd5afe887491f">interClathrate</a>,</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5ad19ecf271dba48ef8dd8175326f669b4">unclassified</a>,</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a5300236c5e45c59840b336b4e735fa0a">reCubic</a>,</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5acbe48f9c31a28c6a0b37e324e6357048">reHex</a></div>
+<div class="fragment"><div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;                           {</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a7ab93feeb36d98e584d10de2e2f68843">cubic</a>,</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a1839c642bbb4a69963fcb822d209d5ac">hexagonal</a>,</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a9460370bb0ca1c98a779b1bcc6861c2c">water</a>,</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a59efaf6a5e576d4e93fb285c00dbd428">interfacial</a>,</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5abf2e20bcb148b586d01ecb98cc701fb5">clathrate</a>,</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a7cc309cdf3bce661fa160b370b7bd8fa">interClathrate</a>,</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5af8c13bb601e2113b166ef926763585b4">unclassified</a>,</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a4d7144359266dc2d0eb957ddeaed8b9b">reCubic</a>,</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;  <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5aba57d7df3e2abf6f2b88fa8e278db9c5">reHex</a></div>
 <div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;};</div>
-<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5a129c76a33f8ebd1a8dedd378543af193"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a129c76a33f8ebd1a8dedd378543af193">molSys::cubic</a></div><div class="ttdeci">@ cubic</div><div class="ttdoc">Ic, or particle type signifying Cubic Ice.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00114">mol_sys.hpp:114</a></div></div>
-<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5a22e673e9b130fe029c171fdf2a2e419a"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a22e673e9b130fe029c171fdf2a2e419a">molSys::hexagonal</a></div><div class="ttdeci">@ hexagonal</div><div class="ttdoc">Ih, or particle type signifying Hexagonal Ice.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00115">mol_sys.hpp:115</a></div></div>
-<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5a2307822a42416cc62fcbd5afe887491f"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a2307822a42416cc62fcbd5afe887491f">molSys::interClathrate</a></div><div class="ttdeci">@ interClathrate</div><div class="ttdoc">Interfacial clathrate ice phase.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00119">mol_sys.hpp:119</a></div></div>
-<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5a2a1eeeb73264d00a89f53b3ec3544b2c"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a2a1eeeb73264d00a89f53b3ec3544b2c">molSys::interfacial</a></div><div class="ttdeci">@ interfacial</div><div class="ttdoc">Interfacial ice: ice-like molecules which do not fulfill the strict criteria of the Ic or Ih phases.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00117">mol_sys.hpp:117</a></div></div>
-<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5a5300236c5e45c59840b336b4e735fa0a"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a5300236c5e45c59840b336b4e735fa0a">molSys::reCubic</a></div><div class="ttdeci">@ reCubic</div><div class="ttdoc">Reclassified as cubic ice, according to the  order parameter.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00121">mol_sys.hpp:121</a></div></div>
-<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5a9e48b0390667a2a6606fb9bd47752ebd"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a9e48b0390667a2a6606fb9bd47752ebd">molSys::clathrate</a></div><div class="ttdeci">@ clathrate</div><div class="ttdoc">Clathrate ice phase.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00118">mol_sys.hpp:118</a></div></div>
-<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5aa701d941ff4dc44b45faa7fd0e1f163f"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5aa701d941ff4dc44b45faa7fd0e1f163f">molSys::water</a></div><div class="ttdeci">@ water</div><div class="ttdoc">Liquid/amorphous phase.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00116">mol_sys.hpp:116</a></div></div>
-<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5acbe48f9c31a28c6a0b37e324e6357048"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5acbe48f9c31a28c6a0b37e324e6357048">molSys::reHex</a></div><div class="ttdeci">@ reHex</div><div class="ttdoc">Reclassified as hexagonal ice, according to the  order parameter.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00123">mol_sys.hpp:122</a></div></div>
-<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5ad19ecf271dba48ef8dd8175326f669b4"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5ad19ecf271dba48ef8dd8175326f669b4">molSys::unclassified</a></div><div class="ttdeci">@ unclassified</div><div class="ttdoc">Not classified into any other category.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00120">mol_sys.hpp:120</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5a1839c642bbb4a69963fcb822d209d5ac"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a1839c642bbb4a69963fcb822d209d5ac">molSys::atom_state_type::hexagonal</a></div><div class="ttdeci">@ hexagonal</div><div class="ttdoc">Ih, or particle type signifying Hexagonal Ice.</div></div>
+<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5a4d7144359266dc2d0eb957ddeaed8b9b"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a4d7144359266dc2d0eb957ddeaed8b9b">molSys::atom_state_type::reCubic</a></div><div class="ttdeci">@ reCubic</div><div class="ttdoc">Reclassified as cubic ice, according to the  order parameter.</div></div>
+<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5a59efaf6a5e576d4e93fb285c00dbd428"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a59efaf6a5e576d4e93fb285c00dbd428">molSys::atom_state_type::interfacial</a></div><div class="ttdeci">@ interfacial</div><div class="ttdoc">Interfacial ice: ice-like molecules which do not fulfill the strict criteria of the Ic or Ih phases.</div></div>
+<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5a7ab93feeb36d98e584d10de2e2f68843"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a7ab93feeb36d98e584d10de2e2f68843">molSys::atom_state_type::cubic</a></div><div class="ttdeci">@ cubic</div><div class="ttdoc">Ic, or particle type signifying Cubic Ice.</div></div>
+<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5a7cc309cdf3bce661fa160b370b7bd8fa"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a7cc309cdf3bce661fa160b370b7bd8fa">molSys::atom_state_type::interClathrate</a></div><div class="ttdeci">@ interClathrate</div><div class="ttdoc">Interfacial clathrate ice phase.</div></div>
+<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5a9460370bb0ca1c98a779b1bcc6861c2c"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a9460370bb0ca1c98a779b1bcc6861c2c">molSys::atom_state_type::water</a></div><div class="ttdeci">@ water</div><div class="ttdoc">Liquid/amorphous phase.</div></div>
+<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5aba57d7df3e2abf6f2b88fa8e278db9c5"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5aba57d7df3e2abf6f2b88fa8e278db9c5">molSys::atom_state_type::reHex</a></div><div class="ttdeci">@ reHex</div><div class="ttdoc">Reclassified as hexagonal ice, according to the  order parameter.</div></div>
+<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5abf2e20bcb148b586d01ecb98cc701fb5"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5abf2e20bcb148b586d01ecb98cc701fb5">molSys::atom_state_type::clathrate</a></div><div class="ttdeci">@ clathrate</div><div class="ttdoc">Clathrate ice phase.</div></div>
+<div class="ttc" id="agroup__molSys_html_gga13ffe3a39a0816627553f195e102abb5af8c13bb601e2113b166ef926763585b4"><div class="ttname"><a href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5af8c13bb601e2113b166ef926763585b4">molSys::atom_state_type::unclassified</a></div><div class="ttdeci">@ unclassified</div><div class="ttdoc">Not classified into any other category.</div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -263,26 +270,34 @@ Variables</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">enum <a class="el" href="group__molSys.html#ga1c858200c3d088bf02839453d0f46328">molSys::bond_type</a></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga1c858200c3d088bf02839453d0f46328afcdf36b254fcbdfc60a9f2c5c0b36a6e"></a>staggered&#160;</td><td class="fielddoc"><p>The bond is a staggered bond, according to the \(a(i,j)\) or \(c(i,j)\) value. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga1c858200c3d088bf02839453d0f46328a6012b5293d0c7397efd784be681cd35c"></a>staggered&#160;</td><td class="fielddoc"><p>The bond is a staggered bond, according to the \(a(i,j)\) or \(c(i,j)\) value. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1c858200c3d088bf02839453d0f46328a01528e0909036616db40df89990aec2f"></a>eclipsed&#160;</td><td class="fielddoc"><p>The bond is an eclipsed bond. </p>
+<tr><td class="fieldname"><a id="gga1c858200c3d088bf02839453d0f46328a1a0a99de3ad872b51a234d16055d14df"></a>eclipsed&#160;</td><td class="fielddoc"><p>The bond is an eclipsed bond. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1c858200c3d088bf02839453d0f46328a1e1018de3fbdf92f0120a4743587ad53"></a>out_of_range&#160;</td><td class="fielddoc"><p>The bond cannot be classified as either staggered or eclipsed. </p>
+<tr><td class="fieldname"><a id="gga1c858200c3d088bf02839453d0f46328a4fb901c70a0fdc05b55d95985f3300b0"></a>out_of_range&#160;</td><td class="fielddoc"><p>The bond cannot be classified as either staggered or eclipsed. </p>
 </td></tr>
 </table>
 
 <p class="definition">Definition at line <a class="el" href="mol__sys_8hpp_source.html#l00075">75</a> of file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;{ <a class="code" href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328afcdf36b254fcbdfc60a9f2c5c0b36a6e">staggered</a>, <a class="code" href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a01528e0909036616db40df89990aec2f">eclipsed</a>, <a class="code" href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a1e1018de3fbdf92f0120a4743587ad53">out_of_range</a> };</div>
-<div class="ttc" id="agroup__molSys_html_gga1c858200c3d088bf02839453d0f46328a01528e0909036616db40df89990aec2f"><div class="ttname"><a href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a01528e0909036616db40df89990aec2f">molSys::eclipsed</a></div><div class="ttdeci">@ eclipsed</div><div class="ttdoc">The bond is an eclipsed bond.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00075">mol_sys.hpp:75</a></div></div>
-<div class="ttc" id="agroup__molSys_html_gga1c858200c3d088bf02839453d0f46328a1e1018de3fbdf92f0120a4743587ad53"><div class="ttname"><a href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a1e1018de3fbdf92f0120a4743587ad53">molSys::out_of_range</a></div><div class="ttdeci">@ out_of_range</div><div class="ttdoc">The bond cannot be classified as either staggered or eclipsed.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00075">mol_sys.hpp:75</a></div></div>
-<div class="ttc" id="agroup__molSys_html_gga1c858200c3d088bf02839453d0f46328afcdf36b254fcbdfc60a9f2c5c0b36a6e"><div class="ttname"><a href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328afcdf36b254fcbdfc60a9f2c5c0b36a6e">molSys::staggered</a></div><div class="ttdeci">@ staggered</div><div class="ttdoc">The bond is a staggered bond, according to the  or  value.</div><div class="ttdef"><b>Definition:</b> <a href="mol__sys_8hpp_source.html#l00075">mol_sys.hpp:75</a></div></div>
+<div class="fragment"><div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;{ <a class="code" href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a6012b5293d0c7397efd784be681cd35c">staggered</a>, <a class="code" href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a1a0a99de3ad872b51a234d16055d14df">eclipsed</a>, <a class="code" href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a4fb901c70a0fdc05b55d95985f3300b0">out_of_range</a> };</div>
+<div class="ttc" id="agroup__molSys_html_gga1c858200c3d088bf02839453d0f46328a1a0a99de3ad872b51a234d16055d14df"><div class="ttname"><a href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a1a0a99de3ad872b51a234d16055d14df">molSys::bond_type::eclipsed</a></div><div class="ttdeci">@ eclipsed</div><div class="ttdoc">The bond is an eclipsed bond.</div></div>
+<div class="ttc" id="agroup__molSys_html_gga1c858200c3d088bf02839453d0f46328a4fb901c70a0fdc05b55d95985f3300b0"><div class="ttname"><a href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a4fb901c70a0fdc05b55d95985f3300b0">molSys::bond_type::out_of_range</a></div><div class="ttdeci">@ out_of_range</div><div class="ttdoc">The bond cannot be classified as either staggered or eclipsed.</div></div>
+<div class="ttc" id="agroup__molSys_html_gga1c858200c3d088bf02839453d0f46328a6012b5293d0c7397efd784be681cd35c"><div class="ttname"><a href="group__molSys.html#gga1c858200c3d088bf02839453d0f46328a6012b5293d0c7397efd784be681cd35c">molSys::bond_type::staggered</a></div><div class="ttdeci">@ staggered</div><div class="ttdoc">The bond is a staggered bond, according to the  or  value.</div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -677,7 +692,7 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 <b>Initial value:</b><div class="fragment"><div class="line">=</div>
-<div class="line">      <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5ad19ecf271dba48ef8dd8175326f669b4">molSys::unclassified</a></div>
+<div class="line">      <a class="code" href="group__molSys.html#gga13ffe3a39a0816627553f195e102abb5af8c13bb601e2113b166ef926763585b4">molSys::atom_state_type::unclassified</a></div>
 </div><!-- fragment -->
 <p>Results (contains bond correlation type) </p>
 

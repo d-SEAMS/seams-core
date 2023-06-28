@@ -8,5 +8,5 @@ digraph "molSys::Point&lt; T &gt;"
   Node2 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" c_ij" ,fontname="Helvetica"];
   Node2 [label="std::vector\< molSys\l::Result \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="/home/runner/work/seams-core/seams-core/tags/cppreference-doxygen-web.tag.xml$cpp/container/vector.html",tooltip=" "];
   Node3 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" elements" ,fontname="Helvetica"];
-  Node3 [label="molSys::Result",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structmolSys_1_1Result.html",tooltip="This contains the bond classifier of enum type bond_type, and the bond correlation factor."];
+  Node3 [label="molSys::Result",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structmolSys_1_1Result.html",tooltip="This contains the bond classifier of enum class type bond_type, and the bond correlation factor."];
 }
