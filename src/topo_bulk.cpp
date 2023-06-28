@@ -362,23 +362,23 @@ std::vector<int> ring::findDDC(std::vector<std::vector<int>> rings,
     }
     // ------------
     // If iring is an equatorial ring, add it to the listDDC vector
-    if ((*ringType)[iring] == ring::unclassified) {
-      (*ringType)[iring] = ring::DDC;
+    if ((*ringType)[iring] == ring::strucType::unclassified) {
+      (*ringType)[iring] = ring::strucType::DDC;
       listDDC.push_back(iring);
     }
     // Add the peripheral ring IDs too
     for (int j = 0; j < peripheralRings.size(); j++) {
       jring = peripheralRings[j];
-      if ((*ringType)[jring] == ring::unclassified) {
-        (*ringType)[jring] = ring::DDC;
+      if ((*ringType)[jring] == ring::strucType::unclassified) {
+        (*ringType)[jring] = ring::strucType::DDC;
         listDDC.push_back(jring);
-      } else if ((*ringType)[jring] == ring::HCbasal) {
-        (*ringType)[jring] = ring::bothBasal;
+      } else if ((*ringType)[jring] == ring::strucType::HCbasal) {
+        (*ringType)[jring] = ring::strucType::bothBasal;
         listDDC.push_back(jring);
       } // end of update
       // never true
-      else if ((*ringType)[jring] == ring::HCprismatic) {
-        (*ringType)[jring] = ring::bothPrismatic;
+      else if ((*ringType)[jring] == ring::strucType::HCprismatic) {
+        (*ringType)[jring] = ring::strucType::bothPrismatic;
         listDDC.push_back(jring);
       }
       //
@@ -390,7 +390,7 @@ std::vector<int> ring::findDDC(std::vector<std::vector<int>> rings,
     DDCRings.push_back(iring); // Add the equatorial ring first
     DDCRings.insert(std::end(DDCRings), std::begin(peripheralRings),
                     std::end(peripheralRings));
-    (*cageList).push_back({cage::DoubleDiaC, DDCRings});
+    (*cageList).push_back({cage::cageType::DoubleDiaC, DDCRings});
     // ------------
   } // end of loop through all hexagonal rings
 
@@ -706,19 +706,19 @@ std::vector<int> ring::findHC(std::vector<std::vector<int>> rings,
       // -----------
       // iring and jring are basal rings!
       // Update iring
-      if ((*ringType)[iring] == ring::unclassified) {
-        (*ringType)[iring] = ring::HCbasal;
+      if ((*ringType)[iring] == ring::strucType::unclassified) {
+        (*ringType)[iring] = ring::strucType::HCbasal;
         listHC.push_back(iring);
-      } else if ((*ringType)[iring] == ring::DDC) {
-        (*ringType)[iring] = ring::bothBasal;
+      } else if ((*ringType)[iring] == ring::strucType::DDC) {
+        (*ringType)[iring] = ring::strucType::bothBasal;
         listHC.push_back(iring);
       }
       // Update jring
-      if ((*ringType)[jring] == ring::unclassified) {
-        (*ringType)[jring] = ring::HCbasal;
+      if ((*ringType)[jring] == ring::strucType::unclassified) {
+        (*ringType)[jring] = ring::strucType::HCbasal;
         listHC.push_back(jring);
-      } else if ((*ringType)[jring] == ring::DDC) {
-        (*ringType)[jring] = ring::bothBasal;
+      } else if ((*ringType)[jring] == ring::strucType::DDC) {
+        (*ringType)[jring] = ring::strucType::bothBasal;
         listHC.push_back(jring);
       }
       // Find the prismatic rings
@@ -730,11 +730,11 @@ std::vector<int> ring::findHC(std::vector<std::vector<int>> rings,
         kring =
             prismaticRings[k]; // Current ring index of the (3) prismatic rings
         // Update kring
-        if ((*ringType)[kring] == ring::unclassified) {
-          (*ringType)[kring] = ring::HCprismatic;
+        if ((*ringType)[kring] == ring::strucType::unclassified) {
+          (*ringType)[kring] = ring::strucType::HCprismatic;
           listHC.push_back(kring);
-        } else if ((*ringType)[kring] == ring::DDC) {
-          (*ringType)[kring] = ring::bothPrismatic;
+        } else if ((*ringType)[kring] == ring::strucType::DDC) {
+          (*ringType)[kring] = ring::strucType::bothPrismatic;
           listHC.push_back(kring);
         }
         //
@@ -751,7 +751,7 @@ std::vector<int> ring::findHC(std::vector<std::vector<int>> rings,
       // Add the prismaticRings
       HCRings.insert(std::end(HCRings), std::begin(prismaticRings),
                      std::end(prismaticRings));
-      (*cageList).push_back({cage::HexC, HCRings});
+      (*cageList).push_back({cage::cageType::HexC, HCRings});
       // -----------
     } // end of loop through rest of the rings to get the second basal ring
   }   // end of loop through all rings for first basal ring
@@ -1086,12 +1086,12 @@ int ring::findPrismatic(std::vector<std::vector<int>> rings,
         (*prismaticRings).push_back(kring); // Update prismatic rings
         // Update the type inside ringType
         // If the ring is already a DDC ring, it is a mixed ring
-        if ((*ringType)[kring] == ring::DDC) {
-          (*ringType)[kring] = ring::bothPrismatic;
+        if ((*ringType)[kring] == ring::strucType::DDC) {
+          (*ringType)[kring] = ring::strucType::bothPrismatic;
         }
         // If it is unclassified, it is just a prismatic ring
-        if ((*ringType)[kring] == ring::unclassified) {
-          (*ringType)[kring] = ring::HCprismatic;
+        if ((*ringType)[kring] == ring::strucType::unclassified) {
+          (*ringType)[kring] = ring::strucType::HCprismatic;
         } // end ring update
       }   // add kring to the list of prismatic rings
     }     // end of searching through rings for kring
@@ -1125,8 +1125,8 @@ std::vector<int> ring::findMixedRings(std::vector<std::vector<int>> rings,
   // adds the ring Indices of all rings which are both DDCs and HCs
   for (int iring = 0; iring < (*ringType).size(); iring++) {
     // If iring is of mixed type, add it to the listMixed vector
-    if ((*ringType)[iring] == ring::bothBasal ||
-        (*ringType)[iring] == ring::bothPrismatic) {
+    if ((*ringType)[iring] == ring::strucType::bothBasal ||
+        (*ringType)[iring] == ring::strucType::bothPrismatic) {
       listMixed.push_back(iring);
 
       //-----------------
@@ -1172,33 +1172,33 @@ int ring::getAtomTypesTopoBulk(std::vector<std::vector<int>> rings,
   for (int iring = 0; iring < ringType.size(); iring++) {
     //
     // Skip if the ring is unclassified
-    if (ringType[iring] == ring::unclassified) {
+    if (ringType[iring] == ring::strucType::unclassified) {
       continue;
     } // skip for unclassified rings
 
     // ------------
     // Get the current ring type
     // DDC
-    if (ringType[iring] == ring::DDC) {
-      iRingType = cage::ddc;
+    if (ringType[iring] == ring::strucType::DDC) {
+      iRingType = cage::iceType::ddc;
     } // DDC atoms
     //
     // HC
-    else if (ringType[iring] == ring::HCbasal ||
-             ringType[iring] == ring::HCprismatic) {
-      iRingType = cage::hc;
+    else if (ringType[iring] == ring::strucType::HCbasal ||
+             ringType[iring] == ring::strucType::HCprismatic) {
+      iRingType = cage::iceType::hc;
     } // HC atoms
     //
     // Mixed
-    else if (ringType[iring] == ring::bothBasal ||
-             ringType[iring] == ring::bothPrismatic) {
-      iRingType = cage::mixed;
+    else if (ringType[iring] == ring::strucType::bothBasal ||
+             ringType[iring] == ring::strucType::bothPrismatic) {
+      iRingType = cage::iceType::mixed;
     } // HC atoms
     // Prism
-    else if (ringType[iring] == ring::Prism ||
-             ringType[iring] == ring::deformedPrism ||
-             ringType[iring] == ring::mixedPrismRing) {
-      iRingType = cage::pnc; // 5 membered pnc
+    else if (ringType[iring] == ring::strucType::Prism ||
+             ringType[iring] == ring::strucType::deformedPrism ||
+             ringType[iring] == ring::strucType::mixedPrismRing) {
+      iRingType = cage::iceType::pnc; // 5 membered pnc
     }                        // prism
     // Should never go here
     else {
@@ -1209,14 +1209,14 @@ int ring::getAtomTypesTopoBulk(std::vector<std::vector<int>> rings,
     // iRingType
     for (int i = 0; i < ringSize; i++) {
       iatom = rings[iring][i]; // Atom index in ring
-      if ((*atomTypes)[iatom] == cage::mixed ||
-          (*atomTypes)[iatom] == cage::mixed2) {
+      if ((*atomTypes)[iatom] == cage::iceType::mixed ||
+          (*atomTypes)[iatom] == cage::iceType::mixed2) {
         continue;
       } // Don't reassign
       // For atoms shared by PNCs and DDCs/HCs
       if (ringSize == 6) {
-        if ((*atomTypes)[iatom] == cage::pnc) {
-          (*atomTypes)[iatom] = cage::mixed2;
+        if ((*atomTypes)[iatom] == cage::iceType::pnc) {
+          (*atomTypes)[iatom] = cage::iceType::mixed2;
         } else {
           (*atomTypes)[iatom] = iRingType;
         }
@@ -1261,12 +1261,12 @@ int ring::getStrucNumbers(std::vector<ring::strucType> ringType,
   for (int icage = 0; icage < cageList.size(); icage++) {
     //
     // HC
-    if (cageList[icage].type == cage::HexC) {
+    if (cageList[icage].type == cage::cageType::HexC) {
       *numHC += 1;
     } // end of updating HC number
     //
     // DDC
-    if (cageList[icage].type == cage::DoubleDiaC) {
+    if (cageList[icage].type == cage::cageType::DoubleDiaC) {
       *numDDC += 1;
     } // end of updating DDC number
   }   // end of loop through cages
@@ -1275,25 +1275,25 @@ int ring::getStrucNumbers(std::vector<ring::strucType> ringType,
   // Loop through the rings
   for (int iring = 0; iring < ringType.size(); iring++) {
     // Mixed
-    if (ringType[iring] == ring::bothBasal ||
-        ringType[iring] == ring::bothPrismatic) {
+    if (ringType[iring] == ring::strucType::bothBasal ||
+        ringType[iring] == ring::strucType::bothPrismatic) {
       *mixedRings += 1;
       // Also update basal rings
-      if (ringType[iring] == ring::bothBasal) {
+      if (ringType[iring] == ring::strucType::bothBasal) {
         *basalRings += 1;
       } // mixed basal rings
       // Also update prismatic rings
-      if (ringType[iring] == ring::bothPrismatic) {
+      if (ringType[iring] == ring::strucType::bothPrismatic) {
         *prismaticRings += 1;
       } // mixed prismatic rings
     }   // end of updating mixed
     //
     // HCs
-    if (ringType[iring] == ring::HCprismatic) {
+    if (ringType[iring] == ring::strucType::HCprismatic) {
       *prismaticRings += 1;
     } // HC prismatic
     // basal HCs
-    if (ringType[iring] == ring::HCbasal) {
+    if (ringType[iring] == ring::strucType::HCbasal) {
       *basalRings += 1;
     } // HC basal
   }   // end of loop through every ring
@@ -1376,12 +1376,12 @@ int prism3::findBulkPrisms(
       if (isPrism) {
         //
         // Update iring
-        if ((*ringType)[iring] == ring::unclassified) {
-          (*ringType)[iring] = ring::Prism;
+        if ((*ringType)[iring] == ring::strucType::unclassified) {
+          (*ringType)[iring] = ring::strucType::Prism;
         }
         // Update jring
-        if ((*ringType)[jring] == ring::unclassified) {
-          (*ringType)[jring] = ring::Prism;
+        if ((*ringType)[jring] == ring::strucType::unclassified) {
+          (*ringType)[jring] = ring::strucType::Prism;
         }
       } // end of reduced criteria
       // Strict criteria
@@ -1392,12 +1392,12 @@ int prism3::findBulkPrisms(
           continue;
         }
         // Update iring
-        if ((*ringType)[iring] == ring::unclassified) {
-          (*ringType)[iring] = ring::Prism;
+        if ((*ringType)[iring] == ring::strucType::unclassified) {
+          (*ringType)[iring] = ring::strucType::Prism;
         }
         // Update jring
-        if ((*ringType)[jring] == ring::unclassified) {
-          (*ringType)[jring] = ring::Prism;
+        if ((*ringType)[jring] == ring::strucType::unclassified) {
+          (*ringType)[jring] = ring::strucType::Prism;
         }
         //
         // Shape-matching to get the RMSD (if shape-matching is desired)

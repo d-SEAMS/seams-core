@@ -121,7 +121,7 @@ int findPrismatic(std::vector<std::vector<int>> rings, std::vector<int> *listHC,
                   std::vector<strucType> *ringType, int iring, int jring,
                   std::vector<int> *prismaticRings);
 
-//! Assigns a type of enum iceType, to every atom, using information from
+//! Assigns a type of enum class iceType, to every atom, using information from
 //! ringType, which has the information of every ring
 int getAtomTypesTopoBulk(std::vector<std::vector<int>> rings,
                          std::vector<ring::strucType> ringType,

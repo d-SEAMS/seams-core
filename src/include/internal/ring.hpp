@@ -63,9 +63,9 @@
 
 namespace ring {
 
-// General enum used throughout this program (Prism is for our prism
+// General enum class used throughout this program (Prism is for our prism
 // classification) {per-ring classification}
-/** @enum ring::strucType Qualifier for each ring, based on the classification
+/** @enum class ring::strucType Qualifier for each ring, based on the classification
  * type determined by the bulk or confined ice topological network criteria.
  * @var ring::strucType unclassified
  * @brief The ring is unclassified, which may be either water or a deformed type
@@ -113,7 +113,7 @@ namespace ring {
  * @brief The ring belongs to a prism block, classified according to the prism
  * identification scheme.
  */
-enum strucType {
+enum class strucType {
   unclassified,
   DDC,
   HCbasal,

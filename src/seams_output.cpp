@@ -313,13 +313,13 @@ int sout::writeAllCages(
     // ------
     // Add to the cage type and write out to the appropriate folders
     // Hexagonal Cages
-    if (type == cage::HexC) {
+    if (type == cage::cageType::HexC) {
       numHC++;
       sout::writeEachCage((*cageList)[icage].rings, numHC, type, rings, yCloud);
       sout::writeBasalRingsHex((*cageList)[icage].rings, numHC, nList, rings);
     } // end of write out of HCs
     // Double diamond Cages
-    else if (type == cage::DoubleDiaC) {
+    else if (type == cage::cageType::DoubleDiaC) {
       numDDC++;
       sout::writeEachCage((*cageList)[icage].rings, numDDC, type, rings,
                           yCloud);
@@ -359,10 +359,10 @@ int sout::writeEachCage(
   char cageChar[100];         // is icage a DDC, HC or MC?
   int iring;                  // Ring index of the current ring
 
-  if (type == cage::HexC) {
+  if (type == cage::cageType::HexC) {
     strcpy(cageChar, "../output/cages/hexCages");
     actualCageType = "hexCages";
-  } else if (type == cage::DoubleDiaC) {
+  } else if (type == cage::cageType::DoubleDiaC) {
     strcpy(cageChar, "../output/cages/doubleDiaCages");
     actualCageType = "doubleDiaCages";
   } else {
@@ -393,7 +393,7 @@ int sout::writeEachCage(
   // x y z coordinates of each node
 
   // For hexagonal cages:
-  if (type == cage::HexC) {
+  if (type == cage::cageType::HexC) {
     // Print out only basal ring atoms, since they describe the outer structure
     // The first two rings are basal rings
     for (int i = 0; i < 2; i++) {
@@ -2156,9 +2156,9 @@ int sout::writeLAMMPSdataCages(
   // Masses
   outputFile << "\nMasses\n\n";
   // For DDCs and HCs
-  if (type == cage::HexC) {
+  if (type == cage::cageType::HexC) {
     actualCageType = "HC";
-  } else if (type == cage::DoubleDiaC) {
+  } else if (type == cage::cageType::DoubleDiaC) {
     actualCageType = "DDC";
   } else {
     actualCageType = "error";
@@ -2280,42 +2280,42 @@ int sout::writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     outputFile << yCloud->pts[iatom].atomID << " " << yCloud->pts[iatom].molID;
 
     // Cubic ice
-    if (yCloud->pts[iatom].iceType == molSys::cubic) {
+    if (yCloud->pts[iatom].iceType == molSys::atom_state_type::cubic) {
       outputFile << " Ic " << yCloud->pts[iatom].x << " "
                  << yCloud->pts[iatom].y << " " << yCloud->pts[iatom].z << "\n";
     } // end of cubic ice
     // Hexagonal ice
-    else if (yCloud->pts[iatom].iceType == molSys::hexagonal) {
+    else if (yCloud->pts[iatom].iceType == molSys::atom_state_type::hexagonal) {
       outputFile << " Ih " << yCloud->pts[iatom].x << " "
                  << yCloud->pts[iatom].y << " " << yCloud->pts[iatom].z << "\n";
     } // end hexagonal ice
     // water
-    else if (yCloud->pts[iatom].iceType == molSys::water) {
+    else if (yCloud->pts[iatom].iceType == molSys::atom_state_type::water) {
       outputFile << " wat " << yCloud->pts[iatom].x << " "
                  << yCloud->pts[iatom].y << " " << yCloud->pts[iatom].z << "\n";
     } // end water
     // interfacial
-    else if (yCloud->pts[iatom].iceType == molSys::interfacial) {
+    else if (yCloud->pts[iatom].iceType == molSys::atom_state_type::interfacial) {
       outputFile << " intFc " << yCloud->pts[iatom].x << " "
                  << yCloud->pts[iatom].y << " " << yCloud->pts[iatom].z << "\n";
     } // end interfacial
     // clathrate
-    else if (yCloud->pts[iatom].iceType == molSys::clathrate) {
+    else if (yCloud->pts[iatom].iceType == molSys::atom_state_type::clathrate) {
       outputFile << " clathrate " << yCloud->pts[iatom].x << " "
                  << yCloud->pts[iatom].y << " " << yCloud->pts[iatom].z << "\n";
     } // end clathrate
     // interClathrate
-    else if (yCloud->pts[iatom].iceType == molSys::interClathrate) {
+    else if (yCloud->pts[iatom].iceType == molSys::atom_state_type::interClathrate) {
       outputFile << " interClathrate " << yCloud->pts[iatom].x << " "
                  << yCloud->pts[iatom].y << " " << yCloud->pts[iatom].z << "\n";
     } // end interClathrate
     // unclassified
-    else if (yCloud->pts[iatom].iceType == molSys::unclassified) {
+    else if (yCloud->pts[iatom].iceType == molSys::atom_state_type::unclassified) {
       outputFile << " unclassified " << yCloud->pts[iatom].x << " "
                  << yCloud->pts[iatom].y << " " << yCloud->pts[iatom].z << "\n";
     } // end unclassified
     // reCubic
-    else if (yCloud->pts[iatom].iceType == molSys::reCubic) {
+    else if (yCloud->pts[iatom].iceType == molSys::atom_state_type::reCubic) {
       outputFile << " reIc " << yCloud->pts[iatom].x << " "
                  << yCloud->pts[iatom].y << " " << yCloud->pts[iatom].z << "\n";
     } // end reCubic
@@ -2499,22 +2499,22 @@ int sout::writeLAMMPSdataTopoBulk(
     //
     // Get the atom type
     // hc atom type
-    if (atomTypes[i] == cage::hc) {
+    if (atomTypes[i] == cage::iceType::hc) {
       currentAtomType = 2;
     } // hc
-    else if (atomTypes[i] == cage::ddc) {
+    else if (atomTypes[i] == cage::iceType::ddc) {
       currentAtomType = 3;
     } // ddc
     // mixed
-    else if (atomTypes[i] == cage::mixed) {
+    else if (atomTypes[i] == cage::iceType::mixed) {
       currentAtomType = 4;
     } // mixed
     // pnc
-    else if (atomTypes[i] == cage::pnc) {
+    else if (atomTypes[i] == cage::iceType::pnc) {
       currentAtomType = 5;
     } // mixed
     // pnc and DDCs/HCs mixed
-    else if (atomTypes[i] == cage::mixed2) {
+    else if (atomTypes[i] == cage::iceType::mixed2) {
       currentAtomType = 6;
     } // mixed
     // dummy
@@ -2582,8 +2582,8 @@ int sout::writeXYZcluster(
   // Write out all the atom coordinates
   for (int i = 0; i < nAtoms; i++) {
     iatom = atoms[i]; // Atom index to be printed out
-    //
-    outputFile << type << " " << yCloud->pts[iatom].x << " "
+    // TODO: Should print string representation
+    outputFile << static_cast<int>(type) << " " << yCloud->pts[iatom].x << " "
                << yCloud->pts[iatom].y << " " << yCloud->pts[iatom].z << "\n";
   } // end of loop through all atoms
 

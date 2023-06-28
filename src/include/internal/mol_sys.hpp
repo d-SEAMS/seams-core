@@ -58,7 +58,7 @@ namespace molSys {
 
 // Enum type for bond type
 
-/** @enum molSys::bond_type
+/** @enum class molSys::bond_type
  * @brief Qualifier for the bond type between two nearest-neighbours, according
  *  to the CHILL or CHILL+ classification scheme.
  *
@@ -72,9 +72,9 @@ namespace molSys {
  * @var molSys::bond_type out_of_range
  * @brief The bond cannot be classified as either staggered or eclipsed.
  */
-enum bond_type { staggered, eclipsed, out_of_range };
+enum class bond_type { staggered, eclipsed, out_of_range };
 
-/** \enum molSys::atom_state_type
+/** \enum class molSys::atom_state_type
  * @brief Qualifier for the per-particle phase state, according to the CHILL,
  *  CHILL+, or @f$q_6@f$ order parameter.
  *
@@ -110,7 +110,7 @@ enum bond_type { staggered, eclipsed, out_of_range };
  * @brief Reclassified as hexagonal ice, according
  *  to the @f$q_6@f$ order parameter.
  */
-enum atom_state_type {
+enum class atom_state_type {
   cubic,
   hexagonal,
   water,
@@ -123,7 +123,7 @@ enum atom_state_type {
 };
 
 /** @struct Result
- * @brief This contains the bond classifier of enum type #bond_type, and the
+ * @brief This contains the bond classifier of enum class type #bond_type, and the
  *  bond correlation factor.
  * @details Contains specifically the members:
  * - Bond classifier or the type of the bond (staggered, eclipsed, out-of-range)
@@ -151,7 +151,7 @@ template <typename T> struct Point {
   T x, y, z;                //! coordinates
   std::vector<Result> c_ij; //! Results (contains bond correlation type)
   atom_state_type iceType =
-      molSys::unclassified; //! Type of ice/water etc based on cij
+      molSys::atom_state_type::unclassified; //! Type of ice/water etc based on cij
   bool inSlice = true;      //! Is the point inside the slice or not?
 };
 

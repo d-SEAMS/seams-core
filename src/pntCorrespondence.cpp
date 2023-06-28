@@ -571,7 +571,7 @@ Eigen::MatrixXd pntToPnt::getPointSetCage(ring::strucType type) {
   molSys::PointCloud<molSys::Point<double>, double>
       setCloud; // PointCloud for holding the reference point values
 
-  if (type == ring::HCbasal) {
+  if (type == ring::strucType::HCbasal) {
     // Read in the XYZ file
     std::string fileName = "templates/hc.xyz";
     //

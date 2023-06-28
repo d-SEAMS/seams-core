@@ -40,7 +40,8 @@ int gen::prettyPrintYoda(
       // Print out cij
       // for(int c=0; c<yCloud->pts[i].c_ij.size(); c++){outputFile <<
       // yCloud->pts[i].c_ij[c]<<"\t";} Print out the classifier
-      outputFile << yCloud->pts[i].iceType << "\n";
+      // TODO: Should print string representation
+      outputFile << static_cast<int>(yCloud->pts[i].iceType) << "\n";
     }
   }
   // Close the file
