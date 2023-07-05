@@ -202,19 +202,19 @@ int tum3::topoUnitMatchingBulk(
   dumpAtomTypes.resize(atomTypes.size());
   // Change from enum to int
   for (int i = 0; i < atomTypes.size(); i++) {
-    if (atomTypes[i] == cage::hc) {
+    if (atomTypes[i] == cage::iceType::hc) {
       dumpAtomTypes[i] = 1;
     } // HC
-    else if (atomTypes[i] == cage::ddc) {
+    else if (atomTypes[i] == cage::iceType::ddc) {
       dumpAtomTypes[i] = 2;
     } // DDC
-    else if (atomTypes[i] == cage::mixed) {
+    else if (atomTypes[i] == cage::iceType::mixed) {
       dumpAtomTypes[i] = 3;
     } // mixed rings
-    else if (atomTypes[i] == cage::pnc) {
+    else if (atomTypes[i] == cage::iceType::pnc) {
       dumpAtomTypes[i] = 4;
     } // pnc
-    else if (atomTypes[i] == cage::mixed2) {
+    else if (atomTypes[i] == cage::iceType::mixed2) {
       dumpAtomTypes[i] = 5;
     } // shared by pnc and ddc/hc
     else {
@@ -378,8 +378,8 @@ Eigen::MatrixXd tum3::buildRefHC(std::string fileName) {
   //
   Eigen::MatrixXd refPnts(12, 3); // Reference point set (Eigen matrix)
   // Get the reference HC point set
-  molSys::PointCloud<molSys::Point<double>, double>
-      setCloud; // PointCloud for holding the reference point values
+ // molSys::PointCloud<molSys::Point<double>, double>
+  //    setCloud; // PointCloud for holding the reference point values
   // Variables for rings
   std::vector<std::vector<int>> nList; // Neighbour list
   std::vector<std::vector<int>> rings; // Rings
@@ -392,7 +392,7 @@ Eigen::MatrixXd tum3::buildRefHC(std::string fileName) {
   //
   // read in the XYZ file into the pointCloud setCloud
   //
-  sinp::readXYZ(fileName, &setCloud);
+  auto setCloud = sinp::readXYZ(fileName);
   // box lengths
   for (int i = 0; i < 3; i++) {
     setCloud.box[i] = 50;
@@ -452,7 +452,7 @@ Eigen::MatrixXd tum3::buildRefDDC(std::string fileName) {
   //
   // read in the XYZ file into the pointCloud setCloud
   //
-  sinp::readXYZ(fileName, &setCloud);
+  setCloud = sinp::readXYZ(fileName);
 
   // box lengths
   for (int i = 0; i < 3; i++) {
@@ -504,7 +504,7 @@ int tum3::updateRMSDatom(std::vector<std::vector<int>> rings,
       iatom = rings[iring][j]; // Current atom index
 
       // Skip for PNC atoms
-      if (atomTypes[iatom] == cage::pnc || atomTypes[iatom] == cage::mixed2) {
+      if (atomTypes[iatom] == cage::iceType::pnc || atomTypes[iatom] == cage::iceType::mixed2) {
         continue;
       } // Do not update if the atom is a PNC
       //
@@ -730,7 +730,7 @@ int tum3::clusterCages(
     // If only one cage is in the cluster
     if (linkedList[i] == i) {
       // Add to the number of single DDCs
-      if (cageList[i].type == cage::DoubleDiaC) {
+      if (cageList[i].type == cage::cageType::DoubleDiaC) {
         singleDDCs++;
       } // add to the single DDCs
       else {
