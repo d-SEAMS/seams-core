@@ -80,8 +80,7 @@ molSys::PointCloud<molSys::Point<double>, double> readLammpsTrjreduced(
     std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
 
 //! Function for reading in atom coordinates from an XYZ file
-int readXYZ(std::string filename,
-            molSys::PointCloud<molSys::Point<double>, double> *yCloud);
+molSys::PointCloud<molSys::Point<double>, double> readXYZ(std::string filename);
 
 //! Reads bonds into a vector of vectors from a file with a specific format
 std::vector<std::vector<int>> readBonds(std::string filename);

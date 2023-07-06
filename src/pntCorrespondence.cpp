@@ -575,7 +575,7 @@ Eigen::MatrixXd pntToPnt::getPointSetCage(ring::strucType type) {
     // Read in the XYZ file
     std::string fileName = "templates/hc.xyz";
     //
-    sinp::readXYZ(fileName, &setCloud);
+    sinp::readXYZ(fileName);
     int n = setCloud.nop; // Number of points in the reference point set
     Eigen::MatrixXd pointSet(n, 3); // Output point set for a regular polygon
 
