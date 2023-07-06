@@ -88,7 +88,7 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
     std::cout
         << "Fatal Error: The file does not exist or you gave the wrong path.\n";
     // Throw exception?
-    return yCloud;
+        throw std::runtime_error("Wrong filepath");
   }
 
   // --------
