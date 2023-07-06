@@ -123,8 +123,6 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
       tokens = gen::tokenizer(line);
       numbers = gen::tokenizerDouble(line);
 
-    std::cout
-        << "I am here at." << nop << "\n";
       // Skip whitespace
       if (tokens.size() == 0) {
         continue;
