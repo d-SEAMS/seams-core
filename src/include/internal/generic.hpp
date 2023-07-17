@@ -18,7 +18,7 @@
 #include <array>
 #include <iostream>
 #include <math.h>
-#include <mol_sys.hpp>
+#include "mol_sys.hpp"
 
 // Boost
 #include <boost/math/constants/constants.hpp>

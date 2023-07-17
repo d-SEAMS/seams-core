@@ -70,10 +70,11 @@ std::vector<std::vector<int>> sinp::readBonds(std::string filename) {
 /**
  * @details Function for reading in an XYZ file
  */
-int sinp::readXYZ(std::string filename,
-                  molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
+molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string filename) {
   std::unique_ptr<std::ifstream> xyzFile;
   xyzFile = std::make_unique<std::ifstream>(filename);
+  molSys::PointCloud<molSys::Point<double>, double>
+      yCloud;
   std::string line;                // Current line being read in
   std::vector<std::string> tokens; // Vector containing word tokens
   std::vector<double> numbers;     // Vector containing type double numbers
@@ -87,7 +88,7 @@ int sinp::readXYZ(std::string filename,
     std::cout
         << "Fatal Error: The file does not exist or you gave the wrong path.\n";
     // Throw exception?
-    return 1;
+    return yCloud;
   }
 
   // --------

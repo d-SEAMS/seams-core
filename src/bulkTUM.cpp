@@ -378,8 +378,8 @@ Eigen::MatrixXd tum3::buildRefHC(std::string fileName) {
   //
   Eigen::MatrixXd refPnts(12, 3); // Reference point set (Eigen matrix)
   // Get the reference HC point set
-  molSys::PointCloud<molSys::Point<double>, double>
-      setCloud; // PointCloud for holding the reference point values
+ // molSys::PointCloud<molSys::Point<double>, double>
+  //    setCloud; // PointCloud for holding the reference point values
   // Variables for rings
   std::vector<std::vector<int>> nList; // Neighbour list
   std::vector<std::vector<int>> rings; // Rings
@@ -392,7 +392,7 @@ Eigen::MatrixXd tum3::buildRefHC(std::string fileName) {
   //
   // read in the XYZ file into the pointCloud setCloud
   //
-  sinp::readXYZ(fileName, &setCloud);
+  auto setCloud = sinp::readXYZ(fileName);
   // box lengths
   for (int i = 0; i < 3; i++) {
     setCloud.box[i] = 50;
@@ -452,7 +452,7 @@ Eigen::MatrixXd tum3::buildRefDDC(std::string fileName) {
   //
   // read in the XYZ file into the pointCloud setCloud
   //
-  sinp::readXYZ(fileName, &setCloud);
+  setCloud = sinp::readXYZ(fileName);
 
   // box lengths
   for (int i = 0; i < 3; i++) {
