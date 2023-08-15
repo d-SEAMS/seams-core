@@ -15,7 +15,7 @@
 # The project is seams-core, the executable is yodaStruct
 project('seams-core', 'cpp',
   version : '1.0.1',
-  default_options : ['warning_level=3', 'cpp_std=c++17'])
+  default_options : ['warning_level=3', 'cpp_std=c++14'])
 
 host_system = host_machine.system()
 
@@ -52,7 +52,7 @@ eigen_dep = dependency('eigen3',
 _deps += [ eigen_dep ]
 
 fmt_dep = dependency('fmt',
-                     version: '9.0.0',
+                     version: '9.1.0',
                      required: true)
 _deps += [ fmt_dep ]
 
