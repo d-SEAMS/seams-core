@@ -88,13 +88,13 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
     std::cout
         << "Fatal Error: The file does not exist or you gave the wrong path.\n";
     // Throw exception?
-    return yCloud;
+        throw std::runtime_error("Wrong filepath");
   }
 
   // --------
   // Before filling up the PointCloud, if the vectors are filled
   // empty them
-  *yCloud = molSys::clearPointCloud(yCloud);
+  //*yCloud = molSys::clearPointCloud(yCloud);
   // --------
 
   // Format of an XYZ file:
@@ -103,6 +103,7 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
   //  O         43.603500       16.926201       15.215700
   //  O         39.912601       14.775100       19.379200
   if (xyzFile->is_open()) {
+
     // ----------------------------------------------------------
     // At this point we know that the XYZ file is open
 
@@ -112,11 +113,11 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
     // Skip the comment line
     std::getline((*xyzFile), line);
     // Reserve memory for atom coordinates using nop read in
-    yCloud->pts.reserve(nop);
-    yCloud->nop = nop;
-
+    yCloud.pts.reserve(nop);
+    yCloud.nop = nop;
     // Run this until EOF or you reach the next timestep
     while (std::getline((*xyzFile), line)) {
+
       // Read in lines and tokenize them into std::string words and <double>
       // numbers
       tokens = gen::tokenizer(line);
@@ -135,8 +136,8 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
       iPoint.y = std::stod(tokens[2]);
       iPoint.z = std::stod(tokens[3]);
 
-      yCloud->pts.push_back(iPoint);
-      yCloud->idIndexMap[iPoint.atomID] = yCloud->pts.size() - 1;
+      yCloud.pts.push_back(iPoint);
+      yCloud.idIndexMap[iPoint.atomID] = yCloud.pts.size() - 1;
       iatom++; // Increase index
 
       // First point
@@ -169,29 +170,28 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
           zHi = iPoint.z;
         } // zHi
       }   // update
-
     } // end of while, looping through lines till EOF
     // ----------------------------------------------------------
   } // End of if file open statement
 
   xyzFile->close();
 
-  if (yCloud->pts.size() == 1) {
+  if (yCloud.pts.size() == 1) {
     xHi = xLo + 10;
     yHi = yLo + 10;
     zHi = zLo + 10;
   } // for a single point in the system (never happens)
 
   // Fill up the box lengths
-  yCloud->box.push_back(xHi - xLo);
-  yCloud->box.push_back(yHi - yLo);
-  yCloud->box.push_back(zHi - zLo);
+  yCloud.box.push_back(xHi - xLo);
+  yCloud.box.push_back(yHi - yLo);
+  yCloud.box.push_back(zHi - zLo);
 
-  if (yCloud->pts.size() != yCloud->nop) {
+  if (yCloud.pts.size() != yCloud.nop) {
     std::cout << "Atoms didn't get filled in properly.\n";
   }
 
-  return 0;
+  return yCloud;
 }
 
 // External Libraries
