@@ -136,6 +136,27 @@ int main(int argc, char *argv[]) {
   if (config["topoOneDim"]["use"].as<bool>()) {
     // Use the script
     lua.script_file(vars);
+    double cutoffRadius = lua["cutoffRadius"];
+    int oxygenAtomType = lua["oxygenAtomType"];
+    int hydrogenAtomType = lua["hydrogenAtomType"];
+    int targetFrame = lua["targetFrame"];
+    int finalFrame = lua["finalFrame"];
+    int frameGap = lua["frameGap"];
+    int maxDepth = lua["maxDepth"];
+    bool isSlice = lua["isSlice"];
+
+    sol::table sliceLowerLimitsTable = lua["sliceLowerLimits"];
+    std::array<double, 3> sliceLowerLimits = {sliceLowerLimitsTable[1],
+                                              sliceLowerLimitsTable[2],
+                                              sliceLowerLimitsTable[3]};
+
+    sol::table sliceUpperLimitsTable = lua["sliceUpperLimits"];
+    std::array<double, 3> sliceUpperLimits = {sliceUpperLimitsTable[1],
+                                              sliceUpperLimitsTable[2],
+                                              sliceUpperLimitsTable[3]};
+
+    std::string outDir = lua["outDir"];
+    std::string functionScript = lua["functionScript"];
     // -----------------
     // Variables which must be declared in C++
     //
@@ -187,8 +208,26 @@ int main(int argc, char *argv[]) {
     // Quasi-one-dimensional ice
     lua.set_function("prismAnalysis", ring::prismAnalysis);
     // --------------------------
-    // Use the script
-    lua.script_file(lscript);
+    // Script equivalent
+    for (int frame = targetFrame; frame <= finalFrame; frame += frameGap) {
+      resCloud =
+          sinp::readLammpsTrjO(tFile, frame, oxygenAtomType, isSlice,
+                           sliceLowerLimits, sliceUpperLimits); // Get the frame
+      nList = nneigh::neighListO(cutoffRadius, &resCloud,
+                           oxygenAtomType); // Calculate the neighborlist by ID
+      hbnList =
+          bond::populateHbonds(tFile, &resCloud, nList, frame,
+                          hydrogenAtomType); // Get the hydrogen-bonded network
+                                             // for the current frame
+      hbnList = nneigh::neighbourListByIndex(
+          &resCloud, hbnList); // Hydrogen-bonded network using indices not IDs
+      rings = primitive::ringNetwork(
+          hbnList, maxDepth); // Gets every ring (non-primitives included)
+      ring::prismAnalysis(
+          outDir, rings, hbnList, &resCloud, maxDepth, &atomID, targetFrame,
+          frame,
+          false); // Does the prism analysis for quasi-one-dimensional ice
+    }
     // --------------------------
 
   } // end of one-dimensional ice block
