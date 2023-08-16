@@ -73,6 +73,29 @@ int main(int argc, char *argv[]) {
   if (config["topoTwoDim"]["use"].as<bool>()) {
     // Use the variables script
     lua.script_file(vars);
+    double cutoffRadius = lua["cutoffRadius"];
+    int oxygenAtomType = lua["oxygenAtomType"];
+    int hydrogenAtomType = lua["hydrogenAtomType"];
+    int targetFrame = lua["targetFrame"];
+    int finalFrame = lua["finalFrame"];
+    int frameGap = lua["frameGap"];
+    int maxDepth = lua["maxDepth"];
+    bool isSlice = lua["isSlice"];
+
+    sol::table sliceLowerLimitsTable = lua["sliceLowerLimits"];
+    std::array<double, 3> sliceLowerLimits = {sliceLowerLimitsTable[1],
+                                              sliceLowerLimitsTable[2],
+                                              sliceLowerLimitsTable[3]};
+
+    sol::table sliceUpperLimitsTable = lua["sliceUpperLimits"];
+    std::array<double, 3> sliceUpperLimits = {sliceUpperLimitsTable[1],
+                                              sliceUpperLimitsTable[2],
+                                              sliceUpperLimitsTable[3]};
+
+    std::string outDir = lua["outDir"];
+    std::string functionScript = lua["functionScript"];
+
+    std::double confiningSheetArea = lua["confiningSheetArea"];
     // -----------------
     // Variables which must be declared in C++
     //
@@ -126,8 +149,26 @@ int main(int argc, char *argv[]) {
     // RDF functions
     lua.set_function("calcRDF", rdf2::rdf2Danalysis_AA);
     // --------------------------
-    // Use the script
-    lua.script_file(lscript);
+    // Script equivalent
+        for (int frame = targetFrame; frame <= finalFrame; frame += frameGap) {
+      resCloud =
+          sinp::readLammpsTrjreduced(tFile, frame, oxygenAtomType, isSlice,
+                           sliceLowerLimits, sliceUpperLimits); // Get the frame
+      nList = nneigh::neighListO(cutoffRadius, &resCloud,
+                           oxygenAtomType); // Calculate the neighborlist by ID
+      hbnList =
+          bond::populateHbonds(tFile, &resCloud, nList, frame,
+                          hydrogenAtomType); // Get the hydrogen-bonded network
+                                             // for the current frame
+      hbnList = nneigh::neighbourListByIndex(
+          &resCloud, hbnList); // Hydrogen-bonded network using indices not IDs
+      rings = primitive::ringNetwork(
+          hbnList, maxDepth); // Gets every ring (non-primitives included)
+      ring::prismAnalysis(
+          outDir, rings, hbnList, &resCloud, maxDepth, &atomID, targetFrame,
+          frame,
+          false); // Does the prism analysis for quasi-one-dimensional ice
+    }
     // --------------------------
 
   } // end of two-dimensional ice block
@@ -236,6 +277,83 @@ int main(int argc, char *argv[]) {
   if (config["bulk"]["use"].as<bool>()) {
     // Use the variables script
     lua.script_file(vars);
+    //bulk_use
+    double cutoffRadius = lua["cutoffRadius"];
+    int oxygenAtomType = lua["oxygenAtomType"];
+    int hydrogenAtomType = lua["hydrogenAtomType"];
+    int targetFrame = lua["targetFrame"];
+    int finalFrame = lua["finalFrame"];
+    int frameGap = lua["frameGap"];
+    int maxDepth = lua["maxDepth"];
+    bool isSlice = lua["isSlice"];
+
+    sol::table sliceLowerLimitsTable = lua["sliceLowerLimits"];
+    std::array<double, 3> sliceLowerLimits = {sliceLowerLimitsTable[1],
+                                              sliceLowerLimitsTable[2],
+                                              sliceLowerLimitsTable[3]};
+
+    sol::table sliceUpperLimitsTable = lua["sliceUpperLimits"];
+    std::array<double, 3> sliceUpperLimits = {sliceUpperLimitsTable[1],
+                                              sliceUpperLimitsTable[2],
+                                              sliceUpperLimitsTable[3]};
+
+    std::string outDir = lua["outDir"];
+    std::string functionScript = lua["functionScript"];
+
+    //bulk_topologicalNetworkCriterion
+    double cutoffRadius = lua["cutoffRadius"];
+    int oxygenAtomType = lua["oxygenAtomType"];
+    int hydrogenAtomType = lua["hydrogenAtomType"];
+    int targetFrame = lua["targetFrame"];
+    int finalFrame = lua["finalFrame"];
+    int frameGap = lua["frameGap"];
+    int maxDepth = lua["maxDepth"];
+    bool isSlice = lua["isSlice"];
+
+    sol::table sliceLowerLimitsTable = lua["sliceLowerLimits"];
+    std::array<double, 3> sliceLowerLimits = {sliceLowerLimitsTable[1],
+                                              sliceLowerLimitsTable[2],
+                                              sliceLowerLimitsTable[3]};
+
+    sol::table sliceUpperLimitsTable = lua["sliceUpperLimits"];
+    std::array<double, 3> sliceUpperLimits = {sliceUpperLimitsTable[1],
+                                              sliceUpperLimitsTable[2],
+                                              sliceUpperLimitsTable[3]};
+
+    std::string outDir = lua["outDir"];
+    std::string functionScript = lua["functionScript"];
+    std::bool onlyTetrahedral = lua["onlyTetrahedral"];
+
+    //bondOrderParameters
+    double cutoffRadius = lua["cutoffRadius"];
+    int oxygenAtomType = lua["oxygenAtomType"];
+    int hydrogenAtomType = lua["hydrogenAtomType"];
+    int targetFrame = lua["targetFrame"];
+    int finalFrame = lua["finalFrame"];
+    int frameGap = lua["frameGap"];
+    int maxDepth = lua["maxDepth"];
+    bool isSlice = lua["isSlice"];
+
+    sol::table sliceLowerLimitsTable = lua["sliceLowerLimits"];
+    std::array<double, 3> sliceLowerLimits = {sliceLowerLimitsTable[1],
+                                              sliceLowerLimitsTable[2],
+                                              sliceLowerLimitsTable[3]};
+
+    sol::table sliceUpperLimitsTable = lua["sliceUpperLimits"];
+    std::array<double, 3> sliceUpperLimits = {sliceUpperLimitsTable[1],
+                                              sliceUpperLimitsTable[2],
+                                              sliceUpperLimitsTable[3]};
+
+    std::string outDir = lua["outDir"];
+    std::string functionScript  =  lua["functionScript"];  
+    std::string dumpName =  lua["dumpName"]; //Output file name
+    std::string chillPlus_mod=  lua["chillPlus_mod"]; //This the modified file
+    std::string chillPlus_noMod=  lua["chillPlus_noMod"]; //This is the standard file name
+    std::string chill_noMod=  lua["chill_noMod"]; //This is the standard file name
+    std::string largest_ice_cluster_name=  lua["largest_ice_cluster_name"]; //This is the standard file name 
+    std::string dumpChillP=  lua["dumpChillP"]; //Output dump file for CHILL+ classification
+    std::string dumpSupaaP=  lua["dumpSupaaP"]; // Output dump file for the SUPER CHILL+ classification
+    std::string largestClusterDump =  lua["largestClusterDump"]; // Output dump file for the largest ice cluster
     // Variables which must be declared in C++
     //
     // Newer pointCloud (rescloud -> ice structure, solcloud -> largest
@@ -325,10 +443,65 @@ int main(int argc, char *argv[]) {
     // use bulkTopologicalNetworkCriterion if you use this function
     lua.set_function("bulkTopoUnitMatching", tum3::topoUnitMatchingBulk);
     // --------------------------
-    // Use the script
-    lua.script_file(lscript);
-    // --------------------------
+    // Script equivalent_bulk_use
+    for (int frame = targetFrame; frame <= finalFrame; frame += frameGap) {
+      resCloud =
+          sinp::readLammpsTrjreduced(tFile, frame, oxygenAtomType, isSlice,
+                           sliceLowerLimits, sliceUpperLimits); // Get the frame
+      nList = nneigh::neighListO(cutoffRadius, &resCloud,
+                           oxygenAtomType); // Calculate the neighborlist by ID
+      hbnList =
+          bond::populateHbonds(tFile, &resCloud, nList, frame,
+                          hydrogenAtomType); // Get the hydrogen-bonded network
+                                             // for the current frame
+      hbnList = nneigh::neighbourListByIndex(
+          &resCloud, hbnList); // Hydrogen-bonded network using indices not IDs
+      rings = primitive::ringNetwork(
+          hbnList, maxDepth); // Gets every ring (non-primitives included)
+      ring::bulkPolygonRingAnalysis(
+          outDir, rings, hbnList, &resCloud, maxDepth,
+          targetFrame,
+          true); // Does the prism analysis for quasi-one-dimensional ice
+    }
 
+    // --------------------------
+    // Script equivalent_bulk_topologicalNetworkCriterion
+    for (int frame = targetFrame; frame <= finalFrame; frame += frameGap) {
+      resCloud =
+          sinp::readLammpsTrjreduced(tFile, frame, &resCloud, oxygenAtomType, isSlice,
+                           sliceLowerLimits, sliceUpperLimits); // Get the frame
+      nList = nneigh::neighListO(cutoffRadius, &resCloud,
+                           oxygenAtomType); // Calculate the neighborlist by ID
+      clump::clusterAnalysis(outDir, &solCloud, &resCloud, nList, &iceList,
+          cutoffRadius, targetFrame, "q6"); 
+      rings = primitive::ringNetwork(
+          iceNeighbourList, maxDepth); // Gets every ring (non-primitives included)
+      tum3::topoUnitMatchingBulk(
+          outDir, rings, &iceList, &solCloud,
+          targetFrame,
+          true,
+          true); // Finds DDCs and HCs
+    } 
+
+      // --------------------------
+    // Script equivalent_bulk_bondOrderParameters
+    for (int frame = targetFrame; frame <= finalFrame; frame += frameGap) {
+      resCloud =
+          sinp::readLammpsTrjO(tFile, frame, &resCloud, oxygenAtomType, isSlice,
+                           sliceLowerLimits, sliceUpperLimits); // Get the frame
+      nList = nneigh::neighListO(cutoffRadius, &resCloud,
+                           oxygenAtomType); // Calculate the neighborlist by ID
+      resCloud = clump::getCorrelPlus(&resCloud, nList, isSlice); 
+      resCloud = clump::getIceTypePlus(&resCloud, nList, outDir, targetFrame, isSlice, chillPlus_noMod);
+      sout::writeDump(&resCloud, outDir, dumpChillP); 
+      avgQ6 = chill::getq6(&resCloud, nList, isSlice);
+      resCloud = chill::reclassifyWater(&resCloud, avgQ6);
+      chill::printIceType(&resCloud, outDir, targetFrame, isSlice, chillPlus_mod);
+      sout::writeDump(&resCloud, outDir, dumpSupaaP); 
+      clump::clusterAnalysis(outDir, &solCloud, &resCloud, nList, &iceList, cutoffRadius, targetFrame, "q6");
+      clump::recenterClusterCloud(&solCloud, &iceList);
+      sout::writeDump(&resCloud, outDir, largestClusterDump); 
+    }
   } // end of bulk ice structure determination block
   // --------------------------------------
 
