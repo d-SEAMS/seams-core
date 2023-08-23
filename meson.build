@@ -15,7 +15,7 @@
 # The project is seams-core, the executable is yodaStruct
 project('seams-core', 'cpp',
   version : '1.0.1',
-  default_options : ['warning_level=3', 'cpp_std=c++17'])
+  default_options : ['warning_level=3', 'cpp_std=c++14'])
 
 host_system = host_machine.system()
 
@@ -33,7 +33,7 @@ if host_system == 'darwin'
   # Workaround for
   # error: aligned allocation function of
   # type 'void *(unsigned long, enum std::align_val_t)' is only available on macOS 10.13 or newer
-  add_global_arguments(['-faligned-allocation', '-ggdb', '-Og', '-fno-inline-functions'], language: 'cpp')
+  add_project_arguments(['-faligned-allocation', '-ggdb', '-Og', '-fno-inline-functions'], language: 'cpp')
 endif
 
 cppc = meson.get_compiler('cpp')
@@ -52,7 +52,7 @@ eigen_dep = dependency('eigen3',
 _deps += [ eigen_dep ]
 
 fmt_dep = dependency('fmt',
-                     version: '9.0.0',
+                     version: '9.1.0',
                      required: true)
 _deps += [ fmt_dep ]
 
@@ -108,6 +108,12 @@ ydslib = library('yodaLib',
                 include_directories : _incdirs,
                 install: true
                )
+yds_dep = declare_dependency(
+                             link_with: [ydslib, _linkto],
+                             include_directories: _incdirs,
+                             compile_args: _args,
+                             dependencies: _deps)
+                              
 
 # -------------------- Executable
 
