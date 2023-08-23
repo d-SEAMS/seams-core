@@ -45,7 +45,6 @@ _deps += m_dep
 _deps += [declare_dependency(link_args: '-lstdc++')]
 
 # All of which can be installed with meson wrap install <blah> originally
-subproject('eigen')
 eigen_dep = dependency('eigen3',
                        version: '3.4.0',
                        required: true)
