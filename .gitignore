@@ -5,6 +5,7 @@ shellBuild/
 doxyYoda
 doxyYoda_*
 run*
+bbdir/
 # Manual updates ONLY
 spack.yml
 /.spack-env/
