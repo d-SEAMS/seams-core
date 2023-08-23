@@ -108,6 +108,12 @@ ydslib = library('yodaLib',
                 include_directories : _incdirs,
                 install: true
                )
+yds_dep = declare_dependency(
+                             link_with: [ydslib, _linkto],
+                             include_directories: _incdirs,
+                             compile_args: _args,
+                             dependencies: _deps)
+                              
 
 # -------------------- Executable
 
