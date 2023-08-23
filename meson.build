@@ -94,6 +94,7 @@ ydsl_sources = [
   'src/ring.cpp',
   'src/seams_input.cpp',
   'src/seams_output.cpp',
+  'src/selection.cpp',
   'src/shapeMatch.cpp',
   'src/topo_bulk.cpp',
   'src/topo_one_dim.cpp',
@@ -107,6 +108,7 @@ ydslib = library('yodaLib',
                 include_directories : _incdirs,
                 install: true
                )
+
 yds_dep = declare_dependency(
                              link_with: [ydslib, _linkto],
                              include_directories: _incdirs,
