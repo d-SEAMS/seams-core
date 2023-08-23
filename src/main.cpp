@@ -465,6 +465,8 @@ int main(int argc, char *argv[]) {
     }
 
     // --------------------------
+
+  if (config["bulk"]["topologicalNetworkCriterion"].as<bool>()) {
     // Script equivalent_bulk_topologicalNetworkCriterion
     for (int frame = targetFrame; frame <= finalFrame; frame += frameGap) {
       resCloud =
@@ -481,9 +483,11 @@ int main(int argc, char *argv[]) {
           targetFrame,
           true,
           true); // Finds DDCs and HCs
-    } 
+    }
+  }
 
       // --------------------------
+  if (config["bulk"]["bondOrderParameters"].as<bool>()) {
     // Script equivalent_bulk_bondOrderParameters
     for (int frame = targetFrame; frame <= finalFrame; frame += frameGap) {
       resCloud =
@@ -502,6 +506,9 @@ int main(int argc, char *argv[]) {
       clump::recenterClusterCloud(&solCloud, &iceList);
       sout::writeDump(&resCloud, outDir, largestClusterDump); 
     }
+  }
+
+      // --------------------------
   } // end of bulk ice structure determination block
   // --------------------------------------
 
