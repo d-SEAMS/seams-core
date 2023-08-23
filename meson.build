@@ -33,7 +33,7 @@ if host_system == 'darwin'
   # Workaround for
   # error: aligned allocation function of
   # type 'void *(unsigned long, enum std::align_val_t)' is only available on macOS 10.13 or newer
-  add_global_arguments(['-faligned-allocation', '-ggdb', '-Og', '-fno-inline-functions'], language: 'cpp')
+  add_project_arguments(['-faligned-allocation', '-ggdb', '-Og', '-fno-inline-functions'], language: 'cpp')
 endif
 
 cppc = meson.get_compiler('cpp')
