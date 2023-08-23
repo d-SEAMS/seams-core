@@ -17,9 +17,10 @@ dependencies:
   - cmake
   - meson
   - cmake
+  - pkgconfig
   # - lua-luafilesystem
   - luarocks
   # Pinned
-  - fmt==9.0.0
+  - fmt==9.1.0
   - eigen==3.4.0
   - lua==5.3.*
