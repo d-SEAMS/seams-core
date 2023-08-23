@@ -22,4 +22,4 @@ dependencies:
   # Pinned
   - fmt==9.0.0
   - eigen==3.4.0
-  - lua==5.4.4
+  - lua==5.3.*
