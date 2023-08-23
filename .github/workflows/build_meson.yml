@@ -1,0 +1,43 @@
+name: "[meson] test yodaLib, yodaStruct"
+on: [push, pull_request]
+jobs:
+  build_lib:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: mamba-org/setup-micromamba@v1
+        with:
+          generate-run-shell: true
+          environment-file: environment.yml
+          cache-environment: true
+          cache-downloads: false
+
+      - name: Build library with meson
+        shell: micromamba-shell {0}
+        run: |
+          mkdir bbdir
+          meson setup bbdir
+          meson compile -C bbdir
+
+  build_pkg:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: mamba-org/setup-micromamba@v1
+        with:
+          generate-run-shell: true
+          environment-file: environment.yml
+          cache-environment: true
+          cache-downloads: false
+
+      - name: Test application with meson
+        shell: micromamba-shell {0}
+        run: |
+          mkdir bbdir
+          meson setup bbdir -Dwith_lua=True \
+          -Dwith_tests=True --prefix $CONDA_PREFIX
+          meson install -C bbdir
+          export LD_LIBRARY_PATH=$CONDA_PREFIX/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+          $CONDA_PREFIX/bin/yodaStruct -c lua_inputs/config.yml

@@ -45,7 +45,6 @@ _deps += m_dep
 _deps += [declare_dependency(link_args: '-lstdc++')]
 
 # All of which can be installed with meson wrap install <blah> originally
-subproject('eigen')
 eigen_dep = dependency('eigen3',
                        version: '3.4.0',
                        required: true)
@@ -95,6 +94,7 @@ ydsl_sources = [
   'src/ring.cpp',
   'src/seams_input.cpp',
   'src/seams_output.cpp',
+  'src/selection.cpp',
   'src/shapeMatch.cpp',
   'src/topo_bulk.cpp',
   'src/topo_one_dim.cpp',
@@ -108,6 +108,7 @@ ydslib = library('yodaLib',
                 include_directories : _incdirs,
                 install: true
                )
+
 yds_dep = declare_dependency(
                              link_with: [ydslib, _linkto],
                              include_directories: _incdirs,
@@ -122,33 +123,15 @@ if (not meson.is_subproject())
     # Lua is only used in the executable
     if get_option('with_lua')
       lua_dep = dependency('lua',
-                           version : '5.4.6',
-                           required : false)
-      if lua_dep.found()
+                           version : '<5.4',
+                           required : true)
         _deps += [ lua_dep ]
-      endif
-      if (not lua_dep.found())
-        message('Trying with subproject lua, but luafilesystem might be problematic')
-        subproject('lua')
-        lua_dep = dependency('lua',
-                             version : '5.4.4',
-                             required : false)
-        if lua_dep.found()
-          _deps += [ lua_dep ]
-        endif
-      else
-        message('Lua not found, will assume spack is present')
-        # Assume spack
-        lua_spack_dep = cppc.find_library('lua', dirs:
-             meson.source_root()+'/../.spack-env/view/lib',
-                                          required: true)
-        _deps += [ lua_spack_dep ]
-      endif
       # Build the executable
       yds = executable('yodaStruct',
-                       ['src/main.cpp'],
+                       ['src/main.cpp',
+                       'src/opt_parser.cpp'],
                        link_with : _linkto,
-                       dependencies: _deps,
+                       dependencies: [_deps, yds_dep],
                        cpp_args : _args,
                        include_directories : _incdirs,
                        install : true)
