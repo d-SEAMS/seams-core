@@ -122,28 +122,10 @@ if (not meson.is_subproject())
     # Lua is only used in the executable
     if get_option('with_lua')
       lua_dep = dependency('lua',
-                           version : '5.4.6',
-                           required : false)
-      if lua_dep.found()
+                           version : '<5.4',
+                           required : true)
         _deps += [ lua_dep ]
-      endif
-      if (not lua_dep.found())
-        message('Trying with subproject lua, but luafilesystem might be problematic')
-        subproject('lua')
-        lua_dep = dependency('lua',
-                             version : '5.4.4',
-                             required : false)
-        if lua_dep.found()
-          _deps += [ lua_dep ]
-        endif
-      else
-        message('Lua not found, will assume spack is present')
-        # Assume spack
-        lua_spack_dep = cppc.find_library('lua', dirs:
-             meson.source_root()+'/../.spack-env/view/lib',
-                                          required: true)
-        _deps += [ lua_spack_dep ]
-      endif
+    endif
       # Build the executable
       yds = executable('yodaStruct',
                        ['src/main.cpp',
@@ -153,5 +135,4 @@ if (not meson.is_subproject())
                        cpp_args : _args,
                        include_directories : _incdirs,
                        install : true)
-    endif
 endif
