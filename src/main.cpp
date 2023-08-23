@@ -298,54 +298,9 @@ int main(int argc, char *argv[]) {
                                               sliceUpperLimitsTable[3]};
 
     std::string outDir = lua["outDir"];
-    std::string functionScript = lua["functionScript"];
-
-    //bulk_topologicalNetworkCriterion
-    double cutoffRadius = lua["cutoffRadius"];
-    int oxygenAtomType = lua["oxygenAtomType"];
-    int hydrogenAtomType = lua["hydrogenAtomType"];
-    int targetFrame = lua["targetFrame"];
-    int finalFrame = lua["finalFrame"];
-    int frameGap = lua["frameGap"];
-    int maxDepth = lua["maxDepth"];
-    bool isSlice = lua["isSlice"];
-
-    sol::table sliceLowerLimitsTable = lua["sliceLowerLimits"];
-    std::array<double, 3> sliceLowerLimits = {sliceLowerLimitsTable[1],
-                                              sliceLowerLimitsTable[2],
-                                              sliceLowerLimitsTable[3]};
-
-    sol::table sliceUpperLimitsTable = lua["sliceUpperLimits"];
-    std::array<double, 3> sliceUpperLimits = {sliceUpperLimitsTable[1],
-                                              sliceUpperLimitsTable[2],
-                                              sliceUpperLimitsTable[3]};
-
-    std::string outDir = lua["outDir"];
-    std::string functionScript = lua["functionScript"];
     std::bool onlyTetrahedral = lua["onlyTetrahedral"];
 
     //bondOrderParameters
-    double cutoffRadius = lua["cutoffRadius"];
-    int oxygenAtomType = lua["oxygenAtomType"];
-    int hydrogenAtomType = lua["hydrogenAtomType"];
-    int targetFrame = lua["targetFrame"];
-    int finalFrame = lua["finalFrame"];
-    int frameGap = lua["frameGap"];
-    int maxDepth = lua["maxDepth"];
-    bool isSlice = lua["isSlice"];
-
-    sol::table sliceLowerLimitsTable = lua["sliceLowerLimits"];
-    std::array<double, 3> sliceLowerLimits = {sliceLowerLimitsTable[1],
-                                              sliceLowerLimitsTable[2],
-                                              sliceLowerLimitsTable[3]};
-
-    sol::table sliceUpperLimitsTable = lua["sliceUpperLimits"];
-    std::array<double, 3> sliceUpperLimits = {sliceUpperLimitsTable[1],
-                                              sliceUpperLimitsTable[2],
-                                              sliceUpperLimitsTable[3]};
-
-    std::string outDir = lua["outDir"];
-    std::string functionScript  =  lua["functionScript"];  
     std::string dumpName =  lua["dumpName"]; //Output file name
     std::string chillPlus_mod=  lua["chillPlus_mod"]; //This the modified file
     std::string chillPlus_noMod=  lua["chillPlus_noMod"]; //This is the standard file name
