@@ -39,4 +39,5 @@ jobs:
           meson setup bbdir -Dwith_lua=True \
           -Dwith_tests=True --prefix $CONDA_PREFIX
           meson install -C bbdir
+          export LD_LIBRARY_PATH=$CONDA_PREFIX/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
           $CONDA_PREFIX/bin/yodaStruct -c lua_inputs/config.yml
