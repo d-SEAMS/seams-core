@@ -71,8 +71,7 @@ std::vector<std::vector<int>> sinp::readBonds(std::string filename) {
  * @details Function for reading in an XYZ file
  */
 molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string filename) {
-  std::unique_ptr<std::ifstream> xyzFile;
-  xyzFile = std::make_unique<std::ifstream>(filename);
+  auto xyzFile = std::make_unique<std::ifstream>(filename);
   molSys::PointCloud<molSys::Point<double>, double>
       yCloud;
   std::string line;                // Current line being read in
@@ -128,7 +127,12 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
         continue;
       }
 
-      // Put logic for checking atom type here later
+      for (int idx{0}; idx < tokens.size() ; idx++){
+        std::cout<<"Tokens "<<idx<<" is "<<tokens[idx]<<"\n";
+      }
+//  std::cout
+//         << "I am here at." << tokens[0] << "\n";
+      // TODO: Put logic for checking atom type here later
       iPoint.type = 1; // Oxygen type; hard-coded!
       iPoint.molID = iatom;
       iPoint.atomID = iatom;
@@ -210,11 +214,11 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
  */
 molSys::PointCloud<molSys::Point<double>, double>
 sinp::readLammpsTrj(std::string filename, int targetFrame,
-                    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                     bool isSlice, std::array<double, 3> coordLow,
                     std::array<double, 3> coordHigh) {
-  std::unique_ptr<std::ifstream> dumpFile;
-  dumpFile = std::make_unique<std::ifstream>(filename);
+  auto dumpFile = std::make_unique<std::ifstream>(filename);
+  molSys::PointCloud<molSys::Point<double>, double>
+      yCloud;
   std::string line;                // Current line being read in
   std::vector<std::string> tokens; // Vector containing word tokens
   std::vector<double> numbers;     // Vector containing type double numbers
@@ -238,7 +242,7 @@ sinp::readLammpsTrj(std::string filename, int targetFrame,
     std::cout
         << "Fatal Error: The file does not exist or you gave the wrong path.\n";
     // Throw exception?
-    return *yCloud;
+    return yCloud;
   }
 
   // The format of the LAMMPS trajectory file is:
@@ -278,8 +282,6 @@ sinp::readLammpsTrj(std::string filename, int targetFrame,
     // ----------------------------------------------------------
     // Before filling up the PointCloud, if the vectors are filled
     // empty them
-    *yCloud = molSys::clearPointCloud(yCloud);
-
     // ----------------------------------------------------------
     // If targetFrame has been found, read in the box lengths,
     // number of atoms and then read in atom positions, type, molID
@@ -305,8 +307,8 @@ sinp::readLammpsTrj(std::string filename, int targetFrame,
         if (readNOP) {
           nop = std::stoi(line.data());
           readNOP = false;
-          yCloud->pts.reserve(nop);
-          yCloud->nop = nop;
+          yCloud.pts.reserve(nop);
+          yCloud.nop = nop;
         }
         // Read box lengths
         if (readBox) {
@@ -318,14 +320,14 @@ sinp::readLammpsTrj(std::string filename, int targetFrame,
             if (isTriclinic) {
               // Update tilt factors
               for (int k = 0; k < tilt.size(); k++) {
-                yCloud->box.push_back(tilt[k]);
+                yCloud.box.push_back(tilt[k]);
               }
             } // end of check for triclinic
           }
           // Or else fill up the box lengths
           else {
-            yCloud->box.push_back(numbers[1] - numbers[0]); // Update box length
-            yCloud->boxLow.push_back(
+            yCloud.box.push_back(numbers[1] - numbers[0]); // Update box length
+            yCloud.boxLow.push_back(
                 numbers[0]); // Update the lower box coordinate
             // Do this for a triclinic box only
             if (numbers.size() == 3) {
@@ -348,8 +350,8 @@ sinp::readLammpsTrj(std::string filename, int targetFrame,
             iPoint.inSlice = sinp::atomInSlice(iPoint.x, iPoint.y, iPoint.z,
                                                coordLow, coordHigh);
           }
-          yCloud->pts.push_back(iPoint);
-          yCloud->idIndexMap[iPoint.atomID] = yCloud->pts.size() - 1;
+          yCloud.pts.push_back(iPoint);
+          yCloud.idIndexMap[iPoint.atomID] = yCloud.pts.size() - 1;
         }
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
@@ -404,14 +406,14 @@ sinp::readLammpsTrj(std::string filename, int targetFrame,
     std::cout << "You entered a frame that doesn't exist.\n";
   } // Throw exception
   if (foundFrame) {
-    if (yCloud->pts.size() != yCloud->nop) {
+    if (yCloud.pts.size() != yCloud.nop) {
       std::cout << "Atoms didn't get filled in properly.\n";
     }
   } // Throw exception
-  yCloud->currentFrame = targetFrame;
+  yCloud.currentFrame = targetFrame;
 
   dumpFile->close();
-  return *yCloud;
+  return yCloud;
 }
 
 /**
@@ -429,11 +431,11 @@ sinp::readLammpsTrj(std::string filename, int targetFrame,
  */
 molSys::PointCloud<molSys::Point<double>, double>
 sinp::readLammpsTrjO(std::string filename, int targetFrame,
-                     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                      int typeO, bool isSlice, std::array<double, 3> coordLow,
                      std::array<double, 3> coordHigh) {
-  std::unique_ptr<std::ifstream> dumpFile;
-  dumpFile = std::make_unique<std::ifstream>(filename);
+  auto dumpFile = std::make_unique<std::ifstream>(filename);
+  molSys::PointCloud<molSys::Point<double>, double>
+      yCloud;
   std::string line;                // Current line being read in
   std::vector<std::string> tokens; // Vector containing word tokens
   std::vector<double> numbers;     // Vector containing type double numbers
@@ -458,7 +460,7 @@ sinp::readLammpsTrjO(std::string filename, int targetFrame,
     std::cout
         << "Fatal Error: The file does not exist or you gave the wrong path.\n";
     // Throw exception?
-    return *yCloud;
+    return yCloud;
   }
 
   // The format of the LAMMPS trajectory file is:
@@ -498,7 +500,6 @@ sinp::readLammpsTrjO(std::string filename, int targetFrame,
     // ----------------------------------------------------------
     // Before filling up the PointCloud, if the vectors are filled
     // empty them
-    *yCloud = molSys::clearPointCloud(yCloud);
 
     // ----------------------------------------------------------
     // If targetFrame has been found, read in the box lengths,
@@ -536,14 +537,14 @@ sinp::readLammpsTrjO(std::string filename, int targetFrame,
             if (isTriclinic) {
               // Update tilt factors
               for (int k = 0; k < tilt.size(); k++) {
-                yCloud->box.push_back(tilt[k]);
+                yCloud.box.push_back(tilt[k]);
               }
             } // end of check for triclinic
           }
           // Or else fill up the box lengths
           else {
-            yCloud->box.push_back(numbers[1] - numbers[0]); // Update box length
-            yCloud->boxLow.push_back(
+            yCloud.box.push_back(numbers[1] - numbers[0]); // Update box length
+            yCloud.boxLow.push_back(
                 numbers[0]); // Update the lower box coordinate
             // Do this for a triclinic box only
             if (numbers.size() == 3) {
@@ -570,8 +571,8 @@ sinp::readLammpsTrjO(std::string filename, int targetFrame,
           if (iPoint.type == typeO) {
             nOxy++;
             // yCloud->pts.resize(yCloud->pts.size()+1);
-            yCloud->pts.push_back(iPoint);
-            yCloud->idIndexMap[iPoint.atomID] = yCloud->pts.size() - 1;
+            yCloud.pts.push_back(iPoint);
+            yCloud.idIndexMap[iPoint.atomID] = yCloud.pts.size() - 1;
           }
         }
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -627,15 +628,15 @@ sinp::readLammpsTrjO(std::string filename, int targetFrame,
     std::cout << "You entered a frame that doesn't exist.\n";
   } // Throw exception
   if (foundFrame) {
-    yCloud->nop = yCloud->pts.size();
-    if (yCloud->pts.size() != nOxy) {
+    yCloud.nop = yCloud.pts.size();
+    if (yCloud.pts.size() != nOxy) {
       std::cout << "Atoms didn't get filled in properly.\n";
     }
   } // Throw exception
-  yCloud->currentFrame = targetFrame;
+  yCloud.currentFrame = targetFrame;
 
   dumpFile->close();
-  return *yCloud;
+  return yCloud;
 }
 
 /**
@@ -654,12 +655,13 @@ sinp::readLammpsTrjO(std::string filename, int targetFrame,
  *  to be created
  */
 molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
-    std::string filename, int targetFrame,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int typeI,
-    bool isSlice, std::array<double, 3> coordLow,
-    std::array<double, 3> coordHigh) {
-  std::unique_ptr<std::ifstream> dumpFile;
-  dumpFile = std::make_unique<std::ifstream>(filename);
+std::string filename, int targetFrame,
+ int typeI,
+bool isSlice, std::array<double, 3> coordLow,
+std::array<double, 3> coordHigh){
+auto dumpFile = std::make_unique<std::ifstream>(filename);
+  molSys::PointCloud<molSys::Point<double>, double>
+      yCloud;
   std::string line;                // Current line being read in
   std::vector<std::string> tokens; // Vector containing word tokens
   std::vector<double> numbers;     // Vector containing type double numbers
@@ -684,7 +686,7 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
     std::cout
         << "Fatal Error: The file does not exist or you gave the wrong path.\n";
     // Throw exception?
-    return *yCloud;
+    return yCloud;
   }
 
   // The format of the LAMMPS trajectory file is:
@@ -722,10 +724,6 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
       }
     } // End of while loop searching for targetFrame
     // ----------------------------------------------------------
-    // Before filling up the PointCloud, if the vectors are filled
-    // empty them
-    *yCloud = molSys::clearPointCloud(yCloud);
-
     // ----------------------------------------------------------
     // If targetFrame has been found, read in the box lengths,
     // number of atoms and then read in atom positions, type, molID
@@ -762,14 +760,14 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
             if (isTriclinic) {
               // Update tilt factors
               for (int k = 0; k < tilt.size(); k++) {
-                yCloud->box.push_back(tilt[k]);
+                yCloud.box.push_back(tilt[k]);
               }
             } // end of check for triclinic
           }
           // Or else fill up the box lengths
           else {
-            yCloud->box.push_back(numbers[1] - numbers[0]); // Update box length
-            yCloud->boxLow.push_back(
+            yCloud.box.push_back(numbers[1] - numbers[0]); // Update box length
+            yCloud.boxLow.push_back(
                 numbers[0]); // Update the lower box coordinate
             // Do this for a triclinic box only
             if (numbers.size() == 3) {
@@ -800,9 +798,9 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
           if (iPoint.type == typeI) {
             nOxy++;
             // yCloud->pts.resize(yCloud->pts.size()+1);
-            yCloud->pts.push_back(iPoint);
-            yCloud->idIndexMap[iPoint.atomID] =
-                yCloud->pts.size() - 1; // array index
+            yCloud.pts.push_back(iPoint);
+            yCloud.idIndexMap[iPoint.atomID] =
+                yCloud.pts.size() - 1; // array index
           }
         }
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -859,11 +857,11 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
   } // Throw exception
 
   // Update the number of particles
-  yCloud->nop = yCloud->pts.size();
+  yCloud.nop = yCloud.pts.size();
 
   // Update the frame number
-  yCloud->currentFrame = targetFrame;
+  yCloud.currentFrame = targetFrame;
 
   dumpFile->close();
-  return *yCloud;
+  return yCloud;
 }

@@ -93,6 +93,7 @@ ydsl_sources = [
   'src/rdf2d.cpp',
   'src/ring.cpp',
   'src/seams_input.cpp',
+  'src/selection.cpp',
   'src/seams_output.cpp',
   'src/selection.cpp',
   'src/shapeMatch.cpp',
