@@ -430,7 +430,7 @@ int main(int argc, char *argv[]) {
       nList = nneigh::neighListO(cutoffRadius, &resCloud,
                            oxygenAtomType); // Calculate the neighborlist by ID
       clump::clusterAnalysis(outDir, &solCloud, &resCloud, nList, &iceList,
-          cutoffRadius, targetFrame, "q6"); 
+          cutoffRadius, targetFrame, "q6");
       rings = primitive::ringNetwork(
           iceNeighbourList, maxDepth); // Gets every ring (non-primitives included)
       tum3::topoUnitMatchingBulk(
@@ -450,16 +450,16 @@ int main(int argc, char *argv[]) {
                            sliceLowerLimits, sliceUpperLimits); // Get the frame
       nList = nneigh::neighListO(cutoffRadius, &resCloud,
                            oxygenAtomType); // Calculate the neighborlist by ID
-      resCloud = clump::getCorrelPlus(&resCloud, nList, isSlice); 
+      resCloud = clump::getCorrelPlus(&resCloud, nList, isSlice);
       resCloud = clump::getIceTypePlus(&resCloud, nList, outDir, targetFrame, isSlice, chillPlus_noMod);
-      sout::writeDump(&resCloud, outDir, dumpChillP); 
+      sout::writeDump(&resCloud, outDir, dumpChillP);
       avgQ6 = chill::getq6(&resCloud, nList, isSlice);
       resCloud = chill::reclassifyWater(&resCloud, avgQ6);
       chill::printIceType(&resCloud, outDir, targetFrame, isSlice, chillPlus_mod);
-      sout::writeDump(&resCloud, outDir, dumpSupaaP); 
+      sout::writeDump(&resCloud, outDir, dumpSupaaP);
       clump::clusterAnalysis(outDir, &solCloud, &resCloud, nList, &iceList, cutoffRadius, targetFrame, "q6");
       clump::recenterClusterCloud(&solCloud, &iceList);
-      sout::writeDump(&resCloud, outDir, largestClusterDump); 
+      sout::writeDump(&resCloud, outDir, largestClusterDump);
     }
   }
 
