@@ -146,9 +146,10 @@ if (not meson.is_subproject())
       endif
       # Build the executable
       yds = executable('yodaStruct',
-                       ['src/main.cpp'],
+                       ['src/main.cpp',
+                       'src/opt_parser.cpp'],
                        link_with : _linkto,
-                       dependencies: _deps,
+                       dependencies: [_deps, yds_dep],
                        cpp_args : _args,
                        include_directories : _incdirs,
                        install : true)
