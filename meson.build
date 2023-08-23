@@ -126,7 +126,6 @@ if (not meson.is_subproject())
                            version : '<5.4',
                            required : true)
         _deps += [ lua_dep ]
-    endif
       # Build the executable
       yds = executable('yodaStruct',
                        ['src/main.cpp',
@@ -136,4 +135,5 @@ if (not meson.is_subproject())
                        cpp_args : _args,
                        include_directories : _incdirs,
                        install : true)
+    endif
 endif
