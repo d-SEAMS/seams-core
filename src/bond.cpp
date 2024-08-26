@@ -178,8 +178,6 @@ bond::populateHbonds(std::string filename,
   //
   std::vector<std::vector<int>>
       hBondNet; // Output vector of vectors containing the HBN
-  molSys::PointCloud<molSys::Point<double>, double>
-      hCloud; // point Cloud for the hydrogen atoms
   std::vector<std::vector<int>>
       molIDlist; // Vector of vectors; first element is the molID, and the next
                  // two elements are the hydrogen atom indices
@@ -202,7 +200,7 @@ bond::populateHbonds(std::string filename,
 
   // --------------------
   // Get all the hydrogen atoms in the frame (no slice)
-  hCloud = sinp::readLammpsTrjreduced(filename, targetFrame, &hCloud, Htype);
+  auto hCloud = sinp::readLammpsTrjreduced(filename, targetFrame, Htype); // point Cloud for the hydrogen atoms
 
   // Get the unordered map of the oxygen atom IDs (keys) and the molecular IDs
   // (values)
