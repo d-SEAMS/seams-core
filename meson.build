@@ -14,7 +14,7 @@
 
 # The project is seams-core, the executable is yodaStruct
 project('seams-core', 'cpp',
-  version : '1.5.1',
+  version : '1.0.1',
   default_options : ['warning_level=3', 'cpp_std=c++14'])
 
 host_system = host_machine.system()
@@ -45,33 +45,35 @@ _deps += m_dep
 _deps += [declare_dependency(link_args: '-lstdc++')]
 
 # All of which can be installed with meson wrap install <blah> originally
-eigen_dep = dependency('eigen3',
-                       version: '3.4.0',
-                       static: true,
-                       required: true)
+eigen_dep = subproject('eigen').get_variable('eigen_dep')
 _deps += [ eigen_dep ]
 
-fmt_dep = dependency('fmt',
-                     version: '9.1.0',
-                     static: true,
-                     required: true)
+fmt_dep = subproject('fmt').get_variable('fmt_dep')
 _deps += [ fmt_dep ]
+
+cmake = import('cmake')
+optv_cppyaml = cmake.subproject_options()
+optv_cppyaml.add_cmake_defines(
+    {
+        'CMAKE_BUILD_TYPE': 'Release',
+        'YAML_BUILD_SHARED_LIBS': 'OFF',
+        'CMAKE_POSITION_INDEPENDENT_CODE': true,
+        'CMAKE_CXX_FLAGS': '-w',
+        'CMAKE_C_FLAGS': '-w',
+    },
+)
+cmcppyaml = cmake.subproject('yaml-cpp', options: optv_cppyaml)
+_deps += cmcppyaml.dependency('yaml-cpp')
+
 
 boost_dep = dependency('boost',
   modules : [
     'filesystem',
     'system',
   ],
-  static: true,
   required : false,
 )
 _deps += [ boost_dep ]
-
-libyamlcpp_dep = dependency('yaml-cpp',
-                            static: true,
-                            fallback: ['yaml-cpp',
-                                       'libyamlcpp_dep'])
-_deps += [ libyamlcpp_dep ]
 
 # Include Sources
 
