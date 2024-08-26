@@ -79,10 +79,11 @@ Now the installation can proceed.
 ```bash
 mkdir build
 cd build
+export EIGEN3_INCLUDE_DIR=$CONDA_PREFIX/include/eigen3
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -DCMAKE_INSTALL_PREFIX:PATH=$CONDA_PREFIX ../
 make -j$(nproc)
 make install
-$CONDA_PREFIX/bin/yodaStruct -c lua_inputs/config.yml
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib $CONDA_PREFIX/bin/yodaStruct -c lua_inputs/config.yml
 ```
 
 We have opted to install into the `conda` environment, if this is not the

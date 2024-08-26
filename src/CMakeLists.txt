@@ -43,8 +43,9 @@ add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
 find_package(
   "Lua" REQUIRED
   "Boost" REQUIRED COMPONENTS system filesystem
-  "yaml-cpp"
-  "fmt")
+  "yaml-cpp")
+
+find_package(fmt REQUIRED)
 
 link_directories(${Boost_LIBRARY_DIRS})
 # Link everything
@@ -53,7 +54,7 @@ target_link_libraries(
   ${Boost_LIBRARIES}
   Eigen3::Eigen
   ${LUA_LIBRARIES}
-  fmt
+  fmt::fmt
   yaml-cpp
   yodaLib
   )
