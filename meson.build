@@ -84,7 +84,6 @@ _incdirs += include_directories([ 'src/include/internal',
 
 ydsl_sources = [
   'src/absOrientation.cpp',
-  'src/backward.cpp',
   'src/bond.cpp',
   'src/bop.cpp',
   'src/bulkTUM.cpp',
