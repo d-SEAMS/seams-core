@@ -14,7 +14,7 @@
 
 # The project is seams-core, the executable is yodaStruct
 project('seams-core', 'cpp',
-  version : '1.0.1',
+  version : '1.5.1',
   default_options : ['warning_level=3', 'cpp_std=c++14'])
 
 host_system = host_machine.system()
