@@ -15,7 +15,7 @@
 # The project is seams-core, the executable is yodaStruct
 project('seams-core', 'cpp',
   version : '1.0.1',
-  default_options : ['warning_level=3', 'cpp_std=c++17'])
+  default_options : ['warning_level=3', 'cpp_std=c++14'])
 
 host_system = host_machine.system()
 
@@ -33,7 +33,7 @@ if host_system == 'darwin'
   # Workaround for
   # error: aligned allocation function of
   # type 'void *(unsigned long, enum std::align_val_t)' is only available on macOS 10.13 or newer
-  add_global_arguments(['-faligned-allocation', '-ggdb', '-Og', '-fno-inline-functions'], language: 'cpp')
+  add_project_arguments(['-faligned-allocation', '-ggdb', '-Og', '-fno-inline-functions'], language: 'cpp')
 endif
 
 cppc = meson.get_compiler('cpp')
@@ -45,14 +45,13 @@ _deps += m_dep
 _deps += [declare_dependency(link_args: '-lstdc++')]
 
 # All of which can be installed with meson wrap install <blah> originally
-subproject('eigen')
 eigen_dep = dependency('eigen3',
                        version: '3.4.0',
                        required: true)
 _deps += [ eigen_dep ]
 
 fmt_dep = dependency('fmt',
-                     version: '9.0.0',
+                     version: '9.1.0',
                      required: true)
 _deps += [ fmt_dep ]
 
@@ -95,6 +94,7 @@ ydsl_sources = [
   'src/ring.cpp',
   'src/seams_input.cpp',
   'src/seams_output.cpp',
+  'src/selection.cpp',
   'src/shapeMatch.cpp',
   'src/topo_bulk.cpp',
   'src/topo_one_dim.cpp',
@@ -109,6 +109,13 @@ ydslib = library('yodaLib',
                 install: true
                )
 
+yds_dep = declare_dependency(
+                             link_with: [ydslib, _linkto],
+                             include_directories: _incdirs,
+                             compile_args: _args,
+                             dependencies: _deps)
+                              
+
 # -------------------- Executable
 
 # Only when not a subproject
@@ -116,33 +123,15 @@ if (not meson.is_subproject())
     # Lua is only used in the executable
     if get_option('with_lua')
       lua_dep = dependency('lua',
-                           version : '5.4.6',
-                           required : false)
-      if lua_dep.found()
+                           version : '<5.4',
+                           required : true)
         _deps += [ lua_dep ]
-      endif
-      if (not lua_dep.found())
-        message('Trying with subproject lua, but luafilesystem might be problematic')
-        subproject('lua')
-        lua_dep = dependency('lua',
-                             version : '5.4.4',
-                             required : false)
-        if lua_dep.found()
-          _deps += [ lua_dep ]
-        endif
-      else
-        message('Lua not found, will assume spack is present')
-        # Assume spack
-        lua_spack_dep = cppc.find_library('lua', dirs:
-             meson.source_root()+'/../.spack-env/view/lib',
-                                          required: true)
-        _deps += [ lua_spack_dep ]
-      endif
       # Build the executable
       yds = executable('yodaStruct',
-                       ['src/main.cpp'],
+                       ['src/main.cpp',
+                       'src/opt_parser.cpp'],
                        link_with : _linkto,
-                       dependencies: _deps,
+                       dependencies: [_deps, yds_dep],
                        cpp_args : _args,
                        include_directories : _incdirs,
                        install : true)
