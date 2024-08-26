@@ -71,7 +71,7 @@ boost_dep = dependency('boost',
     'filesystem',
     'system',
   ],
-  required : false,
+  required : true,
   static : true,
 )
 _deps += [ boost_dep ]
