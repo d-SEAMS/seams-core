@@ -47,11 +47,13 @@ _deps += [declare_dependency(link_args: '-lstdc++')]
 # All of which can be installed with meson wrap install <blah> originally
 eigen_dep = dependency('eigen3',
                        version: '3.4.0',
+                       static: true,
                        required: true)
 _deps += [ eigen_dep ]
 
 fmt_dep = dependency('fmt',
                      version: '9.1.0',
+                     static: true,
                      required: true)
 _deps += [ fmt_dep ]
 
@@ -60,13 +62,15 @@ boost_dep = dependency('boost',
     'filesystem',
     'system',
   ],
+  static: true,
   required : false,
 )
 _deps += [ boost_dep ]
 
 libyamlcpp_dep = dependency('yaml-cpp',
-                        fallback: ['yaml-cpp',
-                                   'libyamlcpp_dep'])
+                            static: true,
+                            fallback: ['yaml-cpp',
+                                       'libyamlcpp_dep'])
 _deps += [ libyamlcpp_dep ]
 
 # Include Sources
