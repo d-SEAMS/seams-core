@@ -45,11 +45,11 @@ _deps += m_dep
 _deps += [declare_dependency(link_args: '-lstdc++')]
 
 # All of which can be installed with meson wrap install <blah> originally
-eigen_dep = subproject('eigen').get_variable('eigen_dep')
+eigen_dep = subproject('eigen', default_options: ['default_library=static']).get_variable('eigen_dep')
 _deps += [ eigen_dep ]
 
-fmt_dep = subproject('fmt').get_variable('fmt_dep')
-_deps += [ fmt_dep ]
+fmt_subproj = subproject('fmt', default_options: ['default_library=static'])
+_deps += fmt_subproj.get_variable('fmt_dep')
 
 cmake = import('cmake')
 optv_cppyaml = cmake.subproject_options()
