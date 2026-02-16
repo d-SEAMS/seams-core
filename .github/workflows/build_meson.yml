@@ -5,7 +5,7 @@ on:
   pull_request:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 permissions:
@@ -17,16 +17,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: mamba-org/setup-micromamba@v2
+      - uses: prefix-dev/setup-pixi@v0.8.10
         with:
-          generate-run-shell: true
-          environment-file: environment.yml
-          cache-environment: true
+          cache: true
+          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
 
       - name: Build library with meson
-        shell: micromamba-shell {0}
+        shell: pixi run bash -e {0}
         run: |
-          mkdir bbdir
+          mkdir -p bbdir
           meson setup bbdir
           meson compile -C bbdir
 
@@ -35,18 +34,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: mamba-org/setup-micromamba@v2
+      - uses: prefix-dev/setup-pixi@v0.8.10
         with:
-          generate-run-shell: true
-          environment-file: environment.yml
-          cache-environment: true
+          cache: true
+          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
 
       - name: Test application with meson
-        shell: micromamba-shell {0}
+        shell: pixi run bash -e {0}
         run: |
-          mkdir bbdir
+          mkdir -p bbdir
           meson setup bbdir -Dwith_lua=True \
-          -Dwith_tests=True --prefix $CONDA_PREFIX
+                -Dwith_tests=True --prefix $CONDA_PREFIX
           meson install -C bbdir
           export LD_LIBRARY_PATH=$CONDA_PREFIX/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
           $CONDA_PREFIX/bin/yodaStruct -c lua_inputs/config.yml
