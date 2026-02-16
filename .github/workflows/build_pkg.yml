@@ -4,13 +4,16 @@ jobs:
   build_pkg:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Install Conda environment from environment.yml
-        uses: mamba-org/provision-with-micromamba@main
+      - uses: mamba-org/setup-micromamba@v2
+        with:
+          generate-run-shell: true
+          environment-file: environment.yml
+          cache-environment: true
 
       - name: Build application with cmake
-        shell: bash -l {0}
+        shell: micromamba-shell {0}
         run: |
           luarocks install luafilesystem
           mkdir bbdir
@@ -21,6 +24,6 @@ jobs:
           make install
 
       - name: Run a test
-        shell: bash -l {0}
+        shell: micromamba-shell {0}
         run: |
           $CONDA_PREFIX/bin/yodaStruct -c lua_inputs/config.yml
