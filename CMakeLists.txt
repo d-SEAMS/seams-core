@@ -20,7 +20,7 @@
 #
 
 # CMake version
-cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5...3.31 FATAL_ERROR)
 set(CMAKE_CXX_STANDARD 17)
 
 # Some Defaults
