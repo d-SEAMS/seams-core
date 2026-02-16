@@ -15,9 +15,10 @@ jobs:
       contents: write
     steps:
     - uses: actions/checkout@v4
-    - uses: HaoZeke/doxyYoda@v0.1.1
+    - uses: HaoZeke/doxyYoda@33bb2e287f333af6f4d6ad0e01b2539f4da0b9b9
       with:
         cppreference-tag: true
+        version: 0.1.2
     - run: sudo apt-get install -y doxygen graphviz
     - run: doxygen Doxyfile-prj.cfg
     - name: Upload documentation artifact
