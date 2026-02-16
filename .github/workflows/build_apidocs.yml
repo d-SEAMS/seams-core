@@ -1,31 +1,33 @@
 name: "Build d-SEAMS API Docs"
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build_apidocs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-    - uses: actions/checkout@v2.3.4
-    - name: Get external tags
-      run: |
-        mkdir -p tags
-        cd tags
-        curl https://upload.cppreference.com/mwiki/images/f/f8/cppreference-doxygen-web.tag.xml -o cppreference-doxygen-web.tag.xml
-    - name: Get Theme
-      run: |
-        wget https://github.com/HaoZeke/doxyYoda/releases/download/0.0.2/doxyYoda_0.0.2.tar.gz
-        tar xf doxyYoda_0.0.2.tar.gz
-    - uses: cachix/install-nix-action@v20
+    - uses: actions/checkout@v4
+    - uses: HaoZeke/doxyYoda@v0.1.1
       with:
-        nix_path: nixpkgs=channel:nixos-unstable
-    - uses: cachix/cachix-action@v12
+        cppreference-tag: true
+    - run: sudo apt-get install -y doxygen graphviz
+    - run: doxygen Doxyfile-prj.cfg
+    - name: Upload documentation artifact
+      uses: actions/upload-artifact@v4
       with:
-        name: dseams
-    - run: nix-shell --run "doxygen Doxyfile-prj.cfg"
-    - run: |
-        find docs/ -type f -name "*" -print0 | xargs -0 sed -i '' -e 's/>Pages</>Wiki</g' || true
+        name: documentation
+        path: ./docs/html
     - name: Deploy Documentation
-      if: ${{ (github.ref == 'refs/heads/main' && github.repository == 'd-SEAMS/seams-core') || (github.ref == 'refs/heads/master' && github.repository == 'd-SEAMS/seams-core')}}
-      uses: peaceiris/actions-gh-pages@v3
+      if: ${{ github.ref == 'refs/heads/main' && github.repository == 'd-SEAMS/seams-core' }}
+      uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./docs/html

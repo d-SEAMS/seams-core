@@ -18,11 +18,10 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 # Standard cmake stuff
-include(FindBLAS)
-include(FindLAPACK)
-include(FindBoost)
-include(FindEigen)
-find_package (Eigen3 3.4 REQUIRED NO_MODULE)
+find_package(BLAS REQUIRED)
+find_package(LAPACK REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system filesystem)
+find_package(Eigen3 3.4 REQUIRED NO_MODULE)
 add_compile_options(
   # "-Wall" "-Wpedantic" "-Wextra" "-fexceptions"
   "$<$<CONFIG:Debug>:-O0;-g3;-ggdb>"
@@ -40,10 +39,8 @@ include_directories(
   ${Boost_INCLUDE_DIRS}
   )
 add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
-find_package(
-  "Lua" REQUIRED
-  "Boost" REQUIRED COMPONENTS system filesystem
-  "yaml-cpp")
+find_package(Lua REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 find_package(fmt REQUIRED)
 

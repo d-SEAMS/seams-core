@@ -1,4 +1,5 @@
 # Additions
+.pixi/
 /result
 /.ccls-cache/
 shellBuild/
@@ -9,6 +10,7 @@ bbdir/
 # Manual updates ONLY
 spack.yml
 /.spack-env/
+!pixi.lock
 *.lock
 subprojects
 
