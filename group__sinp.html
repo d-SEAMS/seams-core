@@ -1,0 +1,1375 @@
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen 1.16.1-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>d-SEAMS: Sinp</title>
+<!--BEGIN PROJECT_ICON-->
+<link rel="icon" href="$projecticon" type="image/x-icon" />
+<!--END PROJECT_ICON-->
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<!--BEGIN COPY_CLIPBOARD-->
+<script type="text/javascript" src="clipboard.js"></script>
+<!--END COPY_CLIPBOARD-->
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<!-- <link href="doxygen.css" rel="stylesheet" type="text/css" /> -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+// Dark mode: restore preference from localStorage
+(function() {
+  var stored = localStorage.getItem('doxyYoda-theme');
+  if (stored === 'dark') {
+    document.documentElement.classList.add('dark');
+  } else if (stored === 'light') {
+    document.documentElement.classList.add('light');
+  }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area">
+<a class="project_logo" href="#">
+<img src="dSeamsLogo.png" alt="Logo">
+</a>
+<span class="project_info">d-SEAMS v1.0.0</span>
+<button class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">&#9790;</button>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+  // Code folding: wrap .fragment elements in <details>
+  var fragments = document.querySelectorAll('.fragment');
+  fragments.forEach(function(frag) {
+    var details = document.createElement('details');
+    details.className = 'code-details';
+    var summary = document.createElement('summary');
+    summary.textContent = 'Code';
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard: add copy button to div.fragment elements
+  document.querySelectorAll('div.fragment').forEach(function(frag) {
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', function() {
+      var lines = frag.querySelectorAll('.line');
+      var text = Array.from(lines).map(function(l) { return l.textContent; }).join('\n');
+      if (!text) text = frag.textContent;
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+      });
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById('darkModeToggle');
+  if (toggle) {
+    function updateIcon() {
+      toggle.innerHTML = document.documentElement.classList.contains('dark') ? '&#9788;' : '&#9790;';
+    }
+    updateIcon();
+    toggle.addEventListener('click', function() {
+      var isDark = document.documentElement.classList.toggle('dark');
+      if (isDark) {
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.add('light');
+      }
+      localStorage.setItem('doxyYoda-theme', isDark ? 'dark' : 'light');
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#func-members">Functions</a>  </div>
+  <div class="headertitle"><div class="title">Sinp</div></div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:namespacesinp" id="r_namespacesinp"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacesinp.html">sinp</a></td></tr>
+<tr class="memdesc:namespacesinp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functions for the d-SEAMS readers. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:gac551295f82cf12446912941d5f32000e" id="r_gac551295f82cf12446912941d5f32000e"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__sinp.html#gac551295f82cf12446912941d5f32000e">sinp::getInpFileList</a> (std::string inputFolder)</td></tr>
+<tr class="memdesc:gac551295f82cf12446912941d5f32000e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get file list inside the input folder.  <br /></td></tr>
+<tr class="separator:gac551295f82cf12446912941d5f32000e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga1cbdb840118d27e2c2a3c05393ae8320" id="r_ga1cbdb840118d27e2c2a3c05393ae8320"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__sinp.html#ga1cbdb840118d27e2c2a3c05393ae8320">sinp::readLammpsTrj</a> (std::string filename, int targetFrame, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, bool isSlice=false, std::array&lt; double, 3 &gt; coordLow=std::array&lt; double, 3 &gt;{0, 0, 0}, std::array&lt; double, 3 &gt; coordHigh=std::array&lt; double, 3 &gt;{0, 0, 0})</td></tr>
+<tr class="separator:ga1cbdb840118d27e2c2a3c05393ae8320"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga594a5996c0ea3ba9ee53c2ab475bde7c" id="r_ga594a5996c0ea3ba9ee53c2ab475bde7c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__sinp.html#ga594a5996c0ea3ba9ee53c2ab475bde7c">sinp::readLammpsTrjO</a> (std::string filename, int targetFrame, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, int typeO, bool isSlice=false, std::array&lt; double, 3 &gt; coordLow=std::array&lt; double, 3 &gt;{0, 0, 0}, std::array&lt; double, 3 &gt; coordHigh=std::array&lt; double, 3 &gt;{0, 0, 0})</td></tr>
+<tr class="separator:ga594a5996c0ea3ba9ee53c2ab475bde7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga30633be4befe606953d55db43d389c7b" id="r_ga30633be4befe606953d55db43d389c7b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__sinp.html#ga30633be4befe606953d55db43d389c7b">sinp::readLammpsTrjreduced</a> (std::string filename, int targetFrame, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, int typeI, bool isSlice=false, std::array&lt; double, 3 &gt; coordLow=std::array&lt; double, 3 &gt;{0, 0, 0}, std::array&lt; double, 3 &gt; coordHigh=std::array&lt; double, 3 &gt;{0, 0, 0})</td></tr>
+<tr class="separator:ga30633be4befe606953d55db43d389c7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9aeec41b2c3fea17e5e54fd266b71f0a" id="r_ga9aeec41b2c3fea17e5e54fd266b71f0a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__sinp.html#ga9aeec41b2c3fea17e5e54fd266b71f0a">sinp::readXYZ</a> (std::string filename)</td></tr>
+<tr class="memdesc:ga9aeec41b2c3fea17e5e54fd266b71f0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for reading in atom coordinates from an XYZ file.  <br /></td></tr>
+<tr class="separator:ga9aeec41b2c3fea17e5e54fd266b71f0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gada34d9d30df182a408a6b69ba7310509" id="r_gada34d9d30df182a408a6b69ba7310509"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__sinp.html#gada34d9d30df182a408a6b69ba7310509">sinp::readBonds</a> (std::string filename)</td></tr>
+<tr class="memdesc:gada34d9d30df182a408a6b69ba7310509"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads bonds into a vector of vectors from a file with a specific format.  <br /></td></tr>
+<tr class="separator:gada34d9d30df182a408a6b69ba7310509"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad5a8c377d8ed78c413c13d80ac8261ac" id="r_gad5a8c377d8ed78c413c13d80ac8261ac"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__sinp.html#gad5a8c377d8ed78c413c13d80ac8261ac">sinp::atomInSlice</a> (double x, double y, double z, std::array&lt; double, 3 &gt; coordLow, std::array&lt; double, 3 &gt; coordHigh)</td></tr>
+<tr class="separator:gad5a8c377d8ed78c413c13d80ac8261ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<h2 class="groupheader">Function Documentation</h2>
+<a id="gad5a8c377d8ed78c413c13d80ac8261ac" name="gad5a8c377d8ed78c413c13d80ac8261ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad5a8c377d8ed78c413c13d80ac8261ac">&#9670;&#160;</a></span>atomInSlice()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool sinp::atomInSlice </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>z</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 3 &gt;&#160;</td>
+          <td class="paramname"><em>coordLow</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 3 &gt;&#160;</td>
+          <td class="paramname"><em>coordHigh</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>If this is 3 then the particle is inside the volume slice</p>
+
+<p class="definition">Definition at line <a class="el" href="seams__input_8hpp_source.html#l00088">88</a> of file <a class="el" href="seams__input_8hpp_source.html">seams_input.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   90</span>                                                       {</div>
+<div class="line"><span class="lineno">   91</span>  <span class="keywordtype">int</span> flag = 0; </div>
+<div class="line"><span class="lineno">   92</span> </div>
+<div class="line"><span class="lineno">   93</span>  <span class="keywordflow">if</span> (((x &gt;= coordLow[0]) &amp;&amp; (x &lt;= coordHigh[0])) ||</div>
+<div class="line"><span class="lineno">   94</span>      coordLow[0] == coordHigh[0]) {</div>
+<div class="line"><span class="lineno">   95</span>    flag++;</div>
+<div class="line"><span class="lineno">   96</span>  }</div>
+<div class="line"><span class="lineno">   97</span>  <span class="keywordflow">if</span> (((y &gt;= coordLow[1]) &amp;&amp; (y &lt;= coordHigh[1])) ||</div>
+<div class="line"><span class="lineno">   98</span>      coordLow[1] == coordHigh[1]) {</div>
+<div class="line"><span class="lineno">   99</span>    flag++;</div>
+<div class="line"><span class="lineno">  100</span>  }</div>
+<div class="line"><span class="lineno">  101</span>  <span class="keywordflow">if</span> (((z &gt;= coordLow[2]) &amp;&amp; (z &lt;= coordHigh[2])) ||</div>
+<div class="line"><span class="lineno">  102</span>      coordLow[2] == coordHigh[2]) {</div>
+<div class="line"><span class="lineno">  103</span>    flag++;</div>
+<div class="line"><span class="lineno">  104</span>  }</div>
+<div class="line"><span class="lineno">  105</span> </div>
+<div class="line"><span class="lineno">  106</span>  <span class="keywordflow">if</span> (flag == 3) {</div>
+<div class="line"><span class="lineno">  107</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  108</span>  } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  109</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  110</span>  }</div>
+<div class="line"><span class="lineno">  111</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gac551295f82cf12446912941d5f32000e" name="gac551295f82cf12446912941d5f32000e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac551295f82cf12446912941d5f32000e">&#9670;&#160;</a></span>getInpFileList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::string &gt; sinp::getInpFileList </td>
+          <td>(</td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>inputFolder</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get file list inside the input folder. </p>
+
+</div>
+</div>
+<a id="gada34d9d30df182a408a6b69ba7310509" name="gada34d9d30df182a408a6b69ba7310509"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gada34d9d30df182a408a6b69ba7310509">&#9670;&#160;</a></span>readBonds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; sinp::readBonds </td>
+          <td>(</td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>filename</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Reads bonds into a vector of vectors from a file with a specific format. </p>
+<p>Get all the ring information, from the R.I.N.G.S. file. Each line contains the IDs of the atoms in the ring. This is saved inside a vector of vectors. Rings which have more than three consecutive water molecules are discarded. </p>
+
+<p class="definition">Definition at line <a class="el" href="seams__input_8cpp_source.html#l00024">24</a> of file <a class="el" href="seams__input_8cpp_source.html">seams_input.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   24</span>                                                            {</div>
+<div class="line"><span class="lineno">   25</span>  std::unique_ptr&lt;std::ifstream&gt; inpFile;</div>
+<div class="line"><span class="lineno">   26</span>  inpFile = std::make_unique&lt;std::ifstream&gt;(filename);</div>
+<div class="line"><span class="lineno">   27</span>  std::vector&lt;std::vector&lt;int&gt;&gt; bonds;</div>
+<div class="line"><span class="lineno">   28</span>  std::string line;                <span class="comment">// Current line being read in</span></div>
+<div class="line"><span class="lineno">   29</span>  std::vector&lt;std::string&gt; tokens; <span class="comment">// Vector containing word tokens</span></div>
+<div class="line"><span class="lineno">   30</span>  std::vector&lt;int&gt; id;             <span class="comment">// Vector for the IDs in the ring</span></div>
+<div class="line"><span class="lineno">   31</span> </div>
+<div class="line"><span class="lineno">   32</span>  <span class="keywordflow">if</span> (!(<a class="code hl_function" href="group__gen.html#gaa49625658169d33851df990c1d62f097">gen::file_exists</a>(filename))) {</div>
+<div class="line"><span class="lineno">   33</span>    std::cout &lt;&lt; <span class="stringliteral">&quot;Fatal Error: The bond file does not exist or you gave the &quot;</span></div>
+<div class="line"><span class="lineno">   34</span>                 <span class="stringliteral">&quot;wrong path.\n&quot;</span>;</div>
+<div class="line"><span class="lineno">   35</span>    <span class="comment">// Throw exception?</span></div>
+<div class="line"><span class="lineno">   36</span>    <span class="keywordflow">return</span> bonds;</div>
+<div class="line"><span class="lineno">   37</span>  }</div>
+<div class="line"><span class="lineno">   38</span> </div>
+<div class="line"><span class="lineno">   39</span>  <span class="comment">// Format of the file:</span></div>
+<div class="line"><span class="lineno">   40</span>  <span class="comment">// 481 Bonds</span></div>
+<div class="line"><span class="lineno">   41</span>  <span class="comment">// 272    214    906   1361    388      1</span></div>
+<div class="line"><span class="lineno">   42</span>  <span class="comment">// 388   1361   1042   1548    237      1</span></div>
+<div class="line"><span class="lineno">   43</span>  <span class="comment">// 272   1536   1582   1701   1905      1</span></div>
+<div class="line"><span class="lineno">   44</span> </div>
+<div class="line"><span class="lineno">   45</span>  <span class="keywordflow">if</span> (inpFile-&gt;is_open()) {</div>
+<div class="line"><span class="lineno">   46</span>    <span class="comment">// ----------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">   47</span>    <span class="comment">// At this point we know that the file is open</span></div>
+<div class="line"><span class="lineno">   48</span>    std::getline((*inpFile), line); <span class="comment">// Read in bonds</span></div>
+<div class="line"><span class="lineno">   49</span>    <span class="comment">// Run this until EOF or you reach the next timestep</span></div>
+<div class="line"><span class="lineno">   50</span>    <span class="keywordflow">while</span> (std::getline((*inpFile), line)) {</div>
+<div class="line"><span class="lineno">   51</span>      <span class="comment">// Read in lines and tokenize them into std::string words</span></div>
+<div class="line"><span class="lineno">   52</span>      tokens = <a class="code hl_function" href="group__gen.html#gaabdeca1aa6b867687a3540e97447544a">gen::tokenizer</a>(line);</div>
+<div class="line"><span class="lineno">   53</span> </div>
+<div class="line"><span class="lineno">   54</span>      <span class="keywordtype">id</span>.clear();</div>
+<div class="line"><span class="lineno">   55</span> </div>
+<div class="line"><span class="lineno">   56</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; tokens.size(); i++) {</div>
+<div class="line"><span class="lineno">   57</span>        <span class="keywordtype">id</span>.push_back(std::stoi(tokens[i]));</div>
+<div class="line"><span class="lineno">   58</span>      } <span class="comment">// end of for, assigning values to id</span></div>
+<div class="line"><span class="lineno">   59</span> </div>
+<div class="line"><span class="lineno">   60</span>      bonds.push_back(<span class="keywordtype">id</span>);</div>
+<div class="line"><span class="lineno">   61</span> </div>
+<div class="line"><span class="lineno">   62</span>    } <span class="comment">// end of while, till EOF</span></div>
+<div class="line"><span class="lineno">   63</span>    <span class="comment">// ----------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">   64</span>  } <span class="comment">// End of if file open statement</span></div>
+<div class="line"><span class="lineno">   65</span> </div>
+<div class="line"><span class="lineno">   66</span>  inpFile-&gt;close();</div>
+<div class="line"><span class="lineno">   67</span> </div>
+<div class="line"><span class="lineno">   68</span>  <span class="keywordflow">return</span> bonds;</div>
+<div class="line"><span class="lineno">   69</span>}</div>
+<div class="ttc" id="agroup__gen_html_gaa49625658169d33851df990c1d62f097"><div class="ttname"><a href="group__gen.html#gaa49625658169d33851df990c1d62f097">gen::file_exists</a></div><div class="ttdeci">bool file_exists(const std::string &amp;name)</div><div class="ttdoc">Function for checking if a file exists or not.</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00298">generic.hpp:298</a></div></div>
+<div class="ttc" id="agroup__gen_html_gaabdeca1aa6b867687a3540e97447544a"><div class="ttname"><a href="group__gen.html#gaabdeca1aa6b867687a3540e97447544a">gen::tokenizer</a></div><div class="ttdeci">std::vector&lt; std::string &gt; tokenizer(std::string line)</div><div class="ttdoc">Function for tokenizing line strings into words (strings) delimited by whitespace....</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00259">generic.hpp:259</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga1cbdb840118d27e2c2a3c05393ae8320" name="ga1cbdb840118d27e2c2a3c05393ae8320"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga1cbdb840118d27e2c2a3c05393ae8320">&#9670;&#160;</a></span>readLammpsTrj()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; sinp::readLammpsTrj </td>
+          <td>(</td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>filename</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>targetFrame</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *&#160;</td>
+          <td class="paramname"><em>yCloud</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isSlice</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 3 &gt;&#160;</td>
+          <td class="paramname"><em>coordLow</em> = <code>std::array&lt;double,&#160;3&gt;{0,&#160;0,&#160;0}</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 3 &gt;&#160;</td>
+          <td class="paramname"><em>coordHigh</em> = <code>std::array&lt;double,&#160;3&gt;{0,&#160;0,&#160;0}</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Function for reading in a specified frame (frame number and not timestep value)</p>
+<p>Function for reading in a lammps file. Reads in a specified frame (frame number and not timestep value). </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">filename</td><td>The name of the lammps trajectory file to be read in </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">targetFrame</td><td>The frame number whose information will be read in </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">yCloud</td><td>The outputted PointCloud </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">isSlice</td><td>This decides whether a slice will be created or not </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">coordLow</td><td>Contains the lower limits of the slice, if a slice is to be created </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">coordHigh</td><td>Contains the upper limits of the slice, if a slice is to be created </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="seams__input_8cpp_source.html#l00212">212</a> of file <a class="el" href="seams__input_8cpp_source.html">seams_input.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  215</span>                                                   {</div>
+<div class="line"><span class="lineno">  216</span>  std::unique_ptr&lt;std::ifstream&gt; dumpFile;</div>
+<div class="line"><span class="lineno">  217</span>  dumpFile = std::make_unique&lt;std::ifstream&gt;(filename);</div>
+<div class="line"><span class="lineno">  218</span>  std::string line;                <span class="comment">// Current line being read in</span></div>
+<div class="line"><span class="lineno">  219</span>  std::vector&lt;std::string&gt; tokens; <span class="comment">// Vector containing word tokens</span></div>
+<div class="line"><span class="lineno">  220</span>  std::vector&lt;double&gt; numbers;     <span class="comment">// Vector containing type double numbers</span></div>
+<div class="line"><span class="lineno">  221</span>  std::vector&lt;double&gt; tilt;        <span class="comment">// Vector containing tilt factors</span></div>
+<div class="line"><span class="lineno">  222</span>  <span class="keywordtype">int</span> currentFrame = 0;            <span class="comment">// Current frame being read in</span></div>
+<div class="line"><span class="lineno">  223</span>  <span class="keywordtype">int</span> nop = -1;                    <span class="comment">// Number of atoms in targetFrame</span></div>
+<div class="line"><span class="lineno">  224</span>  <span class="keywordtype">bool</span> foundFrame =</div>
+<div class="line"><span class="lineno">  225</span>      <span class="keyword">false</span>;            <span class="comment">// Determines whether targetFrame has been found or not</span></div>
+<div class="line"><span class="lineno">  226</span>  <span class="keywordtype">bool</span> readNOP = <span class="keyword">false</span>; <span class="comment">// Flag for reading in the number of atoms</span></div>
+<div class="line"><span class="lineno">  227</span>  <span class="keywordtype">bool</span> readBox = <span class="keyword">false</span>; <span class="comment">// Flag for reading in the box lengths</span></div>
+<div class="line"><span class="lineno">  228</span>  <span class="keywordtype">bool</span> readAtoms = <span class="keyword">false</span>; <span class="comment">// Flag for reading in the atoms</span></div>
+<div class="line"><span class="lineno">  229</span>  <span class="keywordtype">int</span> xIndex, yIndex, zIndex,</div>
+<div class="line"><span class="lineno">  230</span>      typeIndex;     <span class="comment">// Indices for x,y,z coordinates, and LAMMPS type ID</span></div>
+<div class="line"><span class="lineno">  231</span>  <span class="keywordtype">int</span> molIndex = 0;  <span class="comment">// Index for molecular ID</span></div>
+<div class="line"><span class="lineno">  232</span>  <span class="keywordtype">int</span> atomIndex = 0; <span class="comment">// Index for atom ID (Only used if mol ID has not been set)</span></div>
+<div class="line"><span class="lineno">  233</span>  <a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a> iPoint; <span class="comment">// Current point being read in from the file</span></div>
+<div class="line"><span class="lineno">  234</span>  xIndex = yIndex = zIndex = typeIndex = -1; <span class="comment">// Default values</span></div>
+<div class="line"><span class="lineno">  235</span>  <span class="keywordtype">bool</span> isTriclinic = <span class="keyword">false</span>; <span class="comment">// Flag for an orthogonal or triclinic box</span></div>
+<div class="line"><span class="lineno">  236</span> </div>
+<div class="line"><span class="lineno">  237</span>  <span class="keywordflow">if</span> (!(<a class="code hl_function" href="group__gen.html#gaa49625658169d33851df990c1d62f097">gen::file_exists</a>(filename))) {</div>
+<div class="line"><span class="lineno">  238</span>    std::cout</div>
+<div class="line"><span class="lineno">  239</span>        &lt;&lt; <span class="stringliteral">&quot;Fatal Error: The file does not exist or you gave the wrong path.\n&quot;</span>;</div>
+<div class="line"><span class="lineno">  240</span>    <span class="comment">// Throw exception?</span></div>
+<div class="line"><span class="lineno">  241</span>    <span class="keywordflow">return</span> *yCloud;</div>
+<div class="line"><span class="lineno">  242</span>  }</div>
+<div class="line"><span class="lineno">  243</span> </div>
+<div class="line"><span class="lineno">  244</span>  <span class="comment">// The format of the LAMMPS trajectory file is:</span></div>
+<div class="line"><span class="lineno">  245</span>  <span class="comment">// ITEM: TIMESTEP</span></div>
+<div class="line"><span class="lineno">  246</span>  <span class="comment">// 0</span></div>
+<div class="line"><span class="lineno">  247</span>  <span class="comment">// ITEM: NUMBER OF ATOMS</span></div>
+<div class="line"><span class="lineno">  248</span>  <span class="comment">// 4096</span></div>
+<div class="line"><span class="lineno">  249</span>  <span class="comment">// ITEM: BOX BOUNDS pp pp pp</span></div>
+<div class="line"><span class="lineno">  250</span>  <span class="comment">// -7.9599900000000001e-01 5.0164000000000001e+01</span></div>
+<div class="line"><span class="lineno">  251</span>  <span class="comment">// -7.9599900000000001e-01 5.0164000000000001e+01</span></div>
+<div class="line"><span class="lineno">  252</span>  <span class="comment">// -7.9599900000000001e-01 5.0164000000000001e+01</span></div>
+<div class="line"><span class="lineno">  253</span>  <span class="comment">// ITEM: ATOMS id type x y z</span></div>
+<div class="line"><span class="lineno">  254</span>  <span class="comment">// 1 1 0 0 0 etc</span></div>
+<div class="line"><span class="lineno">  255</span>  <span class="keywordflow">if</span> (dumpFile-&gt;is_open()) {</div>
+<div class="line"><span class="lineno">  256</span>    <span class="comment">// ----------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  257</span>    <span class="comment">// At this point we know that the dumpfile is open</span></div>
+<div class="line"><span class="lineno">  258</span>    <span class="comment">// This loop searches for targetFrame</span></div>
+<div class="line"><span class="lineno">  259</span>    <span class="keywordflow">while</span> (std::getline((*dumpFile), line)) {</div>
+<div class="line"><span class="lineno">  260</span>      <span class="comment">// Read in lines and tokenize them</span></div>
+<div class="line"><span class="lineno">  261</span>      tokens = <a class="code hl_function" href="group__gen.html#gaabdeca1aa6b867687a3540e97447544a">gen::tokenizer</a>(line);</div>
+<div class="line"><span class="lineno">  262</span>      <span class="comment">// Find out which timestep number</span></div>
+<div class="line"><span class="lineno">  263</span>      <span class="comment">// you are inside</span></div>
+<div class="line"><span class="lineno">  264</span>      <span class="keywordflow">if</span> (tokens[0].compare(<span class="stringliteral">&quot;ITEM:&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  265</span>        <span class="keywordflow">if</span> (tokens[1].compare(<span class="stringliteral">&quot;TIMESTEP&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  266</span>          <span class="comment">// Now you are in a new timestep. Update frame number</span></div>
+<div class="line"><span class="lineno">  267</span>          currentFrame++;</div>
+<div class="line"><span class="lineno">  268</span>        }</div>
+<div class="line"><span class="lineno">  269</span>      }</div>
+<div class="line"><span class="lineno">  270</span> </div>
+<div class="line"><span class="lineno">  271</span>      <span class="comment">// If targetFrame has been found</span></div>
+<div class="line"><span class="lineno">  272</span>      <span class="comment">// break out of the while loop</span></div>
+<div class="line"><span class="lineno">  273</span>      <span class="keywordflow">if</span> (currentFrame == targetFrame) {</div>
+<div class="line"><span class="lineno">  274</span>        foundFrame = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  275</span>        <span class="keywordflow">break</span>; <span class="comment">// Exit the while loop</span></div>
+<div class="line"><span class="lineno">  276</span>      }</div>
+<div class="line"><span class="lineno">  277</span>    } <span class="comment">// End of while loop searching for targetFrame</span></div>
+<div class="line"><span class="lineno">  278</span>    <span class="comment">// ----------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  279</span>    <span class="comment">// Before filling up the PointCloud, if the vectors are filled</span></div>
+<div class="line"><span class="lineno">  280</span>    <span class="comment">// empty them</span></div>
+<div class="line"><span class="lineno">  281</span>    *yCloud = <a class="code hl_function" href="group__molSys.html#gad8acfb41ee6bc0258612e9cac24269b2">molSys::clearPointCloud</a>(yCloud);</div>
+<div class="line"><span class="lineno">  282</span> </div>
+<div class="line"><span class="lineno">  283</span>    <span class="comment">// ----------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  284</span>    <span class="comment">// If targetFrame has been found, read in the box lengths,</span></div>
+<div class="line"><span class="lineno">  285</span>    <span class="comment">// number of atoms and then read in atom positions, type, molID</span></div>
+<div class="line"><span class="lineno">  286</span>    <span class="comment">// By default, set molID=1 if not specified</span></div>
+<div class="line"><span class="lineno">  287</span>    <span class="keywordflow">if</span> (foundFrame) {</div>
+<div class="line"><span class="lineno">  288</span>      <span class="comment">// Run this until EOF or you reach the next timestep</span></div>
+<div class="line"><span class="lineno">  289</span>      <span class="keywordflow">while</span> (std::getline((*dumpFile), line)) {</div>
+<div class="line"><span class="lineno">  290</span>        <span class="comment">// Read in lines and tokenize them into std::string words and &lt;double&gt;</span></div>
+<div class="line"><span class="lineno">  291</span>        <span class="comment">// numbers</span></div>
+<div class="line"><span class="lineno">  292</span>        tokens = <a class="code hl_function" href="group__gen.html#gaabdeca1aa6b867687a3540e97447544a">gen::tokenizer</a>(line);</div>
+<div class="line"><span class="lineno">  293</span>        numbers = <a class="code hl_function" href="group__gen.html#ga98b7a158dd7a61350fdd6ca43a432e4f">gen::tokenizerDouble</a>(line);</div>
+<div class="line"><span class="lineno">  294</span> </div>
+<div class="line"><span class="lineno">  295</span>        <span class="comment">// If you&#39;ve reached the timestep line then you&#39;ve reached the</span></div>
+<div class="line"><span class="lineno">  296</span>        <span class="comment">// next frame. Break out of the while loop</span></div>
+<div class="line"><span class="lineno">  297</span>        <span class="keywordflow">if</span> (tokens[0].compare(<span class="stringliteral">&quot;ITEM:&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  298</span>          <span class="keywordflow">if</span> (tokens[1].compare(<span class="stringliteral">&quot;TIMESTEP&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  299</span>            <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">  300</span>          }</div>
+<div class="line"><span class="lineno">  301</span>        }</div>
+<div class="line"><span class="lineno">  302</span> </div>
+<div class="line"><span class="lineno">  303</span>        <span class="comment">// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*</span></div>
+<div class="line"><span class="lineno">  304</span>        <span class="comment">// Read number of particles</span></div>
+<div class="line"><span class="lineno">  305</span>        <span class="keywordflow">if</span> (readNOP) {</div>
+<div class="line"><span class="lineno">  306</span>          nop = std::stoi(line.data());</div>
+<div class="line"><span class="lineno">  307</span>          readNOP = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  308</span>          yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>.reserve(nop);</div>
+<div class="line"><span class="lineno">  309</span>          yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a> = nop;</div>
+<div class="line"><span class="lineno">  310</span>        }</div>
+<div class="line"><span class="lineno">  311</span>        <span class="comment">// Read box lengths</span></div>
+<div class="line"><span class="lineno">  312</span>        <span class="keywordflow">if</span> (readBox) {</div>
+<div class="line"><span class="lineno">  313</span>          <span class="comment">// You&#39;ve reached the end of box lengths</span></div>
+<div class="line"><span class="lineno">  314</span>          <span class="keywordflow">if</span> (tokens[0].compare(<span class="stringliteral">&quot;ITEM:&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  315</span>            readBox = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  316</span>            <span class="comment">// If the box is triclinic, get the</span></div>
+<div class="line"><span class="lineno">  317</span>            <span class="comment">// orthogonal &#39;bounding box&#39;</span></div>
+<div class="line"><span class="lineno">  318</span>            <span class="keywordflow">if</span> (isTriclinic) {</div>
+<div class="line"><span class="lineno">  319</span>              <span class="comment">// Update tilt factors</span></div>
+<div class="line"><span class="lineno">  320</span>              <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; tilt.size(); k++) {</div>
+<div class="line"><span class="lineno">  321</span>                yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.push_back(tilt[k]);</div>
+<div class="line"><span class="lineno">  322</span>              }</div>
+<div class="line"><span class="lineno">  323</span>            } <span class="comment">// end of check for triclinic</span></div>
+<div class="line"><span class="lineno">  324</span>          }</div>
+<div class="line"><span class="lineno">  325</span>          <span class="comment">// Or else fill up the box lengths</span></div>
+<div class="line"><span class="lineno">  326</span>          <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  327</span>            yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.push_back(numbers[1] - numbers[0]); <span class="comment">// Update box length</span></div>
+<div class="line"><span class="lineno">  328</span>            yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>.push_back(</div>
+<div class="line"><span class="lineno">  329</span>                numbers[0]); <span class="comment">// Update the lower box coordinate</span></div>
+<div class="line"><span class="lineno">  330</span>            <span class="comment">// Do this for a triclinic box only</span></div>
+<div class="line"><span class="lineno">  331</span>            <span class="keywordflow">if</span> (numbers.size() == 3) {</div>
+<div class="line"><span class="lineno">  332</span>              isTriclinic = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  333</span>              tilt.push_back(numbers[2]);</div>
+<div class="line"><span class="lineno">  334</span>            }</div>
+<div class="line"><span class="lineno">  335</span>          }</div>
+<div class="line"><span class="lineno">  336</span>        }</div>
+<div class="line"><span class="lineno">  337</span>        <span class="comment">// Read atoms into yCloud line by line</span></div>
+<div class="line"><span class="lineno">  338</span>        <span class="keywordflow">if</span> (readAtoms) {</div>
+<div class="line"><span class="lineno">  339</span>          iPoint.<a class="code hl_variable" href="group__molSys.html#ga4ffe5d88981575daa2adcd36cab0ce9f">type</a> = numbers[typeIndex];</div>
+<div class="line"><span class="lineno">  340</span>          iPoint.<a class="code hl_variable" href="group__molSys.html#gaeed1df09b79527444ceb1bc0836f4f1a">molID</a> = numbers[molIndex];</div>
+<div class="line"><span class="lineno">  341</span>          iPoint.<a class="code hl_variable" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a> = numbers[atomIndex];</div>
+<div class="line"><span class="lineno">  342</span>          iPoint.<a class="code hl_variable" href="group__molSys.html#ga25dff2dc0e4cd802b9057d90b3c08d76">x</a> = numbers[xIndex];</div>
+<div class="line"><span class="lineno">  343</span>          iPoint.<a class="code hl_variable" href="group__molSys.html#ga364150fed66ad63fd2d3995909d43fe0">y</a> = numbers[yIndex];</div>
+<div class="line"><span class="lineno">  344</span>          iPoint.<a class="code hl_variable" href="group__molSys.html#ga47e132eb01596124477945fbe4345d73">z</a> = numbers[zIndex];</div>
+<div class="line"><span class="lineno">  345</span>          <span class="comment">// Check if the particle is inside the volume Slice</span></div>
+<div class="line"><span class="lineno">  346</span>          <span class="comment">// or not</span></div>
+<div class="line"><span class="lineno">  347</span>          <span class="keywordflow">if</span> (isSlice) { <span class="comment">// only if a slice has been requested</span></div>
+<div class="line"><span class="lineno">  348</span>            iPoint.<a class="code hl_variable" href="group__molSys.html#ga825e22e4d171aea51998d585c925c897">inSlice</a> = <a class="code hl_function" href="group__sinp.html#gad5a8c377d8ed78c413c13d80ac8261ac">sinp::atomInSlice</a>(iPoint.<a class="code hl_variable" href="group__molSys.html#ga25dff2dc0e4cd802b9057d90b3c08d76">x</a>, iPoint.<a class="code hl_variable" href="group__molSys.html#ga364150fed66ad63fd2d3995909d43fe0">y</a>, iPoint.<a class="code hl_variable" href="group__molSys.html#ga47e132eb01596124477945fbe4345d73">z</a>,</div>
+<div class="line"><span class="lineno">  349</span>                                               coordLow, coordHigh);</div>
+<div class="line"><span class="lineno">  350</span>          }</div>
+<div class="line"><span class="lineno">  351</span>          yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>.push_back(iPoint);</div>
+<div class="line"><span class="lineno">  352</span>          yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#ga8e48a0ae066c2585e7320cdaa0cbc8db">idIndexMap</a>[iPoint.<a class="code hl_variable" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a>] = yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>.size() - 1;</div>
+<div class="line"><span class="lineno">  353</span>        }</div>
+<div class="line"><span class="lineno">  354</span>        <span class="comment">// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*</span></div>
+<div class="line"><span class="lineno">  355</span> </div>
+<div class="line"><span class="lineno">  356</span>        <span class="comment">// Tests for reading in nop, box lengths, and atoms</span></div>
+<div class="line"><span class="lineno">  357</span>        <span class="keywordflow">if</span> (tokens[0].compare(<span class="stringliteral">&quot;ITEM:&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  358</span>          <span class="keywordflow">if</span> (tokens[1].compare(<span class="stringliteral">&quot;NUMBER&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  359</span>            readNOP = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  360</span>          }</div>
+<div class="line"><span class="lineno">  361</span>        }</div>
+<div class="line"><span class="lineno">  362</span>        <span class="keywordflow">if</span> (tokens[0].compare(<span class="stringliteral">&quot;ITEM:&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  363</span>          <span class="keywordflow">if</span> (tokens[1].compare(<span class="stringliteral">&quot;BOX&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  364</span>            readBox = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  365</span>          }</div>
+<div class="line"><span class="lineno">  366</span>        }</div>
+<div class="line"><span class="lineno">  367</span>        <span class="keywordflow">if</span> (tokens[0].compare(<span class="stringliteral">&quot;ITEM:&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  368</span>          <span class="keywordflow">if</span> (tokens[1].compare(<span class="stringliteral">&quot;ATOMS&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  369</span>            readAtoms = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  370</span>            <span class="comment">// Now find out which index is the coordinate index etc</span></div>
+<div class="line"><span class="lineno">  371</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 2; i &lt; tokens.size(); i++) {</div>
+<div class="line"><span class="lineno">  372</span>              <span class="keywordflow">if</span> (tokens[i].compare(<span class="stringliteral">&quot;type&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  373</span>                typeIndex = i - 2;</div>
+<div class="line"><span class="lineno">  374</span>              }</div>
+<div class="line"><span class="lineno">  375</span>              <span class="keywordflow">if</span> (tokens[i].compare(<span class="stringliteral">&quot;x&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  376</span>                xIndex = i - 2;</div>
+<div class="line"><span class="lineno">  377</span>              }</div>
+<div class="line"><span class="lineno">  378</span>              <span class="keywordflow">if</span> (tokens[i].compare(<span class="stringliteral">&quot;y&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  379</span>                yIndex = i - 2;</div>
+<div class="line"><span class="lineno">  380</span>              }</div>
+<div class="line"><span class="lineno">  381</span>              <span class="keywordflow">if</span> (tokens[i].compare(<span class="stringliteral">&quot;z&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  382</span>                zIndex = i - 2;</div>
+<div class="line"><span class="lineno">  383</span>              }</div>
+<div class="line"><span class="lineno">  384</span>              <span class="keywordflow">if</span> (tokens[i].compare(<span class="stringliteral">&quot;mol&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  385</span>                molIndex = i - 2;</div>
+<div class="line"><span class="lineno">  386</span>              }</div>
+<div class="line"><span class="lineno">  387</span>              <span class="keywordflow">if</span> (tokens[i].compare(<span class="stringliteral">&quot;id&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  388</span>                atomIndex = i - 2;</div>
+<div class="line"><span class="lineno">  389</span>              }</div>
+<div class="line"><span class="lineno">  390</span>            } <span class="comment">// End of for loop over tokens</span></div>
+<div class="line"><span class="lineno">  391</span>            <span class="keywordflow">if</span> (molIndex == 0) {</div>
+<div class="line"><span class="lineno">  392</span>              molIndex = atomIndex;</div>
+<div class="line"><span class="lineno">  393</span>            } <span class="comment">// Set mol ID=atomID if not given</span></div>
+<div class="line"><span class="lineno">  394</span>          }</div>
+<div class="line"><span class="lineno">  395</span>        } <span class="comment">// End of nested if loops for checking atom</span></div>
+<div class="line"><span class="lineno">  396</span> </div>
+<div class="line"><span class="lineno">  397</span>      } <span class="comment">// End of while</span></div>
+<div class="line"><span class="lineno">  398</span>    }   <span class="comment">// End of targetFrame found</span></div>
+<div class="line"><span class="lineno">  399</span>    <span class="comment">// ----------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  400</span>  } <span class="comment">// End of if file open statement</span></div>
+<div class="line"><span class="lineno">  401</span> </div>
+<div class="line"><span class="lineno">  402</span>  <span class="comment">// Check if you filled in the frame correctly</span></div>
+<div class="line"><span class="lineno">  403</span>  <span class="keywordflow">if</span> (!(foundFrame)) {</div>
+<div class="line"><span class="lineno">  404</span>    std::cout &lt;&lt; <span class="stringliteral">&quot;You entered a frame that doesn&#39;t exist.\n&quot;</span>;</div>
+<div class="line"><span class="lineno">  405</span>  } <span class="comment">// Throw exception</span></div>
+<div class="line"><span class="lineno">  406</span>  <span class="keywordflow">if</span> (foundFrame) {</div>
+<div class="line"><span class="lineno">  407</span>    <span class="keywordflow">if</span> (yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>.size() != yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a>) {</div>
+<div class="line"><span class="lineno">  408</span>      std::cout &lt;&lt; <span class="stringliteral">&quot;Atoms didn&#39;t get filled in properly.\n&quot;</span>;</div>
+<div class="line"><span class="lineno">  409</span>    }</div>
+<div class="line"><span class="lineno">  410</span>  } <span class="comment">// Throw exception</span></div>
+<div class="line"><span class="lineno">  411</span>  yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#gafccb5a0daab40c3ccc83e4494f4176d7">currentFrame</a> = targetFrame;</div>
+<div class="line"><span class="lineno">  412</span> </div>
+<div class="line"><span class="lineno">  413</span>  dumpFile-&gt;close();</div>
+<div class="line"><span class="lineno">  414</span>  <span class="keywordflow">return</span> *yCloud;</div>
+<div class="line"><span class="lineno">  415</span>}</div>
+<div class="ttc" id="agroup__gen_html_ga98b7a158dd7a61350fdd6ca43a432e4f"><div class="ttname"><a href="group__gen.html#ga98b7a158dd7a61350fdd6ca43a432e4f">gen::tokenizerDouble</a></div><div class="ttdeci">std::vector&lt; double &gt; tokenizerDouble(std::string line)</div><div class="ttdoc">Function for tokenizing line strings into a vector of doubles.</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00270">generic.hpp:270</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga25dff2dc0e4cd802b9057d90b3c08d76"><div class="ttname"><a href="group__molSys.html#ga25dff2dc0e4cd802b9057d90b3c08d76">molSys::Point::x</a></div><div class="ttdeci">T x</div><div class="ttdoc">type ID, molID, atomID</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00151">mol_sys.hpp:151</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga2bdcb9260bd83f313a2d27fcc6437ef1"><div class="ttname"><a href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">molSys::PointCloud::nop</a></div><div class="ttdeci">int nop</div><div class="ttdoc">Current frame number.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00173">mol_sys.hpp:173</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga364150fed66ad63fd2d3995909d43fe0"><div class="ttname"><a href="group__molSys.html#ga364150fed66ad63fd2d3995909d43fe0">molSys::Point::y</a></div><div class="ttdeci">T y</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00151">mol_sys.hpp:151</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga47e132eb01596124477945fbe4345d73"><div class="ttname"><a href="group__molSys.html#ga47e132eb01596124477945fbe4345d73">molSys::Point::z</a></div><div class="ttdeci">T z</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00151">mol_sys.hpp:151</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga4ffe5d88981575daa2adcd36cab0ce9f"><div class="ttname"><a href="group__molSys.html#ga4ffe5d88981575daa2adcd36cab0ce9f">molSys::Point::type</a></div><div class="ttdeci">int type</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00150">mol_sys.hpp:150</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga67ab89369cd26572878a91afd521ef81"><div class="ttname"><a href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">molSys::PointCloud::pts</a></div><div class="ttdeci">std::vector&lt; S &gt; pts</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00171">mol_sys.hpp:171</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga825e22e4d171aea51998d585c925c897"><div class="ttname"><a href="group__molSys.html#ga825e22e4d171aea51998d585c925c897">molSys::Point::inSlice</a></div><div class="ttdeci">bool inSlice</div><div class="ttdoc">Type of ice/water etc based on cij.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00155">mol_sys.hpp:155</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga8e48a0ae066c2585e7320cdaa0cbc8db"><div class="ttname"><a href="group__molSys.html#ga8e48a0ae066c2585e7320cdaa0cbc8db">molSys::PointCloud::idIndexMap</a></div><div class="ttdeci">std::unordered_map&lt; int, int &gt; idIndexMap</div><div class="ttdoc">xlo, ylo, zlo</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00176">mol_sys.hpp:176</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gaa7d9b8543780baf4a495c7acdb1f87d8"><div class="ttname"><a href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">molSys::PointCloud::box</a></div><div class="ttdeci">std::vector&lt; T &gt; box</div><div class="ttdoc">Number of atoms.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00174">mol_sys.hpp:174</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gac861daaeb2b1e75a6ac9eb3390bc6105"><div class="ttname"><a href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">molSys::PointCloud::boxLow</a></div><div class="ttdeci">std::vector&lt; T &gt; boxLow</div><div class="ttdoc">Periodic box lengths.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00175">mol_sys.hpp:175</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gad8acfb41ee6bc0258612e9cac24269b2"><div class="ttname"><a href="group__molSys.html#gad8acfb41ee6bc0258612e9cac24269b2">molSys::clearPointCloud</a></div><div class="ttdeci">molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; clearPointCloud(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud)</div><div class="ttdoc">//! Function for clearing vectors in PointCloud after multiple usage</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8cpp_source.html#l00024">mol_sys.cpp:24</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gaeed1df09b79527444ceb1bc0836f4f1a"><div class="ttname"><a href="group__molSys.html#gaeed1df09b79527444ceb1bc0836f4f1a">molSys::Point::molID</a></div><div class="ttdeci">int molID</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00150">mol_sys.hpp:150</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gafbcfc945f41267043cddfd9bae8c10a2"><div class="ttname"><a href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">molSys::Point::atomID</a></div><div class="ttdeci">int atomID</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00150">mol_sys.hpp:150</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gafccb5a0daab40c3ccc83e4494f4176d7"><div class="ttname"><a href="group__molSys.html#gafccb5a0daab40c3ccc83e4494f4176d7">molSys::PointCloud::currentFrame</a></div><div class="ttdeci">int currentFrame</div><div class="ttdoc">Collection of points.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00172">mol_sys.hpp:172</a></div></div>
+<div class="ttc" id="agroup__sinp_html_gad5a8c377d8ed78c413c13d80ac8261ac"><div class="ttname"><a href="group__sinp.html#gad5a8c377d8ed78c413c13d80ac8261ac">sinp::atomInSlice</a></div><div class="ttdeci">bool atomInSlice(double x, double y, double z, std::array&lt; double, 3 &gt; coordLow, std::array&lt; double, 3 &gt; coordHigh)</div><div class="ttdef"><b>Definition</b> <a href="seams__input_8hpp_source.html#l00088">seams_input.hpp:88</a></div></div>
+<div class="ttc" id="astructmolSys_1_1Point_html"><div class="ttname"><a href="structmolSys_1_1Point.html">molSys::Point</a></div><div class="ttdoc">This contains per-particle information.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00149">mol_sys.hpp:149</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga594a5996c0ea3ba9ee53c2ab475bde7c" name="ga594a5996c0ea3ba9ee53c2ab475bde7c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga594a5996c0ea3ba9ee53c2ab475bde7c">&#9670;&#160;</a></span>readLammpsTrjO()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; sinp::readLammpsTrjO </td>
+          <td>(</td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>filename</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>targetFrame</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *&#160;</td>
+          <td class="paramname"><em>yCloud</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>typeO</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isSlice</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 3 &gt;&#160;</td>
+          <td class="paramname"><em>coordLow</em> = <code>std::array&lt;double,&#160;3&gt;{0,&#160;0,&#160;0}</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 3 &gt;&#160;</td>
+          <td class="paramname"><em>coordHigh</em> = <code>std::array&lt;double,&#160;3&gt;{0,&#160;0,&#160;0}</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Function for reading in a specified frame (frame number and not timestep value) / This only reads in oxygen atoms</p>
+<p>Function for reading in a lammps file; and saves only the Oxygen atoms. This is an overloaded function. The Oxygen atom ID must be specified. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">filename</td><td>The name of the lammps trajectory file to be read in </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">targetFrame</td><td>The frame number whose information will be read in </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">yCloud</td><td>The outputted PointCloud </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">typeO</td><td>The type ID of the Oxygen atoms </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">isSlice</td><td>This decides whether a slice will be created or not </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">coordLow</td><td>Contains the lower limits of the slice, if a slice is to be created </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">coordHigh</td><td>Contains the upper limits of the slice, if a slice is to be created </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="seams__input_8cpp_source.html#l00431">431</a> of file <a class="el" href="seams__input_8cpp_source.html">seams_input.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  434</span>                                                    {</div>
+<div class="line"><span class="lineno">  435</span>  std::unique_ptr&lt;std::ifstream&gt; dumpFile;</div>
+<div class="line"><span class="lineno">  436</span>  dumpFile = std::make_unique&lt;std::ifstream&gt;(filename);</div>
+<div class="line"><span class="lineno">  437</span>  std::string line;                <span class="comment">// Current line being read in</span></div>
+<div class="line"><span class="lineno">  438</span>  std::vector&lt;std::string&gt; tokens; <span class="comment">// Vector containing word tokens</span></div>
+<div class="line"><span class="lineno">  439</span>  std::vector&lt;double&gt; numbers;     <span class="comment">// Vector containing type double numbers</span></div>
+<div class="line"><span class="lineno">  440</span>  std::vector&lt;double&gt; tilt;        <span class="comment">// Vector containing tilt factors</span></div>
+<div class="line"><span class="lineno">  441</span>  <span class="keywordtype">int</span> currentFrame = 0;            <span class="comment">// Current frame being read in</span></div>
+<div class="line"><span class="lineno">  442</span>  <span class="keywordtype">int</span> nop = -1;                    <span class="comment">// Number of atoms in targetFrame</span></div>
+<div class="line"><span class="lineno">  443</span>  <span class="keywordtype">bool</span> foundFrame =</div>
+<div class="line"><span class="lineno">  444</span>      <span class="keyword">false</span>;            <span class="comment">// Determines whether targetFrame has been found or not</span></div>
+<div class="line"><span class="lineno">  445</span>  <span class="keywordtype">bool</span> readNOP = <span class="keyword">false</span>; <span class="comment">// Flag for reading in the number of atoms</span></div>
+<div class="line"><span class="lineno">  446</span>  <span class="keywordtype">bool</span> readBox = <span class="keyword">false</span>; <span class="comment">// Flag for reading in the box lengths</span></div>
+<div class="line"><span class="lineno">  447</span>  <span class="keywordtype">bool</span> readAtoms = <span class="keyword">false</span>; <span class="comment">// Flag for reading in the atoms</span></div>
+<div class="line"><span class="lineno">  448</span>  <span class="keywordtype">int</span> xIndex, yIndex, zIndex,</div>
+<div class="line"><span class="lineno">  449</span>      typeIndex;     <span class="comment">// Indices for x,y,z coordinates, and LAMMPS type ID</span></div>
+<div class="line"><span class="lineno">  450</span>  <span class="keywordtype">int</span> molIndex = 0;  <span class="comment">// Index for molecular ID</span></div>
+<div class="line"><span class="lineno">  451</span>  <span class="keywordtype">int</span> atomIndex = 0; <span class="comment">// Index for atom ID (Only used if mol ID has not been set)</span></div>
+<div class="line"><span class="lineno">  452</span>  <a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a> iPoint; <span class="comment">// Current point being read in from the file</span></div>
+<div class="line"><span class="lineno">  453</span>  xIndex = yIndex = zIndex = typeIndex = -1; <span class="comment">// Default values</span></div>
+<div class="line"><span class="lineno">  454</span>  <span class="keywordtype">bool</span> isTriclinic = <span class="keyword">false</span>; <span class="comment">// Flag for an orthogonal or triclinic box</span></div>
+<div class="line"><span class="lineno">  455</span>  <span class="keywordtype">int</span> nOxy = 0;             <span class="comment">// Number of oxygen atoms</span></div>
+<div class="line"><span class="lineno">  456</span> </div>
+<div class="line"><span class="lineno">  457</span>  <span class="keywordflow">if</span> (!(<a class="code hl_function" href="group__gen.html#gaa49625658169d33851df990c1d62f097">gen::file_exists</a>(filename))) {</div>
+<div class="line"><span class="lineno">  458</span>    std::cout</div>
+<div class="line"><span class="lineno">  459</span>        &lt;&lt; <span class="stringliteral">&quot;Fatal Error: The file does not exist or you gave the wrong path.\n&quot;</span>;</div>
+<div class="line"><span class="lineno">  460</span>    <span class="comment">// Throw exception?</span></div>
+<div class="line"><span class="lineno">  461</span>    <span class="keywordflow">return</span> *yCloud;</div>
+<div class="line"><span class="lineno">  462</span>  }</div>
+<div class="line"><span class="lineno">  463</span> </div>
+<div class="line"><span class="lineno">  464</span>  <span class="comment">// The format of the LAMMPS trajectory file is:</span></div>
+<div class="line"><span class="lineno">  465</span>  <span class="comment">// ITEM: TIMESTEP</span></div>
+<div class="line"><span class="lineno">  466</span>  <span class="comment">// 0</span></div>
+<div class="line"><span class="lineno">  467</span>  <span class="comment">// ITEM: NUMBER OF ATOMS</span></div>
+<div class="line"><span class="lineno">  468</span>  <span class="comment">// 4096</span></div>
+<div class="line"><span class="lineno">  469</span>  <span class="comment">// ITEM: BOX BOUNDS pp pp pp</span></div>
+<div class="line"><span class="lineno">  470</span>  <span class="comment">// -7.9599900000000001e-01 5.0164000000000001e+01</span></div>
+<div class="line"><span class="lineno">  471</span>  <span class="comment">// -7.9599900000000001e-01 5.0164000000000001e+01</span></div>
+<div class="line"><span class="lineno">  472</span>  <span class="comment">// -7.9599900000000001e-01 5.0164000000000001e+01</span></div>
+<div class="line"><span class="lineno">  473</span>  <span class="comment">// ITEM: ATOMS id type x y z</span></div>
+<div class="line"><span class="lineno">  474</span>  <span class="comment">// 1 1 0 0 0 etc</span></div>
+<div class="line"><span class="lineno">  475</span>  <span class="keywordflow">if</span> (dumpFile-&gt;is_open()) {</div>
+<div class="line"><span class="lineno">  476</span>    <span class="comment">// ----------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  477</span>    <span class="comment">// At this point we know that the dumpfile is open</span></div>
+<div class="line"><span class="lineno">  478</span>    <span class="comment">// This loop searches for targetFrame</span></div>
+<div class="line"><span class="lineno">  479</span>    <span class="keywordflow">while</span> (std::getline((*dumpFile), line)) {</div>
+<div class="line"><span class="lineno">  480</span>      <span class="comment">// Read in lines and tokenize them</span></div>
+<div class="line"><span class="lineno">  481</span>      tokens = <a class="code hl_function" href="group__gen.html#gaabdeca1aa6b867687a3540e97447544a">gen::tokenizer</a>(line);</div>
+<div class="line"><span class="lineno">  482</span>      <span class="comment">// Find out which timestep number</span></div>
+<div class="line"><span class="lineno">  483</span>      <span class="comment">// you are inside</span></div>
+<div class="line"><span class="lineno">  484</span>      <span class="keywordflow">if</span> (tokens[0].compare(<span class="stringliteral">&quot;ITEM:&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  485</span>        <span class="keywordflow">if</span> (tokens[1].compare(<span class="stringliteral">&quot;TIMESTEP&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  486</span>          <span class="comment">// Now you are in a new timestep. Update frame number</span></div>
+<div class="line"><span class="lineno">  487</span>          currentFrame++;</div>
+<div class="line"><span class="lineno">  488</span>        }</div>
+<div class="line"><span class="lineno">  489</span>      }</div>
+<div class="line"><span class="lineno">  490</span> </div>
+<div class="line"><span class="lineno">  491</span>      <span class="comment">// If targetFrame has been found</span></div>
+<div class="line"><span class="lineno">  492</span>      <span class="comment">// break out of the while loop</span></div>
+<div class="line"><span class="lineno">  493</span>      <span class="keywordflow">if</span> (currentFrame == targetFrame) {</div>
+<div class="line"><span class="lineno">  494</span>        foundFrame = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  495</span>        <span class="keywordflow">break</span>; <span class="comment">// Exit the while loop</span></div>
+<div class="line"><span class="lineno">  496</span>      }</div>
+<div class="line"><span class="lineno">  497</span>    } <span class="comment">// End of while loop searching for targetFrame</span></div>
+<div class="line"><span class="lineno">  498</span>    <span class="comment">// ----------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  499</span>    <span class="comment">// Before filling up the PointCloud, if the vectors are filled</span></div>
+<div class="line"><span class="lineno">  500</span>    <span class="comment">// empty them</span></div>
+<div class="line"><span class="lineno">  501</span>    *yCloud = <a class="code hl_function" href="group__molSys.html#gad8acfb41ee6bc0258612e9cac24269b2">molSys::clearPointCloud</a>(yCloud);</div>
+<div class="line"><span class="lineno">  502</span> </div>
+<div class="line"><span class="lineno">  503</span>    <span class="comment">// ----------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  504</span>    <span class="comment">// If targetFrame has been found, read in the box lengths,</span></div>
+<div class="line"><span class="lineno">  505</span>    <span class="comment">// number of atoms and then read in atom positions, type, molID</span></div>
+<div class="line"><span class="lineno">  506</span>    <span class="comment">// By default, set molID=1 if not specified</span></div>
+<div class="line"><span class="lineno">  507</span>    <span class="keywordflow">if</span> (foundFrame) {</div>
+<div class="line"><span class="lineno">  508</span>      <span class="comment">// Run this until EOF or you reach the next timestep</span></div>
+<div class="line"><span class="lineno">  509</span>      <span class="keywordflow">while</span> (std::getline((*dumpFile), line)) {</div>
+<div class="line"><span class="lineno">  510</span>        <span class="comment">// Read in lines and tokenize them into std::string words and &lt;double&gt;</span></div>
+<div class="line"><span class="lineno">  511</span>        <span class="comment">// numbers</span></div>
+<div class="line"><span class="lineno">  512</span>        tokens = <a class="code hl_function" href="group__gen.html#gaabdeca1aa6b867687a3540e97447544a">gen::tokenizer</a>(line);</div>
+<div class="line"><span class="lineno">  513</span>        numbers = <a class="code hl_function" href="group__gen.html#ga98b7a158dd7a61350fdd6ca43a432e4f">gen::tokenizerDouble</a>(line);</div>
+<div class="line"><span class="lineno">  514</span> </div>
+<div class="line"><span class="lineno">  515</span>        <span class="comment">// If you&#39;ve reached the timestep line then you&#39;ve reached the</span></div>
+<div class="line"><span class="lineno">  516</span>        <span class="comment">// next frame. Break out of the while loop</span></div>
+<div class="line"><span class="lineno">  517</span>        <span class="keywordflow">if</span> (tokens[0].compare(<span class="stringliteral">&quot;ITEM:&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  518</span>          <span class="keywordflow">if</span> (tokens[1].compare(<span class="stringliteral">&quot;TIMESTEP&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  519</span>            <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">  520</span>          }</div>
+<div class="line"><span class="lineno">  521</span>        }</div>
+<div class="line"><span class="lineno">  522</span> </div>
+<div class="line"><span class="lineno">  523</span>        <span class="comment">// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*</span></div>
+<div class="line"><span class="lineno">  524</span>        <span class="comment">// Read number of particles</span></div>
+<div class="line"><span class="lineno">  525</span>        <span class="keywordflow">if</span> (readNOP) {</div>
+<div class="line"><span class="lineno">  526</span>          nop = std::stoi(line.data());</div>
+<div class="line"><span class="lineno">  527</span>          readNOP = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  528</span>        }</div>
+<div class="line"><span class="lineno">  529</span>        <span class="comment">// Read box lengths</span></div>
+<div class="line"><span class="lineno">  530</span>        <span class="keywordflow">if</span> (readBox) {</div>
+<div class="line"><span class="lineno">  531</span>          <span class="comment">// You&#39;ve reached the end of box lengths</span></div>
+<div class="line"><span class="lineno">  532</span>          <span class="keywordflow">if</span> (tokens[0].compare(<span class="stringliteral">&quot;ITEM:&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  533</span>            readBox = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  534</span>            <span class="comment">// If the box is triclinic, get the</span></div>
+<div class="line"><span class="lineno">  535</span>            <span class="comment">// orthogonal &#39;bounding box&#39;</span></div>
+<div class="line"><span class="lineno">  536</span>            <span class="keywordflow">if</span> (isTriclinic) {</div>
+<div class="line"><span class="lineno">  537</span>              <span class="comment">// Update tilt factors</span></div>
+<div class="line"><span class="lineno">  538</span>              <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; tilt.size(); k++) {</div>
+<div class="line"><span class="lineno">  539</span>                yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.push_back(tilt[k]);</div>
+<div class="line"><span class="lineno">  540</span>              }</div>
+<div class="line"><span class="lineno">  541</span>            } <span class="comment">// end of check for triclinic</span></div>
+<div class="line"><span class="lineno">  542</span>          }</div>
+<div class="line"><span class="lineno">  543</span>          <span class="comment">// Or else fill up the box lengths</span></div>
+<div class="line"><span class="lineno">  544</span>          <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  545</span>            yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.push_back(numbers[1] - numbers[0]); <span class="comment">// Update box length</span></div>
+<div class="line"><span class="lineno">  546</span>            yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>.push_back(</div>
+<div class="line"><span class="lineno">  547</span>                numbers[0]); <span class="comment">// Update the lower box coordinate</span></div>
+<div class="line"><span class="lineno">  548</span>            <span class="comment">// Do this for a triclinic box only</span></div>
+<div class="line"><span class="lineno">  549</span>            <span class="keywordflow">if</span> (numbers.size() == 3) {</div>
+<div class="line"><span class="lineno">  550</span>              isTriclinic = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  551</span>              tilt.push_back(numbers[2]);</div>
+<div class="line"><span class="lineno">  552</span>            }</div>
+<div class="line"><span class="lineno">  553</span>          }</div>
+<div class="line"><span class="lineno">  554</span>        }</div>
+<div class="line"><span class="lineno">  555</span>        <span class="comment">// Read atoms into yCloud line by line</span></div>
+<div class="line"><span class="lineno">  556</span>        <span class="keywordflow">if</span> (readAtoms) {</div>
+<div class="line"><span class="lineno">  557</span>          iPoint.<a class="code hl_variable" href="group__molSys.html#ga4ffe5d88981575daa2adcd36cab0ce9f">type</a> = numbers[typeIndex];</div>
+<div class="line"><span class="lineno">  558</span>          iPoint.<a class="code hl_variable" href="group__molSys.html#gaeed1df09b79527444ceb1bc0836f4f1a">molID</a> = numbers[molIndex];</div>
+<div class="line"><span class="lineno">  559</span>          iPoint.<a class="code hl_variable" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a> = numbers[atomIndex];</div>
+<div class="line"><span class="lineno">  560</span>          iPoint.<a class="code hl_variable" href="group__molSys.html#ga25dff2dc0e4cd802b9057d90b3c08d76">x</a> = numbers[xIndex];</div>
+<div class="line"><span class="lineno">  561</span>          iPoint.<a class="code hl_variable" href="group__molSys.html#ga364150fed66ad63fd2d3995909d43fe0">y</a> = numbers[yIndex];</div>
+<div class="line"><span class="lineno">  562</span>          iPoint.<a class="code hl_variable" href="group__molSys.html#ga47e132eb01596124477945fbe4345d73">z</a> = numbers[zIndex];</div>
+<div class="line"><span class="lineno">  563</span>          <span class="comment">// Check if the particle is inside the volume Slice</span></div>
+<div class="line"><span class="lineno">  564</span>          <span class="comment">// or not</span></div>
+<div class="line"><span class="lineno">  565</span>          <span class="keywordflow">if</span> (isSlice) { <span class="comment">// only if a slice has been requested</span></div>
+<div class="line"><span class="lineno">  566</span>            iPoint.<a class="code hl_variable" href="group__molSys.html#ga825e22e4d171aea51998d585c925c897">inSlice</a> = <a class="code hl_function" href="group__sinp.html#gad5a8c377d8ed78c413c13d80ac8261ac">sinp::atomInSlice</a>(iPoint.<a class="code hl_variable" href="group__molSys.html#ga25dff2dc0e4cd802b9057d90b3c08d76">x</a>, iPoint.<a class="code hl_variable" href="group__molSys.html#ga364150fed66ad63fd2d3995909d43fe0">y</a>, iPoint.<a class="code hl_variable" href="group__molSys.html#ga47e132eb01596124477945fbe4345d73">z</a>,</div>
+<div class="line"><span class="lineno">  567</span>                                               coordLow, coordHigh);</div>
+<div class="line"><span class="lineno">  568</span>          }</div>
+<div class="line"><span class="lineno">  569</span>          <span class="comment">// Save only oxygen atoms</span></div>
+<div class="line"><span class="lineno">  570</span>          <span class="keywordflow">if</span> (iPoint.<a class="code hl_variable" href="group__molSys.html#ga4ffe5d88981575daa2adcd36cab0ce9f">type</a> == typeO) {</div>
+<div class="line"><span class="lineno">  571</span>            nOxy++;</div>
+<div class="line"><span class="lineno">  572</span>            <span class="comment">// yCloud-&gt;pts.resize(yCloud-&gt;pts.size()+1);</span></div>
+<div class="line"><span class="lineno">  573</span>            yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>.push_back(iPoint);</div>
+<div class="line"><span class="lineno">  574</span>            yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#ga8e48a0ae066c2585e7320cdaa0cbc8db">idIndexMap</a>[iPoint.<a class="code hl_variable" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a>] = yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>.size() - 1;</div>
+<div class="line"><span class="lineno">  575</span>          }</div>
+<div class="line"><span class="lineno">  576</span>        }</div>
+<div class="line"><span class="lineno">  577</span>        <span class="comment">// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*</span></div>
+<div class="line"><span class="lineno">  578</span> </div>
+<div class="line"><span class="lineno">  579</span>        <span class="comment">// Tests for reading in nop, box lengths, and atoms</span></div>
+<div class="line"><span class="lineno">  580</span>        <span class="keywordflow">if</span> (tokens[0].compare(<span class="stringliteral">&quot;ITEM:&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  581</span>          <span class="keywordflow">if</span> (tokens[1].compare(<span class="stringliteral">&quot;NUMBER&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  582</span>            readNOP = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  583</span>          }</div>
+<div class="line"><span class="lineno">  584</span>        }</div>
+<div class="line"><span class="lineno">  585</span>        <span class="keywordflow">if</span> (tokens[0].compare(<span class="stringliteral">&quot;ITEM:&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  586</span>          <span class="keywordflow">if</span> (tokens[1].compare(<span class="stringliteral">&quot;BOX&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  587</span>            readBox = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  588</span>          }</div>
+<div class="line"><span class="lineno">  589</span>        }</div>
+<div class="line"><span class="lineno">  590</span>        <span class="keywordflow">if</span> (tokens[0].compare(<span class="stringliteral">&quot;ITEM:&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  591</span>          <span class="keywordflow">if</span> (tokens[1].compare(<span class="stringliteral">&quot;ATOMS&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  592</span>            readAtoms = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  593</span>            <span class="comment">// Now find out which index is the coordinate index etc</span></div>
+<div class="line"><span class="lineno">  594</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 2; i &lt; tokens.size(); i++) {</div>
+<div class="line"><span class="lineno">  595</span>              <span class="keywordflow">if</span> (tokens[i].compare(<span class="stringliteral">&quot;type&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  596</span>                typeIndex = i - 2;</div>
+<div class="line"><span class="lineno">  597</span>              }</div>
+<div class="line"><span class="lineno">  598</span>              <span class="keywordflow">if</span> (tokens[i].compare(<span class="stringliteral">&quot;x&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  599</span>                xIndex = i - 2;</div>
+<div class="line"><span class="lineno">  600</span>              }</div>
+<div class="line"><span class="lineno">  601</span>              <span class="keywordflow">if</span> (tokens[i].compare(<span class="stringliteral">&quot;y&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  602</span>                yIndex = i - 2;</div>
+<div class="line"><span class="lineno">  603</span>              }</div>
+<div class="line"><span class="lineno">  604</span>              <span class="keywordflow">if</span> (tokens[i].compare(<span class="stringliteral">&quot;z&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  605</span>                zIndex = i - 2;</div>
+<div class="line"><span class="lineno">  606</span>              }</div>
+<div class="line"><span class="lineno">  607</span>              <span class="keywordflow">if</span> (tokens[i].compare(<span class="stringliteral">&quot;mol&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  608</span>                molIndex = i - 2;</div>
+<div class="line"><span class="lineno">  609</span>              }</div>
+<div class="line"><span class="lineno">  610</span>              <span class="keywordflow">if</span> (tokens[i].compare(<span class="stringliteral">&quot;id&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  611</span>                atomIndex = i - 2;</div>
+<div class="line"><span class="lineno">  612</span>              }</div>
+<div class="line"><span class="lineno">  613</span>            } <span class="comment">// End of for loop over tokens</span></div>
+<div class="line"><span class="lineno">  614</span>            <span class="keywordflow">if</span> (molIndex == 0) {</div>
+<div class="line"><span class="lineno">  615</span>              molIndex = atomIndex;</div>
+<div class="line"><span class="lineno">  616</span>            } <span class="comment">// Set mol ID=atomID if not given</span></div>
+<div class="line"><span class="lineno">  617</span>          }</div>
+<div class="line"><span class="lineno">  618</span>        } <span class="comment">// End of nested if loops for checking atom</span></div>
+<div class="line"><span class="lineno">  619</span> </div>
+<div class="line"><span class="lineno">  620</span>      } <span class="comment">// End of while</span></div>
+<div class="line"><span class="lineno">  621</span>    }   <span class="comment">// End of targetFrame found</span></div>
+<div class="line"><span class="lineno">  622</span>    <span class="comment">// ----------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  623</span>  } <span class="comment">// End of if file open statement</span></div>
+<div class="line"><span class="lineno">  624</span> </div>
+<div class="line"><span class="lineno">  625</span>  <span class="comment">// Check if you filled in the frame correctly</span></div>
+<div class="line"><span class="lineno">  626</span>  <span class="keywordflow">if</span> (!(foundFrame)) {</div>
+<div class="line"><span class="lineno">  627</span>    std::cout &lt;&lt; <span class="stringliteral">&quot;You entered a frame that doesn&#39;t exist.\n&quot;</span>;</div>
+<div class="line"><span class="lineno">  628</span>  } <span class="comment">// Throw exception</span></div>
+<div class="line"><span class="lineno">  629</span>  <span class="keywordflow">if</span> (foundFrame) {</div>
+<div class="line"><span class="lineno">  630</span>    yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a> = yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>.size();</div>
+<div class="line"><span class="lineno">  631</span>    <span class="keywordflow">if</span> (yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>.size() != nOxy) {</div>
+<div class="line"><span class="lineno">  632</span>      std::cout &lt;&lt; <span class="stringliteral">&quot;Atoms didn&#39;t get filled in properly.\n&quot;</span>;</div>
+<div class="line"><span class="lineno">  633</span>    }</div>
+<div class="line"><span class="lineno">  634</span>  } <span class="comment">// Throw exception</span></div>
+<div class="line"><span class="lineno">  635</span>  yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#gafccb5a0daab40c3ccc83e4494f4176d7">currentFrame</a> = targetFrame;</div>
+<div class="line"><span class="lineno">  636</span> </div>
+<div class="line"><span class="lineno">  637</span>  dumpFile-&gt;close();</div>
+<div class="line"><span class="lineno">  638</span>  <span class="keywordflow">return</span> *yCloud;</div>
+<div class="line"><span class="lineno">  639</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga30633be4befe606953d55db43d389c7b" name="ga30633be4befe606953d55db43d389c7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga30633be4befe606953d55db43d389c7b">&#9670;&#160;</a></span>readLammpsTrjreduced()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; sinp::readLammpsTrjreduced </td>
+          <td>(</td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>filename</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>targetFrame</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *&#160;</td>
+          <td class="paramname"><em>yCloud</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>typeI</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isSlice</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 3 &gt;&#160;</td>
+          <td class="paramname"><em>coordLow</em> = <code>std::array&lt;double,&#160;3&gt;{0,&#160;0,&#160;0}</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 3 &gt;&#160;</td>
+          <td class="paramname"><em>coordHigh</em> = <code>std::array&lt;double,&#160;3&gt;{0,&#160;0,&#160;0}</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Function that reads in only atoms pf the desired type and ignores all atoms which are not in the slice as well</p>
+<p>Function for reading in a lammps file; and saves only the atoms of the desired type. Atoms which are not inside the slice or not of type I are not saved at all This is an overloaded function. The type atom ID must be specified. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">filename</td><td>The name of the lammps trajectory file to be read in </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">targetFrame</td><td>The frame number whose information will be read in </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">yCloud</td><td>The outputted PointCloud </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">typeI</td><td>The type ID of the desired type of atoms </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">isSlice</td><td>This decides whether a slice will be created or not </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">coordLow</td><td>Contains the lower limits of the slice, if a slice is to be created </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">coordHigh</td><td>Contains the upper limits of the slice, if a slice is to be created </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="seams__input_8cpp_source.html#l00656">656</a> of file <a class="el" href="seams__input_8cpp_source.html">seams_input.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  660</span>                                   {</div>
+<div class="line"><span class="lineno">  661</span>  std::unique_ptr&lt;std::ifstream&gt; dumpFile;</div>
+<div class="line"><span class="lineno">  662</span>  dumpFile = std::make_unique&lt;std::ifstream&gt;(filename);</div>
+<div class="line"><span class="lineno">  663</span>  std::string line;                <span class="comment">// Current line being read in</span></div>
+<div class="line"><span class="lineno">  664</span>  std::vector&lt;std::string&gt; tokens; <span class="comment">// Vector containing word tokens</span></div>
+<div class="line"><span class="lineno">  665</span>  std::vector&lt;double&gt; numbers;     <span class="comment">// Vector containing type double numbers</span></div>
+<div class="line"><span class="lineno">  666</span>  std::vector&lt;double&gt; tilt;        <span class="comment">// Vector containing tilt factors</span></div>
+<div class="line"><span class="lineno">  667</span>  <span class="keywordtype">int</span> currentFrame = 0;            <span class="comment">// Current frame being read in</span></div>
+<div class="line"><span class="lineno">  668</span>  <span class="keywordtype">int</span> nop = -1;                    <span class="comment">// Number of atoms in targetFrame</span></div>
+<div class="line"><span class="lineno">  669</span>  <span class="keywordtype">bool</span> foundFrame =</div>
+<div class="line"><span class="lineno">  670</span>      <span class="keyword">false</span>;            <span class="comment">// Determines whether targetFrame has been found or not</span></div>
+<div class="line"><span class="lineno">  671</span>  <span class="keywordtype">bool</span> readNOP = <span class="keyword">false</span>; <span class="comment">// Flag for reading in the number of atoms</span></div>
+<div class="line"><span class="lineno">  672</span>  <span class="keywordtype">bool</span> readBox = <span class="keyword">false</span>; <span class="comment">// Flag for reading in the box lengths</span></div>
+<div class="line"><span class="lineno">  673</span>  <span class="keywordtype">bool</span> readAtoms = <span class="keyword">false</span>; <span class="comment">// Flag for reading in the atoms</span></div>
+<div class="line"><span class="lineno">  674</span>  <span class="keywordtype">int</span> xIndex, yIndex, zIndex,</div>
+<div class="line"><span class="lineno">  675</span>      typeIndex;     <span class="comment">// Indices for x,y,z coordinates, and LAMMPS type ID</span></div>
+<div class="line"><span class="lineno">  676</span>  <span class="keywordtype">int</span> molIndex = 0;  <span class="comment">// Index for molecular ID</span></div>
+<div class="line"><span class="lineno">  677</span>  <span class="keywordtype">int</span> atomIndex = 0; <span class="comment">// Index for atom ID (Only used if mol ID has not been set)</span></div>
+<div class="line"><span class="lineno">  678</span>  <a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a> iPoint; <span class="comment">// Current point being read in from the file</span></div>
+<div class="line"><span class="lineno">  679</span>  xIndex = yIndex = zIndex = typeIndex = -1; <span class="comment">// Default values</span></div>
+<div class="line"><span class="lineno">  680</span>  <span class="keywordtype">bool</span> isTriclinic = <span class="keyword">false</span>; <span class="comment">// Flag for an orthogonal or triclinic box</span></div>
+<div class="line"><span class="lineno">  681</span>  <span class="keywordtype">int</span> nOxy = 0;             <span class="comment">// Number of oxygen atoms</span></div>
+<div class="line"><span class="lineno">  682</span> </div>
+<div class="line"><span class="lineno">  683</span>  <span class="keywordflow">if</span> (!(<a class="code hl_function" href="group__gen.html#gaa49625658169d33851df990c1d62f097">gen::file_exists</a>(filename))) {</div>
+<div class="line"><span class="lineno">  684</span>    std::cout</div>
+<div class="line"><span class="lineno">  685</span>        &lt;&lt; <span class="stringliteral">&quot;Fatal Error: The file does not exist or you gave the wrong path.\n&quot;</span>;</div>
+<div class="line"><span class="lineno">  686</span>    <span class="comment">// Throw exception?</span></div>
+<div class="line"><span class="lineno">  687</span>    <span class="keywordflow">return</span> *yCloud;</div>
+<div class="line"><span class="lineno">  688</span>  }</div>
+<div class="line"><span class="lineno">  689</span> </div>
+<div class="line"><span class="lineno">  690</span>  <span class="comment">// The format of the LAMMPS trajectory file is:</span></div>
+<div class="line"><span class="lineno">  691</span>  <span class="comment">// ITEM: TIMESTEP</span></div>
+<div class="line"><span class="lineno">  692</span>  <span class="comment">// 0</span></div>
+<div class="line"><span class="lineno">  693</span>  <span class="comment">// ITEM: NUMBER OF ATOMS</span></div>
+<div class="line"><span class="lineno">  694</span>  <span class="comment">// 4096</span></div>
+<div class="line"><span class="lineno">  695</span>  <span class="comment">// ITEM: BOX BOUNDS pp pp pp</span></div>
+<div class="line"><span class="lineno">  696</span>  <span class="comment">// -7.9599900000000001e-01 5.0164000000000001e+01</span></div>
+<div class="line"><span class="lineno">  697</span>  <span class="comment">// -7.9599900000000001e-01 5.0164000000000001e+01</span></div>
+<div class="line"><span class="lineno">  698</span>  <span class="comment">// -7.9599900000000001e-01 5.0164000000000001e+01</span></div>
+<div class="line"><span class="lineno">  699</span>  <span class="comment">// ITEM: ATOMS id type x y z</span></div>
+<div class="line"><span class="lineno">  700</span>  <span class="comment">// 1 1 0 0 0 etc</span></div>
+<div class="line"><span class="lineno">  701</span>  <span class="keywordflow">if</span> (dumpFile-&gt;is_open()) {</div>
+<div class="line"><span class="lineno">  702</span>    <span class="comment">// ----------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  703</span>    <span class="comment">// At this point we know that the dumpfile is open</span></div>
+<div class="line"><span class="lineno">  704</span>    <span class="comment">// This loop searches for targetFrame</span></div>
+<div class="line"><span class="lineno">  705</span>    <span class="keywordflow">while</span> (std::getline((*dumpFile), line)) {</div>
+<div class="line"><span class="lineno">  706</span>      <span class="comment">// Read in lines and tokenize them</span></div>
+<div class="line"><span class="lineno">  707</span>      tokens = <a class="code hl_function" href="group__gen.html#gaabdeca1aa6b867687a3540e97447544a">gen::tokenizer</a>(line);</div>
+<div class="line"><span class="lineno">  708</span>      <span class="comment">// Find out which timestep number</span></div>
+<div class="line"><span class="lineno">  709</span>      <span class="comment">// you are inside</span></div>
+<div class="line"><span class="lineno">  710</span>      <span class="keywordflow">if</span> (tokens[0].compare(<span class="stringliteral">&quot;ITEM:&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  711</span>        <span class="keywordflow">if</span> (tokens[1].compare(<span class="stringliteral">&quot;TIMESTEP&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  712</span>          <span class="comment">// Now you are in a new timestep. Update frame number</span></div>
+<div class="line"><span class="lineno">  713</span>          currentFrame++;</div>
+<div class="line"><span class="lineno">  714</span>        }</div>
+<div class="line"><span class="lineno">  715</span>      }</div>
+<div class="line"><span class="lineno">  716</span> </div>
+<div class="line"><span class="lineno">  717</span>      <span class="comment">// If targetFrame has been found</span></div>
+<div class="line"><span class="lineno">  718</span>      <span class="comment">// break out of the while loop</span></div>
+<div class="line"><span class="lineno">  719</span>      <span class="keywordflow">if</span> (currentFrame == targetFrame) {</div>
+<div class="line"><span class="lineno">  720</span>        foundFrame = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  721</span>        <span class="keywordflow">break</span>; <span class="comment">// Exit the while loop</span></div>
+<div class="line"><span class="lineno">  722</span>      }</div>
+<div class="line"><span class="lineno">  723</span>    } <span class="comment">// End of while loop searching for targetFrame</span></div>
+<div class="line"><span class="lineno">  724</span>    <span class="comment">// ----------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  725</span>    <span class="comment">// Before filling up the PointCloud, if the vectors are filled</span></div>
+<div class="line"><span class="lineno">  726</span>    <span class="comment">// empty them</span></div>
+<div class="line"><span class="lineno">  727</span>    *yCloud = <a class="code hl_function" href="group__molSys.html#gad8acfb41ee6bc0258612e9cac24269b2">molSys::clearPointCloud</a>(yCloud);</div>
+<div class="line"><span class="lineno">  728</span> </div>
+<div class="line"><span class="lineno">  729</span>    <span class="comment">// ----------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  730</span>    <span class="comment">// If targetFrame has been found, read in the box lengths,</span></div>
+<div class="line"><span class="lineno">  731</span>    <span class="comment">// number of atoms and then read in atom positions, type, molID</span></div>
+<div class="line"><span class="lineno">  732</span>    <span class="comment">// By default, set molID=1 if not specified</span></div>
+<div class="line"><span class="lineno">  733</span>    <span class="keywordflow">if</span> (foundFrame) {</div>
+<div class="line"><span class="lineno">  734</span>      <span class="comment">// Run this until EOF or you reach the next timestep</span></div>
+<div class="line"><span class="lineno">  735</span>      <span class="keywordflow">while</span> (std::getline((*dumpFile), line)) {</div>
+<div class="line"><span class="lineno">  736</span>        <span class="comment">// Read in lines and tokenize them into std::string words and &lt;double&gt;</span></div>
+<div class="line"><span class="lineno">  737</span>        <span class="comment">// numbers</span></div>
+<div class="line"><span class="lineno">  738</span>        tokens = <a class="code hl_function" href="group__gen.html#gaabdeca1aa6b867687a3540e97447544a">gen::tokenizer</a>(line);</div>
+<div class="line"><span class="lineno">  739</span>        numbers = <a class="code hl_function" href="group__gen.html#ga98b7a158dd7a61350fdd6ca43a432e4f">gen::tokenizerDouble</a>(line);</div>
+<div class="line"><span class="lineno">  740</span> </div>
+<div class="line"><span class="lineno">  741</span>        <span class="comment">// If you&#39;ve reached the timestep line then you&#39;ve reached the</span></div>
+<div class="line"><span class="lineno">  742</span>        <span class="comment">// next frame. Break out of the while loop</span></div>
+<div class="line"><span class="lineno">  743</span>        <span class="keywordflow">if</span> (tokens[0].compare(<span class="stringliteral">&quot;ITEM:&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  744</span>          <span class="keywordflow">if</span> (tokens[1].compare(<span class="stringliteral">&quot;TIMESTEP&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  745</span>            <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">  746</span>          }</div>
+<div class="line"><span class="lineno">  747</span>        }</div>
+<div class="line"><span class="lineno">  748</span> </div>
+<div class="line"><span class="lineno">  749</span>        <span class="comment">// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*</span></div>
+<div class="line"><span class="lineno">  750</span>        <span class="comment">// Read number of particles</span></div>
+<div class="line"><span class="lineno">  751</span>        <span class="keywordflow">if</span> (readNOP) {</div>
+<div class="line"><span class="lineno">  752</span>          nop = std::stoi(line.data());</div>
+<div class="line"><span class="lineno">  753</span>          readNOP = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  754</span>        }</div>
+<div class="line"><span class="lineno">  755</span>        <span class="comment">// Read box lengths</span></div>
+<div class="line"><span class="lineno">  756</span>        <span class="keywordflow">if</span> (readBox) {</div>
+<div class="line"><span class="lineno">  757</span>          <span class="comment">// You&#39;ve reached the end of box lengths</span></div>
+<div class="line"><span class="lineno">  758</span>          <span class="keywordflow">if</span> (tokens[0].compare(<span class="stringliteral">&quot;ITEM:&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  759</span>            readBox = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  760</span>            <span class="comment">// If the box is triclinic, get the</span></div>
+<div class="line"><span class="lineno">  761</span>            <span class="comment">// orthogonal &#39;bounding box&#39;</span></div>
+<div class="line"><span class="lineno">  762</span>            <span class="keywordflow">if</span> (isTriclinic) {</div>
+<div class="line"><span class="lineno">  763</span>              <span class="comment">// Update tilt factors</span></div>
+<div class="line"><span class="lineno">  764</span>              <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; tilt.size(); k++) {</div>
+<div class="line"><span class="lineno">  765</span>                yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.push_back(tilt[k]);</div>
+<div class="line"><span class="lineno">  766</span>              }</div>
+<div class="line"><span class="lineno">  767</span>            } <span class="comment">// end of check for triclinic</span></div>
+<div class="line"><span class="lineno">  768</span>          }</div>
+<div class="line"><span class="lineno">  769</span>          <span class="comment">// Or else fill up the box lengths</span></div>
+<div class="line"><span class="lineno">  770</span>          <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  771</span>            yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.push_back(numbers[1] - numbers[0]); <span class="comment">// Update box length</span></div>
+<div class="line"><span class="lineno">  772</span>            yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>.push_back(</div>
+<div class="line"><span class="lineno">  773</span>                numbers[0]); <span class="comment">// Update the lower box coordinate</span></div>
+<div class="line"><span class="lineno">  774</span>            <span class="comment">// Do this for a triclinic box only</span></div>
+<div class="line"><span class="lineno">  775</span>            <span class="keywordflow">if</span> (numbers.size() == 3) {</div>
+<div class="line"><span class="lineno">  776</span>              isTriclinic = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  777</span>              tilt.push_back(numbers[2]);</div>
+<div class="line"><span class="lineno">  778</span>            }</div>
+<div class="line"><span class="lineno">  779</span>          }</div>
+<div class="line"><span class="lineno">  780</span>        }</div>
+<div class="line"><span class="lineno">  781</span>        <span class="comment">// Read atoms into yCloud line by line</span></div>
+<div class="line"><span class="lineno">  782</span>        <span class="keywordflow">if</span> (readAtoms) {</div>
+<div class="line"><span class="lineno">  783</span>          iPoint.<a class="code hl_variable" href="group__molSys.html#ga4ffe5d88981575daa2adcd36cab0ce9f">type</a> = numbers[typeIndex];</div>
+<div class="line"><span class="lineno">  784</span>          iPoint.<a class="code hl_variable" href="group__molSys.html#gaeed1df09b79527444ceb1bc0836f4f1a">molID</a> = numbers[molIndex];</div>
+<div class="line"><span class="lineno">  785</span>          iPoint.<a class="code hl_variable" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a> = numbers[atomIndex];</div>
+<div class="line"><span class="lineno">  786</span>          iPoint.<a class="code hl_variable" href="group__molSys.html#ga25dff2dc0e4cd802b9057d90b3c08d76">x</a> = numbers[xIndex];</div>
+<div class="line"><span class="lineno">  787</span>          iPoint.<a class="code hl_variable" href="group__molSys.html#ga364150fed66ad63fd2d3995909d43fe0">y</a> = numbers[yIndex];</div>
+<div class="line"><span class="lineno">  788</span>          iPoint.<a class="code hl_variable" href="group__molSys.html#ga47e132eb01596124477945fbe4345d73">z</a> = numbers[zIndex];</div>
+<div class="line"><span class="lineno">  789</span>          <span class="comment">// Check if the particle is inside the volume Slice</span></div>
+<div class="line"><span class="lineno">  790</span>          <span class="comment">// or not</span></div>
+<div class="line"><span class="lineno">  791</span>          <span class="keywordflow">if</span> (isSlice) { <span class="comment">// only if a slice has been requested</span></div>
+<div class="line"><span class="lineno">  792</span>            iPoint.<a class="code hl_variable" href="group__molSys.html#ga825e22e4d171aea51998d585c925c897">inSlice</a> = <a class="code hl_function" href="group__sinp.html#gad5a8c377d8ed78c413c13d80ac8261ac">sinp::atomInSlice</a>(iPoint.<a class="code hl_variable" href="group__molSys.html#ga25dff2dc0e4cd802b9057d90b3c08d76">x</a>, iPoint.<a class="code hl_variable" href="group__molSys.html#ga364150fed66ad63fd2d3995909d43fe0">y</a>, iPoint.<a class="code hl_variable" href="group__molSys.html#ga47e132eb01596124477945fbe4345d73">z</a>,</div>
+<div class="line"><span class="lineno">  793</span>                                               coordLow, coordHigh);</div>
+<div class="line"><span class="lineno">  794</span>            <span class="comment">// Skip if the atom is not part of the slice</span></div>
+<div class="line"><span class="lineno">  795</span>            <span class="keywordflow">if</span> (!iPoint.<a class="code hl_variable" href="group__molSys.html#ga825e22e4d171aea51998d585c925c897">inSlice</a>) {</div>
+<div class="line"><span class="lineno">  796</span>              <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  797</span>            } <span class="comment">// do not save if not inside the slice</span></div>
+<div class="line"><span class="lineno">  798</span>          }</div>
+<div class="line"><span class="lineno">  799</span>          <span class="comment">// Save only atoms of the desired type</span></div>
+<div class="line"><span class="lineno">  800</span>          <span class="keywordflow">if</span> (iPoint.<a class="code hl_variable" href="group__molSys.html#ga4ffe5d88981575daa2adcd36cab0ce9f">type</a> == typeI) {</div>
+<div class="line"><span class="lineno">  801</span>            nOxy++;</div>
+<div class="line"><span class="lineno">  802</span>            <span class="comment">// yCloud-&gt;pts.resize(yCloud-&gt;pts.size()+1);</span></div>
+<div class="line"><span class="lineno">  803</span>            yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>.push_back(iPoint);</div>
+<div class="line"><span class="lineno">  804</span>            yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#ga8e48a0ae066c2585e7320cdaa0cbc8db">idIndexMap</a>[iPoint.<a class="code hl_variable" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a>] =</div>
+<div class="line"><span class="lineno">  805</span>                yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>.size() - 1; <span class="comment">// array index</span></div>
+<div class="line"><span class="lineno">  806</span>          }</div>
+<div class="line"><span class="lineno">  807</span>        }</div>
+<div class="line"><span class="lineno">  808</span>        <span class="comment">// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*</span></div>
+<div class="line"><span class="lineno">  809</span> </div>
+<div class="line"><span class="lineno">  810</span>        <span class="comment">// Tests for reading in nop, box lengths, and atoms</span></div>
+<div class="line"><span class="lineno">  811</span>        <span class="keywordflow">if</span> (tokens[0].compare(<span class="stringliteral">&quot;ITEM:&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  812</span>          <span class="keywordflow">if</span> (tokens[1].compare(<span class="stringliteral">&quot;NUMBER&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  813</span>            readNOP = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  814</span>          }</div>
+<div class="line"><span class="lineno">  815</span>        }</div>
+<div class="line"><span class="lineno">  816</span>        <span class="keywordflow">if</span> (tokens[0].compare(<span class="stringliteral">&quot;ITEM:&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  817</span>          <span class="keywordflow">if</span> (tokens[1].compare(<span class="stringliteral">&quot;BOX&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  818</span>            readBox = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  819</span>          }</div>
+<div class="line"><span class="lineno">  820</span>        }</div>
+<div class="line"><span class="lineno">  821</span>        <span class="keywordflow">if</span> (tokens[0].compare(<span class="stringliteral">&quot;ITEM:&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  822</span>          <span class="keywordflow">if</span> (tokens[1].compare(<span class="stringliteral">&quot;ATOMS&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  823</span>            readAtoms = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  824</span>            <span class="comment">// Now find out which index is the coordinate index etc</span></div>
+<div class="line"><span class="lineno">  825</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 2; i &lt; tokens.size(); i++) {</div>
+<div class="line"><span class="lineno">  826</span>              <span class="keywordflow">if</span> (tokens[i].compare(<span class="stringliteral">&quot;type&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  827</span>                typeIndex = i - 2;</div>
+<div class="line"><span class="lineno">  828</span>              }</div>
+<div class="line"><span class="lineno">  829</span>              <span class="keywordflow">if</span> (tokens[i].compare(<span class="stringliteral">&quot;x&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  830</span>                xIndex = i - 2;</div>
+<div class="line"><span class="lineno">  831</span>              }</div>
+<div class="line"><span class="lineno">  832</span>              <span class="keywordflow">if</span> (tokens[i].compare(<span class="stringliteral">&quot;y&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  833</span>                yIndex = i - 2;</div>
+<div class="line"><span class="lineno">  834</span>              }</div>
+<div class="line"><span class="lineno">  835</span>              <span class="keywordflow">if</span> (tokens[i].compare(<span class="stringliteral">&quot;z&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  836</span>                zIndex = i - 2;</div>
+<div class="line"><span class="lineno">  837</span>              }</div>
+<div class="line"><span class="lineno">  838</span>              <span class="keywordflow">if</span> (tokens[i].compare(<span class="stringliteral">&quot;mol&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  839</span>                molIndex = i - 2;</div>
+<div class="line"><span class="lineno">  840</span>              }</div>
+<div class="line"><span class="lineno">  841</span>              <span class="keywordflow">if</span> (tokens[i].compare(<span class="stringliteral">&quot;id&quot;</span>) == 0) {</div>
+<div class="line"><span class="lineno">  842</span>                atomIndex = i - 2;</div>
+<div class="line"><span class="lineno">  843</span>              }</div>
+<div class="line"><span class="lineno">  844</span>            } <span class="comment">// End of for loop over tokens</span></div>
+<div class="line"><span class="lineno">  845</span>            <span class="keywordflow">if</span> (molIndex == 0) {</div>
+<div class="line"><span class="lineno">  846</span>              molIndex = atomIndex;</div>
+<div class="line"><span class="lineno">  847</span>            } <span class="comment">// Set mol ID=atomID if not given</span></div>
+<div class="line"><span class="lineno">  848</span>          }</div>
+<div class="line"><span class="lineno">  849</span>        } <span class="comment">// End of nested if loops for checking atom</span></div>
+<div class="line"><span class="lineno">  850</span> </div>
+<div class="line"><span class="lineno">  851</span>      } <span class="comment">// End of while</span></div>
+<div class="line"><span class="lineno">  852</span>    }   <span class="comment">// End of targetFrame found</span></div>
+<div class="line"><span class="lineno">  853</span>    <span class="comment">// ----------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  854</span>  } <span class="comment">// End of if file open statement</span></div>
+<div class="line"><span class="lineno">  855</span> </div>
+<div class="line"><span class="lineno">  856</span>  <span class="comment">// Check if you filled in the frame correctly</span></div>
+<div class="line"><span class="lineno">  857</span>  <span class="keywordflow">if</span> (!(foundFrame)) {</div>
+<div class="line"><span class="lineno">  858</span>    std::cout &lt;&lt; <span class="stringliteral">&quot;You entered a frame that doesn&#39;t exist.\n&quot;</span>;</div>
+<div class="line"><span class="lineno">  859</span>  } <span class="comment">// Throw exception</span></div>
+<div class="line"><span class="lineno">  860</span> </div>
+<div class="line"><span class="lineno">  861</span>  <span class="comment">// Update the number of particles</span></div>
+<div class="line"><span class="lineno">  862</span>  yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a> = yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>.size();</div>
+<div class="line"><span class="lineno">  863</span> </div>
+<div class="line"><span class="lineno">  864</span>  <span class="comment">// Update the frame number</span></div>
+<div class="line"><span class="lineno">  865</span>  yCloud-&gt;<a class="code hl_variable" href="group__molSys.html#gafccb5a0daab40c3ccc83e4494f4176d7">currentFrame</a> = targetFrame;</div>
+<div class="line"><span class="lineno">  866</span> </div>
+<div class="line"><span class="lineno">  867</span>  dumpFile-&gt;close();</div>
+<div class="line"><span class="lineno">  868</span>  <span class="keywordflow">return</span> *yCloud;</div>
+<div class="line"><span class="lineno">  869</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga9aeec41b2c3fea17e5e54fd266b71f0a" name="ga9aeec41b2c3fea17e5e54fd266b71f0a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga9aeec41b2c3fea17e5e54fd266b71f0a">&#9670;&#160;</a></span>readXYZ()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; sinp::readXYZ </td>
+          <td>(</td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>filename</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Function for reading in atom coordinates from an XYZ file. </p>
+<p>Function for reading in an XYZ file </p>
+
+<p class="definition">Definition at line <a class="el" href="seams__input_8cpp_source.html#l00073">73</a> of file <a class="el" href="seams__input_8cpp_source.html">seams_input.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   73</span>                                                                              {</div>
+<div class="line"><span class="lineno">   74</span>  std::unique_ptr&lt;std::ifstream&gt; xyzFile;</div>
+<div class="line"><span class="lineno">   75</span>  xyzFile = std::make_unique&lt;std::ifstream&gt;(filename);</div>
+<div class="line"><span class="lineno">   76</span>  <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud&lt;molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt;</div>
+<div class="line"><span class="lineno">   77</span>      yCloud;</div>
+<div class="line"><span class="lineno">   78</span>  std::string line;                <span class="comment">// Current line being read in</span></div>
+<div class="line"><span class="lineno">   79</span>  std::vector&lt;std::string&gt; tokens; <span class="comment">// Vector containing word tokens</span></div>
+<div class="line"><span class="lineno">   80</span>  std::vector&lt;double&gt; numbers;     <span class="comment">// Vector containing type double numbers</span></div>
+<div class="line"><span class="lineno">   81</span>  <span class="keywordtype">int</span> nop = -1;                    <span class="comment">// Number of atoms in targetFrame</span></div>
+<div class="line"><span class="lineno">   82</span>  <span class="keywordtype">int</span> iatom = 1;                <span class="comment">// Current atom being filled into the PointCloud</span></div>
+<div class="line"><span class="lineno">   83</span>  <a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a> iPoint; <span class="comment">// Current point being read in from the file</span></div>
+<div class="line"><span class="lineno">   84</span>  <span class="keywordtype">double</span> xLo, xHi, yLo, yHi, zLo,</div>
+<div class="line"><span class="lineno">   85</span>      zHi; <span class="comment">// Box lengths extrapolated from the least and greatest coordinates</span></div>
+<div class="line"><span class="lineno">   86</span> </div>
+<div class="line"><span class="lineno">   87</span>  <span class="keywordflow">if</span> (!(<a class="code hl_function" href="group__gen.html#gaa49625658169d33851df990c1d62f097">gen::file_exists</a>(filename))) {</div>
+<div class="line"><span class="lineno">   88</span>    std::cout</div>
+<div class="line"><span class="lineno">   89</span>        &lt;&lt; <span class="stringliteral">&quot;Fatal Error: The file does not exist or you gave the wrong path.\n&quot;</span>;</div>
+<div class="line"><span class="lineno">   90</span>    <span class="comment">// Throw exception?</span></div>
+<div class="line"><span class="lineno">   91</span>        <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;Wrong filepath&quot;</span>);</div>
+<div class="line"><span class="lineno">   92</span>  }</div>
+<div class="line"><span class="lineno">   93</span> </div>
+<div class="line"><span class="lineno">   94</span>  <span class="comment">// --------</span></div>
+<div class="line"><span class="lineno">   95</span>  <span class="comment">// Before filling up the PointCloud, if the vectors are filled</span></div>
+<div class="line"><span class="lineno">   96</span>  <span class="comment">// empty them</span></div>
+<div class="line"><span class="lineno">   97</span>  <span class="comment">//*yCloud = molSys::clearPointCloud(yCloud);</span></div>
+<div class="line"><span class="lineno">   98</span>  <span class="comment">// --------</span></div>
+<div class="line"><span class="lineno">   99</span> </div>
+<div class="line"><span class="lineno">  100</span>  <span class="comment">// Format of an XYZ file:</span></div>
+<div class="line"><span class="lineno">  101</span>  <span class="comment">//  1970</span></div>
+<div class="line"><span class="lineno">  102</span>  <span class="comment">// generated by VMD</span></div>
+<div class="line"><span class="lineno">  103</span>  <span class="comment">//  O         43.603500       16.926201       15.215700</span></div>
+<div class="line"><span class="lineno">  104</span>  <span class="comment">//  O         39.912601       14.775100       19.379200</span></div>
+<div class="line"><span class="lineno">  105</span>  <span class="keywordflow">if</span> (xyzFile-&gt;is_open()) {</div>
+<div class="line"><span class="lineno">  106</span> </div>
+<div class="line"><span class="lineno">  107</span>    <span class="comment">// ----------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  108</span>    <span class="comment">// At this point we know that the XYZ file is open</span></div>
+<div class="line"><span class="lineno">  109</span> </div>
+<div class="line"><span class="lineno">  110</span>    <span class="comment">// The first line contains the number of atoms</span></div>
+<div class="line"><span class="lineno">  111</span>    std::getline((*xyzFile), line);</div>
+<div class="line"><span class="lineno">  112</span>    nop = std::stoi(line);</div>
+<div class="line"><span class="lineno">  113</span>    <span class="comment">// Skip the comment line</span></div>
+<div class="line"><span class="lineno">  114</span>    std::getline((*xyzFile), line);</div>
+<div class="line"><span class="lineno">  115</span>    <span class="comment">// Reserve memory for atom coordinates using nop read in</span></div>
+<div class="line"><span class="lineno">  116</span>    yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>.reserve(nop);</div>
+<div class="line"><span class="lineno">  117</span>    yCloud.<a class="code hl_variable" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a> = nop;</div>
+<div class="line"><span class="lineno">  118</span>    <span class="comment">// Run this until EOF or you reach the next timestep</span></div>
+<div class="line"><span class="lineno">  119</span>    <span class="keywordflow">while</span> (std::getline((*xyzFile), line)) {</div>
+<div class="line"><span class="lineno">  120</span> </div>
+<div class="line"><span class="lineno">  121</span>      <span class="comment">// Read in lines and tokenize them into std::string words and &lt;double&gt;</span></div>
+<div class="line"><span class="lineno">  122</span>      <span class="comment">// numbers</span></div>
+<div class="line"><span class="lineno">  123</span>      tokens = <a class="code hl_function" href="group__gen.html#gaabdeca1aa6b867687a3540e97447544a">gen::tokenizer</a>(line);</div>
+<div class="line"><span class="lineno">  124</span>      numbers = <a class="code hl_function" href="group__gen.html#ga98b7a158dd7a61350fdd6ca43a432e4f">gen::tokenizerDouble</a>(line);</div>
+<div class="line"><span class="lineno">  125</span> </div>
+<div class="line"><span class="lineno">  126</span>      <span class="comment">// Skip whitespace</span></div>
+<div class="line"><span class="lineno">  127</span>      <span class="keywordflow">if</span> (tokens.size() == 0) {</div>
+<div class="line"><span class="lineno">  128</span>        <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  129</span>      }</div>
+<div class="line"><span class="lineno">  130</span> </div>
+<div class="line"><span class="lineno">  131</span>      <span class="comment">// Put logic for checking atom type here later</span></div>
+<div class="line"><span class="lineno">  132</span>      iPoint.<a class="code hl_variable" href="group__molSys.html#ga4ffe5d88981575daa2adcd36cab0ce9f">type</a> = 1; <span class="comment">// Oxygen type; hard-coded!</span></div>
+<div class="line"><span class="lineno">  133</span>      iPoint.<a class="code hl_variable" href="group__molSys.html#gaeed1df09b79527444ceb1bc0836f4f1a">molID</a> = iatom;</div>
+<div class="line"><span class="lineno">  134</span>      iPoint.<a class="code hl_variable" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a> = iatom;</div>
+<div class="line"><span class="lineno">  135</span>      iPoint.<a class="code hl_variable" href="group__molSys.html#ga25dff2dc0e4cd802b9057d90b3c08d76">x</a> = std::stod(tokens[1]);</div>
+<div class="line"><span class="lineno">  136</span>      iPoint.<a class="code hl_variable" href="group__molSys.html#ga364150fed66ad63fd2d3995909d43fe0">y</a> = std::stod(tokens[2]);</div>
+<div class="line"><span class="lineno">  137</span>      iPoint.<a class="code hl_variable" href="group__molSys.html#ga47e132eb01596124477945fbe4345d73">z</a> = std::stod(tokens[3]);</div>
+<div class="line"><span class="lineno">  138</span> </div>
+<div class="line"><span class="lineno">  139</span>      yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>.push_back(iPoint);</div>
+<div class="line"><span class="lineno">  140</span>      yCloud.<a class="code hl_variable" href="group__molSys.html#ga8e48a0ae066c2585e7320cdaa0cbc8db">idIndexMap</a>[iPoint.<a class="code hl_variable" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a>] = yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>.size() - 1;</div>
+<div class="line"><span class="lineno">  141</span>      iatom++; <span class="comment">// Increase index</span></div>
+<div class="line"><span class="lineno">  142</span> </div>
+<div class="line"><span class="lineno">  143</span>      <span class="comment">// First point</span></div>
+<div class="line"><span class="lineno">  144</span>      <span class="keywordflow">if</span> (iatom == 1) {</div>
+<div class="line"><span class="lineno">  145</span>        <span class="comment">// Loop through the dimensions</span></div>
+<div class="line"><span class="lineno">  146</span>        xLo = iPoint.<a class="code hl_variable" href="group__molSys.html#ga25dff2dc0e4cd802b9057d90b3c08d76">x</a>;</div>
+<div class="line"><span class="lineno">  147</span>        xHi = iPoint.<a class="code hl_variable" href="group__molSys.html#ga25dff2dc0e4cd802b9057d90b3c08d76">x</a>;</div>
+<div class="line"><span class="lineno">  148</span>        yLo = iPoint.<a class="code hl_variable" href="group__molSys.html#ga364150fed66ad63fd2d3995909d43fe0">y</a>;</div>
+<div class="line"><span class="lineno">  149</span>        yHi = iPoint.<a class="code hl_variable" href="group__molSys.html#ga364150fed66ad63fd2d3995909d43fe0">y</a>;</div>
+<div class="line"><span class="lineno">  150</span>        zLo = iPoint.<a class="code hl_variable" href="group__molSys.html#ga47e132eb01596124477945fbe4345d73">z</a>;</div>
+<div class="line"><span class="lineno">  151</span>        zHi = iPoint.<a class="code hl_variable" href="group__molSys.html#ga47e132eb01596124477945fbe4345d73">z</a>;</div>
+<div class="line"><span class="lineno">  152</span>      } <span class="comment">// first point</span></div>
+<div class="line"><span class="lineno">  153</span>      <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  154</span>        <span class="keywordflow">if</span> (iPoint.<a class="code hl_variable" href="group__molSys.html#ga25dff2dc0e4cd802b9057d90b3c08d76">x</a> &lt; xLo) {</div>
+<div class="line"><span class="lineno">  155</span>          xLo = iPoint.<a class="code hl_variable" href="group__molSys.html#ga25dff2dc0e4cd802b9057d90b3c08d76">x</a>;</div>
+<div class="line"><span class="lineno">  156</span>        } <span class="comment">// xLo</span></div>
+<div class="line"><span class="lineno">  157</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (iPoint.<a class="code hl_variable" href="group__molSys.html#ga25dff2dc0e4cd802b9057d90b3c08d76">x</a> &gt; xHi) {</div>
+<div class="line"><span class="lineno">  158</span>          xHi = iPoint.<a class="code hl_variable" href="group__molSys.html#ga25dff2dc0e4cd802b9057d90b3c08d76">x</a>;</div>
+<div class="line"><span class="lineno">  159</span>        } <span class="comment">// xHi</span></div>
+<div class="line"><span class="lineno">  160</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (iPoint.<a class="code hl_variable" href="group__molSys.html#ga364150fed66ad63fd2d3995909d43fe0">y</a> &lt; yLo) {</div>
+<div class="line"><span class="lineno">  161</span>          yLo = iPoint.<a class="code hl_variable" href="group__molSys.html#ga364150fed66ad63fd2d3995909d43fe0">y</a>;</div>
+<div class="line"><span class="lineno">  162</span>        } <span class="comment">// yLo</span></div>
+<div class="line"><span class="lineno">  163</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (iPoint.<a class="code hl_variable" href="group__molSys.html#ga364150fed66ad63fd2d3995909d43fe0">y</a> &gt; yHi) {</div>
+<div class="line"><span class="lineno">  164</span>          yHi = iPoint.<a class="code hl_variable" href="group__molSys.html#ga364150fed66ad63fd2d3995909d43fe0">y</a>;</div>
+<div class="line"><span class="lineno">  165</span>        } <span class="comment">// yHi</span></div>
+<div class="line"><span class="lineno">  166</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (iPoint.<a class="code hl_variable" href="group__molSys.html#ga47e132eb01596124477945fbe4345d73">z</a> &lt; zLo) {</div>
+<div class="line"><span class="lineno">  167</span>          zLo = iPoint.<a class="code hl_variable" href="group__molSys.html#ga47e132eb01596124477945fbe4345d73">z</a>;</div>
+<div class="line"><span class="lineno">  168</span>        } <span class="comment">// zLo</span></div>
+<div class="line"><span class="lineno">  169</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (iPoint.<a class="code hl_variable" href="group__molSys.html#ga47e132eb01596124477945fbe4345d73">z</a> &gt; zHi) {</div>
+<div class="line"><span class="lineno">  170</span>          zHi = iPoint.<a class="code hl_variable" href="group__molSys.html#ga47e132eb01596124477945fbe4345d73">z</a>;</div>
+<div class="line"><span class="lineno">  171</span>        } <span class="comment">// zHi</span></div>
+<div class="line"><span class="lineno">  172</span>      }   <span class="comment">// update</span></div>
+<div class="line"><span class="lineno">  173</span>    } <span class="comment">// end of while, looping through lines till EOF</span></div>
+<div class="line"><span class="lineno">  174</span>    <span class="comment">// ----------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  175</span>  } <span class="comment">// End of if file open statement</span></div>
+<div class="line"><span class="lineno">  176</span> </div>
+<div class="line"><span class="lineno">  177</span>  xyzFile-&gt;close();</div>
+<div class="line"><span class="lineno">  178</span> </div>
+<div class="line"><span class="lineno">  179</span>  <span class="keywordflow">if</span> (yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>.size() == 1) {</div>
+<div class="line"><span class="lineno">  180</span>    xHi = xLo + 10;</div>
+<div class="line"><span class="lineno">  181</span>    yHi = yLo + 10;</div>
+<div class="line"><span class="lineno">  182</span>    zHi = zLo + 10;</div>
+<div class="line"><span class="lineno">  183</span>  } <span class="comment">// for a single point in the system (never happens)</span></div>
+<div class="line"><span class="lineno">  184</span> </div>
+<div class="line"><span class="lineno">  185</span>  <span class="comment">// Fill up the box lengths</span></div>
+<div class="line"><span class="lineno">  186</span>  yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.push_back(xHi - xLo);</div>
+<div class="line"><span class="lineno">  187</span>  yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.push_back(yHi - yLo);</div>
+<div class="line"><span class="lineno">  188</span>  yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.push_back(zHi - zLo);</div>
+<div class="line"><span class="lineno">  189</span> </div>
+<div class="line"><span class="lineno">  190</span>  <span class="keywordflow">if</span> (yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>.size() != yCloud.<a class="code hl_variable" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">nop</a>) {</div>
+<div class="line"><span class="lineno">  191</span>    std::cout &lt;&lt; <span class="stringliteral">&quot;Atoms didn&#39;t get filled in properly.\n&quot;</span>;</div>
+<div class="line"><span class="lineno">  192</span>  }</div>
+<div class="line"><span class="lineno">  193</span> </div>
+<div class="line"><span class="lineno">  194</span>  <span class="keywordflow">return</span> yCloud;</div>
+<div class="line"><span class="lineno">  195</span>}</div>
+<div class="ttc" id="astructmolSys_1_1PointCloud_html"><div class="ttname"><a href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a></div><div class="ttdoc">This contains a collection of points; contains information for a particular frame.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00170">mol_sys.hpp:170</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+</div><!-- contents -->
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen 1.16.1-->
+<!-- start footer part -->
+</div><!-- close #doc-content (opened by Doxygen) -->
+<div class="footer">
+<hr class="footline"/><address class="footline"><small>
+    Generated by&#160;<a href="https://www.doxygen.org/index.html">Doxygen 1.9.8</a> and the <a class="outlink" href="https://github.com/HaoZeke/doxyYoda">doxyYoda theme</a>
+</small></address>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

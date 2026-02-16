@@ -1,0 +1,288 @@
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen 1.16.1-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>d-SEAMS: src/include/internal/seams_input.hpp Source File</title>
+<!--BEGIN PROJECT_ICON-->
+<link rel="icon" href="$projecticon" type="image/x-icon" />
+<!--END PROJECT_ICON-->
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<!--BEGIN COPY_CLIPBOARD-->
+<script type="text/javascript" src="clipboard.js"></script>
+<!--END COPY_CLIPBOARD-->
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<!-- <link href="doxygen.css" rel="stylesheet" type="text/css" /> -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+// Dark mode: restore preference from localStorage
+(function() {
+  var stored = localStorage.getItem('doxyYoda-theme');
+  if (stored === 'dark') {
+    document.documentElement.classList.add('dark');
+  } else if (stored === 'light') {
+    document.documentElement.classList.add('light');
+  }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area">
+<a class="project_logo" href="#">
+<img src="dSeamsLogo.png" alt="Logo">
+</a>
+<span class="project_info">d-SEAMS v1.0.0</span>
+<button class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">&#9790;</button>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+  // Code folding: wrap .fragment elements in <details>
+  var fragments = document.querySelectorAll('.fragment');
+  fragments.forEach(function(frag) {
+    var details = document.createElement('details');
+    details.className = 'code-details';
+    var summary = document.createElement('summary');
+    summary.textContent = 'Code';
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard: add copy button to div.fragment elements
+  document.querySelectorAll('div.fragment').forEach(function(frag) {
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', function() {
+      var lines = frag.querySelectorAll('.line');
+      var text = Array.from(lines).map(function(l) { return l.textContent; }).join('\n');
+      if (!text) text = frag.textContent;
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+      });
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById('darkModeToggle');
+  if (toggle) {
+    function updateIcon() {
+      toggle.innerHTML = document.documentElement.classList.contains('dark') ? '&#9788;' : '&#9790;';
+    }
+    updateIcon();
+    toggle.addEventListener('click', function() {
+      var isDark = document.documentElement.classList.toggle('dark');
+      if (isDark) {
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.add('light');
+      }
+      localStorage.setItem('doxyYoda-theme', isDark ? 'dark' : 'light');
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="nav-path" class="navpath">
+  <ul>
+<li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a class="el" href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li>  </ul>
+</div>
+</div><!-- top -->
+<div class="header">
+  <div class="headertitle"><div class="title">seams_input.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="seams__input_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">// d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment">//</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">// Copyright (c) 2018--present d-SEAMS core team</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">//</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">// This program is free software: you can redistribute it and/or modify</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">// it under the terms of the MIT License as published by</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">// the Open Source Initiative.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">//</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">// A copy of the MIT License is included in the LICENSE file of this repository.</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// You should have received a copy of the MIT License along with this program.</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// If not, see &lt;https://opensource.org/licenses/MIT&gt;.</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#ifndef __SEAMS_INPUT_H_</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#define __SEAMS_INPUT_H_</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;<a class="code" href="mol__sys_8hpp.html">mol_sys.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;<a class="code" href="ring_8hpp.html">ring.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &quot;boost/filesystem/operations.hpp&quot;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;boost/filesystem/path.hpp&quot;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="foldopen" id="foldopen00050" data-start="{" data-end="}">
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="namespacesinp.html">   50</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacesinp.html">sinp</a> {</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="group__sinp.html#gac551295f82cf12446912941d5f32000e">   53</a></span>std::vector&lt;std::string&gt; <a class="code hl_function" href="group__sinp.html#gac551295f82cf12446912941d5f32000e">getInpFileList</a>(std::string inputFolder);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud&lt;molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><a class="code hl_function" href="group__sinp.html#ga1cbdb840118d27e2c2a3c05393ae8320">readLammpsTrj</a>(std::string filename, <span class="keywordtype">int</span> targetFrame,</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>              <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; *yCloud,</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>              <span class="keywordtype">bool</span> isSlice = <span class="keyword">false</span>,</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>              std::array&lt;double, 3&gt; coordLow = std::array&lt;double, 3&gt;{0, 0, 0},</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>              std::array&lt;double, 3&gt; coordHigh = std::array&lt;double, 3&gt;{0, 0, 0});</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud&lt;molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; <a class="code hl_function" href="group__sinp.html#ga594a5996c0ea3ba9ee53c2ab475bde7c">readLammpsTrjO</a>(</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    std::string filename, <span class="keywordtype">int</span> targetFrame,</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; *yCloud, <span class="keywordtype">int</span> typeO,</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="keywordtype">bool</span> isSlice = <span class="keyword">false</span>,</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    std::array&lt;double, 3&gt; coordLow = std::array&lt;double, 3&gt;{0, 0, 0},</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    std::array&lt;double, 3&gt; coordHigh = std::array&lt;double, 3&gt;{0, 0, 0});</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud&lt;molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; <a class="code hl_function" href="group__sinp.html#ga30633be4befe606953d55db43d389c7b">readLammpsTrjreduced</a>(</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    std::string filename, <span class="keywordtype">int</span> targetFrame,</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; *yCloud, <span class="keywordtype">int</span> typeI,</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keywordtype">bool</span> isSlice = <span class="keyword">false</span>,</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    std::array&lt;double, 3&gt; coordLow = std::array&lt;double, 3&gt;{0, 0, 0},</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    std::array&lt;double, 3&gt; coordHigh = std::array&lt;double, 3&gt;{0, 0, 0});</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud&lt;molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; <a class="code hl_function" href="group__sinp.html#ga9aeec41b2c3fea17e5e54fd266b71f0a">readXYZ</a>(std::string filename);</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="group__sinp.html#gada34d9d30df182a408a6b69ba7310509">readBonds</a>(std::string filename);</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="foldopen" id="foldopen00088" data-start="{" data-end="}">
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="group__sinp.html#gad5a8c377d8ed78c413c13d80ac8261ac">   88</a></span><span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="group__sinp.html#gad5a8c377d8ed78c413c13d80ac8261ac">atomInSlice</a>(<span class="keywordtype">double</span> x, <span class="keywordtype">double</span> y, <span class="keywordtype">double</span> z,</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>                        std::array&lt;double, 3&gt; coordLow,</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>                        std::array&lt;double, 3&gt; coordHigh) {</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  <span class="keywordtype">int</span> flag = 0; </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  <span class="keywordflow">if</span> (((x &gt;= coordLow[0]) &amp;&amp; (x &lt;= coordHigh[0])) ||</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>      coordLow[0] == coordHigh[0]) {</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    flag++;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  }</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>  <span class="keywordflow">if</span> (((y &gt;= coordLow[1]) &amp;&amp; (y &lt;= coordHigh[1])) ||</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>      coordLow[1] == coordHigh[1]) {</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    flag++;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>  }</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>  <span class="keywordflow">if</span> (((z &gt;= coordLow[2]) &amp;&amp; (z &lt;= coordHigh[2])) ||</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>      coordLow[2] == coordHigh[2]) {</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    flag++;</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  }</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  <span class="keywordflow">if</span> (flag == 3) {</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  }</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>}</div>
+</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>} <span class="comment">// namespace sinp</span></div>
+</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><span class="preprocessor">#endif </span></div>
+<div class="ttc" id="agroup__sinp_html_ga1cbdb840118d27e2c2a3c05393ae8320"><div class="ttname"><a href="group__sinp.html#ga1cbdb840118d27e2c2a3c05393ae8320">sinp::readLammpsTrj</a></div><div class="ttdeci">molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; readLammpsTrj(std::string filename, int targetFrame, molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, bool isSlice=false, std::array&lt; double, 3 &gt; coordLow=std::array&lt; double, 3 &gt;{0, 0, 0}, std::array&lt; double, 3 &gt; coordHigh=std::array&lt; double, 3 &gt;{0, 0, 0})</div><div class="ttdef"><b>Definition</b> <a href="seams__input_8cpp_source.html#l00212">seams_input.cpp:212</a></div></div>
+<div class="ttc" id="agroup__sinp_html_ga30633be4befe606953d55db43d389c7b"><div class="ttname"><a href="group__sinp.html#ga30633be4befe606953d55db43d389c7b">sinp::readLammpsTrjreduced</a></div><div class="ttdeci">molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; readLammpsTrjreduced(std::string filename, int targetFrame, molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, int typeI, bool isSlice=false, std::array&lt; double, 3 &gt; coordLow=std::array&lt; double, 3 &gt;{0, 0, 0}, std::array&lt; double, 3 &gt; coordHigh=std::array&lt; double, 3 &gt;{0, 0, 0})</div><div class="ttdef"><b>Definition</b> <a href="seams__input_8cpp_source.html#l00656">seams_input.cpp:656</a></div></div>
+<div class="ttc" id="agroup__sinp_html_ga594a5996c0ea3ba9ee53c2ab475bde7c"><div class="ttname"><a href="group__sinp.html#ga594a5996c0ea3ba9ee53c2ab475bde7c">sinp::readLammpsTrjO</a></div><div class="ttdeci">molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; readLammpsTrjO(std::string filename, int targetFrame, molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, int typeO, bool isSlice=false, std::array&lt; double, 3 &gt; coordLow=std::array&lt; double, 3 &gt;{0, 0, 0}, std::array&lt; double, 3 &gt; coordHigh=std::array&lt; double, 3 &gt;{0, 0, 0})</div><div class="ttdef"><b>Definition</b> <a href="seams__input_8cpp_source.html#l00431">seams_input.cpp:431</a></div></div>
+<div class="ttc" id="agroup__sinp_html_ga9aeec41b2c3fea17e5e54fd266b71f0a"><div class="ttname"><a href="group__sinp.html#ga9aeec41b2c3fea17e5e54fd266b71f0a">sinp::readXYZ</a></div><div class="ttdeci">molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; readXYZ(std::string filename)</div><div class="ttdoc">Function for reading in atom coordinates from an XYZ file.</div><div class="ttdef"><b>Definition</b> <a href="seams__input_8cpp_source.html#l00073">seams_input.cpp:73</a></div></div>
+<div class="ttc" id="agroup__sinp_html_gac551295f82cf12446912941d5f32000e"><div class="ttname"><a href="group__sinp.html#gac551295f82cf12446912941d5f32000e">sinp::getInpFileList</a></div><div class="ttdeci">std::vector&lt; std::string &gt; getInpFileList(std::string inputFolder)</div><div class="ttdoc">Get file list inside the input folder.</div></div>
+<div class="ttc" id="agroup__sinp_html_gad5a8c377d8ed78c413c13d80ac8261ac"><div class="ttname"><a href="group__sinp.html#gad5a8c377d8ed78c413c13d80ac8261ac">sinp::atomInSlice</a></div><div class="ttdeci">bool atomInSlice(double x, double y, double z, std::array&lt; double, 3 &gt; coordLow, std::array&lt; double, 3 &gt; coordHigh)</div><div class="ttdef"><b>Definition</b> <a href="seams__input_8hpp_source.html#l00088">seams_input.hpp:88</a></div></div>
+<div class="ttc" id="agroup__sinp_html_gada34d9d30df182a408a6b69ba7310509"><div class="ttname"><a href="group__sinp.html#gada34d9d30df182a408a6b69ba7310509">sinp::readBonds</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; readBonds(std::string filename)</div><div class="ttdoc">Reads bonds into a vector of vectors from a file with a specific format.</div><div class="ttdef"><b>Definition</b> <a href="seams__input_8cpp_source.html#l00024">seams_input.cpp:24</a></div></div>
+<div class="ttc" id="amol__sys_8hpp_html"><div class="ttname"><a href="mol__sys_8hpp.html">mol_sys.hpp</a></div><div class="ttdoc">The main molecular system handler.</div></div>
+<div class="ttc" id="anamespacesinp_html"><div class="ttname"><a href="namespacesinp.html">sinp</a></div><div class="ttdoc">Functions for the d-SEAMS readers.</div><div class="ttdef"><b>Definition</b> <a href="seams__input_8hpp_source.html#l00050">seams_input.hpp:50</a></div></div>
+<div class="ttc" id="aring_8hpp_html"><div class="ttname"><a href="ring_8hpp.html">ring.hpp</a></div><div class="ttdoc">File containing common functions used by bulk and confined topological network critera.</div></div>
+<div class="ttc" id="astructmolSys_1_1PointCloud_html"><div class="ttname"><a href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a></div><div class="ttdoc">This contains a collection of points; contains information for a particular frame.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00170">mol_sys.hpp:170</a></div></div>
+<div class="ttc" id="astructmolSys_1_1Point_html"><div class="ttname"><a href="structmolSys_1_1Point.html">molSys::Point</a></div><div class="ttdoc">This contains per-particle information.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00149">mol_sys.hpp:149</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen 1.16.1-->
+<!-- start footer part -->
+</div><!-- close #doc-content (opened by Doxygen) -->
+<div class="footer">
+<hr class="footline"/><address class="footline"><small>
+    Generated by&#160;<a href="https://www.doxygen.org/index.html">Doxygen 1.9.8</a> and the <a class="outlink" href="https://github.com/HaoZeke/doxyYoda">doxyYoda theme</a>
+</small></address>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen 1.16.1-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>d-SEAMS: ring Namespace Reference</title>
+<!--BEGIN PROJECT_ICON-->
+<link rel="icon" href="$projecticon" type="image/x-icon" />
+<!--END PROJECT_ICON-->
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<!--BEGIN COPY_CLIPBOARD-->
+<script type="text/javascript" src="clipboard.js"></script>
+<!--END COPY_CLIPBOARD-->
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<!-- <link href="doxygen.css" rel="stylesheet" type="text/css" /> -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+// Dark mode: restore preference from localStorage
+(function() {
+  var stored = localStorage.getItem('doxyYoda-theme');
+  if (stored === 'dark') {
+    document.documentElement.classList.add('dark');
+  } else if (stored === 'light') {
+    document.documentElement.classList.add('light');
+  }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area">
+<a class="project_logo" href="#">
+<img src="dSeamsLogo.png" alt="Logo">
+</a>
+<span class="project_info">d-SEAMS v1.0.0</span>
+<button class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">&#9790;</button>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+  // Code folding: wrap .fragment elements in <details>
+  var fragments = document.querySelectorAll('.fragment');
+  fragments.forEach(function(frag) {
+    var details = document.createElement('details');
+    details.className = 'code-details';
+    var summary = document.createElement('summary');
+    summary.textContent = 'Code';
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard: add copy button to div.fragment elements
+  document.querySelectorAll('div.fragment').forEach(function(frag) {
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', function() {
+      var lines = frag.querySelectorAll('.line');
+      var text = Array.from(lines).map(function(l) { return l.textContent; }).join('\n');
+      if (!text) text = frag.textContent;
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+      });
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById('darkModeToggle');
+  if (toggle) {
+    function updateIcon() {
+      toggle.innerHTML = document.documentElement.classList.contains('dark') ? '&#9788;' : '&#9790;';
+    }
+    updateIcon();
+    toggle.addEventListener('click', function() {
+      var isDark = document.documentElement.classList.toggle('dark');
+      if (isDark) {
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.add('light');
+      }
+      localStorage.setItem('doxyYoda-theme', isDark ? 'dark' : 'light');
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+</div><!-- top -->
+<div class="header">
+  <div class="summary">
+<a href="#enum-members">Enumerations</a> &#124;
+<a href="#func-members">Functions</a>  </div>
+  <div class="headertitle"><div class="title">ring Namespace Reference<div class="ingroups"><a class="el" href="group__gen.html">Gen</a> &raquo; <a class="el" href="group__ring.html">Ring</a></div></div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Topological network criteria functions.  
+<a href="namespacering.html#details">More...</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:ga301cfdc88452cfe51bd4f745d223a7e1" id="r_ga301cfdc88452cfe51bd4f745d223a7e1"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">strucType</a> { <br />
+&#160;&#160;<a class="el" href="group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1af8c13bb601e2113b166ef926763585b4">strucType::unclassified</a>
+, <a class="el" href="group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1a34ccd3ae5d03f22bd20e6792834a2702">strucType::DDC</a>
+, <a class="el" href="group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1a175d62c1050f89d435003f508a86e1b4">strucType::HCbasal</a>
+, <a class="el" href="group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1af27ea6cef025a4bfd5f035ed8b234170">strucType::HCprismatic</a>
+, <br />
+&#160;&#160;<a class="el" href="group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1a8666409c4b1945c12af7af3b37d13cfb">strucType::bothBasal</a>
+, <a class="el" href="group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1a42a4f7093f0f2df6fdaa6dd103a49e6c">strucType::bothPrismatic</a>
+, <a class="el" href="group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1a6e0d8d1239cb1f2a2d1c495c6b2fbf61">strucType::Prism</a>
+, <a class="el" href="group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1a9605a5bbcf57d1b0ad3ceffa800e754d">strucType::deformedPrism</a>
+, <br />
+&#160;&#160;<a class="el" href="group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1a9c3ec5026d4f171bbe81ca2da82cdb60">strucType::mixedPrismRing</a>
+<br />
+ }</td></tr>
+<tr class="separator:ga301cfdc88452cfe51bd4f745d223a7e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:gacc01f5c11043e8e47965f2efdeb80fcc" id="r_gacc01f5c11043e8e47965f2efdeb80fcc"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#gacc01f5c11043e8e47965f2efdeb80fcc">getSingleRingSize</a> (std::vector&lt; std::vector&lt; int &gt; &gt; rings, int ringSize)</td></tr>
+<tr class="memdesc:gacc01f5c11043e8e47965f2efdeb80fcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a vector of vectors of rings of a single size.  <br /></td></tr>
+<tr class="separator:gacc01f5c11043e8e47965f2efdeb80fcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac30855d0daa2b20c29e4dee39f5cd92f" id="r_gac30855d0daa2b20c29e4dee39f5cd92f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#gac30855d0daa2b20c29e4dee39f5cd92f">hasCommonElements</a> (std::vector&lt; int &gt; ring1, std::vector&lt; int &gt; ring2)</td></tr>
+<tr class="separator:gac30855d0daa2b20c29e4dee39f5cd92f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf9c0101aa7e09f97cbcf46a4ab83e0c6" id="r_gaf9c0101aa7e09f97cbcf46a4ab83e0c6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#gaf9c0101aa7e09f97cbcf46a4ab83e0c6">compareRings</a> (std::vector&lt; int &gt; ring1, std::vector&lt; int &gt; ring2)</td></tr>
+<tr class="separator:gaf9c0101aa7e09f97cbcf46a4ab83e0c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3cca615046ff98165863e95fdadce530" id="r_ga3cca615046ff98165863e95fdadce530"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#ga3cca615046ff98165863e95fdadce530">findTripletInRing</a> (std::vector&lt; int &gt; ring, std::vector&lt; int &gt; triplet)</td></tr>
+<tr class="memdesc:ga3cca615046ff98165863e95fdadce530"><td class="mdescLeft">&#160;</td><td class="mdescRight">Searches a particular ring for a triplet.  <br /></td></tr>
+<tr class="separator:ga3cca615046ff98165863e95fdadce530"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0d4e6d1dca2b07091dc0d94999c36ed9" id="r_ga0d4e6d1dca2b07091dc0d94999c36ed9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#ga0d4e6d1dca2b07091dc0d94999c36ed9">commonElementsInThreeRings</a> (std::vector&lt; int &gt; ring1, std::vector&lt; int &gt; ring2, std::vector&lt; int &gt; ring3)</td></tr>
+<tr class="memdesc:ga0d4e6d1dca2b07091dc0d94999c36ed9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Common elements in 3 rings.  <br /></td></tr>
+<tr class="separator:ga0d4e6d1dca2b07091dc0d94999c36ed9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaed5f39c14a4d76c1746aed53e0d0a2dc" id="r_gaed5f39c14a4d76c1746aed53e0d0a2dc"><td class="memItemLeft" align="right" valign="top">std::vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#gaed5f39c14a4d76c1746aed53e0d0a2dc">findsCommonElements</a> (std::vector&lt; int &gt; ring1, std::vector&lt; int &gt; ring2)</td></tr>
+<tr class="memdesc:gaed5f39c14a4d76c1746aed53e0d0a2dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the common elements of two rings.  <br /></td></tr>
+<tr class="separator:gaed5f39c14a4d76c1746aed53e0d0a2dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9d1d7aeb8871cce2fd9f80ac6c4c096d" id="r_ga9d1d7aeb8871cce2fd9f80ac6c4c096d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#ga9d1d7aeb8871cce2fd9f80ac6c4c096d">clearRingList</a> (std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings)</td></tr>
+<tr class="memdesc:ga9d1d7aeb8871cce2fd9f80ac6c4c096d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Erases memory for a vector of vectors for a list of rings.  <br /></td></tr>
+<tr class="separator:ga9d1d7aeb8871cce2fd9f80ac6c4c096d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga84d55a0f6cd90b0ebbc2c8329f71c17b" id="r_ga84d55a0f6cd90b0ebbc2c8329f71c17b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#ga84d55a0f6cd90b0ebbc2c8329f71c17b">assignPolygonType</a> (std::vector&lt; std::vector&lt; int &gt; &gt; rings, std::vector&lt; int &gt; *atomTypes, std::vector&lt; int &gt; nRings)</td></tr>
+<tr class="separator:ga84d55a0f6cd90b0ebbc2c8329f71c17b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga682cf75f9db6fc5d0271c004313fb062" id="r_ga682cf75f9db6fc5d0271c004313fb062"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#ga682cf75f9db6fc5d0271c004313fb062">getEdgeMoleculesInRings</a> (std::vector&lt; std::vector&lt; int &gt; &gt; rings, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *oCloud, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, std::array&lt; double, 3 &gt; coordLow, std::array&lt; double, 3 &gt; coordHigh, bool identicalCloud=false)</td></tr>
+<tr class="separator:ga682cf75f9db6fc5d0271c004313fb062"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaaac5b88914bf3332f3a618f075798879" id="r_gaaac5b88914bf3332f3a618f075798879"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#gaaac5b88914bf3332f3a618f075798879">printSliceGetEdgeMoleculesInRings</a> (std::string path, std::vector&lt; std::vector&lt; int &gt; &gt; rings, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *oCloud, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, std::array&lt; double, 3 &gt; coordLow, std::array&lt; double, 3 &gt; coordHigh, bool identicalCloud=false)</td></tr>
+<tr class="separator:gaaac5b88914bf3332f3a618f075798879"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gacaa6a20825fe0e56c9975a5ad5bc7e28" id="r_gacaa6a20825fe0e56c9975a5ad5bc7e28"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__prism3.html#gacaa6a20825fe0e56c9975a5ad5bc7e28">bulkPolygonRingAnalysis</a> (std::string path, std::vector&lt; std::vector&lt; int &gt; &gt; rings, std::vector&lt; std::vector&lt; int &gt; &gt; nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, int maxDepth, int firstFrame)</td></tr>
+<tr class="separator:gacaa6a20825fe0e56c9975a5ad5bc7e28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga58808c0f484f8b862ee10e7aa60dd1ad" id="r_ga58808c0f484f8b862ee10e7aa60dd1ad"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__prism3.html#ga58808c0f484f8b862ee10e7aa60dd1ad">topoBulkAnalysis</a> (std::string path, std::vector&lt; std::vector&lt; int &gt; &gt; rings, std::vector&lt; std::vector&lt; int &gt; &gt; nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, int firstFrame, bool onlyTetrahedral=true)</td></tr>
+<tr class="separator:ga58808c0f484f8b862ee10e7aa60dd1ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga960e1b7a65a351e2c5ded2b81188f419" id="r_ga960e1b7a65a351e2c5ded2b81188f419"><td class="memItemLeft" align="right" valign="top">std::vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__prism3.html#ga960e1b7a65a351e2c5ded2b81188f419">findDDC</a> (std::vector&lt; std::vector&lt; int &gt; &gt; rings, std::vector&lt; <a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">strucType</a> &gt; *ringType, std::vector&lt; int &gt; listHC, std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; *cageList)</td></tr>
+<tr class="separator:ga960e1b7a65a351e2c5ded2b81188f419"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf6ea370ad51da00f413e67aa5f2efd00" id="r_gaf6ea370ad51da00f413e67aa5f2efd00"><td class="memItemLeft" align="right" valign="top">std::vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__prism3.html#gaf6ea370ad51da00f413e67aa5f2efd00">findMixedRings</a> (std::vector&lt; std::vector&lt; int &gt; &gt; rings, std::vector&lt; <a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">strucType</a> &gt; *ringType, std::vector&lt; int &gt; *listDDC, std::vector&lt; int &gt; *listHC)</td></tr>
+<tr class="separator:gaf6ea370ad51da00f413e67aa5f2efd00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gacb002a9991505530c16db05acdc953f9" id="r_gacb002a9991505530c16db05acdc953f9"><td class="memItemLeft" align="right" valign="top">std::vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__prism3.html#gacb002a9991505530c16db05acdc953f9">findHC</a> (std::vector&lt; std::vector&lt; int &gt; &gt; rings, std::vector&lt; <a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">strucType</a> &gt; *ringType, std::vector&lt; std::vector&lt; int &gt; &gt; nList, std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; *cageList)</td></tr>
+<tr class="separator:gacb002a9991505530c16db05acdc953f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga269e22a6116e730bda1efb42c9aa60c3" id="r_ga269e22a6116e730bda1efb42c9aa60c3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__prism3.html#ga269e22a6116e730bda1efb42c9aa60c3">conditionOneDDC</a> (std::vector&lt; std::vector&lt; int &gt; &gt; rings, std::vector&lt; int &gt; *peripheralRings, int iring)</td></tr>
+<tr class="separator:ga269e22a6116e730bda1efb42c9aa60c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga1e85dfbca9cdea7f3b5356966e149e66" id="r_ga1e85dfbca9cdea7f3b5356966e149e66"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__prism3.html#ga1e85dfbca9cdea7f3b5356966e149e66">conditionTwoDDC</a> (std::vector&lt; std::vector&lt; int &gt; &gt; rings, std::vector&lt; int &gt; *peripheralRings, int iring)</td></tr>
+<tr class="separator:ga1e85dfbca9cdea7f3b5356966e149e66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4dcc2d46f5a050ca6f0fafcabe86ed4b" id="r_ga4dcc2d46f5a050ca6f0fafcabe86ed4b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__prism3.html#ga4dcc2d46f5a050ca6f0fafcabe86ed4b">conditionThreeDDC</a> (std::vector&lt; std::vector&lt; int &gt; &gt; rings, std::vector&lt; int &gt; *peripheralRings)</td></tr>
+<tr class="separator:ga4dcc2d46f5a050ca6f0fafcabe86ed4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4472b36af273de6d32f695e6c9c34668" id="r_ga4472b36af273de6d32f695e6c9c34668"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__prism3.html#ga4472b36af273de6d32f695e6c9c34668">basalConditions</a> (std::vector&lt; std::vector&lt; int &gt; &gt; nList, std::vector&lt; int &gt; *basal1, std::vector&lt; int &gt; *basal2)</td></tr>
+<tr class="memdesc:ga4472b36af273de6d32f695e6c9c34668"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tests whether two rings are basal rings (true) or not (false)  <br /></td></tr>
+<tr class="separator:ga4472b36af273de6d32f695e6c9c34668"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8a9aa057cc0c1133ace834d7ec496e83" id="r_ga8a9aa057cc0c1133ace834d7ec496e83"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__prism3.html#ga8a9aa057cc0c1133ace834d7ec496e83">basalNeighbours</a> (std::vector&lt; std::vector&lt; int &gt; &gt; nList, std::vector&lt; int &gt; *triplet, int atomOne, int atomTwo)</td></tr>
+<tr class="separator:ga8a9aa057cc0c1133ace834d7ec496e83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga1c2d7aca9baf461bf007d6374233626a" id="r_ga1c2d7aca9baf461bf007d6374233626a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__prism3.html#ga1c2d7aca9baf461bf007d6374233626a">notNeighboursOfRing</a> (std::vector&lt; std::vector&lt; int &gt; &gt; nList, std::vector&lt; int &gt; *triplet, std::vector&lt; int &gt; *ring)</td></tr>
+<tr class="separator:ga1c2d7aca9baf461bf007d6374233626a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae286f517fcdf9a36689a318ad8f47fec" id="r_gae286f517fcdf9a36689a318ad8f47fec"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__prism3.html#gae286f517fcdf9a36689a318ad8f47fec">findPrismatic</a> (std::vector&lt; std::vector&lt; int &gt; &gt; rings, std::vector&lt; int &gt; *listHC, std::vector&lt; <a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">strucType</a> &gt; *ringType, int iring, int jring, std::vector&lt; int &gt; *prismaticRings)</td></tr>
+<tr class="memdesc:gae286f517fcdf9a36689a318ad8f47fec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds the prismatic rings from basal rings iring and jring.  <br /></td></tr>
+<tr class="separator:gae286f517fcdf9a36689a318ad8f47fec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga065139891077f470cc637055735383ca" id="r_ga065139891077f470cc637055735383ca"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__prism3.html#ga065139891077f470cc637055735383ca">getAtomTypesTopoBulk</a> (std::vector&lt; std::vector&lt; int &gt; &gt; rings, std::vector&lt; <a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">ring::strucType</a> &gt; ringType, std::vector&lt; <a class="el" href="group__cage.html#gaaac41828990e32b9d6e7db4426b61529">cage::iceType</a> &gt; *atomTypes)</td></tr>
+<tr class="separator:ga065139891077f470cc637055735383ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6fcfac293a750bd14cbf1f94ab2a3976" id="r_ga6fcfac293a750bd14cbf1f94ab2a3976"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__prism3.html#ga6fcfac293a750bd14cbf1f94ab2a3976">getStrucNumbers</a> (std::vector&lt; <a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">ring::strucType</a> &gt; ringType, std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; cageList, int *numHC, int *numDDC, int *mixedRings, int *prismaticRings, int *basalRings)</td></tr>
+<tr class="memdesc:ga6fcfac293a750bd14cbf1f94ab2a3976"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines the number of HCs, DDCs, Mixed rings, prismatic and basal rings.  <br /></td></tr>
+<tr class="separator:ga6fcfac293a750bd14cbf1f94ab2a3976"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf2f03674e78a17a4de8fc9603dea8282" id="r_gaf2f03674e78a17a4de8fc9603dea8282"><td class="memItemLeft" align="right" valign="top">std::vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#gaf2f03674e78a17a4de8fc9603dea8282">findPrisms</a> (std::vector&lt; std::vector&lt; int &gt; &gt; rings, std::vector&lt; <a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">strucType</a> &gt; *ringType, int *nPerfectPrisms, int *nImperfectPrisms, std::vector&lt; std::vector&lt; int &gt; &gt; nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, std::vector&lt; double &gt; *rmsdPerAtom, bool doShapeMatching=false)</td></tr>
+<tr class="separator:gaf2f03674e78a17a4de8fc9603dea8282"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae471d67ad508962b4b7d7e8917900fa5" id="r_gae471d67ad508962b4b7d7e8917900fa5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#gae471d67ad508962b4b7d7e8917900fa5">basalPrismConditions</a> (std::vector&lt; std::vector&lt; int &gt; &gt; nList, std::vector&lt; int &gt; *basal1, std::vector&lt; int &gt; *basal2)</td></tr>
+<tr class="separator:gae471d67ad508962b4b7d7e8917900fa5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad4f3d38b9677a76a81bbaeafb2fbd652" id="r_gad4f3d38b9677a76a81bbaeafb2fbd652"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#gad4f3d38b9677a76a81bbaeafb2fbd652">relaxedPrismConditions</a> (std::vector&lt; std::vector&lt; int &gt; &gt; nList, std::vector&lt; int &gt; *basal1, std::vector&lt; int &gt; *basal2)</td></tr>
+<tr class="separator:gad4f3d38b9677a76a81bbaeafb2fbd652"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8912c1abc7e5c49831f285e12a48f483" id="r_ga8912c1abc7e5c49831f285e12a48f483"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#ga8912c1abc7e5c49831f285e12a48f483">discardExtraTetragonBlocks</a> (std::vector&lt; int &gt; *basal1, std::vector&lt; int &gt; *basal2, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud)</td></tr>
+<tr class="separator:ga8912c1abc7e5c49831f285e12a48f483"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gabb0bcb7500b51bb7db86ce04b2914d07" id="r_gabb0bcb7500b51bb7db86ce04b2914d07"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#gabb0bcb7500b51bb7db86ce04b2914d07">keepAxialRingsOnly</a> (std::vector&lt; std::vector&lt; int &gt; &gt; rings, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud)</td></tr>
+<tr class="memdesc:gabb0bcb7500b51bb7db86ce04b2914d07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves only axial rings out of all possible rings.  <br /></td></tr>
+<tr class="separator:gabb0bcb7500b51bb7db86ce04b2914d07"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8d9cfa4ee615834ca4160ee56bd27e8e" id="r_ga8d9cfa4ee615834ca4160ee56bd27e8e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#ga8d9cfa4ee615834ca4160ee56bd27e8e">prismAnalysis</a> (std::string path, std::vector&lt; std::vector&lt; int &gt; &gt; rings, std::vector&lt; std::vector&lt; int &gt; &gt; nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, int maxDepth, int *atomID, int firstFrame, int currentFrame, bool doShapeMatching=false)</td></tr>
+<tr class="separator:ga8d9cfa4ee615834ca4160ee56bd27e8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaaf9190af40bc246f5586329e073bae3e" id="r_gaaf9190af40bc246f5586329e073bae3e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#gaaf9190af40bc246f5586329e073bae3e">assignPrismType</a> (std::vector&lt; std::vector&lt; int &gt; &gt; rings, std::vector&lt; int &gt; listPrism, int ringSize, std::vector&lt; <a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">ring::strucType</a> &gt; ringType, std::vector&lt; int &gt; *atomTypes, std::vector&lt; <a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">ring::strucType</a> &gt; *atomState)</td></tr>
+<tr class="separator:gaaf9190af40bc246f5586329e073bae3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5f7b22fe1354ebe4982b8a9df0067b65" id="r_ga5f7b22fe1354ebe4982b8a9df0067b65"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#ga5f7b22fe1354ebe4982b8a9df0067b65">deformedPrismTypes</a> (std::vector&lt; <a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">ring::strucType</a> &gt; atomState, std::vector&lt; int &gt; *atomTypes, int maxDepth)</td></tr>
+<tr class="memdesc:ga5f7b22fe1354ebe4982b8a9df0067b65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the atom type values for deformed prisms.  <br /></td></tr>
+<tr class="separator:ga5f7b22fe1354ebe4982b8a9df0067b65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9d7e63eb7b6c37024744c4f372796cef" id="r_ga9d7e63eb7b6c37024744c4f372796cef"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#ga9d7e63eb7b6c37024744c4f372796cef">rmAxialTranslations</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, int *atomID, int firstFrame, int currentFrame)</td></tr>
+<tr class="memdesc:ga9d7e63eb7b6c37024744c4f372796cef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shift the entire ice nanotube and remove axial translations.  <br /></td></tr>
+<tr class="separator:ga9d7e63eb7b6c37024744c4f372796cef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga48a174db91aa0fe5cbd7ca0158eb2204" id="r_ga48a174db91aa0fe5cbd7ca0158eb2204"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#ga48a174db91aa0fe5cbd7ca0158eb2204">polygonRingAnalysis</a> (std::string path, std::vector&lt; std::vector&lt; int &gt; &gt; rings, std::vector&lt; std::vector&lt; int &gt; &gt; nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, int maxDepth, double sheetArea, int firstFrame)</td></tr>
+<tr class="separator:ga48a174db91aa0fe5cbd7ca0158eb2204"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Topological network criteria functions. </p>
+<p>This namespace contains functions for the topological network criteria for bulk and confined systems both.</p>
+<p>Although the namespace is shared by bulk and confined topological network criteria, the functions are split into files specific to each set of criteria.</p>
+<p>All the topological network criteria are based on the identification of primitive rings (using the Franzblau algorithm for primitive rings), following which specific rules for combinations of primitive rings are used to identify quasi-one-dimensional, quasi-two-dimensional and bulk ices.</p>
+<h3><a class="anchor" id="autotoc_md30"></a>
+Changelog</h3>
+<ul>
+<li>Amrita Goswami [<a href="#" onclick="location.href='mai'+'lto:'+'amr'+'it'+'a16'+'th'+'aug'+'64'+'6@g'+'ma'+'il.'+'co'+'m'; return false;">amrit<span class="obfuscator">.nosp@m.</span>a16t<span class="obfuscator">.nosp@m.</span>haug6<span class="obfuscator">.nosp@m.</span>46@g<span class="obfuscator">.nosp@m.</span>mail.<span class="obfuscator">.nosp@m.</span>com</a>]; date modified: Nov 13, 2019</li>
+<li>Rohit Goswami [<a href="#" onclick="location.href='mai'+'lto:'+'rog'+'32'+'@hi'+'.i'+'s'; return false;">rog32<span class="obfuscator">.nosp@m.</span>@hi.<span class="obfuscator">.nosp@m.</span>is</a>]; date modified: Mar 20, 2021 </li>
+</ul>
+</div></div><!-- contents -->
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen 1.16.1-->
+<!-- start footer part -->
+</div><!-- close #doc-content (opened by Doxygen) -->
+<div class="footer">
+<hr class="footline"/><address class="footline"><small>
+    Generated by&#160;<a href="https://www.doxygen.org/index.html">Doxygen 1.9.8</a> and the <a class="outlink" href="https://github.com/HaoZeke/doxyYoda">doxyYoda theme</a>
+</small></address>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

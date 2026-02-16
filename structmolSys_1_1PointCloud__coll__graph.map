@@ -1,0 +1,7 @@
+<map id="molSys::PointCloud&lt; S, T &gt;" name="molSys::PointCloud&lt; S, T &gt;">
+<area shape="rect" id="Node000001" title="This contains a collection of points; contains information for a particular frame." alt="" coords="79,108,227,148"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,13,135,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,47,139,106,135,110,86,50"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="159,5,311,45"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="213,58,170,110,166,106,209,54"/>
+</map>

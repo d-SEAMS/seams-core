@@ -1,0 +1,333 @@
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen 1.16.1-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>d-SEAMS: src/include/internal/bop.hpp Source File</title>
+<!--BEGIN PROJECT_ICON-->
+<link rel="icon" href="$projecticon" type="image/x-icon" />
+<!--END PROJECT_ICON-->
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<!--BEGIN COPY_CLIPBOARD-->
+<script type="text/javascript" src="clipboard.js"></script>
+<!--END COPY_CLIPBOARD-->
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<!-- <link href="doxygen.css" rel="stylesheet" type="text/css" /> -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+// Dark mode: restore preference from localStorage
+(function() {
+  var stored = localStorage.getItem('doxyYoda-theme');
+  if (stored === 'dark') {
+    document.documentElement.classList.add('dark');
+  } else if (stored === 'light') {
+    document.documentElement.classList.add('light');
+  }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area">
+<a class="project_logo" href="#">
+<img src="dSeamsLogo.png" alt="Logo">
+</a>
+<span class="project_info">d-SEAMS v1.0.0</span>
+<button class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">&#9790;</button>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+  // Code folding: wrap .fragment elements in <details>
+  var fragments = document.querySelectorAll('.fragment');
+  fragments.forEach(function(frag) {
+    var details = document.createElement('details');
+    details.className = 'code-details';
+    var summary = document.createElement('summary');
+    summary.textContent = 'Code';
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard: add copy button to div.fragment elements
+  document.querySelectorAll('div.fragment').forEach(function(frag) {
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', function() {
+      var lines = frag.querySelectorAll('.line');
+      var text = Array.from(lines).map(function(l) { return l.textContent; }).join('\n');
+      if (!text) text = frag.textContent;
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+      });
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById('darkModeToggle');
+  if (toggle) {
+    function updateIcon() {
+      toggle.innerHTML = document.documentElement.classList.contains('dark') ? '&#9788;' : '&#9790;';
+    }
+    updateIcon();
+    toggle.addEventListener('click', function() {
+      var isDark = document.documentElement.classList.toggle('dark');
+      if (isDark) {
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.add('light');
+      }
+      localStorage.setItem('doxyYoda-theme', isDark ? 'dark' : 'light');
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="nav-path" class="navpath">
+  <ul>
+<li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a class="el" href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li>  </ul>
+</div>
+</div><!-- top -->
+<div class="header">
+  <div class="headertitle"><div class="title">bop.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="bop_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">// d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment">//</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">// Copyright (c) 2018--present d-SEAMS core team</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">//</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">// This program is free software: you can redistribute it and/or modify</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">// it under the terms of the MIT License as published by</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">// the Open Source Initiative.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">//</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">// A copy of the MIT License is included in the LICENSE file of this repository.</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// You should have received a copy of the MIT License along with this program.</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// If not, see &lt;https://opensource.org/licenses/MIT&gt;.</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#ifndef __BOP_H_</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#define __BOP_H_</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;array&gt;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;boost/geometry.hpp&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;boost/math/special_functions/spherical_harmonic.hpp&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;cmath&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;complex&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;<a class="code" href="generic_8hpp.html">generic.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;math.h&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;<a class="code" href="mol__sys_8hpp.html">mol_sys.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;<a class="code" href="neighbours_8hpp.html">neighbours.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;<a class="code" href="seams__output_8hpp.html">seams_output.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="foldopen" id="foldopen00138" data-start="{" data-end="}">
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno"><a class="line" href="namespacechill.html">  138</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacechill.html">chill</a> {</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span> </div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span><span class="comment">// 2*l+1 length complex vector</span></div>
+<div class="foldopen" id="foldopen00148" data-start="{" data-end="};">
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno"><a class="line" href="structchill_1_1YlmAtom.html">  148</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structchill_1_1YlmAtom.html">YlmAtom</a> {</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno"><a class="line" href="group__chill.html#ga3eb7d9180c409702925c3ac48c79bb7a">  149</a></span>  std::vector&lt;std::complex&lt;double&gt;&gt; <a class="code hl_variable" href="group__chill.html#ga3eb7d9180c409702925c3ac48c79bb7a">ylm</a>;</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>};</div>
+</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span> </div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span><span class="comment">// Vector of 2*l+1 averaged over 4 nearest neighbours</span></div>
+<div class="foldopen" id="foldopen00169" data-start="{" data-end="};">
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno"><a class="line" href="structchill_1_1QlmAtom.html">  169</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structchill_1_1QlmAtom.html">QlmAtom</a> {</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno"><a class="line" href="group__chill.html#ga4449b8cb7345b6dec04dcb5aa155e676">  170</a></span>  std::vector&lt;YlmAtom&gt; <a class="code hl_variable" href="group__chill.html#ga4449b8cb7345b6dec04dcb5aa155e676">ptq</a>; <span class="comment">// Averaged over neighbours</span></div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>};</div>
+</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span> </div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span><a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud&lt;molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt;</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span><a class="code hl_function" href="group__chill.html#gabe618f28bf0368875746e4886295a3df">getCorrel</a>(<a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; *yCloud,</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>          std::vector&lt;std::vector&lt;int&gt;&gt; nList, <span class="keywordtype">bool</span> isSlice = <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span> </div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span><a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud&lt;molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt;</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span><a class="code hl_function" href="group__chill.html#ga983db84e206dfe4c6514f97bbce7ed0a">getIceTypeNoPrint</a>(<a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; *yCloud,</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>                  std::vector&lt;std::vector&lt;int&gt;&gt; nList, <span class="keywordtype">bool</span> isSlice = <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span> </div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span><span class="comment">// Classifies each atom according to the CHILL algorithm</span></div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span><a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud&lt;molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt;</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span><a class="code hl_function" href="group__chill.html#ga24d6e16e6df7bdf9e5fd1a09cf78e434">getIceType</a>(<a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; *yCloud,</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>           std::vector&lt;std::vector&lt;int&gt;&gt; nList, std::string path,</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>           <span class="keywordtype">int</span> firstFrame, <span class="keywordtype">bool</span> isSlice = <span class="keyword">false</span>,</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>           std::string outputFileName = <span class="stringliteral">&quot;chill.txt&quot;</span>);</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span> </div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span><a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud&lt;molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt;</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span><a class="code hl_function" href="group__chill.html#ga7583ad51b62d99f96ee1f8133ce7227d">getCorrelPlus</a>(<a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; *yCloud,</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>              std::vector&lt;std::vector&lt;int&gt;&gt; nList, <span class="keywordtype">bool</span> isSlice = <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span> </div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span><a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud&lt;molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt;</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span><a class="code hl_function" href="group__chill.html#gaf0efe4cc2f2b29558dbe3780554b0dad">getIceTypePlus</a>(<a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; *yCloud,</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>               std::vector&lt;std::vector&lt;int&gt;&gt; nList, std::string path,</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>               <span class="keywordtype">int</span> firstFrame, <span class="keywordtype">bool</span> isSlice = <span class="keyword">false</span>,</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>               std::string outputFileName = <span class="stringliteral">&quot;chillPlus.txt&quot;</span>);</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span> </div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>std::vector&lt;double&gt;</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span><a class="code hl_function" href="group__chill.html#gae3ef1dc47505894b1d29411ceaf90743">getq6</a>(<a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; *yCloud,</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>      std::vector&lt;std::vector&lt;int&gt;&gt; nList, <span class="keywordtype">bool</span> isSlice = <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span> </div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span><a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud&lt;molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt;</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span><a class="code hl_function" href="group__chill.html#gadcda1fbc16c0a4ac61f38c139f423f42">reclassifyWater</a>(<a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; *yCloud,</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>                std::vector&lt;double&gt; *q6);</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span> </div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span><span class="keywordtype">int</span> <a class="code hl_function" href="group__chill.html#ga548414bf35e3ef8e6ea0d786ce13a05b">printIceType</a>(<a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; *yCloud,</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>                 std::string path, <span class="keywordtype">int</span> firstFrame, <span class="keywordtype">bool</span> isSlice = <span class="keyword">false</span>,</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>                 std::string outputFileName = <span class="stringliteral">&quot;superChill.txt&quot;</span>);</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span> </div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span><span class="keywordtype">bool</span> <a class="code hl_function" href="group__chill.html#gaddbe7c1a75a97a52098163e7afbc2126">isInterfacial</a>(<a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; *yCloud,</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>                   std::vector&lt;std::vector&lt;int&gt;&gt; nList, <span class="keywordtype">int</span> iatom,</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>                   <span class="keywordtype">int</span> num_staggrd, <span class="keywordtype">int</span> num_eclipsd);</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span> </div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span><span class="keywordtype">int</span> <a class="code hl_function" href="group__chill.html#ga3add9502de8e0317621486479526190f">numStaggered</a>(<a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; *yCloud,</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>                 std::vector&lt;std::vector&lt;int&gt;&gt; nList, <span class="keywordtype">int</span> jatom);</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span> </div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>} <span class="comment">// namespace chill</span></div>
+</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span> </div>
+<div class="foldopen" id="foldopen00270" data-start="{" data-end="}">
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno"><a class="line" href="namespacesph.html">  270</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacesph.html">sph</a> {</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span> </div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span><span class="comment">// 7 is for Q3, orderL=3</span></div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span> </div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>std::vector&lt;std::complex&lt;double&gt;&gt;</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span><a class="code hl_function" href="group__chill.html#gaa9220b76da7400c9d934fa08ceeeba7a">spheriHarmo</a>(<span class="keywordtype">int</span> orderL, std::array&lt;double, 2&gt; <a class="code hl_function" href="group__chill.html#ga514fadfbfeabee5d144ef4102fb3004d">radialCoord</a>);</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span> </div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>std::array&lt;double, 2&gt; <a class="code hl_function" href="group__chill.html#ga514fadfbfeabee5d144ef4102fb3004d">radialCoord</a>(std::array&lt;double, 3&gt; cartCoord);</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span> </div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>std::vector&lt;std::complex&lt;double&gt;&gt;</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span><a class="code hl_function" href="group__chill.html#ga08491bfa3fa2f6bacdf997be433508c4">lookupTableQ3Vec</a>(std::array&lt;double, 2&gt; angles);</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span> </div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>std::complex&lt;double&gt; <a class="code hl_function" href="group__chill.html#gaccbcfa30cf3762a55c59e7b632117af5">lookupTableQ3</a>(<span class="keywordtype">int</span> m, std::array&lt;double, 2&gt; angles);</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span> </div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>std::vector&lt;std::complex&lt;double&gt;&gt;</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span><a class="code hl_function" href="group__chill.html#ga004e7b144d261654c556c7e66fdd9b2e">lookupTableQ6Vec</a>(std::array&lt;double, 2&gt; angles);</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span> </div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>std::complex&lt;double&gt; <a class="code hl_function" href="group__chill.html#ga63be01f86931b2a45e70606f5b8f545d">lookupTableQ6</a>(<span class="keywordtype">int</span> m, std::array&lt;double, 2&gt; angles);</div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span> </div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>} <span class="comment">// namespace sph</span></div>
+</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span> </div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span><span class="preprocessor">#endif </span><span class="comment">// __BOP_H_</span></div>
+<div class="ttc" id="ageneric_8hpp_html"><div class="ttname"><a href="generic_8hpp.html">generic.hpp</a></div><div class="ttdoc">File for containing generic or common functions.</div></div>
+<div class="ttc" id="agroup__chill_html_ga004e7b144d261654c556c7e66fdd9b2e"><div class="ttname"><a href="group__chill.html#ga004e7b144d261654c556c7e66fdd9b2e">sph::lookupTableQ6Vec</a></div><div class="ttdeci">std::vector&lt; std::complex&lt; double &gt; &gt; lookupTableQ6Vec(std::array&lt; double, 2 &gt; angles)</div><div class="ttdoc">Lookup table for Q6.</div><div class="ttdef"><b>Definition</b> <a href="bop_8cpp_source.html#l00189">bop.cpp:189</a></div></div>
+<div class="ttc" id="agroup__chill_html_ga08491bfa3fa2f6bacdf997be433508c4"><div class="ttname"><a href="group__chill.html#ga08491bfa3fa2f6bacdf997be433508c4">sph::lookupTableQ3Vec</a></div><div class="ttdeci">std::vector&lt; std::complex&lt; double &gt; &gt; lookupTableQ3Vec(std::array&lt; double, 2 &gt; angles)</div><div class="ttdoc">Lookup table for Q3.</div><div class="ttdef"><b>Definition</b> <a href="bop_8cpp_source.html#l00107">bop.cpp:107</a></div></div>
+<div class="ttc" id="agroup__chill_html_ga24d6e16e6df7bdf9e5fd1a09cf78e434"><div class="ttname"><a href="group__chill.html#ga24d6e16e6df7bdf9e5fd1a09cf78e434">chill::getIceType</a></div><div class="ttdeci">molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; getIceType(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, std::vector&lt; std::vector&lt; int &gt; &gt; nList, std::string path, int firstFrame, bool isSlice=false, std::string outputFileName=&quot;chill.txt&quot;)</div><div class="ttdoc">Classifies each atom according to the CHILL algorithm.</div><div class="ttdef"><b>Definition</b> <a href="bop_8cpp_source.html#l00505">bop.cpp:505</a></div></div>
+<div class="ttc" id="agroup__chill_html_ga3add9502de8e0317621486479526190f"><div class="ttname"><a href="group__chill.html#ga3add9502de8e0317621486479526190f">chill::numStaggered</a></div><div class="ttdeci">int numStaggered(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, std::vector&lt; std::vector&lt; int &gt; &gt; nList, int jatom)</div><div class="ttdoc">Finds the number of staggered bonds for a given atom of index jatom.</div><div class="ttdef"><b>Definition</b> <a href="bop_8cpp_source.html#l01201">bop.cpp:1201</a></div></div>
+<div class="ttc" id="agroup__chill_html_ga3eb7d9180c409702925c3ac48c79bb7a"><div class="ttname"><a href="group__chill.html#ga3eb7d9180c409702925c3ac48c79bb7a">chill::YlmAtom::ylm</a></div><div class="ttdeci">std::vector&lt; std::complex&lt; double &gt; &gt; ylm</div><div class="ttdef"><b>Definition</b> <a href="bop_8hpp_source.html#l00149">bop.hpp:149</a></div></div>
+<div class="ttc" id="agroup__chill_html_ga4449b8cb7345b6dec04dcb5aa155e676"><div class="ttname"><a href="group__chill.html#ga4449b8cb7345b6dec04dcb5aa155e676">chill::QlmAtom::ptq</a></div><div class="ttdeci">std::vector&lt; YlmAtom &gt; ptq</div><div class="ttdef"><b>Definition</b> <a href="bop_8hpp_source.html#l00170">bop.hpp:170</a></div></div>
+<div class="ttc" id="agroup__chill_html_ga514fadfbfeabee5d144ef4102fb3004d"><div class="ttname"><a href="group__chill.html#ga514fadfbfeabee5d144ef4102fb3004d">sph::radialCoord</a></div><div class="ttdeci">std::array&lt; double, 2 &gt; radialCoord(std::array&lt; double, 3 &gt; cartCoord)</div><div class="ttdef"><b>Definition</b> <a href="bop_8cpp_source.html#l00081">bop.cpp:81</a></div></div>
+<div class="ttc" id="agroup__chill_html_ga548414bf35e3ef8e6ea0d786ce13a05b"><div class="ttname"><a href="group__chill.html#ga548414bf35e3ef8e6ea0d786ce13a05b">chill::printIceType</a></div><div class="ttdeci">int printIceType(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, std::string path, int firstFrame, bool isSlice=false, std::string outputFileName=&quot;superChill.txt&quot;)</div><div class="ttdoc">Prints out the iceType for a particular frame onto the terminal.</div><div class="ttdef"><b>Definition</b> <a href="bop_8cpp_source.html#l01060">bop.cpp:1060</a></div></div>
+<div class="ttc" id="agroup__chill_html_ga63be01f86931b2a45e70606f5b8f545d"><div class="ttname"><a href="group__chill.html#ga63be01f86931b2a45e70606f5b8f545d">sph::lookupTableQ6</a></div><div class="ttdeci">std::complex&lt; double &gt; lookupTableQ6(int m, std::array&lt; double, 2 &gt; angles)</div><div class="ttdoc">Lookup table for Q6 (m=0 to m=12)</div><div class="ttdef"><b>Definition</b> <a href="bop_8cpp_source.html#l00215">bop.cpp:215</a></div></div>
+<div class="ttc" id="agroup__chill_html_ga7583ad51b62d99f96ee1f8133ce7227d"><div class="ttname"><a href="group__chill.html#ga7583ad51b62d99f96ee1f8133ce7227d">chill::getCorrelPlus</a></div><div class="ttdeci">molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; getCorrelPlus(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, std::vector&lt; std::vector&lt; int &gt; &gt; nList, bool isSlice=false)</div><div class="ttdoc">Gets c_ij and then classifies bond types according to the CHILL+ algorithm.</div><div class="ttdef"><b>Definition</b> <a href="bop_8cpp_source.html#l00602">bop.cpp:602</a></div></div>
+<div class="ttc" id="agroup__chill_html_ga983db84e206dfe4c6514f97bbce7ed0a"><div class="ttname"><a href="group__chill.html#ga983db84e206dfe4c6514f97bbce7ed0a">chill::getIceTypeNoPrint</a></div><div class="ttdeci">molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; getIceTypeNoPrint(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, std::vector&lt; std::vector&lt; int &gt; &gt; nList, bool isSlice=false)</div><div class="ttdoc">Classifies each atom according to the CHILL algorithm without printing.</div><div class="ttdef"><b>Definition</b> <a href="bop_8cpp_source.html#l00437">bop.cpp:437</a></div></div>
+<div class="ttc" id="agroup__chill_html_gaa9220b76da7400c9d934fa08ceeeba7a"><div class="ttname"><a href="group__chill.html#gaa9220b76da7400c9d934fa08ceeeba7a">sph::spheriHarmo</a></div><div class="ttdeci">std::vector&lt; std::complex&lt; double &gt; &gt; spheriHarmo(int orderL, std::array&lt; double, 2 &gt; radialCoord)</div><div class="ttdef"><b>Definition</b> <a href="bop_8cpp_source.html#l00057">bop.cpp:57</a></div></div>
+<div class="ttc" id="agroup__chill_html_gabe618f28bf0368875746e4886295a3df"><div class="ttname"><a href="group__chill.html#gabe618f28bf0368875746e4886295a3df">chill::getCorrel</a></div><div class="ttdeci">molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; getCorrel(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, std::vector&lt; std::vector&lt; int &gt; &gt; nList, bool isSlice=false)</div><div class="ttdef"><b>Definition</b> <a href="bop_8cpp_source.html#l00299">bop.cpp:299</a></div></div>
+<div class="ttc" id="agroup__chill_html_gaccbcfa30cf3762a55c59e7b632117af5"><div class="ttname"><a href="group__chill.html#gaccbcfa30cf3762a55c59e7b632117af5">sph::lookupTableQ3</a></div><div class="ttdeci">std::complex&lt; double &gt; lookupTableQ3(int m, std::array&lt; double, 2 &gt; angles)</div><div class="ttdoc">Lookup table for Q3 (m=0 to m=6)</div><div class="ttdef"><b>Definition</b> <a href="bop_8cpp_source.html#l00133">bop.cpp:133</a></div></div>
+<div class="ttc" id="agroup__chill_html_gadcda1fbc16c0a4ac61f38c139f423f42"><div class="ttname"><a href="group__chill.html#gadcda1fbc16c0a4ac61f38c139f423f42">chill::reclassifyWater</a></div><div class="ttdeci">molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; reclassifyWater(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, std::vector&lt; double &gt; *q6)</div><div class="ttdef"><b>Definition</b> <a href="bop_8cpp_source.html#l01011">bop.cpp:1011</a></div></div>
+<div class="ttc" id="agroup__chill_html_gaddbe7c1a75a97a52098163e7afbc2126"><div class="ttname"><a href="group__chill.html#gaddbe7c1a75a97a52098163e7afbc2126">chill::isInterfacial</a></div><div class="ttdeci">bool isInterfacial(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, std::vector&lt; std::vector&lt; int &gt; &gt; nList, int iatom, int num_staggrd, int num_eclipsd)</div><div class="ttdef"><b>Definition</b> <a href="bop_8cpp_source.html#l01129">bop.cpp:1129</a></div></div>
+<div class="ttc" id="agroup__chill_html_gae3ef1dc47505894b1d29411ceaf90743"><div class="ttname"><a href="group__chill.html#gae3ef1dc47505894b1d29411ceaf90743">chill::getq6</a></div><div class="ttdeci">std::vector&lt; double &gt; getq6(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, std::vector&lt; std::vector&lt; int &gt; &gt; nList, bool isSlice=false)</div><div class="ttdef"><b>Definition</b> <a href="bop_8cpp_source.html#l00868">bop.cpp:868</a></div></div>
+<div class="ttc" id="agroup__chill_html_gaf0efe4cc2f2b29558dbe3780554b0dad"><div class="ttname"><a href="group__chill.html#gaf0efe4cc2f2b29558dbe3780554b0dad">chill::getIceTypePlus</a></div><div class="ttdeci">molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; getIceTypePlus(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; *yCloud, std::vector&lt; std::vector&lt; int &gt; &gt; nList, std::string path, int firstFrame, bool isSlice=false, std::string outputFileName=&quot;chillPlus.txt&quot;)</div><div class="ttdoc">Classifies each atom according to the CHILL+ algorithm.</div><div class="ttdef"><b>Definition</b> <a href="bop_8cpp_source.html#l00755">bop.cpp:755</a></div></div>
+<div class="ttc" id="amol__sys_8hpp_html"><div class="ttname"><a href="mol__sys_8hpp.html">mol_sys.hpp</a></div><div class="ttdoc">The main molecular system handler.</div></div>
+<div class="ttc" id="anamespacechill_html"><div class="ttname"><a href="namespacechill.html">chill</a></div><div class="ttdoc">CHILL and CHILL+ structure classification. This namespace contains functions that are used in the CHI...</div><div class="ttdef"><b>Definition</b> <a href="bop_8hpp_source.html#l00138">bop.hpp:138</a></div></div>
+<div class="ttc" id="anamespacesph_html"><div class="ttname"><a href="namespacesph.html">sph</a></div><div class="ttdoc">Functions used for spherical harmonics.</div><div class="ttdef"><b>Definition</b> <a href="bop_8hpp_source.html#l00270">bop.hpp:270</a></div></div>
+<div class="ttc" id="aneighbours_8hpp_html"><div class="ttname"><a href="neighbours_8hpp.html">neighbours.hpp</a></div><div class="ttdoc">Header file for neighbour list generation.</div></div>
+<div class="ttc" id="aseams__output_8hpp_html"><div class="ttname"><a href="seams__output_8hpp.html">seams_output.hpp</a></div></div>
+<div class="ttc" id="astructchill_1_1QlmAtom_html"><div class="ttname"><a href="structchill_1_1QlmAtom.html">chill::QlmAtom</a></div><div class="ttdoc">This is the local orientational bond order parameter , of length .</div><div class="ttdef"><b>Definition</b> <a href="bop_8hpp_source.html#l00169">bop.hpp:169</a></div></div>
+<div class="ttc" id="astructchill_1_1YlmAtom_html"><div class="ttname"><a href="structchill_1_1YlmAtom.html">chill::YlmAtom</a></div><div class="ttdoc">This contains a complex vector of length .</div><div class="ttdef"><b>Definition</b> <a href="bop_8hpp_source.html#l00148">bop.hpp:148</a></div></div>
+<div class="ttc" id="astructmolSys_1_1PointCloud_html"><div class="ttname"><a href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a></div><div class="ttdoc">This contains a collection of points; contains information for a particular frame.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00170">mol_sys.hpp:170</a></div></div>
+<div class="ttc" id="astructmolSys_1_1Point_html"><div class="ttname"><a href="structmolSys_1_1Point.html">molSys::Point</a></div><div class="ttdoc">This contains per-particle information.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00149">mol_sys.hpp:149</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen 1.16.1-->
+<!-- start footer part -->
+</div><!-- close #doc-content (opened by Doxygen) -->
+<div class="footer">
+<hr class="footline"/><address class="footline"><small>
+    Generated by&#160;<a href="https://www.doxygen.org/index.html">Doxygen 1.9.8</a> and the <a class="outlink" href="https://github.com/HaoZeke/doxyYoda">doxyYoda theme</a>
+</small></address>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

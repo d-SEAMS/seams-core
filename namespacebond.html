@@ -1,0 +1,220 @@
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen 1.16.1-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>d-SEAMS: bond Namespace Reference</title>
+<!--BEGIN PROJECT_ICON-->
+<link rel="icon" href="$projecticon" type="image/x-icon" />
+<!--END PROJECT_ICON-->
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<!--BEGIN COPY_CLIPBOARD-->
+<script type="text/javascript" src="clipboard.js"></script>
+<!--END COPY_CLIPBOARD-->
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<!-- <link href="doxygen.css" rel="stylesheet" type="text/css" /> -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+// Dark mode: restore preference from localStorage
+(function() {
+  var stored = localStorage.getItem('doxyYoda-theme');
+  if (stored === 'dark') {
+    document.documentElement.classList.add('dark');
+  } else if (stored === 'light') {
+    document.documentElement.classList.add('light');
+  }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area">
+<a class="project_logo" href="#">
+<img src="dSeamsLogo.png" alt="Logo">
+</a>
+<span class="project_info">d-SEAMS v1.0.0</span>
+<button class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">&#9790;</button>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+  // Code folding: wrap .fragment elements in <details>
+  var fragments = document.querySelectorAll('.fragment');
+  fragments.forEach(function(frag) {
+    var details = document.createElement('details');
+    details.className = 'code-details';
+    var summary = document.createElement('summary');
+    summary.textContent = 'Code';
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard: add copy button to div.fragment elements
+  document.querySelectorAll('div.fragment').forEach(function(frag) {
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', function() {
+      var lines = frag.querySelectorAll('.line');
+      var text = Array.from(lines).map(function(l) { return l.textContent; }).join('\n');
+      if (!text) text = frag.textContent;
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+      });
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById('darkModeToggle');
+  if (toggle) {
+    function updateIcon() {
+      toggle.innerHTML = document.documentElement.classList.contains('dark') ? '&#9788;' : '&#9790;';
+    }
+    updateIcon();
+    toggle.addEventListener('click', function() {
+      var isDark = document.documentElement.classList.toggle('dark');
+      if (isDark) {
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.add('light');
+      }
+      localStorage.setItem('doxyYoda-theme', isDark ? 'dark' : 'light');
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+</div><!-- top -->
+<div class="header">
+  <div class="summary">
+<a href="#func-members">Functions</a>  </div>
+  <div class="headertitle"><div class="title">bond Namespace Reference<div class="ingroups"><a class="el" href="group__bond.html">Bond</a></div></div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Functions for bond-related analyses.  
+<a href="namespacebond.html#details">More...</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ga07de3300c0a5854c705fa17333767bd1" id="r_ga07de3300c0a5854c705fa17333767bd1"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bond.html#ga07de3300c0a5854c705fa17333767bd1">populateHbonds</a> (std::string filename, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, std::vector&lt; std::vector&lt; int &gt; &gt; nList, int targetFrame, int Htype)</td></tr>
+<tr class="separator:ga07de3300c0a5854c705fa17333767bd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga71debfc746733c34e0868c4a16a57654" id="r_ga71debfc746733c34e0868c4a16a57654"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bond.html#ga71debfc746733c34e0868c4a16a57654">populateHbondsWithInputClouds</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *hCloud, std::vector&lt; std::vector&lt; int &gt; &gt; nList)</td></tr>
+<tr class="separator:ga71debfc746733c34e0868c4a16a57654"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad4b0179fc40db64244a9f8a10ea5fc4c" id="r_gad4b0179fc40db64244a9f8a10ea5fc4c"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bond.html#gad4b0179fc40db64244a9f8a10ea5fc4c">getHbondDistanceOH</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *oCloud, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *hCloud, int oAtomIndex, int hAtomIndex)</td></tr>
+<tr class="separator:gad4b0179fc40db64244a9f8a10ea5fc4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafda865396072cf638e4ee69fa8989b33" id="r_gafda865396072cf638e4ee69fa8989b33"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bond.html#gafda865396072cf638e4ee69fa8989b33">populateBonds</a> (std::vector&lt; std::vector&lt; int &gt; &gt; nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud)</td></tr>
+<tr class="separator:gafda865396072cf638e4ee69fa8989b33"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3a593a1ec35f4fbca74825af1c548291" id="r_ga3a593a1ec35f4fbca74825af1c548291"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bond.html#ga3a593a1ec35f4fbca74825af1c548291">populateBonds</a> (std::vector&lt; std::vector&lt; int &gt; &gt; nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; *yCloud, std::vector&lt; <a class="el" href="group__cage.html#gaaac41828990e32b9d6e7db4426b61529">cage::iceType</a> &gt; atomTypes)</td></tr>
+<tr class="separator:ga3a593a1ec35f4fbca74825af1c548291"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga855d0d32cf79c57da16f86eb008ecb24" id="r_ga855d0d32cf79c57da16f86eb008ecb24"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bond.html#ga855d0d32cf79c57da16f86eb008ecb24">createBondsFromCages</a> (std::vector&lt; std::vector&lt; int &gt; &gt; rings, std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; *cageList, <a class="el" href="group__cage.html#ga5787314f51b5927c213db48b81c21d95">cage::cageType</a> type, int *nRings)</td></tr>
+<tr class="separator:ga855d0d32cf79c57da16f86eb008ecb24"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4dc0b40b8a6510d7a0e48303302e9c41" id="r_ga4dc0b40b8a6510d7a0e48303302e9c41"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bond.html#ga4dc0b40b8a6510d7a0e48303302e9c41">trimBonds</a> (std::vector&lt; std::vector&lt; int &gt; &gt; bonds)</td></tr>
+<tr class="memdesc:ga4dc0b40b8a6510d7a0e48303302e9c41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove duplicate bonds.  <br /></td></tr>
+<tr class="separator:ga4dc0b40b8a6510d7a0e48303302e9c41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Functions for bond-related analyses. </p>
+<p>This namespace contains functions that are used for determining the hydrogen bonds, or lists of bonded atoms for write-outs to data files and visualization.</p>
+<p>These functions are distinct from the neighbour-list building functions. Bonds can be built from cages, ring lists etc.</p>
+<p>Hydrogen bonds are determined using a strict geometric criterion.</p>
+<p>A hydrogen bond between two water molecules exists when:</p>
+<ol type="1">
+<li>The distance between the donor oxygen atom and the acceptor hydrogen atom is less than 2.42 Angstrom</li>
+<li>The angle between the O&ndash;O vector and the O-H vector should be less than 30 degrees</li>
+</ol>
+<h3><a class="anchor" id="autotoc_md20"></a>
+Changelog</h3>
+<ul>
+<li>Amrita Goswami [<a href="#" onclick="location.href='mai'+'lto:'+'amr'+'it'+'a16'+'th'+'aug'+'64'+'6@g'+'ma'+'il.'+'co'+'m'; return false;">amrit<span class="obfuscator">.nosp@m.</span>a16t<span class="obfuscator">.nosp@m.</span>haug6<span class="obfuscator">.nosp@m.</span>46@g<span class="obfuscator">.nosp@m.</span>mail.<span class="obfuscator">.nosp@m.</span>com</a>]; date modified: Nov 13, 2019</li>
+<li>Rohit Goswami [<a href="#" onclick="location.href='mai'+'lto:'+'rog'+'32'+'@hi'+'.i'+'s'; return false;">rog32<span class="obfuscator">.nosp@m.</span>@hi.<span class="obfuscator">.nosp@m.</span>is</a>]; date modified: Mar 20, 2021 </li>
+</ul>
+</div></div><!-- contents -->
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen 1.16.1-->
+<!-- start footer part -->
+</div><!-- close #doc-content (opened by Doxygen) -->
+<div class="footer">
+<hr class="footline"/><address class="footline"><small>
+    Generated by&#160;<a href="https://www.doxygen.org/index.html">Doxygen 1.9.8</a> and the <a class="outlink" href="https://github.com/HaoZeke/doxyYoda">doxyYoda theme</a>
+</small></address>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

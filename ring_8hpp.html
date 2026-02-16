@@ -1,0 +1,275 @@
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen 1.16.1-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>d-SEAMS: src/include/internal/ring.hpp File Reference</title>
+<!--BEGIN PROJECT_ICON-->
+<link rel="icon" href="$projecticon" type="image/x-icon" />
+<!--END PROJECT_ICON-->
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<!--BEGIN COPY_CLIPBOARD-->
+<script type="text/javascript" src="clipboard.js"></script>
+<!--END COPY_CLIPBOARD-->
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<!-- <link href="doxygen.css" rel="stylesheet" type="text/css" /> -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+// Dark mode: restore preference from localStorage
+(function() {
+  var stored = localStorage.getItem('doxyYoda-theme');
+  if (stored === 'dark') {
+    document.documentElement.classList.add('dark');
+  } else if (stored === 'light') {
+    document.documentElement.classList.add('light');
+  }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area">
+<a class="project_logo" href="#">
+<img src="dSeamsLogo.png" alt="Logo">
+</a>
+<span class="project_info">d-SEAMS v1.0.0</span>
+<button class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">&#9790;</button>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+  // Code folding: wrap .fragment elements in <details>
+  var fragments = document.querySelectorAll('.fragment');
+  fragments.forEach(function(frag) {
+    var details = document.createElement('details');
+    details.className = 'code-details';
+    var summary = document.createElement('summary');
+    summary.textContent = 'Code';
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard: add copy button to div.fragment elements
+  document.querySelectorAll('div.fragment').forEach(function(frag) {
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', function() {
+      var lines = frag.querySelectorAll('.line');
+      var text = Array.from(lines).map(function(l) { return l.textContent; }).join('\n');
+      if (!text) text = frag.textContent;
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+      });
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById('darkModeToggle');
+  if (toggle) {
+    function updateIcon() {
+      toggle.innerHTML = document.documentElement.classList.contains('dark') ? '&#9788;' : '&#9790;';
+    }
+    updateIcon();
+    toggle.addEventListener('click', function() {
+      var isDark = document.documentElement.classList.toggle('dark');
+      if (isDark) {
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.add('light');
+      }
+      localStorage.setItem('doxyYoda-theme', isDark ? 'dark' : 'light');
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="nav-path" class="navpath">
+  <ul>
+<li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a class="el" href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li>  </ul>
+</div>
+</div><!-- top -->
+<div class="header">
+  <div class="summary">
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#enum-members">Enumerations</a> &#124;
+<a href="#func-members">Functions</a>  </div>
+  <div class="headertitle"><div class="title">ring.hpp File Reference</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>File containing common functions used by bulk and confined topological network critera.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &lt;algorithm&gt;</code><br />
+<code>#include &lt;array&gt;</code><br />
+<code>#include &lt;fstream&gt;</code><br />
+<code>#include &lt;iostream&gt;</code><br />
+<code>#include &lt;iterator&gt;</code><br />
+<code>#include &lt;math.h&gt;</code><br />
+<code>#include &lt;memory&gt;</code><br />
+<code>#include &lt;sstream&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
+<code>#include &lt;sys/stat.h&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
+<code>#include &lt;<a class="el" href="cage_8hpp_source.html">cage.hpp</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="seams__input_8hpp_source.html">seams_input.hpp</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="seams__output_8hpp_source.html">seams_output.hpp</a>&gt;</code><br />
+</div><div class="textblock"><div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Include dependency graph for ring.hpp:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="ring_8hpp__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+</div>
+</div><div class="textblock"><div id="dynsection-1" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="ring_8hpp__dep__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+</div>
+</div>
+<p><a href="ring_8hpp_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:namespacering" id="r_namespacering"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacering.html">ring</a></td></tr>
+<tr class="memdesc:namespacering"><td class="mdescLeft">&#160;</td><td class="mdescRight">Topological network criteria functions. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:ga301cfdc88452cfe51bd4f745d223a7e1" id="r_ga301cfdc88452cfe51bd4f745d223a7e1"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">ring::strucType</a> { <br />
+&#160;&#160;<a class="el" href="group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1af8c13bb601e2113b166ef926763585b4">ring::strucType::unclassified</a>
+, <a class="el" href="group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1a34ccd3ae5d03f22bd20e6792834a2702">ring::strucType::DDC</a>
+, <a class="el" href="group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1a175d62c1050f89d435003f508a86e1b4">ring::strucType::HCbasal</a>
+, <a class="el" href="group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1af27ea6cef025a4bfd5f035ed8b234170">ring::strucType::HCprismatic</a>
+, <br />
+&#160;&#160;<a class="el" href="group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1a8666409c4b1945c12af7af3b37d13cfb">ring::strucType::bothBasal</a>
+, <a class="el" href="group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1a42a4f7093f0f2df6fdaa6dd103a49e6c">ring::strucType::bothPrismatic</a>
+, <a class="el" href="group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1a6e0d8d1239cb1f2a2d1c495c6b2fbf61">ring::strucType::Prism</a>
+, <a class="el" href="group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1a9605a5bbcf57d1b0ad3ceffa800e754d">ring::strucType::deformedPrism</a>
+, <br />
+&#160;&#160;<a class="el" href="group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1a9c3ec5026d4f171bbe81ca2da82cdb60">ring::strucType::mixedPrismRing</a>
+<br />
+ }</td></tr>
+<tr class="separator:ga301cfdc88452cfe51bd4f745d223a7e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:gacc01f5c11043e8e47965f2efdeb80fcc" id="r_gacc01f5c11043e8e47965f2efdeb80fcc"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#gacc01f5c11043e8e47965f2efdeb80fcc">ring::getSingleRingSize</a> (std::vector&lt; std::vector&lt; int &gt; &gt; rings, int ringSize)</td></tr>
+<tr class="memdesc:gacc01f5c11043e8e47965f2efdeb80fcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a vector of vectors of rings of a single size.  <br /></td></tr>
+<tr class="separator:gacc01f5c11043e8e47965f2efdeb80fcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac30855d0daa2b20c29e4dee39f5cd92f" id="r_gac30855d0daa2b20c29e4dee39f5cd92f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#gac30855d0daa2b20c29e4dee39f5cd92f">ring::hasCommonElements</a> (std::vector&lt; int &gt; ring1, std::vector&lt; int &gt; ring2)</td></tr>
+<tr class="separator:gac30855d0daa2b20c29e4dee39f5cd92f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf9c0101aa7e09f97cbcf46a4ab83e0c6" id="r_gaf9c0101aa7e09f97cbcf46a4ab83e0c6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#gaf9c0101aa7e09f97cbcf46a4ab83e0c6">ring::compareRings</a> (std::vector&lt; int &gt; ring1, std::vector&lt; int &gt; ring2)</td></tr>
+<tr class="separator:gaf9c0101aa7e09f97cbcf46a4ab83e0c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3cca615046ff98165863e95fdadce530" id="r_ga3cca615046ff98165863e95fdadce530"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#ga3cca615046ff98165863e95fdadce530">ring::findTripletInRing</a> (std::vector&lt; int &gt; ring, std::vector&lt; int &gt; triplet)</td></tr>
+<tr class="memdesc:ga3cca615046ff98165863e95fdadce530"><td class="mdescLeft">&#160;</td><td class="mdescRight">Searches a particular ring for a triplet.  <br /></td></tr>
+<tr class="separator:ga3cca615046ff98165863e95fdadce530"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0d4e6d1dca2b07091dc0d94999c36ed9" id="r_ga0d4e6d1dca2b07091dc0d94999c36ed9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#ga0d4e6d1dca2b07091dc0d94999c36ed9">ring::commonElementsInThreeRings</a> (std::vector&lt; int &gt; ring1, std::vector&lt; int &gt; ring2, std::vector&lt; int &gt; ring3)</td></tr>
+<tr class="memdesc:ga0d4e6d1dca2b07091dc0d94999c36ed9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Common elements in 3 rings.  <br /></td></tr>
+<tr class="separator:ga0d4e6d1dca2b07091dc0d94999c36ed9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaed5f39c14a4d76c1746aed53e0d0a2dc" id="r_gaed5f39c14a4d76c1746aed53e0d0a2dc"><td class="memItemLeft" align="right" valign="top">std::vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#gaed5f39c14a4d76c1746aed53e0d0a2dc">ring::findsCommonElements</a> (std::vector&lt; int &gt; ring1, std::vector&lt; int &gt; ring2)</td></tr>
+<tr class="memdesc:gaed5f39c14a4d76c1746aed53e0d0a2dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the common elements of two rings.  <br /></td></tr>
+<tr class="separator:gaed5f39c14a4d76c1746aed53e0d0a2dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9d1d7aeb8871cce2fd9f80ac6c4c096d" id="r_ga9d1d7aeb8871cce2fd9f80ac6c4c096d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#ga9d1d7aeb8871cce2fd9f80ac6c4c096d">ring::clearRingList</a> (std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings)</td></tr>
+<tr class="memdesc:ga9d1d7aeb8871cce2fd9f80ac6c4c096d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Erases memory for a vector of vectors for a list of rings.  <br /></td></tr>
+<tr class="separator:ga9d1d7aeb8871cce2fd9f80ac6c4c096d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga84d55a0f6cd90b0ebbc2c8329f71c17b" id="r_ga84d55a0f6cd90b0ebbc2c8329f71c17b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__ring.html#ga84d55a0f6cd90b0ebbc2c8329f71c17b">ring::assignPolygonType</a> (std::vector&lt; std::vector&lt; int &gt; &gt; rings, std::vector&lt; int &gt; *atomTypes, std::vector&lt; int &gt; nRings)</td></tr>
+<tr class="separator:ga84d55a0f6cd90b0ebbc2c8329f71c17b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>File containing common functions used by bulk and confined topological network critera. </p>
+
+<p class="definition">Definition in file <a class="el" href="ring_8hpp_source.html">ring.hpp</a>.</p>
+</div></div><!-- contents -->
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen 1.16.1-->
+<!-- start footer part -->
+</div><!-- close #doc-content (opened by Doxygen) -->
+<div class="footer">
+<hr class="footline"/><address class="footline"><small>
+    Generated by&#160;<a href="https://www.doxygen.org/index.html">Doxygen 1.9.8</a> and the <a class="outlink" href="https://github.com/HaoZeke/doxyYoda">doxyYoda theme</a>
+</small></address>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

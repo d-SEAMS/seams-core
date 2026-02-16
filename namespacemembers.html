@@ -1,0 +1,445 @@
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen 1.16.1-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>d-SEAMS: Namespace Members</title>
+<!--BEGIN PROJECT_ICON-->
+<link rel="icon" href="$projecticon" type="image/x-icon" />
+<!--END PROJECT_ICON-->
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<!--BEGIN COPY_CLIPBOARD-->
+<script type="text/javascript" src="clipboard.js"></script>
+<!--END COPY_CLIPBOARD-->
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<!-- <link href="doxygen.css" rel="stylesheet" type="text/css" /> -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+// Dark mode: restore preference from localStorage
+(function() {
+  var stored = localStorage.getItem('doxyYoda-theme');
+  if (stored === 'dark') {
+    document.documentElement.classList.add('dark');
+  } else if (stored === 'light') {
+    document.documentElement.classList.add('light');
+  }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area">
+<a class="project_logo" href="#">
+<img src="dSeamsLogo.png" alt="Logo">
+</a>
+<span class="project_info">d-SEAMS v1.0.0</span>
+<button class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">&#9790;</button>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+  // Code folding: wrap .fragment elements in <details>
+  var fragments = document.querySelectorAll('.fragment');
+  fragments.forEach(function(frag) {
+    var details = document.createElement('details');
+    details.className = 'code-details';
+    var summary = document.createElement('summary');
+    summary.textContent = 'Code';
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard: add copy button to div.fragment elements
+  document.querySelectorAll('div.fragment').forEach(function(frag) {
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', function() {
+      var lines = frag.querySelectorAll('.line');
+      var text = Array.from(lines).map(function(l) { return l.textContent; }).join('\n');
+      if (!text) text = frag.textContent;
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+      });
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById('darkModeToggle');
+  if (toggle) {
+    function updateIcon() {
+      toggle.innerHTML = document.documentElement.classList.contains('dark') ? '&#9788;' : '&#9790;';
+    }
+    updateIcon();
+    toggle.addEventListener('click', function() {
+      var isDark = document.documentElement.classList.toggle('dark');
+      if (isDark) {
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.add('light');
+      }
+      localStorage.setItem('doxyYoda-theme', isDark ? 'dark' : 'light');
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="contents">
+<div class="textblock">Here is a list of all namespace members with links to the namespace documentation for each member:</div>
+
+<h3><a id="index_a" name="index_a"></a>- a -</h3><ul>
+<li>angDistDegQuaternions()&#160;:&#160;<a class="el" href="group__gen.html#gac7f742de2fac11d3b249c63bf4f4e126">gen</a></li>
+<li>assignPolygonType()&#160;:&#160;<a class="el" href="group__ring.html#ga84d55a0f6cd90b0ebbc2c8329f71c17b">ring</a></li>
+<li>assignPrismType()&#160;:&#160;<a class="el" href="group__ring.html#gaaf9190af40bc246f5586329e073bae3e">ring</a></li>
+<li>atom_state_type&#160;:&#160;<a class="el" href="group__molSys.html#ga13ffe3a39a0816627553f195e102abb5">molSys</a></li>
+<li>atomInSlice()&#160;:&#160;<a class="el" href="group__sinp.html#gad5a8c377d8ed78c413c13d80ac8261ac">sinp</a></li>
+<li>atomsFromCages()&#160;:&#160;<a class="el" href="group__ring.html#ga61cedac39886fd1d8b2182f35aa537a6">tum3</a></li>
+<li>atomsInSingleSlice()&#160;:&#160;<a class="el" href="group__ring.html#ga336353070302bc293ed5261838ee979e">gen</a></li>
+<li>averageRMSDatom()&#160;:&#160;<a class="el" href="group__ring.html#ga390a8ecb9b86c18c3802fcbdcf37cd83">tum3</a></li>
+<li>avgVector()&#160;:&#160;<a class="el" href="group__gen.html#ga17d4f5636c0469c19d7efa59344396b2">gen</a></li>
+</ul>
+
+
+<h3><a id="index_b" name="index_b"></a>- b -</h3><ul>
+<li>basalConditions()&#160;:&#160;<a class="el" href="group__prism3.html#ga4472b36af273de6d32f695e6c9c34668">ring</a></li>
+<li>basalNeighbours()&#160;:&#160;<a class="el" href="group__prism3.html#ga8a9aa057cc0c1133ace834d7ec496e83">ring</a></li>
+<li>basalPrismConditions()&#160;:&#160;<a class="el" href="group__prism3.html#ga41528a15a4e9f137b24ca348a91231d5">prism3</a>, <a class="el" href="group__ring.html#gae471d67ad508962b4b7d7e8917900fa5">ring</a></li>
+<li>basalRingsSeparation()&#160;:&#160;<a class="el" href="group__prism3.html#ga9fe2899493b03fdf8fe00e3e58b5961c">prism3</a></li>
+<li>bond_type&#160;:&#160;<a class="el" href="group__molSys.html#ga1c858200c3d088bf02839453d0f46328">molSys</a></li>
+<li>buildRefDDC()&#160;:&#160;<a class="el" href="group__ring.html#gabf66bd35cdbccfd8fee51564dc889977">tum3</a></li>
+<li>buildRefHC()&#160;:&#160;<a class="el" href="group__ring.html#ga0a321aab8c8956e0885826b65e550a1d">tum3</a></li>
+<li>bulkPolygonRingAnalysis()&#160;:&#160;<a class="el" href="group__prism3.html#gacaa6a20825fe0e56c9975a5ad5bc7e28">ring</a></li>
+</ul>
+
+
+<h3><a id="index_c" name="index_c"></a>- c -</h3><ul>
+<li>cageType&#160;:&#160;<a class="el" href="group__cage.html#ga5787314f51b5927c213db48b81c21d95">cage</a></li>
+<li>calcCoverageArea()&#160;:&#160;<a class="el" href="namespacetopoparam.html#a5c30082b36d0029e261c8eb218838858">topoparam</a></li>
+<li>calcMatrixN()&#160;:&#160;<a class="el" href="namespaceabsor.html#af2d549df95a889e345c6ce1c86155c12">absor</a></li>
+<li>calcMatrixS()&#160;:&#160;<a class="el" href="namespaceabsor.html#a16e1d855167323dabd3dbfcd8f1290af">absor</a></li>
+<li>calcMedian()&#160;:&#160;<a class="el" href="group__gen.html#ga6046c3c9db73fbf420ad07834047942e">gen</a></li>
+<li>calcScaleFactor()&#160;:&#160;<a class="el" href="namespaceabsor.html#a187318f48da3c9f095806f282a9fd73f">absor</a></li>
+<li>centerWRTcentroid()&#160;:&#160;<a class="el" href="namespaceabsor.html#a446b8553f6f2e4c8aeba3b663d257f4c">absor</a></li>
+<li>changeDiaCageOrder()&#160;:&#160;<a class="el" href="namespacepntToPnt.html#a2c4affea21bfc133f8c752d74f3a943a">pntToPnt</a></li>
+<li>changeHexCageOrder()&#160;:&#160;<a class="el" href="namespacepntToPnt.html#a896e8ed3ac4436156eac99b12e12c255">pntToPnt</a></li>
+<li>clearGraph()&#160;:&#160;<a class="el" href="group__primitive.html#gacca66f8ab7f31902d6c7d9a9f63d5c46">primitive</a></li>
+<li>clearNeighbourList()&#160;:&#160;<a class="el" href="group__nneigh.html#ga752d3e4cbd98fa454a6dc36a4307b75a">nneigh</a></li>
+<li>clearPointCloud()&#160;:&#160;<a class="el" href="group__molSys.html#gad8acfb41ee6bc0258612e9cac24269b2">molSys</a></li>
+<li>clearRingList()&#160;:&#160;<a class="el" href="group__ring.html#ga9d1d7aeb8871cce2fd9f80ac6c4c096d">ring</a></li>
+<li>clusterAnalysis()&#160;:&#160;<a class="el" href="group__clump.html#gaeddc7079209f865864e71009db027b72">clump</a></li>
+<li>clusterCages()&#160;:&#160;<a class="el" href="group__ring.html#gaceefc9dae9d9d55863aab1358fbe936b">tum3</a></li>
+<li>commonElementsInThreeRings()&#160;:&#160;<a class="el" href="group__ring.html#ga0d4e6d1dca2b07091dc0d94999c36ed9">ring</a></li>
+<li>compareByAtomID()&#160;:&#160;<a class="el" href="group__gen.html#gaed4f2e37c89f319a852355a2b7199147">gen</a></li>
+<li>compareRings()&#160;:&#160;<a class="el" href="group__ring.html#gaf9c0101aa7e09f97cbcf46a4ab83e0c6">ring</a></li>
+<li>conditionOneDDC()&#160;:&#160;<a class="el" href="group__prism3.html#ga269e22a6116e730bda1efb42c9aa60c3">ring</a></li>
+<li>conditionThreeDDC()&#160;:&#160;<a class="el" href="group__prism3.html#ga4dcc2d46f5a050ca6f0fafcabe86ed4b">ring</a></li>
+<li>conditionTwoDDC()&#160;:&#160;<a class="el" href="group__prism3.html#ga1e85dfbca9cdea7f3b5356966e149e66">ring</a></li>
+<li>countAllRingsFromIndex()&#160;:&#160;<a class="el" href="group__primitive.html#ga0b4a8b7d561986a74aea8bdd3c3918f7">primitive</a></li>
+<li>createBondsFromCages()&#160;:&#160;<a class="el" href="group__bond.html#ga855d0d32cf79c57da16f86eb008ecb24">bond</a></li>
+<li>createIDMolIDmap()&#160;:&#160;<a class="el" href="group__molSys.html#ga3d2387897322ededb4936d466f74e459">molSys</a></li>
+<li>createMolIDAtomIDMultiMap()&#160;:&#160;<a class="el" href="group__molSys.html#ga4b864398cbcf013fa20a59e597e6e667">molSys</a></li>
+<li>createPrismBlock()&#160;:&#160;<a class="el" href="namespacepntToPnt.html#a7e80d4e9ce192f1a20cdea501f4b9f6f">pntToPnt</a></li>
+</ul>
+
+
+<h3><a id="index_d" name="index_d"></a>- d -</h3><ul>
+<li>deformedPrismTypes()&#160;:&#160;<a class="el" href="group__ring.html#ga5f7b22fe1354ebe4982b8a9df0067b65">ring</a></li>
+<li>discardExtraTetragonBlocks()&#160;:&#160;<a class="el" href="group__ring.html#ga8912c1abc7e5c49831f285e12a48f483">ring</a></li>
+<li>distance()&#160;:&#160;<a class="el" href="group__gen.html#ga11feba0acc8858c6a8a4b637b994c60a">gen</a></li>
+</ul>
+
+
+<h3><a id="index_e" name="index_e"></a>- e -</h3><ul>
+<li>eigenVecAngle()&#160;:&#160;<a class="el" href="group__gen.html#ga48d1277f242712a0948bb029883328e4">gen</a></li>
+</ul>
+
+
+<h3><a id="index_f" name="index_f"></a>- f -</h3><ul>
+<li>file_exists()&#160;:&#160;<a class="el" href="group__gen.html#gaa49625658169d33851df990c1d62f097">gen</a></li>
+<li>fillPointSetPrismBlock()&#160;:&#160;<a class="el" href="namespacepntToPnt.html#ac1fc4d1ca64de4e2ed5e13931cc8a9e3">pntToPnt</a></li>
+<li>fillPointSetPrismRing()&#160;:&#160;<a class="el" href="namespacepntToPnt.html#a468a3864d5ebed50594501666028c244">pntToPnt</a></li>
+<li>findBulkPrisms()&#160;:&#160;<a class="el" href="group__prism3.html#ga5dbef2df121bcbd6ad98dd0036e245e9">prism3</a></li>
+<li>findDDC()&#160;:&#160;<a class="el" href="group__prism3.html#ga960e1b7a65a351e2c5ded2b81188f419">ring</a></li>
+<li>findHC()&#160;:&#160;<a class="el" href="group__prism3.html#gacb002a9991505530c16db05acdc953f9">ring</a></li>
+<li>findMixedRings()&#160;:&#160;<a class="el" href="group__prism3.html#gaf6ea370ad51da00f413e67aa5f2efd00">ring</a></li>
+<li>findPrismatic()&#160;:&#160;<a class="el" href="group__prism3.html#gae286f517fcdf9a36689a318ad8f47fec">ring</a></li>
+<li>findPrisms()&#160;:&#160;<a class="el" href="group__ring.html#gaf2f03674e78a17a4de8fc9603dea8282">ring</a></li>
+<li>findRings()&#160;:&#160;<a class="el" href="group__primitive.html#gae91300e341786a54ce73c0f2e9d4f5d5">primitive</a></li>
+<li>findsCommonElements()&#160;:&#160;<a class="el" href="group__ring.html#gaed5f39c14a4d76c1746aed53e0d0a2dc">ring</a></li>
+<li>findTripletInRing()&#160;:&#160;<a class="el" href="group__ring.html#ga3cca615046ff98165863e95fdadce530">ring</a></li>
+</ul>
+
+
+<h3><a id="index_g" name="index_g"></a>- g -</h3><ul>
+<li>getAtomTypesTopoBulk()&#160;:&#160;<a class="el" href="group__prism3.html#ga065139891077f470cc637055735383ca">ring</a></li>
+<li>getAverageWithoutOutliers()&#160;:&#160;<a class="el" href="group__gen.html#gaf3593d4e71600e8d85fbd873fcd95558">gen</a></li>
+<li>getAvgHeightPrismBlock()&#160;:&#160;<a class="el" href="namespacepntToPnt.html#ac0a7e6a2dd4c1bd115acb3f1226957e7">pntToPnt</a></li>
+<li>getCorrel()&#160;:&#160;<a class="el" href="group__chill.html#gabe618f28bf0368875746e4886295a3df">chill</a></li>
+<li>getCorrelPlus()&#160;:&#160;<a class="el" href="group__chill.html#ga7583ad51b62d99f96ee1f8133ce7227d">chill</a></li>
+<li>getEdgeMoleculesInRings()&#160;:&#160;<a class="el" href="group__ring.html#ga682cf75f9db6fc5d0271c004313fb062">ring</a></li>
+<li>getHbondDistanceOH()&#160;:&#160;<a class="el" href="group__bond.html#gad4b0179fc40db64244a9f8a10ea5fc4c">bond</a></li>
+<li>getIceType()&#160;:&#160;<a class="el" href="group__chill.html#ga24d6e16e6df7bdf9e5fd1a09cf78e434">chill</a></li>
+<li>getIceTypeNoPrint()&#160;:&#160;<a class="el" href="group__chill.html#ga983db84e206dfe4c6514f97bbce7ed0a">chill</a></li>
+<li>getIceTypePlus()&#160;:&#160;<a class="el" href="group__chill.html#gaf0efe4cc2f2b29558dbe3780554b0dad">chill</a></li>
+<li>getInpFileList()&#160;:&#160;<a class="el" href="group__sinp.html#gac551295f82cf12446912941d5f32000e">sinp</a></li>
+<li>getNewNeighbourListByIndex()&#160;:&#160;<a class="el" href="group__nneigh.html#gaf1f3bc572fb2feaca38f59362af681c6">nneigh</a></li>
+<li>getPlaneArea()&#160;:&#160;<a class="el" href="group__rdf2.html#ga309f282dffeee8083437a95aab29f51b">rdf2</a></li>
+<li>getPointCloudOneAtomType()&#160;:&#160;<a class="el" href="group__ring.html#ga216eec245aa026b0c9f78f92aa81af34">gen</a></li>
+<li>getPointSetCage()&#160;:&#160;<a class="el" href="namespacepntToPnt.html#a332141ec965df89d231a1def4dc3f5d7">pntToPnt</a></li>
+<li>getPointSetRefRing()&#160;:&#160;<a class="el" href="namespacepntToPnt.html#a5b2c3bd3984c707965b6cc5ec03ff1da">pntToPnt</a></li>
+<li>getq6()&#160;:&#160;<a class="el" href="group__chill.html#gae3ef1dc47505894b1d29411ceaf90743">chill</a></li>
+<li>getRadiusFromRings()&#160;:&#160;<a class="el" href="namespacepntToPnt.html#a30f913e8e5d720cd00adab9af4276ace">pntToPnt</a></li>
+<li>getRMSD()&#160;:&#160;<a class="el" href="namespaceabsor.html#a09fbc9d47274eb528793b998531fe94e">absor</a></li>
+<li>getSingleRingSize()&#160;:&#160;<a class="el" href="group__ring.html#gacc01f5c11043e8e47965f2efdeb80fcc">ring</a></li>
+<li>getStrucNumbers()&#160;:&#160;<a class="el" href="group__prism3.html#ga6fcfac293a750bd14cbf1f94ab2a3976">ring</a></li>
+<li>getSystemLengths()&#160;:&#160;<a class="el" href="group__rdf2.html#ga2317aabef0016b5b658cef120c179ecf">rdf2</a></li>
+</ul>
+
+
+<h3><a id="index_h" name="index_h"></a>- h -</h3><ul>
+<li>halfNeighList()&#160;:&#160;<a class="el" href="group__nneigh.html#ga935d274a9660169aec97bf6ae29842e8">nneigh</a></li>
+<li>hasCommonElements()&#160;:&#160;<a class="el" href="group__ring.html#gac30855d0daa2b20c29e4dee39f5cd92f">ring</a></li>
+<li>hAtomMolList()&#160;:&#160;<a class="el" href="group__molSys.html#ga34b5cffd59aa8f6701dd919d03706b3f">molSys</a></li>
+<li>hornAbsOrientation()&#160;:&#160;<a class="el" href="namespaceabsor.html#ad4f0741af9784817b44df6883888d9a3">absor</a></li>
+</ul>
+
+
+<h3><a id="index_i" name="index_i"></a>- i -</h3><ul>
+<li>iceType&#160;:&#160;<a class="el" href="group__cage.html#gaaac41828990e32b9d6e7db4426b61529">cage</a></li>
+<li>isDirExist()&#160;:&#160;<a class="el" href="namespacesout.html#a382f9fbf9768a7bc14a8cc164b11a477">sout</a></li>
+<li>isInterfacial()&#160;:&#160;<a class="el" href="group__chill.html#gaddbe7c1a75a97a52098163e7afbc2126">chill</a></li>
+</ul>
+
+
+<h3><a id="index_k" name="index_k"></a>- k -</h3><ul>
+<li>keepAxialRingsOnly()&#160;:&#160;<a class="el" href="group__ring.html#gabb0bcb7500b51bb7db86ce04b2914d07">ring</a></li>
+</ul>
+
+
+<h3><a id="index_l" name="index_l"></a>- l -</h3><ul>
+<li>largestIceCluster()&#160;:&#160;<a class="el" href="group__clump.html#ga3da9b581e1917ee38e89a6a131d69c2b">clump</a></li>
+<li>lookupTableQ3()&#160;:&#160;<a class="el" href="group__chill.html#gaccbcfa30cf3762a55c59e7b632117af5">sph</a></li>
+<li>lookupTableQ3Vec()&#160;:&#160;<a class="el" href="group__chill.html#ga08491bfa3fa2f6bacdf997be433508c4">sph</a></li>
+<li>lookupTableQ6()&#160;:&#160;<a class="el" href="group__chill.html#ga63be01f86931b2a45e70606f5b8f545d">sph</a></li>
+<li>lookupTableQ6Vec()&#160;:&#160;<a class="el" href="group__chill.html#ga004e7b144d261654c556c7e66fdd9b2e">sph</a></li>
+</ul>
+
+
+<h3><a id="index_m" name="index_m"></a>- m -</h3><ul>
+<li>makePath()&#160;:&#160;<a class="el" href="namespacesout.html#a3985775f30d7920fbf13f12386abefc1">sout</a></li>
+<li>matchPrism()&#160;:&#160;<a class="el" href="namespacematch.html#a6973dbc6d30504b69852d550f2f0a815">match</a></li>
+<li>matchPrismBlock()&#160;:&#160;<a class="el" href="namespacematch.html#adf3a8083b12b659845e51ee75672601c">match</a></li>
+<li>matchUntetheredPrism()&#160;:&#160;<a class="el" href="namespacematch.html#a682437e001b4387e8b1ebf95ee3c73e6">match</a></li>
+<li>moleculesInSingleSlice()&#160;:&#160;<a class="el" href="group__ring.html#ga9decdf9fe1692fc0b03dee64653d9ddf">gen</a></li>
+</ul>
+
+
+<h3><a id="index_n" name="index_n"></a>- n -</h3><ul>
+<li>neighbourListByIndex()&#160;:&#160;<a class="el" href="group__nneigh.html#ga5d584fd58c270cfe69925fc6f2294cfc">nneigh</a></li>
+<li>neighList()&#160;:&#160;<a class="el" href="group__nneigh.html#ga17027fd5c55cdca40c0d07137ecddfc2">nneigh</a></li>
+<li>neighListO()&#160;:&#160;<a class="el" href="group__nneigh.html#gaaaaf74d25014d1c08bb73b8be0a6fe74">nneigh</a></li>
+<li>normalizeRDF()&#160;:&#160;<a class="el" href="group__rdf2.html#gaeb724c0a55ce0d34e33620bd0f74e935">rdf2</a></li>
+<li>normHeightPercent()&#160;:&#160;<a class="el" href="namespacetopoparam.html#ae31b7c89d7555d2cdea139a838b8b40b">topoparam</a></li>
+<li>notNeighboursOfRing()&#160;:&#160;<a class="el" href="group__prism3.html#ga1c2d7aca9baf461bf007d6374233626a">ring</a></li>
+<li>numStaggered()&#160;:&#160;<a class="el" href="group__chill.html#ga3add9502de8e0317621486479526190f">chill</a></li>
+</ul>
+
+
+<h3><a id="index_p" name="index_p"></a>- p -</h3><ul>
+<li>periodicDist()&#160;:&#160;<a class="el" href="group__gen.html#ga881e045598dd517609383d8a3fec5913">gen</a></li>
+<li>pi&#160;:&#160;<a class="el" href="group__gen.html#gaa59e2feae36f62dfdb0664bd06de8572">gen</a></li>
+<li>polygonRingAnalysis()&#160;:&#160;<a class="el" href="group__ring.html#ga48a174db91aa0fe5cbd7ca0158eb2204">ring</a></li>
+<li>populateBonds()&#160;:&#160;<a class="el" href="group__bond.html#gafda865396072cf638e4ee69fa8989b33">bond</a></li>
+<li>populateGraphFromIndices()&#160;:&#160;<a class="el" href="group__primitive.html#ga197ea4bf1da4e2d4c98fa068ae07b101">primitive</a></li>
+<li>populateGraphFromNListID()&#160;:&#160;<a class="el" href="group__primitive.html#ga9067e43fde4c90aaebf0d4267dbc5af5">primitive</a></li>
+<li>populateHbonds()&#160;:&#160;<a class="el" href="group__bond.html#ga07de3300c0a5854c705fa17333767bd1">bond</a></li>
+<li>populateHbondsWithInputClouds()&#160;:&#160;<a class="el" href="group__bond.html#ga71debfc746733c34e0868c4a16a57654">bond</a></li>
+<li>prettyPrintYoda()&#160;:&#160;<a class="el" href="group__gen.html#gaf297d0df78effbb9948f7cb91c0ef975">gen</a></li>
+<li>printIceType()&#160;:&#160;<a class="el" href="group__chill.html#ga548414bf35e3ef8e6ea0d786ce13a05b">chill</a></li>
+<li>printRDF()&#160;:&#160;<a class="el" href="namespacesout.html#a8a9d39fa590c92dbb4556edb767e1d8f">sout</a></li>
+<li>printSliceGetEdgeMoleculesInRings()&#160;:&#160;<a class="el" href="group__ring.html#gaaac5b88914bf3332f3a618f075798879">ring</a></li>
+<li>prismAnalysis()&#160;:&#160;<a class="el" href="group__ring.html#ga8d9cfa4ee615834ca4160ee56bd27e8e">ring</a></li>
+<li>projAreaSingleRing()&#160;:&#160;<a class="el" href="namespacetopoparam.html#aa3627cf7b17ab94d612b32c646b11217">topoparam</a></li>
+</ul>
+
+
+<h3><a id="index_q" name="index_q"></a>- q -</h3><ul>
+<li>quat2RotMatrix()&#160;:&#160;<a class="el" href="namespaceabsor.html#af4cf6d8d2d3c0041e995922c3569fc95">absor</a></li>
+</ul>
+
+
+<h3><a id="index_r" name="index_r"></a>- r -</h3><ul>
+<li>radDeg()&#160;:&#160;<a class="el" href="group__gen.html#gaeadb5e8ff98078b0007d0def0eaad39d">gen</a></li>
+<li>radialCoord()&#160;:&#160;<a class="el" href="group__chill.html#ga514fadfbfeabee5d144ef4102fb3004d">sph</a></li>
+<li>rdf2Danalysis_AA()&#160;:&#160;<a class="el" href="group__rdf2.html#ga8dd6ebd3fe62036e77ed8b0695a9cd59">rdf2</a></li>
+<li>readBonds()&#160;:&#160;<a class="el" href="group__sinp.html#gada34d9d30df182a408a6b69ba7310509">sinp</a></li>
+<li>readLammpsTrj()&#160;:&#160;<a class="el" href="group__sinp.html#ga1cbdb840118d27e2c2a3c05393ae8320">sinp</a></li>
+<li>readLammpsTrjO()&#160;:&#160;<a class="el" href="group__sinp.html#ga594a5996c0ea3ba9ee53c2ab475bde7c">sinp</a></li>
+<li>readLammpsTrjreduced()&#160;:&#160;<a class="el" href="group__sinp.html#ga30633be4befe606953d55db43d389c7b">sinp</a></li>
+<li>readXYZ()&#160;:&#160;<a class="el" href="group__sinp.html#ga9aeec41b2c3fea17e5e54fd266b71f0a">sinp</a></li>
+<li>recenterClusterCloud()&#160;:&#160;<a class="el" href="group__clump.html#gae440e178018218e77563dd8ba5172bee">clump</a></li>
+<li>reclassifyWater()&#160;:&#160;<a class="el" href="group__chill.html#gadcda1fbc16c0a4ac61f38c139f423f42">chill</a></li>
+<li>relaxedPrismConditions()&#160;:&#160;<a class="el" href="group__prism3.html#gac1cb5ae1bfc373f39b13f5c702760471">prism3</a>, <a class="el" href="group__ring.html#gad4f3d38b9677a76a81bbaeafb2fbd652">ring</a></li>
+<li>relDist()&#160;:&#160;<a class="el" href="group__gen.html#ga6b56d790e92fe32323af01d5f64d0c3f">gen</a></li>
+<li>relOrderDDC()&#160;:&#160;<a class="el" href="namespacepntToPnt.html#a37bc49eb5fa472c3fdc758f49bb57563">pntToPnt</a></li>
+<li>relOrderHC()&#160;:&#160;<a class="el" href="namespacepntToPnt.html#ac468200c729d2111004830b3f8677a1b">pntToPnt</a></li>
+<li>relOrderPrismBlock()&#160;:&#160;<a class="el" href="namespacepntToPnt.html#a4b676cac174b9f84308166e4d2fa0bcb">pntToPnt</a></li>
+<li>removeNonSPrings()&#160;:&#160;<a class="el" href="group__primitive.html#ga909ca1fa60966421281d40f4ad8cc653">primitive</a></li>
+<li>restoreEdgesFromIndices()&#160;:&#160;<a class="el" href="group__primitive.html#gac87458eea928e7fea59667b268aed397">primitive</a></li>
+<li>ringNetwork()&#160;:&#160;<a class="el" href="group__primitive.html#gafe0c3467ffd3a7986a4df953a7891226">primitive</a></li>
+<li>rmAxialTranslations()&#160;:&#160;<a class="el" href="group__ring.html#ga9d7e63eb7b6c37024744c4f372796cef">ring</a></li>
+</ul>
+
+
+<h3><a id="index_s" name="index_s"></a>- s -</h3><ul>
+<li>sampleRDF_AA()&#160;:&#160;<a class="el" href="group__rdf2.html#ga2a79018e3e8cd922b49b16fddca98e13">rdf2</a></li>
+<li>searchMolList()&#160;:&#160;<a class="el" href="group__molSys.html#ga7be07f7a280d213bc167f8fb30cd5f94">molSys</a></li>
+<li>setAtomsWithSameMolID()&#160;:&#160;<a class="el" href="group__ring.html#ga81dde14f79d13cb8e2c04a1e78ac11fb">gen</a></li>
+<li>sh&#160;:&#160;<a class="el" href="namespacebackward.html#a6be34a42939faf0fbcfe077ce9faf9ae">backward</a></li>
+<li>shapeMatchDDC()&#160;:&#160;<a class="el" href="group__ring.html#ga8b2308749645937c76d6d04b360803c8">tum3</a></li>
+<li>shapeMatchHC()&#160;:&#160;<a class="el" href="group__ring.html#ga9ad19b6ffce4ff8500f654cc0da9fdde">tum3</a></li>
+<li>shortestPath()&#160;:&#160;<a class="el" href="group__primitive.html#gad5a66be66869860a9bd875535cd2671f">primitive</a></li>
+<li>singleClusterLinkedList()&#160;:&#160;<a class="el" href="group__clump.html#gac9e09a06931072c75bbf96ce8290ec26">clump</a></li>
+<li>spheriHarmo()&#160;:&#160;<a class="el" href="group__chill.html#gaa9220b76da7400c9d934fa08ceeeba7a">sph</a></li>
+<li>strucType&#160;:&#160;<a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">ring</a></li>
+</ul>
+
+
+<h3><a id="index_t" name="index_t"></a>- t -</h3><ul>
+<li>tokenizer()&#160;:&#160;<a class="el" href="group__gen.html#gaabdeca1aa6b867687a3540e97447544a">gen</a></li>
+<li>tokenizerDouble()&#160;:&#160;<a class="el" href="group__gen.html#ga98b7a158dd7a61350fdd6ca43a432e4f">gen</a></li>
+<li>tokenizerInt()&#160;:&#160;<a class="el" href="group__gen.html#gae4ee1568b5329d93d76418227a024ac1">gen</a></li>
+<li>topoBulkAnalysis()&#160;:&#160;<a class="el" href="group__prism3.html#ga58808c0f484f8b862ee10e7aa60dd1ad">ring</a></li>
+<li>topoBulkCriteria()&#160;:&#160;<a class="el" href="group__ring.html#ga1b10c23dc60de6e2619ca5c78ce80985">tum3</a></li>
+<li>topoUnitMatchingBulk()&#160;:&#160;<a class="el" href="group__ring.html#ga1c3d2f1cfda2eefbc048f3b6a5c689a3">tum3</a></li>
+<li>trimBonds()&#160;:&#160;<a class="el" href="group__bond.html#ga4dc0b40b8a6510d7a0e48303302e9c41">bond</a></li>
+</ul>
+
+
+<h3><a id="index_u" name="index_u"></a>- u -</h3><ul>
+<li>unwrappedCoordShift()&#160;:&#160;<a class="el" href="group__gen.html#gac94d5646f5e1585d42df29a5b557288e">gen</a></li>
+<li>unWrappedDistFromPoint()&#160;:&#160;<a class="el" href="group__gen.html#ga90ce25cc971287af30df06c6f93cbe01">gen</a></li>
+<li>updatePerAtomRMSDRing()&#160;:&#160;<a class="el" href="namespacematch.html#a5f6e8b6479e09ce7ed9e602b24b6ddfe">match</a></li>
+<li>updateRMSDatom()&#160;:&#160;<a class="el" href="group__ring.html#ga946577bd994b115e310fd1dad1b6103f">tum3</a></li>
+<li>updateRMSDRing()&#160;:&#160;<a class="el" href="namespacematch.html#a75215687da1125d0fd37ba71f8ee18ff">match</a></li>
+</ul>
+
+
+<h3><a id="index_w" name="index_w"></a>- w -</h3><ul>
+<li>writeAllCages()&#160;:&#160;<a class="el" href="namespacesout.html#ac3c3e79e41dfd8d500d914593ce62635">sout</a></li>
+<li>writeBasalRingsHex()&#160;:&#160;<a class="el" href="namespacesout.html#aa8ebf446d17335c981a879b0973634c1">sout</a></li>
+<li>writeBasalRingsPrism()&#160;:&#160;<a class="el" href="namespacesout.html#a03846045f759470e964462307189fc7c">sout</a></li>
+<li>writeCluster()&#160;:&#160;<a class="el" href="namespacesout.html#ae800e10d206146b10745c20d060456f8">sout</a></li>
+<li>writeClusterStats()&#160;:&#160;<a class="el" href="namespacesout.html#aee17b8438205b4b88aad8a481c533ba5">sout</a></li>
+<li>writeDump()&#160;:&#160;<a class="el" href="namespacesout.html#a6d957535efb45598e954f073d95e4d31">sout</a></li>
+<li>writeEachCage()&#160;:&#160;<a class="el" href="namespacesout.html#ab83107a8d94e6c3f4532640ba5ea7c26">sout</a></li>
+<li>writeHisto()&#160;:&#160;<a class="el" href="namespacesout.html#a27a0b3ab1ae625ffc2c31185e8be604e">sout</a></li>
+<li>writeLAMMPSdata()&#160;:&#160;<a class="el" href="namespacesout.html#a7f2fbc5ccf25a80009aafdc95850c6c1">sout</a></li>
+<li>writeLAMMPSdataAllPrisms()&#160;:&#160;<a class="el" href="namespacesout.html#a43ede01e2a342a32342111cdc4c7e225">sout</a></li>
+<li>writeLAMMPSdataAllRings()&#160;:&#160;<a class="el" href="namespacesout.html#a58b34692c5a881b50cf4c3d871679621">sout</a></li>
+<li>writeLAMMPSdataCages()&#160;:&#160;<a class="el" href="namespacesout.html#aa2f07b2f32bf4931dbfe0f54da6bcc63">sout</a></li>
+<li>writeLAMMPSdataPrisms()&#160;:&#160;<a class="el" href="namespacesout.html#afba62d33df0ec068d36dcf277bdcbb70">sout</a></li>
+<li>writeLAMMPSdataTopoBulk()&#160;:&#160;<a class="el" href="namespacesout.html#aa61544fbc7ca5938d0f4d52ff2ca1e5c">sout</a></li>
+<li>writeLAMMPSdumpCages()&#160;:&#160;<a class="el" href="namespacesout.html#ad297dfa82170796cedea7f111e7694df">sout</a></li>
+<li>writeLAMMPSdumpINT()&#160;:&#160;<a class="el" href="namespacesout.html#a6ecf4c61a66360ec154723bffe21b2b2">sout</a></li>
+<li>writeLAMMPSdumpSlice()&#160;:&#160;<a class="el" href="namespacesout.html#a31d215aac08b1a890f73e074eae808a1">sout</a></li>
+<li>writeMoleculeIDsExpressionSelectOVITO()&#160;:&#160;<a class="el" href="namespacesout.html#a96aa8c9d78c09d7cd77c4d46182e7b3b">sout</a></li>
+<li>writeMoleculeIDsInSlice()&#160;:&#160;<a class="el" href="namespacesout.html#a1cfbcd0f8d90f3033ee5e505c07e0400">sout</a></li>
+<li>writePrismNum()&#160;:&#160;<a class="el" href="namespacesout.html#a27b0ed070347ff0351e2d0882d1d6ddd">sout</a></li>
+<li>writePrisms()&#160;:&#160;<a class="el" href="namespacesout.html#a749ab343b193903acb8489f113e6b1e8">sout</a></li>
+<li>writeRingNum()&#160;:&#160;<a class="el" href="namespacesout.html#a3775e3decf75faac38693c4b13143938">sout</a></li>
+<li>writeRingNumBulk()&#160;:&#160;<a class="el" href="namespacesout.html#a2aa4853345a006e923069cbf9602417f">sout</a></li>
+<li>writeRings()&#160;:&#160;<a class="el" href="namespacesout.html#ab9bb39ce660fa471316860ccaa874cec">sout</a></li>
+<li>writeTopoBulkData()&#160;:&#160;<a class="el" href="namespacesout.html#a5ca5eeff9edc702cdcf1b26e8501dc0c">sout</a></li>
+<li>writeXYZcluster()&#160;:&#160;<a class="el" href="namespacesout.html#ad80ee9773d7921a87ef5bbbe76541a91">sout</a></li>
+</ul>
+</div><!-- contents -->
+<!-- Copyright 2020 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen 1.16.1-->
+<!-- start footer part -->
+</div><!-- close #doc-content (opened by Doxygen) -->
+<div class="footer">
+<hr class="footline"/><address class="footline"><small>
+    Generated by&#160;<a href="https://www.doxygen.org/index.html">Doxygen 1.9.8</a> and the <a class="outlink" href="https://github.com/HaoZeke/doxyYoda">doxyYoda theme</a>
+</small></address>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>
