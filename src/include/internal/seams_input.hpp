@@ -56,7 +56,6 @@ std::vector<std::string> getInpFileList(std::string inputFolder);
 //! value)
 molSys::PointCloud<molSys::Point<double>, double>
 readLammpsTrj(std::string filename, int targetFrame,
-              molSys::PointCloud<molSys::Point<double>, double> *yCloud,
               bool isSlice = false,
               std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
               std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
@@ -64,8 +63,7 @@ readLammpsTrj(std::string filename, int targetFrame,
 //! Function for reading in a specified frame (frame number and not timestep
 //! value) / This only reads in oxygen atoms
 molSys::PointCloud<molSys::Point<double>, double> readLammpsTrjO(
-    std::string filename, int targetFrame,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int typeO,
+    std::string filename, int targetFrame, int typeO,
     bool isSlice = false,
     std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
     std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
@@ -73,8 +71,7 @@ molSys::PointCloud<molSys::Point<double>, double> readLammpsTrjO(
 //! Function that reads in only atoms pf the desired type and ignores all atoms
 //! which are not in the slice as well
 molSys::PointCloud<molSys::Point<double>, double> readLammpsTrjreduced(
-    std::string filename, int targetFrame,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int typeI,
+    std::string filename, int targetFrame, int typeI,
     bool isSlice = false,
     std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
     std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});

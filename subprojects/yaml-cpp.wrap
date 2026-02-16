@@ -1,0 +1,9 @@
+[wrap-git]
+directory=yaml-cpp
+url=https://github.com/jbeder/yaml-cpp.git
+revision=84459a7f982ea4d10e943237b2e9c71afdab6a45
+depth=1
+method=cmake
+
+[provide]
+yaml-cpp=yaml-cpp

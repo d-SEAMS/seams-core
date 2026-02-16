@@ -21,6 +21,4 @@ dependencies:
   # - lua-luafilesystem
   - luarocks
   # Pinned
-  - fmt==9.1.0
-  - eigen==3.4.0
   - lua==5.3.*

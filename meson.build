@@ -45,15 +45,26 @@ _deps += m_dep
 _deps += [declare_dependency(link_args: '-lstdc++')]
 
 # All of which can be installed with meson wrap install <blah> originally
-eigen_dep = dependency('eigen3',
-                       version: '3.4.0',
-                       required: true)
+eigen_dep = subproject('eigen', default_options: ['default_library=static']).get_variable('eigen_dep')
 _deps += [ eigen_dep ]
 
-fmt_dep = dependency('fmt',
-                     version: '9.1.0',
-                     required: true)
-_deps += [ fmt_dep ]
+fmt_subproj = subproject('fmt', default_options: ['default_library=static'])
+_deps += fmt_subproj.get_variable('fmt_dep')
+
+cmake = import('cmake')
+optv_cppyaml = cmake.subproject_options()
+optv_cppyaml.add_cmake_defines(
+    {
+        'CMAKE_BUILD_TYPE': 'Release',
+        'YAML_BUILD_SHARED_LIBS': 'OFF',
+        'CMAKE_POSITION_INDEPENDENT_CODE': true,
+        'CMAKE_CXX_FLAGS': '-w',
+        'CMAKE_C_FLAGS': '-w',
+    },
+)
+cmcppyaml = cmake.subproject('yaml-cpp', options: optv_cppyaml)
+_deps += cmcppyaml.dependency('yaml-cpp')
+
 
 boost_dep = dependency('boost',
   modules : [
@@ -61,13 +72,9 @@ boost_dep = dependency('boost',
     'system',
   ],
   required : false,
+  static : true,
 )
 _deps += [ boost_dep ]
-
-libyamlcpp_dep = dependency('yaml-cpp',
-                        fallback: ['yaml-cpp',
-                                   'libyamlcpp_dep'])
-_deps += [ libyamlcpp_dep ]
 
 # Include Sources
 
@@ -78,7 +85,6 @@ _incdirs += include_directories([ 'src/include/internal',
 
 ydsl_sources = [
   'src/absOrientation.cpp',
-  'src/backward.cpp',
   'src/bond.cpp',
   'src/bop.cpp',
   'src/bulkTUM.cpp',
@@ -93,6 +99,7 @@ ydsl_sources = [
   'src/rdf2d.cpp',
   'src/ring.cpp',
   'src/seams_input.cpp',
+  'src/selection.cpp',
   'src/seams_output.cpp',
   'src/selection.cpp',
   'src/shapeMatch.cpp',
