@@ -853,11 +853,16 @@ std::vector<int> pntToPnt::relOrderDDC(int index,
   int iatom;                 // Atom index in the equatorial ring
   std::vector<int> peripheral1, peripheral2; // Vectors holding the neighbours
                                              // of (l1,l3,l5) and (l2,l4,l6)
-  int apex1, apex2;
+  int apex1 = -1, apex2 = -1;
   bool neighbourFound;            // Neighbour found
   int nextI, prevI, nextJ, prevJ; // elements around iatom and jatom
   int jatomIndex, atomIndex;
 
+  // Validate cage structure (DDC has 1 equatorial + 6 peripheral rings)
+  if (index < 0 || index >= static_cast<int>(cageList.size()) ||
+      static_cast<int>(cageList[index].rings.size()) < 7) {
+    return std::vector<int>();
+  }
   // Add the equatorial ring particles
   //
   iring = cageList[index]
@@ -977,10 +982,10 @@ std::vector<int> pntToPnt::relOrderDDC(int index,
           }   // peripheral1
           // if odd peripheral2
           else {
-            peripheral2.push_back(prevJ);
-            // Get apex2 for i=0
+            peripheral2.push_back(nextJ);
+            // Get apex2 for i=1
             if (i == 1) {
-              // Go foward two elements from jatomIndex
+              // Go forward two elements from jatomIndex
               atomIndex = jatomIndex + 2;
               // wrap-around
               if (atomIndex >= ringSize) {
@@ -998,6 +1003,12 @@ std::vector<int> pntToPnt::relOrderDDC(int index,
     // ------------------
   } // end of looping through the elements of the equatorial ring
   // ------------------------------
+  // Validate that peripheral rings and apices were found
+  if (peripheral1.size() != 3 || peripheral2.size() != 3 ||
+      apex1 == -1 || apex2 == -1) {
+    // Incomplete DDC structure; return empty vector to signal error
+    return std::vector<int>();
+  }
   // Update ddcOrder with peripheral1, followed by apex1, peripheral2 and apex2
   //
   // peripheral1
@@ -1041,17 +1052,24 @@ std::vector<int> pntToPnt::relOrderDDC(int index,
  */
 Eigen::MatrixXd pntToPnt::changeDiaCageOrder(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> ddcOrder, int startingIndex) {
+    const std::vector<int> &ddcOrder, int startingIndex) {
   int nop = 14;                     // Number of elements in the DDC
   int ringSize = 6;                 // Six nodes in the rings
   Eigen::MatrixXd pointSet(nop, 3); // Output point set
+
+  // Guard: ddcOrder must have exactly 14 elements
+  if (static_cast<int>(ddcOrder.size()) != nop) {
+    pointSet.setZero();
+    return pointSet;
+  }
+
   int peripheralStartingIndex; // Index using which the elements of peripheral1
                                // and peripheral2 will be wrapped
   std::vector<int> wrappedDDC; // Changed order of the DDC: should be the same
                                // size as the original ddcOrder vector
   int currentIndex;            // Current index
   // Variables for filling the point set
-  int iatomIndex, jatomIndex;
+  int iatomIndex = 0, jatomIndex = 0;
   std::array<double, 3> dr; // Components of the distance
 
   if (startingIndex == 0) {
@@ -1083,23 +1101,15 @@ Eigen::MatrixXd pntToPnt::changeDiaCageOrder(
       peripheralStartingIndex = 2;
     }
     //
-    // Update the portions of the wrappedDDC vector
+    // Update the portions of the wrappedDDC vector (peripheral1: indices 6-8)
     for (int i = 6; i < 9; i++) {
-      currentIndex = i + peripheralStartingIndex;
-      // wrap-around
-      if (currentIndex >= 9) {
-        currentIndex -= 3;
-      } // end of wrap-around
+      currentIndex = 6 + (i - 6 + peripheralStartingIndex) % 3;
       wrappedDDC[i] = ddcOrder[currentIndex];
     } // peripheral1
     //
-    // Update the peripheral2 portions of the wrappedDDC vector
+    // Update the peripheral2 portions of the wrappedDDC vector (indices 10-12)
     for (int i = 10; i < 13; i++) {
-      currentIndex = i + peripheralStartingIndex;
-      // wrap-around
-      if (currentIndex >= 13) {
-        currentIndex -= 3;
-      } // end of wrap-around
+      currentIndex = 10 + (i - 10 + peripheralStartingIndex) % 3;
       wrappedDDC[i] = ddcOrder[currentIndex];
     } // peripheral2
     // ------------------
@@ -1109,6 +1119,14 @@ Eigen::MatrixXd pntToPnt::changeDiaCageOrder(
     // ------------------
   } // the order of the DDC has to be changed
 
+  // Validate that all indices in wrappedDDC are within yCloud bounds
+  for (int i = 0; i < nop; i++) {
+    if (wrappedDDC[i] < 0 ||
+        wrappedDDC[i] >= static_cast<int>(yCloud->pts.size())) {
+      pointSet.setZero();
+      return pointSet;
+    }
+  }
   // FILL UP THE EIGEN MATRIX
   iatomIndex = wrappedDDC[0]; // first point
   pointSet(0, 0) = yCloud->pts[iatomIndex].x;

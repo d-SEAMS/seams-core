@@ -362,14 +362,16 @@ SCENARIO("Test the shape-matching of a perfect DDC rotated by 30 degrees",
     ringType.resize(rings.size());
     listDDC = ring::findDDC(rings, &ringType, listHC, &cageList);
     // Save the order of the DDC in a vector
+    REQUIRE_FALSE(cageList.empty());
     ddcOrder = pntToPnt::relOrderDDC(0, rings, cageList);
+    REQUIRE(ddcOrder.size() == 14);
     //
     // --------------------------
     // Now get the absolute orientation of the left (candidate/target) system
     // with respect to the right (template/reference) system test
     //
     std::vector<double> quaternionRot;         // quaternion rotation
-    double rmsd1, rmsd2;                       // least RMSD
+    double rmsd1 = 0.0, rmsd2;                // least RMSD
     std::vector<double> rmsdList1, rmsdList2;  // List of RMSD per atom
     double scale;                              // Scale factor
     //

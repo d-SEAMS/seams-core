@@ -121,7 +121,7 @@ changeHexCageOrder(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 //! and peripheral rings, embedded in a vector, already filled in relOrderDDC.
 Eigen::MatrixXd
 changeDiaCageOrder(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                   std::vector<int> ddcOrder, int startingIndex = 0);
+                   const std::vector<int> &ddcOrder, int startingIndex = 0);
 
 } // namespace pntToPnt
 

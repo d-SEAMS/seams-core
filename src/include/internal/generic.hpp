@@ -79,18 +79,17 @@ inline double calcMedian(std::vector<double> *input) {
   int n = (*input).size(); // Number of elements
   double median;           // Output median value
 
-  // Sort the vector
-  std::sort((*input).begin(), (*input).end());
+  // Sort a copy (avoid mutating input)
+  std::vector<double> sorted = *input;
+  std::sort(sorted.begin(), sorted.end());
 
   // Calculate the median
   // For even values, the median is the average of the two middle values
   if (n % 2 == 0) {
-    median = 0.5 * ((*input)[n / 2] + (*input)[n / 2 - 1]); // n/2+n/2-1
-  } // median is average of middle values
-  else {
-    median = (*input)[(n + 1) / 2 -
-                      1]; // middle value of 7 elements is the 4th element
-  }                       // if odd, it is the middle value
+    median = 0.5 * (sorted[n / 2] + sorted[n / 2 - 1]);
+  } else {
+    median = sorted[(n + 1) / 2 - 1];
+  }
 
   return median;
 }
