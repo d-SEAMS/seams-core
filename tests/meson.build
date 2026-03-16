@@ -7,6 +7,12 @@ test_sources = {
   'topo_bulk': 'topo_bulk-test.cpp',
   'topo_one_dim': 'topo_one_dim-test.cpp',
   'absor': 'absor-test.cpp',
+  'mol_sys': 'test_mol_sys.cpp',
+  'neighbours': 'test_neighbours.cpp',
+  'bond': 'test_bond.cpp',
+  'bop': 'test_bop.cpp',
+  'cluster': 'test_cluster.cpp',
+  'generic': 'test_generic.cpp',
 }
 
 foreach name, src : test_sources
