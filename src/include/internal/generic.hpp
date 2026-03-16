@@ -202,7 +202,6 @@ relDist(molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
         int jatom) {
   std::array<double, 3> dr;
   std::array<double, 3> box = {yCloud->box[0], yCloud->box[1], yCloud->box[2]};
-  double r2 = 0.0; // Squared absolute distance
 
   // Get x1-x2 etc
   dr[0] = yCloud->pts[iatom].x - yCloud->pts[jatom].x;

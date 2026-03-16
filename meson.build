@@ -14,7 +14,9 @@ project('seams-core', 'cpp',
 host_system = host_machine.system()
 
 # Global accumulator variables (eOn pattern)
-_args = ['-funroll-loops']
+_args = ['-funroll-loops', '-Wno-sign-compare', '-Wno-unused-variable',
+         '-Wno-unused-parameter', '-Wno-unused-but-set-variable',
+         '-Wno-maybe-uninitialized']
 _deps = []
 _linkto = []
 _incdirs = []

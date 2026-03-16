@@ -265,7 +265,7 @@ Eigen::MatrixXd absor::centerWRTcentroid(const Eigen::MatrixXd &pointSet) {
 double absor::calcScaleFactor(const Eigen::MatrixXd &rightSys,
                               const Eigen::MatrixXd &leftSys, int n) {
   double scale;  // Output scale
-  double v1, v2; // Sum of the length of the vector
+  double v1 = 0.0, v2 = 0.0; // Sum of the length of the vector
   Eigen::VectorXd rightVec(
       3);                     // Vector of the i^th particle in the right system
   Eigen::VectorXd leftVec(3); // Vector of the i^th particle in the right system

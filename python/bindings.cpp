@@ -91,15 +91,33 @@ NB_MODULE(_core, m) {
         .def_rw("boxLow", &molSys::PointCloud<molSys::Point<double>, double>::boxLow)
         .def_rw("idIndexMap", &molSys::PointCloud<molSys::Point<double>, double>::idIndexMap);
 
-    // I/O
+    // I/O (lambdas hide the yCloud* in/out parameter, creating it internally)
     m.def("readXYZ", &sinp::readXYZ, nb::arg("filename"));
-    m.def("readLammpsTrjreduced", &sinp::readLammpsTrjreduced,
+    m.def("readLammpsTrjreduced",
+          [](std::string filename, int targetFrame, int typeI, bool isSlice,
+             std::array<double, 3> coordLow, std::array<double, 3> coordHigh) {
+            molSys::PointCloud<molSys::Point<double>, double> yCloud;
+            return sinp::readLammpsTrjreduced(filename, targetFrame, &yCloud,
+                                               typeI, isSlice, coordLow, coordHigh);
+          },
           nb::arg("filename"), nb::arg("targetFrame"), nb::arg("typeI"),
           nb::arg("isSlice"), nb::arg("coordLow"), nb::arg("coordHigh"));
-    m.def("readLammpsTrjO", &sinp::readLammpsTrjO,
+    m.def("readLammpsTrjO",
+          [](std::string filename, int targetFrame, int typeO, bool isSlice,
+             std::array<double, 3> coordLow, std::array<double, 3> coordHigh) {
+            molSys::PointCloud<molSys::Point<double>, double> yCloud;
+            return sinp::readLammpsTrjO(filename, targetFrame, &yCloud,
+                                         typeO, isSlice, coordLow, coordHigh);
+          },
           nb::arg("filename"), nb::arg("targetFrame"), nb::arg("typeO"),
           nb::arg("isSlice"), nb::arg("coordLow"), nb::arg("coordHigh"));
-    m.def("readLammpsTrj", &sinp::readLammpsTrj,
+    m.def("readLammpsTrj",
+          [](std::string filename, int targetFrame, bool isSlice,
+             std::array<double, 3> coordLow, std::array<double, 3> coordHigh) {
+            molSys::PointCloud<molSys::Point<double>, double> yCloud;
+            return sinp::readLammpsTrj(filename, targetFrame, &yCloud,
+                                        isSlice, coordLow, coordHigh);
+          },
           nb::arg("filename"), nb::arg("targetFrame"),
           nb::arg("isSlice"), nb::arg("coordLow"), nb::arg("coordHigh"));
     m.def("readBonds", &sinp::readBonds, nb::arg("filename"));

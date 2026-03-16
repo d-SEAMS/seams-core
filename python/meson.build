@@ -1,7 +1,7 @@
 # d-SEAMS Python bindings (nanobind)
 
 py = import('python').find_installation(pure: false)
-nanobind_dep = dependency('nanobind', method: 'cmake', required: true)
+nanobind_dep = dependency('nanobind')
 
 py.extension_module('_core',
   'bindings.cpp',
