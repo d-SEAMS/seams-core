@@ -1,5 +1,4 @@
-# Booleans
-# TODO: Tests can't be run right now
-option('with_tests', type : 'boolean', value : false)
-option('with_lua', type : 'boolean', value : false)
-# Lua only works with spack
+option('with_tests', type: 'boolean', value: true,
+  description: 'Build Catch2 C++ tests')
+option('with_python', type: 'boolean', value: true,
+  description: 'Build nanobind Python bindings')

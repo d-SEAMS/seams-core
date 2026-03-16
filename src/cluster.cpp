@@ -15,8 +15,6 @@
 #include <cluster.hpp>
 #include <iostream>
 
-namespace bg = boost::geometry;
-
 /**
  * @details Finds the number of particles in the largest ice cluster, for a
  * given frame, using Stoddard's clustering algorithm (Stoddard J. Comp. Phys.,

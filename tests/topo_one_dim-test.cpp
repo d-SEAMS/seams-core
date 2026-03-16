@@ -8,7 +8,7 @@
 // Standard
 #include <iostream>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <rang.hpp>
 
 SCENARIO("Test the prism identification scheme for a single tetragonal prism.",

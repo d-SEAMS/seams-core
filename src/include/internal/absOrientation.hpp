@@ -27,11 +27,10 @@
 #include <sys/stat.h>
 #include <vector>
 
-// External
-#include <Spectra/SymEigsShiftSolver.h>
-#include <Spectra/SymEigsSolver.h>
+// Eigen (SelfAdjointEigenSolver replaces Spectra for 4x4 symmetric matrices)
 #include <Eigen/Core>
 #include <Eigen/Dense>
+#include <Eigen/Eigenvalues>
 
 #include <mol_sys.hpp>
 #include <ring.hpp>

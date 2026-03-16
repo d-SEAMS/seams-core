@@ -9,7 +9,7 @@
 // Standard
 #include <iostream>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <rang.hpp>
 
 SCENARIO("Test the HC algorithm for a single hexagonal cage.", "[topo]") {

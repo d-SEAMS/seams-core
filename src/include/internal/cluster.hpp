@@ -16,8 +16,6 @@
 #define __CLUSTER_H_
 
 #include <array>
-#include <boost/geometry.hpp>
-#include <boost/math/special_functions/spherical_harmonic.hpp>
 #include <bop.hpp>
 #include <cmath>
 #include <complex>

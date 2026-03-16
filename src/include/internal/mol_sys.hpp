@@ -15,7 +15,6 @@
 #ifndef __MOL_SYS_H_
 #define __MOL_SYS_H_
 
-#include "boost/multi_array.hpp"
 #include <algorithm>
 #include <array>
 #include <fstream>

@@ -71,25 +71,14 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd &refPoints,
   N = absor::calcMatrixN(S);
   // --------
   // Calculate the eigenvector corresponding to the largest eigenvalue
-  //
-  // Construct matrix operation object (op) using the wrapper class
-  // DenseSymMatProd for the matrix N
-  Spectra::DenseSymMatProd<double> op(N);
-  //
-  // Construct eigen solver object, requesting the largest 1 eigenvalue and
-  // eigenvector
-  Spectra::SymEigsSolver<double, Spectra::LARGEST_ALGE,
-                         Spectra::DenseSymMatProd<double>>
-      eigs(&op, 1, 4);
-  //
-  // Initialize and compute
-  eigs.init();
-  int nconv = eigs.compute();
-  // Get the eigenvalue and eigenvector
-  if (eigs.info() == Spectra::SUCCESSFUL) {
-    Eigen::VectorXd calcEigenValue = eigs.eigenvalues(); // Eigenvalue
-    calcEigenVec = eigs.eigenvectors();
-  } // end of eigenvector calculation
+  // using Eigen's built-in solver (replaces Spectra for this 4x4 case)
+  Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigensolver(N);
+  if (eigensolver.info() != Eigen::Success) {
+    std::cerr << "Eigenvalue decomposition failed.\n";
+    return 1;
+  }
+  // Eigenvalues sorted ascending; column 3 has the largest
+  calcEigenVec = eigensolver.eigenvectors().col(3);
   //
   // --------
   // Normalize the eigenvector calculated

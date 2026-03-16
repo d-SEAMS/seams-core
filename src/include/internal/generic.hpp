@@ -16,12 +16,13 @@
 #define __GENERIC_H_
 
 #include <array>
+#include <filesystem>
 #include <iostream>
 #include <math.h>
 #include <mol_sys.hpp>
 
-// Boost
-#include <boost/math/constants/constants.hpp>
+// C++20
+#include <numbers>
 // Eigen
 #include <Eigen/Core>
 #include <Eigen/Dense>
@@ -51,7 +52,7 @@ namespace gen {
 /**
  *  Uses Boost to get the value of pi.
  */
-const double pi = boost::math::constants::pi<double>();
+constexpr double pi = std::numbers::pi;
 
 /**
  *  Inline function for converting radians->degrees.
@@ -296,9 +297,7 @@ inline std::vector<int> tokenizerInt(std::string line) {
  *  @param[in] name The name of the file
  */
 inline bool file_exists(const std::string &name) {
-  // Replace by boost function later
-  struct stat buffer;
-  return (stat(name.c_str(), &buffer) == 0);
+  return std::filesystem::exists(name);
 }
 
 /**

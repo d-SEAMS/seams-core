@@ -21,9 +21,7 @@
 #include <ring.hpp>
 #include <string>
 
-//// Boost
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
+#include <filesystem>
 
 /** @file seams_input.hpp
  *  @brief File for functions that read in files).

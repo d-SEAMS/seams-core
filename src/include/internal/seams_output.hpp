@@ -27,12 +27,8 @@
 #include <direct.h> // _mkdir
 #endif
 
-// Boost
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-namespace fs = boost::filesystem;
-// #include <filesystem>
-// namespace fs = std::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 namespace sout {
 

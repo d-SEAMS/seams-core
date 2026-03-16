@@ -11,7 +11,8 @@
 // Standard
 #include <iostream>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <rang.hpp>
 
 SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
@@ -212,7 +213,7 @@ SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
     //
     double angDist = gen::angDistDegQuaternions(selfQuatRot, quaternionRot);
     //
-    REQUIRE_THAT(angDist, Catch::Matchers::Floating::WithinAbsMatcher(
+    REQUIRE_THAT(angDist, Catch::Matchers::WithinAbs(
                               30.0, 0.01));  // Evaluate condition
     // --------------------------
   }  // End of given
@@ -417,7 +418,7 @@ SCENARIO("Test the shape-matching of a perfect DDC rotated by 30 degrees",
     //
     double angDist = gen::angDistDegQuaternions(selfQuatRot, quaternionRot);
     //
-    REQUIRE_THAT(angDist, Catch::Matchers::Floating::WithinAbsMatcher(
+    REQUIRE_THAT(angDist, Catch::Matchers::WithinAbs(
                               30.0, 0.01));  // Evaluate condition
     // --------------------------
     // --------------------------

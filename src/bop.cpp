@@ -15,83 +15,39 @@
 #include <bop.hpp>
 #include <iostream>
 
-namespace bg = boost::geometry;
-
-// //SPHERICAL HARMONIC FUNCTIONS
-// /********************************************/ /**
-//  *  Spherical harmonics using boost
-//  ***********************************************/
-// std::vector<std::complex<double>>
-// sph::spheriHarmo(int orderL, std::array<double, 2> radialCoord) {
-//   // Iterate over the index of order
-//   std::vector<int> v = {-3, -2, -1, 0, 1, 2, 3};
-//   // For keeping track of the index of the output vector
-//   int i(0);
-//   std::vector<std::complex<double>> result;
-//   for (auto n : v) {
-//     auto theta = radialCoord[1];
-//     auto phi = radialCoord[0];
-//     result.resize(result.size() + 1);
-//     // This is for l=3
-//     std::complex<double> b =
-//         boost::math::spherical_harmonic(orderL, n, theta, phi);
-//     result[i] = b;
-//     // Update the index
-//     i++;
-//   }
-//   return result;
-// }
-
 /**
- * @details Function for calculating spherical harmonics, that works for a
- *  general @f$l@f$.
+ * @details Function for calculating spherical harmonics. Dispatches to
+ *  the hard-coded lookup tables for l=3 and l=6 (the only values used
+ *  in CHILL/CHILL+ classification).
  *
- *  This function uses the [Boost libraries](https://www.boost.org/).
- *
- *  @param[in] orderL The int value of @f$l@f$
+ *  @param[in] orderL The int value of l (must be 3 or 6)
  *  @param[in] radialCoord Array containing the polar and azimuth angles
- *  @return a complex vector, holding the complex spherical harmonics values,
- *    of length @f$2l+1@f$
+ *  @return a complex vector of length 2l+1
  */
 std::vector<std::complex<double>>
 sph::spheriHarmo(int orderL, std::array<double, 2> radialCoord) {
-  // For keeping track of the index of the output vector
-  std::vector<std::complex<double>> result;
-  std::complex<double> b; // Boost temp value
-  int m;
-
-  result.resize(2 * orderL + 1);
-
-  for (int k = 0; k < 2 * orderL + 1; k++) {
-    double theta = radialCoord[1];
-    double phi = radialCoord[0];
-    m = k - orderL;
-    result[k] = boost::math::spherical_harmonic(orderL, m, theta, phi);
+  if (orderL == 3) {
+    return sph::lookupTableQ3Vec(radialCoord);
+  } else if (orderL == 6) {
+    return sph::lookupTableQ6Vec(radialCoord);
   }
-
-  return result;
+  // Fallback: return zeros for unsupported l values
+  return std::vector<std::complex<double>>(2 * orderL + 1, {0.0, 0.0});
 }
 
 /**
  * @details Function for the azimuth and polar angles, given the Cartesian
- * coordinates This function uses the [Boost](https://www.boost.org/) libraries.
- * @param[in] cartCoord The Cartesian coordinates of a particular point \return
- * a double array, holding the azimuth and polar angles
+ *  coordinates. Pure trigonometry, no external dependencies.
+ *  @param[in] cartCoord The Cartesian coordinates of a particular point
+ *  @return a double array, holding the azimuth and polar angles
  */
 std::array<double, 2> sph::radialCoord(std::array<double, 3> cartCoord) {
-  // The output
   std::array<double, 2> result;
-  // Point Definitions
-  bg::model::point<long double, 3, bg::cs::cartesian> cartesianPoint;
-  bg::model::point<long double, 3, bg::cs::spherical<bg::radian>> azuPoint;
-  // Set Value (TODO: Recurse this)
-  bg::set<0>(cartesianPoint, cartCoord[0]);
-  bg::set<1>(cartesianPoint, cartCoord[1]);
-  bg::set<2>(cartesianPoint, cartCoord[2]);
-  // Transform
-  bg::transform(cartesianPoint, azuPoint);
-  result[0] = bg::get<0>(azuPoint);
-  result[1] = bg::get<1>(azuPoint);
+  double r = std::sqrt(cartCoord[0] * cartCoord[0] +
+                       cartCoord[1] * cartCoord[1] +
+                       cartCoord[2] * cartCoord[2]);
+  result[0] = std::atan2(cartCoord[0], cartCoord[1]); // azimuth (phi)
+  result[1] = (r > 0.0) ? std::acos(cartCoord[2] / r) : 0.0; // polar (theta)
   return result;
 }
 
