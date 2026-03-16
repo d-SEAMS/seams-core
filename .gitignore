@@ -349,3 +349,12 @@ TSWLatexianTemp*
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode
+
+# Coq build artifacts
+proofs/*.vo
+proofs/*.vok
+proofs/*.vos
+proofs/*.glob
+proofs/CoqMakefile
+proofs/CoqMakefile.conf
+.hypothesis/

@@ -38,3 +38,27 @@ foreach name, src : test_sources
     workdir: meson.project_source_root() / 'input',
     env: _test_env)
 endforeach
+
+# SIMD verification test (header-only, does not need libyodaLib)
+_simd_deps = [catch2_dep]
+_simd_args = _args
+if hwy_dep.found()
+  _simd_deps += [hwy_dep]
+  _simd_args += ['-DSEAMS_HAS_HWY=1']
+endif
+test('simd',
+  executable('test_simd', 'test_simd.cpp',
+    dependencies: _simd_deps,
+    cpp_args: _simd_args,
+    link_args: ['-Wl,--enable-new-dtags'],
+    include_directories: _incdirs,
+    build_rpath: '$ORIGIN/../src'),
+  env: _test_env)
+
+# Performance benchmark binary (not in regular test suite)
+executable('bench_algorithms', 'bench_algorithms.cpp',
+  dependencies: [yds_dep, catch2_dep],
+  cpp_args: _args,
+  link_args: ['-Wl,--enable-new-dtags'],
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
