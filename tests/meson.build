@@ -13,6 +13,7 @@ test_sources = {
   'bop': 'test_bop.cpp',
   'cluster': 'test_cluster.cpp',
   'generic': 'test_generic.cpp',
+  'order_parameter': 'test_order_parameter.cpp',
 }
 
 # Ensure test binaries load the freshly-built libyodaLib.so instead of any

@@ -170,5 +170,5 @@ std::vector<double> topoparam::projAreaSingleRing(
   areaXZ = fabs(areaXZ);
   areaYZ = fabs(areaYZ);
 
-  return {areaXY, areaYZ, areaXZ};
+  return {areaXY, areaXZ, areaYZ};
 }

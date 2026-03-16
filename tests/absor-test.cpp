@@ -9,11 +9,86 @@
 #include <topo_bulk.hpp>
 
 // Standard
+#include <cmath>
 #include <iostream>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <rang.hpp>
+
+// Regression test for quat2RotMatrix: 90-degree rotation around z-axis
+TEST_CASE("quat2RotMatrix produces correct rotation for 90deg around z",
+          "[absor]") {
+  // Quaternion for 90-degree rotation around z-axis:
+  // q = (cos(45deg), 0, 0, sin(45deg)) = (sqrt(2)/2, 0, 0, sqrt(2)/2)
+  Eigen::VectorXd q(4);
+  q << std::sqrt(2.0) / 2.0, 0.0, 0.0, std::sqrt(2.0) / 2.0;
+
+  Eigen::MatrixXd R = absor::quat2RotMatrix(q);
+
+  // Expected rotation matrix for 90deg around z:
+  // [ 0  -1   0 ]
+  // [ 1   0   0 ]
+  // [ 0   0   1 ]
+  REQUIRE_THAT(R(0, 0), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(0, 1), Catch::Matchers::WithinAbs(-1.0, 1e-12));
+  REQUIRE_THAT(R(0, 2), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(1, 0), Catch::Matchers::WithinAbs(1.0, 1e-12));
+  REQUIRE_THAT(R(1, 1), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(1, 2), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(2, 0), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(2, 1), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(2, 2), Catch::Matchers::WithinAbs(1.0, 1e-12));
+
+  // Check determinant is 1 (proper rotation)
+  double det = R.determinant();
+  REQUIRE_THAT(det, Catch::Matchers::WithinAbs(1.0, 1e-12));
+
+  // Check orthogonality: R * R^T = I
+  Eigen::MatrixXd RRt = R * R.transpose();
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      double expected = (i == j) ? 1.0 : 0.0;
+      REQUIRE_THAT(RRt(i, j), Catch::Matchers::WithinAbs(expected, 1e-12));
+    }
+  }
+}
+
+// Regression test: identity quaternion should give identity matrix
+TEST_CASE("quat2RotMatrix identity quaternion gives identity matrix",
+          "[absor]") {
+  Eigen::VectorXd q(4);
+  q << 1.0, 0.0, 0.0, 0.0;
+
+  Eigen::MatrixXd R = absor::quat2RotMatrix(q);
+
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      double expected = (i == j) ? 1.0 : 0.0;
+      REQUIRE_THAT(R(i, j), Catch::Matchers::WithinAbs(expected, 1e-12));
+    }
+  }
+}
+
+// Regression test: 180-degree rotation around x-axis
+TEST_CASE("quat2RotMatrix 180deg around x-axis", "[absor]") {
+  // q = (0, 1, 0, 0)
+  Eigen::VectorXd q(4);
+  q << 0.0, 1.0, 0.0, 0.0;
+
+  Eigen::MatrixXd R = absor::quat2RotMatrix(q);
+
+  // Expected: diag(1, -1, -1)
+  REQUIRE_THAT(R(0, 0), Catch::Matchers::WithinAbs(1.0, 1e-12));
+  REQUIRE_THAT(R(1, 1), Catch::Matchers::WithinAbs(-1.0, 1e-12));
+  REQUIRE_THAT(R(2, 2), Catch::Matchers::WithinAbs(-1.0, 1e-12));
+  REQUIRE_THAT(R(0, 1), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(0, 2), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(1, 0), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(1, 2), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(2, 0), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(2, 1), Catch::Matchers::WithinAbs(0.0, 1e-12));
+}
 
 SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
          "[match]") {

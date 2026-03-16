@@ -197,3 +197,47 @@ TEST_CASE("compareByAtomID sorts points by atomID", "[generic]") {
   REQUIRE_FALSE(gen::compareByAtomID(a, b)); // 5 < 3 is false
   REQUIRE(gen::compareByAtomID(b, a));       // 3 < 5 is true
 }
+
+// -- getAverageWithoutOutliers regression tests --
+
+TEST_CASE("getAverageWithoutOutliers does not crash when all values are outliers",
+          "[generic]") {
+  // Use an even-sized vector where all values are identical.
+  // IQR=0, fences equal the value, so no outliers.
+  std::vector<double> v = {1.0, 1.0, 1.0, 1.0};
+  double avg = gen::getAverageWithoutOutliers(v);
+  REQUIRE_THAT(avg, Catch::Matchers::WithinAbs(1.0, 1e-10));
+}
+
+TEST_CASE("getAverageWithoutOutliers normal case with outlier excluded",
+          "[generic]") {
+  // {1, 2, 3, 4, 5, 100} -- 100 is an outlier
+  // Sorted: {1,2,3,4,5,100}. Median=(3+4)/2=3.5
+  // Lower half: {1,2,3}, Q1=2. Upper half: {4,5,100}, Q3=5
+  // IQR=3, fences: 2-4.5=-2.5 and 5+4.5=9.5
+  // So 100 excluded, avg of {1,2,3,4,5} = 3.0
+  std::vector<double> v = {1.0, 2.0, 3.0, 4.0, 5.0, 100.0};
+  double avg = gen::getAverageWithoutOutliers(v);
+  REQUIRE_THAT(avg, Catch::Matchers::WithinAbs(3.0, 1e-10));
+}
+
+// -- eigenVecAngle regression tests --
+
+TEST_CASE("eigenVecAngle does not produce NaN for nearly parallel vectors",
+          "[generic]") {
+  // Two nearly identical vectors -- dot/(|a|*|b|) may slightly exceed 1.0
+  std::vector<double> a = {1.0, 0.0, 0.0};
+  std::vector<double> b = {1.0, 1e-16, 0.0};
+  double angle = gen::eigenVecAngle(a, b);
+  REQUIRE_FALSE(std::isnan(angle));
+  REQUIRE_THAT(angle, Catch::Matchers::WithinAbs(0.0, 1e-10));
+}
+
+TEST_CASE("eigenVecAngle does not produce NaN for antiparallel vectors",
+          "[generic]") {
+  std::vector<double> a = {1.0, 0.0, 0.0};
+  std::vector<double> b = {-1.0, 0.0, 0.0};
+  double angle = gen::eigenVecAngle(a, b);
+  REQUIRE_FALSE(std::isnan(angle));
+  REQUIRE_THAT(angle, Catch::Matchers::WithinAbs(gen::pi, 1e-10));
+}

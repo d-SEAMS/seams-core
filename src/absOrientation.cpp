@@ -306,24 +306,24 @@ Eigen::MatrixXd absor::quat2RotMatrix(const Eigen::VectorXd &quat) {
 
   // Quaternion derived rotation matrix, when q (q=q0+qx*i+qy*j+qz*k)
   // is a unit quaternion:
-  // R=[(q0^2+qx^2+qy^2+qz^2)      2(qx*qy-q0*qz)        2(qx*qz+q0*qy);...
-  //    2(qy*qx-q0*qz)            (q0^2+qx^2+qy^2+qz^2)  2(qy*qz-q0*qx);...
-  //    2(qz*qx-q0*qy)            2(qz*qy+q0*qz)         (q0^2+qx^2+qy^2+qz^2)];
+  // R=[(q0^2+qx^2-qy^2-qz^2)      2(qx*qy-q0*qz)        2(qx*qz+q0*qy);...
+  //    2(qx*qy+q0*qz)            (q0^2-qx^2+qy^2-qz^2)  2(qy*qz-q0*qx);...
+  //    2(qx*qz-q0*qy)            2(qy*qz+q0*qx)         (q0^2-qx^2-qy^2+qz^2)];
 
   // Fill up the rotation matrix R according to the above formula
   //
   // First row
-  R(0, 0) = q0 * q0 + qx * qx + qy * qy + qz * qz;
+  R(0, 0) = q0 * q0 + qx * qx - qy * qy - qz * qz;
   R(0, 1) = 2 * (qx * qy - q0 * qz);
   R(0, 2) = 2 * (qx * qz + q0 * qy);
   // Second row
-  R(1, 0) = 2 * (qy * qx + q0 * qz);
-  R(1, 1) = q0 * q0 + qx * qx + qy * qy + qz * qz;
-  R(1, 2) = 2 * (qy * qz - q0 * qy);
+  R(1, 0) = 2 * (qx * qy + q0 * qz);
+  R(1, 1) = q0 * q0 - qx * qx + qy * qy - qz * qz;
+  R(1, 2) = 2 * (qy * qz - q0 * qx);
   // Third row
-  R(2, 0) = 2 * (qz * qx - q0 * qy);
-  R(2, 1) = 2 * (qz * qy + q0 * qz);
-  R(2, 2) = q0 * q0 + qx * qx + qy * qy + qz * qz;
+  R(2, 0) = 2 * (qx * qz - q0 * qy);
+  R(2, 1) = 2 * (qy * qz + q0 * qx);
+  R(2, 2) = q0 * q0 - qx * qx - qy * qy + qz * qz;
 
   // return the rotation matrix
   return R;

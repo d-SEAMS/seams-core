@@ -13,6 +13,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <generic.hpp>
+#include <algorithm>
 #include <iostream>
 
 /**
@@ -155,9 +156,10 @@ int gen::unwrappedCoordShift(
 double gen::eigenVecAngle(std::vector<double> OO, std::vector<double> OH) {
   Eigen::Vector3d eigOO = Eigen::Map<Eigen::Vector3d>(OO.data(), OO.size());
   Eigen::Vector3d eigOH = Eigen::Map<Eigen::Vector3d>(OH.data(), OH.size());
-  double angle;
-  angle = acos(eigOO.dot(eigOH) / (eigOO.norm() * eigOH.norm()));
-  return angle;
+  double cosAngle = eigOO.dot(eigOH) / (eigOO.norm() * eigOH.norm());
+  // Clamp to [-1, 1] to guard against floating-point imprecision in acos
+  cosAngle = std::clamp(cosAngle, -1.0, 1.0);
+  return acos(cosAngle);
 }
 
 /**
@@ -237,15 +239,12 @@ double gen::getAverageWithoutOutliers(std::vector<double> inpVec) {
       avgVal += inpVec[i];
     } // take the average
   }   // end of loop for getting the average
-  //
-  // Divide by the number of observations used
-  avgVal /= numOfObservations;
   // ----------------------
   // This fails if there are not enough observations (ring size = 3)
   if (numOfObservations == 0) {
     double sumVal = 0.0;
     // Loop through all the values and sum
-    for (int i = 0; i <= n; i++) {
+    for (int i = 0; i < n; i++) {
       sumVal += inpVec[i];
     } // end of sum
     // Normalize
@@ -253,6 +252,8 @@ double gen::getAverageWithoutOutliers(std::vector<double> inpVec) {
     return avgVal;
   } // for triangular prism blocks
   // ----------------------
+  // Divide by the number of observations used
+  avgVal /= numOfObservations;
 
   return avgVal;
 }
@@ -272,6 +273,8 @@ double gen::angDistDegQuaternions(std::vector<double> quat1,
   // angularDistance = 2*cosInverse(quat1*conj(quat2))
   prod = quat1[0] * quat2[0] - quat1[1] * quat2[1] - quat1[2] * quat2[2] -
          quat1[3] * quat2[3];
+  // Clamp to [-1, 1] to guard against floating-point imprecision in acos
+  prod = std::clamp(prod, -1.0, 1.0);
   // The angular distance is:
   double angDist = 2 * acos(prod) * 180.0 / (gen::pi);
   // Return the angular distance
