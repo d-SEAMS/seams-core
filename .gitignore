@@ -12,7 +12,9 @@ spack.yml
 /.spack-env/
 !pixi.lock
 *.lock
-subprojects
+subprojects/nanobind-*/
+subprojects/robin-map-*/
+subprojects/packagecache/
 
 # Prerequisites
 *.d
@@ -61,7 +63,12 @@ output/
 *.lammpstrj
 bin/
 build/
-docs/
+# docs/source/*.rst is generated from orgmode, but track orgmode + conf.py
+docs/build/
+docs/doctrees/
+docs/source/*.rst
+docs/source/xml/
+docs/source/api/
 m.css/
 compile_commands.json
 yodaStruct
@@ -309,7 +316,8 @@ TSWLatexianTemp*
 
 # auto folder when using emacs and auctex
 ./auto/*
-*.el
+# Emacs backup but keep export.el
+*.el~
 
 # expex forward references with \gathertags
 *-tags.tex

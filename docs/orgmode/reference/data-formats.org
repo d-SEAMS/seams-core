@@ -1,0 +1,66 @@
+#+TITLE: Data Formats
+#+OPTIONS: toc:nil num:nil
+
+* LAMMPS trajectory format
+
+d-SEAMS reads LAMMPS dump files in the standard text format. Each frame in the
+trajectory has the following structure:
+
+#+begin_src text
+ITEM: TIMESTEP
+15000000
+ITEM: NUMBER OF ATOMS
+750
+ITEM: BOX BOUNDS pp pp pp
+-2.0000000000000000e+01 2.0000000000000000e+01
+-2.0000000000000000e+01 2.0000000000000000e+01
+7.0316731227034523e+00 1.8723432986906221e+02
+ITEM: ATOMS id mol type x y z c_peratom
+1 1 2 1.62441 -0.745636 131.621 -28.449
+2 1 1 2.11159 -0.763153 132.444 9.60885
+3 1 1 0.727051 -0.969064 131.868 9.36579
+#+end_src
+
+** Header fields
+
+- ~ITEM: TIMESTEP~ :: The simulation timestep for this frame.
+- ~ITEM: NUMBER OF ATOMS~ :: Total number of atoms in the frame.
+- ~ITEM: BOX BOUNDS~ :: Three lines giving lo/hi bounds for x, y, z. The boundary
+  flags (~pp~ = periodic-periodic) follow on the header line.
+- ~ITEM: ATOMS~ :: Column names for atom data. The required columns are ~id~,
+  ~mol~, ~type~, ~x~, ~y~, ~z~. Additional columns (like ~c_peratom~) are
+  accepted but not used by d-SEAMS.
+
+** Atom type conventions
+
+For water simulations analyzed with CHILL+ or hydrogen bond detection:
+
+| Type ID | Atom | Notes                            |
+|---------+------+----------------------------------|
+|       1 | H    | Hydrogen, used by ~populateHbonds~ |
+|       2 | O    | Oxygen, used by ~readLammpsTrjreduced~ and ~neighListO~ |
+
+These type IDs are passed as the ~typeI~ and ~Htype~ arguments to the reader and
+bond functions. Adjust them to match your LAMMPS data file.
+
+** Multiple frames
+
+A trajectory file can contain multiple frames concatenated back to back. Each
+frame starts with ~ITEM: TIMESTEP~. The ~targetFrame~ argument to the reader
+functions selects which frame to read (1-indexed).
+
+** Coordinate conventions
+
+d-SEAMS uses Cartesian coordinates in Angstroms. The box dimensions stored in
+~PointCloud.box~ are computed as ~hi - lo~ for each dimension. The lower bounds
+are stored in ~PointCloud.boxLow~.
+
+* Slice selection
+
+When ~isSlice=True~ is passed to a reader function, only atoms within the
+coordinate range ~[coordLow, coordHigh]~ are included. The comparison is
+per-component: an atom is included when ~coordLow[i] <= pos[i] <= coordHigh[i]~
+for all three dimensions.
+
+When ~isSlice=False~, the ~coordLow~ and ~coordHigh~ arguments are ignored.
+Convention is to pass ~[0, 0, 0]~ for both.

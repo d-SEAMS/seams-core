@@ -1,0 +1,67 @@
+#+TITLE: d-SEAMS
+#+AUTHOR: [[https://dseams.info][d-SEAMS core team]]
+#+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil ^:nil
+
+#+begin_export rst
+=========
+``d-SEAMS``
+=========
+
+:Author: `d-SEAMS core team <https://dseams.info>`_
+#+end_export
+
+* Overview
+  d-SEAMS (Deferred Structural Elucidation Analysis for Molecular Simulations)
+  is a set of tools for analyzing the structure of molecular simulations.
+  The Python library ~pydseamslib~ exposes the C++ core through nanobind bindings,
+  providing functions for reading trajectories, building neighbour lists,
+  computing hydrogen bond networks, classifying ice structures with CHILL+,
+  and performing ring analysis.
+
+* Getting Started
+#+begin_export rst
+  .. toctree::
+     :maxdepth: 1
+     :caption: Getting Started
+
+     quickstart
+#+end_export
+
+* Tutorials
+#+begin_export rst
+  .. toctree::
+     :maxdepth: 1
+     :caption: Tutorials
+
+     tutorials/bulk-ice
+     tutorials/nanotube
+#+end_export
+
+* How-To Guides
+#+begin_export rst
+  .. toctree::
+     :maxdepth: 1
+     :caption: How-To Guides
+
+     howto/ase-integration
+#+end_export
+
+* Reference
+#+begin_export rst
+  .. toctree::
+     :maxdepth: 2
+     :caption: Reference
+
+     reference/api
+     reference/data-formats
+#+end_export
+
+* Development
+#+begin_export rst
+  .. toctree::
+     :maxdepth: 2
+     :caption: Development
+
+     contributing/index
+     changelog
+#+end_export

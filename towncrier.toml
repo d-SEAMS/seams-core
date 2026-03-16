@@ -1,0 +1,5 @@
+[tool.towncrier]
+directory = "docs/newsfragments"
+filename = "CHANGELOG.rst"
+name = "seams-core"
+version = "2.0.0"
