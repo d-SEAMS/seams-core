@@ -15,6 +15,7 @@
 #include <iostream>
 #include <cmath>
 #include <neighbours.hpp>
+#include <simd_distance.hpp>
 
 /**
  * @details Function for building neighbour lists for each
@@ -146,48 +147,58 @@ nneigh::neighListO(double rcutoff,
     nList[iatom].push_back(iatomIndex);
   } // end of init
 
-  // Loop through every iatom and find nearest neighbours within rcutoff
-  for (int iatom = 0; iatom < yCloud->nop - 1; iatom++) {
-    if (yCloud->pts[iatom].type != typeI) {
-      continue;
+  // Pre-build index-to-atomID lookup and collect indices of typeI atoms
+  std::vector<int> indexToID(yCloud->nop, -1);
+  std::vector<int> typeIIndices;
+  for (auto &kv : yCloud->idIndexMap) {
+    if (kv.second >= 0 && kv.second < yCloud->nop) {
+      indexToID[kv.second] = kv.first;
     }
-    // Loop through the other atoms
-    for (int jatom = iatom + 1; jatom < yCloud->nop; jatom++) {
-      if (yCloud->pts[jatom].type != typeI) {
-        continue;
-      }
-      // If the distance is greater than rcutoff, continue
-      r_ij = gen::periodicDist(yCloud, iatom, jatom);
-      if (r_ij > rcutoff) {
-        continue;
-      }
+  }
+  for (int i = 0; i < yCloud->nop; i++) {
+    if (yCloud->pts[i].type == typeI) {
+      typeIIndices.push_back(i);
+    }
+  }
 
-      // Get the atom IDs for iatom and jatom
-      auto gotI = std::find_if(
-          yCloud->idIndexMap.begin(), yCloud->idIndexMap.end(),
-          [&iatom](const std::pair<int, int> &p) { return p.second == iatom; });
-      if (gotI == yCloud->idIndexMap.end()) {
-        std::cerr << "Something is wrong with your idIndexMap!\n";
-        return nList;
-      } else {
-        iatomIndex = gotI->first;
-      } // End of finding the atom ID for iatom
-      // Find the atom ID of jatom
-      auto gotJ = std::find_if(
-          yCloud->idIndexMap.begin(), yCloud->idIndexMap.end(),
-          [&jatom](const std::pair<int, int> &p) { return p.second == jatom; });
-      if (gotJ == yCloud->idIndexMap.end()) {
-        std::cerr << "Something is wrong with your idIndexMap!\n";
-        return nList;
-      } else {
-        jatomIndex = gotJ->first;
-      } // End of finding the atom ID for jatom
-      // Update the neighbour indices with atom IDs for iatom and jatom both
-      // (full list)
+  double rcutoffSq = rcutoff * rcutoff;
+  double bx = yCloud->box[0];
+  double by = yCloud->box[1];
+  double bz = yCloud->box[2];
+
+  // Loop through every iatom and find nearest neighbours within rcutoff
+  for (size_t ii = 0; ii < typeIIndices.size(); ii++) {
+    int iatom = typeIIndices[ii];
+    iatomIndex = indexToID[iatom];
+
+    // Collect coordinate differences for all j > i of typeI
+    size_t remaining = typeIIndices.size() - ii - 1;
+    if (remaining == 0) continue;
+
+    std::vector<double> dx(remaining), dy(remaining), dz(remaining);
+    std::vector<int> jIndices(remaining);
+
+    for (size_t jj = 0; jj < remaining; jj++) {
+      int jatom = typeIIndices[ii + 1 + jj];
+      jIndices[jj] = jatom;
+      dx[jj] = yCloud->pts[iatom].x - yCloud->pts[jatom].x;
+      dy[jj] = yCloud->pts[iatom].y - yCloud->pts[jatom].y;
+      dz[jj] = yCloud->pts[iatom].z - yCloud->pts[jatom].z;
+    }
+
+    // Batch compute squared periodic distances (SIMD when available)
+    std::vector<double> distSq(remaining);
+    seams::BatchPeriodicDistSq(dx.data(), dy.data(), dz.data(),
+                               bx, by, bz, distSq.data(), remaining);
+
+    // Filter by cutoff and update neighbour lists
+    for (size_t jj = 0; jj < remaining; jj++) {
+      if (distSq[jj] > rcutoffSq) continue;
+      int jatom = jIndices[jj];
+      jatomIndex = indexToID[jatom];
       nList[iatom].push_back(jatomIndex);
       nList[jatom].push_back(iatomIndex);
-
-    } // End of loop through jatom
+    }
   }   // End of loop for iatom
 
   return nList;

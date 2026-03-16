@@ -39,6 +39,12 @@ blas_dep = cppc.find_library('blas', required: true)
 lapack_dep = cppc.find_library('lapack', required: true)
 _deps += [blas_dep, lapack_dep]
 
+hwy_dep = dependency('hwy', version: '>=1.3.0', required: false)
+if hwy_dep.found()
+  _deps += [hwy_dep]
+  _args += ['-DSEAMS_HAS_HWY=1']
+endif
+
 # Include directories
 _incdirs += include_directories([
   'src/include/internal',

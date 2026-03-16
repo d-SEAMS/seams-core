@@ -7,6 +7,7 @@ doxyYoda
 doxyYoda_*
 run*
 bbdir/
+bbdir-cov/
 # Manual updates ONLY
 spack.yml
 /.spack-env/

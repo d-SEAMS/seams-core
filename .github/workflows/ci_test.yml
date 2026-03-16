@@ -21,3 +21,18 @@ jobs:
       - run: pixi run test
       - run: pixi run install
       - run: pixi run pytest
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: prefix-dev/setup-pixi@v0.8.8
+        with:
+          environments: default
+      - run: pixi run coverage-setup
+      - run: pixi run coverage-build
+      - run: pixi run coverage-run
+      - uses: codecov/codecov-action@v5
+        with:
+          files: bbdir-cov/meson-logs/coverage.info
+          fail_ci_if_error: false
