@@ -1087,7 +1087,7 @@ Eigen::MatrixXd pntToPnt::changeDiaCageOrder(
     for (int i = 6; i < 9; i++) {
       currentIndex = i + peripheralStartingIndex;
       // wrap-around
-      if (currentIndex <= 9) {
+      if (currentIndex >= 9) {
         currentIndex -= 3;
       } // end of wrap-around
       wrappedDDC[i] = ddcOrder[currentIndex];
@@ -1097,7 +1097,7 @@ Eigen::MatrixXd pntToPnt::changeDiaCageOrder(
     for (int i = 10; i < 13; i++) {
       currentIndex = i + peripheralStartingIndex;
       // wrap-around
-      if (currentIndex <= 13) {
+      if (currentIndex >= 13) {
         currentIndex -= 3;
       } // end of wrap-around
       wrappedDDC[i] = ddcOrder[currentIndex];
