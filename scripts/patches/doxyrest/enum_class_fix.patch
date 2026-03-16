@@ -1,0 +1,5 @@
+--- a/subprojects/doxyrest/frame/cfamily/enum.rst.in
++++ b/subprojects/doxyrest/frame/cfamily/enum.rst.in
+@@ -55,1 +55,1 @@
+-if enum.baseType.isEmpty then
++if not enum.baseType or enum.baseType.isEmpty then

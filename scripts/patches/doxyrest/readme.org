@@ -1,0 +1,12 @@
+#+title: Doxyrest Patches
+
+Patches applied to the doxyrest subproject for compatibility with the d-SEAMS
+documentation build pipeline.
+
+- =doxyrest.py= :: Patched Sphinx extension from the doxyrest toolkit. Fixes
+  inline syntax highlighting and adds shibuya theme support. Replaces the
+  upstream =sphinx/doxyrest.py= in the cloned subproject.
+
+- =enum_class_fix.patch= :: Fixes a nil-check in the enum template
+  (=frame/cfamily/enum.rst.in=) where =enum.baseType= can be nil rather than
+  an empty string, causing Lua errors during RST generation.

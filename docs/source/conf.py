@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+
+# -- Path setup --------------------------------------------------------------
+sys.path.insert(0, os.path.abspath("../../subprojects/doxyrest/sphinx"))
+
 # -- Project information -----------------------------------------------------
 project = "d-SEAMS"
 copyright = "2019-2026, d-SEAMS core team"
@@ -5,11 +13,21 @@ author = "Rohit Goswami, Amrita Goswami, Ruhila S"
 
 # -- General configuration ---------------------------------------------------
 extensions = [
+    "doxyrest",
+    "cpplexer",
+    "myst_parser",
+    "sphinx.ext.intersphinx",
     "sphinx_sitemap",
 ]
 
 templates_path = ["_templates"]
 exclude_patterns = []
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+    "ase": ("https://wiki.fysik.dtu.dk/ase/", None),
+}
 
 # -- Options for HTML output -------------------------------------------------
 html_theme = "shibuya"
