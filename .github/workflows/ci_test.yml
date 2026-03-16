@@ -20,7 +20,7 @@ jobs:
       - run: pixi run build
       - run: pixi run test
       - run: pixi run install
-      - run: pixi run pytest
+      - run: pixi run -e default -- bash -c "LD_LIBRARY_PATH=\$CONDA_PREFIX/lib:\$LD_LIBRARY_PATH pytest tests/python/ -v"
 
   coverage:
     runs-on: ubuntu-latest
