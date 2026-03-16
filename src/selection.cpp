@@ -224,7 +224,7 @@ void gen::moleculesInSingleSlice(
  */
 void gen::setAtomsWithSameMolID(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::unordered_multimap<int,int> molIDAtomIDmap,
+    const std::unordered_multimap<int,int> &molIDAtomIDmap,
     int molID, bool inSliceValue) {
   //
   int jatomID;    // atom ID of the current jatom
@@ -263,7 +263,7 @@ void gen::setAtomsWithSameMolID(
  * @param[in] coordHigh Contains the upper limits of the slice
  */
 void ring::getEdgeMoleculesInRings(
-    std::vector<std::vector<int>> rings, molSys::PointCloud<molSys::Point<double>, double> *oCloud,
+    const std::vector<std::vector<int>> &rings, molSys::PointCloud<molSys::Point<double>, double> *oCloud,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::array<double, 3> coordLow, std::array<double, 3> coordHigh, bool identicalCloud) {
   //
@@ -373,7 +373,7 @@ void ring::getEdgeMoleculesInRings(
  * @param[in] coordHigh Contains the upper limits of the slice
  */
 void ring::printSliceGetEdgeMoleculesInRings(
-    std::string path, std::vector<std::vector<int>> rings, 
+    std::string path, const std::vector<std::vector<int>> &rings,
     molSys::PointCloud<molSys::Point<double>, double> *oCloud,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     std::array<double, 3> coordLow, std::array<double, 3> coordHigh, bool identicalCloud) {

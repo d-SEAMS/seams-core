@@ -21,14 +21,8 @@
 #include <iterator>
 #include <sstream>
 #include <string>
-#include <sys/stat.h>
 #include <vector>
 #include<unordered_map>
-
-// For debugging, instantiate the unordered map [consider removal for
-// production]
-template class std::unordered_map<int, int>;
-template class std::vector<std::vector<int>>;
 
 /** @file mol_sys.hpp
  *  @brief The main molecular system handler.
@@ -193,7 +187,7 @@ hAtomMolList(molSys::PointCloud<molSys::Point<double>, double> *hCloud,
 
 //! This function searches a vector of vectors molList, for a particular
 //! molecular ID, and returns the index in molList
-int searchMolList(std::vector<std::vector<int>> molList, int molIDtoFind);
+int searchMolList(const std::vector<std::vector<int>> &molList, int molIDtoFind);
 
 //!//! Function for clearing vectors in PointCloud after multiple usage
 molSys::PointCloud<molSys::Point<double>, double>

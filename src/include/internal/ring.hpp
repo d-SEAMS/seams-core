@@ -20,11 +20,10 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <math.h>
+#include <cmath>
 #include <memory>
 #include <sstream>
 #include <string>
-#include <sys/stat.h>
 #include <vector>
 
 #include <cage.hpp>
@@ -127,7 +126,7 @@ enum class strucType {
 
 //! Returns a vector of vectors of rings of a single size
 std::vector<std::vector<int>>
-getSingleRingSize(std::vector<std::vector<int>> rings, int ringSize);
+getSingleRingSize(const std::vector<std::vector<int>> &rings, int ringSize);
 
 //! Check to see if two vectors have common elements or not
 //! True, if common elements are present and false if there are no common
@@ -139,23 +138,23 @@ bool hasCommonElements(std::vector<int> ring1, std::vector<int> ring2);
 bool compareRings(std::vector<int> ring1, std::vector<int> ring2);
 
 //! Searches a particular ring for a triplet
-bool findTripletInRing(std::vector<int> ring, std::vector<int> triplet);
+bool findTripletInRing(const std::vector<int> &ring, const std::vector<int> &triplet);
 
 //! Common elements in 3 rings
-bool commonElementsInThreeRings(std::vector<int> ring1, std::vector<int> ring2,
-                                std::vector<int> ring3);
+bool commonElementsInThreeRings(const std::vector<int> &ring1, const std::vector<int> &ring2,
+                                const std::vector<int> &ring3);
 
 //! Returns the common elements of two rings
-std::vector<int> findsCommonElements(std::vector<int> ring1,
-                                     std::vector<int> ring2);
+std::vector<int> findsCommonElements(const std::vector<int> &ring1,
+                                     const std::vector<int> &ring2);
 
 //! Erases memory for a vector of vectors for a list of rings
 int clearRingList(std::vector<std::vector<int>> &rings);
 
 //! Assign an atomType (equal to the number of nodes in the ring)
 //! given n-membered rings.
-int assignPolygonType(std::vector<std::vector<int>> rings,
-                      std::vector<int> *atomTypes, std::vector<int> nRings);
+int assignPolygonType(const std::vector<std::vector<int>> &rings,
+                      std::vector<int> *atomTypes, const std::vector<int> &nRings);
 
 } // namespace ring
 

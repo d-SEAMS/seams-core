@@ -18,7 +18,7 @@
 #include <array>
 #include <filesystem>
 #include <iostream>
-#include <math.h>
+#include <cmath>
 #include <mol_sys.hpp>
 
 // C++20

@@ -102,27 +102,27 @@ inline int makePath(const std::string &path) {
 }
 
 //! Function for printing out ring info, when there is no volume slice
-int writeRings(std::vector<std::vector<int>> rings,
+int writeRings(const std::vector<std::vector<int>> &rings,
                std::string filename = "rings.dat");
 
 //! Function for printing out the number of prism blocks, with or without
 //! slices. Be careful when using slices!
-int writePrismNum(std::string path, std::vector<int> nPrisms,
-                  std::vector<int> nDefPrisms,
-                  std::vector<double> heightPercent, int maxDepth,
+int writePrismNum(std::string path, const std::vector<int> &nPrisms,
+                  const std::vector<int> &nDefPrisms,
+                  const std::vector<double> &heightPercent, int maxDepth,
                   int currentFrame, int firstFrame);
 
 //! Function for printing out the coverage area and the number of rings of each
 //! type
-int writeRingNum(std::string path, int currentFrame, std::vector<int> nRings,
-                 std::vector<double> coverageAreaXY,
-                 std::vector<double> coverageAreaXZ,
-                 std::vector<double> coverageAreaYZ, int maxDepth,
+int writeRingNum(std::string path, int currentFrame, const std::vector<int> &nRings,
+                 const std::vector<double> &coverageAreaXY,
+                 const std::vector<double> &coverageAreaXZ,
+                 const std::vector<double> &coverageAreaYZ, int maxDepth,
                  int firstFrame);
 
 //! Function for printing out the number of rings of each
 //! type in a bulk system 
-int writeRingNumBulk(std::string path, int currentFrame, std::vector<int> nRings, int maxDepth,
+int writeRingNumBulk(std::string path, int currentFrame, const std::vector<int> &nRings, int maxDepth,
                  int firstFrame);
 
 //! Function for printing out the RDF, given the filename
@@ -162,76 +162,76 @@ int writeLAMMPSdata(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 //! Write out a LAMMPS dump file containing the RMSD per atom
 int writeLAMMPSdumpINT(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<double> rmsdPerAtom, std::vector<int> atomTypes, int maxDepth,
+    const std::vector<double> &rmsdPerAtom, const std::vector<int> &atomTypes, int maxDepth,
     std::string path);
 
 //! Write out a LAMMPS dump file containing the inSlice value for each atom
-//! for a user-defined slice 
+//! for a user-defined slice
 int writeLAMMPSdumpSlice(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, std::string path);
 
 //! Write out a LAMMPS dump file containing the RMSD per atom for bulk ice
 int writeLAMMPSdumpCages(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<double> rmsdPerAtom, std::vector<int> atomTypes,
+    const std::vector<double> &rmsdPerAtom, const std::vector<int> &atomTypes,
     std::string path, int firstFrame);
 
 //! Write a data file for prisms of every type
 int writeLAMMPSdataAllPrisms(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
+    const std::vector<std::vector<int>> &nList, const std::vector<int> &atomTypes,
     int maxDepth, std::string path, bool doShapeMatching = false);
 
 //! Write a data file for rings of every type for a monolayer
 int writeLAMMPSdataAllRings(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
+    const std::vector<std::vector<int>> &nList, const std::vector<int> &atomTypes,
     int maxDepth, std::string path, bool isMonolayer = true);
 
 //! Write a data file for a particular frame, writing out topological bulk ice
 //! structures (DDCs/HCs)
 int writeLAMMPSdataTopoBulk(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, std::vector<cage::iceType> atomTypes,
+    const std::vector<std::vector<int>> &nList, const std::vector<cage::iceType> &atomTypes,
     std::string path, bool bondsBetweenDummy = false);
 
 //! Write a data file for prisms of a single type
 int writeLAMMPSdataPrisms(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> rings, bool useBondFile, std::string bondFile,
-    std::vector<int> listPrism, std::vector<std::vector<int>> nList,
+    const std::vector<std::vector<int>> &rings, bool useBondFile, std::string bondFile,
+    const std::vector<int> &listPrism, const std::vector<std::vector<int>> &nList,
     std::string filename = "system-prisms.data");
 
 //! Write out a lammps data file for DDCs or HCs, assuming that there is no
 //! slice
 int writeLAMMPSdataCages(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> rings, std::vector<cage::Cage> *cageList,
+    const std::vector<std::vector<int>> &rings, std::vector<cage::Cage> *cageList,
     cage::cageType type, int numCages,
     std::string filename = "system-cages.data");
 
 //! Write out all cages of all types into a folder called cages inside the
 //! output directory
 int writeAllCages(std::string path, std::vector<cage::Cage> *cageList,
-                  std::vector<std::vector<int>> rings,
-                  std::vector<std::vector<int>> nList,
+                  const std::vector<std::vector<int>> &rings,
+                  const std::vector<std::vector<int>> &nList,
                   molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                   int currentFrame);
 
 //! Write out a particular cage to a file
-int writeEachCage(std::vector<int> currentCage, int cageNum,
-                  cage::cageType type, std::vector<std::vector<int>> rings,
+int writeEachCage(const std::vector<int> &currentCage, int cageNum,
+                  cage::cageType type, const std::vector<std::vector<int>> &rings,
                   molSys::PointCloud<molSys::Point<double>, double> *yCloud);
 
 //! Write out the basal rings of a particular Hexagonal cage
-int writeBasalRingsHex(std::vector<int> currentCage, int cageNum,
-                       std::vector<std::vector<int>> nList,
-                       std::vector<std::vector<int>> rings);
+int writeBasalRingsHex(const std::vector<int> &currentCage, int cageNum,
+                       const std::vector<std::vector<int>> &nList,
+                       const std::vector<std::vector<int>> &rings);
 
 //! Write out the basal rings for a particular prism
 int writeBasalRingsPrism(
     std::vector<int> *basal1, std::vector<int> *basal2, int prismNum,
-    std::vector<std::vector<int>> nList,
+    const std::vector<std::vector<int>> &nList,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, bool isDeformed);
 
 //! Generic function for writing out to a dump file
@@ -241,7 +241,7 @@ int writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 //! Function for printing out Q6, Cij and averaged Q3 values as single columns
 //! to text files The file names are cij, q6, q3
 int writeHisto(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-               std::vector<std::vector<int>> nList, std::vector<double> avgQ6);
+               const std::vector<std::vector<int>> &nList, const std::vector<double> &avgQ6);
 
 //! Function for printing the largest ice cluster
 int writeCluster(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
@@ -251,6 +251,6 @@ int writeCluster(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 //! Function for writing out the XYZ files for each cluster
 int writeXYZcluster(std::string path,
                     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                    std::vector<int> atoms, int clusterID, cage::cageType type);
+                    const std::vector<int> &atoms, int clusterID, cage::cageType type);
 } // namespace sout
 #endif // __SEAMS_OUTPUT_H_

@@ -253,7 +253,7 @@ std::complex<double> sph::lookupTableQ6(int m, std::array<double, 2> angles) {
 //! algorithm
 molSys::PointCloud<molSys::Point<double>, double>
 chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                 std::vector<std::vector<int>> nList, bool isSlice) {
+                 const std::vector<std::vector<int>> &nList, bool isSlice) {
   //
   int l = 3;      // TODO: Don't hard-code this; change later
   int iatomID;    // Atom ID (key) of iatom
@@ -392,7 +392,7 @@ chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 //! Classifies each atom according to the CHILL algorithm without printing
 molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypeNoPrint(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, bool isSlice) {
+    const std::vector<std::vector<int>> &nList, bool isSlice) {
   int ih, ic, water, interIce, unknown, total; // No. of particles of each type
   ih = ic = water = unknown = interIce = total = 0;
   int num_staggrd, num_eclipsd, na;
@@ -459,7 +459,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypeNoPrint(
 //! Classifies each atom according to the CHILL algorithm
 molSys::PointCloud<molSys::Point<double>, double>
 chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                  std::vector<std::vector<int>> nList, std::string path,
+                  const std::vector<std::vector<int>> &nList, std::string path,
                   int firstFrame, bool isSlice, std::string outputFileName) {
   int ih, ic, water, interIce, unknown, total; // No. of particles of each type
   ih = ic = water = unknown = interIce = total = 0;
@@ -556,7 +556,7 @@ chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
  */
 molSys::PointCloud<molSys::Point<double>, double>
 chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                     std::vector<std::vector<int>> nList, bool isSlice) {
+                     const std::vector<std::vector<int>> &nList, bool isSlice) {
   //
   int l = 3;      // TODO: Don't hard-code this; change later
   int iatomID;    // Atom ID (key) of iatom
@@ -709,7 +709,7 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
  */
 molSys::PointCloud<molSys::Point<double>, double>
 chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                      std::vector<std::vector<int>> nList, std::string path,
+                      const std::vector<std::vector<int>> &nList, std::string path,
                       int firstFrame, bool isSlice,
                       std::string outputFileName) {
   int ih, ic, interIce, water, unknown, clath, interClath,
@@ -822,7 +822,7 @@ chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
  */
 std::vector<double>
 chill::getq6(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-             std::vector<std::vector<int>> nList, bool isSlice) {
+             const std::vector<std::vector<int>> &nList, bool isSlice) {
   //
   int l = 6;      // We're using q6 here
   int jatomID;    // Atom ID of the nearest neighbour
@@ -1084,7 +1084,7 @@ int chill::printIceType(
  */
 bool chill::isInterfacial(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, int iatom, int num_staggrd,
+    const std::vector<std::vector<int>> &nList, int iatom, int num_staggrd,
     int num_eclipsd) {
   int nnumNeighbours =
       nList[iatom].size() - 1; // number of nearest neighbours of iatom
@@ -1156,7 +1156,7 @@ bool chill::isInterfacial(
  */
 int chill::numStaggered(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, int jatom) {
+    const std::vector<std::vector<int>> &nList, int jatom) {
   int num_staggrd = 0;        // Number of staggered bonds
   molSys::bond_type bondType; // Bond type
   int num_bonds;              // No. of bonds of the jatom

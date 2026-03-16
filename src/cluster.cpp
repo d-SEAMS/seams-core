@@ -38,7 +38,7 @@
 int clump::largestIceCluster(
     std::string path, molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
-    std::vector<std::vector<int>> nList, std::vector<bool> *isIce,
+    const std::vector<std::vector<int>> &nList, std::vector<bool> *isIce,
     std::vector<int> *list, std::vector<int> *nClusters,
     std::unordered_map<int, int> *indexNumber, int firstFrame) {
   //
@@ -234,7 +234,7 @@ int clump::largestIceCluster(
  */
 int clump::singleClusterLinkedList(
     molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
-    std::vector<std::vector<int>> nList, std::vector<int> *linkedList) {
+    const std::vector<std::vector<int>> &nList, std::vector<int> *linkedList) {
   //
   int j;
   int temp; // For swapping indices
@@ -311,7 +311,7 @@ int clump::clusterAnalysis(
     std::string path,
     molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList,
+    const std::vector<std::vector<int>> &nList,
     std::vector<std::vector<int>> &iceNeighbourList, double cutoff,
     int firstFrame, std::string bopAnalysis) {
   //
@@ -395,7 +395,7 @@ int clump::clusterAnalysis(
  */
 int clump::recenterClusterCloud(
     molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
-    std::vector<std::vector<int>> nList) {
+    const std::vector<std::vector<int>> &nList) {
   //
   int dim = 3; // Dimensions
   std::vector<double> box = iceCloud->box;

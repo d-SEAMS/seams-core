@@ -15,8 +15,7 @@
 #ifndef __SELECTION_H_
 #define __SELECTION_H_
 
-#include <math.h>
-#include <sys/stat.h>
+#include <cmath>
 #include <algorithm>
 #include <array>
 #include <fstream>
@@ -78,7 +77,7 @@ void atomsInSingleSlice(
 //! with that molecule ID 
 void setAtomsWithSameMolID(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::unordered_multimap<int,int> molIDAtomIDmap,
+    const std::unordered_multimap<int,int> &molIDAtomIDmap,
     int molID, bool inSliceValue=true);
 
 }  // namespace gen
@@ -99,7 +98,7 @@ namespace ring {
 //! to the presence of the atom in the slice 
 //! (this can be done using the gen::moleculesInSingleSlice function. 
 void getEdgeMoleculesInRings(
-    std::vector<std::vector<int>> rings, molSys::PointCloud<molSys::Point<double>, double> *oCloud,
+    const std::vector<std::vector<int>> &rings, molSys::PointCloud<molSys::Point<double>, double> *oCloud,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, 
     std::array<double, 3> coordLow, std::array<double, 3> coordHigh,
     bool identicalCloud=false);
@@ -112,7 +111,7 @@ void getEdgeMoleculesInRings(
 //! Prints out molecule IDs individually of molecules in the slice, and also prints out a LAMMPS
 //! data file of just the molecules and atoms in the slice  
 void printSliceGetEdgeMoleculesInRings(
-    std::string path, std::vector<std::vector<int>> rings, 
+    std::string path, const std::vector<std::vector<int>> &rings,
     molSys::PointCloud<molSys::Point<double>, double> *oCloud,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, 
     std::array<double, 3> coordLow, std::array<double, 3> coordHigh,

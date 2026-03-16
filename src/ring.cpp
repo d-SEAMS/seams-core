@@ -37,9 +37,9 @@ int ring::clearRingList(std::vector<std::vector<int>> &rings) {
  *  depending on it's type as classified by the prism identification scheme.
  * @param[in] nRings Number of rings.
  */
-int ring::assignPolygonType(std::vector<std::vector<int>> rings,
+int ring::assignPolygonType(const std::vector<std::vector<int>> &rings,
                             std::vector<int> *atomTypes,
-                            std::vector<int> nRings) {
+                            const std::vector<int> &nRings) {
   // Every value in listPrism corresponds to an index in rings.
   // Every ring contains atom indices, corresponding to the indices (not atom
   // IDs) in rings
@@ -82,8 +82,8 @@ int ring::assignPolygonType(std::vector<std::vector<int>> rings,
  *  @param[in] ring2 The second ring.
  *  @return A vector containing the common elements between the input rings.
  */
-std::vector<int> ring::findsCommonElements(std::vector<int> ring1,
-                                           std::vector<int> ring2) {
+std::vector<int> ring::findsCommonElements(const std::vector<int> &ring1,
+                                           const std::vector<int> &ring2) {
   //
   std::vector<int> common;
   int iatom; // Index to search for
@@ -111,9 +111,9 @@ std::vector<int> ring::findsCommonElements(std::vector<int> ring1,
  * @return A value which is true if the three rings have at least one common
  * element, and false if the three rings have no elements in common.
  */
-bool ring::commonElementsInThreeRings(std::vector<int> ring1,
-                                      std::vector<int> ring2,
-                                      std::vector<int> ring3) {
+bool ring::commonElementsInThreeRings(const std::vector<int> &ring1,
+                                      const std::vector<int> &ring2,
+                                      const std::vector<int> &ring3) {
   std::vector<int>
       common1; // Vector containing the common elements of the first two rings
   std::vector<int>
@@ -145,7 +145,7 @@ bool ring::commonElementsInThreeRings(std::vector<int> ring1,
  * @return A bool value which is true if the triplet is present in the ring,
  *  and is false if the triplet is not in the ring.
  */
-bool ring::findTripletInRing(std::vector<int> ring, std::vector<int> triplet) {
+bool ring::findTripletInRing(const std::vector<int> &ring, const std::vector<int> &triplet) {
   //
   int ringSize = ring.size();   // should be 6
   std::vector<int> ringTriplet; // triplet from the ring to be searched
@@ -197,7 +197,7 @@ bool ring::findTripletInRing(std::vector<int> ring, std::vector<int> triplet) {
  *  length.
  */
 std::vector<std::vector<int>>
-ring::getSingleRingSize(std::vector<std::vector<int>> rings, int ringSize) {
+ring::getSingleRingSize(const std::vector<std::vector<int>> &rings, int ringSize) {
   //
   std::vector<std::vector<int>> ringSingleSize; // rings of one size
 

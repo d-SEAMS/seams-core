@@ -179,7 +179,7 @@ int sout::writeLAMMPSdata(
  *  volume slice
  *  Uses Boost!
  */
-int sout::writeRings(std::vector<std::vector<int>> rings,
+int sout::writeRings(const std::vector<std::vector<int>> &rings,
                      std::string filename) {
   std::ofstream outputFile;
   // ----------------
@@ -286,7 +286,7 @@ int sout::writePrisms(
  */
 int sout::writeAllCages(
     std::string path, std::vector<cage::Cage> *cageList,
-    std::vector<std::vector<int>> rings, std::vector<std::vector<int>> nList,
+    const std::vector<std::vector<int>> &rings, const std::vector<std::vector<int>> &nList,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     int currentFrame) {
   int numDDC;                          // Number of DDCs
@@ -346,8 +346,8 @@ int sout::writeAllCages(
  * volume slice  Uses Boost!
  */
 int sout::writeEachCage(
-    std::vector<int> currentCage, int cageNum, cage::cageType type,
-    std::vector<std::vector<int>> rings,
+    const std::vector<int> &currentCage, int cageNum, cage::cageType type,
+    const std::vector<std::vector<int>> &rings,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
   std::ofstream outputFile;
   std::string number = std::to_string(cageNum);
@@ -438,9 +438,9 @@ int sout::writeEachCage(
  * @details Function for printing out the basal rings only of the hexagonal cage
  * described by the number cageNum Uses Boost!
  */
-int sout::writeBasalRingsHex(std::vector<int> currentCage, int cageNum,
-                             std::vector<std::vector<int>> nList,
-                             std::vector<std::vector<int>> rings) {
+int sout::writeBasalRingsHex(const std::vector<int> &currentCage, int cageNum,
+                             const std::vector<std::vector<int>> &nList,
+                             const std::vector<std::vector<int>> &rings) {
   std::ofstream outputFile;
   std::string number = std::to_string(cageNum);
   std::string filename = "basalRings" + number + ".dat";
@@ -649,7 +649,7 @@ int sout::writeBasalRingsHex(std::vector<int> currentCage, int cageNum,
  */
 int sout::writeBasalRingsPrism(
     std::vector<int> *basal1, std::vector<int> *basal2, int prismNum,
-    std::vector<std::vector<int>> nList,
+    const std::vector<std::vector<int>> &nList,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     bool isDeformed) {
   std::ofstream outputFile;
@@ -1028,9 +1028,9 @@ int sout::writeMoleculeIDsExpressionSelectOVITO(std::string path,
 /**
  * @details Function for printing out prism info, when there is no  volume slice
  */
-int sout::writePrismNum(std::string path, std::vector<int> nPrisms,
-                        std::vector<int> nDefPrisms,
-                        std::vector<double> heightPercent, int maxDepth,
+int sout::writePrismNum(std::string path, const std::vector<int> &nPrisms,
+                        const std::vector<int> &nDefPrisms,
+                        const std::vector<double> &heightPercent, int maxDepth,
                         int currentFrame, int firstFrame) {
   std::ofstream outputFile;
   int totalPrisms; // Number of total prisms
@@ -1075,10 +1075,10 @@ int sout::writePrismNum(std::string path, std::vector<int> nPrisms,
  * @details Function for printing out ring info, for a monolayer
  */
 int sout::writeRingNum(std::string path, int currentFrame,
-                       std::vector<int> nRings,
-                       std::vector<double> coverageAreaXY,
-                       std::vector<double> coverageAreaXZ,
-                       std::vector<double> coverageAreaYZ, int maxDepth,
+                       const std::vector<int> &nRings,
+                       const std::vector<double> &coverageAreaXY,
+                       const std::vector<double> &coverageAreaXZ,
+                       const std::vector<double> &coverageAreaYZ, int maxDepth,
                        int firstFrame) {
   std::ofstream outputFileXY;
   std::ofstream outputFileXZ;
@@ -1180,7 +1180,7 @@ int sout::writeRingNum(std::string path, int currentFrame,
  * @details Function for printing out ring info, for a bulk system
  */
 int sout::writeRingNumBulk(std::string path, int currentFrame,
-                       std::vector<int> nRings,
+                       const std::vector<int> &nRings,
                        int maxDepth,
                        int firstFrame) {
   std::ofstream outputFile;
@@ -1287,7 +1287,7 @@ int sout::writeTopoBulkData(std::string path, int currentFrame, int numHC,
  */
 int sout::writeLAMMPSdumpCages(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<double> rmsdPerAtom, std::vector<int> atomTypes,
+    const std::vector<double> &rmsdPerAtom, const std::vector<int> &atomTypes,
     std::string path, int firstFrame) {
   std::ofstream outputFile;
   int iatom; // Index, not atom ID
@@ -1377,7 +1377,7 @@ int sout::writeLAMMPSdumpCages(
  */
 int sout::writeLAMMPSdumpINT(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<double> rmsdPerAtom, std::vector<int> atomTypes, int maxDepth,
+    const std::vector<double> &rmsdPerAtom, const std::vector<int> &atomTypes, int maxDepth,
     std::string path) {
   //
   std::ofstream outputFile;
@@ -1526,7 +1526,7 @@ int sout::writeLAMMPSdumpSlice(
  */
 int sout::writeLAMMPSdataAllPrisms(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
+    const std::vector<std::vector<int>> &nList, const std::vector<int> &atomTypes,
     int maxDepth, std::string path, bool doShapeMatching) {
   //
   std::ofstream outputFile;
@@ -1660,7 +1660,7 @@ int sout::writeLAMMPSdataAllPrisms(
  */
 int sout::writeLAMMPSdataAllRings(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, std::vector<int> atomTypes,
+    const std::vector<std::vector<int>> &nList, const std::vector<int> &atomTypes,
     int maxDepth, std::string path, bool isMonolayer) {
   //
   std::ofstream outputFile;
@@ -1792,8 +1792,8 @@ int sout::writeLAMMPSdataAllRings(
  */
 int sout::writeLAMMPSdataPrisms(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> rings, bool useBondFile, std::string bondFile,
-    std::vector<int> listPrism, std::vector<std::vector<int>> nList,
+    const std::vector<std::vector<int>> &rings, bool useBondFile, std::string bondFile,
+    const std::vector<int> &listPrism, const std::vector<std::vector<int>> &nList,
     std::string filename) {
   std::ofstream outputFile;
   std::vector<int> atoms;         // Holds all atom IDs to print
@@ -2022,7 +2022,7 @@ int sout::writeLAMMPSdataPrisms(
  */
 int sout::writeLAMMPSdataCages(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> rings, std::vector<cage::Cage> *cageList,
+    const std::vector<std::vector<int>> &rings, std::vector<cage::Cage> *cageList,
     cage::cageType type, int numCages, std::string filename) {
   std::ofstream outputFile;
   std::vector<int> atoms;         // Holds all atom IDs to print
@@ -2337,8 +2337,8 @@ int sout::writeDump(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
  * values
  */
 int sout::writeHisto(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                     std::vector<std::vector<int>> nList,
-                     std::vector<double> avgQ6) {
+                     const std::vector<std::vector<int>> &nList,
+                     const std::vector<double> &avgQ6) {
   std::ofstream cijFile;
   std::ofstream q3File;
   std::ofstream q6File;
@@ -2396,7 +2396,7 @@ int sout::writeCluster(
  */
 int sout::writeLAMMPSdataTopoBulk(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList, std::vector<cage::iceType> atomTypes,
+    const std::vector<std::vector<int>> &nList, const std::vector<cage::iceType> &atomTypes,
     std::string path, bool bondsBetweenDummy) {
   //
   std::ofstream outputFile;
@@ -2549,7 +2549,7 @@ int sout::writeLAMMPSdataTopoBulk(
  */
 int sout::writeXYZcluster(
     std::string path, molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> atoms, int clusterID, cage::cageType type) {
+    const std::vector<int> &atoms, int clusterID, cage::cageType type) {
   //
   std::ofstream outputFile;
   std::string filename = "cluster-" + std::to_string(clusterID) + ".xyz";

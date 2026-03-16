@@ -23,7 +23,7 @@
  * atom whose neighbours have been found.
  */
 std::vector<std::vector<int>>
-bond::populateBonds(std::vector<std::vector<int>> nList,
+bond::populateBonds(const std::vector<std::vector<int>> &nList,
                     molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
   //
   std::vector<std::vector<int>> bonds; // Output vector of vectors
@@ -90,9 +90,9 @@ bond::populateBonds(std::vector<std::vector<int>> nList,
  *  @param[in] atomTypes Contains an atom type for each particle in yCloud
  */
 std::vector<std::vector<int>>
-bond::populateBonds(std::vector<std::vector<int>> nList,
+bond::populateBonds(const std::vector<std::vector<int>> &nList,
                     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                    std::vector<cage::iceType> atomTypes) {
+                    const std::vector<cage::iceType> &atomTypes) {
   //
   std::vector<std::vector<int>> bonds; // Output vector of vectors
   std::vector<int> currentBond;        // Vector for the current bond
@@ -173,7 +173,7 @@ bond::populateBonds(std::vector<std::vector<int>> nList,
 std::vector<std::vector<int>>
 bond::populateHbonds(std::string filename,
                      molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                     std::vector<std::vector<int>> nList, int targetFrame,
+                     const std::vector<std::vector<int>> &nList, int targetFrame,
                      int Htype) {
   //
   std::vector<std::vector<int>>
@@ -342,7 +342,7 @@ bond::populateHbonds(std::string filename,
 std::vector<std::vector<int>>
 bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                      molSys::PointCloud<molSys::Point<double>, double> *hCloud,
-                     std::vector<std::vector<int>> nList) {
+                     const std::vector<std::vector<int>> &nList) {
   //
   std::vector<std::vector<int>>
       hBondNet; // Output vector of vectors containing the HBN
@@ -526,7 +526,7 @@ double bond::getHbondDistanceOH(
  particular cage type
 */
 std::vector<std::vector<int>>
-bond::createBondsFromCages(std::vector<std::vector<int>> rings,
+bond::createBondsFromCages(const std::vector<std::vector<int>> &rings,
                            std::vector<cage::Cage> *cageList,
                            cage::cageType type, int *nRings) {
   std::vector<std::vector<int>> bonds; // Output vector of vectors

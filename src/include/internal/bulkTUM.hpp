@@ -20,11 +20,10 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <math.h>
+#include <cmath>
 #include <memory>
 #include <sstream>
 #include <string>
-#include <sys/stat.h>
 #include <vector>
 
 #include <franzblau.hpp>
@@ -47,8 +46,8 @@ namespace tum3 {
 //! Topological unit matching for bulk water. If printClusters is true,
 //! individual clusters of connected cages are printed.
 int topoUnitMatchingBulk(
-    std::string path, std::vector<std::vector<int>> rings,
-    std::vector<std::vector<int>> nList,
+    std::string path, const std::vector<std::vector<int>> &rings,
+    const std::vector<std::vector<int>> &nList,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int firstFrame,
     bool printClusters, bool onlyTetrahedral);
 
@@ -61,23 +60,23 @@ Eigen::MatrixXd buildRefDDC(std::string fileName);
 //! Shape-matching for a target HC
 int shapeMatchHC(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                  const Eigen::MatrixXd &refPoints, cage::Cage cageUnit,
-                 std::vector<std::vector<int>> rings,
-                 std::vector<std::vector<int>> nList, std::vector<double> *quat,
+                 const std::vector<std::vector<int>> &rings,
+                 const std::vector<std::vector<int>> &nList, std::vector<double> *quat,
                  double *rmsd);
 
 //! Shape-matching for a target DDC
 int shapeMatchDDC(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                   const Eigen::MatrixXd &refPoints,
-                  std::vector<cage::Cage> cageList, int cageIndex,
-                  std::vector<std::vector<int>> rings,
+                  const std::vector<cage::Cage> &cageList, int cageIndex,
+                  const std::vector<std::vector<int>> &rings,
                   std::vector<double> *quat, double *rmsd);
 
 //! Calulate the RMSD for each ring, using RMSD values (rmsd) obtained from the
 //! shape-matching of each cage
-int updateRMSDatom(std::vector<std::vector<int>> rings, cage::Cage cageUnit,
+int updateRMSDatom(const std::vector<std::vector<int>> &rings, cage::Cage cageUnit,
                    double rmsd, std::vector<double> *rmsdPerAtom,
                    std::vector<int> *noOfCommonAtoms,
-                   std::vector<cage::iceType> atomTypes);
+                   const std::vector<cage::iceType> &atomTypes);
 
 //! Average the RMSD per atom
 int averageRMSDatom(std::vector<double> *rmsdPerAtom,
@@ -86,8 +85,8 @@ int averageRMSDatom(std::vector<double> *rmsdPerAtom,
 //! Topological network methods
 //! Finds the HCs and DDCs for the system
 std::vector<cage::Cage>
-topoBulkCriteria(std::string path, std::vector<std::vector<int>> rings,
-                 std::vector<std::vector<int>> nList,
+topoBulkCriteria(std::string path, const std::vector<std::vector<int>> &rings,
+                 const std::vector<std::vector<int>> &nList,
                  molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                  int firstFrame, int *numHC, int *numDDC,
                  std::vector<ring::strucType> *ringType);
@@ -96,13 +95,13 @@ topoBulkCriteria(std::string path, std::vector<std::vector<int>> rings,
 //! Clusters cages using the Stillinger algorithm and prints out individual XYZ
 //! files of clusters.
 int clusterCages(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                 std::string path, std::vector<std::vector<int>> rings,
-                 std::vector<cage::Cage> cageList, int numHC, int numDDC);
+                 std::string path, const std::vector<std::vector<int>> &rings,
+                 const std::vector<cage::Cage> &cageList, int numHC, int numDDC);
 
 //! Gets the atoms in the cages of a given cluster
-std::vector<int> atomsFromCages(std::vector<std::vector<int>> rings,
-                                std::vector<cage::Cage> cageList,
-                                std::vector<int> clusterCages);
+std::vector<int> atomsFromCages(const std::vector<std::vector<int>> &rings,
+                                const std::vector<cage::Cage> &cageList,
+                                const std::vector<int> &clusterCages);
 
 } // namespace tum3
 

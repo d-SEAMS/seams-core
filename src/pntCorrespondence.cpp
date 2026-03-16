@@ -55,8 +55,8 @@ Eigen::MatrixXd pntToPnt::getPointSetRefRing(int n, int axialDim) {
  */
 Eigen::MatrixXd pntToPnt::createPrismBlock(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    const Eigen::MatrixXd &refPoints, int ringSize, std::vector<int> basal1,
-    std::vector<int> basal2) {
+    const Eigen::MatrixXd &refPoints, int ringSize, const std::vector<int> &basal1,
+    const std::vector<int> &basal2) {
   //
   int nop = ringSize * 2;           // Number of particles in the prism block
   Eigen::MatrixXd pointSet(nop, 3); // Output point set for a regular prism
@@ -110,7 +110,7 @@ Eigen::MatrixXd pntToPnt::createPrismBlock(
  */
 double pntToPnt::getRadiusFromRings(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> basal1, std::vector<int> basal2) {
+    const std::vector<int> &basal1, const std::vector<int> &basal2) {
   //
   double avgRadius = 0.0;
   std::vector<double> centroid1, centroid2;
@@ -170,7 +170,7 @@ double pntToPnt::getRadiusFromRings(
  */
 double pntToPnt::getAvgHeightPrismBlock(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> basal1, std::vector<int> basal2) {
+    const std::vector<int> &basal1, const std::vector<int> &basal2) {
   //
   double avgHeight = 0.0;
   double r_ij;                  // Distance between a point in basal1 and basal2
@@ -206,8 +206,8 @@ double pntToPnt::getAvgHeightPrismBlock(
  */
 int pntToPnt::relOrderPrismBlock(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> basal1, std::vector<int> basal2,
-    std::vector<std::vector<int>> nList, std::vector<int> *outBasal1,
+    const std::vector<int> &basal1, const std::vector<int> &basal2,
+    const std::vector<std::vector<int>> &nList, std::vector<int> *outBasal1,
     std::vector<int> *outBasal2) {
   //
   int ringSize = basal1.size(); // Number of nodes in basal1 and basal2
@@ -336,7 +336,7 @@ int pntToPnt::relOrderPrismBlock(
  */
 int pntToPnt::relOrderPrismBlock(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> basal1, std::vector<int> basal2,
+    const std::vector<int> &basal1, const std::vector<int> &basal2,
     std::vector<int> *outBasal1, std::vector<int> *outBasal2) {
   //
   int ringSize = basal1.size(); // Number of nodes in basal1 and basal2
@@ -463,7 +463,7 @@ int pntToPnt::relOrderPrismBlock(
  */
 Eigen::MatrixXd pntToPnt::fillPointSetPrismRing(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> basalRing, int startingIndex) {
+    const std::vector<int> &basalRing, int startingIndex) {
   //
   //
   int dim = 3;                        // Number of dimensions (3)
@@ -507,7 +507,7 @@ Eigen::MatrixXd pntToPnt::fillPointSetPrismRing(
  */
 Eigen::MatrixXd pntToPnt::fillPointSetPrismBlock(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> basal1, std::vector<int> basal2, int startingIndex) {
+    const std::vector<int> &basal1, const std::vector<int> &basal2, int startingIndex) {
   //
   //
   int dim = 3;                        // Number of dimensions (3)
@@ -608,8 +608,8 @@ Eigen::MatrixXd pntToPnt::getPointSetCage(ring::strucType type) {
  */
 int pntToPnt::relOrderHC(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> basal1, std::vector<int> basal2,
-    std::vector<std::vector<int>> nList, std::vector<int> *matchedBasal1,
+    const std::vector<int> &basal1, const std::vector<int> &basal2,
+    const std::vector<std::vector<int>> &nList, std::vector<int> *matchedBasal1,
     std::vector<int> *matchedBasal2) {
   //
   int l1 = basal1[0];           // First element of basal1
@@ -739,7 +739,7 @@ int pntToPnt::relOrderHC(
  */
 Eigen::MatrixXd pntToPnt::changeHexCageOrder(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> basal1, std::vector<int> basal2, int startingIndex) {
+    const std::vector<int> &basal1, const std::vector<int> &basal2, int startingIndex) {
   Eigen::MatrixXd pointSet(12, 3);
   int iatomIndex, jatomIndex; // Current atom index in yCloud, according to
                               // basal1 and basal2 respectively
@@ -843,8 +843,8 @@ Eigen::MatrixXd pntToPnt::changeHexCageOrder(
  * alternate elements of the equatorial ring are bonded.
  */
 std::vector<int> pntToPnt::relOrderDDC(int index,
-                                       std::vector<std::vector<int>> rings,
-                                       std::vector<cage::Cage> cageList) {
+                                       const std::vector<std::vector<int>> &rings,
+                                       const std::vector<cage::Cage> &cageList) {
   //
   std::vector<int> ddcOrder; // Order of the particles in the DDC.
   int nop = 14;              // Number of elements in the DDC

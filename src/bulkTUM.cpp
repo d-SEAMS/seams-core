@@ -50,8 +50,8 @@
  *   finding PNCs (false)
  */
 int tum3::topoUnitMatchingBulk(
-    std::string path, std::vector<std::vector<int>> rings,
-    std::vector<std::vector<int>> nList,
+    std::string path, const std::vector<std::vector<int>> &rings,
+    const std::vector<std::vector<int>> &nList,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int firstFrame,
     bool printClusters, bool onlyTetrahedral) {
   // The input rings vector has rings of all sizes
@@ -251,7 +251,7 @@ int tum3::topoUnitMatchingBulk(
 int tum3::shapeMatchHC(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     const Eigen::MatrixXd &refPoints, cage::Cage cageUnit,
-    std::vector<std::vector<int>> rings, std::vector<std::vector<int>> nList,
+    const std::vector<std::vector<int>> &rings, const std::vector<std::vector<int>> &nList,
     std::vector<double> *quat, double *rmsd) {
   //
   int iring,
@@ -322,8 +322,8 @@ int tum3::shapeMatchHC(
  */
 int tum3::shapeMatchDDC(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    const Eigen::MatrixXd &refPoints, std::vector<cage::Cage> cageList,
-    int cageIndex, std::vector<std::vector<int>> rings,
+    const Eigen::MatrixXd &refPoints, const std::vector<cage::Cage> &cageList,
+    int cageIndex, const std::vector<std::vector<int>> &rings,
     std::vector<double> *quat, double *rmsd) {
   //
   std::vector<int> ddcOrder;             // Connectivity of the DDC
@@ -483,11 +483,11 @@ Eigen::MatrixXd tum3::buildRefDDC(std::string fileName) {
  * used for averaging the RMSD per atom depending on the number of cages that
  * share that particular ring.
  */
-int tum3::updateRMSDatom(std::vector<std::vector<int>> rings,
+int tum3::updateRMSDatom(const std::vector<std::vector<int>> &rings,
                          cage::Cage cageUnit, double rmsd,
                          std::vector<double> *rmsdPerAtom,
                          std::vector<int> *noOfCommonAtoms,
-                         std::vector<cage::iceType> atomTypes) {
+                         const std::vector<cage::iceType> &atomTypes) {
   //
   int nRings = cageUnit.rings.size(); // Number of rings in the current cage
   int iring; // Index according to the rings vector of vector, for the current
@@ -579,8 +579,8 @@ int tum3::averageRMSDatom(std::vector<double> *rmsdPerAtom,
  *   finding PNCs (false)
  */
 std::vector<cage::Cage> tum3::topoBulkCriteria(
-    std::string path, std::vector<std::vector<int>> rings,
-    std::vector<std::vector<int>> nList,
+    std::string path, const std::vector<std::vector<int>> &rings,
+    const std::vector<std::vector<int>> &nList,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int firstFrame,
     int *numHC, int *numDDC, std::vector<ring::strucType> *ringType) {
   //
@@ -643,7 +643,7 @@ std::vector<cage::Cage> tum3::topoBulkCriteria(
  */
 int tum3::clusterCages(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, std::string path,
-    std::vector<std::vector<int>> rings, std::vector<cage::Cage> cageList,
+    const std::vector<std::vector<int>> &rings, const std::vector<cage::Cage> &cageList,
     int numHC, int numDDC) {
   //
   std::vector<int> linkedList; // Linked list for the clustered cages
@@ -798,9 +798,9 @@ int tum3::clusterCages(
  of all the atoms in a cluster of cages, according to the input cageList vector
  of Cages
  ***********************************************/
-std::vector<int> tum3::atomsFromCages(std::vector<std::vector<int>> rings,
-                                      std::vector<cage::Cage> cageList,
-                                      std::vector<int> clusterCages) {
+std::vector<int> tum3::atomsFromCages(const std::vector<std::vector<int>> &rings,
+                                      const std::vector<cage::Cage> &cageList,
+                                      const std::vector<int> &clusterCages) {
   //
   std::vector<int> atoms; // Contains the atom indices (not IDs) of atoms
   int ringSize = rings[0].size(); // Number of nodes in each ring

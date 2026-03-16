@@ -20,11 +20,10 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <math.h>
+#include <cmath>
 #include <memory>
 #include <sstream>
 #include <string>
-#include <sys/stat.h>
 #include <vector>
 
 // Internal
@@ -75,7 +74,7 @@ namespace bond {
 std::vector<std::vector<int>>
 populateHbonds(std::string filename,
                molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-               std::vector<std::vector<int>> nList, int targetFrame, int Htype);
+               const std::vector<std::vector<int>> &nList, int targetFrame, int Htype);
 
 //! Create a vector of vectors (similar to the neighbour list conventions)
 //! containing the hydrogen bond connectivity information. Decides the
@@ -85,7 +84,7 @@ populateHbonds(std::string filename,
 std::vector<std::vector<int>>
 populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                molSys::PointCloud<molSys::Point<double>, double> *hCloud,
-               std::vector<std::vector<int>> nList);
+               const std::vector<std::vector<int>> &nList);
 
 //! Calculates the distance of the hydrogen bond between O and H (of different
 //! atoms), given the respective pointClouds and the indices to each atom
@@ -98,7 +97,7 @@ getHbondDistanceOH(molSys::PointCloud<molSys::Point<double>, double> *oCloud,
 //! contain duplicates! Gets the bond information from the vector of vectors
 //! containing the neighbour list by index
 std::vector<std::vector<int>>
-populateBonds(std::vector<std::vector<int>> nList,
+populateBonds(const std::vector<std::vector<int>> &nList,
               molSys::PointCloud<molSys::Point<double>, double> *yCloud);
 
 //! Create a vector of vectors containing bond connectivity information
@@ -106,14 +105,14 @@ populateBonds(std::vector<std::vector<int>> nList,
 //! containing the neighbour list by index. Bonds between dummy atoms are not
 //! filled.
 std::vector<std::vector<int>>
-populateBonds(std::vector<std::vector<int>> nList,
+populateBonds(const std::vector<std::vector<int>> &nList,
               molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-              std::vector<cage::iceType> atomTypes);
+              const std::vector<cage::iceType> &atomTypes);
 
 //! Creates a vector of vectors containing bond connectivity information from
 //! the rings vector of vectors and cage information
 std::vector<std::vector<int>>
-createBondsFromCages(std::vector<std::vector<int>> rings,
+createBondsFromCages(const std::vector<std::vector<int>> &rings,
                      std::vector<cage::Cage> *cageList, cage::cageType type,
                      int *nRings);
 

@@ -78,7 +78,7 @@ std::vector<std::vector<int>> halfNeighList(
 //! atom indices, according to the pointCloud
 std::vector<std::vector<int>> neighbourListByIndex(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList);
+    const std::vector<std::vector<int>> &nList);
 
 //! Gets a neighbour list by index, according to a pointCloud given as the
 //! input. Assume no slices or other skullduggery

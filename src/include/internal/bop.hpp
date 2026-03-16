@@ -19,7 +19,6 @@
 #include <cmath>
 #include <complex>
 #include <generic.hpp>
-#include <math.h>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <seams_output.hpp>
@@ -179,7 +178,7 @@ struct QlmAtom {
  */
 molSys::PointCloud<molSys::Point<double>, double>
 getCorrel(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-          std::vector<std::vector<int>> nList, bool isSlice = false);
+          const std::vector<std::vector<int>> &nList, bool isSlice = false);
 
 /**
  *  Function that classifies every particle's #molSys::atom_state_type ice
@@ -190,7 +189,7 @@ getCorrel(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
  */
 molSys::PointCloud<molSys::Point<double>, double>
 getIceTypeNoPrint(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                  std::vector<std::vector<int>> nList, bool isSlice = false);
+                  const std::vector<std::vector<int>> &nList, bool isSlice = false);
 
 // Classifies each atom according to the CHILL algorithm
 /**
@@ -207,19 +206,19 @@ getIceTypeNoPrint(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
  */
 molSys::PointCloud<molSys::Point<double>, double>
 getIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-           std::vector<std::vector<int>> nList, std::string path,
+           const std::vector<std::vector<int>> &nList, std::string path,
            int firstFrame, bool isSlice = false,
            std::string outputFileName = "chill.txt");
 
 //! Gets c_ij and then classifies bond types according to the CHILL+ algorithm
 molSys::PointCloud<molSys::Point<double>, double>
 getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-              std::vector<std::vector<int>> nList, bool isSlice = false);
+              const std::vector<std::vector<int>> &nList, bool isSlice = false);
 
 //! Classifies each atom according to the CHILL+ algorithm
 molSys::PointCloud<molSys::Point<double>, double>
 getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-               std::vector<std::vector<int>> nList, std::string path,
+               const std::vector<std::vector<int>> &nList, std::string path,
                int firstFrame, bool isSlice = false,
                std::string outputFileName = "chillPlus.txt");
 
@@ -227,7 +226,7 @@ getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 //! cluster
 std::vector<double>
 getq6(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-      std::vector<std::vector<int>> nList, bool isSlice = false);
+      const std::vector<std::vector<int>> &nList, bool isSlice = false);
 
 //! 'Test' condition for classifying hexagonal ice using averaged q6 and q3
 //! Checks water
@@ -245,12 +244,12 @@ int printIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 //! Checks if a given iatom is interfacial ice or not, according to the CHILL
 //! algorithm
 bool isInterfacial(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                   std::vector<std::vector<int>> nList, int iatom,
+                   const std::vector<std::vector<int>> &nList, int iatom,
                    int num_staggrd, int num_eclipsd);
 
 //! Finds the number of staggered bonds for a given atom of index jatom
 int numStaggered(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                 std::vector<std::vector<int>> nList, int jatom);
+                 const std::vector<std::vector<int>> &nList, int jatom);
 
 } // namespace chill
 

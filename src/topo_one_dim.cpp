@@ -47,8 +47,8 @@
  * @param[in] maxDepth The first frame.
  */
 int ring::prismAnalysis(
-    std::string path, std::vector<std::vector<int>> rings,
-    std::vector<std::vector<int>> nList,
+    std::string path, const std::vector<std::vector<int>> &rings,
+    const std::vector<std::vector<int>> &nList,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int maxDepth,
     int *atomID, int firstFrame, int currentFrame, bool doShapeMatching) {
   //
@@ -190,9 +190,9 @@ int ring::prismAnalysis(
  *  vector of vectors.
  */
 std::vector<int>
-ring::findPrisms(std::vector<std::vector<int>> rings,
+ring::findPrisms(const std::vector<std::vector<int>> &rings,
                  std::vector<ring::strucType> *ringType, int *nPerfectPrisms,
-                 int *nImperfectPrisms, std::vector<std::vector<int>> nList,
+                 int *nImperfectPrisms, const std::vector<std::vector<int>> &nList,
                  molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                  std::vector<double> *rmsdPerAtom, bool doShapeMatching) {
   std::vector<int> listPrism;
@@ -348,7 +348,7 @@ ring::findPrisms(std::vector<std::vector<int>> rings,
  * @return A value that is true if the basal rings constitute a prism block,
  *  and false if they do not make up a prism block.
  */
-bool ring::basalPrismConditions(std::vector<std::vector<int>> nList,
+bool ring::basalPrismConditions(const std::vector<std::vector<int>> &nList,
                                 std::vector<int> *basal1,
                                 std::vector<int> *basal2) {
   int l1 = (*basal1)[0]; // first element of basal1 ring
@@ -433,7 +433,7 @@ bool ring::basalPrismConditions(std::vector<std::vector<int>> nList,
  * @details Relaxed criteria for deformed prism blocks: at least one bond should
  * exist between the basal rings.
  */
-bool ring::relaxedPrismConditions(std::vector<std::vector<int>> nList,
+bool ring::relaxedPrismConditions(const std::vector<std::vector<int>> &nList,
                                   std::vector<int> *basal1,
                                   std::vector<int> *basal2) {
   int ringSize =
@@ -693,9 +693,9 @@ bool ring::discardExtraTetragonBlocks(
  * @param[in, out] atomTypes A vector which contains a type for each atom,
  *  depending on it's type as classified by the prism identification scheme.
  */
-int ring::assignPrismType(std::vector<std::vector<int>> rings,
-                          std::vector<int> listPrism, int ringSize,
-                          std::vector<ring::strucType> ringType,
+int ring::assignPrismType(const std::vector<std::vector<int>> &rings,
+                          const std::vector<int> &listPrism, int ringSize,
+                          const std::vector<ring::strucType> &ringType,
                           std::vector<int> *atomTypes,
                           std::vector<ring::strucType> *atomState) {
   // Every value in listPrism corresponds to an index in rings.
@@ -756,7 +756,7 @@ int ring::assignPrismType(std::vector<std::vector<int>> rings,
  * @param[in, out] atomTypes A vector which contains a type for each atom,
  * depending on it's type as classified by the prism identification scheme.
  */
-int ring::deformedPrismTypes(std::vector<ring::strucType> atomState,
+int ring::deformedPrismTypes(const std::vector<ring::strucType> &atomState,
                              std::vector<int> *atomTypes, int maxDepth) {
   //
   int nop = atomState.size(); // Number of particles

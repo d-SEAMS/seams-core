@@ -13,7 +13,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <iostream>
-#include <math.h>
+#include <cmath>
 #include <neighbours.hpp>
 
 /**
@@ -340,7 +340,7 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
  */
 std::vector<std::vector<int>> nneigh::neighbourListByIndex(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> nList) {
+    const std::vector<std::vector<int>> &nList) {
   //
   std::vector<std::vector<int>> indexNlist; // Desired neighbour list of indices
   int iatomID, jatomID;                     // Atom IDs

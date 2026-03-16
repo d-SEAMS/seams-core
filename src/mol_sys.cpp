@@ -128,7 +128,7 @@ std::vector<std::vector<int>> molSys::hAtomMolList(
  * @returns the index found in molList
  * @returns -1 if not found
  */
-int molSys::searchMolList(std::vector<std::vector<int>> molList,
+int molSys::searchMolList(const std::vector<std::vector<int>> &molList,
                           int molIDtoFind) {
   int index = -1; // init invalid index
 

@@ -20,11 +20,10 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <math.h>
+#include <cmath>
 #include <memory>
 #include <sstream>
 #include <string>
-#include <sys/stat.h>
 #include <vector>
 
 // Eigen (SelfAdjointEigenSolver replaces Spectra for 4x4 symmetric matrices)
