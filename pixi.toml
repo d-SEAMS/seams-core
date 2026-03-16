@@ -28,7 +28,7 @@ setup = "meson setup bbdir --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_pytho
 build = { cmd = "ninja -j4 -C bbdir", depends-on = ["setup"] }
 test = { cmd = "meson test -C bbdir -v", depends-on = ["build"] }
 install = { cmd = "meson install -C bbdir", depends-on = ["build"] }
-pytest = { cmd = "pytest tests/python/ -v", depends-on = ["install"] }
+pytest = { cmd = "LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH pytest tests/python/ -v", depends-on = ["install"] }
 coverage-setup = "meson setup bbdir-cov --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=false -Db_coverage=true --wipe 2>/dev/null; meson setup bbdir-cov --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=false -Db_coverage=true"
 coverage-build = { cmd = "ninja -j4 -C bbdir-cov", depends-on = ["coverage-setup"] }
 coverage-run = { cmd = "meson test -C bbdir-cov && ninja -C bbdir-cov coverage", depends-on = ["coverage-build"] }
