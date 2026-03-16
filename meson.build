@@ -15,13 +15,22 @@ host_system = host_machine.system()
 
 # Global accumulator variables (eOn pattern)
 _args = ['-funroll-loops', '-Wno-sign-compare', '-Wno-unused-variable',
-         '-Wno-unused-parameter', '-Wno-unused-but-set-variable',
-         '-Wno-maybe-uninitialized']
+         '-Wno-unused-parameter', '-Wno-unused-but-set-variable']
 _deps = []
 _linkto = []
 _incdirs = []
 
 cppc = meson.get_compiler('cpp')
+
+# GCC vs clang warning flag differences
+if cppc.get_id() == 'gcc'
+  _args += ['-Wno-maybe-uninitialized']
+else
+  _args += ['-Wno-uninitialized']
+endif
+
+# Suppress [[nodiscard]] warnings from legacy callers (to be fixed incrementally)
+_args += ['-Wno-unused-result']
 
 # Platform conditionals
 if host_system == 'darwin'
