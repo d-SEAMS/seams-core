@@ -9,7 +9,7 @@
 project('seams-core', 'cpp',
   version: '2.0.0',
   default_options: ['warning_level=2', 'cpp_std=c++20'],
-  meson_version: '>=1.2.0')
+  meson_version: '>=1.3.0')
 
 host_system = host_machine.system()
 

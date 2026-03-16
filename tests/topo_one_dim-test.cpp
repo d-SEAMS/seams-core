@@ -87,7 +87,7 @@ SCENARIO("Test the prism identification scheme for a single tetragonal prism.",
     // --------------------
     WHEN("Given a pointCloud, and a neighbour list") {
       // Calculate a neighbour list
-      nList = nneigh::neighListO(3.5, &yCloud, 1);
+      nList = nneigh::neighListO(3.5, yCloud, 1);
       // Find the vector of vector of rings
       rings = primitive::ringNetwork(nList, 5);
       THEN("There should be exactly one tetragonal prism.") {
@@ -99,7 +99,7 @@ SCENARIO("Test the prism identification scheme for a single tetragonal prism.",
             rings.size()); // Has a value for each ring. init to zero.
         // Find the number of tetragonal prisms
         listPrism = ring::findPrisms(rings, &ringType, &nPrisms, &nDeformed,
-                                     nList, &yCloud, &rmsdPerAtom, false);
+                                     nList, yCloud, &rmsdPerAtom, false);
         // Assert the number of prism blocks
         REQUIRE(nPrisms ==
                 1); // Evaluate condition for a single tetragonal prism

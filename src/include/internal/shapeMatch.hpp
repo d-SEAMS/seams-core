@@ -37,7 +37,7 @@ namespace match {
 
 //! Shape-matching for a pair of polygon basal rings. Returns true if the pair
 //! of basal rings form a prism block.
-bool matchPrism(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+bool matchPrism(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                 std::vector<std::vector<int>> nList,
                 const Eigen::MatrixXd &refPoints, std::vector<int> *basal1,
                 std::vector<int> *basal2, std::vector<double> *rmsdPerAtom,
@@ -46,14 +46,14 @@ bool matchPrism(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 //! Shape-matching for a pair of polygon basal rings. Returns true if the pair
 //! of basal rings form a prism block.
 bool matchUntetheredPrism(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     std::vector<std::vector<int>> nList, const Eigen::MatrixXd &refPoints,
     std::vector<int> *basal1, std::vector<int> *basal2,
     std::vector<double> *rmsdPerAtom);
 
 //! Shape-matching for a pair of polygon basal rings, comparing with a complete
 //! prism block. Returns true if the pair of basal rings form a prism block.
-bool matchPrismBlock(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+bool matchPrismBlock(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      std::vector<std::vector<int>> nList,
                      const Eigen::MatrixXd &refPoints, std::vector<int> *basal1,
                      std::vector<int> *basal2, int *beginIndex);

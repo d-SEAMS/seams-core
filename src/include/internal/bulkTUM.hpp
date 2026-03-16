@@ -48,7 +48,7 @@ namespace tum3 {
 [[nodiscard]] int topoUnitMatchingBulk(
     std::string path, const std::vector<std::vector<int>> &rings,
     const std::vector<std::vector<int>> &nList,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int firstFrame,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int firstFrame,
     bool printClusters, bool onlyTetrahedral);
 
 //! Build a reference Hexagonal cage, reading in from a template XYZ file
@@ -58,14 +58,14 @@ Eigen::MatrixXd buildRefHC(std::string fileName);
 Eigen::MatrixXd buildRefDDC(std::string fileName);
 
 //! Shape-matching for a target HC
-[[nodiscard]] int shapeMatchHC(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+[[nodiscard]] int shapeMatchHC(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                  const Eigen::MatrixXd &refPoints, cage::Cage cageUnit,
                  const std::vector<std::vector<int>> &rings,
                  const std::vector<std::vector<int>> &nList, std::vector<double> *quat,
                  double *rmsd);
 
 //! Shape-matching for a target DDC
-[[nodiscard]] int shapeMatchDDC(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+[[nodiscard]] int shapeMatchDDC(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                   const Eigen::MatrixXd &refPoints,
                   const std::vector<cage::Cage> &cageList, int cageIndex,
                   const std::vector<std::vector<int>> &rings,
@@ -87,14 +87,14 @@ Eigen::MatrixXd buildRefDDC(std::string fileName);
 std::vector<cage::Cage>
 topoBulkCriteria(std::string path, const std::vector<std::vector<int>> &rings,
                  const std::vector<std::vector<int>> &nList,
-                 molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                 molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                  int firstFrame, int *numHC, int *numDDC,
                  std::vector<ring::strucType> *ringType);
 
 //! Clustering
 //! Clusters cages using the Stillinger algorithm and prints out individual XYZ
 //! files of clusters.
-[[nodiscard]] int clusterCages(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+[[nodiscard]] int clusterCages(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                  std::string path, const std::vector<std::vector<int>> &rings,
                  const std::vector<cage::Cage> &cageList, int numHC, int numDDC);
 

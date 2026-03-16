@@ -126,10 +126,10 @@ TEST_CASE("getCorrel populates c_ij for a simple tetrahedral system", "[bop]") {
   cloud.nop = 5;
 
   // Build neighbour list
-  auto nList = nneigh::neighListO(3.0, &cloud, 1);
+  auto nList = nneigh::neighListO(3.0, cloud, 1);
 
   // Get correlations
-  cloud = chill::getCorrel(&cloud, nList, false);
+  cloud = chill::getCorrel(cloud, nList, false);
 
   // The central atom (index 0) should now have c_ij entries
   REQUIRE_FALSE(cloud.pts[0].c_ij.empty());

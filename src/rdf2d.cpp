@@ -44,11 +44,11 @@
  */
 int rdf2::rdf2Danalysis_AA(
     std::string path, std::vector<double> *rdfValues,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, double cutoff,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
     double binwidth, int firstFrame, int finalFrame) {
   //
-  int nopA = yCloud->nop; // Number of particles of type A in the current frame.
-  int currentFrame = yCloud->currentFrame; // The current frame
+  int nopA = yCloud.nop; // Number of particles of type A in the current frame.
+  int currentFrame = yCloud.currentFrame; // The current frame
   int nbin;                                // Number of bins
   std::vector<double> volumeLengths;       // Lengths of the volume of the
                                            // quasi-two-dimensional system
@@ -112,7 +112,7 @@ int rdf2::rdf2Danalysis_AA(
  * @return RDF histogram for the current frame.
  */
 std::vector<int>
-rdf2::sampleRDF_AA(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+rdf2::sampleRDF_AA(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                    double cutoff, double binwidth, int nbin) {
   //
   std::vector<int> histogram; // Histogram for the RDF
@@ -123,10 +123,10 @@ rdf2::sampleRDF_AA(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   histogram.resize(nbin);
 
   // Loop through pairs of atoms
-  for (int iatom = 0; iatom < yCloud->nop - 1; iatom++) {
+  for (int iatom = 0; iatom < yCloud.nop - 1; iatom++) {
     //
     // Loop through the next atom in the atom pair
-    for (int jatom = iatom + 1; jatom < yCloud->nop; jatom++) {
+    for (int jatom = iatom + 1; jatom < yCloud.nop; jatom++) {
       // Calculate the distance between iatom and jatom
       r_ij = gen::periodicDist(yCloud, iatom, jatom);
       // Check if the distance is within the cutoff. Update the histogram if
@@ -210,7 +210,7 @@ int rdf2::normalizeRDF(int nopA, std::vector<double> *rdfValues,
  *  quasi-two-dimensional system.
  */
 std::vector<double> rdf2::getSystemLengths(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   //
   std::vector<double> lengths; // Volume lengths
   std::vector<double>
@@ -221,17 +221,17 @@ std::vector<double> rdf2::getSystemLengths(
   int dim = 3;
 
   // Init
-  r_iatom.push_back(yCloud->pts[0].x);
-  r_iatom.push_back(yCloud->pts[0].y);
-  r_iatom.push_back(yCloud->pts[0].z);
+  r_iatom.push_back(yCloud.pts[0].x);
+  r_iatom.push_back(yCloud.pts[0].y);
+  r_iatom.push_back(yCloud.pts[0].z);
   rMin = r_iatom;
   rMax = r_iatom;
 
   // Loop through the entire PointCloud
-  for (int iatom = 1; iatom < yCloud->nop; iatom++) {
-    r_iatom[0] = yCloud->pts[iatom].x; // x coordinate of iatom
-    r_iatom[1] = yCloud->pts[iatom].y; // y coordinate of iatom
-    r_iatom[2] = yCloud->pts[iatom].z; // z coordinate of iatom
+  for (int iatom = 1; iatom < yCloud.nop; iatom++) {
+    r_iatom[0] = yCloud.pts[iatom].x; // x coordinate of iatom
+    r_iatom[1] = yCloud.pts[iatom].y; // y coordinate of iatom
+    r_iatom[2] = yCloud.pts[iatom].z; // z coordinate of iatom
     // Loop through every dimension
     for (int k = 0; k < dim; k++) {
       // Update rMin

@@ -45,20 +45,20 @@ makeTwoAtomCloud(double x0, double y0, double z0, double x1, double y1,
 
 TEST_CASE("periodicDist for atoms within the same image", "[generic]") {
   auto cloud = makeTwoAtomCloud(1.0, 0.0, 0.0, 4.0, 0.0, 0.0);
-  double d = gen::periodicDist(&cloud, 0, 1);
+  double d = gen::periodicDist(cloud, 0, 1);
   REQUIRE_THAT(d, Catch::Matchers::WithinAbs(3.0, 1e-10));
 }
 
 TEST_CASE("periodicDist across periodic boundary", "[generic]") {
   auto cloud = makeTwoAtomCloud(0.5, 0.0, 0.0, 9.5, 0.0, 0.0);
-  double d = gen::periodicDist(&cloud, 0, 1);
+  double d = gen::periodicDist(cloud, 0, 1);
   // Periodic distance should be 1.0
   REQUIRE_THAT(d, Catch::Matchers::WithinAbs(1.0, 1e-10));
 }
 
 TEST_CASE("periodicDist for identical atoms is zero", "[generic]") {
   auto cloud = makeTwoAtomCloud(3.0, 4.0, 5.0, 3.0, 4.0, 5.0);
-  double d = gen::periodicDist(&cloud, 0, 1);
+  double d = gen::periodicDist(cloud, 0, 1);
   REQUIRE_THAT(d, Catch::Matchers::WithinAbs(0.0, 1e-10));
 }
 
@@ -66,13 +66,13 @@ TEST_CASE("periodicDist for identical atoms is zero", "[generic]") {
 
 TEST_CASE("distance without PBC", "[generic]") {
   auto cloud = makeTwoAtomCloud(0.0, 0.0, 0.0, 3.0, 4.0, 0.0);
-  double d = gen::distance(&cloud, 0, 1);
+  double d = gen::distance(cloud, 0, 1);
   REQUIRE_THAT(d, Catch::Matchers::WithinAbs(5.0, 1e-10));
 }
 
 TEST_CASE("distance across box edge does NOT wrap", "[generic]") {
   auto cloud = makeTwoAtomCloud(0.5, 0.0, 0.0, 9.5, 0.0, 0.0);
-  double d = gen::distance(&cloud, 0, 1);
+  double d = gen::distance(cloud, 0, 1);
   // Without PBC, distance is 9.0
   REQUIRE_THAT(d, Catch::Matchers::WithinAbs(9.0, 1e-10));
 }
@@ -81,7 +81,7 @@ TEST_CASE("distance across box edge does NOT wrap", "[generic]") {
 
 TEST_CASE("relDist returns signed relative distances with PBC", "[generic]") {
   auto cloud = makeTwoAtomCloud(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
-  auto dr = gen::relDist(&cloud, 0, 1);
+  auto dr = gen::relDist(cloud, 0, 1);
 
   REQUIRE_THAT(dr[0], Catch::Matchers::WithinAbs(-3.0, 1e-10));
   REQUIRE_THAT(dr[1], Catch::Matchers::WithinAbs(-3.0, 1e-10));
@@ -90,7 +90,7 @@ TEST_CASE("relDist returns signed relative distances with PBC", "[generic]") {
 
 TEST_CASE("relDist wraps across boundary", "[generic]") {
   auto cloud = makeTwoAtomCloud(0.5, 0.0, 0.0, 9.5, 0.0, 0.0);
-  auto dr = gen::relDist(&cloud, 0, 1);
+  auto dr = gen::relDist(cloud, 0, 1);
 
   // 0.5 - 9.5 = -9.0, which is < -5.0, so wrap: -9.0 + 10.0 = 1.0
   REQUIRE_THAT(dr[0], Catch::Matchers::WithinAbs(1.0, 1e-10));

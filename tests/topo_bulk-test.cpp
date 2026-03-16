@@ -112,9 +112,9 @@ SCENARIO("Test the HC algorithm for a single hexagonal cage.", "[topo]") {
     // --------------------
     WHEN("Given a pointCloud, and a neighbour list") {
       // Calculate a neighbour list
-      nList = nneigh::neighListO(3.5, &yCloud, 1);
+      nList = nneigh::neighListO(3.5, yCloud, 1);
       // Neighbour list by index
-      nList = nneigh::neighbourListByIndex(&yCloud, nList);
+      nList = nneigh::neighbourListByIndex(yCloud, nList);
       // Find the vector of vector of rings
       rings = primitive::ringNetwork(nList, 7);
       THEN("There should be exactly one hexagonal cage.") {
@@ -245,9 +245,9 @@ SCENARIO("Test the DDC algorithm for a single double-diamond cage.", "[topo]") {
     // --------------------
     WHEN("Given a pointCloud") {
       // Calculate a neighbour list
-      nList = nneigh::neighListO(3.5, &yCloud, 1);
+      nList = nneigh::neighListO(3.5, yCloud, 1);
       // Neighbour list by index
-      nList = nneigh::neighbourListByIndex(&yCloud, nList);
+      nList = nneigh::neighbourListByIndex(yCloud, nList);
       // Find the vector of vector of rings
       rings = primitive::ringNetwork(nList, 7);
       THEN("There should be exactly one double-diamond cage.") {

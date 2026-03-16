@@ -38,18 +38,18 @@ namespace topoparam {
 //! height of a prism can be taken to be 2.75-2.85 Angstrom. (Koga et. al.,
 //! 2001)
 double
-normHeightPercent(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+normHeightPercent(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                   int nPrisms, double avgPrismHeight);
 
 //! Calculates the coverage area%, an area-based measure of relative proportion
 //! of monolayer ices.
 std::vector<double>
-calcCoverageArea(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+calcCoverageArea(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                  std::vector<std::vector<int>> rings, double sheetArea);
 
 //! Calculates the projected area on the XY, YZ and XZ planes
 std::vector<double>
-projAreaSingleRing(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+projAreaSingleRing(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                    std::vector<int> ring);
 
 } // namespace topoparam

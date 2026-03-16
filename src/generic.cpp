@@ -23,7 +23,7 @@
  *  be printed.
  */
 int gen::prettyPrintYoda(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     std::string outFile) {
   std::ofstream outputFile;
   // Create a new file in the output directory
@@ -33,15 +33,15 @@ int gen::prettyPrintYoda(
     // First line
     outputFile << "# Frame\tAtomID\tx\ty\tz\tcij\ticeType\n";
     // Write out all the information out line by line
-    for (int i = 0; i < yCloud->nop; i++) {
-      outputFile << yCloud->currentFrame << "\t" << yCloud->pts[i].atomID
-                 << "\t" << yCloud->pts[i].x << "\t" << yCloud->pts[i].y << "\t"
-                 << yCloud->pts[i].z << "\t";
+    for (int i = 0; i < yCloud.nop; i++) {
+      outputFile << yCloud.currentFrame << "\t" << yCloud.pts[i].atomID
+                 << "\t" << yCloud.pts[i].x << "\t" << yCloud.pts[i].y << "\t"
+                 << yCloud.pts[i].z << "\t";
       // Print out cij
-      // for(int c=0; c<yCloud->pts[i].c_ij.size(); c++){outputFile <<
-      // yCloud->pts[i].c_ij[c]<<"\t";} Print out the classifier
+      // for(int c=0; c<yCloud.pts[i].c_ij.size(); c++){outputFile <<
+      // yCloud.pts[i].c_ij[c]<<"\t";} Print out the classifier
       // TODO: Should print string representation
-      outputFile << static_cast<int>(yCloud->pts[i].iceType) << "\n";
+      outputFile << static_cast<int>(yCloud.pts[i].iceType) << "\n";
     }
   }
   // Close the file
@@ -69,26 +69,26 @@ int gen::prettyPrintYoda(
  *   the unwrapped distance.
  */
 int gen::unwrappedCoordShift(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatomIndex,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatomIndex,
     int jatomIndex, double *x_i, double *y_i, double *z_i, double *x_j,
     double *y_j, double *z_j) {
   //
   double x_iatom, y_iatom, z_iatom;
   double x_jatom, y_jatom, z_jatom;
   double x_ij, y_ij, z_ij; // Relative distance
-  std::vector<double> box = yCloud->box;
+  std::vector<double> box = yCloud.box;
   double xPBC, yPBC, zPBC; // Actual unwrapped distance
 
   // ----------------------------------------------------------------------
   // INIT
   // iatom
-  x_iatom = yCloud->pts[iatomIndex].x;
-  y_iatom = yCloud->pts[iatomIndex].y;
-  z_iatom = yCloud->pts[iatomIndex].z;
+  x_iatom = yCloud.pts[iatomIndex].x;
+  y_iatom = yCloud.pts[iatomIndex].y;
+  z_iatom = yCloud.pts[iatomIndex].z;
   // jatom
-  x_jatom = yCloud->pts[jatomIndex].x;
-  y_jatom = yCloud->pts[jatomIndex].y;
-  z_jatom = yCloud->pts[jatomIndex].z;
+  x_jatom = yCloud.pts[jatomIndex].x;
+  y_jatom = yCloud.pts[jatomIndex].y;
+  z_jatom = yCloud.pts[jatomIndex].z;
   // ----------------------------------------------------------------------
   // GET RELATIVE DISTANCE
   x_ij = x_iatom - x_jatom;

@@ -190,7 +190,7 @@ int primitive::findRings(Graph *fullGraph, int v, std::vector<int> *visited,
  * @return The Graph object for the current frame.
  */
 primitive::Graph primitive::populateGraphFromNListID(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     std::vector<std::vector<int>> neighHbondList) {
   //
   primitive::Graph fullGraph; // Contains all the information of the pointCloud
@@ -201,7 +201,7 @@ primitive::Graph primitive::populateGraphFromNListID(
   int jatomIndex;             // Atom index of the nearest neighbour
   // ------------------------------
   // Loop through every point in yCloud
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     // -----
     // Update the neighbours of iatom (only the indices!)
     iNeigh.clear(); // init
@@ -210,8 +210,8 @@ primitive::Graph primitive::populateGraphFromNListID(
     for (int j = 1; j <= nnumNeighbours; j++) {
       jatomID = neighHbondList[iatom][j]; // Atom ID
       // Get the atom index for the vector nearest neighbour list
-      auto it = yCloud->idIndexMap.find(jatomID);
-      if (it != yCloud->idIndexMap.end()) {
+      auto it = yCloud.idIndexMap.find(jatomID);
+      if (it != yCloud.idIndexMap.end()) {
         jatomIndex = it->second;
       } // found jatomIndex
       else {

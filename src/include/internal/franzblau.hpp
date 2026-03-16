@@ -122,7 +122,7 @@ std::vector<std::vector<int>> ringNetwork(std::vector<std::vector<int>> nList,
 //! list and pointCloud created before. NOTE: the neighbourListIndex contains
 //! the indices and NOT the atom IDs as in the neighbour list
 Graph populateGraphFromNListID(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     std::vector<std::vector<int>> neighHbondList);
 
 //! Creates a graph object and fills it with the information from a neighbour

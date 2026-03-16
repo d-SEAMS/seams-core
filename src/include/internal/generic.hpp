@@ -105,20 +105,20 @@ inline double calcMedian(std::vector<double> *input) {
  *  @return The unwrapped periodic distance.
  */
 inline double
-periodicDist(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+periodicDist(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
              int iatom, int jatom) {
   std::array<double, 3> dr;
   double r2 = 0.0; // Squared absolute distance
 
   // Get x1-x2 etc
-  dr[0] = fabs(yCloud->pts[iatom].x - yCloud->pts[jatom].x);
-  dr[1] = fabs(yCloud->pts[iatom].y - yCloud->pts[jatom].y);
-  dr[2] = fabs(yCloud->pts[iatom].z - yCloud->pts[jatom].z);
+  dr[0] = fabs(yCloud.pts[iatom].x - yCloud.pts[jatom].x);
+  dr[1] = fabs(yCloud.pts[iatom].y - yCloud.pts[jatom].y);
+  dr[2] = fabs(yCloud.pts[iatom].z - yCloud.pts[jatom].z);
 
   // Get the squared absolute distance
   for (int k = 0; k < 3; k++) {
     // Correct for periodicity
-    dr[k] -= yCloud->box[k] * round(dr[k] / yCloud->box[k]);
+    dr[k] -= yCloud.box[k] * round(dr[k] / yCloud.box[k]);
     r2 += pow(dr[k], 2.0);
   }
 
@@ -136,20 +136,20 @@ periodicDist(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
  *  \return The unwrapped periodic distance.
  */
 inline double unWrappedDistFromPoint(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
     std::vector<double> singlePoint) {
   std::array<double, 3> dr;
   double r2 = 0.0; // Squared absolute distance
 
   // Get x1-x2 etc
-  dr[0] = fabs(yCloud->pts[iatom].x - singlePoint[0]);
-  dr[1] = fabs(yCloud->pts[iatom].y - singlePoint[1]);
-  dr[2] = fabs(yCloud->pts[iatom].z - singlePoint[2]);
+  dr[0] = fabs(yCloud.pts[iatom].x - singlePoint[0]);
+  dr[1] = fabs(yCloud.pts[iatom].y - singlePoint[1]);
+  dr[2] = fabs(yCloud.pts[iatom].z - singlePoint[2]);
 
   // Get the squared absolute distance
   for (int k = 0; k < 3; k++) {
     // Correct for periodicity
-    dr[k] -= yCloud->box[k] * round(dr[k] / yCloud->box[k]);
+    dr[k] -= yCloud.box[k] * round(dr[k] / yCloud.box[k]);
     r2 += pow(dr[k], 2.0);
   }
 
@@ -167,15 +167,15 @@ inline double unWrappedDistFromPoint(
  *  @return The wrapped distance.
  */
 inline double
-distance(molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
+distance(molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
          int jatom) {
   std::array<double, 3> dr;
   double r2 = 0.0; // Squared absolute distance
 
   // Get x1-x2 etc
-  dr[0] = fabs(yCloud->pts[iatom].x - yCloud->pts[jatom].x);
-  dr[1] = fabs(yCloud->pts[iatom].y - yCloud->pts[jatom].y);
-  dr[2] = fabs(yCloud->pts[iatom].z - yCloud->pts[jatom].z);
+  dr[0] = fabs(yCloud.pts[iatom].x - yCloud.pts[jatom].x);
+  dr[1] = fabs(yCloud.pts[iatom].y - yCloud.pts[jatom].y);
+  dr[2] = fabs(yCloud.pts[iatom].z - yCloud.pts[jatom].z);
 
   // Get the squared absolute distance
   for (int k = 0; k < 3; k++) {
@@ -197,15 +197,15 @@ distance(molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
  *  @return The unwrapped relative distances for each dimension.
  */
 inline std::array<double, 3>
-relDist(molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
+relDist(molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
         int jatom) {
   std::array<double, 3> dr;
-  std::array<double, 3> box = {yCloud->box[0], yCloud->box[1], yCloud->box[2]};
+  std::array<double, 3> box = {yCloud.box[0], yCloud.box[1], yCloud.box[2]};
 
   // Get x1-x2 etc
-  dr[0] = yCloud->pts[iatom].x - yCloud->pts[jatom].x;
-  dr[1] = yCloud->pts[iatom].y - yCloud->pts[jatom].y;
-  dr[2] = yCloud->pts[iatom].z - yCloud->pts[jatom].z;
+  dr[0] = yCloud.pts[iatom].x - yCloud.pts[jatom].x;
+  dr[1] = yCloud.pts[iatom].y - yCloud.pts[jatom].y;
+  dr[2] = yCloud.pts[iatom].z - yCloud.pts[jatom].z;
 
   // Get the relative distance
   for (int k = 0; k < 3; k++) {
@@ -236,12 +236,12 @@ inline bool compareByAtomID(const molSys::Point<double> &a,
 }
 
 //! Generic function for printing all the struct information
-[[nodiscard]] int prettyPrintYoda(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+[[nodiscard]] int prettyPrintYoda(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                     std::string outFile);
 
 //! Shift particles (unwrapped coordinates)
 [[nodiscard]] int unwrappedCoordShift(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatomIndex,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatomIndex,
     int jatomIndex, double *x_i, double *y_i, double *z_i, double *x_j,
     double *y_j, double *z_j);
 

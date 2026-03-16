@@ -252,7 +252,7 @@ std::complex<double> sph::lookupTableQ6(int m, std::array<double, 2> angles) {
 //! Uses Boost for spherical harmonics, and gets c_ij according to the CHILL
 //! algorithm
 molSys::PointCloud<molSys::Point<double>, double>
-chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                  const std::vector<std::vector<int>> &nList, bool isSlice) {
   //
   int l = 3;      // TODO: Don't hard-code this; change later
@@ -276,7 +276,7 @@ chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   double cij_real;
   int nnumNeighbours; // Number of nearest neighbours for iatom
 
-  QlmTotal.ptq.resize(yCloud->nop);
+  QlmTotal.ptq.resize(yCloud.nop);
 
   // Loop through the neighbour list
   for (int iatom = 0; iatom < nList.size(); iatom++) {
@@ -291,14 +291,14 @@ chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
       jatomID = nList[iatomIndex][j];
 
       // Get the index of jatom
-      auto it = yCloud->idIndexMap.find(jatomID);
+      auto it = yCloud.idIndexMap.find(jatomID);
 
-      if (it != yCloud->idIndexMap.end()) {
+      if (it != yCloud.idIndexMap.end()) {
         jatomIndex = it->second;
       } // found jatom
       else {
         std::cerr << "Something is wrong with the ID and index map.\n";
-        return *yCloud;
+        return yCloud;
       } // error handling
 
       // Get the relative distance now that the index values are known
@@ -330,19 +330,19 @@ chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   // ------------------------------------------------
   // Now that you have all qlm for the particles,
   // find c_ij
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-    // if(yCloud->pts[iatom].type!=typeO){continue;}
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+    // if(yCloud.pts[iatom].type!=typeO){continue;}
     // if this is a slice and the particle is not in the slice
     // then skip
     if (isSlice) {
-      if (yCloud->pts[iatom].inSlice == false) {
+      if (yCloud.pts[iatom].inSlice == false) {
         continue;
       }
     }
     // The index is what we are looping through
     iatomIndex = iatom;
     nnumNeighbours = nList[iatomIndex].size() - 1;
-    yCloud->pts[iatomIndex].c_ij.reserve(nnumNeighbours);
+    yCloud.pts[iatomIndex].c_ij.reserve(nnumNeighbours);
     // loop over the 4 nearest neighbours
     for (int j = 1; j <= nnumNeighbours; j++) {
       // Init to zero
@@ -352,14 +352,14 @@ chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
       // Get ID of the nearest neighbour
       jatomID = nList[iatomIndex][j];
       // Get the index (value) from the ID (key)
-      auto it = yCloud->idIndexMap.find(jatomID);
+      auto it = yCloud.idIndexMap.find(jatomID);
 
-      if (it != yCloud->idIndexMap.end()) {
+      if (it != yCloud.idIndexMap.end()) {
         jatomIndex = it->second;
       } // found jatom
       else {
         std::cerr << "Something is wrong with the ID and index map.\n";
-        return *yCloud;
+        return yCloud;
       } // error handling
       // Spherical harmonics
       for (int m = 0; m < 2 * l + 1; m++) {
@@ -382,16 +382,16 @@ chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
       } else {
         temp_cij.classifier = molSys::bond_type::out_of_range;
       }
-      yCloud->pts[iatomIndex].c_ij.push_back(temp_cij);
+      yCloud.pts[iatomIndex].c_ij.push_back(temp_cij);
     } // end loop over nearest neighbours
   }
 
-  return *yCloud;
+  return yCloud;
 }
 
 //! Classifies each atom according to the CHILL algorithm without printing
 molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypeNoPrint(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList, bool isSlice) {
   int ih, ic, water, interIce, unknown, total; // No. of particles of each type
   ih = ic = water = unknown = interIce = total = 0;
@@ -399,12 +399,12 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypeNoPrint(
   molSys::bond_type bondType;
   int nnumNeighbours; // Number of nearest neighbours
 
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-    // if(yCloud->pts[iatom].type!=typeO){continue;}
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+    // if(yCloud.pts[iatom].type!=typeO){continue;}
     // if this is a slice and the particle is not in the slice
     // then skip
     if (isSlice) {
-      if (yCloud->pts[iatom].inSlice == false) {
+      if (yCloud.pts[iatom].inSlice == false) {
         continue;
       }
     }
@@ -416,7 +416,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypeNoPrint(
     nnumNeighbours = nList[iatom].size() - 1;
     // Loop through the bond cij and get the number of staggered, eclipsed bonds
     for (int j = 0; j < nnumNeighbours; j++) {
-      bondType = yCloud->pts[iatom].c_ij[j].classifier;
+      bondType = yCloud.pts[iatom].c_ij[j].classifier;
       if (bondType == molSys::bond_type::eclipsed) {
         num_eclipsd++;
       } else if (bondType == molSys::bond_type::staggered) {
@@ -427,38 +427,38 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypeNoPrint(
     } // End of loop through neighbours
 
     // Add more tests later
-    yCloud->pts[iatom].iceType = molSys::atom_state_type::unclassified; // default
+    yCloud.pts[iatom].iceType = molSys::atom_state_type::unclassified; // default
     // Cubic ice
     // if (num_eclipsd==0 && num_staggrd==4){
-    //  yCloud->pts[iatom].iceType = molSys::cubic;
+    //  yCloud.pts[iatom].iceType = molSys::cubic;
     //  ic++;
     // }
     if (num_staggrd >= 4) {
-      yCloud->pts[iatom].iceType = molSys::atom_state_type::cubic;
+      yCloud.pts[iatom].iceType = molSys::atom_state_type::cubic;
       ic++;
     }
     // Hexagonal
     else if (num_eclipsd == 1 && num_staggrd == 3) {
-      yCloud->pts[iatom].iceType = molSys::atom_state_type::hexagonal;
+      yCloud.pts[iatom].iceType = molSys::atom_state_type::hexagonal;
       ih++;
     }
     // Interfacial
     else if (isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd)) {
-      yCloud->pts[iatom].iceType = molSys::atom_state_type::interfacial;
+      yCloud.pts[iatom].iceType = molSys::atom_state_type::interfacial;
       interIce++;
     } else {
-      yCloud->pts[iatom].iceType = molSys::atom_state_type::water;
+      yCloud.pts[iatom].iceType = molSys::atom_state_type::water;
       water++;
     }
 
   } // End of loop through every iatom
 
-  return *yCloud;
+  return yCloud;
 }
 
 //! Classifies each atom according to the CHILL algorithm
 molSys::PointCloud<molSys::Point<double>, double>
-chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                   const std::vector<std::vector<int>> &nList, std::string path,
                   int firstFrame, bool isSlice, std::string outputFileName) {
   int ih, ic, water, interIce, unknown, total; // No. of particles of each type
@@ -467,12 +467,12 @@ chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   molSys::bond_type bondType;
   int nnumNeighbours; // Number of nearest neighbours
 
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-    // if(yCloud->pts[iatom].type!=typeO){continue;}
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+    // if(yCloud.pts[iatom].type!=typeO){continue;}
     // if this is a slice and the particle is not in the slice
     // then skip
     if (isSlice) {
-      if (yCloud->pts[iatom].inSlice == false) {
+      if (yCloud.pts[iatom].inSlice == false) {
         continue;
       }
     }
@@ -484,7 +484,7 @@ chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     nnumNeighbours = nList[iatom].size() - 1;
     // Loop through the bond cij and get the number of staggered, eclipsed bonds
     for (int j = 0; j < nnumNeighbours; j++) {
-      bondType = yCloud->pts[iatom].c_ij[j].classifier;
+      bondType = yCloud.pts[iatom].c_ij[j].classifier;
       if (bondType == molSys::bond_type::eclipsed) {
         num_eclipsd++;
       } else if (bondType == molSys::bond_type::staggered) {
@@ -495,27 +495,27 @@ chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     } // End of loop through neighbours
 
     // Add more tests later
-    yCloud->pts[iatom].iceType = molSys::atom_state_type::unclassified; // default
+    yCloud.pts[iatom].iceType = molSys::atom_state_type::unclassified; // default
     // Cubic ice
     // if (num_eclipsd==0 && num_staggrd==4){
-    // 	yCloud->pts[iatom].iceType = molSys::cubic;
+    // 	yCloud.pts[iatom].iceType = molSys::cubic;
     // 	ic++;
     // }
     if (num_staggrd >= 4) {
-      yCloud->pts[iatom].iceType = molSys::atom_state_type::cubic;
+      yCloud.pts[iatom].iceType = molSys::atom_state_type::cubic;
       ic++;
     }
     // Hexagonal
     else if (num_eclipsd == 1 && num_staggrd == 3) {
-      yCloud->pts[iatom].iceType = molSys::atom_state_type::hexagonal;
+      yCloud.pts[iatom].iceType = molSys::atom_state_type::hexagonal;
       ih++;
     }
     // Interfacial
     else if (isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd)) {
-      yCloud->pts[iatom].iceType = molSys::atom_state_type::interfacial;
+      yCloud.pts[iatom].iceType = molSys::atom_state_type::interfacial;
       interIce++;
     } else {
-      yCloud->pts[iatom].iceType = molSys::atom_state_type::water;
+      yCloud.pts[iatom].iceType = molSys::atom_state_type::water;
       water++;
     }
 
@@ -535,15 +535,15 @@ chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   outputFile.open(path + "bop/" + outputFileName, std::ios_base::app);
   // --------------------
   // Write out the comment line for the first frame
-  if (yCloud->currentFrame == firstFrame) {
+  if (yCloud.currentFrame == firstFrame) {
     outputFile << "Frame Ic Ih Interfacial Water Total \n";
   }
   // --------------------
-  outputFile << yCloud->currentFrame << " " << ic << " " << ih << " "
+  outputFile << yCloud.currentFrame << " " << ic << " " << ih << " "
              << interIce << " " << water << " " << total << "\n";
   outputFile.close();
 
-  return *yCloud;
+  return yCloud;
 }
 
 /**
@@ -555,7 +555,7 @@ chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
  *  @param[in] isSlice This decides whether there is a slice or not
  */
 molSys::PointCloud<molSys::Point<double>, double>
-chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      const std::vector<std::vector<int>> &nList, bool isSlice) {
   //
   int l = 3;      // TODO: Don't hard-code this; change later
@@ -579,7 +579,7 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   double cij_real;
   int nnumNeighbours; // Number of nearest neighbours for iatom
 
-  QlmTotal.ptq.resize(yCloud->nop);
+  QlmTotal.ptq.resize(yCloud.nop);
 
   // Loop through the neighbour list
   for (int iatom = 0; iatom < nList.size(); iatom++) {
@@ -594,14 +594,14 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
       jatomID = nList[iatomIndex][j];
 
       // Get the index of jatom
-      auto it = yCloud->idIndexMap.find(jatomID);
+      auto it = yCloud.idIndexMap.find(jatomID);
 
-      if (it != yCloud->idIndexMap.end()) {
+      if (it != yCloud.idIndexMap.end()) {
         jatomIndex = it->second;
       } // found jatom
       else {
         std::cerr << "Something is wrong with the ID and index map.\n";
-        return *yCloud;
+        return yCloud;
       } // error handling
 
       // Get the relative distance now that the index values are known
@@ -633,19 +633,19 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   // ------------------------------------------------
   // Now that you have all qlm for the particles,
   // find c_ij
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-    // if(yCloud->pts[iatom].type!=typeO){continue;}
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+    // if(yCloud.pts[iatom].type!=typeO){continue;}
     // if this is a slice and the particle is not in the slice
     // then skip
     if (isSlice) {
-      if (yCloud->pts[iatom].inSlice == false) {
+      if (yCloud.pts[iatom].inSlice == false) {
         continue;
       }
     }
     // The index is what we are looping through
     iatomIndex = iatom;
     nnumNeighbours = nList[iatomIndex].size() - 1;
-    yCloud->pts[iatomIndex].c_ij.reserve(nnumNeighbours);
+    yCloud.pts[iatomIndex].c_ij.reserve(nnumNeighbours);
     // loop over the 4 nearest neighbours
     for (int j = 1; j <= nnumNeighbours; j++) {
       // Init to zero
@@ -655,14 +655,14 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
       // Get ID of the nearest neighbour
       jatomID = nList[iatomIndex][j];
       // Get the index (value) from the ID (key)
-      auto it = yCloud->idIndexMap.find(jatomID);
+      auto it = yCloud.idIndexMap.find(jatomID);
 
-      if (it != yCloud->idIndexMap.end()) {
+      if (it != yCloud.idIndexMap.end()) {
         jatomIndex = it->second;
       } // found jatom
       else {
         std::cerr << "Something is wrong with the ID and index map.\n";
-        return *yCloud;
+        return yCloud;
       } // error handling
       // Spherical harmonics
       for (int m = 0; m < 2 * l + 1; m++) {
@@ -685,13 +685,13 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
       } else {
         temp_cij.classifier = molSys::bond_type::out_of_range;
       }
-      yCloud->pts[iatomIndex].c_ij.push_back(temp_cij);
+      yCloud.pts[iatomIndex].c_ij.push_back(temp_cij);
     } // end loop over nearest neighbours
   }
 
   // ------------------------------------------------
 
-  return *yCloud;
+  return yCloud;
 }
 
 /**
@@ -708,7 +708,7 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
  *   The default file name is "chillPlus.txt"
  */
 molSys::PointCloud<molSys::Point<double>, double>
-chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                       const std::vector<std::vector<int>> &nList, std::string path,
                       int firstFrame, bool isSlice,
                       std::string outputFileName) {
@@ -720,12 +720,12 @@ chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   molSys::bond_type bondType;
   int nnumNeighbours; // number of nearest neighbours
 
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-    // if(yCloud->pts[iatom].type!=typeO){continue;}
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+    // if(yCloud.pts[iatom].type!=typeO){continue;}
     // if this is a slice and the particle is not in the slice
     // then skip
     if (isSlice) {
-      if (yCloud->pts[iatom].inSlice == false) {
+      if (yCloud.pts[iatom].inSlice == false) {
         continue;
       }
     }
@@ -737,7 +737,7 @@ chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
         0; // init to zero before loop through neighbours
     // Loop through the bond cij and get the number of staggered, eclipsed bonds
     for (int j = 0; j < nnumNeighbours; j++) {
-      bondType = yCloud->pts[iatom].c_ij[j].classifier;
+      bondType = yCloud.pts[iatom].c_ij[j].classifier;
       if (bondType == molSys::bond_type::eclipsed) {
         num_eclipsd++;
       } else if (bondType == molSys::bond_type::staggered) {
@@ -748,40 +748,40 @@ chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     } // End of loop through neighbours
 
     // Add more tests later
-    yCloud->pts[iatom].iceType = molSys::atom_state_type::unclassified; // default
+    yCloud.pts[iatom].iceType = molSys::atom_state_type::unclassified; // default
     if (nnumNeighbours == 4) {
       // Cubic ice
       if (num_eclipsd == 0 && num_staggrd == 4) {
-        yCloud->pts[iatom].iceType = molSys::atom_state_type::cubic;
+        yCloud.pts[iatom].iceType = molSys::atom_state_type::cubic;
         ic++;
       }
       // Hexagonal
       else if (num_eclipsd == 1 && num_staggrd == 3) {
-        yCloud->pts[iatom].iceType = molSys::atom_state_type::hexagonal;
+        yCloud.pts[iatom].iceType = molSys::atom_state_type::hexagonal;
         ih++;
       }
       // Interfacial
       else if (isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd)) {
-        yCloud->pts[iatom].iceType = molSys::atom_state_type::interfacial;
+        yCloud.pts[iatom].iceType = molSys::atom_state_type::interfacial;
         interIce++;
       }
       // Clathrate
       else if (num_eclipsd == 4 && num_staggrd == 0) {
-        yCloud->pts[iatom].iceType = molSys::atom_state_type::clathrate;
+        yCloud.pts[iatom].iceType = molSys::atom_state_type::clathrate;
         clath++;
       }
       // Interfacial clathrate
       else if (num_eclipsd == 3) {
-        yCloud->pts[iatom].iceType = molSys::atom_state_type::interClathrate;
+        yCloud.pts[iatom].iceType = molSys::atom_state_type::interClathrate;
         interClath++;
       }
       // Water
       else {
-        yCloud->pts[iatom].iceType = molSys::atom_state_type::water;
+        yCloud.pts[iatom].iceType = molSys::atom_state_type::water;
         water++;
       }
     } else {
-      yCloud->pts[iatom].iceType = molSys::atom_state_type::water;
+      yCloud.pts[iatom].iceType = molSys::atom_state_type::water;
       water++;
     }
 
@@ -800,16 +800,16 @@ chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   outputFile.open(path + "bop/" + outputFileName, std::ios_base::app);
   // --------------------
   // Comment line for the first line
-  if (yCloud->currentFrame == firstFrame) {
+  if (yCloud.currentFrame == firstFrame) {
     outputFile << "Frame Ic Ih Interfacial Clath InterClath Water Total\n";
   }
   // --------------------
-  outputFile << yCloud->currentFrame << " " << ic << " " << ih << " "
+  outputFile << yCloud.currentFrame << " " << ic << " " << ih << " "
              << interIce << " " << clath << " " << interClath << " " << water
              << " " << total << "\n";
   outputFile.close();
 
-  return *yCloud;
+  return yCloud;
 }
 
 // TODO: Add code for slices!
@@ -821,7 +821,7 @@ chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
  *  @return a double vector of the averaged @f$q_6@f$ values.
  */
 std::vector<double>
-chill::getq6(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+chill::getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
              const std::vector<std::vector<int>> &nList, bool isSlice) {
   //
   int l = 6;      // We're using q6 here
@@ -844,12 +844,12 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   std::vector<double> resultQ; // Vector with averaged q values
   double q_value = 0.0;        // Averaged q value per neighbour pair
 
-  QlmTotal.ptq.resize(yCloud->nop);
-  resultQ.resize(yCloud->nop);
+  QlmTotal.ptq.resize(yCloud.nop);
+  resultQ.resize(yCloud.nop);
 
   // Loop through every index in yCloud
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-    // if(yCloud->pts[iatom].type!=typeO){continue;}
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+    // if(yCloud.pts[iatom].type!=typeO){continue;}
 
     nnumNeighbours = nList[iatom].size() - 1; // One less than the actual length
     // Now loop over the first four neighbours
@@ -858,9 +858,9 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
       jatomID = nList[iatom][j]; // Atom ID (key)
 
       // Get the atom index (value) from the atom ID (key)
-      auto it = yCloud->idIndexMap.find(jatomID);
+      auto it = yCloud.idIndexMap.find(jatomID);
 
-      if (it != yCloud->idIndexMap.end()) {
+      if (it != yCloud.idIndexMap.end()) {
         jatomIndex = it->second;
       } else {
         std::cerr << "Your map must be wrong.\n";
@@ -898,17 +898,17 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
   // ------------------------------------------------
   // Now that you have all qlm for the particles,
   // find c_ij
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-    // if(yCloud->pts[iatom].type!=typeO){continue;}
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+    // if(yCloud.pts[iatom].type!=typeO){continue;}
     // if this is a slice and the particle is not in the slice
     // then skip TODO: UNCOMMENT
     // if(isSlice){
-    // 	if(yCloud->pts[iatom].inSlice==false){continue;}
+    // 	if(yCloud.pts[iatom].inSlice==false){continue;}
     // }
 
     nnumNeighbours = nList[iatom].size() - 1; // Number of nearest neighbours
     q_value = 0.0;                            // initialize to zero
-    // yCloud->pts[iatom].c_ij.reserve(nnumNeighbours);
+    // yCloud.pts[iatom].c_ij.reserve(nnumNeighbours);
     // loop over the 4 nearest neighbours
     for (int j = 1; j <= nnumNeighbours; j++) {
       // Init to zero
@@ -919,9 +919,9 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
       jatomID = nList[iatom][j]; // Atom ID (key)
 
       // Get the index jatomIndex
-      auto it = yCloud->idIndexMap.find(jatomID);
+      auto it = yCloud.idIndexMap.find(jatomID);
 
-      if (it != yCloud->idIndexMap.end()) {
+      if (it != yCloud.idIndexMap.end()) {
         jatomIndex = it->second;
       } // end of getting the index of jatom
 
@@ -965,7 +965,7 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
  *   values (using chill::getq6)
  */
 molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     std::vector<double> *q6) {
   // If averaged q6 > 0.5, then consider it to be ice
   // If averaged q3 < -0.75 then it is ih or ic. If q3 < -0.85 then it is cubic,
@@ -973,32 +973,32 @@ molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
   double avgQ3 = 0.0;
   int nnumNeighbours;
 
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     // Check if it has been classified as water
-    if (yCloud->pts[iatom].iceType == molSys::atom_state_type::water) {
+    if (yCloud.pts[iatom].iceType == molSys::atom_state_type::water) {
       if ((*q6)[iatom] > 0.5) {
         avgQ3 = 0.0; // init to zero
         // Loop through all c_ij
-        nnumNeighbours = yCloud->pts[iatom].c_ij.size();
+        nnumNeighbours = yCloud.pts[iatom].c_ij.size();
         for (int j = 0; j < nnumNeighbours; j++) {
-          avgQ3 += yCloud->pts[iatom].c_ij[j].c_value;
+          avgQ3 += yCloud.pts[iatom].c_ij[j].c_value;
         }
         avgQ3 /= (double)nnumNeighbours;
 
         // If averaged q3 < -0.75, then reclassify
         if (avgQ3 <= -0.75) {
           if (avgQ3 < -0.85) {
-            yCloud->pts[iatom].iceType = molSys::atom_state_type::reCubic;
+            yCloud.pts[iatom].iceType = molSys::atom_state_type::reCubic;
           } // molSys::cubic
           else {
-            yCloud->pts[iatom].iceType = molSys::atom_state_type::reHex;
+            yCloud.pts[iatom].iceType = molSys::atom_state_type::reHex;
           } // molSys::hexagonal
         }   // end of reclassification
       }     // check for solid atom!
     }       // end of check for water
   }         // End loop through every iatom
 
-  return *yCloud;
+  return yCloud;
 }
 
 /**
@@ -1014,33 +1014,33 @@ molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
  *   "superChill.txt"
  */
 int chill::printIceType(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, std::string path,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, std::string path,
     int firstFrame, bool isSlice, std::string outputFileName) {
   int ih, ic, interIce, water, unknown, clath, interClath,
       total; // No. of particles of each type
   ih = ic = water = unknown = interIce = total = 0;
   clath = interClath = 0;
 
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-    // if(yCloud->pts[iatom].type != typeO){continue;}
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+    // if(yCloud.pts[iatom].type != typeO){continue;}
     // check for slice
     if (isSlice) {
-      if (yCloud->pts[iatom].inSlice == false) {
+      if (yCloud.pts[iatom].inSlice == false) {
         continue;
       }
     }
     total++;
-    if (yCloud->pts[iatom].iceType == molSys::atom_state_type::cubic) {
+    if (yCloud.pts[iatom].iceType == molSys::atom_state_type::cubic) {
       ic++;
-    } else if (yCloud->pts[iatom].iceType == molSys::atom_state_type::hexagonal) {
+    } else if (yCloud.pts[iatom].iceType == molSys::atom_state_type::hexagonal) {
       ih++;
-    } else if (yCloud->pts[iatom].iceType == molSys::atom_state_type::water) {
+    } else if (yCloud.pts[iatom].iceType == molSys::atom_state_type::water) {
       water++;
-    } else if (yCloud->pts[iatom].iceType == molSys::atom_state_type::interfacial) {
+    } else if (yCloud.pts[iatom].iceType == molSys::atom_state_type::interfacial) {
       interIce++;
-    } else if (yCloud->pts[iatom].iceType == molSys::atom_state_type::clathrate) {
+    } else if (yCloud.pts[iatom].iceType == molSys::atom_state_type::clathrate) {
       clath++;
-    } else if (yCloud->pts[iatom].iceType == molSys::atom_state_type::interClathrate) {
+    } else if (yCloud.pts[iatom].iceType == molSys::atom_state_type::interClathrate) {
       interClath++;
     } else {
       unknown++;
@@ -1058,11 +1058,11 @@ int chill::printIceType(
   outputFile.open(path + "bop/" + outputFileName, std::ios_base::app);
   // --------------------
   // Write out the comment line
-  if (yCloud->currentFrame == firstFrame) {
+  if (yCloud.currentFrame == firstFrame) {
     outputFile << "Frame Ic Ih Interfacial Clath InterClath Water Total\n";
   }
   // --------------------
-  outputFile << yCloud->currentFrame << " " << ic << " " << ih << " "
+  outputFile << yCloud.currentFrame << " " << ic << " " << ih << " "
              << interIce << " " << clath << " " << interClath << " " << water
              << " " << total << "\n";
   outputFile.close();
@@ -1083,7 +1083,7 @@ int chill::printIceType(
  *  @return a bool; true if the particle is interfacial and otherwise false
  */
 bool chill::isInterfacial(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList, int iatom, int num_staggrd,
     int num_eclipsd) {
   int nnumNeighbours =
@@ -1102,9 +1102,9 @@ bool chill::isInterfacial(
       // Get index of the nearest neighbour
       jatomID = nList[iatom][j];
       // Get the index (value) from the ID (key)
-      auto it = yCloud->idIndexMap.find(jatomID);
+      auto it = yCloud.idIndexMap.find(jatomID);
 
-      if (it != yCloud->idIndexMap.end()) {
+      if (it != yCloud.idIndexMap.end()) {
         jatomIndex = it->second;
       } else {
         std::cerr << "Something is gravely wrong with your map.\n";
@@ -1126,9 +1126,9 @@ bool chill::isInterfacial(
       // ID of the nearest neighbour
       jatomID = nList[iatom][j];
       // Get the index (value) from the ID (key)
-      auto it = yCloud->idIndexMap.find(jatomID);
+      auto it = yCloud.idIndexMap.find(jatomID);
 
-      if (it != yCloud->idIndexMap.end()) {
+      if (it != yCloud.idIndexMap.end()) {
         jatomIndex = it->second;
       } else {
         std::cerr << "Something is gravely wrong with your map.\n";
@@ -1155,7 +1155,7 @@ bool chill::isInterfacial(
  *   particle
  */
 int chill::numStaggered(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList, int jatom) {
   int num_staggrd = 0;        // Number of staggered bonds
   molSys::bond_type bondType; // Bond type
@@ -1165,7 +1165,7 @@ int chill::numStaggered(
 
   // Loop over all bonds
   for (int i = 0; i < nnumNeighbours; i++) {
-    bondType = yCloud->pts[jatom].c_ij[i].classifier;
+    bondType = yCloud.pts[jatom].c_ij[i].classifier;
     // If the bond is staggered increment the number of staggered bonds
     if (bondType == molSys::bond_type::staggered) {
       num_staggrd++;

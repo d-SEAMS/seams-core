@@ -44,7 +44,7 @@
 int ring::bulkPolygonRingAnalysis(
     std::string path, const std::vector<std::vector<int>> &rings,
     const std::vector<std::vector<int>> &nList,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int maxDepth,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int maxDepth,
     int firstFrame) {
   //
   std::vector<std::vector<int>>
@@ -60,7 +60,7 @@ int ring::bulkPolygonRingAnalysis(
       maxDepth -
       2); // Has a value for every value of ringSize from 3, upto maxDepth
   // The atomTypes vector is the same size as the pointCloud atoms
-  atomTypes.resize(yCloud->nop, 1); // The dummy or unclassified value is 1
+  atomTypes.resize(yCloud.nop, 1); // The dummy or unclassified value is 1
   // -------------------------------------------------------------------------------
   // Run this loop for rings of sizes upto maxDepth
   // The smallest possible ring is of size 3
@@ -89,7 +89,7 @@ int ring::bulkPolygonRingAnalysis(
   ring::assignPolygonType(rings, &atomTypes, nRingList);
 
   // Write out the ring information
-  sout::writeRingNumBulk(path, yCloud->currentFrame, nRingList, maxDepth, firstFrame);
+  sout::writeRingNumBulk(path, yCloud.currentFrame, nRingList, maxDepth, firstFrame);
   // Write out the lammps data file for the particular frame
   sout::writeLAMMPSdataAllRings(yCloud, nList, atomTypes, maxDepth, path, false);
 
@@ -134,7 +134,7 @@ int ring::bulkPolygonRingAnalysis(
 int ring::topoBulkAnalysis(
     std::string path, const std::vector<std::vector<int>> &rings,
     const std::vector<std::vector<int>> &nList,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int firstFrame,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int firstFrame,
     bool onlyTetrahedral) {
   //
   // Ring IDs of each type will be saved in these vectors
@@ -180,9 +180,9 @@ int ring::topoBulkAnalysis(
   }
 
   // Init the atom type vector
-  atomTypes.resize(yCloud->nop); // Has a value for each atom
+  atomTypes.resize(yCloud.nop); // Has a value for each atom
   // Init the rmsd per atom (not used yet)
-  rmsdPerAtom.resize(yCloud->nop); // Has a value for each atom
+  rmsdPerAtom.resize(yCloud.nop); // Has a value for each atom
 
   // ----------------------------------------------
   // Init
@@ -221,7 +221,7 @@ int ring::topoBulkAnalysis(
                             &prismaticRings, &basalRings);
 
       // Write out to a file
-      sout::writeTopoBulkData(path, yCloud->currentFrame, numHC, numDDC,
+      sout::writeTopoBulkData(path, yCloud.currentFrame, numHC, numDDC,
                               mixedRings, basalRings, prismaticRings,
                               firstFrame);
       // Gets the atom type for every atom, to be used for printing out the ice
@@ -1328,7 +1328,7 @@ int ring::getStrucNumbers(const std::vector<ring::strucType> &ringType,
 int prism3::findBulkPrisms(
     const std::vector<std::vector<int>> &rings, std::vector<ring::strucType> *ringType,
     const std::vector<std::vector<int>> &nList,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     std::vector<double> *rmsdPerAtom, double heightCutoff) {
   int totalRingNum = rings.size(); // Total number of rings
   std::vector<int> basal1;         // First basal ring
@@ -1555,7 +1555,7 @@ bool prism3::relaxedPrismConditions(const std::vector<std::vector<int>> &nList,
 //! Check to see that candidate basal prisms are not really far from each other
 //! Return true if the basal rings are within the heightCutoff
 bool prism3::basalRingsSeparation(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &basal1, const std::vector<int> &basal2, double heightCutoff) {
   //
   int ringSize = basal1.size();

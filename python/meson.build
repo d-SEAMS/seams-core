@@ -7,8 +7,10 @@ py.extension_module('_core',
   'bindings.cpp',
   dependencies: [yds_dep, nanobind_dep],
   cpp_args: _args,
+  link_args: ['-Wl,--enable-new-dtags'],
   install: true,
-  subdir: 'pydseamslib')
+  subdir: 'pydseamslib',
+  limited_api: '3.12')
 
 py.install_sources(
   ['pydseamslib/__init__.py'],

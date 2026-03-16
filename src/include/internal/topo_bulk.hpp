@@ -51,7 +51,7 @@ namespace ring {
 [[nodiscard]] int bulkPolygonRingAnalysis(
     std::string path, const std::vector<std::vector<int>> &rings,
     const std::vector<std::vector<int>> &nList,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int maxDepth,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int maxDepth,
     int firstFrame);
 
 // DDC HC Ring functions
@@ -61,7 +61,7 @@ namespace ring {
 //! vectors of rings (also by index). TODO: try 'square' ice and ice0
 [[nodiscard]] int topoBulkAnalysis(std::string path, const std::vector<std::vector<int>> &rings,
                      const std::vector<std::vector<int>> &nList,
-                     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      int firstFrame, bool onlyTetrahedral = true);
 
 //! Find out which hexagonal rings are DDC (Double Diamond Cages) rings.
@@ -144,7 +144,7 @@ namespace prism3 {
 [[nodiscard]] int findBulkPrisms(const std::vector<std::vector<int>> &rings,
                    std::vector<ring::strucType> *ringType,
                    const std::vector<std::vector<int>> &nList,
-                   molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                   molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                    std::vector<double> *rmsdPerAtom, double heightCutoff = 8);
 
 //! Tests whether two rings are basal rings (true) or not (false) for a prism
@@ -159,7 +159,7 @@ bool relaxedPrismConditions(const std::vector<std::vector<int>> &nList,
 
 //! Check to see that candidate basal prisms are not really far from each other
 bool basalRingsSeparation(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &basal1, const std::vector<int> &basal2, double heightCutoff = 8);
 } // namespace prism3
 

@@ -58,9 +58,9 @@ TEST_CASE("trimBonds on empty input returns empty", "[bond]") {
 TEST_CASE("populateBonds generates bonds from neighbour list", "[bond]") {
   auto cloud = makeSquareCloud();
   // Build a neighbour list by index (not ID, since populateBonds expects index-based)
-  auto nList = nneigh::getNewNeighbourListByIndex(&cloud, 1.5);
+  auto nList = nneigh::getNewNeighbourListByIndex(cloud, 1.5);
 
-  auto bonds = bond::populateBonds(nList, &cloud);
+  auto bonds = bond::populateBonds(nList, cloud);
 
   // With cutoff 1.5, each atom should be bonded to its adjacent square
   // neighbours (distance 1.0). Diagonal distance is sqrt(2) ~ 1.414, also
@@ -93,7 +93,7 @@ TEST_CASE("getHbondDistanceOH computes periodic distance between two clouds",
   hPoint.z = 0.0;
   hCloud.pts.push_back(hPoint);
 
-  double dist = bond::getHbondDistanceOH(&oCloud, &hCloud, 0, 0);
+  double dist = bond::getHbondDistanceOH(oCloud, hCloud, 0, 0);
   REQUIRE_THAT(dist, Catch::Matchers::WithinAbs(1.0, 1e-10));
 }
 
@@ -115,7 +115,7 @@ TEST_CASE("getHbondDistanceOH respects periodic boundaries", "[bond]") {
   hPoint.z = 0.0;
   hCloud.pts.push_back(hPoint);
 
-  double dist = bond::getHbondDistanceOH(&oCloud, &hCloud, 0, 0);
+  double dist = bond::getHbondDistanceOH(oCloud, hCloud, 0, 0);
   // Periodic distance should be 1.0, not 9.0
   REQUIRE_THAT(dist, Catch::Matchers::WithinAbs(1.0, 1e-10));
 }

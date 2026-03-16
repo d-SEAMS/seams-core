@@ -172,18 +172,18 @@ template <typename S, typename T> struct PointCloud {
 //! Creates an unordered map, with the atomIDs as keys and molecular IDs as the
 //! values
 std::unordered_map<int, int>
-createIDMolIDmap(molSys::PointCloud<molSys::Point<double>, double> *yCloud);
+createIDMolIDmap(molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 
 //! Creates an multimap with molecule IDs of the atoms as the keys and the
 //! atom IDs as the values. More than one atom can have the same molecule ID
 std::unordered_multimap<int, int>
-createMolIDAtomIDMultiMap(molSys::PointCloud<molSys::Point<double>, double> *yCloud);
+createMolIDAtomIDMultiMap(molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 
 //! Returns a vector of vectors, which contains the molIDs in the first column,
 //! and the hydrogen atom indices (not atom IDs) in the row
 std::vector<std::vector<int>>
-hAtomMolList(molSys::PointCloud<molSys::Point<double>, double> *hCloud,
-             molSys::PointCloud<molSys::Point<double>, double> *oCloud);
+hAtomMolList(molSys::PointCloud<molSys::Point<double>, double> &hCloud,
+             molSys::PointCloud<molSys::Point<double>, double> &oCloud);
 
 //! This function searches a vector of vectors molList, for a particular
 //! molecular ID, and returns the index in molList
@@ -191,7 +191,7 @@ hAtomMolList(molSys::PointCloud<molSys::Point<double>, double> *hCloud,
 
 //!//! Function for clearing vectors in PointCloud after multiple usage
 molSys::PointCloud<molSys::Point<double>, double>
-clearPointCloud(molSys::PointCloud<molSys::Point<double>, double> *yCloud);
+clearPointCloud(molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 } // namespace molSys
 
 #endif // __MOL_SYS_H_

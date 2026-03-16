@@ -35,7 +35,7 @@ TEST_CASE("neighListO produces full neighbour list by atom ID", "[neighbours]") 
   auto cloud = makeFourAtomCloud();
   double cutoff = 1.5;
 
-  auto nList = nneigh::neighListO(cutoff, &cloud, 1);
+  auto nList = nneigh::neighListO(cutoff, cloud, 1);
 
   // Should have one row per atom
   REQUIRE(nList.size() == 4);
@@ -61,7 +61,7 @@ TEST_CASE("halfNeighList produces half neighbour list", "[neighbours]") {
   auto cloud = makeFourAtomCloud();
   double cutoff = 1.5;
 
-  auto nList = nneigh::halfNeighList(cutoff, &cloud, 1);
+  auto nList = nneigh::halfNeighList(cutoff, cloud, 1);
 
   REQUIRE(nList.size() == 4);
 
@@ -83,9 +83,9 @@ TEST_CASE("neighbourListByIndex converts ID list to index list",
   double cutoff = 1.5;
 
   // Get a neighbour list by ID
-  auto nListByID = nneigh::neighListO(cutoff, &cloud, 1);
+  auto nListByID = nneigh::neighListO(cutoff, cloud, 1);
   // Convert to index-based
-  auto nListByIdx = nneigh::neighbourListByIndex(&cloud, nListByID);
+  auto nListByIdx = nneigh::neighbourListByIndex(cloud, nListByID);
 
   REQUIRE(nListByIdx.size() == 4);
 
@@ -100,7 +100,7 @@ TEST_CASE("getNewNeighbourListByIndex builds index-based list from scratch",
   auto cloud = makeFourAtomCloud();
   double cutoff = 1.5;
 
-  auto nList = nneigh::getNewNeighbourListByIndex(&cloud, cutoff);
+  auto nList = nneigh::getNewNeighbourListByIndex(cloud, cutoff);
 
   REQUIRE(nList.size() == 4);
   // Atom 0 (index 0) should have indices 1 and 2 as neighbours
@@ -115,7 +115,7 @@ TEST_CASE("getNewNeighbourListByIndex builds index-based list from scratch",
 
 TEST_CASE("clearNeighbourList empties the list", "[neighbours]") {
   auto cloud = makeFourAtomCloud();
-  auto nList = nneigh::neighListO(1.5, &cloud, 1);
+  auto nList = nneigh::neighListO(1.5, cloud, 1);
   REQUIRE_FALSE(nList.empty());
 
   nneigh::clearNeighbourList(nList);

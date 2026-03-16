@@ -105,7 +105,7 @@ NB_MODULE(_core, m) {
           [](std::string filename, int targetFrame, int typeI, bool isSlice,
              std::array<double, 3> coordLow, std::array<double, 3> coordHigh) {
             molSys::PointCloud<molSys::Point<double>, double> yCloud;
-            return sinp::readLammpsTrjreduced(filename, targetFrame, &yCloud,
+            return sinp::readLammpsTrjreduced(filename, targetFrame, yCloud,
                                                typeI, isSlice, coordLow, coordHigh);
           },
           "Read a LAMMPS trajectory frame, keeping only atoms of the given type.",
@@ -115,7 +115,7 @@ NB_MODULE(_core, m) {
           [](std::string filename, int targetFrame, int typeO, bool isSlice,
              std::array<double, 3> coordLow, std::array<double, 3> coordHigh) {
             molSys::PointCloud<molSys::Point<double>, double> yCloud;
-            return sinp::readLammpsTrjO(filename, targetFrame, &yCloud,
+            return sinp::readLammpsTrjO(filename, targetFrame, yCloud,
                                          typeO, isSlice, coordLow, coordHigh);
           },
           "Read a LAMMPS trajectory frame, keeping only oxygen atoms.",
@@ -125,7 +125,7 @@ NB_MODULE(_core, m) {
           [](std::string filename, int targetFrame, bool isSlice,
              std::array<double, 3> coordLow, std::array<double, 3> coordHigh) {
             molSys::PointCloud<molSys::Point<double>, double> yCloud;
-            return sinp::readLammpsTrj(filename, targetFrame, &yCloud,
+            return sinp::readLammpsTrj(filename, targetFrame, yCloud,
                                         isSlice, coordLow, coordHigh);
           },
           "Read a LAMMPS trajectory frame with all atom types.",

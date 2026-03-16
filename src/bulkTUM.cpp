@@ -52,7 +52,7 @@
 int tum3::topoUnitMatchingBulk(
     std::string path, const std::vector<std::vector<int>> &rings,
     const std::vector<std::vector<int>> &nList,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int firstFrame,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int firstFrame,
     bool printClusters, bool onlyTetrahedral) {
   // The input rings vector has rings of all sizes
 
@@ -93,10 +93,10 @@ int tum3::topoUnitMatchingBulk(
   }
 
   // Init the atom type vector
-  atomTypes.resize(yCloud->nop); // Has a value for each atom
+  atomTypes.resize(yCloud.nop); // Has a value for each atom
   // Init the rmsd per atom
-  rmsdPerAtom.resize(yCloud->nop, -1);    // Has a value for each atom
-  noOfCommonElements.resize(yCloud->nop); // Has a value for each atom
+  rmsdPerAtom.resize(yCloud.nop, -1);    // Has a value for each atom
+  noOfCommonElements.resize(yCloud.nop); // Has a value for each atom
 
   // ----------------------------------------------
   // Init
@@ -150,7 +150,7 @@ int tum3::topoUnitMatchingBulk(
   // Init
   //
   // Loop through all the atoms and set commonElements to 1 for PNC atoms
-  for (int i = 0; i < yCloud->nop; i++) {
+  for (int i = 0; i < yCloud.nop; i++) {
     if (rmsdPerAtom[i] != -1) {
       noOfCommonElements[i] = 1;
     } // for atoms which have been updated
@@ -249,7 +249,7 @@ int tum3::topoUnitMatchingBulk(
  *  @param[in, out] scale The scale factor obtained from Horn's algorithm.
  */
 int tum3::shapeMatchHC(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const Eigen::MatrixXd &refPoints, cage::Cage cageUnit,
     const std::vector<std::vector<int>> &rings, const std::vector<std::vector<int>> &nList,
     std::vector<double> *quat, double *rmsd) {
@@ -273,7 +273,7 @@ int tum3::shapeMatchHC(
   // Init
   iring = cageUnit.rings[0];    // Index of basal1
   jring = cageUnit.rings[1];    // Index of basal2
-  rmsdList.resize(yCloud->nop); // Not actually updated here
+  rmsdList.resize(yCloud.nop); // Not actually updated here
   //
   // ----------------
   // Re-order the basal rings so that they are matched
@@ -321,7 +321,7 @@ int tum3::shapeMatchHC(
  *  @param[in, out] scale The scale factor obtained from Horn's algorithm.
  */
 int tum3::shapeMatchDDC(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const Eigen::MatrixXd &refPoints, const std::vector<cage::Cage> &cageList,
     int cageIndex, const std::vector<std::vector<int>> &rings,
     std::vector<double> *quat, double *rmsd) {
@@ -399,9 +399,9 @@ Eigen::MatrixXd tum3::buildRefHC(std::string fileName) {
   } // end of setting box lengths
   //
 
-  nList = nneigh::neighListO(3.5, &setCloud, 1);
+  nList = nneigh::neighListO(3.5, setCloud, 1);
   // Neighbour list by index
-  nList = nneigh::neighbourListByIndex(&setCloud, nList);
+  nList = nneigh::neighbourListByIndex(setCloud, nList);
   // Find the vector of vector of rings
   rings = primitive::ringNetwork(nList, 6);
   // init the ringType vector
@@ -419,11 +419,11 @@ Eigen::MatrixXd tum3::buildRefHC(std::string fileName) {
   // Get the re-ordered matched basal rings, ordered with respect to each
   // other
 
-  pntToPnt::relOrderHC(&setCloud, rings[iring], rings[jring], nList,
+  pntToPnt::relOrderHC(setCloud, rings[iring], rings[jring], nList,
                        &matchedBasal1, &matchedBasal2);
   // Get the reference point set
   refPnts =
-      pntToPnt::changeHexCageOrder(&setCloud, matchedBasal1, matchedBasal2, 0);
+      pntToPnt::changeHexCageOrder(setCloud, matchedBasal1, matchedBasal2, 0);
   //
   return refPnts;
 }
@@ -460,9 +460,9 @@ Eigen::MatrixXd tum3::buildRefDDC(std::string fileName) {
   } // end of setting box lengths
   //
 
-  nList = nneigh::neighListO(3.5, &setCloud, 1);
+  nList = nneigh::neighListO(3.5, setCloud, 1);
   // Neighbour list by index
-  nList = nneigh::neighbourListByIndex(&setCloud, nList);
+  nList = nneigh::neighbourListByIndex(setCloud, nList);
   // Find the vector of vector of rings
   rings = primitive::ringNetwork(nList, 6);
   // init the ringType vector
@@ -472,7 +472,7 @@ Eigen::MatrixXd tum3::buildRefDDC(std::string fileName) {
   // Save the order of the DDC in a vector
   ddcOrder = pntToPnt::relOrderDDC(0, rings, cageList);
   // Get the reference point set
-  refPnts = pntToPnt::changeDiaCageOrder(&setCloud, ddcOrder, 0);
+  refPnts = pntToPnt::changeDiaCageOrder(setCloud, ddcOrder, 0);
   //
   return refPnts;
 }
@@ -581,7 +581,7 @@ int tum3::averageRMSDatom(std::vector<double> *rmsdPerAtom,
 std::vector<cage::Cage> tum3::topoBulkCriteria(
     std::string path, const std::vector<std::vector<int>> &rings,
     const std::vector<std::vector<int>> &nList,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int firstFrame,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int firstFrame,
     int *numHC, int *numDDC, std::vector<ring::strucType> *ringType) {
   //
   // Ring IDs of each type will be saved in these vectors
@@ -626,7 +626,7 @@ std::vector<cage::Cage> tum3::topoBulkCriteria(
                         &prismaticRings, &basalRings);
 
   // Write out to a file
-  sout::writeTopoBulkData(path, yCloud->currentFrame, *numHC, *numDDC,
+  sout::writeTopoBulkData(path, yCloud.currentFrame, *numHC, *numDDC,
                           mixedRings, basalRings, prismaticRings, firstFrame);
 
   return cageList;
@@ -642,7 +642,7 @@ std::vector<cage::Cage> tum3::topoBulkCriteria(
  * file
  */
 int tum3::clusterCages(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, std::string path,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, std::string path,
     const std::vector<std::vector<int>> &rings, const std::vector<cage::Cage> &cageList,
     int numHC, int numDDC) {
   //
@@ -778,12 +778,12 @@ int tum3::clusterCages(
   outputDirName = path + "bulkTopo/clusterXYZ/";
   sout::makePath(outputDirName);
   outputDirName = path + "bulkTopo/clusterXYZ/frame-" +
-                  std::to_string(yCloud->currentFrame);
+                  std::to_string(yCloud.currentFrame);
   sout::makePath(outputDirName);
   // ----------------
   // Write output to file inside the output directory
   outputFile.open(path + "bulkTopo/clusterXYZ/frame-" +
-                  std::to_string(yCloud->currentFrame) + "/info.dat");
+                  std::to_string(yCloud.currentFrame) + "/info.dat");
   outputFile << "# volDDC volHC in Angstrom^3\n";
   outputFile << singleDDCs * volDDC << " " << singleHCs * volHC << "\n";
   outputFile << "There are " << singleDDCs << " single DDCs\n";

@@ -135,9 +135,9 @@ SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
     // --------------------------
     // GETTING THE TARGET POINT SET
     // Calculate a neighbour list
-    nList = nneigh::neighListO(3.5, &targetCloud, 1);
+    nList = nneigh::neighListO(3.5, targetCloud, 1);
     // Neighbour list by index
-    nList = nneigh::neighbourListByIndex(&targetCloud, nList);
+    nList = nneigh::neighbourListByIndex(targetCloud, nList);
     // Find the vector of vector of rings
     rings = primitive::ringNetwork(nList, 6);
     // init the ringType vector
@@ -155,7 +155,7 @@ SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
     // Get the re-ordered matched basal rings, ordered with respect to each
     // other
 
-    pntToPnt::relOrderHC(&targetCloud, rings[iring], rings[jring], nList,
+    pntToPnt::relOrderHC(targetCloud, rings[iring], rings[jring], nList,
                          &matchedBasal1, &matchedBasal2);
     //
     // --------------------------
@@ -180,7 +180,7 @@ SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
     for (int i = 0; i < 6; i++) {
       // Change the order of the target points somehow!
       //
-      targetPointSet = pntToPnt::changeHexCageOrder(&targetCloud, matchedBasal1,
+      targetPointSet = pntToPnt::changeHexCageOrder(targetCloud, matchedBasal1,
                                                     matchedBasal2, i);
       // Shape-matching
       absor::hornAbsOrientation(refPnts, targetPointSet, &currentQuat,
@@ -353,9 +353,9 @@ SCENARIO("Test the shape-matching of a perfect DDC rotated by 30 degrees",
     // --------------------------
     // GETTING THE TARGET POINT SET
     // Calculate a neighbour list
-    nList = nneigh::neighListO(3.5, &targetCloud, 1);
+    nList = nneigh::neighListO(3.5, targetCloud, 1);
     // Neighbour list by index
-    nList = nneigh::neighbourListByIndex(&targetCloud, nList);
+    nList = nneigh::neighbourListByIndex(targetCloud, nList);
     // Find the vector of vector of rings
     rings = primitive::ringNetwork(nList, 6);
     // init the ringType vector
@@ -388,7 +388,7 @@ SCENARIO("Test the shape-matching of a perfect DDC rotated by 30 degrees",
     for (int i = 0; i < 6; i++) {
       // Change the order of the target points somehow!
       //
-      targetPointSet = pntToPnt::changeDiaCageOrder(&targetCloud, ddcOrder, i);
+      targetPointSet = pntToPnt::changeDiaCageOrder(targetCloud, ddcOrder, i);
       // Shape-matching
       absor::hornAbsOrientation(refPnts, targetPointSet, &currentQuat,
                                 &currentRmsd, &currentRmsdList, &currentScale);

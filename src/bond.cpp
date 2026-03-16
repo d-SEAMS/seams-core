@@ -24,7 +24,7 @@
  */
 std::vector<std::vector<int>>
 bond::populateBonds(const std::vector<std::vector<int>> &nList,
-                    molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
+                    molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   //
   std::vector<std::vector<int>> bonds; // Output vector of vectors
   std::vector<int> currentBond;        // Vector for the current bond
@@ -64,8 +64,8 @@ bond::populateBonds(const std::vector<std::vector<int>> &nList,
       // Clear the current bond vector
       currentBond.clear();
       // Fill the current bond vector with ATOM IDs
-      iatomID = yCloud->pts[iatom].atomID;
-      jatomID = yCloud->pts[jatom].atomID;
+      iatomID = yCloud.pts[iatom].atomID;
+      jatomID = yCloud.pts[jatom].atomID;
       currentBond.push_back(iatomID);
       currentBond.push_back(jatomID);
       // Add to the bonds vector of vectors
@@ -91,7 +91,7 @@ bond::populateBonds(const std::vector<std::vector<int>> &nList,
  */
 std::vector<std::vector<int>>
 bond::populateBonds(const std::vector<std::vector<int>> &nList,
-                    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                     const std::vector<cage::iceType> &atomTypes) {
   //
   std::vector<std::vector<int>> bonds; // Output vector of vectors
@@ -140,8 +140,8 @@ bond::populateBonds(const std::vector<std::vector<int>> &nList,
       // Clear the current bond vector
       currentBond.clear();
       // Fill the current bond vector with ATOM IDs
-      iatomID = yCloud->pts[iatom].atomID;
-      jatomID = yCloud->pts[jatom].atomID;
+      iatomID = yCloud.pts[iatom].atomID;
+      jatomID = yCloud.pts[jatom].atomID;
       currentBond.push_back(iatomID);
       currentBond.push_back(jatomID);
       // Add to the bonds vector of vectors
@@ -172,7 +172,7 @@ bond::populateBonds(const std::vector<std::vector<int>> &nList,
  ***********************************************/
 std::vector<std::vector<int>>
 bond::populateHbonds(std::string filename,
-                     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      const std::vector<std::vector<int>> &nList, int targetFrame,
                      int Htype) {
   //
@@ -202,7 +202,7 @@ bond::populateHbonds(std::string filename,
 
   // --------------------
   // Get all the hydrogen atoms in the frame (no slice)
-  hCloud = sinp::readLammpsTrjreduced(filename, targetFrame, &hCloud, Htype);
+  hCloud = sinp::readLammpsTrjreduced(filename, targetFrame, hCloud, Htype);
 
   // Get the unordered map of the oxygen atom IDs (keys) and the molecular IDs
   // (values)
@@ -210,13 +210,13 @@ bond::populateHbonds(std::string filename,
 
   // Get a vector of vectors with the molID in the first column, and the
   // hydrogen atom indices (not ID) in each row
-  molIDlist = molSys::hAtomMolList(&hCloud, yCloud);
+  molIDlist = molSys::hAtomMolList(hCloud, yCloud);
 
   // Initialize the vector of vectors hBondNet
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     hBondNet.push_back(std::vector<int>()); // Empty vector for the index iatom
     // Fill the first element with the atom ID of iatom itself
-    hBondNet[iatom].push_back(yCloud->pts[iatom].atomID);
+    hBondNet[iatom].push_back(yCloud.pts[iatom].atomID);
   } // end of init of hBondNet
 
   // Loop through the neighbour list
@@ -244,8 +244,8 @@ bond::populateHbonds(std::string filename,
       listIndex = molSys::searchMolList(molIDlist, jOxyMolID);
 
       // Get the atom index of the oxygen atom jatom corresponding jatomID
-      auto gotJ = yCloud->idIndexMap.find(jatomID);
-      if (gotJ != yCloud->idIndexMap.end()) {
+      auto gotJ = yCloud.idIndexMap.find(jatomID);
+      if (gotJ != yCloud.idIndexMap.end()) {
         jatomIndex = gotJ->second;
       } // found atom index of jatomID
       else {
@@ -261,7 +261,7 @@ bond::populateHbonds(std::string filename,
         // the acceptor oxygen atom) should be less than 2.42 Angstrom
         // (hard-coded)
         hBondLen =
-            bond::getHbondDistanceOH(yCloud, &hCloud, iatomIndex, hAtomIndex);
+            bond::getHbondDistanceOH(yCloud, hCloud, iatomIndex, hAtomIndex);
 
         // If O-H distance is greater than or equal to 2.42 then it is not a
         // hydrogen bond
@@ -276,23 +276,23 @@ bond::populateHbonds(std::string filename,
         ohVec.clear();
         // Get the O--O and O-H vectors
         // O--O
-        ooVec.push_back(yCloud->pts[iatomIndex].x -
-                        yCloud->pts[jatomIndex].x); // dx
-        ooVec.push_back(yCloud->pts[iatomIndex].y -
-                        yCloud->pts[jatomIndex].y); // dy
-        ooVec.push_back(yCloud->pts[iatomIndex].z -
-                        yCloud->pts[jatomIndex].z); // dz
+        ooVec.push_back(yCloud.pts[iatomIndex].x -
+                        yCloud.pts[jatomIndex].x); // dx
+        ooVec.push_back(yCloud.pts[iatomIndex].y -
+                        yCloud.pts[jatomIndex].y); // dy
+        ooVec.push_back(yCloud.pts[iatomIndex].z -
+                        yCloud.pts[jatomIndex].z); // dz
         // O-H
-        ohVec.push_back(yCloud->pts[iatomIndex].x -
+        ohVec.push_back(yCloud.pts[iatomIndex].x -
                         hCloud.pts[hAtomIndex].x); // dx
-        ohVec.push_back(yCloud->pts[iatomIndex].y -
+        ohVec.push_back(yCloud.pts[iatomIndex].y -
                         hCloud.pts[hAtomIndex].y); // dy
-        ohVec.push_back(yCloud->pts[iatomIndex].z -
+        ohVec.push_back(yCloud.pts[iatomIndex].z -
                         hCloud.pts[hAtomIndex].z); // dz
         // Apply PBCs
         for (int l = 0; l < 3; l++) {
-          ooVec[l] -= yCloud->box[l] * round(ooVec[l] / yCloud->box[l]);
-          ohVec[l] -= yCloud->box[l] * round(ohVec[l] / yCloud->box[l]);
+          ooVec[l] -= yCloud.box[l] * round(ooVec[l] / yCloud.box[l]);
+          ohVec[l] -= yCloud.box[l] * round(ohVec[l] / yCloud.box[l]);
         } // end of applying PBCs to the O-H and O--O vectors
         //
         // Get the angle between the O--O and O-H vectors
@@ -321,7 +321,7 @@ bond::populateHbonds(std::string filename,
   // --------------------
 
   // Erase all temporary stuff
-  hCloud = molSys::clearPointCloud(&hCloud);
+  hCloud = molSys::clearPointCloud(hCloud);
 
   return hBondNet;
 }
@@ -340,8 +340,8 @@ bond::populateHbonds(std::string filename,
  *  @param[in] nList Row-ordered neighbour list by atom ID
  ***********************************************/
 std::vector<std::vector<int>>
-bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                     molSys::PointCloud<molSys::Point<double>, double> *hCloud,
+bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                     molSys::PointCloud<molSys::Point<double>, double> &hCloud,
                      const std::vector<std::vector<int>> &nList) {
   //
   std::vector<std::vector<int>>
@@ -376,10 +376,10 @@ bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, do
   molIDlist = molSys::hAtomMolList(hCloud, yCloud);
 
   // Initialize the vector of vectors hBondNet
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     hBondNet.push_back(std::vector<int>()); // Empty vector for the index iatom
     // Fill the first element with the atom ID of iatom itself
-    hBondNet[iatom].push_back(yCloud->pts[iatom].atomID);
+    hBondNet[iatom].push_back(yCloud.pts[iatom].atomID);
   } // end of init of hBondNet
 
   // Loop through the neighbour list
@@ -407,8 +407,8 @@ bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, do
       listIndex = molSys::searchMolList(molIDlist, jOxyMolID);
 
       // Get the atom index of the oxygen atom jatom corresponding jatomID
-      auto gotJ = yCloud->idIndexMap.find(jatomID);
-      if (gotJ != yCloud->idIndexMap.end()) {
+      auto gotJ = yCloud.idIndexMap.find(jatomID);
+      if (gotJ != yCloud.idIndexMap.end()) {
         jatomIndex = gotJ->second;
       } // found atom index of jatomID
       else {
@@ -439,23 +439,23 @@ bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, do
         ohVec.clear();
         // Get the O--O and O-H vectors
         // O--O
-        ooVec.push_back(yCloud->pts[iatomIndex].x -
-                        yCloud->pts[jatomIndex].x); // dx
-        ooVec.push_back(yCloud->pts[iatomIndex].y -
-                        yCloud->pts[jatomIndex].y); // dy
-        ooVec.push_back(yCloud->pts[iatomIndex].z -
-                        yCloud->pts[jatomIndex].z); // dz
+        ooVec.push_back(yCloud.pts[iatomIndex].x -
+                        yCloud.pts[jatomIndex].x); // dx
+        ooVec.push_back(yCloud.pts[iatomIndex].y -
+                        yCloud.pts[jatomIndex].y); // dy
+        ooVec.push_back(yCloud.pts[iatomIndex].z -
+                        yCloud.pts[jatomIndex].z); // dz
         // O-H
-        ohVec.push_back(yCloud->pts[iatomIndex].x -
-                        hCloud->pts[hAtomIndex].x); // dx
-        ohVec.push_back(yCloud->pts[iatomIndex].y -
-                        hCloud->pts[hAtomIndex].y); // dy
-        ohVec.push_back(yCloud->pts[iatomIndex].z -
-                        hCloud->pts[hAtomIndex].z); // dz
+        ohVec.push_back(yCloud.pts[iatomIndex].x -
+                        hCloud.pts[hAtomIndex].x); // dx
+        ohVec.push_back(yCloud.pts[iatomIndex].y -
+                        hCloud.pts[hAtomIndex].y); // dy
+        ohVec.push_back(yCloud.pts[iatomIndex].z -
+                        hCloud.pts[hAtomIndex].z); // dz
         // Apply PBCs
         for (int l = 0; l < 3; l++) {
-          ooVec[l] -= yCloud->box[l] * round(ooVec[l] / yCloud->box[l]);
-          ohVec[l] -= yCloud->box[l] * round(ohVec[l] / yCloud->box[l]);
+          ooVec[l] -= yCloud.box[l] * round(ooVec[l] / yCloud.box[l]);
+          ohVec[l] -= yCloud.box[l] * round(ohVec[l] / yCloud.box[l]);
         } // end of applying PBCs to the O-H and O--O vectors
         //
         // Get the angle between the O--O and O-H vectors
@@ -496,19 +496,19 @@ to each atom.
  *  @param[in] hAtomIndex The index (in the hCloud) of the hydrogen atom
 */
 double bond::getHbondDistanceOH(
-    molSys::PointCloud<molSys::Point<double>, double> *oCloud,
-    molSys::PointCloud<molSys::Point<double>, double> *hCloud, int oAtomIndex,
+    molSys::PointCloud<molSys::Point<double>, double> &oCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &hCloud, int oAtomIndex,
     int hAtomIndex) {
   std::array<double, 3> dr; // relative distance in the X, Y, Z dimensions
   double r2 = 0.0;          // Bond length
 
-  dr[0] = oCloud->pts[oAtomIndex].x - hCloud->pts[hAtomIndex].x;
-  dr[1] = oCloud->pts[oAtomIndex].y - hCloud->pts[hAtomIndex].y;
-  dr[2] = oCloud->pts[oAtomIndex].z - hCloud->pts[hAtomIndex].z;
+  dr[0] = oCloud.pts[oAtomIndex].x - hCloud.pts[hAtomIndex].x;
+  dr[1] = oCloud.pts[oAtomIndex].y - hCloud.pts[hAtomIndex].y;
+  dr[2] = oCloud.pts[oAtomIndex].z - hCloud.pts[hAtomIndex].z;
 
   // Apply the PBCs and get the squared area
   for (int k = 0; k < 3; k++) {
-    dr[k] -= oCloud->box[k] * round(dr[k] / oCloud->box[k]);
+    dr[k] -= oCloud.box[k] * round(dr[k] / oCloud.box[k]);
     r2 += pow(dr[k], 2.0);
   } // end of applying the PBCs and getting the squared area
   return sqrt(r2);

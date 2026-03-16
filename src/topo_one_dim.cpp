@@ -49,8 +49,8 @@
 int ring::prismAnalysis(
     std::string path, const std::vector<std::vector<int>> &rings,
     const std::vector<std::vector<int>> &nList,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int maxDepth,
-    int *atomID, int firstFrame, int currentFrame, bool doShapeMatching) {
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int maxDepth,
+    int &atomID, int firstFrame, int currentFrame, bool doShapeMatching) {
   //
   std::vector<std::vector<int>>
       ringsOneType;           // Vector of vectors of rings of a single size
@@ -81,12 +81,12 @@ int ring::prismAnalysis(
   nDefPrismList.resize(maxDepth - 2);
   heightPercent.resize(maxDepth - 2);
   // The atomTypes vector is the same size as the pointCloud atoms
-  atomTypes.resize(yCloud->nop, 1); // The dummy or unclassified value is 1
+  atomTypes.resize(yCloud.nop, 1); // The dummy or unclassified value is 1
   // The rmsdPerAtom vector is the same size as the pointCloud atoms and has an
   // RMSD value for every atom
-  rmsdPerAtom.resize(yCloud->nop, -1);
+  rmsdPerAtom.resize(yCloud.nop, -1);
   // Resize the atom state vector
-  atomState.resize(yCloud->nop); // Dummy or unclassified
+  atomState.resize(yCloud.nop); // Dummy or unclassified
   // -------------------------------------------------------------------------------
   // Run this loop for rings of sizes upto maxDepth
   // The smallest possible ring is of size 3
@@ -144,7 +144,7 @@ int ring::prismAnalysis(
 
   // Write out the prism information
   sout::writePrismNum(path, nPrismList, nDefPrismList, heightPercent, maxDepth,
-                      yCloud->currentFrame, firstFrame);
+                      yCloud.currentFrame, firstFrame);
   // Reassign the prism block types for the deformed prisms
   if (doShapeMatching) {
     ring::deformedPrismTypes(atomState, &atomTypes, maxDepth);
@@ -193,7 +193,7 @@ std::vector<int>
 ring::findPrisms(const std::vector<std::vector<int>> &rings,
                  std::vector<ring::strucType> *ringType, int *nPerfectPrisms,
                  int *nImperfectPrisms, const std::vector<std::vector<int>> &nList,
-                 molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                 molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                  std::vector<double> *rmsdPerAtom, bool doShapeMatching) {
   std::vector<int> listPrism;
   int totalRingNum = rings.size(); // Total number of rings
@@ -212,8 +212,8 @@ ring::findPrisms(const std::vector<std::vector<int>> &rings,
 
   // Get the reference ring point set for a given ring size.
   // Get the axial dimension
-  int axialDim = std::max_element(yCloud->box.begin(), yCloud->box.end()) -
-                 yCloud->box.begin();
+  int axialDim = std::max_element(yCloud.box.begin(), yCloud.box.end()) -
+                 yCloud.box.begin();
   refPointSet = pntToPnt::getPointSetRefRing(ringSize, axialDim);
   //
 
@@ -486,7 +486,7 @@ bool ring::relaxedPrismConditions(const std::vector<std::vector<int>> &nList,
  */
 bool ring::discardExtraTetragonBlocks(
     std::vector<int> *basal1, std::vector<int> *basal2,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   int ringSize =
       (*basal1).size(); // Size of the ring; each ring contains n elements
   int iatomIndex,
@@ -506,8 +506,8 @@ bool ring::discardExtraTetragonBlocks(
   // 0 -> x dim
   // 1 -> y dim
   // 2 -> z dim
-  axialDim = std::max_element(yCloud->box.begin(), yCloud->box.end()) -
-             yCloud->box.begin();
+  axialDim = std::max_element(yCloud.box.begin(), yCloud.box.end()) -
+             yCloud.box.begin();
   // ----------------------------------------
   // Calculate projected area onto the XY, YZ and XZ planes for basal1
   axialBasal1 = false; // Init to false
@@ -527,16 +527,16 @@ bool ring::discardExtraTetragonBlocks(
     // Add to the polygon area
     // ------
     // XY plane
-    areaXY += (yCloud->pts[jatomIndex].x + yCloud->pts[iatomIndex].x) *
-              (yCloud->pts[jatomIndex].y - yCloud->pts[iatomIndex].y);
+    areaXY += (yCloud.pts[jatomIndex].x + yCloud.pts[iatomIndex].x) *
+              (yCloud.pts[jatomIndex].y - yCloud.pts[iatomIndex].y);
     // ------
     // XZ plane
-    areaXZ += (yCloud->pts[jatomIndex].x + yCloud->pts[iatomIndex].x) *
-              (yCloud->pts[jatomIndex].z - yCloud->pts[iatomIndex].z);
+    areaXZ += (yCloud.pts[jatomIndex].x + yCloud.pts[iatomIndex].x) *
+              (yCloud.pts[jatomIndex].z - yCloud.pts[iatomIndex].z);
     // ------
     // YZ plane
-    areaYZ += (yCloud->pts[jatomIndex].y + yCloud->pts[iatomIndex].y) *
-              (yCloud->pts[jatomIndex].z - yCloud->pts[iatomIndex].z);
+    areaYZ += (yCloud.pts[jatomIndex].y + yCloud.pts[iatomIndex].y) *
+              (yCloud.pts[jatomIndex].z - yCloud.pts[iatomIndex].z);
     // ------
     jatomIndex = iatomIndex;
   }
@@ -545,16 +545,16 @@ bool ring::discardExtraTetragonBlocks(
   iatomIndex = (*basal1)[0];
   // ------
   // XY plane
-  areaXY += (yCloud->pts[jatomIndex].x + yCloud->pts[iatomIndex].x) *
-            (yCloud->pts[jatomIndex].y - yCloud->pts[iatomIndex].y);
+  areaXY += (yCloud.pts[jatomIndex].x + yCloud.pts[iatomIndex].x) *
+            (yCloud.pts[jatomIndex].y - yCloud.pts[iatomIndex].y);
   // ------
   // XZ plane
-  areaXZ += (yCloud->pts[jatomIndex].x + yCloud->pts[iatomIndex].x) *
-            (yCloud->pts[jatomIndex].z - yCloud->pts[iatomIndex].z);
+  areaXZ += (yCloud.pts[jatomIndex].x + yCloud.pts[iatomIndex].x) *
+            (yCloud.pts[jatomIndex].z - yCloud.pts[iatomIndex].z);
   // ------
   // YZ plane
-  areaYZ += (yCloud->pts[jatomIndex].y + yCloud->pts[iatomIndex].y) *
-            (yCloud->pts[jatomIndex].z - yCloud->pts[iatomIndex].z);
+  areaYZ += (yCloud.pts[jatomIndex].y + yCloud.pts[iatomIndex].y) *
+            (yCloud.pts[jatomIndex].z - yCloud.pts[iatomIndex].z);
   // ------
   // The actual projected area is half of this
   areaXY *= 0.5;
@@ -607,16 +607,16 @@ bool ring::discardExtraTetragonBlocks(
     // Add to the polygon area
     // ------
     // XY plane
-    areaXY += (yCloud->pts[jatomIndex].x + yCloud->pts[iatomIndex].x) *
-              (yCloud->pts[jatomIndex].y - yCloud->pts[iatomIndex].y);
+    areaXY += (yCloud.pts[jatomIndex].x + yCloud.pts[iatomIndex].x) *
+              (yCloud.pts[jatomIndex].y - yCloud.pts[iatomIndex].y);
     // ------
     // XZ plane
-    areaXZ += (yCloud->pts[jatomIndex].x + yCloud->pts[iatomIndex].x) *
-              (yCloud->pts[jatomIndex].z - yCloud->pts[iatomIndex].z);
+    areaXZ += (yCloud.pts[jatomIndex].x + yCloud.pts[iatomIndex].x) *
+              (yCloud.pts[jatomIndex].z - yCloud.pts[iatomIndex].z);
     // ------
     // YZ plane
-    areaYZ += (yCloud->pts[jatomIndex].y + yCloud->pts[iatomIndex].y) *
-              (yCloud->pts[jatomIndex].z - yCloud->pts[iatomIndex].z);
+    areaYZ += (yCloud.pts[jatomIndex].y + yCloud.pts[iatomIndex].y) *
+              (yCloud.pts[jatomIndex].z - yCloud.pts[iatomIndex].z);
     // ------
     jatomIndex = iatomIndex;
   }
@@ -625,16 +625,16 @@ bool ring::discardExtraTetragonBlocks(
   iatomIndex = (*basal2)[0];
   // ------
   // XY plane
-  areaXY += (yCloud->pts[jatomIndex].x + yCloud->pts[iatomIndex].x) *
-            (yCloud->pts[jatomIndex].y - yCloud->pts[iatomIndex].y);
+  areaXY += (yCloud.pts[jatomIndex].x + yCloud.pts[iatomIndex].x) *
+            (yCloud.pts[jatomIndex].y - yCloud.pts[iatomIndex].y);
   // ------
   // XZ plane
-  areaXZ += (yCloud->pts[jatomIndex].x + yCloud->pts[iatomIndex].x) *
-            (yCloud->pts[jatomIndex].z - yCloud->pts[iatomIndex].z);
+  areaXZ += (yCloud.pts[jatomIndex].x + yCloud.pts[iatomIndex].x) *
+            (yCloud.pts[jatomIndex].z - yCloud.pts[iatomIndex].z);
   // ------
   // YZ plane
-  areaYZ += (yCloud->pts[jatomIndex].y + yCloud->pts[iatomIndex].y) *
-            (yCloud->pts[jatomIndex].z - yCloud->pts[iatomIndex].z);
+  areaYZ += (yCloud.pts[jatomIndex].y + yCloud.pts[iatomIndex].y) *
+            (yCloud.pts[jatomIndex].z - yCloud.pts[iatomIndex].z);
   // ------
   // The actual projected area is half of this
   areaXY *= 0.5;
@@ -789,7 +789,7 @@ int ring::deformedPrismTypes(const std::vector<ring::strucType> &atomState,
  *  depending on it's type as classified by the prism identification scheme.
  */
 int ring::rmAxialTranslations(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int *atomID,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int &atomID,
     int firstFrame, int currentFrame) {
   //
   int atomIndex;          // Index of the atom to be shifted first
@@ -797,31 +797,31 @@ int ring::rmAxialTranslations(
   double distFrmBoundary; // Distance from either the upper or lower boundary
                           // along the axial dimension
   // Get the axial dimension
-  int axialDim = std::max_element(yCloud->box.begin(), yCloud->box.end()) -
-                 yCloud->box.begin();
+  int axialDim = std::max_element(yCloud.box.begin(), yCloud.box.end()) -
+                 yCloud.box.begin();
   // Check: (default z)
   if (axialDim < 0 || axialDim > 2) {
     axialDim = 2;
   } // end of check to set the axial dimension
   // Lower and higher limits of the box in the axial dimension
-  double boxLowAxial = yCloud->boxLow[axialDim];
-  double boxHighAxial = boxLowAxial + yCloud->box[axialDim];
+  double boxLowAxial = yCloud.boxLow[axialDim];
+  double boxHighAxial = boxLowAxial + yCloud.box[axialDim];
   //
   // -----------------------------------
   // Update the atomID of the 'first' atom in yCloud if the current frame is the
   // first frame.
   // Get the atom index of the first atom to be shifted down or up
   if (currentFrame == firstFrame) {
-    *atomID = yCloud->pts[0].atomID;
+    atomID = yCloud.pts[0].atomID;
     atomIndex = 0;
   } // end of update of the atom ID to be shifted for the first frame
   else {
     //
-    int iatomID = *atomID; // Atom ID of the first particle to be moved down
+    int iatomID = atomID; // Atom ID of the first particle to be moved down
     // Find the index given the atom ID
-    auto it = yCloud->idIndexMap.find(iatomID);
+    auto it = yCloud.idIndexMap.find(iatomID);
 
-    if (it != yCloud->idIndexMap.end()) {
+    if (it != yCloud.idIndexMap.end()) {
       atomIndex = it->second;
     } // found jatom
     else {
@@ -833,40 +833,40 @@ int ring::rmAxialTranslations(
   // -----------------------------------
   // Calculate the distance by which the atoms must be shifted (negative value)
   if (axialDim == 0) {
-    shiftDistance = boxLowAxial - yCloud->pts[atomIndex].x;
+    shiftDistance = boxLowAxial - yCloud.pts[atomIndex].x;
   } // x coordinate
   else if (axialDim == 1) {
-    shiftDistance = boxLowAxial - yCloud->pts[atomIndex].y;
+    shiftDistance = boxLowAxial - yCloud.pts[atomIndex].y;
   } // y coordinate
   else {
-    shiftDistance = boxLowAxial - yCloud->pts[atomIndex].z;
+    shiftDistance = boxLowAxial - yCloud.pts[atomIndex].z;
   } // z coordinate
   // -----------------------------------
   // Shift all the particles
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     // Shift the particles along the axial dimension only
     if (axialDim == 0) {
-      yCloud->pts[iatom].x += shiftDistance;
+      yCloud.pts[iatom].x += shiftDistance;
       // Wrap-around
-      if (yCloud->pts[iatom].x < boxLowAxial) {
-        distFrmBoundary = boxLowAxial - yCloud->pts[iatom].x; // positive value
-        yCloud->pts[iatom].x = boxHighAxial - distFrmBoundary;
+      if (yCloud.pts[iatom].x < boxLowAxial) {
+        distFrmBoundary = boxLowAxial - yCloud.pts[iatom].x; // positive value
+        yCloud.pts[iatom].x = boxHighAxial - distFrmBoundary;
       } // end of wrap-around
     }   // x coordinate
     else if (axialDim == 1) {
-      yCloud->pts[iatom].y += shiftDistance;
+      yCloud.pts[iatom].y += shiftDistance;
       // Wrap-around
-      if (yCloud->pts[iatom].y < boxLowAxial) {
-        distFrmBoundary = boxLowAxial - yCloud->pts[iatom].y; // positive value
-        yCloud->pts[iatom].y = boxHighAxial - distFrmBoundary;
+      if (yCloud.pts[iatom].y < boxLowAxial) {
+        distFrmBoundary = boxLowAxial - yCloud.pts[iatom].y; // positive value
+        yCloud.pts[iatom].y = boxHighAxial - distFrmBoundary;
       } // end of wrap-around
     }   // y coordinate
     else {
-      yCloud->pts[iatom].z += shiftDistance;
+      yCloud.pts[iatom].z += shiftDistance;
       // Wrap-around
-      if (yCloud->pts[iatom].z < boxLowAxial) {
-        distFrmBoundary = boxLowAxial - yCloud->pts[iatom].z; // positive value
-        yCloud->pts[iatom].z = boxHighAxial - distFrmBoundary;
+      if (yCloud.pts[iatom].z < boxLowAxial) {
+        distFrmBoundary = boxLowAxial - yCloud.pts[iatom].z; // positive value
+        yCloud.pts[iatom].z = boxHighAxial - distFrmBoundary;
       } // end of wrap-around
     }   // z coordinate
   }     // end of shifting all paritcles downward

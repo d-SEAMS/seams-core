@@ -36,8 +36,8 @@
  * @param[in] firstFrame First frame to be analyzed
  */
 int clump::largestIceCluster(
-    std::string path, molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
+    std::string path, molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &iceCloud,
     const std::vector<std::vector<int>> &nList, std::vector<bool> *isIce,
     std::vector<int> *list, std::vector<int> *nClusters,
     std::unordered_map<int, int> *indexNumber, int firstFrame) {
@@ -57,12 +57,12 @@ int clump::largestIceCluster(
 
   // -----------------------------------------------------------
   // INITIALIZATION
-  linkedList.resize(yCloud->nop, -1); // init to dummy value
+  linkedList.resize(yCloud.nop, -1); // init to dummy value
   // Initial values of the list. -1 is a dummy value if the molecule is
   // water or not in the slice
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     // Skip if the molecule is water or if it is not in the slice
-    if ((*isIce)[iatom] == false || yCloud->pts[iatom].inSlice == false) {
+    if ((*isIce)[iatom] == false || yCloud.pts[iatom].inSlice == false) {
       continue;
     } // skip for water or not in slice
     // Otherwise, assign the index as the ID
@@ -70,7 +70,7 @@ int clump::largestIceCluster(
   } // init of cluster IDs
   // -----------------------------------------------------------
   // Get the linked list
-  for (int i = 0; i < yCloud->nop - 1; i++) {
+  for (int i = 0; i < yCloud.nop - 1; i++) {
     //
     // Skip if the molecule is water or if it is not in the slice
     if (linkedList[i] == -1) {
@@ -87,7 +87,7 @@ int clump::largestIceCluster(
     do {
       //
       // Go through the rest of the atoms (KLOOP)
-      for (int k = i + 1; k < yCloud->nop; k++) {
+      for (int k = i + 1; k < yCloud.nop; k++) {
         // Skip if not ice
         if ((*isIce)[k] == false) {
           continue;
@@ -98,7 +98,7 @@ int clump::largestIceCluster(
         } // Already part of a cluster
         //
         // Check to see if k is a nearest neighbour of j
-        kAtomID = yCloud->pts[k].atomID; // Atom ID
+        kAtomID = yCloud.pts[k].atomID; // Atom ID
         auto it = std::find(nList[j].begin() + 1, nList[j].end(), kAtomID);
         if (it != nList[j].end()) {
           // Swap!
@@ -120,9 +120,9 @@ int clump::largestIceCluster(
   int nextElement; // value in list
   int index;       // starting index value
   // init
-  visited.resize(yCloud->nop);
+  visited.resize(yCloud.nop);
 
-  for (int i = 0; i < yCloud->nop; i++) {
+  for (int i = 0; i < yCloud.nop; i++) {
     //
     if (visited[i]) {
       continue;
@@ -167,29 +167,29 @@ int clump::largestIceCluster(
   // L[i]->j->L[j]->k->L[k]->i
   index = startCluster;
   // Update iceCloud
-  iPoint = yCloud->pts[index];
-  iceCloud->pts.push_back(iPoint);
+  iPoint = yCloud.pts[index];
+  iceCloud.pts.push_back(iPoint);
   //
   nextElement = linkedList[startCluster];
   while (nextElement != index) {
     currentIndex = nextElement;
     // update with currentIndex
-    iPoint = yCloud->pts[currentIndex];
-    iceCloud->pts.push_back(iPoint);
+    iPoint = yCloud.pts[currentIndex];
+    iceCloud.pts.push_back(iPoint);
     // end update
     nextElement = linkedList[currentIndex];
   } // get the largest cluster
   // -----------------------------------------------------------
   // Update other variables in iceCloud
 
-  iceCloud->currentFrame = yCloud->currentFrame;
-  iceCloud->nop = iceCloud->pts.size();
-  iceCloud->box = yCloud->box;
-  iceCloud->boxLow = yCloud->boxLow;
+  iceCloud.currentFrame = yCloud.currentFrame;
+  iceCloud.nop = iceCloud.pts.size();
+  iceCloud.box = yCloud.box;
+  iceCloud.boxLow = yCloud.boxLow;
 
   // Update idIndexMap
-  for (int iatom = 0; iatom < iceCloud->nop; iceCloud++) {
-    iceCloud->idIndexMap[iceCloud->pts[iatom].atomID] = iatom;
+  for (int iatom = 0; iatom < iceCloud.nop; iatom++) {
+    iceCloud.idIndexMap[iceCloud.pts[iatom].atomID] = iatom;
   } // end of loop through iceCloud
 
   // -----------------------------------------------------------
@@ -211,11 +211,11 @@ int clump::largestIceCluster(
     avgClusterSize /= totalClusters;
   }
 
-  iceCloud->currentFrame = yCloud->currentFrame;
+  iceCloud.currentFrame = yCloud.currentFrame;
   nLargestCluster = (*nClusters)[lClusIndex];
 
   // Write out to the file
-  sout::writeClusterStats(path, yCloud->currentFrame, nLargestCluster,
+  sout::writeClusterStats(path, yCloud.currentFrame, nLargestCluster,
                           totalClusters, smallestCluster, avgClusterSize,
                           firstFrame);
 
@@ -233,7 +233,7 @@ int clump::largestIceCluster(
  *  for the largest ice cluster
  */
 int clump::singleClusterLinkedList(
-    molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &iceCloud,
     const std::vector<std::vector<int>> &nList, std::vector<int> *linkedList) {
   //
   int j;
@@ -241,15 +241,15 @@ int clump::singleClusterLinkedList(
   //
   // -----------------------------------------------------------
   // INITIALIZATION
-  (*linkedList).resize(iceCloud->nop);
+  (*linkedList).resize(iceCloud.nop);
   // Initial values of the list.
-  for (int iatom = 0; iatom < iceCloud->nop; iatom++) {
+  for (int iatom = 0; iatom < iceCloud.nop; iatom++) {
     // Assign the index as the ID
     (*linkedList)[iatom] = iatom;
   } // init of cluster IDs
   // -----------------------------------------------------------
   // Get the linked list
-  for (int i = 0; i < iceCloud->nop - 1; i++) {
+  for (int i = 0; i < iceCloud.nop - 1; i++) {
     //
     // If iatom is already in a cluster, skip it
     if ((*linkedList)[i] != i) {
@@ -261,7 +261,7 @@ int clump::singleClusterLinkedList(
     do {
       //
       // Go through the rest of the atoms (KLOOP)
-      for (int k = i + 1; k < iceCloud->nop; k++) {
+      for (int k = i + 1; k < iceCloud.nop; k++) {
         // Skip if already part of a cluster
         if ((*linkedList)[k] != k) {
           continue;
@@ -309,8 +309,8 @@ int clump::singleClusterLinkedList(
  */
 int clump::clusterAnalysis(
     std::string path,
-    molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &iceCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList,
     std::vector<std::vector<int>> &iceNeighbourList, double cutoff,
     int firstFrame, std::string bopAnalysis) {
@@ -326,11 +326,11 @@ int clump::clusterAnalysis(
   // -------------------------------------------------------
   // Init
   // Clear the largest ice cluster pointCloud.
-  *iceCloud = molSys::clearPointCloud(iceCloud);
+  iceCloud = molSys::clearPointCloud(iceCloud);
   // Clear the neighbour list by index
   nneigh::clearNeighbourList(iceNeighbourList);
   // Init the vector of bools for every particle in yCloud
-  isIce.resize(yCloud->nop);
+  isIce.resize(yCloud.nop);
   nTotalIce = 0; // Total number of ice-like molecules
   // -------------------------------------------------------
   // Use a bond-orientational parameter to find ice-like particles
@@ -342,7 +342,7 @@ int clump::clusterAnalysis(
     q6Values = chill::getq6(yCloud, nList);
     // Assign values to isIce according to the values
     // of the q6 parameter. If q6 is greater than 0.5, it is ice-like.
-    for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+    for (int iatom = 0; iatom < yCloud.nop; iatom++) {
       // If q6 is greater than 0.5, it is ice-like
       if (q6Values[iatom] > 0.5) {
         isIce[iatom] = true; // is ice-like; by default false
@@ -355,16 +355,16 @@ int clump::clusterAnalysis(
   // Q6
   if (bopAnalysis == "chill") {
     //
-    *yCloud = chill::getCorrel(yCloud, nList, false);
+    yCloud = chill::getCorrel(yCloud, nList, false);
     // Get the ice types
-    *yCloud = chill::getIceTypeNoPrint(yCloud, nList, false);
+    yCloud = chill::getIceTypeNoPrint(yCloud, nList, false);
     // Assign values to isIce according to the CHILL algorithm
-    for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+    for (int iatom = 0; iatom < yCloud.nop; iatom++) {
       // If it is an ice-like molecule, add it, otherwise skip
-      if (yCloud->pts[iatom].iceType == molSys::atom_state_type::water) {
+      if (yCloud.pts[iatom].iceType == molSys::atom_state_type::water) {
         continue;
       } // water
-      if (yCloud->pts[iatom].iceType == molSys::atom_state_type::unclassified) {
+      if (yCloud.pts[iatom].iceType == molSys::atom_state_type::unclassified) {
         continue;
       }                    // unclassified
       isIce[iatom] = true; // is ice-like; by default false
@@ -394,12 +394,12 @@ int clump::clusterAnalysis(
  *  molSys::PointCloud iceCloud
  */
 int clump::recenterClusterCloud(
-    molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &iceCloud,
     const std::vector<std::vector<int>> &nList) {
   //
   int dim = 3; // Dimensions
-  std::vector<double> box = iceCloud->box;
-  std::vector<double> boxLow = iceCloud->boxLow;
+  std::vector<double> box = iceCloud.box;
+  std::vector<double> boxLow = iceCloud.boxLow;
   std::vector<double> boxHigh;
   double xBoxCenter, yBoxCenter, zBoxCenter; // Centroid of the simulation box
   double x_centroid, y_centroid, z_centroid; // Centroid of the cluster
@@ -418,7 +418,7 @@ int clump::recenterClusterCloud(
   // --------------------------------------------------------------------------
   // Loop through the entire looped list
   // init
-  visited.resize(iceCloud->nop);
+  visited.resize(iceCloud.nop);
 
   // The starting value is the first atom
   int iatom = 0;    // Atom index of the 'starting value'
@@ -429,7 +429,7 @@ int clump::recenterClusterCloud(
   double xPBC, yPBC, zPBC; // Actual distance
 
   // Loop through the entire linked list
-  for (int i = 0; i < iceCloud->nop; i++) {
+  for (int i = 0; i < iceCloud.nop; i++) {
     //
     if (visited[i]) {
       continue;
@@ -453,19 +453,19 @@ int clump::recenterClusterCloud(
       // and the next element
       // Coordinates
       // if (nextElement != index) {
-      x_ij = iceCloud->pts[currentIndex].x - iceCloud->pts[nextElement].x;
-      y_ij = iceCloud->pts[currentIndex].y - iceCloud->pts[nextElement].y;
-      z_ij = iceCloud->pts[currentIndex].z - iceCloud->pts[nextElement].z;
+      x_ij = iceCloud.pts[currentIndex].x - iceCloud.pts[nextElement].x;
+      y_ij = iceCloud.pts[currentIndex].y - iceCloud.pts[nextElement].y;
+      z_ij = iceCloud.pts[currentIndex].z - iceCloud.pts[nextElement].z;
       // Shift the nextElement if it's on the other side of the box
       // Shift x
       if (fabs(x_ij) > 0.5 * box[0]) {
         // Get the actual distance
         xPBC = box[0] - fabs(x_ij);
         if (x_ij < 0) {
-          iceCloud->pts[nextElement].x = iceCloud->pts[currentIndex].x - xPBC;
+          iceCloud.pts[nextElement].x = iceCloud.pts[currentIndex].x - xPBC;
         } // To the -x side of currentIndex
         else {
-          iceCloud->pts[nextElement].x = iceCloud->pts[currentIndex].x + xPBC;
+          iceCloud.pts[nextElement].x = iceCloud.pts[currentIndex].x + xPBC;
         } // Add to the + side
       }   // Shift nextElement
       //
@@ -474,10 +474,10 @@ int clump::recenterClusterCloud(
         // Get the actual distance
         yPBC = box[1] - fabs(y_ij);
         if (y_ij < 0) {
-          iceCloud->pts[nextElement].y = iceCloud->pts[currentIndex].y - yPBC;
+          iceCloud.pts[nextElement].y = iceCloud.pts[currentIndex].y - yPBC;
         } // To the -y side of currentIndex
         else {
-          iceCloud->pts[nextElement].y = iceCloud->pts[currentIndex].y + yPBC;
+          iceCloud.pts[nextElement].y = iceCloud.pts[currentIndex].y + yPBC;
         } // Add to the + side
       }   // Shift nextElement
       //
@@ -486,10 +486,10 @@ int clump::recenterClusterCloud(
         // Get the actual distance
         zPBC = box[2] - fabs(z_ij);
         if (z_ij < 0) {
-          iceCloud->pts[nextElement].z = iceCloud->pts[currentIndex].z - zPBC;
+          iceCloud.pts[nextElement].z = iceCloud.pts[currentIndex].z - zPBC;
         } // To the -z side of currentIndex
         else {
-          iceCloud->pts[nextElement].z = iceCloud->pts[currentIndex].z + zPBC;
+          iceCloud.pts[nextElement].z = iceCloud.pts[currentIndex].z + zPBC;
         } // Add to the + side
       }   // Shift nextElement
           // -----------------------------------
@@ -509,21 +509,21 @@ int clump::recenterClusterCloud(
   y_centroid = 0.0;
   z_centroid = 0.0;
 
-  for (int i = 0; i < iceCloud->nop; i++) {
-    x_centroid += iceCloud->pts[i].x;
-    y_centroid += iceCloud->pts[i].y;
-    z_centroid += iceCloud->pts[i].z;
+  for (int i = 0; i < iceCloud.nop; i++) {
+    x_centroid += iceCloud.pts[i].x;
+    y_centroid += iceCloud.pts[i].y;
+    z_centroid += iceCloud.pts[i].z;
   } // end of loop through the particles
 
-  if (iceCloud->nop == 0) {
+  if (iceCloud.nop == 0) {
     std::cerr << "There are no particles in the cluster.\n";
     return 1;
   } // error
 
   // Normalize by the number of particles.
-  x_centroid /= iceCloud->nop;
-  y_centroid /= iceCloud->nop;
-  z_centroid /= iceCloud->nop;
+  x_centroid /= iceCloud.nop;
+  y_centroid /= iceCloud.nop;
+  z_centroid /= iceCloud.nop;
 
   // --------------------------------------------------------------------------
   // Get the distance to shift by:
@@ -532,10 +532,10 @@ int clump::recenterClusterCloud(
   double zShift = z_centroid - zBoxCenter;
 
   // Loop through all atoms and shift them
-  for (int i = 0; i < iceCloud->nop; i++) {
-    iceCloud->pts[i].x -= xShift;
-    iceCloud->pts[i].y -= yShift;
-    iceCloud->pts[i].z -= zShift;
+  for (int i = 0; i < iceCloud.nop; i++) {
+    iceCloud.pts[i].x -= xShift;
+    iceCloud.pts[i].y -= yShift;
+    iceCloud.pts[i].z -= zShift;
   } // end of loop through the particles
 
   return 0;

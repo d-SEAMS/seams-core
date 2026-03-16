@@ -10,7 +10,7 @@ int main() {
 
   auto start = std::chrono::high_resolution_clock::now();
   for (int rep = 0; rep < 100; rep++) {
-    auto nList = nneigh::neighListO(3.5, &cloud, 2);
+    auto nList = nneigh::neighListO(3.5, cloud, 2);
   }
   auto end = std::chrono::high_resolution_clock::now();
   auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();

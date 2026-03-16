@@ -22,19 +22,19 @@
  * @param[out] yCloud The cleared PointCloud
  */
 molSys::PointCloud<molSys::Point<double>, double> molSys::clearPointCloud(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   //
   std::vector<molSys::Point<double>> tempPts;
   std::vector<double> tempBox;
   //
   std::vector<double> tempBox1;
 
-  tempPts.swap(yCloud->pts);
-  tempBox.swap(yCloud->box);
-  tempBox1.swap(yCloud->boxLow);
-  yCloud->idIndexMap.clear();
+  tempPts.swap(yCloud.pts);
+  tempBox.swap(yCloud.box);
+  tempBox1.swap(yCloud.boxLow);
+  yCloud.idIndexMap.clear();
 
-  return *yCloud;
+  return yCloud;
 }
 
 /**
@@ -42,16 +42,16 @@ molSys::PointCloud<molSys::Point<double>, double> molSys::clearPointCloud(
  *  pointCloud as the keys and the molecular IDs as the values
  */
 std::unordered_map<int, int> molSys::createIDMolIDmap(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   std::unordered_map<int, int>
       idMolIDmap; // atom IDs as keys and mol IDs as values
   int iatomMolID; // molID of the current iatom
   int iatomID;    // atom ID of the current iatom
 
   // Loop through the atoms in yCloud
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-    iatomID = yCloud->pts[iatom].atomID;   // atom ID
-    iatomMolID = yCloud->pts[iatom].molID; // molecular ID
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+    iatomID = yCloud.pts[iatom].atomID;   // atom ID
+    iatomMolID = yCloud.pts[iatom].molID; // molecular ID
     // Update the unordered map
     idMolIDmap[iatomID] = iatomMolID;
   } // end of loop through every iatom in pointCloud
@@ -65,16 +65,16 @@ std::unordered_map<int, int> molSys::createIDMolIDmap(
  * can have the same molecule ID. 
  */
 std::unordered_multimap<int, int> molSys::createMolIDAtomIDMultiMap(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   std::unordered_multimap<int, int>
       molIDAtomIDmap; // atom IDs as keys and mol IDs as values
   int iatomMolID; // molID of the current iatom
   int iatomID;    // atom ID of the current iatom
 
   // Loop through the atoms in yCloud
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-    iatomID = yCloud->pts[iatom].atomID;   // atom ID
-    iatomMolID = yCloud->pts[iatom].molID; // molecular ID
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+    iatomID = yCloud.pts[iatom].atomID;   // atom ID
+    iatomMolID = yCloud.pts[iatom].molID; // molecular ID
     // Update the unordered multimap
     molIDAtomIDmap.emplace(iatomMolID,iatomID);
   } // end of loop through every iatom in pointCloud
@@ -87,8 +87,8 @@ std::unordered_multimap<int, int> molSys::createMolIDAtomIDMultiMap(
  *  hydrogen atoms for each molID in the oxygen atom pointCloud
  */
 std::vector<std::vector<int>> molSys::hAtomMolList(
-    molSys::PointCloud<molSys::Point<double>, double> *hCloud,
-    molSys::PointCloud<molSys::Point<double>, double> *oCloud) {
+    molSys::PointCloud<molSys::Point<double>, double> &hCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &oCloud) {
   std::vector<std::vector<int>>
       hMolList; // the first column contains the molecular IDs, and the next
                 // two elements in the row are the hydrogen bond atoms in the
@@ -96,9 +96,9 @@ std::vector<std::vector<int>> molSys::hAtomMolList(
   int iMolID;   // Current molecular ID
   int nHatoms;  // No. of h atoms found for a particular molID.
 
-  for (int iatom = 0; iatom < oCloud->nop; iatom++) {
+  for (int iatom = 0; iatom < oCloud.nop; iatom++) {
     // Get the molID
-    iMolID = oCloud->pts[iatom].molID;
+    iMolID = oCloud.pts[iatom].molID;
 
     hMolList.push_back(std::vector<int>()); // Empty vector for the index iatom
     // Fill the first element with the molecular ID
@@ -107,8 +107,8 @@ std::vector<std::vector<int>> molSys::hAtomMolList(
     nHatoms = 0; // init (no. of h atoms for the particular molID)
 
     // Now search through the hydrogen atom pointCloud for this particular molID
-    for (int jatom = 0; jatom < hCloud->nop; jatom++) {
-      if (hCloud->pts[jatom].molID == iMolID) {
+    for (int jatom = 0; jatom < hCloud.nop; jatom++) {
+      if (hCloud.pts[jatom].molID == iMolID) {
         hMolList[iatom].push_back(jatom); // fill the hatom index
         nHatoms++;
         // If the two hydrogens have been found, break out of the loop

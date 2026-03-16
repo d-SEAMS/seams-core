@@ -59,7 +59,7 @@ TEST_CASE("clearPointCloud empties all vectors", "[mol_sys]") {
   REQUIRE(cloud.nop == 4);
   REQUIRE_FALSE(cloud.pts.empty());
 
-  cloud = molSys::clearPointCloud(&cloud);
+  cloud = molSys::clearPointCloud(cloud);
 
   REQUIRE(cloud.pts.empty());
   REQUIRE(cloud.box.empty());
@@ -69,7 +69,7 @@ TEST_CASE("clearPointCloud empties all vectors", "[mol_sys]") {
 
 TEST_CASE("createIDMolIDmap maps atomID to molID", "[mol_sys]") {
   auto cloud = makeSmallCloud();
-  auto idMolMap = molSys::createIDMolIDmap(&cloud);
+  auto idMolMap = molSys::createIDMolIDmap(cloud);
 
   REQUIRE(idMolMap.size() == 4);
   // atomID 100 -> molID 10
@@ -80,7 +80,7 @@ TEST_CASE("createIDMolIDmap maps atomID to molID", "[mol_sys]") {
 
 TEST_CASE("createMolIDAtomIDMultiMap maps molID to atomID", "[mol_sys]") {
   auto cloud = makeSmallCloud();
-  auto multiMap = molSys::createMolIDAtomIDMultiMap(&cloud);
+  auto multiMap = molSys::createMolIDAtomIDMultiMap(cloud);
 
   REQUIRE(multiMap.size() == 4);
   // Each molID should map to exactly one atomID in this simple case

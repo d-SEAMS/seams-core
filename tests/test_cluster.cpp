@@ -35,10 +35,10 @@ makeClusterCloud(int nAtoms, double spacing) {
 TEST_CASE("singleClusterLinkedList groups all connected atoms", "[cluster]") {
   // 4 atoms in a line with spacing 1.0; cutoff 1.5 connects consecutive pairs
   auto cloud = makeClusterCloud(4, 1.0);
-  auto nList = nneigh::getNewNeighbourListByIndex(&cloud, 1.5);
+  auto nList = nneigh::getNewNeighbourListByIndex(cloud, 1.5);
 
   std::vector<int> linkedList;
-  int result = clump::singleClusterLinkedList(&cloud, nList, &linkedList);
+  int result = clump::singleClusterLinkedList(cloud, nList, &linkedList);
 
   REQUIRE(result == 0);
   REQUIRE(linkedList.size() == 4);
@@ -81,10 +81,10 @@ TEST_CASE("singleClusterLinkedList with disconnected atom", "[cluster]") {
   }
   cloud.nop = 4;
 
-  auto nList = nneigh::getNewNeighbourListByIndex(&cloud, 1.5);
+  auto nList = nneigh::getNewNeighbourListByIndex(cloud, 1.5);
 
   std::vector<int> linkedList;
-  clump::singleClusterLinkedList(&cloud, nList, &linkedList);
+  clump::singleClusterLinkedList(cloud, nList, &linkedList);
 
   REQUIRE(linkedList.size() == 4);
 
@@ -99,8 +99,8 @@ TEST_CASE("recenterClusterCloud shifts centroid toward box center",
   auto cloud = makeClusterCloud(3, 1.0);
   // Atoms at x=0,1,2; box center is at 50
 
-  auto nList = nneigh::getNewNeighbourListByIndex(&cloud, 1.5);
-  int result = clump::recenterClusterCloud(&cloud, nList);
+  auto nList = nneigh::getNewNeighbourListByIndex(cloud, 1.5);
+  int result = clump::recenterClusterCloud(cloud, nList);
 
   REQUIRE(result == 0);
 

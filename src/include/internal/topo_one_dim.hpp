@@ -51,7 +51,7 @@ std::vector<int> findPrisms(
     const std::vector<std::vector<int>> &rings, std::vector<strucType> *ringType,
     int *nPerfectPrisms, int *nImperfectPrisms,
     const std::vector<std::vector<int>> &nList,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     std::vector<double> *rmsdPerAtom, bool doShapeMatching = false);
 
 //! Tests whether two rings are basal rings (true) or not (false) for a prism
@@ -68,19 +68,19 @@ bool relaxedPrismConditions(const std::vector<std::vector<int>> &nList,
 //! prevent overcounting
 bool discardExtraTetragonBlocks(
     std::vector<int> *basal1, std::vector<int> *basal2,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud);
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 
 //! Saves only axial rings out of all possible rings
 std::vector<std::vector<int>> keepAxialRingsOnly(
     const std::vector<std::vector<int>> &rings,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud);
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 
 //! Find out which rings are prisms, looping through all ring sizes upto the
 //! maxDepth The input ringsAllSizes array has rings of every size.
 [[nodiscard]] int prismAnalysis(std::string path, const std::vector<std::vector<int>> &rings,
                   const std::vector<std::vector<int>> &nList,
-                  molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                  int maxDepth, int *atomID, int firstFrame, int currentFrame,
+                  molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                  int maxDepth, int &atomID, int firstFrame, int currentFrame,
                   bool doShapeMatching = false);
 
 //! Assign an atomType (equal to the number of nodes in the ring)
@@ -97,7 +97,7 @@ std::vector<std::vector<int>> keepAxialRingsOnly(
 
 //! Shift the entire ice nanotube and remove axial translations
 [[nodiscard]] int rmAxialTranslations(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int *atomID,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int &atomID,
     int firstFrame, int currentFrame);
 
 }  // namespace ring

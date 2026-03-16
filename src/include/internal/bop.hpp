@@ -177,7 +177,7 @@ struct QlmAtom {
  *  @param[in] isSlice This decides whether there is a slice or not
  */
 molSys::PointCloud<molSys::Point<double>, double>
-getCorrel(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
           const std::vector<std::vector<int>> &nList, bool isSlice = false);
 
 /**
@@ -188,7 +188,7 @@ getCorrel(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
  *  @param[in] nList Row-ordered neighbour list by atom ID
  */
 molSys::PointCloud<molSys::Point<double>, double>
-getIceTypeNoPrint(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+getIceTypeNoPrint(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                   const std::vector<std::vector<int>> &nList, bool isSlice = false);
 
 // Classifies each atom according to the CHILL algorithm
@@ -205,19 +205,19 @@ getIceTypeNoPrint(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
  will be written out.
  */
 molSys::PointCloud<molSys::Point<double>, double>
-getIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+getIceType(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
            const std::vector<std::vector<int>> &nList, std::string path,
            int firstFrame, bool isSlice = false,
            std::string outputFileName = "chill.txt");
 
 //! Gets c_ij and then classifies bond types according to the CHILL+ algorithm
 molSys::PointCloud<molSys::Point<double>, double>
-getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
               const std::vector<std::vector<int>> &nList, bool isSlice = false);
 
 //! Classifies each atom according to the CHILL+ algorithm
 molSys::PointCloud<molSys::Point<double>, double>
-getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                const std::vector<std::vector<int>> &nList, std::string path,
                int firstFrame, bool isSlice = false,
                std::string outputFileName = "chillPlus.txt");
@@ -225,7 +225,7 @@ getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 //! q6 can distinguish between water and ice. Use this for the largest ice
 //! cluster
 std::vector<double>
-getq6(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
       const std::vector<std::vector<int>> &nList, bool isSlice = false);
 
 //! 'Test' condition for classifying hexagonal ice using averaged q6 and q3
@@ -233,22 +233,22 @@ getq6(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 //! According to https://!pubs.rsc.org/en/content/articlehtml/2011/cp/c1cp22167a
 //! Gets c_ij and then classifies bond types according to the CHILL+ algorithm
 molSys::PointCloud<molSys::Point<double>, double>
-reclassifyWater(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+reclassifyWater(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                 std::vector<double> *q6);
 
 //! Prints out the iceType for a particular frame onto the terminal
-[[nodiscard]] int printIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+[[nodiscard]] int printIceType(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                  std::string path, int firstFrame, bool isSlice = false,
                  std::string outputFileName = "superChill.txt");
 
 //! Checks if a given iatom is interfacial ice or not, according to the CHILL
 //! algorithm
-bool isInterfacial(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+bool isInterfacial(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                    const std::vector<std::vector<int>> &nList, int iatom,
                    int num_staggrd, int num_eclipsd);
 
 //! Finds the number of staggered bonds for a given atom of index jatom
-[[nodiscard]] int numStaggered(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+[[nodiscard]] int numStaggered(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                  const std::vector<std::vector<int>> &nList, int jatom);
 
 } // namespace chill

@@ -48,8 +48,8 @@ namespace gen {
 //! this returns a pointCloud containing atoms of only the desired type
 molSys::PointCloud<molSys::Point<double>, double>
 getPointCloudOneAtomType(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    molSys::PointCloud<molSys::Point<double>, double> *outCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &outCloud,
     int atomTypeI, bool isSlice = false,
     std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
     std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
@@ -59,7 +59,7 @@ getPointCloudOneAtomType(
 //! If even one atom of a molecule is inside the region, then all
 //! atoms of that molecule will be inside the region (irrespective of type)
 void moleculesInSingleSlice(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     bool clearPreviousSliceSelection=true,
     std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
     std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
@@ -68,7 +68,7 @@ void moleculesInSingleSlice(
 //! if the atoms are inside the specified (single) region. 
 //! Does not handle atoms in molecules straddling the boundary
 void atomsInSingleSlice(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     bool clearPreviousSliceSelection=true,
     std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
     std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
@@ -76,7 +76,7 @@ void atomsInSingleSlice(
 //! Given a particular molecule ID and a pointCloud set the inSlice bool for all atoms,
 //! with that molecule ID 
 void setAtomsWithSameMolID(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::unordered_multimap<int,int> &molIDAtomIDmap,
     int molID, bool inSliceValue=true);
 
@@ -98,8 +98,8 @@ namespace ring {
 //! to the presence of the atom in the slice 
 //! (this can be done using the gen::moleculesInSingleSlice function. 
 void getEdgeMoleculesInRings(
-    const std::vector<std::vector<int>> &rings, molSys::PointCloud<molSys::Point<double>, double> *oCloud,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, 
+    const std::vector<std::vector<int>> &rings, molSys::PointCloud<molSys::Point<double>, double> &oCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, 
     std::array<double, 3> coordLow, std::array<double, 3> coordHigh,
     bool identicalCloud=false);
 
@@ -112,8 +112,8 @@ void getEdgeMoleculesInRings(
 //! data file of just the molecules and atoms in the slice  
 void printSliceGetEdgeMoleculesInRings(
     std::string path, const std::vector<std::vector<int>> &rings,
-    molSys::PointCloud<molSys::Point<double>, double> *oCloud,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, 
+    molSys::PointCloud<molSys::Point<double>, double> &oCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, 
     std::array<double, 3> coordLow, std::array<double, 3> coordHigh,
     bool identicalCloud=false);
 

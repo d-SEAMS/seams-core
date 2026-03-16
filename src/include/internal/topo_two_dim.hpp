@@ -49,7 +49,7 @@ namespace ring {
 [[nodiscard]] int polygonRingAnalysis(
     std::string path, std::vector<std::vector<int>> rings,
     std::vector<std::vector<int>> nList,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int maxDepth,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int maxDepth,
     double sheetArea, int firstFrame);
 
 } // namespace ring

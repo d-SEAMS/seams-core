@@ -61,8 +61,8 @@ namespace clump {
 
 //! Finds the largest ice cluster
 [[nodiscard]] int largestIceCluster(
-    std::string path, molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
+    std::string path, molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &iceCloud,
     const std::vector<std::vector<int>> &nList, std::vector<bool> *isIce,
     std::vector<int> *clusterID, std::vector<int> *nClusters,
     std::unordered_map<int, int> *indexNumber, int firstFrame);
@@ -70,15 +70,15 @@ namespace clump {
 //! Get the linked list of a cluster, given by iceCloud, for a single cluster.
 //! Required for cluster re-centering
 [[nodiscard]] int singleClusterLinkedList(
-    molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &iceCloud,
     const std::vector<std::vector<int>> &nList, std::vector<int> *linkedList);
 
 //! Does the cluster analysis of ice particles in the system. Returns a
 //! pointCloud of the largest ice cluster. The neighbour list returned is BY
 //! INDEX of the largest ice cluster pointCloud.
 [[nodiscard]] int clusterAnalysis(std::string path,
-                    molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
-                    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+                    molSys::PointCloud<molSys::Point<double>, double> &iceCloud,
+                    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                     const std::vector<std::vector<int>> &nList,
                     std::vector<std::vector<int>> &iceNeighbourList,
                     double cutoff, int firstFrame,
@@ -86,7 +86,7 @@ namespace clump {
 
 //! Recenters the coordinates of a pointCloud
 [[nodiscard]] int recenterClusterCloud(
-    molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &iceCloud,
     const std::vector<std::vector<int>> &nList);
 
 } // namespace clump
