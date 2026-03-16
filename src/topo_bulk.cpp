@@ -984,7 +984,7 @@ bool ring::notNeighboursOfRing(const std::vector<std::vector<int>> &nList,
   int iatom; // AtomID of the atom to be searched for inside the neighbour
              // lists
   int jatom; // AtomID of in whose neighbour list iatom will be searched for
-  std::vector<int>::iterator it;
+  std::vector<int>::const_iterator it;
 
   for (int i = 0; i < (*triplet).size(); i++) {
     iatom = (*triplet)[i]; // AtomID to be searched for
