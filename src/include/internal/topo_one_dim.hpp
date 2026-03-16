@@ -77,7 +77,7 @@ std::vector<std::vector<int>> keepAxialRingsOnly(
 
 //! Find out which rings are prisms, looping through all ring sizes upto the
 //! maxDepth The input ringsAllSizes array has rings of every size.
-int prismAnalysis(std::string path, const std::vector<std::vector<int>> &rings,
+[[nodiscard]] int prismAnalysis(std::string path, const std::vector<std::vector<int>> &rings,
                   const std::vector<std::vector<int>> &nList,
                   molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                   int maxDepth, int *atomID, int firstFrame, int currentFrame,
@@ -85,18 +85,18 @@ int prismAnalysis(std::string path, const std::vector<std::vector<int>> &rings,
 
 //! Assign an atomType (equal to the number of nodes in the ring)
 //! given a vector with a list of indices of rings comprising the prisms
-int assignPrismType(const std::vector<std::vector<int>> &rings,
+[[nodiscard]] int assignPrismType(const std::vector<std::vector<int>> &rings,
                     const std::vector<int> &listPrism, int ringSize,
                     const std::vector<ring::strucType> &ringType,
                     std::vector<int> *atomTypes,
                     std::vector<ring::strucType> *atomState);
 
 //! Get the atom type values for deformed prisms
-int deformedPrismTypes(const std::vector<ring::strucType> &atomState,
+[[nodiscard]] int deformedPrismTypes(const std::vector<ring::strucType> &atomState,
                        std::vector<int> *atomTypes, int maxDepth);
 
 //! Shift the entire ice nanotube and remove axial translations
-int rmAxialTranslations(
+[[nodiscard]] int rmAxialTranslations(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int *atomID,
     int firstFrame, int currentFrame);
 

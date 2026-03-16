@@ -144,11 +144,11 @@ Graph countAllRingsFromIndex(std::vector<std::vector<int>> neighHbondList,
 Graph removeNonSPrings(Graph *fullGraph);
 
 //! Main function that searches for all rings
-int findRings(Graph *fullGraph, int v, std::vector<int> *visited, int maxDepth,
+[[nodiscard]] int findRings(Graph *fullGraph, int v, std::vector<int> *visited, int maxDepth,
               int depth, int root = -1);
 
 //! Calculates the shortest path
-int shortestPath(Graph *fullGraph, int v, int goal, std::vector<int> *path,
+[[nodiscard]] int shortestPath(Graph *fullGraph, int v, int goal, std::vector<int> *path,
                  std::vector<int> *visited, int maxDepth, int depth = 1);
 
 //! Function for clearing vectors in Graph after multiple usage

@@ -60,7 +60,7 @@
 namespace clump {
 
 //! Finds the largest ice cluster
-int largestIceCluster(
+[[nodiscard]] int largestIceCluster(
     std::string path, molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
     const std::vector<std::vector<int>> &nList, std::vector<bool> *isIce,
@@ -69,14 +69,14 @@ int largestIceCluster(
 
 //! Get the linked list of a cluster, given by iceCloud, for a single cluster.
 //! Required for cluster re-centering
-int singleClusterLinkedList(
+[[nodiscard]] int singleClusterLinkedList(
     molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
     const std::vector<std::vector<int>> &nList, std::vector<int> *linkedList);
 
 //! Does the cluster analysis of ice particles in the system. Returns a
 //! pointCloud of the largest ice cluster. The neighbour list returned is BY
 //! INDEX of the largest ice cluster pointCloud.
-int clusterAnalysis(std::string path,
+[[nodiscard]] int clusterAnalysis(std::string path,
                     molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
                     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                     const std::vector<std::vector<int>> &nList,
@@ -85,7 +85,7 @@ int clusterAnalysis(std::string path,
                     std::string bopAnalysis = "q6");
 
 //! Recenters the coordinates of a pointCloud
-int recenterClusterCloud(
+[[nodiscard]] int recenterClusterCloud(
     molSys::PointCloud<molSys::Point<double>, double> *iceCloud,
     const std::vector<std::vector<int>> &nList);
 

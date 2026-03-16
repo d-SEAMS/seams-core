@@ -48,7 +48,7 @@ namespace ring {
 
 //! Find out rings in the bulk, looping through all ring sizes upto the
 //! maxDepth The input ringsAllSizes array has rings of every size.
-int bulkPolygonRingAnalysis(
+[[nodiscard]] int bulkPolygonRingAnalysis(
     std::string path, const std::vector<std::vector<int>> &rings,
     const std::vector<std::vector<int>> &nList,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int maxDepth,
@@ -59,7 +59,7 @@ int bulkPolygonRingAnalysis(
 //! Find out which rings are DDCs or HCs, which are comprised of 6-membered
 //! primitive rings. Start with a neighbour list (by index) and a vector of
 //! vectors of rings (also by index). TODO: try 'square' ice and ice0
-int topoBulkAnalysis(std::string path, const std::vector<std::vector<int>> &rings,
+[[nodiscard]] int topoBulkAnalysis(std::string path, const std::vector<std::vector<int>> &rings,
                      const std::vector<std::vector<int>> &nList,
                      molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                      int firstFrame, bool onlyTetrahedral = true);
@@ -116,18 +116,18 @@ bool notNeighboursOfRing(const std::vector<std::vector<int>> &nList,
                          std::vector<int> *triplet, std::vector<int> *ring);
 
 //! Finds the prismatic rings from basal rings iring and jring
-int findPrismatic(const std::vector<std::vector<int>> &rings, std::vector<int> *listHC,
+[[nodiscard]] int findPrismatic(const std::vector<std::vector<int>> &rings, std::vector<int> *listHC,
                   std::vector<strucType> *ringType, int iring, int jring,
                   std::vector<int> *prismaticRings);
 
 //! Assigns a type of enum class iceType, to every atom, using information from
 //! ringType, which has the information of every ring
-int getAtomTypesTopoBulk(const std::vector<std::vector<int>> &rings,
+[[nodiscard]] int getAtomTypesTopoBulk(const std::vector<std::vector<int>> &rings,
                          const std::vector<ring::strucType> &ringType,
                          std::vector<cage::iceType> *atomTypes);
 
 //! Determines the number of HCs, DDCs, Mixed rings, prismatic and basal rings
-int getStrucNumbers(const std::vector<ring::strucType> &ringType,
+[[nodiscard]] int getStrucNumbers(const std::vector<ring::strucType> &ringType,
                     const std::vector<cage::Cage> &cageList, int *numHC, int *numDDC,
                     int *mixedRings, int *prismaticRings, int *basalRings);
 
@@ -141,7 +141,7 @@ int getStrucNumbers(const std::vector<ring::strucType> &ringType,
 namespace prism3 {
 
 //! Find out which rings are prisms.
-int findBulkPrisms(const std::vector<std::vector<int>> &rings,
+[[nodiscard]] int findBulkPrisms(const std::vector<std::vector<int>> &rings,
                    std::vector<ring::strucType> *ringType,
                    const std::vector<std::vector<int>> &nList,
                    molSys::PointCloud<molSys::Point<double>, double> *yCloud,

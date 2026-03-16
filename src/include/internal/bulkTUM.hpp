@@ -45,7 +45,7 @@ namespace tum3 {
 
 //! Topological unit matching for bulk water. If printClusters is true,
 //! individual clusters of connected cages are printed.
-int topoUnitMatchingBulk(
+[[nodiscard]] int topoUnitMatchingBulk(
     std::string path, const std::vector<std::vector<int>> &rings,
     const std::vector<std::vector<int>> &nList,
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int firstFrame,
@@ -58,14 +58,14 @@ Eigen::MatrixXd buildRefHC(std::string fileName);
 Eigen::MatrixXd buildRefDDC(std::string fileName);
 
 //! Shape-matching for a target HC
-int shapeMatchHC(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+[[nodiscard]] int shapeMatchHC(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                  const Eigen::MatrixXd &refPoints, cage::Cage cageUnit,
                  const std::vector<std::vector<int>> &rings,
                  const std::vector<std::vector<int>> &nList, std::vector<double> *quat,
                  double *rmsd);
 
 //! Shape-matching for a target DDC
-int shapeMatchDDC(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+[[nodiscard]] int shapeMatchDDC(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                   const Eigen::MatrixXd &refPoints,
                   const std::vector<cage::Cage> &cageList, int cageIndex,
                   const std::vector<std::vector<int>> &rings,
@@ -73,13 +73,13 @@ int shapeMatchDDC(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
 
 //! Calulate the RMSD for each ring, using RMSD values (rmsd) obtained from the
 //! shape-matching of each cage
-int updateRMSDatom(const std::vector<std::vector<int>> &rings, cage::Cage cageUnit,
+[[nodiscard]] int updateRMSDatom(const std::vector<std::vector<int>> &rings, cage::Cage cageUnit,
                    double rmsd, std::vector<double> *rmsdPerAtom,
                    std::vector<int> *noOfCommonAtoms,
                    const std::vector<cage::iceType> &atomTypes);
 
 //! Average the RMSD per atom
-int averageRMSDatom(std::vector<double> *rmsdPerAtom,
+[[nodiscard]] int averageRMSDatom(std::vector<double> *rmsdPerAtom,
                     std::vector<int> *noOfCommonAtoms);
 
 //! Topological network methods
@@ -94,7 +94,7 @@ topoBulkCriteria(std::string path, const std::vector<std::vector<int>> &rings,
 //! Clustering
 //! Clusters cages using the Stillinger algorithm and prints out individual XYZ
 //! files of clusters.
-int clusterCages(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+[[nodiscard]] int clusterCages(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                  std::string path, const std::vector<std::vector<int>> &rings,
                  const std::vector<cage::Cage> &cageList, int numHC, int numDDC);
 

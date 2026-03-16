@@ -140,12 +140,12 @@ struct Result {
  *  - In slice bool
  */
 template <typename T> struct Point {
-  int type, molID, atomID;  //! type ID, molID, atomID
-  T x, y, z;                //! coordinates
-  std::vector<Result> c_ij; //! Results (contains bond correlation type)
+  int type = 0, molID = 0, atomID = 0; //! type ID, molID, atomID
+  T x = 0, y = 0, z = 0;              //! coordinates
+  std::vector<Result> c_ij;            //! Results (contains bond correlation type)
   atom_state_type iceType =
-      molSys::atom_state_type::unclassified; //! Type of ice/water etc based on cij
-  bool inSlice = true;      //! Is the point inside the slice or not?
+      atom_state_type::unclassified;   //! Type of ice/water etc based on cij
+  bool inSlice = true;                 //! Is the point inside the slice or not?
 };
 
 // Struct for a collection of points; contains information for a particular
@@ -162,8 +162,8 @@ template <typename T> struct Point {
  */
 template <typename S, typename T> struct PointCloud {
   std::vector<S> pts;    //! Collection of points
-  int currentFrame;      //! Current frame number
-  int nop;               //! Number of atoms
+  int currentFrame = 0;  //! Current frame number
+  int nop = 0;           //! Number of atoms
   std::vector<T> box;    //! Periodic box lengths
   std::vector<T> boxLow; //! xlo, ylo, zlo
   std::unordered_map<int, int> idIndexMap;
@@ -187,7 +187,7 @@ hAtomMolList(molSys::PointCloud<molSys::Point<double>, double> *hCloud,
 
 //! This function searches a vector of vectors molList, for a particular
 //! molecular ID, and returns the index in molList
-int searchMolList(const std::vector<std::vector<int>> &molList, int molIDtoFind);
+[[nodiscard]] int searchMolList(const std::vector<std::vector<int>> &molList, int molIDtoFind);
 
 //!//! Function for clearing vectors in PointCloud after multiple usage
 molSys::PointCloud<molSys::Point<double>, double>

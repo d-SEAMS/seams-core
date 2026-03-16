@@ -65,7 +65,7 @@ double getAvgHeightPrismBlock(
 //! first vector is for the first basal ring, and the second vector is for the
 //! second basal ring. The input neighbour list is with respect to indices, not
 //! IDs
-int relOrderPrismBlock(
+[[nodiscard]] int relOrderPrismBlock(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     const std::vector<int> &basal1, const std::vector<int> &basal2,
     const std::vector<std::vector<int>> &nList, std::vector<int> *outBasal1,
@@ -75,7 +75,7 @@ int relOrderPrismBlock(
 //! prism/perfect prism. Outputs a vector of vectors of indices, such that the
 //! first vector is for the first basal ring, and the second vector is for the
 //! second basal ring.
-int relOrderPrismBlock(
+[[nodiscard]] int relOrderPrismBlock(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
     const std::vector<int> &basal1, const std::vector<int> &basal2,
     std::vector<int> *outBasal1, std::vector<int> *outBasal2);
@@ -98,7 +98,7 @@ Eigen::MatrixXd fillPointSetPrismBlock(
 Eigen::MatrixXd getPointSetCage(ring::strucType type);
 
 //! Matches the order of the basal rings of an HC or a potential HC
-int relOrderHC(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+[[nodiscard]] int relOrderHC(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                const std::vector<int> &basal1, const std::vector<int> &basal2,
                const std::vector<std::vector<int>> &nList,
                std::vector<int> *matchedBasal1,

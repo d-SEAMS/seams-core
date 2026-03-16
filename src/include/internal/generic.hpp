@@ -236,11 +236,11 @@ inline bool compareByAtomID(const molSys::Point<double> &a,
 }
 
 //! Generic function for printing all the struct information
-int prettyPrintYoda(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+[[nodiscard]] int prettyPrintYoda(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                     std::string outFile);
 
 //! Shift particles (unwrapped coordinates)
-int unwrappedCoordShift(
+[[nodiscard]] int unwrappedCoordShift(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatomIndex,
     int jatomIndex, double *x_i, double *y_i, double *z_i, double *x_j,
     double *y_j, double *z_j);

@@ -6,7 +6,7 @@ known properties of the test systems.
 """
 
 from pathlib import Path
-from pydseamslib import _core
+from pydseamslib import _core, Trajectory
 
 # Test trajectory (relative to repo root)
 TRAJ = Path("input/traj/exampleTraj.lammpstrj")
@@ -148,3 +148,85 @@ def test_full_pipeline_chill_plus():
     assert classified_count > cloud.nop * 0.5, (
         f"Only {classified_count}/{cloud.nop} atoms classified"
     )
+
+
+# --- Trajectory class tests ---
+
+
+def test_trajectory_load():
+    """Load a trajectory with the Trajectory class and check basic properties."""
+    traj = Trajectory(str(TRAJ.absolute()))
+    assert traj.n_atoms > 0
+    assert len(traj.box) == 3
+    assert all(b > 0 for b in traj.box)
+    assert traj.frame == 1
+    assert traj.atom_type == 2
+    assert traj.cutoff == 3.5
+
+
+def test_trajectory_neighbor_list():
+    """Verify lazy neighbour list construction through the Trajectory class."""
+    traj = Trajectory(str(TRAJ.absolute()))
+    nlist = traj.neighbor_list
+    assert len(nlist) == traj.n_atoms
+    # Each atom should have at least one neighbour (plus self)
+    for entry in nlist:
+        assert len(entry) >= 2, "Expected at least self + one neighbour"
+
+
+def test_trajectory_hbonds():
+    """Verify lazy hydrogen bond construction through the Trajectory class."""
+    traj = Trajectory(str(TRAJ.absolute()))
+    hbonds = traj.hbonds
+    assert len(hbonds) == traj.n_atoms
+    for i in range(len(hbonds)):
+        n_hb = len(hbonds[i]) - 1
+        assert 0 <= n_hb <= 6, f"Atom {i} has {n_hb} H-bonds (expected 0-6)"
+
+
+def test_trajectory_rings():
+    """Verify lazy ring detection through the Trajectory class."""
+    traj = Trajectory(str(TRAJ.absolute()))
+    rings = traj.rings
+    assert len(rings) > 0
+    for ring in rings:
+        assert 3 <= len(ring) <= 6, f"Ring has {len(ring)} members (expected 3-6)"
+
+
+def test_trajectory_classify_chill_plus():
+    """Run CHILL+ via the Trajectory class and verify classification dict."""
+    traj = Trajectory(str(TRAJ.absolute()))
+    counts = traj.classify_chill_plus()
+
+    # Should return a dict of ice type name -> count
+    assert isinstance(counts, dict)
+    assert len(counts) > 0
+
+    # Total should equal number of atoms
+    total = sum(counts.values())
+    assert total == traj.n_atoms, (
+        f"Sum of ice type counts ({total}) != n_atoms ({traj.n_atoms})"
+    )
+
+    # At least some atoms should be classified as non-unclassified
+    classified = total - counts.get("unclassified", 0)
+    assert classified > 0, "Expected some atoms to be classified"
+
+
+def test_trajectory_classify_chill():
+    """Run CHILL via the Trajectory class and verify classification dict."""
+    traj = Trajectory(str(TRAJ.absolute()))
+    counts = traj.classify_chill()
+
+    assert isinstance(counts, dict)
+    total = sum(counts.values())
+    assert total == traj.n_atoms
+
+
+def test_trajectory_custom_parameters():
+    """Verify Trajectory accepts custom frame, atom_type, and cutoff."""
+    traj = Trajectory(
+        str(TRAJ.absolute()), frame=1, atom_type=2, cutoff=4.0
+    )
+    assert traj.cutoff == 4.0
+    assert traj.n_atoms > 0

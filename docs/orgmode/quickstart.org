@@ -30,11 +30,44 @@ python -c "import pydseamslib; print(pydseamslib.__version__)"
 # 2.0.0
 #+end_src
 
-* Read a LAMMPS trajectory
+* Classify ice with the Trajectory class
+
+The high-level ~Trajectory~ class handles trajectory reading, neighbour list
+construction, and hydrogen bond computation automatically. This is the
+recommended way to use d-SEAMS from Python.
 
 The example trajectory ships with the repository at
 ~input/traj/exampleTraj.lammpstrj~. It contains 750 atoms (250 water molecules
 with atom types 1=H and 2=O) in a periodic box.
+
+#+begin_src python
+from pydseamslib import Trajectory
+
+traj = Trajectory("input/traj/exampleTraj.lammpstrj")
+print(f"Loaded {traj.n_atoms} atoms, box: {traj.box}")
+
+ice_types = traj.classify_chill_plus()
+for ice_type, count in sorted(ice_types.items()):
+    print(f"  {ice_type}: {count}")
+#+end_src
+
+You should see 250 oxygen atoms classified into cubic, hexagonal, interfacial,
+and water categories.
+
+The ~Trajectory~ class builds the neighbour list and hydrogen bond network
+lazily on first access. You can also access them directly:
+
+#+begin_src python
+print(f"Neighbours per atom: {len(traj.neighbor_list[0]) - 1}")
+print(f"H-bonds per atom: {len(traj.hbonds[0]) - 1}")
+print(f"Number of rings found: {len(traj.rings)}")
+#+end_src
+
+* Low-level API (step by step)
+
+For full control over each analysis step, use the ~_core~ module directly.
+
+** Read a LAMMPS trajectory
 
 #+begin_src python
 from pydseamslib import _core
@@ -56,7 +89,7 @@ print(f"Box dimensions: {cloud.box}")
 
 You should see 250 oxygen atoms and a box with three positive dimensions.
 
-* Build the neighbour list
+** Build the neighbour list
 
 d-SEAMS builds neighbour lists based on a distance cutoff. For water, 3.5
 Angstroms captures the first coordination shell.
@@ -70,7 +103,7 @@ print(f"Neighbour list has {len(nList)} entries (one per atom)")
 print(f"Atom 0 neighbours: {len(nList[0]) - 1}")
 #+end_src
 
-* Compute hydrogen bonds
+** Compute hydrogen bonds
 
 The hydrogen bond network is built by re-reading the trajectory (to access
 hydrogen positions) and applying geometric criteria to the oxygen neighbour
@@ -96,7 +129,7 @@ print(f"Average H-bonds per oxygen: {avg_hbonds:.2f}")
 
 In bulk water/ice you should see roughly 3.5-4.0 hydrogen bonds per oxygen.
 
-* Run CHILL+ classification
+** Run CHILL+ classification
 
 CHILL+ classifies each molecule by computing bond-order correlations between
 neighbours. The function modifies the point cloud in-place, populating the
@@ -111,7 +144,7 @@ n_classified = sum(1 for pt in cloud.pts if len(pt.c_ij) > 0)
 print(f"Atoms with bond-order data: {n_classified}/{cloud.nop}")
 #+end_src
 
-* Print ice type statistics
+** Print ice type statistics
 
 After CHILL+ correlation, each atom has a list of ~Result~ objects in ~c_ij~.
 Each result contains a ~classifier~ (the bond type) and a ~c_value~ (the
@@ -148,7 +181,7 @@ you can load into visualization tools.
 
 * Verify
 
-After running all five steps you should have:
+After running the tutorial you should have:
 
 1. A ~cloud~ object with ~nop~ equal to 250 (one entry per oxygen)
 2. A neighbour list with 250 entries, each oxygen having roughly 4 neighbours

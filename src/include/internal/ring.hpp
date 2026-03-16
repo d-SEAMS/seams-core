@@ -149,11 +149,11 @@ std::vector<int> findsCommonElements(const std::vector<int> &ring1,
                                      const std::vector<int> &ring2);
 
 //! Erases memory for a vector of vectors for a list of rings
-int clearRingList(std::vector<std::vector<int>> &rings);
+[[nodiscard]] int clearRingList(std::vector<std::vector<int>> &rings);
 
 //! Assign an atomType (equal to the number of nodes in the ring)
 //! given n-membered rings.
-int assignPolygonType(const std::vector<std::vector<int>> &rings,
+[[nodiscard]] int assignPolygonType(const std::vector<std::vector<int>> &rings,
                       std::vector<int> *atomTypes, const std::vector<int> &nRings);
 
 } // namespace ring

@@ -86,7 +86,7 @@ std::vector<std::vector<int>> getNewNeighbourListByIndex(
     molSys::PointCloud<molSys::Point<double>, double> *yCloud, double cutoff);
 
 //! Erases memory for a vector of vectors for the neighbour list
-int clearNeighbourList(std::vector<std::vector<int>> &nList);
+[[nodiscard]] int clearNeighbourList(std::vector<std::vector<int>> &nList);
 
 }  // namespace nneigh
 

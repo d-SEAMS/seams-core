@@ -43,7 +43,7 @@ namespace absor {
 /**
  * @brief Get the absolute orientation using Horn's algorithm (with quaternions)
  */
-int hornAbsOrientation(const Eigen::MatrixXd &refPoints,
+[[nodiscard]] int hornAbsOrientation(const Eigen::MatrixXd &refPoints,
                        const Eigen::MatrixXd &targetPoints,
                        std::vector<double> *quat, double *rmsd,
                        std::vector<double> *rmsdList, double *scale);

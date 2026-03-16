@@ -237,7 +237,7 @@ reclassifyWater(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                 std::vector<double> *q6);
 
 //! Prints out the iceType for a particular frame onto the terminal
-int printIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+[[nodiscard]] int printIceType(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                  std::string path, int firstFrame, bool isSlice = false,
                  std::string outputFileName = "superChill.txt");
 
@@ -248,7 +248,7 @@ bool isInterfacial(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                    int num_staggrd, int num_eclipsd);
 
 //! Finds the number of staggered bonds for a given atom of index jatom
-int numStaggered(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+[[nodiscard]] int numStaggered(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
                  const std::vector<std::vector<int>> &nList, int jatom);
 
 } // namespace chill
