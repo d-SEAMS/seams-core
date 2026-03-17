@@ -53,7 +53,7 @@ int tum3::topoUnitMatchingBulk(
     std::string path, const std::vector<std::vector<int>> &rings,
     const std::vector<std::vector<int>> &nList,
     molSys::PointCloud<molSys::Point<double>, double> &yCloud, int firstFrame,
-    bool printClusters, bool onlyTetrahedral) {
+    bool printClusters, bool onlyTetrahedral, std::string templatePath) {
   // The input rings vector has rings of all sizes
 
   // ringType has a value for rings of a particular size
@@ -107,7 +107,7 @@ int tum3::topoUnitMatchingBulk(
     // Get rings of the current ring size
     ringsOneType = ring::getSingleRingSize(rings, ringSize);
     // Skip for zero rings
-    if (ringsOneType.size() == 0) {
+    if (ringsOneType.empty()) {
       continue;
     } // skip for no rings of ringSize
     //
@@ -120,20 +120,20 @@ int tum3::topoUnitMatchingBulk(
 
       // Find the DDCs and HCs
       cageList = tum3::topoBulkCriteria(path, ringsOneType, nList, yCloud,
-                                        firstFrame, &numHC, &numDDC, &ringType);
+                                        firstFrame, numHC, numDDC, ringType);
 
       // Gets the atom type for every atom, to be used for printing out the ice
       // types found
-      ring::getAtomTypesTopoBulk(ringsOneType, ringType, &atomTypes);
+      ring::getAtomTypesTopoBulk(ringsOneType, ringType, atomTypes);
     }
     // Finding the 5-membered prismatic blocks
     else {
       // Get the prism block classifications
-      prism3::findBulkPrisms(ringsOneType, &ringType, nList, yCloud,
-                             &rmsdPerAtom);
+      prism3::findBulkPrisms(ringsOneType, ringType, nList, yCloud,
+                             rmsdPerAtom);
       // Gets the atom type for every atom, to be used for printing out the ice
       // types found
-      ring::getAtomTypesTopoBulk(ringsOneType, ringType, &atomTypes);
+      ring::getAtomTypesTopoBulk(ringsOneType, ringType, atomTypes);
     }
   }
 
@@ -142,8 +142,8 @@ int tum3::topoUnitMatchingBulk(
   //
   // Get the reference point sets
   //
-  std::string filePathHC = "templates/hc.xyz";
-  std::string filePathDDC = "templates/ddc.xyz";
+  std::string filePathHC = templatePath + "/hc.xyz";
+  std::string filePathDDC = templatePath + "/ddc.xyz";
   refPntsHC = tum3::buildRefHC(filePathHC);    // HC
   refPntsDDC = tum3::buildRefDDC(filePathDDC); // DDC
   //
@@ -164,30 +164,30 @@ int tum3::topoUnitMatchingBulk(
   for (int icage = 0; icage < numHC; icage++) {
     // Match against a perfect HC
     tum3::shapeMatchHC(yCloud, refPntsHC, cageList[icage], ringsOneType, nList,
-                       &quat, &rmsd);
+                       quat, rmsd);
     // Update the vector of quaternions
     quatList.push_back(quat);
     // Update the RMSD per ring
-    tum3::updateRMSDatom(ringsOneType, cageList[icage], rmsd, &rmsdPerAtom,
-                         &noOfCommonElements, atomTypes);
+    tum3::updateRMSDatom(ringsOneType, cageList[icage], rmsd, rmsdPerAtom,
+                         noOfCommonElements, atomTypes);
   } // end of looping through all HCs
   // --------------------------------------------------
   // Go through all the DDCs
   for (int icage = numHC; icage < cageList.size(); icage++) {
     // Match against a perfect DDC
     tum3::shapeMatchDDC(yCloud, refPntsDDC, cageList, icage, ringsOneType,
-                        &quat, &rmsd);
+                        quat, rmsd);
     // Update the vector of quaternions
     quatList.push_back(quat);
     // Update the RMSD per ring
-    tum3::updateRMSDatom(ringsOneType, cageList[icage], rmsd, &rmsdPerAtom,
-                         &noOfCommonElements, atomTypes);
+    tum3::updateRMSDatom(ringsOneType, cageList[icage], rmsd, rmsdPerAtom,
+                         noOfCommonElements, atomTypes);
   } // end of looping through all HCs
 
   // --------------------------------------------------
   // Getting the RMSD per atom
   // Average the RMSD per atom
-  tum3::averageRMSDatom(&rmsdPerAtom, &noOfCommonElements);
+  tum3::averageRMSDatom(rmsdPerAtom, noOfCommonElements);
   // --------------------------------------------------
 
   // Print out the lammps data file with the bonds and types
@@ -252,7 +252,7 @@ int tum3::shapeMatchHC(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const Eigen::MatrixXd &refPoints, cage::Cage cageUnit,
     const std::vector<std::vector<int>> &rings, const std::vector<std::vector<int>> &nList,
-    std::vector<double> *quat, double *rmsd) {
+    std::vector<double> &quat, double &rmsd) {
   //
   int iring,
       jring; // Indices in the ring vector of vectors for the basal rings
@@ -277,8 +277,8 @@ int tum3::shapeMatchHC(
   //
   // ----------------
   // Re-order the basal rings so that they are matched
-  pntToPnt::relOrderHC(yCloud, rings[iring], rings[jring], nList, &basal1,
-                       &basal2);
+  pntToPnt::relOrderHC(yCloud, rings[iring], rings[jring], nList, basal1,
+                       basal2);
   // ----------------
   // Loop through all possible permutations
   //
@@ -287,17 +287,17 @@ int tum3::shapeMatchHC(
     //
     targetPointSet = pntToPnt::changeHexCageOrder(yCloud, basal1, basal2, i);
     // Shape-matching
-    absor::hornAbsOrientation(refPoints, targetPointSet, &currentQuat,
-                              &currentRmsd, &rmsdList, &currentScale);
+    absor::hornAbsOrientation(refPoints, targetPointSet, currentQuat,
+                              currentRmsd, rmsdList, currentScale);
     if (i == 0) {
-      *quat = currentQuat;
-      *rmsd = currentRmsd;
+      quat = currentQuat;
+      rmsd = currentRmsd;
       scale = currentScale;
       index = 0;
     } else {
-      if (currentRmsd < *rmsd) {
-        *quat = currentQuat;
-        *rmsd = currentRmsd;
+      if (currentRmsd < rmsd) {
+        quat = currentQuat;
+        rmsd = currentRmsd;
         scale = currentScale;
         index = i;
       } // update
@@ -324,7 +324,7 @@ int tum3::shapeMatchDDC(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const Eigen::MatrixXd &refPoints, const std::vector<cage::Cage> &cageList,
     int cageIndex, const std::vector<std::vector<int>> &rings,
-    std::vector<double> *quat, double *rmsd) {
+    std::vector<double> &quat, double &rmsd) {
   //
   std::vector<int> ddcOrder;             // Connectivity of the DDC
   int ringSize = 6;                      // Each ring has 6 nodes
@@ -350,17 +350,17 @@ int tum3::shapeMatchDDC(
     //
     targetPointSet = pntToPnt::changeDiaCageOrder(yCloud, ddcOrder, i);
     // Shape-matching
-    absor::hornAbsOrientation(refPoints, targetPointSet, &currentQuat,
-                              &currentRmsd, &rmsdList, &currentScale);
+    absor::hornAbsOrientation(refPoints, targetPointSet, currentQuat,
+                              currentRmsd, rmsdList, currentScale);
     if (i == 0) {
-      *quat = currentQuat;
-      *rmsd = currentRmsd;
+      quat = currentQuat;
+      rmsd = currentRmsd;
       scale = currentScale;
       index = 0;
     } else {
-      if (currentRmsd < *rmsd) {
-        *quat = currentQuat;
-        *rmsd = currentRmsd;
+      if (currentRmsd < rmsd) {
+        quat = currentQuat;
+        rmsd = currentRmsd;
         scale = currentScale;
         index = i;
       } // update
@@ -374,7 +374,7 @@ int tum3::shapeMatchDDC(
  * @details Build a reference Hexagonal cage, reading it in from a templates
  * directory
  */
-Eigen::MatrixXd tum3::buildRefHC(std::string fileName) {
+Eigen::MatrixXd tum3::buildRefHC(const std::string &fileName) {
   //
   Eigen::MatrixXd refPnts(12, 3); // Reference point set (Eigen matrix)
   // Get the reference HC point set
@@ -407,7 +407,7 @@ Eigen::MatrixXd tum3::buildRefHC(std::string fileName) {
   // init the ringType vector
   ringType.resize(rings.size());
   // Find the HCs
-  listHC = ring::findHC(rings, &ringType, nList, &cageList);
+  listHC = ring::findHC(rings, ringType, nList, cageList);
   // Get the basal rings from cageList
   iring = cageList[0].rings[0];
   jring = cageList[0].rings[1];
@@ -420,7 +420,7 @@ Eigen::MatrixXd tum3::buildRefHC(std::string fileName) {
   // other
 
   pntToPnt::relOrderHC(setCloud, rings[iring], rings[jring], nList,
-                       &matchedBasal1, &matchedBasal2);
+                       matchedBasal1, matchedBasal2);
   // Get the reference point set
   refPnts =
       pntToPnt::changeHexCageOrder(setCloud, matchedBasal1, matchedBasal2, 0);
@@ -432,7 +432,7 @@ Eigen::MatrixXd tum3::buildRefHC(std::string fileName) {
  * @details Build a reference Double-Diamond cage, reading it in from a
  * templates directory
  */
-Eigen::MatrixXd tum3::buildRefDDC(std::string fileName) {
+Eigen::MatrixXd tum3::buildRefDDC(const std::string &fileName) {
   //
   Eigen::MatrixXd refPnts(14, 3); // Reference point set (Eigen matrix)
   // Get the reference HC point set
@@ -468,7 +468,7 @@ Eigen::MatrixXd tum3::buildRefDDC(std::string fileName) {
   // init the ringType vector
   ringType.resize(rings.size());
   // Find the DDCs
-  listDDC = ring::findDDC(rings, &ringType, listHC, &cageList);
+  listDDC = ring::findDDC(rings, ringType, listHC, cageList);
   // Save the order of the DDC in a vector
   ddcOrder = pntToPnt::relOrderDDC(0, rings, cageList);
   // Get the reference point set
@@ -485,8 +485,8 @@ Eigen::MatrixXd tum3::buildRefDDC(std::string fileName) {
  */
 int tum3::updateRMSDatom(const std::vector<std::vector<int>> &rings,
                          cage::Cage cageUnit, double rmsd,
-                         std::vector<double> *rmsdPerAtom,
-                         std::vector<int> *noOfCommonAtoms,
+                         std::vector<double> &rmsdPerAtom,
+                         std::vector<int> &noOfCommonAtoms,
                          const std::vector<cage::iceType> &atomTypes) {
   //
   int nRings = cageUnit.rings.size(); // Number of rings in the current cage
@@ -509,12 +509,12 @@ int tum3::updateRMSDatom(const std::vector<std::vector<int>> &rings,
       } // Do not update if the atom is a PNC
       //
       // UPDATE
-      if ((*rmsdPerAtom)[iatom] == -1) {
-        (*rmsdPerAtom)[iatom] = rmsd;
-        (*noOfCommonAtoms)[iatom] = 1;
+      if (rmsdPerAtom[iatom] == -1) {
+        rmsdPerAtom[iatom] = rmsd;
+        noOfCommonAtoms[iatom] = 1;
       } else {
-        (*rmsdPerAtom)[iatom] += rmsd;
-        (*noOfCommonAtoms)[iatom] += 1;
+        rmsdPerAtom[iatom] += rmsd;
+        noOfCommonAtoms[iatom] += 1;
       }
     } // end of looping through all the atoms in the ring
 
@@ -526,17 +526,17 @@ int tum3::updateRMSDatom(const std::vector<std::vector<int>> &rings,
 /**
  *  @details Average the RMSD per atom, by the number of common elements
  */
-int tum3::averageRMSDatom(std::vector<double> *rmsdPerAtom,
-                          std::vector<int> *noOfCommonAtoms) {
+int tum3::averageRMSDatom(std::vector<double> &rmsdPerAtom,
+                          std::vector<int> &noOfCommonAtoms) {
   //
-  int nop = (*rmsdPerAtom).size(); // Number of particles
+  int nop = rmsdPerAtom.size(); // Number of particles
 
   for (int iatom = 0; iatom < nop; iatom++) {
     //
-    if ((*noOfCommonAtoms)[iatom] == 0) {
-      (*rmsdPerAtom)[iatom] = -1; // Dummy atom
+    if (noOfCommonAtoms[iatom] == 0) {
+      rmsdPerAtom[iatom] = -1; // Dummy atom
     } else {
-      (*rmsdPerAtom)[iatom] /= (*noOfCommonAtoms)[iatom];
+      rmsdPerAtom[iatom] /= noOfCommonAtoms[iatom];
     }
   } // end of averaging
 
@@ -582,7 +582,7 @@ std::vector<cage::Cage> tum3::topoBulkCriteria(
     std::string path, const std::vector<std::vector<int>> &rings,
     const std::vector<std::vector<int>> &nList,
     molSys::PointCloud<molSys::Point<double>, double> &yCloud, int firstFrame,
-    int *numHC, int *numDDC, std::vector<ring::strucType> *ringType) {
+    int &numHC, int &numDDC, std::vector<ring::strucType> &ringType) {
   //
   // Ring IDs of each type will be saved in these vectors
   std::vector<int> listDDC; // Vector for ring indices of DDC
@@ -598,35 +598,35 @@ std::vector<cage::Cage> tum3::topoBulkCriteria(
   // ----------------------------------------------
   // Init
   //
-  *numHC = 0;  // Number of hexagonal cages
-  *numDDC = 0; // Init the number of DDCs
+  numHC = 0;  // Number of hexagonal cages
+  numDDC = 0; // Init the number of DDCs
   // Quit the function for zero rings
-  if (rings.size() == 0) {
+  if (rings.empty()) {
     return cageList;
   } // skip for no rings of ringSize
   //
   // Init the ringType vector
-  (*ringType).resize(rings.size()); // Has a value for each ring. init to zero.
+  ringType.resize(rings.size()); // Has a value for each ring. init to zero.
   // ----------------------------------------------
   // Get the cages
 
   // Find HC rings, saving the ring IDs (starting from 0) to listHC
-  listHC = ring::findHC(rings, ringType, nList, &cageList);
+  listHC = ring::findHC(rings, ringType, nList, cageList);
 
   // Find DDC rings, saving the IDs to listDDC
-  listDDC = ring::findDDC(rings, ringType, listHC, &cageList);
+  listDDC = ring::findDDC(rings, ringType, listHC, cageList);
 
   // Find rings which are both DDCs and HCs (mixed)
   // A dummy value of -10 in the listDDC and listHC vectors for mixed rings
-  listMixed = ring::findMixedRings(rings, ringType, &listDDC, &listHC);
+  listMixed = ring::findMixedRings(rings, ringType, listDDC, listHC);
 
   // Get the number of structures (DDCs, HCs, mixed rings, basal rings,
   // prismatic rings)
-  ring::getStrucNumbers(*ringType, cageList, numHC, numDDC, &mixedRings,
-                        &prismaticRings, &basalRings);
+  ring::getStrucNumbers(ringType, cageList, numHC, numDDC, mixedRings,
+                        prismaticRings, basalRings);
 
   // Write out to a file
-  sout::writeTopoBulkData(path, yCloud.currentFrame, *numHC, *numDDC,
+  sout::writeTopoBulkData(path, yCloud.currentFrame, numHC, numDDC,
                           mixedRings, basalRings, prismaticRings, firstFrame);
 
   return cageList;

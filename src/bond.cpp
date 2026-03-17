@@ -24,7 +24,7 @@
  */
 std::vector<std::vector<int>>
 bond::populateBonds(const std::vector<std::vector<int>> &nList,
-                    molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+                    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   //
   std::vector<std::vector<int>> bonds; // Output vector of vectors
   std::vector<int> currentBond;        // Vector for the current bond
@@ -33,7 +33,7 @@ bond::populateBonds(const std::vector<std::vector<int>> &nList,
   int iatomID, jatomID; // Atom IDs of the elements which are bonded
 
   // Error handling
-  if (nList.size() == 0) {
+  if (nList.empty()) {
     // There is some problem!
     std::cerr << "There are no bonds in the system!\n";
     return bonds;
@@ -91,7 +91,7 @@ bond::populateBonds(const std::vector<std::vector<int>> &nList,
  */
 std::vector<std::vector<int>>
 bond::populateBonds(const std::vector<std::vector<int>> &nList,
-                    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                     const std::vector<cage::iceType> &atomTypes) {
   //
   std::vector<std::vector<int>> bonds; // Output vector of vectors
@@ -101,7 +101,7 @@ bond::populateBonds(const std::vector<std::vector<int>> &nList,
   int iatomID, jatomID; // Atom IDs of the elements which are bonded
 
   // Error handling
-  if (nList.size() == 0) {
+  if (nList.empty()) {
     // There is some problem!
     std::cerr << "There are no bonds in the system!\n";
     return bonds;
@@ -243,6 +243,11 @@ bond::populateHbonds(std::string filename,
       // to look for
       listIndex = molSys::searchMolList(molIDlist, jOxyMolID);
 
+      // Skip if the molecular ID was not found in the molIDlist
+      if (listIndex == -1) {
+        continue;
+      } // molID not found
+
       // Get the atom index of the oxygen atom jatom corresponding jatomID
       auto gotJ = yCloud.idIndexMap.find(jatomID);
       if (gotJ != yCloud.idIndexMap.end()) {
@@ -254,6 +259,10 @@ bond::populateHbonds(std::string filename,
       } // index not found
 
       // Loop through the hydrogen atoms connected to jatom oxygen atom
+      // Guard: skip if fewer than 2 H atoms were found for this molecule
+      if (molIDlist[listIndex].size() < 3) {
+        continue;
+      }
       for (int k = 1; k <= 2; k++) {
         hAtomIndex = molIDlist[listIndex][k];
         // --------
@@ -406,6 +415,11 @@ bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, do
       // to look for
       listIndex = molSys::searchMolList(molIDlist, jOxyMolID);
 
+      // Skip if the molecular ID was not found in the molIDlist
+      if (listIndex == -1) {
+        continue;
+      } // molID not found
+
       // Get the atom index of the oxygen atom jatom corresponding jatomID
       auto gotJ = yCloud.idIndexMap.find(jatomID);
       if (gotJ != yCloud.idIndexMap.end()) {
@@ -417,6 +431,10 @@ bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, do
       } // index not found
 
       // Loop through the hydrogen atoms connected to jatom oxygen atom
+      // Guard: skip if fewer than 2 H atoms were found for this molecule
+      if (molIDlist[listIndex].size() < 3) {
+        continue;
+      }
       for (int k = 1; k <= 2; k++) {
         hAtomIndex = molIDlist[listIndex][k];
         // --------
@@ -496,8 +514,8 @@ to each atom.
  *  @param[in] hAtomIndex The index (in the hCloud) of the hydrogen atom
 */
 double bond::getHbondDistanceOH(
-    molSys::PointCloud<molSys::Point<double>, double> &oCloud,
-    molSys::PointCloud<molSys::Point<double>, double> &hCloud, int oAtomIndex,
+    const molSys::PointCloud<molSys::Point<double>, double> &oCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &hCloud, int oAtomIndex,
     int hAtomIndex) {
   std::array<double, 3> dr; // relative distance in the X, Y, Z dimensions
   double r2 = 0.0;          // Bond length
@@ -527,15 +545,15 @@ double bond::getHbondDistanceOH(
 */
 std::vector<std::vector<int>>
 bond::createBondsFromCages(const std::vector<std::vector<int>> &rings,
-                           std::vector<cage::Cage> *cageList,
-                           cage::cageType type, int *nRings) {
+                           std::vector<cage::Cage> &cageList,
+                           cage::cageType type, int &nRings) {
   std::vector<std::vector<int>> bonds; // Output vector of vectors
   std::vector<int> currentBond;        // Vector for the current bond
   int ringSize = rings[0].size();
   int currentRing; // (vector) index of the current ring in a particular cage
 
   // Error handling
-  if (rings.size() == 0) {
+  if (rings.empty()) {
     // There is some problem!
     std::cerr << "There are no rings in the system!\n";
     return bonds;
@@ -548,19 +566,19 @@ bond::createBondsFromCages(const std::vector<std::vector<int>> &rings,
 
   // Traverse the cageList vector of Cages
 
-  *nRings = 0; // init
+  nRings = 0; // init
 
   // Loop through all the cages
-  for (int icage = 0; icage < (*cageList).size(); icage++) {
+  for (int icage = 0; icage < cageList.size(); icage++) {
     // Skip if the cage is of a different type
-    if ((*cageList)[icage].type != type) {
+    if (cageList[icage].type != type) {
       continue;
     }
-    *nRings += (*cageList)[icage].rings.size(); // Add to the number of rings
+    nRings += cageList[icage].rings.size(); // Add to the number of rings
     //
     // Now loop through a particular ring inside the i^th cage
-    for (int iring = 0; iring < (*cageList)[icage].rings.size(); iring++) {
-      currentRing = (*cageList)[icage].rings[iring]; // Current ring index
+    for (int iring = 0; iring < cageList[icage].rings.size(); iring++) {
+      currentRing = cageList[icage].rings[iring]; // Current ring index
       // Get the first atom of each pair inside currentRing
       for (int k = 0; k < rings[currentRing].size() - 1; k++) {
         // Clear the current bond vector

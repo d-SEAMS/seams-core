@@ -20,6 +20,8 @@ test_sources = {
   'topo_two_dim': 'test_topo_two_dim.cpp',
   'seams_input': 'test_seams_input.cpp',
   'seams_output': 'test_seams_output.cpp',
+  'bulkTUM': 'test_bulkTUM.cpp',
+  'pntCorrespondence': 'test_pntCorrespondence.cpp',
 }
 
 # Ensure test binaries load the freshly-built libyodaLib.so instead of any

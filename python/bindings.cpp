@@ -297,7 +297,8 @@ NB_MODULE(_core, m) {
     m.def("topoUnitMatchingBulk", &tum3::topoUnitMatchingBulk,
           "Run full topological unit matching for bulk water.",
           nb::arg("path"), nb::arg("rings"), nb::arg("nList"), nb::arg("yCloud"),
-          nb::arg("firstFrame"), nb::arg("printClusters"), nb::arg("onlyTetrahedral"));
+          nb::arg("firstFrame"), nb::arg("printClusters"), nb::arg("onlyTetrahedral"),
+          nb::arg("templatePath") = "templates");
     m.def("updateRMSDatom", &tum3::updateRMSDatom,
           "Update per-atom RMSD from a cage shape-matching result.",
           nb::arg("rings"), nb::arg("cageUnit"), nb::arg("rmsd"),

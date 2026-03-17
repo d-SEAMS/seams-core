@@ -5,6 +5,7 @@
 #include <cage.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <seams_input.hpp>
 
 // Helper: build a minimal cloud for bond tests
 // 4 atoms forming a square in the xy-plane
@@ -164,6 +165,44 @@ TEST_CASE("createBondsFromCages extracts bonds from cage rings", "[bond]") {
 
   REQUIRE(nRings == 2);
   REQUIRE(bonds.size() > 0);
+}
+
+TEST_CASE("populateHbonds detects hydrogen bonds from trajectory", "[bond]") {
+  // Read O atoms only (populateHbonds expects an O-only cloud)
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/exampleTraj.lammpstrj", 1, yCloud, 1);
+  REQUIRE(yCloud.nop > 0);
+
+  // Build neighbour list for O atoms
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+
+  // Detect H-bonds (Htype = 2)
+  auto hBonds = bond::populateHbonds("traj/exampleTraj.lammpstrj", yCloud,
+                                      nList, 1, 2);
+
+  // Should detect at least some H-bonds in a water system
+  REQUIRE(hBonds.size() > 0);
+}
+
+TEST_CASE("populateHbondsWithInputClouds detects H-bonds from O+H clouds",
+          "[bond]") {
+  // Read O atoms
+  molSys::PointCloud<molSys::Point<double>, double> oCloud;
+  oCloud = sinp::readLammpsTrjO("traj/exampleTraj.lammpstrj", 1, oCloud, 1);
+  if (oCloud.nop == 0) return; // skip if file not found
+
+  // Read H atoms
+  molSys::PointCloud<molSys::Point<double>, double> hCloud;
+  hCloud = sinp::readLammpsTrjO("traj/exampleTraj.lammpstrj", 1, hCloud, 2);
+  REQUIRE(hCloud.nop > 0);
+
+  // Build neighbour list for O atoms
+  auto nList = nneigh::neighListO(3.5, oCloud, 1);
+
+  auto hBonds = bond::populateHbondsWithInputClouds(oCloud, hCloud, nList);
+
+  // H-bonds should be detected in a water system
+  REQUIRE_FALSE(hBonds.empty());
 }
 
 TEST_CASE("createBondsFromCages with no matching cage type returns empty",

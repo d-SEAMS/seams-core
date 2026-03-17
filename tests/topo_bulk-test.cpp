@@ -4,6 +4,7 @@
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <ring.hpp>
+#include <seams_input.hpp>
 #include <seams_output.hpp>
 #include <topo_bulk.hpp>
 
@@ -369,6 +370,36 @@ TEST_CASE("findMixedRings identifies shared DDC/HC rings", "[topo_bulk]") {
   // Find mixed rings (with a single HC, there should be none)
   auto mixedList = ring::findMixedRings(rings, ringType, listDDC, listHC);
   REQUIRE(mixedList.empty());
+}
+
+TEST_CASE("topoBulkAnalysis on mW cubic trajectory", "[topo_bulk]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  REQUIRE(yCloud.nop > 0);
+
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  nList = nneigh::neighbourListByIndex(yCloud, nList);
+  auto rings = primitive::ringNetwork(nList, 7);
+
+  std::string tmpPath = "/tmp/dseams_test_topobulk_mw/";
+  int ret = ring::topoBulkAnalysis(tmpPath, rings, nList, yCloud, 1, true);
+  REQUIRE(ret == 0);
+  fs::remove_all(tmpPath);
+}
+
+TEST_CASE("bulkPolygonRingAnalysis on mW cubic trajectory", "[topo_bulk]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  REQUIRE(yCloud.nop > 0);
+
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  nList = nneigh::neighbourListByIndex(yCloud, nList);
+  auto rings = primitive::ringNetwork(nList, 7);
+
+  std::string tmpPath = "/tmp/dseams_test_bulkpoly_mw/";
+  int ret = ring::bulkPolygonRingAnalysis(tmpPath, rings, nList, yCloud, 7, 1);
+  REQUIRE(ret == 0);
+  fs::remove_all(tmpPath);
 }
 
 TEST_CASE("findPrismatic identifies prismatic rings between HC basals",
