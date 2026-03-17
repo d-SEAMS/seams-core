@@ -943,7 +943,7 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     } // end loop over nearest neighbours
 
     // Average q_value over all nearest neighbours
-    q_value /= (double)nnumNeighbours;
+    q_value /= static_cast<double>(nnumNeighbours);
 
     resultQ[iatom] = q_value; // Update the vector of averaged q6
   }
@@ -983,7 +983,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
         for (int j = 0; j < nnumNeighbours; j++) {
           avgQ3 += yCloud.pts[iatom].c_ij[j].c_value;
         }
-        avgQ3 /= (double)nnumNeighbours;
+        avgQ3 /= static_cast<double>(nnumNeighbours);
 
         // If averaged q3 < -0.75, then reclassify
         if (avgQ3 <= -0.75) {

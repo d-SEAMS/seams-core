@@ -312,7 +312,7 @@ avgVector(std::vector<std::complex<double>> v, int l, int neigh) {
     return v;
   }
   for (int m = 0; m < 2 * l + 1; m++) {
-    v[m] = (1.0 / (double)neigh) * v[m];
+    v[m] = (1.0 / static_cast<double>(neigh)) * v[m];
   }
 
   return v;
