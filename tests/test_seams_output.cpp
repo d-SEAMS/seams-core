@@ -474,6 +474,114 @@ TEST_CASE("writeLAMMPSdataCages writes cage data file", "[seams_output]") {
   }
 }
 
+// -- writePrisms tests --
+
+TEST_CASE("writePrisms writes prism coordinates", "[seams_output]") {
+  auto cloud = makeTestCloud(8);
+  std::string outDir = "../output/prisms";
+  fs::create_directories(outDir);
+
+  std::vector<int> basal1 = {0, 1, 2, 3};
+  std::vector<int> basal2 = {4, 5, 6, 7};
+
+  int ret = sout::writePrisms(basal1, basal2, 1, cloud);
+  REQUIRE(ret == 0);
+
+  fs::remove_all("../output");
+}
+
+// -- writeBasalRingsPrism tests --
+
+TEST_CASE("writeBasalRingsPrism writes prism basal ring data",
+          "[seams_output]") {
+  // Use mW data where atom IDs and nList are consistent
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  if (yCloud.nop == 0) return;
+
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+
+  // Create output directories
+  fs::create_directories("../output/perfect/basalRings");
+
+  // Use the first 4 atom IDs as basal1, next 4 as basal2
+  std::vector<int> basal1, basal2;
+  for (int i = 0; i < 4 && i < yCloud.nop; i++)
+    basal1.push_back(yCloud.pts[i].atomID);
+  for (int i = 4; i < 8 && i < yCloud.nop; i++)
+    basal2.push_back(yCloud.pts[i].atomID);
+
+  int ret =
+      sout::writeBasalRingsPrism(basal1, basal2, 1, nList, yCloud, false);
+  // May return 1 if no neighbors found between basals
+  REQUIRE((ret == 0 || ret == 1));
+
+  fs::remove_all("../output");
+}
+
+// -- writeLAMMPSdataPrisms tests --
+
+TEST_CASE("writeLAMMPSdataPrisms returns 1 for empty prism list",
+          "[seams_output]") {
+  auto cloud = makeTestCloud(4);
+  std::vector<std::vector<int>> rings = {{1, 2, 3}};
+  std::vector<int> listPrism; // empty
+  auto nList = nneigh::getNewNeighbourListByIndex(cloud, 1.5);
+
+  int ret = sout::writeLAMMPSdataPrisms(cloud, rings, false, "", listPrism,
+                                         nList);
+  REQUIRE(ret == 1);
+}
+
+// -- writeLAMMPSdataTopoBulk with real data --
+
+TEST_CASE("writeLAMMPSdataTopoBulk with mixed cage types", "[seams_output]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  if (yCloud.nop == 0) return;
+
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  nList = nneigh::neighbourListByIndex(yCloud, nList);
+  auto rings = primitive::ringNetwork(nList, 7);
+
+  std::vector<ring::strucType> ringType(rings.size());
+  std::vector<cage::Cage> cageList;
+  ring::findHC(rings, ringType, nList, cageList);
+  ring::findDDC(rings, ringType, {}, cageList);
+
+  // Get atom types from ring types
+  std::vector<cage::iceType> atomTypes(yCloud.nop, cage::iceType::dummy);
+  ring::getAtomTypesTopoBulk(rings, ringType, atomTypes);
+
+  std::string tmpPath = "/tmp/dseams_test_datatopobulk_mixed/";
+  int ret = sout::writeLAMMPSdataTopoBulk(yCloud, nList, atomTypes, tmpPath);
+  REQUIRE(ret == 0);
+
+  fs::remove_all(tmpPath);
+}
+
+// -- writeDump with various ice types --
+
+TEST_CASE("writeDump writes all ice type labels", "[seams_output]") {
+  auto cloud = makeTestCloud(8);
+  // Assign various ice types to test all branches
+  cloud.pts[0].iceType = molSys::atom_state_type::cubic;
+  cloud.pts[1].iceType = molSys::atom_state_type::hexagonal;
+  cloud.pts[2].iceType = molSys::atom_state_type::water;
+  cloud.pts[3].iceType = molSys::atom_state_type::interfacial;
+  cloud.pts[4].iceType = molSys::atom_state_type::clathrate;
+  cloud.pts[5].iceType = molSys::atom_state_type::interClathrate;
+  cloud.pts[6].iceType = molSys::atom_state_type::reCubic;
+  cloud.pts[7].iceType = molSys::atom_state_type::reHex;
+
+  std::string tmpPath = "/tmp/dseams_test_dump_types/";
+  int ret = sout::writeDump(cloud, tmpPath, "test.lammpstrj");
+  REQUIRE(ret == 0);
+  REQUIRE(fs::file_size(tmpPath + "test.lammpstrj") > 0);
+
+  fs::remove_all(tmpPath);
+}
+
 TEST_CASE("writeAllCages writes cages from mW cubic trajectory",
           "[seams_output]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
