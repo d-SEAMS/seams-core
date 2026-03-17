@@ -35,12 +35,18 @@ test_sources = {
 _test_env = environment()
 _test_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
 
+# --enable-new-dtags is Linux-only (macOS ld does not support it)
+_test_link_args = []
+if host_machine.system() == 'linux'
+  _test_link_args += ['-Wl,--enable-new-dtags']
+endif
+
 foreach name, src : test_sources
   test(name,
     executable('test_' + name, src,
       dependencies: [yds_dep, catch2_dep],
       cpp_args: _args,
-      link_args: ['-Wl,--enable-new-dtags'],
+      link_args: _test_link_args,
       include_directories: _incdirs,
       build_rpath: '$ORIGIN/../src'),
     workdir: meson.project_source_root() / 'input',
@@ -58,7 +64,7 @@ test('simd',
   executable('test_simd', 'test_simd.cpp',
     dependencies: _simd_deps,
     cpp_args: _simd_args,
-    link_args: ['-Wl,--enable-new-dtags'],
+    link_args: _test_link_args,
     include_directories: _incdirs,
     build_rpath: '$ORIGIN/../src'),
   env: _test_env)
@@ -67,6 +73,6 @@ test('simd',
 executable('bench_algorithms', 'bench_algorithms.cpp',
   dependencies: [yds_dep, catch2_dep],
   cpp_args: _args,
-  link_args: ['-Wl,--enable-new-dtags'],
+  link_args: _test_link_args,
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
