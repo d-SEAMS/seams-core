@@ -132,8 +132,8 @@ int ring::prismAnalysis(
       continue;
     } // skip for no prisms
     // Do a bunch of write-outs and calculations
-    // TODO: Write out each individual prism as data files (maybe with an
-    // option)
+    // Per-prism data file output not yet implemented (future
+    // enhancement)
     // Get the atom types for a particular prism type
     ring::assignPrismType(ringsOneType, listPrism, ringSize, ringType,
                           &atomTypes, &atomState);
