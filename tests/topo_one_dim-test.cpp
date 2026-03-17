@@ -3,6 +3,7 @@
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <ring.hpp>
+#include <seams_input.hpp>
 #include <seams_output.hpp>
 #include <topo_one_dim.hpp>
 

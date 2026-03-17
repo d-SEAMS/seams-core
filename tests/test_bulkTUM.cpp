@@ -76,6 +76,44 @@ TEST_CASE("topoUnitMatchingBulk runs full TUM pipeline on mW cubic",
   fs::remove_all(tmpPath);
 }
 
+TEST_CASE("topoUnitMatchingBulk with clustering enabled on mW cubic",
+          "[bulkTUM]") {
+  auto yCloud = readMwCubicFrame1();
+  REQUIRE(yCloud.nop > 0);
+
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  nList = nneigh::neighbourListByIndex(yCloud, nList);
+  auto rings = primitive::ringNetwork(nList, 7);
+
+  std::string tmpPath = "/tmp/dseams_test_tum_cluster/";
+
+  // printClusters=true exercises clusterCages
+  int ret = tum3::topoUnitMatchingBulk(tmpPath, rings, nList, yCloud, 1, true,
+                                         true, "../templates");
+  REQUIRE(ret == 0);
+
+  fs::remove_all(tmpPath);
+}
+
+TEST_CASE("topoUnitMatchingBulk with onlyTetrahedral=false on mW cubic",
+          "[bulkTUM]") {
+  auto yCloud = readMwCubicFrame1();
+  REQUIRE(yCloud.nop > 0);
+
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  nList = nneigh::neighbourListByIndex(yCloud, nList);
+  auto rings = primitive::ringNetwork(nList, 7);
+
+  std::string tmpPath = "/tmp/dseams_test_tum_nonttet/";
+
+  // onlyTetrahedral=false exercises the 5-membered ring (PNC) path
+  int ret = tum3::topoUnitMatchingBulk(tmpPath, rings, nList, yCloud, 1, false,
+                                         false, "../templates");
+  REQUIRE(ret == 0);
+
+  fs::remove_all(tmpPath);
+}
+
 TEST_CASE("atomsFromCages extracts unique atom indices from cage list",
           "[bulkTUM]") {
   // Synthetic cage data
