@@ -1,8 +1,10 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <pntCorrespondence.hpp>
 #include <shapeMatch.hpp>
 
 #include <Eigen/Dense>
@@ -101,3 +103,48 @@ TEST_CASE("updatePerAtomRMSDRing does not overwrite existing", "[shapeMatch]") {
   // Atom 1 should get 0.6
   REQUIRE_THAT(rmsdPerAtom[1], Catch::Matchers::WithinAbs(0.6, 1e-10));
 }
+
+// -- matchPrismBlock tests using hard-coded tetragonal prism --
+
+TEST_CASE("matchPrismBlock on ideal tetragonal prism", "[shapeMatch]") {
+  // Build 8-atom prism
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {10, 10, 50};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  molSys::Point<double> pt;
+  pt.type = 1;
+  double coords[8][3] = {
+      {0, 0, 0}, {2.75, 0, 0}, {2.75, 2.75, 0}, {0, 2.75, 0},
+      {0, 0, 2.75}, {2.75, 0, 2.75}, {2.75, 2.75, 2.75}, {0, 2.75, 2.75}};
+  for (int i = 0; i < 8; i++) {
+    pt.atomID = i;
+    pt.x = coords[i][0]; pt.y = coords[i][1]; pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i] = i;
+  }
+  cloud.nop = 8;
+
+  auto nList = nneigh::neighListO(3.5, cloud, 1);
+  nList = nneigh::neighbourListByIndex(cloud, nList);
+
+  // Get reference ring points for a 4-membered ring (axial dim=2)
+  auto refPoints = pntToPnt::getPointSetRefRing(4, 2);
+  // Scale reference to match our prism
+  auto refPrism = pntToPnt::createPrismBlock(cloud, refPoints, 4,
+                                              {0, 1, 2, 3}, {4, 5, 6, 7});
+
+  std::vector<int> basal1 = {0, 1, 2, 3};
+  std::vector<int> basal2 = {4, 5, 6, 7};
+  int beginIndex = 0;
+
+  bool isMatch = match::matchPrismBlock(cloud, nList, refPoints, basal1,
+                                         basal2, beginIndex);
+
+  // An ideal prism should match itself (RMSD should be small)
+  REQUIRE(isMatch == true);
+}
+
+// NOTE: matchPrism crashes when relOrderPrismBlock fails to find inter-plane
+// neighbors. This is tracked as d-SEAMS-2z7. The matchPrismBlock test above
+// covers the core shape matching logic directly.
