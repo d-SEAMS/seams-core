@@ -24,7 +24,7 @@
  *  be printed.
  */
 int gen::prettyPrintYoda(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     std::string outFile) {
   std::ofstream outputFile;
   // Create a new file in the output directory
@@ -70,7 +70,7 @@ int gen::prettyPrintYoda(
  *   the unwrapped distance.
  */
 int gen::unwrappedCoordShift(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatomIndex,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatomIndex,
     int jatomIndex, double *x_i, double *y_i, double *z_i, double *x_j,
     double *y_j, double *z_j) {
   //

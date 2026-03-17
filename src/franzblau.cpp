@@ -39,7 +39,7 @@ primitive::ringNetwork(std::vector<std::vector<int>> nList, int maxDepth) {
   fullGraph = primitive::countAllRingsFromIndex(nList, maxDepth);
 
   // Remove all non-SP rings using the Franzblau algorithm.
-  fullGraph = primitive::removeNonSPrings(&fullGraph);
+  fullGraph = primitive::removeNonSPrings(fullGraph);
 
   // The rings vector of vectors inside the fullGraph graph object is the ring
   // network information we want
@@ -80,11 +80,11 @@ primitive::countAllRingsFromIndex(std::vector<std::vector<int>> neighHbondList,
     visited.clear();
     depth = 0;
     // Call the function for getting rings
-    primitive::findRings(&fullGraph, iatom, &visited, maxDepth, depth);
+    primitive::findRings(fullGraph, iatom, visited, maxDepth, depth);
   } // loop through every vertex
   // ------------------------------
   // Restore back-up of the edges (some may have been removed)
-  fullGraph = primitive::restoreEdgesFromIndices(&fullGraph, neighHbondList);
+  fullGraph = primitive::restoreEdgesFromIndices(fullGraph, neighHbondList);
   // ------------------------------
 
   return fullGraph;
@@ -113,7 +113,7 @@ primitive::countAllRingsFromIndex(std::vector<std::vector<int>> neighHbondList,
  * (candidate ring) is being grown. This is initialized to a dummy value of -1,
  * when it is called from primitive::countAllRingsFromIndex.
  */
-int primitive::findRings(Graph *fullGraph, int v, std::vector<int> *visited,
+int primitive::findRings(Graph &fullGraph, int v, std::vector<int> &visited,
                          int maxDepth, int depth, int root) {
   //
   int nnumNeighbours; // Number of nearest neighbours for iNode
@@ -122,7 +122,7 @@ int primitive::findRings(Graph *fullGraph, int v, std::vector<int> *visited,
   // For the first call:
   if (root == -1) {
     root = v;                          // Init the root as the current node
-    fullGraph->pts[v].inGraph = false; // Remove the root from the graph
+    fullGraph.pts[v].inGraph = false; // Remove the root from the graph
   }                                    // first call
   //
   // Checks
@@ -131,7 +131,7 @@ int primitive::findRings(Graph *fullGraph, int v, std::vector<int> *visited,
   }           // searched until the maximum length specified
   //
   // Add the current node to the visited vector
-  visited->push_back(v);
+  visited.push_back(v);
   // -------------
   // Depth-first search
   // 1. Pick a root node (above)
@@ -144,37 +144,37 @@ int primitive::findRings(Graph *fullGraph, int v, std::vector<int> *visited,
   // -------------
   // Start the search
   depth += 1; // Go to the next layer
-  nnumNeighbours = fullGraph->pts[v].neighListIndex.size();
+  nnumNeighbours = fullGraph.pts[v].neighListIndex.size();
   // Loop through the neighbours of iNode
   for (int j = 0; j < nnumNeighbours; j++) {
-    n = fullGraph->pts[v].neighListIndex[j]; // Neighbour index
+    n = fullGraph.pts[v].neighListIndex[j]; // Neighbour index
     // Has a ring been found?!
     if (depth > 2 && n == root) {
       // Add the visited vector to the rings vector of vector
-      fullGraph->rings.push_back(*visited);
+      fullGraph.rings.push_back(visited);
     } // A ring has been found!
     // Otherwise search all the neighbours which have not been searched already
-    else if (fullGraph->pts[n].inGraph) {
-      fullGraph->pts[n].inGraph = false; // Set to false now
+    else if (fullGraph.pts[n].inGraph) {
+      fullGraph.pts[n].inGraph = false; // Set to false now
       // Recursive call
       primitive::findRings(fullGraph, n, visited, maxDepth, depth, root);
-      fullGraph->pts[n].inGraph = true; // Put n back in the graph
+      fullGraph.pts[n].inGraph = true; // Put n back in the graph
     } // Search the other unsearched neighbours
   }   // end of search through all neighbours
   // -------------
   // When the depth is 2, remove just the root from the neighbours of iNode
   if (depth == 2) {
     // Search for root in the neighbour list of v
-    for (int j = 0; j < fullGraph->pts[v].neighListIndex.size(); j++) {
-      if (root == fullGraph->pts[v].neighListIndex[j]) {
-        fullGraph->pts[v].neighListIndex.erase(
-            fullGraph->pts[v].neighListIndex.begin() + j);
+    for (int j = 0; j < fullGraph.pts[v].neighListIndex.size(); j++) {
+      if (root == fullGraph.pts[v].neighListIndex[j]) {
+        fullGraph.pts[v].neighListIndex.erase(
+            fullGraph.pts[v].neighListIndex.begin() + j);
       } // end of erase
     }   // end of search
   }     // remove root not edges
 
   //
-  (*visited).pop_back();
+  visited.pop_back();
   //
   return 0;
 }
@@ -280,7 +280,7 @@ primitive::populateGraphFromIndices(std::vector<std::vector<int>> nList) {
  * @return The Graph object for the current frame.
  */
 primitive::Graph
-primitive::restoreEdgesFromIndices(Graph *fullGraph,
+primitive::restoreEdgesFromIndices(Graph &fullGraph,
                                    std::vector<std::vector<int>> nList) {
   //
   // ------------------------------
@@ -288,10 +288,10 @@ primitive::restoreEdgesFromIndices(Graph *fullGraph,
   for (int i = 0; i < nList.size(); i++) {
     // neighListIndex is simply the i^th row of nList
     // Update the neighListIndex list in the graph object
-    fullGraph->pts[i].neighListIndex = nList[i];
+    fullGraph.pts[i].neighListIndex = nList[i];
   } // end of loop through iatom
 
-  return *fullGraph;
+  return fullGraph;
 }
 
 /**
@@ -304,10 +304,10 @@ primitive::restoreEdgesFromIndices(Graph *fullGraph,
  *  inclding non-SP rings).
  * @return The Graph object for the current frame.
  */
-primitive::Graph primitive::removeNonSPrings(primitive::Graph *fullGraph) {
+primitive::Graph primitive::removeNonSPrings(primitive::Graph &fullGraph) {
   //
-  int nVertices = fullGraph->pts.size(); // Number of vertices in the graph
-  int nRings = fullGraph->rings.size();  // Number of rings
+  int nVertices = fullGraph.pts.size(); // Number of vertices in the graph
+  int nRings = fullGraph.rings.size();  // Number of rings
   std::vector<bool> ringsToRemove; // Vector containing the logical values for
                                    // removal of the current ring index
   std::vector<int> currentRing;    // Current ring being evaluated
@@ -327,12 +327,12 @@ primitive::Graph primitive::removeNonSPrings(primitive::Graph *fullGraph) {
   // -------------------
   // Make sure all the vertices are in the graph before removing non-SP rings
   for (int iVer = 0; iVer < nVertices; iVer++) {
-    fullGraph->pts[iVer].inGraph = true;
+    fullGraph.pts[iVer].inGraph = true;
   } // end of loop through every vertex
   // -------------------
   // Loop through every ring
   for (int iRing = 0; iRing < nRings; iRing++) {
-    currentRing = fullGraph->rings[iRing]; // Current ring
+    currentRing = fullGraph.rings[iRing]; // Current ring
     ringSize = currentRing.size();         // Length of the current ring
     removeRing = false;                    // init
     // Loop through every j^th vertex
@@ -350,8 +350,8 @@ primitive::Graph primitive::removeNonSPrings(primitive::Graph *fullGraph) {
           path.clear(); // init
           visited.clear();
           // Call shortest path function
-          primitive::shortestPath(fullGraph, currentV, currentN, &path,
-                                  &visited, dist_r, 0);
+          primitive::shortestPath(fullGraph, currentV, currentN, path,
+                                  visited, dist_r, 0);
           dist_g = path.size(); // Length of the path over the graph
           if (dist_g < dist_r) {
             removeRing = true;
@@ -366,15 +366,15 @@ primitive::Graph primitive::removeNonSPrings(primitive::Graph *fullGraph) {
   // Remove all the rings whose indices are given in the ringsToRemove vector
   for (int i = 0; i < ringsToRemove.size(); i++) {
     if (!ringsToRemove[i]) {
-      primitiveRings.push_back(fullGraph->rings[i]);
+      primitiveRings.push_back(fullGraph.rings[i]);
     } // updates new copy
   }   // end of loop through ringsToRemove
   // -------------------
   // Update the graph rings with the primitiveRings
-  emptyTempRings.swap(fullGraph->rings);
-  fullGraph->rings = primitiveRings;
+  emptyTempRings.swap(fullGraph.rings);
+  fullGraph.rings = primitiveRings;
   // -------------------
-  return *fullGraph;
+  return fullGraph;
 }
 
 /**
@@ -394,8 +394,8 @@ primitive::Graph primitive::removeNonSPrings(primitive::Graph *fullGraph) {
  *  primitive::removeNonSPrings, the depth is initialized as 0.
  * @return The Graph object for the current frame.
  */
-int primitive::shortestPath(Graph *fullGraph, int v, int goal,
-                            std::vector<int> *path, std::vector<int> *visited,
+int primitive::shortestPath(Graph &fullGraph, int v, int goal,
+                            std::vector<int> &path, std::vector<int> &visited,
                             int maxDepth, int depth) {
   int len_path = 0;   // Length of the path
   int nnumNeighbours; // Number of neighbours for a particular v
@@ -403,35 +403,35 @@ int primitive::shortestPath(Graph *fullGraph, int v, int goal,
   // Start the search for the shortest path
   if (depth < maxDepth) {
     depth += 1; // One layer below
-    (*visited).push_back(
+    visited.push_back(
         v); // Add the current vertex to the path (visited points)
     //
     if (v == goal) {
-      len_path = (*path).size(); // Path of the length of visited points
+      len_path = path.size(); // Path of the length of visited points
       // If the current path is shorter OR this is the first path found
       if (depth < len_path || len_path == 0) {
-        (*path) = (*visited);
+        path = visited;
         maxDepth = depth;
       } // Current path is the shortest
     }   // Goal reached
     // Recursive calls to function
     else {
-      nnumNeighbours = fullGraph->pts[v].neighListIndex.size();
+      nnumNeighbours = fullGraph.pts[v].neighListIndex.size();
       // Search all the neighbours
       for (int j = 0; j < nnumNeighbours; j++) {
-        n = fullGraph->pts[v].neighListIndex[j]; // Index of nearest neighbour
+        n = fullGraph.pts[v].neighListIndex[j]; // Index of nearest neighbour
         // If n has not already been searched:
-        if (fullGraph->pts[n].inGraph == true) {
-          fullGraph->pts[n].inGraph = false; // Set to false
+        if (fullGraph.pts[n].inGraph == true) {
+          fullGraph.pts[n].inGraph = false; // Set to false
           primitive::shortestPath(fullGraph, n, goal, path, visited, maxDepth,
                                   depth);   // Recursive call
-          fullGraph->pts[n].inGraph = true; // Put back in the graph
+          fullGraph.pts[n].inGraph = true; // Put back in the graph
         } // If n is in the graph, call recursively
       }   // End of loop over all neighbours
     }     // Goal not reached
     //
     // Pop the vector
-    (*visited).pop_back();
+    visited.pop_back();
   } // for depth less than maxDepth
   return 0;
 }
@@ -441,11 +441,11 @@ int primitive::shortestPath(Graph *fullGraph, int v, int goal,
  *  filled. This should be called before every frame is read in.
  * @param[out] currentGraph The cleared Graph
  */
-primitive::Graph primitive::clearGraph(Graph *currentGraph) {
+primitive::Graph primitive::clearGraph(Graph &currentGraph) {
   //
   std::vector<primitive::Vertex> tempPts;
   std::vector<std::vector<int>> tempRings;
-  tempPts.swap(currentGraph->pts);
-  tempRings.swap(currentGraph->rings);
-  return *currentGraph;
+  tempPts.swap(currentGraph.pts);
+  tempRings.swap(currentGraph.rings);
+  return currentGraph;
 }
