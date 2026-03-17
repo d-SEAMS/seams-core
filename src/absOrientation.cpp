@@ -29,8 +29,8 @@
  */
 int absor::hornAbsOrientation(const Eigen::MatrixXd &refPoints,
                               const Eigen::MatrixXd &targetPoints,
-                              std::vector<double> *quat, double *rmsd,
-                              std::vector<double> *rmsdList, double *scale) {
+                              std::vector<double> &quat, double &rmsd,
+                              std::vector<double> &rmsdList, double &scale) {
   int nop =
       refPoints.rows(); // Number of particles (equal to the number of rows)
   int dim =
@@ -82,21 +82,21 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd &refPoints,
   //
   // --------
   // Normalize the eigenvector calculated
-  double qNorm = sqrt(calcEigenVec.dot(calcEigenVec));
+  double qNorm = std::sqrt(calcEigenVec.dot(calcEigenVec));
   calcEigenVec /= qNorm; // Divide by the square root of the sum
   // Update the quaternion with the normalized eigenvector
-  (*quat).resize(4); // Output quaternion update
+  quat.resize(4); // Output quaternion update
   for (int i = 0; i < 4; i++) {
-    (*quat)[i] = calcEigenVec(i);
+    quat[i] = calcEigenVec(i);
   } // end of quaternion update
   // --------
   // ---------------------------------------------------
   // COMPUTE THE OPTIMUM SCALE
-  (*scale) = absor::calcScaleFactor(centeredRefPnts, centeredTargetPnts, nop);
+  scale = absor::calcScaleFactor(centeredRefPnts, centeredTargetPnts, nop);
   // ---------------------------------------------------
   // GETTING THE ERROR
-  (*rmsd) = absor::getRMSD(centeredRefPnts, centeredTargetPnts, calcEigenVec,
-                           rmsdList, nop, (*scale));
+  rmsd = absor::getRMSD(centeredRefPnts, centeredTargetPnts, calcEigenVec,
+                           rmsdList, nop, scale);
   // ---------------------------------------------------
   return 0;
 } // end of function
@@ -120,25 +120,8 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd &refPoints,
 Eigen::MatrixXd absor::calcMatrixS(const Eigen::MatrixXd &centeredRefPnts,
                                    const Eigen::MatrixXd &centeredTargetPnts,
                                    int nop, int dim) {
-  Eigen::MatrixXd S(nop, dim);      // Output matrix S
-  Eigen::VectorXd targetCoord(nop); // Column of the target point set
-  Eigen::VectorXd refCoord(nop);    // Column of the reference point set
-  double Svalue; // Current value being filled (Sxx, Sxy etc.)
-
-  // Calculate Sxx, Sxy, Sxz etc
-  for (int iCol = 0; iCol < dim; iCol++) {
-    //
-    for (int jCol = 0; jCol < dim; jCol++) {
-      targetCoord =
-          centeredTargetPnts.col(iCol); // iCol^th column of target point set
-      refCoord = centeredRefPnts.col(jCol); // jCol^th of reference point set
-      Svalue = targetCoord.dot(refCoord);
-      S(iCol, jCol) = Svalue;
-    } // end column wise filling
-  }   // end of filling
-
-  // Output matrix
-  return S;
+  // S = target^T * ref (each column dot product gives Sij)
+  return centeredTargetPnts.transpose() * centeredRefPnts;
 } // end of function
 
 /**
@@ -215,39 +198,8 @@ Eigen::MatrixXd absor::calcMatrixN(const Eigen::MatrixXd &S) {
  *   point set.
  */
 Eigen::MatrixXd absor::centerWRTcentroid(const Eigen::MatrixXd &pointSet) {
-  int nop = pointSet.rows();                  // Number of particles
-  int dim = pointSet.cols();                  // Number of dimensions
-  Eigen::MatrixXd centeredPointSet(nop, dim); // Output point set
-  Eigen::VectorXd vecOfOnes(nop);             // vector of ones
-  std::vector<double> centroid;
-  double coordValue;
-  double centeredVal;
-  //
-  centroid.resize(dim); // Init to zero
-  vecOfOnes = Eigen::VectorXd::Ones(nop);
-  // --------------------------------
-
-  for (int i = 0; i < nop; i++) {
-    for (int k = 0; k < dim; k++) {
-      coordValue = pointSet(i, k);
-      centroid[k] += coordValue;
-    } // loop through columns
-  }   // end of loop through rows
-  // Divide by the total number of particles
-  centroid[0] /= nop; // x
-  centroid[1] /= nop; // y
-  centroid[2] /= nop; // z
-  // --------------------------------
-  // Subtract the centroid from the coordinates to get the centered point set
-  for (int i = 0; i < nop; i++) {
-    for (int k = 0; k < dim; k++) {
-      coordValue = pointSet(i, k);
-      centeredVal = coordValue - centroid[k];
-      centeredPointSet(i, k) = centeredVal;
-    } // end of loop through columns (dimensions)
-  }   // end of loop through the rows
-  // --------------------------------
-  return centeredPointSet;
+  Eigen::RowVectorXd centroid = pointSet.colwise().mean();
+  return pointSet.rowwise() - centroid;
 } // end of function
 
 /**
@@ -264,29 +216,10 @@ Eigen::MatrixXd absor::centerWRTcentroid(const Eigen::MatrixXd &pointSet) {
  */
 double absor::calcScaleFactor(const Eigen::MatrixXd &rightSys,
                               const Eigen::MatrixXd &leftSys, int n) {
-  double scale;  // Output scale
-  double v1 = 0.0, v2 = 0.0; // Sum of the length of the vector
-  Eigen::VectorXd rightVec(
-      3);                     // Vector of the i^th particle in the right system
-  Eigen::VectorXd leftVec(3); // Vector of the i^th particle in the right system
-
-  // scale = (sigma_to_n ||r_r||^2 / ||r_l||^2)^0.5
-  // ref: http://people.csail.mit.edu/bkph/papers/Absolute_Orientation.pdf
-
-  // Loop through all the points, and get the dot product of the vector for each
-  // point
-  for (int i = 0; i < n; i++) {
-    //
-    rightVec = rightSys.row(i); // i^th row of the right system
-    leftVec = leftSys.row(i);   // i^th row of the left system
-    v1 += rightVec.dot(rightVec);
-    v2 += leftVec.dot(leftVec);
-  } // end of loop through all points
-
-  // The optimum scale is the ratio of v1 and v2
-  scale = std::sqrt(v1 / v2);
-
-  return scale;
+  // scale = sqrt(sum ||r_r||^2 / sum ||r_l||^2)
+  double v1 = rightSys.squaredNorm();
+  double v2 = leftSys.squaredNorm();
+  return std::sqrt(v1 / v2);
 } // end of function
 
 /**
@@ -348,10 +281,10 @@ Eigen::MatrixXd absor::quat2RotMatrix(const Eigen::VectorXd &quat) {
 double absor::getRMSD(const Eigen::MatrixXd &centeredRefPnts,
                       const Eigen::MatrixXd &centeredTargetPnts,
                       const Eigen::VectorXd &quat,
-                      std::vector<double> *rmsdList, int nop, double scale) {
+                      std::vector<double> &rmsdList, int nop, double scale) {
   Eigen::MatrixXd R(3, 3); // The (3x3) rotation vector
   // The RMSD per atom is filled in this vector
-  (*rmsdList).resize(nop);
+  rmsdList.resize(nop);
   //
   R = absor::quat2RotMatrix(
       quat); // orthonormal rotation matrix from the quaternion
@@ -372,8 +305,8 @@ double absor::getRMSD(const Eigen::MatrixXd &centeredRefPnts,
     rotatedLeft = R * targetCol;
     errorVec = refCol - scale * rotatedLeft;
     rmsd += errorVec.dot(errorVec);                // Total error
-    (*rmsdList)[i] = sqrt(errorVec.dot(errorVec)); // Error per atom
+    rmsdList[i] = std::sqrt(errorVec.dot(errorVec)); // Error per atom
   } // end of loop through every row
   //
-  return sqrt(rmsd / nop);
+  return std::sqrt(rmsd / nop);
 } // end of function

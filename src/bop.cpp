@@ -966,7 +966,7 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
  */
 molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-    std::vector<double> *q6) {
+    std::vector<double> &q6) {
   // If averaged q6 > 0.5, then consider it to be ice
   // If averaged q3 < -0.75 then it is ih or ic. If q3 < -0.85 then it is cubic,
   // otherwise it is hexagonal
@@ -976,7 +976,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     // Check if it has been classified as water
     if (yCloud.pts[iatom].iceType == molSys::atom_state_type::water) {
-      if ((*q6)[iatom] > 0.5) {
+      if (q6[iatom] > 0.5) {
         avgQ3 = 0.0; // init to zero
         // Loop through all c_ij
         nnumNeighbours = yCloud.pts[iatom].c_ij.size();

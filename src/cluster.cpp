@@ -38,9 +38,9 @@
 int clump::largestIceCluster(
     std::string path, molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     molSys::PointCloud<molSys::Point<double>, double> &iceCloud,
-    const std::vector<std::vector<int>> &nList, std::vector<bool> *isIce,
-    std::vector<int> *list, std::vector<int> *nClusters,
-    std::unordered_map<int, int> *indexNumber, int firstFrame) {
+    const std::vector<std::vector<int>> &nList, std::vector<bool> &isIce,
+    std::vector<int> &list, std::vector<int> &nClusters,
+    std::unordered_map<int, int> &indexNumber, int firstFrame) {
   //
   int kAtomID;                    // Atom ID of the nearest neighbour
   int iClusterNumber;             // Number in the current cluster
@@ -62,7 +62,7 @@ int clump::largestIceCluster(
   // water or not in the slice
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     // Skip if the molecule is water or if it is not in the slice
-    if ((*isIce)[iatom] == false || yCloud.pts[iatom].inSlice == false) {
+    if (!isIce[iatom] || !yCloud.pts[iatom].inSlice) {
       continue;
     } // skip for water or not in slice
     // Otherwise, assign the index as the ID
@@ -89,7 +89,7 @@ int clump::largestIceCluster(
       // Go through the rest of the atoms (KLOOP)
       for (int k = i + 1; k < yCloud.nop; k++) {
         // Skip if not ice
-        if ((*isIce)[k] == false) {
+        if (!isIce[k]) {
           continue;
         } // not ice
         // Skip if already part of a cluster
@@ -148,16 +148,16 @@ int clump::largestIceCluster(
     // Update startingIndex with index
     startingIndex.push_back(index);
     // Update the number of molecules in the cluster
-    (*nClusters).push_back(iClusterNumber);
+    nClusters.push_back(iClusterNumber);
   } // end of loop through
   // -----------------------------------------------------------
   // Get the largest cluster and save the atoms to the iceCloud pointCloud
-  nLargestCluster = *std::max_element((*nClusters).begin(), (*nClusters).end());
+  nLargestCluster = *std::max_element(nClusters.begin(), nClusters.end());
   int lClusIndex = distance(
-      (*nClusters).begin(),
+      nClusters.begin(),
       max_element(
-          (*nClusters).begin(),
-          (*nClusters).end())); // index of the cluster with the largest number
+          nClusters.begin(),
+          nClusters.end())); // index of the cluster with the largest number
   // -----------------------------------------------------------
   // Loop through the linked list from the starting element
   // startingIndex[lClusIndex].
@@ -194,15 +194,15 @@ int clump::largestIceCluster(
 
   // -----------------------------------------------------------
   // Write out the cluster statistics
-  int totalClusters = (*nClusters).size(); // Total number of clusters
+  int totalClusters = nClusters.size(); // Total number of clusters
   int smallestCluster = nLargestCluster =
-      *std::min_element((*nClusters).begin(),
-                        (*nClusters).end()); // Size of the smallest cluster
+      *std::min_element(nClusters.begin(),
+                        nClusters.end()); // Size of the smallest cluster
   double avgClusterSize = 0.0;
 
   // Get the average cluster size
   for (int iCluster = 0; iCluster < totalClusters; iCluster++) {
-    avgClusterSize += (*nClusters)[iCluster];
+    avgClusterSize += nClusters[iCluster];
   } // Loop through the clusters
   // Normalize by the number
   if (totalClusters == 0) {
@@ -212,7 +212,7 @@ int clump::largestIceCluster(
   }
 
   iceCloud.currentFrame = yCloud.currentFrame;
-  nLargestCluster = (*nClusters)[lClusIndex];
+  nLargestCluster = nClusters[lClusIndex];
 
   // Write out to the file
   sout::writeClusterStats(path, yCloud.currentFrame, nLargestCluster,
@@ -234,25 +234,25 @@ int clump::largestIceCluster(
  */
 int clump::singleClusterLinkedList(
     molSys::PointCloud<molSys::Point<double>, double> &iceCloud,
-    const std::vector<std::vector<int>> &nList, std::vector<int> *linkedList) {
+    const std::vector<std::vector<int>> &nList, std::vector<int> &linkedList) {
   //
   int j;
   int temp; // For swapping indices
   //
   // -----------------------------------------------------------
   // INITIALIZATION
-  (*linkedList).resize(iceCloud.nop);
+  linkedList.resize(iceCloud.nop);
   // Initial values of the list.
   for (int iatom = 0; iatom < iceCloud.nop; iatom++) {
     // Assign the index as the ID
-    (*linkedList)[iatom] = iatom;
+    linkedList[iatom] = iatom;
   } // init of cluster IDs
   // -----------------------------------------------------------
   // Get the linked list
   for (int i = 0; i < iceCloud.nop - 1; i++) {
     //
     // If iatom is already in a cluster, skip it
-    if ((*linkedList)[i] != i) {
+    if (linkedList[i] != i) {
       continue;
     } // Already part of a cluster
     //
@@ -263,7 +263,7 @@ int clump::singleClusterLinkedList(
       // Go through the rest of the atoms (KLOOP)
       for (int k = i + 1; k < iceCloud.nop; k++) {
         // Skip if already part of a cluster
-        if ((*linkedList)[k] != k) {
+        if (linkedList[k] != k) {
           continue;
         } // Already part of a cluster
         //
@@ -271,13 +271,13 @@ int clump::singleClusterLinkedList(
         auto it = std::find(nList[j].begin() + 1, nList[j].end(), k);
         if (it != nList[j].end()) {
           // Swap!
-          temp = (*linkedList)[j];
-          (*linkedList)[j] = (*linkedList)[k];
-          (*linkedList)[k] = temp;
+          temp = linkedList[j];
+          linkedList[j] = linkedList[k];
+          linkedList[k] = temp;
         } // j and k are nearest neighbours
       }   // end of loop through k (KLOOP)
       //
-      j = (*linkedList)[j];
+      j = linkedList[j];
     } while (j != i); // end of control for j!=i
     //
 
@@ -374,8 +374,8 @@ int clump::clusterAnalysis(
   }   // end of getting a vector of bools for ice-like particles
   // -------------------------------------------------------
   // Get the largest ice cluster and other data
-  clump::largestIceCluster(path, yCloud, iceCloud, nList, &isIce, &clusterID,
-                           &nClusters, &indexNumber, firstFrame);
+  clump::largestIceCluster(path, yCloud, iceCloud, nList, isIce, clusterID,
+                           nClusters, indexNumber, firstFrame);
 
   // -------------------------------------------------------
   // Get the neighbour list by index according to the largest ice cluster
@@ -414,7 +414,7 @@ int clump::recenterClusterCloud(
 
   // --------------------------------------------------------------------------
   // Get the linked list of the cluster
-  clump::singleClusterLinkedList(iceCloud, nList, &linkedList);
+  clump::singleClusterLinkedList(iceCloud, nList, linkedList);
   // --------------------------------------------------------------------------
   // Loop through the entire looped list
   // init
@@ -458,9 +458,9 @@ int clump::recenterClusterCloud(
       z_ij = iceCloud.pts[currentIndex].z - iceCloud.pts[nextElement].z;
       // Shift the nextElement if it's on the other side of the box
       // Shift x
-      if (fabs(x_ij) > 0.5 * box[0]) {
+      if (std::abs(x_ij) > 0.5 * box[0]) {
         // Get the actual distance
-        xPBC = box[0] - fabs(x_ij);
+        xPBC = box[0] - std::abs(x_ij);
         if (x_ij < 0) {
           iceCloud.pts[nextElement].x = iceCloud.pts[currentIndex].x - xPBC;
         } // To the -x side of currentIndex
@@ -470,9 +470,9 @@ int clump::recenterClusterCloud(
       }   // Shift nextElement
       //
       // Shift y
-      if (fabs(y_ij) > 0.5 * box[1]) {
+      if (std::abs(y_ij) > 0.5 * box[1]) {
         // Get the actual distance
-        yPBC = box[1] - fabs(y_ij);
+        yPBC = box[1] - std::abs(y_ij);
         if (y_ij < 0) {
           iceCloud.pts[nextElement].y = iceCloud.pts[currentIndex].y - yPBC;
         } // To the -y side of currentIndex
@@ -482,9 +482,9 @@ int clump::recenterClusterCloud(
       }   // Shift nextElement
       //
       // Shift z
-      if (fabs(z_ij) > 0.5 * box[2]) {
+      if (std::abs(z_ij) > 0.5 * box[2]) {
         // Get the actual distance
-        zPBC = box[2] - fabs(z_ij);
+        zPBC = box[2] - std::abs(z_ij);
         if (z_ij < 0) {
           iceCloud.pts[nextElement].z = iceCloud.pts[currentIndex].z - zPBC;
         } // To the -z side of currentIndex

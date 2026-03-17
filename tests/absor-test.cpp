@@ -218,7 +218,7 @@ SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
     // init the ringType vector
     ringType.resize(rings.size());
     // Find the HCs
-    listHC = ring::findHC(rings, &ringType, nList, &cageList);
+    listHC = ring::findHC(rings, ringType, nList, cageList);
     // Get the basal rings from cageList
     iring = cageList[0].rings[0];
     jring = cageList[0].rings[1];
@@ -231,7 +231,7 @@ SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
     // other
 
     pntToPnt::relOrderHC(targetCloud, rings[iring], rings[jring], nList,
-                         &matchedBasal1, &matchedBasal2);
+                         matchedBasal1, matchedBasal2);
     //
     // --------------------------
     // Now get the absolute orientation of the left (candidate/target) system
@@ -258,8 +258,8 @@ SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
       targetPointSet = pntToPnt::changeHexCageOrder(targetCloud, matchedBasal1,
                                                     matchedBasal2, i);
       // Shape-matching
-      absor::hornAbsOrientation(refPnts, targetPointSet, &currentQuat,
-                                &currentRmsd, &currentRmsdList, &currentScale);
+      absor::hornAbsOrientation(refPnts, targetPointSet, currentQuat,
+                                currentRmsd, currentRmsdList, currentScale);
       if (i == 0) {
         quaternionRot = currentQuat;
         rmsd1 = currentRmsd;
@@ -282,8 +282,8 @@ SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
     double selfScale;  // Scale for the reference set and itself
 
     // Shape-matching
-    absor::hornAbsOrientation(refPnts, refPnts, &selfQuatRot, &rmsd2,
-                              &rmsdList2, &selfScale);
+    absor::hornAbsOrientation(refPnts, refPnts, selfQuatRot, rmsd2,
+                              rmsdList2, selfScale);
 
     //
     double angDist = gen::angDistDegQuaternions(selfQuatRot, quaternionRot);
@@ -435,7 +435,7 @@ SCENARIO("Test the shape-matching of a perfect DDC rotated by 30 degrees",
     rings = primitive::ringNetwork(nList, 6);
     // init the ringType vector
     ringType.resize(rings.size());
-    listDDC = ring::findDDC(rings, &ringType, listHC, &cageList);
+    listDDC = ring::findDDC(rings, ringType, listHC, cageList);
     // Save the order of the DDC in a vector
     REQUIRE_FALSE(cageList.empty());
     ddcOrder = pntToPnt::relOrderDDC(0, rings, cageList);
@@ -465,8 +465,8 @@ SCENARIO("Test the shape-matching of a perfect DDC rotated by 30 degrees",
       //
       targetPointSet = pntToPnt::changeDiaCageOrder(targetCloud, ddcOrder, i);
       // Shape-matching
-      absor::hornAbsOrientation(refPnts, targetPointSet, &currentQuat,
-                                &currentRmsd, &currentRmsdList, &currentScale);
+      absor::hornAbsOrientation(refPnts, targetPointSet, currentQuat,
+                                currentRmsd, currentRmsdList, currentScale);
       if (i == 0) {
         quaternionRot = currentQuat;
         rmsd1 = currentRmsd;
@@ -489,8 +489,8 @@ SCENARIO("Test the shape-matching of a perfect DDC rotated by 30 degrees",
     double selfScale;  // Scale for the reference set and itself
 
     // Shape-matching
-    absor::hornAbsOrientation(refPnts, refPnts, &selfQuatRot, &rmsd2,
-                              &rmsdList2, &selfScale);
+    absor::hornAbsOrientation(refPnts, refPnts, selfQuatRot, rmsd2,
+                              rmsdList2, selfScale);
 
     //
     double angDist = gen::angDistDegQuaternions(selfQuatRot, quaternionRot);

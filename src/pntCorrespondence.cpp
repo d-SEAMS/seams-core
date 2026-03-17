@@ -54,7 +54,7 @@ Eigen::MatrixXd pntToPnt::getPointSetRefRing(int n, int axialDim) {
  * axial dimension
  */
 Eigen::MatrixXd pntToPnt::createPrismBlock(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const Eigen::MatrixXd &refPoints, int ringSize, const std::vector<int> &basal1,
     const std::vector<int> &basal2) {
   //
@@ -109,7 +109,7 @@ Eigen::MatrixXd pntToPnt::createPrismBlock(
  * calculated from the centroid of each basal ring
  */
 double pntToPnt::getRadiusFromRings(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &basal1, const std::vector<int> &basal2) {
   //
   double avgRadius = 0.0;
@@ -169,7 +169,7 @@ double pntToPnt::getRadiusFromRings(
  * the basal rings of the prism and the axial dimension
  */
 double pntToPnt::getAvgHeightPrismBlock(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &basal1, const std::vector<int> &basal2) {
   //
   double avgHeight = 0.0;
@@ -205,10 +205,10 @@ double pntToPnt::getAvgHeightPrismBlock(
  * IDs
  */
 int pntToPnt::relOrderPrismBlock(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &basal1, const std::vector<int> &basal2,
-    const std::vector<std::vector<int>> &nList, std::vector<int> *outBasal1,
-    std::vector<int> *outBasal2) {
+    const std::vector<std::vector<int>> &nList, std::vector<int> &outBasal1,
+    std::vector<int> &outBasal2) {
   //
   int ringSize = basal1.size(); // Number of nodes in basal1 and basal2
   int nBonds;       // Number of bonds between two parallel basal rings
@@ -319,8 +319,8 @@ int pntToPnt::relOrderPrismBlock(
     }   // end of anti-clockwise update
 
     // Add to outBasal1 and outBasal2 now
-    (*outBasal1).push_back(basal1[currentIatom]);
-    (*outBasal2).push_back(basal2[currentJatom]);
+    outBasal1.push_back(basal1[currentIatom]);
+    outBasal2.push_back(basal2[currentJatom]);
   } //
   //
 
@@ -335,9 +335,9 @@ int pntToPnt::relOrderPrismBlock(
  * IDs
  */
 int pntToPnt::relOrderPrismBlock(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &basal1, const std::vector<int> &basal2,
-    std::vector<int> *outBasal1, std::vector<int> *outBasal2) {
+    std::vector<int> &outBasal1, std::vector<int> &outBasal2) {
   //
   int ringSize = basal1.size(); // Number of nodes in basal1 and basal2
   int nBonds;       // Number of bonds between two parallel basal rings
@@ -449,8 +449,8 @@ int pntToPnt::relOrderPrismBlock(
     }   // end of anti-clockwise update
 
     // Add to outBasal1 and outBasal2 now
-    (*outBasal1).push_back(basal1[currentIatom]);
-    (*outBasal2).push_back(basal2[currentJatom]);
+    outBasal1.push_back(basal1[currentIatom]);
+    outBasal2.push_back(basal2[currentJatom]);
   } //
   //
 
@@ -462,7 +462,7 @@ int pntToPnt::relOrderPrismBlock(
  * of atom indices
  */
 Eigen::MatrixXd pntToPnt::fillPointSetPrismRing(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &basalRing, int startingIndex) {
   //
   //
@@ -506,7 +506,7 @@ Eigen::MatrixXd pntToPnt::fillPointSetPrismRing(
  * indices of the basal rings
  */
 Eigen::MatrixXd pntToPnt::fillPointSetPrismBlock(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &basal1, const std::vector<int> &basal2, int startingIndex) {
   //
   //
@@ -607,10 +607,10 @@ Eigen::MatrixXd pntToPnt::getPointSetCage(ring::strucType type) {
  * the relative order
  */
 int pntToPnt::relOrderHC(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &basal1, const std::vector<int> &basal2,
-    const std::vector<std::vector<int>> &nList, std::vector<int> *matchedBasal1,
-    std::vector<int> *matchedBasal2) {
+    const std::vector<std::vector<int>> &nList, std::vector<int> &matchedBasal1,
+    std::vector<int> &matchedBasal2) {
   //
   int l1 = basal1[0];           // First element of basal1
   int l2 = basal1[1];           // Second element of basal1
@@ -625,8 +625,8 @@ int pntToPnt::relOrderHC(
   bool isReversedOrder;  // basal2 is reversed wrt basal1
   int index;
 
-  (*matchedBasal1).resize(ringSize);
-  (*matchedBasal2).resize(ringSize);
+  matchedBasal1.resize(ringSize);
+  matchedBasal2.resize(ringSize);
 
   // Search to see if l1 or l2 is a neighbour
   // -------------------
@@ -691,7 +691,7 @@ int pntToPnt::relOrderHC(
       if (index >= ringSize) {
         index -= ringSize;
       }                                    // end of wrap-around
-      (*matchedBasal2)[i] = basal2[index]; // fill up values
+      matchedBasal2[i] = basal2[index]; // fill up values
     }                                      // end of filling up tempBasal2
   }                                        // the original order is correct
   else {
@@ -714,7 +714,7 @@ int pntToPnt::relOrderHC(
         if (index < 0) {
           index += ringSize;
         }                                    // end of wrap-around
-        (*matchedBasal2)[i] = basal2[index]; // fill up values
+        matchedBasal2[i] = basal2[index]; // fill up values
       }                                      // end of filling up tempBasal2
 
     }
@@ -727,7 +727,7 @@ int pntToPnt::relOrderHC(
   } // the reversed order is correct!
   // ------------------------------
   // Fill up basal1
-  (*matchedBasal1) = basal1;
+  matchedBasal1 = basal1;
   return 0;
 } // end of the function
 
@@ -738,7 +738,7 @@ int pntToPnt::relOrderHC(
  * (starting from 0 to 5)
  */
 Eigen::MatrixXd pntToPnt::changeHexCageOrder(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &basal1, const std::vector<int> &basal2, int startingIndex) {
   Eigen::MatrixXd pointSet(12, 3);
   int iatomIndex, jatomIndex; // Current atom index in yCloud, according to
@@ -1051,7 +1051,7 @@ std::vector<int> pntToPnt::relOrderDDC(int index,
  * alternate elements of the equatorial ring are bonded.
  */
 Eigen::MatrixXd pntToPnt::changeDiaCageOrder(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &ddcOrder, int startingIndex) {
   int nop = 14;                     // Number of elements in the DDC
   int ringSize = 6;                 // Six nodes in the rings

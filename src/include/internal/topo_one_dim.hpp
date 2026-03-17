@@ -48,26 +48,26 @@ namespace ring {
 //! Find out which rings are prisms.
 //! Returns a vector containing all the ring IDs which are prisms
 std::vector<int> findPrisms(
-    const std::vector<std::vector<int>> &rings, std::vector<strucType> *ringType,
-    int *nPerfectPrisms, int *nImperfectPrisms,
+    const std::vector<std::vector<int>> &rings, std::vector<strucType> &ringType,
+    int &nPerfectPrisms, int &nImperfectPrisms,
     const std::vector<std::vector<int>> &nList,
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-    std::vector<double> *rmsdPerAtom, bool doShapeMatching = false);
+    std::vector<double> &rmsdPerAtom, bool doShapeMatching = false);
 
 //! Tests whether two rings are basal rings (true) or not (false) for a prism
 //! (strict criterion)
 bool basalPrismConditions(const std::vector<std::vector<int>> &nList,
-                          std::vector<int> *basal1, std::vector<int> *basal2);
+                          std::vector<int> &basal1, std::vector<int> &basal2);
 
 //! Reduced criterion: Two candidate basal rings of a prism block should have at
 //! least one bond between them
 bool relaxedPrismConditions(const std::vector<std::vector<int>> &nList,
-                            std::vector<int> *basal1, std::vector<int> *basal2);
+                            std::vector<int> &basal1, std::vector<int> &basal2);
 
 //! Checks whether two 4-membered rings are parallel in one dimension or not to
 //! prevent overcounting
 bool discardExtraTetragonBlocks(
-    std::vector<int> *basal1, std::vector<int> *basal2,
+    std::vector<int> &basal1, std::vector<int> &basal2,
     molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 
 //! Saves only axial rings out of all possible rings
@@ -88,12 +88,12 @@ std::vector<std::vector<int>> keepAxialRingsOnly(
 [[nodiscard]] int assignPrismType(const std::vector<std::vector<int>> &rings,
                     const std::vector<int> &listPrism, int ringSize,
                     const std::vector<ring::strucType> &ringType,
-                    std::vector<int> *atomTypes,
-                    std::vector<ring::strucType> *atomState);
+                    std::vector<int> &atomTypes,
+                    std::vector<ring::strucType> &atomState);
 
 //! Get the atom type values for deformed prisms
 [[nodiscard]] int deformedPrismTypes(const std::vector<ring::strucType> &atomState,
-                       std::vector<int> *atomTypes, int maxDepth);
+                       std::vector<int> &atomTypes, int maxDepth);
 
 //! Shift the entire ice nanotube and remove axial translations
 [[nodiscard]] int rmAxialTranslations(

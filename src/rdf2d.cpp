@@ -43,8 +43,8 @@
  *  @param[in] finalFrame The final frame for RDF binning.
  */
 int rdf2::rdf2Danalysis_AA(
-    std::string path, std::vector<double> *rdfValues,
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
+    std::string path, std::vector<double> &rdfValues,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
     double binwidth, int firstFrame, int finalFrame) {
   //
   int nopA = yCloud.nop; // Number of particles of type A in the current frame.
@@ -61,7 +61,7 @@ int rdf2::rdf2Danalysis_AA(
     // Checks and balances?
     // -----------------
     nbin = 1 + int(cutoff / binwidth); // Number of bins
-    (*rdfValues).resize(nbin);         // RDF initialized to 0
+    rdfValues.resize(nbin);         // RDF initialized to 0
   }                                    // end of initialization
   // ----------------------------------------------
   // SAMPLING
@@ -112,7 +112,7 @@ int rdf2::rdf2Danalysis_AA(
  * @return RDF histogram for the current frame.
  */
 std::vector<int>
-rdf2::sampleRDF_AA(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                    double cutoff, double binwidth, int nbin) {
   //
   std::vector<int> histogram; // Histogram for the RDF
@@ -159,7 +159,7 @@ rdf2::sampleRDF_AA(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
  *  binned. This is basically equivalent to the number of frames over which the
  * RDF will be calculated.
  */
-int rdf2::normalizeRDF(int nopA, std::vector<double> *rdfValues,
+int rdf2::normalizeRDF(int nopA, std::vector<double> &rdfValues,
                        std::vector<int> histogram, double binwidth, int nbin,
                        std::vector<double> volumeLengths, int nIter) {
   //
@@ -194,7 +194,7 @@ int rdf2::normalizeRDF(int nopA, std::vector<double> *rdfValues,
     binVolume = 4 * gen::pi * pow(binwidth, 3.0) *
                 (pow(ibin + 1, 3.0) - pow(ibin, 3.0)) / 3.0;
     // Update the RDF
-    (*rdfValues)[ibin] +=
+    rdfValues[ibin] +=
         histogram[ibin] / (nIter * binVolume * nopA * volumeDensity * factor);
   } // end of loop through every bin
 
@@ -210,7 +210,7 @@ int rdf2::normalizeRDF(int nopA, std::vector<double> *rdfValues,
  *  quasi-two-dimensional system.
  */
 std::vector<double> rdf2::getSystemLengths(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   //
   std::vector<double> lengths; // Volume lengths
   std::vector<double>

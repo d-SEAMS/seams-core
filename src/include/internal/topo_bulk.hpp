@@ -67,69 +67,69 @@ namespace ring {
 //! Find out which hexagonal rings are DDC (Double Diamond Cages) rings.
 //! Returns a vector containing all the ring IDs which are DDC rings
 std::vector<int> findDDC(const std::vector<std::vector<int>> &rings,
-                         std::vector<strucType> *ringType,
+                         std::vector<strucType> &ringType,
                          const std::vector<int> &listHC,
-                         std::vector<cage::Cage> *cageList);
+                         std::vector<cage::Cage> &cageList);
 
 //! Find out which hexagonal rings are both DDCs (Double Diamond Cages) and HCs
 //! (Hexagonal Cages). Returns a vector containing all the ring IDs which are
 //! of this type
 std::vector<int> findMixedRings(const std::vector<std::vector<int>> &rings,
-                                std::vector<strucType> *ringType,
-                                std::vector<int> *listDDC,
-                                std::vector<int> *listHC);
+                                std::vector<strucType> &ringType,
+                                std::vector<int> &listDDC,
+                                std::vector<int> &listHC);
 
 //! Find out which hexagonal rings are HC rings.
 //! Returns a vector containing all the ring IDs which are HC rings
 std::vector<int> findHC(const std::vector<std::vector<int>> &rings,
-                        std::vector<strucType> *ringType,
+                        std::vector<strucType> &ringType,
                         const std::vector<std::vector<int>> &nList,
-                        std::vector<cage::Cage> *cageList);
+                        std::vector<cage::Cage> &cageList);
 
 //! First condition for the DDC: There must be at least 3 other
 //! rings in which each element of the equatorial  ring is present
 bool conditionOneDDC(const std::vector<std::vector<int>> &rings,
-                     std::vector<int> *peripheralRings, int iring);
+                     std::vector<int> &peripheralRings, int iring);
 
 //! Second condition for the DDC: There must be at least 1 other
 //! ring for every triplet in the equatorial  ring
 bool conditionTwoDDC(const std::vector<std::vector<int>> &rings,
-                     std::vector<int> *peripheralRings, int iring);
+                     std::vector<int> &peripheralRings, int iring);
 
 //! Third condition for the DDC: Even (by vector index) numbered index triplets
 //! and odd triplets must have at least one element in common
 bool conditionThreeDDC(const std::vector<std::vector<int>> &rings,
-                       std::vector<int> *peripheralRings);
+                       std::vector<int> &peripheralRings);
 
 //! Tests whether two rings are basal rings (true) or not (false)
 bool basalConditions(const std::vector<std::vector<int>> &nList,
-                     std::vector<int> *basal1, std::vector<int> *basal2);
+                     std::vector<int> &basal1, std::vector<int> &basal2);
 
 //! Tests whether the last two elements of a triplet are neighbours of two atom
 //! IDs passed in
 bool basalNeighbours(const std::vector<std::vector<int>> &nList,
-                     std::vector<int> *triplet, int atomOne, int atomTwo);
+                     std::vector<int> &triplet, int atomOne, int atomTwo);
 
 //! Tests to check that elements of a triplet are not neighbours of a ring
 //! (vector) passed
 bool notNeighboursOfRing(const std::vector<std::vector<int>> &nList,
-                         std::vector<int> *triplet, std::vector<int> *ring);
+                         std::vector<int> &triplet, std::vector<int> &ring);
 
 //! Finds the prismatic rings from basal rings iring and jring
-[[nodiscard]] int findPrismatic(const std::vector<std::vector<int>> &rings, std::vector<int> *listHC,
-                  std::vector<strucType> *ringType, int iring, int jring,
-                  std::vector<int> *prismaticRings);
+[[nodiscard]] int findPrismatic(const std::vector<std::vector<int>> &rings, std::vector<int> &listHC,
+                  std::vector<strucType> &ringType, int iring, int jring,
+                  std::vector<int> &prismaticRings);
 
 //! Assigns a type of enum class iceType, to every atom, using information from
 //! ringType, which has the information of every ring
 [[nodiscard]] int getAtomTypesTopoBulk(const std::vector<std::vector<int>> &rings,
                          const std::vector<ring::strucType> &ringType,
-                         std::vector<cage::iceType> *atomTypes);
+                         std::vector<cage::iceType> &atomTypes);
 
 //! Determines the number of HCs, DDCs, Mixed rings, prismatic and basal rings
 [[nodiscard]] int getStrucNumbers(const std::vector<ring::strucType> &ringType,
-                    const std::vector<cage::Cage> &cageList, int *numHC, int *numDDC,
-                    int *mixedRings, int *prismaticRings, int *basalRings);
+                    const std::vector<cage::Cage> &cageList, int &numHC, int &numDDC,
+                    int &mixedRings, int &prismaticRings, int &basalRings);
 
 } // namespace ring
 
@@ -142,20 +142,20 @@ namespace prism3 {
 
 //! Find out which rings are prisms.
 [[nodiscard]] int findBulkPrisms(const std::vector<std::vector<int>> &rings,
-                   std::vector<ring::strucType> *ringType,
+                   std::vector<ring::strucType> &ringType,
                    const std::vector<std::vector<int>> &nList,
                    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-                   std::vector<double> *rmsdPerAtom, double heightCutoff = 8);
+                   std::vector<double> &rmsdPerAtom, double heightCutoff = 8);
 
 //! Tests whether two rings are basal rings (true) or not (false) for a prism
 //! (strict criterion)
 bool basalPrismConditions(const std::vector<std::vector<int>> &nList,
-                          std::vector<int> *basal1, std::vector<int> *basal2);
+                          std::vector<int> &basal1, std::vector<int> &basal2);
 
 //! Reduced criterion: Two candidate basal rings of a prism block should have
 //! at least one bond between them
 bool relaxedPrismConditions(const std::vector<std::vector<int>> &nList,
-                            std::vector<int> *basal1, std::vector<int> *basal2);
+                            std::vector<int> &basal1, std::vector<int> &basal2);
 
 //! Check to see that candidate basal prisms are not really far from each other
 bool basalRingsSeparation(

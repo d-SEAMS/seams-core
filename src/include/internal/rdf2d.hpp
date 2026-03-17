@@ -84,24 +84,24 @@ namespace rdf2 {
 
 //! Main function for calculating the RDF for the same type of particle: calls
 //! other functions for initializing, sampling and normalizing the RDF
-[[nodiscard]] int rdf2Danalysis_AA(std::string path, std::vector<double> *rdfValues,
-                     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+[[nodiscard]] int rdf2Danalysis_AA(std::string path, std::vector<double> &rdfValues,
+                     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      double cutoff, double binwidth, int firstFrame,
                      int finalFrame);
 
 //! Samples the RDF histogram at every step
 std::vector<int>
-sampleRDF_AA(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
              double cutoff, double binwidth, int nbin);
 
 //! Normalize the histogram
-[[nodiscard]] int normalizeRDF(int nopA, std::vector<double> *rdfValues,
+[[nodiscard]] int normalizeRDF(int nopA, std::vector<double> &rdfValues,
                  std::vector<int> histogram, double binwidth, int nbin,
                  std::vector<double> volumeLengths, int nIter);
 
 //! Gets the lengths of the volume slice of the quasi-two-dimensional system
 std::vector<double>
-getSystemLengths(molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+getSystemLengths(const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 
 //! Gets the plane area from the volume lengths vector
 double getPlaneArea(std::vector<double> volumeLengths);

@@ -89,8 +89,8 @@ populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, double> 
 //! Calculates the distance of the hydrogen bond between O and H (of different
 //! atoms), given the respective pointClouds and the indices to each atom
 double
-getHbondDistanceOH(molSys::PointCloud<molSys::Point<double>, double> &oCloud,
-                   molSys::PointCloud<molSys::Point<double>, double> &hCloud,
+getHbondDistanceOH(const molSys::PointCloud<molSys::Point<double>, double> &oCloud,
+                   const molSys::PointCloud<molSys::Point<double>, double> &hCloud,
                    int oAtomIndex, int hAtomIndex);
 
 //! Create a vector of vectors containing bond connectivity information. May
@@ -98,7 +98,7 @@ getHbondDistanceOH(molSys::PointCloud<molSys::Point<double>, double> &oCloud,
 //! containing the neighbour list by index
 std::vector<std::vector<int>>
 populateBonds(const std::vector<std::vector<int>> &nList,
-              molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+              const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 
 //! Create a vector of vectors containing bond connectivity information
 //! Gets the bond information from the vector of vectors
@@ -106,15 +106,15 @@ populateBonds(const std::vector<std::vector<int>> &nList,
 //! filled.
 std::vector<std::vector<int>>
 populateBonds(const std::vector<std::vector<int>> &nList,
-              molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+              const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
               const std::vector<cage::iceType> &atomTypes);
 
 //! Creates a vector of vectors containing bond connectivity information from
 //! the rings vector of vectors and cage information
 std::vector<std::vector<int>>
 createBondsFromCages(const std::vector<std::vector<int>> &rings,
-                     std::vector<cage::Cage> *cageList, cage::cageType type,
-                     int *nRings);
+                     std::vector<cage::Cage> &cageList, cage::cageType type,
+                     int &nRings);
 
 //! Remove duplicate bonds
 std::vector<std::vector<int>> trimBonds(std::vector<std::vector<int>> bonds);

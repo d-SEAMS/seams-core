@@ -75,7 +75,7 @@ int ring::polygonRingAnalysis(
     ringsOneType = ring::getSingleRingSize(rings, ringSize);
     //
     // Continue if there are zero rings of ringSize
-    if (ringsOneType.size() == 0) {
+    if (ringsOneType.empty()) {
       nRingList[ringSize - 3] = 0; // Update the number of prisms
       // Update the coverage area%
       coverageAreaXY[ringSize - 3] = 0.0;
@@ -102,7 +102,7 @@ int ring::polygonRingAnalysis(
   } // end of loop through every possible ringSize
 
   // Get the atom types for all the ring types
-  ring::assignPolygonType(rings, &atomTypes, nRingList);
+  ring::assignPolygonType(rings, atomTypes, nRingList);
 
   // Write out the ring information
   sout::writeRingNum(path, yCloud.currentFrame, nRingList, coverageAreaXY,

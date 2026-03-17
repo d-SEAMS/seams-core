@@ -29,7 +29,7 @@
  */
 std::vector<std::vector<int>>
 nneigh::neighList(double rcutoff,
-                  molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                  const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                   int typeI, int typeJ) {
   std::vector<std::vector<int>> nList; // Vector of vector of ints
   int jatomIndex;                      // Atom ID corresponding to jatom
@@ -117,15 +117,12 @@ nneigh::neighList(double rcutoff,
  */
 std::vector<std::vector<int>>
 nneigh::neighListO(double rcutoff,
-                   molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                   const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                    int typeI) {
   std::vector<std::vector<int>>
       nList;      // Vector of vectors of the neighbour list
-  double r_ij;    // Distance between iatom and jatom
   int iatomIndex; // Atomic ID of the atom with index iatom
   int jatomIndex; // Atomic ID of the atom with index jatom
-  int indexYay;
-  std::vector<int> tempListIatom;
 
   // Initialize and fill the first element with the current atom ID whose
   // neighbour list will be filled
@@ -216,15 +213,13 @@ nneigh::neighListO(double rcutoff,
  */
 std::vector<std::vector<int>>
 nneigh::halfNeighList(double rcutoff,
-                      molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                      const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                       int typeI) {
   std::vector<std::vector<int>>
       nList;      // Vector of vectors of the neighbour list
   double r_ij;    // Distance between iatom and jatom
   int iatomIndex; // Atomic ID of the atom with index iatom
   int jatomIndex; // Atomic ID of the atom with index jatom
-  int indexYay;
-  std::vector<int> tempListIatom;
 
   // Initialize and fill the first element with the current atom ID whose
   // neighbour list will be filled
@@ -303,7 +298,7 @@ nneigh::halfNeighList(double rcutoff,
  * @return Row-ordered full neighbour list, by index, NOT atom ID.
  */
 std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff) {
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff) {
   //
   std::vector<std::vector<int>> nList;
   double r_ij; // Distance between iatom and jatom
@@ -350,7 +345,7 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
  * @return Row-ordered full neighbour list, by index, NOT atom ID.
  */
 std::vector<std::vector<int>> nneigh::neighbourListByIndex(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList) {
   //
   std::vector<std::vector<int>> indexNlist; // Desired neighbour list of indices
@@ -400,10 +395,7 @@ std::vector<std::vector<int>> nneigh::neighbourListByIndex(
  *  @param[in, out] nList Vector of vectors, of the neighbour list to be erased.
  */
 int nneigh::clearNeighbourList(std::vector<std::vector<int>> &nList) {
-  //
-  std::vector<std::vector<int>> tempEmpty;
-
-  nList.swap(tempEmpty);
-
+  nList.clear();
+  nList.shrink_to_fit();
   return 0;
 }

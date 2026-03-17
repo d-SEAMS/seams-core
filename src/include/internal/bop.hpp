@@ -234,7 +234,7 @@ getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 //! Gets c_ij and then classifies bond types according to the CHILL+ algorithm
 molSys::PointCloud<molSys::Point<double>, double>
 reclassifyWater(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-                std::vector<double> *q6);
+                std::vector<double> &q6);
 
 //! Prints out the iceType for a particular frame onto the terminal
 [[nodiscard]] int printIceType(molSys::PointCloud<molSys::Point<double>, double> &yCloud,

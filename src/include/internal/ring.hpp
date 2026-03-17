@@ -154,7 +154,7 @@ std::vector<int> findsCommonElements(const std::vector<int> &ring1,
 //! Assign an atomType (equal to the number of nodes in the ring)
 //! given n-membered rings.
 [[nodiscard]] int assignPolygonType(const std::vector<std::vector<int>> &rings,
-                      std::vector<int> *atomTypes, const std::vector<int> &nRings);
+                      std::vector<int> &atomTypes, const std::vector<int> &nRings);
 
 } // namespace ring
 
