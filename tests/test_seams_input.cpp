@@ -20,7 +20,7 @@ TEST_CASE("readXYZ throws for nonexistent file", "[seams_input]") {
 
 TEST_CASE("readXYZ creates a synthetic file and reads it back",
           "[seams_input]") {
-  std::string tmpFile = "/tmp/dseams_test_readxyz.xyz";
+  std::string tmpFile = fs::temp_directory_path().append("dseams_test_readxyz.xyz").string();
   {
     std::ofstream f(tmpFile);
     f << "3\n";
@@ -155,7 +155,7 @@ TEST_CASE("readBonds returns empty for nonexistent file", "[seams_input]") {
 }
 
 TEST_CASE("readBonds reads synthetic bond file", "[seams_input]") {
-  std::string tmpFile = "/tmp/dseams_test_bonds.dat";
+  std::string tmpFile = fs::temp_directory_path().append("dseams_test_bonds.dat").string();
   {
     std::ofstream f(tmpFile);
     f << "3 Bonds\n";

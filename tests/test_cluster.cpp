@@ -156,7 +156,7 @@ TEST_CASE("largestIceCluster identifies clusters and writes stats",
   std::vector<int> nClusters;
   std::unordered_map<int, int> indexNumber;
 
-  std::string tmpPath = "/tmp/dseams_test_largestcluster/";
+  std::string tmpPath = fs::temp_directory_path().append("dseams_test_largestcluster/").string();
 
   int ret = clump::largestIceCluster(tmpPath, cloud, iceCloud, iceNList, isIce,
                                       linkedList, nClusters, indexNumber, 1);
@@ -194,7 +194,7 @@ TEST_CASE("clusterAnalysis with Q6 on mW cubic trajectory", "[cluster]") {
   // clusterAnalysis expects the full yCloud and returns the largest ice cluster
   molSys::PointCloud<molSys::Point<double>, double> iceCloud;
   std::vector<std::vector<int>> iceNeighbourList;
-  std::string tmpPath = "/tmp/dseams_test_clusteranalysis/";
+  std::string tmpPath = fs::temp_directory_path().append("dseams_test_clusteranalysis/").string();
 
   int ret = clump::clusterAnalysis(tmpPath, iceCloud, yCloud, nList,
                                     iceNeighbourList, 3.5, 1, "q6");

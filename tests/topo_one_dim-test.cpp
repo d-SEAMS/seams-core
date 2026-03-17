@@ -141,7 +141,7 @@ TEST_CASE("prismAnalysis integration with tetragonal prism", "[topo_one_dim]") {
   auto nList = nneigh::neighListO(3.5, yCloud, 1);
   auto rings = primitive::ringNetwork(nList, 5);
 
-  std::string tmpPath = "/tmp/dseams_test_prismanalysis/";
+  std::string tmpPath = fs::temp_directory_path().append("dseams_test_prismanalysis/").string();
   int atomID = 0;
 
   int ret = ring::prismAnalysis(tmpPath, rings, nList, yCloud, 5, atomID, 1, 1,
@@ -184,7 +184,7 @@ TEST_CASE("prismAnalysis with shape matching on tetragonal prism",
   auto nList = nneigh::neighListO(3.5, yCloud, 1);
   auto rings = primitive::ringNetwork(nList, 5);
 
-  std::string tmpPath = "/tmp/dseams_test_prism_sm/";
+  std::string tmpPath = fs::temp_directory_path().append("dseams_test_prism_sm/").string();
   int atomID = 0;
 
   int ret = ring::prismAnalysis(tmpPath, rings, nList, yCloud, 5, atomID, 1, 1,

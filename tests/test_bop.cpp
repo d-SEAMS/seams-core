@@ -232,7 +232,7 @@ TEST_CASE("getIceType writes output and classifies atoms", "[bop]") {
   auto cloud = makeTetraCloud();
   auto nList = nneigh::neighListO(3.0, cloud, 1);
 
-  std::string tmpPath = "/tmp/dseams_test_icetype/";
+  std::string tmpPath = fs::temp_directory_path().append("dseams_test_icetype/").string();
 
   cloud = chill::getCorrel(cloud, nList, false);
   cloud = chill::getIceType(cloud, nList, tmpPath, 1, false);
@@ -264,7 +264,7 @@ TEST_CASE("printIceType writes super chill classification", "[bop]") {
   cloud = chill::getCorrel(cloud, nList, false);
   cloud = chill::getIceTypeNoPrint(cloud, nList, false);
 
-  std::string tmpPath = "/tmp/dseams_test_printice/";
+  std::string tmpPath = fs::temp_directory_path().append("dseams_test_printice/").string();
   int ret = chill::printIceType(cloud, tmpPath, 1, false);
   REQUIRE(ret == 0);
 
@@ -285,7 +285,7 @@ TEST_CASE("getIceTypePlus classifies with CHILL+ and writes output", "[bop]") {
   auto cloud = makeTetraCloud();
   auto nList = nneigh::neighListO(3.0, cloud, 1);
 
-  std::string tmpPath = "/tmp/dseams_test_icetypeplus/";
+  std::string tmpPath = fs::temp_directory_path().append("dseams_test_icetypeplus/").string();
 
   cloud = chill::getCorrelPlus(cloud, nList, false);
   cloud = chill::getIceTypePlus(cloud, nList, tmpPath, 1, false);

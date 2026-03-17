@@ -241,7 +241,7 @@ TEST_CASE("printSliceGetEdgeMoleculesInRings runs without crash",
   std::array<double, 3> lo = {0.0, 0.0, 0.0};
   std::array<double, 3> hi = {5.0, 5.0, 5.0};
 
-  std::string tmpPath = "/tmp/dseams_test_printslice/";
+  std::string tmpPath = fs::temp_directory_path().append("dseams_test_printslice/").string();
   fs::create_directories(tmpPath);
 
   // Should not crash; exercises the full pipeline

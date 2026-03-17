@@ -301,7 +301,7 @@ TEST_CASE("topoBulkAnalysis integration with HC geometry", "[topo_bulk]") {
   nList = nneigh::neighbourListByIndex(yCloud, nList);
   auto rings = primitive::ringNetwork(nList, 7);
 
-  std::string tmpPath = "/tmp/dseams_test_topobulk_analysis/";
+  std::string tmpPath = fs::temp_directory_path().append("dseams_test_topobulk_analysis/").string();
 
   int ret = ring::topoBulkAnalysis(tmpPath, rings, nList, yCloud, 1, true);
   REQUIRE(ret == 0);
@@ -381,7 +381,7 @@ TEST_CASE("topoBulkAnalysis on mW cubic trajectory", "[topo_bulk]") {
   nList = nneigh::neighbourListByIndex(yCloud, nList);
   auto rings = primitive::ringNetwork(nList, 7);
 
-  std::string tmpPath = "/tmp/dseams_test_topobulk_mw/";
+  std::string tmpPath = fs::temp_directory_path().append("dseams_test_topobulk_mw/").string();
   int ret = ring::topoBulkAnalysis(tmpPath, rings, nList, yCloud, 1, true);
   REQUIRE(ret == 0);
   fs::remove_all(tmpPath);
@@ -396,7 +396,7 @@ TEST_CASE("bulkPolygonRingAnalysis on mW cubic trajectory", "[topo_bulk]") {
   nList = nneigh::neighbourListByIndex(yCloud, nList);
   auto rings = primitive::ringNetwork(nList, 7);
 
-  std::string tmpPath = "/tmp/dseams_test_bulkpoly_mw/";
+  std::string tmpPath = fs::temp_directory_path().append("dseams_test_bulkpoly_mw/").string();
   int ret = ring::bulkPolygonRingAnalysis(tmpPath, rings, nList, yCloud, 7, 1);
   REQUIRE(ret == 0);
   fs::remove_all(tmpPath);

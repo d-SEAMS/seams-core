@@ -194,7 +194,7 @@ TEST_CASE("prettyPrintYoda does not crash", "[generic]") {
   auto cloud = makeTwoAtomCloud(1.0, 0.0, 0.0, 4.0, 0.0, 0.0);
   cloud.boxLow = {0.0, 0.0, 0.0};
 
-  std::string outFile = "/tmp/dseams_test_prettyprint.dat";
+  std::string outFile = std::filesystem::temp_directory_path().append("dseams_test_prettyprint.dat").string();
   int ret = gen::prettyPrintYoda(cloud, outFile);
   REQUIRE(ret == 0);
 

@@ -47,7 +47,7 @@ TEST_CASE("topoBulkCriteria finds cages in mW cubic ice", "[bulkTUM]") {
   int numHC = 0, numDDC = 0;
   std::vector<ring::strucType> ringType;
 
-  std::string tmpPath = "/tmp/dseams_test_topobulkcrit/";
+  std::string tmpPath = fs::temp_directory_path().append("dseams_test_topobulkcrit/").string();
 
   auto cageList = tum3::topoBulkCriteria(tmpPath, rings, nList, yCloud, 1,
                                           numHC, numDDC, ringType);
@@ -67,7 +67,7 @@ TEST_CASE("topoUnitMatchingBulk runs full TUM pipeline on mW cubic",
   nList = nneigh::neighbourListByIndex(yCloud, nList);
   auto rings = primitive::ringNetwork(nList, 7);
 
-  std::string tmpPath = "/tmp/dseams_test_tum_full/";
+  std::string tmpPath = fs::temp_directory_path().append("dseams_test_tum_full/").string();
 
   int ret = tum3::topoUnitMatchingBulk(tmpPath, rings, nList, yCloud, 1, false,
                                          true, "../templates");
@@ -85,7 +85,7 @@ TEST_CASE("topoUnitMatchingBulk with clustering enabled on mW cubic",
   nList = nneigh::neighbourListByIndex(yCloud, nList);
   auto rings = primitive::ringNetwork(nList, 7);
 
-  std::string tmpPath = "/tmp/dseams_test_tum_cluster/";
+  std::string tmpPath = fs::temp_directory_path().append("dseams_test_tum_cluster/").string();
 
   // printClusters=true exercises clusterCages
   int ret = tum3::topoUnitMatchingBulk(tmpPath, rings, nList, yCloud, 1, true,
@@ -104,7 +104,7 @@ TEST_CASE("topoUnitMatchingBulk with onlyTetrahedral=false on mW cubic",
   nList = nneigh::neighbourListByIndex(yCloud, nList);
   auto rings = primitive::ringNetwork(nList, 7);
 
-  std::string tmpPath = "/tmp/dseams_test_tum_nonttet/";
+  std::string tmpPath = fs::temp_directory_path().append("dseams_test_tum_nonttet/").string();
 
   // onlyTetrahedral=false exercises the 5-membered ring (PNC) path
   int ret = tum3::topoUnitMatchingBulk(tmpPath, rings, nList, yCloud, 1, false,

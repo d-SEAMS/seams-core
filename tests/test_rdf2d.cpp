@@ -150,7 +150,7 @@ TEST_CASE("rdf2Danalysis_AA runs without error for single frame", "[rdf2d]") {
   auto cloud = makeRdfCloud(8, 20.0);
   cloud.currentFrame = 1;
 
-  std::string tmpPath = "/tmp/dseams_test_rdf2d/";
+  std::string tmpPath = fs::temp_directory_path().append("dseams_test_rdf2d/").string();
   fs::create_directories(tmpPath);
 
   std::vector<double> rdfValues;

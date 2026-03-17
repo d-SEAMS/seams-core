@@ -40,7 +40,7 @@ TEST_CASE("polygonRingAnalysis runs with empty rings", "[topo_two_dim]") {
   auto cloud = makeHexCloud();
   auto nList = nneigh::getNewNeighbourListByIndex(cloud, 2.5);
 
-  std::string tmpPath = "/tmp/dseams_test_topo2d/";
+  std::string tmpPath = fs::temp_directory_path().append("dseams_test_topo2d/").string();
   fs::create_directories(tmpPath);
 
   std::vector<std::vector<int>> rings; // empty
@@ -55,7 +55,7 @@ TEST_CASE("polygonRingAnalysis processes known ring set", "[topo_two_dim]") {
   auto cloud = makeHexCloud();
   auto nList = nneigh::getNewNeighbourListByIndex(cloud, 2.5);
 
-  std::string tmpPath = "/tmp/dseams_test_topo2d_rings/";
+  std::string tmpPath = fs::temp_directory_path().append("dseams_test_topo2d_rings/").string();
   fs::create_directories(tmpPath);
 
   // A single 6-membered ring
