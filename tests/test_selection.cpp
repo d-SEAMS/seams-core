@@ -3,9 +3,13 @@
 
 #include <mol_sys.hpp>
 #include <selection.hpp>
+#include <seams_output.hpp>
 
 #include <array>
+#include <filesystem>
 #include <vector>
+
+namespace fs = std::filesystem;
 
 // Helper: build a cloud with atoms at known positions and molecule IDs
 static molSys::PointCloud<molSys::Point<double>, double>
@@ -169,4 +173,80 @@ TEST_CASE("setAtomsWithSameMolID sets all atoms of a molecule", "[selection]") {
 
   // Molecule 1 should be unaffected
   REQUIRE(cloud.pts[3].inSlice == false);
+}
+
+// Helper: build a cloud with rings for edge molecule tests
+// 6 atoms at known positions, all same type and molecule ID
+static molSys::PointCloud<molSys::Point<double>, double>
+makeRingSelectionCloud() {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {20.0, 20.0, 20.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+
+  // 6 atoms forming a ring, some inside slice and some outside
+  // Atoms 0-3 at low coords (in slice), atoms 4-5 at high coords (out of slice)
+  double coords[6][3] = {
+      {1.0, 1.0, 1.0}, {2.0, 1.0, 1.0}, {3.0, 1.0, 1.0},
+      {4.0, 1.0, 1.0}, {8.0, 8.0, 8.0}, {9.0, 8.0, 8.0}};
+
+  for (int i = 0; i < 6; i++) {
+    molSys::Point<double> pt;
+    pt.type = 1;
+    pt.atomID = i;
+    pt.molID = i; // each atom in its own molecule for simplicity
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    pt.inSlice = false;
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i] = i;
+  }
+  cloud.nop = 6;
+  return cloud;
+}
+
+// -- getEdgeMoleculesInRings tests --
+
+TEST_CASE("getEdgeMoleculesInRings marks edge atoms in rings", "[selection]") {
+  auto oCloud = makeRingSelectionCloud();
+  auto yCloud = makeRingSelectionCloud();
+
+  // A ring containing atoms 0, 1, 4 (atom 0 and 1 in slice, 4 outside)
+  std::vector<std::vector<int>> rings = {{0, 1, 4}};
+
+  std::array<double, 3> lo = {0.0, 0.0, 0.0};
+  std::array<double, 3> hi = {5.0, 5.0, 5.0};
+
+  // identicalCloud=true means oCloud and yCloud are the same
+  ring::getEdgeMoleculesInRings(rings, oCloud, yCloud, lo, hi, true);
+
+  // Atom 0 and 1 are in the slice, so the ring is "in slice"
+  // Therefore atom 4 (outside slice but in ring) should be marked inSlice
+  REQUIRE(oCloud.pts[0].inSlice == true);
+  REQUIRE(oCloud.pts[1].inSlice == true);
+  // Atom 4 is part of a ring that has atoms in the slice
+  REQUIRE(oCloud.pts[4].inSlice == true);
+}
+
+// -- printSliceGetEdgeMoleculesInRings tests --
+
+TEST_CASE("printSliceGetEdgeMoleculesInRings runs without crash",
+          "[selection]") {
+  auto oCloud = makeRingSelectionCloud();
+  auto yCloud = makeRingSelectionCloud();
+
+  std::vector<std::vector<int>> rings = {{0, 1, 2}};
+
+  std::array<double, 3> lo = {0.0, 0.0, 0.0};
+  std::array<double, 3> hi = {5.0, 5.0, 5.0};
+
+  std::string tmpPath = "/tmp/dseams_test_printslice/";
+  fs::create_directories(tmpPath);
+
+  // Should not crash; exercises the full pipeline
+  ring::printSliceGetEdgeMoleculesInRings(tmpPath, rings, oCloud, yCloud, lo,
+                                           hi, true);
+
+  fs::remove_all(tmpPath);
 }

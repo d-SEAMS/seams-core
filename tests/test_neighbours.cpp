@@ -113,6 +113,54 @@ TEST_CASE("getNewNeighbourListByIndex builds index-based list from scratch",
   REQUIRE(found2);
 }
 
+// Helper: build a cloud with two atom types
+static molSys::PointCloud<molSys::Point<double>, double>
+makeTwoTypeCloud() {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {10.0, 10.0, 10.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+
+  // 4 atoms: types 1 and 2, close together
+  int types[] = {1, 2, 1, 2};
+  double coords[4][3] = {
+      {0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {5.0, 5.0, 5.0}};
+
+  for (int i = 0; i < 4; i++) {
+    molSys::Point<double> pt;
+    pt.type = types[i];
+    pt.atomID = i;
+    pt.molID = i;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i] = i;
+  }
+  cloud.nop = 4;
+  return cloud;
+}
+
+TEST_CASE("neighList produces neighbour list for two atom types",
+          "[neighbours]") {
+  auto cloud = makeTwoTypeCloud();
+  double cutoff = 1.5;
+
+  // Find neighbours between type 1 and type 2
+  auto nList = nneigh::neighList(cutoff, cloud, 1, 2);
+
+  // Should have one row per atom (all atom types)
+  REQUIRE(nList.size() == 4);
+
+  // Atom 0 (type 1) should have atom 1 (type 2) as neighbour (distance 1.0)
+  bool found1 =
+      std::find(nList[0].begin() + 1, nList[0].end(), 1) != nList[0].end();
+  REQUIRE(found1);
+
+  // Atom 3 (type 2, far away) should have no type-1 neighbours within cutoff
+  REQUIRE(nList[3].size() == 1); // only self
+}
+
 TEST_CASE("clearNeighbourList empties the list", "[neighbours]") {
   auto cloud = makeFourAtomCloud();
   auto nList = nneigh::neighListO(1.5, cloud, 1);

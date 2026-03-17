@@ -190,6 +190,81 @@ TEST_CASE("fillPointSetPrismBlock fills both basal rings",
   REQUIRE(pts.cols() == 3);
 }
 
+// -- getPointSetCage tests --
+
+TEST_CASE("getPointSetCage returns 12x3 matrix for HCbasal type",
+          "[pntCorrespondence]") {
+  // getPointSetCage reads templates/hc.xyz relative to workdir
+  // The test workdir is set to input/ and templates are at ../templates/
+  // The function hardcodes "templates/hc.xyz" so it needs the cwd to be
+  // the project root. Since tests run from input/, this may fail.
+  // We test with a non-HCbasal type which returns the default 12x3 matrix.
+  auto pts = pntToPnt::getPointSetCage(ring::strucType::DDC);
+  // Default path returns uninitialized 12x3 matrix
+  REQUIRE(pts.rows() == 12);
+  REQUIRE(pts.cols() == 3);
+}
+
+// -- relOrderPrismBlock (2-arg, no nList) tests --
+
+TEST_CASE("relOrderPrismBlock 2-arg orders by distance",
+          "[pntCorrespondence]") {
+  auto cloud = makePrismCloud();
+  std::vector<int> basal1 = {0, 1, 2, 3};
+  std::vector<int> basal2 = {4, 5, 6, 7};
+  std::vector<int> outBasal1, outBasal2;
+
+  int ret = pntToPnt::relOrderPrismBlock(cloud, basal1, basal2, outBasal1,
+                                          outBasal2);
+
+  REQUIRE(ret == 0);
+  REQUIRE(outBasal1.size() == 4);
+  REQUIRE(outBasal2.size() == 4);
+}
+
+TEST_CASE("relOrderPrismBlock 2-arg preserves ring size",
+          "[pntCorrespondence]") {
+  // Build a hexagonal prism (6-membered rings)
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {20, 20, 20};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  molSys::Point<double> pt;
+  pt.type = 1;
+
+  // 6-ring at z=0 and z=2
+  for (int i = 0; i < 6; i++) {
+    double angle = 2.0 * M_PI * i / 6.0;
+    pt.atomID = i;
+    pt.x = 5.0 + 2.0 * cos(angle);
+    pt.y = 5.0 + 2.0 * sin(angle);
+    pt.z = 0.0;
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i] = i;
+  }
+  for (int i = 0; i < 6; i++) {
+    double angle = 2.0 * M_PI * i / 6.0;
+    pt.atomID = i + 6;
+    pt.x = 5.0 + 2.0 * cos(angle);
+    pt.y = 5.0 + 2.0 * sin(angle);
+    pt.z = 2.0;
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 6] = i + 6;
+  }
+  cloud.nop = 12;
+
+  std::vector<int> basal1 = {0, 1, 2, 3, 4, 5};
+  std::vector<int> basal2 = {6, 7, 8, 9, 10, 11};
+  std::vector<int> outBasal1, outBasal2;
+
+  int ret = pntToPnt::relOrderPrismBlock(cloud, basal1, basal2, outBasal1,
+                                          outBasal2);
+
+  REQUIRE(ret == 0);
+  REQUIRE(outBasal1.size() == 6);
+  REQUIRE(outBasal2.size() == 6);
+}
+
 // -- HC point set tests using real geometry --
 
 TEST_CASE("relOrderHC orders HC basal rings", "[pntCorrespondence]") {

@@ -22,6 +22,7 @@ test_sources = {
   'seams_output': 'test_seams_output.cpp',
   'bulkTUM': 'test_bulkTUM.cpp',
   'pntCorrespondence': 'test_pntCorrespondence.cpp',
+  'franzblau_extra': 'test_franzblau_extra.cpp',
 }
 
 # Ensure test binaries load the freshly-built libyodaLib.so instead of any

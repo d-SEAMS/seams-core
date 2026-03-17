@@ -402,6 +402,171 @@ TEST_CASE("bulkPolygonRingAnalysis on mW cubic trajectory", "[topo_bulk]") {
   fs::remove_all(tmpPath);
 }
 
+// -- prism3 namespace tests --
+
+TEST_CASE("basalPrismConditions returns true for connected basal rings",
+          "[topo_bulk][prism3]") {
+  // Build a prism: 8 atoms, two 4-membered basal rings connected
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {10, 10, 50};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  molSys::Point<double> pt;
+  pt.type = 1;
+  double coords[8][3] = {{0, 0, 0},       {2.75, 0, 0},    {2.75, 2.75, 0},
+                          {0, 2.75, 0},    {0, 0, 2.75},    {2.75, 0, 2.75},
+                          {2.75, 2.75, 2.75}, {0, 2.75, 2.75}};
+  for (int i = 0; i < 8; i++) {
+    pt.atomID = i;
+    pt.x = coords[i][0]; pt.y = coords[i][1]; pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i] = i;
+  }
+  cloud.nop = 8;
+
+  auto nList = nneigh::neighListO(3.5, cloud, 1);
+  nList = nneigh::neighbourListByIndex(cloud, nList);
+
+  std::vector<int> basal1 = {0, 1, 2, 3};
+  std::vector<int> basal2 = {4, 5, 6, 7};
+
+  bool result = prism3::basalPrismConditions(nList, basal1, basal2);
+  // Each atom in basal1 should have a neighbour in basal2
+  REQUIRE(result == true);
+}
+
+TEST_CASE("basalPrismConditions returns false for disconnected rings",
+          "[topo_bulk][prism3]") {
+  // Two rings far apart with no bonds between them
+  // Build nList manually: atoms 0-3 are in one plane, 4-7 in another far away
+  // nList where atoms only know their own basal ring neighbours
+  std::vector<std::vector<int>> nList = {
+      {0, 1, 3}, {1, 0, 2}, {2, 1, 3}, {3, 0, 2},
+      {4, 5, 7}, {5, 4, 6}, {6, 5, 7}, {7, 4, 6}};
+
+  std::vector<int> basal1 = {0, 1, 2, 3};
+  std::vector<int> basal2 = {4, 5, 6, 7};
+
+  bool result = prism3::basalPrismConditions(nList, basal1, basal2);
+  REQUIRE(result == false);
+}
+
+TEST_CASE("relaxedPrismConditions returns true when at least one bond exists",
+          "[topo_bulk][prism3]") {
+  // nList where only atom 0 has atom 4 as neighbour (one bond between rings)
+  std::vector<std::vector<int>> nList = {
+      {0, 1, 3, 4}, {1, 0, 2}, {2, 1, 3}, {3, 0, 2},
+      {4, 5, 7, 0}, {5, 4, 6}, {6, 5, 7}, {7, 4, 6}};
+
+  std::vector<int> basal1 = {0, 1, 2, 3};
+  std::vector<int> basal2 = {4, 5, 6, 7};
+
+  bool result = prism3::relaxedPrismConditions(nList, basal1, basal2);
+  REQUIRE(result == true);
+}
+
+TEST_CASE("relaxedPrismConditions returns false when no bonds exist",
+          "[topo_bulk][prism3]") {
+  std::vector<std::vector<int>> nList = {
+      {0, 1, 3}, {1, 0, 2}, {2, 1, 3}, {3, 0, 2},
+      {4, 5, 7}, {5, 4, 6}, {6, 5, 7}, {7, 4, 6}};
+
+  std::vector<int> basal1 = {0, 1, 2, 3};
+  std::vector<int> basal2 = {4, 5, 6, 7};
+
+  bool result = prism3::relaxedPrismConditions(nList, basal1, basal2);
+  REQUIRE(result == false);
+}
+
+TEST_CASE("basalRingsSeparation returns true for close rings",
+          "[topo_bulk][prism3]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {10, 10, 50};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  molSys::Point<double> pt;
+  pt.type = 1;
+  // Two parallel 4-rings separated by 2.75 in z
+  double coords[8][3] = {{0, 0, 0},       {2.75, 0, 0},    {2.75, 2.75, 0},
+                          {0, 2.75, 0},    {0, 0, 2.75},    {2.75, 0, 2.75},
+                          {2.75, 2.75, 2.75}, {0, 2.75, 2.75}};
+  for (int i = 0; i < 8; i++) {
+    pt.atomID = i;
+    pt.x = coords[i][0]; pt.y = coords[i][1]; pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i] = i;
+  }
+  cloud.nop = 8;
+
+  std::vector<int> basal1 = {0, 1, 2, 3};
+  std::vector<int> basal2 = {4, 5, 6, 7};
+
+  // Height cutoff 8.0 (default), separation is 2.75
+  bool result = prism3::basalRingsSeparation(cloud, basal1, basal2, 8.0);
+  REQUIRE(result == true);
+}
+
+TEST_CASE("basalRingsSeparation returns false for far apart rings",
+          "[topo_bulk][prism3]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {100, 100, 100};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  molSys::Point<double> pt;
+  pt.type = 1;
+  // Two rings separated by 20 in z
+  double coords[8][3] = {{0, 0, 0},    {2, 0, 0},    {2, 2, 0},    {0, 2, 0},
+                          {0, 0, 20},   {2, 0, 20},   {2, 2, 20},   {0, 2, 20}};
+  for (int i = 0; i < 8; i++) {
+    pt.atomID = i;
+    pt.x = coords[i][0]; pt.y = coords[i][1]; pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i] = i;
+  }
+  cloud.nop = 8;
+
+  std::vector<int> basal1 = {0, 1, 2, 3};
+  std::vector<int> basal2 = {4, 5, 6, 7};
+
+  bool result = prism3::basalRingsSeparation(cloud, basal1, basal2, 8.0);
+  REQUIRE(result == false);
+}
+
+TEST_CASE("findBulkPrisms on ideal prism geometry", "[topo_bulk][prism3]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {10, 10, 50};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  molSys::Point<double> pt;
+  pt.type = 1;
+  double coords[8][3] = {{0, 0, 0},       {2.75, 0, 0},    {2.75, 2.75, 0},
+                          {0, 2.75, 0},    {0, 0, 2.75},    {2.75, 0, 2.75},
+                          {2.75, 2.75, 2.75}, {0, 2.75, 2.75}};
+  for (int i = 0; i < 8; i++) {
+    pt.atomID = i;
+    pt.x = coords[i][0]; pt.y = coords[i][1]; pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i] = i;
+  }
+  cloud.nop = 8;
+
+  auto nList = nneigh::neighListO(3.5, cloud, 1);
+  nList = nneigh::neighbourListByIndex(cloud, nList);
+  auto rings = primitive::ringNetwork(nList, 5);
+
+  // Get only 4-membered rings
+  auto fourRings = ring::getSingleRingSize(rings, 4);
+  if (fourRings.size() >= 2) {
+    std::vector<ring::strucType> ringType(fourRings.size(),
+                                           ring::strucType::unclassified);
+    std::vector<double> rmsdPerAtom(cloud.nop, -1.0);
+
+    int ret = prism3::findBulkPrisms(fourRings, ringType, nList, cloud,
+                                      rmsdPerAtom, 8.0);
+    REQUIRE(ret == 0);
+  }
+}
+
 TEST_CASE("findPrismatic identifies prismatic rings between HC basals",
           "[topo_bulk]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
