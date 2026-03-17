@@ -3,9 +3,13 @@
 
 #include <bond.hpp>
 #include <cage.hpp>
+#include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <ring.hpp>
+#include <seams_input.hpp>
 #include <seams_output.hpp>
+#include <topo_bulk.hpp>
 
 #include <filesystem>
 #include <fstream>
@@ -438,4 +442,59 @@ TEST_CASE("writeAllCages returns 1 for empty cage list", "[seams_output]") {
   REQUIRE(ret == 1);
 
   fs::remove_all(tmpPath);
+}
+
+// -- writeLAMMPSdataCages with real cage data from mW trajectory --
+
+TEST_CASE("writeLAMMPSdataCages writes cage data file", "[seams_output]") {
+  // Read mW cubic ice and find cages
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  if (yCloud.nop == 0) return;
+
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  nList = nneigh::neighbourListByIndex(yCloud, nList);
+  auto rings = primitive::ringNetwork(nList, 7);
+
+  std::vector<ring::strucType> ringType(rings.size());
+  std::vector<cage::Cage> cageList;
+  auto listHC = ring::findHC(rings, ringType, nList, cageList);
+
+  if (!cageList.empty()) {
+    std::string tmpPath = "/tmp/dseams_test_datacages/";
+
+    int ret = sout::writeLAMMPSdataCages(yCloud, rings, cageList,
+                                          cage::cageType::HexC,
+                                          static_cast<int>(cageList.size()));
+    // Writes to ../output/ by default
+    REQUIRE(ret == 0);
+
+    fs::remove_all(tmpPath);
+    fs::remove_all("../output");
+  }
+}
+
+TEST_CASE("writeAllCages writes cages from mW cubic trajectory",
+          "[seams_output]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  if (yCloud.nop == 0) return;
+
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  nList = nneigh::neighbourListByIndex(yCloud, nList);
+  auto rings = primitive::ringNetwork(nList, 7);
+
+  std::vector<ring::strucType> ringType(rings.size());
+  std::vector<cage::Cage> cageList;
+  ring::findHC(rings, ringType, nList, cageList);
+
+  if (!cageList.empty()) {
+    std::string tmpPath = "/tmp/dseams_test_writeallcages/";
+
+    int ret = sout::writeAllCages(tmpPath, cageList, rings, nList, yCloud, 1);
+    REQUIRE(ret == 0);
+
+    fs::remove_all(tmpPath);
+    fs::remove_all("../output");
+  }
 }

@@ -1,9 +1,11 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <bop.hpp>
 #include <cluster.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <seams_input.hpp>
 
 #include <filesystem>
 #include <unordered_map>
@@ -174,4 +176,31 @@ TEST_CASE("singleClusterLinkedList with single atom", "[cluster]") {
   REQUIRE(result == 0);
   REQUIRE(linkedList.size() == 1);
   REQUIRE(linkedList[0] == 0); // Points to itself
+}
+
+TEST_CASE("clusterAnalysis with Q6 on mW cubic trajectory", "[cluster]") {
+  // Read O atoms from mW cubic ice
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  REQUIRE(yCloud.nop > 0);
+
+  // Build neighbour list
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+
+  // Run CHILL correlation + ice type classification
+  yCloud = chill::getCorrel(yCloud, nList, false);
+  yCloud = chill::getIceTypeNoPrint(yCloud, nList, false);
+
+  // clusterAnalysis expects the full yCloud and returns the largest ice cluster
+  molSys::PointCloud<molSys::Point<double>, double> iceCloud;
+  std::vector<std::vector<int>> iceNeighbourList;
+  std::string tmpPath = "/tmp/dseams_test_clusteranalysis/";
+
+  int ret = clump::clusterAnalysis(tmpPath, iceCloud, yCloud, nList,
+                                    iceNeighbourList, 3.5, 1, "q6");
+  REQUIRE(ret == 0);
+  // mW cubic ice should produce a non-trivial ice cluster
+  REQUIRE(iceCloud.nop > 0);
+
+  std::filesystem::remove_all(tmpPath);
 }
