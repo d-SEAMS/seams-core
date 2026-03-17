@@ -27,9 +27,9 @@ from sphinx.domains import Domain
 
 sphinx_version = version.parse(sphinx_version_string)
 this_dir = os.path.dirname(os.path.realpath(__file__))
-url_re_prog = re.compile('(ftp|https?)://')
+url_re_prog = re.compile('(?:ftp|https?)://')
 crefdb = {}
-cref_w_target_re_prog = re.compile('(.+?)\s*<([^<>]*)>$')
+cref_w_target_re_prog = re.compile('([^<]+?)\\s*<([^<>]*)>$')
 
 def get_cref_target(text, target=None):
     if not target:
