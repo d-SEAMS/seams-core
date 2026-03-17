@@ -174,10 +174,18 @@ TEST_CASE("matchPrism returns false when basal ordering fails",
   std::vector<int> basal2 = {4, 5, 6, 7};
   std::vector<double> rmsdPerAtom(8, -1.0);
 
-  // With the fix, this should return false gracefully instead of crashing
+  // With the fix, matchPrism handles relOrderPrismBlock failure gracefully
   bool isMatch = match::matchPrism(cloud, nList, refPoints, basal1, basal2,
                                     rmsdPerAtom, true);
 
-  // Result depends on whether relOrderPrismBlock succeeds
-  REQUIRE((isMatch == true || isMatch == false));
+  // An ideal prism should match (relOrderPrismBlock should find inter-plane
+  // neighbors since atoms 0-4, 1-5, 2-6, 3-7 are within cutoff)
+  REQUIRE(isMatch == true);
+
+  // RMSD should be assigned for atoms in the prism
+  bool hasRMSD = false;
+  for (double r : rmsdPerAtom) {
+    if (r >= 0.0) hasRMSD = true;
+  }
+  REQUIRE(hasRMSD);
 }

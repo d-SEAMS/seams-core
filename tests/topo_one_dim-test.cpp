@@ -176,6 +176,24 @@ TEST_CASE("relaxedPrismConditions detects prism with relaxed criteria",
   }
 }
 
+TEST_CASE("prismAnalysis with shape matching on tetragonal prism",
+          "[topo_one_dim]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  buildPrismCloud(yCloud);
+
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  auto rings = primitive::ringNetwork(nList, 5);
+
+  std::string tmpPath = "/tmp/dseams_test_prism_sm/";
+  int atomID = 0;
+
+  int ret = ring::prismAnalysis(tmpPath, rings, nList, yCloud, 5, atomID, 1, 1,
+                                 true);
+  REQUIRE(ret == 0);
+
+  fs::remove_all(tmpPath);
+}
+
 TEST_CASE("assignPrismType assigns atom types for known prism list",
           "[topo_one_dim]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;

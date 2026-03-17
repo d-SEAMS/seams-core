@@ -290,12 +290,10 @@ int pntToPnt::relOrderPrismBlock(
   if (distAntiClock < distClock) {
     isAntiClock = true;
   } // end of anti-clockwise check
-  // Some error
+  // When equidistant (symmetric prism), default to clockwise
   if (isClock == false && isAntiClock == false) {
-    // std::cerr << "The points are equidistant.\n";
-    // Error handling
-    return 1;
-  } // end of error handling
+    isClock = true;
+  } // end of equidistant handling
   // ---------------------------------------------------
   // Get the order of basal1 and basal2
   for (int i = 0; i < ringSize; i++) {
@@ -420,12 +418,10 @@ int pntToPnt::relOrderPrismBlock(
   if (distAntiClock < distClock) {
     isAntiClock = true;
   } // end of anti-clockwise check
-  // Some error
+  // When equidistant (symmetric prism), default to clockwise
   if (isClock == false && isAntiClock == false) {
-    // std::cerr << "The points are equidistant.\n";
-    // Error handling
-    return 1;
-  } // end of error handling
+    isClock = true;
+  } // end of equidistant handling
   // ---------------------------------------------------
   // Get the order of basal1 and basal2
   for (int i = 0; i < ringSize; i++) {
