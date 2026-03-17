@@ -5,6 +5,9 @@
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 
+#include <filesystem>
+#include <unordered_map>
+
 // Helper: build a PointCloud with some "ice" and some "water" particles
 // to test the clustering machinery at the linked-list level.
 // We test singleClusterLinkedList since largestIceCluster and clusterAnalysis
@@ -38,7 +41,7 @@ TEST_CASE("singleClusterLinkedList groups all connected atoms", "[cluster]") {
   auto nList = nneigh::getNewNeighbourListByIndex(cloud, 1.5);
 
   std::vector<int> linkedList;
-  int result = clump::singleClusterLinkedList(cloud, nList, &linkedList);
+  int result = clump::singleClusterLinkedList(cloud, nList, linkedList);
 
   REQUIRE(result == 0);
   REQUIRE(linkedList.size() == 4);
@@ -84,7 +87,7 @@ TEST_CASE("singleClusterLinkedList with disconnected atom", "[cluster]") {
   auto nList = nneigh::getNewNeighbourListByIndex(cloud, 1.5);
 
   std::vector<int> linkedList;
-  clump::singleClusterLinkedList(cloud, nList, &linkedList);
+  clump::singleClusterLinkedList(cloud, nList, linkedList);
 
   REQUIRE(linkedList.size() == 4);
 
@@ -118,4 +121,57 @@ TEST_CASE("recenterClusterCloud shifts centroid toward box center",
   REQUIRE_THAT(cx, Catch::Matchers::WithinAbs(50.0, 1e-8));
   REQUIRE_THAT(cy, Catch::Matchers::WithinAbs(50.0, 1e-8));
   REQUIRE_THAT(cz, Catch::Matchers::WithinAbs(50.0, 1e-8));
+}
+
+TEST_CASE("largestIceCluster identifies clusters and writes stats",
+          "[cluster]") {
+  // Build a system with a few "ice" atoms close together and one "water" atom
+  // far away
+  auto cloud = makeClusterCloud(6, 1.0);
+  auto nList = nneigh::getNewNeighbourListByIndex(cloud, 1.5);
+
+  // Mark first 4 atoms as ice, last 2 as water
+  std::vector<bool> isIce = {true, true, true, true, false, false};
+
+  // Build an "ice" PointCloud from ice atoms
+  molSys::PointCloud<molSys::Point<double>, double> iceCloud;
+  iceCloud.box = cloud.box;
+  iceCloud.boxLow = cloud.boxLow;
+  iceCloud.currentFrame = cloud.currentFrame;
+  for (int i = 0; i < cloud.nop; i++) {
+    if (isIce[i]) {
+      iceCloud.pts.push_back(cloud.pts[i]);
+      iceCloud.idIndexMap[cloud.pts[i].atomID] =
+          static_cast<int>(iceCloud.pts.size()) - 1;
+    }
+  }
+  iceCloud.nop = static_cast<int>(iceCloud.pts.size());
+
+  // Build an ID-based neighbour list for the ice cloud
+  auto iceNList = nneigh::neighListO(1.5, iceCloud, 1);
+
+  std::vector<int> linkedList;
+  std::vector<int> nClusters;
+  std::unordered_map<int, int> indexNumber;
+
+  std::string tmpPath = "/tmp/dseams_test_largestcluster/";
+
+  int ret = clump::largestIceCluster(tmpPath, cloud, iceCloud, iceNList, isIce,
+                                      linkedList, nClusters, indexNumber, 1);
+
+  REQUIRE(ret == 0);
+
+  std::filesystem::remove_all(tmpPath);
+}
+
+TEST_CASE("singleClusterLinkedList with single atom", "[cluster]") {
+  auto cloud = makeClusterCloud(1, 1.0);
+  auto nList = nneigh::getNewNeighbourListByIndex(cloud, 1.5);
+
+  std::vector<int> linkedList;
+  int result = clump::singleClusterLinkedList(cloud, nList, linkedList);
+
+  REQUIRE(result == 0);
+  REQUIRE(linkedList.size() == 1);
+  REQUIRE(linkedList[0] == 0); // Points to itself
 }

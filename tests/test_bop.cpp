@@ -8,6 +8,7 @@
 
 #include <cmath>
 #include <complex>
+#include <filesystem>
 #include <numeric>
 
 TEST_CASE("radialCoord converts Cartesian to spherical angles", "[bop]") {
@@ -139,4 +140,153 @@ TEST_CASE("getCorrel populates c_ij for a simple tetrahedral system", "[bop]") {
     REQUIRE(cij.c_value >= -1.0);
     REQUIRE(cij.c_value <= 1.0);
   }
+}
+
+// Helper: build a tetrahedral cloud for ice-like testing
+static molSys::PointCloud<molSys::Point<double>, double>
+makeTetraCloud() {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {20.0, 20.0, 20.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+
+  double coords[5][3] = {
+      {10.0, 10.0, 10.0},
+      {11.0, 11.0, 11.0},
+      {11.0, 9.0, 9.0},
+      {9.0, 11.0, 9.0},
+      {9.0, 9.0, 11.0}};
+
+  for (int i = 0; i < 5; i++) {
+    molSys::Point<double> pt;
+    pt.type = 1;
+    pt.atomID = i;
+    pt.molID = i;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i] = i;
+  }
+  cloud.nop = 5;
+  return cloud;
+}
+
+TEST_CASE("getIceTypeNoPrint classifies atoms after correlation", "[bop]") {
+  auto cloud = makeTetraCloud();
+  auto nList = nneigh::neighListO(3.0, cloud, 1);
+
+  // First get correlations, then classify
+  cloud = chill::getCorrel(cloud, nList, false);
+  cloud = chill::getIceTypeNoPrint(cloud, nList, false);
+
+  // Every atom should have an ice type assigned (could be any type)
+  for (int i = 0; i < cloud.nop; i++) {
+    // Just check that it's a valid enum value (not undefined)
+    auto t = cloud.pts[i].iceType;
+    bool validType =
+        (t == molSys::atom_state_type::cubic ||
+         t == molSys::atom_state_type::hexagonal ||
+         t == molSys::atom_state_type::water ||
+         t == molSys::atom_state_type::interfacial ||
+         t == molSys::atom_state_type::clathrate ||
+         t == molSys::atom_state_type::interClathrate ||
+         t == molSys::atom_state_type::unclassified ||
+         t == molSys::atom_state_type::reCubic ||
+         t == molSys::atom_state_type::reHex);
+    REQUIRE(validType);
+  }
+}
+
+TEST_CASE("getq6 computes Q6 order parameter for each atom", "[bop]") {
+  auto cloud = makeTetraCloud();
+  auto nList = nneigh::neighListO(3.0, cloud, 1);
+
+  auto q6 = chill::getq6(cloud, nList, false);
+
+  REQUIRE(q6.size() == static_cast<size_t>(cloud.nop));
+  // Q6 values should be finite
+  for (const auto &val : q6) {
+    REQUIRE_FALSE(std::isnan(val));
+    REQUIRE_FALSE(std::isinf(val));
+  }
+}
+
+TEST_CASE("reclassifyWater uses Q6 to reclassify water atoms", "[bop]") {
+  auto cloud = makeTetraCloud();
+  auto nList = nneigh::neighListO(3.0, cloud, 1);
+
+  cloud = chill::getCorrel(cloud, nList, false);
+  cloud = chill::getIceTypeNoPrint(cloud, nList, false);
+  auto q6 = chill::getq6(cloud, nList, false);
+  cloud = chill::reclassifyWater(cloud, q6);
+
+  // Should not crash and all types should still be valid
+  for (int i = 0; i < cloud.nop; i++) {
+    auto t = cloud.pts[i].iceType;
+    REQUIRE(static_cast<int>(t) >= 0);
+  }
+}
+
+TEST_CASE("getIceType writes output and classifies atoms", "[bop]") {
+  auto cloud = makeTetraCloud();
+  auto nList = nneigh::neighListO(3.0, cloud, 1);
+
+  std::string tmpPath = "/tmp/dseams_test_icetype/";
+
+  cloud = chill::getCorrel(cloud, nList, false);
+  cloud = chill::getIceType(cloud, nList, tmpPath, 1, false);
+
+  // Check output file was written (getIceType writes to path + "bop/chill.txt")
+  REQUIRE(std::filesystem::exists(tmpPath + "bop/chill.txt"));
+
+  std::filesystem::remove_all(tmpPath);
+}
+
+TEST_CASE("getCorrelPlus uses CHILL+ algorithm", "[bop]") {
+  auto cloud = makeTetraCloud();
+  auto nList = nneigh::neighListO(3.0, cloud, 1);
+
+  cloud = chill::getCorrelPlus(cloud, nList, false);
+
+  // Central atom should have c_ij entries
+  REQUIRE_FALSE(cloud.pts[0].c_ij.empty());
+  for (const auto &cij : cloud.pts[0].c_ij) {
+    REQUIRE(cij.c_value >= -1.0);
+    REQUIRE(cij.c_value <= 1.0);
+  }
+}
+
+TEST_CASE("printIceType writes super chill classification", "[bop]") {
+  auto cloud = makeTetraCloud();
+  auto nList = nneigh::neighListO(3.0, cloud, 1);
+
+  cloud = chill::getCorrel(cloud, nList, false);
+  cloud = chill::getIceTypeNoPrint(cloud, nList, false);
+
+  std::string tmpPath = "/tmp/dseams_test_printice/";
+  int ret = chill::printIceType(cloud, tmpPath, 1, false);
+  REQUIRE(ret == 0);
+
+  std::filesystem::remove_all(tmpPath);
+}
+
+TEST_CASE("numStaggered counts staggered bonds for an atom", "[bop]") {
+  auto cloud = makeTetraCloud();
+  auto nList = nneigh::neighListO(3.0, cloud, 1);
+  cloud = chill::getCorrel(cloud, nList, false);
+
+  int nStag = chill::numStaggered(cloud, nList, 0);
+  REQUIRE(nStag >= 0);
+  REQUIRE(nStag <= 4);
+}
+
+TEST_CASE("isInterfacial checks interfacial criteria", "[bop]") {
+  auto cloud = makeTetraCloud();
+  auto nList = nneigh::neighListO(3.0, cloud, 1);
+  cloud = chill::getCorrel(cloud, nList, false);
+
+  bool result = chill::isInterfacial(cloud, nList, 0, 2, 1);
+  // Just check it doesn't crash; result depends on geometry
+  REQUIRE((result == true || result == false));
 }

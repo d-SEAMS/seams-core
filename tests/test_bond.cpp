@@ -2,6 +2,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <bond.hpp>
+#include <cage.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 
@@ -118,4 +119,65 @@ TEST_CASE("getHbondDistanceOH respects periodic boundaries", "[bond]") {
   double dist = bond::getHbondDistanceOH(oCloud, hCloud, 0, 0);
   // Periodic distance should be 1.0, not 9.0
   REQUIRE_THAT(dist, Catch::Matchers::WithinAbs(1.0, 1e-10));
+}
+
+TEST_CASE("populateBonds with cage iceType filters dummy atoms", "[bond]") {
+  auto cloud = makeSquareCloud();
+  auto nList = nneigh::getNewNeighbourListByIndex(cloud, 1.5);
+
+  // All atoms classified as dummy -- bonds should still be created between them
+  std::vector<cage::iceType> atomTypes(4, cage::iceType::dummy);
+  auto bonds = bond::populateBonds(nList, cloud, atomTypes);
+
+  // With bondsBetweenDummy=false (default), bonds between dummy atoms are excluded
+  // So no bonds should be created
+  REQUIRE(bonds.empty());
+}
+
+TEST_CASE("populateBonds with non-dummy iceType creates bonds", "[bond]") {
+  auto cloud = makeSquareCloud();
+  auto nList = nneigh::getNewNeighbourListByIndex(cloud, 1.5);
+
+  // Mark all atoms as HC ice type
+  std::vector<cage::iceType> atomTypes(4, cage::iceType::hc);
+  auto bonds = bond::populateBonds(nList, cloud, atomTypes);
+
+  REQUIRE(bonds.size() > 0);
+  for (const auto &b : bonds) {
+    REQUIRE(b.size() == 2);
+  }
+}
+
+TEST_CASE("createBondsFromCages extracts bonds from cage rings", "[bond]") {
+  // Minimal cage setup: a single HC cage has rings
+  std::vector<std::vector<int>> rings = {{1, 2, 3, 4, 5, 6},
+                                          {7, 8, 9, 10, 11, 12}};
+  cage::Cage cage1;
+  cage1.type = cage::cageType::HexC;
+  cage1.rings = {0, 1}; // Indices into rings
+
+  std::vector<cage::Cage> cageList = {cage1};
+  int nRings = 0;
+
+  auto bonds = bond::createBondsFromCages(rings, cageList,
+                                           cage::cageType::HexC, nRings);
+
+  REQUIRE(nRings == 2);
+  REQUIRE(bonds.size() > 0);
+}
+
+TEST_CASE("createBondsFromCages with no matching cage type returns empty",
+          "[bond]") {
+  std::vector<std::vector<int>> rings = {{1, 2, 3, 4, 5, 6}};
+  cage::Cage cage1;
+  cage1.type = cage::cageType::DoubleDiaC;
+  cage1.rings = {0};
+
+  std::vector<cage::Cage> cageList = {cage1};
+  int nRings = 0;
+
+  auto bonds = bond::createBondsFromCages(rings, cageList,
+                                           cage::cageType::HexC, nRings);
+
+  REQUIRE(nRings == 0);
 }

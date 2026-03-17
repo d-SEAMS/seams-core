@@ -20,12 +20,11 @@
  * Oxygen atoms are printed out
  */
 int sout::writeLAMMPSdata(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     std::vector<std::vector<int>> rings, std::vector<std::vector<int>> bonds,
     std::string filename) {
   std::ofstream outputFile;
   std::vector<int> atoms;         // Holds all atom IDs to print
-  int ringSize = rings[0].size(); // Ring size of each ring in rings
   int iatom;                      // Index, not atom ID
   bool padAtoms = false;          // Add extra atoms if the atom IDs are skipped
   int prevAtomID = 0;             // Check for previous atom ID
@@ -34,9 +33,10 @@ int sout::writeLAMMPSdata(
   int jatom; // Array index is 1 less than the ID (index for dummy atom)
   // ----------------
   // Return if there are no rings
-  if (rings.size() == 0) {
+  if (rings.empty()) {
     return 1;
   }
+  int ringSize = rings[0].size(); // Ring size of each ring in rings
   // ----------------
   // Otherwise create file
   // Create output dir if it doesn't exist already
@@ -214,13 +214,13 @@ int sout::writeRings(const std::vector<std::vector<int>> &rings,
  * Uses Boost!
  */
 int sout::writePrisms(
-    std::vector<int> *basal1, std::vector<int> *basal2, int prismNum,
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+    std::vector<int> &basal1, std::vector<int> &basal2, int prismNum,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   std::ofstream outputFile;
   std::string number = std::to_string(prismNum);
   std::string filename = "prism" + number + ".dat";
   int ringSize =
-      (*basal1).size(); // Size of the ring; each ring contains n elements
+      basal1.size(); // Size of the ring; each ring contains n elements
   int iatomIndex;       // index of atom coordinate being written out
 
   // ----------------
@@ -239,7 +239,7 @@ int sout::writePrisms(
 
   // For basal 1
   for (int iring = 0; iring < ringSize; iring++) {
-    iatomIndex = (*basal1)[iring]; // C++ indices are one less
+    iatomIndex = basal1[iring]; // C++ indices are one less
     // Write the coordinates out to the file
     outputFile << yCloud.pts[iatomIndex].x << " ";
     outputFile << yCloud.pts[iatomIndex].y << " ";
@@ -250,7 +250,7 @@ int sout::writePrisms(
 
   // For basal 2
   for (int iring = 0; iring < ringSize; iring++) {
-    iatomIndex = (*basal2)[iring]; // C++ indices are one less
+    iatomIndex = basal2[iring]; // C++ indices are one less
     // Write the coordinates out to the file
     outputFile << yCloud.pts[iatomIndex].x << " ";
     outputFile << yCloud.pts[iatomIndex].y << " ";
@@ -266,7 +266,7 @@ int sout::writePrisms(
     outputFile.open("../output/prisms/singleRing.dat");
     // For basal 1
     for (int iring = 0; iring < ringSize; iring++) {
-      iatomIndex = (*basal1)[iring]; // C++ indices are one less
+      iatomIndex = basal1[iring]; // C++ indices are one less
       // Write the coordinates out to the file
       outputFile << yCloud.pts[iatomIndex].x << " ";
       outputFile << yCloud.pts[iatomIndex].y << " ";
@@ -285,14 +285,14 @@ int sout::writePrisms(
  * the output
  */
 int sout::writeAllCages(
-    std::string path, std::vector<cage::Cage> *cageList,
+    std::string path, std::vector<cage::Cage> &cageList,
     const std::vector<std::vector<int>> &rings, const std::vector<std::vector<int>> &nList,
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     int currentFrame) {
   int numDDC;                          // Number of DDCs
   int numHC;                           // Number of HCs
   int numMC;                           // Number of MCs
-  int totalCages = (*cageList).size(); // Total number of cages
+  int totalCages = cageList.size(); // Total number of cages
   cage::cageType type;                 // Current cage type
 
   // ---------------------------------
@@ -309,25 +309,25 @@ int sout::writeAllCages(
 
   // Loop through every cage
   for (int icage = 0; icage < totalCages; icage++) {
-    type = (*cageList)[icage].type;
+    type = cageList[icage].type;
     // ------
     // Add to the cage type and write out to the appropriate folders
     // Hexagonal Cages
     if (type == cage::cageType::HexC) {
       numHC++;
-      sout::writeEachCage((*cageList)[icage].rings, numHC, type, rings, yCloud);
-      sout::writeBasalRingsHex((*cageList)[icage].rings, numHC, nList, rings);
+      sout::writeEachCage(cageList[icage].rings, numHC, type, rings, yCloud);
+      sout::writeBasalRingsHex(cageList[icage].rings, numHC, nList, rings);
     } // end of write out of HCs
     // Double diamond Cages
     else if (type == cage::cageType::DoubleDiaC) {
       numDDC++;
-      sout::writeEachCage((*cageList)[icage].rings, numDDC, type, rings,
+      sout::writeEachCage(cageList[icage].rings, numDDC, type, rings,
                           yCloud);
     } // end of write out of DDCs
     // // Mixed Cages
     // else if (type == cage::Mixed) {
     //   numMC++;
-    //   sout::writeEachCage((*cageList)[icage].rings, numMC, type, rings,
+    //   sout::writeEachCage(cageList[icage].rings, numMC, type, rings,
     //   yCloud);
     // }  // end of write out of MCs
     // // Error
@@ -348,7 +348,7 @@ int sout::writeAllCages(
 int sout::writeEachCage(
     const std::vector<int> &currentCage, int cageNum, cage::cageType type,
     const std::vector<std::vector<int>> &rings,
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   std::ofstream outputFile;
   std::string number = std::to_string(cageNum);
   std::string filename = "cage" + number + ".dat";
@@ -356,14 +356,14 @@ int sout::writeEachCage(
       rings[0].size();        // Size of the ring; each ring contains n elements
   int iatomIndex;             // index of atom coordinate being written out
   std::string actualCageType; // is icage a DDC, HC or MC?
-  char cageChar[100];         // is icage a DDC, HC or MC?
+  std::string cageDir;        // output subdirectory for cage type
   int iring;                  // Ring index of the current ring
 
   if (type == cage::cageType::HexC) {
-    strcpy(cageChar, "../output/cages/hexCages");
+    cageDir = "../output/cages/hexCages";
     actualCageType = "hexCages";
   } else if (type == cage::cageType::DoubleDiaC) {
-    strcpy(cageChar, "../output/cages/doubleDiaCages");
+    cageDir = "../output/cages/doubleDiaCages";
     actualCageType = "doubleDiaCages";
   } else {
     // throw error
@@ -381,7 +381,7 @@ int sout::writeEachCage(
   // ----------------
   // Subdirectory
 
-  const fs::path path1(cageChar);
+  const fs::path path1(cageDir);
   // fs::create_directories(path1);
 
   // Write output to file inside the output directory
@@ -648,15 +648,15 @@ int sout::writeBasalRingsHex(const std::vector<int> &currentCage, int cageNum,
  * described by the number prismNum. Uses Boost!
  */
 int sout::writeBasalRingsPrism(
-    std::vector<int> *basal1, std::vector<int> *basal2, int prismNum,
+    std::vector<int> &basal1, std::vector<int> &basal2, int prismNum,
     const std::vector<std::vector<int>> &nList,
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     bool isDeformed) {
   std::ofstream outputFile;
   std::string number = std::to_string(prismNum);
   std::string filename = "basalRings" + number + ".dat";
   int ringSize =
-      (*basal1).size(); // Size of the ring; each ring contains n elements
+      basal1.size(); // Size of the ring; each ring contains n elements
   int nBonds;           // Number of bonds between the two deformed prisms
   int l_k, m_k;         // Atom ID in basal1 and basal2 respectively
   int iatom,
@@ -716,12 +716,12 @@ int sout::writeBasalRingsPrism(
   isNeighbour = false;
   // Loop through every element of basal1
   for (int l = 0; l < ringSize; l++) {
-    l_k = (*basal1)[l]; // This is the atom particle ID, not the C++ index
+    l_k = basal1[l]; // This is the atom particle ID, not the C++ index
 
     // Search for the nearest neighbour of l_k in basal2
     // Loop through basal2 elements
     for (int m = 0; m < ringSize; m++) {
-      m_k = (*basal2)[m]; // Atom ID to find in the neighbour list of iatom
+      m_k = basal2[m]; // Atom ID to find in the neighbour list of iatom
 
       // Find m_k inside l_k neighbour list
       auto it = std::find(nList[l_k].begin() + 1, nList[l_k].end(), m_k);
@@ -765,9 +765,9 @@ int sout::writeBasalRingsPrism(
     tempJback = ringSize - 1;
   }
 
-  int forwardJ = (*basal2)[tempJfor];
-  int backwardJ = (*basal2)[tempJback];
-  int currentI = (*basal1)[iatom];
+  int forwardJ = basal2[tempJfor];
+  int backwardJ = basal2[tempJback];
+  int currentI = basal1[iatom];
 
   // Check clockwise
   double distClock = gen::periodicDist(yCloud, currentI, forwardJ);
@@ -809,8 +809,8 @@ int sout::writeBasalRingsPrism(
     }   // end of anti-clockwise update
 
     // Add to matchedBasal1 and matchedBasal2 now
-    matchedBasal1.push_back((*basal1)[currentIatom]);
-    matchedBasal2.push_back((*basal2)[currentJatom]);
+    matchedBasal1.push_back(basal1[currentIatom]);
+    matchedBasal2.push_back(basal2[currentJatom]);
   }
   // ---------------------------------------------------
   // Print out the ordered rings
@@ -875,7 +875,7 @@ int sout::writeClusterStats(std::string path, int currentFrame,
  The format should be compatible with the group command in LAMMPS 
  */
 int sout::writeMoleculeIDsInSlice(std::string path,
-                            molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+                            const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   std::ofstream outputFile;
   std::string filename =
       "molID-" + std::to_string(yCloud.currentFrame) + ".dat";
@@ -962,7 +962,7 @@ int sout::writeMoleculeIDsInSlice(std::string path,
  The format should be compatible with the group command in LAMMPS 
  */
 int sout::writeMoleculeIDsExpressionSelectOVITO(std::string path,
-                            molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+                            const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   std::ofstream outputFile;
   std::string filename =
       "ovito-molIDSelect-" + std::to_string(yCloud.currentFrame) + ".dat";
@@ -1223,7 +1223,7 @@ int sout::writeRingNumBulk(std::string path, int currentFrame,
  * @details Function for printing out the RDF to a file, given that the file
  * already exists and given the filename.
  */
-int sout::printRDF(std::string fileName, std::vector<double> *rdfValues,
+int sout::printRDF(std::string fileName, std::vector<double> &rdfValues,
                    double binwidth, int nbin) {
   //
   std::ofstream outputFile; // For the output file
@@ -1236,7 +1236,7 @@ int sout::printRDF(std::string fileName, std::vector<double> *rdfValues,
   for (int ibin = 0; ibin < nbin; ibin++) {
     //
     r = binwidth * (ibin + 0.5); // Current distance for ibin
-    outputFile << r << " " << (*rdfValues)[ibin] << "\n";
+    outputFile << r << " " << rdfValues[ibin] << "\n";
   } // end of loop through all bins
 
   outputFile.close();
@@ -1286,7 +1286,7 @@ int sout::writeTopoBulkData(std::string path, int currentFrame, int numHC,
  * every frame, printing the RMSD per atom as well
  */
 int sout::writeLAMMPSdumpCages(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<double> &rmsdPerAtom, const std::vector<int> &atomTypes,
     std::string path, int firstFrame) {
   std::ofstream outputFile;
@@ -1376,7 +1376,7 @@ int sout::writeLAMMPSdumpCages(
  * printing the RMSD per atom as well
  */
 int sout::writeLAMMPSdumpINT(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<double> &rmsdPerAtom, const std::vector<int> &atomTypes, int maxDepth,
     std::string path) {
   //
@@ -1450,7 +1450,7 @@ int sout::writeLAMMPSdumpINT(
  * printing the inSlice attribute for a user-defined slice in a separate column 
  */
 int sout::writeLAMMPSdumpSlice(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     std::string path) {
   //
   std::ofstream outputFile;
@@ -1525,7 +1525,7 @@ int sout::writeLAMMPSdumpSlice(
  * inferred from the rings vector of vectors
  */
 int sout::writeLAMMPSdataAllPrisms(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList, const std::vector<int> &atomTypes,
     int maxDepth, std::string path, bool doShapeMatching) {
   //
@@ -1659,7 +1659,7 @@ int sout::writeLAMMPSdataAllPrisms(
  * inferred from the rings vector of vectors
  */
 int sout::writeLAMMPSdataAllRings(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList, const std::vector<int> &atomTypes,
     int maxDepth, std::string path, bool isMonolayer) {
   //
@@ -1791,7 +1791,7 @@ int sout::writeLAMMPSdataAllRings(
  * options. Only Oxygen atoms are printed out
  */
 int sout::writeLAMMPSdataPrisms(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &rings, bool useBondFile, std::string bondFile,
     const std::vector<int> &listPrism, const std::vector<std::vector<int>> &nList,
     std::string filename) {
@@ -1813,7 +1813,7 @@ int sout::writeLAMMPSdataPrisms(
 
   // ----------------
   // Return if there are no prisms
-  if (listPrism.size() == 0) {
+  if (listPrism.empty()) {
     return 1;
   }
 
@@ -2021,8 +2021,8 @@ int sout::writeLAMMPSdataPrisms(
  * some default options. Only Oxygen atoms are printed out
  */
 int sout::writeLAMMPSdataCages(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-    const std::vector<std::vector<int>> &rings, std::vector<cage::Cage> *cageList,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<std::vector<int>> &rings, std::vector<cage::Cage> &cageList,
     cage::cageType type, int numCages, std::string filename) {
   std::ofstream outputFile;
   std::vector<int> atoms;         // Holds all atom IDs to print
@@ -2043,7 +2043,7 @@ int sout::writeLAMMPSdataCages(
 
   // ----------------
   // Return if there are no cages at all
-  if ((*cageList).size() == 0) {
+  if (cageList.empty()) {
     return 1;
   }
 
@@ -2053,7 +2053,7 @@ int sout::writeLAMMPSdataCages(
   }
   // ---------------
   // Get the bonds
-  bonds = bond::createBondsFromCages(rings, cageList, type, &nRings);
+  bonds = bond::createBondsFromCages(rings, cageList, type, nRings);
   //
   // ----------------
   // Otherwise create file
@@ -2073,14 +2073,14 @@ int sout::writeLAMMPSdataCages(
   atoms.reserve(total_size);
   // Fill up all these atom IDs
   // Loop through every cage in cageList
-  for (int icage = 0; icage < (*cageList).size(); icage++) {
+  for (int icage = 0; icage < cageList.size(); icage++) {
     // Skip if the cage is of a different type
-    if ((*cageList)[icage].type != type) {
+    if (cageList[icage].type != type) {
       continue;
     }
     // Loop through every ring inside Cage
-    for (int k = 0; k < (*cageList)[icage].rings.size(); k++) {
-      iring = (*cageList)[icage].rings[k]; // Current ring index
+    for (int k = 0; k < cageList[icage].rings.size(); k++) {
+      iring = cageList[icage].rings[k]; // Current ring index
       std::move(rings[iring].begin(), rings[iring].end(),
                 std::back_inserter(atoms));
     } // end of loop through every ring in icage
@@ -2232,7 +2232,7 @@ int sout::writeLAMMPSdataCages(
 /**
  * @details  Function for printing out info in PairCorrel struct
  */
-int sout::writeDump(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+int sout::writeDump(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                     std::string path, std::string outFile) {
   std::ofstream outputFile;
   // ----------------
@@ -2336,7 +2336,7 @@ int sout::writeDump(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
  * @details Function for printing out values of averaged Q6, averaged Q3 and Cij
  * values
  */
-int sout::writeHisto(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+int sout::writeHisto(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      const std::vector<std::vector<int>> &nList,
                      const std::vector<double> &avgQ6) {
   std::ofstream cijFile;
@@ -2378,7 +2378,7 @@ int sout::writeHisto(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
  * @details Function to print out the largest ice cluster
  */
 int sout::writeCluster(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     std::string fileName, bool isSlice, int largestIceCluster) {
   std::ofstream clusterFile;
   // Create a new file in the output directory
@@ -2395,7 +2395,7 @@ int sout::writeCluster(
  * Bonds are inferred from the neighbour list
  */
 int sout::writeLAMMPSdataTopoBulk(
-    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList, const std::vector<cage::iceType> &atomTypes,
     std::string path, bool bondsBetweenDummy) {
   //
@@ -2548,7 +2548,7 @@ int sout::writeLAMMPSdataTopoBulk(
  * vector atoms contains the atom indices of the atoms to be written out
  */
 int sout::writeXYZcluster(
-    std::string path, molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    std::string path, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &atoms, int clusterID, cage::cageType type) {
   //
   std::ofstream outputFile;

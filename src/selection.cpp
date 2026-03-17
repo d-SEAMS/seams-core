@@ -133,7 +133,8 @@ void gen::atomsInSingleSlice(
  * is in the specified (single) slice or not. If even one atom of a molecule 
  * is inside the region, then all atoms belonging to that molecule should be
  * inside the slice as well (therefore, inSlice would be set to true)
- * NOTE: THIS DOES NOT WORK. ERROR
+ * NOTE: The earlier bug was that out-of-slice atoms could overwrite inSlice=true
+ * set by a molecule-mate. Fixed by skipping atoms already marked inSlice.
  * @param[in] yCloud The given input PointCloud
  * @param[in] clearPreviousSliceSelection sets all inSlice bool values to false before 
  * adding Points to the slice
@@ -197,9 +198,12 @@ void gen::moleculesInSingleSlice(
         yCloud.pts[jatomIndex].inSlice = true; // jatomIndex is inside the slice 
       }
       // -----------
-    } // the atom is in the slice 
+    } // the atom is in the slice
     else{
-      yCloud.pts[iatom].inSlice = false; // iatom is not in the slice  
+      // Only set to false if not already marked true by a molecule-mate
+      if (!yCloud.pts[iatom].inSlice) {
+        yCloud.pts[iatom].inSlice = false; // iatom is not in the slice
+      }
     } // atom is not in the slice
   }
 
