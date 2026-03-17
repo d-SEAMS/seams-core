@@ -281,6 +281,21 @@ TEST_CASE("numStaggered counts staggered bonds for an atom", "[bop]") {
   REQUIRE(nStag <= 4);
 }
 
+TEST_CASE("getIceTypePlus classifies with CHILL+ and writes output", "[bop]") {
+  auto cloud = makeTetraCloud();
+  auto nList = nneigh::neighListO(3.0, cloud, 1);
+
+  std::string tmpPath = "/tmp/dseams_test_icetypeplus/";
+
+  cloud = chill::getCorrelPlus(cloud, nList, false);
+  cloud = chill::getIceTypePlus(cloud, nList, tmpPath, 1, false);
+
+  // Check output file was written
+  REQUIRE(std::filesystem::exists(tmpPath + "bop/chillPlus.txt"));
+
+  std::filesystem::remove_all(tmpPath);
+}
+
 TEST_CASE("isInterfacial checks interfacial criteria", "[bop]") {
   auto cloud = makeTetraCloud();
   auto nList = nneigh::neighListO(3.0, cloud, 1);

@@ -5,6 +5,7 @@
 #include <mol_sys.hpp>
 
 #include <cmath>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -188,6 +189,17 @@ TEST_CASE("avgVector with zero neighbours returns original", "[generic]") {
 }
 
 // -- compareByAtomID tests --
+
+TEST_CASE("prettyPrintYoda does not crash", "[generic]") {
+  auto cloud = makeTwoAtomCloud(1.0, 0.0, 0.0, 4.0, 0.0, 0.0);
+  cloud.boxLow = {0.0, 0.0, 0.0};
+
+  std::string outFile = "/tmp/dseams_test_prettyprint.dat";
+  int ret = gen::prettyPrintYoda(cloud, outFile);
+  REQUIRE(ret == 0);
+
+  std::filesystem::remove(outFile);
+}
 
 TEST_CASE("compareByAtomID sorts points by atomID", "[generic]") {
   molSys::Point<double> a, b;
