@@ -582,27 +582,74 @@ TEST_CASE("writeDump writes all ice type labels", "[seams_output]") {
   fs::remove_all(tmpPath);
 }
 
-TEST_CASE("writeAllCages writes cages from mW cubic trajectory",
-          "[seams_output]") {
-  molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
-  if (yCloud.nop == 0) return;
+TEST_CASE("writeEachCage writes HC cage data directly", "[seams_output]") {
+  auto cloud = makeTestCloud(12);
+  // Create output directory structure (the functions expect these to exist)
+  fs::create_directories("../output/cages/hexCages");
+  fs::create_directories("../output/cages/doubleDiaCages");
 
-  auto nList = nneigh::neighListO(3.5, yCloud, 1);
-  nList = nneigh::neighbourListByIndex(yCloud, nList);
-  auto rings = primitive::ringNetwork(nList, 7);
+  // Rings with 6 elements each (6-membered rings for HC)
+  std::vector<std::vector<int>> rings = {
+      {1, 2, 3, 4, 5, 6}, {7, 8, 9, 10, 11, 12}};
 
-  std::vector<ring::strucType> ringType(rings.size());
-  std::vector<cage::Cage> cageList;
-  ring::findHC(rings, ringType, nList, cageList);
+  // HC cage referencing ring indices
+  std::vector<int> currentCage = {0, 1};
 
-  if (!cageList.empty()) {
-    std::string tmpPath = "/tmp/dseams_test_writeallcages/";
+  int ret = sout::writeEachCage(currentCage, 1, cage::cageType::HexC, rings,
+                                 cloud);
+  REQUIRE(ret == 0);
 
-    int ret = sout::writeAllCages(tmpPath, cageList, rings, nList, yCloud, 1);
-    REQUIRE(ret == 0);
+  // Also test DDC cage
+  int ret2 = sout::writeEachCage(currentCage, 1, cage::cageType::DoubleDiaC,
+                                  rings, cloud);
+  REQUIRE(ret2 == 0);
 
-    fs::remove_all(tmpPath);
-    fs::remove_all("../output");
+  fs::remove_all("../output");
+}
+
+TEST_CASE("writeBasalRingsHex writes HC basal ring data", "[seams_output]") {
+  auto cloud = makeTestCloud(12);
+  fs::create_directories("../output/cages/hexBasalRings");
+
+  // 6-membered rings
+  std::vector<std::vector<int>> rings = {
+      {1, 2, 3, 4, 5, 6}, {7, 8, 9, 10, 11, 12}};
+
+  // HC cage: first two rings are basal
+  std::vector<int> currentCage = {0, 1};
+
+  // Build a nList where each basal1 atom has a neighbor in basal2
+  // nList is by atom ID (1-based), nList[atomID] = {atomID, neighbors...}
+  std::vector<std::vector<int>> nList(13); // 0-12
+  for (int i = 1; i <= 6; i++) {
+    nList[i] = {i, i + 6}; // atom i is neighbor of atom i+6
   }
+  for (int i = 7; i <= 12; i++) {
+    nList[i] = {i, i - 6}; // atom i is neighbor of atom i-6
+  }
+
+  int ret = sout::writeBasalRingsHex(currentCage, 1, nList, rings);
+  REQUIRE(ret == 0);
+
+  fs::remove_all("../output");
+}
+
+TEST_CASE("writeLAMMPSdataCages writes cage LAMMPS data file",
+          "[seams_output]") {
+  auto cloud = makeTestCloud(12);
+  fs::create_directories("../output");
+
+  std::vector<std::vector<int>> rings = {
+      {1, 2, 3, 4, 5, 6}, {7, 8, 9, 10, 11, 12}};
+
+  cage::Cage cage1;
+  cage1.type = cage::cageType::HexC;
+  cage1.rings = {0, 1};
+  std::vector<cage::Cage> cageList = {cage1};
+
+  int ret = sout::writeLAMMPSdataCages(cloud, rings, cageList,
+                                        cage::cageType::HexC, 1);
+  REQUIRE(ret == 0);
+
+  fs::remove_all("../output");
 }
