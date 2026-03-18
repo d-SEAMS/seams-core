@@ -1,0 +1,7 @@
+recursive-include src *.cpp *.hpp
+recursive-include python *.cpp *.py
+include meson.build meson_options.txt
+include src/meson.build python/meson.build tests/meson.build
+recursive-include subprojects *.wrap
+recursive-include templates *.xyz
+include LICENSE
