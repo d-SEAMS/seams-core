@@ -450,7 +450,7 @@ TEST_CASE("writeLAMMPSdataCages writes cage data file", "[seams_output]") {
   // Read mW cubic ice and find cages
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
   yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
-  if (yCloud.nop == 0) return;
+  REQUIRE(yCloud.nop > 0);
 
   auto nList = nneigh::neighListO(3.5, yCloud, 1);
   nList = nneigh::neighbourListByIndex(yCloud, nList);
@@ -497,7 +497,7 @@ TEST_CASE("writeBasalRingsPrism writes prism basal ring data",
   // Use mW data where atom IDs and nList are consistent
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
   yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
-  if (yCloud.nop == 0) return;
+  REQUIRE(yCloud.nop > 0);
 
   auto nList = nneigh::neighListO(3.5, yCloud, 1);
 
@@ -538,7 +538,7 @@ TEST_CASE("writeLAMMPSdataPrisms returns 1 for empty prism list",
 TEST_CASE("writeLAMMPSdataTopoBulk with mixed cage types", "[seams_output]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
   yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
-  if (yCloud.nop == 0) return;
+  REQUIRE(yCloud.nop > 0);
 
   auto nList = nneigh::neighListO(3.5, yCloud, 1);
   nList = nneigh::neighbourListByIndex(yCloud, nList);

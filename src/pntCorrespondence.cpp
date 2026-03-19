@@ -943,7 +943,7 @@ std::vector<int> pntToPnt::relOrderDDC(int index,
           // if odd peripheral2
           else {
             peripheral2.push_back(prevJ);
-            // Get apex2 for i=0
+            // Get apex2 for i=1
             if (i == 1) {
               // Go back two elements from jatomIndex
               atomIndex = jatomIndex - 2;

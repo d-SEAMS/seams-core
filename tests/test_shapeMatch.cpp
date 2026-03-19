@@ -228,7 +228,7 @@ TEST_CASE("matchUntetheredPrism on ideal tetragonal prism", "[shapeMatch]") {
   REQUIRE(isMatch == true);
 }
 
-TEST_CASE("matchUntetheredPrism returns false for non-prism geometry",
+TEST_CASE("matchUntetheredPrism does not crash on degenerate geometry",
           "[shapeMatch]") {
   // Build atoms that do NOT form a prism (random positions)
   molSys::PointCloud<molSys::Point<double>, double> cloud;
@@ -261,8 +261,6 @@ TEST_CASE("matchUntetheredPrism returns false for non-prism geometry",
   // Coplanar rings cannot be a prism; shape matching should fail
   bool isMatch = match::matchUntetheredPrism(cloud, nList, refPoints, basal1,
                                               basal2, rmsdPerAtom);
-  // The coplanar geometry with zero height should fail matchPrismBlock
-  // (but matchUntetheredPrism might still return true if RMSD is low enough)
-  // At minimum, it should not crash
-  REQUIRE((isMatch == true || isMatch == false));
+  // Coplanar rings should not form a valid prism; just verify no crash
+  (void)isMatch;
 }

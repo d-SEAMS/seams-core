@@ -20,7 +20,7 @@ jobs:
       - run: pixi run build
       - run: pixi run test
       - run: pixi run install
-      - run: pixi run -e default -- bash -c "LD_LIBRARY_PATH=\$CONDA_PREFIX/lib:bbdir/src:\$LD_LIBRARY_PATH pytest tests/python/ -v --ignore=tests/python/test_hypothesis_horn.py --ignore=tests/python/test_hypothesis_pbc.py --ignore=tests/python/test_hypothesis_hbond.py --ignore=tests/python/test_hypothesis_rings.py"
+      - run: pixi run -e default -- bash -c "LD_LIBRARY_PATH=\$CONDA_PREFIX/lib:\$GITHUB_WORKSPACE/bbdir/src:\$LD_LIBRARY_PATH pytest tests/python/ -v --ignore=tests/python/test_hypothesis_horn.py --ignore=tests/python/test_hypothesis_pbc.py --ignore=tests/python/test_hypothesis_hbond.py --ignore=tests/python/test_hypothesis_rings.py"
 
   coverage:
     runs-on: ubuntu-latest

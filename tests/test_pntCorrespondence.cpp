@@ -143,7 +143,7 @@ TEST_CASE("relOrderPrismBlock with nList from trajectory", "[pntCorrespondence]"
   // neighbours. Use the mW trajectory for a realistic test.
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
   yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
-  if (yCloud.nop == 0) return; // skip if no data
+  REQUIRE(yCloud.nop > 0);
 
   auto nList = nneigh::neighListO(3.5, yCloud, 1);
   nList = nneigh::neighbourListByIndex(yCloud, nList);

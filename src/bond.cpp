@@ -239,15 +239,20 @@ bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, do
   } // end of init of hBondNet
 
   // Loop through the neighbour list
-  for (int iatom = 0; iatom < nList.size(); iatom++) {
+  for (size_t iatom = 0; iatom < nList.size(); iatom++) {
     currentBondList.clear();                  // Clear the current bond vector
     iatomID = nList[iatom][0];                // atom ID corresponding to iatom
     nnumNeighbours = nList[iatom].size() - 1; // No. of nearest neighbours
     iatomIndex = iatom;                       // Atomic index
     //
     // Loop through the nearest neighbours
+    // Only process pairs where iatomID < jatomID to avoid adding each
+    // H-bond twice (both directions are added when a bond is found)
     for (int j = 1; j <= nnumNeighbours; j++) {
       jatomID = nList[iatom][j]; // Atom ID of the nearest neighbour
+      if (iatomID >= jatomID) {
+        continue;
+      } // skip to avoid duplicate H-bond entries
       // Get the hydrogen atom indices corresponding to the molID of jatomID
       // Find jOxyMolID
       auto it = idMolIDmap.find(jatomID);

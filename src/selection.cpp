@@ -199,12 +199,8 @@ void gen::moleculesInSingleSlice(
       }
       // -----------
     } // the atom is in the slice
-    else{
-      // Only set to false if not already marked true by a molecule-mate
-      if (!yCloud.pts[iatom].inSlice) {
-        yCloud.pts[iatom].inSlice = false; // iatom is not in the slice
-      }
-    } // atom is not in the slice
+    // If not in slice, inSlice retains its current value (may have been
+    // set true by a molecule-mate processed earlier in the loop)
   }
 
   return;

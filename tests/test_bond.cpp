@@ -189,7 +189,7 @@ TEST_CASE("populateHbondsWithInputClouds detects H-bonds from O+H clouds",
   // Read O atoms
   molSys::PointCloud<molSys::Point<double>, double> oCloud;
   oCloud = sinp::readLammpsTrjO("traj/exampleTraj.lammpstrj", 1, oCloud, 1);
-  if (oCloud.nop == 0) return; // skip if file not found
+  REQUIRE(oCloud.nop > 0);
 
   // Read H atoms
   molSys::PointCloud<molSys::Point<double>, double> hCloud;
