@@ -1,0 +1,8 @@
+[wrap-git]
+url = https://github.com/rubber-duck-debug/gpu-lite.git
+revision = main
+depth = 1
+patch_directory = gpulite
+
+[provide]
+gpulite = gpulite_dep

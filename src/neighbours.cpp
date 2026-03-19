@@ -17,6 +17,10 @@
 #include <neighbours.hpp>
 #include <simd_distance.hpp>
 
+#ifdef SEAMS_HAS_VESIN
+#include <vesin.h>
+#endif
+
 /**
  * @details Function for building neighbour lists for each
  *  particle. Inefficient brute-force \f$ O(n^2) \f$ implementation.
@@ -123,6 +127,89 @@ nneigh::neighListO(double rcutoff,
       nList;      // Vector of vectors of the neighbour list
   int iatomIndex; // Atomic ID of the atom with index iatom
   int jatomIndex; // Atomic ID of the atom with index jatom
+
+#ifdef SEAMS_HAS_VESIN
+  // O(n) cell-list neighbor search via vesin
+  {
+    // Collect indices and positions of typeI atoms
+    std::vector<int> typeIIndices;
+    for (int i = 0; i < yCloud.nop; i++) {
+      if (yCloud.pts[i].type == typeI) {
+        typeIIndices.push_back(i);
+      }
+    }
+
+    // Build index-to-atomID lookup
+    std::vector<int> indexToID(yCloud.nop, -1);
+    for (auto &kv : yCloud.idIndexMap) {
+      if (kv.second >= 0 && kv.second < yCloud.nop) {
+        indexToID[kv.second] = kv.first;
+      }
+    }
+
+    // Prepare positions array for vesin (only typeI atoms)
+    size_t nTypeI = typeIIndices.size();
+    std::vector<std::array<double, 3>> positions(nTypeI);
+    for (size_t i = 0; i < nTypeI; i++) {
+      int idx = typeIIndices[i];
+      positions[i] = {yCloud.pts[idx].x, yCloud.pts[idx].y, yCloud.pts[idx].z};
+    }
+
+    // Box matrix (row-major, diagonal for orthorhombic)
+    double box[3][3] = {
+        {yCloud.box[0], 0.0, 0.0},
+        {0.0, yCloud.box[1], 0.0},
+        {0.0, 0.0, yCloud.box[2]}};
+    bool periodic[3] = {true, true, true};
+
+    VesinOptions options;
+    options.cutoff = rcutoff;
+    options.full = true;  // full neighbor list (both i->j and j->i)
+    options.sorted = false;
+    options.algorithm = VesinAutoAlgorithm;
+    options.return_shifts = false;
+    options.return_distances = false;
+    options.return_vectors = false;
+
+    VesinNeighborList neighbors;
+    const char *error_message = nullptr;
+    VesinDevice device = {VesinCPU, 0};
+
+    int status = vesin_neighbors(
+        reinterpret_cast<const double(*)[3]>(positions.data()),
+        nTypeI, box, periodic, device, options, &neighbors, &error_message);
+
+    if (status == 0) {
+      // Initialize nList for ALL atoms (not just typeI)
+      nList.resize(yCloud.nop);
+      for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+        auto itr = std::find_if(
+            yCloud.idIndexMap.begin(), yCloud.idIndexMap.end(),
+            [&iatom](const std::pair<int, int> &p) { return p.second == iatom; });
+        if (itr != yCloud.idIndexMap.end()) {
+          nList[iatom].push_back(itr->first); // self atom ID
+        }
+      }
+
+      // Fill neighbor pairs from vesin output
+      for (size_t k = 0; k < neighbors.length; k++) {
+        size_t vi = neighbors.pairs[k][0]; // vesin index (into typeIIndices)
+        size_t vj = neighbors.pairs[k][1];
+        int realI = typeIIndices[vi]; // cloud index
+        int realJ = typeIIndices[vj];
+        int atomIDj = indexToID[realJ];
+        // Add j to i's neighbor list (vesin full list already has both dirs)
+        nList[realI].push_back(atomIDj);
+      }
+
+      vesin_free(&neighbors);
+      return nList;
+    }
+    // If vesin failed, fall through to brute-force
+    std::cerr << "Vesin failed: " << (error_message ? error_message : "unknown")
+              << "; falling back to brute force.\n";
+  }
+#endif
 
   // Initialize and fill the first element with the current atom ID whose
   // neighbour list will be filled

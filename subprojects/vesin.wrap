@@ -1,0 +1,8 @@
+[wrap-git]
+url = https://github.com/Luthaf/vesin.git
+revision = main
+depth = 1
+patch_directory = vesin
+
+[provide]
+vesin = vesin_dep

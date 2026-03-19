@@ -54,6 +54,12 @@ if hwy_dep.found()
   _args += ['-DSEAMS_HAS_HWY=1']
 endif
 
+vesin_dep = dependency('vesin', required: false, fallback: ['vesin', 'vesin_dep'])
+if vesin_dep.found()
+  _deps += [vesin_dep]
+  _args += ['-DSEAMS_HAS_VESIN=1']
+endif
+
 # Include directories
 _incdirs += include_directories([
   'src/include/internal',
