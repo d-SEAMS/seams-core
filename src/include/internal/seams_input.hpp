@@ -83,6 +83,21 @@ molSys::PointCloud<molSys::Point<double>, double> readXYZ(std::string filename);
 //! Reads bonds into a vector of vectors from a file with a specific format
 std::vector<std::vector<int>> readBonds(std::string filename);
 
+#ifdef SEAMS_HAS_CHEMFILES
+//! Read any trajectory format supported by chemfiles (PDB, GRO, DCD, etc.)
+molSys::PointCloud<molSys::Point<double>, double>
+readChemfiles(std::string filename, int targetFrame,
+              molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+              int typeFilter = -1);
+#endif
+
+#ifdef SEAMS_HAS_READCON
+//! Read a .con format file (eOn saddle point search trajectories)
+molSys::PointCloud<molSys::Point<double>, double>
+readCon(std::string filename, int targetFrame,
+        molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+#endif
+
 inline bool atomInSlice(double x, double y, double z,
                         std::array<double, 3> coordLow,
                         std::array<double, 3> coordHigh) {

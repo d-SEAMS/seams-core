@@ -138,6 +138,25 @@ NB_MODULE(_core, m) {
           "Check whether a point (x, y, z) lies within a volume slice.",
           nb::arg("x"), nb::arg("y"), nb::arg("z"),
           nb::arg("coordLow"), nb::arg("coordHigh"));
+#ifdef SEAMS_HAS_CHEMFILES
+    m.def("readChemfiles",
+          [](std::string filename, int targetFrame, int typeFilter) {
+            molSys::PointCloud<molSys::Point<double>, double> yCloud;
+            return sinp::readChemfiles(filename, targetFrame, yCloud, typeFilter);
+          },
+          "Read any trajectory format supported by chemfiles (PDB, GRO, DCD, etc.).",
+          nb::arg("filename"), nb::arg("targetFrame"),
+          nb::arg("typeFilter") = -1);
+#endif
+#ifdef SEAMS_HAS_READCON
+    m.def("readCon",
+          [](std::string filename, int targetFrame) {
+            molSys::PointCloud<molSys::Point<double>, double> yCloud;
+            return sinp::readCon(filename, targetFrame, yCloud);
+          },
+          "Read a .con format file (eOn saddle point search trajectories).",
+          nb::arg("filename"), nb::arg("targetFrame"));
+#endif
 
     // Neighbours
     m.def("clearNeighbourList", &nneigh::clearNeighbourList,

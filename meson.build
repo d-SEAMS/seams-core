@@ -60,6 +60,18 @@ if vesin_dep.found()
   _args += ['-DSEAMS_HAS_VESIN=1']
 endif
 
+chemfiles_dep = dependency('chemfiles', required: false)
+if chemfiles_dep.found()
+  _deps += [chemfiles_dep]
+  _args += ['-DSEAMS_HAS_CHEMFILES=1']
+endif
+
+readcon_dep = dependency('readcon-core', required: false)
+if readcon_dep.found()
+  _deps += [readcon_dep]
+  _args += ['-DSEAMS_HAS_READCON=1']
+endif
+
 # Include directories
 _incdirs += include_directories([
   'src/include/internal',

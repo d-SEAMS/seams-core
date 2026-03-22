@@ -22,6 +22,7 @@ meson-python = ">=0.16"
 pytest = ">=8.0"
 lcov = ">=1.16"
 libhwy = ">=1.3.0"
+chemfiles = ">=0.10"
 
 [tasks]
 setup = "meson setup bbdir --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=true --wipe 2>/dev/null; meson setup bbdir --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=true"

@@ -867,3 +867,114 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
   dumpFile->close();
   return yCloud;
 }
+
+// ============================================================================
+// Optional format readers (compiled only when dependencies are available)
+// ============================================================================
+
+#ifdef SEAMS_HAS_CHEMFILES
+#include <chemfiles.hpp>
+
+molSys::PointCloud<molSys::Point<double>, double>
+sinp::readChemfiles(std::string filename, int targetFrame,
+                    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                    int typeFilter) {
+  chemfiles::Trajectory trajectory(filename);
+
+  if (targetFrame < 1 ||
+      static_cast<size_t>(targetFrame) > trajectory.nsteps()) {
+    std::cerr << "Frame " << targetFrame << " does not exist in " << filename
+              << " (has " << trajectory.nsteps() << " frames).\n";
+    return yCloud;
+  }
+
+  yCloud = molSys::clearPointCloud(yCloud);
+
+  auto frame = trajectory.read_step(static_cast<size_t>(targetFrame - 1));
+  auto positions = frame.positions();
+  auto cell = frame.cell();
+
+  // Box dimensions
+  yCloud.box = {cell.lengths()[0], cell.lengths()[1], cell.lengths()[2]};
+  yCloud.boxLow = {0.0, 0.0, 0.0};
+
+  auto &topology = frame.topology();
+
+  for (size_t i = 0; i < frame.size(); i++) {
+    auto atomType =
+        static_cast<int>(topology[i].atomic_number().value_or(1));
+
+    // Apply type filter if requested (-1 means accept all)
+    if (typeFilter >= 0 && atomType != typeFilter) {
+      continue;
+    }
+
+    molSys::Point<double> pt;
+    pt.type = atomType;
+    pt.atomID = static_cast<int>(i);
+    pt.molID = static_cast<int>(i); // chemfiles doesn't always have mol IDs
+    pt.x = positions[i][0];
+    pt.y = positions[i][1];
+    pt.z = positions[i][2];
+
+    yCloud.pts.push_back(pt);
+    yCloud.idIndexMap[pt.atomID] = static_cast<int>(yCloud.pts.size()) - 1;
+  }
+
+  yCloud.nop = static_cast<int>(yCloud.pts.size());
+  yCloud.currentFrame = targetFrame;
+
+  return yCloud;
+}
+#endif // SEAMS_HAS_CHEMFILES
+
+#ifdef SEAMS_HAS_READCON
+#include <readcon-core.hpp>
+
+molSys::PointCloud<molSys::Point<double>, double>
+sinp::readCon(std::string filename, int targetFrame,
+              molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  yCloud = molSys::clearPointCloud(yCloud);
+
+  try {
+    int frameIdx = 0;
+    readcon::ConFrameIterator frames(filename);
+    for (auto &&frame : frames) {
+      frameIdx++;
+      if (frameIdx != targetFrame) continue;
+
+      // Found target frame
+      auto &cell = frame.cell();
+      yCloud.box = {cell[0], cell[1], cell[2]};
+      yCloud.boxLow = {0.0, 0.0, 0.0};
+
+      auto &atoms = frame.atoms();
+      yCloud.pts.reserve(atoms.size());
+
+      for (size_t i = 0; i < atoms.size(); i++) {
+        molSys::Point<double> pt;
+        pt.type = static_cast<int>(atoms[i].atomic_number);
+        pt.atomID = static_cast<int>(atoms[i].atom_id);
+        pt.molID = pt.atomID;
+        pt.x = atoms[i].x;
+        pt.y = atoms[i].y;
+        pt.z = atoms[i].z;
+
+        yCloud.pts.push_back(pt);
+        yCloud.idIndexMap[pt.atomID] = static_cast<int>(yCloud.pts.size()) - 1;
+      }
+
+      yCloud.nop = static_cast<int>(yCloud.pts.size());
+      yCloud.currentFrame = targetFrame;
+      return yCloud;
+    }
+
+    std::cerr << "Frame " << targetFrame << " not found in " << filename
+              << " (has " << frameIdx << " frames).\n";
+  } catch (const std::exception &e) {
+    std::cerr << "Error reading .con file: " << e.what() << "\n";
+  }
+
+  return yCloud;
+}
+#endif // SEAMS_HAS_READCON
