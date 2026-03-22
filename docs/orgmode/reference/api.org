@@ -101,6 +101,30 @@ cloud = _core.readXYZ(filename)
 
 Read an XYZ format file. Returns a ~PointCloudDouble~.
 
+** readChemfiles (optional, requires chemfiles)
+
+#+begin_src python
+cloud = _core.readChemfiles(filename, targetFrame, typeFilter=-1)
+#+end_src
+
+Read any trajectory format supported by chemfiles (PDB, GRO, DCD, TRR, and
+40+ others). Available when d-SEAMS is built with chemfiles.
+
+| Argument      | Type | Description                                    |
+|---------------+------+------------------------------------------------|
+| ~filename~    | str  | Path to trajectory file (any chemfiles format) |
+| ~targetFrame~ | int  | Frame number to read (1-indexed)               |
+| ~typeFilter~  | int  | Atomic number to filter (-1 = all atoms)       |
+
+** readCon (optional, requires readcon-core)
+
+#+begin_src python
+cloud = _core.readCon(filename, targetFrame)
+#+end_src
+
+Read a =.con= format file used by eOn for saddle point searches. Available when
+d-SEAMS is built with readcon-core.
+
 * Neighbour list functions
 
 ** neighListO
@@ -110,6 +134,8 @@ nList = _core.neighListO(rcutoff, yCloud, typeI)
 #+end_src
 
 Build a neighbour list for atoms of a given type within a cutoff distance.
+Uses O(n) cell-list algorithm (vesin) when available, with automatic fallback
+to O(n^2) brute-force.
 
 | Argument   | Type             | Description                     |
 |------------+------------------+---------------------------------|
