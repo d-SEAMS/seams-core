@@ -66,7 +66,8 @@ if chemfiles_dep.found()
   _args += ['-DSEAMS_HAS_CHEMFILES=1']
 endif
 
-readcon_dep = dependency('readcon-core', required: false)
+readcon_dep = dependency('readcon-core', required: false,
+                         fallback: ['readcon-core', 'readcon_dep'])
 if readcon_dep.found()
   _deps += [readcon_dep]
   _args += ['-DSEAMS_HAS_READCON=1']
