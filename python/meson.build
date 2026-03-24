@@ -15,8 +15,7 @@ py.extension_module('_core',
   cpp_args: _args,
   link_args: _py_link_args,
   install: true,
-  subdir: 'pydseamslib',
-  limited_api: '3.10')
+  subdir: 'pydseamslib')
 
 py.install_sources(
   ['pydseamslib/__init__.py'],
