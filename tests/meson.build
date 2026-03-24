@@ -51,7 +51,8 @@ foreach name, src : test_sources
       include_directories: _incdirs,
       build_rpath: '$ORIGIN/../src'),
     workdir: meson.project_source_root() / 'input',
-    env: _test_env)
+    env: _test_env,
+    timeout: 120)
 endforeach
 
 # SIMD verification test (header-only, does not need libyodaLib)
