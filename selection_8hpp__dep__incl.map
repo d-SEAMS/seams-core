@@ -1,7 +1,0 @@
-<map id="src/include/internal/selection.hpp" name="src/include/internal/selection.hpp">
-<area shape="rect" id="Node000001" title="File containing functions used to define &#39;selections&#39; in a given range, using ring information." alt="" coords="55,5,202,45"/>
-<area shape="rect" id="Node000002" href="$main_8cpp.html" title=" " alt="" coords="5,93,111,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,57,71,95,67,91,101,54"/>
-<area shape="rect" id="Node000003" href="$selection_8cpp.html" title=" " alt="" coords="134,93,265,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="157,54,191,91,187,95,153,57"/>
-</map>

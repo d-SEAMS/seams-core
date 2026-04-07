@@ -1,5 +1,0 @@
-<map id="primitive::Vertex" name="primitive::Vertex">
-<area shape="rect" id="Node000001" title="This is a collection of elements, for each point, required for graph traversal." alt="" coords="9,93,140,119"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,144,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="77,45,77,93,72,93,72,45"/>
-</map>
