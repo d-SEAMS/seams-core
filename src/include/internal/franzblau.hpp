@@ -20,11 +20,10 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <math.h>
+#include <cmath>
 #include <memory>
 #include <sstream>
 #include <string>
-#include <sys/stat.h>
 #include <vector>
 
 #include <cage.hpp>
@@ -123,7 +122,7 @@ std::vector<std::vector<int>> ringNetwork(std::vector<std::vector<int>> nList,
 //! list and pointCloud created before. NOTE: the neighbourListIndex contains
 //! the indices and NOT the atom IDs as in the neighbour list
 Graph populateGraphFromNListID(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     std::vector<std::vector<int>> neighHbondList);
 
 //! Creates a graph object and fills it with the information from a neighbour
@@ -134,7 +133,7 @@ Graph populateGraphFromIndices(std::vector<std::vector<int>> nList);
 //! Re-fills the neighbour lists of a graph object from a neighbour
 //! list of INDICES NOT ATOM IDs created before. NOTE: the neighbourListIndex
 //! contains the indices and NOT the atom IDs as in the neighbour list
-Graph restoreEdgesFromIndices(Graph *fullGraph,
+Graph restoreEdgesFromIndices(Graph &fullGraph,
                               std::vector<std::vector<int>> nList);
 
 //! Creates a vector of vectors of all possible rings
@@ -142,18 +141,18 @@ Graph countAllRingsFromIndex(std::vector<std::vector<int>> neighHbondList,
                              int maxDepth);
 
 //! Removes the non-SP rings, using the Franzblau shortest path criterion
-Graph removeNonSPrings(Graph *fullGraph);
+Graph removeNonSPrings(Graph &fullGraph);
 
 //! Main function that searches for all rings
-int findRings(Graph *fullGraph, int v, std::vector<int> *visited, int maxDepth,
+[[nodiscard]] int findRings(Graph &fullGraph, int v, std::vector<int> &visited, int maxDepth,
               int depth, int root = -1);
 
 //! Calculates the shortest path
-int shortestPath(Graph *fullGraph, int v, int goal, std::vector<int> *path,
-                 std::vector<int> *visited, int maxDepth, int depth = 1);
+[[nodiscard]] int shortestPath(Graph &fullGraph, int v, int goal, std::vector<int> &path,
+                 std::vector<int> &visited, int maxDepth, int depth = 1);
 
 //! Function for clearing vectors in Graph after multiple usage
-Graph clearGraph(Graph *currentGraph);
+Graph clearGraph(Graph &currentGraph);
 
 } // namespace primitive
 

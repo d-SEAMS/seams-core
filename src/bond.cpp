@@ -23,8 +23,8 @@
  * atom whose neighbours have been found.
  */
 std::vector<std::vector<int>>
-bond::populateBonds(std::vector<std::vector<int>> nList,
-                    molSys::PointCloud<molSys::Point<double>, double> *yCloud) {
+bond::populateBonds(const std::vector<std::vector<int>> &nList,
+                    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   //
   std::vector<std::vector<int>> bonds; // Output vector of vectors
   std::vector<int> currentBond;        // Vector for the current bond
@@ -33,7 +33,7 @@ bond::populateBonds(std::vector<std::vector<int>> nList,
   int iatomID, jatomID; // Atom IDs of the elements which are bonded
 
   // Error handling
-  if (nList.size() == 0) {
+  if (nList.empty()) {
     // There is some problem!
     std::cerr << "There are no bonds in the system!\n";
     return bonds;
@@ -64,8 +64,8 @@ bond::populateBonds(std::vector<std::vector<int>> nList,
       // Clear the current bond vector
       currentBond.clear();
       // Fill the current bond vector with ATOM IDs
-      iatomID = yCloud->pts[iatom].atomID;
-      jatomID = yCloud->pts[jatom].atomID;
+      iatomID = yCloud.pts[iatom].atomID;
+      jatomID = yCloud.pts[jatom].atomID;
       currentBond.push_back(iatomID);
       currentBond.push_back(jatomID);
       // Add to the bonds vector of vectors
@@ -90,9 +90,9 @@ bond::populateBonds(std::vector<std::vector<int>> nList,
  *  @param[in] atomTypes Contains an atom type for each particle in yCloud
  */
 std::vector<std::vector<int>>
-bond::populateBonds(std::vector<std::vector<int>> nList,
-                    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                    std::vector<cage::iceType> atomTypes) {
+bond::populateBonds(const std::vector<std::vector<int>> &nList,
+                    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                    const std::vector<cage::iceType> &atomTypes) {
   //
   std::vector<std::vector<int>> bonds; // Output vector of vectors
   std::vector<int> currentBond;        // Vector for the current bond
@@ -101,7 +101,7 @@ bond::populateBonds(std::vector<std::vector<int>> nList,
   int iatomID, jatomID; // Atom IDs of the elements which are bonded
 
   // Error handling
-  if (nList.size() == 0) {
+  if (nList.empty()) {
     // There is some problem!
     std::cerr << "There are no bonds in the system!\n";
     return bonds;
@@ -140,8 +140,8 @@ bond::populateBonds(std::vector<std::vector<int>> nList,
       // Clear the current bond vector
       currentBond.clear();
       // Fill the current bond vector with ATOM IDs
-      iatomID = yCloud->pts[iatom].atomID;
-      jatomID = yCloud->pts[jatom].atomID;
+      iatomID = yCloud.pts[iatom].atomID;
+      jatomID = yCloud.pts[jatom].atomID;
       currentBond.push_back(iatomID);
       currentBond.push_back(jatomID);
       // Add to the bonds vector of vectors
@@ -172,158 +172,14 @@ bond::populateBonds(std::vector<std::vector<int>> nList,
  ***********************************************/
 std::vector<std::vector<int>>
 bond::populateHbonds(std::string filename,
-                     molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                     std::vector<std::vector<int>> nList, int targetFrame,
+                     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                     const std::vector<std::vector<int>> &nList, int targetFrame,
                      int Htype) {
-  //
-  std::vector<std::vector<int>>
-      hBondNet; // Output vector of vectors containing the HBN
-  molSys::PointCloud<molSys::Point<double>, double>
-      hCloud; // point Cloud for the hydrogen atoms
-  std::vector<std::vector<int>>
-      molIDlist; // Vector of vectors; first element is the molID, and the next
-                 // two elements are the hydrogen atom indices
-  std::unordered_map<int, int>
-      idMolIDmap; // Unordered map with atom IDs of oxygens as the keys and the
-                  // molecular IDs as the values
-  std::vector<int> currentBondList; // Current bond list for atom
-  int nnumNeighbours;   // Number of nearest neighbours for the current atom
-  int iatomID, jatomID; // Atom IDs
-  int iatomIndex, jatomIndex; // Atomic indices of oxygen atoms
-  int hAtomIndex;             // Atom index of hydrogen
-  int listIndex;   // Index in molIDlist corresponding to a particular molecular
-                   // ID
-  int jOxyMolID;   // Molecular ID of the jatom oxygen atom
-  double hBondLen; // Length of O-H (between the donor O and acceptor H)
-  double distCutoff = 2.42;  // Distance cutoff of O-H, hard-coded
-  double angleCutoff = 30;   // Angle cutoff in degrees
-  std::vector<double> ooVec; // Array for the O--O vector
-  std::vector<double> ohVec; // Array for the O-H vector
-
-  // --------------------
-  // Get all the hydrogen atoms in the frame (no slice)
-  hCloud = sinp::readLammpsTrjreduced(filename, targetFrame, &hCloud, Htype);
-
-  // Get the unordered map of the oxygen atom IDs (keys) and the molecular IDs
-  // (values)
-  idMolIDmap = molSys::createIDMolIDmap(yCloud);
-
-  // Get a vector of vectors with the molID in the first column, and the
-  // hydrogen atom indices (not ID) in each row
-  molIDlist = molSys::hAtomMolList(&hCloud, yCloud);
-
-  // Initialize the vector of vectors hBondNet
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-    hBondNet.push_back(std::vector<int>()); // Empty vector for the index iatom
-    // Fill the first element with the atom ID of iatom itself
-    hBondNet[iatom].push_back(yCloud->pts[iatom].atomID);
-  } // end of init of hBondNet
-
-  // Loop through the neighbour list
-  for (int iatom = 0; iatom < nList.size(); iatom++) {
-    currentBondList.clear();                  // Clear the current bond vector
-    iatomID = nList[iatom][0];                // atom ID corresponding to iatom
-    nnumNeighbours = nList[iatom].size() - 1; // No. of nearest neighbours
-    iatomIndex = iatom;                       // Atomic index
-    //
-    // Loop through the nearest neighbours
-    for (int j = 1; j <= nnumNeighbours; j++) {
-      jatomID = nList[iatom][j]; // Atom ID of the nearest neighbour
-      // Get the hydrogen atom indices corresponding to the molID of jatomID
-      // Find jOxyMolID
-      auto it = idMolIDmap.find(jatomID);
-      if (it != idMolIDmap.end()) {
-        jOxyMolID = it->second;
-      } // found molecular ID of jatom oxygen atom
-      else {
-        continue;
-      } // not found
-
-      // Find the index inside the molIDlist corresponding to the molecular ID
-      // to look for
-      listIndex = molSys::searchMolList(molIDlist, jOxyMolID);
-
-      // Get the atom index of the oxygen atom jatom corresponding jatomID
-      auto gotJ = yCloud->idIndexMap.find(jatomID);
-      if (gotJ != yCloud->idIndexMap.end()) {
-        jatomIndex = gotJ->second;
-      } // found atom index of jatomID
-      else {
-        std::cerr << "Something is wrong with the map.\n";
-        continue;
-      } // index not found
-
-      // Loop through the hydrogen atoms connected to jatom oxygen atom
-      for (int k = 1; k <= 2; k++) {
-        hAtomIndex = molIDlist[listIndex][k];
-        // --------
-        // Condition One: The O-H length (between the donor hydrogen atom and
-        // the acceptor oxygen atom) should be less than 2.42 Angstrom
-        // (hard-coded)
-        hBondLen =
-            bond::getHbondDistanceOH(yCloud, &hCloud, iatomIndex, hAtomIndex);
-
-        // If O-H distance is greater than or equal to 2.42 then it is not a
-        // hydrogen bond
-        if (hBondLen >= distCutoff) {
-          continue;
-        } // not a hydrogen bond
-        // --------
-        // Condition Two: The angle between the O-H and O--O vectors is less
-        // than 30 degrees (hard-coded)
-        //
-        ooVec.clear();
-        ohVec.clear();
-        // Get the O--O and O-H vectors
-        // O--O
-        ooVec.push_back(yCloud->pts[iatomIndex].x -
-                        yCloud->pts[jatomIndex].x); // dx
-        ooVec.push_back(yCloud->pts[iatomIndex].y -
-                        yCloud->pts[jatomIndex].y); // dy
-        ooVec.push_back(yCloud->pts[iatomIndex].z -
-                        yCloud->pts[jatomIndex].z); // dz
-        // O-H
-        ohVec.push_back(yCloud->pts[iatomIndex].x -
-                        hCloud.pts[hAtomIndex].x); // dx
-        ohVec.push_back(yCloud->pts[iatomIndex].y -
-                        hCloud.pts[hAtomIndex].y); // dy
-        ohVec.push_back(yCloud->pts[iatomIndex].z -
-                        hCloud.pts[hAtomIndex].z); // dz
-        // Apply PBCs
-        for (int l = 0; l < 3; l++) {
-          ooVec[l] -= yCloud->box[l] * round(ooVec[l] / yCloud->box[l]);
-          ohVec[l] -= yCloud->box[l] * round(ohVec[l] / yCloud->box[l]);
-        } // end of applying PBCs to the O-H and O--O vectors
-        //
-        // Get the angle between the O--O and O-H vectors
-        double eigenAngle = gen::eigenVecAngle(ooVec, ohVec);
-        double eigenAngleDeg = gen::radDeg(eigenAngle);
-
-        //
-        // A hydrogen bond is formed if the angle is less than 30 degrees
-        if (eigenAngleDeg > angleCutoff) {
-          continue;
-        } // not a hydrogen bond
-
-        // If you have reached this point, then O and H and indeed
-        // hydrogen-bonded. This means that jatomID should be saved in the new
-        // currentBond
-        hBondNet[iatomIndex].push_back(jatomID);
-        hBondNet[jatomIndex].push_back(iatomID);
-        break; // No need to test the other hydrogen atom if the first has
-        // been tested
-      } // end of loop through hydrogen atoms
-
-    } // end of loop through the nearest neighbours
-
-  } // end of loop through the neighbour list
-
-  // --------------------
-
-  // Erase all temporary stuff
-  hCloud = molSys::clearPointCloud(&hCloud);
-
-  return hBondNet;
+  // Read hydrogen atoms from the trajectory file
+  molSys::PointCloud<molSys::Point<double>, double> hCloud;
+  hCloud = sinp::readLammpsTrjreduced(filename, targetFrame, hCloud, Htype);
+  // Delegate to the cloud-based overload
+  return bond::populateHbondsWithInputClouds(yCloud, hCloud, nList);
 }
 
 /********************************************/ /**
@@ -340,9 +196,9 @@ bond::populateHbonds(std::string filename,
  *  @param[in] nList Row-ordered neighbour list by atom ID
  ***********************************************/
 std::vector<std::vector<int>>
-bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-                     molSys::PointCloud<molSys::Point<double>, double> *hCloud,
-                     std::vector<std::vector<int>> nList) {
+bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                     molSys::PointCloud<molSys::Point<double>, double> &hCloud,
+                     const std::vector<std::vector<int>> &nList) {
   //
   std::vector<std::vector<int>>
       hBondNet; // Output vector of vectors containing the HBN
@@ -376,22 +232,27 @@ bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, do
   molIDlist = molSys::hAtomMolList(hCloud, yCloud);
 
   // Initialize the vector of vectors hBondNet
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     hBondNet.push_back(std::vector<int>()); // Empty vector for the index iatom
     // Fill the first element with the atom ID of iatom itself
-    hBondNet[iatom].push_back(yCloud->pts[iatom].atomID);
+    hBondNet[iatom].push_back(yCloud.pts[iatom].atomID);
   } // end of init of hBondNet
 
   // Loop through the neighbour list
-  for (int iatom = 0; iatom < nList.size(); iatom++) {
+  for (size_t iatom = 0; iatom < nList.size(); iatom++) {
     currentBondList.clear();                  // Clear the current bond vector
     iatomID = nList[iatom][0];                // atom ID corresponding to iatom
     nnumNeighbours = nList[iatom].size() - 1; // No. of nearest neighbours
     iatomIndex = iatom;                       // Atomic index
     //
     // Loop through the nearest neighbours
+    // Only process pairs where iatomID < jatomID to avoid adding each
+    // H-bond twice (both directions are added when a bond is found)
     for (int j = 1; j <= nnumNeighbours; j++) {
       jatomID = nList[iatom][j]; // Atom ID of the nearest neighbour
+      if (iatomID >= jatomID) {
+        continue;
+      } // skip to avoid duplicate H-bond entries
       // Get the hydrogen atom indices corresponding to the molID of jatomID
       // Find jOxyMolID
       auto it = idMolIDmap.find(jatomID);
@@ -406,9 +267,14 @@ bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, do
       // to look for
       listIndex = molSys::searchMolList(molIDlist, jOxyMolID);
 
+      // Skip if the molecular ID was not found in the molIDlist
+      if (listIndex == -1) {
+        continue;
+      } // molID not found
+
       // Get the atom index of the oxygen atom jatom corresponding jatomID
-      auto gotJ = yCloud->idIndexMap.find(jatomID);
-      if (gotJ != yCloud->idIndexMap.end()) {
+      auto gotJ = yCloud.idIndexMap.find(jatomID);
+      if (gotJ != yCloud.idIndexMap.end()) {
         jatomIndex = gotJ->second;
       } // found atom index of jatomID
       else {
@@ -417,6 +283,10 @@ bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, do
       } // index not found
 
       // Loop through the hydrogen atoms connected to jatom oxygen atom
+      // Guard: skip if fewer than 2 H atoms were found for this molecule
+      if (molIDlist[listIndex].size() < 3) {
+        continue;
+      }
       for (int k = 1; k <= 2; k++) {
         hAtomIndex = molIDlist[listIndex][k];
         // --------
@@ -439,23 +309,23 @@ bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, do
         ohVec.clear();
         // Get the O--O and O-H vectors
         // O--O
-        ooVec.push_back(yCloud->pts[iatomIndex].x -
-                        yCloud->pts[jatomIndex].x); // dx
-        ooVec.push_back(yCloud->pts[iatomIndex].y -
-                        yCloud->pts[jatomIndex].y); // dy
-        ooVec.push_back(yCloud->pts[iatomIndex].z -
-                        yCloud->pts[jatomIndex].z); // dz
+        ooVec.push_back(yCloud.pts[iatomIndex].x -
+                        yCloud.pts[jatomIndex].x); // dx
+        ooVec.push_back(yCloud.pts[iatomIndex].y -
+                        yCloud.pts[jatomIndex].y); // dy
+        ooVec.push_back(yCloud.pts[iatomIndex].z -
+                        yCloud.pts[jatomIndex].z); // dz
         // O-H
-        ohVec.push_back(yCloud->pts[iatomIndex].x -
-                        hCloud->pts[hAtomIndex].x); // dx
-        ohVec.push_back(yCloud->pts[iatomIndex].y -
-                        hCloud->pts[hAtomIndex].y); // dy
-        ohVec.push_back(yCloud->pts[iatomIndex].z -
-                        hCloud->pts[hAtomIndex].z); // dz
+        ohVec.push_back(yCloud.pts[iatomIndex].x -
+                        hCloud.pts[hAtomIndex].x); // dx
+        ohVec.push_back(yCloud.pts[iatomIndex].y -
+                        hCloud.pts[hAtomIndex].y); // dy
+        ohVec.push_back(yCloud.pts[iatomIndex].z -
+                        hCloud.pts[hAtomIndex].z); // dz
         // Apply PBCs
         for (int l = 0; l < 3; l++) {
-          ooVec[l] -= yCloud->box[l] * round(ooVec[l] / yCloud->box[l]);
-          ohVec[l] -= yCloud->box[l] * round(ohVec[l] / yCloud->box[l]);
+          ooVec[l] -= yCloud.box[l] * round(ooVec[l] / yCloud.box[l]);
+          ohVec[l] -= yCloud.box[l] * round(ohVec[l] / yCloud.box[l]);
         } // end of applying PBCs to the O-H and O--O vectors
         //
         // Get the angle between the O--O and O-H vectors
@@ -496,19 +366,19 @@ to each atom.
  *  @param[in] hAtomIndex The index (in the hCloud) of the hydrogen atom
 */
 double bond::getHbondDistanceOH(
-    molSys::PointCloud<molSys::Point<double>, double> *oCloud,
-    molSys::PointCloud<molSys::Point<double>, double> *hCloud, int oAtomIndex,
+    const molSys::PointCloud<molSys::Point<double>, double> &oCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &hCloud, int oAtomIndex,
     int hAtomIndex) {
   std::array<double, 3> dr; // relative distance in the X, Y, Z dimensions
   double r2 = 0.0;          // Bond length
 
-  dr[0] = oCloud->pts[oAtomIndex].x - hCloud->pts[hAtomIndex].x;
-  dr[1] = oCloud->pts[oAtomIndex].y - hCloud->pts[hAtomIndex].y;
-  dr[2] = oCloud->pts[oAtomIndex].z - hCloud->pts[hAtomIndex].z;
+  dr[0] = oCloud.pts[oAtomIndex].x - hCloud.pts[hAtomIndex].x;
+  dr[1] = oCloud.pts[oAtomIndex].y - hCloud.pts[hAtomIndex].y;
+  dr[2] = oCloud.pts[oAtomIndex].z - hCloud.pts[hAtomIndex].z;
 
   // Apply the PBCs and get the squared area
   for (int k = 0; k < 3; k++) {
-    dr[k] -= oCloud->box[k] * round(dr[k] / oCloud->box[k]);
+    dr[k] -= oCloud.box[k] * round(dr[k] / oCloud.box[k]);
     r2 += pow(dr[k], 2.0);
   } // end of applying the PBCs and getting the squared area
   return sqrt(r2);
@@ -526,16 +396,16 @@ double bond::getHbondDistanceOH(
  particular cage type
 */
 std::vector<std::vector<int>>
-bond::createBondsFromCages(std::vector<std::vector<int>> rings,
-                           std::vector<cage::Cage> *cageList,
-                           cage::cageType type, int *nRings) {
+bond::createBondsFromCages(const std::vector<std::vector<int>> &rings,
+                           std::vector<cage::Cage> &cageList,
+                           cage::cageType type, int &nRings) {
   std::vector<std::vector<int>> bonds; // Output vector of vectors
   std::vector<int> currentBond;        // Vector for the current bond
   int ringSize = rings[0].size();
   int currentRing; // (vector) index of the current ring in a particular cage
 
   // Error handling
-  if (rings.size() == 0) {
+  if (rings.empty()) {
     // There is some problem!
     std::cerr << "There are no rings in the system!\n";
     return bonds;
@@ -548,19 +418,19 @@ bond::createBondsFromCages(std::vector<std::vector<int>> rings,
 
   // Traverse the cageList vector of Cages
 
-  *nRings = 0; // init
+  nRings = 0; // init
 
   // Loop through all the cages
-  for (int icage = 0; icage < (*cageList).size(); icage++) {
+  for (int icage = 0; icage < cageList.size(); icage++) {
     // Skip if the cage is of a different type
-    if ((*cageList)[icage].type != type) {
+    if (cageList[icage].type != type) {
       continue;
     }
-    *nRings += (*cageList)[icage].rings.size(); // Add to the number of rings
+    nRings += cageList[icage].rings.size(); // Add to the number of rings
     //
     // Now loop through a particular ring inside the i^th cage
-    for (int iring = 0; iring < (*cageList)[icage].rings.size(); iring++) {
-      currentRing = (*cageList)[icage].rings[iring]; // Current ring index
+    for (int iring = 0; iring < cageList[icage].rings.size(); iring++) {
+      currentRing = cageList[icage].rings[iring]; // Current ring index
       // Get the first atom of each pair inside currentRing
       for (int k = 0; k < rings[currentRing].size() - 1; k++) {
         // Clear the current bond vector

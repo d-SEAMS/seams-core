@@ -54,9 +54,9 @@ Eigen::MatrixXd pntToPnt::getPointSetRefRing(int n, int axialDim) {
  * axial dimension
  */
 Eigen::MatrixXd pntToPnt::createPrismBlock(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    const Eigen::MatrixXd &refPoints, int ringSize, std::vector<int> basal1,
-    std::vector<int> basal2) {
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const Eigen::MatrixXd &refPoints, int ringSize, const std::vector<int> &basal1,
+    const std::vector<int> &basal2) {
   //
   int nop = ringSize * 2;           // Number of particles in the prism block
   Eigen::MatrixXd pointSet(nop, 3); // Output point set for a regular prism
@@ -72,8 +72,8 @@ Eigen::MatrixXd pntToPnt::createPrismBlock(
   // 0 -> x dim
   // 1 -> y dim
   // 2 -> z dim
-  axialDim = std::max_element(yCloud->box.begin(), yCloud->box.end()) -
-             yCloud->box.begin();
+  axialDim = std::max_element(yCloud.box.begin(), yCloud.box.end()) -
+             yCloud.box.begin();
   // --------------------------------------
   // Get the average radius
   avgRadius = pntToPnt::getRadiusFromRings(yCloud, basal1, basal2);
@@ -109,8 +109,8 @@ Eigen::MatrixXd pntToPnt::createPrismBlock(
  * calculated from the centroid of each basal ring
  */
 double pntToPnt::getRadiusFromRings(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> basal1, std::vector<int> basal2) {
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &basal1, const std::vector<int> &basal2) {
   //
   double avgRadius = 0.0;
   std::vector<double> centroid1, centroid2;
@@ -126,14 +126,14 @@ double pntToPnt::getRadiusFromRings(
   // Loop through basal1 and basal2
   for (int i = 0; i < ringSize; i++) {
     // For basal1
-    centroid1[0] += yCloud->pts[basal1[i]].x;
-    centroid1[1] += yCloud->pts[basal1[i]].y;
-    centroid1[2] += yCloud->pts[basal1[i]].z;
+    centroid1[0] += yCloud.pts[basal1[i]].x;
+    centroid1[1] += yCloud.pts[basal1[i]].y;
+    centroid1[2] += yCloud.pts[basal1[i]].z;
     //
     // For basal2
-    centroid2[0] += yCloud->pts[basal2[i]].x;
-    centroid2[1] += yCloud->pts[basal2[i]].y;
-    centroid2[2] += yCloud->pts[basal2[i]].z;
+    centroid2[0] += yCloud.pts[basal2[i]].x;
+    centroid2[1] += yCloud.pts[basal2[i]].y;
+    centroid2[2] += yCloud.pts[basal2[i]].z;
     //
   } // end of loop through basal1 and basal2
   // Normalize by the number of nodes
@@ -169,8 +169,8 @@ double pntToPnt::getRadiusFromRings(
  * the basal rings of the prism and the axial dimension
  */
 double pntToPnt::getAvgHeightPrismBlock(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> basal1, std::vector<int> basal2) {
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &basal1, const std::vector<int> &basal2) {
   //
   double avgHeight = 0.0;
   double r_ij;                  // Distance between a point in basal1 and basal2
@@ -205,10 +205,10 @@ double pntToPnt::getAvgHeightPrismBlock(
  * IDs
  */
 int pntToPnt::relOrderPrismBlock(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> basal1, std::vector<int> basal2,
-    std::vector<std::vector<int>> nList, std::vector<int> *outBasal1,
-    std::vector<int> *outBasal2) {
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &basal1, const std::vector<int> &basal2,
+    const std::vector<std::vector<int>> &nList, std::vector<int> &outBasal1,
+    std::vector<int> &outBasal2) {
   //
   int ringSize = basal1.size(); // Number of nodes in basal1 and basal2
   int nBonds;       // Number of bonds between two parallel basal rings
@@ -290,12 +290,10 @@ int pntToPnt::relOrderPrismBlock(
   if (distAntiClock < distClock) {
     isAntiClock = true;
   } // end of anti-clockwise check
-  // Some error
+  // When equidistant (symmetric prism), default to clockwise
   if (isClock == false && isAntiClock == false) {
-    // std::cerr << "The points are equidistant.\n";
-    // Error handling
-    return 1;
-  } // end of error handling
+    isClock = true;
+  } // end of equidistant handling
   // ---------------------------------------------------
   // Get the order of basal1 and basal2
   for (int i = 0; i < ringSize; i++) {
@@ -319,8 +317,8 @@ int pntToPnt::relOrderPrismBlock(
     }   // end of anti-clockwise update
 
     // Add to outBasal1 and outBasal2 now
-    (*outBasal1).push_back(basal1[currentIatom]);
-    (*outBasal2).push_back(basal2[currentJatom]);
+    outBasal1.push_back(basal1[currentIatom]);
+    outBasal2.push_back(basal2[currentJatom]);
   } //
   //
 
@@ -335,9 +333,9 @@ int pntToPnt::relOrderPrismBlock(
  * IDs
  */
 int pntToPnt::relOrderPrismBlock(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> basal1, std::vector<int> basal2,
-    std::vector<int> *outBasal1, std::vector<int> *outBasal2) {
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &basal1, const std::vector<int> &basal2,
+    std::vector<int> &outBasal1, std::vector<int> &outBasal2) {
   //
   int ringSize = basal1.size(); // Number of nodes in basal1 and basal2
   int nBonds;       // Number of bonds between two parallel basal rings
@@ -420,12 +418,10 @@ int pntToPnt::relOrderPrismBlock(
   if (distAntiClock < distClock) {
     isAntiClock = true;
   } // end of anti-clockwise check
-  // Some error
+  // When equidistant (symmetric prism), default to clockwise
   if (isClock == false && isAntiClock == false) {
-    // std::cerr << "The points are equidistant.\n";
-    // Error handling
-    return 1;
-  } // end of error handling
+    isClock = true;
+  } // end of equidistant handling
   // ---------------------------------------------------
   // Get the order of basal1 and basal2
   for (int i = 0; i < ringSize; i++) {
@@ -449,8 +445,8 @@ int pntToPnt::relOrderPrismBlock(
     }   // end of anti-clockwise update
 
     // Add to outBasal1 and outBasal2 now
-    (*outBasal1).push_back(basal1[currentIatom]);
-    (*outBasal2).push_back(basal2[currentJatom]);
+    outBasal1.push_back(basal1[currentIatom]);
+    outBasal2.push_back(basal2[currentJatom]);
   } //
   //
 
@@ -462,8 +458,8 @@ int pntToPnt::relOrderPrismBlock(
  * of atom indices
  */
 Eigen::MatrixXd pntToPnt::fillPointSetPrismRing(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> basalRing, int startingIndex) {
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &basalRing, int startingIndex) {
   //
   //
   int dim = 3;                        // Number of dimensions (3)
@@ -492,9 +488,9 @@ Eigen::MatrixXd pntToPnt::fillPointSetPrismRing(
     // -------------------
     // Basal ring points
     index = basalRing[currentPosition];    // Index of the current point
-    pointSet(i, 0) = yCloud->pts[index].x; // x coord
-    pointSet(i, 1) = yCloud->pts[index].y; // y coord
-    pointSet(i, 2) = yCloud->pts[index].z; // z coord
+    pointSet(i, 0) = yCloud.pts[index].x; // x coord
+    pointSet(i, 1) = yCloud.pts[index].y; // y coord
+    pointSet(i, 2) = yCloud.pts[index].z; // z coord
   } // end of point filling from the relative ordering vector of vectors
 
   // Return the set of points
@@ -506,8 +502,8 @@ Eigen::MatrixXd pntToPnt::fillPointSetPrismRing(
  * indices of the basal rings
  */
 Eigen::MatrixXd pntToPnt::fillPointSetPrismBlock(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> basal1, std::vector<int> basal2, int startingIndex) {
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &basal1, const std::vector<int> &basal2, int startingIndex) {
   //
   //
   int dim = 3;                        // Number of dimensions (3)
@@ -542,17 +538,17 @@ Eigen::MatrixXd pntToPnt::fillPointSetPrismBlock(
     iatomIndex =
         basal1[currentPosition]; // Index of the current point in basal1
     iatom = i;                   // index in the point set being filled
-    pointSet(iatom, 0) = yCloud->pts[iatomIndex].x; // x coord
-    pointSet(iatom, 1) = yCloud->pts[iatomIndex].y; // y coord
-    pointSet(iatom, 2) = yCloud->pts[iatomIndex].z; // z coord
+    pointSet(iatom, 0) = yCloud.pts[iatomIndex].x; // x coord
+    pointSet(iatom, 1) = yCloud.pts[iatomIndex].y; // y coord
+    pointSet(iatom, 2) = yCloud.pts[iatomIndex].z; // z coord
     // -------------------
     // Basal2 ring points
     jatomIndex =
         basal2[currentPosition]; // Index of the current point in basal2
     jatom = i + ringSize;        // index in the point set being filled
-    pointSet(jatom, 0) = yCloud->pts[jatomIndex].x; // x coord
-    pointSet(jatom, 1) = yCloud->pts[jatomIndex].y; // y coord
-    pointSet(jatom, 2) = yCloud->pts[jatomIndex].z; // z coord
+    pointSet(jatom, 0) = yCloud.pts[jatomIndex].x; // x coord
+    pointSet(jatom, 1) = yCloud.pts[jatomIndex].y; // y coord
+    pointSet(jatom, 2) = yCloud.pts[jatomIndex].z; // z coord
   } // end of point filling from the relative ordering vector of vectors
 
   // Return the set of points
@@ -607,10 +603,10 @@ Eigen::MatrixXd pntToPnt::getPointSetCage(ring::strucType type) {
  * the relative order
  */
 int pntToPnt::relOrderHC(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> basal1, std::vector<int> basal2,
-    std::vector<std::vector<int>> nList, std::vector<int> *matchedBasal1,
-    std::vector<int> *matchedBasal2) {
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &basal1, const std::vector<int> &basal2,
+    const std::vector<std::vector<int>> &nList, std::vector<int> &matchedBasal1,
+    std::vector<int> &matchedBasal2) {
   //
   int l1 = basal1[0];           // First element of basal1
   int l2 = basal1[1];           // Second element of basal1
@@ -625,8 +621,8 @@ int pntToPnt::relOrderHC(
   bool isReversedOrder;  // basal2 is reversed wrt basal1
   int index;
 
-  (*matchedBasal1).resize(ringSize);
-  (*matchedBasal2).resize(ringSize);
+  matchedBasal1.resize(ringSize);
+  matchedBasal2.resize(ringSize);
 
   // Search to see if l1 or l2 is a neighbour
   // -------------------
@@ -691,7 +687,7 @@ int pntToPnt::relOrderHC(
       if (index >= ringSize) {
         index -= ringSize;
       }                                    // end of wrap-around
-      (*matchedBasal2)[i] = basal2[index]; // fill up values
+      matchedBasal2[i] = basal2[index]; // fill up values
     }                                      // end of filling up tempBasal2
   }                                        // the original order is correct
   else {
@@ -714,7 +710,7 @@ int pntToPnt::relOrderHC(
         if (index < 0) {
           index += ringSize;
         }                                    // end of wrap-around
-        (*matchedBasal2)[i] = basal2[index]; // fill up values
+        matchedBasal2[i] = basal2[index]; // fill up values
       }                                      // end of filling up tempBasal2
 
     }
@@ -727,7 +723,7 @@ int pntToPnt::relOrderHC(
   } // the reversed order is correct!
   // ------------------------------
   // Fill up basal1
-  (*matchedBasal1) = basal1;
+  matchedBasal1 = basal1;
   return 0;
 } // end of the function
 
@@ -738,8 +734,8 @@ int pntToPnt::relOrderHC(
  * (starting from 0 to 5)
  */
 Eigen::MatrixXd pntToPnt::changeHexCageOrder(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> basal1, std::vector<int> basal2, int startingIndex) {
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &basal1, const std::vector<int> &basal2, int startingIndex) {
   Eigen::MatrixXd pointSet(12, 3);
   int iatomIndex, jatomIndex; // Current atom index in yCloud, according to
                               // basal1 and basal2 respectively
@@ -775,18 +771,18 @@ Eigen::MatrixXd pntToPnt::changeHexCageOrder(
   // FIRST POINT
   // basal1
   iatomOne = newBasal1[0];
-  pointSet(0, 0) = yCloud->pts[iatomOne].x;
-  pointSet(0, 1) = yCloud->pts[iatomOne].y;
-  pointSet(0, 2) = yCloud->pts[iatomOne].z;
+  pointSet(0, 0) = yCloud.pts[iatomOne].x;
+  pointSet(0, 1) = yCloud.pts[iatomOne].y;
+  pointSet(0, 2) = yCloud.pts[iatomOne].z;
   // basal2
   jatomIndex = newBasal2[0];
   // Get the distance from basal1
   dr = gen::relDist(yCloud, iatomOne, jatomIndex);
 
   // basal2
-  pointSet(6, 0) = yCloud->pts[iatomOne].x + dr[0];
-  pointSet(6, 1) = yCloud->pts[iatomOne].y + dr[1];
-  pointSet(6, 2) = yCloud->pts[iatomOne].z + dr[2];
+  pointSet(6, 0) = yCloud.pts[iatomOne].x + dr[0];
+  pointSet(6, 1) = yCloud.pts[iatomOne].y + dr[1];
+  pointSet(6, 2) = yCloud.pts[iatomOne].z + dr[2];
   //
   // Loop through the rest of the points
   for (int i = 1; i < 6; i++) {
@@ -797,16 +793,16 @@ Eigen::MatrixXd pntToPnt::changeHexCageOrder(
     // Get the distance from the first atom
     dr = gen::relDist(yCloud, iatomOne, iatomIndex);
     //
-    pointSet(i, 0) = yCloud->pts[iatomOne].x + dr[0];
-    pointSet(i, 1) = yCloud->pts[iatomOne].y + dr[1];
-    pointSet(i, 2) = yCloud->pts[iatomOne].z + dr[2];
+    pointSet(i, 0) = yCloud.pts[iatomOne].x + dr[0];
+    pointSet(i, 1) = yCloud.pts[iatomOne].y + dr[1];
+    pointSet(i, 2) = yCloud.pts[iatomOne].z + dr[2];
     //
     // Get the distance from the first atom
     dr = gen::relDist(yCloud, iatomOne, jatomIndex);
     // basal2
-    pointSet(i + 6, 0) = yCloud->pts[iatomOne].x + dr[0];
-    pointSet(i + 6, 1) = yCloud->pts[iatomOne].y + dr[1];
-    pointSet(i + 6, 2) = yCloud->pts[iatomOne].z + dr[2];
+    pointSet(i + 6, 0) = yCloud.pts[iatomOne].x + dr[0];
+    pointSet(i + 6, 1) = yCloud.pts[iatomOne].y + dr[1];
+    pointSet(i + 6, 2) = yCloud.pts[iatomOne].z + dr[2];
     //
   } // end of loop
 
@@ -843,8 +839,8 @@ Eigen::MatrixXd pntToPnt::changeHexCageOrder(
  * alternate elements of the equatorial ring are bonded.
  */
 std::vector<int> pntToPnt::relOrderDDC(int index,
-                                       std::vector<std::vector<int>> rings,
-                                       std::vector<cage::Cage> cageList) {
+                                       const std::vector<std::vector<int>> &rings,
+                                       const std::vector<cage::Cage> &cageList) {
   //
   std::vector<int> ddcOrder; // Order of the particles in the DDC.
   int nop = 14;              // Number of elements in the DDC
@@ -853,11 +849,16 @@ std::vector<int> pntToPnt::relOrderDDC(int index,
   int iatom;                 // Atom index in the equatorial ring
   std::vector<int> peripheral1, peripheral2; // Vectors holding the neighbours
                                              // of (l1,l3,l5) and (l2,l4,l6)
-  int apex1, apex2;
+  int apex1 = -1, apex2 = -1;
   bool neighbourFound;            // Neighbour found
   int nextI, prevI, nextJ, prevJ; // elements around iatom and jatom
   int jatomIndex, atomIndex;
 
+  // Validate cage structure (DDC has 1 equatorial + 6 peripheral rings)
+  if (index < 0 || index >= static_cast<int>(cageList.size()) ||
+      static_cast<int>(cageList[index].rings.size()) < 7) {
+    return std::vector<int>();
+  }
   // Add the equatorial ring particles
   //
   iring = cageList[index]
@@ -942,7 +943,7 @@ std::vector<int> pntToPnt::relOrderDDC(int index,
           // if odd peripheral2
           else {
             peripheral2.push_back(prevJ);
-            // Get apex2 for i=0
+            // Get apex2 for i=1
             if (i == 1) {
               // Go back two elements from jatomIndex
               atomIndex = jatomIndex - 2;
@@ -977,10 +978,10 @@ std::vector<int> pntToPnt::relOrderDDC(int index,
           }   // peripheral1
           // if odd peripheral2
           else {
-            peripheral2.push_back(prevJ);
-            // Get apex2 for i=0
+            peripheral2.push_back(nextJ);
+            // Get apex2 for i=1
             if (i == 1) {
-              // Go foward two elements from jatomIndex
+              // Go forward two elements from jatomIndex
               atomIndex = jatomIndex + 2;
               // wrap-around
               if (atomIndex >= ringSize) {
@@ -998,6 +999,12 @@ std::vector<int> pntToPnt::relOrderDDC(int index,
     // ------------------
   } // end of looping through the elements of the equatorial ring
   // ------------------------------
+  // Validate that peripheral rings and apices were found
+  if (peripheral1.size() != 3 || peripheral2.size() != 3 ||
+      apex1 == -1 || apex2 == -1) {
+    // Incomplete DDC structure; return empty vector to signal error
+    return std::vector<int>();
+  }
   // Update ddcOrder with peripheral1, followed by apex1, peripheral2 and apex2
   //
   // peripheral1
@@ -1040,18 +1047,25 @@ std::vector<int> pntToPnt::relOrderDDC(int index,
  * alternate elements of the equatorial ring are bonded.
  */
 Eigen::MatrixXd pntToPnt::changeDiaCageOrder(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> ddcOrder, int startingIndex) {
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &ddcOrder, int startingIndex) {
   int nop = 14;                     // Number of elements in the DDC
   int ringSize = 6;                 // Six nodes in the rings
   Eigen::MatrixXd pointSet(nop, 3); // Output point set
+
+  // Guard: ddcOrder must have exactly 14 elements
+  if (static_cast<int>(ddcOrder.size()) != nop) {
+    pointSet.setZero();
+    return pointSet;
+  }
+
   int peripheralStartingIndex; // Index using which the elements of peripheral1
                                // and peripheral2 will be wrapped
   std::vector<int> wrappedDDC; // Changed order of the DDC: should be the same
                                // size as the original ddcOrder vector
   int currentIndex;            // Current index
   // Variables for filling the point set
-  int iatomIndex, jatomIndex;
+  int iatomIndex = 0, jatomIndex = 0;
   std::array<double, 3> dr; // Components of the distance
 
   if (startingIndex == 0) {
@@ -1083,23 +1097,15 @@ Eigen::MatrixXd pntToPnt::changeDiaCageOrder(
       peripheralStartingIndex = 2;
     }
     //
-    // Update the portions of the wrappedDDC vector
+    // Update the portions of the wrappedDDC vector (peripheral1: indices 6-8)
     for (int i = 6; i < 9; i++) {
-      currentIndex = i + peripheralStartingIndex;
-      // wrap-around
-      if (currentIndex <= 9) {
-        currentIndex -= 3;
-      } // end of wrap-around
+      currentIndex = 6 + (i - 6 + peripheralStartingIndex) % 3;
       wrappedDDC[i] = ddcOrder[currentIndex];
     } // peripheral1
     //
-    // Update the peripheral2 portions of the wrappedDDC vector
+    // Update the peripheral2 portions of the wrappedDDC vector (indices 10-12)
     for (int i = 10; i < 13; i++) {
-      currentIndex = i + peripheralStartingIndex;
-      // wrap-around
-      if (currentIndex <= 13) {
-        currentIndex -= 3;
-      } // end of wrap-around
+      currentIndex = 10 + (i - 10 + peripheralStartingIndex) % 3;
       wrappedDDC[i] = ddcOrder[currentIndex];
     } // peripheral2
     // ------------------
@@ -1109,11 +1115,19 @@ Eigen::MatrixXd pntToPnt::changeDiaCageOrder(
     // ------------------
   } // the order of the DDC has to be changed
 
+  // Validate that all indices in wrappedDDC are within yCloud bounds
+  for (int i = 0; i < nop; i++) {
+    if (wrappedDDC[i] < 0 ||
+        wrappedDDC[i] >= static_cast<int>(yCloud.pts.size())) {
+      pointSet.setZero();
+      return pointSet;
+    }
+  }
   // FILL UP THE EIGEN MATRIX
   iatomIndex = wrappedDDC[0]; // first point
-  pointSet(0, 0) = yCloud->pts[iatomIndex].x;
-  pointSet(0, 1) = yCloud->pts[iatomIndex].y;
-  pointSet(0, 2) = yCloud->pts[iatomIndex].z;
+  pointSet(0, 0) = yCloud.pts[iatomIndex].x;
+  pointSet(0, 1) = yCloud.pts[iatomIndex].y;
+  pointSet(0, 2) = yCloud.pts[iatomIndex].z;
   // Loop through the rest of the equatorial ring points
   for (int i = 1; i < 14; i++) {
     //
@@ -1122,9 +1136,9 @@ Eigen::MatrixXd pntToPnt::changeDiaCageOrder(
     dr = gen::relDist(yCloud, iatomIndex, jatomIndex);
 
     // basal2
-    pointSet(i, 0) = yCloud->pts[iatomIndex].x + dr[0];
-    pointSet(i, 1) = yCloud->pts[iatomIndex].y + dr[1];
-    pointSet(i, 2) = yCloud->pts[iatomIndex].z + dr[2];
+    pointSet(i, 0) = yCloud.pts[iatomIndex].x + dr[0];
+    pointSet(i, 1) = yCloud.pts[iatomIndex].y + dr[1];
+    pointSet(i, 2) = yCloud.pts[iatomIndex].z + dr[2];
   } // end of loop
 
   return pointSet;

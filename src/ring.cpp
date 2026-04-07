@@ -20,11 +20,8 @@
  * @param[in, out] rings The vector of vectors to be cleared.
  */
 int ring::clearRingList(std::vector<std::vector<int>> &rings) {
-  //
-  std::vector<std::vector<int>> tempEmpty;
-
-  rings.swap(tempEmpty);
-
+  rings.clear();
+  rings.shrink_to_fit();
   return 0;
 }
 
@@ -37,13 +34,12 @@ int ring::clearRingList(std::vector<std::vector<int>> &rings) {
  *  depending on it's type as classified by the prism identification scheme.
  * @param[in] nRings Number of rings.
  */
-int ring::assignPolygonType(std::vector<std::vector<int>> rings,
-                            std::vector<int> *atomTypes,
-                            std::vector<int> nRings) {
+int ring::assignPolygonType(const std::vector<std::vector<int>> &rings,
+                            std::vector<int> &atomTypes,
+                            const std::vector<int> &nRings) {
   // Every value in listPrism corresponds to an index in rings.
   // Every ring contains atom indices, corresponding to the indices (not atom
   // IDs) in rings
-  int iring;        // Index of current ring
   int iatom;        // Index of current atom
   int ringSize;     // Ring size of the current ring
   int prevRingSize; // Ring size previously assigned to a point
@@ -59,14 +55,14 @@ int ring::assignPolygonType(std::vector<std::vector<int>> rings,
     for (int j = 0; j < ringSize; j++) {
       iatom = rings[iring][j]; // Atom index
       // Update the atom type
-      if ((*atomTypes)[iatom] == 1) {
-        (*atomTypes)[iatom] = ringSize;
+      if (atomTypes[iatom] == 1) {
+        atomTypes[iatom] = ringSize;
       } // The atom is unclassified
       else {
         // Only update the ring type if the number is higher
-        prevRingSize = (*atomTypes)[iatom]; // Previously assigned ring size
+        prevRingSize = atomTypes[iatom]; // Previously assigned ring size
         if (ringSize > prevRingSize) {
-          (*atomTypes)[iatom] = ringSize;
+          atomTypes[iatom] = ringSize;
         } // end of assigning the new ring size
       }   // only update if the number is higher
     }     // end of loop through every atom in iring
@@ -82,8 +78,8 @@ int ring::assignPolygonType(std::vector<std::vector<int>> rings,
  *  @param[in] ring2 The second ring.
  *  @return A vector containing the common elements between the input rings.
  */
-std::vector<int> ring::findsCommonElements(std::vector<int> ring1,
-                                           std::vector<int> ring2) {
+std::vector<int> ring::findsCommonElements(const std::vector<int> &ring1,
+                                           const std::vector<int> &ring2) {
   //
   std::vector<int> common;
   int iatom; // Index to search for
@@ -111,9 +107,9 @@ std::vector<int> ring::findsCommonElements(std::vector<int> ring1,
  * @return A value which is true if the three rings have at least one common
  * element, and false if the three rings have no elements in common.
  */
-bool ring::commonElementsInThreeRings(std::vector<int> ring1,
-                                      std::vector<int> ring2,
-                                      std::vector<int> ring3) {
+bool ring::commonElementsInThreeRings(const std::vector<int> &ring1,
+                                      const std::vector<int> &ring2,
+                                      const std::vector<int> &ring3) {
   std::vector<int>
       common1; // Vector containing the common elements of the first two rings
   std::vector<int>
@@ -121,7 +117,7 @@ bool ring::commonElementsInThreeRings(std::vector<int> ring1,
 
   // Common elements among the first two rings
   common1 = ring::findsCommonElements(ring1, ring2);
-  if (common1.size() == 0) {
+  if (common1.empty()) {
     return false;
   } // no common elements in ring1 and ring2
 
@@ -129,7 +125,7 @@ bool ring::commonElementsInThreeRings(std::vector<int> ring1,
   common2 = ring::findsCommonElements(common1, ring3);
 
   // If no common elements were found:
-  if (common2.size() == 0) {
+  if (common2.empty()) {
     return false;
   } // no common elements between ring1, ring2, and ring3
 
@@ -145,7 +141,7 @@ bool ring::commonElementsInThreeRings(std::vector<int> ring1,
  * @return A bool value which is true if the triplet is present in the ring,
  *  and is false if the triplet is not in the ring.
  */
-bool ring::findTripletInRing(std::vector<int> ring, std::vector<int> triplet) {
+bool ring::findTripletInRing(const std::vector<int> &ring, const std::vector<int> &triplet) {
   //
   int ringSize = ring.size();   // should be 6
   std::vector<int> ringTriplet; // triplet from the ring to be searched
@@ -197,7 +193,7 @@ bool ring::findTripletInRing(std::vector<int> ring, std::vector<int> triplet) {
  *  length.
  */
 std::vector<std::vector<int>>
-ring::getSingleRingSize(std::vector<std::vector<int>> rings, int ringSize) {
+ring::getSingleRingSize(const std::vector<std::vector<int>> &rings, int ringSize) {
   //
   std::vector<std::vector<int>> ringSingleSize; // rings of one size
 
@@ -224,25 +220,13 @@ ring::getSingleRingSize(std::vector<std::vector<int>> rings, int ringSize) {
  * element, and false if there are no common elements.
  */
 bool ring::hasCommonElements(std::vector<int> ring1, std::vector<int> ring2) {
-  std::vector<int> commonElements; // Vector containing common elements
+  std::sort(ring1.begin(), ring1.end());
+  std::sort(ring2.begin(), ring2.end());
 
-  // Sort the vectors before finding common elements
-  sort(ring1.begin(), ring1.end());
-  sort(ring2.begin(), ring2.end());
-
-  // Find intersection of sorted vectors
-  auto it =
-      std::set_intersection(ring1.begin(), ring1.end(), ring2.begin(),
-                            ring2.end(), std::back_inserter(commonElements));
-
-  // If there are no elements in common, then return false
-  if (commonElements.size() == 0) {
-    return false;
-  }
-  // If there are common elements, return true
-  else {
-    return true;
-  }
+  std::vector<int> commonElements;
+  std::set_intersection(ring1.begin(), ring1.end(), ring2.begin(),
+                        ring2.end(), std::back_inserter(commonElements));
+  return !commonElements.empty();
 }
 
 /**
@@ -256,12 +240,7 @@ bool ring::hasCommonElements(std::vector<int> ring1, std::vector<int> ring2) {
  *  in the same sequence) and false if they do not have the same elements.
  */
 bool ring::compareRings(std::vector<int> ring1, std::vector<int> ring2) {
-  // Sort the rings first
-  sort(ring1.begin(), ring1.end()); // Sort ring1 by ID
-  sort(ring2.begin(), ring2.end()); // Sort ring2 by ID
-  bool result;
-
-  (ring1 == ring2) ? result = true : result = false;
-
-  return result;
+  std::sort(ring1.begin(), ring1.end());
+  std::sort(ring2.begin(), ring2.end());
+  return ring1 == ring2;
 }

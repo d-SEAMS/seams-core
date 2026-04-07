@@ -20,11 +20,10 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <math.h>
+#include <cmath>
 #include <memory>
 #include <sstream>
 #include <string>
-#include <sys/stat.h>
 #include <vector>
 
 #include <mol_sys.hpp>
@@ -47,10 +46,10 @@ namespace ring {
 
 //! Find out which rings are prisms, looping through all ring sizes upto the
 //! maxDepth The input ringsAllSizes array has rings of every size.
-int polygonRingAnalysis(
+[[nodiscard]] int polygonRingAnalysis(
     std::string path, std::vector<std::vector<int>> rings,
     std::vector<std::vector<int>> nList,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int maxDepth,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int maxDepth,
     double sheetArea, int firstFrame);
 
 } // namespace ring

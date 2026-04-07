@@ -1,0 +1,38 @@
+name: CI
+on:
+  push:
+    branches: [main, modernize]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: prefix-dev/setup-pixi@19eac09b398e3d0c747adc7921926a6d802df4da # v0.8.8
+        with:
+          environments: default
+      - run: pixi run setup
+      - run: pixi run build
+      - run: pixi run test
+      - run: pixi run install
+      - run: pixi run -e default -- bash -c "LD_LIBRARY_PATH=\$CONDA_PREFIX/lib:\$GITHUB_WORKSPACE/bbdir/src:\$LD_LIBRARY_PATH pytest tests/python/ -v --ignore=tests/python/test_hypothesis_horn.py --ignore=tests/python/test_hypothesis_pbc.py --ignore=tests/python/test_hypothesis_hbond.py --ignore=tests/python/test_hypothesis_rings.py"
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: prefix-dev/setup-pixi@19eac09b398e3d0c747adc7921926a6d802df4da # v0.8.8
+        with:
+          environments: default
+      - run: pixi run coverage-setup
+      - run: pixi run coverage-build
+      - run: pixi run coverage-run
+      - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
+        with:
+          files: bbdir-cov/meson-logs/coverage.info
+          fail_ci_if_error: false

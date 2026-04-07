@@ -15,21 +15,14 @@
 #ifndef __MOL_SYS_H_
 #define __MOL_SYS_H_
 
-#include "boost/multi_array.hpp"
 #include <algorithm>
 #include <array>
 #include <fstream>
 #include <iterator>
 #include <sstream>
 #include <string>
-#include <sys/stat.h>
 #include <vector>
 #include<unordered_map>
-
-// For debugging, instantiate the unordered map [consider removal for
-// production]
-template class std::unordered_map<int, int>;
-template class std::vector<std::vector<int>>;
 
 /** @file mol_sys.hpp
  *  @brief The main molecular system handler.
@@ -147,12 +140,12 @@ struct Result {
  *  - In slice bool
  */
 template <typename T> struct Point {
-  int type, molID, atomID;  //! type ID, molID, atomID
-  T x, y, z;                //! coordinates
-  std::vector<Result> c_ij; //! Results (contains bond correlation type)
+  int type = 0, molID = 0, atomID = 0; //! type ID, molID, atomID
+  T x = 0, y = 0, z = 0;              //! coordinates
+  std::vector<Result> c_ij;            //! Results (contains bond correlation type)
   atom_state_type iceType =
-      molSys::atom_state_type::unclassified; //! Type of ice/water etc based on cij
-  bool inSlice = true;      //! Is the point inside the slice or not?
+      atom_state_type::unclassified;   //! Type of ice/water etc based on cij
+  bool inSlice = true;                 //! Is the point inside the slice or not?
 };
 
 // Struct for a collection of points; contains information for a particular
@@ -169,8 +162,8 @@ template <typename T> struct Point {
  */
 template <typename S, typename T> struct PointCloud {
   std::vector<S> pts;    //! Collection of points
-  int currentFrame;      //! Current frame number
-  int nop;               //! Number of atoms
+  int currentFrame = 0;  //! Current frame number
+  int nop = 0;           //! Number of atoms
   std::vector<T> box;    //! Periodic box lengths
   std::vector<T> boxLow; //! xlo, ylo, zlo
   std::unordered_map<int, int> idIndexMap;
@@ -179,26 +172,26 @@ template <typename S, typename T> struct PointCloud {
 //! Creates an unordered map, with the atomIDs as keys and molecular IDs as the
 //! values
 std::unordered_map<int, int>
-createIDMolIDmap(molSys::PointCloud<molSys::Point<double>, double> *yCloud);
+createIDMolIDmap(molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 
 //! Creates an multimap with molecule IDs of the atoms as the keys and the
 //! atom IDs as the values. More than one atom can have the same molecule ID
 std::unordered_multimap<int, int>
-createMolIDAtomIDMultiMap(molSys::PointCloud<molSys::Point<double>, double> *yCloud);
+createMolIDAtomIDMultiMap(molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 
 //! Returns a vector of vectors, which contains the molIDs in the first column,
 //! and the hydrogen atom indices (not atom IDs) in the row
 std::vector<std::vector<int>>
-hAtomMolList(molSys::PointCloud<molSys::Point<double>, double> *hCloud,
-             molSys::PointCloud<molSys::Point<double>, double> *oCloud);
+hAtomMolList(molSys::PointCloud<molSys::Point<double>, double> &hCloud,
+             molSys::PointCloud<molSys::Point<double>, double> &oCloud);
 
 //! This function searches a vector of vectors molList, for a particular
 //! molecular ID, and returns the index in molList
-int searchMolList(std::vector<std::vector<int>> molList, int molIDtoFind);
+[[nodiscard]] int searchMolList(const std::vector<std::vector<int>> &molList, int molIDtoFind);
 
 //!//! Function for clearing vectors in PointCloud after multiple usage
 molSys::PointCloud<molSys::Point<double>, double>
-clearPointCloud(molSys::PointCloud<molSys::Point<double>, double> *yCloud);
+clearPointCloud(molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 } // namespace molSys
 
 #endif // __MOL_SYS_H_

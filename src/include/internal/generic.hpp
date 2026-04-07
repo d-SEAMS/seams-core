@@ -16,12 +16,13 @@
 #define __GENERIC_H_
 
 #include <array>
+#include <filesystem>
 #include <iostream>
-#include <math.h>
+#include <cmath>
 #include <mol_sys.hpp>
 
-// Boost
-#include <boost/math/constants/constants.hpp>
+// C++20
+#include <numbers>
 // Eigen
 #include <Eigen/Core>
 #include <Eigen/Dense>
@@ -51,7 +52,7 @@ namespace gen {
 /**
  *  Uses Boost to get the value of pi.
  */
-const double pi = boost::math::constants::pi<double>();
+constexpr double pi = std::numbers::pi;
 
 /**
  *  Inline function for converting radians->degrees.
@@ -78,18 +79,17 @@ inline double calcMedian(std::vector<double> *input) {
   int n = (*input).size(); // Number of elements
   double median;           // Output median value
 
-  // Sort the vector
-  std::sort((*input).begin(), (*input).end());
+  // Sort a copy (avoid mutating input)
+  std::vector<double> sorted = *input;
+  std::sort(sorted.begin(), sorted.end());
 
   // Calculate the median
   // For even values, the median is the average of the two middle values
   if (n % 2 == 0) {
-    median = 0.5 * ((*input)[n / 2] + (*input)[n / 2 - 1]); // n/2+n/2-1
-  } // median is average of middle values
-  else {
-    median = (*input)[(n + 1) / 2 -
-                      1]; // middle value of 7 elements is the 4th element
-  }                       // if odd, it is the middle value
+    median = 0.5 * (sorted[n / 2] + sorted[n / 2 - 1]);
+  } else {
+    median = sorted[(n + 1) / 2 - 1];
+  }
 
   return median;
 }
@@ -105,20 +105,20 @@ inline double calcMedian(std::vector<double> *input) {
  *  @return The unwrapped periodic distance.
  */
 inline double
-periodicDist(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+periodicDist(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
              int iatom, int jatom) {
   std::array<double, 3> dr;
   double r2 = 0.0; // Squared absolute distance
 
   // Get x1-x2 etc
-  dr[0] = fabs(yCloud->pts[iatom].x - yCloud->pts[jatom].x);
-  dr[1] = fabs(yCloud->pts[iatom].y - yCloud->pts[jatom].y);
-  dr[2] = fabs(yCloud->pts[iatom].z - yCloud->pts[jatom].z);
+  dr[0] = fabs(yCloud.pts[iatom].x - yCloud.pts[jatom].x);
+  dr[1] = fabs(yCloud.pts[iatom].y - yCloud.pts[jatom].y);
+  dr[2] = fabs(yCloud.pts[iatom].z - yCloud.pts[jatom].z);
 
   // Get the squared absolute distance
   for (int k = 0; k < 3; k++) {
     // Correct for periodicity
-    dr[k] -= yCloud->box[k] * round(dr[k] / yCloud->box[k]);
+    dr[k] -= yCloud.box[k] * round(dr[k] / yCloud.box[k]);
     r2 += pow(dr[k], 2.0);
   }
 
@@ -136,20 +136,20 @@ periodicDist(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
  *  \return The unwrapped periodic distance.
  */
 inline double unWrappedDistFromPoint(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
     std::vector<double> singlePoint) {
   std::array<double, 3> dr;
   double r2 = 0.0; // Squared absolute distance
 
   // Get x1-x2 etc
-  dr[0] = fabs(yCloud->pts[iatom].x - singlePoint[0]);
-  dr[1] = fabs(yCloud->pts[iatom].y - singlePoint[1]);
-  dr[2] = fabs(yCloud->pts[iatom].z - singlePoint[2]);
+  dr[0] = fabs(yCloud.pts[iatom].x - singlePoint[0]);
+  dr[1] = fabs(yCloud.pts[iatom].y - singlePoint[1]);
+  dr[2] = fabs(yCloud.pts[iatom].z - singlePoint[2]);
 
   // Get the squared absolute distance
   for (int k = 0; k < 3; k++) {
     // Correct for periodicity
-    dr[k] -= yCloud->box[k] * round(dr[k] / yCloud->box[k]);
+    dr[k] -= yCloud.box[k] * round(dr[k] / yCloud.box[k]);
     r2 += pow(dr[k], 2.0);
   }
 
@@ -167,15 +167,15 @@ inline double unWrappedDistFromPoint(
  *  @return The wrapped distance.
  */
 inline double
-distance(molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
+distance(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
          int jatom) {
   std::array<double, 3> dr;
   double r2 = 0.0; // Squared absolute distance
 
   // Get x1-x2 etc
-  dr[0] = fabs(yCloud->pts[iatom].x - yCloud->pts[jatom].x);
-  dr[1] = fabs(yCloud->pts[iatom].y - yCloud->pts[jatom].y);
-  dr[2] = fabs(yCloud->pts[iatom].z - yCloud->pts[jatom].z);
+  dr[0] = fabs(yCloud.pts[iatom].x - yCloud.pts[jatom].x);
+  dr[1] = fabs(yCloud.pts[iatom].y - yCloud.pts[jatom].y);
+  dr[2] = fabs(yCloud.pts[iatom].z - yCloud.pts[jatom].z);
 
   // Get the squared absolute distance
   for (int k = 0; k < 3; k++) {
@@ -197,16 +197,15 @@ distance(molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
  *  @return The unwrapped relative distances for each dimension.
  */
 inline std::array<double, 3>
-relDist(molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatom,
+relDist(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
         int jatom) {
   std::array<double, 3> dr;
-  std::array<double, 3> box = {yCloud->box[0], yCloud->box[1], yCloud->box[2]};
-  double r2 = 0.0; // Squared absolute distance
+  std::array<double, 3> box = {yCloud.box[0], yCloud.box[1], yCloud.box[2]};
 
   // Get x1-x2 etc
-  dr[0] = yCloud->pts[iatom].x - yCloud->pts[jatom].x;
-  dr[1] = yCloud->pts[iatom].y - yCloud->pts[jatom].y;
-  dr[2] = yCloud->pts[iatom].z - yCloud->pts[jatom].z;
+  dr[0] = yCloud.pts[iatom].x - yCloud.pts[jatom].x;
+  dr[1] = yCloud.pts[iatom].y - yCloud.pts[jatom].y;
+  dr[2] = yCloud.pts[iatom].z - yCloud.pts[jatom].z;
 
   // Get the relative distance
   for (int k = 0; k < 3; k++) {
@@ -237,12 +236,12 @@ inline bool compareByAtomID(const molSys::Point<double> &a,
 }
 
 //! Generic function for printing all the struct information
-int prettyPrintYoda(molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+[[nodiscard]] int prettyPrintYoda(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                     std::string outFile);
 
 //! Shift particles (unwrapped coordinates)
-int unwrappedCoordShift(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatomIndex,
+[[nodiscard]] int unwrappedCoordShift(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatomIndex,
     int jatomIndex, double *x_i, double *y_i, double *z_i, double *x_j,
     double *y_j, double *z_j);
 
@@ -296,9 +295,7 @@ inline std::vector<int> tokenizerInt(std::string line) {
  *  @param[in] name The name of the file
  */
 inline bool file_exists(const std::string &name) {
-  // Replace by boost function later
-  struct stat buffer;
-  return (stat(name.c_str(), &buffer) == 0);
+  return std::filesystem::exists(name);
 }
 
 /**
@@ -315,7 +312,7 @@ avgVector(std::vector<std::complex<double>> v, int l, int neigh) {
     return v;
   }
   for (int m = 0; m < 2 * l + 1; m++) {
-    v[m] = (1.0 / (double)neigh) * v[m];
+    v[m] = (1.0 / static_cast<double>(neigh)) * v[m];
   }
 
   return v;

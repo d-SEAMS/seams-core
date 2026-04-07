@@ -9,10 +9,86 @@
 #include <topo_bulk.hpp>
 
 // Standard
+#include <cmath>
 #include <iostream>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <rang.hpp>
+
+// Regression test for quat2RotMatrix: 90-degree rotation around z-axis
+TEST_CASE("quat2RotMatrix produces correct rotation for 90deg around z",
+          "[absor]") {
+  // Quaternion for 90-degree rotation around z-axis:
+  // q = (cos(45deg), 0, 0, sin(45deg)) = (sqrt(2)/2, 0, 0, sqrt(2)/2)
+  Eigen::VectorXd q(4);
+  q << std::sqrt(2.0) / 2.0, 0.0, 0.0, std::sqrt(2.0) / 2.0;
+
+  Eigen::MatrixXd R = absor::quat2RotMatrix(q);
+
+  // Expected rotation matrix for 90deg around z:
+  // [ 0  -1   0 ]
+  // [ 1   0   0 ]
+  // [ 0   0   1 ]
+  REQUIRE_THAT(R(0, 0), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(0, 1), Catch::Matchers::WithinAbs(-1.0, 1e-12));
+  REQUIRE_THAT(R(0, 2), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(1, 0), Catch::Matchers::WithinAbs(1.0, 1e-12));
+  REQUIRE_THAT(R(1, 1), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(1, 2), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(2, 0), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(2, 1), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(2, 2), Catch::Matchers::WithinAbs(1.0, 1e-12));
+
+  // Check determinant is 1 (proper rotation)
+  double det = R.determinant();
+  REQUIRE_THAT(det, Catch::Matchers::WithinAbs(1.0, 1e-12));
+
+  // Check orthogonality: R * R^T = I
+  Eigen::MatrixXd RRt = R * R.transpose();
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      double expected = (i == j) ? 1.0 : 0.0;
+      REQUIRE_THAT(RRt(i, j), Catch::Matchers::WithinAbs(expected, 1e-12));
+    }
+  }
+}
+
+// Regression test: identity quaternion should give identity matrix
+TEST_CASE("quat2RotMatrix identity quaternion gives identity matrix",
+          "[absor]") {
+  Eigen::VectorXd q(4);
+  q << 1.0, 0.0, 0.0, 0.0;
+
+  Eigen::MatrixXd R = absor::quat2RotMatrix(q);
+
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      double expected = (i == j) ? 1.0 : 0.0;
+      REQUIRE_THAT(R(i, j), Catch::Matchers::WithinAbs(expected, 1e-12));
+    }
+  }
+}
+
+// Regression test: 180-degree rotation around x-axis
+TEST_CASE("quat2RotMatrix 180deg around x-axis", "[absor]") {
+  // q = (0, 1, 0, 0)
+  Eigen::VectorXd q(4);
+  q << 0.0, 1.0, 0.0, 0.0;
+
+  Eigen::MatrixXd R = absor::quat2RotMatrix(q);
+
+  // Expected: diag(1, -1, -1)
+  REQUIRE_THAT(R(0, 0), Catch::Matchers::WithinAbs(1.0, 1e-12));
+  REQUIRE_THAT(R(1, 1), Catch::Matchers::WithinAbs(-1.0, 1e-12));
+  REQUIRE_THAT(R(2, 2), Catch::Matchers::WithinAbs(-1.0, 1e-12));
+  REQUIRE_THAT(R(0, 1), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(0, 2), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(1, 0), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(1, 2), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(2, 0), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(R(2, 1), Catch::Matchers::WithinAbs(0.0, 1e-12));
+}
 
 SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
          "[match]") {
@@ -134,15 +210,15 @@ SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
     // --------------------------
     // GETTING THE TARGET POINT SET
     // Calculate a neighbour list
-    nList = nneigh::neighListO(3.5, &targetCloud, 1);
+    nList = nneigh::neighListO(3.5, targetCloud, 1);
     // Neighbour list by index
-    nList = nneigh::neighbourListByIndex(&targetCloud, nList);
+    nList = nneigh::neighbourListByIndex(targetCloud, nList);
     // Find the vector of vector of rings
     rings = primitive::ringNetwork(nList, 6);
     // init the ringType vector
     ringType.resize(rings.size());
     // Find the HCs
-    listHC = ring::findHC(rings, &ringType, nList, &cageList);
+    listHC = ring::findHC(rings, ringType, nList, cageList);
     // Get the basal rings from cageList
     iring = cageList[0].rings[0];
     jring = cageList[0].rings[1];
@@ -154,8 +230,8 @@ SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
     // Get the re-ordered matched basal rings, ordered with respect to each
     // other
 
-    pntToPnt::relOrderHC(&targetCloud, rings[iring], rings[jring], nList,
-                         &matchedBasal1, &matchedBasal2);
+    pntToPnt::relOrderHC(targetCloud, rings[iring], rings[jring], nList,
+                         matchedBasal1, matchedBasal2);
     //
     // --------------------------
     // Now get the absolute orientation of the left (candidate/target) system
@@ -179,11 +255,11 @@ SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
     for (int i = 0; i < 6; i++) {
       // Change the order of the target points somehow!
       //
-      targetPointSet = pntToPnt::changeHexCageOrder(&targetCloud, matchedBasal1,
+      targetPointSet = pntToPnt::changeHexCageOrder(targetCloud, matchedBasal1,
                                                     matchedBasal2, i);
       // Shape-matching
-      absor::hornAbsOrientation(refPnts, targetPointSet, &currentQuat,
-                                &currentRmsd, &currentRmsdList, &currentScale);
+      absor::hornAbsOrientation(refPnts, targetPointSet, currentQuat,
+                                currentRmsd, currentRmsdList, currentScale);
       if (i == 0) {
         quaternionRot = currentQuat;
         rmsd1 = currentRmsd;
@@ -206,13 +282,13 @@ SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
     double selfScale;  // Scale for the reference set and itself
 
     // Shape-matching
-    absor::hornAbsOrientation(refPnts, refPnts, &selfQuatRot, &rmsd2,
-                              &rmsdList2, &selfScale);
+    absor::hornAbsOrientation(refPnts, refPnts, selfQuatRot, rmsd2,
+                              rmsdList2, selfScale);
 
     //
     double angDist = gen::angDistDegQuaternions(selfQuatRot, quaternionRot);
     //
-    REQUIRE_THAT(angDist, Catch::Matchers::Floating::WithinAbsMatcher(
+    REQUIRE_THAT(angDist, Catch::Matchers::WithinAbs(
                               30.0, 0.01));  // Evaluate condition
     // --------------------------
   }  // End of given
@@ -352,23 +428,25 @@ SCENARIO("Test the shape-matching of a perfect DDC rotated by 30 degrees",
     // --------------------------
     // GETTING THE TARGET POINT SET
     // Calculate a neighbour list
-    nList = nneigh::neighListO(3.5, &targetCloud, 1);
+    nList = nneigh::neighListO(3.5, targetCloud, 1);
     // Neighbour list by index
-    nList = nneigh::neighbourListByIndex(&targetCloud, nList);
+    nList = nneigh::neighbourListByIndex(targetCloud, nList);
     // Find the vector of vector of rings
     rings = primitive::ringNetwork(nList, 6);
     // init the ringType vector
     ringType.resize(rings.size());
-    listDDC = ring::findDDC(rings, &ringType, listHC, &cageList);
+    listDDC = ring::findDDC(rings, ringType, listHC, cageList);
     // Save the order of the DDC in a vector
+    REQUIRE_FALSE(cageList.empty());
     ddcOrder = pntToPnt::relOrderDDC(0, rings, cageList);
+    REQUIRE(ddcOrder.size() == 14);
     //
     // --------------------------
     // Now get the absolute orientation of the left (candidate/target) system
     // with respect to the right (template/reference) system test
     //
     std::vector<double> quaternionRot;         // quaternion rotation
-    double rmsd1, rmsd2;                       // least RMSD
+    double rmsd1 = 0.0, rmsd2;                // least RMSD
     std::vector<double> rmsdList1, rmsdList2;  // List of RMSD per atom
     double scale;                              // Scale factor
     //
@@ -385,10 +463,10 @@ SCENARIO("Test the shape-matching of a perfect DDC rotated by 30 degrees",
     for (int i = 0; i < 6; i++) {
       // Change the order of the target points somehow!
       //
-      targetPointSet = pntToPnt::changeDiaCageOrder(&targetCloud, ddcOrder, i);
+      targetPointSet = pntToPnt::changeDiaCageOrder(targetCloud, ddcOrder, i);
       // Shape-matching
-      absor::hornAbsOrientation(refPnts, targetPointSet, &currentQuat,
-                                &currentRmsd, &currentRmsdList, &currentScale);
+      absor::hornAbsOrientation(refPnts, targetPointSet, currentQuat,
+                                currentRmsd, currentRmsdList, currentScale);
       if (i == 0) {
         quaternionRot = currentQuat;
         rmsd1 = currentRmsd;
@@ -411,13 +489,13 @@ SCENARIO("Test the shape-matching of a perfect DDC rotated by 30 degrees",
     double selfScale;  // Scale for the reference set and itself
 
     // Shape-matching
-    absor::hornAbsOrientation(refPnts, refPnts, &selfQuatRot, &rmsd2,
-                              &rmsdList2, &selfScale);
+    absor::hornAbsOrientation(refPnts, refPnts, selfQuatRot, rmsd2,
+                              rmsdList2, selfScale);
 
     //
     double angDist = gen::angDistDegQuaternions(selfQuatRot, quaternionRot);
     //
-    REQUIRE_THAT(angDist, Catch::Matchers::Floating::WithinAbsMatcher(
+    REQUIRE_THAT(angDist, Catch::Matchers::WithinAbs(
                               30.0, 0.01));  // Evaluate condition
     // --------------------------
     // --------------------------

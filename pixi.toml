@@ -1,67 +1,124 @@
 [workspace]
-authors = ["Rohit Goswami <rgoswami@ieee.org>"]
-channels = ["conda-forge"]
 name = "seams-core"
-platforms = ["linux-64"]
-version = "1.0.1"
+version = "2.0.0"
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-64", "osx-arm64"]
+authors = ["Rohit Goswami <rgoswami@ieee.org>"]
 
 [dependencies]
 compilers = ">=1.9.0,<2"
-gfortran = ">=14.3.0,<14.4"
-catch2 = ">=3.12.0,<4"
-yaml-cpp = ">=0.8.0,<0.9"
-liblapack = ">=3.11.0,<4"
+eigen = "3.4.0.*"
 libblas = ">=3.11.0,<4"
-boost-cpp = ">=1.85.0,<2"
-cmake = ">=3.5,<4"
-meson = ">=1.0"
+liblapack = ">=3.11.0,<4"
+catch2 = ">=3.6.0,<4"
+meson = ">=1.3.0"
 ninja = ">=1.13.2,<2"
 pkgconfig = ">=1.5.5,<2"
-luarocks = ">=3.13.0,<4"
-fmt = "9.1.0.*"
-eigen = "3.4.0.*"
-lua = "5.3.*"
-pkgconf = ">=2.5.1,<3"
+python = "3.12.*"
+nanobind = ">=2.0"
+numpy = ">=1.24"
+pip = "*"
+meson-python = ">=0.16"
+pytest = ">=8.0"
+lcov = ">=1.16"
+libhwy = ">=1.3.0"
+chemfiles = ">=0.10"
 
 [tasks]
-
-[feature.cmake.tasks.build-cmake]
-cmd = """
-luarocks install luafilesystem && \
-mkdir -p bbdir && cd bbdir && \
-cmake -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_EXPORT_COMPILE_COMMANDS=YES \
-      -DCMAKE_INSTALL_PREFIX:PATH=$CONDA_PREFIX \
-      ../ && \
-make -j$(nproc) && \
-make install
-"""
-
-[feature.cmake.tasks.test-cmake]
-depends-on = ["build-cmake"]
-cmd = "$CONDA_PREFIX/bin/yodaStruct -c lua_inputs/config.yml"
-
-[feature.meson.tasks.build-lib]
-cmd = """
-mkdir -p bbdir && \
-meson setup bbdir && \
-meson compile -C bbdir
-"""
-
-[feature.meson.tasks.build-pkg]
-cmd = """
-mkdir -p bbdir && \
-meson setup bbdir -Dwith_lua=True \
-      -Dwith_tests=True --prefix $CONDA_PREFIX && \
-meson install -C bbdir
-"""
-
-[feature.meson.tasks.test-meson]
-depends-on = ["build-pkg"]
-cmd = """
-export LD_LIBRARY_PATH=$CONDA_PREFIX/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH && \
-$CONDA_PREFIX/bin/yodaStruct -c lua_inputs/config.yml
-"""
+setup = "meson setup bbdir --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=true --wipe 2>/dev/null; meson setup bbdir --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=true"
+build = { cmd = "ninja -j4 -C bbdir", depends-on = ["setup"] }
+test = { cmd = "meson test -C bbdir -v", depends-on = ["build"] }
+install = { cmd = "meson install -C bbdir", depends-on = ["build"] }
+pytest = { cmd = "LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH pytest tests/python/ -v", depends-on = ["install"] }
+coverage-setup = "meson setup bbdir-cov --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=false -Db_coverage=true --wipe 2>/dev/null; meson setup bbdir-cov --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=false -Db_coverage=true"
+coverage-build = { cmd = "ninja -j4 -C bbdir-cov", depends-on = ["coverage-setup"] }
+coverage-run = { cmd = """
+meson test -C bbdir-cov && ninja -C bbdir-cov coverage && \
+lcov --remove bbdir-cov/meson-logs/coverage.info \
+  '*/external/backward.hpp' '*/backward.cpp' \
+  '*/tests/*' '*/bench_*' \
+  --output-file bbdir-cov/meson-logs/coverage.info --ignore-errors unused
+""", depends-on = ["coverage-build"] }
 
 [environments]
-default = {features = ["cmake", "meson"]}
+docs = { features = ["docs"] }
+formalanalysis = { features = ["formalanalysis"] }
+
+[feature.formalanalysis]
+platforms = ["linux-64"]
+
+[feature.formalanalysis.dependencies]
+python = "3.12.*"
+coq = "8.12.2.*"
+
+[feature.formalanalysis.pypi-dependencies]
+sympy = ">=1.13"
+hypothesis = ">=6.100"
+mpmath = ">=1.3"
+
+[feature.formalanalysis.tasks]
+verify-sympy = { cmd = "pytest analysis/ -v" }
+verify-coq = { cmd = "cd proofs && make" }
+verify-hypothesis = { cmd = "LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH pytest tests/python/test_hypothesis_*.py -v", depends-on = ["install"] }
+verify-all = { depends-on = ["verify-sympy", "verify-coq", "verify-hypothesis"] }
+
+[feature.docs]
+# doxyrest only works on linux
+platforms = ["linux-64"]
+
+[feature.docs.dependencies]
+python = "3.12.*"
+emacs = ">=30"
+graphviz = ">=12"
+doxygen = ">=1.13"
+doxyrest = ">=2.1"
+
+[feature.docs.pypi-dependencies]
+shibuya = ">=2025.12, <2027"
+sphinx = ">=8.0, <9"
+sphinx-sitemap = ">=2.9, <3"
+myst-parser = ">=4.0, <5"
+
+[feature.docs.tasks.setup-doxyrest]
+description = "Clones the doxyrest dependency into the subprojects directory"
+cmd = "test -d subprojects/doxyrest || (mkdir -p subprojects && git clone --depth 1 --single-branch https://github.com/vovkos/doxyrest subprojects/doxyrest)"
+
+[feature.docs.tasks.patch-doxyrest]
+description = "Apply temporary fixes for documentation"
+depends-on = ["setup-doxyrest"]
+cmd = """
+cp scripts/patches/doxyrest/doxyrest.py subprojects/doxyrest/sphinx/doxyrest.py &&
+patch -p1 -N -s < scripts/patches/doxyrest/enum_class_fix.patch || true
+"""
+
+[feature.docs.tasks.mkrst]
+cwd = "docs"
+cmd = "emacs --batch --load export.el"
+
+[feature.docs.tasks.doxybuild]
+description = "Generates XML via Doxygen and converts it to RST via Doxyrest"
+cwd = "docs/source"
+depends-on = ["patch-doxyrest"]
+cmd = "doxygen Doxyfile_seams.cfg && doxyrest -c doxyrest-config.lua"
+
+[feature.docs.tasks.sphinxbld]
+depends-on = ["mkrst", "doxybuild"]
+cmd = "sphinx-build -d docs/doctrees docs/source/ docs/build"
+
+[feature.docs.tasks.docbld]
+depends-on = ["sphinxbld"]
+
+[feature.docs.tasks.docdel]
+cwd = "docs"
+# removes files generated by doxygen, sphinx and orgmode
+cmd = """
+rm -rf build
+rm -rf doctrees
+rm -rf source/xml
+rm -rf source/api
+rm -rf source/contributing
+rm -rf source/tutorials
+rm -rf source/howto
+rm -rf source/reference
+rm -rf source/*.rst
+"""

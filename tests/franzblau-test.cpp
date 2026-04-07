@@ -4,7 +4,7 @@
 // Standard
 #include <iostream>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <rang.hpp>
 
 SCENARIO(
@@ -174,7 +174,7 @@ SCENARIO(
         // The number of all rings from backtracking should be 8
         REQUIRE(nAllRings == 8);
         // Get rid of all non-SP rings
-        fullGraph = primitive::removeNonSPrings(&fullGraph);
+        fullGraph = primitive::removeNonSPrings(fullGraph);
         // Get the number of primitive rings
         nPrimitiveRings = fullGraph.rings.size();
         // For this case, the number of primitive rings should be 5

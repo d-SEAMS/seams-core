@@ -7,12 +7,15 @@ doxyYoda
 doxyYoda_*
 run*
 bbdir/
+bbdir-cov/
 # Manual updates ONLY
 spack.yml
 /.spack-env/
 !pixi.lock
 *.lock
-subprojects
+subprojects/nanobind-*/
+subprojects/robin-map-*/
+subprojects/packagecache/
 
 # Prerequisites
 *.d
@@ -61,7 +64,12 @@ output/
 *.lammpstrj
 bin/
 build/
-docs/
+# docs/source/*.rst is generated from orgmode, but track orgmode + conf.py
+docs/build/
+docs/doctrees/
+docs/source/*.rst
+docs/source/xml/
+docs/source/api/
 m.css/
 compile_commands.json
 yodaStruct
@@ -309,7 +317,8 @@ TSWLatexianTemp*
 
 # auto folder when using emacs and auctex
 ./auto/*
-*.el
+# Emacs backup but keep export.el
+*.el~
 
 # expex forward references with \gathertags
 *-tags.tex
@@ -340,3 +349,12 @@ TSWLatexianTemp*
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode
+
+# Coq build artifacts
+proofs/*.vo
+proofs/*.vok
+proofs/*.vos
+proofs/*.glob
+proofs/CoqMakefile
+proofs/CoqMakefile.conf
+.hypothesis/

@@ -21,9 +21,7 @@
 #include <ring.hpp>
 #include <string>
 
-//// Boost
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
+#include <filesystem>
 
 /** @file seams_input.hpp
  *  @brief File for functions that read in files).
@@ -56,7 +54,7 @@ std::vector<std::string> getInpFileList(std::string inputFolder);
 //! value)
 molSys::PointCloud<molSys::Point<double>, double>
 readLammpsTrj(std::string filename, int targetFrame,
-              molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+              molSys::PointCloud<molSys::Point<double>, double> &yCloud,
               bool isSlice = false,
               std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
               std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
@@ -65,7 +63,7 @@ readLammpsTrj(std::string filename, int targetFrame,
 //! value) / This only reads in oxygen atoms
 molSys::PointCloud<molSys::Point<double>, double> readLammpsTrjO(
     std::string filename, int targetFrame,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int typeO,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeO,
     bool isSlice = false,
     std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
     std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
@@ -74,7 +72,7 @@ molSys::PointCloud<molSys::Point<double>, double> readLammpsTrjO(
 //! which are not in the slice as well
 molSys::PointCloud<molSys::Point<double>, double> readLammpsTrjreduced(
     std::string filename, int targetFrame,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int typeI,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeI,
     bool isSlice = false,
     std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
     std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
@@ -84,6 +82,21 @@ molSys::PointCloud<molSys::Point<double>, double> readXYZ(std::string filename);
 
 //! Reads bonds into a vector of vectors from a file with a specific format
 std::vector<std::vector<int>> readBonds(std::string filename);
+
+#ifdef SEAMS_HAS_CHEMFILES
+//! Read any trajectory format supported by chemfiles (PDB, GRO, DCD, etc.)
+molSys::PointCloud<molSys::Point<double>, double>
+readChemfiles(std::string filename, int targetFrame,
+              molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+              int typeFilter = -1);
+#endif
+
+#ifdef SEAMS_HAS_READCON
+//! Read a .con format file (eOn saddle point search trajectories)
+molSys::PointCloud<molSys::Point<double>, double>
+readCon(std::string filename, int targetFrame,
+        molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+#endif
 
 inline bool atomInSlice(double x, double y, double z,
                         std::array<double, 3> coordLow,

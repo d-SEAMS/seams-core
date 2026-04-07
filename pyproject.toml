@@ -1,0 +1,28 @@
+[build-system]
+requires = ["meson-python>=0.16", "nanobind>=2.0", "numpy"]
+build-backend = "mesonpy"
+
+[project]
+name = "pydseamslib"
+version = "2.0.0"
+description = "Deferred Structural Elucidation Analysis for Molecular Simulations"
+license = {text = "MIT"}
+requires-python = ">=3.12"
+dependencies = ["numpy>=1.24"]
+authors = [
+  {name = "Amrita Goswami", email = "amrita16thaug646@gmail.com"},
+  {name = "Rohit Goswami", email = "rgoswami@ieee.org"},
+  {name = "Ruhila S", email = "ruhiresearcher209@gmail.com"},
+]
+
+[project.urls]
+Homepage = "https://dseams.info"
+Repository = "https://github.com/d-SEAMS/seams-core"
+Documentation = "https://wiki.dseams.info"
+
+[project.optional-dependencies]
+test = ["pytest>=8.0", "approvaltests>=14.0", "pytest-approvaltests>=0.2"]
+ase = ["ase>=3.23"]
+
+[tool.meson-python.args]
+setup = ['-Dwith_python=true', '-Dwith_tests=false']

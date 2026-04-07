@@ -37,7 +37,7 @@
 int ring::polygonRingAnalysis(
     std::string path, std::vector<std::vector<int>> rings,
     std::vector<std::vector<int>> nList,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int maxDepth,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int maxDepth,
     double sheetArea, int firstFrame) {
   //
   std::vector<std::vector<int>>
@@ -64,7 +64,7 @@ int ring::polygonRingAnalysis(
   coverageAreaXZ.resize(maxDepth - 2);
   coverageAreaYZ.resize(maxDepth - 2);
   // The atomTypes vector is the same size as the pointCloud atoms
-  atomTypes.resize(yCloud->nop, 1); // The dummy or unclassified value is 1
+  atomTypes.resize(yCloud.nop, 1); // The dummy or unclassified value is 1
   // -------------------------------------------------------------------------------
   // Run this loop for rings of sizes upto maxDepth
   // The smallest possible ring is of size 3
@@ -75,7 +75,7 @@ int ring::polygonRingAnalysis(
     ringsOneType = ring::getSingleRingSize(rings, ringSize);
     //
     // Continue if there are zero rings of ringSize
-    if (ringsOneType.size() == 0) {
+    if (ringsOneType.empty()) {
       nRingList[ringSize - 3] = 0; // Update the number of prisms
       // Update the coverage area%
       coverageAreaXY[ringSize - 3] = 0.0;
@@ -102,10 +102,10 @@ int ring::polygonRingAnalysis(
   } // end of loop through every possible ringSize
 
   // Get the atom types for all the ring types
-  ring::assignPolygonType(rings, &atomTypes, nRingList);
+  ring::assignPolygonType(rings, atomTypes, nRingList);
 
   // Write out the ring information
-  sout::writeRingNum(path, yCloud->currentFrame, nRingList, coverageAreaXY,
+  sout::writeRingNum(path, yCloud.currentFrame, nRingList, coverageAreaXY,
                      coverageAreaXZ, coverageAreaYZ, maxDepth, firstFrame);
   // Write out the lammps data file for the particular frame
   sout::writeLAMMPSdataAllRings(yCloud, nList, atomTypes, maxDepth, path);

@@ -1,0 +1,106 @@
+#+TITLE: Contributing
+#+OPTIONS: toc:nil num:nil
+
+* Prerequisites
+
+d-SEAMS uses [[https://pixi.sh][pixi]] for environment and task management. Install pixi first:
+
+#+begin_src bash
+curl -fsSL https://pixi.sh/install.sh | bash
+#+end_src
+
+The pixi environment provides all build dependencies: a C++ compiler, Eigen,
+BLAS/LAPACK, Catch2, Meson, Ninja, nanobind, NumPy, and pytest.
+
+* Clone and build
+
+#+begin_src bash
+git clone https://github.com/d-SEAMS/seams-core.git
+cd seams-core
+#+end_src
+
+Set up the Meson build directory and compile:
+
+#+begin_src bash
+pixi run setup
+pixi run build
+#+end_src
+
+~pixi run setup~ configures a Meson build directory at ~bbdir/~ with tests and
+Python bindings enabled. ~pixi run build~ compiles the C++ library and the
+nanobind extension module.
+
+* Running tests
+
+C++ tests (Catch2):
+
+#+begin_src bash
+pixi run test
+#+end_src
+
+Python tests (pytest):
+
+#+begin_src bash
+pixi run pytest
+#+end_src
+
+~pixi run test~ runs the Catch2 test suite through Meson. ~pixi run pytest~ first
+installs the Python package, then runs pytest on ~tests/python/~.
+
+* Project structure
+
+#+begin_src text
+seams-core/
+  src/                   C++ source files
+    include/
+      internal/          Internal headers (mol_sys, neighbours, bond, ...)
+      external/          Vendored headers (backward, cxxopts, rang, ...)
+    mol_sys.cpp          Molecular system data structures
+    neighbours.cpp       Neighbour list construction
+    bond.cpp             Hydrogen bond detection
+    bop.cpp              Bond order parameters (CHILL/CHILL+)
+    ring.cpp             Ring analysis and classification
+    franzblau.cpp        Franzblau shortest-path ring finder
+    bulkTUM.cpp          Topological unit matching for bulk ice
+    topo_one_dim.cpp     1D topology (nanotubes)
+    topo_two_dim.cpp     2D topology (sheets)
+    ...
+  python/
+    bindings.cpp         nanobind bindings (_core module)
+    pydseamslib/
+      __init__.py        Python package entry point
+      adapters/
+        _ase.py          ASE Atoms to PointCloud conversion
+  tests/
+    python/              Python test suite
+    *.cpp                C++ test files (Catch2)
+  input/
+    traj/                Example LAMMPS trajectories
+  meson.build            Top-level Meson build definition
+  pixi.toml              pixi workspace configuration
+  pyproject.toml         Python package metadata (meson-python backend)
+#+end_src
+
+* Core concepts
+
+- ~PointCloud~ :: The central data structure. Holds atom positions, types, box
+  dimensions, and per-atom properties (ice type, bond-order correlations).
+
+- ~neighListO~ :: Builds distance-based neighbour lists for oxygen atoms. Returns
+  a vector of vectors where each inner vector starts with the atom's own ID
+  followed by its neighbours.
+
+- ~populateHbonds~ :: Re-reads the trajectory to find hydrogen positions, then
+  applies geometric criteria to determine hydrogen bonds between oxygen pairs.
+
+- ~getCorrelPlus~ / ~getIceTypePlus~ :: The CHILL+ algorithm. First computes
+  bond-order correlations (~c_ij~) between neighbours, then classifies each atom
+  as cubic ice, hexagonal ice, interfacial, clathrate, or liquid water.
+
+- ~ringNetwork~ :: Franzblau shortest-path ring analysis. Finds primitive rings
+  in the hydrogen bond or neighbour network up to a specified depth.
+
+* Commit style
+
+Follow the pattern ~fileName: description of change~. See ~CONTRIBUTING.md~ in the
+repository root for full details.

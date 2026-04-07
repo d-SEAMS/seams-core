@@ -13,6 +13,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <generic.hpp>
+#include <algorithm>
 #include <iostream>
 
 /**
@@ -23,7 +24,7 @@
  *  be printed.
  */
 int gen::prettyPrintYoda(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     std::string outFile) {
   std::ofstream outputFile;
   // Create a new file in the output directory
@@ -33,15 +34,15 @@ int gen::prettyPrintYoda(
     // First line
     outputFile << "# Frame\tAtomID\tx\ty\tz\tcij\ticeType\n";
     // Write out all the information out line by line
-    for (int i = 0; i < yCloud->nop; i++) {
-      outputFile << yCloud->currentFrame << "\t" << yCloud->pts[i].atomID
-                 << "\t" << yCloud->pts[i].x << "\t" << yCloud->pts[i].y << "\t"
-                 << yCloud->pts[i].z << "\t";
+    for (int i = 0; i < yCloud.nop; i++) {
+      outputFile << yCloud.currentFrame << "\t" << yCloud.pts[i].atomID
+                 << "\t" << yCloud.pts[i].x << "\t" << yCloud.pts[i].y << "\t"
+                 << yCloud.pts[i].z << "\t";
       // Print out cij
-      // for(int c=0; c<yCloud->pts[i].c_ij.size(); c++){outputFile <<
-      // yCloud->pts[i].c_ij[c]<<"\t";} Print out the classifier
+      // for(int c=0; c<yCloud.pts[i].c_ij.size(); c++){outputFile <<
+      // yCloud.pts[i].c_ij[c]<<"\t";} Print out the classifier
       // TODO: Should print string representation
-      outputFile << static_cast<int>(yCloud->pts[i].iceType) << "\n";
+      outputFile << static_cast<int>(yCloud.pts[i].iceType) << "\n";
     }
   }
   // Close the file
@@ -69,26 +70,26 @@ int gen::prettyPrintYoda(
  *   the unwrapped distance.
  */
 int gen::unwrappedCoordShift(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int iatomIndex,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatomIndex,
     int jatomIndex, double *x_i, double *y_i, double *z_i, double *x_j,
     double *y_j, double *z_j) {
   //
   double x_iatom, y_iatom, z_iatom;
   double x_jatom, y_jatom, z_jatom;
   double x_ij, y_ij, z_ij; // Relative distance
-  std::vector<double> box = yCloud->box;
+  std::vector<double> box = yCloud.box;
   double xPBC, yPBC, zPBC; // Actual unwrapped distance
 
   // ----------------------------------------------------------------------
   // INIT
   // iatom
-  x_iatom = yCloud->pts[iatomIndex].x;
-  y_iatom = yCloud->pts[iatomIndex].y;
-  z_iatom = yCloud->pts[iatomIndex].z;
+  x_iatom = yCloud.pts[iatomIndex].x;
+  y_iatom = yCloud.pts[iatomIndex].y;
+  z_iatom = yCloud.pts[iatomIndex].z;
   // jatom
-  x_jatom = yCloud->pts[jatomIndex].x;
-  y_jatom = yCloud->pts[jatomIndex].y;
-  z_jatom = yCloud->pts[jatomIndex].z;
+  x_jatom = yCloud.pts[jatomIndex].x;
+  y_jatom = yCloud.pts[jatomIndex].y;
+  z_jatom = yCloud.pts[jatomIndex].z;
   // ----------------------------------------------------------------------
   // GET RELATIVE DISTANCE
   x_ij = x_iatom - x_jatom;
@@ -155,9 +156,10 @@ int gen::unwrappedCoordShift(
 double gen::eigenVecAngle(std::vector<double> OO, std::vector<double> OH) {
   Eigen::Vector3d eigOO = Eigen::Map<Eigen::Vector3d>(OO.data(), OO.size());
   Eigen::Vector3d eigOH = Eigen::Map<Eigen::Vector3d>(OH.data(), OH.size());
-  double angle;
-  angle = acos(eigOO.dot(eigOH) / (eigOO.norm() * eigOH.norm()));
-  return angle;
+  double cosAngle = eigOO.dot(eigOH) / (eigOO.norm() * eigOH.norm());
+  // Clamp to [-1, 1] to guard against floating-point imprecision in acos
+  cosAngle = std::clamp(cosAngle, -1.0, 1.0);
+  return acos(cosAngle);
 }
 
 /**
@@ -237,15 +239,12 @@ double gen::getAverageWithoutOutliers(std::vector<double> inpVec) {
       avgVal += inpVec[i];
     } // take the average
   }   // end of loop for getting the average
-  //
-  // Divide by the number of observations used
-  avgVal /= numOfObservations;
   // ----------------------
   // This fails if there are not enough observations (ring size = 3)
   if (numOfObservations == 0) {
     double sumVal = 0.0;
     // Loop through all the values and sum
-    for (int i = 0; i <= n; i++) {
+    for (int i = 0; i < n; i++) {
       sumVal += inpVec[i];
     } // end of sum
     // Normalize
@@ -253,6 +252,8 @@ double gen::getAverageWithoutOutliers(std::vector<double> inpVec) {
     return avgVal;
   } // for triangular prism blocks
   // ----------------------
+  // Divide by the number of observations used
+  avgVal /= numOfObservations;
 
   return avgVal;
 }
@@ -272,6 +273,8 @@ double gen::angDistDegQuaternions(std::vector<double> quat1,
   // angularDistance = 2*cosInverse(quat1*conj(quat2))
   prod = quat1[0] * quat2[0] - quat1[1] * quat2[1] - quat1[2] * quat2[2] -
          quat1[3] * quat2[3];
+  // Clamp to [-1, 1] to guard against floating-point imprecision in acos
+  prod = std::clamp(prod, -1.0, 1.0);
   // The angular distance is:
   double angDist = 2 * acos(prod) * 180.0 / (gen::pi);
   // Return the angular distance

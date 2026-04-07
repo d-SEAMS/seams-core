@@ -14,8 +14,6 @@
 
 #include <selection.hpp>
 
-#include <icecream.hpp>
-
 // -----------------------------------------------------------------------------------------------------
 // FUNCTIONS FOR SELECTIONS
 // -----------------------------------------------------------------------------------------------------
@@ -35,8 +33,8 @@
  */
 molSys::PointCloud<molSys::Point<double>, double>
 gen::getPointCloudOneAtomType(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    molSys::PointCloud<molSys::Point<double>, double> *outCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &outCloud,
     int atomTypeI, bool isSlice, std::array<double, 3> coordLow,
     std::array<double, 3> coordHigh) {
   //
@@ -46,19 +44,19 @@ gen::getPointCloudOneAtomType(
   // --------
   // Before filling up the PointCloud, if the vectors are filled
   // empty them
-  *outCloud = molSys::clearPointCloud(outCloud);
+  outCloud = molSys::clearPointCloud(outCloud);
   // --------
 
   // Loop through every iatom and check the type
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     // Skip if the atom is not of the desired type 
-    if (yCloud->pts[iatom].type != atomTypeI) {
+    if (yCloud.pts[iatom].type != atomTypeI) {
       continue;
     } // end of checking for the type 
     // ----------------
     // only if a slice has been requested
     if (isSlice) {
-      pointInSlice = sinp::atomInSlice(yCloud->pts[iatom].x, yCloud->pts[iatom].y, yCloud->pts[iatom].z,
+      pointInSlice = sinp::atomInSlice(yCloud.pts[iatom].x, yCloud.pts[iatom].y, yCloud.pts[iatom].z,
                                                coordLow, coordHigh);
       // Skip if the atom is not part of the slice
       if (!pointInSlice) {
@@ -68,22 +66,22 @@ gen::getPointCloudOneAtomType(
     //
     // Actually add the atoms to the outCloud
     natoms++; // Update the number of atoms in outCloud
-    outCloud->pts.push_back(yCloud->pts[iatom]); // Update the pts vector
-    outCloud->idIndexMap[yCloud->pts[iatom].atomID] =
-                outCloud->pts.size() - 1; // array index
+    outCloud.pts.push_back(yCloud.pts[iatom]); // Update the pts vector
+    outCloud.idIndexMap[yCloud.pts[iatom].atomID] =
+                outCloud.pts.size() - 1; // array index
   }
 
   // Update the number of particles in the PointCloud
-  outCloud->nop = outCloud->pts.size();
+  outCloud.nop = outCloud.pts.size();
 
   // Box and box lengths 
-  outCloud->box = yCloud->box;
-  outCloud->boxLow = yCloud->boxLow;
+  outCloud.box = yCloud.box;
+  outCloud.boxLow = yCloud.boxLow;
 
   // Update the frame number
-  outCloud->currentFrame = yCloud->currentFrame; 
+  outCloud.currentFrame = yCloud.currentFrame; 
 
-  return *outCloud;
+  return outCloud;
 }
 
 /**
@@ -99,7 +97,7 @@ gen::getPointCloudOneAtomType(
  *  to be created
  */
 void gen::atomsInSingleSlice(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     bool clearPreviousSliceSelection,
     std::array<double, 3> coordLow,
     std::array<double, 3> coordHigh) {
@@ -110,19 +108,19 @@ void gen::atomsInSingleSlice(
   // Set inSlice to false for every atom first
   if (clearPreviousSliceSelection)
   {
-    for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-      yCloud->pts[iatom].inSlice = false;
+    for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+      yCloud.pts[iatom].inSlice = false;
     }
   } // end of init
   // --------------------
 
   // Loop through every iatom and check if the atom is in the slice or not 
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     // Check if the current atom is in the slice 
-    pointInSlice = sinp::atomInSlice(yCloud->pts[iatom].x, yCloud->pts[iatom].y, yCloud->pts[iatom].z,
+    pointInSlice = sinp::atomInSlice(yCloud.pts[iatom].x, yCloud.pts[iatom].y, yCloud.pts[iatom].z,
                                                coordLow, coordHigh);
 
-    yCloud->pts[iatom].inSlice = pointInSlice; // iatom is inside the slice
+    yCloud.pts[iatom].inSlice = pointInSlice; // iatom is inside the slice
     //
   }
 
@@ -135,7 +133,8 @@ void gen::atomsInSingleSlice(
  * is in the specified (single) slice or not. If even one atom of a molecule 
  * is inside the region, then all atoms belonging to that molecule should be
  * inside the slice as well (therefore, inSlice would be set to true)
- * NOTE: THIS DOES NOT WORK. ERROR
+ * NOTE: The earlier bug was that out-of-slice atoms could overwrite inSlice=true
+ * set by a molecule-mate. Fixed by skipping atoms already marked inSlice.
  * @param[in] yCloud The given input PointCloud
  * @param[in] clearPreviousSliceSelection sets all inSlice bool values to false before 
  * adding Points to the slice
@@ -145,7 +144,7 @@ void gen::atomsInSingleSlice(
  *  to be created
  */
 void gen::moleculesInSingleSlice(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     bool clearPreviousSliceSelection,
     std::array<double, 3> coordLow,
     std::array<double, 3> coordHigh) {
@@ -166,24 +165,24 @@ void gen::moleculesInSingleSlice(
   // Set inSlice to false for every atom first
   if (clearPreviousSliceSelection)
   {
-    for (int iatom = 0; iatom < yCloud->nop; iatom++) {
-      yCloud->pts[iatom].inSlice = false;
+    for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+      yCloud.pts[iatom].inSlice = false;
     }
   } // end of init
   // --------------------
 
   // Loop through every iatom and check if the atom is in the slice or not 
-  for (int iatom = 0; iatom < yCloud->nop; iatom++) {
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     // Check if the current atom is in the slice 
-    pointInSlice = sinp::atomInSlice(yCloud->pts[iatom].x, yCloud->pts[iatom].y, yCloud->pts[iatom].z,
+    pointInSlice = sinp::atomInSlice(yCloud.pts[iatom].x, yCloud.pts[iatom].y, yCloud.pts[iatom].z,
                                                coordLow, coordHigh);
     //
     // Set the inSlice bool for the particular Point 
     if (pointInSlice)
     {
-      yCloud->pts[iatom].inSlice = true; // iatom is inside the slice
+      yCloud.pts[iatom].inSlice = true; // iatom is inside the slice
       // Find mol ID and atoms with that particular molecular ID 
-      iatomMolID = yCloud->pts[iatom].molID; // molecule ID 
+      iatomMolID = yCloud.pts[iatom].molID; // molecule ID 
       // -----------
       // Find all atoms with iatomMolID and set the inSlice bool
       // to true
@@ -193,16 +192,15 @@ void gen::moleculesInSingleSlice(
       {
         // it->second gives the value (in this case, the atom ID)
         jatomID = it->second; // Atom ID with molecule ID equal to iatomMolID
-        auto gotJ = yCloud->idIndexMap.find(jatomID);
+        auto gotJ = yCloud.idIndexMap.find(jatomID);
         jatomIndex = gotJ->second;
         // Set the jatom inSlice bool to true
-        yCloud->pts[jatomIndex].inSlice = true; // jatomIndex is inside the slice 
+        yCloud.pts[jatomIndex].inSlice = true; // jatomIndex is inside the slice 
       }
       // -----------
-    } // the atom is in the slice 
-    else{
-      yCloud->pts[iatom].inSlice = false; // iatom is not in the slice  
-    } // atom is not in the slice
+    } // the atom is in the slice
+    // If not in slice, inSlice retains its current value (may have been
+    // set true by a molecule-mate processed earlier in the loop)
   }
 
   return;
@@ -223,8 +221,8 @@ void gen::moleculesInSingleSlice(
  *  to be created
  */
 void gen::setAtomsWithSameMolID(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::unordered_multimap<int,int> molIDAtomIDmap,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::unordered_multimap<int,int> &molIDAtomIDmap,
     int molID, bool inSliceValue) {
   //
   int jatomID;    // atom ID of the current jatom
@@ -237,13 +235,13 @@ void gen::setAtomsWithSameMolID(
   for (auto it = range.first; it != range.second; it++){
     // it->second gives the value (in this case, the atom ID)
     jatomID = it->second; // Atom ID with molecule ID equal to iatomMolID
-    auto gotJ = yCloud->idIndexMap.find(jatomID);
+    auto gotJ = yCloud.idIndexMap.find(jatomID);
     jatomIndex = gotJ->second;
     // Set the jatom inSlice bool to true
-    yCloud->pts[jatomIndex].inSlice = inSliceValue; // jatomIndex is assigned inSliceValue
+    yCloud.pts[jatomIndex].inSlice = inSliceValue; // jatomIndex is assigned inSliceValue
   } // end of loop through all atoms with molID
 
-  // IC(yCloud->pts[jatomIndex]);
+  // IC(yCloud.pts[jatomIndex]);
 
   return;
 }
@@ -263,8 +261,8 @@ void gen::setAtomsWithSameMolID(
  * @param[in] coordHigh Contains the upper limits of the slice
  */
 void ring::getEdgeMoleculesInRings(
-    std::vector<std::vector<int>> rings, molSys::PointCloud<molSys::Point<double>, double> *oCloud,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    const std::vector<std::vector<int>> &rings, molSys::PointCloud<molSys::Point<double>, double> &oCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     std::array<double, 3> coordLow, std::array<double, 3> coordHigh, bool identicalCloud) {
   //
   // A vector of bool values, such that every ring has a value of true (in the slice) or false (not in the slice) 
@@ -292,9 +290,9 @@ void ring::getEdgeMoleculesInRings(
 
   // Loop through every iatom present in the slice in oCloud to determine which rings are in the slice
   // The indices of oCloud and rings should match (or this will produce unexpected results)
-  for (int iatom = 0; iatom < oCloud->nop; iatom++) {
+  for (int iatom = 0; iatom < oCloud.nop; iatom++) {
     // Skip if iatom is not in the slice
-    if (!oCloud->pts[iatom].inSlice)
+    if (!oCloud.pts[iatom].inSlice)
     {
       continue;
     } // skip for iatom not in slice
@@ -320,21 +318,21 @@ void ring::getEdgeMoleculesInRings(
         {
           jatomIndex = rings[iring][j]; // Index of the atom in oCloud 
           // Set this to true in oCloud 
-          oCloud->pts[jatomIndex].inSlice = true; // part of slice 
-          jatomID = oCloud->pts[jatomIndex].atomID; // Atom ID 
+          oCloud.pts[jatomIndex].inSlice = true; // part of slice 
+          jatomID = oCloud.pts[jatomIndex].atomID; // Atom ID 
           // Now if oCloud and yCloud are not the same, use the
           // atom ID to set the inSlice bool value in yCloud 
           if (!identicalCloud)
           {
             // Find the index corresponding to the same atom in yCloud 
-            auto gotJ = yCloud->idIndexMap.find(jatomID);
+            auto gotJ = yCloud.idIndexMap.find(jatomID);
             jatomIndex1 = gotJ->second;
             // throw if not found ?
             // Set the jatom inSlice bool to true
-            yCloud->pts[jatomIndex1].inSlice = true; // jatomIndex is inside the slice 
+            yCloud.pts[jatomIndex1].inSlice = true; // jatomIndex is inside the slice 
             // set the inSlice value of all atoms in yCloud with the current molecule ID 
             gen::setAtomsWithSameMolID(yCloud, molIDAtomIDmap, 
-              yCloud->pts[jatomIndex1].molID, true);
+              yCloud.pts[jatomIndex1].molID, true);
           } // end of setting values in yCloud 
         } // end of loop through the elements of the current ring 
         // --------------------------
@@ -373,9 +371,9 @@ void ring::getEdgeMoleculesInRings(
  * @param[in] coordHigh Contains the upper limits of the slice
  */
 void ring::printSliceGetEdgeMoleculesInRings(
-    std::string path, std::vector<std::vector<int>> rings, 
-    molSys::PointCloud<molSys::Point<double>, double> *oCloud,
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
+    std::string path, const std::vector<std::vector<int>> &rings,
+    molSys::PointCloud<molSys::Point<double>, double> &oCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     std::array<double, 3> coordLow, std::array<double, 3> coordHigh, bool identicalCloud) {
   //
 
@@ -395,9 +393,7 @@ void ring::printSliceGetEdgeMoleculesInRings(
 
   // Print out the dump of all atoms and molecules, with an inSlice value printed in a separate column
   // H atoms not included in the slice (TODO: fix)
-  sout::writeLAMMPSdumpSlice(yCloud, path); 
+  (void)sout::writeLAMMPSdumpSlice(yCloud, path);
   
-  IC(rings[0]);
-
   return;
 }

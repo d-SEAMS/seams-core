@@ -30,7 +30,7 @@
  * every node number @f$n@f$.
  */
 double topoparam::normHeightPercent(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud, int nPrisms,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int nPrisms,
     double avgPrismHeight) {
   //
   double hPercent;       // Normalized height percent
@@ -40,7 +40,7 @@ double topoparam::normHeightPercent(
   // ---------------------------------------
   // Calculate the height of the SWCT
   // This is the longest dimension of the simulation box
-  nanoTubeHeight = *max_element(yCloud->box.begin(), yCloud->box.end());
+  nanoTubeHeight = *max_element(yCloud.box.begin(), yCloud.box.end());
   // ---------------------------------------
   // Calculate the maximum possible height, given the average prism height
   // and the height of the nanotube
@@ -68,8 +68,8 @@ double topoparam::normHeightPercent(
  * every node number \f$n\f$.
  */
 std::vector<double> topoparam::calcCoverageArea(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<std::vector<int>> rings, double sheetArea) {
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<std::vector<int>> &rings, double sheetArea) {
   //
   double areaXY, areaXZ, areaYZ;   // Total coverage area
   std::vector<double> singleAreas; // Area of single rings
@@ -103,8 +103,8 @@ std::vector<double> topoparam::calcCoverageArea(
  *  given the ring and the PointCloud.
  */
 std::vector<double> topoparam::projAreaSingleRing(
-    molSys::PointCloud<molSys::Point<double>, double> *yCloud,
-    std::vector<int> ring) {
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &ring) {
   //
   int iatomIndex, jatomIndex; // Atom indices of the i^th and j^th atoms
   int ringSize = ring.size(); // Number of nodes in the ring
@@ -166,9 +166,9 @@ std::vector<double> topoparam::projAreaSingleRing(
   areaYZ *= 0.5;
 
   // Absolute area
-  areaXY = fabs(areaXY);
-  areaXZ = fabs(areaXZ);
-  areaYZ = fabs(areaYZ);
+  areaXY = std::abs(areaXY);
+  areaXZ = std::abs(areaXZ);
+  areaYZ = std::abs(areaYZ);
 
-  return {areaXY, areaYZ, areaXZ};
+  return {areaXY, areaXZ, areaYZ};
 }

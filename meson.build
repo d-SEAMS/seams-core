@@ -1,139 +1,93 @@
 #-----------------------------------------------------------------------------------
 # d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations
 #
-# Copyright (c) 2023--present d-SEAMS core team
+# Copyright (c) 2018--present d-SEAMS core team
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the MIT License as published by
-# the Open Source Initiative.
-#
-# A copy of the MIT License is included in the LICENSE file of this repository.
-# You should have received a copy of the MIT License along with this program.
-# If not, see <https://opensource.org/licenses/MIT>.
+# SPDX-License-Identifier: MIT
 #-----------------------------------------------------------------------------------
 
-# The project is seams-core, the executable is yodaStruct
 project('seams-core', 'cpp',
-  version : '1.0.1',
-  default_options : ['warning_level=3', 'cpp_std=c++14'])
+  version: '2.0.0',
+  default_options: ['warning_level=2', 'cpp_std=c++20'],
+  meson_version: '>=1.3.0')
 
 host_system = host_machine.system()
 
-# Add C++ compiler options
-# Note that fast-math gives incorrect results, and the third set is for debugging
-_args = ['-funroll-loops'] # ['-ffast-math', '-funroll-loops'] #['-ggdb', '-Og', '-fno-inline-functions']
-_deps = [] # Dependencies
-_linkto = [] # All the sub-libraries
-_incdirs = [] # All the includes
-
-
-# Add conditionals
-if host_system == 'darwin'
-  _args += ['-DOSX=TRUE']
-  # Workaround for
-  # error: aligned allocation function of
-  # type 'void *(unsigned long, enum std::align_val_t)' is only available on macOS 10.13 or newer
-  add_project_arguments(['-faligned-allocation', '-ggdb', '-Og', '-fno-inline-functions'], language: 'cpp')
-endif
+# Global accumulator variables (eOn pattern)
+_args = ['-funroll-loops', '-Wno-sign-compare', '-Wno-unused-variable',
+         '-Wno-unused-parameter', '-Wno-unused-but-set-variable']
+_deps = []
+_linkto = []
+_incdirs = []
 
 cppc = meson.get_compiler('cpp')
 
-# Dependencies
-# libm for Unix systems
+# GCC vs clang warning flag differences
+if cppc.get_id() == 'gcc'
+  _args += ['-Wno-maybe-uninitialized']
+else
+  _args += ['-Wno-uninitialized']
+endif
+
+# Suppress [[nodiscard]] warnings from legacy callers (to be fixed incrementally)
+_args += ['-Wno-unused-result']
+
+# Platform conditionals
+if host_system == 'darwin'
+  _args += ['-DOSX=TRUE']
+endif
+
+# Core dependencies
 m_dep = cppc.find_library('m', required: false)
 _deps += m_dep
-_deps += [declare_dependency(link_args: '-lstdc++')]
 
-# All of which can be installed with meson wrap install <blah> originally
-eigen_dep = dependency('eigen3',
-                       version: '3.4.0',
-                       required: true)
-_deps += [ eigen_dep ]
+eigen_dep = dependency('eigen3', version: '>=3.4.0', required: true)
+_deps += [eigen_dep]
 
-fmt_dep = dependency('fmt',
-                     version: '9.1.0',
-                     required: true)
-_deps += [ fmt_dep ]
+blas_dep = cppc.find_library('blas', required: true)
+lapack_dep = cppc.find_library('lapack', required: true)
+_deps += [blas_dep, lapack_dep]
 
-boost_dep = dependency('boost',
-  modules : [
-    'filesystem',
-    'system',
-  ],
-  required : false,
-)
-_deps += [ boost_dep ]
+hwy_dep = dependency('hwy', version: '>=1.3.0', required: false)
+if hwy_dep.found()
+  _deps += [hwy_dep]
+  _args += ['-DSEAMS_HAS_HWY=1']
+endif
 
-libyamlcpp_dep = dependency('yaml-cpp',
-                        fallback: ['yaml-cpp',
-                                   'libyamlcpp_dep'])
-_deps += [ libyamlcpp_dep ]
+vesin_dep = dependency('vesin', required: false, fallback: ['vesin', 'vesin_dep'])
+if vesin_dep.found()
+  _deps += [vesin_dep]
+  _args += ['-DSEAMS_HAS_VESIN=1']
+endif
 
-# Include Sources
+chemfiles_dep = dependency('chemfiles', required: false)
+if chemfiles_dep.found()
+  _deps += [chemfiles_dep]
+  _args += ['-DSEAMS_HAS_CHEMFILES=1']
+endif
 
-_incdirs += include_directories([ 'src/include/internal',
-                               'src/include/external' ])
+readcon_dep = dependency('readcon-core', required: false,
+                         fallback: ['readcon-core', 'readcon_dep'])
+if readcon_dep.found()
+  _deps += [readcon_dep]
+  _args += ['-DSEAMS_HAS_READCON=1']
+endif
 
-# --------------------- Library
+# Include directories
+_incdirs += include_directories([
+  'src/include/internal',
+  'src/include/external',
+])
 
-ydsl_sources = [
-  'src/absOrientation.cpp',
-  'src/backward.cpp',
-  'src/bond.cpp',
-  'src/bop.cpp',
-  'src/bulkTUM.cpp',
-  'src/cluster.cpp',
-  'src/franzblau.cpp',
-  'src/generic.cpp',
-  'src/mol_sys.cpp',
-  'src/neighbours.cpp',
-  'src/opt_parser.cpp',
-  'src/order_parameter.cpp',
-  'src/pntCorrespondence.cpp',
-  'src/rdf2d.cpp',
-  'src/ring.cpp',
-  'src/seams_input.cpp',
-  'src/seams_output.cpp',
-  'src/selection.cpp',
-  'src/shapeMatch.cpp',
-  'src/topo_bulk.cpp',
-  'src/topo_one_dim.cpp',
-  'src/topo_two_dim.cpp',
-]
+# Library
+subdir('src')
 
-ydslib = library('yodaLib',
-                ydsl_sources,
-                dependencies: _deps,
-                cpp_args: _args,
-                include_directories : _incdirs,
-                install: true
-               )
+# Tests
+if get_option('with_tests')
+  subdir('tests')
+endif
 
-yds_dep = declare_dependency(
-                             link_with: [ydslib, _linkto],
-                             include_directories: _incdirs,
-                             compile_args: _args,
-                             dependencies: _deps)
-                              
-
-# -------------------- Executable
-
-# Only when not a subproject
-if (not meson.is_subproject())
-    # Lua is only used in the executable
-    if get_option('with_lua')
-      lua_dep = dependency('lua',
-                           version : '<5.4',
-                           required : true)
-        _deps += [ lua_dep ]
-      # Build the executable
-      yds = executable('yodaStruct',
-                       ['src/main.cpp',
-                       'src/opt_parser.cpp'],
-                       link_with : _linkto,
-                       dependencies: [_deps, yds_dep],
-                       cpp_args : _args,
-                       include_directories : _incdirs,
-                       install : true)
-    endif
+# Python bindings
+if get_option('with_python')
+  subdir('python')
 endif
