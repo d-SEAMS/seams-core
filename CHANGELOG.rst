@@ -2,6 +2,24 @@
 Changelog
 =========
 
+Version 2.0.1 (2026-04-07)
+===========================
+
+Build and CI fixes following v2.0.0 release.
+
+Fixed
+------
+- Pin Python to 3.12 for nanobind compatibility, drop limited_api
+- Fix Eigen install path in wheel builds
+- Fix macOS deployment target (bump to 14), remove --enable-new-dtags on macOS
+- Regenerate pixi.lock for chemfiles compatibility
+- Increase test timeout to 120s for bulkTUM tests on macOS
+- Drop macOS x86_64 wheel builds (no macos-13 runners available)
+
+Developer
+----------
+- Added release workflow for automatic Zenodo DOI minting on tag push
+
 Version 2.0.0 (2026-03-22)
 ===========================
 
