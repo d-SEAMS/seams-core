@@ -168,5 +168,5 @@ TEST_CASE("rdf2Danalysis_AA runs without error for single frame", "[rdf2d]") {
   REQUIRE(fs::exists(tmpPath + "topoMonolayer/rdf.dat"));
 
   // Cleanup
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }

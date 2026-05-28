@@ -240,7 +240,7 @@ TEST_CASE("getIceType writes output and classifies atoms", "[bop]") {
   // Check output file was written (getIceType writes to path + "bop/chill.txt")
   REQUIRE(std::filesystem::exists(tmpPath + "bop/chill.txt"));
 
-  std::filesystem::remove_all(tmpPath);
+  std::error_code _ec_; std::filesystem::remove_all(tmpPath, _ec_);
 }
 
 TEST_CASE("getCorrelPlus uses CHILL+ algorithm", "[bop]") {
@@ -268,7 +268,7 @@ TEST_CASE("printIceType writes super chill classification", "[bop]") {
   int ret = chill::printIceType(cloud, tmpPath, 1, false);
   REQUIRE(ret == 0);
 
-  std::filesystem::remove_all(tmpPath);
+  std::error_code _ec_; std::filesystem::remove_all(tmpPath, _ec_);
 }
 
 TEST_CASE("numStaggered counts staggered bonds for an atom", "[bop]") {
@@ -293,7 +293,7 @@ TEST_CASE("getIceTypePlus classifies with CHILL+ and writes output", "[bop]") {
   // Check output file was written
   REQUIRE(std::filesystem::exists(tmpPath + "bop/chillPlus.txt"));
 
-  std::filesystem::remove_all(tmpPath);
+  std::error_code _ec_; std::filesystem::remove_all(tmpPath, _ec_);
 }
 
 TEST_CASE("isInterfacial checks interfacial criteria", "[bop]") {

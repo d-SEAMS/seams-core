@@ -48,7 +48,7 @@ TEST_CASE("polygonRingAnalysis runs with empty rings", "[topo_two_dim]") {
 
   REQUIRE(ret == 0);
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 TEST_CASE("polygonRingAnalysis processes known ring set", "[topo_two_dim]") {
@@ -65,5 +65,5 @@ TEST_CASE("polygonRingAnalysis processes known ring set", "[topo_two_dim]") {
 
   REQUIRE(ret == 0);
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }

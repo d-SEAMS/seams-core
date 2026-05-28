@@ -163,7 +163,7 @@ TEST_CASE("largestIceCluster identifies clusters and writes stats",
 
   REQUIRE(ret == 0);
 
-  std::filesystem::remove_all(tmpPath);
+  std::error_code _ec_; std::filesystem::remove_all(tmpPath, _ec_);
 }
 
 TEST_CASE("singleClusterLinkedList with single atom", "[cluster]") {
@@ -202,5 +202,5 @@ TEST_CASE("clusterAnalysis with Q6 on mW cubic trajectory", "[cluster]") {
   // mW cubic ice should produce a non-trivial ice cluster
   REQUIRE(iceCloud.nop > 0);
 
-  std::filesystem::remove_all(tmpPath);
+  std::error_code _ec_; std::filesystem::remove_all(tmpPath, _ec_);
 }
