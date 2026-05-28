@@ -98,7 +98,7 @@ TEST_CASE("writeClusterStats writes cluster statistics", "[seams_output]") {
   REQUIRE(fs::exists(tmpPath + "clusterStats.dat"));
   REQUIRE(fs::file_size(tmpPath + "clusterStats.dat") > 0);
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 TEST_CASE("writeClusterStats appends for subsequent frames", "[seams_output]") {
@@ -114,7 +114,7 @@ TEST_CASE("writeClusterStats appends for subsequent frames", "[seams_output]") {
   while (std::getline(f, line)) lineCount++;
   REQUIRE(lineCount == 3); // header + 2 frames
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 // -- writeCluster tests --
@@ -141,7 +141,7 @@ TEST_CASE("writeDump writes LAMMPS dump format", "[seams_output]") {
   REQUIRE(fs::exists(tmpPath + "test.lammpstrj"));
   REQUIRE(fs::file_size(tmpPath + "test.lammpstrj") > 0);
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 // -- writeTopoBulkData tests --
@@ -153,7 +153,7 @@ TEST_CASE("writeTopoBulkData writes bulk topology data", "[seams_output]") {
   REQUIRE(ret == 0);
   REQUIRE(fs::exists(tmpPath + "bulkTopo/cageData.dat"));
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 // -- writePrismNum tests --
@@ -169,7 +169,7 @@ TEST_CASE("writePrismNum writes prism statistics", "[seams_output]") {
   REQUIRE(ret == 0);
   REQUIRE(fs::exists(tmpPath + "topoINT/nPrisms.dat"));
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 // -- writeRingNum tests --
@@ -188,7 +188,7 @@ TEST_CASE("writeRingNum writes ring coverage data for monolayer",
   REQUIRE(fs::exists(tmpPath + "topoMonolayer/coverageAreaXZ.dat"));
   REQUIRE(fs::exists(tmpPath + "topoMonolayer/coverageAreaYZ.dat"));
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 // -- writeRingNumBulk tests --
@@ -201,7 +201,7 @@ TEST_CASE("writeRingNumBulk writes bulk ring data", "[seams_output]") {
   REQUIRE(ret == 0);
   REQUIRE(fs::exists(tmpPath + "bulkTopo/num_rings.dat"));
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 // -- writeMoleculeIDsInSlice tests --
@@ -214,7 +214,7 @@ TEST_CASE("writeMoleculeIDsInSlice writes molecule selection", "[seams_output]")
   REQUIRE(ret == 0);
   REQUIRE(fs::exists(tmpPath + "selection/IDtextFiles/molID-1.dat"));
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 // -- writeMoleculeIDsExpressionSelectOVITO tests --
@@ -229,7 +229,7 @@ TEST_CASE("writeMoleculeIDsExpressionSelectOVITO writes OVITO selection",
   REQUIRE(
       fs::exists(tmpPath + "selection/IDovitoFiles/ovito-molIDSelect-1.dat"));
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 // -- writeLAMMPSdumpSlice tests --
@@ -242,7 +242,7 @@ TEST_CASE("writeLAMMPSdumpSlice writes slice dump", "[seams_output]") {
   REQUIRE(ret == 0);
   REQUIRE(fs::exists(tmpPath + "selection/dumpFiles/dump-1.lammpstrj"));
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 // -- writeLAMMPSdumpINT tests --
@@ -257,7 +257,7 @@ TEST_CASE("writeLAMMPSdumpINT writes prism dump with RMSD", "[seams_output]") {
   REQUIRE(ret == 0);
   REQUIRE(fs::exists(tmpPath + "topoINT/dumpFiles/dump-1.lammpstrj"));
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 // -- writeLAMMPSdumpCages tests --
@@ -275,7 +275,7 @@ TEST_CASE("writeLAMMPSdumpCages writes cage dump with RMSD", "[seams_output]") {
   // First frame also creates typeInfo.dat
   REQUIRE(fs::exists(tmpPath + "bulkTopo/typeInfo.dat"));
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 // -- writeLAMMPSdataAllPrisms tests --
@@ -291,7 +291,7 @@ TEST_CASE("writeLAMMPSdataAllPrisms writes data file", "[seams_output]") {
   REQUIRE(ret == 0);
   REQUIRE(fs::exists(tmpPath + "topoINT/dataFiles/system-prisms-1.data"));
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 // -- writeLAMMPSdataAllRings tests --
@@ -308,7 +308,7 @@ TEST_CASE("writeLAMMPSdataAllRings writes ring data file", "[seams_output]") {
   REQUIRE(
       fs::exists(tmpPath + "topoMonolayer/dataFiles/system-rings-1.data"));
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 TEST_CASE("writeLAMMPSdataAllRings bulk mode writes to bulkTopo",
@@ -323,7 +323,7 @@ TEST_CASE("writeLAMMPSdataAllRings bulk mode writes to bulkTopo",
   REQUIRE(ret == 0);
   REQUIRE(fs::exists(tmpPath + "bulkTopo/dataFiles/system-rings-1.data"));
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 // -- writeLAMMPSdataTopoBulk tests --
@@ -339,7 +339,7 @@ TEST_CASE("writeLAMMPSdataTopoBulk writes bulk topo data file",
   REQUIRE(ret == 0);
   REQUIRE(fs::exists(tmpPath + "bulkTopo/dataFiles/system-1.data"));
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 // -- writeLAMMPSdata tests --
@@ -397,7 +397,7 @@ TEST_CASE("writeXYZcluster writes XYZ cluster file", "[seams_output]") {
   REQUIRE(ret == 0);
   REQUIRE(fs::exists(tmpPath + "bulkTopo/clusterXYZ/frame-1/cluster-1.xyz"));
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 // -- writeHisto tests --
@@ -441,7 +441,7 @@ TEST_CASE("writeAllCages returns 1 for empty cage list", "[seams_output]") {
   int ret = sout::writeAllCages(tmpPath, cageList, rings, nList, cloud, 1);
   REQUIRE(ret == 1);
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 // -- writeLAMMPSdataCages with real cage data from mW trajectory --
@@ -469,7 +469,7 @@ TEST_CASE("writeLAMMPSdataCages writes cage data file", "[seams_output]") {
     // Writes to ../output/ by default
     REQUIRE(ret == 0);
 
-    fs::remove_all(tmpPath);
+    std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
     fs::remove_all("../output");
   }
 }
@@ -557,7 +557,7 @@ TEST_CASE("writeLAMMPSdataTopoBulk with mixed cage types", "[seams_output]") {
   int ret = sout::writeLAMMPSdataTopoBulk(yCloud, nList, atomTypes, tmpPath);
   REQUIRE(ret == 0);
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 // -- writeDump with various ice types --
@@ -579,7 +579,7 @@ TEST_CASE("writeDump writes all ice type labels", "[seams_output]") {
   REQUIRE(ret == 0);
   REQUIRE(fs::file_size(tmpPath + "test.lammpstrj") > 0);
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 TEST_CASE("writeEachCage writes HC cage data directly", "[seams_output]") {

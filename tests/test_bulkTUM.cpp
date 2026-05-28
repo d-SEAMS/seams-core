@@ -55,7 +55,7 @@ TEST_CASE("topoBulkCriteria finds cages in mW cubic ice", "[bulkTUM]") {
   // mW cubic ice should have DDC cages
   REQUIRE((numHC + numDDC) > 0);
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 TEST_CASE("topoUnitMatchingBulk runs full TUM pipeline on mW cubic",
@@ -73,7 +73,7 @@ TEST_CASE("topoUnitMatchingBulk runs full TUM pipeline on mW cubic",
                                          true, "../templates");
   REQUIRE(ret == 0);
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 TEST_CASE("topoUnitMatchingBulk with clustering enabled on mW cubic",
@@ -92,7 +92,7 @@ TEST_CASE("topoUnitMatchingBulk with clustering enabled on mW cubic",
                                          true, "../templates");
   REQUIRE(ret == 0);
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 TEST_CASE("topoUnitMatchingBulk with onlyTetrahedral=false on mW cubic",
@@ -111,7 +111,7 @@ TEST_CASE("topoUnitMatchingBulk with onlyTetrahedral=false on mW cubic",
                                          false, "../templates");
   REQUIRE(ret == 0);
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 TEST_CASE("shapeMatchHC computes RMSD for a known HC cage", "[bulkTUM]") {

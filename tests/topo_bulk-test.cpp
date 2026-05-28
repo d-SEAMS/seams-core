@@ -306,7 +306,7 @@ TEST_CASE("topoBulkAnalysis integration with HC geometry", "[topo_bulk]") {
   int ret = ring::topoBulkAnalysis(tmpPath, rings, nList, yCloud, 1, true);
   REQUIRE(ret == 0);
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 
@@ -384,7 +384,7 @@ TEST_CASE("topoBulkAnalysis on mW cubic trajectory", "[topo_bulk]") {
   std::string tmpPath = fs::temp_directory_path().append("dseams_test_topobulk_mw/").string();
   int ret = ring::topoBulkAnalysis(tmpPath, rings, nList, yCloud, 1, true);
   REQUIRE(ret == 0);
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 TEST_CASE("bulkPolygonRingAnalysis on mW cubic trajectory", "[topo_bulk]") {
@@ -399,7 +399,7 @@ TEST_CASE("bulkPolygonRingAnalysis on mW cubic trajectory", "[topo_bulk]") {
   std::string tmpPath = fs::temp_directory_path().append("dseams_test_bulkpoly_mw/").string();
   int ret = ring::bulkPolygonRingAnalysis(tmpPath, rings, nList, yCloud, 7, 1);
   REQUIRE(ret == 0);
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 // -- prism3 namespace tests --

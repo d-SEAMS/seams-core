@@ -248,5 +248,5 @@ TEST_CASE("printSliceGetEdgeMoleculesInRings runs without crash",
   ring::printSliceGetEdgeMoleculesInRings(tmpPath, rings, oCloud, yCloud, lo,
                                            hi, true);
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }

@@ -148,7 +148,7 @@ TEST_CASE("prismAnalysis integration with tetragonal prism", "[topo_one_dim]") {
                                  false);
   REQUIRE(ret == 0);
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 
@@ -191,7 +191,7 @@ TEST_CASE("prismAnalysis with shape matching on tetragonal prism",
                                  true);
   REQUIRE(ret == 0);
 
-  fs::remove_all(tmpPath);
+  std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
 TEST_CASE("assignPrismType assigns atom types for known prism list",
