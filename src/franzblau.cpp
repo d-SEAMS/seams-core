@@ -29,7 +29,7 @@
  * of the ring members.
  */
 std::vector<std::vector<int>>
-primitive::ringNetwork(std::vector<std::vector<int>> nList, int maxDepth) {
+primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth) {
   //
   primitive::Graph fullGraph; // Graph object, contains the connectivity
                               // information from the neighbourlist
@@ -39,7 +39,7 @@ primitive::ringNetwork(std::vector<std::vector<int>> nList, int maxDepth) {
   fullGraph = primitive::countAllRingsFromIndex(nList, maxDepth);
 
   // Remove all non-SP rings using the Franzblau algorithm.
-  fullGraph = primitive::removeNonSPrings(fullGraph);
+  primitive::removeNonSPrings(fullGraph);
 
   // The rings vector of vectors inside the fullGraph graph object is the ring
   // network information we want
@@ -61,7 +61,7 @@ primitive::ringNetwork(std::vector<std::vector<int>> nList, int maxDepth) {
  *  @return The Graph object for the current frame.
  */
 primitive::Graph
-primitive::countAllRingsFromIndex(std::vector<std::vector<int>> neighHbondList,
+primitive::countAllRingsFromIndex(const std::vector<std::vector<int>> &neighHbondList,
                                   int maxDepth) {
   //
   primitive::Graph fullGraph; // Graph object
@@ -84,7 +84,7 @@ primitive::countAllRingsFromIndex(std::vector<std::vector<int>> neighHbondList,
   } // loop through every vertex
   // ------------------------------
   // Restore back-up of the edges (some may have been removed)
-  fullGraph = primitive::restoreEdgesFromIndices(fullGraph, neighHbondList);
+  primitive::restoreEdgesFromIndices(fullGraph, neighHbondList);
   // ------------------------------
 
   return fullGraph;
@@ -191,7 +191,7 @@ int primitive::findRings(Graph &fullGraph, int v, std::vector<int> &visited,
  */
 primitive::Graph primitive::populateGraphFromNListID(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-    std::vector<std::vector<int>> neighHbondList) {
+    const std::vector<std::vector<int>> &neighHbondList) {
   //
   primitive::Graph fullGraph; // Contains all the information of the pointCloud
   primitive::Vertex iVertex;  // The vertex corresponding to a particular point
@@ -245,7 +245,7 @@ primitive::Graph primitive::populateGraphFromNListID(
  * @return The Graph object for the current frame.
  */
 primitive::Graph
-primitive::populateGraphFromIndices(std::vector<std::vector<int>> nList) {
+primitive::populateGraphFromIndices(const std::vector<std::vector<int>> &nList) {
   //
   primitive::Graph fullGraph; // Contains all the information of the pointCloud
   primitive::Vertex iVertex;  // The vertex corresponding to a particular point
@@ -279,9 +279,9 @@ primitive::populateGraphFromIndices(std::vector<std::vector<int>> nList) {
  *  indices (according to the input PointCloud).
  * @return The Graph object for the current frame.
  */
-primitive::Graph
+void
 primitive::restoreEdgesFromIndices(Graph &fullGraph,
-                                   std::vector<std::vector<int>> nList) {
+                                   const std::vector<std::vector<int>> &nList) {
   //
   // ------------------------------
   // Loop through every point in nList
@@ -290,8 +290,6 @@ primitive::restoreEdgesFromIndices(Graph &fullGraph,
     // Update the neighListIndex list in the graph object
     fullGraph.pts[i].neighListIndex = nList[i];
   } // end of loop through iatom
-
-  return fullGraph;
 }
 
 /**
@@ -304,7 +302,7 @@ primitive::restoreEdgesFromIndices(Graph &fullGraph,
  *  inclding non-SP rings).
  * @return The Graph object for the current frame.
  */
-primitive::Graph primitive::removeNonSPrings(primitive::Graph &fullGraph) {
+void primitive::removeNonSPrings(primitive::Graph &fullGraph) {
   //
   int nVertices = fullGraph.pts.size(); // Number of vertices in the graph
   int nRings = fullGraph.rings.size();  // Number of rings
@@ -372,9 +370,8 @@ primitive::Graph primitive::removeNonSPrings(primitive::Graph &fullGraph) {
   // -------------------
   // Update the graph rings with the primitiveRings
   emptyTempRings.swap(fullGraph.rings);
-  fullGraph.rings = primitiveRings;
+  fullGraph.rings = std::move(primitiveRings);
   // -------------------
-  return fullGraph;
 }
 
 /**

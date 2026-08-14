@@ -355,9 +355,9 @@ int clump::clusterAnalysis(
   // Q6
   if (bopAnalysis == "chill") {
     //
-    yCloud = chill::getCorrel(yCloud, nList, false);
+    chill::getCorrel(yCloud, nList, false);
     // Get the ice types
-    yCloud = chill::getIceTypeNoPrint(yCloud, nList, false);
+    chill::getIceTypeNoPrint(yCloud, nList, false);
     // Assign values to isIce according to the CHILL algorithm
     for (int iatom = 0; iatom < yCloud.nop; iatom++) {
       // If it is an ice-like molecule, add it, otherwise skip

@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __FRANZBLAU_H_
-#define __FRANZBLAU_H_
+#ifndef SEAMS_FRANZBLAU_H_
+#define SEAMS_FRANZBLAU_H_
 
 #include <algorithm>
 #include <array>
@@ -115,7 +115,7 @@ struct Graph {
 //! index, given the neighbour list also by index (preferably the
 //! hydrogen-bonded neighbour list). Internally uses the Graph and Vertex
 //! objects.
-std::vector<std::vector<int>> ringNetwork(std::vector<std::vector<int>> nList,
+std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,
                                           int maxDepth);
 
 //! Creates a graph object and fills it with the information from a neighbour
@@ -123,25 +123,25 @@ std::vector<std::vector<int>> ringNetwork(std::vector<std::vector<int>> nList,
 //! the indices and NOT the atom IDs as in the neighbour list
 Graph populateGraphFromNListID(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-    std::vector<std::vector<int>> neighHbondList);
+    const std::vector<std::vector<int>> &neighHbondList);
 
 //! Creates a graph object and fills it with the information from a neighbour
 //! list of INDICES NOT ATOM IDs created before. NOTE: the neighbourListIndex
 //! contains the indices and NOT the atom IDs as in the neighbour list
-Graph populateGraphFromIndices(std::vector<std::vector<int>> nList);
+Graph populateGraphFromIndices(const std::vector<std::vector<int>> &nList);
 
 //! Re-fills the neighbour lists of a graph object from a neighbour
 //! list of INDICES NOT ATOM IDs created before. NOTE: the neighbourListIndex
 //! contains the indices and NOT the atom IDs as in the neighbour list
-Graph restoreEdgesFromIndices(Graph &fullGraph,
-                              std::vector<std::vector<int>> nList);
+void restoreEdgesFromIndices(Graph &fullGraph,
+                             const std::vector<std::vector<int>> &nList);
 
 //! Creates a vector of vectors of all possible rings
-Graph countAllRingsFromIndex(std::vector<std::vector<int>> neighHbondList,
+Graph countAllRingsFromIndex(const std::vector<std::vector<int>> &neighHbondList,
                              int maxDepth);
 
 //! Removes the non-SP rings, using the Franzblau shortest path criterion
-Graph removeNonSPrings(Graph &fullGraph);
+void removeNonSPrings(Graph &fullGraph);
 
 //! Main function that searches for all rings
 [[nodiscard]] int findRings(Graph &fullGraph, int v, std::vector<int> &visited, int maxDepth,
@@ -156,4 +156,4 @@ Graph clearGraph(Graph &currentGraph);
 
 } // namespace primitive
 
-#endif // __FRANZBLAU_H_
+#endif // SEAMS_FRANZBLAU_H_

@@ -91,11 +91,11 @@ class Trajectory:
             clathrate, interClathrate, water, unclassified.
         """
         # Step 1: compute bond correlations
-        self.cloud = _core.getCorrelPlus(
+        _core.getCorrelPlus(
             yCloud=self.cloud, nList=self.neighbor_list, isSlice=False)
         # Step 2: classify ice types based on correlations
         outdir = tempfile.mkdtemp(prefix="dseams_")
-        self.cloud = _core.getIceTypePlus(
+        _core.getIceTypePlus(
             yCloud=self.cloud, nList=self.neighbor_list,
             path=outdir + "/", firstFrame=self.frame,
             isSlice=False, outputFileName="chillPlus.txt"
@@ -116,11 +116,11 @@ class Trajectory:
             Counts of each ice type.
         """
         # Step 1: compute bond correlations
-        self.cloud = _core.getCorrel(
+        _core.getCorrel(
             yCloud=self.cloud, nList=self.neighbor_list, isSlice=False)
         # Step 2: classify ice types based on correlations
         outdir = tempfile.mkdtemp(prefix="dseams_")
-        self.cloud = _core.getIceType(
+        _core.getIceType(
             yCloud=self.cloud, nList=self.neighbor_list,
             path=outdir + "/", firstFrame=self.frame,
             isSlice=False, outputFileName="chill.txt"

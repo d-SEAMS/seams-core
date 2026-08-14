@@ -130,7 +130,7 @@ TEST_CASE("getCorrel populates c_ij for a simple tetrahedral system", "[bop]") {
   auto nList = nneigh::neighListO(3.0, cloud, 1);
 
   // Get correlations
-  cloud = chill::getCorrel(cloud, nList, false);
+  chill::getCorrel(cloud, nList, false);
 
   // The central atom (index 0) should now have c_ij entries
   REQUIRE_FALSE(cloud.pts[0].c_ij.empty());
@@ -177,8 +177,8 @@ TEST_CASE("getIceTypeNoPrint classifies atoms after correlation", "[bop]") {
   auto nList = nneigh::neighListO(3.0, cloud, 1);
 
   // First get correlations, then classify
-  cloud = chill::getCorrel(cloud, nList, false);
-  cloud = chill::getIceTypeNoPrint(cloud, nList, false);
+  chill::getCorrel(cloud, nList, false);
+  chill::getIceTypeNoPrint(cloud, nList, false);
 
   // Every atom should have an ice type assigned (could be any type)
   for (int i = 0; i < cloud.nop; i++) {
@@ -216,10 +216,10 @@ TEST_CASE("reclassifyWater uses Q6 to reclassify water atoms", "[bop]") {
   auto cloud = makeTetraCloud();
   auto nList = nneigh::neighListO(3.0, cloud, 1);
 
-  cloud = chill::getCorrel(cloud, nList, false);
-  cloud = chill::getIceTypeNoPrint(cloud, nList, false);
+  chill::getCorrel(cloud, nList, false);
+  chill::getIceTypeNoPrint(cloud, nList, false);
   auto q6 = chill::getq6(cloud, nList, false);
-  cloud = chill::reclassifyWater(cloud, q6);
+  chill::reclassifyWater(cloud, q6);
 
   // Should not crash and all types should still be valid
   for (int i = 0; i < cloud.nop; i++) {
@@ -234,8 +234,8 @@ TEST_CASE("getIceType writes output and classifies atoms", "[bop]") {
 
   std::string tmpPath = fs::temp_directory_path().append("dseams_test_icetype/").string();
 
-  cloud = chill::getCorrel(cloud, nList, false);
-  cloud = chill::getIceType(cloud, nList, tmpPath, 1, false);
+  chill::getCorrel(cloud, nList, false);
+  chill::getIceType(cloud, nList, tmpPath, 1, false);
 
   // Check output file was written (getIceType writes to path + "bop/chill.txt")
   REQUIRE(std::filesystem::exists(tmpPath + "bop/chill.txt"));
@@ -247,7 +247,7 @@ TEST_CASE("getCorrelPlus uses CHILL+ algorithm", "[bop]") {
   auto cloud = makeTetraCloud();
   auto nList = nneigh::neighListO(3.0, cloud, 1);
 
-  cloud = chill::getCorrelPlus(cloud, nList, false);
+  chill::getCorrelPlus(cloud, nList, false);
 
   // Central atom should have c_ij entries
   REQUIRE_FALSE(cloud.pts[0].c_ij.empty());
@@ -261,8 +261,8 @@ TEST_CASE("printIceType writes super chill classification", "[bop]") {
   auto cloud = makeTetraCloud();
   auto nList = nneigh::neighListO(3.0, cloud, 1);
 
-  cloud = chill::getCorrel(cloud, nList, false);
-  cloud = chill::getIceTypeNoPrint(cloud, nList, false);
+  chill::getCorrel(cloud, nList, false);
+  chill::getIceTypeNoPrint(cloud, nList, false);
 
   std::string tmpPath = fs::temp_directory_path().append("dseams_test_printice/").string();
   int ret = chill::printIceType(cloud, tmpPath, 1, false);
@@ -274,7 +274,7 @@ TEST_CASE("printIceType writes super chill classification", "[bop]") {
 TEST_CASE("numStaggered counts staggered bonds for an atom", "[bop]") {
   auto cloud = makeTetraCloud();
   auto nList = nneigh::neighListO(3.0, cloud, 1);
-  cloud = chill::getCorrel(cloud, nList, false);
+  chill::getCorrel(cloud, nList, false);
 
   int nStag = chill::numStaggered(cloud, nList, 0);
   REQUIRE(nStag >= 0);
@@ -287,8 +287,8 @@ TEST_CASE("getIceTypePlus classifies with CHILL+ and writes output", "[bop]") {
 
   std::string tmpPath = fs::temp_directory_path().append("dseams_test_icetypeplus/").string();
 
-  cloud = chill::getCorrelPlus(cloud, nList, false);
-  cloud = chill::getIceTypePlus(cloud, nList, tmpPath, 1, false);
+  chill::getCorrelPlus(cloud, nList, false);
+  chill::getIceTypePlus(cloud, nList, tmpPath, 1, false);
 
   // Check output file was written
   REQUIRE(std::filesystem::exists(tmpPath + "bop/chillPlus.txt"));
@@ -299,7 +299,7 @@ TEST_CASE("getIceTypePlus classifies with CHILL+ and writes output", "[bop]") {
 TEST_CASE("isInterfacial checks interfacial criteria", "[bop]") {
   auto cloud = makeTetraCloud();
   auto nList = nneigh::neighListO(3.0, cloud, 1);
-  cloud = chill::getCorrel(cloud, nList, false);
+  chill::getCorrel(cloud, nList, false);
 
   bool result = chill::isInterfacial(cloud, nList, 0, 2, 1);
   // Just check it doesn't crash; result depends on geometry

@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __BOP_H_
-#define __BOP_H_
+#ifndef SEAMS_BOP_H_
+#define SEAMS_BOP_H_
 
 #include <array>
 #include <cmath>
@@ -176,7 +176,7 @@ struct QlmAtom {
  neighbours
  *  @param[in] isSlice This decides whether there is a slice or not
  */
-molSys::PointCloud<molSys::Point<double>, double>
+void
 getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
           const std::vector<std::vector<int>> &nList, bool isSlice = false);
 
@@ -187,7 +187,7 @@ getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
  *  @param[in] isSlice This decides whether there is a slice or not
  *  @param[in] nList Row-ordered neighbour list by atom ID
  */
-molSys::PointCloud<molSys::Point<double>, double>
+void
 getIceTypeNoPrint(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                   const std::vector<std::vector<int>> &nList, bool isSlice = false);
 
@@ -204,19 +204,19 @@ getIceTypeNoPrint(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
  *  @param[in] outputFileName Name of the output file, to which the ice types
  will be written out.
  */
-molSys::PointCloud<molSys::Point<double>, double>
+void
 getIceType(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
            const std::vector<std::vector<int>> &nList, std::string path,
            int firstFrame, bool isSlice = false,
            std::string outputFileName = "chill.txt");
 
 //! Gets c_ij and then classifies bond types according to the CHILL+ algorithm
-molSys::PointCloud<molSys::Point<double>, double>
+void
 getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
               const std::vector<std::vector<int>> &nList, bool isSlice = false);
 
 //! Classifies each atom according to the CHILL+ algorithm
-molSys::PointCloud<molSys::Point<double>, double>
+void
 getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                const std::vector<std::vector<int>> &nList, std::string path,
                int firstFrame, bool isSlice = false,
@@ -232,7 +232,7 @@ getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 //! Checks water
 //! According to https://!pubs.rsc.org/en/content/articlehtml/2011/cp/c1cp22167a
 //! Gets c_ij and then classifies bond types according to the CHILL+ algorithm
-molSys::PointCloud<molSys::Point<double>, double>
+void
 reclassifyWater(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                 std::vector<double> &q6);
 
@@ -289,4 +289,4 @@ std::complex<double> lookupTableQ6(int m, std::array<double, 2> angles);
 
 } // namespace sph
 
-#endif // __BOP_H_
+#endif // SEAMS_BOP_H_
