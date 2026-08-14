@@ -184,6 +184,9 @@ public:
   //! first frame, zero when nothing changed
   [[nodiscard]] int lastRecomputedSources() const;
 
+  //! Vertices whose bounded balls were rebuilt on the last update
+  [[nodiscard]] int lastBallsRefreshed() const;
+
 private:
   struct Impl;
   std::unique_ptr<Impl> impl_;

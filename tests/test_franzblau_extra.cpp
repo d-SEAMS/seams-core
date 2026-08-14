@@ -253,7 +253,7 @@ std::set<std::vector<int>> canonicalSet(const std::vector<std::vector<int>> &rin
 
 TEST_CASE("RingUpdater equals full recomputation across perturbed frames",
           "[franzblau]") {
-  // The locality radius is 2*maxLvl + 1 hops; the update only wins once the
+  // The locality radius is 2*maxLvl - 1 hops; the update only wins once the
   // system dwarfs that ball, so the test must too
   const int n = 2000;
   auto cloud = jitteredCloud(n, 0.30, 88172645463325252ULL);
@@ -292,5 +292,7 @@ TEST_CASE("RingUpdater equals full recomputation across perturbed frames",
                   << updater.lastRecomputedSources() << " of " << n);
     REQUIRE(canonicalSet(incr) == canonicalSet(primitive::ringNetwork(idx, 6)));
     REQUIRE(updater.lastRecomputedSources() < n);
+    REQUIRE(updater.lastBallsRefreshed() < n);
+    REQUIRE(updater.lastBallsRefreshed() <= updater.lastRecomputedSources());
   }
 }

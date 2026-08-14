@@ -221,6 +221,15 @@ NB_MODULE(_core, m) {
     m.def("ringNetwork", &primitive::ringNetwork,
           "Find all primitive (shortest-path) rings up to maxDepth.",
           nb::arg("nList"), nb::arg("maxDepth"));
+    nb::class_<primitive::RingUpdater>(m, "RingUpdater")
+        .def(nb::init<int>(), nb::arg("maxDepth"))
+        .def("update", &primitive::RingUpdater::update,
+             "Exact incremental primitive rings for this neighbour list.",
+             nb::arg("nList"))
+        .def("lastRecomputedSources",
+             &primitive::RingUpdater::lastRecomputedSources)
+        .def("lastBallsRefreshed",
+             &primitive::RingUpdater::lastBallsRefreshed);
     m.def("populateGraphFromIndices", &primitive::populateGraphFromIndices,
           "Create a graph object from an index-based neighbour list.",
           nb::arg("nList"));

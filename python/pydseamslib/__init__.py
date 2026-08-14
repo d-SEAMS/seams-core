@@ -38,6 +38,7 @@ class Trajectory:
         self._nlist = None
         self._hbonds = None
         self._rings = None
+        self._ring_updater = _core.RingUpdater(6)
 
     @property
     def n_atoms(self):
@@ -71,15 +72,39 @@ class Trajectory:
             )
         return self._hbonds
 
+    def load_frame(self, frame):
+        """Read another frame, keeping the incremental ring updater."""
+        self.frame = frame
+        self.cloud = _core.readLammpsTrjreduced(
+            filename=self.filename,
+            targetFrame=frame,
+            typeI=self.atom_type,
+            isSlice=False,
+            coordLow=[0, 0, 0],
+            coordHigh=[0, 0, 0],
+        )
+        self._nlist = None
+        self._hbonds = None
+        self._rings = None
+
     @property
     def rings(self):
-        """Primitive ring network (computed lazily, max depth 6)."""
+        """Primitive ring network (max depth 6).
+
+        Consecutive load_frame calls re-enumerate only sources inside the
+        locality bound of a changed bond. The first access is a full pass.
+        """
         if self._rings is None:
             hbonds_idx = _core.neighbourListByIndex(
                 yCloud=self.cloud, nList=self.hbonds
             )
-            self._rings = _core.ringNetwork(nList=hbonds_idx, maxDepth=6)
+            self._rings = self._ring_updater.update(hbonds_idx)
         return self._rings
+
+    @property
+    def rings_recomputed_sources(self):
+        """Sources re-enumerated by the last rings update."""
+        return self._ring_updater.lastRecomputedSources()
 
     def classify_chill_plus(self):
         """Run CHILL+ classification on all atoms.

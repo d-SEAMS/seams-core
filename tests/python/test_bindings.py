@@ -44,6 +44,7 @@ def test_populate_hbonds_exists():
 
 def test_ring_network_exists():
     assert hasattr(_core, "ringNetwork")
+    assert hasattr(_core, "RingUpdater")
 
 
 def test_lookup_table_q4_vec_length():

@@ -33,9 +33,44 @@ namespace {
 struct BoundedBalls {
   std::vector<std::vector<std::pair<int, int>>> ball;
 
-  BoundedBalls(const std::vector<std::vector<int>> &adjacency, int radius)
-      : ball(adjacency.size()) {
+  void fillVertex(int v, const std::vector<std::vector<int>> &adjacency,
+                  int radius, std::vector<int> &dist, std::vector<int> &touched,
+                  std::vector<int> &frontier, std::vector<int> &next) {
     const int nVertices = static_cast<int>(adjacency.size());
+    for (const int w : touched) {
+      dist[w] = -1;
+    }
+    touched.clear();
+    dist[v] = 0;
+    touched.push_back(v);
+    frontier.assign(1, v);
+    for (int depth = 1; depth <= radius && !frontier.empty(); depth++) {
+      next.clear();
+      for (const int u : frontier) {
+        for (const int w : adjacency[u]) {
+          if (w >= 0 && w < nVertices && dist[w] == -1) {
+            dist[w] = depth;
+            touched.push_back(w);
+            next.push_back(w);
+          }
+        }
+      }
+      frontier.swap(next);
+    }
+    auto &b = ball[v];
+    b.clear();
+    b.reserve(touched.size());
+    for (const int w : touched) {
+      if (w != v) {
+        b.emplace_back(w, dist[w]);
+      }
+    }
+    std::sort(b.begin(), b.end());
+  }
+
+  void fillAll(const std::vector<std::vector<int>> &adjacency, int radius) {
+    const int nVertices = static_cast<int>(adjacency.size());
+    ball.assign(nVertices, {});
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (nVertices >= 256)
 #endif
@@ -46,36 +81,49 @@ struct BoundedBalls {
 #pragma omp for schedule(static)
 #endif
       for (int v = 0; v < nVertices; v++) {
-        for (const int w : touched) {
-          dist[w] = -1;
-        }
-        touched.clear();
-        dist[v] = 0;
-        touched.push_back(v);
-        frontier.assign(1, v);
-        for (int depth = 1; depth <= radius && !frontier.empty(); depth++) {
-          next.clear();
-          for (const int u : frontier) {
-            for (const int w : adjacency[u]) {
-              if (w >= 0 && w < nVertices && dist[w] == -1) {
-                dist[w] = depth;
-                touched.push_back(w);
-                next.push_back(w);
-              }
-            }
-          }
-          frontier.swap(next);
-        }
-        auto &b = ball[v];
-        b.reserve(touched.size());
-        for (const int w : touched) {
-          if (w != v) {
-            b.emplace_back(w, dist[w]);
-          }
-        }
-        std::sort(b.begin(), b.end());
+        fillVertex(v, adjacency, radius, dist, touched, frontier, next);
       }
     }
+  }
+
+  // Balls that can change are those of vertices within `radius` of a
+  // changed endpoint, in the union of the two frames' graphs.
+  int refreshNear(const std::vector<std::vector<int>> &unionAdj,
+                  const std::vector<std::vector<int>> &newAdj,
+                  const std::vector<int> &changed, int radius) {
+    const int nVertices = static_cast<int>(newAdj.size());
+    if (static_cast<int>(ball.size()) != nVertices) {
+      fillAll(newAdj, radius);
+      return nVertices;
+    }
+    std::vector<int> dist(nVertices, -1);
+    std::vector<int> frontier, next, affected;
+    for (const int v : changed) {
+      if (v >= 0 && v < nVertices && dist[v] == -1) {
+        dist[v] = 0;
+        frontier.push_back(v);
+        affected.push_back(v);
+      }
+    }
+    for (int depth = 1; depth <= radius && !frontier.empty(); depth++) {
+      next.clear();
+      for (const int u : frontier) {
+        for (const int w : unionAdj[u]) {
+          if (w >= 0 && w < nVertices && dist[w] == -1) {
+            dist[w] = depth;
+            affected.push_back(w);
+            next.push_back(w);
+          }
+        }
+      }
+      frontier.swap(next);
+    }
+    std::vector<int> scratchDist(nVertices, -1);
+    std::vector<int> touched, fr, nxt;
+    for (const int v : affected) {
+      fillVertex(v, newAdj, radius, scratchDist, touched, fr, nxt);
+    }
+    return static_cast<int>(affected.size());
   }
 
   //! Graph distance from v to w when within the radius, else a large sentinel
@@ -301,7 +349,8 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth)
 
   const int maxLvl = maxDepth / 2;
   const int radius = std::max(maxLvl - 1, 1);
-  const BoundedBalls balls(adjacency, radius);
+  BoundedBalls balls;
+  balls.fillAll(adjacency, radius);
 
   RingScratch scratch;
   for (int src = 0; src < nVertices; src++) {
@@ -761,13 +810,16 @@ primitive::Graph primitive::clearGraph(Graph &currentGraph) {
  *  The locality bound that makes the update exact: every member of a ring of
  *  size at most maxDepth lies within maxLvl = maxDepth/2 hops of the ring's
  *  lowest-indexed member, and the primitivity of the ring is decided by paths
- *  of fewer than maxLvl edges between members. A source further than
- *  2*maxLvl + 1 hops from every endpoint of a changed edge, measured in the
- *  union of the old and the new graph, therefore encloses its rings and every
- *  path that could decide them entirely in unchanged territory: its ring set
- *  cannot differ between frames. Distances in the union graph never exceed
- *  those in either frame's graph, so measuring there errs only toward
- *  recomputing more.
+ *  of fewer than maxLvl edges between members. Enumeration from a source
+ *  reads adjacency to maxLvl hops and ball contents to 2*maxLvl-1. A source
+ *  further than 2*maxLvl-1 hops from every endpoint of a changed edge,
+ *  measured in the union of the old and the new graph, therefore encloses
+ *  its rings and every path that could decide them entirely in unchanged
+ *  territory: its ring set cannot differ between frames. Distances in the
+ *  union graph never exceed those in either frame's graph, so measuring
+ *  there errs only toward recomputing more. Balls of a vertex change only
+ *  when an edge within ballRadius = maxLvl-1 of that vertex changes, so
+ *  they are refreshed on the same union graph at that smaller radius.
  */
 struct primitive::RingUpdater::Impl {
   int maxDepth = 0;
@@ -776,7 +828,9 @@ struct primitive::RingUpdater::Impl {
   std::vector<std::vector<int>> adjacency;              // previous frame
   std::vector<std::vector<std::vector<int>>> bySource;  // rings, by source
   std::vector<std::vector<int>> flattened;              // last returned set
+  BoundedBalls balls;
   int recomputed = 0;
+  int ballsRefreshed = 0;
 };
 
 primitive::RingUpdater::RingUpdater(int maxDepth)
@@ -793,6 +847,10 @@ primitive::RingUpdater::operator=(RingUpdater &&) noexcept = default;
 
 int primitive::RingUpdater::lastRecomputedSources() const {
   return impl_->recomputed;
+}
+
+int primitive::RingUpdater::lastBallsRefreshed() const {
+  return impl_->ballsRefreshed;
 }
 
 const std::vector<std::vector<int>> &
@@ -816,13 +874,12 @@ primitive::RingUpdater::update(const std::vector<std::vector<int>> &nList) {
   if (fullPass) {
     st.adjacency = std::move(newAdj);
     st.bySource.assign(nVertices, {});
-    // Balls rebuild in linear time each frame; the incrementality that pays
-    // is confined to the enumeration
     RingScratch scratch;
-    const BoundedBalls balls(st.adjacency, st.ballRadius);
+    st.balls.fillAll(st.adjacency, st.ballRadius);
+    st.ballsRefreshed = nVertices;
     st.recomputed = nVertices;
     for (int src = 0; src < nVertices; src++) {
-      enumerateFromSource(st.adjacency, balls, src, st.maxDepth, st.maxLvl,
+      enumerateFromSource(st.adjacency, st.balls, src, st.maxDepth, st.maxLvl,
                           scratch, st.bySource[src]);
     }
   } else {
@@ -870,19 +927,21 @@ primitive::RingUpdater::update(const std::vector<std::vector<int>> &nList) {
         frontier.swap(next);
       }
 
+      st.ballsRefreshed = st.balls.refreshNear(unionAdj, newAdj, changed,
+                                               st.ballRadius);
       st.adjacency = std::move(newAdj);
 
-      const BoundedBalls balls(st.adjacency, st.ballRadius);
       RingScratch scratch;
       st.recomputed = 0;
       for (const int src : affected) {
         st.bySource[src].clear();
-        enumerateFromSource(st.adjacency, balls, src, st.maxDepth, st.maxLvl,
-                            scratch, st.bySource[src]);
+        enumerateFromSource(st.adjacency, st.balls, src, st.maxDepth,
+                            st.maxLvl, scratch, st.bySource[src]);
         st.recomputed++;
       }
     } else {
       st.recomputed = 0;
+      st.ballsRefreshed = 0;
     }
   }
 
