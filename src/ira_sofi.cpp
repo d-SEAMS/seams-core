@@ -114,13 +114,21 @@ int match(const Eigen::MatrixXd &ref, const Eigen::MatrixXd &target, Match &out,
   out.assignment.assign(permP, permP + nat2);
   fillQuat(out.rotation, out.quat);
   const int nPair = std::min(nat1, nat2);
+  bool hasZero = false;
+  bool hasN = false;
+  for (int p : out.assignment) {
+    if (p == 0) {
+      hasZero = true;
+    }
+    if (p == nat2) {
+      hasN = true;
+    }
+  }
+  const int shift = (hasN && !hasZero) ? 1 : 0;
   double sum = 0.0;
   int used = 0;
   for (int i = 0; i < nPair; i++) {
-    int j = out.assignment[static_cast<size_t>(i)];
-    if (j < 0 || j >= nat2) {
-      j -= 1;
-    }
+    const int j = out.assignment[static_cast<size_t>(i)] - shift;
     if (j < 0 || j >= nat2) {
       continue;
     }
