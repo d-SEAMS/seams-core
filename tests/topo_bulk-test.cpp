@@ -398,6 +398,15 @@ TEST_CASE("buildRingSearchIndex ignores atoms outside numAtoms",
   REQUIRE(index.ringsContainingAtom[2] == std::vector<int>{1});
 }
 
+TEST_CASE("conditionOneDDC rejects an atom outside the ring index",
+          "[topo_bulk]") {
+  const std::vector<std::vector<int>> rings = {{0, 1, 2, 3, 4, 5}};
+  ring::RingSearchIndex index;
+  index.ringsContainingAtom.resize(3);
+  std::vector<int> peripheral;
+  REQUIRE_FALSE(ring::conditionOneDDC(rings, peripheral, 0, index));
+}
+
 TEST_CASE("findHC on the twelve-atom HC reports one HexC of five rings",
           "[topo_bulk]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;

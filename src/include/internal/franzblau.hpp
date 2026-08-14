@@ -64,8 +64,8 @@
  * algorithm</a>. This is a recursive algorithm.
  *
  * 2. The non-SP rings are then removed from the list of all rings, using the
- * Franzblau shortest path criterion (primitive::removeNonSPrings). This also
- * uses recursion.
+ * Franzblau shortest path criterion (primitive::removeNonSPrings), answered
+ * by a hop-bounded breadth-first sweep per vertex.
  *
  *   ### Changelog ###
  *

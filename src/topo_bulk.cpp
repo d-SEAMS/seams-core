@@ -496,6 +496,11 @@ bool ring::conditionOneDDC(const std::vector<std::vector<int>> &rings,
     const int atom = rings[iring][m]; // Atom index to be matched with
     int noOfCommonRings = 0;          // init to zero.
 
+    if (atom < 0 ||
+        static_cast<size_t>(atom) >= index.ringsContainingAtom.size()) {
+      return false;
+    }
+
     // Every ring holding this atom, in ascending ring order
     for (const int jring : index.ringsContainingAtom[atom]) {
       if (jring == iring) {

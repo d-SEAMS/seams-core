@@ -359,27 +359,73 @@ NB_MODULE(_core, m) {
           nb::arg("path"), nb::arg("rings"), nb::arg("oCloud"), nb::arg("yCloud"),
           nb::arg("coordLow"), nb::arg("coordHigh"), nb::arg("identicalCloud"));
 
-    // CHILL/CHILL+ classification
-    m.def("getCorrelPlus", &chill::getCorrelPlus,
-          "Compute CHILL+ bond-order correlations and classify bond types.",
-          nb::arg("yCloud"), nb::arg("nList"), nb::arg("isSlice"));
-    m.def("getIceTypePlus", &chill::getIceTypePlus,
-          "Classify each atom's ice type using CHILL+ and write to file.",
-          nb::arg("yCloud"), nb::arg("nList"), nb::arg("path"),
-          nb::arg("firstFrame"), nb::arg("isSlice"), nb::arg("outputFileName"));
-    m.def("getCorrel", &chill::getCorrel,
-          "Compute CHILL bond-order correlations and classify bond types.",
-          nb::arg("yCloud"), nb::arg("nList"), nb::arg("isSlice"));
-    m.def("getIceType", &chill::getIceType,
-          "Classify each atom's ice type using CHILL and write to file.",
-          nb::arg("yCloud"), nb::arg("nList"), nb::arg("path"),
-          nb::arg("firstFrame"), nb::arg("isSlice"), nb::arg("outputFileName"));
+    // CHILL/CHILL+ classification. The C++ routines mutate yCloud in place
+    // and return void. The Python bindings return the same object so that
+    // `cloud = _core.getCorrel(yCloud=cloud, ...)` keeps the caller's
+    // reference, which is the contract the 2.0 bindings shipped.
+    m.def(
+        "getCorrelPlus",
+        [](molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+           const std::vector<std::vector<int>> &nList, bool isSlice)
+            -> molSys::PointCloud<molSys::Point<double>, double> & {
+          chill::getCorrelPlus(yCloud, nList, isSlice);
+          return yCloud;
+        },
+        "Compute CHILL+ bond-order correlations and classify bond types.",
+        nb::arg("yCloud"), nb::arg("nList"), nb::arg("isSlice"),
+        nb::rv_policy::reference);
+    m.def(
+        "getIceTypePlus",
+        [](molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+           const std::vector<std::vector<int>> &nList, std::string path,
+           int firstFrame, bool isSlice, std::string outputFileName)
+            -> molSys::PointCloud<molSys::Point<double>, double> & {
+          chill::getIceTypePlus(yCloud, nList, path, firstFrame, isSlice,
+                                outputFileName);
+          return yCloud;
+        },
+        "Classify each atom's ice type using CHILL+ and write to file.",
+        nb::arg("yCloud"), nb::arg("nList"), nb::arg("path"),
+        nb::arg("firstFrame"), nb::arg("isSlice"), nb::arg("outputFileName"),
+        nb::rv_policy::reference);
+    m.def(
+        "getCorrel",
+        [](molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+           const std::vector<std::vector<int>> &nList, bool isSlice)
+            -> molSys::PointCloud<molSys::Point<double>, double> & {
+          chill::getCorrel(yCloud, nList, isSlice);
+          return yCloud;
+        },
+        "Compute CHILL bond-order correlations and classify bond types.",
+        nb::arg("yCloud"), nb::arg("nList"), nb::arg("isSlice"),
+        nb::rv_policy::reference);
+    m.def(
+        "getIceType",
+        [](molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+           const std::vector<std::vector<int>> &nList, std::string path,
+           int firstFrame, bool isSlice, std::string outputFileName)
+            -> molSys::PointCloud<molSys::Point<double>, double> & {
+          chill::getIceType(yCloud, nList, path, firstFrame, isSlice,
+                            outputFileName);
+          return yCloud;
+        },
+        "Classify each atom's ice type using CHILL and write to file.",
+        nb::arg("yCloud"), nb::arg("nList"), nb::arg("path"),
+        nb::arg("firstFrame"), nb::arg("isSlice"), nb::arg("outputFileName"),
+        nb::rv_policy::reference);
     m.def("getq6", &chill::getq6,
           "Compute the q6 bond order parameter for all atoms.",
           nb::arg("yCloud"), nb::arg("nList"), nb::arg("isSlice"));
-    m.def("reclassifyWater", &chill::reclassifyWater,
-          "Reclassify water molecules using averaged q6 and q3 parameters.",
-          nb::arg("yCloud"), nb::arg("q6"));
+    m.def(
+        "reclassifyWater",
+        [](molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+           std::vector<double> &q6)
+            -> molSys::PointCloud<molSys::Point<double>, double> & {
+          chill::reclassifyWater(yCloud, q6);
+          return yCloud;
+        },
+        "Reclassify water molecules using averaged q6 and q3 parameters.",
+        nb::arg("yCloud"), nb::arg("q6"), nb::rv_policy::reference);
     m.def("printIceType", &chill::printIceType,
           "Print the ice type classification for the current frame.",
           nb::arg("yCloud"), nb::arg("path"), nb::arg("firstFrame"),

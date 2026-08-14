@@ -20,9 +20,7 @@ namespace {
 
 /**
  * @details Writes the fixed part of a LAMMPS dump frame: the timestep, the
- *  atom count, the box bounds and the column header. Five writers emitted this
- *  block character by character, which is where seams_output.cpp acquired most
- *  of its duplication.
+ *  atom count, the box bounds and the column header.
  * @param[in,out] outputFile The open output stream.
  * @param[in] yCloud The point cloud supplying the frame number and the box.
  * @param[in] nAtoms Number of atoms the frame will contain, which is not
