@@ -10,18 +10,26 @@ export OMP_PLACES=cores
 run_cages() {
   local bin=$1
   local label=$2
+  shift 2
   if [[ -x $bin ]]; then
     echo "======== $label ========"
-    (cd input && "../$bin" traj/mW_cubic.lammpstrj 1 3)
+    (cd input && "../$bin" "$@")
   else
     echo "======== $label MISSING $bin ========"
   fi
 }
 
-run_cages bcpp/tests/bench_cages "default (vesin, closed-form Ylm, Horn)"
-run_cages bcpp-sph/tests/bench_cages "sphericart"
-run_cages bcpp-ira/tests/bench_cages "ira"
-run_cages bcpp-nauty/tests/bench_cages "nauty"
+run_cages bcpp/tests/bench_cages "default (vesin, closed-form Ylm, Horn)" \
+  traj/mW_cubic.lammpstrj 1 3
+run_cages bcpp-sph/tests/bench_cages "sphericart" traj/mW_cubic.lammpstrj 1 3
+run_cages bcpp-ira/tests/bench_cages "ira" traj/mW_cubic.lammpstrj 1 3
+run_cages bcpp-nauty/tests/bench_cages "nauty" traj/mW_cubic.lammpstrj 1 3
+
+# exampleTraj is TIP4P-like: type 2 is oxygen. The cubic mW frame has no HCs.
+run_cages bcpp/tests/bench_cages "default exampleTraj O=2" \
+  traj/exampleTraj.lammpstrj 1 3 ../templates/hc.xyz ../templates/ddc.xyz 2
+run_cages bcpp-ira/tests/bench_cages "ira exampleTraj O=2" \
+  traj/exampleTraj.lammpstrj 1 3 ../templates/hc.xyz ../templates/ddc.xyz 2
 
 if [[ -x bcpp/tests/bench_overhead ]]; then
   echo "======== vesin overhead N=4096,16000 ========"

@@ -53,9 +53,10 @@ int main(int argc, char **argv) {
       argc > 1 ? argv[1] : "traj/mW_cubic.lammpstrj";
   const int frame = argc > 2 ? std::atoi(argv[2]) : 1;
   const int reps = argc > 3 ? std::atoi(argv[3]) : 3;
+  const int atomType = argc > 6 ? std::atoi(argv[6]) : 1;
 
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO(traj, frame, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO(traj, frame, yCloud, atomType);
   if (yCloud.nop == 0) {
     std::cerr << "could not read " << traj << "\n";
     return 1;
@@ -63,7 +64,7 @@ int main(int argc, char **argv) {
 
   // mW is monatomic, so the ring network is built from the oxygen neighbour
   // list directly rather than from a hydrogen-bond network
-  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  auto nList = nneigh::neighListO(3.5, yCloud, atomType);
   auto hbondIdx = nneigh::neighbourListByIndex(yCloud, nList);
 
   std::vector<std::vector<int>> rings = primitive::ringNetwork(hbondIdx, 7);
