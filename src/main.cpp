@@ -35,9 +35,6 @@
 namespace {
 
 void registerCommon(sol::state &lua) {
-  using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
-  lua.new_usertype<Cloud>("PointCloud", "nop", &Cloud::nop, "box",
-                          &Cloud::box);
   lua.set_function("readFrameOnlyOne", sinp::readLammpsTrjreduced);
   lua.set_function("readFrameOnlyOneAllAtoms", sinp::readLammpsTrj);
   lua.set_function("readFrame", sinp::readLammpsTrjO);
@@ -50,24 +47,43 @@ void registerCommon(sol::state &lua) {
 }
 
 void registerDescriptors(sol::state &lua) {
-  lua.new_usertype<chill::TemplateHit>(
-      "TemplateHit", "rmsd", &chill::TemplateHit::rmsd, "name",
-      sol::property([](const chill::TemplateHit &h) {
-        return std::string(h.name);
-      }));
-  lua.new_usertype<chill::SteinhardtQl>("SteinhardtQl", "ql",
-                                        &chill::SteinhardtQl::ql, "qlBar",
-                                        &chill::SteinhardtQl::qlBar);
-  lua.new_usertype<chill::LinearClassifier>(
-      "LinearClassifier", sol::constructors<chill::LinearClassifier()>(),
-      "fit", &chill::LinearClassifier::fit, "predict",
-      &chill::LinearClassifier::predict, "ridge",
-      &chill::LinearClassifier::ridge);
-  lua.set_function("classifyTemplates", chill::classifyTemplates);
+  using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
+  lua.set_function(
+      "classifyTemplates",
+      [](sol::this_state ts, const Cloud &cloud,
+         const std::vector<std::vector<int>> &nList, int kNeigh) {
+        sol::state_view lua(ts);
+        const auto hits = chill::classifyTemplates(cloud, nList, kNeigh);
+        sol::table out = lua.create_table(static_cast<int>(hits.size()), 0);
+        for (size_t i = 0; i < hits.size(); i++) {
+          sol::table row = lua.create_table(0, 2);
+          row["name"] = hits[i].name;
+          row["rmsd"] = hits[i].rmsd;
+          out[i + 1] = row;
+        }
+        return out;
+      });
   lua.set_function("soapSpectrum", chill::soapSpectrum);
   lua.set_function("soapSpectrumAll", chill::soapSpectrumAll);
-  lua.set_function("steinhardtQl", chill::steinhardtQl);
-  lua.set_function("steinhardtQlVoronoi", chill::steinhardtQlVoronoi);
+  auto packQl = [](sol::this_state ts, const chill::SteinhardtQl &q) {
+    sol::state_view lua(ts);
+    sol::table t = lua.create_table(0, 2);
+    t["ql"] = q.ql;
+    t["qlBar"] = q.qlBar;
+    return t;
+  };
+  lua.set_function("steinhardtQl",
+                   [packQl](sol::this_state ts, const Cloud &cloud,
+                            const std::vector<std::vector<int>> &nList,
+                            int orderL) {
+                     return packQl(ts, chill::steinhardtQl(cloud, nList, orderL));
+                   });
+  lua.set_function("steinhardtQlVoronoi",
+                   [packQl](sol::this_state ts, const Cloud &cloud, double cut,
+                            int orderL) {
+                     return packQl(ts,
+                                   chill::steinhardtQlVoronoi(cloud, cut, orderL));
+                   });
   lua.set_function("voronoiFeatures", chill::voronoiFeatures);
 }
 
