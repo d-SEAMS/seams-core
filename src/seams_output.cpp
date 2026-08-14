@@ -15,6 +15,38 @@
 #include <seams_input.hpp>
 #include <seams_output.hpp>
 
+
+namespace {
+
+/**
+ * @details Writes the fixed part of a LAMMPS dump frame: the timestep, the
+ *  atom count, the box bounds and the column header. Five writers emitted this
+ *  block character by character, which is where seams_output.cpp acquired most
+ *  of its duplication.
+ * @param[in,out] outputFile The open output stream.
+ * @param[in] yCloud The point cloud supplying the frame number and the box.
+ * @param[in] nAtoms Number of atoms the frame will contain, which is not
+ *  always the size of the cloud.
+ * @param[in] columns The trailing "ITEM: ATOMS ..." column specification.
+ */
+void writeDumpHeader(
+    std::ofstream &outputFile,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    size_t nAtoms, const std::string &columns) {
+  outputFile << "ITEM: TIMESTEP\n";
+  outputFile << yCloud.currentFrame << "\n";
+  outputFile << "ITEM: NUMBER OF ATOMS\n";
+  outputFile << nAtoms << "\n";
+  outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
+  for (int k = 0; k < 3; k++) {
+    outputFile << yCloud.boxLow[k] << " " << yCloud.boxLow[k] + yCloud.box[k]
+               << "\n";
+  }
+  outputFile << "ITEM: ATOMS " << columns << "\n";
+}
+
+} // namespace
+
 /**
  * @details  Prints out a LAMMPS data file, with some default options. Only
  * Oxygen atoms are printed out
@@ -1333,24 +1365,7 @@ int sout::writeLAMMPSdumpCages(
   // -------
   // Write the header
   // ITEM: TIMESTEP
-  outputFile << "ITEM: TIMESTEP\n";
-  // Write out frame number
-  outputFile << yCloud.currentFrame << "\n";
-  // ITEM: NUMBER OF ATOMS
-  outputFile << "ITEM: NUMBER OF ATOMS\n";
-  // Number of atoms
-  outputFile << yCloud.pts.size() << "\n";
-  // ITEM: BOX BOUNDS pp pp pp
-  outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
-  // Box lengths
-  outputFile << yCloud.boxLow[0] << " " << yCloud.boxLow[0] + yCloud.box[0]
-             << "\n";
-  outputFile << yCloud.boxLow[1] << " " << yCloud.boxLow[1] + yCloud.box[1]
-             << "\n";
-  outputFile << yCloud.boxLow[2] << " " << yCloud.boxLow[2] + yCloud.box[2]
-             << "\n";
-  // ITEM: ATOMS id mol type x y z rmsd
-  outputFile << "ITEM: ATOMS id mol type x y z rmsd\n";
+  writeDumpHeader(outputFile, yCloud, yCloud.pts.size(), "id mol type x y z rmsd");
   // -------
   // Write out the atom coordinates
   // Format
@@ -1408,24 +1423,7 @@ int sout::writeLAMMPSdumpINT(
   // -------
   // Write the header
   // ITEM: TIMESTEP
-  outputFile << "ITEM: TIMESTEP\n";
-  // Write out frame number
-  outputFile << yCloud.currentFrame << "\n";
-  // ITEM: NUMBER OF ATOMS
-  outputFile << "ITEM: NUMBER OF ATOMS\n";
-  // Number of atoms
-  outputFile << yCloud.pts.size() << "\n";
-  // ITEM: BOX BOUNDS pp pp pp
-  outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
-  // Box lengths
-  outputFile << yCloud.boxLow[0] << " " << yCloud.boxLow[0] + yCloud.box[0]
-             << "\n";
-  outputFile << yCloud.boxLow[1] << " " << yCloud.boxLow[1] + yCloud.box[1]
-             << "\n";
-  outputFile << yCloud.boxLow[2] << " " << yCloud.boxLow[2] + yCloud.box[2]
-             << "\n";
-  // ITEM: ATOMS id mol type x y z rmsd
-  outputFile << "ITEM: ATOMS id mol type x y z rmsd\n";
+  writeDumpHeader(outputFile, yCloud, yCloud.pts.size(), "id mol type x y z rmsd");
   // -------
   // Write out the atom coordinates
   // Format
@@ -1482,24 +1480,7 @@ int sout::writeLAMMPSdumpSlice(
   // -------
   // Write the header
   // ITEM: TIMESTEP
-  outputFile << "ITEM: TIMESTEP\n";
-  // Write out frame number
-  outputFile << yCloud.currentFrame << "\n";
-  // ITEM: NUMBER OF ATOMS
-  outputFile << "ITEM: NUMBER OF ATOMS\n";
-  // Number of atoms
-  outputFile << yCloud.pts.size() << "\n";
-  // ITEM: BOX BOUNDS pp pp pp
-  outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
-  // Box lengths
-  outputFile << yCloud.boxLow[0] << " " << yCloud.boxLow[0] + yCloud.box[0]
-             << "\n";
-  outputFile << yCloud.boxLow[1] << " " << yCloud.boxLow[1] + yCloud.box[1]
-             << "\n";
-  outputFile << yCloud.boxLow[2] << " " << yCloud.boxLow[2] + yCloud.box[2]
-             << "\n";
-  // ITEM: ATOMS id mol type x y z rmsd
-  outputFile << "ITEM: ATOMS id mol type x y z inSlice\n";
+  writeDumpHeader(outputFile, yCloud, yCloud.pts.size(), "id mol type x y z inSlice");
   // -------
   // Write out the atom coordinates
   // Format
