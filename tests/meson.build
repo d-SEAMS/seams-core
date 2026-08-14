@@ -85,3 +85,14 @@ executable('bench_scaling', 'bench_scaling.cpp',
   link_args: _test_link_args,
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
+
+_overhead_deps = [yds_dep]
+if vesin_dep.found()
+  _overhead_deps += [vesin_dep]
+endif
+executable('bench_overhead', 'bench_overhead.cpp',
+  dependencies: _overhead_deps,
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
