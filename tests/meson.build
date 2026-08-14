@@ -103,3 +103,10 @@ executable('bench_cages', 'bench_cages.cpp',
   link_args: _test_link_args,
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
+
+executable('gen_figure_data', 'gen_figure_data.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
