@@ -40,6 +40,13 @@ struct TemplateHit {
     const std::vector<std::vector<int>> &nList, int nMax, int lMax,
     double rcut);
 
+//! Bartok SOAP power spectrum for every particle. Length is nop; each
+//! row is nMax*nMax*(lMax+1).
+[[nodiscard]] std::vector<std::vector<double>> soapSpectrumAll(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<std::vector<int>> &nList, int nMax, int lMax,
+    double rcut);
+
 //! One-versus-rest ridge classifier on a dense feature matrix.
 struct LinearClassifier {
   int nClasses = 0;
@@ -56,6 +63,11 @@ struct LinearClassifier {
 //! [q4, q6, q8] from the Voronoi-weighted Steinhardt path (Mickel).
 [[nodiscard]] std::vector<double> voronoiFeature(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
+    double candidateCutoff);
+
+//! [q4, q6, q8] for every particle. One tessellation per order (l = 4, 6, 8).
+[[nodiscard]] std::vector<std::vector<double>> voronoiFeatures(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     double candidateCutoff);
 
 } // namespace chill

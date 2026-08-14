@@ -20,6 +20,10 @@
 #include <numbers>
 #include <utility>
 
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
+
 namespace {
 
 using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
@@ -187,55 +191,9 @@ double overlayRmsd(Eigen::MatrixXd ref, Eigen::MatrixXd tgt) {
   return best;
 }
 
-} // namespace
-
-std::vector<chill::TemplateHit> chill::classifyTemplates(
-    const Cloud &yCloud, const std::vector<std::vector<int>> &nList,
-    int kNeigh) {
-  std::vector<TemplateHit> out(yCloud.nop);
-  const struct {
-    CrystalKind kind;
-    const char *name;
-    Eigen::MatrixXd (*make)();
-    int k;
-  } templates[] = {{CrystalKind::fcc, "fcc", fcc12, 12},
-                   {CrystalKind::hcp, "hcp", hcp12, 12},
-                   {CrystalKind::bcc, "bcc", bcc8, 8},
-                   {CrystalKind::sc, "sc", sc6, 6}};
-
-  for (int i = 0; i < yCloud.nop; i++) {
-    TemplateHit best;
-    for (const auto &tmpl : templates) {
-      if (kNeigh > 0 && kNeigh < tmpl.k) {
-        continue;
-      }
-      auto shell = shellOf(yCloud, nList, i, tmpl.k);
-      if (shell.rows() < tmpl.k) {
-        continue;
-      }
-      if (shell.rows() > tmpl.k) {
-        shell.conservativeResize(tmpl.k, 3);
-      }
-      const double rmsd = overlayRmsd(tmpl.make(), shell);
-      if (rmsd < best.rmsd) {
-        best.kind = tmpl.kind;
-        best.name = tmpl.name;
-        best.rmsd = rmsd;
-      }
-    }
-    // A first-neighbour-unit RMSD above 0.35 is not a lattice shell
-    if (best.rmsd > 0.35) {
-      best.kind = CrystalKind::other;
-      best.name = "other";
-    }
-    out[static_cast<size_t>(i)] = best;
-  }
-  return out;
-}
-
-std::vector<double> chill::soapSpectrum(
-    const Cloud &yCloud, int iatom, const std::vector<std::vector<int>> &nList,
-    int nMax, int lMax, double rcut) {
+std::vector<double> soapOne(const Cloud &yCloud, int iatom,
+                            const std::vector<std::vector<int>> &nList,
+                            int nMax, int lMax, double rcut) {
   const int nComp = (lMax + 1) * (lMax + 1);
   std::vector<std::complex<double>> coeff(
       static_cast<size_t>(nMax) * static_cast<size_t>(nComp), {0.0, 0.0});
@@ -300,6 +258,75 @@ std::vector<double> chill::soapSpectrum(
   return spec;
 }
 
+} // namespace
+
+std::vector<chill::TemplateHit> chill::classifyTemplates(
+    const Cloud &yCloud, const std::vector<std::vector<int>> &nList,
+    int kNeigh) {
+  std::vector<TemplateHit> out(yCloud.nop);
+  const struct {
+    CrystalKind kind;
+    const char *name;
+    Eigen::MatrixXd (*make)();
+    int k;
+  } templates[] = {{CrystalKind::fcc, "fcc", fcc12, 12},
+                   {CrystalKind::hcp, "hcp", hcp12, 12},
+                   {CrystalKind::bcc, "bcc", bcc8, 8},
+                   {CrystalKind::sc, "sc", sc6, 6}};
+
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (yCloud.nop >= 64)
+#endif
+  for (int i = 0; i < yCloud.nop; i++) {
+    TemplateHit best;
+    for (const auto &tmpl : templates) {
+      if (kNeigh > 0 && kNeigh < tmpl.k) {
+        continue;
+      }
+      auto shell = shellOf(yCloud, nList, i, tmpl.k);
+      if (shell.rows() < tmpl.k) {
+        continue;
+      }
+      if (shell.rows() > tmpl.k) {
+        shell.conservativeResize(tmpl.k, 3);
+      }
+      const double rmsd = overlayRmsd(tmpl.make(), shell);
+      if (rmsd < best.rmsd) {
+        best.kind = tmpl.kind;
+        best.name = tmpl.name;
+        best.rmsd = rmsd;
+      }
+    }
+    // A first-neighbour-unit RMSD above 0.35 is not a lattice shell
+    if (best.rmsd > 0.35) {
+      best.kind = CrystalKind::other;
+      best.name = "other";
+    }
+    out[static_cast<size_t>(i)] = best;
+  }
+  return out;
+}
+
+std::vector<double> chill::soapSpectrum(
+    const Cloud &yCloud, int iatom, const std::vector<std::vector<int>> &nList,
+    int nMax, int lMax, double rcut) {
+  return soapOne(yCloud, iatom, nList, nMax, lMax, rcut);
+}
+
+std::vector<std::vector<double>> chill::soapSpectrumAll(
+    const Cloud &yCloud, const std::vector<std::vector<int>> &nList, int nMax,
+    int lMax, double rcut) {
+  std::vector<std::vector<double>> out(static_cast<size_t>(yCloud.nop));
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (yCloud.nop >= 64)
+#endif
+  for (int i = 0; i < yCloud.nop; i++) {
+    out[static_cast<size_t>(i)] =
+        soapOne(yCloud, i, nList, nMax, lMax, rcut);
+  }
+  return out;
+}
+
 void chill::LinearClassifier::fit(const std::vector<std::vector<double>> &X,
                                   const std::vector<int> &y) {
   nFeat = X.empty() ? 0 : static_cast<int>(X[0].size());
@@ -354,17 +381,29 @@ int chill::LinearClassifier::predict(const std::vector<double> &x) const {
   return best;
 }
 
+std::vector<std::vector<double>> chill::voronoiFeatures(
+    const Cloud &yCloud, double candidateCutoff) {
+  std::vector<std::vector<double>> out(
+      static_cast<size_t>(yCloud.nop), std::vector<double>(3, 0.0));
+  if (yCloud.nop <= 0) {
+    return out;
+  }
+  const auto q4 = chill::steinhardtQlVoronoi(yCloud, candidateCutoff, 4);
+  const auto q6 = chill::steinhardtQlVoronoi(yCloud, candidateCutoff, 6);
+  const auto q8 = chill::steinhardtQlVoronoi(yCloud, candidateCutoff, 8);
+  for (int i = 0; i < yCloud.nop; i++) {
+    const size_t row = static_cast<size_t>(i);
+    out[row][0] = q4.ql[row];
+    out[row][1] = q6.ql[row];
+    out[row][2] = q8.ql[row];
+  }
+  return out;
+}
+
 std::vector<double> chill::voronoiFeature(const Cloud &yCloud, int iatom,
                                           double candidateCutoff) {
-  std::vector<double> feat(3, 0.0);
   if (iatom < 0 || iatom >= yCloud.nop) {
-    return feat;
+    return {0.0, 0.0, 0.0};
   }
-  const int orders[3] = {4, 6, 8};
-  for (int k = 0; k < 3; k++) {
-    const auto q =
-        chill::steinhardtQlVoronoi(yCloud, candidateCutoff, orders[k]);
-    feat[static_cast<size_t>(k)] = q.ql[static_cast<size_t>(iatom)];
-  }
-  return feat;
+  return voronoiFeatures(yCloud, candidateCutoff)[static_cast<size_t>(iatom)];
 }

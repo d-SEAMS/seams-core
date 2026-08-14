@@ -201,3 +201,29 @@ TEST_CASE("linear classifier separates FCC from BCC on Voronoi features",
   REQUIRE(fccRight == fccCloud.nop);
   REQUIRE(bccRight == bccCloud.nop);
 }
+
+TEST_CASE("soapSpectrumAll matches soapSpectrum for atom 0",
+          "[structure_desc]") {
+  auto cloud = fcc();
+  auto nList = nneigh::neighListO(3.2, cloud, 1);
+  auto one = chill::soapSpectrum(cloud, 0, nList, 3, 6, 3.2);
+  auto all = chill::soapSpectrumAll(cloud, nList, 3, 6, 3.2);
+  REQUIRE(all.size() == static_cast<size_t>(cloud.nop));
+  REQUIRE(all[0].size() == one.size());
+  for (size_t i = 0; i < one.size(); i++) {
+    REQUIRE_THAT(all[0][i], Catch::Matchers::WithinAbs(one[i], 1e-12));
+  }
+}
+
+TEST_CASE("voronoiFeatures matches voronoiFeature for atom 0",
+          "[structure_desc]") {
+  auto cloud = fcc();
+  auto all = chill::voronoiFeatures(cloud, 4.8);
+  auto one = chill::voronoiFeature(cloud, 0, 4.8);
+  REQUIRE(all.size() == static_cast<size_t>(cloud.nop));
+  REQUIRE(all[0].size() == 3);
+  REQUIRE(one.size() == 3);
+  for (size_t i = 0; i < 3; i++) {
+    REQUIRE_THAT(all[0][i], Catch::Matchers::WithinAbs(one[i], 1e-12));
+  }
+}
