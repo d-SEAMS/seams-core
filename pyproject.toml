@@ -25,4 +25,4 @@ test = ["pytest>=8.0", "approvaltests>=14.0", "pytest-approvaltests>=0.2"]
 ase = ["ase>=3.23"]
 
 [tool.meson-python.args]
-setup = ['-Dwith_python=true', '-Dwith_tests=false']
+setup = ['-Dwith_python=true', '-Dwith_tests=false', '-Dwith_lua=disabled']
