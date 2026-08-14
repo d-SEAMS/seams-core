@@ -12,6 +12,9 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
+#include <algorithm>
+#include <vector>
+
 #include <franzblau.hpp>
 
 /**
@@ -304,62 +307,104 @@ primitive::restoreEdgesFromIndices(Graph &fullGraph,
  */
 void primitive::removeNonSPrings(primitive::Graph &fullGraph) {
   //
-  int nVertices = fullGraph.pts.size(); // Number of vertices in the graph
-  int nRings = fullGraph.rings.size();  // Number of rings
+  const int nVertices = fullGraph.pts.size(); // Number of vertices in the graph
+  const int nRings = fullGraph.rings.size();  // Number of rings
   std::vector<bool> ringsToRemove; // Vector containing the logical values for
                                    // removal of the current ring index
-  std::vector<int> currentRing;    // Current ring being evaluated
-  int ringSize;                    // Length of the current ring
-  bool removeRing; // Logical for removing the current ring (true) or not
   std::vector<std::vector<int>>
       emptyTempRings; // Empty vector of vectors to swap
   std::vector<std::vector<int>>
       primitiveRings; // Vector of vectors of rings after removing non SP rings
-  int currentV;       // Current vertex
-  int currentN;       // Current neighbour
-  int dist_r;         // Distance over ring
-  int dist_g;         // Distance over the entire graph
-  int d_jk;           // Absolute difference between j and k
-  std::vector<int> path;    // Vector containing a path
-  std::vector<int> visited; // Vector containing the visited points
   // -------------------
   // Make sure all the vertices are in the graph before removing non-SP rings
   for (int iVer = 0; iVer < nVertices; iVer++) {
     fullGraph.pts[iVer].inGraph = true;
   } // end of loop through every vertex
   // -------------------
-  // Loop through every ring
+  // The criterion compares, for each pair of non-adjacent ring members, the
+  // separation around the ring against the separation through the graph. Only
+  // the latter needs searching, it is bounded by half the longest ring, and it
+  // does not depend on which ring the pair was drawn from.
+  //
+  // Collect every such question first and group them by the vertex they start
+  // from. One breadth-first sweep per distinct starting vertex then answers all
+  // of its questions at once, in place of one depth-first search per pair per
+  // ring. The sweep reaches only the handful of vertices within the bound, so
+  // its scratch is cleared by walking what it touched rather than the whole
+  // graph.
+  ringsToRemove.assign(nRings, false);
+
+  struct Query {
+    int target;   // The other ring member
+    int ringHops; // Separation around the ring, in edges
+    int ring;     // Which ring asked
+  };
+  std::vector<std::vector<Query>> queries(nVertices);
+
+  int maxHops = 0;
   for (int iRing = 0; iRing < nRings; iRing++) {
-    currentRing = fullGraph.rings[iRing]; // Current ring
-    ringSize = currentRing.size();         // Length of the current ring
-    removeRing = false;                    // init
-    // Loop through every j^th vertex
+    const std::vector<int> &currentRing = fullGraph.rings[iRing];
+    const int ringSize = currentRing.size();
+    maxHops = std::max(maxHops, ringSize / 2);
     for (int jVer = 0; jVer < ringSize; jVer++) {
       // connect with all other, skip j-j (distance=0) and j-(j+1) (nearest
       // neighbors)
       for (int kVer = jVer + 2; kVer < ringSize; kVer++) {
-        // If not remove
-        if (!removeRing) {
-          currentV = currentRing[jVer]; // current 'vertex'
-          currentN = currentRing[kVer]; // Current 'neighbour'
-          d_jk = std::abs(jVer - kVer);
-          dist_r = std::min(d_jk, std::abs(d_jk - ringSize)) +
-                   1;   // Distance over the ring
-          path.clear(); // init
-          visited.clear();
-          // Call shortest path function
-          primitive::shortestPath(fullGraph, currentV, currentN, path,
-                                  visited, dist_r, 0);
-          dist_g = path.size(); // Length of the path over the graph
-          if (dist_g < dist_r) {
-            removeRing = true;
-          } // Decide whether to keep or remove the ring
-        }   // If ring is not to be removed
-      }     // end of loop through k^th vertex
-    }       // end of loop through j^th vertex
-    // Update bool value for removal of currentRing
-    ringsToRemove.push_back(removeRing);
-  } // end of loop through rings
+        const int currentV = currentRing[jVer];
+        const int currentN = currentRing[kVer];
+        if (currentV < 0 || currentV >= nVertices || currentN < 0 ||
+            currentN >= nVertices) {
+          continue;
+        }
+        const int d_jk = std::abs(jVer - kVer);
+        queries[currentV].push_back(
+            {currentN, std::min(d_jk, std::abs(d_jk - ringSize)), iRing});
+      } // end of loop through k^th vertex
+    }   // end of loop through j^th vertex
+  }     // end of loop through rings
+
+  // Answer each vertex's questions with one bounded sweep
+  std::vector<int> distance(nVertices, -1);
+  std::vector<int> touched;
+  std::vector<int> frontier;
+  std::vector<int> next;
+
+  for (int v = 0; v < nVertices; v++) {
+    if (queries[v].empty()) {
+      continue;
+    }
+
+    touched.clear();
+    frontier.assign(1, v);
+    distance[v] = 0;
+    touched.push_back(v);
+    for (int depth = 1; depth <= maxHops && !frontier.empty(); depth++) {
+      next.clear();
+      for (const int u : frontier) {
+        for (const int w : fullGraph.pts[u].neighListIndex) {
+          if (w >= 0 && w < nVertices && distance[w] == -1) {
+            distance[w] = depth;
+            touched.push_back(w);
+            next.push_back(w);
+          }
+        }
+      }
+      frontier.swap(next);
+    }
+
+    for (const Query &q : queries[v]) {
+      // Separation through the graph, in edges; -1 when beyond the bound
+      const int graphHops = distance[q.target];
+      if (graphHops >= 0 && graphHops < q.ringHops) {
+        ringsToRemove[q.ring] = true;
+      } // Decide whether to keep or remove the ring
+    }
+
+    // Clear only what this sweep reached
+    for (const int w : touched) {
+      distance[w] = -1;
+    }
+  } // end of loop through vertices
   // -------------------
   // Remove all the rings whose indices are given in the ringsToRemove vector
   for (int i = 0; i < ringsToRemove.size(); i++) {
