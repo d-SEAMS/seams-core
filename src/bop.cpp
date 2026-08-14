@@ -181,6 +181,12 @@ harmonicPair(int orderL, int absM, const AngularTerms &terms) {
   return {negative, positive};
 }
 
+/// Particle count below which the per-particle loops stay on one thread.
+/// Starting threads for a few thousand particles costs more than it saves,
+/// and the figure is deliberately conservative: it was set on a shared
+/// machine where a clean scaling curve was not obtainable.
+constexpr int kParallelThreshold = 50000;
+
 } // namespace
 
 /**
@@ -1321,11 +1327,17 @@ chill::steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCl
   // First pass: the local q_lm(i), averaged over the bonds of each particle.
   // Each particle writes only its own row and reads only the neighbour list,
   // so the iterations are independent.
-  std::vector<std::vector<std::complex<double>>> qlm(
-      yCloud.nop, std::vector<std::complex<double>>(nComponents, {0.0, 0.0}));
+  // One contiguous buffer, row iatom at qlm[iatom * nComponents]. A vector of
+  // per-particle vectors costs one allocation per particle and scatters the
+  // rows across the heap.
+  std::vector<std::complex<double>> qlm(
+      static_cast<size_t>(yCloud.nop) * nComponents, {0.0, 0.0});
+
+  // Threads help only once there is enough work to cover starting them
+  const bool useThreads = yCloud.nop >= kParallelThreshold;
 
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) if (useThreads)
 #endif
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     if (static_cast<size_t>(iatom) >= nList.size()) {
@@ -1354,12 +1366,13 @@ chill::steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCl
                                             std::acos(delta[2] / r)};
       const auto ylm = sph::spheriHarmo(orderL, angles);
       for (int m = 0; m < nComponents; m++) {
-        qlm[iatom][m] += ylm[m];
+        qlm[static_cast<size_t>(iatom) * nComponents + m] += ylm[m];
       }
     }
 
     for (int m = 0; m < nComponents; m++) {
-      qlm[iatom][m] /= static_cast<double>(nBonds);
+      qlm[static_cast<size_t>(iatom) * nComponents + m] /=
+          static_cast<double>(nBonds);
     }
   }
 
@@ -1368,12 +1381,13 @@ chill::steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCl
   // over the particle together with its neighbours. qlm is complete and read
   // only from here, and each particle writes only its own results.
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) if (useThreads)
 #endif
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+    const size_t iRow = static_cast<size_t>(iatom) * nComponents;
     double sumLocal = 0.0;
     for (int m = 0; m < nComponents; m++) {
-      sumLocal += std::norm(qlm[iatom][m]);
+      sumLocal += std::norm(qlm[iRow + m]);
     }
     result.ql[iatom] = std::sqrt(prefactor * sumLocal);
 
@@ -1386,7 +1400,8 @@ chill::steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCl
       continue;
     }
 
-    std::vector<std::complex<double>> qlmBar = qlm[iatom];
+    std::vector<std::complex<double>> qlmBar(qlm.begin() + iRow,
+                                             qlm.begin() + iRow + nComponents);
     int nContributing = 1; // the particle itself
     for (int j = 1; j <= nBonds; j++) {
       const auto it = yCloud.idIndexMap.find(nList[iatom][j]);
@@ -1394,8 +1409,9 @@ chill::steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCl
         continue;
       }
       const int jatom = it->second;
+      const size_t jRow = static_cast<size_t>(jatom) * nComponents;
       for (int m = 0; m < nComponents; m++) {
-        qlmBar[m] += qlm[jatom][m];
+        qlmBar[m] += qlm[jRow + m];
       }
       nContributing++;
     }
