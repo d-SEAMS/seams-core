@@ -18,6 +18,7 @@
 #include <neighbours.hpp>
 #include <ring.hpp>
 #include <seams_input.hpp>
+#include <bop.hpp>
 #include <topo_bulk.hpp>
 
 #include <chrono>
@@ -99,6 +100,17 @@ int main(int argc, char **argv) {
       },
       reps);
 
+  // Steinhardt parameters, which the OpenMP build spreads over threads
+  auto qRef = chill::steinhardtQl(yCloud, nList, 6);
+  const double tSteinhardt = bestMillis(
+      [&]() {
+        volatile auto q = chill::steinhardtQl(yCloud, nList, 6);
+        (void)q;
+      },
+      reps);
+
+  std::cout << std::left << std::setw(28) << "steinhardtQl l=6/ms"
+            << std::fixed << std::setprecision(3) << tSteinhardt << "\n";
   std::cout << std::left << std::setw(28) << "ringNetwork/ms" << std::fixed
             << std::setprecision(3) << tRings << "\n"
             << std::setw(28) << "findHC/ms" << tHC << "\n"

@@ -48,6 +48,15 @@ blas_dep = cppc.find_library('blas', required: true)
 lapack_dep = cppc.find_library('lapack', required: true)
 _deps += [blas_dep, lapack_dep]
 
+# Shared-memory parallelism. libstdc++ routes std::execution::par through TBB,
+# which conda-forge does not put in this environment, so a build relying on it
+# would quietly run serially. OpenMP ships with the compiler and is present.
+openmp_dep = dependency('openmp', required: false)
+if openmp_dep.found()
+  _deps += [openmp_dep]
+  _args += ['-DSEAMS_HAS_OPENMP=1']
+endif
+
 hwy_dep = dependency('hwy', version: '>=1.3.0', required: false)
 if hwy_dep.found()
   _deps += [hwy_dep]
@@ -79,6 +88,7 @@ endif
 # absent from the library, with nothing at run time to say so.
 summary({
   'SIMD distance kernel (hwy)': hwy_dep.found(),
+  'Shared-memory parallelism (OpenMP)': openmp_dep.found(),
   'Cell-list neighbours (vesin)': vesin_dep.found(),
   'PDB/GRO/DCD readers (chemfiles)': chemfiles_dep.found(),
   '.con reader (readcon-core)': readcon_dep.found(),

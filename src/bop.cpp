@@ -1318,10 +1318,15 @@ chill::steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCl
   const double prefactor = 4.0 * std::numbers::pi / (2.0 * orderL + 1.0);
 
   // ------------------------------------------------
-  // First pass: the local q_lm(i), averaged over the bonds of each particle
+  // First pass: the local q_lm(i), averaged over the bonds of each particle.
+  // Each particle writes only its own row and reads only the neighbour list,
+  // so the iterations are independent.
   std::vector<std::vector<std::complex<double>>> qlm(
       yCloud.nop, std::vector<std::complex<double>>(nComponents, {0.0, 0.0}));
 
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static)
+#endif
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     if (static_cast<size_t>(iatom) >= nList.size()) {
       continue;
@@ -1360,7 +1365,11 @@ chill::steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCl
 
   // ------------------------------------------------
   // Second pass: q_l from the local q_lm, and qbar_l from the mean of q_lm
-  // over the particle together with its neighbours
+  // over the particle together with its neighbours. qlm is complete and read
+  // only from here, and each particle writes only its own results.
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static)
+#endif
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     double sumLocal = 0.0;
     for (int m = 0; m < nComponents; m++) {
