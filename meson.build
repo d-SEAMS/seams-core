@@ -6,7 +6,7 @@
 # SPDX-License-Identifier: MIT
 #-----------------------------------------------------------------------------------
 
-project('seams-core', 'cpp',
+project('seams-core', ['cpp', 'c'],
   version: '2.0.0',
   default_options: ['warning_level=2', 'cpp_std=c++20'],
   meson_version: '>=1.3.0')
@@ -346,3 +346,33 @@ endif
 if get_option('with_python')
   subdir('python')
 endif
+
+# yodaStruct Lua CLI (optional; Lua via pkg-config or the wrap)
+lua_dep = dependency('lua', required: false)
+if not lua_dep.found()
+  lua_dep = dependency('lua-5.4', required: false)
+endif
+if not lua_dep.found()
+  lua_dep = dependency('lua-5.3', required: false)
+endif
+if not lua_dep.found() and get_option('with_lua').allowed()
+  lua_dep = dependency('lua-5.4', fallback: ['lua', 'lua_dep'],
+                       required: get_option('with_lua').enabled())
+endif
+yoda_struct = disabler()
+if get_option('with_lua').allowed() and lua_dep.found()
+  yoda_struct = executable('yodaStruct',
+    files('src/main.cpp', 'src/opt_parser.cpp'),
+    dependencies: [yds_dep, lua_dep],
+    cpp_args: _args,
+    include_directories: _incdirs,
+    install: true)
+  test('yoda_structure_desc', yoda_struct,
+    args: ['-c', 'example_lua/structureDesc/config.yml'],
+    workdir: meson.project_source_root(),
+    timeout: 120)
+endif
+
+summary({
+  'yodaStruct Lua CLI': lua_dep.found() and get_option('with_lua').allowed(),
+}, section: 'Front ends', bool_yn: true)
