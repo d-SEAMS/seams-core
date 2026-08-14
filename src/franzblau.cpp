@@ -17,36 +17,260 @@
 
 #include <franzblau.hpp>
 
+namespace {
+
 /**
- * @details The vector of vector of rings, by index, is returned, given a
- *  neighbour list (also by index) and the maximum depth upto which rings will
- * be searched, using the Franzblau algorithm for shortest paths.  This function
- * is registered in Lua and exposed to the user.  This internally calls the
- * functions:
- *  - primitive::countAllRingsFromIndex (to generate all rings)
- *  - primitive::removeNonSPrings (to only get the primitive rings)
+ * @brief Sorted (vertex, distance) pairs within a fixed radius of each vertex.
+ * @details One bounded breadth-first sweep per vertex for the whole ring
+ *  search, cleared by walking what each sweep touched. Every shortcut question
+ *  the primitivity test asks is then a sorted lookup, in place of a fresh
+ *  sweep per candidate ring.
+ */
+struct BoundedBalls {
+  std::vector<std::vector<std::pair<int, int>>> ball;
+
+  BoundedBalls(const std::vector<std::vector<int>> &adjacency, int radius)
+      : ball(adjacency.size()) {
+    const int nVertices = static_cast<int>(adjacency.size());
+    std::vector<int> dist(nVertices, -1);
+    std::vector<int> touched, frontier, next;
+    for (int v = 0; v < nVertices; v++) {
+      for (const int w : touched) {
+        dist[w] = -1;
+      }
+      touched.clear();
+      dist[v] = 0;
+      touched.push_back(v);
+      frontier.assign(1, v);
+      for (int depth = 1; depth <= radius && !frontier.empty(); depth++) {
+        next.clear();
+        for (const int u : frontier) {
+          for (const int w : adjacency[u]) {
+            if (w >= 0 && w < nVertices && dist[w] == -1) {
+              dist[w] = depth;
+              touched.push_back(w);
+              next.push_back(w);
+            }
+          }
+        }
+        frontier.swap(next);
+      }
+      auto &b = ball[v];
+      b.reserve(touched.size());
+      for (const int w : touched) {
+        if (w != v) {
+          b.emplace_back(w, dist[w]);
+        }
+      }
+      std::sort(b.begin(), b.end());
+    }
+  }
+
+  //! Graph distance from v to w when within the radius, else a large sentinel
+  int dist(int v, int w) const {
+    const auto &b = ball[v];
+    auto it = std::lower_bound(b.begin(), b.end(), std::make_pair(w, 0));
+    if (it != b.end() && it->first == w) {
+      return it->second;
+    }
+    return 1 << 20;
+  }
+};
+
+//! Bounded breadth-first levels from src, scratch reused across sources
+void levelsFrom(const std::vector<std::vector<int>> &adjacency, int src,
+                int maxLvl, std::vector<int> &lvl, std::vector<int> &touched,
+                std::vector<int> &frontier, std::vector<int> &next) {
+  for (const int w : touched) {
+    lvl[w] = -1;
+  }
+  touched.clear();
+  lvl[src] = 0;
+  touched.push_back(src);
+  frontier.assign(1, src);
+  for (int depth = 1; depth <= maxLvl && !frontier.empty(); depth++) {
+    next.clear();
+    for (const int u : frontier) {
+      for (const int w : adjacency[u]) {
+        if (w >= 0 && w < static_cast<int>(lvl.size()) && lvl[w] == -1) {
+          lvl[w] = depth;
+          touched.push_back(w);
+          next.push_back(w);
+        }
+      }
+    }
+    frontier.swap(next);
+  }
+}
+
+//! All shortest paths src -> target under the level field, excluding src
+void allShortestPaths(const std::vector<std::vector<int>> &adjacency,
+                      const std::vector<int> &lvl, int src, int target,
+                      std::vector<int> cur,
+                      std::vector<std::vector<int>> &out) {
+  if (target == src) {
+    std::reverse(cur.begin(), cur.end());
+    out.push_back(std::move(cur));
+    return;
+  }
+  for (const int w : adjacency[target]) {
+    if (w >= 0 && w < static_cast<int>(lvl.size()) && lvl[w] >= 0 &&
+        lvl[w] == lvl[target] - 1) {
+      std::vector<int> nxt = cur;
+      nxt.push_back(target);
+      allShortestPaths(adjacency, lvl, src, w, std::move(nxt), out);
+    }
+  }
+}
+
+//! Shortest-path criterion over every pair of members, by ball lookup
+bool ringIsPrimitive(const BoundedBalls &balls, const std::vector<int> &ring) {
+  const int k = static_cast<int>(ring.size());
+  for (int i = 0; i < k; i++) {
+    for (int j = i + 2; j < k; j++) {
+      const int sep = j - i;
+      const int ringDist = std::min(sep, k - sep);
+      if (ringDist <= 1) {
+        continue;
+      }
+      if (balls.dist(ring[i], ring[j]) < ringDist) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+//! Append v if absent; ring sizes are tiny, so a scan beats a set
+inline bool pushUniqueMember(std::vector<int> &ring, int v) {
+  for (const int x : ring) {
+    if (x == v) {
+      return false;
+    }
+  }
+  ring.push_back(v);
+  return true;
+}
+
+} // namespace
+
+/**
+ * @details Returns the primitive (shortest-path) rings, by index, given a
+ *  neighbour list (also by index) and the largest ring size sought.
+ *
+ *  The construction follows Yuan and Cormack (Comput. Mater. Sci. 24, 343,
+ *  2002): every member of a primitive ring sits at a graph distance from any
+ *  other member equal to their separation around the ring, so each arc of the
+ *  ring is a shortest path from any member taken as a source. A ring of even
+ *  size @f$2L@f$ is therefore a source vertex plus two vertex-disjoint
+ *  shortest paths to a vertex at level @f$L@f$; a ring of odd size
+ *  @f$2L+1@f$ closes instead over an edge joining two vertices both at level
+ *  @f$L@f$. Candidates are built only from shortest paths, and each ring is
+ *  enumerated exactly once by restricting the search to its lowest-indexed
+ *  member, so the output carries no duplicates by construction.
+ *
+ *  Candidates are then kept or dropped by the same criterion Franzblau's
+ *  filter applied: no pair of members may be joined through the graph by
+ *  fewer edges than around the ring. Each such question is answered by a
+ *  lookup into per-vertex bounded neighbourhoods computed once for the whole
+ *  search.
+ *
+ *  primitive::countAllRingsFromIndex and primitive::removeNonSPrings remain
+ *  available and produce the same ring set by the generate-then-filter route.
  * @param[in] nList Row-ordered neighbour list by index (and NOT the atom ID)
- * @param[in] maxDepth The maximum depth upto which rings will be searched. This
- *  means that rings larger than maxDepth in length will not be generated.
- * @return A vector of vectors of the rings; each ring contains the atom indices
- * of the ring members.
+ * @param[in] maxDepth The largest ring size to search for. Rings larger than
+ *  maxDepth are not generated.
+ * @return A vector of vectors of the rings; each ring contains the atom
+ *  indices of the ring members.
  */
 std::vector<std::vector<int>>
 primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth) {
-  //
-  primitive::Graph fullGraph; // Graph object, contains the connectivity
-                              // information from the neighbourlist
+  std::vector<std::vector<int>> rings;
+  if (maxDepth < 3 || nList.empty()) {
+    return rings;
+  }
 
-  // Find all possible rings, using backtracking. This may contain non-primitive
-  // rings as well.
-  fullGraph = primitive::countAllRingsFromIndex(nList, maxDepth);
+  // Adjacency by index; the first element of each nList row is the vertex
+  // itself, so it is skipped
+  const int nVertices = static_cast<int>(nList.size());
+  std::vector<std::vector<int>> adjacency(nVertices);
+  for (int i = 0; i < nVertices; i++) {
+    for (size_t j = 1; j < nList[i].size(); j++) {
+      adjacency[i].push_back(nList[i][j]);
+    }
+  }
 
-  // Remove all non-SP rings using the Franzblau algorithm.
-  primitive::removeNonSPrings(fullGraph);
+  const int maxLvl = maxDepth / 2;
+  const int radius = std::max(maxLvl - 1, 1);
+  const BoundedBalls balls(adjacency, radius);
 
-  // The rings vector of vectors inside the fullGraph graph object is the ring
-  // network information we want
-  return fullGraph.rings;
+  std::vector<int> lvl(nVertices, -1);
+  std::vector<int> touched, frontier, next;
+  std::vector<std::vector<int>> paths, pathsQ;
+
+  for (int src = 0; src < nVertices; src++) {
+    levelsFrom(adjacency, src, maxLvl, lvl, touched, frontier, next);
+    // Directing: only the lowest-indexed member of a ring enumerates it, so
+    // vertices below the source leave the level field entirely
+    for (int v = 0; v < src; v++) {
+      if (lvl[v] >= 0) {
+        lvl[v] = -1;
+      }
+    }
+    for (const int p : touched) {
+      if (lvl[p] < 1 || lvl[p] > maxLvl) {
+        continue;
+      }
+      paths.clear();
+      allShortestPaths(adjacency, lvl, src, p, {}, paths);
+      // Even rings: two vertex-disjoint shortest paths to an antipodal vertex
+      if (2 * lvl[p] >= 3 && 2 * lvl[p] <= maxDepth) {
+        for (size_t a = 0; a < paths.size(); a++) {
+          for (size_t b = a + 1; b < paths.size(); b++) {
+            std::vector<int> ring{src};
+            bool ok = true;
+            for (const int v : paths[a]) {
+              ok = ok && pushUniqueMember(ring, v);
+            }
+            for (int i = static_cast<int>(paths[b].size()) - 2; i >= 0 && ok;
+                 i--) {
+              ok = pushUniqueMember(ring, paths[b][i]);
+            }
+            if (ok && ringIsPrimitive(balls, ring)) {
+              rings.push_back(std::move(ring));
+            }
+          }
+        }
+      }
+      // Odd rings: an antipodal edge between two vertices at the same level
+      if (2 * lvl[p] + 1 <= maxDepth) {
+        for (const int q : adjacency[p]) {
+          if (q <= p || q >= nVertices || lvl[q] != lvl[p]) {
+            continue;
+          }
+          pathsQ.clear();
+          allShortestPaths(adjacency, lvl, src, q, {}, pathsQ);
+          for (const auto &pa : paths) {
+            for (const auto &pb : pathsQ) {
+              std::vector<int> ring{src};
+              bool ok = true;
+              for (const int v : pa) {
+                ok = ok && pushUniqueMember(ring, v);
+              }
+              for (int i = static_cast<int>(pb.size()) - 1; i >= 0 && ok; i--) {
+                ok = pushUniqueMember(ring, pb[i]);
+              }
+              if (ok && ringIsPrimitive(balls, ring)) {
+                rings.push_back(std::move(ring));
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return rings;
 }
 
 /**
