@@ -205,10 +205,13 @@ int ring::topoBulkAnalysis(
       // Get the cages
 
       // Find HC rings, saving the ring IDs (starting from 0) to listHC
-      listHC = ring::findHC(ringsOneType, ringType, nList, cageList);
+      const auto ringIndex = ring::buildRingSearchIndex(
+          ringsOneType, static_cast<int>(nList.size()));
+      listHC = ring::findHC(ringsOneType, ringType, nList, cageList, ringIndex);
 
       // Find DDC rings, saving the IDs to listDDC
-      listDDC = ring::findDDC(ringsOneType, ringType, listHC, cageList);
+      listDDC =
+          ring::findDDC(ringsOneType, ringType, listHC, cageList, ringIndex);
 
       // Find rings which are both DDCs and HCs (mixed)
       // A dummy value of -10 in the listDDC and listHC vectors for mixed rings
@@ -282,10 +285,56 @@ int ring::topoBulkAnalysis(
  * @param[in] cageList Vector in which every cage is saved.
  * @return A vector of all the ring indices which constitute DDCs.
  */
+/**
+ * @details Builds the inverted atom-to-rings index. Rows stay in ascending
+ *  ring order, which is the order a linear scan over the ring network would
+ *  have visited them in, so callers that substitute a lookup for the scan see
+ *  the same sequence.
+ * @param[in] rings Vector of vectors containing the rings, by atom index.
+ * @param[in] numAtoms Number of atoms in the point cloud.
+ * @return The index.
+ */
+ring::RingSearchIndex
+ring::buildRingSearchIndex(const std::vector<std::vector<int>> &rings,
+                           int numAtoms) {
+  ring::RingSearchIndex index;
+  index.ringsContainingAtom.resize(numAtoms);
+
+  for (int iring = 0; iring < static_cast<int>(rings.size()); iring++) {
+    for (const int atom : rings[iring]) {
+      if (atom >= 0 && atom < numAtoms) {
+        index.ringsContainingAtom[atom].push_back(iring);
+      }
+    }
+  }
+
+  return index;
+}
+
+/**
+ * @details Convenience overload that builds the index itself. Prefer the
+ *  overload taking a prebuilt index when several searches run over one ring
+ *  network.
+ */
 std::vector<int> ring::findDDC(const std::vector<std::vector<int>> &rings,
                                std::vector<ring::strucType> &ringType,
                                const std::vector<int> &listHC,
                                std::vector<cage::Cage> &cageList) {
+  int maxAtom = 0;
+  for (const auto &r : rings) {
+    for (const int atom : r) {
+      maxAtom = std::max(maxAtom, atom);
+    }
+  }
+  const auto index = ring::buildRingSearchIndex(rings, maxAtom + 1);
+  return ring::findDDC(rings, ringType, listHC, cageList, index);
+}
+
+std::vector<int> ring::findDDC(const std::vector<std::vector<int>> &rings,
+                               std::vector<ring::strucType> &ringType,
+                               const std::vector<int> &listHC,
+                               std::vector<cage::Cage> &cageList,
+                               const ring::RingSearchIndex &index) {
   std::vector<int> listDDC;
   int totalRingNum = rings.size();  // Total number of hexagonal rings
   std::vector<int> peripheralRings; // Indices which may be peripheral rings
@@ -325,7 +374,7 @@ std::vector<int> ring::findDDC(const std::vector<std::vector<int>> &rings,
     // ------------
     // Step one: Find all rings which contain each index (m_k) of the equatorial
     // ring, iring, in at least three other rings
-    cond1 = ring::conditionOneDDC(rings, peripheralRings, iring);
+    cond1 = ring::conditionOneDDC(rings, peripheralRings, iring, index);
     if (!cond1) {
       continue;
     }
@@ -415,35 +464,47 @@ std::vector<int> ring::findDDC(const std::vector<std::vector<int>> &rings,
  */
 bool ring::conditionOneDDC(const std::vector<std::vector<int>> &rings,
                            std::vector<int> &peripheralRings, int iring) {
-  int index; // Atom ID to be compared
-  int noOfCommonRings =
-      0;        // No of rings in which the element to be matched has been found
-  int jElement; // Atom ID being compared to index
+  int maxAtom = 0;
+  for (const auto &r : rings) {
+    for (const int atom : r) {
+      maxAtom = std::max(maxAtom, atom);
+    }
+  }
+  const auto index = ring::buildRingSearchIndex(rings, maxAtom + 1);
+  return ring::conditionOneDDC(rings, peripheralRings, iring, index);
+}
 
+/**
+ * @details As the overload above, but answering "which rings contain this
+ *  atom" from a prebuilt index rather than by scanning the whole ring network
+ *  once per element. The scan made the search quadratic in the ring count for
+ *  no gain: the answer is fixed for a given ring network.
+ * @param[in] rings Vector of vectors containing the 6-membered primitive
+ *  rings.
+ * @param[in] peripheralRings Vector containing the indices of rings which are
+ *  potential peripheral rings.
+ * @param[in] iring Index of the ring being tested as equatorial.
+ * @param[in] index Inverted atom-to-rings index over @a rings.
+ * @return A bool; true if iring satisfies the condition for being an
+ *  equatorial ring, and false otherwise.
+ */
+bool ring::conditionOneDDC(const std::vector<std::vector<int>> &rings,
+                           std::vector<int> &peripheralRings, int iring,
+                           const ring::RingSearchIndex &index) {
   // Loop through each element of iring for finding matches
   for (int m = 0; m < 6; m++) {
-    index = rings[iring][m]; // Atom Index to be compared and matched with
-    noOfCommonRings = 0;     // init to zero.
-    // Loop through every ring except iring
-    for (int jring = 0; jring < rings.size(); jring++) {
-      if (iring == jring) {
+    const int atom = rings[iring][m]; // Atom index to be matched with
+    int noOfCommonRings = 0;          // init to zero.
+
+    // Every ring holding this atom, in ascending ring order
+    for (const int jring : index.ringsContainingAtom[atom]) {
+      if (jring == iring) {
         continue;
       } // Skip for iring
-      // -------
-      // Search every element of jring
-      for (int k = 0; k < 6; k++) {
-        jElement = rings[jring][k];
-        if (jElement == index) {
-          noOfCommonRings++;
-          peripheralRings.push_back(jring);
-          break;
-        } // if index is found inside jring
-        else {
-          continue;
-        }
-      } // end of loop through every element of jring
-      // -------
-    } // end of loop through all rings except iring
+      noOfCommonRings++;
+      peripheralRings.push_back(jring);
+    } // end of loop through all rings holding atom
+
     // If less than 3 rings have been found for each element, then this is
     // not an equatorial ring
     if (noOfCommonRings < 3) {
@@ -652,7 +713,36 @@ std::vector<int> ring::findHC(const std::vector<std::vector<int>> &rings,
                               std::vector<ring::strucType> &ringType,
                               const std::vector<std::vector<int>> &nList,
                               std::vector<cage::Cage> &cageList) {
+  const auto index =
+      ring::buildRingSearchIndex(rings, static_cast<int>(nList.size()));
+  return ring::findHC(rings, ringType, nList, cageList, index);
+}
+
+/**
+ * @details As the overload above, but drawing candidate partner rings from a
+ *  prebuilt index instead of testing every pair.
+ *
+ *  ring::basalConditions can only succeed when the second ring contains an
+ *  atom that neighbours the first or second atom of the first ring, and a pair
+ *  it rejects leaves no state behind. Only rings holding one of those
+ *  neighbours are therefore worth testing, which is a small set rather than
+ *  the whole network. Candidates are visited in ascending ring order, so the
+ *  rings are claimed in the same sequence as the exhaustive search.
+ * @param[in] rings Vector of vectors containing the 6-membered primitive
+ *  rings.
+ * @param[in,out] ringType Vector describing the type of each ring.
+ * @param[in] nList Row-ordered neighbour list, by index.
+ * @param[in,out] cageList Vector of cages.
+ * @param[in] index Inverted atom-to-rings index over @a rings.
+ * @return Vector of ring indices which are HC rings.
+ */
+std::vector<int> ring::findHC(const std::vector<std::vector<int>> &rings,
+                              std::vector<ring::strucType> &ringType,
+                              const std::vector<std::vector<int>> &nList,
+                              std::vector<cage::Cage> &cageList,
+                              const ring::RingSearchIndex &index) {
   std::vector<int> listHC;
+  std::vector<int> candidates; // Rings worth testing against the current ring
   int totalRingNum = rings.size(); // Total number of hexagonal rings
   std::vector<int> basal1;         // First basal ring
   std::vector<int> basal2;         // Second basal ring
@@ -678,8 +768,34 @@ std::vector<int> ring::findHC(const std::vector<std::vector<int>> &rings,
     cond1 = false;
     cond2 = false;
     basal1 = rings[iring]; // Assign iring to basal1
-    // Loop through the other rings to get a pair
-    for (int jring = iring + 1; jring < totalRingNum; jring++) {
+
+    // Gather the rings that could satisfy ring::basalConditions against
+    // basal1: those holding a neighbour of its first or second atom
+    candidates.clear();
+    for (const int anchor : {basal1[0], basal1[1]}) {
+      if (anchor < 0 || anchor >= static_cast<int>(nList.size())) {
+        continue;
+      }
+      // Skip the leading self entry of the neighbour list row
+      for (size_t n = 1; n < nList[anchor].size(); n++) {
+        const int neighbour = nList[anchor][n];
+        if (neighbour < 0 ||
+            neighbour >= static_cast<int>(index.ringsContainingAtom.size())) {
+          continue;
+        }
+        for (const int candidate : index.ringsContainingAtom[neighbour]) {
+          if (candidate > iring) {
+            candidates.push_back(candidate);
+          }
+        }
+      }
+    }
+    std::sort(candidates.begin(), candidates.end());
+    candidates.erase(std::unique(candidates.begin(), candidates.end()),
+                     candidates.end());
+
+    // Loop through the candidate rings to get a pair
+    for (const int jring : candidates) {
       // -----------------------
       // Skip if iring is prismatic
       if (isPrismatic[jring]) {
