@@ -53,22 +53,25 @@ def run_freud(name: str, xyz, L: float, r_max: float):
 
 
 def run_pyscal(name: str, xyz, L: float, r_max: float):
-    import pyscal3 as pc
+    from pyscal3 import System
 
-    sys_ = pc.System()
-    sys_.box = [[L, 0, 0], [0, L, 0], [0, 0, L]]
-    sys_.atoms.positions = xyz
+    # Same cell as compare_structure_desc.cpp. atoms+box ctor fills ghosts.
+    sys_ = System(
+        atoms={"positions": xyz},
+        box=[[L, 0.0, 0.0], [0.0, L, 0.0], [0.0, 0.0, L]],
+    )
     sys_.find.neighbors(method="cutoff", cutoff=r_max)
     print(f"tool=pyscal3 lattice={name} n={len(xyz)} L={L} cut_ql={r_max}")
-    # pyscal3 computes a list of q_l; API is calculate.steinhardt_parameter
-    out = sys_.calculate.steinhardt_parameter([4, 6, 8])
-    # Some versions return (q, qbar), others a dict
-    if isinstance(out, tuple):
-        qs = out[0]
-        for ell, col in zip((4, 6, 8), np.asarray(qs).T):
+    qs = sys_.calculate.steinhardt_parameter([4, 6, 8])
+    arr = np.asarray(qs)
+    if arr.ndim == 2 and arr.shape[0] == 3:
+        for ell, row in zip((4, 6, 8), arr):
+            print(f"  ql{ell}={float(np.mean(row)):.6f}")
+    elif arr.ndim == 2 and arr.shape[1] == 3:
+        for ell, col in zip((4, 6, 8), arr.T):
             print(f"  ql{ell}={float(np.mean(col)):.6f}")
     else:
-        print(f"  raw={out!r}")
+        print(f"  raw_shape={arr.shape} raw={arr!r}")
 
 
 def run_dscribe(name: str, xyz, L: float, r_max: float):

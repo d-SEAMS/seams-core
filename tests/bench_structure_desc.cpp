@@ -76,7 +76,9 @@ int main(int argc, char **argv) {
   const int n = argc > 1 ? std::atoi(argv[1]) : 4;
 #ifdef SEAMS_HAS_OPENMP
   omp_set_dynamic(0);
-  omp_set_num_threads(1);
+  if (std::getenv("OMP_NUM_THREADS") == nullptr) {
+    omp_set_num_threads(1);
+  }
 #endif
 
   auto cloud = fcc(n, 4.0);
