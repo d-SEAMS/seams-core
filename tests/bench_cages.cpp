@@ -12,13 +12,17 @@
 ** Build target: bench_cages.  Run from the input/ directory.
 */
 
+#include <bop.hpp>
+#include <bulkTUM.hpp>
 #include <cage.hpp>
+#include <cage_canon.hpp>
 #include <franzblau.hpp>
+#include <ira_sofi.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <ring.hpp>
 #include <seams_input.hpp>
-#include <bop.hpp>
+#include <sphericart_ylm.hpp>
 #include <topo_bulk.hpp>
 
 #include <chrono>
@@ -109,14 +113,58 @@ int main(int argc, char **argv) {
       },
       reps);
 
+  double tNauty = -1.0;
+  if (cage::nautyAvailable()) {
+    tNauty = bestMillis(
+        [&]() {
+          volatile auto cert = cage::canonicalCertificate(sixRings);
+          (void)cert;
+        },
+        reps);
+  }
+
+  double tMatchHC = -1.0;
+  int nMatched = 0;
+  const char *hcTemplate = argc > 4 ? argv[4] : "../templates/hc.xyz";
+  Eigen::MatrixXd refHC = tum3::buildRefHC(hcTemplate);
+  if (refHC.rows() > 0) {
+    tMatchHC = bestMillis(
+        [&]() {
+          nMatched = 0;
+          for (const auto &c : cageList) {
+            if (c.type != cage::cageType::HexC) {
+              continue;
+            }
+            std::vector<double> quat;
+            double rmsd = 0.0;
+            (void)tum3::shapeMatchHC(yCloud, refHC, c, sixRings, hbondIdx, quat,
+                                     rmsd);
+            nMatched++;
+          }
+        },
+        reps);
+  }
+
+  std::cout << "backends   vesin=on"
+            << " sphericart=" << (seams::sphericart_ylm::available() ? "on" : "off")
+            << " nauty=" << (cage::nautyAvailable() ? "on" : "off")
+            << " ira=" << (ira::available() ? "on" : "off") << "\n\n";
+
   std::cout << std::left << std::setw(28) << "steinhardtQl l=6/ms"
             << std::fixed << std::setprecision(3) << tSteinhardt << "\n";
   std::cout << std::left << std::setw(28) << "ringNetwork/ms" << std::fixed
             << std::setprecision(3) << tRings << "\n"
             << std::setw(28) << "findHC/ms" << tHC << "\n"
             << std::setw(28) << "findHC+findDDC/ms" << tDDC << "\n"
-            << std::setw(28) << "findDDC alone/ms" << (tDDC - tHC) << "\n\n"
-            << "HC rings   " << listHC.size() << "\n"
+            << std::setw(28) << "findDDC alone/ms" << (tDDC - tHC) << "\n";
+  if (tNauty >= 0.0) {
+    std::cout << std::setw(28) << "nauty cert six-rings/ms" << tNauty << "\n";
+  }
+  if (tMatchHC >= 0.0) {
+    std::cout << std::setw(28) << "shapeMatchHC/ms" << tMatchHC << "\n"
+              << "matched HCs " << nMatched << "\n";
+  }
+  std::cout << "\nHC rings   " << listHC.size() << "\n"
             << "DDC rings  " << listDDC.size() << "\n";
 
   return 0;
