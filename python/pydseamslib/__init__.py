@@ -1,4 +1,4 @@
-from pydseamslib import _core
+from . import _core
 from pathlib import Path
 import tempfile
 
