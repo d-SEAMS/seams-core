@@ -23,6 +23,7 @@ test_sources = {
   'bulkTUM': 'test_bulkTUM.cpp',
   'pntCorrespondence': 'test_pntCorrespondence.cpp',
   'franzblau_extra': 'test_franzblau_extra.cpp',
+  'ira_sofi': 'test_ira_sofi.cpp',
 }
 
 # Ensure test binaries load the freshly-built libyodaLib.so instead of any
