@@ -18,7 +18,7 @@ namespace hn = hwy::HWY_NAMESPACE;
 // dx, dy, dz: coordinate differences (length n)
 // bx, by, bz: periodic box dimensions
 // out: output squared distances (length n)
-inline void BatchPeriodicDistSq(const double* HWY_RESTRICT dx,
+inline HWY_ATTR void BatchPeriodicDistSq(const double* HWY_RESTRICT dx,
                                 const double* HWY_RESTRICT dy,
                                 const double* HWY_RESTRICT dz,
                                 double bx, double by, double bz,
@@ -42,9 +42,11 @@ inline void BatchPeriodicDistSq(const double* HWY_RESTRICT dx,
 
   size_t i = 0;
   for (; i + N <= n; i += N) {
-    auto vdx = hn::Load(d, dx + i);
-    auto vdy = hn::Load(d, dy + i);
-    auto vdz = hn::Load(d, dz + i);
+    // Callers pass std::vector<double> scratch (16-byte typical). Load/Store
+    // require native vector alignment and fault under AVX2/AVX-512.
+    auto vdx = hn::LoadU(d, dx + i);
+    auto vdy = hn::LoadU(d, dy + i);
+    auto vdz = hn::LoadU(d, dz + i);
 
     // Absolute values
     vdx = hn::Abs(vdx);
@@ -58,7 +60,7 @@ inline void BatchPeriodicDistSq(const double* HWY_RESTRICT dx,
 
     // r2 = dx*dx + dy*dy + dz*dz
     auto r2 = hn::MulAdd(vdx, vdx, hn::MulAdd(vdy, vdy, hn::Mul(vdz, vdz)));
-    hn::Store(r2, d, out + i);
+    hn::StoreU(r2, d, out + i);
   }
 
   // Scalar remainder
