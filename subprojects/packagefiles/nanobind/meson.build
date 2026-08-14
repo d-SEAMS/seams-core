@@ -83,8 +83,19 @@ endif
 
 nanobind_sources = files('src/nb_combined.cpp')
 
+# A static library is linked into the extension. The wrapdb recipe uses
+# declare_dependency(sources:), which compiled the object but did not put
+# it on the extension_module link line.
+nanobind_lib = static_library(
+  'nanobind',
+  nanobind_sources,
+  include_directories: [incdir],
+  dependencies: [py_dep, robin_map_dep],
+  cpp_args: dep_compile_args,
+)
+
 nanobind_dep = declare_dependency(
-  sources: nanobind_sources,
+  link_with: nanobind_lib,
   include_directories: [incdir],
   dependencies: [py_dep, robin_map_dep],
   compile_args: dep_compile_args,
