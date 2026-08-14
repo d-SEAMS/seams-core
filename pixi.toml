@@ -44,6 +44,13 @@ lcov --remove bbdir-cov/meson-logs/coverage.info \
 docs = { features = ["docs"] }
 formalanalysis = { features = ["formalanalysis"] }
 mpi = { features = ["mpi"] }
+ira = { features = ["ira"] }
+
+[feature.ira]
+platforms = ["linux-64"]
+
+[feature.ira.dependencies]
+ira = ">=2.2"
 
 [feature.mpi]
 platforms = ["linux-64"]

@@ -18,6 +18,10 @@
 #include <bulkTUM.hpp>
 #include <cluster.hpp>
 #include <franzblau.hpp>
+#include <ira_sofi.hpp>
+#ifdef SEAMS_HAS_IRA
+#include <Eigen/Core>
+#endif
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <rdf2d.hpp>
@@ -434,6 +438,47 @@ NB_MODULE(_core, m) {
           "Compute the local and neighbour-averaged Steinhardt parameters "
           "of degree orderL (3, 4 or 6) for every particle.",
           nb::arg("yCloud"), nb::arg("nList"), nb::arg("orderL"));
+
+    m.def("ira_available", &ira::available,
+          "True when this build linked libira (IRA/SOFI).");
+#ifdef SEAMS_HAS_IRA
+    m.def(
+        "ira_match",
+        [](const std::vector<std::vector<double>> &refPts,
+           const std::vector<std::vector<double>> &tgtPts) {
+          auto toMat = [](const std::vector<std::vector<double>> &rows) {
+            Eigen::MatrixXd m(static_cast<int>(rows.size()), 3);
+            for (int i = 0; i < static_cast<int>(rows.size()); i++) {
+              m(i, 0) = rows[static_cast<size_t>(i)][0];
+              m(i, 1) = rows[static_cast<size_t>(i)][1];
+              m(i, 2) = rows[static_cast<size_t>(i)][2];
+            }
+            return m;
+          };
+          ira::Match out;
+          const int err = ira::match(toMat(refPts), toMat(tgtPts), out);
+          return nb::make_tuple(err, out.rmsd, out.hausdorff, out.quat,
+                                out.assignment);
+        },
+        "IRA overlay of two n x 3 point sets. Returns err, rmsd, hausdorff, "
+        "quat, assignment.",
+        nb::arg("ref"), nb::arg("target"));
+    m.def(
+        "sofi_point_group",
+        [](const std::vector<std::vector<double>> &pts) {
+          Eigen::MatrixXd m(static_cast<int>(pts.size()), 3);
+          for (int i = 0; i < static_cast<int>(pts.size()); i++) {
+            m(i, 0) = pts[static_cast<size_t>(i)][0];
+            m(i, 1) = pts[static_cast<size_t>(i)][1];
+            m(i, 2) = pts[static_cast<size_t>(i)][2];
+          }
+          ira::PointGroup pg;
+          const int err = ira::pointGroup(m, pg);
+          return nb::make_tuple(err, pg.symbol, pg.nOperations);
+        },
+        "SOFI point group of an n x 3 cloud. Returns err, symbol, n_ops.",
+        nb::arg("coords"));
+#endif
 
     // Spherical harmonics lookup tables
     m.def("lookupTableQ4Vec", &sph::lookupTableQ4Vec,
