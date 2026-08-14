@@ -379,6 +379,10 @@ if get_option('with_lua').allowed() and lua_dep.found()
     args: ['-c', 'example_lua/structureDesc/config.yml'],
     workdir: meson.project_source_root(),
     timeout: 120)
+  test('yoda_full_api', yoda_struct,
+    args: ['-c', 'example_lua/full_api/config.yml'],
+    workdir: meson.project_source_root(),
+    timeout: 240)
 endif
 
 summary({
