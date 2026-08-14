@@ -30,6 +30,7 @@
 #include <seams_output.hpp>
 #include <selection.hpp>
 #include <structure_desc.hpp>
+#include <voronoi_qlm.hpp>
 #include <topo_one_dim.hpp>
 #include <topo_two_dim.hpp>
 
