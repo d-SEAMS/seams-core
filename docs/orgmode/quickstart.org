@@ -63,6 +63,33 @@ print(f"H-bonds per atom: {len(traj.hbonds[0]) - 1}")
 print(f"Number of rings found: {len(traj.rings)}")
 #+end_src
 
+* Steinhardt order parameters
+
+The ~Trajectory~ class computes the local Steinhardt ~q_l~ and the
+neighbour-averaged ~q_l~ bar for every atom in the frame:
+
+#+begin_src python
+ql = traj.steinhardt(order_l=6)
+print(len(ql["ql"]), len(ql["ql_bar"]))
+#+end_src
+
+* Template overlay, SOAP and Voronoi features
+
+Each neighbour shell can be overlaid onto FCC, HCP, BCC and SC templates.
+SOAP spectra and Voronoi-weighted Steinhardt parameters use the same
+loaded frame:
+
+#+begin_src python
+hits = traj.classify_templates()
+print(hits[0]["name"], hits[0]["rmsd"], hits[0]["kind"])
+
+spectra = traj.soap()
+print(len(spectra), len(spectra[0]))
+
+ql_voro = traj.steinhardt_voronoi()
+print(len(ql_voro["ql"]))
+#+end_src
+
 * Low-level API (step by step)
 
 For full control over each analysis step, use the ~_core~ module directly.

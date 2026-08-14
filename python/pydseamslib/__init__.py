@@ -38,6 +38,7 @@ class Trajectory:
         self._nlist = None
         self._hbonds = None
         self._rings = None
+        self._classifier = None
         self._ring_updater = _core.RingUpdater(6)
 
     @property
@@ -212,22 +213,125 @@ class Trajectory:
         return {"ql": list(result.ql), "ql_bar": list(result.qlBar)}
 
     def classify_templates(self, k_neigh=12):
-        """Overlay each neighbour shell onto FCC, HCP, BCC and SC templates."""
-        hits = _core.classifyTemplates(self.cloud, self.neighbor_list, k_neigh)
-        return [{"name": h.name, "rmsd": h.rmsd} for h in hits]
+        """Overlay each neighbour shell onto FCC, HCP, BCC and SC templates.
 
-    def soap(self, iatom, n_max=3, l_max=6, rcut=None):
-        """SOAP power spectrum of one particle."""
+        Returns
+        -------
+        list of dict
+            One entry per atom with keys "name", "rmsd" and "kind".
+            "kind" is the template name string (fcc, hcp, bcc, sc, other).
+        """
+        hits = _core.classifyTemplates(self.cloud, self.neighbor_list, k_neigh)
+        rows = []
+        for h in hits:
+            name = h.name
+            kind = name or getattr(h.kind, "name", str(h.kind))
+            rows.append({"name": name, "rmsd": h.rmsd, "kind": kind})
+        return rows
+
+    def soap(self, iatom=None, n_max=3, l_max=6, rcut=None):
+        """SOAP power spectrum of one particle, or of every atom.
+
+        Parameters
+        ----------
+        iatom : int or None
+            Atom index. None returns one spectrum per atom.
+        n_max : int
+            Number of radial Gaussians.
+        l_max : int
+            Highest spherical-harmonic degree.
+        rcut : float or None
+            SOAP cutoff. Defaults to the Trajectory cutoff.
+
+        Returns
+        -------
+        list
+            A single spectrum when iatom is an int, or a list of spectra
+            when iatom is None.
+        """
+        r = self.cutoff if rcut is None else rcut
+        if iatom is None:
+            soap_all = getattr(_core, "soapSpectrumAll", None)
+            if soap_all is not None:
+                return [
+                    list(spec)
+                    for spec in soap_all(
+                        self.cloud, self.neighbor_list, n_max, l_max, r
+                    )
+                ]
+            return [
+                list(
+                    _core.soapSpectrum(
+                        self.cloud, i, self.neighbor_list, n_max, l_max, r
+                    )
+                )
+                for i in range(self.n_atoms)
+            ]
         return list(
             _core.soapSpectrum(
-                self.cloud,
-                iatom,
-                self.neighbor_list,
-                n_max,
-                l_max,
-                rcut if rcut is not None else self.cutoff,
+                self.cloud, iatom, self.neighbor_list, n_max, l_max, r
             )
         )
+
+    def voronoi_features(self, cutoff=None):
+        """Per-atom Voronoi-weighted [q4, q6, q8].
+
+        Prefers a single cloud-wide _core.voronoiFeatures call when the
+        extension exposes it. Otherwise packs three steinhardtQlVoronoi
+        results. Does not loop _core.voronoiFeature.
+        """
+        cut = self.cutoff if cutoff is None else cutoff
+        all_fn = getattr(_core, "voronoiFeatures", None)
+        if all_fn is not None:
+            return [list(row) for row in all_fn(self.cloud, cut)]
+        q4 = _core.steinhardtQlVoronoi(
+            yCloud=self.cloud, candidateCutoff=cut, orderL=4
+        )
+        q6 = _core.steinhardtQlVoronoi(
+            yCloud=self.cloud, candidateCutoff=cut, orderL=6
+        )
+        q8 = _core.steinhardtQlVoronoi(
+            yCloud=self.cloud, candidateCutoff=cut, orderL=8
+        )
+        return [
+            [q4.ql[i], q6.ql[i], q8.ql[i]] for i in range(self.n_atoms)
+        ]
+
+    def fit_classifier(self, X, y, labels=None):
+        """Fit a one-versus-rest ridge classifier stored on this trajectory.
+
+        Parameters
+        ----------
+        X : list of list of float
+            Feature matrix, one row per sample.
+        y : list of int
+            Class indices in ``0 .. n_classes-1``.
+        labels : list of str or None
+            Optional class names stored on the classifier.
+
+        Returns
+        -------
+        LinearClassifier
+            The fitted _core.LinearClassifier kept on this object.
+        """
+        clf = _core.LinearClassifier()
+        if labels is not None:
+            clf.labels = list(labels)
+        clf.fit(X, y)
+        self._classifier = clf
+        return clf
+
+    def predict_class(self, x):
+        """Predict the class index of one feature row.
+
+        Parameters
+        ----------
+        x : list of float
+            A single feature row with the same width used in fit_classifier.
+        """
+        if self._classifier is None:
+            raise RuntimeError("fit_classifier must be called first")
+        return self._classifier.predict(x)
 
 
 # Re-export low-level API for advanced users

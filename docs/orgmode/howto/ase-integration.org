@@ -84,6 +84,10 @@ nList = _core.neighListO(rcutoff=3.5, yCloud=cloud_O, typeI=2)
 
 # Run CHILL+ classification
 cloud_O = _core.getCorrelPlus(yCloud=cloud_O, nList=nList, isSlice=False)
+
+# Overlay neighbour shells onto FCC, HCP, BCC and SC templates
+hits = _core.classifyTemplates(yCloud=cloud_O, nList=nList, kNeigh=12)
+print(hits[0].name, hits[0].rmsd)
 #+end_src
 
 * Notes

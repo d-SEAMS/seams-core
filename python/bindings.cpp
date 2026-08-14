@@ -479,9 +479,15 @@ NB_MODULE(_core, m) {
           "SOAP power spectrum of one particle.", nb::arg("yCloud"),
           nb::arg("iatom"), nb::arg("nList"), nb::arg("nMax"), nb::arg("lMax"),
           nb::arg("rcut"));
+    m.def("soapSpectrumAll", &chill::soapSpectrumAll,
+          "SOAP power spectrum of every particle.", nb::arg("yCloud"),
+          nb::arg("nList"), nb::arg("nMax"), nb::arg("lMax"), nb::arg("rcut"));
     m.def("voronoiFeature", &chill::voronoiFeature,
           "Per-atom [q4, q6, q8] from the Voronoi-weighted Steinhardt path.",
           nb::arg("yCloud"), nb::arg("iatom"), nb::arg("candidateCutoff"));
+    m.def("voronoiFeatures", &chill::voronoiFeatures,
+          "[q4, q6, q8] for every particle from one Voronoi pass per order.",
+          nb::arg("yCloud"), nb::arg("candidateCutoff"));
 
     m.def("ira_available", &ira::available,
           "True when this build linked libira (IRA/SOFI).");

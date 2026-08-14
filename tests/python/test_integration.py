@@ -253,3 +253,31 @@ def test_trajectory_steinhardt_order_l_4():
     assert len(result["ql"]) == traj.n_atoms
     assert 0.0 < (sum(result["ql"]) / len(result["ql"])) < 1.0
     assert max(result["ql"]) > 0.05
+
+
+def test_trajectory_classify_templates():
+    """Template overlay returns one hit per atom on the example trajectory."""
+    traj = Trajectory(str(TRAJ.absolute()), atom_type=2)
+    hits = traj.classify_templates()
+    assert len(hits) == traj.n_atoms
+    for hit in hits:
+        assert "name" in hit
+        assert "rmsd" in hit
+        assert "kind" in hit
+        assert isinstance(hit["kind"], str)
+
+
+def test_trajectory_soap_frame():
+    """Frame-wide SOAP returns one spectrum per atom."""
+    traj = Trajectory(str(TRAJ.absolute()), atom_type=2)
+    spectra = traj.soap()
+    assert len(spectra) == traj.n_atoms
+    assert len(spectra[0]) == 3 * 3 * 7
+
+
+def test_trajectory_steinhardt_voronoi():
+    """Voronoi-weighted Steinhardt parameters have one entry per atom."""
+    traj = Trajectory(str(TRAJ.absolute()), atom_type=2)
+    result = traj.steinhardt_voronoi()
+    assert len(result["ql"]) == traj.n_atoms
+    assert len(result["ql_bar"]) == traj.n_atoms
