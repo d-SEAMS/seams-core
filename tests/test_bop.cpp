@@ -305,3 +305,180 @@ TEST_CASE("isInterfacial checks interfacial criteria", "[bop]") {
   // Just check it doesn't crash; result depends on geometry
   REQUIRE((result == true || result == false));
 }
+
+// ---------------------------------------------------------------------------
+// Independent verification of the l=3 and l=6 spherical harmonics.
+//
+// The reference values below were produced with mpmath's spherharm at 30
+// decimal digits, which shares the Condon-Shortley convention used here.  The
+// "matches spheriHarmo" cases above cannot serve this purpose: spheriHarmo
+// dispatches to the same lookup tables, so it compares the implementation with
+// itself.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+/// Reference Y_{3m}(theta, phi) for m = -3 .. 3.
+struct HarmonicReference {
+  double theta;
+  double phi;
+  std::vector<std::complex<double>> values;
+};
+
+const std::vector<HarmonicReference> &referenceQ3() {
+  static const std::vector<HarmonicReference> refs = {
+      {0.7, 1.2,
+       {{-1.00032815672438657e-01, +4.93628664410609153e-02},
+        {-2.39211073242928146e-01, -2.19120761338635062e-01},
+        {+1.45220233090458700e-01, -3.73528458109185446e-01},
+        {-2.14300204504549903e-02, +0.00000000000000000e+00},
+        {-1.45220233090458700e-01, -3.73528458109185446e-01},
+        {-2.39211073242928146e-01, +2.19120761338635062e-01},
+        {+1.00032815672438657e-01, +4.93628664410609153e-02}}},
+      {2.31, 5.02,
+       {{-1.34258415477968879e-01, -1.01633027317392696e-01},
+        {+3.07071559111461612e-01, -2.17013718940049311e-01},
+        {+9.17923958435597764e-02, +2.88932088592419922e-01},
+        {+1.83690302770999236e-01, +0.00000000000000000e+00},
+        {-9.17923958435597764e-02, +2.88932088592419922e-01},
+        {+3.07071559111461612e-01, +2.17013718940049311e-01},
+        {+1.34258415477968879e-01, -1.01633027317392696e-01}}}};
+  return refs;
+}
+
+const std::vector<HarmonicReference> &referenceQ6() {
+  static const std::vector<HarmonicReference> refs = {
+      {0.3, 0.8,
+       {{+2.81545670960087548e-05, +3.20536104714261793e-04},
+        {-2.35530243398039772e-03, +2.72701928443226617e-03},
+        {-2.45553748690631526e-02, +1.43584741629399393e-03},
+        {-8.33664022251006664e-02, -7.63648157168533986e-02},
+        {-1.00161212420759645e-02, -3.42877198302676434e-01},
+        {+4.13897504353533674e-01, -4.26164829149319191e-01},
+        {+2.57919389430428581e-01, +0.00000000000000000e+00},
+        {-4.13897504353533674e-01, -4.26164829149319191e-01},
+        {-1.00161212420759645e-02, +3.42877198302676434e-01},
+        {+8.33664022251006664e-02, -7.63648157168533986e-02},
+        {-2.45553748690631526e-02, -1.43584741629399393e-03},
+        {+2.35530243398039772e-03, +2.72701928443226617e-03},
+        {+2.81545670960087548e-05, -3.20536104714261793e-04}}},
+      {1.77, 3.41,
+       {{-1.69855955987211517e-02, -4.28188076653546246e-01},
+        {+6.79590313290316522e-02, -2.91875937921525719e-01},
+        {-8.94254456210246268e-02, +1.64800164515641279e-01},
+        {-2.16145708595750607e-01, +2.24889888997438808e-01},
+        {+9.29737859183197707e-02, -5.53294457857134367e-02},
+        {+2.98637874216372556e-01, -8.21386292029009507e-02},
+        {-8.62877939979529995e-02, +0.00000000000000000e+00},
+        {-2.98637874216372556e-01, -8.21386292029009507e-02},
+        {+9.29737859183197707e-02, +5.53294457857134367e-02},
+        {+2.16145708595750607e-01, +2.24889888997438808e-01},
+        {-8.94254456210246268e-02, -1.64800164515641279e-01},
+        {-6.79590313290316522e-02, -2.91875937921525719e-01},
+        {-1.69855955987211517e-02, +4.28188076653546246e-01}}}};
+  return refs;
+}
+
+} // namespace
+
+TEST_CASE("lookupTableQ3Vec matches independent reference values", "[bop]") {
+  for (const auto &ref : referenceQ3()) {
+    auto result = sph::lookupTableQ3Vec({ref.phi, ref.theta});
+    REQUIRE(result.size() == ref.values.size());
+    for (size_t m = 0; m < result.size(); m++) {
+      REQUIRE_THAT(result[m].real(),
+                   Catch::Matchers::WithinAbs(ref.values[m].real(), 1e-13));
+      REQUIRE_THAT(result[m].imag(),
+                   Catch::Matchers::WithinAbs(ref.values[m].imag(), 1e-13));
+    }
+  }
+}
+
+TEST_CASE("lookupTableQ6Vec matches independent reference values", "[bop]") {
+  for (const auto &ref : referenceQ6()) {
+    auto result = sph::lookupTableQ6Vec({ref.phi, ref.theta});
+    REQUIRE(result.size() == ref.values.size());
+    for (size_t m = 0; m < result.size(); m++) {
+      REQUIRE_THAT(result[m].real(),
+                   Catch::Matchers::WithinAbs(ref.values[m].real(), 1e-13));
+      REQUIRE_THAT(result[m].imag(),
+                   Catch::Matchers::WithinAbs(ref.values[m].imag(), 1e-13));
+    }
+  }
+}
+
+TEST_CASE("spherical harmonics satisfy the addition theorem", "[bop]") {
+  // sum_m |Y_lm(theta, phi)|^2 = (2l+1) / (4 pi), for every direction
+  const std::vector<std::pair<double, double>> directions = {
+      {0.7, 1.2}, {0.3, 0.8}, {2.31, 5.02}, {1.77, 3.41}, {0.05, 0.0},
+      {M_PI - 0.05, 6.1}};
+
+  for (const auto &[theta, phi] : directions) {
+    double sumQ3 = 0.0;
+    for (const auto &y : sph::lookupTableQ3Vec({phi, theta})) {
+      sumQ3 += std::norm(y);
+    }
+    REQUIRE_THAT(sumQ3, Catch::Matchers::WithinAbs(7.0 / (4.0 * M_PI), 1e-13));
+
+    double sumQ6 = 0.0;
+    for (const auto &y : sph::lookupTableQ6Vec({phi, theta})) {
+      sumQ6 += std::norm(y);
+    }
+    REQUIRE_THAT(sumQ6, Catch::Matchers::WithinAbs(13.0 / (4.0 * M_PI), 1e-13));
+  }
+}
+
+TEST_CASE("spherical harmonics obey the Condon-Shortley relation", "[bop]") {
+  // Y_{l,m} = (-1)^m conj(Y_{l,-m})
+  const std::vector<std::pair<double, double>> directions = {
+      {0.7, 1.2}, {0.3, 0.8}, {2.31, 5.02}, {1.77, 3.41}};
+
+  for (const auto &[theta, phi] : directions) {
+    auto q3 = sph::lookupTableQ3Vec({phi, theta});
+    for (int m = 1; m <= 3; m++) {
+      const std::complex<double> expected =
+          ((m % 2 == 0) ? 1.0 : -1.0) * std::conj(q3[3 - m]);
+      REQUIRE_THAT(q3[3 + m].real(),
+                   Catch::Matchers::WithinAbs(expected.real(), 1e-15));
+      REQUIRE_THAT(q3[3 + m].imag(),
+                   Catch::Matchers::WithinAbs(expected.imag(), 1e-15));
+    }
+
+    auto q6 = sph::lookupTableQ6Vec({phi, theta});
+    for (int m = 1; m <= 6; m++) {
+      const std::complex<double> expected =
+          ((m % 2 == 0) ? 1.0 : -1.0) * std::conj(q6[6 - m]);
+      REQUIRE_THAT(q6[6 + m].real(),
+                   Catch::Matchers::WithinAbs(expected.real(), 1e-15));
+      REQUIRE_THAT(q6[6 + m].imag(),
+                   Catch::Matchers::WithinAbs(expected.imag(), 1e-15));
+    }
+  }
+}
+
+TEST_CASE("per-order lookup agrees with the vector form", "[bop]") {
+  const std::vector<std::pair<double, double>> directions = {
+      {0.7, 1.2}, {2.31, 5.02}};
+
+  for (const auto &[theta, phi] : directions) {
+    const std::array<double, 2> angles = {phi, theta};
+
+    auto q3 = sph::lookupTableQ3Vec(angles);
+    for (int m = 0; m < 7; m++) {
+      const auto single = sph::lookupTableQ3(m, angles);
+      REQUIRE_THAT(single.real(),
+                   Catch::Matchers::WithinAbs(q3[m].real(), 1e-15));
+      REQUIRE_THAT(single.imag(),
+                   Catch::Matchers::WithinAbs(q3[m].imag(), 1e-15));
+    }
+
+    auto q6 = sph::lookupTableQ6Vec(angles);
+    for (int m = 0; m < 13; m++) {
+      const auto single = sph::lookupTableQ6(m, angles);
+      REQUIRE_THAT(single.real(),
+                   Catch::Matchers::WithinAbs(q6[m].real(), 1e-15));
+      REQUIRE_THAT(single.imag(),
+                   Catch::Matchers::WithinAbs(q6[m].imag(), 1e-15));
+    }
+  }
+}
