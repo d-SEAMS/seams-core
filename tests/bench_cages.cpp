@@ -62,9 +62,9 @@ int main(int argc, char **argv) {
   auto nList = nneigh::neighListO(3.5, yCloud, 1);
   auto hbondIdx = nneigh::neighbourListByIndex(yCloud, nList);
 
-  std::vector<std::vector<int>> rings;
+  std::vector<std::vector<int>> rings = primitive::ringNetwork(hbondIdx, 7);
   const double tRings =
-      bestMillis([&]() { rings = primitive::ringNetwork(hbondIdx, 7); }, 1);
+      bestMillis([&]() { rings = primitive::ringNetwork(hbondIdx, 7); }, reps);
 
   // Only the six-membered rings take part in DDC and HC detection
   std::vector<std::vector<int>> sixRings;
