@@ -13,6 +13,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <bop.hpp>
+#include <algorithm>
 #include <cmath>
 #include <complex>
 #include <iostream>
@@ -179,6 +180,52 @@ harmonicPair(int orderL, int absM, const AngularTerms &terms) {
       ((absM % 2 == 0) ? amplitude : -amplitude) * terms.phase[absM];
 
   return {negative, positive};
+}
+
+/**
+ * @details Selects the neighbours CHILL and CHILL+ are defined over.
+ *
+ *  Both schemes fix the coordination at @f$N_b(i) = 4@f$: Moore, de la Llave,
+ *  Welke, Scherlis and Molinero (Phys. Chem. Chem. Phys. 12, 4124, 2010) and
+ *  Nguyen and Molinero (J. Phys. Chem. B 119, 9369, 2015) both average the
+ *  spherical harmonics over the four nearest neighbours, not over whatever
+ *  falls inside a distance cutoff. On an ordered lattice the two coincide; in
+ *  disordered or interfacial water they do not, which is where the
+ *  classification is actually used.
+ *
+ *  Where fewer than four neighbours are available the shorter list is
+ *  returned, since there is no fourth neighbour to choose.
+ * @param[in] yCloud The input molSys::PointCloud.
+ * @param[in] nList Row-ordered neighbour list, by atom ID.
+ * @param[in] iatomIndex Index of the particle whose neighbours are wanted.
+ * @return Cloud indices of the four nearest neighbours, nearest first.
+ */
+std::vector<int> nearestNeighbourIndices(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<std::vector<int>> &nList, int iatomIndex) {
+  constexpr size_t kCoordination = 4;
+
+  std::vector<std::pair<double, int>> candidates;
+  candidates.reserve(nList[iatomIndex].size());
+  for (size_t j = 1; j < nList[iatomIndex].size(); j++) {
+    const auto it = yCloud.idIndexMap.find(nList[iatomIndex][j]);
+    if (it == yCloud.idIndexMap.end()) {
+      continue;
+    }
+    candidates.emplace_back(gen::periodicDistSq(yCloud, iatomIndex, it->second),
+                            it->second);
+  }
+
+  const size_t keep = std::min(kCoordination, candidates.size());
+  std::partial_sort(candidates.begin(), candidates.begin() + keep,
+                    candidates.end());
+
+  std::vector<int> nearest;
+  nearest.reserve(keep);
+  for (size_t k = 0; k < keep; k++) {
+    nearest.push_back(candidates[k].second);
+  }
+  return nearest;
 }
 
 } // namespace
@@ -386,22 +433,13 @@ chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     iatomIndex = iatom;
     iatomID =
         nList[iatomIndex][0]; // The first element in nList is the ID of iatom
-    nnumNeighbours = nList[iatomIndex].size() - 1;
-    // Now loop over the first four neighbours
-    for (int j = 1; j <= nnumNeighbours; j++) {
-      // Get the ID of jatom saved in the neighbour list
-      jatomID = nList[iatomIndex][j];
-
-      // Get the index of jatom
-      auto it = yCloud.idIndexMap.find(jatomID);
-
-      if (it != yCloud.idIndexMap.end()) {
-        jatomIndex = it->second;
-      } // found jatom
-      else {
-        std::cerr << "Something is wrong with the ID and index map.\n";
-        return;
-      } // error handling
+    // CHILL and CHILL+ average over the four nearest neighbours, not over
+    // every neighbour that falls inside the cutoff
+    const std::vector<int> nearest =
+        nearestNeighbourIndices(yCloud, nList, iatomIndex);
+    nnumNeighbours = static_cast<int>(nearest.size());
+    for (int j = 0; j < nnumNeighbours; j++) {
+      jatomIndex = nearest[j];
 
       // Get the relative distance now that the index values are known
       delta = gen::relDist(yCloud, iatomIndex, jatomIndex);
@@ -411,7 +449,7 @@ chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
       angles[0] = atan2(delta[0], delta[1]); // phi
 
       // Now add over all nearest neighbours
-      if (j == 1) {
+      if (j == 0) {
         QlmTotal.ptq[iatomIndex].ylm = sph::spheriHarmo(3, angles);
         // QlmTotal.ptq[iatom].ylm = sph::lookupTableQ3Vec(angles);
         continue;
@@ -443,26 +481,18 @@ chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     }
     // The index is what we are looping through
     iatomIndex = iatom;
-    nnumNeighbours = nList[iatomIndex].size() - 1;
+    // The same four neighbours the q_lm were averaged over, so that the bond
+    // count the classification tables are written against matches
+    const std::vector<int> nearestBonds =
+        nearestNeighbourIndices(yCloud, nList, iatomIndex);
+    nnumNeighbours = static_cast<int>(nearestBonds.size());
     yCloud.pts[iatomIndex].c_ij.reserve(nnumNeighbours);
-    // loop over the 4 nearest neighbours
-    for (int j = 1; j <= nnumNeighbours; j++) {
+    for (int j = 0; j < nnumNeighbours; j++) {
       // Init to zero
       dot_product = {0, 0};
       Inorm = {0, 0};
       Jnorm = {0, 0};
-      // Get ID of the nearest neighbour
-      jatomID = nList[iatomIndex][j];
-      // Get the index (value) from the ID (key)
-      auto it = yCloud.idIndexMap.find(jatomID);
-
-      if (it != yCloud.idIndexMap.end()) {
-        jatomIndex = it->second;
-      } // found jatom
-      else {
-        std::cerr << "Something is wrong with the ID and index map.\n";
-        return;
-      } // error handling
+      jatomIndex = nearestBonds[j];
       // Spherical harmonics
       for (int m = 0; m < 2 * l + 1; m++) {
         qI = QlmTotal.ptq[iatomIndex].ylm[m];
@@ -515,7 +545,9 @@ void chill::getIceTypeNoPrint(
     num_staggrd = num_eclipsd = na =
         0; // init to zero before loop through neighbours
 
-    nnumNeighbours = nList[iatom].size() - 1;
+    // c_ij is the bond list the correlation pass actually produced; the
+    // neighbour list is not a proxy for its length
+    nnumNeighbours = yCloud.pts[iatom].c_ij.size();
     // Loop through the bond cij and get the number of staggered, eclipsed bonds
     for (int j = 0; j < nnumNeighbours; j++) {
       bondType = yCloud.pts[iatom].c_ij[j].classifier;
@@ -583,7 +615,9 @@ chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     num_staggrd = num_eclipsd = na =
         0; // init to zero before loop through neighbours
 
-    nnumNeighbours = nList[iatom].size() - 1;
+    // c_ij is the bond list the correlation pass actually produced; the
+    // neighbour list is not a proxy for its length
+    nnumNeighbours = yCloud.pts[iatom].c_ij.size();
     // Loop through the bond cij and get the number of staggered, eclipsed bonds
     for (int j = 0; j < nnumNeighbours; j++) {
       bondType = yCloud.pts[iatom].c_ij[j].classifier;
@@ -689,22 +723,13 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     iatomIndex = iatom;
     iatomID =
         nList[iatomIndex][0]; // The first element in nList is the ID of iatom
-    nnumNeighbours = nList[iatomIndex].size() - 1;
-    // Now loop over the first four neighbours
-    for (int j = 1; j <= nnumNeighbours; j++) {
-      // Get the ID of jatom saved in the neighbour list
-      jatomID = nList[iatomIndex][j];
-
-      // Get the index of jatom
-      auto it = yCloud.idIndexMap.find(jatomID);
-
-      if (it != yCloud.idIndexMap.end()) {
-        jatomIndex = it->second;
-      } // found jatom
-      else {
-        std::cerr << "Something is wrong with the ID and index map.\n";
-        return;
-      } // error handling
+    // CHILL and CHILL+ average over the four nearest neighbours, not over
+    // every neighbour that falls inside the cutoff
+    const std::vector<int> nearest =
+        nearestNeighbourIndices(yCloud, nList, iatomIndex);
+    nnumNeighbours = static_cast<int>(nearest.size());
+    for (int j = 0; j < nnumNeighbours; j++) {
+      jatomIndex = nearest[j];
 
       // Get the relative distance now that the index values are known
       delta = gen::relDist(yCloud, iatomIndex, jatomIndex);
@@ -714,7 +739,7 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
       angles[0] = atan2(delta[0], delta[1]); // phi
 
       // Now add over all nearest neighbours
-      if (j == 1) {
+      if (j == 0) {
         QlmTotal.ptq[iatomIndex].ylm = sph::spheriHarmo(3, angles);
         // QlmTotal.ptq[iatom].ylm = sph::lookupTableQ3Vec(angles);
         continue;
@@ -746,26 +771,18 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     }
     // The index is what we are looping through
     iatomIndex = iatom;
-    nnumNeighbours = nList[iatomIndex].size() - 1;
+    // The same four neighbours the q_lm were averaged over, so that the bond
+    // count the classification tables are written against matches
+    const std::vector<int> nearestBonds =
+        nearestNeighbourIndices(yCloud, nList, iatomIndex);
+    nnumNeighbours = static_cast<int>(nearestBonds.size());
     yCloud.pts[iatomIndex].c_ij.reserve(nnumNeighbours);
-    // loop over the 4 nearest neighbours
-    for (int j = 1; j <= nnumNeighbours; j++) {
+    for (int j = 0; j < nnumNeighbours; j++) {
       // Init to zero
       dot_product = {0, 0};
       Inorm = {0, 0};
       Jnorm = {0, 0};
-      // Get ID of the nearest neighbour
-      jatomID = nList[iatomIndex][j];
-      // Get the index (value) from the ID (key)
-      auto it = yCloud.idIndexMap.find(jatomID);
-
-      if (it != yCloud.idIndexMap.end()) {
-        jatomIndex = it->second;
-      } // found jatom
-      else {
-        std::cerr << "Something is wrong with the ID and index map.\n";
-        return;
-      } // error handling
+      jatomIndex = nearestBonds[j];
       // Spherical harmonics
       for (int m = 0; m < 2 * l + 1; m++) {
         qI = QlmTotal.ptq[iatomIndex].ylm[m];
@@ -833,8 +850,8 @@ chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     }
     total++; // Update the total number of atoms considered. Change this to a
              // check for slices
-    nnumNeighbours =
-        nList[iatom].size() - 1; // number of nearest neighbours (total -1)
+    // Bound on the bonds that were recorded, not on the neighbour list
+    nnumNeighbours = yCloud.pts[iatom].c_ij.size();
     num_staggrd = num_eclipsd = na =
         0; // init to zero before loop through neighbours
     // Loop through the bond cij and get the number of staggered, eclipsed bonds
@@ -1262,8 +1279,8 @@ int chill::numStaggered(
   int num_staggrd = 0;        // Number of staggered bonds
   molSys::bond_type bondType; // Bond type
   int num_bonds;              // No. of bonds of the jatom
-  int nnumNeighbours =
-      nList[jatom].size() - 1; // No. of nearest neighbours of index jatom
+  // Bound on the bonds recorded for jatom, not on its neighbour-list row
+  int nnumNeighbours = yCloud.pts[jatom].c_ij.size();
 
   // Loop over all bonds
   for (int i = 0; i < nnumNeighbours; i++) {
