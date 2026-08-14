@@ -124,19 +124,20 @@ void runOffload(const NeighbourCSR &g, int orderL, std::vector<double> &qlm,
   const int offN = n + 1;
   const int qlmN = static_cast<int>(qlm.size());
 
-#pragma omp target teams distribute parallel for                                      \
-    map(to : xyz[0 : xyzN], offsets[0 : offN], cols[0 : nnz], bx, by, bz,             \
-            orderL) map(from : qlmP[0 : qlmN])
-  for (int i = 0; i < n; i++) {
-    seams::steinhardt::qlmOneAtom(i, orderL, xyz, offsets, cols, bx, by, bz,
-                                  qlmP);
-  }
-
-#pragma omp target teams distribute parallel for                                      \
-    map(to : qlmP[0 : qlmN], offsets[0 : offN], cols[0 : nnz], orderL)                \
-        map(from : qlP[0 : n], qlBarP[0 : n])
-  for (int i = 0; i < n; i++) {
-    seams::steinhardt::qlOneAtom(i, orderL, qlmP, offsets, cols, qlP, qlBarP);
+#pragma omp target data map(to : xyz[0 : xyzN], offsets[0 : offN],                    \
+                                cols[0 : nnz], bx, by, bz, orderL)                    \
+    map(alloc : qlmP[0 : qlmN]) map(from : qlP[0 : n], qlBarP[0 : n])
+  {
+#pragma omp target teams distribute parallel for
+    for (int i = 0; i < n; i++) {
+      seams::steinhardt::qlmOneAtom(i, orderL, xyz, offsets, cols, bx, by, bz,
+                                    qlmP);
+    }
+#pragma omp target teams distribute parallel for
+    for (int i = 0; i < n; i++) {
+      seams::steinhardt::qlOneAtom(i, orderL, qlmP, offsets, cols, qlP,
+                                   qlBarP);
+    }
   }
 }
 #endif
