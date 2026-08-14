@@ -284,6 +284,38 @@ TEST_CASE("neighbour builders return empty when the cloud has no box",
   REQUIRE(nneigh::getNewNeighbourListByIndex(cloud, 3.5).empty());
 }
 
+TEST_CASE("neighList same type does not self-include or double-count",
+          "[neighbours]") {
+  auto cloud = makeFourAtomCloud();
+  auto nList = nneigh::neighList(1.5, cloud, 1, 1);
+  REQUIRE(nList.size() == 4);
+  for (int i = 0; i < 4; i++) {
+    REQUIRE(nList[i][0] == i);
+    auto neigh = nList[i];
+    std::sort(neigh.begin() + 1, neigh.end());
+    REQUIRE(std::adjacent_find(neigh.begin() + 1, neigh.end()) == neigh.end());
+    REQUIRE(std::find(neigh.begin() + 1, neigh.end(), i) == neigh.end());
+  }
+  REQUIRE(nList[0].size() == 3);
+  REQUIRE(nList[3].size() == 1);
+}
+
+TEST_CASE("neighbourListByIndex skips empty rows and unknown IDs",
+          "[neighbours]") {
+  auto cloud = makeFourAtomCloud();
+  cloud.idIndexMap.erase(2);
+  std::vector<std::vector<int>> nList = {{0, 1, 2}, {}, {2, 0}, {3, 99}};
+  auto idx = nneigh::neighbourListByIndex(cloud, nList);
+  REQUIRE(idx.size() == 4);
+  REQUIRE(idx[0][0] == 0);
+  REQUIRE(std::find(idx[0].begin() + 1, idx[0].end(), 1) != idx[0].end());
+  REQUIRE(std::find(idx[0].begin() + 1, idx[0].end(), 2) == idx[0].end());
+  REQUIRE(idx[1].empty());
+  REQUIRE(idx[2].empty());
+  REQUIRE(idx[3].size() == 1);
+  REQUIRE(idx[3][0] == 3);
+}
+
 TEST_CASE("neighListO leaves an unmapped atom as an empty row",
           "[neighbours]") {
   auto cloud = makeFourAtomCloud();

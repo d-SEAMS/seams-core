@@ -116,6 +116,7 @@ bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   if (status != 0) {
     std::cerr << "Vesin failed: " << (error_message ? error_message : "unknown")
               << "; falling back to brute force.\n";
+    vesin_free(&neighbors);
     return false;
   }
 
@@ -210,29 +211,25 @@ nneigh::neighList(double rcutoff,
   // Compare squared distances so that the per-pair square root is avoided
   const double rcutoffSq = rcutoff * rcutoff;
 
-  // pairs of atoms of type I and J
-  // Loop through every iatom and find nearest neighbours within rcutoff
+  // Pairs of type I and type J. When the types coincide the full i x j
+  // product would write each unordered pair twice and accept iatom == jatom
+  // (distance 0). Walk j > i in that case, matching halfNeighList.
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     if (yCloud.pts[iatom].type != typeI) {
       continue;
     }
-    // Loop through the other atoms
-    for (int jatom = 0; jatom < yCloud.nop; jatom++) {
+    const int jStart = (typeI == typeJ) ? iatom + 1 : 0;
+    for (int jatom = jStart; jatom < yCloud.nop; jatom++) {
       if (yCloud.pts[jatom].type != typeJ) {
         continue;
       }
-      // If the distance is greater than rcutoff, continue
       if (gen::periodicDistSq(yCloud, iatom, jatom) > rcutoffSq) {
         continue;
       }
-
-      // Update the neighbour indices with atom IDs for iatom and jatom both
-      // (full list)
       appendNeighbourID(nList, indexToID, iatom, jatom);
       appendNeighbourID(nList, indexToID, jatom, iatom);
-
-    } // End of loop through jatom
-  }   // End of loop for iatom
+    }
+  }
 
   return nList;
 }
@@ -493,41 +490,30 @@ std::vector<std::vector<int>> nneigh::neighbourListByIndex(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList) {
   //
-  std::vector<std::vector<int>> indexNlist; // Desired neighbour list of indices
-  int iatomID, jatomID;                     // Atom IDs
-  int iatomIndex, jatomIndex;               // Indices of iatom and jatom
-  int nnumNeighbours;                       // Number of nearest neighbours
+  std::vector<std::vector<int>> indexNlist(nList.size());
+  int iatomID, jatomID;
+  int iatomIndex;
 
-  // Loop through every atom whose neighbours are contained in the neighbour
-  // list
-  for (int iatom = 0; iatom < nList.size(); iatom++) {
-    iatomID = nList[iatom][0]; // Atom ID
-    // Get the index of iatom
+  for (size_t iatom = 0; iatom < nList.size(); iatom++) {
+    if (nList[iatom].empty()) {
+      continue;
+    }
+    iatomID = nList[iatom][0];
     auto gotI = yCloud.idIndexMap.find(iatomID);
-    if (gotI != yCloud.idIndexMap.end()) {
-      iatomIndex = gotI->second;
-    } // found iatomIndex
-    //
-    nnumNeighbours = nList[iatomIndex].size() - 1;
-    // Update the new neighbour list
-    indexNlist.push_back(
-        std::vector<int>()); // Empty vector for the index iatom
-    // Fill the first element with the atom ID of iatom itself
+    if (gotI == yCloud.idIndexMap.end()) {
+      continue;
+    }
+    iatomIndex = gotI->second;
     indexNlist[iatom].push_back(iatomIndex);
-    //
-    // Loop through the neighbours of iatom
-    for (int jatom = 1; jatom <= nnumNeighbours; jatom++) {
-      jatomID = nList[iatomIndex][jatom]; // Atom ID of neighbour
-      //
-      // Get the index of the j^th atom
+    for (size_t j = 1; j < nList[iatom].size(); j++) {
+      jatomID = nList[iatom][j];
       auto gotJ = yCloud.idIndexMap.find(jatomID);
-      if (gotJ != yCloud.idIndexMap.end()) {
-        jatomIndex = gotJ->second;
-      } // found jatomIndex
-      // Add to the neighbour list
-      indexNlist[iatom].push_back(jatomIndex);
-    } // end of loop through neighbours
-  }   // end of loop through every atom
+      if (gotJ == yCloud.idIndexMap.end()) {
+        continue;
+      }
+      indexNlist[iatom].push_back(gotJ->second);
+    }
+  }
 
   // Return the new neighbour list
   return indexNlist;
