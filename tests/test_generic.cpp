@@ -221,6 +221,15 @@ TEST_CASE("getAverageWithoutOutliers does not crash when all values are outliers
   REQUIRE_THAT(avg, Catch::Matchers::WithinAbs(1.0, 1e-10));
 }
 
+TEST_CASE("getAverageWithoutOutliers handles odd length and empty input",
+          "[generic]") {
+  REQUIRE(gen::getAverageWithoutOutliers({}) == 0.0);
+  REQUIRE_THAT(gen::getAverageWithoutOutliers({2.0}),
+               Catch::Matchers::WithinAbs(2.0, 1e-10));
+  REQUIRE_THAT(gen::getAverageWithoutOutliers({1.0, 2.0, 3.0}),
+               Catch::Matchers::WithinAbs(2.0, 1e-10));
+}
+
 TEST_CASE("getAverageWithoutOutliers normal case with outlier excluded",
           "[generic]") {
   // {1, 2, 3, 4, 5, 100} -- 100 is an outlier
