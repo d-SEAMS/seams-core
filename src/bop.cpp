@@ -13,7 +13,146 @@
 //-----------------------------------------------------------------------------------
 
 #include <bop.hpp>
+#include <cmath>
+#include <complex>
 #include <iostream>
+#include <numbers>
+#include <utility>
+
+namespace {
+
+/**
+ * @brief Powers of @f$\sin\theta@f$ and @f$\cos\theta@f$ together with the
+ *  unit-modulus phases @f$e^{im\phi}@f$, evaluated once per direction.
+ * @details The closed forms for @f$Y_{3m}@f$ and @f$Y_{6m}@f$ need
+ *  @f$\sin^k\theta@f$ and @f$\cos^k\theta@f$ up to @f$k=6@f$ and the phases for
+ *  @f$|m| \leq 6@f$. Building them by recurrence costs two calls to the
+ *  trigonometric library per direction, shared across every @f$m@f$.
+ */
+struct AngularTerms {
+  std::array<double, 7> sinPow;             //! sinPow[k] = sin(theta)^k
+  std::array<double, 7> cosPow;             //! cosPow[k] = cos(theta)^k
+  std::array<std::complex<double>, 7> phase; //! phase[k] = exp(i k phi)
+
+  AngularTerms(double theta, double phi) {
+    const double sinTheta = std::sin(theta);
+    const double cosTheta = std::cos(theta);
+    const std::complex<double> unitPhase(std::cos(phi), std::sin(phi));
+
+    sinPow[0] = 1.0;
+    cosPow[0] = 1.0;
+    phase[0] = {1.0, 0.0};
+    for (std::size_t k = 1; k < sinPow.size(); k++) {
+      sinPow[k] = sinPow[k - 1] * sinTheta;
+      cosPow[k] = cosPow[k - 1] * cosTheta;
+      phase[k] = phase[k - 1] * unitPhase;
+    }
+  }
+};
+
+/**
+ * @brief Normalisation constants @f$N_{lm}@f$ of the Condon-Shortley spherical
+ *  harmonics, for @f$m \geq 0@f$.
+ * @details Held as function-local statics so that the square roots are
+ *  evaluated once for the lifetime of the process rather than per call.
+ */
+const std::array<double, 4> &normQ3() {
+  static const std::array<double, 4> values = {
+      0.25 * std::sqrt(7.0 / std::numbers::pi),           // m = 0
+      0.125 * std::sqrt(21.0 / std::numbers::pi),         // |m| = 1
+      0.25 * std::sqrt(105.0 / (2.0 * std::numbers::pi)), // |m| = 2
+      0.125 * std::sqrt(35.0 / std::numbers::pi)};        // |m| = 3
+  return values;
+}
+
+const std::array<double, 7> &normQ6() {
+  static const std::array<double, 7> values = {
+      0.03125 * std::sqrt(13.0 / std::numbers::pi),         // m = 0
+      0.0625 * std::sqrt(273.0 / (2.0 * std::numbers::pi)), // |m| = 1
+      0.015625 * std::sqrt(1365.0 / std::numbers::pi),      // |m| = 2
+      0.03125 * std::sqrt(1365.0 / std::numbers::pi),       // |m| = 3
+      0.09375 * std::sqrt(91.0 / (2.0 * std::numbers::pi)), // |m| = 4
+      0.09375 * std::sqrt(1001.0 / std::numbers::pi),       // |m| = 5
+      0.015625 * std::sqrt(3003.0 / std::numbers::pi)};     // |m| = 6
+  return values;
+}
+
+/**
+ * @brief The associated-Legendre amplitude of @f$Y_{lm}@f$ stripped of its
+ *  normalisation and azimuthal phase.
+ * @param[in] orderL Degree @f$l@f$; either 3 or 6.
+ * @param[in] absM Absolute order @f$|m|@f$.
+ * @param[in] terms Precomputed powers of the polar angle.
+ * @return The real amplitude @f$P_{l|m|}(\cos\theta)@f$ in the convention used
+ *  by the hard-coded tables.
+ */
+double legendreAmplitude(int orderL, int absM, const AngularTerms &terms) {
+  const auto &s = terms.sinPow;
+  const auto &c = terms.cosPow;
+
+  if (orderL == 3) {
+    switch (absM) {
+    case 0:
+      return 5.0 * c[3] - 3.0 * c[1];
+    case 1:
+      return s[1] * (5.0 * c[2] - 1.0);
+    case 2:
+      return s[2] * c[1];
+    case 3:
+      return s[3];
+    default:
+      return 0.0;
+    }
+  }
+
+  if (orderL == 6) {
+    switch (absM) {
+    case 0:
+      return 231.0 * c[6] - 315.0 * c[4] + 105.0 * c[2] - 5.0;
+    case 1:
+      return s[1] * (33.0 * c[5] - 30.0 * c[3] + 5.0 * c[1]);
+    case 2:
+      return s[2] * (33.0 * c[4] - 18.0 * c[2] + 1.0);
+    case 3:
+      return s[3] * (11.0 * c[3] - 3.0 * c[1]);
+    case 4:
+      return s[4] * (11.0 * c[2] - 1.0);
+    case 5:
+      return s[5] * c[1];
+    case 6:
+      return s[6];
+    default:
+      return 0.0;
+    }
+  }
+
+  return 0.0;
+}
+
+/**
+ * @brief Evaluates the conjugate pair @f$(Y_{l,-m}, Y_{l,+m})@f$ for
+ *  @f$m \geq 0@f$.
+ * @details The two members satisfy
+ *  @f$Y_{l,m} = (-1)^m Y_{l,-m}^{*}@f$ exactly, since both are formed from the
+ *  same amplitude and the same phase.
+ * @param[in] orderL Degree @f$l@f$; either 3 or 6.
+ * @param[in] absM Absolute order @f$|m|@f$.
+ * @param[in] terms Precomputed powers and phases.
+ * @return A pair holding @f$Y_{l,-m}@f$ then @f$Y_{l,+m}@f$.
+ */
+std::pair<std::complex<double>, std::complex<double>>
+harmonicPair(int orderL, int absM, const AngularTerms &terms) {
+  const double norm = (orderL == 3) ? normQ3()[absM] : normQ6()[absM];
+  const double amplitude = norm * legendreAmplitude(orderL, absM, terms);
+
+  const std::complex<double> negative = amplitude * std::conj(terms.phase[absM]);
+  const std::complex<double> positive =
+      ((absM % 2 == 0) ? amplitude : -amplitude) * terms.phase[absM];
+
+  return {negative, positive};
+}
+
+} // namespace
 
 /**
  * @details Function for calculating spherical harmonics. Dispatches to
@@ -61,15 +200,13 @@ std::array<double, 2> sph::radialCoord(std::array<double, 3> cartCoord) {
  */
 std::vector<std::complex<double>>
 sph::lookupTableQ3Vec(std::array<double, 2> angles) {
-  // For keeping track of the index of the output vector
-  std::vector<std::complex<double>> result;
-  double theta = angles[1];
-  double phi = angles[0];
+  const AngularTerms terms(angles[1], angles[0]);
+  std::vector<std::complex<double>> result(7);
 
-  result.resize(7);
-
-  for (int m = 0; m < 7; m++) {
-    result[m] = sph::lookupTableQ3(m, angles);
+  for (int m = 0; m <= 3; m++) {
+    const auto [negative, positive] = harmonicPair(3, m, terms);
+    result[3 - m] = negative;
+    result[3 + m] = positive;
   }
 
   return result;
@@ -87,48 +224,15 @@ sph::lookupTableQ3Vec(std::array<double, 2> angles) {
  *   values
  */
 std::complex<double> sph::lookupTableQ3(int m, std::array<double, 2> angles) {
-  std::complex<double> result(0.0, 0.0);
-  const double pi = std::acos(-1);
-  const std::complex<double> i(0.0, 1.0);
-  double constant;
-  double theta = angles[1];
-  double phi = angles[0];
-
-  if (m == 0) {
-    constant = 0.125 * std::sqrt(35 / pi);
-    result = constant * std::exp(-3.0 * i * phi) * std::pow(sin(theta), 3.0);
-    return result;
-  } else if (m == 1) {
-    constant = 0.25 * std::sqrt(105 / (2 * pi));
-    result = constant * std::exp(-2.0 * i * phi) * std::pow(sin(theta), 2.0) *
-             cos(theta);
-    return result;
-  } else if (m == 2) {
-    constant = 0.125 * std::sqrt(21 / pi);
-    result = constant * std::exp(-1.0 * i * phi) * sin(theta) *
-             (5.0 * std::pow(cos(theta), 2.0) - 1);
-    return result;
-  } else if (m == 3) {
-    constant = 0.25 * std::sqrt(7 / pi);
-    result = constant * (5.0 * std::pow(cos(theta), 3.0) - 3.0 * cos(theta));
-    return result;
-  } else if (m == 4) {
-    constant = -0.125 * std::sqrt(21 / pi);
-    result = constant * std::exp(i * phi) * sin(theta) *
-             (5.0 * std::pow(cos(theta), 2.0) - 1);
-    return result;
-  } else if (m == 5) {
-    constant = 0.25 * std::sqrt(105 / (2 * pi));
-    result = constant * std::exp(2.0 * i * phi) * std::pow(sin(theta), 2.0) *
-             cos(theta);
-    return result;
-  } else if (m == 6) {
-    constant = -0.125 * std::sqrt(35 / pi);
-    result = constant * std::exp(3.0 * i * phi) * std::pow(sin(theta), 3.0);
-    return result;
+  if (m < 0 || m > 6) {
+    return {0.0, 0.0};
   }
 
-  return result;
+  const AngularTerms terms(angles[1], angles[0]);
+  const int order = m - 3; // table index 0..6 maps to m = -3..3
+  const auto [negative, positive] = harmonicPair(3, std::abs(order), terms);
+
+  return (order < 0) ? negative : positive;
 }
 
 /**
@@ -143,15 +247,13 @@ std::complex<double> sph::lookupTableQ3(int m, std::array<double, 2> angles) {
  */
 std::vector<std::complex<double>>
 sph::lookupTableQ6Vec(std::array<double, 2> angles) {
-  // For keeping track of the index of the output vector
-  std::vector<std::complex<double>> result;
-  double theta = angles[1];
-  double phi = angles[0];
+  const AngularTerms terms(angles[1], angles[0]);
+  std::vector<std::complex<double>> result(13);
 
-  result.resize(13);
-
-  for (int m = 0; m < 13; m++) {
-    result[m] = sph::lookupTableQ6(m, angles);
+  for (int m = 0; m <= 6; m++) {
+    const auto [negative, positive] = harmonicPair(6, m, terms);
+    result[6 - m] = negative;
+    result[6 + m] = positive;
   }
 
   return result;
@@ -169,89 +271,20 @@ sph::lookupTableQ6Vec(std::array<double, 2> angles) {
  *   values
  */
 std::complex<double> sph::lookupTableQ6(int m, std::array<double, 2> angles) {
-  std::complex<double> result(0.0, 0.0);
-  const double pi = std::acos(-1);
-  const std::complex<double> i(0.0, 1.0);
-  double constant;
-  double theta = angles[1];
-  double phi = angles[0];
-
-  if (m == 0) {
-    constant = 0.015625 * std::sqrt(3003 / pi);
-    result = constant * std::exp(-6.0 * i * phi) * std::pow(sin(theta), 6.0);
-    return result;
-  } else if (m == 1) {
-    constant = 0.09375 * std::sqrt(1001 / pi);
-    result = constant * std::exp(-5.0 * i * phi) * std::pow(sin(theta), 5.0) *
-             cos(theta);
-    return result;
-  } else if (m == 2) {
-    constant = 0.09375 * std::sqrt(91 / (2 * pi));
-    result = constant * std::exp(-4.0 * i * phi) * std::pow(sin(theta), 4.0) *
-             (11.0 * std::pow(cos(theta), 2.0) - 1);
-    return result;
-  } else if (m == 3) {
-    constant = 0.03125 * std::sqrt(1365 / pi);
-    result = constant * std::exp(-3.0 * i * phi) * std::pow(sin(theta), 3.0) *
-             (11.0 * std::pow(cos(theta), 3.0) - 3.0 * cos(theta));
-    return result;
-  } else if (m == 4) {
-    constant = 0.015625 * std::sqrt(1365 / pi);
-    result = constant * std::exp(-2.0 * i * phi) * std::pow(sin(theta), 2.0) *
-             (33.0 * std::pow(cos(theta), 4.0) -
-              18.0 * std::pow(cos(theta), 2.0) + 1.0);
-    return result;
-  } else if (m == 5) {
-    constant = 0.0625 * std::sqrt(273 / (2 * pi));
-    result = constant * std::exp(-1.0 * i * phi) * sin(theta) *
-             (33.0 * std::pow(cos(theta), 5.0) -
-              30.0 * std::pow(cos(theta), 3.0) + 5.0 * cos(theta));
-    return result;
-  } else if (m == 6) {
-    constant = 0.03125 * std::sqrt(13 / pi);
-    result = constant * (231.0 * std::pow(cos(theta), 6.0) -
-                         315.0 * std::pow(cos(theta), 4.0) +
-                         105.0 * std::pow(cos(theta), 2.0) - 5.0);
-    return result;
-  } else if (m == 7) {
-    constant = -0.0625 * std::sqrt(273 / (2 * pi));
-    result = constant * std::exp(i * phi) * sin(theta) *
-             (33.0 * std::pow(cos(theta), 5.0) -
-              30.0 * std::pow(cos(theta), 3.0) + 5.0 * cos(theta));
-    return result;
-  } else if (m == 8) {
-    constant = 0.015625 * std::sqrt(1365 / pi);
-    result = constant * std::exp(2.0 * i * phi) * std::pow(sin(theta), 2.0) *
-             (33.0 * std::pow(cos(theta), 4.0) -
-              18.0 * std::pow(cos(theta), 2.0) + 1.0);
-    return result;
-  } else if (m == 9) {
-    constant = -0.03125 * std::sqrt(1365 / pi);
-    result = constant * std::exp(3.0 * i * phi) * std::pow(sin(theta), 3.0) *
-             (11.0 * std::pow(cos(theta), 3.0) - 3.0 * cos(theta));
-    return result;
-  } else if (m == 10) {
-    constant = 0.09375 * std::sqrt(91 / (2 * pi));
-    result = constant * std::exp(4.0 * i * phi) * std::pow(sin(theta), 4.0) *
-             (11.0 * std::pow(cos(theta), 2.0) - 1);
-    return result;
-  } else if (m == 11) {
-    constant = -0.09375 * std::sqrt(1001 / pi);
-    result = constant * std::exp(5.0 * i * phi) * std::pow(sin(theta), 5.0) *
-             cos(theta);
-    return result;
-  } else if (m == 12) {
-    constant = 0.015625 * std::sqrt(3003 / pi);
-    result = constant * std::exp(6.0 * i * phi) * std::pow(sin(theta), 6.0);
-    return result;
+  if (m < 0 || m > 12) {
+    return {0.0, 0.0};
   }
 
-  return result;
+  const AngularTerms terms(angles[1], angles[0]);
+  const int order = m - 6; // table index 0..12 maps to m = -6..6
+  const auto [negative, positive] = harmonicPair(6, std::abs(order), terms);
+
+  return (order < 0) ? negative : positive;
 }
 
 //! Uses Boost for spherical harmonics, and gets c_ij according to the CHILL
 //! algorithm
-molSys::PointCloud<molSys::Point<double>, double>
+void
 chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                  const std::vector<std::vector<int>> &nList, bool isSlice) {
   //
@@ -298,7 +331,7 @@ chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
       } // found jatom
       else {
         std::cerr << "Something is wrong with the ID and index map.\n";
-        return yCloud;
+        return;
       } // error handling
 
       // Get the relative distance now that the index values are known
@@ -359,7 +392,7 @@ chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
       } // found jatom
       else {
         std::cerr << "Something is wrong with the ID and index map.\n";
-        return yCloud;
+        return;
       } // error handling
       // Spherical harmonics
       for (int m = 0; m < 2 * l + 1; m++) {
@@ -386,11 +419,11 @@ chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     } // end loop over nearest neighbours
   }
 
-  return yCloud;
+  return;
 }
 
 //! Classifies each atom according to the CHILL algorithm without printing
-molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypeNoPrint(
+void chill::getIceTypeNoPrint(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList, bool isSlice) {
   int ih, ic, water, interIce, unknown, total; // No. of particles of each type
@@ -453,11 +486,11 @@ molSys::PointCloud<molSys::Point<double>, double> chill::getIceTypeNoPrint(
 
   } // End of loop through every iatom
 
-  return yCloud;
+  return;
 }
 
 //! Classifies each atom according to the CHILL algorithm
-molSys::PointCloud<molSys::Point<double>, double>
+void
 chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                   const std::vector<std::vector<int>> &nList, std::string path,
                   int firstFrame, bool isSlice, std::string outputFileName) {
@@ -543,7 +576,7 @@ chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
              << interIce << " " << water << " " << total << "\n";
   outputFile.close();
 
-  return yCloud;
+  return;
 }
 
 /**
@@ -554,7 +587,7 @@ chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
  *  @param[in] nList Row-ordered neighbour list by atom ID
  *  @param[in] isSlice This decides whether there is a slice or not
  */
-molSys::PointCloud<molSys::Point<double>, double>
+void
 chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      const std::vector<std::vector<int>> &nList, bool isSlice) {
   //
@@ -601,7 +634,7 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
       } // found jatom
       else {
         std::cerr << "Something is wrong with the ID and index map.\n";
-        return yCloud;
+        return;
       } // error handling
 
       // Get the relative distance now that the index values are known
@@ -662,7 +695,7 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
       } // found jatom
       else {
         std::cerr << "Something is wrong with the ID and index map.\n";
-        return yCloud;
+        return;
       } // error handling
       // Spherical harmonics
       for (int m = 0; m < 2 * l + 1; m++) {
@@ -691,7 +724,7 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 
   // ------------------------------------------------
 
-  return yCloud;
+  return;
 }
 
 /**
@@ -707,7 +740,7 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
  *   will be written out.
  *   The default file name is "chillPlus.txt"
  */
-molSys::PointCloud<molSys::Point<double>, double>
+void
 chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                       const std::vector<std::vector<int>> &nList, std::string path,
                       int firstFrame, bool isSlice,
@@ -809,7 +842,7 @@ chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
              << " " << total << "\n";
   outputFile.close();
 
-  return yCloud;
+  return;
 }
 
 // TODO: Add code for slices!
@@ -964,7 +997,7 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
  *  @param[in] q6 Vector containing the previously calculated averaged @f$q_6@f$
  *   values (using chill::getq6)
  */
-molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
+void chill::reclassifyWater(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     std::vector<double> &q6) {
   // If averaged q6 > 0.5, then consider it to be ice
@@ -998,7 +1031,7 @@ molSys::PointCloud<molSys::Point<double>, double> chill::reclassifyWater(
     }       // end of check for water
   }         // End loop through every iatom
 
-  return yCloud;
+  return;
 }
 
 /**
