@@ -597,6 +597,22 @@ TEST_CASE("Q4 satisfies the addition theorem and Condon-Shortley", "[bop]") {
   }
 }
 
+TEST_CASE("device Ylm matches spheriHarmo for l=3,4,6", "[bop]") {
+  const std::array<double, 2> angles = {0.7, 1.2};
+  for (int l : {3, 4, 6}) {
+    auto host = sph::spheriHarmo(l, angles);
+    double dev[26];
+    seams::steinhardt::ylmAll(l, angles[1], angles[0], dev);
+    const int nComp = 2 * l + 1;
+    for (int m = 0; m < nComp; m++) {
+      REQUIRE_THAT(dev[2 * m],
+                   Catch::Matchers::WithinAbs(host[m].real(), 1e-12));
+      REQUIRE_THAT(dev[2 * m + 1],
+                   Catch::Matchers::WithinAbs(host[m].imag(), 1e-12));
+    }
+  }
+}
+
 TEST_CASE("steinhardtQl l=3 vanishes on an inversion-symmetric FCC lattice",
           "[bop]") {
   const double lattice = 4.0;
