@@ -5,6 +5,7 @@
 #include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <steinhardt_device.hpp>
 
 #include <cmath>
 #include <complex>

@@ -19,6 +19,7 @@ ydslib_sources = files(
   'seams_output.cpp',
   'selection.cpp',
   'shapeMatch.cpp',
+  'steinhardt_parallel.cpp',
   'topo_bulk.cpp',
   'topo_one_dim.cpp',
   'topo_two_dim.cpp',

@@ -43,6 +43,13 @@ lcov --remove bbdir-cov/meson-logs/coverage.info \
 [environments]
 docs = { features = ["docs"] }
 formalanalysis = { features = ["formalanalysis"] }
+mpi = { features = ["mpi"] }
+
+[feature.mpi]
+platforms = ["linux-64"]
+
+[feature.mpi.dependencies]
+openmpi = ">=5.0"
 
 [feature.formalanalysis]
 platforms = ["linux-64"]

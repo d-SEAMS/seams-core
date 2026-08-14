@@ -57,6 +57,47 @@ if openmp_dep.found()
   _args += ['-DSEAMS_HAS_OPENMP=1']
 endif
 
+# MPI is optional. Analysis splits atoms across ranks and Allgathervs
+# q_lm (Lechner-Dellago needs neighbours that may live on another rank).
+# This is not LAMMPS-style spatial decomposition (Plimpton 1995).
+mpi_found = false
+if get_option('with_mpi')
+  mpi_dep = dependency('mpi', language: 'cpp', required: false)
+  if mpi_dep.found()
+    _deps += [mpi_dep]
+    _args += ['-DSEAMS_HAS_MPI=1']
+    mpi_found = true
+  else
+    message('with_mpi=true but no MPI compiler wrapper was found')
+  endif
+endif
+
+# OpenMP target offload. The probe must actually link a target region;
+# a bare -fopenmp-targets flag is not enough (missing nvptx bitcode).
+offload_enabled = false
+if get_option('with_openmp_offload')
+  if not openmp_dep.found()
+    message('with_openmp_offload=true but OpenMP is not available')
+  else
+    offload_arg = '-fopenmp-targets=' + get_option('offload_triple')
+    offload_probe = '''
+      int main() {
+        #pragma omp target
+        { }
+        return 0;
+      }
+    '''
+    if cppc.links(offload_probe, args: ['-fopenmp', offload_arg],
+                  name: 'OpenMP target offload link')
+      _args += ['-DSEAMS_HAS_OFFLOAD=1', offload_arg]
+      offload_enabled = true
+    else
+      message('OpenMP target offload was requested but the compiler ' +
+              'cannot link a target region for ' + get_option('offload_triple'))
+    endif
+  endif
+endif
+
 hwy_dep = dependency('hwy', version: '>=1.3.0', required: false)
 if hwy_dep.found()
   _deps += [hwy_dep]
@@ -89,6 +130,8 @@ endif
 summary({
   'SIMD distance kernel (hwy)': hwy_dep.found(),
   'Shared-memory parallelism (OpenMP)': openmp_dep.found(),
+  'MPI atom split (Steinhardt)': mpi_found,
+  'OpenMP target offload': offload_enabled,
   'Cell-list neighbours (vesin)': vesin_dep.found(),
   'PDB/GRO/DCD readers (chemfiles)': chemfiles_dep.found(),
   '.con reader (readcon-core)': readcon_dep.found(),
