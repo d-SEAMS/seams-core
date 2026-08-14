@@ -241,11 +241,12 @@ reclassifyWater(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                  std::string path, int firstFrame, bool isSlice = false,
                  std::string outputFileName = "superChill.txt");
 
-//! Checks if a given iatom is interfacial ice or not, according to the CHILL
-//! algorithm
+//! Interfacial ice. Moore CHILL uses a neighbour with exactly two staggered
+//! bonds; Nguyen CHILL+ uses a neighbour with more than one. Pass
+//! chillPlus=true for the latter.
 bool isInterfacial(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                    const std::vector<std::vector<int>> &nList, int iatom,
-                   int num_staggrd, int num_eclipsd);
+                   int num_staggrd, int num_eclipsd, bool chillPlus = false);
 
 //! Finds the number of staggered bonds for a given atom of index jatom
 [[nodiscard]] int numStaggered(molSys::PointCloud<molSys::Point<double>, double> &yCloud,

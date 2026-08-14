@@ -210,11 +210,34 @@ TEST_CASE("getq6 computes Q6 order parameter for each atom", "[bop]") {
   auto q6 = chill::getq6(cloud, nList, false);
 
   REQUIRE(q6.size() == static_cast<size_t>(cloud.nop));
-  // Q6 values should be finite
   for (const auto &val : q6) {
     REQUIRE_FALSE(std::isnan(val));
     REQUIRE_FALSE(std::isinf(val));
   }
+}
+
+TEST_CASE("getq6 uses the four nearest neighbours, not the cutoff list",
+          "[bop]") {
+  auto tetra = makeTetraCloud();
+  auto nTetra = nneigh::neighListO(3.0, tetra, 1);
+  const double q0 = chill::getq6(tetra, nTetra, false)[0];
+
+  auto padded = tetra;
+  molSys::Point<double> extra;
+  extra.type = 1;
+  extra.atomID = 5;
+  extra.molID = 5;
+  extra.x = 10.0;
+  extra.y = 10.0;
+  extra.z = 12.8;
+  padded.pts.push_back(extra);
+  padded.idIndexMap[5] = padded.nop;
+  padded.nop += 1;
+  auto nPadded = nneigh::neighListO(3.0, padded, 1);
+  REQUIRE(nPadded[0].size() > nTetra[0].size());
+
+  const double q0Pad = chill::getq6(padded, nPadded, false)[0];
+  REQUIRE_THAT(q0Pad, Catch::Matchers::WithinAbs(q0, 1e-12));
 }
 
 TEST_CASE("reclassifyWater uses Q6 to reclassify water atoms", "[bop]") {
@@ -307,8 +330,38 @@ TEST_CASE("isInterfacial checks interfacial criteria", "[bop]") {
   chill::getCorrel(cloud, nList, false);
 
   bool result = chill::isInterfacial(cloud, nList, 0, 2, 1);
-  // Just check it doesn't crash; result depends on geometry
   REQUIRE((result == true || result == false));
+}
+
+TEST_CASE("CHILL+ interfacial accepts a neighbour with three staggered bonds",
+          "[bop]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {20.0, 20.0, 20.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  cloud.currentFrame = 1;
+  for (int i = 0; i < 2; i++) {
+    molSys::Point<double> pt;
+    pt.type = 1;
+    pt.atomID = i + 1;
+    pt.x = static_cast<double>(i);
+    pt.y = 0.0;
+    pt.z = 0.0;
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[pt.atomID] = i;
+  }
+  std::vector<std::vector<int>> nList = {{1, 2}, {2, 1}};
+  molSys::Result stag;
+  stag.classifier = molSys::bond_type::staggered;
+  stag.c_value = -0.9;
+  cloud.pts[1].c_ij = {stag, stag, stag};
+
+  const bool moore =
+      chill::isInterfacial(cloud, nList, 0, 3, 0, false);
+  const bool nguyen =
+      chill::isInterfacial(cloud, nList, 0, 3, 0, true);
+  REQUIRE_FALSE(moore);
+  REQUIRE(nguyen);
 }
 
 // ---------------------------------------------------------------------------

@@ -880,7 +880,8 @@ chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
         ih++;
       }
       // Interfacial
-      else if (isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd)) {
+      else if (isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd,
+                             true)) {
         yCloud.pts[iatom].iceType = molSys::atom_state_type::interfacial;
         interIce++;
       }
@@ -943,9 +944,7 @@ std::vector<double>
 chill::getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
              const std::vector<std::vector<int>> &nList, bool isSlice) {
   //
-  int l = 6;      // We're using q6 here
-  int jatomID;    // Atom ID of the nearest neighbour
-  int jatomIndex; // Index of nearest neighbour
+  int l = 6;
   std::array<double, 3> delta;
   std::array<double, 2> angles;
   chill::QlmAtom QlmTotal; // Qlm for each iatom
@@ -959,8 +958,7 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
   std::complex<double> complexDenominator = {0, 0};
   std::complex<double> complexCij = {0, 0};
   double cij_real;
-  int nnumNeighbours;
-  std::vector<double> resultQ; // Vector with averaged q values
+  std::vector<double> resultQ;
   double q_value = 0.0;        // Averaged q value per neighbour pair
 
   QlmTotal.ptq.resize(yCloud.nop);
@@ -970,48 +968,33 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     // if(yCloud.pts[iatom].type!=typeO){continue;}
 
-    nnumNeighbours = nList[iatom].size() - 1; // One less than the actual length
-    // Now loop over the first four neighbours
-    for (int j = 1; j <= nnumNeighbours; j++) {
-      // Get the atom ID
-      jatomID = nList[iatom][j]; // Atom ID (key)
-
-      // Get the atom index (value) from the atom ID (key)
-      auto it = yCloud.idIndexMap.find(jatomID);
-
-      if (it != yCloud.idIndexMap.end()) {
-        jatomIndex = it->second;
-      } else {
-        std::cerr << "Your map must be wrong.\n";
-        return resultQ; // return with error
-      }
-
-      // Get the relative distances
+    const auto nearest = nearestNeighbourIndices(yCloud, nList, iatom);
+    bool first = true;
+    for (int jatomIndex : nearest) {
       delta = gen::relDist(yCloud, iatom, jatomIndex);
-
-      // angles = sph::radialCoord(delta);
       double r = std::sqrt(std::pow(delta[0], 2.0) + std::pow(delta[1], 2.0) +
                            std::pow(delta[2], 2.0));
-      angles[1] = acos(delta[2] / r);        // theta
-      angles[0] = atan2(delta[0], delta[1]); // phi
-
-      // Now add over all nearest neighbours
-      if (j == 1) {
-        // QlmTotal.ptq[iatom].ylm = sph::spheriHarmo(l, angles);
-        QlmTotal.ptq[iatom].ylm = sph::lookupTableQ6Vec(angles);
+      if (r == 0.0) {
         continue;
       }
-      // Not for the first jatom
+      angles[1] = acos(delta[2] / r);
+      angles[0] = atan2(delta[0], delta[1]);
+
+      if (first) {
+        QlmTotal.ptq[iatom].ylm = sph::lookupTableQ6Vec(angles);
+        first = false;
+        continue;
+      }
       yl = sph::spheriHarmo(l, angles);
       for (int m = 0; m < 2 * l + 1; m++) {
         QlmTotal.ptq[iatom].ylm[m] += yl[m];
-        // QlmTotal.ptq[iatom].ylm[m] += sph::lookupTableQ6(m, angles);
       }
-    } // End of loop over 4 nearest neighbours
+    }
 
-    // Divide by 4
-    QlmTotal.ptq[iatom].ylm =
-        gen::avgVector(QlmTotal.ptq[iatom].ylm, l, nnumNeighbours);
+    if (!nearest.empty()) {
+      QlmTotal.ptq[iatom].ylm = gen::avgVector(
+          QlmTotal.ptq[iatom].ylm, l, static_cast<int>(nearest.size()));
+    }
   } // End of looping over all iatom
 
   // ------------------------------------------------
@@ -1025,46 +1008,31 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     // 	if(yCloud.pts[iatom].inSlice==false){continue;}
     // }
 
-    nnumNeighbours = nList[iatom].size() - 1; // Number of nearest neighbours
-    q_value = 0.0;                            // initialize to zero
-    // yCloud.pts[iatom].c_ij.reserve(nnumNeighbours);
-    // loop over the 4 nearest neighbours
-    for (int j = 1; j <= nnumNeighbours; j++) {
-      // Init to zero
+    const auto nearest = nearestNeighbourIndices(yCloud, nList, iatom);
+    q_value = 0.0;
+    for (int jatomIndex : nearest) {
       dot_product = {0, 0};
       Inorm = {0, 0};
       Jnorm = {0, 0};
-      // Get index of the nearest neighbour!
-      jatomID = nList[iatom][j]; // Atom ID (key)
-
-      // Get the index jatomIndex
-      auto it = yCloud.idIndexMap.find(jatomID);
-
-      if (it != yCloud.idIndexMap.end()) {
-        jatomIndex = it->second;
-      } // end of getting the index of jatom
 
       for (int m = 0; m < 2 * l + 1; m++) {
         qI = QlmTotal.ptq[iatom].ylm[m];
         qJ = QlmTotal.ptq[jatomIndex].ylm[m];
-        dot_product = dot_product + (qI * std::conj(qJ)); // unnormalized
+        dot_product = dot_product + (qI * std::conj(qJ));
         Inorm = Inorm + (qI * std::conj(qI));
         Jnorm = Jnorm + (qJ * std::conj(qJ));
-      } // end loop over m components
-      // Get the denominator
+      }
       complexDenominator = std::sqrt(Inorm * Jnorm);
       complexCij = dot_product / complexDenominator;
-      // Update c_ij and type
       cij_real = complexCij.real();
 
       q_value += cij_real;
+    }
 
-    } // end loop over nearest neighbours
-
-    // Average q_value over all nearest neighbours
-    q_value /= static_cast<double>(nnumNeighbours);
-
-    resultQ[iatom] = q_value; // Update the vector of averaged q6
+    if (!nearest.empty()) {
+      q_value /= static_cast<double>(nearest.size());
+    }
+    resultQ[iatom] = q_value;
   }
 
   // ------------------------------------------------
@@ -1204,7 +1172,7 @@ int chill::printIceType(
 bool chill::isInterfacial(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList, int iatom, int num_staggrd,
-    int num_eclipsd) {
+    int num_eclipsd, bool chillPlus) {
   int nnumNeighbours =
       nList[iatom].size() - 1; // number of nearest neighbours of iatom
   int neighStaggered =
@@ -1255,7 +1223,11 @@ bool chill::isInterfacial(
       }
       //
       neighStaggered = chill::numStaggered(yCloud, nList, jatomIndex);
-      if (neighStaggered == 2) {
+      if (chillPlus) {
+        if (neighStaggered > 1) {
+          return true;
+        }
+      } else if (neighStaggered == 2) {
         return true;
       }
     }
