@@ -10,3 +10,7 @@ option('offload_triple', type: 'string', value: 'nvptx64-nvidia-cuda',
   description: 'OpenMP offload target triple when with_openmp_offload is enabled')
 option('with_ira', type: 'feature', value: 'auto',
   description: 'Link libira (IRA match and SOFI point groups)')
+option('with_sphericart', type: 'feature', value: 'auto',
+  description: 'Batch Cartesian Ylm for host Steinhardt via sphericart')
+option('with_nauty', type: 'feature', value: 'auto',
+  description: 'Canonical cage certificates via nauty')

@@ -9,6 +9,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <bop.hpp>
+#include <sphericart_ylm.hpp>
 #include <steinhardt_device.hpp>
 
 #include <algorithm>
@@ -80,8 +81,88 @@ void atomRange(int n, int rank, int nranks, int &begin, int &end) {
   end = begin + base + (rank < rem ? 1 : 0);
 }
 
+#ifdef SEAMS_HAS_SPHERICART
+void runPass1Sphericart(const NeighbourCSR &g, int orderL, int begin, int end,
+                        std::vector<double> &qlm) {
+  const int nComp = 2 * orderL + 1;
+  int nBonds = 0;
+  for (int i = begin; i < end; i++) {
+    nBonds += g.offsets[static_cast<size_t>(i) + 1] - g.offsets[static_cast<size_t>(i)];
+  }
+  std::vector<double> cart(static_cast<size_t>(std::max(nBonds, 0)) * 3, 0.0);
+  std::vector<int> owner;
+  owner.reserve(static_cast<size_t>(std::max(nBonds, 0)));
+  int b = 0;
+  for (int i = begin; i < end; i++) {
+    const int iOff = 3 * i;
+    for (int p = g.offsets[static_cast<size_t>(i)];
+         p < g.offsets[static_cast<size_t>(i) + 1]; p++) {
+      const int j = g.cols[static_cast<size_t>(p)];
+      double dx = g.xyz[static_cast<size_t>(iOff)] - g.xyz[static_cast<size_t>(3 * j)];
+      double dy = g.xyz[static_cast<size_t>(iOff + 1)] -
+                  g.xyz[static_cast<size_t>(3 * j + 1)];
+      double dz = g.xyz[static_cast<size_t>(iOff + 2)] -
+                  g.xyz[static_cast<size_t>(3 * j + 2)];
+      seams::steinhardt::minImage(dx, dy, dz, g.box[0], g.box[1], g.box[2]);
+      const double r2 = dx * dx + dy * dy + dz * dz;
+      if (r2 == 0.0) {
+        continue;
+      }
+      const double inv = 1.0 / std::sqrt(r2);
+      cart[static_cast<size_t>(3 * b)] = dx * inv;
+      cart[static_cast<size_t>(3 * b + 1)] = dy * inv;
+      cart[static_cast<size_t>(3 * b + 2)] = dz * inv;
+      owner.push_back(i);
+      b++;
+    }
+  }
+  std::vector<double> ylm(static_cast<size_t>(b) * nComp * 2, 0.0);
+  if (seams::sphericart_ylm::ylmCartesian(orderL, cart.data(), b, ylm.data()) !=
+      0) {
+    for (int i = begin; i < end; i++) {
+      seams::steinhardt::qlmOneAtom(i, orderL, g.xyz.data(), g.offsets.data(),
+                                    g.cols.data(), g.box[0], g.box[1], g.box[2],
+                                    qlm.data());
+    }
+    return;
+  }
+  for (int k = 0; k < b; k++) {
+    const int i = owner[static_cast<size_t>(k)];
+    const size_t row = static_cast<size_t>(i) * nComp;
+    const double *src = ylm.data() + static_cast<size_t>(k) * nComp * 2;
+    for (int m = 0; m < nComp; m++) {
+      qlm[2 * (row + static_cast<size_t>(m))] += src[2 * m];
+      qlm[2 * (row + static_cast<size_t>(m)) + 1] += src[2 * m + 1];
+    }
+  }
+  for (int i = begin; i < end; i++) {
+    int nUsed = 0;
+    for (int k = 0; k < b; k++) {
+      if (owner[static_cast<size_t>(k)] == i) {
+        nUsed++;
+      }
+    }
+    if (nUsed == 0) {
+      continue;
+    }
+    const double inv = 1.0 / static_cast<double>(nUsed);
+    const size_t row = static_cast<size_t>(i) * nComp;
+    for (int m = 0; m < nComp; m++) {
+      qlm[2 * (row + static_cast<size_t>(m))] *= inv;
+      qlm[2 * (row + static_cast<size_t>(m)) + 1] *= inv;
+    }
+  }
+}
+#endif
+
 void runPass1(const NeighbourCSR &g, int orderL, int begin, int end,
               std::vector<double> &qlm) {
+#ifdef SEAMS_HAS_SPHERICART
+  if (seams::sphericart_ylm::available()) {
+    runPass1Sphericart(g, orderL, begin, end, qlm);
+    return;
+  }
+#endif
 #ifdef SEAMS_HAS_OPENMP
   const bool useThreads = g.nop >= kParallelThreshold;
 #pragma omp parallel for schedule(static) if (useThreads)

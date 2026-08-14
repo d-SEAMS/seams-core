@@ -209,6 +209,56 @@ if not ira_opt.disabled()
   endif
 endif
 
+sphericart_opt = get_option('with_sphericart')
+sphericart_found = false
+if not sphericart_opt.disabled()
+  sphericart_dep = dependency('sphericart', required: false)
+  sphericart_probe = '''
+    #include <sphericart.hpp>
+    int main() {
+      sphericart::SphericalHarmonics<double> s(2);
+      return 0;
+    }
+  '''
+  if sphericart_dep.found() and cppc.links(sphericart_probe,
+                                          dependencies: [sphericart_dep],
+                                          name: 'sphericart C++ API')
+    _deps += [sphericart_dep]
+    _args += ['-DSEAMS_HAS_SPHERICART=1']
+    sphericart_found = true
+  elif sphericart_opt.enabled()
+    error('with_sphericart=enabled but sphericart does not link')
+  endif
+endif
+
+nauty_opt = get_option('with_nauty')
+nauty_found = false
+if not nauty_opt.disabled()
+  nauty_dep = dependency('nauty', required: false)
+  if not nauty_dep.found()
+    nauty_lib = cppc.find_library('nauty', required: false)
+    if nauty_lib.found()
+      nauty_dep = nauty_lib
+    endif
+  endif
+  nauty_probe = '''
+    #define MAXN 32
+    #include <nauty.h>
+    int main() {
+      DEFAULTOPTIONS_GRAPH(options);
+      return options.getcanon ? 0 : 0;
+    }
+  '''
+  if nauty_dep.found() and cppc.links(nauty_probe, dependencies: [nauty_dep],
+                                      name: 'nauty densenauty')
+    _deps += [nauty_dep]
+    _args += ['-DSEAMS_HAS_NAUTY=1']
+    nauty_found = true
+  elif nauty_opt.enabled()
+    error('with_nauty=enabled but nauty does not link')
+  endif
+endif
+
 # Report which optional backends this build actually got. Each of these
 # degrades silently: without vesin the neighbour search falls back to the
 # brute-force path, and without a reader the corresponding formats are simply
@@ -222,12 +272,16 @@ summary({
   'PDB/GRO/DCD readers (chemfiles)': chemfiles_dep.found(),
   '.con reader (readcon-core)': readcon_dep.found(),
   'IRA/SOFI shape matching (libira)': ira_found,
+  'Cartesian Ylm (sphericart)': sphericart_found,
+  'Cage certificates (nauty)': nauty_found,
 }, section: 'Optional backends', bool_yn: true)
 
 if not readcon_dep.found()
-  message('readcon-core needs cbindgen >= 0.29 on PATH, which conda-forge ' +
-          'does not package; install it with `cargo install cbindgen` to ' +
-          'enable the .con reader.')
+  message('readcon-core was not found. It installs its own pkg-config file ' +
+          'through cargo-c, so `cargo cinstall --prefix=$CONDA_PREFIX` in a ' +
+          'readcon-core checkout is enough to enable the .con reader; a ' +
+          'conda-forge recipe is in review. The subproject fallback builds ' +
+          'the header with cbindgen instead and is the slower path.')
 endif
 
 # Include directories
