@@ -243,12 +243,12 @@ if not sphericart_opt.disabled()
       foreach d : sph_lib_dirs
         sph_rpath += ['-Wl,-rpath,' + d]
       endforeach
-      sph_inc = []
+      sph_cflags = []
       foreach d : sph_inc_dirs
-        sph_inc += [include_directories(d, is_system: true)]
+        sph_cflags += ['-I' + d]
       endforeach
       sphericart_dep = declare_dependency(dependencies: [sph_lib],
-                                          include_directories: sph_inc,
+                                          compile_args: sph_cflags,
                                           link_args: sph_rpath)
     endif
   endif
