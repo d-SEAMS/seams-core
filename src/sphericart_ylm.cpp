@@ -22,18 +22,17 @@ bool available() {
 }
 
 int ylmCartesian(int orderL, const double *xyz, int nVec, double *ylmOut) {
+  if (nVec == 0) {
+    return 0;
+  }
 #ifndef SEAMS_HAS_SPHERICART
   (void)orderL;
   (void)xyz;
-  (void)nVec;
   (void)ylmOut;
   return 1;
 #else
   if ((orderL != 3 && orderL != 4 && orderL != 6) || nVec < 0) {
     return 1;
-  }
-  if (nVec == 0) {
-    return 0;
   }
   const int nComp = 2 * orderL + 1;
   std::vector<double> cart(static_cast<size_t>(nVec) * 3);
