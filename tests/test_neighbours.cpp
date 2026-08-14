@@ -1,8 +1,13 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+
+#include <algorithm>
+#include <array>
+#include <vector>
 
 // Helper: build a 4-atom system in a 10x10x10 box
 // Atoms at (0,0,0), (1,0,0), (0,1,0), (5,5,5)
@@ -168,4 +173,90 @@ TEST_CASE("clearNeighbourList empties the list", "[neighbours]") {
 
   nneigh::clearNeighbourList(nList);
   REQUIRE(nList.empty());
+}
+
+// ---------------------------------------------------------------------------
+// A cell list enumerates periodic images; the minimum image convention does
+// not. Once the box stops being larger than twice the cutoff the two disagree
+// unless the cell-list output is reduced: a neighbour reachable through more
+// than one image would otherwise be listed more than once, and below the
+// cutoff a particle becomes its own neighbour. Every other fixture in this
+// suite uses a box comfortably larger than 2*cutoff, so nothing else covers
+// this.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+molSys::PointCloud<molSys::Point<double>, double>
+smallBoxCloud(double boxLength) {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  const std::vector<std::array<double, 3>> pos = {
+      {0.0, 0.0, 0.0}, {3.0, 0.0, 0.0}, {0.0, 2.0, 0.0}, {1.0, 1.0, 1.0}};
+
+  cloud.nop = static_cast<int>(pos.size());
+  cloud.currentFrame = 1;
+  cloud.box = {boxLength, boxLength, boxLength};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  for (size_t i = 0; i < pos.size(); i++) {
+    molSys::Point<double> p;
+    p.type = 1;
+    p.atomID = static_cast<int>(i) + 1;
+    p.molID = p.atomID;
+    p.x = pos[i][0];
+    p.y = pos[i][1];
+    p.z = pos[i][2];
+    cloud.pts.push_back(p);
+    cloud.idIndexMap[p.atomID] = static_cast<int>(i);
+  }
+  return cloud;
+}
+
+//! Neighbours of iatom under the minimum image convention, sorted, no self
+std::vector<int> minimumImageNeighbours(
+    const molSys::PointCloud<molSys::Point<double>, double> &cloud, int iatom,
+    double cutoff) {
+  std::vector<int> ref;
+  for (int j = 0; j < cloud.nop; j++) {
+    if (j == iatom) {
+      continue;
+    }
+    if (gen::periodicDist(cloud, iatom, j) <= cutoff) {
+      ref.push_back(j);
+    }
+  }
+  std::sort(ref.begin(), ref.end());
+  return ref;
+}
+
+} // namespace
+
+TEST_CASE("neighbour list matches minimum image for a tight box",
+          "[neighbours]") {
+  const double cutoff = 3.5;
+
+  // 30.0 is the comfortable case; 6.0 puts two images of a pair inside the
+  // sphere; 3.0 puts a particle inside its own image
+  for (double boxLength : {30.0, 6.0, 3.0}) {
+    auto cloud = smallBoxCloud(boxLength);
+    auto nList = nneigh::getNewNeighbourListByIndex(cloud, cutoff);
+
+    REQUIRE(nList.size() == static_cast<size_t>(cloud.nop));
+
+    for (int iatom = 0; iatom < cloud.nop; iatom++) {
+      INFO("box = " << boxLength << ", atom " << iatom);
+
+      // Row header is the particle itself
+      REQUIRE(nList[iatom].size() >= 1);
+      REQUIRE(nList[iatom][0] == iatom);
+
+      std::vector<int> got(nList[iatom].begin() + 1, nList[iatom].end());
+      std::sort(got.begin(), got.end());
+
+      // No duplicates, and never the particle itself
+      REQUIRE(std::adjacent_find(got.begin(), got.end()) == got.end());
+      REQUIRE(std::find(got.begin(), got.end(), iatom) == got.end());
+
+      REQUIRE(got == minimumImageNeighbours(cloud, iatom, cutoff));
+    }
+  }
 }

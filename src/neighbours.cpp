@@ -12,6 +12,7 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <numeric>
@@ -121,11 +122,26 @@ bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   pairs.clear();
   pairs.reserve(neighbors.length);
   for (size_t k = 0; k < neighbors.length; k++) {
-    pairs.emplace_back(subset[neighbors.pairs[k][0]],
-                       subset[neighbors.pairs[k][1]]);
+    const int iatom = subset[neighbors.pairs[k][0]];
+    const int jatom = subset[neighbors.pairs[k][1]];
+    // A cell list enumerates periodic images, so a particle can appear as its
+    // own neighbour through an image, and one neighbour can arrive through
+    // several images at once. Both happen as soon as the box stops being
+    // larger than twice the cutoff. The minimum image convention that the
+    // brute-force path applies admits each ordered pair once and never the
+    // self pair, so reduce to that here rather than letting box size change
+    // the meaning of a neighbour list.
+    if (iatom == jatom) {
+      continue;
+    }
+    pairs.emplace_back(iatom, jatom);
   }
 
   vesin_free(&neighbors);
+
+  std::sort(pairs.begin(), pairs.end());
+  pairs.erase(std::unique(pairs.begin(), pairs.end()), pairs.end());
+
   return true;
 }
 #endif
