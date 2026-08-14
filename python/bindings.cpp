@@ -537,6 +537,23 @@ NB_MODULE(_core, m) {
     m.def("lookupTableQ4", &sph::lookupTableQ4,
           "Lookup table for Q4 at a single m (m=0 to m=8).",
           nb::arg("m"), nb::arg("angles"));
+    m.def("lookupTableQ8Vec", &sph::lookupTableQ8Vec,
+          "Lookup table for Q8 (m=0 to m=16).",
+          nb::arg("angles"));
+    m.def("lookupTableQ8", &sph::lookupTableQ8,
+          "Lookup table for Q8 at a single m (m=0 to m=16).",
+          nb::arg("m"), nb::arg("angles"));
+
+    // Voronoi facet-area weighted parameters
+    nb::class_<chill::VoronoiWeights>(m, "VoronoiWeights",
+        "Facet-sharing neighbours of one particle and their facet-area "
+        "weights, normalised to sum to one.")
+        .def(nb::init<>())
+        .def_ro("neighbours", &chill::VoronoiWeights::neighbours)
+        .def_ro("weights", &chill::VoronoiWeights::weights);
+    m.def("voronoiFacetWeights", &chill::voronoiFacetWeights,
+          "Voronoi facet neighbours and area weights for every particle.",
+          nb::arg("yCloud"), nb::arg("candidateCutoff"));
 
     // Output
     m.def("writeDump", &sout::writeDump,
