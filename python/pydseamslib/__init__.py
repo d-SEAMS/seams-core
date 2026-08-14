@@ -159,6 +159,24 @@ class Trajectory:
             doShapeMatching=shape_matching,
         )
 
+    def steinhardt(self, order_l=6):
+        """Compute the local and neighbour-averaged Steinhardt parameters.
+
+        Parameters
+        ----------
+        order_l : int
+            Degree l of the Steinhardt parameter (3, 4 or 6).
+
+        Returns
+        -------
+        dict
+            "ql" and "ql_bar", each a list of per-atom floats.
+        """
+        result = _core.steinhardtQl(
+            yCloud=self.cloud, nList=self.neighbor_list, orderL=order_l
+        )
+        return {"ql": list(result.ql), "ql_bar": list(result.qlBar)}
+
 
 # Re-export low-level API for advanced users
 __all__ = ["Trajectory", "_core", "__version__"]

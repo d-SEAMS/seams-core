@@ -230,3 +230,14 @@ def test_trajectory_custom_parameters():
     )
     assert traj.cutoff == 4.0
     assert traj.n_atoms > 0
+
+
+def test_trajectory_steinhardt():
+    """Verify the Steinhardt parameters have one entry per atom."""
+    traj = Trajectory(str(TRAJ.absolute()))
+    result = traj.steinhardt(order_l=6)
+
+    assert isinstance(result, dict)
+    assert set(result.keys()) == {"ql", "ql_bar"}
+    assert len(result["ql"]) == traj.n_atoms
+    assert len(result["ql_bar"]) == traj.n_atoms

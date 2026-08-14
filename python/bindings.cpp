@@ -97,6 +97,17 @@ NB_MODULE(_core, m) {
         .def_rw("boxLow", &molSys::PointCloud<molSys::Point<double>, double>::boxLow)
         .def_rw("idIndexMap", &molSys::PointCloud<molSys::Point<double>, double>::idIndexMap);
 
+    nb::class_<chill::SteinhardtQl>(m, "SteinhardtQl",
+        "Per-particle Steinhardt order parameters of a single degree l: "
+        "the local ql and the neighbour-averaged qlBar.")
+        .def(nb::init<>())
+        .def_ro("ql", &chill::SteinhardtQl::ql)
+        .def_ro("qlBar", &chill::SteinhardtQl::qlBar)
+        .def("__repr__", [](const chill::SteinhardtQl &self_C) {
+            std::uintptr_t ptr_val = std::uintptr_t(&self_C);
+            return std::format("<SteinhardtQl mem_loc:{:x}>", static_cast<uint64_t>(ptr_val));
+        });
+
     // I/O (lambdas hide the yCloud* in/out parameter, creating it internally)
     m.def("readXYZ", &sinp::readXYZ,
           "Read atom coordinates from an XYZ file.",
@@ -373,6 +384,18 @@ NB_MODULE(_core, m) {
           "Print the ice type classification for the current frame.",
           nb::arg("yCloud"), nb::arg("path"), nb::arg("firstFrame"),
           nb::arg("isSlice"), nb::arg("outputFileName"));
+    m.def("steinhardtQl", &chill::steinhardtQl,
+          "Compute the local and neighbour-averaged Steinhardt parameters "
+          "of degree orderL (3, 4 or 6) for every particle.",
+          nb::arg("yCloud"), nb::arg("nList"), nb::arg("orderL"));
+
+    // Spherical harmonics lookup tables
+    m.def("lookupTableQ4Vec", &sph::lookupTableQ4Vec,
+          "Lookup table for Q4 (m=0 to m=8).",
+          nb::arg("angles"));
+    m.def("lookupTableQ4", &sph::lookupTableQ4,
+          "Lookup table for Q4 at a single m (m=0 to m=8).",
+          nb::arg("m"), nb::arg("angles"));
 
     // Output
     m.def("writeDump", &sout::writeDump,

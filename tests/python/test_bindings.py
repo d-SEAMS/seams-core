@@ -44,3 +44,16 @@ def test_populate_hbonds_exists():
 
 def test_ring_network_exists():
     assert hasattr(_core, "ringNetwork")
+
+
+def test_lookup_table_q4_vec_length():
+    result = _core.lookupTableQ4Vec(angles=[0.7, 1.2])
+    assert len(result) == 9
+
+
+def test_lookup_table_q4_matches_vec():
+    angles = [0.7, 1.2]
+    vec = _core.lookupTableQ4Vec(angles=angles)
+    for m in range(9):
+        single = _core.lookupTableQ4(m=m, angles=angles)
+        assert single == vec[m]
