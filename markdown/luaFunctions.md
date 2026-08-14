@@ -138,6 +138,10 @@ The following `Lua` functions interface to the same `C++` functions in every wor
   + *resCloud* - The input \ref molSys::PointCloud, which has been passed to the `Lua` side.
   + *printCages* - Flag for printing the information of each cage in the frame (true) or not printing the coordinates/connectivity of each cage (false). Defined in _vars.lua_. 
 
+## Fennel Scripts
+
+Any script path ending in `.fnl` (the `variables` file or the `functionScript` it names) compiles through the vendored [Fennel](https://fennel-lang.org) 1.5.3 (`src/include/external/fennel/fennel.lua`) and runs against the same registered globals as a Lua script. The compiler path is baked in at configure time from the source root; set `YODA_FENNEL_PATH` to point an installed binary at a `fennel.lua` elsewhere. See `example_lua/fennel/` for a ring-network example on mW cubic ice.
+
 ## Extending d-SEAMS 
 
 d-SEAMS can be extended by writing `C++` functions in pre-existing header files or by creating header files of your own. 
