@@ -212,7 +212,46 @@ endif
 sphericart_opt = get_option('with_sphericart')
 sphericart_found = false
 if not sphericart_opt.disabled()
+  sph_lib_dirs = []
+  sph_inc_dirs = []
+  python_for_sph = find_program('python3', required: false)
+  if python_for_sph.found()
+    sph_dir_cmd = run_command(
+      python_for_sph, '-c',
+      'import pathlib, sys\n' +
+      'try:\n' +
+      ' import sphericart, pathlib as p\n' +
+      ' root = p.Path(sphericart.__file__).resolve().parent\n' +
+      ' print(root / "lib")\n' +
+      ' print(root / "include")\n' +
+      'except Exception:\n' +
+      ' sys.exit(1)\n',
+      check: false)
+    if sph_dir_cmd.returncode() == 0
+      lines = sph_dir_cmd.stdout().strip().split('\n')
+      if lines.length() >= 2
+        sph_lib_dirs += [lines[0].strip()]
+        sph_inc_dirs += [lines[1].strip()]
+      endif
+    endif
+  endif
   sphericart_dep = dependency('sphericart', required: false)
+  if not sphericart_dep.found()
+    sph_lib = cppc.find_library('sphericart', dirs: sph_lib_dirs, required: false)
+    if sph_lib.found()
+      sph_rpath = []
+      foreach d : sph_lib_dirs
+        sph_rpath += ['-Wl,-rpath,' + d]
+      endforeach
+      sph_inc = []
+      foreach d : sph_inc_dirs
+        sph_inc += [include_directories(d, is_system: true)]
+      endforeach
+      sphericart_dep = declare_dependency(dependencies: [sph_lib],
+                                          include_directories: sph_inc,
+                                          link_args: sph_rpath)
+    endif
+  endif
   sphericart_probe = '''
     #include <sphericart.hpp>
     int main() {
@@ -220,8 +259,13 @@ if not sphericart_opt.disabled()
       return 0;
     }
   '''
+  sph_probe_args = []
+  foreach d : sph_inc_dirs
+    sph_probe_args += ['-I' + d]
+  endforeach
   if sphericart_dep.found() and cppc.links(sphericart_probe,
                                           dependencies: [sphericart_dep],
+                                          args: sph_probe_args,
                                           name: 'sphericart C++ API')
     _deps += [sphericart_dep]
     _args += ['-DSEAMS_HAS_SPHERICART=1']
@@ -243,10 +287,10 @@ if not nauty_opt.disabled()
   endif
   nauty_probe = '''
     #define MAXN 32
-    #include <nauty.h>
+    #include <nauty/nauty.h>
     int main() {
       DEFAULTOPTIONS_GRAPH(options);
-      return options.getcanon ? 0 : 0;
+      return 0;
     }
   '''
   if nauty_dep.found() and cppc.links(nauty_probe, dependencies: [nauty_dep],

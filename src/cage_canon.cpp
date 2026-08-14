@@ -13,7 +13,11 @@
 
 #ifdef SEAMS_HAS_NAUTY
 #define MAXN 64
+#if __has_include(<nauty/nauty.h>)
+#include <nauty/nauty.h>
+#else
 #include <nauty.h>
+#endif
 #endif
 
 namespace {
