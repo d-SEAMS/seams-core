@@ -1,7 +1,10 @@
-#ifndef __SIMD_DISTANCE_H_
-#define __SIMD_DISTANCE_H_
+#ifndef SEAMS_SIMD_DISTANCE_H_
+#define SEAMS_SIMD_DISTANCE_H_
 
 #include <cmath>
+#include <algorithm>
+#include <cstddef>
+#include <span>
 
 #ifdef SEAMS_HAS_HWY
 
@@ -27,6 +30,16 @@ inline void BatchPeriodicDistSq(const double* HWY_RESTRICT dx,
   const auto vby = hn::Set(d, by);
   const auto vbz = hn::Set(d, bz);
 
+  // The box is fixed across the batch, so the three divisions of the minimum
+  // image convention collapse into one reciprocal each, hoisted out of the
+  // loop. Vector division has several times the latency of multiplication.
+  const double rbx = 1.0 / bx;
+  const double rby = 1.0 / by;
+  const double rbz = 1.0 / bz;
+  const auto vrbx = hn::Set(d, rbx);
+  const auto vrby = hn::Set(d, rby);
+  const auto vrbz = hn::Set(d, rbz);
+
   size_t i = 0;
   for (; i + N <= n; i += N) {
     auto vdx = hn::Load(d, dx + i);
@@ -38,10 +51,10 @@ inline void BatchPeriodicDistSq(const double* HWY_RESTRICT dx,
     vdy = hn::Abs(vdy);
     vdz = hn::Abs(vdz);
 
-    // Periodic wrap: dr -= box * round(dr / box)
-    vdx = hn::Sub(vdx, hn::Mul(vbx, hn::Round(hn::Div(vdx, vbx))));
-    vdy = hn::Sub(vdy, hn::Mul(vby, hn::Round(hn::Div(vdy, vby))));
-    vdz = hn::Sub(vdz, hn::Mul(vbz, hn::Round(hn::Div(vdz, vbz))));
+    // Periodic wrap: dr -= box * round(dr * (1 / box))
+    vdx = hn::NegMulAdd(vbx, hn::Round(hn::Mul(vdx, vrbx)), vdx);
+    vdy = hn::NegMulAdd(vby, hn::Round(hn::Mul(vdy, vrby)), vdy);
+    vdz = hn::NegMulAdd(vbz, hn::Round(hn::Mul(vdz, vrbz)), vdz);
 
     // r2 = dx*dx + dy*dy + dz*dz
     auto r2 = hn::MulAdd(vdx, vdx, hn::MulAdd(vdy, vdy, hn::Mul(vdz, vdz)));
@@ -53,9 +66,9 @@ inline void BatchPeriodicDistSq(const double* HWY_RESTRICT dx,
     double ddx = std::fabs(dx[i]);
     double ddy = std::fabs(dy[i]);
     double ddz = std::fabs(dz[i]);
-    ddx -= bx * std::round(ddx / bx);
-    ddy -= by * std::round(ddy / by);
-    ddz -= bz * std::round(ddz / bz);
+    ddx -= bx * std::round(ddx * rbx);
+    ddy -= by * std::round(ddy * rby);
+    ddz -= bz * std::round(ddz * rbz);
     out[i] = ddx * ddx + ddy * ddy + ddz * ddz;
   }
 }
@@ -69,13 +82,17 @@ namespace seams {
 inline void BatchPeriodicDistSq(const double* dx, const double* dy,
                                 const double* dz, double bx, double by,
                                 double bz, double* out, size_t n) {
+  // Matches the vectorised path: one reciprocal per axis for the whole batch
+  const double rbx = 1.0 / bx;
+  const double rby = 1.0 / by;
+  const double rbz = 1.0 / bz;
   for (size_t i = 0; i < n; i++) {
     double ddx = std::fabs(dx[i]);
     double ddy = std::fabs(dy[i]);
     double ddz = std::fabs(dz[i]);
-    ddx -= bx * std::round(ddx / bx);
-    ddy -= by * std::round(ddy / by);
-    ddz -= bz * std::round(ddz / bz);
+    ddx -= bx * std::round(ddx * rbx);
+    ddy -= by * std::round(ddy * rby);
+    ddz -= bz * std::round(ddz * rbz);
     out[i] = ddx * ddx + ddy * ddy + ddz * ddz;
   }
 }
@@ -83,4 +100,27 @@ inline void BatchPeriodicDistSq(const double* dx, const double* dy,
 
 #endif  // SEAMS_HAS_HWY
 
-#endif  // __SIMD_DISTANCE_H_
+namespace seams {
+
+/**
+ * @brief Squared minimum-image distances for a batch of coordinate
+ *  differences, with the extents carried alongside the data.
+ * @details The ranges must agree in length; the shortest one bounds the work,
+ *  so a mismatched call computes fewer results rather than running off the end
+ *  of an array. This overload forwards to whichever kernel the build selected.
+ * @param[in] dx,dy,dz Coordinate differences.
+ * @param[in] bx,by,bz Periodic box dimensions.
+ * @param[out] out Squared distances.
+ */
+inline void BatchPeriodicDistSq(std::span<const double> dx,
+                                std::span<const double> dy,
+                                std::span<const double> dz, double bx,
+                                double by, double bz, std::span<double> out) {
+  const size_t n = std::min({dx.size(), dy.size(), dz.size(), out.size()});
+  BatchPeriodicDistSq(dx.data(), dy.data(), dz.data(), bx, by, bz, out.data(),
+                      n);
+}
+
+}  // namespace seams
+
+#endif  // SEAMS_SIMD_DISTANCE_H_

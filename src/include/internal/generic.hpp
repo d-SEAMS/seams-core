@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __GENERIC_H_
-#define __GENERIC_H_
+#ifndef SEAMS_GENERIC_H_
+#define SEAMS_GENERIC_H_
 
 #include <array>
 #include <filesystem>
@@ -105,24 +105,39 @@ inline double calcMedian(std::vector<double> *input) {
  *  @return The unwrapped periodic distance.
  */
 inline double
-periodicDist(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-             int iatom, int jatom) {
+periodicDistSq(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+               int iatom, int jatom) {
   std::array<double, 3> dr;
   double r2 = 0.0; // Squared absolute distance
 
   // Get x1-x2 etc
-  dr[0] = fabs(yCloud.pts[iatom].x - yCloud.pts[jatom].x);
-  dr[1] = fabs(yCloud.pts[iatom].y - yCloud.pts[jatom].y);
-  dr[2] = fabs(yCloud.pts[iatom].z - yCloud.pts[jatom].z);
+  dr[0] = std::fabs(yCloud.pts[iatom].x - yCloud.pts[jatom].x);
+  dr[1] = std::fabs(yCloud.pts[iatom].y - yCloud.pts[jatom].y);
+  dr[2] = std::fabs(yCloud.pts[iatom].z - yCloud.pts[jatom].z);
 
   // Get the squared absolute distance
   for (int k = 0; k < 3; k++) {
     // Correct for periodicity
-    dr[k] -= yCloud.box[k] * round(dr[k] / yCloud.box[k]);
-    r2 += pow(dr[k], 2.0);
+    dr[k] -= yCloud.box[k] * std::round(dr[k] / yCloud.box[k]);
+    r2 += dr[k] * dr[k];
   }
 
-  return sqrt(r2);
+  return r2;
+}
+
+/**
+ *  @brief Inline generic function for obtaining the unwrapped periodic distance
+ *  between two particles, whose indices (not IDs) have been given.
+ *  @param[in] yCloud The input PointCloud, which contains the particle
+ * coordinates, simulation box lengths etc.
+ *  @param[in] iatom The index of the @f$ i^{th} @f$ atom.
+ *  @param[in] jatom The index of the @f$ j^{th} @f$ atom.
+ *  @return The unwrapped periodic distance.
+ */
+inline double
+periodicDist(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+             int iatom, int jatom) {
+  return std::sqrt(periodicDistSq(yCloud, iatom, jatom));
 }
 
 /**
