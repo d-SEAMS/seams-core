@@ -159,11 +159,33 @@ endif
 ira_opt = get_option('with_ira')
 ira_found = false
 if not ira_opt.disabled()
+  ira_lib_dirs = []
+  # conda-forge ira installs libira.so next to ira_mod, not in $PREFIX/lib.
+  python_for_ira = find_program('python3', required: false)
+  if python_for_ira.found()
+    ira_libdir_cmd = run_command(
+      python_for_ira, '-c',
+      'import pathlib, sys\n' +
+      'try:\n' +
+      ' import ira_mod\n' +
+      ' print(pathlib.Path(ira_mod.__file__).resolve().parent / "lib")\n' +
+      'except Exception:\n' +
+      ' sys.exit(1)\n',
+      check: false)
+    if ira_libdir_cmd.returncode() == 0
+      ira_lib_dirs += [ira_libdir_cmd.stdout().strip()]
+    endif
+  endif
   ira_dep = dependency('ira', required: false)
   if not ira_dep.found()
-    ira_lib = cppc.find_library('ira', required: false)
+    ira_lib = cppc.find_library('ira', dirs: ira_lib_dirs, required: false)
     if ira_lib.found()
-      ira_dep = ira_lib
+      ira_rpath = []
+      foreach d : ira_lib_dirs
+        ira_rpath += ['-Wl,-rpath,' + d]
+      endforeach
+      ira_dep = declare_dependency(dependencies: [ira_lib],
+                                   link_args: ira_rpath)
     endif
   endif
   ira_probe = '''
@@ -175,8 +197,9 @@ if not ira_opt.disabled()
       return 0;
     }
   '''
+  ira_inc = meson.project_source_root() / 'src/include/external'
   if ira_dep.found() and cppc.links(ira_probe, dependencies: [ira_dep],
-                                    args: ['-I' + meson.project_source_root() / 'src/include/external'],
+                                    args: ['-I' + ira_inc],
                                     name: 'libira C API')
     _deps += [ira_dep]
     _args += ['-DSEAMS_HAS_IRA=1']
