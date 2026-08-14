@@ -60,15 +60,20 @@ int rdf2::rdf2Danalysis_AA(
     // -----------------
     // Checks and balances?
     // -----------------
-    nbin = 1 + int(cutoff / binwidth); // Number of bins
-    rdfValues.resize(nbin);         // RDF initialized to 0
-  }                                    // end of initialization
-  // ----------------------------------------------
-  // SAMPLING
-  // Get the volume lengths of the quasi-two-dimensional system
+    nbin = static_cast<int>(cutoff / binwidth);
+    if (nbin < 1) {
+      nbin = 1;
+    }
+    rdfValues.resize(nbin);
+  }
   volumeLengths = rdf2::getSystemLengths(yCloud);
-  // Update cutoff if required? later
-  nbin = int(cutoff / binwidth); // Number of bins
+  nbin = static_cast<int>(cutoff / binwidth);
+  if (nbin < 1) {
+    nbin = 1;
+  }
+  if (static_cast<int>(rdfValues.size()) != nbin) {
+    rdfValues.assign(nbin, 0.0);
+  }
   // Sample for the current frame!!
   histogram = rdf2::sampleRDF_AA(yCloud, cutoff, binwidth, nbin);
   // ----------------------------------------------
@@ -132,9 +137,15 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
       // Check if the distance is within the cutoff. Update the histogram if
       // r_ij is within the cutoff
       if (r_ij <= cutoff) {
-        ibin = int(r_ij / binwidth); // Bin in which r_ij falls
-        histogram[ibin] += 2;        // Update for iatom and jatom both
-      }                              // end of histogram update
+        ibin = static_cast<int>(r_ij / binwidth);
+        if (ibin < 0) {
+          continue;
+        }
+        if (ibin >= nbin) {
+          ibin = nbin - 1;
+        }
+        histogram[ibin] += 2;
+      }
     }                                // end of loop through jatom
   }                                  // end of loop through iatom
 
