@@ -45,12 +45,26 @@ docs = { features = ["docs"] }
 formalanalysis = { features = ["formalanalysis"] }
 mpi = { features = ["mpi"] }
 ira = { features = ["ira"] }
+sphericart = { features = ["sphericart"] }
+nauty = { features = ["nauty"] }
 
 [feature.ira]
 platforms = ["linux-64"]
 
 [feature.ira.dependencies]
 ira = ">=2.2"
+
+[feature.sphericart]
+platforms = ["linux-64"]
+
+[feature.sphericart.dependencies]
+sphericart = ">=0.7"
+
+[feature.nauty]
+platforms = ["linux-64"]
+
+[feature.nauty.dependencies]
+nauty = ">=2.8"
 
 [feature.mpi]
 platforms = ["linux-64"]
