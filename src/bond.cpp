@@ -16,6 +16,63 @@
 #include <bond.hpp>
 #include <generic.hpp>
 
+#include <cmath>
+
+namespace {
+
+// Geometric test (O-H cutoff + OO/OH angle) for one donor-acceptor
+// assignment. The H-bond network is undirected, so each unordered pair
+// of oxygens is tried both ways.
+bool donatedHydrogenBond(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &hCloud,
+    const std::vector<std::vector<int>> &molIDlist,
+    const std::unordered_map<int, int> &idMolIDmap, int acceptorIndex,
+    int donorID, double distCutoff, double angleCutoff) {
+  auto molIt = idMolIDmap.find(donorID);
+  if (molIt == idMolIDmap.end()) {
+    return false;
+  }
+  auto donorIt = yCloud.idIndexMap.find(donorID);
+  if (donorIt == yCloud.idIndexMap.end()) {
+    return false;
+  }
+  const int listIndex = molSys::searchMolList(molIDlist, molIt->second);
+  if (listIndex == -1 || molIDlist[listIndex].size() < 3) {
+    return false;
+  }
+  const int donorIndex = donorIt->second;
+  for (int k = 1; k <= 2; k++) {
+    const int hAtomIndex = molIDlist[listIndex][k];
+    if (bond::getHbondDistanceOH(yCloud, hCloud, acceptorIndex, hAtomIndex) >=
+        distCutoff) {
+      continue;
+    }
+    std::vector<double> oo = {yCloud.pts[acceptorIndex].x -
+                                  yCloud.pts[donorIndex].x,
+                              yCloud.pts[acceptorIndex].y -
+                                  yCloud.pts[donorIndex].y,
+                              yCloud.pts[acceptorIndex].z -
+                                  yCloud.pts[donorIndex].z};
+    std::vector<double> oh = {yCloud.pts[acceptorIndex].x -
+                                  hCloud.pts[hAtomIndex].x,
+                              yCloud.pts[acceptorIndex].y -
+                                  hCloud.pts[hAtomIndex].y,
+                              yCloud.pts[acceptorIndex].z -
+                                  hCloud.pts[hAtomIndex].z};
+    for (int l = 0; l < 3; l++) {
+      oo[l] -= yCloud.box[l] * std::round(oo[l] / yCloud.box[l]);
+      oh[l] -= yCloud.box[l] * std::round(oh[l] / yCloud.box[l]);
+    }
+    if (gen::radDeg(gen::eigenVecAngle(oo, oh)) <= angleCutoff) {
+      return true;
+    }
+  }
+  return false;
+}
+
+} // namespace
+
 /**
  * @details Create a vector of vectors containing bond information (outputs
  * bonded atom IDs, not indices!) from the neighbour list vector of vectors
@@ -208,19 +265,11 @@ bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, do
   std::unordered_map<int, int>
       idMolIDmap; // Unordered map with atom IDs of oxygens as the keys and the
                   // molecular IDs as the values
-  std::vector<int> currentBondList; // Current bond list for atom
-  int nnumNeighbours;   // Number of nearest neighbours for the current atom
-  int iatomID, jatomID; // Atom IDs
-  int iatomIndex, jatomIndex; // Atomic indices of oxygen atoms
-  int hAtomIndex;             // Atom index of hydrogen
-  int listIndex;   // Index in molIDlist corresponding to a particular molecular
-                   // ID
-  int jOxyMolID;   // Molecular ID of the jatom oxygen atom
-  double hBondLen; // Length of O-H (between the donor O and acceptor H)
-  double distCutoff = 2.42;  // Distance cutoff of O-H, hard-coded
-  double angleCutoff = 30;   // Angle cutoff in degrees
-  std::vector<double> ooVec; // Array for the O--O vector
-  std::vector<double> ohVec; // Array for the O-H vector
+  int nnumNeighbours;
+  int iatomID, jatomID;
+  int iatomIndex, jatomIndex;
+  const double distCutoff = 2.42;
+  const double angleCutoff = 30;
 
   // --------------------
   // Get the unordered map of the oxygen atom IDs (keys) and the molecular IDs
@@ -240,10 +289,12 @@ bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, do
 
   // Loop through the neighbour list
   for (size_t iatom = 0; iatom < nList.size(); iatom++) {
-    currentBondList.clear();                  // Clear the current bond vector
-    iatomID = nList[iatom][0];                // atom ID corresponding to iatom
-    nnumNeighbours = nList[iatom].size() - 1; // No. of nearest neighbours
-    iatomIndex = iatom;                       // Atomic index
+    if (nList[iatom].empty()) {
+      continue;
+    }
+    iatomID = nList[iatom][0];
+    nnumNeighbours = static_cast<int>(nList[iatom].size()) - 1;
+    iatomIndex = static_cast<int>(iatom);
     //
     // Loop through the nearest neighbours
     // Only process pairs where iatomID < jatomID to avoid adding each
@@ -253,99 +304,20 @@ bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, do
       if (iatomID >= jatomID) {
         continue;
       } // skip to avoid duplicate H-bond entries
-      // Get the hydrogen atom indices corresponding to the molID of jatomID
-      // Find jOxyMolID
-      auto it = idMolIDmap.find(jatomID);
-      if (it != idMolIDmap.end()) {
-        jOxyMolID = it->second;
-      } // found molecular ID of jatom oxygen atom
-      else {
-        continue;
-      } // not found
-
-      // Find the index inside the molIDlist corresponding to the molecular ID
-      // to look for
-      listIndex = molSys::searchMolList(molIDlist, jOxyMolID);
-
-      // Skip if the molecular ID was not found in the molIDlist
-      if (listIndex == -1) {
-        continue;
-      } // molID not found
-
-      // Get the atom index of the oxygen atom jatom corresponding jatomID
       auto gotJ = yCloud.idIndexMap.find(jatomID);
-      if (gotJ != yCloud.idIndexMap.end()) {
-        jatomIndex = gotJ->second;
-      } // found atom index of jatomID
-      else {
-        std::cerr << "Something is wrong with the map.\n";
-        continue;
-      } // index not found
-
-      // Loop through the hydrogen atoms connected to jatom oxygen atom
-      // Guard: skip if fewer than 2 H atoms were found for this molecule
-      if (molIDlist[listIndex].size() < 3) {
+      if (gotJ == yCloud.idIndexMap.end()) {
         continue;
       }
-      for (int k = 1; k <= 2; k++) {
-        hAtomIndex = molIDlist[listIndex][k];
-        // --------
-        // Condition One: The O-H length (between the donor hydrogen atom and
-        // the acceptor oxygen atom) should be less than 2.42 Angstrom
-        // (hard-coded)
-        hBondLen =
-            bond::getHbondDistanceOH(yCloud, hCloud, iatomIndex, hAtomIndex);
-
-        // If O-H distance is greater than or equal to 2.42 then it is not a
-        // hydrogen bond
-        if (hBondLen >= distCutoff) {
-          continue;
-        } // not a hydrogen bond
-        // --------
-        // Condition Two: The angle between the O-H and O--O vectors is less
-        // than 30 degrees (hard-coded)
-        //
-        ooVec.clear();
-        ohVec.clear();
-        // Get the O--O and O-H vectors
-        // O--O
-        ooVec.push_back(yCloud.pts[iatomIndex].x -
-                        yCloud.pts[jatomIndex].x); // dx
-        ooVec.push_back(yCloud.pts[iatomIndex].y -
-                        yCloud.pts[jatomIndex].y); // dy
-        ooVec.push_back(yCloud.pts[iatomIndex].z -
-                        yCloud.pts[jatomIndex].z); // dz
-        // O-H
-        ohVec.push_back(yCloud.pts[iatomIndex].x -
-                        hCloud.pts[hAtomIndex].x); // dx
-        ohVec.push_back(yCloud.pts[iatomIndex].y -
-                        hCloud.pts[hAtomIndex].y); // dy
-        ohVec.push_back(yCloud.pts[iatomIndex].z -
-                        hCloud.pts[hAtomIndex].z); // dz
-        // Apply PBCs
-        for (int l = 0; l < 3; l++) {
-          ooVec[l] -= yCloud.box[l] * round(ooVec[l] / yCloud.box[l]);
-          ohVec[l] -= yCloud.box[l] * round(ohVec[l] / yCloud.box[l]);
-        } // end of applying PBCs to the O-H and O--O vectors
-        //
-        // Get the angle between the O--O and O-H vectors
-        double eigenAngle = gen::eigenVecAngle(ooVec, ohVec);
-        double eigenAngleDeg = gen::radDeg(eigenAngle);
-
-        //
-        // A hydrogen bond is formed if the angle is less than 30 degrees
-        if (eigenAngleDeg > angleCutoff) {
-          continue;
-        } // not a hydrogen bond
-
-        // If you have reached this point, then O and H and indeed
-        // hydrogen-bonded. This means that jatomID should be saved in the new
-        // currentBond
+      jatomIndex = gotJ->second;
+      // Either oxygen may donate. The unordered-pair skip above only
+      // prevents writing the edge twice.
+      if (donatedHydrogenBond(yCloud, hCloud, molIDlist, idMolIDmap,
+                              iatomIndex, jatomID, distCutoff, angleCutoff) ||
+          donatedHydrogenBond(yCloud, hCloud, molIDlist, idMolIDmap,
+                              jatomIndex, iatomID, distCutoff, angleCutoff)) {
         hBondNet[iatomIndex].push_back(jatomID);
         hBondNet[jatomIndex].push_back(iatomID);
-        break; // No need to test the other hydrogen atom if the first has
-        // been tested
-      } // end of loop through hydrogen atoms
+      }
 
     } // end of loop through the nearest neighbours
 
