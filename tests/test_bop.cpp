@@ -482,3 +482,149 @@ TEST_CASE("per-order lookup agrees with the vector form", "[bop]") {
     }
   }
 }
+
+namespace {
+
+const std::vector<HarmonicReference> &referenceQ4() {
+  static const std::vector<HarmonicReference> refs = {
+      {0.7, 1.2,
+       {{+6.66927990676342581e-03, +7.59288890954429030e-02},
+        {-2.29527952617402109e-01, +1.13264408218239299e-01},
+        {-3.16836766612184129e-01, -2.90227005710680053e-01},
+        {+9.24808639851284198e-02, -2.37874804314991500e-01},
+        {-2.72112678899294469e-01, +0.00000000000000000e+00},
+        {-9.24808639851284198e-02, -2.37874804314991500e-01},
+        {-3.16836766612184129e-01, +2.90227005710680053e-01},
+        {+2.29527952617402109e-01, +1.13264408218239299e-01},
+        {+6.66927990676342581e-03, -7.59288890954429030e-02}}},
+      {2.31, 5.02,
+       {{+4.40602314860978964e-02, -1.24417097718791364e-01},
+        {+2.71349536749032338e-01, +2.05410400404298560e-01},
+        {-3.24812661828660476e-01, +2.29551717216077311e-01},
+        {-1.26299260956492816e-02, -3.97548281864557596e-02},
+        {-3.60323417242993271e-01, +0.00000000000000000e+00},
+        {+1.26299260956492816e-02, -3.97548281864557596e-02},
+        {-3.24812661828660476e-01, -2.29551717216077311e-01},
+        {-2.71349536749032338e-01, +2.05410400404298560e-01},
+        {+4.40602314860978964e-02, +1.24417097718791364e-01}}}};
+  return refs;
+}
+
+/// Builds a perfect FCC cell of `reps` repeats, which has a known Steinhardt
+/// signature and so pins the absolute scale of the parameters.
+molSys::PointCloud<molSys::Point<double>, double> fccCloud(int reps,
+                                                           double lattice) {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  const std::array<std::array<double, 3>, 4> basis = {
+      {{0.0, 0.0, 0.0}, {0.5, 0.5, 0.0}, {0.5, 0.0, 0.5}, {0.0, 0.5, 0.5}}};
+
+  int id = 1;
+  for (int i = 0; i < reps; i++) {
+    for (int j = 0; j < reps; j++) {
+      for (int k = 0; k < reps; k++) {
+        for (const auto &b : basis) {
+          molSys::Point<double> p;
+          p.type = 1;
+          p.atomID = id;
+          p.molID = id;
+          p.x = (i + b[0]) * lattice;
+          p.y = (j + b[1]) * lattice;
+          p.z = (k + b[2]) * lattice;
+          cloud.pts.push_back(p);
+          cloud.idIndexMap[id] = id - 1;
+          id++;
+        }
+      }
+    }
+  }
+  cloud.nop = static_cast<int>(cloud.pts.size());
+  cloud.currentFrame = 1;
+  const double L = reps * lattice;
+  cloud.box = {L, L, L};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  return cloud;
+}
+
+} // namespace
+
+TEST_CASE("lookupTableQ4Vec matches independent reference values", "[bop]") {
+  for (const auto &ref : referenceQ4()) {
+    auto result = sph::lookupTableQ4Vec({ref.phi, ref.theta});
+    REQUIRE(result.size() == ref.values.size());
+    for (size_t m = 0; m < result.size(); m++) {
+      REQUIRE_THAT(result[m].real(),
+                   Catch::Matchers::WithinAbs(ref.values[m].real(), 1e-13));
+      REQUIRE_THAT(result[m].imag(),
+                   Catch::Matchers::WithinAbs(ref.values[m].imag(), 1e-13));
+    }
+  }
+}
+
+TEST_CASE("Q4 satisfies the addition theorem and Condon-Shortley", "[bop]") {
+  const std::vector<std::pair<double, double>> directions = {
+      {0.7, 1.2}, {0.3, 0.8}, {2.31, 5.02}, {1.77, 3.41}};
+
+  for (const auto &[theta, phi] : directions) {
+    auto q4 = sph::lookupTableQ4Vec({phi, theta});
+
+    double sum = 0.0;
+    for (const auto &y : q4) {
+      sum += std::norm(y);
+    }
+    REQUIRE_THAT(sum, Catch::Matchers::WithinAbs(9.0 / (4.0 * M_PI), 1e-13));
+
+    for (int m = 1; m <= 4; m++) {
+      const std::complex<double> expected =
+          ((m % 2 == 0) ? 1.0 : -1.0) * std::conj(q4[4 - m]);
+      REQUIRE_THAT(q4[4 + m].real(),
+                   Catch::Matchers::WithinAbs(expected.real(), 1e-15));
+      REQUIRE_THAT(q4[4 + m].imag(),
+                   Catch::Matchers::WithinAbs(expected.imag(), 1e-15));
+    }
+
+    for (int m = 0; m < 9; m++) {
+      const auto single = sph::lookupTableQ4(m, {phi, theta});
+      REQUIRE_THAT(single.real(),
+                   Catch::Matchers::WithinAbs(q4[m].real(), 1e-15));
+      REQUIRE_THAT(single.imag(),
+                   Catch::Matchers::WithinAbs(q4[m].imag(), 1e-15));
+    }
+  }
+}
+
+TEST_CASE("Steinhardt parameters reproduce the FCC reference values", "[bop]") {
+  // A perfect FCC lattice has q4 = 0.190941, q6 = 0.574524 for the twelve
+  // nearest neighbours (Steinhardt, Nelson and Ronchetti 1983, Table I).
+  // With every environment identical, the averaged parameters must coincide
+  // with the local ones.
+  const double lattice = 4.0;
+  auto cloud = fccCloud(4, lattice);
+
+  // First shell of FCC sits at a/sqrt(2); cut between that and the second
+  // shell at a
+  const double cutoff = 0.85 * lattice;
+  auto nList = nneigh::neighListO(cutoff, cloud, 1);
+
+  auto q4 = chill::steinhardtQl(cloud, nList, 4);
+  auto q6 = chill::steinhardtQl(cloud, nList, 6);
+
+  REQUIRE(q4.ql.size() == static_cast<size_t>(cloud.nop));
+
+  for (int i = 0; i < cloud.nop; i++) {
+    REQUIRE_THAT(q4.ql[i], Catch::Matchers::WithinAbs(0.190941, 1e-5));
+    REQUIRE_THAT(q6.ql[i], Catch::Matchers::WithinAbs(0.574524, 1e-5));
+    // Uniform environment: averaging changes nothing
+    REQUIRE_THAT(q4.qlBar[i], Catch::Matchers::WithinAbs(q4.ql[i], 1e-9));
+    REQUIRE_THAT(q6.qlBar[i], Catch::Matchers::WithinAbs(q6.ql[i], 1e-9));
+  }
+}
+
+TEST_CASE("steinhardtQl rejects unsupported degrees", "[bop]") {
+  auto cloud = fccCloud(2, 4.0);
+  auto nList = nneigh::neighListO(3.4, cloud, 1);
+  auto q5 = chill::steinhardtQl(cloud, nList, 5);
+  REQUIRE(q5.ql.size() == static_cast<size_t>(cloud.nop));
+  for (double v : q5.ql) {
+    REQUIRE(v == 0.0);
+  }
+}

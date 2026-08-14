@@ -24,7 +24,7 @@ namespace {
 /**
  * @brief Powers of @f$\sin\theta@f$ and @f$\cos\theta@f$ together with the
  *  unit-modulus phases @f$e^{im\phi}@f$, evaluated once per direction.
- * @details The closed forms for @f$Y_{3m}@f$ and @f$Y_{6m}@f$ need
+ * @details The closed forms for @f{3m}@f$, @f{4m}@f$ and @f{6m}@f$ need
  *  @f$\sin^k\theta@f$ and @f$\cos^k\theta@f$ up to @f$k=6@f$ and the phases for
  *  @f$|m| \leq 6@f$. Building them by recurrence costs two calls to the
  *  trigonometric library per direction, shared across every @f$m@f$.
@@ -65,6 +65,16 @@ const std::array<double, 4> &normQ3() {
   return values;
 }
 
+const std::array<double, 5> &normQ4() {
+  static const std::array<double, 5> values = {
+      0.1875 * std::sqrt(1.0 / std::numbers::pi),          // m = 0
+      0.375 * std::sqrt(5.0 / std::numbers::pi),           // |m| = 1
+      0.375 * std::sqrt(5.0 / (2.0 * std::numbers::pi)),   // |m| = 2
+      0.375 * std::sqrt(35.0 / std::numbers::pi),          // |m| = 3
+      0.1875 * std::sqrt(35.0 / (2.0 * std::numbers::pi))}; // |m| = 4
+  return values;
+}
+
 const std::array<double, 7> &normQ6() {
   static const std::array<double, 7> values = {
       0.03125 * std::sqrt(13.0 / std::numbers::pi),         // m = 0
@@ -80,7 +90,7 @@ const std::array<double, 7> &normQ6() {
 /**
  * @brief The associated-Legendre amplitude of @f$Y_{lm}@f$ stripped of its
  *  normalisation and azimuthal phase.
- * @param[in] orderL Degree @f$l@f$; either 3 or 6.
+ * @param[in] orderL Degree @f@f$; 3, 4 or 6.
  * @param[in] absM Absolute order @f$|m|@f$.
  * @param[in] terms Precomputed powers of the polar angle.
  * @return The real amplitude @f$P_{l|m|}(\cos\theta)@f$ in the convention used
@@ -100,6 +110,23 @@ double legendreAmplitude(int orderL, int absM, const AngularTerms &terms) {
       return s[2] * c[1];
     case 3:
       return s[3];
+    default:
+      return 0.0;
+    }
+  }
+
+  if (orderL == 4) {
+    switch (absM) {
+    case 0:
+      return 35.0 * c[4] - 30.0 * c[2] + 3.0;
+    case 1:
+      return s[1] * (7.0 * c[3] - 3.0 * c[1]);
+    case 2:
+      return s[2] * (7.0 * c[2] - 1.0);
+    case 3:
+      return s[3] * c[1];
+    case 4:
+      return s[4];
     default:
       return 0.0;
     }
@@ -135,14 +162,16 @@ double legendreAmplitude(int orderL, int absM, const AngularTerms &terms) {
  * @details The two members satisfy
  *  @f$Y_{l,m} = (-1)^m Y_{l,-m}^{*}@f$ exactly, since both are formed from the
  *  same amplitude and the same phase.
- * @param[in] orderL Degree @f$l@f$; either 3 or 6.
+ * @param[in] orderL Degree @f@f$; 3, 4 or 6.
  * @param[in] absM Absolute order @f$|m|@f$.
  * @param[in] terms Precomputed powers and phases.
  * @return A pair holding @f$Y_{l,-m}@f$ then @f$Y_{l,+m}@f$.
  */
 std::pair<std::complex<double>, std::complex<double>>
 harmonicPair(int orderL, int absM, const AngularTerms &terms) {
-  const double norm = (orderL == 3) ? normQ3()[absM] : normQ6()[absM];
+  const double norm = (orderL == 3)   ? normQ3()[absM]
+                      : (orderL == 4) ? normQ4()[absM]
+                                      : normQ6()[absM];
   const double amplitude = norm * legendreAmplitude(orderL, absM, terms);
 
   const std::complex<double> negative = amplitude * std::conj(terms.phase[absM]);
@@ -156,10 +185,9 @@ harmonicPair(int orderL, int absM, const AngularTerms &terms) {
 
 /**
  * @details Function for calculating spherical harmonics. Dispatches to
- *  the hard-coded lookup tables for l=3 and l=6 (the only values used
- *  in CHILL/CHILL+ classification).
+ *  the closed forms for l=3, l=4 and l=6.
  *
- *  @param[in] orderL The int value of l (must be 3 or 6)
+ *  @param[in] orderL The int value of l (must be 3, 4 or 6)
  *  @param[in] radialCoord Array containing the polar and azimuth angles
  *  @return a complex vector of length 2l+1
  */
@@ -167,6 +195,8 @@ std::vector<std::complex<double>>
 sph::spheriHarmo(int orderL, std::array<double, 2> radialCoord) {
   if (orderL == 3) {
     return sph::lookupTableQ3Vec(radialCoord);
+  } else if (orderL == 4) {
+    return sph::lookupTableQ4Vec(radialCoord);
   } else if (orderL == 6) {
     return sph::lookupTableQ6Vec(radialCoord);
   }
@@ -231,6 +261,45 @@ std::complex<double> sph::lookupTableQ3(int m, std::array<double, 2> angles) {
   const AngularTerms terms(angles[1], angles[0]);
   const int order = m - 3; // table index 0..6 maps to m = -3..3
   const auto [negative, positive] = harmonicPair(3, std::abs(order), terms);
+
+  return (order < 0) ? negative : positive;
+}
+
+/**
+ * @details Calculates @f$Q_4@f$ from the shared trigonometric terms.
+ *  @f$q_4@f$ paired with @f$q_6@f$ is the standard discriminator between
+ *  close-packed and body-centred environments.
+ * @param[in] angles The azimuth and polar angles for a particular particle
+ * @return a complex vector of length @f$9@f$, ordered @f$m = -4 \ldots 4@f$
+ */
+std::vector<std::complex<double>>
+sph::lookupTableQ4Vec(std::array<double, 2> angles) {
+  const AngularTerms terms(angles[1], angles[0]);
+  std::vector<std::complex<double>> result(9);
+
+  for (int m = 0; m <= 4; m++) {
+    const auto [negative, positive] = harmonicPair(4, m, terms);
+    result[4 - m] = negative;
+    result[4 + m] = positive;
+  }
+
+  return result;
+}
+
+/**
+ * @details Single order of @f$Q_4@f$.
+ * @param[in] m Table index, @f$0 \ldots 8@f$, mapping to @f$m = -4 \ldots 4@f$
+ * @param[in] angles The azimuth and polar angles for a particular particle
+ * @return The complex value of @f$Y_{4m}@f$
+ */
+std::complex<double> sph::lookupTableQ4(int m, std::array<double, 2> angles) {
+  if (m < 0 || m > 8) {
+    return {0.0, 0.0};
+  }
+
+  const AngularTerms terms(angles[1], angles[0]);
+  const int order = m - 4; // table index 0..8 maps to m = -4..4
+  const auto [negative, positive] = harmonicPair(4, std::abs(order), terms);
 
   return (order < 0) ? negative : positive;
 }
@@ -1206,4 +1275,129 @@ int chill::numStaggered(
   } // end of loop over c_ij
 
   return num_staggrd;
+}
+
+/**
+ * @details Computes the Steinhardt order parameters of a single degree for
+ *  every particle, in both the local and the neighbour-averaged form.
+ *
+ *  The local parameter follows Steinhardt, Nelson and Ronchetti:
+ *  @f[
+ *  q_l(i) = \sqrt{\frac{4\pi}{2l+1} \sum_{m=-l}^{l} |q_{lm}(i)|^2},
+ *  \quad q_{lm}(i) = \frac{1}{N_b(i)} \sum_{j=1}^{N_b(i)} Y_{lm}(\hat{r}_{ij}).
+ *  @f]
+ *
+ *  The averaged parameter of Lechner and Dellago replaces @f$q_{lm}(i)@f$ with
+ *  its mean over the particle and its neighbours,
+ *  @f[
+ *  \bar{q}_{lm}(i) = \frac{1}{N_b(i)+1} \sum_{k=0}^{N_b(i)} q_{lm}(k),
+ *  @f]
+ *  where @f$k=0@f$ denotes the particle itself. Folding in the second
+ *  coordination shell narrows the overlap between the distributions of
+ *  competing structures, which is what makes the averaged form the usual
+ *  choice for identifying solid-like particles during nucleation.
+ *
+ * @param[in] yCloud The input molSys::PointCloud
+ * @param[in] nList Row-ordered neighbour list, by atom ID
+ * @param[in] orderL The degree @f$l@f$; 3, 4 or 6
+ * @return Local and averaged parameters, one entry per particle
+ */
+chill::SteinhardtQl
+chill::steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                    const std::vector<std::vector<int>> &nList, int orderL) {
+  chill::SteinhardtQl result;
+  result.ql.assign(yCloud.nop, 0.0);
+  result.qlBar.assign(yCloud.nop, 0.0);
+
+  if (orderL != 3 && orderL != 4 && orderL != 6) {
+    std::cerr << "Steinhardt parameters are available for l = 3, 4 and 6.\n";
+    return result;
+  }
+
+  const int nComponents = 2 * orderL + 1;
+  const double prefactor = 4.0 * std::numbers::pi / (2.0 * orderL + 1.0);
+
+  // ------------------------------------------------
+  // First pass: the local q_lm(i), averaged over the bonds of each particle
+  std::vector<std::vector<std::complex<double>>> qlm(
+      yCloud.nop, std::vector<std::complex<double>>(nComponents, {0.0, 0.0}));
+
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+    if (static_cast<size_t>(iatom) >= nList.size()) {
+      continue;
+    }
+    const int nBonds = static_cast<int>(nList[iatom].size()) - 1;
+    if (nBonds <= 0) {
+      continue;
+    }
+
+    for (int j = 1; j <= nBonds; j++) {
+      const auto it = yCloud.idIndexMap.find(nList[iatom][j]);
+      if (it == yCloud.idIndexMap.end()) {
+        continue;
+      }
+      const int jatom = it->second;
+
+      const std::array<double, 3> delta = gen::relDist(yCloud, iatom, jatom);
+      const double r = std::sqrt(delta[0] * delta[0] + delta[1] * delta[1] +
+                                 delta[2] * delta[2]);
+      if (r == 0.0) {
+        continue;
+      }
+
+      const std::array<double, 2> angles = {std::atan2(delta[0], delta[1]),
+                                            std::acos(delta[2] / r)};
+      const auto ylm = sph::spheriHarmo(orderL, angles);
+      for (int m = 0; m < nComponents; m++) {
+        qlm[iatom][m] += ylm[m];
+      }
+    }
+
+    for (int m = 0; m < nComponents; m++) {
+      qlm[iatom][m] /= static_cast<double>(nBonds);
+    }
+  }
+
+  // ------------------------------------------------
+  // Second pass: q_l from the local q_lm, and qbar_l from the mean of q_lm
+  // over the particle together with its neighbours
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+    double sumLocal = 0.0;
+    for (int m = 0; m < nComponents; m++) {
+      sumLocal += std::norm(qlm[iatom][m]);
+    }
+    result.ql[iatom] = std::sqrt(prefactor * sumLocal);
+
+    if (static_cast<size_t>(iatom) >= nList.size()) {
+      continue;
+    }
+    const int nBonds = static_cast<int>(nList[iatom].size()) - 1;
+    if (nBonds <= 0) {
+      result.qlBar[iatom] = result.ql[iatom];
+      continue;
+    }
+
+    std::vector<std::complex<double>> qlmBar = qlm[iatom];
+    int nContributing = 1; // the particle itself
+    for (int j = 1; j <= nBonds; j++) {
+      const auto it = yCloud.idIndexMap.find(nList[iatom][j]);
+      if (it == yCloud.idIndexMap.end()) {
+        continue;
+      }
+      const int jatom = it->second;
+      for (int m = 0; m < nComponents; m++) {
+        qlmBar[m] += qlm[jatom][m];
+      }
+      nContributing++;
+    }
+
+    double sumAveraged = 0.0;
+    for (int m = 0; m < nComponents; m++) {
+      qlmBar[m] /= static_cast<double>(nContributing);
+      sumAveraged += std::norm(qlmBar[m]);
+    }
+    result.qlBar[iatom] = std::sqrt(prefactor * sumAveraged);
+  }
+
+  return result;
 }

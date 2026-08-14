@@ -251,6 +251,24 @@ bool isInterfacial(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 [[nodiscard]] int numStaggered(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                  const std::vector<std::vector<int>> &nList, int jatom);
 
+/** @struct SteinhardtQl
+ * @brief Per-particle Steinhardt order parameters of a single degree @f$l@f$.
+ * @details Holds both the local parameter and its neighbour-averaged
+ *  counterpart. The averaged form of Lechner and Dellago folds in the second
+ *  coordination shell, which separates the distributions of competing
+ *  structures far more cleanly than the local form alone.
+ */
+struct SteinhardtQl {
+  std::vector<double> ql;    //! Local @f$q_l(i)@f$
+  std::vector<double> qlBar; //! Averaged @f$\bar{q}_l(i)@f$
+};
+
+//! Computes the local and neighbour-averaged Steinhardt parameters of degree
+//! orderL (3, 4 or 6) for every particle
+[[nodiscard]] SteinhardtQl
+steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+             const std::vector<std::vector<int>> &nList, int orderL);
+
 } // namespace chill
 
 /** \brief Functions used for spherical harmonics
@@ -279,6 +297,13 @@ lookupTableQ3Vec(std::array<double, 2> angles);
 
 //! Lookup table for Q3 (m=0 to m=6)
 std::complex<double> lookupTableQ3(int m, std::array<double, 2> angles);
+
+//! Lookup table for Q4
+std::vector<std::complex<double>>
+lookupTableQ4Vec(std::array<double, 2> angles);
+
+//! Lookup table for Q4 (m=0 to m=8)
+std::complex<double> lookupTableQ4(int m, std::array<double, 2> angles);
 
 //! Lookup table for Q6
 std::vector<std::complex<double>>
