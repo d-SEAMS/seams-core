@@ -41,35 +41,30 @@ std::string densenautyCertificate(int n, const std::vector<std::pair<int, int>> 
   if (n <= 0 || n > MAXN) {
     return {};
   }
-  DYNALLSTAT(graph, g, g_sz);
-  DYNALLSTAT(graph, cg, cg_sz);
-  DYNALLSTAT(int, lab, lab_sz);
-  DYNALLSTAT(int, ptn, ptn_sz);
-  DYNALLSTAT(int, orbits, orbits_sz);
   DEFAULTOPTIONS_GRAPH(options);
   statsblk stats;
   const int m = SETWORDSNEEDED(n);
   options.getcanon = TRUE;
   nauty_check(WORDSIZE, m, n, NAUTYVERSIONID);
-  DYNALLOC2(graph, g, g_sz, n, m, "densenauty");
-  DYNALLOC2(graph, cg, cg_sz, n, m, "densenauty");
-  DYNALLOC1(int, lab, lab_sz, n, "densenauty");
-  DYNALLOC1(int, ptn, ptn_sz, n, "densenauty");
-  DYNALLOC1(int, orbits, orbits_sz, n, "densenauty");
-  EMPTYGRAPH(g, m, n);
+  std::vector<graph> g(static_cast<size_t>(n * m), 0);
+  std::vector<graph> cg(static_cast<size_t>(n * m), 0);
+  std::vector<int> lab(static_cast<size_t>(n), 0);
+  std::vector<int> ptn(static_cast<size_t>(n), 0);
+  std::vector<int> orbits(static_cast<size_t>(n), 0);
+  EMPTYGRAPH(g.data(), m, n);
   for (const auto &e : edges) {
     if (e.first == e.second) {
       continue;
     }
-    ADDONEEDGE(g, e.first, e.second, m);
+    ADDONEEDGE(g.data(), e.first, e.second, m);
   }
-  densenauty(g, lab, ptn, orbits, &options, &stats, m, n, cg);
+  densenauty(g.data(), lab.data(), ptn.data(), orbits.data(), &options, &stats,
+             m, n, cg.data());
   std::ostringstream out;
   out << std::hex;
-  const int words = m * n;
-  for (int i = 0; i < words; i++) {
-    out << cg[i];
-    if (i + 1 < words) {
+  for (int i = 0; i < n * m; i++) {
+    out << cg[static_cast<size_t>(i)];
+    if (i + 1 < n * m) {
       out << '-';
     }
   }
