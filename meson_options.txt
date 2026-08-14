@@ -8,3 +8,5 @@ option('with_openmp_offload', type: 'feature', value: 'disabled',
   description: 'Compile OpenMP target offload for the Steinhardt kernel')
 option('offload_triple', type: 'string', value: 'nvptx64-nvidia-cuda',
   description: 'OpenMP offload target triple when with_openmp_offload is enabled')
+option('with_ira', type: 'feature', value: 'auto',
+  description: 'Link libira (IRA match and SOFI point groups)')

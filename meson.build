@@ -153,6 +153,39 @@ if readcon_dep.found()
   _args += ['-DSEAMS_HAS_READCON=1']
 endif
 
+# IRA/SOFI (Gunde et al.). Optional: the CPU wheel stays Horn-only
+# unless the builder has libira. The C header is vendored; the probe
+# must actually link libira_match.
+ira_opt = get_option('with_ira')
+ira_found = false
+if not ira_opt.disabled()
+  ira_dep = dependency('ira', required: false)
+  if not ira_dep.found()
+    ira_lib = cppc.find_library('ira', required: false)
+    if ira_lib.found()
+      ira_dep = ira_lib
+    endif
+  endif
+  ira_probe = '''
+    #include <iralib_interf.h>
+    int main() {
+      char ver[16] = {};
+      long date = 0;
+      libira_get_version(ver, &date);
+      return 0;
+    }
+  '''
+  if ira_dep.found() and cppc.links(ira_probe, dependencies: [ira_dep],
+                                    args: ['-I' + meson.project_source_root() / 'src/include/external'],
+                                    name: 'libira C API')
+    _deps += [ira_dep]
+    _args += ['-DSEAMS_HAS_IRA=1']
+    ira_found = true
+  elif ira_opt.enabled()
+    error('with_ira=enabled but libira does not link')
+  endif
+endif
+
 # Report which optional backends this build actually got. Each of these
 # degrades silently: without vesin the neighbour search falls back to the
 # brute-force path, and without a reader the corresponding formats are simply
@@ -165,6 +198,7 @@ summary({
   'Cell-list neighbours (vesin)': vesin_dep.found(),
   'PDB/GRO/DCD readers (chemfiles)': chemfiles_dep.found(),
   '.con reader (readcon-core)': readcon_dep.found(),
+  'IRA/SOFI shape matching (libira)': ira_found,
 }, section: 'Optional backends', bool_yn: true)
 
 if not readcon_dep.found()

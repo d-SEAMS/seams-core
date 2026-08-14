@@ -9,6 +9,7 @@ ydslib_sources = files(
   'cluster.cpp',
   'franzblau.cpp',
   'generic.cpp',
+  'ira_sofi.cpp',
   'mol_sys.cpp',
   'neighbours.cpp',
   'order_parameter.cpp',
