@@ -153,16 +153,16 @@ double overlayRmsd(Eigen::MatrixXd ref, Eigen::MatrixXd tgt) {
   }
   scaleToUnit(ref);
   scaleToUnit(tgt);
+  double best = 1e300;
   if (ira::available()) {
     ira::Match hit;
     if (ira::match(ref, tgt, hit) == 0) {
-      return hit.rmsd;
+      best = hit.rmsd;
     }
   }
-  // HCP A and B sites differ by a 60-degree turn. Without IRA the
-  // correspondence is the z-then-y-then-x sort, so try the six in-plane
-  // rotations and keep the best Horn overlay.
-  double best = 1e300;
+  // HCP A and B sites differ by a 60-degree turn. The sorted-row
+  // correspondence only hits one orientation, so try the six in-plane
+  // rotations. Keep whichever of IRA and Horn is tighter.
   for (int k = 0; k < 6; k++) {
     const double t = k * std::numbers::pi / 3.0;
     const double ct = std::cos(t);
