@@ -12,6 +12,7 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
+#include <algorithm>
 #include <generic.hpp>
 #include <seams_input.hpp>
 
@@ -79,10 +80,9 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
   std::vector<std::string> tokens; // Vector containing word tokens
   std::vector<double> numbers;     // Vector containing type double numbers
   int nop = -1;                    // Number of atoms in targetFrame
-  int iatom = 1;                // Current atom being filled into the PointCloud
+  int iatom = 0;
   molSys::Point<double> iPoint; // Current point being read in from the file
-  double xLo, xHi, yLo, yHi, zLo,
-      zHi; // Box lengths extrapolated from the least and greatest coordinates
+  double xLo = 0.0, xHi = 0.0, yLo = 0.0, yHi = 0.0, zLo = 0.0, zHi = 0.0;
 
   if (!(gen::file_exists(filename))) {
     std::cout
@@ -130,46 +130,26 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
 
       // Put logic for checking atom type here later
       iPoint.type = 1; // Oxygen type; hard-coded!
-      iPoint.molID = iatom;
-      iPoint.atomID = iatom;
       iPoint.x = std::stod(tokens[1]);
       iPoint.y = std::stod(tokens[2]);
       iPoint.z = std::stod(tokens[3]);
-
+      if (yCloud.pts.empty()) {
+        xLo = xHi = iPoint.x;
+        yLo = yHi = iPoint.y;
+        zLo = zHi = iPoint.z;
+      } else {
+        xLo = std::min(xLo, iPoint.x);
+        xHi = std::max(xHi, iPoint.x);
+        yLo = std::min(yLo, iPoint.y);
+        yHi = std::max(yHi, iPoint.y);
+        zLo = std::min(zLo, iPoint.z);
+        zHi = std::max(zHi, iPoint.z);
+      }
+      iatom++;
+      iPoint.molID = iatom;
+      iPoint.atomID = iatom;
       yCloud.pts.push_back(iPoint);
-      yCloud.idIndexMap[iPoint.atomID] = yCloud.pts.size() - 1;
-      iatom++; // Increase index
-
-      // First point
-      if (iatom == 1) {
-        // Loop through the dimensions
-        xLo = iPoint.x;
-        xHi = iPoint.x;
-        yLo = iPoint.y;
-        yHi = iPoint.y;
-        zLo = iPoint.z;
-        zHi = iPoint.z;
-      } // first point
-      else {
-        if (iPoint.x < xLo) {
-          xLo = iPoint.x;
-        } // xLo
-        else if (iPoint.x > xHi) {
-          xHi = iPoint.x;
-        } // xHi
-        else if (iPoint.y < yLo) {
-          yLo = iPoint.y;
-        } // yLo
-        else if (iPoint.y > yHi) {
-          yHi = iPoint.y;
-        } // yHi
-        else if (iPoint.z < zLo) {
-          zLo = iPoint.z;
-        } // zLo
-        else if (iPoint.z > zHi) {
-          zHi = iPoint.z;
-        } // zHi
-      }   // update
+      yCloud.idIndexMap[iPoint.atomID] = static_cast<int>(yCloud.pts.size()) - 1;
     } // end of while, looping through lines till EOF
     // ----------------------------------------------------------
   } // End of if file open statement
@@ -182,10 +162,8 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
     zHi = zLo + 10;
   } // for a single point in the system (never happens)
 
-  // Fill up the box lengths
-  yCloud.box.push_back(xHi - xLo);
-  yCloud.box.push_back(yHi - yLo);
-  yCloud.box.push_back(zHi - zLo);
+  yCloud.box = {xHi - xLo, yHi - yLo, zHi - zLo};
+  yCloud.boxLow = {xLo, yLo, zLo};
 
   if (yCloud.pts.size() != yCloud.nop) {
     std::cout << "Atoms didn't get filled in properly.\n";

@@ -37,8 +37,12 @@ void writeDumpHeader(
   outputFile << nAtoms << "\n";
   outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
   for (int k = 0; k < 3; k++) {
-    outputFile << yCloud.boxLow[k] << " " << yCloud.boxLow[k] + yCloud.box[k]
-               << "\n";
+    const double lo = (static_cast<size_t>(k) < yCloud.boxLow.size())
+                          ? yCloud.boxLow[k]
+                          : 0.0;
+    const double len =
+        (static_cast<size_t>(k) < yCloud.box.size()) ? yCloud.box[k] : 0.0;
+    outputFile << lo << " " << lo + len << "\n";
   }
   outputFile << "ITEM: ATOMS " << columns << "\n";
 }
