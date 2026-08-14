@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __SEAMS_OUTPUT_H_
-#define __SEAMS_OUTPUT_H_
+#ifndef SEAMS_SEAMS_OUTPUT_H_
+#define SEAMS_SEAMS_OUTPUT_H_
 
 #include <bond.hpp>
 #include <cage.hpp>
@@ -196,4 +196,4 @@ namespace sout {
                     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                     const std::vector<int> &atoms, int clusterID, cage::cageType type);
 } // namespace sout
-#endif // __SEAMS_OUTPUT_H_
+#endif // SEAMS_SEAMS_OUTPUT_H_

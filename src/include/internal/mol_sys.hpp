@@ -12,17 +12,18 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __MOL_SYS_H_
-#define __MOL_SYS_H_
+#ifndef SEAMS_MOL_SYS_H_
+#define SEAMS_MOL_SYS_H_
 
 #include <algorithm>
 #include <array>
+#include <concepts>
 #include <fstream>
 #include <iterator>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <vector>
-#include<unordered_map>
 
 /** @file mol_sys.hpp
  *  @brief The main molecular system handler.
@@ -127,6 +128,15 @@ struct Result {
   double c_value;       //! Bond correlation factor
 };
 
+/** @concept molSys::CoordinateScalar
+ * @brief The arithmetic type a coordinate may take.
+ * @details Constrains #Point and #PointCloud so that instantiating them on an
+ *  unsuitable type names the offending requirement, rather than failing deep
+ *  inside a member.
+ */
+template <typename T>
+concept CoordinateScalar = std::floating_point<T>;
+
 /** @struct Point
  * @brief This contains per-particle information.
  * @details Specifically
@@ -139,7 +149,7 @@ struct Result {
  *  - Type of #atom_state_type iceType
  *  - In slice bool
  */
-template <typename T> struct Point {
+template <CoordinateScalar T> struct Point {
   int type = 0, molID = 0, atomID = 0; //! type ID, molID, atomID
   T x = 0, y = 0, z = 0;              //! coordinates
   std::vector<Result> c_ij;            //! Results (contains bond correlation type)
@@ -160,7 +170,7 @@ template <typename T> struct Point {
  *  - A vector for the simulation box lengths in each dimension
  *  - A vector containing the absolute lower box coordinates
  */
-template <typename S, typename T> struct PointCloud {
+template <typename S, CoordinateScalar T> struct PointCloud {
   std::vector<S> pts;    //! Collection of points
   int currentFrame = 0;  //! Current frame number
   int nop = 0;           //! Number of atoms
@@ -194,4 +204,4 @@ molSys::PointCloud<molSys::Point<double>, double>
 clearPointCloud(molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 } // namespace molSys
 
-#endif // __MOL_SYS_H_
+#endif // SEAMS_MOL_SYS_H_

@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __NEIGHBOURS_H_
-#define __NEIGHBOURS_H_
+#ifndef SEAMS_NEIGHBOURS_H_
+#define SEAMS_NEIGHBOURS_H_
 
 #include <generic.hpp>
 #include <mol_sys.hpp>
@@ -90,4 +90,4 @@ std::vector<std::vector<int>> getNewNeighbourListByIndex(
 
 }  // namespace nneigh
 
-#endif  // __NEIGHBOURS_H_
+#endif  // SEAMS_NEIGHBOURS_H_

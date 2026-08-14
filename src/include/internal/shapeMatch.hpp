@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __SHAPEMATCH_H_
-#define __SHAPEMATCH_H_
+#ifndef SEAMS_SHAPEMATCH_H_
+#define SEAMS_SHAPEMATCH_H_
 
 #include <algorithm>
 #include <array>
@@ -70,4 +70,4 @@ bool matchPrismBlock(const molSys::PointCloud<molSys::Point<double>, double> &yC
 
 } // namespace match
 
-#endif // __SHAPEMATCH_H_
+#endif // SEAMS_SHAPEMATCH_H_

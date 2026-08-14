@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __RDF2D_H_
-#define __RDF2D_H_
+#ifndef SEAMS_RDF2D_H_
+#define SEAMS_RDF2D_H_
 
 #include <algorithm>
 #include <array>
@@ -108,4 +108,4 @@ double getPlaneArea(std::vector<double> volumeLengths);
 
 } // namespace rdf2
 
-#endif // __RDF2D_H_
+#endif // SEAMS_RDF2D_H_

@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __BONDING_H_
-#define __BONDING_H_
+#ifndef SEAMS_BONDING_H_
+#define SEAMS_BONDING_H_
 
 #include <algorithm>
 #include <array>
@@ -121,4 +121,4 @@ std::vector<std::vector<int>> trimBonds(std::vector<std::vector<int>> bonds);
 
 } // namespace bond
 
-#endif // __BONDING_H_
+#endif // SEAMS_BONDING_H_

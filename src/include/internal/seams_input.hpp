@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __SEAMS_INPUT_H_
-#define __SEAMS_INPUT_H_
+#ifndef SEAMS_SEAMS_INPUT_H_
+#define SEAMS_SEAMS_INPUT_H_
 
 #include <iostream>
 #include <memory>
@@ -125,4 +125,4 @@ inline bool atomInSlice(double x, double y, double z,
 
 } // namespace sinp
 
-#endif //// __SEAMS_INPUT_H_
+#endif //// SEAMS_SEAMS_INPUT_H_

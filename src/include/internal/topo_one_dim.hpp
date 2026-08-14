@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __TOPO_ONE_DIM_H_
-#define __TOPO_ONE_DIM_H_
+#ifndef SEAMS_TOPO_ONE_DIM_H_
+#define SEAMS_TOPO_ONE_DIM_H_
 
 #include <cmath>
 #include <algorithm>

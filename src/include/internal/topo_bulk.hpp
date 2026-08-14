@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __TOPO_BULK_H_
-#define __TOPO_BULK_H_
+#ifndef SEAMS_TOPO_BULK_H_
+#define SEAMS_TOPO_BULK_H_
 
 #include <algorithm>
 #include <array>
@@ -163,4 +163,4 @@ bool basalRingsSeparation(
     const std::vector<int> &basal1, const std::vector<int> &basal2, double heightCutoff = 8);
 } // namespace prism3
 
-#endif // __TOPO_BULK_H_
+#endif // SEAMS_TOPO_BULK_H_

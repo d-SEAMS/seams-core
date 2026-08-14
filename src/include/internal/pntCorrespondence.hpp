@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __PNTCORRESPONDENCE_H_
-#define __PNTCORRESPONDENCE_H_
+#ifndef SEAMS_PNTCORRESPONDENCE_H_
+#define SEAMS_PNTCORRESPONDENCE_H_
 
 #include <algorithm>
 #include <array>
@@ -124,4 +124,4 @@ changeDiaCageOrder(const molSys::PointCloud<molSys::Point<double>, double> &yClo
 
 } // namespace pntToPnt
 
-#endif // __PNTCORRESPONDENCE_H_
+#endif // SEAMS_PNTCORRESPONDENCE_H_

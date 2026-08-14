@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __TOPO_TWO_DIM_H_
-#define __TOPO_TWO_DIM_H_
+#ifndef SEAMS_TOPO_TWO_DIM_H_
+#define SEAMS_TOPO_TWO_DIM_H_
 
 #include <algorithm>
 #include <array>
