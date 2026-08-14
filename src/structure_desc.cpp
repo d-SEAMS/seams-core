@@ -159,15 +159,32 @@ double overlayRmsd(Eigen::MatrixXd ref, Eigen::MatrixXd tgt) {
       return hit.rmsd;
     }
   }
-  sortRows(ref);
-  sortRows(tgt);
-  std::vector<double> quat, perAtom;
-  double rmsd = 0.0;
-  double scale = 1.0;
-  if (absor::hornAbsOrientation(ref, tgt, quat, rmsd, perAtom, scale) != 0) {
-    return 1e300;
+  // HCP A and B sites differ by a 60-degree turn. Without IRA the
+  // correspondence is the z-then-y-then-x sort, so try the six in-plane
+  // rotations and keep the best Horn overlay.
+  double best = 1e300;
+  for (int k = 0; k < 6; k++) {
+    const double t = k * std::numbers::pi / 3.0;
+    const double ct = std::cos(t);
+    const double st = std::sin(t);
+    Eigen::MatrixXd rot = tgt;
+    for (int i = 0; i < rot.rows(); i++) {
+      const double x = tgt(i, 0);
+      const double y = tgt(i, 1);
+      rot(i, 0) = ct * x - st * y;
+      rot(i, 1) = st * x + ct * y;
+    }
+    Eigen::MatrixXd r = ref;
+    sortRows(r);
+    sortRows(rot);
+    std::vector<double> quat, perAtom;
+    double rmsd = 0.0;
+    double scale = 1.0;
+    if (absor::hornAbsOrientation(r, rot, quat, rmsd, perAtom, scale) == 0) {
+      best = std::min(best, rmsd);
+    }
   }
-  return rmsd;
+  return best;
 }
 
 } // namespace
