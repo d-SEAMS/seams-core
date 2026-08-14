@@ -60,40 +60,47 @@ endif
 # MPI is optional. Analysis splits atoms across ranks and Allgathervs
 # q_lm (Lechner-Dellago needs neighbours that may live on another rank).
 # This is not LAMMPS-style spatial decomposition (Plimpton 1995).
-mpi_found = false
-if get_option('with_mpi')
-  mpi_dep = dependency('mpi', language: 'cpp', required: false)
-  if mpi_dep.found()
-    _deps += [mpi_dep]
-    _args += ['-DSEAMS_HAS_MPI=1']
-    mpi_found = true
-  else
-    message('with_mpi=true but no MPI compiler wrapper was found')
-  endif
+# Default disabled so the CPU wheel never picks up a stray system MPI.
+mpi_dep = dependency('mpi', language: 'cpp', required: get_option('with_mpi'))
+mpi_found = mpi_dep.found()
+if mpi_found
+  _deps += [mpi_dep]
+  _args += ['-DSEAMS_HAS_MPI=1']
 endif
 
-# OpenMP target offload. The probe must actually link a target region;
-# a bare -fopenmp-targets flag is not enough (missing nvptx bitcode).
+# OpenMP target offload. The probe must actually link the combined
+# construct the library ships; a bare -fopenmp-targets flag or an
+# empty `#pragma omp target {}` is not enough (missing nvptx bitcode
+# still outlines to the host).
+offload_opt = get_option('with_openmp_offload')
 offload_enabled = false
-if get_option('with_openmp_offload')
+if not offload_opt.disabled()
   if not openmp_dep.found()
-    message('with_openmp_offload=true but OpenMP is not available')
+    if offload_opt.enabled()
+      error('with_openmp_offload=enabled but OpenMP is not available')
+    endif
   else
     offload_arg = '-fopenmp-targets=' + get_option('offload_triple')
     offload_probe = '''
+      #include <omp.h>
       int main() {
-        #pragma omp target
-        { }
-        return 0;
+        const int n = 64;
+        double x[64] = {};
+        #pragma omp target teams distribute parallel for map(tofrom: x[0:n])
+        for (int i = 0; i < n; ++i) x[i] = 1.0;
+        return x[0] == 1.0 ? 0 : 1;
       }
     '''
     if cppc.links(offload_probe, args: ['-fopenmp', offload_arg],
                   name: 'OpenMP target offload link')
       _args += ['-DSEAMS_HAS_OFFLOAD=1', offload_arg]
       offload_enabled = true
+    elif offload_opt.enabled()
+      error('OpenMP target offload was requested but the compiler ' +
+            'cannot link a target region for ' + get_option('offload_triple'))
     else
-      message('OpenMP target offload was requested but the compiler ' +
-              'cannot link a target region for ' + get_option('offload_triple'))
+      message('OpenMP target offload probe failed for ' +
+              get_option('offload_triple') + '; host OpenMP only')
     endif
   endif
 endif
