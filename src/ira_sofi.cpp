@@ -33,11 +33,12 @@ void flatten(const Eigen::MatrixXd &pts, std::vector<double> &coords,
 }
 
 #ifdef SEAMS_HAS_IRA
-Eigen::Matrix3d rotationFromFortran(const double *rmat) {
+// ira_mod.py fills rotation[i][j] from the flat buffer in C row-major order.
+Eigen::Matrix3d rotationFromC(const double *rmat) {
   Eigen::Matrix3d R;
-  for (int j = 0; j < 3; j++) {
-    for (int i = 0; i < 3; i++) {
-      R(i, j) = rmat[i + 3 * j];
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      R(i, j) = rmat[3 * i + j];
     }
   }
   return R;
@@ -107,7 +108,7 @@ int match(const Eigen::MatrixXd &ref, const Eigen::MatrixXd &target, Match &out,
   if (err != 0) {
     return err;
   }
-  out.rotation = rotationFromFortran(rmatP);
+  out.rotation = rotationFromC(rmatP);
   out.translation = Eigen::Vector3d(trP[0], trP[1], trP[2]);
   out.hausdorff = hd;
   out.assignment.assign(permP, permP + nat2);
@@ -116,7 +117,10 @@ int match(const Eigen::MatrixXd &ref, const Eigen::MatrixXd &target, Match &out,
   double sum = 0.0;
   int used = 0;
   for (int i = 0; i < nPair; i++) {
-    int j = out.assignment[static_cast<size_t>(i)] - 1;
+    int j = out.assignment[static_cast<size_t>(i)];
+    if (j < 0 || j >= nat2) {
+      j -= 1;
+    }
     if (j < 0 || j >= nat2) {
       continue;
     }
@@ -192,7 +196,7 @@ int pointGroup(const Eigen::MatrixXd &coords, PointGroup &out, double symThr) {
   out.operations.clear();
   out.operations.reserve(static_cast<size_t>(nmat));
   for (int k = 0; k < nmat; k++) {
-    out.operations.push_back(rotationFromFortran(matP + 9 * k));
+    out.operations.push_back(rotationFromC(matP + 9 * k));
   }
   return 0;
 #endif
