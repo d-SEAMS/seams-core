@@ -104,6 +104,11 @@ int main(int argc, char **argv) {
       },
       reps);
 
+  ringType.assign(sixRings.size(), ring::strucType::unclassified);
+  cageList.clear();
+  listHC = ring::findHC(sixRings, ringType, hbondIdx, cageList);
+  listDDC = ring::findDDC(sixRings, ringType, listHC, cageList);
+
   // Steinhardt parameters, which the OpenMP build spreads over threads
   auto qRef = chill::steinhardtQl(yCloud, nList, 6);
   const double tSteinhardt = bestMillis(
@@ -124,13 +129,17 @@ int main(int argc, char **argv) {
   }
 
   double tMatchHC = -1.0;
-  int nMatched = 0;
+  double tMatchDDC = -1.0;
+  int nMatchedHC = 0;
+  int nMatchedDDC = 0;
   const char *hcTemplate = argc > 4 ? argv[4] : "../templates/hc.xyz";
+  const char *ddcTemplate = argc > 5 ? argv[5] : "../templates/ddc.xyz";
   Eigen::MatrixXd refHC = tum3::buildRefHC(hcTemplate);
+  Eigen::MatrixXd refDDC = tum3::buildRefDDC(ddcTemplate);
   if (refHC.rows() > 0) {
     tMatchHC = bestMillis(
         [&]() {
-          nMatched = 0;
+          nMatchedHC = 0;
           for (const auto &c : cageList) {
             if (c.type != cage::cageType::HexC) {
               continue;
@@ -139,7 +148,25 @@ int main(int argc, char **argv) {
             double rmsd = 0.0;
             (void)tum3::shapeMatchHC(yCloud, refHC, c, sixRings, hbondIdx, quat,
                                      rmsd);
-            nMatched++;
+            nMatchedHC++;
+          }
+        },
+        reps);
+  }
+  if (refDDC.rows() > 0) {
+    tMatchDDC = bestMillis(
+        [&]() {
+          nMatchedDDC = 0;
+          for (size_t i = 0; i < cageList.size(); i++) {
+            if (cageList[i].type != cage::cageType::DoubleDiaC) {
+              continue;
+            }
+            std::vector<double> quat;
+            double rmsd = 0.0;
+            (void)tum3::shapeMatchDDC(yCloud, refDDC, cageList,
+                                      static_cast<int>(i), sixRings, quat,
+                                      rmsd);
+            nMatchedDDC++;
           }
         },
         reps);
@@ -162,7 +189,11 @@ int main(int argc, char **argv) {
   }
   if (tMatchHC >= 0.0) {
     std::cout << std::setw(28) << "shapeMatchHC/ms" << tMatchHC << "\n"
-              << "matched HCs " << nMatched << "\n";
+              << "matched HCs " << nMatchedHC << "\n";
+  }
+  if (tMatchDDC >= 0.0) {
+    std::cout << std::setw(28) << "shapeMatchDDC/ms" << tMatchDDC << "\n"
+              << "matched DDCs " << nMatchedDDC << "\n";
   }
   std::cout << "\nHC rings   " << listHC.size() << "\n"
             << "DDC rings  " << listDDC.size() << "\n";

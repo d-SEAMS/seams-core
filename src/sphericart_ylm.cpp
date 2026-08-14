@@ -39,9 +39,17 @@ int ylmCartesian(int orderL, const double *xyz, int nVec, double *ylmOut) {
   for (int i = 0; i < nVec * 3; i++) {
     cart[static_cast<size_t>(i)] = xyz[i];
   }
-  sphericart::SphericalHarmonics<double> calc(static_cast<size_t>(orderL));
+  static sphericart::SphericalHarmonics<double> calc3(3);
+  static sphericart::SphericalHarmonics<double> calc4(4);
+  static sphericart::SphericalHarmonics<double> calc6(6);
+  sphericart::SphericalHarmonics<double> *calc = &calc6;
+  if (orderL == 3) {
+    calc = &calc3;
+  } else if (orderL == 4) {
+    calc = &calc4;
+  }
   std::vector<double> sph;
-  calc.compute(cart, sph);
+  calc->compute(cart, sph);
   const int base = orderL * orderL;
   for (int i = 0; i < nVec; i++) {
     const double *row = sph.data() + static_cast<size_t>(i) * (orderL + 1) * (orderL + 1);
