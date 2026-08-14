@@ -71,9 +71,16 @@ test('simd',
     build_rpath: '$ORIGIN/../src'),
   env: _test_env)
 
-# Performance benchmark binary (not in regular test suite)
+# Performance benchmark binaries (not in regular test suite)
 executable('bench_algorithms', 'bench_algorithms.cpp',
   dependencies: [yds_dep, catch2_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('bench_scaling', 'bench_scaling.cpp',
+  dependencies: [yds_dep],
   cpp_args: _args,
   link_args: _test_link_args,
   include_directories: _incdirs,
