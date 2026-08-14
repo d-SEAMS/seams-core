@@ -11,6 +11,10 @@
 #include <filesystem>
 #include <numeric>
 
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
+
 TEST_CASE("radialCoord converts Cartesian to spherical angles", "[bop]") {
   // Point along the z-axis: (0, 0, 1)
   // Polar angle (theta) should be 0, azimuth (phi) should be 0
@@ -626,5 +630,55 @@ TEST_CASE("steinhardtQl rejects unsupported degrees", "[bop]") {
   REQUIRE(q5.ql.size() == static_cast<size_t>(cloud.nop));
   for (double v : q5.ql) {
     REQUIRE(v == 0.0);
+  }
+}
+
+TEST_CASE("steinhardtQl is independent of the OpenMP thread count", "[bop]") {
+  // steinhardtQl only starts threads at 50000 atoms. A chain of nearest
+  // neighbours is enough to exercise both parallel loops without building
+  // a physical lattice.
+  constexpr int nAtoms = 50000;
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.nop = nAtoms;
+  cloud.currentFrame = 1;
+  cloud.box = {static_cast<double>(nAtoms) * 2.0, 10.0, 10.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.pts.reserve(nAtoms);
+  std::vector<std::vector<int>> nList(nAtoms);
+  for (int i = 0; i < nAtoms; i++) {
+    molSys::Point<double> p;
+    p.type = 1;
+    p.atomID = i + 1;
+    p.molID = p.atomID;
+    p.x = static_cast<double>(i) * 1.5;
+    p.y = 0.0;
+    p.z = 0.0;
+    cloud.pts.push_back(p);
+    cloud.idIndexMap[p.atomID] = i;
+    nList[i].push_back(p.atomID);
+    if (i + 1 < nAtoms) {
+      nList[i].push_back(i + 2);
+    }
+  }
+
+  auto run = [&]() { return chill::steinhardtQl(cloud, nList, 6); };
+
+#ifdef SEAMS_HAS_OPENMP
+  omp_set_dynamic(0);
+  omp_set_num_threads(1);
+#endif
+  const auto serial = run();
+#ifdef SEAMS_HAS_OPENMP
+  omp_set_num_threads(4);
+#endif
+  const auto threaded = run();
+
+  REQUIRE(serial.ql.size() == static_cast<size_t>(nAtoms));
+  REQUIRE(threaded.ql.size() == serial.ql.size());
+  for (int i = 0; i < nAtoms; i++) {
+    REQUIRE_THAT(threaded.ql[i],
+                 Catch::Matchers::WithinAbs(serial.ql[i], 1e-15));
+    REQUIRE_THAT(threaded.qlBar[i],
+                 Catch::Matchers::WithinAbs(serial.qlBar[i], 1e-15));
   }
 }

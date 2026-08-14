@@ -9,6 +9,7 @@
 #include <topo_bulk.hpp>
 
 // Standard
+#include <algorithm>
 #include <filesystem>
 #include <iostream>
 
@@ -370,6 +371,70 @@ TEST_CASE("findMixedRings identifies shared DDC/HC rings", "[topo_bulk]") {
   // Find mixed rings (with a single HC, there should be none)
   auto mixedList = ring::findMixedRings(rings, ringType, listDDC, listHC);
   REQUIRE(mixedList.empty());
+}
+
+TEST_CASE("buildRingSearchIndex lists every ring that contains an atom",
+          "[topo_bulk]") {
+  const std::vector<std::vector<int>> rings = {
+      {0, 1, 2}, {2, 3, 4}, {0, 4, 5}, {9}};
+  const auto index = ring::buildRingSearchIndex(rings, 6);
+
+  REQUIRE(index.ringsContainingAtom.size() == 6);
+  REQUIRE(index.ringsContainingAtom[0] == std::vector<int>{0, 2});
+  REQUIRE(index.ringsContainingAtom[1] == std::vector<int>{0});
+  REQUIRE(index.ringsContainingAtom[2] == std::vector<int>{0, 1});
+  REQUIRE(index.ringsContainingAtom[3] == std::vector<int>{1});
+  REQUIRE(index.ringsContainingAtom[4] == std::vector<int>{1, 2});
+  REQUIRE(index.ringsContainingAtom[5] == std::vector<int>{2});
+}
+
+TEST_CASE("buildRingSearchIndex ignores atoms outside numAtoms",
+          "[topo_bulk]") {
+  const std::vector<std::vector<int>> rings = {{0, 1, 99}, {-1, 2}};
+  const auto index = ring::buildRingSearchIndex(rings, 3);
+  REQUIRE(index.ringsContainingAtom.size() == 3);
+  REQUIRE(index.ringsContainingAtom[0] == std::vector<int>{0});
+  REQUIRE(index.ringsContainingAtom[1] == std::vector<int>{0});
+  REQUIRE(index.ringsContainingAtom[2] == std::vector<int>{1});
+}
+
+TEST_CASE("indexed findHC and findDDC match the convenience overloads",
+          "[topo_bulk]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  buildHCCloud(yCloud);
+
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  nList = nneigh::neighbourListByIndex(yCloud, nList);
+  auto rings = primitive::ringNetwork(nList, 7);
+
+  std::vector<std::vector<int>> sixRings;
+  int maxAtom = 0;
+  for (const auto &r : rings) {
+    if (r.size() == 6) {
+      sixRings.push_back(r);
+      for (int atom : r) {
+        maxAtom = std::max(maxAtom, atom);
+      }
+    }
+  }
+
+  const auto index =
+      ring::buildRingSearchIndex(sixRings, maxAtom + 1);
+
+  std::vector<ring::strucType> typeWrap(sixRings.size());
+  std::vector<ring::strucType> typeIdx(sixRings.size());
+  std::vector<cage::Cage> cagesWrap;
+  std::vector<cage::Cage> cagesIdx;
+
+  auto hcWrap = ring::findHC(sixRings, typeWrap, nList, cagesWrap);
+  auto hcIdx = ring::findHC(sixRings, typeIdx, nList, cagesIdx, index);
+  REQUIRE(hcWrap == hcIdx);
+  REQUIRE(typeWrap == typeIdx);
+
+  auto ddcWrap = ring::findDDC(sixRings, typeWrap, hcWrap, cagesWrap);
+  auto ddcIdx = ring::findDDC(sixRings, typeIdx, hcIdx, cagesIdx, index);
+  REQUIRE(ddcWrap == ddcIdx);
+  REQUIRE(typeWrap == typeIdx);
 }
 
 TEST_CASE("topoBulkAnalysis on mW cubic trajectory", "[topo_bulk]") {

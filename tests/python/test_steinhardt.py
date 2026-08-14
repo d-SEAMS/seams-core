@@ -63,3 +63,17 @@ def test_steinhardt_qbar_equals_ql_for_uniform_environment():
         assert abs(ql_bar - ql) <= 1e-9, (
             f"qlBar ({ql_bar}) != ql ({ql}) in a uniform FCC environment"
         )
+
+
+def test_steinhardt_q4_matches_fcc_reference():
+    lattice = 4.0
+    cloud = _fcc_cloud(reps=4, lattice=lattice)
+    cutoff = 0.85 * lattice
+    nList = _core.neighListO(rcutoff=cutoff, yCloud=cloud, typeI=1)
+
+    result = _core.steinhardtQl(yCloud=cloud, nList=nList, orderL=4)
+
+    assert len(result.ql) == cloud.nop
+    for ql, ql_bar in zip(result.ql, result.qlBar):
+        assert abs(ql - 0.190941) <= 1e-5
+        assert abs(ql_bar - ql) <= 1e-9

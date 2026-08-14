@@ -260,3 +260,37 @@ TEST_CASE("neighbour list matches minimum image for a tight box",
     }
   }
 }
+
+TEST_CASE("neighbour builders return empty when the cloud has no box",
+          "[neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.nop = 2;
+  cloud.currentFrame = 1;
+  for (int i = 0; i < 2; i++) {
+    molSys::Point<double> pt;
+    pt.type = 1;
+    pt.atomID = i;
+    pt.x = static_cast<double>(i);
+    pt.y = 0.0;
+    pt.z = 0.0;
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i] = i;
+  }
+
+  REQUIRE(cloud.box.empty());
+  REQUIRE(nneigh::neighListO(3.5, cloud, 1).empty());
+  REQUIRE(nneigh::neighList(3.5, cloud, 1, 1).empty());
+  REQUIRE(nneigh::halfNeighList(3.5, cloud, 1).empty());
+  REQUIRE(nneigh::getNewNeighbourListByIndex(cloud, 3.5).empty());
+}
+
+TEST_CASE("neighListO returns empty when the cloud has no atoms",
+          "[neighbours]") {
+  auto cloud = makeFourAtomCloud();
+  cloud.nop = 0;
+  cloud.pts.clear();
+  cloud.idIndexMap.clear();
+
+  auto nList = nneigh::neighListO(3.5, cloud, 1);
+  REQUIRE(nList.empty());
+}
