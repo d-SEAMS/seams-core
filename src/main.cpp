@@ -139,7 +139,15 @@ int main(int argc, char *argv[]) {
     lua["ringsAllSizes"] = &rings;
     lua["lowestAtomID"] = &atomID;
     registerCommon(lua);
-    lua.set_function("prismAnalysis", ring::prismAnalysis);
+    lua.set_function(
+        "prismAnalysis",
+        [](std::string path, const std::vector<std::vector<int>> &rings,
+           const std::vector<std::vector<int>> &nList,
+           molSys::PointCloud<molSys::Point<double>, double> &cloud, int maxDepth,
+           int atomID, int firstFrame, int currentFrame, bool doShapeMatching) {
+          return ring::prismAnalysis(path, rings, nList, cloud, maxDepth, atomID,
+                                     firstFrame, currentFrame, doShapeMatching);
+        });
     lua.script_file(lscript);
   }
 
