@@ -369,7 +369,7 @@ if get_option('with_lua').allowed() and lua_dep.found()
     yoda_link_args += ['-Wl,--enable-new-dtags']
   endif
   yoda_struct = executable('yodaStruct',
-    files('src/main.cpp', 'src/opt_parser.cpp'),
+    files('src/main.cpp', 'src/lua_api.cpp', 'src/opt_parser.cpp'),
     dependencies: [yds_dep, lua_dep],
     cpp_args: _args,
     link_args: yoda_link_args,
