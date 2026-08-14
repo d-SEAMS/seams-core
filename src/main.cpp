@@ -12,20 +12,73 @@
 #include <rang.hpp>
 #include <sol/sol.hpp>
 
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include <vector>
 
 namespace {
 
-//! Runs a Lua file in protected mode; a script error is reported on stderr
-//! and returned as a non-zero exit code instead of aborting the process
+//! Where the vendored Fennel compiler lives. The build embeds the source-root
+//! path at configure time; YODA_FENNEL_PATH overrides it at runtime (e.g. for
+//! installed binaries running away from a checkout).
+std::string fennelSourcePath() {
+  const char *env = std::getenv("YODA_FENNEL_PATH");
+  if (env != nullptr && *env != '\0') {
+    return env;
+  }
+#ifdef YODA_FENNEL_LUA
+  return YODA_FENNEL_LUA;
+#else
+  return "src/include/external/fennel/fennel.lua";
+#endif
+}
+
+//! Runs a user script in protected mode. Paths ending in .fnl are compiled by
+//! the vendored Fennel (a lisp that compiles to Lua) against the same
+//! globals; anything else runs as plain Lua. Errors in either language are
+//! reported on stderr and returned as a non-zero exit code instead of
+//! aborting the process
 [[nodiscard]] int runScriptFile(sol::state &lua, const std::string &path) {
-  const sol::protected_function_result result =
-      lua.safe_script_file(path, sol::script_pass_on_error);
-  if (!result.valid()) {
-    const sol::error err = result;
-    std::cerr << rang::fg::red << "Lua error in " << path << ":\n"
+  const std::string fnlExt = ".fnl";
+  const bool isFennel =
+      path.size() >= fnlExt.size() &&
+      path.compare(path.size() - fnlExt.size(), fnlExt.size(), fnlExt) == 0;
+  if (!isFennel) {
+    const sol::protected_function_result result =
+        lua.safe_script_file(path, sol::script_pass_on_error);
+    if (!result.valid()) {
+      const sol::error err = result;
+      std::cerr << rang::fg::red << "Lua error in " << path << ":\n"
+                << rang::fg::reset << err.what() << "\n";
+      return 1;
+    }
+    return 0;
+  }
+  sol::table loaded = lua["package"]["loaded"];
+  sol::table fennel;
+  if (sol::object cached = loaded["fennel"]; cached.is<sol::table>()) {
+    fennel = cached.as<sol::table>();
+  } else {
+    const std::string fennelLua = fennelSourcePath();
+    auto mod = lua.safe_script_file(fennelLua, sol::script_pass_on_error);
+    if (!mod.valid()) {
+      const sol::error err = mod;
+      std::cerr << rang::fg::red << "Cannot load the Fennel compiler from "
+                << fennelLua << " (set YODA_FENNEL_PATH to override):\n"
+                << rang::fg::reset << err.what() << "\n";
+      return 1;
+    }
+    fennel = mod.get<sol::table>();
+    loaded["fennel"] = fennel;
+  }
+  sol::protected_function dofile = fennel["dofile"];
+  sol::table opts = lua.create_table();
+  opts["allowedGlobals"] = false;
+  auto run = dofile(path, opts);
+  if (!run.valid()) {
+    const sol::error err = run;
+    std::cerr << rang::fg::red << "Fennel error in " << path << ":\n"
               << rang::fg::reset << err.what() << "\n";
     return 1;
   }

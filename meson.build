@@ -368,10 +368,14 @@ if get_option('with_lua').allowed() and lua_dep.found()
   if host_machine.system() == 'linux'
     yoda_link_args += ['-Wl,--enable-new-dtags']
   endif
+  # Vendored Fennel compiler for .fnl scripts; the binary falls back to this
+  # source-root path unless YODA_FENNEL_PATH overrides it at runtime.
+  fennel_lua = meson.project_source_root() / 'src/include/external/fennel/fennel.lua'
   yoda_struct = executable('yodaStruct',
     files('src/main.cpp', 'src/lua_api.cpp', 'src/opt_parser.cpp'),
     dependencies: [yds_dep, lua_dep],
-    cpp_args: _args,
+    cpp_args: _args + ['-DYODA_FENNEL_LUA="' + fennel_lua + '"'],
+    include_directories: _incdirs,
     link_args: yoda_link_args,
     build_rpath: meson.project_build_root() / 'src',
     install: true)
@@ -383,6 +387,10 @@ if get_option('with_lua').allowed() and lua_dep.found()
     args: ['-c', 'example_lua/full_api/config.yml'],
     workdir: meson.project_source_root(),
     timeout: 240)
+  test('yoda_fennel', yoda_struct,
+    args: ['-c', 'example_lua/fennel/config.yml'],
+    workdir: meson.project_source_root(),
+    timeout: 120)
 endif
 
 summary({
