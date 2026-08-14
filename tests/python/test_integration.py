@@ -130,8 +130,8 @@ def test_full_pipeline_chill_plus():
 
     nList = _core.neighListO(rcutoff=3.5, yCloud=cloud, typeI=2)
 
-    # Run CHILL+ correlation
-    cloud = _core.getCorrelPlus(yCloud=cloud, nList=nList, isSlice=False)
+    # Run CHILL+ correlation, which mutates the cloud in place
+    _core.getCorrelPlus(yCloud=cloud, nList=nList, isSlice=False)
 
     # Every atom should now have c_ij entries
     classified_count = 0
