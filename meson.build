@@ -50,11 +50,34 @@ _deps += [blas_dep, lapack_dep]
 
 # Shared-memory parallelism. libstdc++ routes std::execution::par through TBB,
 # which conda-forge does not put in this environment, so a build relying on it
-# would quietly run serially. OpenMP ships with the compiler and is present.
+# would quietly run serially. OpenMP ships with the compiler on most toolchains.
+#
+# Finding the dependency is not the same as being able to link it. On the macOS
+# toolchain the flags it supplies drop the default libraries from the link, and
+# the failure surfaces as missing unwinder and locale symbols rather than as a
+# missing libomp, so probe an actual parallel region before committing to it.
 openmp_dep = dependency('openmp', required: false)
+openmp_found = false
 if openmp_dep.found()
-  _deps += [openmp_dep]
-  _args += ['-DSEAMS_HAS_OPENMP=1']
+  openmp_probe = '''
+    #include <omp.h>
+    int main() {
+      int total = 0;
+      #pragma omp parallel for reduction(+ : total)
+      for (int i = 0; i < 64; ++i) {
+        total += i;
+      }
+      return total == 2016 ? 0 : 1;
+    }
+  '''
+  if cppc.links(openmp_probe, dependencies: [openmp_dep], name: 'OpenMP links')
+    _deps += [openmp_dep]
+    _args += ['-DSEAMS_HAS_OPENMP=1']
+    openmp_found = true
+  else
+    message('OpenMP was found but a parallel region does not link; ' +
+            'building the per-particle loops single-threaded')
+  endif
 endif
 
 # MPI is optional. Analysis splits atoms across ranks and Allgathervs
@@ -75,9 +98,9 @@ endif
 offload_opt = get_option('with_openmp_offload')
 offload_enabled = false
 if not offload_opt.disabled()
-  if not openmp_dep.found()
+  if not openmp_found
     if offload_opt.enabled()
-      error('with_openmp_offload=enabled but OpenMP is not available')
+      error('with_openmp_offload=enabled but OpenMP does not link')
     endif
   else
     offload_arg = '-fopenmp-targets=' + get_option('offload_triple')
@@ -136,7 +159,7 @@ endif
 # absent from the library, with nothing at run time to say so.
 summary({
   'SIMD distance kernel (hwy)': hwy_dep.found(),
-  'Shared-memory parallelism (OpenMP)': openmp_dep.found(),
+  'Shared-memory parallelism (OpenMP)': openmp_found,
   'MPI atom split (Steinhardt)': mpi_found,
   'OpenMP target offload': offload_enabled,
   'Cell-list neighbours (vesin)': vesin_dep.found(),
