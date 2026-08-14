@@ -69,9 +69,9 @@ normalized dot product of the local orientational bond order parameter,
 by:
 
   @f[
-  a(i,j) = \frac{q_l(i).q_l(j)}{|q_l(i)||q_l(j)|} = \frac{ \Sigma_{m=-l}^{l}
-q_l(i) q_l^*(j)}{ (\Sigma_{m=-l}^{l} q_l(j) q_l^*(i))^{1/2} (\Sigma_{m=-l}^{l}
-q_l(j) q_l^*(i))^{1/2} } @f]
+  a(i,j) = \frac{\sum_{m=-l}^{l} q_{lm}(i)\, q_{lm}^*(j)}
+  {|q_l(i)|\,|q_l(j)|}
+  @f]
 
   where, @f$q_{lm}^*@f$ is the complex conjugate of @f$q_{lm}@f$.
 
