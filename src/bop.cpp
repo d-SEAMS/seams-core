@@ -1348,12 +1348,16 @@ chill::steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCl
       continue;
     }
 
+    int nUsed = 0;
     for (int j = 1; j <= nBonds; j++) {
       const auto it = yCloud.idIndexMap.find(nList[iatom][j]);
       if (it == yCloud.idIndexMap.end()) {
         continue;
       }
       const int jatom = it->second;
+      if (jatom < 0 || jatom >= yCloud.nop) {
+        continue;
+      }
 
       const std::array<double, 3> delta = gen::relDist(yCloud, iatom, jatom);
       const double r = std::sqrt(delta[0] * delta[0] + delta[1] * delta[1] +
@@ -1368,11 +1372,15 @@ chill::steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCl
       for (int m = 0; m < nComponents; m++) {
         qlm[static_cast<size_t>(iatom) * nComponents + m] += ylm[m];
       }
+      nUsed++;
     }
 
+    if (nUsed == 0) {
+      continue;
+    }
     for (int m = 0; m < nComponents; m++) {
       qlm[static_cast<size_t>(iatom) * nComponents + m] /=
-          static_cast<double>(nBonds);
+          static_cast<double>(nUsed);
     }
   }
 
@@ -1409,6 +1417,9 @@ chill::steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCl
         continue;
       }
       const int jatom = it->second;
+      if (jatom < 0 || jatom >= yCloud.nop) {
+        continue;
+      }
       const size_t jRow = static_cast<size_t>(jatom) * nComponents;
       for (int m = 0; m < nComponents; m++) {
         qlmBar[m] += qlm[jRow + m];

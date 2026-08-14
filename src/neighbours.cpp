@@ -166,6 +166,24 @@ std::vector<std::vector<int>> seedWithSelfIDs(const std::vector<int> &indexToID,
   return nList;
 }
 
+//! True when index has a real atom ID in the reverse table.
+bool hasAtomID(const std::vector<int> &indexToID, int index) {
+  return index >= 0 && static_cast<size_t>(index) < indexToID.size() &&
+         indexToID[index] != -1;
+}
+
+//! Appends jatom's ID to iatom's row only when both particles have IDs.
+//! An unmapped index is left as an empty row, which callers treat as
+//! "no self header, skip this particle".
+void appendNeighbourID(std::vector<std::vector<int>> &nList,
+                       const std::vector<int> &indexToID, int iatom,
+                       int jatom) {
+  if (!hasAtomID(indexToID, iatom) || !hasAtomID(indexToID, jatom)) {
+    return;
+  }
+  nList[iatom].push_back(indexToID[jatom]);
+}
+
 } // namespace
 
 /**
@@ -198,7 +216,6 @@ nneigh::neighList(double rcutoff,
     if (yCloud.pts[iatom].type != typeI) {
       continue;
     }
-    const int iatomIndex = indexToID[iatom];
     // Loop through the other atoms
     for (int jatom = 0; jatom < yCloud.nop; jatom++) {
       if (yCloud.pts[jatom].type != typeJ) {
@@ -211,8 +228,8 @@ nneigh::neighList(double rcutoff,
 
       // Update the neighbour indices with atom IDs for iatom and jatom both
       // (full list)
-      nList[iatom].push_back(indexToID[jatom]);
-      nList[jatom].push_back(iatomIndex);
+      appendNeighbourID(nList, indexToID, iatom, jatom);
+      appendNeighbourID(nList, indexToID, jatom, iatom);
 
     } // End of loop through jatom
   }   // End of loop for iatom
@@ -262,7 +279,7 @@ nneigh::neighListO(double rcutoff,
 
       // Fill neighbor pairs from vesin output, which is already bidirectional
       for (const auto &[iatom, jatom] : pairs) {
-        nList[iatom].push_back(indexToID[jatom]);
+        appendNeighbourID(nList, indexToID, iatom, jatom);
       }
 
       return nList;
@@ -289,7 +306,6 @@ nneigh::neighListO(double rcutoff,
   // Loop through every iatom and find nearest neighbours within rcutoff
   for (size_t ii = 0; ii < nTypeIAtoms; ii++) {
     const int iatom = typeIIndices[ii];
-    const int iatomIndex = indexToID[iatom];
 
     // Collect coordinate differences for all j > i of typeI
     const size_t remaining = nTypeIAtoms - ii - 1;
@@ -319,8 +335,8 @@ nneigh::neighListO(double rcutoff,
         continue;
       }
       const int jatom = typeIIndices[ii + 1 + jj];
-      nList[iatom].push_back(indexToID[jatom]);
-      nList[jatom].push_back(iatomIndex);
+      appendNeighbourID(nList, indexToID, iatom, jatom);
+      appendNeighbourID(nList, indexToID, jatom, iatom);
     }
   }   // End of loop for iatom
 
@@ -367,7 +383,7 @@ nneigh::halfNeighList(double rcutoff,
       }
 
       // Update the neighbour indices with the atom ID of jatom (half list)
-      nList[iatom].push_back(indexToID[jatom]);
+      appendNeighbourID(nList, indexToID, iatom, jatom);
 
     } // End of loop through jatom
   }   // End of loop for iatom

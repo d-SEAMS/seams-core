@@ -284,7 +284,7 @@ TEST_CASE("neighbour builders return empty when the cloud has no box",
   REQUIRE(nneigh::getNewNeighbourListByIndex(cloud, 3.5).empty());
 }
 
-TEST_CASE("neighListO still returns a row per atom when idIndexMap is incomplete",
+TEST_CASE("neighListO leaves an unmapped atom as an empty row",
           "[neighbours]") {
   auto cloud = makeFourAtomCloud();
   cloud.idIndexMap.erase(2);
@@ -293,11 +293,7 @@ TEST_CASE("neighListO still returns a row per atom when idIndexMap is incomplete
   REQUIRE(nList.size() == 4);
   REQUIRE_FALSE(nList[0].empty());
   REQUIRE(nList[0][0] == 0);
-  // The reverse table has no ID for index 2, so that row is not seeded
-  // with a self header even if neighbours are later appended.
-  if (!nList[2].empty()) {
-    REQUIRE(nList[2][0] != 2);
-  }
+  REQUIRE(nList[2].empty());
 }
 
 TEST_CASE("neighListO returns empty when the cloud has no atoms",

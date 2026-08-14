@@ -638,6 +638,56 @@ TEST_CASE("Steinhardt parameters reproduce the FCC reference values", "[bop]") {
   }
 }
 
+TEST_CASE("steinhardtQl averages only the bonds that resolve", "[bop]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {10.0, 10.0, 10.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  for (int i = 0; i < 2; i++) {
+    molSys::Point<double> p;
+    p.type = 1;
+    p.atomID = i + 1;
+    p.molID = p.atomID;
+    p.x = static_cast<double>(i);
+    p.y = 0.0;
+    p.z = 0.0;
+    cloud.pts.push_back(p);
+    cloud.idIndexMap[p.atomID] = i;
+  }
+  cloud.nop = 2;
+
+  std::vector<std::vector<int>> clean = {{1, 2}, {2, 1}};
+  std::vector<std::vector<int>> padded = {{1, 2, 99}, {2, 1}};
+  const auto qClean = chill::steinhardtQl(cloud, clean, 6);
+  const auto qPadded = chill::steinhardtQl(cloud, padded, 6);
+  REQUIRE_THAT(qPadded.ql[0], Catch::Matchers::WithinAbs(qClean.ql[0], 1e-15));
+  REQUIRE_THAT(qPadded.qlBar[0],
+               Catch::Matchers::WithinAbs(qClean.qlBar[0], 1e-15));
+}
+
+TEST_CASE("steinhardtQl skips neighbour indices outside the cloud", "[bop]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {10.0, 10.0, 10.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  molSys::Point<double> p;
+  p.type = 1;
+  p.atomID = 1;
+  p.x = 0.0;
+  p.y = 0.0;
+  p.z = 0.0;
+  cloud.pts.push_back(p);
+  cloud.idIndexMap[1] = 0;
+  cloud.idIndexMap[2] = 99;
+  cloud.nop = 1;
+
+  std::vector<std::vector<int>> nList = {{1, 2}};
+  const auto q = chill::steinhardtQl(cloud, nList, 6);
+  REQUIRE(q.ql.size() == 1);
+  REQUIRE(q.ql[0] == 0.0);
+  REQUIRE(q.qlBar[0] == 0.0);
+}
+
 TEST_CASE("steinhardtQl rejects unsupported degrees", "[bop]") {
   auto cloud = fccCloud(2, 4.0);
   auto nList = nneigh::neighListO(3.4, cloud, 1);
