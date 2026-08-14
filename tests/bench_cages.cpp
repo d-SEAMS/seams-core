@@ -25,6 +25,7 @@
 #include <sphericart_ylm.hpp>
 #include <topo_bulk.hpp>
 
+#include <algorithm>
 #include <chrono>
 #include <iomanip>
 #include <iostream>
@@ -86,12 +87,21 @@ int main(int argc, char **argv) {
   std::vector<int> listHC, listDDC;
   std::vector<cage::Cage> cageList;
   std::vector<ring::strucType> ringType;
+  int maxAtom = 0;
+  for (const auto &r : sixRings) {
+    for (const int a : r) {
+      maxAtom = std::max(maxAtom, a);
+    }
+  }
+  const auto ringIndex =
+      ring::buildRingSearchIndex(sixRings, maxAtom + 1);
 
   const double tHC = bestMillis(
       [&]() {
         ringType.assign(sixRings.size(), ring::strucType::unclassified);
         cageList.clear();
-        listHC = ring::findHC(sixRings, ringType, hbondIdx, cageList);
+        listHC =
+            ring::findHC(sixRings, ringType, hbondIdx, cageList, ringIndex);
       },
       reps);
 
@@ -100,15 +110,15 @@ int main(int argc, char **argv) {
         std::vector<ring::strucType> rt(sixRings.size(),
                                         ring::strucType::unclassified);
         std::vector<cage::Cage> cl;
-        auto hc = ring::findHC(sixRings, rt, hbondIdx, cl);
-        listDDC = ring::findDDC(sixRings, rt, hc, cl);
+        auto hc = ring::findHC(sixRings, rt, hbondIdx, cl, ringIndex);
+        listDDC = ring::findDDC(sixRings, rt, hc, cl, ringIndex);
       },
       reps);
 
   ringType.assign(sixRings.size(), ring::strucType::unclassified);
   cageList.clear();
-  listHC = ring::findHC(sixRings, ringType, hbondIdx, cageList);
-  listDDC = ring::findDDC(sixRings, ringType, listHC, cageList);
+  listHC = ring::findHC(sixRings, ringType, hbondIdx, cageList, ringIndex);
+  listDDC = ring::findDDC(sixRings, ringType, listHC, cageList, ringIndex);
 
   // Steinhardt parameters, which the OpenMP build spreads over threads
   auto qRef = chill::steinhardtQl(yCloud, nList, 6);

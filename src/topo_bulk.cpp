@@ -14,6 +14,95 @@
 
 #include <topo_bulk.hpp>
 
+#include <algorithm>
+#include <array>
+
+namespace {
+
+const std::vector<int> kEmptyRings;
+
+const std::vector<int> &atomRow(const ring::RingSearchIndex &index, int atom) {
+  if (atom < 0 ||
+      static_cast<size_t>(atom) >= index.ringsContainingAtom.size()) {
+    return kEmptyRings;
+  }
+  return index.ringsContainingAtom[atom];
+}
+
+// Lowest ring ID that contains all three atoms and is not skipA or skipB.
+// Rows are already ascending. -1 if none.
+int firstRingThrough(const ring::RingSearchIndex &index, int a, int b, int c,
+                     int skipA, int skipB = -1) {
+  const auto &A = atomRow(index, a);
+  const auto &B = atomRow(index, b);
+  const auto &C = atomRow(index, c);
+  size_t i = 0;
+  size_t j = 0;
+  size_t k = 0;
+  while (i < A.size() && j < B.size() && k < C.size()) {
+    const int x = A[i];
+    const int y = B[j];
+    const int z = C[k];
+    if (x == y && y == z) {
+      if (x != skipA && x != skipB) {
+        return x;
+      }
+      ++i;
+      ++j;
+      ++k;
+      continue;
+    }
+    const int lo = std::min(x, std::min(y, z));
+    if (x == lo) {
+      ++i;
+    }
+    if (y == lo) {
+      ++j;
+    }
+    if (z == lo) {
+      ++k;
+    }
+  }
+  return -1;
+}
+
+// Every ring that contains all three atoms, except skipA and skipB.
+void ringsThrough(const ring::RingSearchIndex &index, int a, int b, int c,
+                  int skipA, int skipB, std::vector<int> &out) {
+  const auto &A = atomRow(index, a);
+  const auto &B = atomRow(index, b);
+  const auto &C = atomRow(index, c);
+  size_t i = 0;
+  size_t j = 0;
+  size_t k = 0;
+  while (i < A.size() && j < B.size() && k < C.size()) {
+    const int x = A[i];
+    const int y = B[j];
+    const int z = C[k];
+    if (x == y && y == z) {
+      if (x != skipA && x != skipB) {
+        out.push_back(x);
+      }
+      ++i;
+      ++j;
+      ++k;
+      continue;
+    }
+    const int lo = std::min(x, std::min(y, z));
+    if (x == lo) {
+      ++i;
+    }
+    if (y == lo) {
+      ++j;
+    }
+    if (z == lo) {
+      ++k;
+    }
+  }
+}
+
+} // namespace
+
 // -----------------------------------------------------------------------------------------------------
 // BULK RING SEARCH ONLY
 // -----------------------------------------------------------------------------------------------------
@@ -383,7 +472,7 @@ std::vector<int> ring::findDDC(const std::vector<std::vector<int>> &rings,
     // hexagonal ring other than iring that passes through the triplet.
     // The peripheral rings are stored in order of the starting element
     // of each triplet.
-    cond2 = ring::conditionTwoDDC(rings, peripheralRings, iring);
+    cond2 = ring::conditionTwoDDC(rings, peripheralRings, iring, index);
     if (!cond2) {
       continue;
     }
@@ -553,14 +642,27 @@ bool ring::conditionOneDDC(const std::vector<std::vector<int>> &rings,
  */
 bool ring::conditionTwoDDC(const std::vector<std::vector<int>> &rings,
                            std::vector<int> &peripheralRings, int iring) {
+  int maxAtom = 0;
+  for (const auto &r : rings) {
+    for (const int atom : r) {
+      maxAtom = std::max(maxAtom, atom);
+    }
+  }
+  const auto index = ring::buildRingSearchIndex(rings, maxAtom + 1);
+  return ring::conditionTwoDDC(rings, peripheralRings, iring, index);
+}
+
+bool ring::conditionTwoDDC(const std::vector<std::vector<int>> &rings,
+                           std::vector<int> &peripheralRings, int iring,
+                           const ring::RingSearchIndex &index) {
   std::vector<int> triplet; //  Triplet formed from iring
   int ringSize = 6;         // Here, all the rings are hexagons
   int j;                    // Used for making the triplet
   int jring;                // Peripheral ring ID to be searched
-  int count;                // Number of  rings found that match the triplet
   std::vector<int>
       newPeripherals; // Vector in which the new peripheral ring IDs are saved.
                       // This will be swapped with peripheralRings later
+  newPeripherals.reserve(6);
 
   for (int k = 0; k < ringSize; k++) {
     triplet.clear(); // Clear the triplet
@@ -572,28 +674,11 @@ bool ring::conditionTwoDDC(const std::vector<std::vector<int>> &rings,
       }
       triplet.push_back(rings[iring][j]);
     } // end of getting a triplet from k
-    // -------------
-    // Compare the triplet with every possible peripheral
-    // ring inside peripheralRings.
-    count = 0; // init to zero
-    // Loop through all possible peripheral rings
-    for (int m = 0; m < peripheralRings.size(); m++) {
-      jring = peripheralRings[m]; // Ring ID of ring to be searched
-      // Search inside the ring with index jring for the triplet
-      bool foundTriplet = ring::findTripletInRing(rings[jring], triplet);
-
-      // If the triplet has been found inside jring
-      if (foundTriplet) {
-        newPeripherals.push_back(jring); // Update new peripheral vector
-        count++;
-        break;
-      } // end of ring found
-    }   // end of loop through all possible peripheral rings
-    // If count is 0, then the triplet was not found in any peripheral ring
-    if (count == 0) {
+    jring = firstRingThrough(index, triplet[0], triplet[1], triplet[2], iring);
+    if (jring < 0) {
       return false;
-    } // Return false since the triplet was not found
-    // -------------
+    }
+    newPeripherals.push_back(jring);
   } // end of looping through 0-6 to get triplets
 
   // Swap the old peripheral rings vector with the new one
@@ -845,7 +930,7 @@ std::vector<int> ring::findHC(const std::vector<std::vector<int>> &rings,
       // Find the prismatic rings
       prismaticRings.clear(); // Clear the prismatic ring vector first
       ring::findPrismatic(rings, listHC, ringType, iring, jring,
-                          prismaticRings);
+                          prismaticRings, index);
       // Update the prismatic rings
       for (int k = 0; k < prismaticRings.size(); k++) {
         kring =
@@ -1143,11 +1228,28 @@ int ring::findPrismatic(const std::vector<std::vector<int>> &rings,
                         std::vector<int> &listHC,
                         std::vector<ring::strucType> &ringType, int iring,
                         int jring, std::vector<int> &prismaticRings) {
-  int iIndex, jIndex;             // Used for making rings to be searched
+  int maxAtom = 0;
+  for (const auto &r : rings) {
+    for (const int atom : r) {
+      maxAtom = std::max(maxAtom, atom);
+    }
+  }
+  const auto index = ring::buildRingSearchIndex(rings, maxAtom + 1);
+  return ring::findPrismatic(rings, listHC, ringType, iring, jring,
+                             prismaticRings, index);
+}
+
+int ring::findPrismatic(const std::vector<std::vector<int>> &rings,
+                        std::vector<int> &listHC,
+                        std::vector<ring::strucType> &ringType, int iring,
+                        int jring, std::vector<int> &prismaticRings,
+                        const ring::RingSearchIndex &index) {
+  int iIndex;                     // Used for making rings to be searched
   int ringSize = rings[0].size(); // This is 6 for hexagons
   std::vector<int> iTriplet;      // triplet formed from iring
   std::vector<int> jTriplet;      // triplet formed from jring
   std::vector<int> common;        // Common elements
+  std::vector<int> candidates;
 
   // Make all possible triplets out of iring
   for (int i = 0; i < ringSize; i++) {
@@ -1163,23 +1265,10 @@ int ring::findPrismatic(const std::vector<std::vector<int>> &rings,
       iTriplet.push_back(rings[iring][iIndex]);
     } // end of getting a triplet from iring
 
-    // -------------------------------------------
-    // Now that a triplet has been found, find all rings with that triplet in
-    // it!
-    for (int kring = 0; kring < rings.size(); kring++) {
-      // If this is the same as iring or jring, skip
-      if (kring == iring || kring == jring) {
-        continue;
-      } // is not prismatic
-      //
-      // Now find out whether kring has the triplet or not!
-      common = ring::findsCommonElements(iTriplet, rings[kring]);
-
-      // If this triplet is not shared by  kring
-      // skip
-      if (common.size() != 3) {
-        continue;
-      } // kring does not have iTriplet
+    candidates.clear();
+    ringsThrough(index, iTriplet[0], iTriplet[1], iTriplet[2], iring, jring,
+                 candidates);
+    for (const int kring : candidates) {
 
       // -----------------
       // If kring does have the triplet, check to see if at least three other

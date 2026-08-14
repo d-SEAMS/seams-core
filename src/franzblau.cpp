@@ -17,6 +17,10 @@
 
 #include <franzblau.hpp>
 
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
+
 namespace {
 
 /**
@@ -32,37 +36,45 @@ struct BoundedBalls {
   BoundedBalls(const std::vector<std::vector<int>> &adjacency, int radius)
       : ball(adjacency.size()) {
     const int nVertices = static_cast<int>(adjacency.size());
-    std::vector<int> dist(nVertices, -1);
-    std::vector<int> touched, frontier, next;
-    for (int v = 0; v < nVertices; v++) {
-      for (const int w : touched) {
-        dist[w] = -1;
-      }
-      touched.clear();
-      dist[v] = 0;
-      touched.push_back(v);
-      frontier.assign(1, v);
-      for (int depth = 1; depth <= radius && !frontier.empty(); depth++) {
-        next.clear();
-        for (const int u : frontier) {
-          for (const int w : adjacency[u]) {
-            if (w >= 0 && w < nVertices && dist[w] == -1) {
-              dist[w] = depth;
-              touched.push_back(w);
-              next.push_back(w);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel if (nVertices >= 256)
+#endif
+    {
+      std::vector<int> dist(nVertices, -1);
+      std::vector<int> touched, frontier, next;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static)
+#endif
+      for (int v = 0; v < nVertices; v++) {
+        for (const int w : touched) {
+          dist[w] = -1;
+        }
+        touched.clear();
+        dist[v] = 0;
+        touched.push_back(v);
+        frontier.assign(1, v);
+        for (int depth = 1; depth <= radius && !frontier.empty(); depth++) {
+          next.clear();
+          for (const int u : frontier) {
+            for (const int w : adjacency[u]) {
+              if (w >= 0 && w < nVertices && dist[w] == -1) {
+                dist[w] = depth;
+                touched.push_back(w);
+                next.push_back(w);
+              }
             }
           }
+          frontier.swap(next);
         }
-        frontier.swap(next);
-      }
-      auto &b = ball[v];
-      b.reserve(touched.size());
-      for (const int w : touched) {
-        if (w != v) {
-          b.emplace_back(w, dist[w]);
+        auto &b = ball[v];
+        b.reserve(touched.size());
+        for (const int w : touched) {
+          if (w != v) {
+            b.emplace_back(w, dist[w]);
+          }
         }
+        std::sort(b.begin(), b.end());
       }
-      std::sort(b.begin(), b.end());
     }
   }
 

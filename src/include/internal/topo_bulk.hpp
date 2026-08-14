@@ -131,6 +131,11 @@ bool conditionOneDDC(const std::vector<std::vector<int>> &rings,
 bool conditionTwoDDC(const std::vector<std::vector<int>> &rings,
                      std::vector<int> &peripheralRings, int iring);
 
+//! As conditionTwoDDC, answering each triplet from the inverted index
+bool conditionTwoDDC(const std::vector<std::vector<int>> &rings,
+                     std::vector<int> &peripheralRings, int iring,
+                     const RingSearchIndex &index);
+
 //! Third condition for the DDC: Even (by vector index) numbered index triplets
 //! and odd triplets must have at least one element in common
 bool conditionThreeDDC(const std::vector<std::vector<int>> &rings,
@@ -154,6 +159,13 @@ bool notNeighboursOfRing(const std::vector<std::vector<int>> &nList,
 [[nodiscard]] int findPrismatic(const std::vector<std::vector<int>> &rings, std::vector<int> &listHC,
                   std::vector<strucType> &ringType, int iring, int jring,
                   std::vector<int> &prismaticRings);
+
+//! As findPrismatic, drawing candidate rings from the inverted index
+[[nodiscard]] int findPrismatic(const std::vector<std::vector<int>> &rings,
+                                std::vector<int> &listHC,
+                                std::vector<strucType> &ringType, int iring,
+                                int jring, std::vector<int> &prismaticRings,
+                                const RingSearchIndex &index);
 
 //! Assigns a type of enum class iceType, to every atom, using information from
 //! ringType, which has the information of every ring
