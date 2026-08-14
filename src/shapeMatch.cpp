@@ -12,6 +12,7 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
+#include <ira_sofi.hpp>
 #include <shapeMatch.hpp>
 
 /**
@@ -272,6 +273,13 @@ bool match::matchPrismBlock(
   refPrismBlock =
       pntToPnt::createPrismBlock(yCloud, refPoints, ringSize, basal1, basal2);
   // ----------------------------------------------------
+
+  targetPrismBlock =
+      pntToPnt::fillPointSetPrismBlock(yCloud, basal1, basal2, 0);
+  if (ira::orient(refPrismBlock, targetPrismBlock, quat, rmsd)) {
+    beginIndex = 0;
+    return rmsd <= 6.0;
+  }
 
   // Loop through possible point-to-point correspondences
   if (ringSize % 2 == 0 || ringSize == 3) {

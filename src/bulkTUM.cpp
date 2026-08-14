@@ -13,6 +13,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <bulkTUM.hpp>
+#include <ira_sofi.hpp>
 
 // -----------------------------------------------------------------------------------------------------
 // TOPOLOGICAL UNIT MATCHING ALGORITHMS
@@ -280,6 +281,10 @@ int tum3::shapeMatchHC(
   pntToPnt::relOrderHC(yCloud, rings[iring], rings[jring], nList, basal1,
                        basal2);
   // ----------------
+  targetPointSet = pntToPnt::changeHexCageOrder(yCloud, basal1, basal2, 0);
+  if (ira::orient(refPoints, targetPointSet, quat, rmsd)) {
+    return 0;
+  }
   // Loop through all possible permutations
   //
   for (int i = 0; i < ringSize; i++) {
@@ -343,6 +348,10 @@ int tum3::shapeMatchDDC(
   // Save the order of the DDC in a vector
   ddcOrder = pntToPnt::relOrderDDC(cageIndex, rings, cageList);
   // ----------------
+  targetPointSet = pntToPnt::changeDiaCageOrder(yCloud, ddcOrder, 0);
+  if (ira::orient(refPoints, targetPointSet, quat, rmsd)) {
+    return 0;
+  }
   // Loop through all possible permutations
   //
   for (int i = 0; i < ringSize; i++) {
