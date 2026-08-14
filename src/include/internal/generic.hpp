@@ -335,4 +335,4 @@ avgVector(std::vector<std::complex<double>> v, int l, int neigh) {
 
 } // namespace gen
 
-#endif // __NEIGHBOURS_H_
+#endif // SEAMS_GENERIC_H_
