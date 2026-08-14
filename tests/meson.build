@@ -24,6 +24,8 @@ test_sources = {
   'pntCorrespondence': 'test_pntCorrespondence.cpp',
   'franzblau_extra': 'test_franzblau_extra.cpp',
   'ira_sofi': 'test_ira_sofi.cpp',
+  'sphericart': 'test_sphericart.cpp',
+  'cage_canon': 'test_cage_canon.cpp',
 }
 
 # Ensure test binaries load the freshly-built libyodaLib.so instead of any
