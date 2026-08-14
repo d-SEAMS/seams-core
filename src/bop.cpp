@@ -520,10 +520,9 @@ chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 
       // Get the relative distance now that the index values are known
       delta = gen::relDist(yCloud, iatomIndex, jatomIndex);
-      double r = std::sqrt(std::pow(delta[0], 2.0) + std::pow(delta[1], 2.0) +
-                           std::pow(delta[2], 2.0));
-      angles[1] = acos(delta[2] / r);        // theta
-      angles[0] = atan2(delta[0], delta[1]); // phi
+      // radialCoord carries the r > 0 guard, so coincident atoms yield a
+      // defined angle instead of acos(0/0)
+      angles = sph::radialCoord(delta);
 
       // Now add over all nearest neighbours
       if (j == 0) {
@@ -810,10 +809,9 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 
       // Get the relative distance now that the index values are known
       delta = gen::relDist(yCloud, iatomIndex, jatomIndex);
-      double r = std::sqrt(std::pow(delta[0], 2.0) + std::pow(delta[1], 2.0) +
-                           std::pow(delta[2], 2.0));
-      angles[1] = acos(delta[2] / r);        // theta
-      angles[0] = atan2(delta[0], delta[1]); // phi
+      // radialCoord carries the r > 0 guard, so coincident atoms yield a
+      // defined angle instead of acos(0/0)
+      angles = sph::radialCoord(delta);
 
       // Now add over all nearest neighbours
       if (j == 0) {

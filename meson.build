@@ -361,11 +361,19 @@ if not lua_dep.found() and get_option('with_lua').allowed()
 endif
 yoda_struct = disabler()
 if get_option('with_lua').allowed() and lua_dep.found()
+  # Same counter-measure as the test binaries: conda LDFLAGS inject a
+  # DT_RPATH to the env prefix, which outranks LD_LIBRARY_PATH and resolves a
+  # stale installed libyodaLib over the freshly built one
+  yoda_link_args = []
+  if host_machine.system() == 'linux'
+    yoda_link_args += ['-Wl,--enable-new-dtags']
+  endif
   yoda_struct = executable('yodaStruct',
     files('src/main.cpp', 'src/opt_parser.cpp'),
     dependencies: [yds_dep, lua_dep],
     cpp_args: _args,
-    include_directories: _incdirs,
+    link_args: yoda_link_args,
+    build_rpath: meson.project_build_root() / 'src',
     install: true)
   test('yoda_structure_desc', yoda_struct,
     args: ['-c', 'example_lua/structureDesc/config.yml'],

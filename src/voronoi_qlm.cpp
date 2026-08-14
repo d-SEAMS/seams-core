@@ -190,10 +190,8 @@ chill::SteinhardtQl chill::steinhardtQlVoronoi(
     for (size_t k = 0; k < cell.neighbours.size(); k++) {
       const int j = cell.neighbours[k];
       const auto d = gen::relDist(yCloud, i, j);
-      const double r =
-          std::sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
-      const std::array<double, 2> angles = {std::atan2(d[0], d[1]),
-                                            std::acos(d[2] / r)};
+      // radialCoord carries the r > 0 guard
+      const std::array<double, 2> angles = sph::radialCoord(d);
       const auto ylm = sph::spheriHarmo(orderL, angles);
       for (int m = 0; m < nComp; m++) {
         qlm[static_cast<size_t>(i) * nComp + m] += cell.weights[k] * ylm[m];
