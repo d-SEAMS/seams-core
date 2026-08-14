@@ -7,6 +7,7 @@
 #include <neighbours.hpp>
 #include <steinhardt_device.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <complex>
 #include <filesystem>
@@ -218,11 +219,7 @@ TEST_CASE("getq6 computes Q6 order parameter for each atom", "[bop]") {
 
 TEST_CASE("getq6 uses the four nearest neighbours, not the cutoff list",
           "[bop]") {
-  auto tetra = makeTetraCloud();
-  auto nTetra = nneigh::neighListO(3.0, tetra, 1);
-  const double q0 = chill::getq6(tetra, nTetra, false)[0];
-
-  auto padded = tetra;
+  auto cloud = makeTetraCloud();
   molSys::Point<double> extra;
   extra.type = 1;
   extra.atomID = 5;
@@ -230,14 +227,37 @@ TEST_CASE("getq6 uses the four nearest neighbours, not the cutoff list",
   extra.x = 10.0;
   extra.y = 10.0;
   extra.z = 12.8;
-  padded.pts.push_back(extra);
-  padded.idIndexMap[5] = padded.nop;
-  padded.nop += 1;
-  auto nPadded = nneigh::neighListO(3.0, padded, 1);
-  REQUIRE(nPadded[0].size() > nTetra[0].size());
+  cloud.pts.push_back(extra);
+  cloud.idIndexMap[5] = cloud.nop;
+  cloud.nop += 1;
 
-  const double q0Pad = chill::getq6(padded, nPadded, false)[0];
-  REQUIRE_THAT(q0Pad, Catch::Matchers::WithinAbs(q0, 1e-12));
+  auto full = nneigh::neighListO(3.0, cloud, 1);
+  REQUIRE(full[0].size() > 5);
+
+  std::vector<std::vector<int>> fourOnly(full.size());
+  for (int iatom = 0; iatom < cloud.nop; iatom++) {
+    std::vector<std::pair<double, int>> cand;
+    for (size_t j = 1; j < full[iatom].size(); j++) {
+      const auto it = cloud.idIndexMap.find(full[iatom][j]);
+      REQUIRE(it != cloud.idIndexMap.end());
+      cand.emplace_back(gen::periodicDistSq(cloud, iatom, it->second),
+                        full[iatom][j]);
+    }
+    const size_t keep = std::min<size_t>(4, cand.size());
+    std::partial_sort(cand.begin(), cand.begin() + keep, cand.end());
+    fourOnly[iatom].push_back(full[iatom][0]);
+    for (size_t k = 0; k < keep; k++) {
+      fourOnly[iatom].push_back(cand[k].second);
+    }
+  }
+  REQUIRE(fourOnly[0].size() < full[0].size());
+
+  const auto qFull = chill::getq6(cloud, full, false);
+  const auto qFour = chill::getq6(cloud, fourOnly, false);
+  REQUIRE(qFull.size() == qFour.size());
+  for (size_t i = 0; i < qFull.size(); i++) {
+    REQUIRE_THAT(qFull[i], Catch::Matchers::WithinAbs(qFour[i], 1e-12));
+  }
 }
 
 TEST_CASE("reclassifyWater uses Q6 to reclassify water atoms", "[bop]") {
