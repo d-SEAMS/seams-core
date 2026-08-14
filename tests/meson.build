@@ -27,6 +27,7 @@ test_sources = {
   'sphericart': 'test_sphericart.cpp',
   'cage_canon': 'test_cage_canon.cpp',
   'voronoi': 'test_voronoi.cpp',
+  'structure_desc': 'test_structure_desc.cpp',
 }
 
 # Ensure test binaries load the freshly-built libyodaLib.so instead of any

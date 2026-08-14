@@ -202,6 +202,33 @@ class Trajectory:
         )
         return {"ql": list(result.ql), "ql_bar": list(result.qlBar)}
 
+    def steinhardt_voronoi(self, order_l=6, cutoff=None):
+        """Voronoi facet-area weighted Steinhardt parameters (Mickel)."""
+        result = _core.steinhardtQlVoronoi(
+            yCloud=self.cloud,
+            candidateCutoff=cutoff if cutoff is not None else self.cutoff,
+            orderL=order_l,
+        )
+        return {"ql": list(result.ql), "ql_bar": list(result.qlBar)}
+
+    def classify_templates(self, k_neigh=12):
+        """Overlay each neighbour shell onto FCC, HCP, BCC and SC templates."""
+        hits = _core.classifyTemplates(self.cloud, self.neighbor_list, k_neigh)
+        return [{"name": h.name, "rmsd": h.rmsd} for h in hits]
+
+    def soap(self, iatom, n_max=3, l_max=6, rcut=None):
+        """SOAP power spectrum of one particle."""
+        return list(
+            _core.soapSpectrum(
+                self.cloud,
+                iatom,
+                self.neighbor_list,
+                n_max,
+                l_max,
+                rcut if rcut is not None else self.cutoff,
+            )
+        )
+
 
 # Re-export low-level API for advanced users
 __all__ = ["Trajectory", "_core", "__version__"]

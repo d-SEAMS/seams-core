@@ -25,6 +25,7 @@ ydslib_sources = files(
   'steinhardt_parallel.cpp',
   'topo_bulk.cpp',
   'voronoi_qlm.cpp',
+  'structure_desc.cpp',
   'topo_one_dim.cpp',
   'topo_two_dim.cpp',
 )

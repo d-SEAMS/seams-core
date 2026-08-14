@@ -29,6 +29,7 @@
 #include <seams_input.hpp>
 #include <seams_output.hpp>
 #include <selection.hpp>
+#include <structure_desc.hpp>
 #include <topo_one_dim.hpp>
 #include <topo_two_dim.hpp>
 
@@ -447,6 +448,39 @@ NB_MODULE(_core, m) {
           "Compute the local and neighbour-averaged Steinhardt parameters "
           "of degree orderL (3, 4 or 6) for every particle.",
           nb::arg("yCloud"), nb::arg("nList"), nb::arg("orderL"));
+    nb::enum_<chill::CrystalKind>(m, "CrystalKind")
+        .value("other", chill::CrystalKind::other)
+        .value("sc", chill::CrystalKind::sc)
+        .value("fcc", chill::CrystalKind::fcc)
+        .value("hcp", chill::CrystalKind::hcp)
+        .value("bcc", chill::CrystalKind::bcc);
+    nb::class_<chill::TemplateHit>(m, "TemplateHit")
+        .def_ro("kind", &chill::TemplateHit::kind)
+        .def_ro("rmsd", &chill::TemplateHit::rmsd)
+        .def_prop_ro("name", [](const chill::TemplateHit &h) {
+          return std::string(h.name);
+        });
+    nb::class_<chill::LinearClassifier>(m, "LinearClassifier")
+        .def(nb::init<>())
+        .def_rw("ridge", &chill::LinearClassifier::ridge)
+        .def_rw("labels", &chill::LinearClassifier::labels)
+        .def_ro("n_classes", &chill::LinearClassifier::nClasses)
+        .def_ro("n_feat", &chill::LinearClassifier::nFeat)
+        .def("fit", &chill::LinearClassifier::fit, nb::arg("X"), nb::arg("y"))
+        .def("predict", &chill::LinearClassifier::predict, nb::arg("x"));
+    m.def("steinhardtQlVoronoi", &chill::steinhardtQlVoronoi,
+          "Voronoi facet-area weighted Steinhardt parameters.",
+          nb::arg("yCloud"), nb::arg("candidateCutoff"), nb::arg("orderL"));
+    m.def("classifyTemplates", &chill::classifyTemplates,
+          "IRA/Horn overlay onto FCC, HCP, BCC and SC neighbour shells.",
+          nb::arg("yCloud"), nb::arg("nList"), nb::arg("kNeigh") = 12);
+    m.def("soapSpectrum", &chill::soapSpectrum,
+          "SOAP power spectrum of one particle.", nb::arg("yCloud"),
+          nb::arg("iatom"), nb::arg("nList"), nb::arg("nMax"), nb::arg("lMax"),
+          nb::arg("rcut"));
+    m.def("voronoiFeature", &chill::voronoiFeature,
+          "Per-atom [q4, q6, q8] from the Voronoi-weighted Steinhardt path.",
+          nb::arg("yCloud"), nb::arg("iatom"), nb::arg("candidateCutoff"));
 
     m.def("ira_available", &ira::available,
           "True when this build linked libira (IRA/SOFI).");
