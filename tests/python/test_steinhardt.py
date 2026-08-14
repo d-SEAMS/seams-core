@@ -60,6 +60,7 @@ def test_steinhardt_qbar_equals_ql_for_uniform_environment():
 
     assert len(result.ql) == cloud.nop
     for ql, ql_bar in zip(result.ql, result.qlBar):
+        assert abs(ql - 0.574524) <= 1e-5
         assert abs(ql_bar - ql) <= 1e-9, (
             f"qlBar ({ql_bar}) != ql ({ql}) in a uniform FCC environment"
         )

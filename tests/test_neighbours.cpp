@@ -284,6 +284,19 @@ TEST_CASE("neighbour builders return empty when the cloud has no box",
   REQUIRE(nneigh::getNewNeighbourListByIndex(cloud, 3.5).empty());
 }
 
+TEST_CASE("neighListO leaves a hole when idIndexMap misses an atom",
+          "[neighbours]") {
+  auto cloud = makeFourAtomCloud();
+  cloud.idIndexMap.erase(2);
+
+  auto nList = nneigh::neighListO(1.5, cloud, 1);
+  REQUIRE(nList.size() == 4);
+  // Atom 2 is index 2; the reverse table stores -1 and the row is not seeded
+  REQUIRE(nList[2].empty());
+  REQUIRE_FALSE(nList[0].empty());
+  REQUIRE(nList[0][0] == 0);
+}
+
 TEST_CASE("neighListO returns empty when the cloud has no atoms",
           "[neighbours]") {
   auto cloud = makeFourAtomCloud();

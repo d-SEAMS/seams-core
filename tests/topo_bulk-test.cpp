@@ -398,6 +398,25 @@ TEST_CASE("buildRingSearchIndex ignores atoms outside numAtoms",
   REQUIRE(index.ringsContainingAtom[2] == std::vector<int>{1});
 }
 
+TEST_CASE("findHC on the twelve-atom HC reports one HexC of five rings",
+          "[topo_bulk]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  buildHCCloud(yCloud);
+
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  nList = nneigh::neighbourListByIndex(yCloud, nList);
+  auto rings = primitive::ringNetwork(nList, 7);
+
+  std::vector<ring::strucType> ringType(rings.size());
+  std::vector<cage::Cage> cageList;
+  auto listHC = ring::findHC(rings, ringType, nList, cageList);
+
+  REQUIRE(cageList.size() == 1);
+  REQUIRE(cageList[0].type == cage::cageType::HexC);
+  REQUIRE(cageList[0].rings.size() == 5);
+  REQUIRE_FALSE(listHC.empty());
+}
+
 TEST_CASE("indexed findHC and findDDC match the convenience overloads",
           "[topo_bulk]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;

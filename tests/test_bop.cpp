@@ -596,6 +596,21 @@ TEST_CASE("Q4 satisfies the addition theorem and Condon-Shortley", "[bop]") {
   }
 }
 
+TEST_CASE("steinhardtQl l=3 vanishes on an inversion-symmetric FCC lattice",
+          "[bop]") {
+  const double lattice = 4.0;
+  auto cloud = fccCloud(4, lattice);
+  const double cutoff = 0.85 * lattice;
+  auto nList = nneigh::neighListO(cutoff, cloud, 1);
+  auto q3 = chill::steinhardtQl(cloud, nList, 3);
+
+  REQUIRE(q3.ql.size() == static_cast<size_t>(cloud.nop));
+  for (int i = 0; i < cloud.nop; i++) {
+    REQUIRE_THAT(q3.ql[i], Catch::Matchers::WithinAbs(0.0, 1e-5));
+    REQUIRE_THAT(q3.qlBar[i], Catch::Matchers::WithinAbs(0.0, 1e-5));
+  }
+}
+
 TEST_CASE("Steinhardt parameters reproduce the FCC reference values", "[bop]") {
   // A perfect FCC lattice has q4 = 0.190941, q6 = 0.574524 for the twelve
   // nearest neighbours (Steinhardt, Nelson and Ronchetti 1983, Table I).

@@ -241,3 +241,14 @@ def test_trajectory_steinhardt():
     assert set(result.keys()) == {"ql", "ql_bar"}
     assert len(result["ql"]) == traj.n_atoms
     assert len(result["ql_bar"]) == traj.n_atoms
+    assert 0.0 < (sum(result["ql"]) / len(result["ql"])) < 1.0
+    assert max(result["ql"]) > 0.1
+
+
+def test_trajectory_steinhardt_order_l_4():
+    traj = Trajectory(str(TRAJ.absolute()))
+    result = traj.steinhardt(order_l=4)
+
+    assert len(result["ql"]) == traj.n_atoms
+    assert 0.0 < (sum(result["ql"]) / len(result["ql"])) < 1.0
+    assert max(result["ql"]) > 0.05

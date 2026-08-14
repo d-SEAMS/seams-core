@@ -262,6 +262,47 @@ TEST_CASE("writeLAMMPSdumpINT writes prism dump with RMSD", "[seams_output]") {
 
 // -- writeLAMMPSdumpCages tests --
 
+TEST_CASE("writeLAMMPSdumpCages emits a well-formed LAMMPS dump header",
+          "[seams_output]") {
+  auto cloud = makeTestCloud(4);
+  cloud.currentFrame = 7;
+  cloud.boxLow = {1.0, 2.0, 3.0};
+  cloud.box = {10.0, 11.0, 12.0};
+  std::vector<double> rmsdPerAtom = {0.1, 0.2, 0.3, 0.4};
+  std::vector<int> atomTypes = {1, 2, 3, 4};
+  std::string tmpPath =
+      fs::temp_directory_path().append("dseams_test_dumpheader/").string();
+
+  int ret =
+      sout::writeLAMMPSdumpCages(cloud, rmsdPerAtom, atomTypes, tmpPath, 7);
+  REQUIRE(ret == 0);
+
+  std::ifstream in(tmpPath + "bulkTopo/dumpFiles/dump-7.lammpstrj");
+  REQUIRE(in.good());
+  std::string line;
+  std::getline(in, line);
+  REQUIRE(line == "ITEM: TIMESTEP");
+  std::getline(in, line);
+  REQUIRE(line == "7");
+  std::getline(in, line);
+  REQUIRE(line == "ITEM: NUMBER OF ATOMS");
+  std::getline(in, line);
+  REQUIRE(line == "4");
+  std::getline(in, line);
+  REQUIRE(line == "ITEM: BOX BOUNDS pp pp pp");
+  std::getline(in, line);
+  REQUIRE(line == "1 11");
+  std::getline(in, line);
+  REQUIRE(line == "2 13");
+  std::getline(in, line);
+  REQUIRE(line == "3 15");
+  std::getline(in, line);
+  REQUIRE(line == "ITEM: ATOMS id mol type x y z rmsd");
+
+  std::error_code _ec_;
+  fs::remove_all(tmpPath, _ec_);
+}
+
 TEST_CASE("writeLAMMPSdumpCages writes cage dump with RMSD", "[seams_output]") {
   auto cloud = makeTestCloud(4);
   std::vector<double> rmsdPerAtom = {0.1, 0.2, 0.3, 0.4};
