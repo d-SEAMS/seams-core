@@ -117,8 +117,8 @@ Eigen::MatrixXd hcp12() {
   }
   for (int sign : { -1, 1 }) {
     for (int k = 0; k < 3; k++) {
-      const double t = k * 2.0 * std::numbers::pi / 3.0 +
-                       (sign > 0 ? 0.0 : std::numbers::pi / 3.0);
+      const double t =
+          k * 2.0 * std::numbers::pi / 3.0 + std::numbers::pi / 6.0;
       m.row(r++) << (a / std::sqrt(3.0)) * std::cos(t),
           (a / std::sqrt(3.0)) * std::sin(t), sign * 0.5 * c;
     }
