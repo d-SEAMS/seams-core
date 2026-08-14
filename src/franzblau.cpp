@@ -152,6 +152,93 @@ inline bool pushUniqueMember(std::vector<int> &ring, int v) {
   return true;
 }
 
+
+/**
+ * @brief Reusable scratch for the per-source ring enumeration.
+ */
+struct RingScratch {
+  std::vector<int> lvl;
+  std::vector<int> touched, frontier, next;
+  std::vector<std::vector<int>> paths, pathsQ;
+};
+
+/**
+ * @details Enumerates every primitive ring whose lowest-indexed member is
+ *  @a src, appending to @a out. Shared by the whole-frame construction and
+ *  the incremental updater, which re-runs it only for sources a
+ *  frame-to-frame change can reach.
+ */
+void enumerateFromSource(const std::vector<std::vector<int>> &adjacency,
+                         const BoundedBalls &balls, int src, int maxDepth,
+                         int maxLvl, RingScratch &scr,
+                         std::vector<std::vector<int>> &out) {
+  const int nVertices = static_cast<int>(adjacency.size());
+  if (static_cast<int>(scr.lvl.size()) != nVertices) {
+    scr.lvl.assign(nVertices, -1);
+    scr.touched.clear();
+  }
+  levelsFrom(adjacency, src, maxLvl, scr.lvl, scr.touched, scr.frontier,
+             scr.next);
+  // Directing: only the lowest-indexed member of a ring enumerates it, so
+  // vertices below the source leave the level field entirely
+  for (int v = 0; v < src; v++) {
+    if (scr.lvl[v] >= 0) {
+      scr.lvl[v] = -1;
+    }
+  }
+  for (const int p : scr.touched) {
+    if (scr.lvl[p] < 1 || scr.lvl[p] > maxLvl) {
+      continue;
+    }
+    scr.paths.clear();
+    allShortestPaths(adjacency, scr.lvl, src, p, {}, scr.paths);
+    // Even rings: two vertex-disjoint shortest paths to an antipodal vertex
+    if (2 * scr.lvl[p] >= 3 && 2 * scr.lvl[p] <= maxDepth) {
+      for (size_t a = 0; a < scr.paths.size(); a++) {
+        for (size_t b = a + 1; b < scr.paths.size(); b++) {
+          std::vector<int> ring{src};
+          bool ok = true;
+          for (const int v : scr.paths[a]) {
+            ok = ok && pushUniqueMember(ring, v);
+          }
+          for (int i = static_cast<int>(scr.paths[b].size()) - 2; i >= 0 && ok;
+               i--) {
+            ok = pushUniqueMember(ring, scr.paths[b][i]);
+          }
+          if (ok && ringIsPrimitive(balls, ring)) {
+            out.push_back(std::move(ring));
+          }
+        }
+      }
+    }
+    // Odd rings: an antipodal edge between two vertices at the same level
+    if (2 * scr.lvl[p] + 1 <= maxDepth) {
+      for (const int q : adjacency[p]) {
+        if (q <= p || q >= nVertices || scr.lvl[q] != scr.lvl[p]) {
+          continue;
+        }
+        scr.pathsQ.clear();
+        allShortestPaths(adjacency, scr.lvl, src, q, {}, scr.pathsQ);
+        for (const auto &pa : scr.paths) {
+          for (const auto &pb : scr.pathsQ) {
+            std::vector<int> ring{src};
+            bool ok = true;
+            for (const int v : pa) {
+              ok = ok && pushUniqueMember(ring, v);
+            }
+            for (int i = static_cast<int>(pb.size()) - 1; i >= 0 && ok; i--) {
+              ok = pushUniqueMember(ring, pb[i]);
+            }
+            if (ok && ringIsPrimitive(balls, ring)) {
+              out.push_back(std::move(ring));
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 } // namespace
 
 /**
@@ -204,70 +291,10 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth)
   const int radius = std::max(maxLvl - 1, 1);
   const BoundedBalls balls(adjacency, radius);
 
-  std::vector<int> lvl(nVertices, -1);
-  std::vector<int> touched, frontier, next;
-  std::vector<std::vector<int>> paths, pathsQ;
-
+  RingScratch scratch;
   for (int src = 0; src < nVertices; src++) {
-    levelsFrom(adjacency, src, maxLvl, lvl, touched, frontier, next);
-    // Directing: only the lowest-indexed member of a ring enumerates it, so
-    // vertices below the source leave the level field entirely
-    for (int v = 0; v < src; v++) {
-      if (lvl[v] >= 0) {
-        lvl[v] = -1;
-      }
-    }
-    for (const int p : touched) {
-      if (lvl[p] < 1 || lvl[p] > maxLvl) {
-        continue;
-      }
-      paths.clear();
-      allShortestPaths(adjacency, lvl, src, p, {}, paths);
-      // Even rings: two vertex-disjoint shortest paths to an antipodal vertex
-      if (2 * lvl[p] >= 3 && 2 * lvl[p] <= maxDepth) {
-        for (size_t a = 0; a < paths.size(); a++) {
-          for (size_t b = a + 1; b < paths.size(); b++) {
-            std::vector<int> ring{src};
-            bool ok = true;
-            for (const int v : paths[a]) {
-              ok = ok && pushUniqueMember(ring, v);
-            }
-            for (int i = static_cast<int>(paths[b].size()) - 2; i >= 0 && ok;
-                 i--) {
-              ok = pushUniqueMember(ring, paths[b][i]);
-            }
-            if (ok && ringIsPrimitive(balls, ring)) {
-              rings.push_back(std::move(ring));
-            }
-          }
-        }
-      }
-      // Odd rings: an antipodal edge between two vertices at the same level
-      if (2 * lvl[p] + 1 <= maxDepth) {
-        for (const int q : adjacency[p]) {
-          if (q <= p || q >= nVertices || lvl[q] != lvl[p]) {
-            continue;
-          }
-          pathsQ.clear();
-          allShortestPaths(adjacency, lvl, src, q, {}, pathsQ);
-          for (const auto &pa : paths) {
-            for (const auto &pb : pathsQ) {
-              std::vector<int> ring{src};
-              bool ok = true;
-              for (const int v : pa) {
-                ok = ok && pushUniqueMember(ring, v);
-              }
-              for (int i = static_cast<int>(pb.size()) - 1; i >= 0 && ok; i--) {
-                ok = pushUniqueMember(ring, pb[i]);
-              }
-              if (ok && ringIsPrimitive(balls, ring)) {
-                rings.push_back(std::move(ring));
-              }
-            }
-          }
-        }
-      }
-    }
+    enumerateFromSource(adjacency, balls, src, maxDepth, maxLvl, scratch,
+                        rings);
   }
 
   return rings;
@@ -714,4 +741,142 @@ primitive::Graph primitive::clearGraph(Graph &currentGraph) {
   tempPts.swap(currentGraph.pts);
   tempRings.swap(currentGraph.rings);
   return currentGraph;
+}
+
+/**
+ * @details Implementation state of primitive::RingUpdater.
+ *
+ *  The locality bound that makes the update exact: every member of a ring of
+ *  size at most maxDepth lies within maxLvl = maxDepth/2 hops of the ring's
+ *  lowest-indexed member, and the primitivity of the ring is decided by paths
+ *  of fewer than maxLvl edges between members. A source further than
+ *  2*maxLvl + 1 hops from every endpoint of a changed edge, measured in the
+ *  union of the old and the new graph, therefore encloses its rings and every
+ *  path that could decide them entirely in unchanged territory: its ring set
+ *  cannot differ between frames. Distances in the union graph never exceed
+ *  those in either frame's graph, so measuring there errs only toward
+ *  recomputing more.
+ */
+struct primitive::RingUpdater::Impl {
+  int maxDepth = 0;
+  int maxLvl = 0;
+  int ballRadius = 1;
+  std::vector<std::vector<int>> adjacency;              // previous frame
+  std::vector<std::vector<std::vector<int>>> bySource;  // rings, by source
+  std::vector<std::vector<int>> flattened;              // last returned set
+  int recomputed = 0;
+};
+
+primitive::RingUpdater::RingUpdater(int maxDepth)
+    : impl_(new Impl) {
+  impl_->maxDepth = maxDepth;
+  impl_->maxLvl = maxDepth / 2;
+  impl_->ballRadius = std::max(impl_->maxLvl - 1, 1);
+}
+
+primitive::RingUpdater::~RingUpdater() = default;
+primitive::RingUpdater::RingUpdater(RingUpdater &&) noexcept = default;
+primitive::RingUpdater &
+primitive::RingUpdater::operator=(RingUpdater &&) noexcept = default;
+
+int primitive::RingUpdater::lastRecomputedSources() const {
+  return impl_->recomputed;
+}
+
+const std::vector<std::vector<int>> &
+primitive::RingUpdater::update(const std::vector<std::vector<int>> &nList) {
+  Impl &st = *impl_;
+  const int nVertices = static_cast<int>(nList.size());
+
+  // Adjacency rows sorted, so frame-to-frame comparison is a vector compare
+  std::vector<std::vector<int>> newAdj(nVertices);
+  for (int i = 0; i < nVertices; i++) {
+    for (size_t j = 1; j < nList[i].size(); j++) {
+      newAdj[i].push_back(nList[i][j]);
+    }
+    std::sort(newAdj[i].begin(), newAdj[i].end());
+  }
+
+  const bool fullPass =
+      st.adjacency.size() != static_cast<size_t>(nVertices) ||
+      st.maxDepth < 3;
+
+  if (fullPass) {
+    st.adjacency = std::move(newAdj);
+    st.bySource.assign(nVertices, {});
+    // Balls rebuild in linear time each frame; the incrementality that pays
+    // is confined to the enumeration
+    RingScratch scratch;
+    const BoundedBalls balls(st.adjacency, st.ballRadius);
+    st.recomputed = nVertices;
+    for (int src = 0; src < nVertices; src++) {
+      enumerateFromSource(st.adjacency, balls, src, st.maxDepth, st.maxLvl,
+                          scratch, st.bySource[src]);
+    }
+  } else {
+    // Vertices whose adjacency row changed: the endpoints of every added or
+    // removed edge
+    std::vector<int> changed;
+    for (int v = 0; v < nVertices; v++) {
+      if (st.adjacency[v] != newAdj[v]) {
+        changed.push_back(v);
+      }
+    }
+
+    if (!changed.empty()) {
+      // Union graph reaches everything either frame can reach
+      std::vector<std::vector<int>> unionAdj(nVertices);
+      for (int v = 0; v < nVertices; v++) {
+        unionAdj[v] = st.adjacency[v];
+        unionAdj[v].insert(unionAdj[v].end(), newAdj[v].begin(),
+                           newAdj[v].end());
+        std::sort(unionAdj[v].begin(), unionAdj[v].end());
+        unionAdj[v].erase(
+            std::unique(unionAdj[v].begin(), unionAdj[v].end()),
+            unionAdj[v].end());
+      }
+
+      const int reach = 2 * st.maxLvl - 1;
+      std::vector<int> dist(nVertices, -1);
+      std::vector<int> frontier, next;
+      for (const int v : changed) {
+        dist[v] = 0;
+        frontier.push_back(v);
+      }
+      std::vector<int> affected = changed;
+      for (int depth = 1; depth <= reach && !frontier.empty(); depth++) {
+        next.clear();
+        for (const int u : frontier) {
+          for (const int w : unionAdj[u]) {
+            if (w >= 0 && w < nVertices && dist[w] == -1) {
+              dist[w] = depth;
+              affected.push_back(w);
+              next.push_back(w);
+            }
+          }
+        }
+        frontier.swap(next);
+      }
+
+      st.adjacency = std::move(newAdj);
+
+      const BoundedBalls balls(st.adjacency, st.ballRadius);
+      RingScratch scratch;
+      st.recomputed = 0;
+      for (const int src : affected) {
+        st.bySource[src].clear();
+        enumerateFromSource(st.adjacency, balls, src, st.maxDepth, st.maxLvl,
+                            scratch, st.bySource[src]);
+        st.recomputed++;
+      }
+    } else {
+      st.recomputed = 0;
+    }
+  }
+
+  st.flattened.clear();
+  for (const auto &group : st.bySource) {
+    st.flattened.insert(st.flattened.end(), group.begin(), group.end());
+  }
+  return st.flattened;
 }

@@ -154,6 +154,41 @@ void removeNonSPrings(Graph &fullGraph);
 //! Function for clearing vectors in Graph after multiple usage
 Graph clearGraph(Graph &currentGraph);
 
+
+/** @class primitive::RingUpdater
+ * @brief Exact frame-to-frame maintenance of the primitive ring network.
+ * @details Consecutive trajectory frames share almost all of their bond
+ *  topology. Rings are stored partitioned by their lowest-indexed member, and
+ *  on a new frame only sources within a proven locality radius of a changed
+ *  edge are re-enumerated: a ring's members and every path that can decide
+ *  its primitivity lie within a bounded neighbourhood of its source, so a
+ *  source far enough from every change keeps its rings unchanged. The output
+ *  equals a full recomputation exactly, at a cost that scales with the edge
+ *  churn between frames rather than with system size.
+ */
+class RingUpdater {
+public:
+  explicit RingUpdater(int maxDepth);
+  ~RingUpdater();
+  RingUpdater(RingUpdater &&) noexcept;
+  RingUpdater &operator=(RingUpdater &&) noexcept;
+  RingUpdater(const RingUpdater &) = delete;
+  RingUpdater &operator=(const RingUpdater &) = delete;
+
+  //! Primitive rings for this frame's neighbour list (row-ordered, by index,
+  //! first element of each row the vertex itself)
+  const std::vector<std::vector<int>> &
+  update(const std::vector<std::vector<int>> &nList);
+
+  //! Sources re-enumerated by the last update; the full vertex count on the
+  //! first frame, zero when nothing changed
+  [[nodiscard]] int lastRecomputedSources() const;
+
+private:
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
+};
+
 } // namespace primitive
 
 #endif // SEAMS_FRANZBLAU_H_

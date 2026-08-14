@@ -193,3 +193,104 @@ TEST_CASE("ringNetwork matches the generate-then-filter route", "[franzblau]") {
     }
   }
 }
+
+// ---------------------------------------------------------------------------
+// The incremental updater must be indistinguishable from a full recomputation
+// on every frame, while re-enumerating only sources within the locality
+// radius of a change.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+std::vector<std::vector<int>> networkFromCloud(
+    molSys::PointCloud<molSys::Point<double>, double> &cloud) {
+  auto nList = nneigh::neighListO(3.5, cloud, 1);
+  return nneigh::neighbourListByIndex(cloud, nList);
+}
+
+molSys::PointCloud<molSys::Point<double>, double>
+jitteredCloud(int nAtoms, double jitterFrac, unsigned long long seed) {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  const double density = 0.0332;
+  const double boxLength = std::cbrt(nAtoms / density);
+  const int perSide = static_cast<int>(std::ceil(std::cbrt(nAtoms)));
+  const double spacing = boxLength / perSide;
+  cloud.nop = nAtoms;
+  cloud.currentFrame = 1;
+  cloud.box = {boxLength, boxLength, boxLength};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  unsigned long long state = seed;
+  auto jitter = [&state, spacing, jitterFrac]() {
+    state ^= state << 13;
+    state ^= state >> 7;
+    state ^= state << 17;
+    const double unit = static_cast<double>(state >> 11) / 9007199254740992.0;
+    return (unit - 0.5) * jitterFrac * spacing;
+  };
+  for (int i = 0; i < nAtoms; i++) {
+    molSys::Point<double> p;
+    p.type = 1;
+    p.atomID = i + 1;
+    p.molID = i + 1;
+    p.x = ((i % perSide) + 0.5) * spacing + jitter();
+    p.y = (((i / perSide) % perSide) + 0.5) * spacing + jitter();
+    p.z = (((i / (perSide * perSide)) % perSide) + 0.5) * spacing + jitter();
+    cloud.pts.push_back(p);
+    cloud.idIndexMap[p.atomID] = i;
+  }
+  return cloud;
+}
+
+std::set<std::vector<int>> canonicalSet(const std::vector<std::vector<int>> &rings) {
+  std::set<std::vector<int>> out;
+  for (auto r : rings) {
+    out.insert(canonicalRing(r));
+  }
+  return out;
+}
+
+} // namespace
+
+TEST_CASE("RingUpdater equals full recomputation across perturbed frames",
+          "[franzblau]") {
+  // The locality radius is 2*maxLvl + 1 hops; the update only wins once the
+  // system dwarfs that ball, so the test must too
+  const int n = 2000;
+  auto cloud = jitteredCloud(n, 0.30, 88172645463325252ULL);
+  primitive::RingUpdater updater(6);
+
+  // Frame one: a full pass
+  auto idx = networkFromCloud(cloud);
+  auto incr = updater.update(idx);
+  REQUIRE(updater.lastRecomputedSources() == n);
+  REQUIRE(canonicalSet(incr) == canonicalSet(primitive::ringNetwork(idx, 6)));
+
+  // Same frame again: nothing to do
+  incr = updater.update(idx);
+  REQUIRE(updater.lastRecomputedSources() == 0);
+  REQUIRE(canonicalSet(incr) == canonicalSet(primitive::ringNetwork(idx, 6)));
+
+  // Three frames of local perturbation: displace a few atoms enough to move
+  // bonds, and require exact agreement with a full recomputation each time,
+  // with strictly fewer sources re-enumerated than a full pass
+  unsigned long long state = 424242ULL;
+  auto pick = [&state](int bound) {
+    state ^= state << 13;
+    state ^= state >> 7;
+    state ^= state << 17;
+    return static_cast<int>((state >> 11) % static_cast<unsigned long long>(bound));
+  };
+  for (int frame = 0; frame < 3; frame++) {
+    for (int k = 0; k < 3; k++) {
+      auto &p = cloud.pts[pick(n)];
+      p.x += 0.8 * ((frame + k) % 2 ? 1.0 : -1.0);
+      p.y += 0.4;
+    }
+    idx = networkFromCloud(cloud);
+    incr = updater.update(idx);
+    INFO("frame " << frame << ", recomputed "
+                  << updater.lastRecomputedSources() << " of " << n);
+    REQUIRE(canonicalSet(incr) == canonicalSet(primitive::ringNetwork(idx, 6)));
+    REQUIRE(updater.lastRecomputedSources() < n);
+  }
+}
