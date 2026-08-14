@@ -1,5 +1,5 @@
 trajectory: "input/traj/clathrate-thf.lammpstrj"
-variables: "lua_inputs/iceType/vars.lua"
+variables: "example_lua/selection/clathrate-system/iceType/vars.lua"
 bulk:
   use: true
   topologicalNetworkCriterion: false

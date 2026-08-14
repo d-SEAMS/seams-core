@@ -1,5 +1,5 @@
 trajectory: "input/traj/exampleTraj.lammpstrj"
-variables: "lua_inputs/iceType/vars.lua"
+variables: "example_lua/iceNanotube/shapeMatching/iceType/vars.lua"
 bulk:
   use: false
   topologicalNetworkCriterion: false

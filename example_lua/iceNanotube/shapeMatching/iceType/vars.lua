@@ -16,4 +16,4 @@ doShapeMatching=true;
 
 --- Paths for the output directories and lua scipt
 outDir="runOne/"; --- The subdirectory used; 
-functionScript="lua_inputs/iceType/functions.lua" --- This is relative to the binary location 
+functionScript="example_lua/iceNanotube/shapeMatching/iceType/functions.lua"

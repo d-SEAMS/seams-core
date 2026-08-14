@@ -13,7 +13,7 @@ sliceUpperLimits = {0,0,0}; --- Upper limit of the slice
 
 --- Paths for the output directories and lua scipt
 outDir="runOne/"; --- The subdirectory used; 
-functionScript="lua_inputs/iceType/functions.lua" --- This is relative to the binary location
+functionScript="example_lua/bulkTopologicalCriterion/iceType/functions.lua"
 
 -- Variable for the topological network criterion
 onlyTetrahedral = false; --- Only finds DDCs and HCs if true; finds PNCs too if false 

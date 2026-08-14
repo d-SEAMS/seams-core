@@ -1,5 +1,5 @@
 trajectory: "input/traj/tiny-selectionTest.lammpstrj"
-variables: "lua_inputs/iceType/vars.lua"
+variables: "example_lua/selection/tiny-selection/iceType/vars.lua"
 bulk:
   use: true
   topologicalNetworkCriterion: false

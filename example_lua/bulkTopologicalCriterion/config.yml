@@ -1,5 +1,5 @@
 trajectory: "input/traj/cluster-417.lammpstrj"
-variables: "lua_inputs/iceType/vars.lua"
+variables: "example_lua/bulkTopologicalCriterion/iceType/vars.lua"
 bulk:
   use: true  
   topologicalNetworkCriterion: true
