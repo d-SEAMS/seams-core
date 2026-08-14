@@ -307,8 +307,13 @@ bool match::matchPrismBlock(
           pntToPnt::fillPointSetPrismBlock(yCloud, basal1, basal2, i);
       // Use Horn's algorithm to calculate the absolute orientation and RMSD
       // etc. for basal1
-      absor::hornAbsOrientation(refPrismBlock, targetPrismBlock, currentQuat,
-                                currentRmsd, currentRmsdList, currentScale);
+      // A permutation Horn cannot solve carries a negative RMSD, which would
+      // win every subsequent comparison; drop it from the search.
+      if (absor::hornAbsOrientation(refPrismBlock, targetPrismBlock,
+                                    currentQuat, currentRmsd, currentRmsdList,
+                                    currentScale) != 0) {
+        continue;
+      }
       // Comparison to get the least RMSD for the correct mapping
       if (i == 0) {
         // Init

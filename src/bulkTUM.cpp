@@ -291,9 +291,13 @@ int tum3::shapeMatchHC(
     // Change the order of the target points somehow!
     //
     targetPointSet = pntToPnt::changeHexCageOrder(yCloud, basal1, basal2, i);
-    // Shape-matching
-    absor::hornAbsOrientation(refPoints, targetPointSet, currentQuat,
-                              currentRmsd, rmsdList, currentScale);
+    // Shape-matching. A permutation Horn cannot solve carries a negative RMSD,
+    // which would win every subsequent comparison, so drop it from the search
+    // rather than let it stand in for a match.
+    if (absor::hornAbsOrientation(refPoints, targetPointSet, currentQuat,
+                                  currentRmsd, rmsdList, currentScale) != 0) {
+      continue;
+    }
     if (i == 0) {
       quat = currentQuat;
       rmsd = currentRmsd;

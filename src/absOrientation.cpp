@@ -35,6 +35,16 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd &refPoints,
       refPoints.rows(); // Number of particles (equal to the number of rows)
   int dim =
       refPoints.cols(); // Number of dimensions (equal to the number of columns)
+  // Define every output before the first path that can leave early. Callers
+  // hold these by reference and read them without consulting the return, so
+  // an early exit that left them alone would hand back whatever the caller's
+  // stack happened to contain. A negative RMSD cannot arise from a successful
+  // match, so it also reads as a failure at a glance.
+  quat.assign(4, 0.0);
+  quat[0] = 1.0; // identity rotation
+  rmsd = -1.0;
+  rmsdList.assign(nop > 0 ? nop : 0, -1.0);
+  scale = 1.0;
   Eigen::MatrixXd centeredRefPnts(
       nop, dim); // Reference point set after centering wrt the centroid
   Eigen::MatrixXd centeredTargetPnts(
