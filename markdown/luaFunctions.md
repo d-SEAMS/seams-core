@@ -6,6 +6,17 @@ In the _functions.lua_ file, lua functions are called, which are registered on t
 
 The workflows for quasi-two-dimensional ice, quasi-one-dimensional ice and bulk systems are separated. The `Lua` functions for each work-flow are registered in different blocks in the `C++` code.
 
+### Structure descriptors
+
+Enabled when `structureDesc.use` is true in the YAML config
+(`example_lua/structureDesc/`).
+
+- **classifyTemplates**: overlay each neighbour shell onto FCC, HCP, BCC and SC. Returns a 1-based array of `{name, rmsd}` tables.
+- **soapSpectrum**: Bartok SOAP of one particle (`nMax`, `lMax`, `rcut`). Returns a flat array of length `nMax*nMax*(lMax+1)`.
+- **soapSpectrumAll**: SOAP of every particle.
+- **steinhardtQl** / **steinhardtQlVoronoi**: tables with `ql` and `qlBar` arrays.
+- **voronoiFeatures**: per-atom `{q4, q6, q8}` from one Voronoi pass per order.
+
 ### Common Functions
 
 The following `Lua` functions interface to the same `C++` functions in every work-flow code block.
