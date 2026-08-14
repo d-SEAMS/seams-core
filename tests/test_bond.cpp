@@ -168,41 +168,52 @@ TEST_CASE("createBondsFromCages extracts bonds from cage rings", "[bond]") {
 }
 
 TEST_CASE("populateHbonds detects hydrogen bonds from trajectory", "[bond]") {
-  // Read O atoms only (populateHbonds expects an O-only cloud)
+  // exampleTraj stores oxygen as type 2 and hydrogen as type 1.
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/exampleTraj.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/exampleTraj.lammpstrj", 1, yCloud, 2);
   REQUIRE(yCloud.nop > 0);
 
-  // Build neighbour list for O atoms
-  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  auto nList = nneigh::neighListO(3.5, yCloud, 2);
 
-  // Detect H-bonds (Htype = 2)
   auto hBonds = bond::populateHbonds("traj/exampleTraj.lammpstrj", yCloud,
-                                      nList, 1, 2);
+                                      nList, 1, 1);
 
-  // Should detect at least some H-bonds in a water system
-  REQUIRE(hBonds.size() > 0);
+  REQUIRE(hBonds.size() == static_cast<size_t>(yCloud.nop));
+  int bonded = 0;
+  for (size_t i = 0; i < hBonds.size(); i++) {
+    REQUIRE_FALSE(hBonds[i].empty());
+    REQUIRE(hBonds[i][0] == yCloud.pts[static_cast<int>(i)].atomID);
+    if (hBonds[i].size() > 1) {
+      bonded++;
+    }
+  }
+  REQUIRE(bonded > 0);
 }
 
 TEST_CASE("populateHbondsWithInputClouds detects H-bonds from O+H clouds",
           "[bond]") {
-  // Read O atoms
   molSys::PointCloud<molSys::Point<double>, double> oCloud;
-  oCloud = sinp::readLammpsTrjO("traj/exampleTraj.lammpstrj", 1, oCloud, 1);
+  oCloud = sinp::readLammpsTrjO("traj/exampleTraj.lammpstrj", 1, oCloud, 2);
   REQUIRE(oCloud.nop > 0);
 
-  // Read H atoms
   molSys::PointCloud<molSys::Point<double>, double> hCloud;
-  hCloud = sinp::readLammpsTrjO("traj/exampleTraj.lammpstrj", 1, hCloud, 2);
+  hCloud = sinp::readLammpsTrjO("traj/exampleTraj.lammpstrj", 1, hCloud, 1);
   REQUIRE(hCloud.nop > 0);
+  REQUIRE(hCloud.nop == 2 * oCloud.nop);
 
-  // Build neighbour list for O atoms
-  auto nList = nneigh::neighListO(3.5, oCloud, 1);
+  auto nList = nneigh::neighListO(3.5, oCloud, 2);
 
   auto hBonds = bond::populateHbondsWithInputClouds(oCloud, hCloud, nList);
 
-  // H-bonds should be detected in a water system
-  REQUIRE_FALSE(hBonds.empty());
+  REQUIRE(hBonds.size() == static_cast<size_t>(oCloud.nop));
+  int bonded = 0;
+  for (const auto &row : hBonds) {
+    REQUIRE_FALSE(row.empty());
+    if (row.size() > 1) {
+      bonded++;
+    }
+  }
+  REQUIRE(bonded > 0);
 }
 
 TEST_CASE("createBondsFromCages with no matching cage type returns empty",
