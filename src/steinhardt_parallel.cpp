@@ -266,7 +266,7 @@ SteinhardtQl steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double
   result.ql.assign(yCloud.nop, 0.0);
   result.qlBar.assign(yCloud.nop, 0.0);
 
-  if (orderL != 3 && orderL != 4 && orderL != 6) {
+  if (orderL != 3 && orderL != 4 && orderL != 6 && orderL != 8) {
     return result;
   }
   if (yCloud.nop <= 0) {

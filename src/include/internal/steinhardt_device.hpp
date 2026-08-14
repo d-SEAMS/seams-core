@@ -92,6 +92,30 @@ inline double normLM(int orderL, int absM) {
       return 0.0;
     }
   }
+  if (orderL == 8) {
+    switch (absM) {
+    case 0:
+      return std::sqrt(17.0 / (4.0 * pi));
+    case 1:
+      return std::sqrt(17.0 / (288.0 * pi));
+    case 2:
+      return std::sqrt(17.0 / (20160.0 * pi));
+    case 3:
+      return std::sqrt(17.0 / (1330560.0 * pi));
+    case 4:
+      return std::sqrt(17.0 / (79833600.0 * pi));
+    case 5:
+      return std::sqrt(17.0 / (4151347200.0 * pi));
+    case 6:
+      return std::sqrt(17.0 / (174356582400.0 * pi));
+    case 7:
+      return std::sqrt(17.0 / (5230697472000.0 * pi));
+    case 8:
+      return std::sqrt(17.0 / (83691159552000.0 * pi));
+    default:
+      return 0.0;
+    }
+  }
   return 0.0;
 }
 
@@ -147,6 +171,30 @@ inline double legendreAmp(int orderL, int absM, const double *s,
       return 0.0;
     }
   }
+  if (orderL == 8) {
+    switch (absM) {
+    case 0:
+      return (35.0 + c[2] * (-1260.0 + c[2] * (6930.0 + c[2] * (-12012.0 + c[2] * 6435.0)))) / 128.0;
+    case 1:
+      return s[1] * c[1] * (-315.0 + c[2] * (3465.0 + c[2] * (-9009.0 + c[2] * 6435.0))) / 16.0;
+    case 2:
+      return s[2] * (-315.0 + c[2] * (10395.0 + c[2] * (-45045.0 + c[2] * 45045.0))) / 16.0;
+    case 3:
+      return s[3] * c[1] * (10395.0 + c[2] * (-90090.0 + c[2] * 135135.0)) / 8.0;
+    case 4:
+      return s[4] * (10395.0 + c[2] * (-270270.0 + c[2] * 675675.0)) / 8.0;
+    case 5:
+      return s[5] * c[1] * (-135135.0 + c[2] * 675675.0) / 2.0;
+    case 6:
+      return s[6] * (-135135.0 + c[2] * 2027025.0) / 2.0;
+    case 7:
+      return s[7] * c[1] * 2027025.0;
+    case 8:
+      return s[8] * 2027025.0;
+    default:
+      return 0.0;
+    }
+  }
   return 0.0;
 }
 
@@ -158,10 +206,10 @@ inline void ylmAll(int orderL, double theta, double phi, double *out) {
     out[2 * k + 1] = 0.0;
   }
 
-  double s[7];
-  double c[7];
-  double pr[7];
-  double pi[7];
+  double s[9];
+  double c[9];
+  double pr[9];
+  double pi[9];
   const double sinT = std::sin(theta);
   const double cosT = std::cos(theta);
   const double cphi = std::cos(phi);
@@ -207,7 +255,7 @@ inline void qlmOneAtom(int iatom, int orderL, const double *xyz,
   const int j0 = offsets[iatom];
   const int j1 = offsets[iatom + 1];
   int nUsed = 0;
-  double ylm[26];
+  double ylm[34];
   for (int p = j0; p < j1; p++) {
     const int jatom = cols[p];
     double dx = xyz[iOff] - xyz[3 * jatom];
@@ -259,8 +307,8 @@ inline void qlOneAtom(int iatom, int orderL, const double *qlmInterleaved,
     qlBar[iatom] = ql[iatom];
     return;
   }
-  double barRe[13];
-  double barIm[13];
+  double barRe[17];
+  double barIm[17];
   for (int m = 0; m < nComp; m++) {
     barRe[m] = qlmInterleaved[2 * (row + m)];
     barIm[m] = qlmInterleaved[2 * (row + m) + 1];

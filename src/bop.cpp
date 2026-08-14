@@ -31,9 +31,9 @@ namespace {
  *  trigonometric library per direction, shared across every @f$m@f$.
  */
 struct AngularTerms {
-  std::array<double, 7> sinPow;             //! sinPow[k] = sin(theta)^k
-  std::array<double, 7> cosPow;             //! cosPow[k] = cos(theta)^k
-  std::array<std::complex<double>, 7> phase; //! phase[k] = exp(i k phi)
+  std::array<double, 9> sinPow;             //! sinPow[k] = sin(theta)^k
+  std::array<double, 9> cosPow;             //! cosPow[k] = cos(theta)^k
+  std::array<std::complex<double>, 9> phase; //! phase[k] = exp(i k phi)
 
   AngularTerms(double theta, double phi) {
     const double sinTheta = std::sin(theta);
@@ -73,6 +73,20 @@ const std::array<double, 5> &normQ4() {
       0.375 * std::sqrt(5.0 / (2.0 * std::numbers::pi)),   // |m| = 2
       0.375 * std::sqrt(35.0 / std::numbers::pi),          // |m| = 3
       0.1875 * std::sqrt(35.0 / (2.0 * std::numbers::pi))}; // |m| = 4
+  return values;
+}
+
+const std::array<double, 9> &normQ8() {
+  static const std::array<double, 9> values = {
+      std::sqrt(17.0 / (4.0 * std::numbers::pi)),              // m = 0
+      std::sqrt(17.0 / (288.0 * std::numbers::pi)),            // |m| = 1
+      std::sqrt(17.0 / (20160.0 * std::numbers::pi)),          // |m| = 2
+      std::sqrt(17.0 / (1330560.0 * std::numbers::pi)),        // |m| = 3
+      std::sqrt(17.0 / (79833600.0 * std::numbers::pi)),       // |m| = 4
+      std::sqrt(17.0 / (4151347200.0 * std::numbers::pi)),     // |m| = 5
+      std::sqrt(17.0 / (174356582400.0 * std::numbers::pi)),   // |m| = 6
+      std::sqrt(17.0 / (5230697472000.0 * std::numbers::pi)),  // |m| = 7
+      std::sqrt(17.0 / (83691159552000.0 * std::numbers::pi))}; // |m| = 8
   return values;
 }
 
@@ -154,6 +168,31 @@ double legendreAmplitude(int orderL, int absM, const AngularTerms &terms) {
     }
   }
 
+  if (orderL == 8) {
+    switch (absM) {
+    case 0:
+      return (35.0 + c[2] * (-1260.0 + c[2] * (6930.0 + c[2] * (-12012.0 + c[2] * 6435.0)))) / 128.0;
+    case 1:
+      return s[1] * c[1] * (-315.0 + c[2] * (3465.0 + c[2] * (-9009.0 + c[2] * 6435.0))) / 16.0;
+    case 2:
+      return s[2] * (-315.0 + c[2] * (10395.0 + c[2] * (-45045.0 + c[2] * 45045.0))) / 16.0;
+    case 3:
+      return s[3] * c[1] * (10395.0 + c[2] * (-90090.0 + c[2] * 135135.0)) / 8.0;
+    case 4:
+      return s[4] * (10395.0 + c[2] * (-270270.0 + c[2] * 675675.0)) / 8.0;
+    case 5:
+      return s[5] * c[1] * (-135135.0 + c[2] * 675675.0) / 2.0;
+    case 6:
+      return s[6] * (-135135.0 + c[2] * 2027025.0) / 2.0;
+    case 7:
+      return s[7] * c[1] * 2027025.0;
+    case 8:
+      return s[8] * 2027025.0;
+    default:
+      return 0.0;
+    }
+  }
+
   return 0.0;
 }
 
@@ -172,6 +211,7 @@ std::pair<std::complex<double>, std::complex<double>>
 harmonicPair(int orderL, int absM, const AngularTerms &terms) {
   const double norm = (orderL == 3)   ? normQ3()[absM]
                       : (orderL == 4) ? normQ4()[absM]
+                      : (orderL == 8) ? normQ8()[absM]
                                       : normQ6()[absM];
   const double amplitude = norm * legendreAmplitude(orderL, absM, terms);
 
@@ -246,9 +286,46 @@ sph::spheriHarmo(int orderL, std::array<double, 2> radialCoord) {
     return sph::lookupTableQ4Vec(radialCoord);
   } else if (orderL == 6) {
     return sph::lookupTableQ6Vec(radialCoord);
+  } else if (orderL == 8) {
+    return sph::lookupTableQ8Vec(radialCoord);
   }
   // Fallback: return zeros for unsupported l values
   return std::vector<std::complex<double>>(2 * orderL + 1, {0.0, 0.0});
+}
+
+
+/**
+ * @details Calculates @f$Q_8@f$ from the shared trigonometric terms. Used for
+ *  distinguishing crystal phases whose @f$q_4@f$-@f$q_6@f$ signatures overlap.
+ * @param[in] angles The azimuth and polar angles for a particular particle
+ * @return a complex vector of length @f$17@f$, ordered @f$m = -8 \ldots 8@f$
+ */
+std::vector<std::complex<double>>
+sph::lookupTableQ8Vec(std::array<double, 2> angles) {
+  const AngularTerms terms(angles[1], angles[0]);
+  std::vector<std::complex<double>> result(17);
+  for (int m = 0; m <= 8; m++) {
+    const auto [negative, positive] = harmonicPair(8, m, terms);
+    result[8 - m] = negative;
+    result[8 + m] = positive;
+  }
+  return result;
+}
+
+/**
+ * @details Single order of @f$Q_8@f$.
+ * @param[in] m Table index, @f$0 \ldots 16@f$, mapping to @f$m = -8 \ldots 8@f$
+ * @param[in] angles The azimuth and polar angles for a particular particle
+ * @return The complex value of @f$Y_{8m}@f$
+ */
+std::complex<double> sph::lookupTableQ8(int m, std::array<double, 2> angles) {
+  if (m < 0 || m > 16) {
+    return {0.0, 0.0};
+  }
+  const AngularTerms terms(angles[1], angles[0]);
+  const int order = m - 8;
+  const auto [negative, positive] = harmonicPair(8, std::abs(order), terms);
+  return (order < 0) ? negative : positive;
 }
 
 /**

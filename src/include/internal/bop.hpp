@@ -314,6 +314,13 @@ std::complex<double> lookupTableQ4(int m, std::array<double, 2> angles);
 std::vector<std::complex<double>>
 lookupTableQ6Vec(std::array<double, 2> angles);
 
+//! Lookup table for Q8
+std::vector<std::complex<double>>
+lookupTableQ8Vec(std::array<double, 2> angles);
+
+//! Lookup table for Q8 (m=0 to m=16)
+std::complex<double> lookupTableQ8(int m, std::array<double, 2> angles);
+
 //! Lookup table for Q6 (m=0 to m=12)
 std::complex<double> lookupTableQ6(int m, std::array<double, 2> angles);
 

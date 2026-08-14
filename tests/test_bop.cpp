@@ -672,9 +672,9 @@ TEST_CASE("Q4 satisfies the addition theorem and Condon-Shortley", "[bop]") {
 
 TEST_CASE("device Ylm matches spheriHarmo for l=3,4,6", "[bop]") {
   const std::array<double, 2> angles = {0.7, 1.2};
-  for (int l : {3, 4, 6}) {
+  for (int l : {3, 4, 6, 8}) {
     auto host = sph::spheriHarmo(l, angles);
-    double dev[26];
+    double dev[34];
     seams::steinhardt::ylmAll(l, angles[1], angles[0], dev);
     const int nComp = 2 * l + 1;
     for (int m = 0; m < nComp; m++) {
@@ -835,5 +835,108 @@ TEST_CASE("steinhardtQl is independent of the OpenMP thread count", "[bop]") {
                  Catch::Matchers::WithinAbs(serial.ql[i], 1e-15));
     REQUIRE_THAT(threaded.qlBar[i],
                  Catch::Matchers::WithinAbs(serial.qlBar[i], 1e-15));
+  }
+}
+
+namespace {
+
+const std::vector<HarmonicReference> &referenceQ8() {
+  // mpmath spherharm at 30 digits, theta/phi as in the l=3,4,6 references
+  static const std::vector<HarmonicReference> refs = {
+      {0.7, 1.2,
+       {{-1.50566575719588720e-02, +2.66559461970755553e-03},
+        {-3.77083914952981436e-02, -6.20571043526132460e-02},
+        {+1.27263877225608890e-01, -1.66031119141199057e-01},
+        {+3.82638236458474390e-01, +1.11350095869957796e-01},
+        {+4.09586774205907000e-02, +4.66309244602285233e-01},
+        {-1.82029622803040386e-01, +8.98255627250017646e-02},
+        {+1.97868206964352672e-01, +1.81250105051402932e-01},
+        {-1.26611692820706584e-01, +3.25664471068939643e-01},
+        {+1.66803869622521250e-01, +0.00000000000000000e+00},
+        {+1.26611692820706584e-01, +3.25664471068939643e-01},
+        {+1.97868206964352672e-01, -1.81250105051402932e-01},
+        {+1.82029622803040386e-01, +8.98255627250017646e-02},
+        {+4.09586774205907000e-02, -4.66309244602285233e-01},
+        {-3.82638236458474390e-01, +1.11350095869957796e-01},
+        {+1.27263877225608890e-01, +1.66031119141199057e-01},
+        {+3.77083914952981436e-02, -6.20571043526132460e-02},
+        {-1.50566575719588720e-02, -2.66559461970755553e-03}}},
+      {2.31, 5.02,
+       {{-3.56321951023816641e-02, -2.88559218572720516e-02},
+        {+1.39626124302155624e-01, -9.19745088952253348e-02},
+        {+9.66561669354474851e-02, +3.42742586142052830e-01},
+        {-4.59565562033470043e-01, -1.50521201263779918e-02},
+        {+8.72113398829371667e-02, -2.46267017453726950e-01},
+        {-1.45178642334412467e-01, -1.09899590798437044e-01},
+        {+3.03538655695245463e-01, -2.14516944210316723e-01},
+        {-4.48339778327363353e-03, -1.41122526937808735e-02},
+        {+3.69672685761530673e-01, +0.00000000000000000e+00},
+        {+4.48339778327363353e-03, -1.41122526937808735e-02},
+        {+3.03538655695245463e-01, +2.14516944210316723e-01},
+        {+1.45178642334412467e-01, -1.09899590798437044e-01},
+        {+8.72113398829371667e-02, +2.46267017453726950e-01},
+        {+4.59565562033470043e-01, -1.50521201263779918e-02},
+        {+9.66561669354474851e-02, -3.42742586142052830e-01},
+        {-1.39626124302155624e-01, -9.19745088952253348e-02},
+        {-3.56321951023816641e-02, +2.88559218572720516e-02}}}};
+  return refs;
+}
+
+} // namespace
+
+TEST_CASE("lookupTableQ8Vec matches independent reference values", "[bop]") {
+  for (const auto &ref : referenceQ8()) {
+    auto result = sph::lookupTableQ8Vec({ref.phi, ref.theta});
+    REQUIRE(result.size() == ref.values.size());
+    for (size_t m = 0; m < result.size(); m++) {
+      REQUIRE_THAT(result[m].real(),
+                   Catch::Matchers::WithinAbs(ref.values[m].real(), 1e-13));
+      REQUIRE_THAT(result[m].imag(),
+                   Catch::Matchers::WithinAbs(ref.values[m].imag(), 1e-13));
+    }
+  }
+}
+
+TEST_CASE("Q8 satisfies the addition theorem and Condon-Shortley", "[bop]") {
+  const std::vector<std::pair<double, double>> directions = {
+      {0.7, 1.2}, {0.3, 0.8}, {2.31, 5.02}, {1.77, 3.41}};
+  for (const auto &[theta, phi] : directions) {
+    auto q8 = sph::lookupTableQ8Vec({phi, theta});
+    double sum = 0.0;
+    for (const auto &y : q8) {
+      sum += std::norm(y);
+    }
+    REQUIRE_THAT(sum, Catch::Matchers::WithinAbs(17.0 / (4.0 * M_PI), 1e-13));
+    for (int m = 1; m <= 8; m++) {
+      const std::complex<double> expected =
+          ((m % 2 == 0) ? 1.0 : -1.0) * std::conj(q8[8 - m]);
+      REQUIRE_THAT(q8[8 + m].real(),
+                   Catch::Matchers::WithinAbs(expected.real(), 1e-15));
+      REQUIRE_THAT(q8[8 + m].imag(),
+                   Catch::Matchers::WithinAbs(expected.imag(), 1e-15));
+    }
+    for (int m = 0; m < 17; m++) {
+      const auto single = sph::lookupTableQ8(m, {phi, theta});
+      REQUIRE_THAT(single.real(),
+                   Catch::Matchers::WithinAbs(q8[m].real(), 1e-15));
+      REQUIRE_THAT(single.imag(),
+                   Catch::Matchers::WithinAbs(q8[m].imag(), 1e-15));
+    }
+  }
+}
+
+TEST_CASE("steinhardtQl accepts l=8 and averages correctly on FCC", "[bop]") {
+  // FCC reference value q8 = 0.40391 for twelve nearest neighbours
+  // (Steinhardt, Nelson and Ronchetti 1983); uniform environment makes the
+  // neighbour average coincide with the local value
+  const double lattice = 4.0;
+  auto cloud = fccCloud(4, lattice);
+  const double cutoff = 0.85 * lattice;
+  auto nList = nneigh::neighListO(cutoff, cloud, 1);
+  auto q8 = chill::steinhardtQl(cloud, nList, 8);
+  REQUIRE(q8.ql.size() == static_cast<size_t>(cloud.nop));
+  for (int i = 0; i < cloud.nop; i++) {
+    REQUIRE_THAT(q8.ql[i], Catch::Matchers::WithinAbs(0.40391, 1e-4));
+    REQUIRE_THAT(q8.qlBar[i], Catch::Matchers::WithinAbs(q8.ql[i], 1e-9));
   }
 }
