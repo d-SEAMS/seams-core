@@ -73,6 +73,23 @@ if readcon_dep.found()
   _args += ['-DSEAMS_HAS_READCON=1']
 endif
 
+# Report which optional backends this build actually got. Each of these
+# degrades silently: without vesin the neighbour search falls back to the
+# brute-force path, and without a reader the corresponding formats are simply
+# absent from the library, with nothing at run time to say so.
+summary({
+  'SIMD distance kernel (hwy)': hwy_dep.found(),
+  'Cell-list neighbours (vesin)': vesin_dep.found(),
+  'PDB/GRO/DCD readers (chemfiles)': chemfiles_dep.found(),
+  '.con reader (readcon-core)': readcon_dep.found(),
+}, section: 'Optional backends', bool_yn: true)
+
+if not readcon_dep.found()
+  message('readcon-core needs cbindgen >= 0.29 on PATH, which conda-forge ' +
+          'does not package; install it with `cargo install cbindgen` to ' +
+          'enable the .con reader.')
+endif
+
 # Include directories
 _incdirs += include_directories([
   'src/include/internal',
