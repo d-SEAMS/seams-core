@@ -4,7 +4,7 @@
 
 [![Build Status](https://github.com/d-SEAMS/seams-core/actions/workflows/ci_test.yml/badge.svg)](https://github.com/d-SEAMS/seams-core/actions/workflows/ci_test.yml)
 
-[![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
+
 
 - Check our build status [here](https://github.com/d-SEAMS/seams-core/actions/workflows/).
 - The docs themselves are [here](https://docs.dseams.info) and development is
@@ -31,7 +31,9 @@ yodaStruct checkout.
 the data-sets (trajectories) <a
 href="https://figshare.com/projects/d-SEAMS_Datasets/73545">from figshare</a>.
 
-\warning **If** you are unwilling to use the `nix` build system, then **please note** that you must manage the dependencies MANUALLY, including the compiler versions. Optionally, use the provided `conda` environment.
+\warning The live build is `pixi` + meson. The old Nix/CMake `yodaStruct`
+derivation is gone. Manage compiler and library versions yourself if you
+do not use the provided `pixi` or `conda` environment.
 
 # Citation
 

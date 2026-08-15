@@ -2,6 +2,15 @@
 Changelog
 =========
 
+Version 2.1.2 (2026-08-15)
+===========================
+
+Removed
+-------
+- CMake-era Nix entrypoints (``default.nix``, ``shell.nix``,
+  ``nix/yodaStruct.nix``). They still named the product ``yodaStruct``.
+  Build with pixi.
+
 Version 2.1.1 (2026-08-15)
 ===========================
 
