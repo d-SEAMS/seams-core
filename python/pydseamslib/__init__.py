@@ -8,7 +8,8 @@ __version__ = "2.0.0"
 class Trajectory:
     """High-level interface for d-SEAMS ice structure analysis."""
 
-    def __init__(self, filename, frame=1, atom_type=2, cutoff=3.5):
+    def __init__(self, filename, frame=1, atom_type=2, cutoff=3.5,
+                 bonded="hbond", region=None):
         """Load a LAMMPS trajectory frame.
 
         Parameters
@@ -21,25 +22,44 @@ class Trajectory:
             Type ID of atoms to analyze (default 2 for oxygen).
         cutoff : float
             Neighbor list cutoff distance in Angstroms.
+        bonded : str
+            Which graph ring analyses walk: "hbond" builds the
+            hydrogen-bonded network (needs hydrogens in the trajectory),
+            "cutoff" bonds every neighbour-list pair (single-site models
+            like mW).
+        region : tuple of (list, list) or None
+            Optional volume slice as (coordLow, coordHigh); axes whose
+            low and high are both zero span the whole box. None analyzes
+            every atom of the type.
         """
+        if bonded not in ("hbond", "cutoff"):
+            raise ValueError('bonded must be "hbond" or "cutoff"')
+        self.bonded = bonded
+        self.region = region
         self.filename = str(Path(filename).resolve())
         self.frame = frame
         self.atom_type = atom_type
         self.cutoff = cutoff
 
-        self.cloud = _core.readLammpsTrjreduced(
-            filename=self.filename,
-            targetFrame=frame,
-            typeI=atom_type,
-            isSlice=False,
-            coordLow=[0, 0, 0],
-            coordHigh=[0, 0, 0],
-        )
+        self.cloud = self._read(frame)
         self._nlist = None
         self._hbonds = None
         self._rings = None
         self._classifier = None
         self._ring_updater = _core.RingUpdater(6)
+        self._affiliation_updater = None
+
+    def _read(self, frame):
+        low, high = self.region if self.region is not None else (
+            [0, 0, 0], [0, 0, 0])
+        return _core.readLammpsTrjreduced(
+            filename=self.filename,
+            targetFrame=frame,
+            typeI=self.atom_type,
+            isSlice=self.region is not None,
+            coordLow=list(low),
+            coordHigh=list(high),
+        )
 
     @property
     def n_atoms(self):
@@ -76,17 +96,18 @@ class Trajectory:
     def load_frame(self, frame):
         """Read another frame, keeping the incremental ring updater."""
         self.frame = frame
-        self.cloud = _core.readLammpsTrjreduced(
-            filename=self.filename,
-            targetFrame=frame,
-            typeI=self.atom_type,
-            isSlice=False,
-            coordLow=[0, 0, 0],
-            coordHigh=[0, 0, 0],
-        )
+        self.cloud = self._read(frame)
         self._nlist = None
         self._hbonds = None
         self._rings = None
+
+    @property
+    def bonds_by_index(self):
+        """The bonded graph ring analyses walk, by atom index."""
+        source = (
+            self.neighbor_list if self.bonded == "cutoff" else self.hbonds
+        )
+        return _core.neighbourListByIndex(yCloud=self.cloud, nList=source)
 
     @property
     def rings(self):
@@ -96,10 +117,7 @@ class Trajectory:
         locality bound of a changed bond. The first access is a full pass.
         """
         if self._rings is None:
-            hbonds_idx = _core.neighbourListByIndex(
-                yCloud=self.cloud, nList=self.hbonds
-            )
-            self._rings = self._ring_updater.update(hbonds_idx)
+            self._rings = self._ring_updater.update(self.bonds_by_index)
         return self._rings
 
     @property
@@ -184,6 +202,109 @@ class Trajectory:
             currentFrame=self.frame,
             doShapeMatching=shape_matching,
         )
+
+    def cage_affiliation(self):
+        """Order-free HC/DDC affiliation of this frame's six-rings.
+
+        Exact incremental across load_frame calls: only rings inside the
+        second ring-adjacency neighbourhood of a change are reclassified.
+
+        Returns
+        -------
+        dict
+            "six_rings" (the rings themselves), per-ring "hc" and "ddc"
+            flag lists, and "reclassified" from the last update.
+        """
+        six = [r for r in self.rings if len(r) == 6]
+        if self._affiliation_updater is None:
+            self._affiliation_updater = _core.AffiliationUpdater()
+        hc, ddc = self._affiliation_updater.update(six, self.bonds_by_index)
+        return {
+            "six_rings": six,
+            "hc": list(hc),
+            "ddc": list(ddc),
+            "reclassified": self._affiliation_updater.lastReclassified(),
+        }
+
+    def seeded_affiliation(self, k=4, candidate_cutoff=None):
+        """Seeded (hysteresis) per-atom cage flags.
+
+        The mutual k-nearest graph supplies seeds, the union graph
+        supplies completions, and a permissively affiliated atom is
+        accepted only when its bonded component of affiliated atoms
+        contains a seed, so a structureless frame accepts nothing.
+
+        Returns
+        -------
+        dict
+            Per-atom boolean lists "hc" and "ddc".
+        """
+        cut = (
+            self.cutoff + 1.5 if candidate_cutoff is None else candidate_cutoff
+        )
+        strict = _core.neighbourListByIndex(
+            self.cloud,
+            _core.kNearestNeighbourList(self.cloud, k, cut, self.atom_type, True),
+        )
+        union = _core.neighbourListByIndex(
+            self.cloud,
+            _core.kNearestNeighbourList(self.cloud, k, cut, self.atom_type, False),
+        )
+        six_s = [r for r in _core.ringNetwork(strict, 6) if len(r) == 6]
+        six_u = [r for r in _core.ringNetwork(union, 6) if len(r) == 6]
+        hc, ddc = _core.seededCageAffiliation(six_s, strict, six_u, union)
+        return {"hc": list(hc), "ddc": list(ddc)}
+
+    def monolayer_rings(self, output_dir, sheet_area, max_depth=4):
+        """Ring statistics and coverage areas for quasi-2D ice.
+
+        Writes the topoMonolayer outputs under output_dir and returns the
+        per-size ring counts parsed back from coverageAreaXY.dat.
+        """
+        rings = _core.ringNetwork(self.bonds_by_index, max_depth)
+        _core.polygonRingAnalysis(
+            path=str(output_dir) + "/",
+            rings=rings,
+            nList=self.bonds_by_index,
+            yCloud=self.cloud,
+            maxDepth=max_depth,
+            sheetArea=sheet_area,
+            firstFrame=self.frame,
+        )
+        counts = {}
+        cov = (
+            Path(output_dir) / "topoMonolayer" / "coverageAreaXY.dat"
+        ).read_text().splitlines()
+        fields = cov[-1].split()[1:]
+        for size, n, area in zip(fields[::3], fields[1::3], fields[2::3]):
+            counts[int(size)] = {"count": int(n), "coverage_xy": float(area)}
+        return counts
+
+    def rdf_2d(self, output_dir, cutoff=12.0, binwidth=0.05):
+        """In-plane radial distribution function of this frame.
+
+        Writes rdf.dat under output_dir/topoMonolayer and returns (r, g)
+        lists parsed back from it.
+        """
+        _core.rdf2Danalysis_AA(
+            path=str(output_dir) + "/",
+            rdfValues=[],
+            yCloud=self.cloud,
+            cutoff=cutoff,
+            binwidth=binwidth,
+            firstFrame=self.frame,
+            finalFrame=self.frame,
+        )
+        r, g = [], []
+        rdf = (
+            Path(output_dir) / "topoMonolayer" / "rdf.dat"
+        ).read_text().splitlines()
+        for line in rdf:
+            parts = line.split()
+            if len(parts) == 2:
+                r.append(float(parts[0]))
+                g.append(float(parts[1]))
+        return r, g
 
     def steinhardt(self, order_l=6):
         """Compute the local and neighbour-averaged Steinhardt parameters.
