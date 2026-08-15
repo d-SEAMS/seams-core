@@ -87,6 +87,10 @@ bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yClo
                    const std::vector<int> &subset, double rcutoff,
                    std::vector<std::pair<int, int>> &pairs) {
   const size_t nSubset = subset.size();
+  if (nSubset == 0) {
+    pairs.clear();
+    return true;
+  }
   std::vector<std::array<double, 3>> positions(nSubset);
   for (size_t i = 0; i < nSubset; i++) {
     const int idx = subset[i];

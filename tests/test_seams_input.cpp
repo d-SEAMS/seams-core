@@ -183,6 +183,23 @@ std::string writeUnwrappedDump() {
   f << "7 2 11.5 12.25 -3.0\n";
   return path.string();
 }
+
+std::string writeEmptyMiddleDump() {
+  auto path =
+      fs::temp_directory_path() / "dseams_test_lammps_empty_frame.lammpstrj";
+  std::ofstream f(path);
+  const int counts[3] = {2, 0, 2};
+  for (int frame = 0; frame < 3; ++frame) {
+    f << "ITEM: TIMESTEP\n" << frame << "\n";
+    f << "ITEM: NUMBER OF ATOMS\n" << counts[frame] << "\n";
+    f << "ITEM: BOX BOUNDS pp pp pp\n0 10\n0 10\n0 10\n";
+    f << "ITEM: ATOMS id type x y z\n";
+    for (int i = 0; i < counts[frame]; ++i) {
+      f << (i + 1) << " 1 " << (i + 0.25) << " 0 0\n";
+    }
+  }
+  return path.string();
+}
 } // namespace
 
 TEST_CASE("nLammpsFrames counts ITEM: TIMESTEP markers", "[seams_input]") {
@@ -266,6 +283,42 @@ TEST_CASE("forEachLammpsFrame matches sequential reads", "[seams_input]") {
   REQUIRE_THAT(xs[2], Catch::Matchers::WithinAbs(2.25, 1e-10));
   fs::remove(tiny);
   sinp::dropLammpsDumpIndex(tiny);
+}
+
+TEST_CASE("empty NUMBER OF ATOMS frames are valid snapshots",
+          "[seams_input]") {
+  const auto dump = writeEmptyMiddleDump();
+  sinp::dropLammpsDumpIndex(dump);
+  REQUIRE(sinp::nLammpsFrames(dump) == 3);
+
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  auto first = sinp::readLammpsTrjO(dump, 1, yCloud, 1);
+  REQUIRE(first.nop == 2);
+  REQUIRE(first.box.size() >= 3);
+
+  auto empty = sinp::readLammpsTrjO(dump, 2, yCloud, 1);
+  REQUIRE(empty.nop == 0);
+  REQUIRE(empty.pts.empty());
+  REQUIRE(empty.currentFrame == 2);
+  REQUIRE(empty.box.size() >= 3);
+
+  auto last = sinp::readLammpsTrjO(dump, 3, yCloud, 1);
+  REQUIRE(last.nop == 2);
+  REQUIRE(last.currentFrame == 3);
+
+  std::vector<int> nops(3, -1);
+  sinp::forEachLammpsFrame(
+      dump, 1, 3, 1,
+      [&](int frame, molSys::PointCloud<molSys::Point<double>, double> &cloud) {
+        nops[static_cast<std::size_t>(frame - 1)] = cloud.nop;
+      },
+      1);
+  REQUIRE(nops[0] == 2);
+  REQUIRE(nops[1] == 0);
+  REQUIRE(nops[2] == 2);
+
+  fs::remove(dump);
+  sinp::dropLammpsDumpIndex(dump);
 }
 
 TEST_CASE("readLammpsTrj binds xu yu zu when x y z are absent",

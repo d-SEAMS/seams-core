@@ -188,6 +188,10 @@ int cmdRead(std::ostream &os, Cloud &cloud) {
 }
 
 int cmdChillPlus(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
+  if (cloud.nop == 0) {
+    printCounts(os, cloud);
+    return 0;
+  }
   const int typ = typeOf(cloud, typeI);
   auto nList = nneigh::neighListO(cutoff, cloud, typ);
   chill::getCorrelPlus(cloud, nList, false);
@@ -197,6 +201,10 @@ int cmdChillPlus(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
 }
 
 int cmdChill(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
+  if (cloud.nop == 0) {
+    printCounts(os, cloud);
+    return 0;
+  }
   const int typ = typeOf(cloud, typeI);
   auto nList = nneigh::neighListO(cutoff, cloud, typ);
   chill::getCorrel(cloud, nList, false);
@@ -207,6 +215,13 @@ int cmdChill(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
 
 int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
              const std::string &graphName) {
+  if (cloud.nop == 0) {
+    os << colorizer.heading("nop") << " 0 "
+       << colorizer.longOption("graph") << " " << graphName << " "
+       << iceColor("hexagonal") << " 0 " << iceColor("cubic") << " 0 "
+       << iceColor("water") << " 0\n";
+    return 0;
+  }
   const int typ = typeOf(cloud, typeI);
   const double cand = cutoff + 1.5;
 

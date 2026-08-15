@@ -71,6 +71,25 @@ molSys::PointCloud<molSys::Point<double>, double> hcCloud() {
 
 } // namespace
 
+TEST_CASE("seeded affiliation on an empty framed cloud is empty",
+          "[cage_affiliation]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.nop = 0;
+  cloud.box = {10.0, 10.0, 10.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  auto knn = nneigh::kNearestNeighbourList(cloud, 4, 5.5, 1, true);
+  auto uni = nneigh::kNearestNeighbourList(cloud, 4, 5.5, 1, false);
+  auto idxS = nneigh::neighbourListByIndex(cloud, knn);
+  auto idxU = nneigh::neighbourListByIndex(cloud, uni);
+  auto sixS = sixMembered(primitive::ringNetwork(idxS, 6));
+  auto sixU = sixMembered(primitive::ringNetwork(idxU, 6));
+  const auto seeded = ring::seededCageAffiliation(sixS, idxS, sixU, idxU);
+  REQUIRE(knn.empty());
+  REQUIRE(sixS.empty());
+  REQUIRE(seeded.hc.empty());
+  REQUIRE(seeded.ddc.empty());
+}
+
 TEST_CASE("cageAffiliation matches the greedy classification on mW",
           "[cage_affiliation]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;

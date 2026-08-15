@@ -388,6 +388,8 @@ TEST_CASE("neighListO returns empty when the cloud has no atoms",
 
   auto nList = nneigh::neighListO(3.5, cloud, 1);
   REQUIRE(nList.empty());
+  auto knn = nneigh::kNearestNeighbourList(cloud, 4, 5.5, 1, true);
+  REQUIRE(knn.empty());
 }
 
 TEST_CASE("k-nearest graph reduces exactly to the cutoff graph when the "

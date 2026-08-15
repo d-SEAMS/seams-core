@@ -3,8 +3,8 @@
 **
 ** SPDX-License-Identifier: MIT
 **
-** Seeded TUM ice score and largest ice cluster on every frame.
-**   walk_seeded TRAJ [lastFrame] [atomType] [stride]
+** Ice cluster size for every published bond graph on each frame.
+**   walk_graphs TRAJ [lastFrame] [atomType] [stride]
 */
 
 #include <cage_affiliation.hpp>
@@ -55,15 +55,14 @@ void unite(std::vector<int> &parent, std::vector<int> &sz, int a, int b) {
   sz[static_cast<std::size_t>(a)] += sz[static_cast<std::size_t>(b)];
 }
 
-void clusterIce(const ring::SeededAtomLabels &lab,
-                const std::vector<std::vector<int>> &idxU, int &nMax,
-                int &nClus) {
-  const int n = static_cast<int>(lab.hc.size());
+void clusterFlags(const std::vector<bool> &hc, const std::vector<bool> &ddc,
+                  const std::vector<std::vector<int>> &idx, int &nIce,
+                  int &nMax, int &nClus) {
+  const int n = static_cast<int>(hc.size());
   std::vector<char> ice(static_cast<std::size_t>(n), 0);
-  int nIce = 0;
+  nIce = 0;
   for (int i = 0; i < n; i++) {
-    if (lab.hc[static_cast<std::size_t>(i)] ||
-        lab.ddc[static_cast<std::size_t>(i)]) {
+    if (hc[static_cast<std::size_t>(i)] || ddc[static_cast<std::size_t>(i)]) {
       ice[static_cast<std::size_t>(i)] = 1;
       ++nIce;
     }
@@ -80,12 +79,11 @@ void clusterIce(const ring::SeededAtomLabels &lab,
   }
   for (int i = 0; i < n; i++) {
     if (!ice[static_cast<std::size_t>(i)] ||
-        static_cast<int>(idxU.size()) <= i) {
+        static_cast<int>(idx.size()) <= i) {
       continue;
     }
-    for (std::size_t k = 1; k < idxU[static_cast<std::size_t>(i)].size();
-         k++) {
-      const int j = idxU[static_cast<std::size_t>(i)][k];
+    for (std::size_t k = 1; k < idx[static_cast<std::size_t>(i)].size(); k++) {
+      const int j = idx[static_cast<std::size_t>(i)][k];
       if (j > i && j < n && ice[static_cast<std::size_t>(j)]) {
         unite(parent, sz, i, j);
       }
@@ -104,21 +102,19 @@ void clusterIce(const ring::SeededAtomLabels &lab,
   }
 }
 
-void countIce(const ring::SeededAtomLabels &lab, int &ih, int &ic, int &both,
-              int &water) {
-  ih = ic = both = water = 0;
-  const int n = static_cast<int>(lab.hc.size());
-  for (int i = 0; i < n; i++) {
-    const bool h = lab.hc[static_cast<std::size_t>(i)];
-    const bool d = lab.ddc[static_cast<std::size_t>(i)];
-    if (h && d) {
-      ++both;
-    } else if (h) {
-      ++ih;
-    } else if (d) {
-      ++ic;
-    } else {
-      ++water;
+void atomsFromRings(const std::vector<std::vector<int>> &six,
+                    const ring::CageAffiliation &aff, int nop,
+                    std::vector<bool> &hc, std::vector<bool> &ddc) {
+  hc.assign(static_cast<std::size_t>(nop), false);
+  ddc.assign(static_cast<std::size_t>(nop), false);
+  for (std::size_t r = 0; r < six.size(); r++) {
+    for (const int a : six[r]) {
+      if (a >= 0 && a < nop) {
+        hc[static_cast<std::size_t>(a)] =
+            hc[static_cast<std::size_t>(a)] || aff.hc[r];
+        ddc[static_cast<std::size_t>(a)] =
+            ddc[static_cast<std::size_t>(a)] || aff.ddc[r];
+      }
     }
   }
 }
@@ -128,7 +124,7 @@ void countIce(const ring::SeededAtomLabels &lab, int &ih, int &ic, int &both,
 int main(int argc, char **argv) {
   if (argc < 2) {
     std::fprintf(stderr,
-                 "usage: walk_seeded TRAJ [lastFrame] [atomType] [stride]\n");
+                 "usage: walk_graphs TRAJ [lastFrame] [atomType] [stride]\n");
     return 2;
   }
   const std::string traj = argv[1];
@@ -145,37 +141,53 @@ int main(int argc, char **argv) {
 
   std::printf("# %s nframes %d last %d stride %d\n", traj.c_str(), nframes,
               last, step);
-  std::printf("# frame nop ih ic both water n_ice n_max n_clus cubicity\n");
+  std::printf("# frame "
+              "cut_ice cut_max cut_clus "
+              "knn_ice knn_max knn_clus "
+              "uni_ice uni_max uni_clus "
+              "seed_ice seed_max seed_clus\n");
 
+  const double cutoff = 3.5;
   const double cand = 5.5;
   const int k = 4;
   for (int frame = 1; frame <= last; frame += step) {
     molSys::PointCloud<molSys::Point<double>, double> cloud;
     cloud = sinp::readLammpsTrjO(traj, frame, cloud, typeI);
     if (cloud.nop == 0) {
-      std::printf("%d 0 0 0 0 0 0 0 0 0.0000\n", frame);
+      std::printf("%d 0 0 0 0 0 0 0 0 0 0 0 0\n", frame);
       continue;
     }
-    auto mutual = nneigh::kNearestNeighbourList(cloud, k, cand, typeI, true);
-    auto uni = nneigh::kNearestNeighbourList(cloud, k, cand, typeI, false);
-    auto idxS = nneigh::neighbourListByIndex(cloud, mutual);
-    auto idxU = nneigh::neighbourListByIndex(cloud, uni);
-    auto sixS = sixOf(primitive::ringNetwork(idxS, 6));
+    const int nop = cloud.nop;
+    auto cutRows = nneigh::neighListO(cutoff, cloud, typeI);
+    auto knnRows = nneigh::kNearestNeighbourList(cloud, k, cand, typeI, true);
+    auto uniRows = nneigh::kNearestNeighbourList(cloud, k, cand, typeI, false);
+    auto idxC = nneigh::neighbourListByIndex(cloud, cutRows);
+    auto idxK = nneigh::neighbourListByIndex(cloud, knnRows);
+    auto idxU = nneigh::neighbourListByIndex(cloud, uniRows);
+    auto sixC = sixOf(primitive::ringNetwork(idxC, 6));
+    auto sixK = sixOf(primitive::ringNetwork(idxK, 6));
     auto sixU = sixOf(primitive::ringNetwork(idxU, 6));
-    const auto seeded = ring::seededCageAffiliation(sixS, idxS, sixU, idxU);
-    int ih = 0;
-    int ic = 0;
-    int both = 0;
-    int water = 0;
-    countIce(seeded, ih, ic, both, water);
-    int nMax = 0;
-    int nClus = 0;
-    clusterIce(seeded, idxU, nMax, nClus);
-    const int nIce = ih + ic + both;
-    const double cub =
-        nIce > 0 ? static_cast<double>(ic + both) / nIce : 0.0;
-    std::printf("%d %d %d %d %d %d %d %d %d %.4f\n", frame, cloud.nop, ih, ic,
-                both, water, nIce, nMax, nClus, cub);
+    const auto affC = ring::cageAffiliation(sixC, idxC);
+    const auto affK = ring::cageAffiliation(sixK, idxK);
+    const auto affU = ring::cageAffiliation(sixU, idxU);
+    const auto seeded = ring::seededCageAffiliation(sixK, idxK, sixU, idxU);
+
+    std::vector<bool> hc, ddc;
+    int ice = 0;
+    int mx = 0;
+    int cl = 0;
+    std::printf("%d", frame);
+    atomsFromRings(sixC, affC, nop, hc, ddc);
+    clusterFlags(hc, ddc, idxC, ice, mx, cl);
+    std::printf(" %d %d %d", ice, mx, cl);
+    atomsFromRings(sixK, affK, nop, hc, ddc);
+    clusterFlags(hc, ddc, idxK, ice, mx, cl);
+    std::printf(" %d %d %d", ice, mx, cl);
+    atomsFromRings(sixU, affU, nop, hc, ddc);
+    clusterFlags(hc, ddc, idxU, ice, mx, cl);
+    std::printf(" %d %d %d", ice, mx, cl);
+    clusterFlags(seeded.hc, seeded.ddc, idxU, ice, mx, cl);
+    std::printf(" %d %d %d\n", ice, mx, cl);
   }
   return 0;
 }
