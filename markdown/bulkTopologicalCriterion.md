@@ -20,7 +20,7 @@ trajectory: "path/to/trajectory/file"
 
 ## Analyzing the Output
 
-Inside the output directory, a file called *clusterStats.dat* contains the cluster statistics for each frame. Inside the *bulkTopo* directory, *cageData.dat* contains the number of HCs, DDCs and mixed rings for each frame. Inside *runOne/bulkTopo/dataFiles*, LAMMPS data files which are numbered according to the frame number are created. These data files can be visualized in [OVITO](https://www.ovito.org/) or [VMD](http://www.ks.uiuc.edu/Research/vmd/), although OVITO is recommended for optimal type visualization.
+Inside the output directory, a file called *clusterStats.dat* contains the cluster statistics for each frame. Inside the *bulkTopo* directory, *cageData.dat* contains the number of HCs, DDCs and mixed rings for each frame. Inside *runOne/bulkTopo/dataFiles*, LAMMPS data files which are numbered according to the frame number are created. These data files are LAMMPS text. View classified frames with [solvis](https://github.com/amritagos/solvis) through `pydseams[solvis]` (`frame.to_solvis()`).
 
 ## References 
 

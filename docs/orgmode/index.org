@@ -112,6 +112,7 @@ framework.
    howto/install
    howto/classify-cli
    howto/ase-integration
+   howto/solvis
    howto/confined-ice
    howto/faq
    howto/troubleshooting

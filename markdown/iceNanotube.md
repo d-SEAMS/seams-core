@@ -41,8 +41,8 @@ _topoINT_ directory, a file called _nPrisms.dat_ contains the number of prism
 blocks and the corresponding height% [2], for each frame. Inside
 _runOne/topoINT/dataFiles_, LAMMPS data files which are numbered according to
 the frame number are created. These data files can be visualized in
-[OVITO](https://www.ovito.org/) or [VMD](http://www.ks.uiuc.edu/Research/vmd/),
-although OVITO is recommended for optimal type visualization.
+[solvis](https://github.com/amritagos/solvis) through `pydseams[solvis]`
+(`frame.to_solvis()`). The files are LAMMPS text.
 
 ## References
 
