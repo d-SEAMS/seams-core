@@ -1,0 +1,39 @@
+.. index:: pair: struct; molSys::Point
+.. _doxid-structmol_sys_1_1_point:
+
+template struct molSys::Point
+=============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+This contains per-particle information. :ref:`More...<details-structmol_sys_1_1_point>`
+
+.. _details-structmol_sys_1_1_point:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+This contains per-particle information.
+
+Specifically
+
+* Type ID
+
+* Molecular ID
+
+* Atom ID
+
+* Coordinates
+
+* Neighbourlist
+
+* Bond correlation type of type :ref:`Result <doxid-structmol_sys_1_1_result>`
+
+* Type of :ref:`atom_state_type <doxid-group__mol_sys_1ga13ffe3a39a0816627553f195e102abb5>` iceType
+
+* In slice bool
+

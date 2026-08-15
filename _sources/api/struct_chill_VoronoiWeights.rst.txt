@@ -1,0 +1,59 @@
+.. index:: pair: struct; chill::VoronoiWeights
+.. _doxid-structchill_1_1_voronoi_weights:
+
+struct chill::VoronoiWeights
+============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+The Voronoi facet neighbours of one particle and their area weights. :ref:`More...<details-structchill_1_1_voronoi_weights>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <voronoi_qlm.hpp>
+	
+	struct VoronoiWeights {
+		// fields
+	
+		std::vector<int> :target:`neighbours<doxid-structchill_1_1_voronoi_weights_1a011165cd6360e0c275311af270aa68dc>`;
+		std::vector<double> :ref:`weights<doxid-structchill_1_1_voronoi_weights_1af0c66ea83a6956cbfd5ed7d1e03d8a81>`;
+		bool :ref:`certified<doxid-structchill_1_1_voronoi_weights_1ac5c078e14d5da5156f96f416933bb6a7>` = false;
+	};
+.. _details-structchill_1_1_voronoi_weights:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+The Voronoi facet neighbours of one particle and their area weights.
+
+Neighbours are those sharing a facet with the particle's Voronoi cell; weights are facet areas normalised to sum to one. Cutoff-based parameters change discontinuously when a neighbour crosses the cutoff, which is the shortcoming Mickel, Kapfer, Schr"oder-Turk and Mecke identified (J. Chem. Phys. 138, 044501, 2013): facet areas shrink to zero continuously as a neighbour leaves the first shell.
+
+Fields
+------
+
+.. index:: pair: variable; weights
+.. _doxid-structchill_1_1_voronoi_weights_1af0c66ea83a6956cbfd5ed7d1e03d8a81:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> weights
+
+Cloud indices of facet-sharing neighbours.
+
+.. index:: pair: variable; certified
+.. _doxid-structchill_1_1_voronoi_weights_1ac5c078e14d5da5156f96f416933bb6a7:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool certified = false
+
+Facet areas, normalised to sum to one.
+

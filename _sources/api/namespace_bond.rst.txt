@@ -1,0 +1,56 @@
+.. index:: pair: namespace; bond
+.. _doxid-namespacebond:
+
+namespace bond
+==============
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Functions for bond-related analyses. :ref:`More...<details-namespacebond>`
+
+.. _details-namespacebond:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Functions for bond-related analyses.
+
+This namespace contains functions that are used for determining the hydrogen bonds, or lists of bonded atoms for write-outs to data files and visualization.
+
+These functions are distinct from the neighbour-list building functions. Bonds can be built from cages, ring lists etc.
+
+Hydrogen bonds are determined using a strict geometric criterion.
+
+A hydrogen bond between two water molecules exists when:
+
+#. The distance between the donor oxygen atom and the acceptor hydrogen atom is less than 2.42 Angstrom
+
+#. The angle between the O O vector and the O-H vector should be less than 30 degrees
+
+
+
+.. _doxid-namespacebond_1autotoc_md0_1s1:
+
+
+
+
+
+.. _doxid-namespacebond_1autotoc_md0_1s2:
+
+
+
+
+
+.. _doxid-namespacebond_1autotoc_md0:
+
+Changelog
++++++++++
+
+* Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Nov 13, 2019
+
+* Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+

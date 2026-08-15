@@ -1,0 +1,46 @@
+.. index:: pair: namespace; sinp
+.. _doxid-namespacesinp:
+
+namespace sinp
+==============
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Functions for the d-SEAMS readers. :ref:`More...<details-namespacesinp>`
+
+.. _details-namespacesinp:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Functions for the d-SEAMS readers.
+
+This namespace contains functions that are used for reading in the formats supported by d-SEAMS. LAMMPS trajectory files and XYZ files are currently supported, though it is recommended to use LAMMPS trajectory files, since the simulation box size etc. are not normally present in XYZ files, and many analyses may fail without the correct box dimensions.
+
+
+
+.. _doxid-namespacesinp_1autotoc_md11_1s1:
+
+
+
+
+
+.. _doxid-namespacesinp_1autotoc_md11_1s2:
+
+
+
+
+
+.. _doxid-namespacesinp_1autotoc_md11:
+
+Changelog
++++++++++
+
+* Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Dec 26, 2019
+
+* Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+

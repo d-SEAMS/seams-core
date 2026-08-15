@@ -1,0 +1,96 @@
+.. index:: pair: namespace; match
+.. _doxid-namespacematch:
+
+namespace match
+===============
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace match {
+
+	// global functions
+
+	bool :ref:`matchPrism<doxid-namespacematch_1af3c2ebe9ccd146ee0ce293609fef7761>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const Eigen::MatrixXd& refPoints, std::vector<int>& basal1, std::vector<int>& basal2, std::vector<double>& rmsdPerAtom, bool isPerfect = true);
+	bool :ref:`matchUntetheredPrism<doxid-namespacematch_1a0cbe20cb5b3bebd6d5275f69498057d5>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const Eigen::MatrixXd& refPoints, std::vector<int>& basal1, std::vector<int>& basal2, std::vector<double>& rmsdPerAtom);
+	bool :ref:`matchPrismBlock<doxid-namespacematch_1a61062b67c8fd77b122c581135548a29c>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const Eigen::MatrixXd& refPoints, std::vector<int>& basal1, std::vector<int>& basal2, int& beginIndex);
+	int :ref:`updatePerAtomRMSDRing<doxid-namespacematch_1a9ecab3363a62bb95c0199fe240c1b2a2>`(const std::vector<int>& basalRing, int startingIndex, const std::vector<double>& rmsdFromMatch, std::vector<double>& rmsdPerAtom);
+	int :ref:`updateRMSDRing<doxid-namespacematch_1ac8f83bc585182e62498822b7890fa0f8>`(const std::vector<int>& basalRing, int startingIndex, double rmsdVal, std::vector<double>& rmsdPerAtom);
+
+	} // namespace match
+.. _details-namespacematch:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Global Functions
+----------------
+
+.. index:: pair: function; matchPrism
+.. _doxid-namespacematch_1af3c2ebe9ccd146ee0ce293609fef7761:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool matchPrism(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const Eigen::MatrixXd& refPoints, std::vector<int>& basal1, std::vector<int>& basal2, std::vector<double>& rmsdPerAtom, bool isPerfect = true)
+
+Shape-matching for a pair of polygon basal rings.
+
+Returns true if the pair of basal rings form a prism block.
+
+.. index:: pair: function; matchUntetheredPrism
+.. _doxid-namespacematch_1a0cbe20cb5b3bebd6d5275f69498057d5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool matchUntetheredPrism(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const Eigen::MatrixXd& refPoints, std::vector<int>& basal1, std::vector<int>& basal2, std::vector<double>& rmsdPerAtom)
+
+Shape-matching for a pair of polygon basal rings.
+
+Returns true if the pair of basal rings form a prism block.
+
+.. index:: pair: function; matchPrismBlock
+.. _doxid-namespacematch_1a61062b67c8fd77b122c581135548a29c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool matchPrismBlock(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const Eigen::MatrixXd& refPoints, std::vector<int>& basal1, std::vector<int>& basal2, int& beginIndex)
+
+Shape-matching for a pair of polygon basal rings, comparing with a complete prism block.
+
+Returns true if the pair of basal rings form a prism block.
+
+.. index:: pair: function; updatePerAtomRMSDRing
+.. _doxid-namespacematch_1a9ecab3363a62bb95c0199fe240c1b2a2:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int updatePerAtomRMSDRing(const std::vector<int>& basalRing, int startingIndex, const std::vector<double>& rmsdFromMatch, std::vector<double>& rmsdPerAtom)
+
+Update the per-particle RMSD for a prism block basal ring.
+
+.. index:: pair: function; updateRMSDRing
+.. _doxid-namespacematch_1ac8f83bc585182e62498822b7890fa0f8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int updateRMSDRing(const std::vector<int>& basalRing, int startingIndex, double rmsdVal, std::vector<double>& rmsdPerAtom)
+
+Update the RMSD of each particle in a prism block basal ring with the RMSD of the ring.
+

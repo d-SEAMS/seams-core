@@ -1,0 +1,46 @@
+.. index:: pair: namespace; sph
+.. _doxid-namespacesph:
+
+namespace sph
+=============
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Functions used for spherical harmonics. :ref:`More...<details-namespacesph>`
+
+.. _details-namespacesph:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Functions used for spherical harmonics.
+
+The recommended function for calculating the spherical-harmonics based complex vector is :ref:`sph::spheriHarmo <doxid-group__chill_1gaa9220b76da7400c9d934fa08ceeeba7a>`. This function uses the `Boost <https://www.boost.org/>`__ libraries.
+
+
+
+.. _doxid-namespacesph_1autotoc_md2_1s1:
+
+
+
+
+
+.. _doxid-namespacesph_1autotoc_md2_1s2:
+
+
+
+
+
+.. _doxid-namespacesph_1autotoc_md2:
+
+Changelog
++++++++++
+
+* Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Sept 19, 2019
+
+* Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+

@@ -1,0 +1,31 @@
+.. index:: pair: struct; chill::LinearClassifier
+.. _doxid-structchill_1_1_linear_classifier:
+
+struct chill::LinearClassifier
+==============================
+
+.. toctree::
+	:hidden:
+
+One-versus-rest ridge classifier on a dense feature matrix.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <structure_desc.hpp>
+	
+	struct LinearClassifier {
+		// fields
+	
+		int :target:`nClasses<doxid-structchill_1_1_linear_classifier_1adbc7eb691580d4c569d3ae8f3b46d675>` = 0;
+		int :target:`nFeat<doxid-structchill_1_1_linear_classifier_1a80420505e41f4d6462815d62e7b13671>` = 0;
+		double :target:`ridge<doxid-structchill_1_1_linear_classifier_1a5aabcb34def301a6c7146134c20f6483>` = 1e-6;
+		std::vector<double> :target:`weights<doxid-structchill_1_1_linear_classifier_1a4088b2d0b62d217535574e6e9ef2a2ae>`;
+		std::vector<std::string> :target:`labels<doxid-structchill_1_1_linear_classifier_1ac5d08fd477153fe168f77101330ac400>`;
+
+		// methods
+	
+		void :target:`fit<doxid-structchill_1_1_linear_classifier_1a71891e00818b87d370748614fc3e84ff>`(const std::vector<std::vector<double>>& X, const std::vector<int>& y);
+		int :target:`predict<doxid-structchill_1_1_linear_classifier_1aa2e6670a82d536991b8efb24874c4886>`(const std::vector<double>& x) const;
+	};

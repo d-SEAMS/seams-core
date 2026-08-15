@@ -1,0 +1,34 @@
+.. index:: pair: group; Primitive
+.. _doxid-group__primitive:
+
+Primitive
+=========
+
+.. toctree::
+	:hidden:
+
+	namespace_primitive.rst
+	struct_primitive_Graph.rst
+	struct_primitive_Vertex.rst
+	class_primitive_RingUpdater.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// namespaces
+
+	namespace :ref:`primitive<doxid-namespaceprimitive>`;
+
+	// structs
+
+	struct :ref:`primitive::Graph<doxid-structprimitive_1_1_graph>`;
+	struct :ref:`primitive::Vertex<doxid-structprimitive_1_1_vertex>`;
+
+	// classes
+
+	class :ref:`primitive::RingUpdater<doxid-classprimitive_1_1_ring_updater>`;
+

@@ -1,0 +1,27 @@
+.. index:: pair: struct; cage::Cage
+.. _doxid-structcage_1_1_cage:
+
+struct cage::Cage
+=================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+This contains a cage, with the constituent rings. :ref:`More...<details-structcage_1_1_cage>`
+
+.. _details-structcage_1_1_cage:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+This contains a cage, with the constituent rings.
+
+Contains specifically the members:
+
+* :ref:`Cage <doxid-structcage_1_1_cage>` classifier or qualifier, for each cage (can be a DDC or HC)
+
+* Vector of rings in the cage
+

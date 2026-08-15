@@ -1,0 +1,22 @@
+.. index:: pair: group; Bond
+.. _doxid-group__bond:
+
+Bond
+====
+
+.. toctree::
+	:hidden:
+
+	namespace_bond.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// namespaces
+
+	namespace :ref:`bond<doxid-namespacebond>`;
+

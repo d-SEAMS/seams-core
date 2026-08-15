@@ -1,0 +1,213 @@
+.. index:: pair: namespace; chill
+.. _doxid-namespacechill:
+
+namespace chill
+===============
+
+.. toctree::
+	:hidden:
+
+	enum_chill_CrystalKind.rst
+	struct_chill_LinearClassifier.rst
+	struct_chill_TemplateHit.rst
+	struct_chill_VoronoiWeights.rst
+
+Overview
+~~~~~~~~
+
+CHILL and CHILL+ structure classification. :ref:`More...<details-namespacechill>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace chill {
+
+	// enums
+
+	enum :ref:`CrystalKind<doxid-namespacechill_1ac13b1a10b6669044f75448ec1abe5122>`;
+
+	// structs
+
+	struct :ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>`;
+	struct :ref:`LinearClassifier<doxid-structchill_1_1_linear_classifier>`;
+	struct :ref:`QlmAtom<doxid-structchill_1_1_qlm_atom>`;
+	struct :ref:`SteinhardtQl<doxid-structchill_1_1_steinhardt_ql>`;
+	struct :ref:`TemplateHit<doxid-structchill_1_1_template_hit>`;
+	struct :ref:`VoronoiWeights<doxid-structchill_1_1_voronoi_weights>`;
+	struct :ref:`YlmAtom<doxid-structchill_1_1_ylm_atom>`;
+
+	// global functions
+
+	std::vector<:ref:`TemplateHit<doxid-structchill_1_1_template_hit>`> :ref:`classifyTemplates<doxid-namespacechill_1a6235256c303786bfee2a6143044b46a8>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int kNeigh = 12);
+	std::vector<double> :ref:`soapSpectrum<doxid-namespacechill_1a7ce20c1ee581242dfd8e0dc80ddc17bc>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, const std::vector<std::vector<int>>& nList, int nMax, int lMax, double rcut);
+	std::vector<std::vector<double>> :ref:`soapSpectrumAll<doxid-namespacechill_1a587a1bffcd6e21ecf2feb16a95fe01c1>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int nMax, int lMax, double rcut);
+	std::vector<double> :ref:`voronoiFeature<doxid-namespacechill_1af9780d7bcf4a3a4436a2d59cc26606bb>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, double candidateCutoff);
+	std::vector<std::vector<double>> :ref:`voronoiFeatures<doxid-namespacechill_1a0e8f53a909d946d418fb28cc3cb4b082>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double candidateCutoff);
+	std::vector<:ref:`VoronoiWeights<doxid-structchill_1_1_voronoi_weights>`> :ref:`voronoiFacetWeights<doxid-namespacechill_1a99f37a13584cd3861607a78d8a4e10eb>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double candidateCutoff);
+	:ref:`SteinhardtQl<doxid-structchill_1_1_steinhardt_ql>` :ref:`steinhardtQlVoronoi<doxid-namespacechill_1ac42b78e61e685301c32b8bc54d344ec1>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double candidateCutoff, int orderL);
+
+	} // namespace chill
+.. _details-namespacechill:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+CHILL and CHILL+ structure classification.
+
+This namespace contains functions that are used in the CHILL/CHILL+ classification scheme, as well as a yodaCloud struct to hold all the information.
+
+Both the `CHILL <https://pubs.rsc.org/en/content/articlehtml/2010/cp/b919724a>`__ and `CHILL+ <https://pubs.acs.org/doi/abs/10.1021/jp510289t>`__ methods are based on the `local bond order parameter method <https://aip.scitation.org/doi/10.1063/1.471721>`__, developed by ten Wolde et al. for the identification of crystal nuclei in Lennard-Jones systems. The local order parameter method is based on `order parameters <https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.47.1297>`__ introduced by Steinhardt et al.
+
+The local environment of the water molecules is classified using an algorithm based on spherical harmonics, which is independent of the specific crystal structure and does not require the definition of a reference frame. The local order around each water molecule :math:`i` is described by a local orientational bond order parameter :math:`q_{lm}(i)`, with :math:`2l+1` complex components:
+
+.. math::
+
+	q_{lm}(i) = @frac{1}{N_b(i)} \Sigma_{j=1}^{N_b(i)} Y_{lm}(r_{ij})
+
+Here, :math:`N_b(i)=4` is the number of nearest neighbours for water molecule :math:`i`, :math:`l` is a free integer parameter, :math:`m` is an integer such that :math:`m \in [-l,l]`. The functions :math:`Y_{lm}(r_{ij})` are the spherical harmonics and :math:`r_{ij}` is the distance vector between molecule :math:`i` and each one of its four nearest neighbours :math:`j`.
+
+The alignment of the orientation of the local structures is measured by the normalized dot product of the local orientational bond order parameter, :math:`q_l(i)`, between each pair of neighbor molecules :math:`i` and :math:`j`, given by:
+
+.. math::
+
+	a(i,j) = \frac{\sum_{m=-l}^{l} q_{lm}(i)\, q_{lm}^*(j)}
+	{|q_l(i)|\,|q_l(j)|}
+
+where, :math:`q_{lm}^*` is the complex conjugate of :math:`q_{lm}`.
+
+Depending on the values of :math:`a(i,j)`, the bond between each pair of molecules :math:`i` and :math:`j` is classified as being either staggered or eclipsed.
+
+=========  ==============  ===============  
+Algorithm  Eclipsed Bonds  Staggered Bonds  
+=========  ==============  ===============  
+CHILL                                       
+CHILL+                                      
+=========  ==============  ===============
+
+Since each molecule :math:`i` in deeply supercooled water has four nearest neighbours, the type of the resultant four bonds is used to identify phases according to the CHILL and CHILL+ algorithms.
+
+The CHILL algorithm can classify water molecules as belonging to the cubic, hexagonal, interfacial or liquid (amorphous) phase:
+
+| Phase | E | S | Neighbours | Description | |---------- |-- |-- |--------- |------------------------------------------------------ | | Cubic | 0 | 4 | 4 | All 4 neighbours are staggered. | | Hexagonal | 1 | 3 | 4 | 3 staggered and 1 eclipsed bond. | | Interfacial | any | 2 | 4 | Belongs to the ice phase, but does not satisfy strict criteria of cubic and hexagonal | | | 0 | 3 | 4 | | | Liquid | N/A | N/A | any | Classification by exclusion. |
+
+Here, E and S refer to eclipsed and staggered bonds. The neighbours column contains the number of nearest neighbours.
+
+The CHILL+ algorithm, which is a modified version of CHILL, additionally identifies clathrate and interfacial clathrate phases. The criteria are enumerated in the table below:
+
+=====  =  =  ==========  =====================  
+Phase  E  S  Neighbours  Description            
+=====  =  =  ==========  =====================  
+Cubic  0  4  4           no change was made to  
+=====  =  =  ==========  =====================  
+staggered bond criterion from CHILL | | Hexagonal | 1 | 3 | 4 | wider eclipsed range compared to CHILL; identifies 99% hexagonal ice up to 270 K | | Interfacial | any | 2 | 4 | must have at least one first neighbor water with more than two staggered bonds | | | 0 | 3 | 4 | must have at least one first neighbor water with more than one staggered bond | | Clathrate | 4 | 0 | 4 | bulk clathrate and part of the interface of clathrates can be identified with four eclipsed bonds | | Interfacial clathrate | 3 | any | 4 | partial clathrate cages and threads of clathrate-like order | | Liquid | N/A | N/A | any | classifies as liquid if none of the above criteria are fulfilled |
+
+Although both the CHILL and CHILL+ classification schemes take into account the local order of the environment of each particle, both schemes output a per-particle classification.
+
+
+
+.. _doxid-namespacechill_1autotoc_md1_1s1:
+
+
+
+
+
+.. _doxid-namespacechill_1autotoc_md1_1s2:
+
+
+
+
+
+.. _doxid-namespacechill_1autotoc_md1:
+
+Changelog
++++++++++
+
+* Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Sept 19, 2019
+
+Global Functions
+----------------
+
+.. index:: pair: function; classifyTemplates
+.. _doxid-namespacechill_1a6235256c303786bfee2a6143044b46a8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<:ref:`TemplateHit<doxid-structchill_1_1_template_hit>`> classifyTemplates(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int kNeigh = 12)
+
+Overlay the k nearest neighbours of each particle onto FCC, HCP, BCC and SC shells.
+
+Uses IRA when linked; otherwise Horn on a distance-sorted correspondence (high-symmetry shells only).
+
+.. index:: pair: function; soapSpectrum
+.. _doxid-namespacechill_1a7ce20c1ee581242dfd8e0dc80ddc17bc:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> soapSpectrum(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, const std::vector<std::vector<int>>& nList, int nMax, int lMax, double rcut)
+
+Bartok SOAP power spectrum for one particle (nMax radial Gaussians, spherical harmonics through lMax).
+
+Length is nMax\*nMax\*(lMax+1).
+
+.. index:: pair: function; soapSpectrumAll
+.. _doxid-namespacechill_1a587a1bffcd6e21ecf2feb16a95fe01c1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<double>> soapSpectrumAll(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int nMax, int lMax, double rcut)
+
+Bartok SOAP power spectrum for every particle.
+
+Length is nop; each row is nMax\*nMax\*(lMax+1).
+
+.. index:: pair: function; voronoiFeature
+.. _doxid-namespacechill_1af9780d7bcf4a3a4436a2d59cc26606bb:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> voronoiFeature(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, double candidateCutoff)
+
+[q4, q6, q8] from the Voronoi-weighted Steinhardt path (Mickel).
+
+.. index:: pair: function; voronoiFeatures
+.. _doxid-namespacechill_1a0e8f53a909d946d418fb28cc3cb4b082:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<double>> voronoiFeatures(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double candidateCutoff)
+
+[q4, q6, q8] for every particle. One tessellation per order (l = 4, 6, 8).
+
+.. index:: pair: function; voronoiFacetWeights
+.. _doxid-namespacechill_1a99f37a13584cd3861607a78d8a4e10eb:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<:ref:`VoronoiWeights<doxid-structchill_1_1_voronoi_weights>`> voronoiFacetWeights(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double candidateCutoff)
+
+Facet neighbours and area weights for every particle, with an a posteriori exactness certificate.
+
+candidateCutoff seeds the bisector search; the cutoff is enlarged automatically until the certificate holds or the growth cap is reached.
+
+Certificate. The cell of particle i clipped against every candidate within cutoff c is the true Voronoi cell whenever every vertex of the clipped cell lies within c/2 of i: a particle k beyond the cutoff has |d_k| > c, its bisector plane sits at distance |d_k|/2 > c/2 from i, and a half-space whose boundary is farther than c/2 cannot cut a region contained in the ball of radius c/2. An open or under-clipped cell keeps vertices on the seeding square at distance ~c and fails the certificate, which is exactly the failure the enlargement retries.
+
+.. index:: pair: function; steinhardtQlVoronoi
+.. _doxid-namespacechill_1ac42b78e61e685301c32b8bc54d344ec1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`SteinhardtQl<doxid-structchill_1_1_steinhardt_ql>` steinhardtQlVoronoi(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double candidateCutoff, int orderL)
+
+Steinhardt parameters of degree orderL (3, 4, 6 or 8) with the bond sum weighted by Voronoi facet areas.
+
+qlBar averages the weighted q_lm over the particle and its facet neighbours, after Lechner and Dellago.
+

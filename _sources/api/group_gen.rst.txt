@@ -1,0 +1,27 @@
+.. index:: pair: group; Gen
+.. _doxid-group__gen:
+
+Gen
+===
+
+.. toctree::
+	:hidden:
+
+	group_ring.rst
+	namespace_gen.rst
+
+
+
+|	:ref:`Ring<doxid-group__ring>`
+|		:ref:`Prism3<doxid-group__prism3>`
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// namespaces
+
+	namespace :ref:`gen<doxid-namespacegen>`;
+

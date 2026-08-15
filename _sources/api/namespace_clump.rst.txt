@@ -1,0 +1,50 @@
+.. index:: pair: namespace; clump
+.. _doxid-namespaceclump:
+
+namespace clump
+===============
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Clustering functions. This namespace contains functions that are used in the for clustering ice-like particles. :ref:`More...<details-namespaceclump>`
+
+.. _details-namespaceclump:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Clustering functions. This namespace contains functions that are used in the for clustering ice-like particles.
+
+Particles are clustered according to Stoddard's algorithm `(Stoddard J. Comp. Phys., 27, 291, 1977) <https://www.sciencedirect.com/science/article/pii/0021999178900116>`__.
+
+The largest ice cluster determines the largest cluster of ice-like particles, using a "linked list" created by the clustering algorithm. The determination of ice-like molecules can be done using the :math:`q_6` parameter, CHILL or CHILL+ parameters.
+
+The largest ice cluster thus determined can be re-centered for ease of visualization.
+
+
+
+.. _doxid-namespaceclump_1autotoc_md4_1s1:
+
+
+
+
+
+.. _doxid-namespaceclump_1autotoc_md4_1s2:
+
+
+
+
+
+.. _doxid-namespaceclump_1autotoc_md4:
+
+Changelog
++++++++++
+
+* Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Nov 13, 2019
+
+* Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+

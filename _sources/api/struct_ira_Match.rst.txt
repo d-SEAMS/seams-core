@@ -1,0 +1,27 @@
+.. index:: pair: struct; ira::Match
+.. _doxid-structira_1_1_match:
+
+struct ira::Match
+=================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <ira_sofi.hpp>
+	
+	struct Match {
+		// fields
+	
+		Eigen::Matrix3d :target:`rotation<doxid-structira_1_1_match_1a4a98f0d5bfd17ab0b1aa668dbf72c415>` = Eigen::Matrix3d::Identity();
+		Eigen::Vector3d :target:`translation<doxid-structira_1_1_match_1aa87a041a36fe2ccc088034f85d01f074>` = Eigen::Vector3d::Zero();
+		std::vector<int> :target:`assignment<doxid-structira_1_1_match_1a8edc4272c13e68aa6b723015410efb6c>`;
+		std::vector<double> :target:`quat<doxid-structira_1_1_match_1a485640ca625cb1553db753a1491cf8e4>`;
+		double :target:`hausdorff<doxid-structira_1_1_match_1ace1f42824c354ae15ac5f7abf006931c>` = 0.0;
+		double :target:`rmsd<doxid-structira_1_1_match_1ab14b20ac985fe3c9fb6359973da2b5c9>` = 0.0;
+	};

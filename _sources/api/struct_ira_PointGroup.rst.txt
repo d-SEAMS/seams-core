@@ -1,0 +1,24 @@
+.. index:: pair: struct; ira::PointGroup
+.. _doxid-structira_1_1_point_group:
+
+struct ira::PointGroup
+======================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <ira_sofi.hpp>
+	
+	struct PointGroup {
+		// fields
+	
+		std::string :target:`symbol<doxid-structira_1_1_point_group_1adae4a9fa2ea71c4b628ac94bfe79a4f7>`;
+		int :target:`nOperations<doxid-structira_1_1_point_group_1a1e65b4956b4fa7c746d8153cae52cda9>` = 0;
+		std::vector<Eigen::Matrix3d> :target:`operations<doxid-structira_1_1_point_group_1a61c9804e0f5ea9c584b4b1e5885cc93f>`;
+	};

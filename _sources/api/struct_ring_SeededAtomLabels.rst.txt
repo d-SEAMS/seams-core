@@ -1,0 +1,46 @@
+.. index:: pair: struct; ring::SeededAtomLabels
+.. _doxid-structring_1_1_seeded_atom_labels:
+
+struct ring::SeededAtomLabels
+=============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Per-atom cage flags from seeded (hysteresis) affiliation. :ref:`More...<details-structring_1_1_seeded_atom_labels>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <cage_affiliation.hpp>
+	
+	struct SeededAtomLabels {
+		// fields
+	
+		std::vector<bool> :target:`hc<doxid-structring_1_1_seeded_atom_labels_1a86b70944057c6a0478cc33617e95d819>`;
+		std::vector<bool> :ref:`ddc<doxid-structring_1_1_seeded_atom_labels_1a850d14e4cf97556a4d09c6260a626b40>`;
+	};
+.. _details-structring_1_1_seeded_atom_labels:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Per-atom cage flags from seeded (hysteresis) affiliation.
+
+Fields
+------
+
+.. index:: pair: variable; ddc
+.. _doxid-structring_1_1_seeded_atom_labels_1a850d14e4cf97556a4d09c6260a626b40:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<bool> ddc
+
+Atom belongs to an accepted HC-affiliated ring.
+

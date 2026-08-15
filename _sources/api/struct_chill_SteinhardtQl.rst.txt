@@ -1,0 +1,23 @@
+.. index:: pair: struct; chill::SteinhardtQl
+.. _doxid-structchill_1_1_steinhardt_ql:
+
+struct chill::SteinhardtQl
+==========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Per-particle Steinhardt order parameters of a single degree :math:`l`. :ref:`More...<details-structchill_1_1_steinhardt_ql>`
+
+.. _details-structchill_1_1_steinhardt_ql:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Per-particle Steinhardt order parameters of a single degree :math:`l`.
+
+Holds both the local parameter and its neighbour-averaged counterpart. The averaged form of Lechner and Dellago folds in the second coordination shell, which separates the distributions of competing structures far more cleanly than the local form alone.
+

@@ -1,0 +1,46 @@
+.. index:: pair: namespace; gen
+.. _doxid-namespacegen:
+
+namespace gen
+=============
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Small generic functions that are shared by all namespaces. :ref:`More...<details-namespacegen>`
+
+.. _details-namespacegen:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Small generic functions that are shared by all namespaces.
+
+These are general functions (eg. for finding the periodic distance) which are required by several namespaces.
+
+
+
+.. _doxid-namespacegen_1autotoc_md6_1s1:
+
+
+
+
+
+.. _doxid-namespacegen_1autotoc_md6_1s2:
+
+
+
+
+
+.. _doxid-namespacegen_1autotoc_md6:
+
+Changelog
++++++++++
+
+* Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Nov 14, 2019
+
+* Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+

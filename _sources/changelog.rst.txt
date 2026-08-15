@@ -1,0 +1,31 @@
+=========
+Changelog
+=========
+
+
+
+2.0.0
+-----
+
+- Modernized build system: Meson replaces CMake
+
+- Python bindings via nanobind (replacing pybind11)
+
+- New pixi-based development environment
+
+- ASE adapter for converting ASE Atoms to d-SEAMS point clouds
+
+- Comprehensive Python test suite (pytest)
+
+1.0.0
+-----
+
+- Initial release with Lua scripting interface
+
+- CHILL and CHILL+ ice classification
+
+- Franzblau ring analysis
+
+- Topological unit matching (TUM) for bulk ice
+
+- LAMMPS trajectory reader

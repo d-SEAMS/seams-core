@@ -1,0 +1,131 @@
+.. index:: pair: namespace; ring
+.. _doxid-namespacering:
+
+namespace ring
+==============
+
+.. toctree::
+	:hidden:
+
+	struct_ring_CageAffiliation.rst
+	struct_ring_SeededAtomLabels.rst
+	class_ring_AffiliationUpdater.rst
+
+Overview
+~~~~~~~~
+
+Topological network criteria functions. :ref:`More...<details-namespacering>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace ring {
+
+	// structs
+
+	struct :ref:`CageAffiliation<doxid-structring_1_1_cage_affiliation>`;
+	struct :ref:`RingSearchIndex<doxid-structring_1_1_ring_search_index>`;
+	struct :ref:`SeededAtomLabels<doxid-structring_1_1_seeded_atom_labels>`;
+
+	// classes
+
+	class :ref:`AffiliationUpdater<doxid-classring_1_1_affiliation_updater>`;
+
+	// global functions
+
+	:ref:`CageAffiliation<doxid-structring_1_1_cage_affiliation>` :ref:`cageAffiliation<doxid-namespacering_1a6a455f7a0da97df613534671c9377a45>`(const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList);
+	:ref:`SeededAtomLabels<doxid-structring_1_1_seeded_atom_labels>` :ref:`seededCageAffiliation<doxid-namespacering_1a995edc47f2d855d9b3d19b6aedfa640c>`(const std::vector<std::vector<int>>& strictRings, const std::vector<std::vector<int>>& strictNList, const std::vector<std::vector<int>>& permissiveRings, const std::vector<std::vector<int>>& permissiveNList);
+
+	} // namespace ring
+.. _details-namespacering:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Topological network criteria functions.
+
+This namespace contains functions for the topological network criteria for bulk and confined systems both.
+
+Although the namespace is shared by bulk and confined topological network criteria, the functions are split into files specific to each set of criteria.
+
+All the topological network criteria are based on the identification of primitive rings (using the Franzblau algorithm for primitive rings), following which specific rules for combinations of primitive rings are used to identify quasi-one-dimensional, quasi-two-dimensional and bulk ices.
+
+
+
+.. _doxid-namespacering_1autotoc_md10_1s1:
+
+
+
+
+
+.. _doxid-namespacering_1autotoc_md10_1s2:
+
+
+
+
+
+.. _doxid-namespacering_1autotoc_md10:
+
+Changelog
++++++++++
+
+* Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Nov 13, 2019
+
+* Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+
+Global Functions
+----------------
+
+.. index:: pair: function; cageAffiliation
+.. _doxid-namespacering_1a6a455f7a0da97df613534671c9377a45:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`CageAffiliation<doxid-structring_1_1_cage_affiliation>` cageAffiliation(const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList)
+
+Batch computation of the affiliation predicates for six-membered rings.
+
+nList is by index with the leading self entry, as neighbourListByIndex produces.
+
+.. index:: pair: function; seededCageAffiliation
+.. _doxid-namespacering_1a995edc47f2d855d9b3d19b6aedfa640c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`SeededAtomLabels<doxid-structring_1_1_seeded_atom_labels>` seededCageAffiliation(const std::vector<std::vector<int>>& strictRings, const std::vector<std::vector<int>>& strictNList, const std::vector<std::vector<int>>& permissiveRings, const std::vector<std::vector<int>>& permissiveNList)
+
+Seeded affiliation over two graphs on the same atoms: the strict graph (typically the mutual k-nearest bonds) supplies seeds, the permissive supergraph (typically the union bonds) supplies completions, and a permissively affiliated atom is accepted only when its bonded component of affiliated atoms contains a seed.
+
+Specificity on structureless input is structural rather than statistical: when the strict pass affiliates nothing, nothing is accepted regardless of what the permissive graph builds. Where both graphs label an atom, the strict labels win.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- strictRings
+
+		- Six-membered rings of the strict graph.
+
+	*
+		- strictNList
+
+		- Strict graph, by index with leading self entries.
+
+	*
+		- permissiveRings
+
+		- Six-membered rings of the permissive graph.
+
+	*
+		- permissiveNList
+
+		- Permissive graph, same conventions.
+

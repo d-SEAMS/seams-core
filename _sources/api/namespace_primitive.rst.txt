@@ -1,0 +1,73 @@
+.. index:: pair: namespace; primitive
+.. _doxid-namespaceprimitive:
+
+namespace primitive
+===================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Functions for generating primitive rings. :ref:`More...<details-namespaceprimitive>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace primitive {
+
+	// structs
+
+	struct :ref:`Graph<doxid-structprimitive_1_1_graph>`;
+	struct :ref:`Vertex<doxid-structprimitive_1_1_vertex>`;
+
+	// classes
+
+	class :ref:`RingUpdater<doxid-classprimitive_1_1_ring_updater>`;
+
+	} // namespace primitive
+.. _details-namespaceprimitive:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Functions for generating primitive rings.
+
+This namespace contains struct definitions and functions that are used for generating primitive (shortest-path) rings (directed cyclic graphs).
+
+The :ref:`Vertex <doxid-structprimitive_1_1_vertex>` object is a collection of elements for each point, required for graph traversal. The :ref:`Graph <doxid-structprimitive_1_1_graph>` object is an object for the whole frame, containing the information of all vertices, and a row-ordered vector of vector of the rings generated.
+
+The `Franzblau shortest-path criterion <https://journals.aps.org/prb/pdf/10.1103/PhysRevB.44.4925>`__ has been used. The SP (shortest-path) criterion is midway between the least restrictive and most restrictive criteria in the hierarchy.
+
+The following is the procedure for finding primitive rings:
+
+#. All possible rings (including non-SP) rings are found, in the :ref:`primitive::countAllRingsFromIndex <doxid-group__primitive_1gac81b1dd4b67e8200de61e52c498c1b2f>` function, using the `backtracking algorithm <https://www.math.upenn.edu/~wilf/website/CombinatorialAlgorithms.pdf>`__. This is a recursive algorithm.
+
+#. The non-SP rings are then removed from the list of all rings, using the Franzblau shortest path criterion (:ref:`primitive::removeNonSPrings <doxid-group__primitive_1ga592086d3afae4fab5aa5ff6aa5c1d215>`), answered by a hop-bounded breadth-first sweep per vertex.
+
+
+
+.. _doxid-namespaceprimitive_1autotoc_md5_1s1:
+
+
+
+
+
+.. _doxid-namespaceprimitive_1autotoc_md5_1s2:
+
+
+
+
+
+.. _doxid-namespaceprimitive_1autotoc_md5:
+
+Changelog
++++++++++
+
+* Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Nov 14, 2019
+
+* Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+

@@ -1,0 +1,23 @@
+.. index:: pair: struct; chill::BondClassifier
+.. _doxid-structchill_1_1_bond_classifier:
+
+struct chill::BondClassifier
+============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+One rule set for classifying bond correlations :math:`c_{ij}`. :ref:`More...<details-structchill_1_1_bond_classifier>`
+
+.. _details-structchill_1_1_bond_classifier:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+One rule set for classifying bond correlations :math:`c_{ij}`.
+
+A bond is staggered when :math:`c_{ij} \le` staggeredMax, eclipsed when it falls in [eclipsedMin, eclipsedMax], and out of range otherwise. The CHILL and CHILL+ water rules are two instances; other hydrogen-bonded or tetrahedral materials register their own thresholds and coordination.
+

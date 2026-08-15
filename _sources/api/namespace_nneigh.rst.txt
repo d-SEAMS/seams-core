@@ -1,0 +1,50 @@
+.. index:: pair: namespace; nneigh
+.. _doxid-namespacenneigh:
+
+namespace nneigh
+================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Functions for building neighbour lists. :ref:`More...<details-namespacenneigh>`
+
+.. _details-namespacenneigh:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Functions for building neighbour lists.
+
+This namespace contains functions that build neighbour lists (using brute-force), saving either the atom IDs or atom indices (according to a PointCloud) in a row-ordered vector of vectors. Whether the atom IDs or atom indices (i.e. the indices of the elements in the vector pts inside the PointCloud) are saved, the neighbour lists are constructed such that the first element is the 'central atom', whose neighbours are being saved on that particular line. The central atom is followed by the atom IDs or indices of the nearest neighbours.
+
+In a 'full' neighbour list, if 1 is a neighbour of 2 then 1 is saved in the neighbour list of 2 AND 2 is also saved in the neighbour list of 1.
+
+In a 'half' neighbour list, if 1 is a neighbour of 2, then 2 is saved in the neighbour list of 1 but not vice versa.
+
+
+
+.. _doxid-namespacenneigh_1autotoc_md8_1s1:
+
+
+
+
+
+.. _doxid-namespacenneigh_1autotoc_md8_1s2:
+
+
+
+
+
+.. _doxid-namespacenneigh_1autotoc_md8:
+
+Changelog
++++++++++
+
+* Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Nov 14, 2019
+
+* Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+

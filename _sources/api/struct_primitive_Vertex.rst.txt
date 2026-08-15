@@ -1,0 +1,29 @@
+.. index:: pair: struct; primitive::Vertex
+.. _doxid-structprimitive_1_1_vertex:
+
+struct primitive::Vertex
+========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+This is a collection of elements, for each point, required for graph traversal. :ref:`More...<details-structprimitive_1_1_vertex>`
+
+.. _details-structprimitive_1_1_vertex:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+This is a collection of elements, for each point, required for graph traversal.
+
+Contains specifically the members:
+
+* **atomIndex** : This is the index according to the PointCloud.
+
+* **neighListIndex** : A vector of indices (not IDs) of the neighboring vertices.
+
+* **inGraph** : Bool qualifier, which is true by default. Setting it to false removes the vertex from the graph.
+

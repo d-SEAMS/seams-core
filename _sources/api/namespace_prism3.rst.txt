@@ -1,0 +1,11 @@
+.. index:: pair: namespace; prism3
+.. _doxid-namespaceprism3:
+
+namespace prism3
+================
+
+.. toctree::
+	:hidden:
+
+
+

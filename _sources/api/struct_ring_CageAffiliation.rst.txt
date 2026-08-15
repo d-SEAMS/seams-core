@@ -1,0 +1,46 @@
+.. index:: pair: struct; ring::CageAffiliation
+.. _doxid-structring_1_1_cage_affiliation:
+
+struct ring::CageAffiliation
+============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Per-ring affiliation flags, indexed like the input ring vector. :ref:`More...<details-structring_1_1_cage_affiliation>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <cage_affiliation.hpp>
+	
+	struct CageAffiliation {
+		// fields
+	
+		std::vector<bool> :target:`hc<doxid-structring_1_1_cage_affiliation_1ad64ca4fb8e7b4b56bec72ac899e5b084>`;
+		std::vector<bool> :ref:`ddc<doxid-structring_1_1_cage_affiliation_1a62e4f552cead2f3be6c2de3cc23e4952>`;
+	};
+.. _details-structring_1_1_cage_affiliation:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Per-ring affiliation flags, indexed like the input ring vector.
+
+Fields
+------
+
+.. index:: pair: variable; ddc
+.. _doxid-structring_1_1_cage_affiliation_1a62e4f552cead2f3be6c2de3cc23e4952:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<bool> ddc
+
+Basal or prismatic of a passing basal pair.
+

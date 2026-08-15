@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="teal" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>namespace chill - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" />
+      <link rel="canonical" href="dseams.info/api/namespace_chill.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-pygments.css?v=ff3f4257" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/>
+  <meta property="og:url" content="dseams.info/api/namespace_chill.html"/>
+  <meta property="og:title" content="namespace chill"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>d-SEAMS</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link">
+          <a href="https://pypi.org/project/pydseamslib">
+            <span>PyPI</span><i class="i-lucide external-link"></i></a>
+        </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+  <a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../quickstart.html">Tutorial</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Bulk Ice Analysis</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/nanotube.html">Nanotube Ring Analysis</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-To Guides</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ase-integration.html">ASE Integration</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API Reference</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#detailed-documentation">Detailed Documentation</a><ul>
+<li><a class="reference internal" href="#changelog">Changelog</a><ul>
+<li><a class="reference internal" href="#global-functions">Global Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
+  data-type="github" data-user="d-SEAMS" data-repo="seams-core">
+  <span class="w-8 flex items-center justify-around shrink-0 text-3xl">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </span>
+  <span class="flex-grow px-2 break-all">
+    
+    
+      <span>seams-core</span>
+    
+    <span class="flex text-sm repo-stats-count">
+      <span class="flex items-center pr-3">
+        <iconify-icon icon="lucide:star"></iconify-icon>
+        <strong class="js-repo-stars ml-1">0</strong>
+      </span>
+      <span class="flex items-center">
+        <iconify-icon icon="lucide:git-fork"></iconify-icon>
+        <strong class="js-repo-forks ml-1">0</strong>
+      </span>
+    </span>
+  </span>
+</a><div class="edit-this-page">
+  <a href="https://github.com/d-SEAMS/seams-core/blob/main/docs/source/api/namespace_chill.rst">Edit this page</a>
+</div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">d-SEAMS</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">namespace chill</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <div class="copy-page-wrapper relative pb-4 lg:absolute lg:top-8 lg:right-6 xl:right-12">
+  <div id="copy-page-trigger">
+    <button
+      type="button"
+      class="js-copy px-3 py-1 inline-flex items-center gap-1"
+      data-url="dseams.info/_sources/api/namespace_chill.rst.txt"
+    >
+      <i class="i-lucide" data-icon="copy"></i>
+      <span>Copy page</span>
+    </button>
+    <button class="js-menu px-2 py-1" type="button" aria-label="More actions"
+      aria-haspopup="menu" aria-expanded="false" aria-controls="copy-page-content">
+      <i class="i-lucide chevron-down"></i>
+    </button>
+  </div>
+  <div id="copy-page-content" role="menu" aria-orientation="vertical" aria-hidden="true">
+    <div role="presentation">
+      <div class="flex flex-col" role="group">
+        <button class="js-copy" type="button" role="menuitem"
+          data-url="dseams.info/_sources/api/namespace_chill.rst.txt">
+          <span class="iconify-icon">
+            <i class="i-lucide" data-icon="copy"></i>
+          </span>
+          <span>Copy page</span>
+        </button>
+        <a role="menuitem" href="dseams.info/_sources/api/namespace_chill.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
+            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20dseams.info/_sources/api/namespace_chill.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+          <iconify-icon icon="bi:openai"></iconify-icon>
+          <span>Open in ChatGPT</span>
+        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20dseams.info/_sources/api/namespace_chill.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+          <iconify-icon icon="bi:claude"></iconify-icon>
+          <span>Open in Claude</span>
+        </a></div>
+    </div>
+  </div>
+</div><article class="yue dark-code" role="main">
+          <section id="namespace-chill">
+<span id="doxid-namespacechill"></span><span id="index-0"></span><h1>namespace chill<a class="headerlink" href="#namespace-chill" title="Link to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>CHILL and CHILL+ structure classification. <a class="reference internal" href="#details-namespacechill"><span class="std std-ref">More…</span></a></p>
+<div class="doxyrest-overview-code-block highlight">
+<pre><span data-line="1"><span class="k">namespace</span> <span class="n">chill</span> <span class="p">{</span></span>
+<span data-line="2"> </span>
+<span data-line="3"><span class="c1">// enums</span></span>
+<span data-line="4"> </span>
+<span data-line="5"><span class="k">enum</span> <a class="doxyrest-code-link reference internal" href="enum_chill_CrystalKind.html#doxid-namespacechill-1ac13b1a10b6669044f75448ec1abe5122"><span class="std std-ref">CrystalKind</span></a><span class="p">;</span></span>
+<span data-line="6"> </span>
+<span data-line="7"><span class="c1">// structs</span></span>
+<span data-line="8"> </span>
+<span data-line="9"><span class="k">struct</span> <a class="doxyrest-code-link reference internal" href="struct_chill_BondClassifier.html#doxid-structchill-1-1-bond-classifier"><span class="std std-ref">BondClassifier</span></a><span class="p">;</span></span>
+<span data-line="10"><span class="k">struct</span> <a class="doxyrest-code-link reference internal" href="struct_chill_LinearClassifier.html#doxid-structchill-1-1-linear-classifier"><span class="std std-ref">LinearClassifier</span></a><span class="p">;</span></span>
+<span data-line="11"><span class="k">struct</span> <a class="doxyrest-code-link reference internal" href="struct_chill_QlmAtom.html#doxid-structchill-1-1-qlm-atom"><span class="std std-ref">QlmAtom</span></a><span class="p">;</span></span>
+<span data-line="12"><span class="k">struct</span> <a class="doxyrest-code-link reference internal" href="struct_chill_SteinhardtQl.html#doxid-structchill-1-1-steinhardt-ql"><span class="std std-ref">SteinhardtQl</span></a><span class="p">;</span></span>
+<span data-line="13"><span class="k">struct</span> <a class="doxyrest-code-link reference internal" href="struct_chill_TemplateHit.html#doxid-structchill-1-1-template-hit"><span class="std std-ref">TemplateHit</span></a><span class="p">;</span></span>
+<span data-line="14"><span class="k">struct</span> <a class="doxyrest-code-link reference internal" href="struct_chill_VoronoiWeights.html#doxid-structchill-1-1-voronoi-weights"><span class="std std-ref">VoronoiWeights</span></a><span class="p">;</span></span>
+<span data-line="15"><span class="k">struct</span> <a class="doxyrest-code-link reference internal" href="struct_chill_YlmAtom.html#doxid-structchill-1-1-ylm-atom"><span class="std std-ref">YlmAtom</span></a><span class="p">;</span></span>
+<span data-line="16"> </span>
+<span data-line="17"><span class="c1">// global functions</span></span>
+<span data-line="18"> </span>
+<span data-line="19"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_chill_TemplateHit.html#doxid-structchill-1-1-template-hit"><span class="std std-ref">TemplateHit</span></a><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-namespacechill-1a6235256c303786bfee2a6143044b46a8"><span class="std std-ref">classifyTemplates</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span> <span class="n">nList</span><span class="p">,</span> <span class="kt">int</span> <span class="n">kNeigh</span> <span class="o">=</span> <span class="mi">12</span><span class="p">);</span></span>
+<span data-line="20"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-namespacechill-1a7ce20c1ee581242dfd8e0dc80ddc17bc"><span class="std std-ref">soapSpectrum</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="kt">int</span> <span class="n">iatom</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span> <span class="n">nList</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nMax</span><span class="p">,</span> <span class="kt">int</span> <span class="n">lMax</span><span class="p">,</span> <span class="kt">double</span> <span class="n">rcut</span><span class="p">);</span></span>
+<span data-line="21"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-namespacechill-1a587a1bffcd6e21ecf2feb16a95fe01c1"><span class="std std-ref">soapSpectrumAll</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span> <span class="n">nList</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nMax</span><span class="p">,</span> <span class="kt">int</span> <span class="n">lMax</span><span class="p">,</span> <span class="kt">double</span> <span class="n">rcut</span><span class="p">);</span></span>
+<span data-line="22"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-namespacechill-1af9780d7bcf4a3a4436a2d59cc26606bb"><span class="std std-ref">voronoiFeature</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="kt">int</span> <span class="n">iatom</span><span class="p">,</span> <span class="kt">double</span> <span class="n">candidateCutoff</span><span class="p">);</span></span>
+<span data-line="23"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-namespacechill-1a0e8f53a909d946d418fb28cc3cb4b082"><span class="std std-ref">voronoiFeatures</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="kt">double</span> <span class="n">candidateCutoff</span><span class="p">);</span></span>
+<span data-line="24"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_chill_VoronoiWeights.html#doxid-structchill-1-1-voronoi-weights"><span class="std std-ref">VoronoiWeights</span></a><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-namespacechill-1a99f37a13584cd3861607a78d8a4e10eb"><span class="std std-ref">voronoiFacetWeights</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="kt">double</span> <span class="n">candidateCutoff</span><span class="p">);</span></span>
+<span data-line="25"><a class="doxyrest-code-link reference internal" href="struct_chill_SteinhardtQl.html#doxid-structchill-1-1-steinhardt-ql"><span class="std std-ref">SteinhardtQl</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-namespacechill-1ac42b78e61e685301c32b8bc54d344ec1"><span class="std std-ref">steinhardtQlVoronoi</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="kt">double</span> <span class="n">candidateCutoff</span><span class="p">,</span> <span class="kt">int</span> <span class="n">orderL</span><span class="p">);</span></span>
+<span data-line="26"> </span>
+<span data-line="27"><span class="p">}</span> <span class="c1">// namespace chill</span></span>
+</pre></div>
+</section>
+<section id="detailed-documentation">
+<span id="details-namespacechill"></span><h2>Detailed Documentation<a class="headerlink" href="#detailed-documentation" title="Link to this heading">¶</a></h2>
+<p>CHILL and CHILL+ structure classification.</p>
+<p>This namespace contains functions that are used in the CHILL/CHILL+ classification scheme, as well as a yodaCloud struct to hold all the information.</p>
+<p>Both the <a class="reference external" href="https://pubs.rsc.org/en/content/articlehtml/2010/cp/b919724a">CHILL</a> and <a class="reference external" href="https://pubs.acs.org/doi/abs/10.1021/jp510289t">CHILL+</a> methods are based on the <a class="reference external" href="https://aip.scitation.org/doi/10.1063/1.471721">local bond order parameter method</a>, developed by ten Wolde et al. for the identification of crystal nuclei in Lennard-Jones systems. The local order parameter method is based on <a class="reference external" href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.47.1297">order parameters</a> introduced by Steinhardt et al.</p>
+<p>The local environment of the water molecules is classified using an algorithm based on spherical harmonics, which is independent of the specific crystal structure and does not require the definition of a reference frame. The local order around each water molecule <span class="math notranslate nohighlight">\(i\)</span> is described by a local orientational bond order parameter <span class="math notranslate nohighlight">\(q_{lm}(i)\)</span>, with <span class="math notranslate nohighlight">\(2l+1\)</span> complex components:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[q_{lm}(i) = &#64;frac{1}{N_b(i)} \Sigma_{j=1}^{N_b(i)} Y_{lm}(r_{ij})\]</div>
+</div>
+<p>Here, <span class="math notranslate nohighlight">\(N_b(i)=4\)</span> is the number of nearest neighbours for water molecule <span class="math notranslate nohighlight">\(i\)</span>, <span class="math notranslate nohighlight">\(l\)</span> is a free integer parameter, <span class="math notranslate nohighlight">\(m\)</span> is an integer such that <span class="math notranslate nohighlight">\(m \in [-l,l]\)</span>. The functions <span class="math notranslate nohighlight">\(Y_{lm}(r_{ij})\)</span> are the spherical harmonics and <span class="math notranslate nohighlight">\(r_{ij}\)</span> is the distance vector between molecule <span class="math notranslate nohighlight">\(i\)</span> and each one of its four nearest neighbours <span class="math notranslate nohighlight">\(j\)</span>.</p>
+<p>The alignment of the orientation of the local structures is measured by the normalized dot product of the local orientational bond order parameter, <span class="math notranslate nohighlight">\(q_l(i)\)</span>, between each pair of neighbor molecules <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span>, given by:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[a(i,j) = \frac{\sum_{m=-l}^{l} q_{lm}(i)\, q_{lm}^*(j)}
+{|q_l(i)|\,|q_l(j)|}\]</div>
+</div>
+<p>where, <span class="math notranslate nohighlight">\(q_{lm}^*\)</span> is the complex conjugate of <span class="math notranslate nohighlight">\(q_{lm}\)</span>.</p>
+<p>Depending on the values of <span class="math notranslate nohighlight">\(a(i,j)\)</span>, the bond between each pair of molecules <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span> is classified as being either staggered or eclipsed.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Algorithm</p></th>
+<th class="head"><p>Eclipsed Bonds</p></th>
+<th class="head"><p>Staggered Bonds</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CHILL</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>CHILL+</p></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Since each molecule <span class="math notranslate nohighlight">\(i\)</span> in deeply supercooled water has four nearest neighbours, the type of the resultant four bonds is used to identify phases according to the CHILL and CHILL+ algorithms.</p>
+<p>The CHILL algorithm can classify water molecules as belonging to the cubic, hexagonal, interfacial or liquid (amorphous) phase:</p>
+<div class="line-block">
+<div class="line">Phase | E | S | Neighbours | Description | <a href="#id1"><span class="problematic" id="id2">|</span></a>———- <a href="#id3"><span class="problematic" id="id4">|</span></a>– <a href="#id5"><span class="problematic" id="id6">|</span></a>– <a href="#id7"><span class="problematic" id="id8">|</span></a>——— <a href="#id9"><span class="problematic" id="id10">|</span></a>—————————————————— | | Cubic | 0 | 4 | 4 | All 4 neighbours are staggered. | | Hexagonal | 1 | 3 | 4 | 3 staggered and 1 eclipsed bond. | | Interfacial | any | 2 | 4 | Belongs to the ice phase, but does not satisfy strict criteria of cubic and hexagonal | | | 0 | 3 | 4 | | | Liquid | N/A | N/A | any | Classification by exclusion. |</div>
+</div>
+<p>Here, E and S refer to eclipsed and staggered bonds. The neighbours column contains the number of nearest neighbours.</p>
+<p>The CHILL+ algorithm, which is a modified version of CHILL, additionally identifies clathrate and interfacial clathrate phases. The criteria are enumerated in the table below:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Phase</p></th>
+<th class="head"><p>E</p></th>
+<th class="head"><p>S</p></th>
+<th class="head"><p>Neighbours</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Cubic</p></td>
+<td><p>0</p></td>
+<td><p>4</p></td>
+<td><p>4</p></td>
+<td><p>no change was made to</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>staggered bond criterion from CHILL | | Hexagonal | 1 | 3 | 4 | wider eclipsed range compared to CHILL; identifies 99% hexagonal ice up to 270 K | | Interfacial | any | 2 | 4 | must have at least one first neighbor water with more than two staggered bonds | | | 0 | 3 | 4 | must have at least one first neighbor water with more than one staggered bond | | Clathrate | 4 | 0 | 4 | bulk clathrate and part of the interface of clathrates can be identified with four eclipsed bonds | | Interfacial clathrate | 3 | any | 4 | partial clathrate cages and threads of clathrate-like order | | Liquid | N/A | N/A | any | classifies as liquid if none of the above criteria are fulfilled |</p>
+<p>Although both the CHILL and CHILL+ classification schemes take into account the local order of the environment of each particle, both schemes output a per-particle classification.</p>
+<section id="changelog">
+<span id="doxid-namespacechill-1autotoc-md1"></span><span id="doxid-namespacechill-1autotoc-md1-1s2"></span><span id="doxid-namespacechill-1autotoc-md1-1s1"></span><h3>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Amrita Goswami [<a class="reference external" href="mailto:amrita16thaug646&#37;&#52;&#48;gmail&#46;com">amrita16thaug646<span>&#64;</span>gmail<span>&#46;</span>com</a>]; date modified: Sept 19, 2019</p></li>
+</ul>
+<section id="global-functions">
+<h4>Global Functions<a class="headerlink" href="#global-functions" title="Link to this heading">¶</a></h4>
+<div class="doxyrest-title-code-block highlight" id="doxid-namespacechill-1a6235256c303786bfee2a6143044b46a8">
+<span id="index-1"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_chill_TemplateHit.html#doxid-structchill-1-1-template-hit"><span class="std std-ref">TemplateHit</span></a><span class="o">&gt;</span> <span class="n">classifyTemplates</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span> <span class="n">nList</span><span class="p">,</span> <span class="kt">int</span> <span class="n">kNeigh</span> <span class="o">=</span> <span class="mi">12</span><span class="p">)</span></span>
+</pre></div>
+<p>Overlay the k nearest neighbours of each particle onto FCC, HCP, BCC and SC shells.</p>
+<p>Uses IRA when linked; otherwise Horn on a distance-sorted correspondence (high-symmetry shells only).</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-namespacechill-1a7ce20c1ee581242dfd8e0dc80ddc17bc">
+<span id="index-2"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">soapSpectrum</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="kt">int</span> <span class="n">iatom</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span> <span class="n">nList</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nMax</span><span class="p">,</span> <span class="kt">int</span> <span class="n">lMax</span><span class="p">,</span> <span class="kt">double</span> <span class="n">rcut</span><span class="p">)</span></span>
+</pre></div>
+<p>Bartok SOAP power spectrum for one particle (nMax radial Gaussians, spherical harmonics through lMax).</p>
+<p>Length is nMax*nMax*(lMax+1).</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-namespacechill-1a587a1bffcd6e21ecf2feb16a95fe01c1">
+<span id="index-3"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&gt;</span> <span class="n">soapSpectrumAll</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span> <span class="n">nList</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nMax</span><span class="p">,</span> <span class="kt">int</span> <span class="n">lMax</span><span class="p">,</span> <span class="kt">double</span> <span class="n">rcut</span><span class="p">)</span></span>
+</pre></div>
+<p>Bartok SOAP power spectrum for every particle.</p>
+<p>Length is nop; each row is nMax*nMax*(lMax+1).</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-namespacechill-1af9780d7bcf4a3a4436a2d59cc26606bb">
+<span id="index-4"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">voronoiFeature</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="kt">int</span> <span class="n">iatom</span><span class="p">,</span> <span class="kt">double</span> <span class="n">candidateCutoff</span><span class="p">)</span></span>
+</pre></div>
+<p>[q4, q6, q8] from the Voronoi-weighted Steinhardt path (Mickel).</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-namespacechill-1a0e8f53a909d946d418fb28cc3cb4b082">
+<span id="index-5"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&gt;</span> <span class="n">voronoiFeatures</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="kt">double</span> <span class="n">candidateCutoff</span><span class="p">)</span></span>
+</pre></div>
+<p>[q4, q6, q8] for every particle. One tessellation per order (l = 4, 6, 8).</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-namespacechill-1a99f37a13584cd3861607a78d8a4e10eb">
+<span id="index-6"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_chill_VoronoiWeights.html#doxid-structchill-1-1-voronoi-weights"><span class="std std-ref">VoronoiWeights</span></a><span class="o">&gt;</span> <span class="n">voronoiFacetWeights</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="kt">double</span> <span class="n">candidateCutoff</span><span class="p">)</span></span>
+</pre></div>
+<p>Facet neighbours and area weights for every particle, with an a posteriori exactness certificate.</p>
+<p>candidateCutoff seeds the bisector search; the cutoff is enlarged automatically until the certificate holds or the growth cap is reached.</p>
+<p>Certificate. The cell of particle i clipped against every candidate within cutoff c is the true Voronoi cell whenever every vertex of the clipped cell lies within c/2 of i: a particle k beyond the cutoff has <a href="#id11"><span class="problematic" id="id12">|d_k|</span></a> &gt; c, its bisector plane sits at distance <a href="#id13"><span class="problematic" id="id14">|d_k|</span></a>/2 &gt; c/2 from i, and a half-space whose boundary is farther than c/2 cannot cut a region contained in the ball of radius c/2. An open or under-clipped cell keeps vertices on the seeding square at distance ~c and fails the certificate, which is exactly the failure the enlargement retries.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-namespacechill-1ac42b78e61e685301c32b8bc54d344ec1">
+<span id="index-7"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_chill_SteinhardtQl.html#doxid-structchill-1-1-steinhardt-ql"><span class="std std-ref">SteinhardtQl</span></a> <span class="n">steinhardtQlVoronoi</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="kt">double</span> <span class="n">candidateCutoff</span><span class="p">,</span> <span class="kt">int</span> <span class="n">orderL</span><span class="p">)</span></span>
+</pre></div>
+<p>Steinhardt parameters of degree orderL (3, 4, 6 or 8) with the bond sum weighted by Voronoi facet areas.</p>
+<p>qlBar averages the weighted q_lm over the particle and its facet neighbours, after Lechner and Dellago.</p>
+</section>
+</section>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2019-2026, d-SEAMS core team</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+<a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+  <iconify-icon icon="simple-icons:github"></iconify-icon>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/target-highlight.js?v=df7d332b"></script>
+      <script src="../_static/shibuya.js?v=cac61aee"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script></body>
+</html>

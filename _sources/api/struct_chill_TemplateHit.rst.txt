@@ -1,0 +1,24 @@
+.. index:: pair: struct; chill::TemplateHit
+.. _doxid-structchill_1_1_template_hit:
+
+struct chill::TemplateHit
+=========================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <structure_desc.hpp>
+	
+	struct TemplateHit {
+		// fields
+	
+		:ref:`CrystalKind<doxid-namespacechill_1ac13b1a10b6669044f75448ec1abe5122>` :target:`kind<doxid-structchill_1_1_template_hit_1ae13a09b6ba70e05e96b251cb0c326212>` = :ref:`CrystalKind::other<doxid-namespacechill_1ac13b1a10b6669044f75448ec1abe5122a795f3202b17cb6bc3d4b771d8c6c9eaf>`;
+		double :target:`rmsd<doxid-structchill_1_1_template_hit_1ab9b9bdbf34e6272e29ab3bdcf2c9e1c2>` = 1e300;
+		const char* :target:`name<doxid-structchill_1_1_template_hit_1a69c28bf3fc7a3a7831b3b7ab3b113a73>` = "other";
+	};

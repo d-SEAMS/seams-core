@@ -1,0 +1,62 @@
+.. index:: pair: namespace; rdf2
+.. _doxid-namespacerdf2:
+
+namespace rdf2
+==============
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Defines RDF-specific functions. :ref:`More...<details-namespacerdf2>`
+
+.. _details-namespacerdf2:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Defines RDF-specific functions.
+
+The radial distribution function :math:`g(r)`, or pair distribution function. It can be used to illuminate features of short-range and long-range order. The RDF is the probability of finding a particle at a distance of :math:`r` from a tagged reference particle, relative to that of an ideal gas. For a system of :math:`N` particles, the pair correlation function for :math:`N(N-1)` pairs is:
+
+.. math::
+
+	 \rho_N^{(2)}(r,r') = ⟨\sum_{i=1}^{N} \sum_{j=1,j \neq i}^{N} \delta
+	(r-r_i) \delta (r'-r_j) \langle
+
+The code essentially bins distances between pairs of particles, and normalizes the resulting histogram is normalized with respect to an ideal gas. The algorithm for the calculation of :math:`g(r)` may be divided into the following steps:
+
+#. **Initialization:** The :math:`g(r)` array is initialized to zero.
+
+#. **Sampling:** The histogram is added to for a particular bin, if the distance of a pair of atoms falls within the :math:`r` associated with the bin.
+
+#. **Normalization:** Every bin of the :math:`g(r)` array is normalized by the product of the number of ideal gas particles in that bin, and the number of particles and number of frames.
+
+To account for the geometry of the slab-like quasi-two-dimensional system, the RDF must be additionally normalized by a form factor :math:`f` such that :math:`f = \frac{h}{2r}` for :math:`r>h` and :math:`f = \frac{h}{2r}` for :math:`r \le
+h`; where :math:`h` is the height of the quasi-two-dimensional system.
+
+
+
+.. _doxid-namespacerdf2_1autotoc_md9_1s1:
+
+
+
+
+
+.. _doxid-namespacerdf2_1autotoc_md9_1s2:
+
+
+
+
+
+.. _doxid-namespacerdf2_1autotoc_md9:
+
+Changelog
++++++++++
+
+* Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Dec 10, 2019
+
+* Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+

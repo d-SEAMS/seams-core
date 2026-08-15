@@ -1,0 +1,66 @@
+.. index:: pair: namespace; molSys
+.. _doxid-namespacemol_sys:
+
+namespace molSys
+================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Bare-bones structs used throughout the architecture. :ref:`More...<details-namespacemol_sys>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace molSys {
+
+	// structs
+
+	template <CoordinateScalar T>
+	struct :ref:`Point<doxid-structmol_sys_1_1_point>`;
+
+	template <typename S, CoordinateScalar T>
+	struct :ref:`PointCloud<doxid-structmol_sys_1_1_point_cloud>`;
+
+	struct :ref:`Result<doxid-structmol_sys_1_1_result>`;
+
+	} // namespace molSys
+.. _details-namespacemol_sys:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Bare-bones structs used throughout the architecture.
+
+@detials This namespace defines :ref:`Point <doxid-structmol_sys_1_1_point>` and :ref:`PointCloud <doxid-structmol_sys_1_1_point_cloud>` structs, alongwith other basic functions and enums.
+
+:ref:`PointCloud <doxid-structmol_sys_1_1_point_cloud>` is a struct that contains the information of a collection of :ref:`Point <doxid-structmol_sys_1_1_point>` structs, at every frame. :ref:`Point <doxid-structmol_sys_1_1_point>` contains the coordinates and types of each point, along with information about whether the particular particle is within a slice or not.
+
+
+
+.. _doxid-namespacemol_sys_1autotoc_md7_1s1:
+
+
+
+
+
+.. _doxid-namespacemol_sys_1autotoc_md7_1s2:
+
+
+
+
+
+.. _doxid-namespacemol_sys_1autotoc_md7:
+
+Changelog
++++++++++
+
+* Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Sept 19, 2019
+
+* Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+

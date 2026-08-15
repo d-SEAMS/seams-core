@@ -1,0 +1,67 @@
+.. index:: pair: namespace; cage
+.. _doxid-namespacecage:
+
+namespace cage
+==============
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Functions for topological network criteria cage types. :ref:`More...<details-namespacecage>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace cage {
+
+	// structs
+
+	struct :ref:`Cage<doxid-structcage_1_1_cage>`;
+
+	// global functions
+
+	bool :target:`nautyAvailable<doxid-namespacecage_1af3048384a261c7ffc3487cb54af20cb1>`();
+	std::string :target:`canonicalCertificate<doxid-namespacecage_1a9d73050e1b7374d21a15c61e21e39ecb>`(const std::vector<std::vector<int>>& rings);
+	bool :target:`isHexagonalPrism<doxid-namespacecage_1a2b191b4c90fc095838928727d7c11b3e>`(const std::vector<std::vector<int>>& rings);
+	bool :target:`sameCertificate<doxid-namespacecage_1ae431d00a43e0a0e99da9ff62d23a6e22>`(const std::vector<std::vector<int>>& a, const std::vector<std::vector<int>>& b);
+
+	} // namespace cage
+.. _details-namespacecage:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Functions for topological network criteria cage types.
+
+This namespace contains structs and enums for cage types
+
+Type definitions for atoms, rings and cages which are DDCs and HCs.
+
+
+
+.. _doxid-namespacecage_1autotoc_md3_1s1:
+
+
+
+
+
+.. _doxid-namespacecage_1autotoc_md3_1s2:
+
+
+
+
+
+.. _doxid-namespacecage_1autotoc_md3:
+
+Changelog
++++++++++
+
+* Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Nov 13, 2019
+
+* Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+

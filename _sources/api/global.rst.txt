@@ -1,0 +1,52 @@
+.. _global:
+.. index:: pair: namespace; global
+
+Global Namespace
+================
+
+.. toctree::
+	:hidden:
+
+	namespace_absor.rst
+	namespace_ira.rst
+	namespace_match.rst
+	namespace_pntToPnt.rst
+	namespace_seams.rst
+	namespace_sout.rst
+	namespace_std.rst
+	namespace_topoparam.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// namespaces
+
+	namespace :ref:`absor<doxid-namespaceabsor>`;
+	namespace :ref:`bond<doxid-namespacebond>`;
+	namespace :ref:`cage<doxid-namespacecage>`;
+	namespace :ref:`chill<doxid-namespacechill>`;
+	namespace :ref:`clump<doxid-namespaceclump>`;
+	namespace :ref:`gen<doxid-namespacegen>`;
+	namespace :ref:`ira<doxid-namespaceira>`;
+	namespace :ref:`match<doxid-namespacematch>`;
+	namespace :ref:`molSys<doxid-namespacemol_sys>`;
+	namespace :ref:`nneigh<doxid-namespacenneigh>`;
+	namespace :ref:`pntToPnt<doxid-namespacepnt_to_pnt>`;
+	namespace :ref:`primitive<doxid-namespaceprimitive>`;
+	namespace :ref:`prism3<doxid-namespaceprism3>`;
+	namespace :ref:`rdf2<doxid-namespacerdf2>`;
+	namespace :ref:`ring<doxid-namespacering>`;
+	namespace :ref:`seams<doxid-namespaceseams>`;
+		namespace :ref:`seams::sphericart_ylm<doxid-namespaceseams_1_1sphericart__ylm>`;
+		namespace :ref:`seams::steinhardt<doxid-namespaceseams_1_1steinhardt>`;
+	namespace :ref:`sinp<doxid-namespacesinp>`;
+	namespace :ref:`sout<doxid-namespacesout>`;
+	namespace :ref:`sph<doxid-namespacesph>`;
+	namespace :ref:`std<doxid-namespacestd>`;
+	namespace :ref:`topoparam<doxid-namespacetopoparam>`;
+	namespace :ref:`tum3<doxid-namespacetum3>`;
+

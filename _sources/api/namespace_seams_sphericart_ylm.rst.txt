@@ -1,0 +1,24 @@
+.. index:: pair: namespace; seams::sphericart_ylm
+.. _doxid-namespaceseams_1_1sphericart__ylm:
+
+namespace seams::sphericart_ylm
+===============================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace sphericart_ylm {
+
+	// global functions
+
+	bool :target:`available<doxid-namespaceseams_1_1sphericart__ylm_1ac07a3ae725018c5cd077e46edebaa712>`();
+	int :target:`ylmCartesian<doxid-namespaceseams_1_1sphericart__ylm_1a3d7e262a77527ba90b9a718c6b692b9b>`(int orderL, const double* xyz, int nVec, double* ylmOut);
+
+	} // namespace sphericart_ylm

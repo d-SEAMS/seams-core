@@ -1,0 +1,31 @@
+.. index:: pair: struct; chill::QlmAtom
+.. _doxid-structchill_1_1_qlm_atom:
+
+struct chill::QlmAtom
+=====================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+This is the local orientational bond order parameter :math:`q_{lm}`, of length :math:`2l+1`. :ref:`More...<details-structchill_1_1_qlm_atom>`
+
+.. _details-structchill_1_1_qlm_atom:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+This is the local orientational bond order parameter :math:`q_{lm}`, of length :math:`2l+1`.
+
+This complex vector is averaged over the four nearest neighbours, according to the following equation:
+
+.. math::
+
+	q_{lm}(i) = \frac{1}{N_b(i)} \Sigma_{j=1}^{N_b(i)} Y_{lm}(r_{ij})
+
+Here, :math:`N_b(i)=4` is the number of nearest neighbours for the molecule :math:`i`. This struct contains specifically:
+
+* A complex vector of length :math:`2l+1`, calculated according to the equation above
+

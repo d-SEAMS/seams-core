@@ -1,0 +1,66 @@
+
+=========
+``d-SEAMS``
+=========
+
+:Author: `d-SEAMS core team <https://dseams.info>`_
+
+Overview
+--------
+
+d-SEAMS (Deferred Structural Elucidation Analysis for Molecular Simulations)
+is a set of tools for analyzing the structure of molecular simulations.
+The Python library ``pydseamslib`` lives in the
+`PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_ repository. This
+tree is the C++ engine and the Lua CLI.
+providing functions for reading trajectories, building neighbour lists,
+computing hydrogen bond networks, classifying ice structures with CHILL+,
+and performing ring analysis.
+
+Getting Started
+---------------
+
+  .. toctree::
+     :maxdepth: 1
+     :caption: Getting Started
+
+     quickstart
+
+Tutorials
+---------
+
+  .. toctree::
+     :maxdepth: 1
+     :caption: Tutorials
+
+     tutorials/bulk-ice
+     tutorials/nanotube
+
+How-To Guides
+-------------
+
+  .. toctree::
+     :maxdepth: 1
+     :caption: How-To Guides
+
+     howto/ase-integration
+
+Reference
+---------
+
+  .. toctree::
+     :maxdepth: 2
+     :caption: Reference
+
+     reference/api
+     reference/data-formats
+
+Development
+-----------
+
+  .. toctree::
+     :maxdepth: 2
+     :caption: Development
+
+     contributing/index
+     changelog

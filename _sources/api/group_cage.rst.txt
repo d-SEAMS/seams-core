@@ -1,0 +1,27 @@
+.. index:: pair: group; Cage
+.. _doxid-group__cage:
+
+Cage
+====
+
+.. toctree::
+	:hidden:
+
+	namespace_cage.rst
+	struct_cage_Cage.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// namespaces
+
+	namespace :ref:`cage<doxid-namespacecage>`;
+
+	// structs
+
+	struct :ref:`cage::Cage<doxid-structcage_1_1_cage>`;
+

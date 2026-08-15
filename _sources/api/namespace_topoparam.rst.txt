@@ -1,0 +1,70 @@
+.. index:: pair: namespace; topoparam
+.. _doxid-namespacetopoparam:
+
+namespace topoparam
+===================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace topoparam {
+
+	// global functions
+
+	double :ref:`normHeightPercent<doxid-namespacetopoparam_1a473e7ca29f517802126410c59756c974>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int nPrisms, double avgPrismHeight);
+	std::vector<double> :ref:`calcCoverageArea<doxid-namespacetopoparam_1a9c3eb2dbcb32ec7523ed28f8ad4d6b19>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, double sheetArea);
+	std::vector<double> :ref:`projAreaSingleRing<doxid-namespacetopoparam_1a2e190293e3c4603ddd1026e4c8f3896a>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& ring);
+
+	} // namespace topoparam
+.. _details-namespacetopoparam:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Global Functions
+----------------
+
+.. index:: pair: function; normHeightPercent
+.. _doxid-namespacetopoparam_1a473e7ca29f517802126410c59756c974:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double normHeightPercent(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int nPrisms, double avgPrismHeight)
+
+Calculates the height%, an average measure of filled volume.
+
+The average height of a prism can be taken to be 2.75-2.85 Angstrom. (Koga et. al., 2001)
+
+.. index:: pair: function; calcCoverageArea
+.. _doxid-namespacetopoparam_1a9c3eb2dbcb32ec7523ed28f8ad4d6b19:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> calcCoverageArea(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, double sheetArea)
+
+Calculates the coverage area%, an area-based measure of relative proportion of monolayer ices.
+
+.. index:: pair: function; projAreaSingleRing
+.. _doxid-namespacetopoparam_1a2e190293e3c4603ddd1026e4c8f3896a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> projAreaSingleRing(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& ring)
+
+Calculates the projected area on the XY, YZ and XZ planes.
+

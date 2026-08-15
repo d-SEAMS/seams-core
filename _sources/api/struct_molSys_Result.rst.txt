@@ -1,0 +1,27 @@
+.. index:: pair: struct; molSys::Result
+.. _doxid-structmol_sys_1_1_result:
+
+struct molSys::Result
+=====================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+This contains the bond classifier of enum class type :ref:`bond_type <doxid-group__mol_sys_1ga1c858200c3d088bf02839453d0f46328>`, and the bond correlation factor. :ref:`More...<details-structmol_sys_1_1_result>`
+
+.. _details-structmol_sys_1_1_result:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+This contains the bond classifier of enum class type :ref:`bond_type <doxid-group__mol_sys_1ga1c858200c3d088bf02839453d0f46328>`, and the bond correlation factor.
+
+Contains specifically the members:
+
+* Bond classifier or the type of the bond (staggered, eclipsed, out-of-range)
+
+* Bond correlation factor
+

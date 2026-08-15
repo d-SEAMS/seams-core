@@ -1,0 +1,33 @@
+.. index:: pair: struct; molSys::PointCloud
+.. _doxid-structmol_sys_1_1_point_cloud:
+
+template struct molSys::PointCloud
+==================================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+This contains a collection of points; contains information for a particular frame. :ref:`More...<details-structmol_sys_1_1_point_cloud>`
+
+.. _details-structmol_sys_1_1_point_cloud:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+This contains a collection of points; contains information for a particular frame.
+
+Specifically
+
+* A vector of :ref:`Point <doxid-structmol_sys_1_1_point>` structs
+
+* The current frame number
+
+* The number of particles in the current frame
+
+* A vector for the simulation box lengths in each dimension
+
+* A vector containing the absolute lower box coordinates
+

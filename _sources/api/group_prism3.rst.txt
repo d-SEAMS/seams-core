@@ -1,0 +1,27 @@
+.. index:: pair: group; Prism3
+.. _doxid-group__prism3:
+
+Prism3
+======
+
+.. toctree::
+	:hidden:
+
+	namespace_prism3.rst
+	struct_ring_RingSearchIndex.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// namespaces
+
+	namespace :ref:`prism3<doxid-namespaceprism3>`;
+
+	// structs
+
+	struct :ref:`ring::RingSearchIndex<doxid-structring_1_1_ring_search_index>`;
+

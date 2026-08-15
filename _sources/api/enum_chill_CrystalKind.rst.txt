@@ -1,0 +1,21 @@
+.. index:: pair: enum; CrystalKind
+.. _doxid-namespacechill_1ac13b1a10b6669044f75448ec1abe5122:
+
+enum chill::CrystalKind
+=======================
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <structure_desc.hpp>
+
+	enum CrystalKind {
+	    :target:`other<doxid-namespacechill_1ac13b1a10b6669044f75448ec1abe5122a795f3202b17cb6bc3d4b771d8c6c9eaf>` = 0,
+	    :target:`sc<doxid-namespacechill_1ac13b1a10b6669044f75448ec1abe5122ad54185b71f614c30a396ac4bc44d3269>`,
+	    :target:`fcc<doxid-namespacechill_1ac13b1a10b6669044f75448ec1abe5122abfca5f5929b01a5119351bc0b1a391ae>`,
+	    :target:`hcp<doxid-namespacechill_1ac13b1a10b6669044f75448ec1abe5122a463ba1e631ac9ed1c3de0b306afd561e>`,
+	    :target:`bcc<doxid-namespacechill_1ac13b1a10b6669044f75448ec1abe5122adc9262a469f6f315f74c087a7b3a7f35>`,
+	};
+

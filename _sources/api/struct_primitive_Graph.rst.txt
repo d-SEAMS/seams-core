@@ -1,0 +1,27 @@
+.. index:: pair: struct; primitive::Graph
+.. _doxid-structprimitive_1_1_graph:
+
+struct primitive::Graph
+=======================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+This is a per-frame object, containing all the vertices for the particular frame, along with the vector of rings generated. :ref:`More...<details-structprimitive_1_1_graph>`
+
+.. _details-structprimitive_1_1_graph:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+This is a per-frame object, containing all the vertices for the particular frame, along with the vector of rings generated.
+
+Contains specifically the members:
+
+* **pts** : Collection of vertices. The index of each should be the index according to the PointCloud.
+
+* **rings** : A row-ordered vector of vectors for the rings generated, containing the indices (not IDs) of each member of the rings.
+

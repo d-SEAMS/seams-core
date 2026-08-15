@@ -1,0 +1,28 @@
+.. index:: pair: group; Ring
+.. _doxid-group__ring:
+
+Ring
+====
+
+.. toctree::
+	:hidden:
+
+	group_prism3.rst
+	namespace_ring.rst
+	namespace_tum3.rst
+
+
+
+|	:ref:`Prism3<doxid-group__prism3>`
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// namespaces
+
+	namespace :ref:`ring<doxid-namespacering>`;
+	namespace :ref:`tum3<doxid-namespacetum3>`;
+

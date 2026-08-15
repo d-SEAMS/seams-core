@@ -1,0 +1,23 @@
+.. index:: pair: struct; ring::RingSearchIndex
+.. _doxid-structring_1_1_ring_search_index:
+
+struct ring::RingSearchIndex
+============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Inverted index from an atom to the rings that contain it. :ref:`More...<details-structring_1_1_ring_search_index>`
+
+.. _details-structring_1_1_ring_search_index:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Inverted index from an atom to the rings that contain it.
+
+The cage searches repeatedly ask which rings a given atom belongs to. Answering that by scanning every ring makes the searches quadratic in the ring count. One pass over the ring network answers it in constant time thereafter, and the ring indices in each row stay ascending, which is the order the searches previously visited them in.
+

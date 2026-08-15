@@ -1,0 +1,34 @@
+.. index:: pair: namespace; ira
+.. _doxid-namespaceira:
+
+namespace ira
+=============
+
+.. toctree::
+	:hidden:
+
+	struct_ira_Match.rst
+	struct_ira_PointGroup.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace ira {
+
+	// structs
+
+	struct :ref:`Match<doxid-structira_1_1_match>`;
+	struct :ref:`PointGroup<doxid-structira_1_1_point_group>`;
+
+	// global functions
+
+	bool :target:`available<doxid-namespaceira_1a78158b2832fc60ee81ee0690306a1513>`();
+	int :target:`match<doxid-namespaceira_1a1f9efef83542809bf7eb5d32a08115c1>`(const Eigen::MatrixXd& ref, const Eigen::MatrixXd& target, :ref:`Match<doxid-structira_1_1_match>`& out, double kmaxFactor = 1.8);
+	int :target:`pointGroup<doxid-namespaceira_1aa9b334b9ee20ce45a89d779f800a8fad>`(const Eigen::MatrixXd& coords, :ref:`PointGroup<doxid-structira_1_1_point_group>`& out, double symThr = 0.05);
+	bool :target:`orient<doxid-namespaceira_1a9f5216d32f2e5e19932afa78424c825b>`(const Eigen::MatrixXd& ref, const Eigen::MatrixXd& target, std::vector<double>& quat, double& rmsd);
+
+	} // namespace ira
