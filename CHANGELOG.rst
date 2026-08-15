@@ -2,6 +2,12 @@
 Changelog
 =========
 
+Version 2.2.4 (2026-08-15)
+===========================
+
+Docs orgmode covers the ~seams~ CLI, the Nix flake, and the
+three-repo split. Tutorials use the live APIs.
+
 Version 2.2.3 (2026-08-15)
 ===========================
 

@@ -1,9 +1,33 @@
-#+TITLE: Nanotube Ring Analysis
+#+TITLE: Quasi-one-dimensional ice
 #+OPTIONS: toc:nil num:nil
 
-.. note::
+Ice nanotubes and confined prisms are the 2020 quasi-one-dimensional
+path: primitive rings, then prism identification on that ring set.
 
-   This tutorial is under construction.
+* Where the code lives
 
-This tutorial will cover using Franzblau ring analysis to characterize
-the ring topology of carbon nanotubes and similar one-dimensional structures.
+C++: ~topo_one_dim.cpp~ / ~prismAnalysis~. The Catch2 binary
+~topo_one_dim~ exercises the path.
+
+Lua: ~example_lua/iceNanotube/~ in
+[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] still runs the
+registered prism helpers (~prismAnalysis~, ~ringAnalysis~) through
+~require("dseams")~.
+
+* From Python
+
+There is no separate ~seams nanotube~ subcommand. Load a frame and
+call the compiled registrations on ~pydseams.yoda~ (or the Lua
+helpers) after you have a bonded graph and a ring set. The high-level
+~Frame~ API is CHILL+ and cages; prism analysis stays on ~yoda~.
+
+#+begin_src python
+from pydseams import yoda
+# yoda.prismAnalysis(...) after rings and a neighbour list
+#+end_src
+
+* Trajectories
+
+The 2020 INT dumps live on the
+[[https://figshare.com/projects/d-SEAMS_Datasets/73545][figshare project]].
+Keep paths relative to the directory you invoke ~dseams~ from.
