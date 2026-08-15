@@ -131,7 +131,10 @@ std::pair<double, double> shellSeparation(
  */
 class SkinNeighborList {
 public:
-  SkinNeighborList(double cutoff, double skin, int typeI);
+  //! k <= 0: bonds are candidate pairs inside cutoff. k > 0 (default 4):
+  //! bonds are the mutual k-nearest among the skin candidates, the TUM
+  //! v2 graph. 3.5 A is only the candidate search, not the bond rule.
+  SkinNeighborList(double cutoff, double skin, int typeI, int k = 4);
 
   //! Refresh from a new frame. The returned list is ID-keyed with a
   //! leading self entry, the same shape as neighListO.
@@ -151,6 +154,7 @@ private:
   double cutoffSq_;
   double triggerSq_;
   int typeI_;
+  int k_;
   bool rebuilt_{true};
   int changedAtoms_{0};
   std::vector<double> x0_;

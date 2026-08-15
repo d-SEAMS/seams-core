@@ -15,9 +15,9 @@ Added
   ``load_frame`` walks no longer rescan prior snapshots.
 - ``forEachLammpsFrame``: OpenMP walk over a frame range. Each worker
   opens its own handle and seeks. ``seams --frame N --last M --jobs J``.
-- ``SkinNeighborList``: vesin candidates at cutoff+skin (the ghost
-  halo), rebuilt when an atom moves more than skin/2. The bond graph
-  is the candidates currently inside the analysis cutoff.
+- ``SkinNeighborList``: vesin candidates at cutoff+skin, rebuilt on
+  the Verlet trigger. Default bonds are the mutual four nearest
+  (TUM v2). ``k = 0`` keeps the hard cutoff graph.
 
 Fixed
 -----

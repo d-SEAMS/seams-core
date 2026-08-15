@@ -686,9 +686,9 @@ std::pair<double, double> nneigh::shellSeparation(
 }
 
 nneigh::SkinNeighborList::SkinNeighborList(double cutoff, double skin,
-                                           int typeI)
+                                           int typeI, int k)
     : cutoff_(cutoff), skin_(skin), cutoffSq_(cutoff * cutoff),
-      triggerSq_((0.5 * skin) * (0.5 * skin)), typeI_(typeI) {}
+      triggerSq_((0.5 * skin) * (0.5 * skin)), typeI_(typeI), k_(k) {}
 
 bool nneigh::SkinNeighborList::mustRebuild(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud) const {
@@ -770,13 +770,49 @@ void nneigh::SkinNeighborList::rebuildCandidates(
 void nneigh::SkinNeighborList::refreshBonds(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   std::set<std::pair<int, int>> next;
-  for (const auto &[i, j] : candidates_) {
-    if (i < 0 || j < 0 || i >= yCloud.nop || j >= yCloud.nop) {
-      continue;
+  if (k_ <= 0) {
+    for (const auto &[i, j] : candidates_) {
+      if (i < 0 || j < 0 || i >= yCloud.nop || j >= yCloud.nop) {
+        continue;
+      }
+      if (gen::periodicDistSq(yCloud, i, j) <= cutoffSq_) {
+        next.emplace(i, j);
+      }
     }
-    const double r2 = gen::periodicDistSq(yCloud, i, j);
-    if (r2 <= cutoffSq_) {
-      next.emplace(i, j);
+  } else {
+    std::vector<std::vector<std::pair<double, int>>> byDist(
+        static_cast<std::size_t>(yCloud.nop));
+    for (const auto &[i, j] : candidates_) {
+      if (i < 0 || j < 0 || i >= yCloud.nop || j >= yCloud.nop) {
+        continue;
+      }
+      const double r2 = gen::periodicDistSq(yCloud, i, j);
+      byDist[static_cast<std::size_t>(i)].emplace_back(r2, j);
+      byDist[static_cast<std::size_t>(j)].emplace_back(r2, i);
+    }
+    std::vector<std::vector<int>> nominated(static_cast<std::size_t>(yCloud.nop));
+    for (int i = 0; i < yCloud.nop; i++) {
+      auto &row = byDist[static_cast<std::size_t>(i)];
+      if (row.empty()) {
+        continue;
+      }
+      const int take = std::min(k_, static_cast<int>(row.size()));
+      std::partial_sort(row.begin(), row.begin() + take, row.end());
+      nominated[static_cast<std::size_t>(i)].reserve(static_cast<std::size_t>(take));
+      for (int n = 0; n < take; n++) {
+        nominated[static_cast<std::size_t>(i)].push_back(row[static_cast<std::size_t>(n)].second);
+      }
+    }
+    for (int i = 0; i < yCloud.nop; i++) {
+      for (const int j : nominated[static_cast<std::size_t>(i)]) {
+        if (j <= i) {
+          continue;
+        }
+        const auto &other = nominated[static_cast<std::size_t>(j)];
+        if (std::find(other.begin(), other.end(), i) != other.end()) {
+          next.emplace(i, j);
+        }
+      }
     }
   }
   std::set<int> touched;

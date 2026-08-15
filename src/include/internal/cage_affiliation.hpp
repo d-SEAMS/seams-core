@@ -75,8 +75,8 @@ struct CageAffiliation {
  *  rows against the previous frame, recomputes affiliation inside the
  *  locality closure of the changes, and carries stored answers elsewhere.
  *  The result is identical to cageAffiliation on the new frame. The
- *  neighbour graph should come from SkinNeighborList so cutoff flicker
- *  does not rewrite every row.
+ *  neighbour graph should come from SkinNeighborList (default: mutual
+ *  four-nearest, the TUM v2 graph).
  */
 class AffiliationUpdater {
 public:
