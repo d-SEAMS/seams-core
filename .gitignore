@@ -13,6 +13,7 @@ spack.yml
 /.spack-env/
 !pixi.lock
 *.lock
+!flake.lock
 subprojects/nanobind-*/
 subprojects/robin-map-*/
 subprojects/packagecache/
