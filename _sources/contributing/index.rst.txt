@@ -56,7 +56,7 @@ Project structure
       src/                   C++ source files
         include/
           internal/          Internal headers (mol_sys, neighbours, bond, ...)
-          external/          Vendored headers (backward, cxxopts, rang, ...)
+          external/          Vendored headers (backward, argum, cxxopts, rang, ...)
         mol_sys.cpp          Molecular system data structures
         neighbours.cpp       Neighbour list construction
         bond.cpp             Hydrogen bond detection
