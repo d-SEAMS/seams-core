@@ -356,6 +356,6 @@ endif
 # Front ends are not in this repository.
 # Lua/Fennel: https://github.com/d-SEAMS/yodaStruct
 # Python:     https://github.com/d-SEAMS/PydSEAMSlib
-if get_option('with_lua').enabled()
+if not get_option('with_lua').disabled()
   error('The yodaStruct Lua CLI lives in https://github.com/d-SEAMS/yodaStruct')
 endif
