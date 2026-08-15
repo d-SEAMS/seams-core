@@ -1,26 +1,68 @@
-#+TITLE: Bulk ice on the mixed TIP4P example
+#+TITLE: Classify ice on the mixed TIP4P example
 #+OPTIONS: toc:nil num:nil
 
-This walk uses ~input/traj/exampleTraj.lammpstrj~ from a seams-core
-checkout (250 waters, type 2 is oxygen).
+You classify one in-tree frame two ways: CHILL+ (a four-neighbour
+staggered/eclipsed star per oxygen) and topological cages (HC/DDC
+membership). The result is a labelled oxygen set and a reason the two
+scores disagree.
+
+Work from a seams-core checkout with =seams= on =PATH=. The dump is
+=input/traj/exampleTraj.lammpstrj=: one frame, 250 TIP4P waters, 750
+atoms, type 2 oxygen and type 1 hydrogen. Both classifiers use the
+oxygens.
+
+Python is a separate package
+([[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]). The engine
+CLI is not a scripting host.
+
+* Read the frame
+
+#+begin_src bash
+seams read input/traj/exampleTraj.lammpstrj
+#+end_src
+
+The line starts =nop 250 frame 1 box ...=. The CLI guesses oxygen
+(type 2) and falls back to type 1. Pass =--type 2= on the classifiers
+so the type is explicit.
 
 * CHILL+ from the CLI
+
+CHILL+ looks at each oxygen's four nearest neighbours inside the
+cutoff. Each of those four bonds is staggered or eclipsed from the
+pair correlation =c_ij=. The star of four labels is the ice type:
+
+| label       | four-neighbour star              |
+|-------------+----------------------------------|
+| cubic       | four staggered                   |
+| hexagonal   | three staggered and one eclipsed |
+| interfacial | ice-like, not cubic or hexagonal |
+| water       | none of the above                |
 
 #+begin_src bash
 seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
 #+end_src
 
-Four-neighbour staggered/eclipsed counts on this frame:
+The line is:
 
-| label        | atoms |
-|--------------+-------|
-| cubic        |    42 |
-| hexagonal    |    65 |
-| interfacial  |    58 |
-| water        |    85 |
-| bulk ice     |   107 |
+#+begin_example
+nop 250 cubic 42 hexagonal 65 interfacial 58 water 85
+#+end_example
+
+| label       | atoms |
+|-------------+-------|
+| cubic       |    42 |
+| hexagonal   |    65 |
+| interfacial |    58 |
+| water       |    85 |
+| bulk ice    |   107 |
+
+Bulk ice is cubic plus hexagonal (42 + 65 = 107). Interfacial is
+ice-like at the surface of those stars and is not in that sum. The
+four labels add to 250.
 
 * The same path in Python
+
+From the same checkout, so the relative path holds:
 
 #+begin_src python
 import pydseams as ds
@@ -30,32 +72,65 @@ print(frame.chill_plus())
 print(frame.cages())
 #+end_src
 
-~Frame.chill_plus~ is the four-neighbour classifier.
-~Frame.cages~ is topological unit matching on six-rings. On this
-mixed frame TUM finds no complete HC or DDC: cage membership is not
-the CHILL+ star.
+=ds.read= picks type 2 when that type is present. =Frame.chill_plus=
+is the four-neighbour classifier. The histogram is cubic 42,
+hexagonal 65, interfacial 58, water 85 (attributes =cubic=,
+=hexagonal=, =interfacial=, and =["water"]=). =Frame.cages= is cage
+membership on the same oxygens: =n_ih= 0, =n_ic= 0, =n_water= 250.
 
-* Cubic mW
+* Cages from the CLI
 
-The 4096-molecule cubic mW dump (~input/traj/mW_cubic.lammpstrj~)
-is the opposite case: every molecule is in a double-diamond cage and
-CHILL+ reports cubic ice.
+Cages ask a different question: does this oxygen belong to a complete
+hexagonal cage (HC, ice Ih, 12 waters) or a complete double-diamond
+cage (DDC, ice Ic, 14 waters)? The search walks primitive six-rings on
+a bonded graph.
+
+#+begin_src bash
+seams cages input/traj/exampleTraj.lammpstrj --type 2
+#+end_src
+
+The default graph is =--graph seeded=: mutual four-nearest seeds,
+union completions. This mixed frame has no complete HC or DDC:
+
+#+begin_example
+nop 250 graph seeded hexagonal 0 cubic 0 water 250
+#+end_example
+
+That is the same zero-cage result as =frame.cages()=.
+
+* Why the two scores differ
+
+CHILL+ is a four-neighbour star. A molecule is cubic or hexagonal when
+its four bonds look like ice, even if those neighbours do not close a
+cage.
+
+Cages are topological unit matching (TUM). A molecule is ice Ih only
+as a member of an HC, ice Ic only as a member of a DDC, and water
+otherwise. Partial ice-like order is water on that score.
+
+On this mixed frame 107 oxygens have a bulk-ice star and 58 more are
+interfacial, yet TUM finds no complete HC or DDC. Local tetrahedral
+order is not cage membership.
+
+* A cubic crystal
+
+The 4096-molecule cubic mW dump (=input/traj/mW_cubic.lammpstrj=, type
+1) is the opposite case: every molecule is in a DDC, and CHILL+
+reports cubic ice.
 
 #+begin_src bash
 seams cages input/traj/mW_cubic.lammpstrj --type 1
 seams chill-plus input/traj/mW_cubic.lammpstrj --type 1
 #+end_src
 
-* Bond graphs for cages
+On a perfect cubic lattice the four cage graphs (=cutoff=, =knn=,
+=knn-union=, =seeded=) coincide. The mixed TIP4P frame is the one that
+separates the two scores.
 
-~seams cages --graph~ selects the neighbour graph:
+* What you can do
 
-| value      | graph                                      |
-|------------+--------------------------------------------|
-| ~cutoff~   | distance cutoff (2020 default)             |
-| ~knn~      | mutual four-nearest                        |
-| ~knn-union~| union four-nearest                         |
-| ~seeded~   | mutual seeds, union completions (default)  |
-
-On a perfect cubic crystal the four graphs coincide. On a disordered
-nucleation dump they do not.
+You can classify any LAMMPS water dump the same two ways: pass
+=--type= for the oxygen (or single-site) type, read CHILL+ as a
+four-neighbour star, and read cages as HC/DDC membership. Use
+=frame.chill_plus()= and =frame.cages()= when you want those scores in
+Python.

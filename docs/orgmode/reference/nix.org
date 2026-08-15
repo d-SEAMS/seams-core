@@ -1,22 +1,48 @@
 #+TITLE: Nix flake
 #+OPTIONS: toc:nil num:nil
 
+The flake builds ~libyodaLib~ and the ~seams~ CLI with Meson. It does
+not build Python or Lua.
+
 #+begin_src bash
 nix build                  # ./result/bin/seams
 nix run . -- read input/traj/exampleTraj.lammpstrj
-nix develop
+nix develop                # compiler, Eigen, BLAS, Catch2, gdb, ccache
 nix flake update nixpkgs
 nix fmt
 #+end_src
 
-~nix build~ runs the Catch2 suite (Meson install check).
+~nix build~ runs the Catch2 suite (Meson ~doCheck~) plus the ~seams
+read~ / ~--help~ / ~--version~ / ~--features~ smoke tests.
+
+Supported systems: ~x86_64-linux~, ~aarch64-linux~, ~x86_64-darwin~,
+~aarch64-darwin~. ~packages.default~ and ~apps.default~ are ~seams~.
+The formatter is ~nixfmt~.
 
 * What the flake enables
 
-Eigen, BLAS/LAPACK, Catch2, Highway when nixpkgs has them. OpenMP when
-the toolchain links it. Optional wrap-git backends (vesin,
-readcon-core) and chemfiles stay off unless a nixpkgs package is
-already in the closure.
+From ~nix/package.nix~:
+
+| on | Eigen, BLAS, LAPACK, Catch2 3, Highway (~libhwy~) |
+| OpenMP | when the toolchain links a parallel region (Clang gets ~llvmPackages.openmp~) |
+| Meson flags | ~with_tests=true~, ~with_cli=true~ |
+| ~mesonAutoFeatures~ | ~disabled~ |
+| wrap mode | ~nodownload~ (Meson setup hook) |
+
+* What stays off
+
+| ~with_python~ | error if forced; Python is PydSEAMSlib |
+| ~with_lua~ | error if forced; Lua is yodaStruct |
+| ~with_mpi~ | disabled |
+| ~with_openmp_offload~ | disabled |
+| vesin, readcon-core | wrap-git fallbacks are not fetched |
+| chemfiles | not in the flake closure |
+| IRA, sphericart, nauty | ~auto_features=disabled~, so the auto probes stay off |
+
+~seams --features~ on a flake build therefore reports Highway (and
+OpenMP when it linked) as enabled, and vesin, chemfiles, readcon-core,
+IRA/SOFI, sphericart, nauty, and MPI as disabled. Optional backends
+turn on only if a nixpkgs package is already in the closure.
 
 * Front-end flakes
 

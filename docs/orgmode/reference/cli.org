@@ -2,8 +2,8 @@
 #+OPTIONS: toc:nil num:nil
 
 The engine command is ~seams~. It uses Argum (the same parser as
-eonclient). Help, errors and ice-type counts are colorized.
-~NO_COLOR~ / ~FORCE_COLOR~ apply.
+eonclient). Help, errors, ice-type counts and ~--features~ are
+colorized. ~NO_COLOR~ turns colors off; ~FORCE_COLOR~ turns them on.
 
 #+begin_src text
 seams --help
@@ -15,17 +15,77 @@ seams chill-plus FILE
 seams cages FILE
 #+end_src
 
+* Commands
+
+| command | action |
+|---------+--------|
+| ~read~ | print ~nop~, 1-based ~frame~, and box lengths |
+| ~chill~ | CHILL four-neighbour labels |
+| ~chill-plus~ | CHILL+ four-neighbour labels (~chill_plus~ is an alias) |
+| ~cages~ | ice score: HC = Ih, DDC = Ic, neither = water |
+
+A command and a trajectory file are required. Unknown commands exit 2.
+
 * Options
 
-| flag | meaning |
-|------+---------|
-| ~-f~, ~--frame N~ | first frame, 1-based |
-| ~--last N~ | last frame inclusive; omit for one frame |
-| ~-j~, ~--jobs N~ | OpenMP workers over a frame range |
-| ~-t~, ~--type I~ | atom type; ~0~ guesses oxygen then type 1 |
-| ~-c~, ~--cutoff A~ | neighbour cutoff (Å) |
-| ~-k N~ | ~k~ for knn / seeded cages |
-| ~--graph KIND~ | ~cutoff~ / ~knn~ / ~knn-union~ / ~seeded~ |
+| flag | default | meaning |
+|------+---------+---------|
+| ~-h~, ~--help~ | | print help and exit |
+| ~-v~, ~--version~ | | print ~seams~ and the Meson project version |
+| ~--features~ | | print compile-time backends and exit |
+| ~-f~, ~--frame N~ | ~1~ | first frame, 1-based |
+| ~--last N~ | omitted | last frame inclusive; omit for one frame |
+| ~-j~, ~--jobs N~ | ~1~ | OpenMP workers over a frame range; ~1~ is serial |
+| ~-t~, ~--type I~ | ~0~ | atom type; ~0~ guesses oxygen (type 2) then type 1 |
+| ~-c~, ~--cutoff A~ | ~3.5~ | neighbour cutoff (Angstrom) |
+| ~-k N~ | ~4~ | ~k~ for ~knn~ / ~knn-union~ / ~seeded~ cages |
+| ~--graph KIND~ | ~seeded~ | bond graph for ~cages~ |
+
+* ~--graph~
+
+Used only by ~cages~.
+
+| value | graph |
+|-------+-------|
+| ~cutoff~ | pairs inside ~--cutoff~ |
+| ~knn~ | mutual k-nearest |
+| ~knn-union~ | union k-nearest |
+| ~seeded~ | mutual four-nearest seeds, union completions |
+
+Unknown names fail at run time.
+
+* File suffix
+
+~seams~ picks a reader from the path suffix:
+
+| suffix | reader | compile-time gate |
+|--------+--------+-------------------|
+| ~.xyz~ | ~readXYZ~ | always |
+| ~.con~ | ~readCon~ | ~readcon-core~ |
+| ~.pdb~, ~.gro~, ~.dcd~ | ~readChemfiles~ | ~chemfiles~ |
+| anything else | LAMMPS dump | always |
+
+~--frame~ / ~--last~ / ~--jobs~ walk a LAMMPS dump through
+~forEachLammpsFrame~ (each worker opens its own handle). Single-frame
+~read~ / ~chill~ / ~chill-plus~ / ~cages~ work on every linked
+suffix.
+
+* ~--features~
+
+One line per backend: OpenMP, MPI, Highway SIMD, vesin neighbours,
+chemfiles, readcon-core, IRA/SOFI, sphericart, nauty. Each line is
+~enabled~ or ~disabled~.
+
+* Colors
+
+Argum's ~environmentColorStatus~:
+
+- ~NO_COLOR~ set and non-empty: colors off
+- ~FORCE_COLOR~ set and non-empty: colors on
+- otherwise TTY / ~CLICOLOR~ / ~COLORTERM~ heuristics
+
+Ice-type names in ~chill~ / ~chill-plus~ / ~cages~ counts are
+colorized the same way.
 
 * Examples
 
@@ -33,9 +93,14 @@ seams cages FILE
 seams read input/traj/exampleTraj.lammpstrj
 seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
 seams cages input/traj/mW_cubic.lammpstrj --type 1 --graph seeded
+seams cages dump.lammpstrj --graph cutoff
+seams cages dump.lammpstrj --graph knn
+seams cages dump.lammpstrj --graph knn-union
 seams chill-plus dump.lammpstrj --frame 1 --last 50 --jobs 8
 #+end_src
 
 Lua and Python are not this binary. See
-[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] and
-[[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
+[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
+(~require("dseams")~) and
+[[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]
+(~pydseams~).

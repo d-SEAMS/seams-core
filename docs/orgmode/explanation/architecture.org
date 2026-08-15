@@ -1,7 +1,8 @@
 #+TITLE: Three repositories
 #+OPTIONS: toc:nil num:nil
 
-d-SEAMS 2 is not a monolith.
+d-SEAMS 2 is not a monolith. The classifier is one C++ library. Each
+language ships its own package against that library.
 
 | repository | product | role |
 |------------+---------+------|
@@ -12,12 +13,21 @@ d-SEAMS 2 is not a monolith.
 The front ends take seams-core as a Meson subproject (static library)
 or as a flake input. They do not vendor a second engine.
 
+A language binding that lived in the engine tree would force every
+C++ user to take that language's toolchain, and every wheel or rock
+to rebuild the same library. Splitting the repos keeps the Catch2
+suite, the ~seams~ CLI, and the optional backends on one Meson
+project, while Python and Lua version and release on their own
+schedules.
+
 * Why ~yoda~
 
-The 2020 executable was ~yodaStruct~. The compiled Python module is
-~pydseams.yoda~ so that name stays on the C++ surface.
-~_core~ and ~cyoda~ are aliases of ~yoda~. Lua helpers are
+The 2020 product was a single executable named ~yodaStruct~. That
+binary is gone. The compiled C++ surface kept the name so existing
+registrations stay findable: the Python module is ~pydseams.yoda~
+(~_core~ and ~cyoda~ are aliases of ~yoda~). Lua helpers are
 ~require("dseams")~; ~require("yoda")~ still resolves to that table.
+There is no ~yodaStruct~ executable in any of the three repositories.
 
 * Builds
 
@@ -27,9 +37,43 @@ The 2020 executable was ~yodaStruct~. The compiled Python module is
 - *Wheels*: cibuildwheel on PydSEAMSlib, CPython 3.12 limited ABI.
 
 The 2020 CMake Nix derivation of ~yodaStruct~ is gone.
+~-Dwith_python=true~ and ~-Dwith_lua=enabled~ are Meson errors that
+name PydSEAMSlib and yodaStruct.
 
-* Ice score
+* Ice score and the CHILL+ star
 
-A molecule in an HC is ice Ih. A molecule in a DDC is ice Ic. A
-molecule in neither is water. That is cage membership, not the
-four-neighbour CHILL+ star. Both live in ~libyodaLib~.
+Two classifiers live in ~libyodaLib~. They answer different questions
+and they do not imply each other.
+
+CHILL and CHILL+ look at the *four-neighbour star*. They compute
+bond-order correlations ~c_ij~ on the four nearest neighbours of each
+oxygen (or each mW site) and label the atom cubic, hexagonal,
+interfacial, clathrate, or water from the staggered and eclipsed
+pattern of that star. ~seams chill~ / ~seams chill-plus~ and
+~Frame.chill~ / ~Frame.chill_plus~ are this path.
+
+The *ice score* is cage membership. A molecule in a hexagonal cage
+(HC) is ice Ih. A molecule in a double-diamond cage (DDC) is ice Ic.
+A molecule in neither is water. The cages are assembled from
+six-membered primitive rings on a chosen bond graph, not from the
+four-neighbour star. ~seams cages~ and ~Frame.cages~ are this path.
+
+A configuration can agree exactly on the closed star of a vertex
+(same induced graph, same coordinates on those five atoms) and still
+disagree on that vertex's cage label, because the cage predicates
+read a larger neighbourhood of six-rings. The Catch2 suite encodes
+that fact: cage membership is not a function of the four-neighbour
+star.
+
+~seams cages --graph~ chooses the bond graph those rings are found
+on:
+
+| value | graph |
+|-------+-------|
+| ~cutoff~ | pairs inside the distance cutoff (2020 graph) |
+| ~knn~ | mutual k-nearest (default ~k=4~) |
+| ~knn-union~ | union k-nearest (completion graph of the seeded rule) |
+| ~seeded~ | mutual seeds, union completions (CLI default) |
+
+On a perfect cubic crystal the four graphs coincide. On a mixed
+nucleation dump they do not.

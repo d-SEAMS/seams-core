@@ -1,8 +1,10 @@
 #+TITLE: Quickstart
 #+OPTIONS: toc:nil num:nil
 
-Classify ice on the in-tree mixed TIP4P example
-(~input/traj/exampleTraj.lammpstrj~, 250 waters).
+Build the engine, read a frame, and print what this binary linked.
+
+The in-tree mixed TIP4P dump is ~input/traj/exampleTraj.lammpstrj~
+(750 atoms, 250 waters; type 2 is oxygen).
 
 * Install the engine
 
@@ -19,8 +21,11 @@ pixi:
 #+begin_src bash
 pixi run setup
 pixi run build
-./bbdir/src/seams --help
+./bbdir/seams --help
 #+end_src
+
+Either path produces ~libyodaLib~ and the ~seams~ CLI. This repository
+does not install Python or Lua.
 
 * Read a frame
 
@@ -28,25 +33,33 @@ pixi run build
 seams read input/traj/exampleTraj.lammpstrj
 #+end_src
 
-Expected shape of the line: ~nop 250 frame 1 box ...~.
+The line is ~nop 250 frame 1 box ...~ after the oxygen guess (type 2,
+then type 1). Pass ~--type 2~ to skip the guess.
 
-* CHILL+
+* Features of this build
+
+#+begin_src bash
+seams --features
+#+end_src
+
+Each line is a compile-time backend: OpenMP, MPI, Highway SIMD, vesin,
+chemfiles, readcon-core, IRA/SOFI, sphericart, nauty. The Nix flake
+turns Eigen, BLAS/LAPACK, Catch2 and Highway on when nixpkgs provides
+them. Optional wrap-git backends stay off unless a package is already
+in the closure. ~pixi~ enables what conda-forge put in the environment
+(Highway and chemfiles are in the default pixi lock).
+
+* CHILL+ and cages
 
 #+begin_src bash
 seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
-#+end_src
-
-On this fixture the four-neighbour labels are 42 cubic, 65 hexagonal,
-58 interfacial and 85 water.
-
-* Cages
-
-#+begin_src bash
 seams cages input/traj/exampleTraj.lammpstrj --type 2
 #+end_src
 
-The default bond graph is ~--graph seeded~ (mutual four-nearest seeds,
-union completions). This mixed frame has no complete HC or DDC.
+On this fixture the four-neighbour labels are 42 cubic, 65 hexagonal,
+58 interfacial and 85 water. The default bond graph is ~--graph seeded~
+(mutual four-nearest seeds, union completions). This mixed frame has
+no complete HC or DDC: cage membership is not the CHILL+ star.
 
 * Python and Lua
 
@@ -67,16 +80,7 @@ print(dseams.chill_plus(cloud, {cutoff = 3.5}))
 #+end_src
 
 Install those from
-[[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] and
-[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]].
-
-* Features of this build
-
-#+begin_src bash
-seams --features
-#+end_src
-
-Optional backends (vesin, chemfiles, readcon-core, IRA, sphericart,
-nauty, MPI) stay off unless the Meson probe finds them. The Nix flake
-enables Eigen, BLAS/LAPACK, Catch2 and Highway when nixpkgs provides
-them.
+[[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] (~pydseams~,
+compiled module ~yoda~) and
+[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
+(~require("dseams")~). ~import pydseamslib~ is an alias of ~pydseams~.

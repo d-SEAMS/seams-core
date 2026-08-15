@@ -18,6 +18,7 @@ extensions = [
     "myst_parser",
     "sphinx.ext.intersphinx",
     "sphinx_sitemap",
+    "sphinx_design",
 ]
 
 templates_path = ["_templates"]
@@ -28,6 +29,7 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable", None),
     "ase": ("https://wiki.fysik.dtu.dk/ase/", None),
     "pydseams": ("https://d-seams.github.io/PydSEAMSlib/", None),
+    "luadseams": ("https://d-seams.github.io/yodaStruct/", None),
 }
 
 # -- Options for HTML output -------------------------------------------------
@@ -49,14 +51,27 @@ html_theme_options = {
     "globaltoc_expand_depth": 1,
     "nav_links": [
         {
-            "title": "pydseams",
-            "url": "https://github.com/d-SEAMS/PydSEAMSlib",
-            "external": True,
-        },
-        {
-            "title": "dseams (Lua)",
-            "url": "https://github.com/d-SEAMS/yodaStruct",
-            "external": True,
+            "title": "Ecosystem",
+            "children": [
+                {
+                    "title": "d-SEAMS engine",
+                    "url": "https://docs.dseams.info",
+                    "summary": "libyodaLib and the seams CLI",
+                    "external": True,
+                },
+                {
+                    "title": "pydseams",
+                    "url": "https://d-seams.github.io/PydSEAMSlib/",
+                    "summary": "Python Frame API on yoda",
+                    "external": True,
+                },
+                {
+                    "title": "dseams (Lua)",
+                    "url": "https://d-seams.github.io/yodaStruct/",
+                    "summary": "require(\"dseams\") and Fennel",
+                    "external": True,
+                },
+            ],
         },
     ],
 }
@@ -69,4 +84,4 @@ html_sidebars = {
     ],
 }
 
-html_baseurl = "https://docs.dseams.info"
+html_baseurl = "https://docs.dseams.info/"

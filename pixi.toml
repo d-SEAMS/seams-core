@@ -105,6 +105,7 @@ doxyrest = ">=2.1"
 shibuya = ">=2025.12, <2027"
 sphinx = ">=8.0, <9"
 sphinx-sitemap = ">=2.9, <3"
+sphinx-design = ">=0.6, <1"
 myst-parser = ">=4.0, <5"
 
 [feature.docs.tasks.setup-doxyrest]

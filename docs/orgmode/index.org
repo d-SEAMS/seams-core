@@ -14,10 +14,10 @@
 
 d-SEAMS (Deferred Structural Elucidation Analysis for Molecular
 Simulations) classifies ice in molecular-dynamics trajectories: CHILL
-and CHILL+, Franzblau / Yuan--Cormack primitive rings, and hexagonal /
+and CHILL+, Franzblau / Yuan-Cormack primitive rings, and hexagonal /
 double-diamond cage membership.
 
-This repository is the C++ engine (~libyodaLib~) and the ~seams~ CLI.
+This repository is the C++ engine (=libyodaLib=) and the =seams= CLI.
 
 #+begin_src bash
 seams read water.lammpstrj
@@ -27,11 +27,18 @@ seams cages water.lammpstrj
 
 Scripting front ends are separate packages:
 
-- Python: ~pydseams~ ([[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]), compiled module ~yoda~
-- Lua/Fennel: ~dseams~ ([[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]), ~require("dseams")~
+- Python: =pydseams= ([[https://d-seams.github.io/PydSEAMSlib/][docs]],
+  [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]), compiled
+  module =yoda=
+- Lua/Fennel: =dseams= ([[https://d-seams.github.io/yodaStruct/][docs]],
+  [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]),
+  =require("dseams")=
 
-Build with a Nix flake (~nix build~, ~nix develop~) or with
-~pixi run setup && pixi run build && pixi run test~.
+The header *Ecosystem* menu on every page jumps between the three
+Shibuya sites.
+
+Build with a Nix flake (=nix build=, =nix develop=) or with
+=pixi run setup && pixi run build && pixi run test=.
 
 * Getting Started
 #+begin_export rst
@@ -49,7 +56,6 @@ Build with a Nix flake (~nix build~, ~nix develop~) or with
      :caption: Tutorials
 
      tutorials/bulk-ice
-     tutorials/nanotube
 #+end_export
 
 * How-To Guides

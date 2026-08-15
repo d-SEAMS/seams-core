@@ -1,6 +1,6 @@
 INPUT_FILE = "xml/index.xml"
 OUTPUT_FILE = "api/index.rst"
-INDEX_TITLE = "API Reference"
+INDEX_TITLE = "C++ headers (doxyrest)"
 
 FRAME_DIR_LIST = {
     "../../subprojects/doxyrest/frame/common",
