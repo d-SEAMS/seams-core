@@ -30,7 +30,9 @@ BASE_BUILD = os.path.join(BUILD, "build-base")
 def hq(cpus):
     if os.environ.get("SEAMS_NO_HQ") or shutil.which("hq") is None:
         return ""
-    return "hq submit --wait --cpus {} --".format(cpus)
+    return ("hq submit --wait --cpus {} "
+            "--stdout repro/results/hq-%{{JOB_ID}}.stdout "
+            "--stderr repro/results/hq-%{{JOB_ID}}.stderr --").format(cpus)
 
 
 rule all:

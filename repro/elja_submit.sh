@@ -57,7 +57,9 @@ run)
   hq server start > repro/results/hq-server.log 2>&1 &
   HQ_SERVER_PID=$!
   sleep 3
-  hq worker start --cpus "${SLURM_CPUS_PER_TASK:-8}" \
+  # Tasks inherit the worker environment, so the worker starts inside the
+  # repro pixi environment; meson, ninja and python resolve there
+  pixi run -e repro -- hq worker start --cpus "${SLURM_CPUS_PER_TASK:-8}" \
     > repro/results/hq-worker.log 2>&1 &
   HQ_WORKER_PID=$!
   sleep 2
