@@ -13,8 +13,14 @@
 //-----------------------------------------------------------------------------------
 
 #include <algorithm>
+#include <cstdint>
+#include <filesystem>
+#include <fstream>
 #include <generic.hpp>
+#include <memory>
+#include <mutex>
 #include <seams_input.hpp>
+#include <unordered_map>
 
 namespace {
 /**
@@ -34,7 +40,173 @@ void mapAtomIdToIndex(
     yCloud.idIndexMap[id] = idx;
   }
 }
+
+bool isLammpsTimestep(const std::string &line) {
+  return line.size() >= 14 && line.compare(0, 14, "ITEM: TIMESTEP") == 0;
+}
+
+// Live dump cursor, matching LAMMPS ReaderNative (rerun keeps FILE* at
+// the next snapshot) and chemfiles LAMMPSTrajectory::read_next. Random
+// access seeks a cached ITEM: TIMESTEP offset table.
+struct LammpsDumpSession {
+  std::mutex mu;
+  std::string path;
+  std::ifstream file;
+  std::vector<std::uint64_t> offsets;
+  int lastFrame = 0;
+  std::filesystem::file_time_type mtime{};
+  std::uintmax_t size{0};
+
+  bool open(const std::string &filename) {
+    path = filename;
+    std::error_code ec;
+    size = std::filesystem::file_size(filename, ec);
+    if (ec) {
+      return false;
+    }
+    mtime = std::filesystem::last_write_time(filename, ec);
+    if (ec) {
+      return false;
+    }
+    file.open(filename, std::ios::in | std::ios::binary);
+    offsets.clear();
+    lastFrame = 0;
+    return file.is_open();
+  }
+
+  bool stale() const {
+    std::error_code ec;
+    const auto sz = std::filesystem::file_size(path, ec);
+    if (ec || sz != size) {
+      return true;
+    }
+    const auto mt = std::filesystem::last_write_time(path, ec);
+    return ec || mt != mtime;
+  }
+
+  bool discoverNext() {
+    if (!file.is_open()) {
+      return false;
+    }
+    if (offsets.empty()) {
+      file.clear();
+      file.seekg(0);
+    } else {
+      file.clear();
+      file.seekg(static_cast<std::streamoff>(offsets.back()));
+      std::string skip;
+      if (!std::getline(file, skip)) {
+        return false;
+      }
+    }
+    while (file) {
+      const auto here = file.tellg();
+      if (here < 0) {
+        return false;
+      }
+      std::string line;
+      if (!std::getline(file, line)) {
+        return false;
+      }
+      if (isLammpsTimestep(line)) {
+        offsets.push_back(static_cast<std::uint64_t>(here));
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool positionAt(int frame) {
+    if (frame < 1 || !file.is_open()) {
+      return false;
+    }
+    if (lastFrame + 1 == frame && lastFrame > 0) {
+      const auto here = file.tellg();
+      if (here >= 0 && static_cast<int>(offsets.size()) < frame) {
+        offsets.push_back(static_cast<std::uint64_t>(here));
+      }
+      std::string line;
+      if (!std::getline(file, line) || !isLammpsTimestep(line)) {
+        return false;
+      }
+      lastFrame = frame;
+      return true;
+    }
+    while (static_cast<int>(offsets.size()) < frame) {
+      if (!discoverNext()) {
+        return false;
+      }
+    }
+    file.clear();
+    file.seekg(static_cast<std::streamoff>(offsets[frame - 1]));
+    std::string line;
+    if (!std::getline(file, line) || !isLammpsTimestep(line)) {
+      return false;
+    }
+    lastFrame = frame;
+    return true;
+  }
+
+  int nframes() {
+    while (discoverNext()) {
+    }
+    return static_cast<int>(offsets.size());
+  }
+};
+
+std::mutex gDumpMu;
+std::unordered_map<std::string, std::shared_ptr<LammpsDumpSession>> gDumps;
+
+std::shared_ptr<LammpsDumpSession> sessionFor(const std::string &filename) {
+  if (!gen::file_exists(filename)) {
+    return nullptr;
+  }
+  std::lock_guard<std::mutex> lock(gDumpMu);
+  auto &slot = gDumps[filename];
+  if (!slot || slot->stale() || !slot->file.is_open()) {
+    slot = std::make_shared<LammpsDumpSession>();
+    if (!slot->open(filename)) {
+      slot.reset();
+      return nullptr;
+    }
+  }
+  return slot;
+}
+
+void noteCoordColumn(int col, const std::string &tok, int &x, int &y,
+                     int &z) {
+  // LAMMPS ReaderNative (src/reader_native.cpp): take x if present,
+  // otherwise the first of xs / xu / xsu in column order.
+  if (tok == "x") {
+    x = col;
+  } else if ((tok == "xu" || tok == "xs" || tok == "xsu") && x < 0) {
+    x = col;
+  } else if (tok == "y") {
+    y = col;
+  } else if ((tok == "yu" || tok == "ys" || tok == "ysu") && y < 0) {
+    y = col;
+  } else if (tok == "z") {
+    z = col;
+  } else if ((tok == "zu" || tok == "zs" || tok == "zsu") && z < 0) {
+    z = col;
+  }
+}
+
 } // namespace
+
+int sinp::nLammpsFrames(const std::string &filename) {
+  auto sess = sessionFor(filename);
+  if (sess == nullptr) {
+    return 0;
+  }
+  std::lock_guard<std::mutex> lock(sess->mu);
+  return sess->nframes();
+}
+
+void sinp::dropLammpsDumpIndex(const std::string &filename) {
+  std::lock_guard<std::mutex> lock(gDumpMu);
+  gDumps.erase(filename);
+}
 
 /**
  * @details Get all the ring information, from the R.I.N.G.S. file. Each line
@@ -194,6 +366,172 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
 
 // External Libraries
 
+namespace {
+enum class LammpsKeep { All, Type, TypeInSlice };
+
+// Parse one snapshot. The session has already consumed ITEM: TIMESTEP.
+// Stop at the next ITEM: TIMESTEP and seek back so the live cursor sits
+// on that line, matching LAMMPS ReaderNative::read_time.
+void parseLammpsFrameBody(
+    std::ifstream &file,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeFilter,
+    LammpsKeep keep, bool isSlice, std::array<double, 3> coordLow,
+    std::array<double, 3> coordHigh) {
+  std::string line;
+  std::vector<std::string> tokens;
+  std::vector<double> numbers;
+  std::vector<double> tilt;
+  int nop = -1;
+  bool readNOP = false;
+  bool readBox = false;
+  bool readAtoms = false;
+  int xIndex = -1;
+  int yIndex = -1;
+  int zIndex = -1;
+  int typeIndex = -1;
+  int molIndex = 0;
+  int atomIndex = 0;
+  bool isTriclinic = false;
+  int nKept = 0;
+  molSys::Point<double> iPoint;
+
+  while (true) {
+    const auto mark = file.tellg();
+    if (!std::getline(file, line)) {
+      break;
+    }
+    if (isLammpsTimestep(line)) {
+      if (mark >= 0) {
+        file.clear();
+        file.seekg(mark);
+      }
+      break;
+    }
+
+    tokens = gen::tokenizer(line);
+    numbers = gen::tokenizerDouble(line);
+
+    if (readNOP) {
+      nop = std::stoi(line.data());
+      readNOP = false;
+      if (keep == LammpsKeep::All) {
+        yCloud.pts.reserve(static_cast<std::size_t>(nop));
+        yCloud.nop = nop;
+      }
+    }
+    if (readBox) {
+      if (!tokens.empty() && tokens[0] == "ITEM:") {
+        readBox = false;
+        if (isTriclinic) {
+          for (std::size_t k = 0; k < tilt.size(); k++) {
+            yCloud.box.push_back(tilt[k]);
+          }
+        }
+      } else if (numbers.size() >= 2) {
+        yCloud.box.push_back(numbers[1] - numbers[0]);
+        yCloud.boxLow.push_back(numbers[0]);
+        if (numbers.size() == 3) {
+          isTriclinic = true;
+          tilt.push_back(numbers[2]);
+        }
+      }
+    }
+    if (readAtoms && typeIndex >= 0 && xIndex >= 0 && yIndex >= 0 &&
+        zIndex >= 0 &&
+        numbers.size() >
+            static_cast<std::size_t>(
+                std::max({typeIndex, xIndex, yIndex, zIndex, molIndex,
+                          atomIndex}))) {
+      iPoint.type = static_cast<int>(numbers[typeIndex]);
+      iPoint.molID = static_cast<int>(numbers[molIndex]);
+      iPoint.atomID = static_cast<int>(numbers[atomIndex]);
+      iPoint.x = numbers[xIndex];
+      iPoint.y = numbers[yIndex];
+      iPoint.z = numbers[zIndex];
+      if (isSlice) {
+        iPoint.inSlice = sinp::atomInSlice(iPoint.x, iPoint.y, iPoint.z,
+                                           coordLow, coordHigh);
+        if (keep == LammpsKeep::TypeInSlice && !iPoint.inSlice) {
+          continue;
+        }
+      }
+      if (keep != LammpsKeep::All && iPoint.type != typeFilter) {
+        continue;
+      }
+      nKept++;
+      yCloud.pts.push_back(iPoint);
+      mapAtomIdToIndex(yCloud);
+    }
+
+    if (!tokens.empty() && tokens[0] == "ITEM:" && tokens.size() > 1) {
+      if (tokens[1] == "NUMBER") {
+        readNOP = true;
+      } else if (tokens[1] == "BOX") {
+        readBox = true;
+      } else if (tokens[1] == "ATOMS") {
+        readAtoms = true;
+        xIndex = yIndex = zIndex = typeIndex = -1;
+        molIndex = 0;
+        atomIndex = 0;
+        for (int i = 2; i < static_cast<int>(tokens.size()); i++) {
+          if (tokens[i] == "type") {
+            typeIndex = i - 2;
+          } else if (tokens[i] == "mol") {
+            molIndex = i - 2;
+          } else if (tokens[i] == "id") {
+            atomIndex = i - 2;
+          } else {
+            noteCoordColumn(i - 2, tokens[i], xIndex, yIndex, zIndex);
+          }
+        }
+        if (molIndex == 0) {
+          molIndex = atomIndex;
+        }
+      }
+    }
+  }
+
+  if (keep != LammpsKeep::All) {
+    yCloud.nop = static_cast<int>(yCloud.pts.size());
+    if (yCloud.pts.size() != static_cast<std::size_t>(nKept)) {
+      std::cout << "Atoms didn't get filled in properly.\n";
+    }
+  } else if (nop >= 0 && yCloud.pts.size() != static_cast<std::size_t>(yCloud.nop)) {
+    std::cout << "Atoms didn't get filled in properly.\n";
+  }
+}
+
+void loadLammpsFrame(
+    const std::string &filename, int targetFrame,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeFilter,
+    LammpsKeep keep, bool isSlice, std::array<double, 3> coordLow,
+    std::array<double, 3> coordHigh) {
+  yCloud = molSys::clearPointCloud(yCloud);
+  if (!gen::file_exists(filename)) {
+    std::cout
+        << "Fatal Error: The file does not exist or you gave the wrong path.\n";
+    yCloud.currentFrame = targetFrame;
+    return;
+  }
+  auto sess = sessionFor(filename);
+  if (sess == nullptr) {
+    std::cout
+        << "Fatal Error: The file does not exist or you gave the wrong path.\n";
+    yCloud.currentFrame = targetFrame;
+    return;
+  }
+  std::lock_guard<std::mutex> lock(sess->mu);
+  if (!sess->positionAt(targetFrame)) {
+    std::cout << "You entered a frame that doesn't exist.\n";
+    yCloud.currentFrame = targetFrame;
+    return;
+  }
+  parseLammpsFrameBody(sess->file, yCloud, typeFilter, keep, isSlice, coordLow,
+                       coordHigh);
+  yCloud.currentFrame = targetFrame;
+}
+} // namespace
+
 /**
  * @details  Function for reading in a lammps file. Reads in a specified frame
  *  (frame number and not timestep value).
@@ -211,204 +549,8 @@ sinp::readLammpsTrj(std::string filename, int targetFrame,
                     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                     bool isSlice, std::array<double, 3> coordLow,
                     std::array<double, 3> coordHigh) {
-  std::unique_ptr<std::ifstream> dumpFile;
-  dumpFile = std::make_unique<std::ifstream>(filename);
-  std::string line;                // Current line being read in
-  std::vector<std::string> tokens; // Vector containing word tokens
-  std::vector<double> numbers;     // Vector containing type double numbers
-  std::vector<double> tilt;        // Vector containing tilt factors
-  int currentFrame = 0;            // Current frame being read in
-  int nop = -1;                    // Number of atoms in targetFrame
-  bool foundFrame =
-      false;            // Determines whether targetFrame has been found or not
-  bool readNOP = false; // Flag for reading in the number of atoms
-  bool readBox = false; // Flag for reading in the box lengths
-  bool readAtoms = false; // Flag for reading in the atoms
-  int xIndex, yIndex, zIndex,
-      typeIndex;     // Indices for x,y,z coordinates, and LAMMPS type ID
-  int molIndex = 0;  // Index for molecular ID
-  int atomIndex = 0; // Index for atom ID (Only used if mol ID has not been set)
-  molSys::Point<double> iPoint; // Current point being read in from the file
-  xIndex = yIndex = zIndex = typeIndex = -1; // Default values
-  bool isTriclinic = false; // Flag for an orthogonal or triclinic box
-
-  if (!(gen::file_exists(filename))) {
-    std::cout
-        << "Fatal Error: The file does not exist or you gave the wrong path.\n";
-    // Throw exception?
-    return yCloud;
-  }
-
-  // The format of the LAMMPS trajectory file is:
-  // ITEM: TIMESTEP
-  // 0
-  // ITEM: NUMBER OF ATOMS
-  // 4096
-  // ITEM: BOX BOUNDS pp pp pp
-  // -7.9599900000000001e-01 5.0164000000000001e+01
-  // -7.9599900000000001e-01 5.0164000000000001e+01
-  // -7.9599900000000001e-01 5.0164000000000001e+01
-  // ITEM: ATOMS id type x y z
-  // 1 1 0 0 0 etc
-  if (dumpFile->is_open()) {
-    // ----------------------------------------------------------
-    // At this point we know that the dumpfile is open
-    // This loop searches for targetFrame
-    while (std::getline((*dumpFile), line)) {
-      // Read in lines and tokenize them
-      tokens = gen::tokenizer(line);
-      // Find out which timestep number
-      // you are inside
-      if (tokens[0].compare("ITEM:") == 0) {
-        if (tokens[1].compare("TIMESTEP") == 0) {
-          // Now you are in a new timestep. Update frame number
-          currentFrame++;
-        }
-      }
-
-      // If targetFrame has been found
-      // break out of the while loop
-      if (currentFrame == targetFrame) {
-        foundFrame = true;
-        break; // Exit the while loop
-      }
-    } // End of while loop searching for targetFrame
-    // ----------------------------------------------------------
-    // Before filling up the PointCloud, if the vectors are filled
-    // empty them
-    yCloud = molSys::clearPointCloud(yCloud);
-
-    // ----------------------------------------------------------
-    // If targetFrame has been found, read in the box lengths,
-    // number of atoms and then read in atom positions, type, molID
-    // By default, set molID=1 if not specified
-    if (foundFrame) {
-      // Run this until EOF or you reach the next timestep
-      while (std::getline((*dumpFile), line)) {
-        // Read in lines and tokenize them into std::string words and <double>
-        // numbers
-        tokens = gen::tokenizer(line);
-        numbers = gen::tokenizerDouble(line);
-
-        // If you've reached the timestep line then you've reached the
-        // next frame. Break out of the while loop
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("TIMESTEP") == 0) {
-            break;
-          }
-        }
-
-        // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-        // Read number of particles
-        if (readNOP) {
-          nop = std::stoi(line.data());
-          readNOP = false;
-          yCloud.pts.reserve(nop);
-          yCloud.nop = nop;
-        }
-        // Read box lengths
-        if (readBox) {
-          // You've reached the end of box lengths
-          if (tokens[0].compare("ITEM:") == 0) {
-            readBox = false;
-            // If the box is triclinic, get the
-            // orthogonal 'bounding box'
-            if (isTriclinic) {
-              // Update tilt factors
-              for (int k = 0; k < tilt.size(); k++) {
-                yCloud.box.push_back(tilt[k]);
-              }
-            } // end of check for triclinic
-          }
-          // Or else fill up the box lengths
-          else {
-            yCloud.box.push_back(numbers[1] - numbers[0]); // Update box length
-            yCloud.boxLow.push_back(
-                numbers[0]); // Update the lower box coordinate
-            // Do this for a triclinic box only
-            if (numbers.size() == 3) {
-              isTriclinic = true;
-              tilt.push_back(numbers[2]);
-            }
-          }
-        }
-        // Read atoms into yCloud line by line
-        if (readAtoms) {
-          iPoint.type = numbers[typeIndex];
-          iPoint.molID = numbers[molIndex];
-          iPoint.atomID = numbers[atomIndex];
-          iPoint.x = numbers[xIndex];
-          iPoint.y = numbers[yIndex];
-          iPoint.z = numbers[zIndex];
-          // Check if the particle is inside the volume Slice
-          // or not
-          if (isSlice) { // only if a slice has been requested
-            iPoint.inSlice = sinp::atomInSlice(iPoint.x, iPoint.y, iPoint.z,
-                                               coordLow, coordHigh);
-          }
-          yCloud.pts.push_back(iPoint);
-          mapAtomIdToIndex(yCloud);
-        }
-        // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-
-        // Tests for reading in nop, box lengths, and atoms
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("NUMBER") == 0) {
-            readNOP = true;
-          }
-        }
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("BOX") == 0) {
-            readBox = true;
-          }
-        }
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("ATOMS") == 0) {
-            readAtoms = true;
-            // Now find out which index is the coordinate index etc
-            for (int i = 2; i < tokens.size(); i++) {
-              if (tokens[i].compare("type") == 0) {
-                typeIndex = i - 2;
-              }
-              if (tokens[i].compare("x") == 0) {
-                xIndex = i - 2;
-              }
-              if (tokens[i].compare("y") == 0) {
-                yIndex = i - 2;
-              }
-              if (tokens[i].compare("z") == 0) {
-                zIndex = i - 2;
-              }
-              if (tokens[i].compare("mol") == 0) {
-                molIndex = i - 2;
-              }
-              if (tokens[i].compare("id") == 0) {
-                atomIndex = i - 2;
-              }
-            } // End of for loop over tokens
-            if (molIndex == 0) {
-              molIndex = atomIndex;
-            } // Set mol ID=atomID if not given
-          }
-        } // End of nested if loops for checking atom
-
-      } // End of while
-    }   // End of targetFrame found
-    // ----------------------------------------------------------
-  } // End of if file open statement
-
-  // Check if you filled in the frame correctly
-  if (!(foundFrame)) {
-    std::cout << "You entered a frame that doesn't exist.\n";
-  } // Throw exception
-  if (foundFrame) {
-    if (yCloud.pts.size() != yCloud.nop) {
-      std::cout << "Atoms didn't get filled in properly.\n";
-    }
-  } // Throw exception
-  yCloud.currentFrame = targetFrame;
-
-  dumpFile->close();
+  loadLammpsFrame(filename, targetFrame, yCloud, -1, LammpsKeep::All, isSlice,
+                  coordLow, coordHigh);
   return yCloud;
 }
 
@@ -430,209 +572,8 @@ sinp::readLammpsTrjO(std::string filename, int targetFrame,
                      molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      int typeO, bool isSlice, std::array<double, 3> coordLow,
                      std::array<double, 3> coordHigh) {
-  std::unique_ptr<std::ifstream> dumpFile;
-  dumpFile = std::make_unique<std::ifstream>(filename);
-  std::string line;                // Current line being read in
-  std::vector<std::string> tokens; // Vector containing word tokens
-  std::vector<double> numbers;     // Vector containing type double numbers
-  std::vector<double> tilt;        // Vector containing tilt factors
-  int currentFrame = 0;            // Current frame being read in
-  int nop = -1;                    // Number of atoms in targetFrame
-  bool foundFrame =
-      false;            // Determines whether targetFrame has been found or not
-  bool readNOP = false; // Flag for reading in the number of atoms
-  bool readBox = false; // Flag for reading in the box lengths
-  bool readAtoms = false; // Flag for reading in the atoms
-  int xIndex, yIndex, zIndex,
-      typeIndex;     // Indices for x,y,z coordinates, and LAMMPS type ID
-  int molIndex = 0;  // Index for molecular ID
-  int atomIndex = 0; // Index for atom ID (Only used if mol ID has not been set)
-  molSys::Point<double> iPoint; // Current point being read in from the file
-  xIndex = yIndex = zIndex = typeIndex = -1; // Default values
-  bool isTriclinic = false; // Flag for an orthogonal or triclinic box
-  int nOxy = 0;             // Number of oxygen atoms
-
-  if (!(gen::file_exists(filename))) {
-    std::cout
-        << "Fatal Error: The file does not exist or you gave the wrong path.\n";
-    // Throw exception?
-    return yCloud;
-  }
-
-  // The format of the LAMMPS trajectory file is:
-  // ITEM: TIMESTEP
-  // 0
-  // ITEM: NUMBER OF ATOMS
-  // 4096
-  // ITEM: BOX BOUNDS pp pp pp
-  // -7.9599900000000001e-01 5.0164000000000001e+01
-  // -7.9599900000000001e-01 5.0164000000000001e+01
-  // -7.9599900000000001e-01 5.0164000000000001e+01
-  // ITEM: ATOMS id type x y z
-  // 1 1 0 0 0 etc
-  if (dumpFile->is_open()) {
-    // ----------------------------------------------------------
-    // At this point we know that the dumpfile is open
-    // This loop searches for targetFrame
-    while (std::getline((*dumpFile), line)) {
-      // Read in lines and tokenize them
-      tokens = gen::tokenizer(line);
-      // Find out which timestep number
-      // you are inside
-      if (tokens[0].compare("ITEM:") == 0) {
-        if (tokens[1].compare("TIMESTEP") == 0) {
-          // Now you are in a new timestep. Update frame number
-          currentFrame++;
-        }
-      }
-
-      // If targetFrame has been found
-      // break out of the while loop
-      if (currentFrame == targetFrame) {
-        foundFrame = true;
-        break; // Exit the while loop
-      }
-    } // End of while loop searching for targetFrame
-    // ----------------------------------------------------------
-    // Before filling up the PointCloud, if the vectors are filled
-    // empty them
-    yCloud = molSys::clearPointCloud(yCloud);
-
-    // ----------------------------------------------------------
-    // If targetFrame has been found, read in the box lengths,
-    // number of atoms and then read in atom positions, type, molID
-    // By default, set molID=1 if not specified
-    if (foundFrame) {
-      // Run this until EOF or you reach the next timestep
-      while (std::getline((*dumpFile), line)) {
-        // Read in lines and tokenize them into std::string words and <double>
-        // numbers
-        tokens = gen::tokenizer(line);
-        numbers = gen::tokenizerDouble(line);
-
-        // If you've reached the timestep line then you've reached the
-        // next frame. Break out of the while loop
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("TIMESTEP") == 0) {
-            break;
-          }
-        }
-
-        // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-        // Read number of particles
-        if (readNOP) {
-          nop = std::stoi(line.data());
-          readNOP = false;
-        }
-        // Read box lengths
-        if (readBox) {
-          // You've reached the end of box lengths
-          if (tokens[0].compare("ITEM:") == 0) {
-            readBox = false;
-            // If the box is triclinic, get the
-            // orthogonal 'bounding box'
-            if (isTriclinic) {
-              // Update tilt factors
-              for (int k = 0; k < tilt.size(); k++) {
-                yCloud.box.push_back(tilt[k]);
-              }
-            } // end of check for triclinic
-          }
-          // Or else fill up the box lengths
-          else {
-            yCloud.box.push_back(numbers[1] - numbers[0]); // Update box length
-            yCloud.boxLow.push_back(
-                numbers[0]); // Update the lower box coordinate
-            // Do this for a triclinic box only
-            if (numbers.size() == 3) {
-              isTriclinic = true;
-              tilt.push_back(numbers[2]);
-            }
-          }
-        }
-        // Read atoms into yCloud line by line
-        if (readAtoms) {
-          iPoint.type = numbers[typeIndex];
-          iPoint.molID = numbers[molIndex];
-          iPoint.atomID = numbers[atomIndex];
-          iPoint.x = numbers[xIndex];
-          iPoint.y = numbers[yIndex];
-          iPoint.z = numbers[zIndex];
-          // Check if the particle is inside the volume Slice
-          // or not
-          if (isSlice) { // only if a slice has been requested
-            iPoint.inSlice = sinp::atomInSlice(iPoint.x, iPoint.y, iPoint.z,
-                                               coordLow, coordHigh);
-          }
-          // Save only oxygen atoms
-          if (iPoint.type == typeO) {
-            nOxy++;
-            // yCloud.pts.resize(yCloud.pts.size()+1);
-            yCloud.pts.push_back(iPoint);
-            mapAtomIdToIndex(yCloud);
-          }
-        }
-        // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-
-        // Tests for reading in nop, box lengths, and atoms
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("NUMBER") == 0) {
-            readNOP = true;
-          }
-        }
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("BOX") == 0) {
-            readBox = true;
-          }
-        }
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("ATOMS") == 0) {
-            readAtoms = true;
-            // Now find out which index is the coordinate index etc
-            for (int i = 2; i < tokens.size(); i++) {
-              if (tokens[i].compare("type") == 0) {
-                typeIndex = i - 2;
-              }
-              if (tokens[i].compare("x") == 0) {
-                xIndex = i - 2;
-              }
-              if (tokens[i].compare("y") == 0) {
-                yIndex = i - 2;
-              }
-              if (tokens[i].compare("z") == 0) {
-                zIndex = i - 2;
-              }
-              if (tokens[i].compare("mol") == 0) {
-                molIndex = i - 2;
-              }
-              if (tokens[i].compare("id") == 0) {
-                atomIndex = i - 2;
-              }
-            } // End of for loop over tokens
-            if (molIndex == 0) {
-              molIndex = atomIndex;
-            } // Set mol ID=atomID if not given
-          }
-        } // End of nested if loops for checking atom
-
-      } // End of while
-    }   // End of targetFrame found
-    // ----------------------------------------------------------
-  } // End of if file open statement
-
-  // Check if you filled in the frame correctly
-  if (!(foundFrame)) {
-    std::cout << "You entered a frame that doesn't exist.\n";
-  } // Throw exception
-  if (foundFrame) {
-    yCloud.nop = yCloud.pts.size();
-    if (yCloud.pts.size() != nOxy) {
-      std::cout << "Atoms didn't get filled in properly.\n";
-    }
-  } // Throw exception
-  yCloud.currentFrame = targetFrame;
-
-  dumpFile->close();
+  loadLammpsFrame(filename, targetFrame, yCloud, typeO, LammpsKeep::Type,
+                  isSlice, coordLow, coordHigh);
   return yCloud;
 }
 
@@ -656,212 +597,8 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeI,
     bool isSlice, std::array<double, 3> coordLow,
     std::array<double, 3> coordHigh) {
-  std::unique_ptr<std::ifstream> dumpFile;
-  dumpFile = std::make_unique<std::ifstream>(filename);
-  std::string line;                // Current line being read in
-  std::vector<std::string> tokens; // Vector containing word tokens
-  std::vector<double> numbers;     // Vector containing type double numbers
-  std::vector<double> tilt;        // Vector containing tilt factors
-  int currentFrame = 0;            // Current frame being read in
-  int nop = -1;                    // Number of atoms in targetFrame
-  bool foundFrame =
-      false;            // Determines whether targetFrame has been found or not
-  bool readNOP = false; // Flag for reading in the number of atoms
-  bool readBox = false; // Flag for reading in the box lengths
-  bool readAtoms = false; // Flag for reading in the atoms
-  int xIndex, yIndex, zIndex,
-      typeIndex;     // Indices for x,y,z coordinates, and LAMMPS type ID
-  int molIndex = 0;  // Index for molecular ID
-  int atomIndex = 0; // Index for atom ID (Only used if mol ID has not been set)
-  molSys::Point<double> iPoint; // Current point being read in from the file
-  xIndex = yIndex = zIndex = typeIndex = -1; // Default values
-  bool isTriclinic = false; // Flag for an orthogonal or triclinic box
-  int nOxy = 0;             // Number of oxygen atoms
-
-  if (!(gen::file_exists(filename))) {
-    std::cout
-        << "Fatal Error: The file does not exist or you gave the wrong path.\n";
-    // Throw exception?
-    return yCloud;
-  }
-
-  // The format of the LAMMPS trajectory file is:
-  // ITEM: TIMESTEP
-  // 0
-  // ITEM: NUMBER OF ATOMS
-  // 4096
-  // ITEM: BOX BOUNDS pp pp pp
-  // -7.9599900000000001e-01 5.0164000000000001e+01
-  // -7.9599900000000001e-01 5.0164000000000001e+01
-  // -7.9599900000000001e-01 5.0164000000000001e+01
-  // ITEM: ATOMS id type x y z
-  // 1 1 0 0 0 etc
-  if (dumpFile->is_open()) {
-    // ----------------------------------------------------------
-    // At this point we know that the dumpfile is open
-    // This loop searches for targetFrame
-    while (std::getline((*dumpFile), line)) {
-      // Read in lines and tokenize them
-      tokens = gen::tokenizer(line);
-      // Find out which timestep number
-      // you are inside
-      if (tokens[0].compare("ITEM:") == 0) {
-        if (tokens[1].compare("TIMESTEP") == 0) {
-          // Now you are in a new timestep. Update frame number
-          currentFrame++;
-        }
-      }
-
-      // If targetFrame has been found
-      // break out of the while loop
-      if (currentFrame == targetFrame) {
-        foundFrame = true;
-        break; // Exit the while loop
-      }
-    } // End of while loop searching for targetFrame
-    // ----------------------------------------------------------
-    // Before filling up the PointCloud, if the vectors are filled
-    // empty them
-    yCloud = molSys::clearPointCloud(yCloud);
-
-    // ----------------------------------------------------------
-    // If targetFrame has been found, read in the box lengths,
-    // number of atoms and then read in atom positions, type, molID
-    // By default, set molID=1 if not specified
-    if (foundFrame) {
-      // Run this until EOF or you reach the next timestep
-      while (std::getline((*dumpFile), line)) {
-        // Read in lines and tokenize them into std::string words and <double>
-        // numbers
-        tokens = gen::tokenizer(line);
-        numbers = gen::tokenizerDouble(line);
-
-        // If you've reached the timestep line then you've reached the
-        // next frame. Break out of the while loop
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("TIMESTEP") == 0) {
-            break;
-          }
-        }
-
-        // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-        // Read number of particles
-        if (readNOP) {
-          nop = std::stoi(line.data());
-          readNOP = false;
-        }
-        // Read box lengths
-        if (readBox) {
-          // You've reached the end of box lengths
-          if (tokens[0].compare("ITEM:") == 0) {
-            readBox = false;
-            // If the box is triclinic, get the
-            // orthogonal 'bounding box'
-            if (isTriclinic) {
-              // Update tilt factors
-              for (int k = 0; k < tilt.size(); k++) {
-                yCloud.box.push_back(tilt[k]);
-              }
-            } // end of check for triclinic
-          }
-          // Or else fill up the box lengths
-          else {
-            yCloud.box.push_back(numbers[1] - numbers[0]); // Update box length
-            yCloud.boxLow.push_back(
-                numbers[0]); // Update the lower box coordinate
-            // Do this for a triclinic box only
-            if (numbers.size() == 3) {
-              isTriclinic = true;
-              tilt.push_back(numbers[2]);
-            }
-          }
-        }
-        // Read atoms into yCloud line by line
-        if (readAtoms) {
-          iPoint.type = numbers[typeIndex];
-          iPoint.molID = numbers[molIndex];
-          iPoint.atomID = numbers[atomIndex];
-          iPoint.x = numbers[xIndex];
-          iPoint.y = numbers[yIndex];
-          iPoint.z = numbers[zIndex];
-          // Check if the particle is inside the volume Slice
-          // or not
-          if (isSlice) { // only if a slice has been requested
-            iPoint.inSlice = sinp::atomInSlice(iPoint.x, iPoint.y, iPoint.z,
-                                               coordLow, coordHigh);
-            // Skip if the atom is not part of the slice
-            if (!iPoint.inSlice) {
-              continue;
-            } // do not save if not inside the slice
-          }
-          // Save only atoms of the desired type
-          if (iPoint.type == typeI) {
-            nOxy++;
-            // yCloud.pts.resize(yCloud.pts.size()+1);
-            yCloud.pts.push_back(iPoint);
-            mapAtomIdToIndex(yCloud);
-          }
-        }
-        // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-
-        // Tests for reading in nop, box lengths, and atoms
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("NUMBER") == 0) {
-            readNOP = true;
-          }
-        }
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("BOX") == 0) {
-            readBox = true;
-          }
-        }
-        if (tokens[0].compare("ITEM:") == 0) {
-          if (tokens[1].compare("ATOMS") == 0) {
-            readAtoms = true;
-            // Now find out which index is the coordinate index etc
-            for (int i = 2; i < tokens.size(); i++) {
-              if (tokens[i].compare("type") == 0) {
-                typeIndex = i - 2;
-              }
-              if (tokens[i].compare("x") == 0) {
-                xIndex = i - 2;
-              }
-              if (tokens[i].compare("y") == 0) {
-                yIndex = i - 2;
-              }
-              if (tokens[i].compare("z") == 0) {
-                zIndex = i - 2;
-              }
-              if (tokens[i].compare("mol") == 0) {
-                molIndex = i - 2;
-              }
-              if (tokens[i].compare("id") == 0) {
-                atomIndex = i - 2;
-              }
-            } // End of for loop over tokens
-            if (molIndex == 0) {
-              molIndex = atomIndex;
-            } // Set mol ID=atomID if not given
-          }
-        } // End of nested if loops for checking atom
-
-      } // End of while
-    }   // End of targetFrame found
-    // ----------------------------------------------------------
-  } // End of if file open statement
-
-  // Check if you filled in the frame correctly
-  if (!(foundFrame)) {
-    std::cout << "You entered a frame that doesn't exist.\n";
-  } // Throw exception
-
-  // Update the number of particles
-  yCloud.nop = yCloud.pts.size();
-
-  // Update the frame number
-  yCloud.currentFrame = targetFrame;
-
-  dumpFile->close();
+  loadLammpsFrame(filename, targetFrame, yCloud, typeI,
+                  LammpsKeep::TypeInSlice, isSlice, coordLow, coordHigh);
   return yCloud;
 }
 

@@ -50,6 +50,16 @@ namespace sinp {
 //! Get file list inside the input folder
 std::vector<std::string> getInpFileList(std::string inputFolder);
 
+//! Number of ITEM: TIMESTEP frames in a LAMMPS dump, or 0 if the file
+//! cannot be read. The first full count per path walks the file once
+//! and later reads seek, matching chemfiles Trajectory::nsteps and
+//! readcon's frame-offset table. Sequential load_frame walks reuse a
+//! live cursor the way LAMMPS ReaderNative does on rerun.
+int nLammpsFrames(const std::string &filename);
+
+//! Drop a cached dump session (tests that rewrite a path in place).
+void dropLammpsDumpIndex(const std::string &filename);
+
 //! Function for reading in a specified frame (frame number and not timestep
 //! value)
 molSys::PointCloud<molSys::Point<double>, double>

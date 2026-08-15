@@ -155,6 +155,110 @@ TEST_CASE("readLammpsTrjreduced with slice and type filter", "[seams_input]") {
   }
 }
 
+// -- LAMMPS dump live session (ReaderNative cursor + offset table) --
+
+namespace {
+std::string writeTinyDump() {
+  auto path =
+      fs::temp_directory_path() / "dseams_test_lammps_index.lammpstrj";
+  std::ofstream f(path);
+  for (int frame = 0; frame < 3; ++frame) {
+    f << "ITEM: TIMESTEP\n" << (100 * frame) << "\n";
+    f << "ITEM: NUMBER OF ATOMS\n2\n";
+    f << "ITEM: BOX BOUNDS pp pp pp\n0 10\n0 10\n0 10\n";
+    f << "ITEM: ATOMS id type x y z\n";
+    f << "1 1 " << frame + 0.25 << " 0 0\n";
+    f << "2 1 " << frame + 0.75 << " 0 0\n";
+  }
+  return path.string();
+}
+
+std::string writeUnwrappedDump() {
+  auto path =
+      fs::temp_directory_path() / "dseams_test_lammps_xu.lammpstrj";
+  std::ofstream f(path);
+  f << "ITEM: TIMESTEP\n0\nITEM: NUMBER OF ATOMS\n1\n";
+  f << "ITEM: BOX BOUNDS pp pp pp\n0 10\n0 10\n0 10\n";
+  f << "ITEM: ATOMS id type xu yu zu\n";
+  f << "7 2 11.5 12.25 -3.0\n";
+  return path.string();
+}
+} // namespace
+
+TEST_CASE("nLammpsFrames counts ITEM: TIMESTEP markers", "[seams_input]") {
+  REQUIRE(sinp::nLammpsFrames("/tmp/nonexistent.lammpstrj") == 0);
+  REQUIRE(sinp::nLammpsFrames("traj/mW_cubic.lammpstrj") == 11);
+  const auto tiny = writeTinyDump();
+  sinp::dropLammpsDumpIndex(tiny);
+  REQUIRE(sinp::nLammpsFrames(tiny) == 3);
+  fs::remove(tiny);
+  sinp::dropLammpsDumpIndex(tiny);
+}
+
+TEST_CASE("readLammpsTrjreduced seeks the last frame by index",
+          "[seams_input]") {
+  const auto tiny = writeTinyDump();
+  sinp::dropLammpsDumpIndex(tiny);
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  auto last = sinp::readLammpsTrjreduced(tiny, 3, yCloud, 1);
+  REQUIRE(last.nop == 2);
+  REQUIRE(last.currentFrame == 3);
+  REQUIRE_THAT(last.pts[0].x, Catch::Matchers::WithinAbs(2.25, 1e-10));
+  REQUIRE_THAT(last.pts[1].x, Catch::Matchers::WithinAbs(2.75, 1e-10));
+  auto first = sinp::readLammpsTrjreduced(tiny, 1, yCloud, 1);
+  REQUIRE_THAT(first.pts[0].x, Catch::Matchers::WithinAbs(0.25, 1e-10));
+  auto mid = sinp::readLammpsTrjreduced(tiny, 2, yCloud, 1);
+  REQUIRE_THAT(mid.pts[0].x, Catch::Matchers::WithinAbs(1.25, 1e-10));
+  fs::remove(tiny);
+  sinp::dropLammpsDumpIndex(tiny);
+}
+
+TEST_CASE("sequential load_frame walks keep the live dump cursor",
+          "[seams_input]") {
+  const auto tiny = writeTinyDump();
+  sinp::dropLammpsDumpIndex(tiny);
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  for (int frame = 1; frame <= 3; ++frame) {
+    auto cloud = sinp::readLammpsTrj(tiny, frame, yCloud);
+    REQUIRE(cloud.nop == 2);
+    REQUIRE(cloud.currentFrame == frame);
+    REQUIRE_THAT(cloud.pts[0].x,
+                 Catch::Matchers::WithinAbs(frame - 0.75, 1e-10));
+  }
+  auto again = sinp::readLammpsTrj(tiny, 1, yCloud);
+  REQUIRE_THAT(again.pts[0].x, Catch::Matchers::WithinAbs(0.25, 1e-10));
+  fs::remove(tiny);
+  sinp::dropLammpsDumpIndex(tiny);
+}
+
+TEST_CASE("indexed last-frame read of mW_cubic matches a full scan",
+          "[seams_input]") {
+  REQUIRE(sinp::nLammpsFrames("traj/mW_cubic.lammpstrj") == 11);
+  molSys::PointCloud<molSys::Point<double>, double> a, b;
+  auto last = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 11, a, 1);
+  auto first = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, b, 1);
+  REQUIRE(last.nop == first.nop);
+  REQUIRE(last.nop == 4096);
+  REQUIRE(last.currentFrame == 11);
+  REQUIRE(first.currentFrame == 1);
+}
+
+TEST_CASE("readLammpsTrj binds xu yu zu when x y z are absent",
+          "[seams_input]") {
+  const auto path = writeUnwrappedDump();
+  sinp::dropLammpsDumpIndex(path);
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  auto cloud = sinp::readLammpsTrj(path, 1, yCloud);
+  REQUIRE(cloud.nop == 1);
+  REQUIRE(cloud.pts[0].atomID == 7);
+  REQUIRE(cloud.pts[0].type == 2);
+  REQUIRE_THAT(cloud.pts[0].x, Catch::Matchers::WithinAbs(11.5, 1e-10));
+  REQUIRE_THAT(cloud.pts[0].y, Catch::Matchers::WithinAbs(12.25, 1e-10));
+  REQUIRE_THAT(cloud.pts[0].z, Catch::Matchers::WithinAbs(-3.0, 1e-10));
+  fs::remove(path);
+  sinp::dropLammpsDumpIndex(path);
+}
+
 // -- readBonds tests --
 
 TEST_CASE("readBonds returns empty for nonexistent file", "[seams_input]") {

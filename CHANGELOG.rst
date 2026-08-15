@@ -2,6 +2,25 @@
 Changelog
 =========
 
+Version 2.2.1 (2026-08-15)
+===========================
+
+Added
+-----
+- Flake-based Nix package for ``libyodaLib`` and the ``seams`` CLI
+  (meson, not the CMake-era ``yodaStruct`` derivation).
+- ``nLammpsFrames`` / ``dropLammpsDumpIndex``: live dump session with a
+  lazy ``ITEM: TIMESTEP`` offset table (LAMMPS ``ReaderNative`` cursor,
+  chemfiles ``read_step``, readcon frame offsets). Sequential
+  ``load_frame`` walks no longer rescan prior snapshots.
+
+Fixed
+-----
+- LAMMPS readers bind ``xu``/``yu``/``zu`` and ``xs``/``ys``/``zs``
+  when ``x y z`` are absent (Niu/Parrinello TIP4P/Ice dumps).
+- ``AffiliationUpdater`` uses the batch classifier when more than half
+  the six-rings sit in the dirty closure.
+
 Version 2.2.0 (2026-08-15)
 ===========================
 

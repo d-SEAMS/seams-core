@@ -399,6 +399,14 @@ ring::AffiliationUpdater::update(const std::vector<std::vector<int>> &rings,
   std::unordered_set<int> dirty = expandOnce(atoms2);
   dirty.insert(dirty1.begin(), dirty1.end());
 
+  // Nucleation dumps churn the whole six-ring set. The dirty A(A(r))
+  // walk then visits every ring twice and is slower than a batch
+  // cageAffiliation. Fall back when more than half the rings are dirty.
+  if (!rings.empty() && dirty.size() * 2 > rings.size()) {
+    st.primeFull(rings, nList);
+    return st.current;
+  }
+
   // ----------------------------------------------------------- reclassify
   st.current.hc.assign(rings.size(), false);
   st.current.ddc.assign(rings.size(), false);
