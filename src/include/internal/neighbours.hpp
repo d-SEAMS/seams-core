@@ -97,13 +97,12 @@ std::vector<std::vector<int>> getNewNeighbourListByIndex(
  *  shell is mutual and the two coincide; on disordered packings the mutual
  *  graph is sparser, which starves accidental ring structure -- measured on
  *  the dense null, mutual scores zero false crystal where union reaches
- *  2.5%. Candidates come from the cell list at
- *  candidateCutoff, which must comfortably exceed the k-th neighbour
- *  distance. On an undistorted tetrahedral lattice with k = 4 this graph
- *  equals the first-shell cutoff graph; under thermal distortion it keeps
- *  the neighbour identities a hard cutoff loses, which is what the cage
- *  predicates need. Rows are by atom ID with the leading self entry, like
- *  neighListO.
+ *  2.5%. Nominations are a periodic linked-cell k-nearest search
+ *  (Allen and Tildesley): vesin is cutoff-only and KD-trees have no
+ *  minimum-image convention. candidateCutoff is only a cell-size hint.
+ *  On an undistorted tetrahedral lattice with k = 4 this graph equals
+ *  the first-shell cutoff graph. Rows are by atom ID with the leading
+ *  self entry, like neighListO.
  */
 std::vector<std::vector<int>> kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,

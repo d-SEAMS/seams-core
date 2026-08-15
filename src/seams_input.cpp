@@ -15,6 +15,8 @@
 #include <algorithm>
 #include <charconv>
 #include <cstdint>
+#include <cstring>
+#include <fcntl.h>
 #include <filesystem>
 #include <fstream>
 #include <generic.hpp>
@@ -22,6 +24,9 @@
 #include <mutex>
 #include <seams_input.hpp>
 #include <string_view>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <unordered_map>
 
 #ifdef SEAMS_HAS_OPENMP
@@ -104,6 +109,7 @@ struct LammpsDumpSession {
   std::ifstream file;
   std::vector<std::uint64_t> offsets;
   int lastFrame = 0;
+  bool fullyIndexed = false;
   std::filesystem::file_time_type mtime{};
   std::uintmax_t size{0};
 
@@ -121,6 +127,7 @@ struct LammpsDumpSession {
     file.open(filename, std::ios::in | std::ios::binary);
     offsets.clear();
     lastFrame = 0;
+    fullyIndexed = false;
     return file.is_open();
   }
 
@@ -132,6 +139,55 @@ struct LammpsDumpSession {
     }
     const auto mt = std::filesystem::last_write_time(path, ec);
     return ec || mt != mtime;
+  }
+
+  // One mmap + memchr walk of ITEM: TIMESTEP. getline was ~0.5 s on the
+  // 103 MB Niu dump; glibc memchr is the SIMD find, no extra library.
+  bool mmapIndexAll() {
+    if (fullyIndexed) {
+      return true;
+    }
+    const int fd = ::open(path.c_str(), O_RDONLY);
+    if (fd < 0) {
+      return false;
+    }
+    struct stat st {};
+    if (::fstat(fd, &st) != 0 || st.st_size <= 0) {
+      ::close(fd);
+      return false;
+    }
+    const auto nbytes = static_cast<std::size_t>(st.st_size);
+    void *map = ::mmap(nullptr, nbytes, PROT_READ, MAP_PRIVATE, fd, 0);
+    ::close(fd);
+    if (map == MAP_FAILED) {
+      return false;
+    }
+#ifdef POSIX_MADV_SEQUENTIAL
+    ::posix_madvise(map, nbytes, POSIX_MADV_SEQUENTIAL);
+#endif
+    offsets.clear();
+    const char *const begin = static_cast<const char *>(map);
+    const char *const end = begin + nbytes;
+    constexpr char kNeedle[] = "ITEM: TIMESTEP";
+    constexpr std::size_t kN = 14;
+    const char *p = begin;
+    while (p + kN <= end) {
+      const void *hit = std::memchr(p, 'I', static_cast<std::size_t>(end - p));
+      if (hit == nullptr) {
+        break;
+      }
+      p = static_cast<const char *>(hit);
+      if (p + kN <= end && std::memcmp(p, kNeedle, kN) == 0 &&
+          (p == begin || p[-1] == '\n')) {
+        offsets.push_back(static_cast<std::uint64_t>(p - begin));
+        p += kN;
+      } else {
+        ++p;
+      }
+    }
+    ::munmap(map, nbytes);
+    fullyIndexed = true;
+    return !offsets.empty();
   }
 
   bool discoverNext() {
@@ -198,7 +254,13 @@ struct LammpsDumpSession {
   }
 
   int nframes() {
-    while (discoverNext()) {
+    if (!fullyIndexed) {
+      mmapIndexAll();
+    }
+    if (!fullyIndexed) {
+      while (discoverNext()) {
+      }
+      fullyIndexed = true;
     }
     return static_cast<int>(offsets.size());
   }
@@ -206,6 +268,9 @@ struct LammpsDumpSession {
   bool ensureIndexed(int frame) {
     if (frame < 1) {
       return false;
+    }
+    if (!fullyIndexed && static_cast<int>(offsets.size()) < frame) {
+      mmapIndexAll();
     }
     while (static_cast<int>(offsets.size()) < frame) {
       if (!discoverNext()) {
