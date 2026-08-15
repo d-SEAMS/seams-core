@@ -15,14 +15,14 @@ Added
   ``load_frame`` walks no longer rescan prior snapshots.
 - ``forEachLammpsFrame``: OpenMP walk over a frame range. Each worker
   opens its own handle and seeks. ``seams --frame N --last M --jobs J``.
+- ``SkinNeighborList``: vesin candidates at cutoff+skin (the ghost
+  halo), rebuilt when an atom moves more than skin/2. Bonds form at
+  cutoff and break at cutoff+skin.
 
 Fixed
 -----
 - LAMMPS readers bind ``xu``/``yu``/``zu`` and ``xs``/``ys``/``zs``
   when ``x y z`` are absent (Niu/Parrinello TIP4P/Ice dumps).
-- ``AffiliationUpdater`` uses the batch classifier when more than half
-  the neighbour rows change, or when more than half the six-rings sit
-  in the dirty closure.
 
 Version 2.2.0 (2026-08-15)
 ===========================

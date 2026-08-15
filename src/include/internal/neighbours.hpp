@@ -15,6 +15,8 @@
 #ifndef SEAMS_NEIGHBOURS_H_
 #define SEAMS_NEIGHBOURS_H_
 
+#include <array>
+#include <set>
 #include <utility>
 
 #include <generic.hpp>
@@ -118,6 +120,55 @@ std::pair<double, double> shellSeparation(
 
 //! Erases memory for a vector of vectors for the neighbour list
 [[nodiscard]] int clearNeighbourList(std::vector<std::vector<int>> &nList);
+
+/** Persistent neighbour list with a LAMMPS skin.
+ *  Vesin (or the brute-force fallback) builds candidates at cutoff+skin,
+ *  which is the ghost halo: periodic images already sit in that shell.
+ *  The cell list is rebuilt only when some atom has moved more than
+ *  skin/2 from the last rebuild, the Verlet trigger. Bonds for rings
+ *  form at cutoff and break at cutoff+skin, so a pair that flickers
+ *  across the analysis cutoff does not rewrite the graph.
+ */
+class SkinNeighborList {
+public:
+  SkinNeighborList(double cutoff, double skin, int typeI);
+
+  //! Refresh from a new frame. The returned list is ID-keyed with a
+  //! leading self entry, the same shape as neighListO.
+  const std::vector<std::vector<int>> &
+  update(const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+
+  [[nodiscard]] bool lastRebuilt() const { return rebuilt_; }
+  //! Atoms whose cutoff bond set changed on the last update.
+  [[nodiscard]] int lastChangedAtoms() const { return changedAtoms_; }
+  [[nodiscard]] const std::vector<std::vector<int>> &bonds() const {
+    return nList_;
+  }
+
+private:
+  double cutoff_;
+  double skin_;
+  double cutoffSq_;
+  double breakSq_;
+  double triggerSq_;
+  int typeI_;
+  bool rebuilt_{true};
+  int changedAtoms_{0};
+  std::vector<double> x0_;
+  std::vector<double> y0_;
+  std::vector<double> z0_;
+  std::array<double, 3> box0_{};
+  std::vector<std::pair<int, int>> candidates_;
+  std::set<std::pair<int, int>> bonded_;
+  std::vector<std::vector<int>> nList_;
+
+  bool mustRebuild(
+      const molSys::PointCloud<molSys::Point<double>, double> &yCloud) const;
+  void rebuildCandidates(
+      const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+  void refreshBonds(
+      const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+};
 
 }  // namespace nneigh
 

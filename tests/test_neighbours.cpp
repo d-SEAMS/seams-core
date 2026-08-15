@@ -329,6 +329,58 @@ TEST_CASE("neighListO leaves an unmapped atom as an empty row",
   REQUIRE(nList[2].empty());
 }
 
+TEST_CASE("SkinNeighborList matches neighListO on a static cloud",
+          "[neighbours]") {
+  auto cloud = makeFourAtomCloud();
+  nneigh::SkinNeighborList skin(1.5, 0.5, 1);
+  const auto &bonds = skin.update(cloud);
+  auto hard = nneigh::neighListO(1.5, cloud, 1);
+  REQUIRE(skin.lastRebuilt());
+  REQUIRE(bonds.size() == hard.size());
+  for (std::size_t i = 0; i < bonds.size(); i++) {
+    auto a = bonds[i];
+    auto b = hard[i];
+    std::sort(a.begin() + 1, a.end());
+    std::sort(b.begin() + 1, b.end());
+    REQUIRE(a == b);
+  }
+}
+
+TEST_CASE("SkinNeighborList rebuilds only after the Verlet trigger",
+          "[neighbours]") {
+  auto cloud = makeFourAtomCloud();
+  nneigh::SkinNeighborList skin(1.5, 1.0, 1);
+  (void)skin.update(cloud);
+  REQUIRE(skin.lastRebuilt());
+
+  cloud.pts[1].x += 0.2; // skin/2 = 0.5
+  (void)skin.update(cloud);
+  REQUIRE_FALSE(skin.lastRebuilt());
+
+  cloud.pts[1].x += 0.5;
+  (void)skin.update(cloud);
+  REQUIRE(skin.lastRebuilt());
+}
+
+TEST_CASE("SkinNeighborList keeps a bond until cutoff plus skin",
+          "[neighbours]") {
+  auto cloud = makeFourAtomCloud();
+  nneigh::SkinNeighborList skin(1.5, 0.6, 1);
+  (void)skin.update(cloud);
+  REQUIRE(std::find(skin.bonds()[0].begin() + 1, skin.bonds()[0].end(), 1) !=
+          skin.bonds()[0].end());
+
+  cloud.pts[1].x = 1.8; // 1.8 > 1.5, still < 2.1
+  (void)skin.update(cloud);
+  REQUIRE(std::find(skin.bonds()[0].begin() + 1, skin.bonds()[0].end(), 1) !=
+          skin.bonds()[0].end());
+
+  cloud.pts[1].x = 2.3; // 2.3 > 2.1
+  (void)skin.update(cloud);
+  REQUIRE(std::find(skin.bonds()[0].begin() + 1, skin.bonds()[0].end(), 1) ==
+          skin.bonds()[0].end());
+}
+
 TEST_CASE("neighListO returns empty when the cloud has no atoms",
           "[neighbours]") {
   auto cloud = makeFourAtomCloud();

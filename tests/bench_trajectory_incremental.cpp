@@ -59,6 +59,7 @@ int main(int argc, char **argv) {
 
   primitive::RingUpdater ringUpd(maxDepth);
   ring::AffiliationUpdater affilUpd;
+  nneigh::SkinNeighborList skin(3.5, 2.0, atomType);
 
   double ringFullSum = 0.0, ringIncSum = 0.0;
   double affilBatchSum = 0.0, affilIncSum = 0.0;
@@ -77,7 +78,7 @@ int main(int argc, char **argv) {
                    traj.c_str());
       return 1;
     }
-    auto nList = nneigh::neighListO(3.5, cloud, atomType);
+    auto nList = skin.update(cloud);
     auto idx = nneigh::neighbourListByIndex(cloud, nList);
 
     const auto t0 = Clock::now();
