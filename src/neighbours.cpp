@@ -778,39 +778,46 @@ std::vector<std::vector<int>> nominateByCellList(
   return nominated;
 }
 
+bool listsIndex(const std::vector<int> &row, int j) {
+  return std::find(row.begin(), row.end(), j) != row.end();
+}
+
+void addUndirectedIDs(
+    std::vector<std::vector<int>> &out,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int i,
+    int j) {
+  out[static_cast<std::size_t>(i)].push_back(
+      yCloud.pts[static_cast<std::size_t>(j)].atomID);
+  out[static_cast<std::size_t>(j)].push_back(
+      yCloud.pts[static_cast<std::size_t>(i)].atomID);
+}
+
+// Mutual: i and j each list the other. Union: either lists the other.
+// k is 4 on ice; a 4-wide scan replaces two red-black trees.
 std::vector<std::vector<int>> symmetrizeNominations(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nominated, bool mutual) {
-  std::vector<std::vector<int>> out(static_cast<std::size_t>(yCloud.nop));
-  for (int i = 0; i < yCloud.nop; i++) {
+  const int n = yCloud.nop;
+  std::vector<std::vector<int>> out(static_cast<std::size_t>(n));
+  for (int i = 0; i < n; i++) {
     out[static_cast<std::size_t>(i)].push_back(
         yCloud.pts[static_cast<std::size_t>(i)].atomID);
   }
-  std::set<std::pair<int, int>> bonds;
-  if (mutual) {
-    std::set<std::pair<int, int>> directed;
-    for (int i = 0; i < yCloud.nop; i++) {
-      for (const int j : nominated[static_cast<std::size_t>(i)]) {
-        directed.emplace(i, j);
+  for (int i = 0; i < n; i++) {
+    for (const int j : nominated[static_cast<std::size_t>(i)]) {
+      if (j < 0 || j >= n || j == i) {
+        continue;
+      }
+      if (mutual) {
+        if (i < j && listsIndex(nominated[static_cast<std::size_t>(j)], i)) {
+          addUndirectedIDs(out, yCloud, i, j);
+        }
+      } else if (i < j) {
+        addUndirectedIDs(out, yCloud, i, j);
+      } else if (!listsIndex(nominated[static_cast<std::size_t>(j)], i)) {
+        addUndirectedIDs(out, yCloud, i, j);
       }
     }
-    for (const auto &[i, j] : directed) {
-      if (directed.count({j, i})) {
-        bonds.emplace(std::min(i, j), std::max(i, j));
-      }
-    }
-  } else {
-    for (int i = 0; i < yCloud.nop; i++) {
-      for (const int j : nominated[static_cast<std::size_t>(i)]) {
-        bonds.emplace(std::min(i, j), std::max(i, j));
-      }
-    }
-  }
-  for (const auto &[i, j] : bonds) {
-    out[static_cast<std::size_t>(i)].push_back(
-        yCloud.pts[static_cast<std::size_t>(j)].atomID);
-    out[static_cast<std::size_t>(j)].push_back(
-        yCloud.pts[static_cast<std::size_t>(i)].atomID);
   }
   return out;
 }
