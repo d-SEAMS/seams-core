@@ -4,16 +4,17 @@
 The d-SEAMS 1.0 paper (10.1021/acs.jcim.0c00031) demonstrated on five
 LAMMPS trajectories archived in the figshare project "d-SEAMS Datasets"
 (https://figshare.com/projects/d-SEAMS_Datasets/73545). This script
-fetches those exact deposits (MD5-verified against figshare's records),
-runs each corresponding example workflow with the current yoda binary,
-and runs the incremental ring/affiliation pipeline plus the seeded
-classification across every frame of the nucleation trajectory.
+fetches those exact deposits (MD5-verified against figshare's records)
+and runs each corresponding published example workflow, unmodified,
+with the current yoda binary.
 
 Subcommands (all paths relative to the repository root):
 
   fetch <trajdir>                       download + verify the deposits
-  demos <yoda> <trajdir> <outdir>       run the five example workflows
-  incremental <trajdir> <outfile.json>  per-frame incremental + seeded run
+  demos <yoda> <trajdir> <outdir>       run the five example workflows (Lua CLI)
+
+The Python-bindings demonstrations live as jupytext notebooks under
+repro/notebooks/, executed by the figshare_notebooks Snakemake rule.
 """
 import hashlib
 import json
@@ -98,9 +99,6 @@ DEMOS = [
         "frame": None,
     },
 ]
-
-NO_COORDS = [0.0, 0.0, 0.0]
-
 
 def md5sum(path):
     h = hashlib.md5()
@@ -232,82 +230,12 @@ def demos(yoda, trajdir, outdir):
         sys.exit(f"failed demos: {failed}")
 
 
-def incremental(trajdir, outfile):
-    import _core as cy
-
-    traj = str(pathlib.Path(trajdir) / FILES["nucleation"]["name"])
-    frames = count_frames(traj)
-    ring_updater = cy.RingUpdater(6)
-    affil_updater = cy.AffiliationUpdater()
-    rows = []
-    t_batch = t_incr = 0.0
-    for frame in range(1, frames + 1):
-        cloud = cy.readLammpsTrjO(traj, frame, 1, False, NO_COORDS, NO_COORDS)
-        nlist = cy.neighListO(3.5, cloud, 1)
-        idx = cy.neighbourListByIndex(cloud, nlist)
-
-        t0 = time.perf_counter()
-        batch_rings = cy.ringNetwork(idx, 6)
-        t_batch += time.perf_counter() - t0
-
-        t0 = time.perf_counter()
-        incr_rings = ring_updater.update(idx)
-        t_incr += time.perf_counter() - t0
-        if sorted(map(sorted, batch_rings)) != sorted(map(sorted, incr_rings)):
-            sys.exit(f"frame {frame}: incremental rings != batch rings")
-
-        six = [r for r in incr_rings if len(r) == 6]
-        hc, ddc = affil_updater.update(six, idx)
-
-        strict = cy.neighbourListByIndex(
-            cloud, cy.kNearestNeighbourList(cloud, 4, 5.0, 1, True)
-        )
-        perm = cy.neighbourListByIndex(
-            cloud, cy.kNearestNeighbourList(cloud, 4, 5.0, 1, False)
-        )
-        six_s = [r for r in cy.ringNetwork(strict, 6) if len(r) == 6]
-        six_p = [r for r in cy.ringNetwork(perm, 6) if len(r) == 6]
-        shc, sddc = cy.seededCageAffiliation(six_s, strict, six_p, perm)
-
-        rows.append(
-            {
-                "frame": frame,
-                "natoms": len(idx),
-                "six_rings": len(six),
-                "ring_sources_recomputed": ring_updater.lastRecomputedSources(),
-                "affiliation_reclassified": affil_updater.lastReclassified(),
-                "hc_rings": sum(hc),
-                "ddc_rings": sum(ddc),
-                "seeded_hc_atoms": sum(shc),
-                "seeded_ddc_atoms": sum(sddc),
-            }
-        )
-        print(
-            f"frame {frame}/{frames}: rings={len(six)} "
-            f"seeded_ddc={sum(sddc)}",
-            flush=True,
-        )
-    manifest = {
-        "trajectory": FILES["nucleation"]["name"],
-        "doi": FILES["nucleation"]["doi"],
-        "frames": frames,
-        "batch_ring_seconds": round(t_batch, 3),
-        "incremental_ring_seconds": round(t_incr, 3),
-        "per_frame": rows,
-    }
-    pathlib.Path(outfile).write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n"
-    )
-
-
 def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
     if cmd == "fetch" and len(sys.argv) == 3:
         fetch(sys.argv[2])
     elif cmd == "demos" and len(sys.argv) == 5:
         demos(sys.argv[2], sys.argv[3], sys.argv[4])
-    elif cmd == "incremental" and len(sys.argv) == 4:
-        incremental(sys.argv[2], sys.argv[3])
     else:
         sys.exit(__doc__)
 

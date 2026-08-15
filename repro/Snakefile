@@ -309,23 +309,45 @@ rule figshare_demos:
         + R + "/figshare-demos'"
 
 
-rule figshare_incremental:
-    # Per-frame incremental rings (refereed against batch every frame),
-    # incremental affiliation, and seeded classification across the whole
-    # nucleation trajectory
+NOTEBOOKS = [
+    "01_chillplus_ic",
+    "02_nucleation_cages",
+    "03_nanotube_prisms",
+    "04_monolayer_rings",
+    "05_rdf2d",
+]
+
+
+rule figshare_notebook:
+    # The Python-bindings demonstrations on the v1 deposits are jupytext
+    # notebooks; execution is the test (each notebook asserts its own
+    # headline numbers) and the executed .ipynb is the artifact. The
+    # nucleation notebook also writes figshare-incremental.json.
     input:
         py=R + "/py-install.done",
-        traj=FIGSHARE_DIR + "/nucleation.lammpstrj",
+        nb="repro/notebooks/{nb}.py",
+        traj=expand(FIGSHARE_DIR + "/{f}", f=FIGSHARE_FILES),
     output:
-        R + "/figshare-incremental.json",
+        R + "/notebooks/{nb}.ipynb",
     params:
-        hq=lambda wc: hq(1),
+        hq=lambda wc: hq(2),
     shell:
         "{params.hq} bash -c "
         "'LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH "
-        "PYTHONPATH=$(ls -d $CONDA_PREFIX/lib/python3*/site-packages/pydseamslib):$PYTHONPATH "
-        "OMP_NUM_THREADS=1 python repro/scripts/figshare_demos.py "
-        "incremental " + FIGSHARE_DIR + " {output}'"
+        "OMP_NUM_THREADS=2 jupytext --to ipynb --execute "
+        "--output {output} {input.nb}'"
+
+
+rule figshare_incremental:
+    # Produced by the nucleation notebook: per-frame incremental rings
+    # (refereed against batch every frame), incremental affiliation, and
+    # seeded classification across the whole deposit
+    input:
+        R + "/notebooks/02_nucleation_cages.ipynb",
+    output:
+        R + "/figshare-incremental.json",
+    shell:
+        "test -s {output}"
 
 
 rule aggregate:
@@ -344,6 +366,9 @@ rule aggregate:
         ql_dseams=R + "/ql-dseams.txt",
         ql_python=R + "/ql-python.txt",
         figshare_demos=R + "/figshare-demos/figshare-demos.json",
+        figshare_notebooks=expand(
+            R + "/notebooks/{nb}.ipynb", nb=NOTEBOOKS
+        ),
         figshare_incremental=R + "/figshare-incremental.json",
     output:
         R + "/paper_manifest.json",
