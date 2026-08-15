@@ -67,6 +67,12 @@ int main(int argc, char **argv) {
         (void)knn;
       },
       reps);
+  const double tKnnPair = bestMs(
+      [&]() {
+        auto both = nneigh::kNearestNeighbourPair(cloud, 4, 5.5, typeI);
+        (void)both;
+      },
+      reps);
   const double tRings = bestMs(
       [&]() { rings = primitive::ringNetwork(idx, 6); }, reps);
   six.clear();
@@ -78,8 +84,9 @@ int main(int argc, char **argv) {
   ring::CageAffiliation aff;
   const double tAff = bestMs(
       [&]() { aff = ring::cageAffiliation(six, idx); }, reps);
-  auto knn = nneigh::kNearestNeighbourList(cloud, 4, 5.5, typeI, true);
-  auto uni = nneigh::kNearestNeighbourList(cloud, 4, 5.5, typeI, false);
+  auto knnPair = nneigh::kNearestNeighbourPair(cloud, 4, 5.5, typeI);
+  const auto &knn = knnPair.first;
+  const auto &uni = knnPair.second;
   auto idxS = nneigh::neighbourListByIndex(cloud, knn);
   auto idxU = nneigh::neighbourListByIndex(cloud, uni);
   const double tSeeded = bestMs(
@@ -107,8 +114,8 @@ int main(int argc, char **argv) {
   }
   std::printf("# traj %s frame %d nop %d rings %zu six %zu ddc %d\n",
               traj.c_str(), frame, cloud.nop, rings.size(), six.size(), nDdc);
-  std::printf("io_ms %.3f\nneigh_ms %.3f\nknn_ms %.3f\nrings_ms %.3f\n"
-              "affil_ms %.3f\nseeded_ms %.3f\n",
-              tIo, tNeigh, tKnn, tRings, tAff, tSeeded);
+  std::printf("io_ms %.3f\nneigh_ms %.3f\nknn_ms %.3f\nknn_pair_ms %.3f\n"
+              "rings_ms %.3f\naffil_ms %.3f\nseeded_ms %.3f\n",
+              tIo, tNeigh, tKnn, tKnnPair, tRings, tAff, tSeeded);
   return 0;
 }

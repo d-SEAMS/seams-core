@@ -390,6 +390,9 @@ TEST_CASE("neighListO returns empty when the cloud has no atoms",
   REQUIRE(nList.empty());
   auto knn = nneigh::kNearestNeighbourList(cloud, 4, 5.5, 1, true);
   REQUIRE(knn.empty());
+  auto both = nneigh::kNearestNeighbourPair(cloud, 4, 5.5, 1);
+  REQUIRE(both.first.empty());
+  REQUIRE(both.second.empty());
 }
 
 TEST_CASE("k-nearest graph reduces exactly to the cutoff graph when the "
@@ -421,6 +424,17 @@ TEST_CASE("k-nearest graph reduces exactly to the cutoff graph when the "
     std::sort(b.begin(), b.end());
     REQUIRE(a == b);
   }
+}
+
+TEST_CASE("k-nearest pair matches two separate k-nearest builds",
+          "[neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  auto mutual = nneigh::kNearestNeighbourList(yCloud, 4, 5.5, 1, true);
+  auto uni = nneigh::kNearestNeighbourList(yCloud, 4, 5.5, 1, false);
+  auto both = nneigh::kNearestNeighbourPair(yCloud, 4, 5.5, 1);
+  REQUIRE(both.first == mutual);
+  REQUIRE(both.second == uni);
 }
 
 TEST_CASE("k-nearest graph is exact under an undersized candidate cutoff",

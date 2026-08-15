@@ -159,8 +159,9 @@ int main(int argc, char **argv) {
     }
     const int nop = cloud.nop;
     auto cutRows = nneigh::neighListO(cutoff, cloud, typeI);
-    auto knnRows = nneigh::kNearestNeighbourList(cloud, k, cand, typeI, true);
-    auto uniRows = nneigh::kNearestNeighbourList(cloud, k, cand, typeI, false);
+    auto knnPair = nneigh::kNearestNeighbourPair(cloud, k, cand, typeI);
+    const auto &knnRows = knnPair.first;
+    const auto &uniRows = knnPair.second;
     auto idxC = nneigh::neighbourListByIndex(cloud, cutRows);
     auto idxK = nneigh::neighbourListByIndex(cloud, knnRows);
     auto idxU = nneigh::neighbourListByIndex(cloud, uniRows);

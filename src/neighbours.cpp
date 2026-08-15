@@ -554,21 +554,16 @@ int nneigh::clearNeighbourList(std::vector<std::vector<int>> &nList) {
  * @return Row-ordered full neighbour list by atom ID, one row per atom with
  *  the leading self entry, like neighListO.
  */
-std::vector<std::vector<int>>
-nneigh::kNearestNeighbourList(
-    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
-    double candidateCutoff, int typeI, bool mutual) {
-  std::vector<std::vector<int>> candidateRows =
-      nneigh::neighListO(candidateCutoff, yCloud, typeI);
-  if (candidateRows.empty() || k <= 0) {
-    return candidateRows;
-  }
+namespace {
 
-  // Directed nominations: each atom's k nearest among the candidates
-  std::vector<std::vector<int>> nominated(yCloud.nop);
-  std::vector<std::pair<double, int>> byDist; // (distance^2, neighbour index)
+std::vector<std::vector<int>> nominateKNearest(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<std::vector<int>> &candidateRows, int k, int typeI) {
+  std::vector<std::vector<int>> nominated(
+      static_cast<std::size_t>(yCloud.nop));
+  std::vector<std::pair<double, int>> byDist;
   for (int i = 0; i < yCloud.nop; i++) {
-    const auto &row = candidateRows[i];
+    const auto &row = candidateRows[static_cast<std::size_t>(i)];
     if (row.size() <= 1) {
       continue;
     }
@@ -583,50 +578,50 @@ nneigh::kNearestNeighbourList(
     }
     const size_t keep = std::min(static_cast<size_t>(k), byDist.size());
     std::partial_sort(byDist.begin(), byDist.begin() + keep, byDist.end());
-    nominated[i].reserve(keep);
+    nominated[static_cast<std::size_t>(i)].reserve(keep);
     for (size_t m = 0; m < keep; m++) {
-      nominated[i].push_back(byDist[m].second);
+      nominated[static_cast<std::size_t>(i)].push_back(byDist[m].second);
     }
   }
-
-  // Exactness fallback: an atom whose k-th neighbour lies beyond the
-  // candidate cutoff got a truncated nomination; recompute those few by a
-  // brute-force scan so the k nearest are exact regardless of the cutoff
   for (int i = 0; i < yCloud.nop; i++) {
-    if (yCloud.pts[i].type != typeI ||
-        static_cast<int>(nominated[i].size()) >= k) {
+    if (yCloud.pts[static_cast<std::size_t>(i)].type != typeI ||
+        static_cast<int>(nominated[static_cast<std::size_t>(i)].size()) >=
+            k) {
       continue;
     }
     byDist.clear();
     for (int j = 0; j < yCloud.nop; j++) {
-      if (j == i || yCloud.pts[j].type != typeI) {
+      if (j == i || yCloud.pts[static_cast<std::size_t>(j)].type != typeI) {
         continue;
       }
       byDist.emplace_back(gen::periodicDistSq(yCloud, i, j), j);
     }
     const size_t keep = std::min(static_cast<size_t>(k), byDist.size());
     std::partial_sort(byDist.begin(), byDist.begin() + keep, byDist.end());
-    nominated[i].clear();
+    nominated[static_cast<std::size_t>(i)].clear();
     for (size_t m = 0; m < keep; m++) {
-      nominated[i].push_back(byDist[m].second);
+      nominated[static_cast<std::size_t>(i)].push_back(byDist[m].second);
     }
   }
+  return nominated;
+}
 
-  // Union symmetrization into ID rows with the leading self entry
-  std::vector<std::vector<int>> out(yCloud.nop);
+std::vector<std::vector<int>> symmetrizeNominations(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<std::vector<int>> &candidateRows,
+    const std::vector<std::vector<int>> &nominated, bool mutual) {
+  std::vector<std::vector<int>> out(static_cast<std::size_t>(yCloud.nop));
   for (int i = 0; i < yCloud.nop; i++) {
-    out[i].push_back(candidateRows[i].empty() ? yCloud.pts[i].atomID
-                                              : candidateRows[i][0]);
+    out[static_cast<std::size_t>(i)].push_back(
+        candidateRows[static_cast<std::size_t>(i)].empty()
+            ? yCloud.pts[static_cast<std::size_t>(i)].atomID
+            : candidateRows[static_cast<std::size_t>(i)][0]);
   }
   std::set<std::pair<int, int>> bonds;
   if (mutual) {
-    // Intersection symmetrization: a bond requires both nominations. In a
-    // crystal the first shell is mutual, so this equals the union graph
-    // there; on disordered packings one-sided nominations vanish, which is
-    // what starves the accidental ring complexes
     std::set<std::pair<int, int>> directed;
     for (int i = 0; i < yCloud.nop; i++) {
-      for (const int j : nominated[i]) {
+      for (const int j : nominated[static_cast<std::size_t>(i)]) {
         directed.emplace(i, j);
       }
     }
@@ -637,16 +632,47 @@ nneigh::kNearestNeighbourList(
     }
   } else {
     for (int i = 0; i < yCloud.nop; i++) {
-      for (const int j : nominated[i]) {
+      for (const int j : nominated[static_cast<std::size_t>(i)]) {
         bonds.emplace(std::min(i, j), std::max(i, j));
       }
     }
   }
   for (const auto &[i, j] : bonds) {
-    out[i].push_back(yCloud.pts[j].atomID);
-    out[j].push_back(yCloud.pts[i].atomID);
+    out[static_cast<std::size_t>(i)].push_back(
+        yCloud.pts[static_cast<std::size_t>(j)].atomID);
+    out[static_cast<std::size_t>(j)].push_back(
+        yCloud.pts[static_cast<std::size_t>(i)].atomID);
   }
   return out;
+}
+
+} // namespace
+
+std::vector<std::vector<int>>
+nneigh::kNearestNeighbourList(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, int typeI, bool mutual) {
+  std::vector<std::vector<int>> candidateRows =
+      nneigh::neighListO(candidateCutoff, yCloud, typeI);
+  if (candidateRows.empty() || k <= 0) {
+    return candidateRows;
+  }
+  auto nominated = nominateKNearest(yCloud, candidateRows, k, typeI);
+  return symmetrizeNominations(yCloud, candidateRows, nominated, mutual);
+}
+
+std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
+nneigh::kNearestNeighbourPair(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, int typeI) {
+  std::vector<std::vector<int>> candidateRows =
+      nneigh::neighListO(candidateCutoff, yCloud, typeI);
+  if (candidateRows.empty() || k <= 0) {
+    return {candidateRows, candidateRows};
+  }
+  auto nominated = nominateKNearest(yCloud, candidateRows, k, typeI);
+  return {symmetrizeNominations(yCloud, candidateRows, nominated, true),
+          symmetrizeNominations(yCloud, candidateRows, nominated, false)};
 }
 
 /**

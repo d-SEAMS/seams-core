@@ -156,8 +156,9 @@ int main(int argc, char **argv) {
       std::printf("%d 0 0 0 0 0 0 0 0 0.0000\n", frame);
       continue;
     }
-    auto mutual = nneigh::kNearestNeighbourList(cloud, k, cand, typeI, true);
-    auto uni = nneigh::kNearestNeighbourList(cloud, k, cand, typeI, false);
+    auto graphs = nneigh::kNearestNeighbourPair(cloud, k, cand, typeI);
+    const auto &mutual = graphs.first;
+    const auto &uni = graphs.second;
     auto idxS = nneigh::neighbourListByIndex(cloud, mutual);
     auto idxU = nneigh::neighbourListByIndex(cloud, uni);
     auto sixS = sixOf(primitive::ringNetwork(idxS, 6));

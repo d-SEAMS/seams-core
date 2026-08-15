@@ -109,6 +109,14 @@ std::vector<std::vector<int>> kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     double candidateCutoff, int typeI, bool mutual = true);
 
+/** Mutual and union k-nearest graphs from one candidate search. Seeded
+ *  affiliation needs both; building them separately repeats the cell list.
+ */
+std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
+kNearestNeighbourPair(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, int typeI);
+
 /** The shell-separation certificate for the exact reduction of the k-nearest
  *  graph to the cutoff graph: returns {max_i d_k(i), min_i d_{k+1}(i)} over
  *  particles of the type. When max_i d_k(i) <= rcutoff <= min_i d_{k+1}(i),
