@@ -2,6 +2,15 @@
 Changelog
 =========
 
+Version 2.2.0 (2026-08-15)
+===========================
+
+Added
+-----
+- ``seams`` CLI: ``read``, ``chill``, ``chill-plus``, ``cages``.
+  This is the engine command line. Lua is the ``dseams`` library
+  (yodaStruct repo). Python is ``pydseams``.
+
 Version 2.1.2 (2026-08-15)
 ===========================
 
