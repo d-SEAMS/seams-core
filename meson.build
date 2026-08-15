@@ -396,6 +396,10 @@ if get_option('with_lua').allowed() and lua_dep.found()
     args: ['-c', 'example_lua/fennel/config.yml'],
     workdir: meson.project_source_root(),
     timeout: 120)
+  test('yoda_fennel_full', yoda_struct,
+    args: ['-c', 'example_lua/fennel_full/config.yml'],
+    workdir: meson.project_source_root(),
+    timeout: 240)
 endif
 
 summary({
