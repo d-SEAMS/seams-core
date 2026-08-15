@@ -15,6 +15,7 @@
 #ifndef SEAMS_NEIGHBOURS_H_
 #define SEAMS_NEIGHBOURS_H_
 
+#include <algorithm>
 #include <array>
 #include <string>
 #include <utility>
@@ -22,6 +23,10 @@
 
 #include <generic.hpp>
 #include <mol_sys.hpp>
+
+#ifdef SEAMS_HAS_LINKCELL
+#include <linkcell.h>
+#endif
 
 /** @file neighbours.hpp
  *  @brief Header file for neighbour list generation.
@@ -55,6 +60,44 @@
  */
 
 namespace nneigh {
+
+#ifdef SEAMS_HAS_LINKCELL
+/// Map a LAMMPS dump box onto lc_cell.
+///
+/// `box[0..3]` are bound spans (`xhi_bound - xlo_bound`, ...) as
+/// `seams_input` stores them. `boxLow` is the bound lo. Optional
+/// `box[3..6]` are the dump tilt factors `xy, xz, yz`.
+///
+/// The conversion is the LAMMPS dump convention:
+/// `xlo = xlo_bound - min(0, xy, xz, xy+xz)` and
+/// `lx = xhi_bound - xlo_bound - max(...) + min(...)`, then
+/// `a = (lx, 0, 0)`, `b = (xy, ly, 0)`, `c = (xz, yz, lz)`.
+inline lc_cell lammpsBoxToLcCell(const std::vector<double> &box,
+                                 const std::vector<double> &boxLow) {
+  const double xspan = box.size() > 0 ? box[0] : 0.0;
+  const double yspan = box.size() > 1 ? box[1] : 0.0;
+  const double zspan = box.size() > 2 ? box[2] : 0.0;
+  const double xlo_b = boxLow.size() > 0 ? boxLow[0] : 0.0;
+  const double ylo_b = boxLow.size() > 1 ? boxLow[1] : 0.0;
+  const double zlo_b = boxLow.size() > 2 ? boxLow[2] : 0.0;
+  const double xy = box.size() >= 6 ? box[3] : 0.0;
+  const double xz = box.size() >= 6 ? box[4] : 0.0;
+  const double yz = box.size() >= 6 ? box[5] : 0.0;
+  const double xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));
+  const double xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));
+  const double ymin = std::min(0.0, yz);
+  const double ymax = std::max(0.0, yz);
+  lc_cell c = lc_cell_ortho(xspan - xmax + xmin, yspan - ymax + ymin, zspan);
+  c.bx = xy;
+  c.cx = xz;
+  c.cy = yz;
+  c.ox = xlo_b - xmin;
+  c.oy = ylo_b - ymin;
+  c.oz = zlo_b;
+  return c;
+}
+#endif
+
 //! All these functions use atom IDs and not indices
 
 //! Inefficient @f$O(n^2)@f$ implementation of neighbour lists when there are

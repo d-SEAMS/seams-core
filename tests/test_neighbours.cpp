@@ -503,3 +503,65 @@ TEST_CASE("SkinNeighborList default is the mutual four-nearest graph",
     REQUIRE(a == b);
   }
 }
+
+TEST_CASE("empty cloud k-nearest does not throw", "[neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {10.0, 10.0, 10.0};
+  cloud.nop = 0;
+  auto rows = nneigh::kNearestNeighbourList(cloud, 4, 5.5, 1, true);
+  REQUIRE(rows.empty());
+  auto both = nneigh::kNearestNeighbourPair(cloud, 4, 5.5, 1);
+  REQUIRE(both.first.empty());
+  REQUIRE(both.second.empty());
+}
+
+#ifdef SEAMS_HAS_LINKCELL
+TEST_CASE("LAMMPS dump bounds convert to lattice H",
+          "[neighbours][linkcell]") {
+  // Dump stores bound spans, not edge lengths. These bounds recover
+  // lx=10, ly=11, lz=12, xy=1.5, xz=0.4, yz=-0.2, origin (1,2,3).
+  const lc_cell box = nneigh::lammpsBoxToLcCell(
+      {11.9, 11.2, 12.0, 1.5, 0.4, -0.2}, {1.0, 1.8, 3.0});
+  REQUIRE_THAT(box.ax, Catch::Matchers::WithinAbs(10.0, 1e-12));
+  REQUIRE(box.ay == 0.0);
+  REQUIRE(box.az == 0.0);
+  REQUIRE(box.bx == 1.5);
+  REQUIRE_THAT(box.by, Catch::Matchers::WithinAbs(11.0, 1e-12));
+  REQUIRE(box.bz == 0.0);
+  REQUIRE(box.cx == 0.4);
+  REQUIRE(box.cy == -0.2);
+  REQUIRE(box.cz == 12.0);
+  REQUIRE_THAT(box.ox, Catch::Matchers::WithinAbs(1.0, 1e-12));
+  REQUIRE_THAT(box.oy, Catch::Matchers::WithinAbs(2.0, 1e-12));
+  REQUIRE(box.oz == 3.0);
+}
+
+TEST_CASE("sheared box k-nearest uses the periodic image",
+          "[neighbours][linkcell]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  // Bound span 15 with xy=5 recovers lx=10, b=(5, 8.66, 0).
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  const double coords[2][3] = {{0.2, 0.1, 1.0}, {9.7, 0.1, 1.0}};
+  for (int i = 0; i < 2; i++) {
+    molSys::Point<double> pt;
+    pt.type = 1;
+    pt.atomID = i + 1;
+    pt.molID = i + 1;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+  auto knn = nneigh::kNearestNeighbourList(cloud, 1, 5.5, 1, true);
+  REQUIRE(knn.size() == 2);
+  REQUIRE(knn[0].size() >= 2);
+  REQUIRE(knn[1].size() >= 2);
+  REQUIRE(knn[0][0] == 1);
+  REQUIRE(knn[1][0] == 2);
+  REQUIRE(knn[0][1] == 2);
+  REQUIRE(knn[1][1] == 1);
+}
+#endif

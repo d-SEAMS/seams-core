@@ -17,7 +17,6 @@
 #include <iostream>
 #include <numeric>
 #include <queue>
-#include <set>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -591,19 +590,10 @@ bool nominateByLinkcell(
   if (nSrc == 0) {
     return true;
   }
-  lc_cell box = lc_cell_ortho(bx, by, bz);
-  if (yCloud.box.size() >= 6) {
-    box.bx = yCloud.box[3];
-    box.cx = yCloud.box[4];
-    box.cy = yCloud.box[5];
-  }
-  if (yCloud.boxLow.size() >= 3) {
-    box.ox = yCloud.boxLow[0];
-    box.oy = yCloud.boxLow[1];
-    box.oz = yCloud.boxLow[2];
-  }
-  if (lc_knearest(xyz.data(), n, &box, k, mask.data(), cellHint, nom.data()) !=
-      0) {
+  const lc_cell box = nneigh::lammpsBoxToLcCell(yCloud.box, yCloud.boxLow);
+  if (lc_knearest(xyz.data(), static_cast<std::size_t>(n), &box,
+                  static_cast<std::size_t>(k), mask.data(), cellHint,
+                  nom.data()) != 0) {
     const char *msg = lc_last_error();
     std::cerr << "linkcell failed: " << (msg ? msg : "unknown")
               << "; falling back to the in-tree cell list.\n";
