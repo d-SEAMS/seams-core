@@ -185,6 +185,37 @@ def dseams_topo_4nn(pos, box, mutual=True):
     return _affiliation_labels(cloud, idx, len(pos))
 
 
+def dseams_topo_seeded(pos, box, permissive_k=4, permissive_mutual=False):
+    """TUM v2.1, seeded affiliation via the library: strict mutual seeds,
+    permissive completion, component-gated acceptance (structural null
+    specificity)."""
+    n = len(pos)
+    cloud = make_cloud(pos, box)
+    strict = _core.neighbourListByIndex(
+        cloud, _core.kNearestNeighbourList(cloud, 4, 5.0, 1, True)
+    )
+    perm_rows = _core.neighbourListByIndex(
+        cloud,
+        _core.kNearestNeighbourList(
+            cloud, permissive_k, 5.0, 1, permissive_mutual
+        ),
+    )
+    six_s = [r for r in _core.ringNetwork(strict, 7) if len(r) == 6]
+    six_p = [r for r in _core.ringNetwork(perm_rows, 7) if len(r) == 6]
+    hc, ddc = _core.seededCageAffiliation(six_s, strict, six_p, perm_rows)
+    labels = []
+    for i in range(n):
+        if hc[i] and ddc[i]:
+            labels.append("mixed")
+        elif hc[i]:
+            labels.append("hexagonal")
+        elif ddc[i]:
+            labels.append("cubic")
+        else:
+            labels.append("water")
+    return labels
+
+
 def dseams_topo(pos, box):
     """Per-atom label from cage affiliation: an atom in any HC-affiliated
     six-ring is hexagonal, in a DDC-affiliated ring cubic, in both mixed,
@@ -416,6 +447,11 @@ def main():
             for method, run in (
                 ("dseams-topo", lambda: dseams_topo(pos, box)),
                 ("dseams-topo-4nn", lambda: dseams_topo_4nn(pos, box)),
+                ("dseams-topo-seeded", lambda: dseams_topo_seeded(pos, box)),
+                (
+                    "dseams-topo-seeded5",
+                    lambda: dseams_topo_seeded(pos, box, 5, True),
+                ),
                 ("chill+", lambda: chill_plus(pos, box, scratch)),
             ):
                 t0 = time.perf_counter()
@@ -474,6 +510,11 @@ def main():
     for method, run in (
         ("dseams-topo", lambda: dseams_topo(null_pos, ic_box)),
         ("dseams-topo-4nn", lambda: dseams_topo_4nn(null_pos, ic_box)),
+        ("dseams-topo-seeded", lambda: dseams_topo_seeded(null_pos, ic_box)),
+        (
+            "dseams-topo-seeded5",
+            lambda: dseams_topo_seeded(null_pos, ic_box, 5, True),
+        ),
         ("chill+", lambda: chill_plus(null_pos, ic_box, scratch)),
     ):
         labels = run()
