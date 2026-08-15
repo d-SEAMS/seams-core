@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: MIT
 //-----------------------------------------------------------------------------------
 
+#include <argum.h>
 #include <bop.hpp>
 #include <cage_affiliation.hpp>
-#include <cxxopts.hpp>
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
@@ -19,7 +19,12 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <vector>
+
+using namespace Argum;
+
+Colorizer colorizer;
 
 namespace {
 
@@ -86,24 +91,99 @@ int typeOf(const Cloud &cloud, int requested) {
   return cloud.pts[0].type;
 }
 
+std::string iceColor(std::string_view name) {
+  if (name == "cubic" || name == "reCubic") {
+    return colorizer.longOption(name);
+  }
+  if (name == "hexagonal" || name == "reHex") {
+    return colorizer.shortOption(name);
+  }
+  if (name == "interfacial") {
+    return colorizer.warning(name);
+  }
+  if (name == "clathrate" || name == "interClathrate") {
+    return colorizer.progName(name);
+  }
+  if (name == "water") {
+    return std::string(name);
+  }
+  return colorizer.error(name);
+}
+
 void printCounts(std::ostream &os, const Cloud &cloud) {
   std::map<std::string, int> hist;
   for (const auto &pt : cloud.pts) {
     hist[iceName(pt.iceType)]++;
   }
-  os << "nop " << cloud.nop;
+  os << colorizer.heading("nop") << " " << cloud.nop;
   for (const auto &[name, n] : hist) {
     if (n > 0) {
-      os << " " << name << " " << n;
+      os << " " << iceColor(name) << " " << n;
     }
   }
   os << "\n";
 }
 
+void printFeatures(std::ostream &os) {
+  os << colorizer.heading("Compile-time features:") << "\n";
+  const auto line = [&](const char *name, bool on) {
+    os << name << ": "
+       << (on ? colorizer.warning("enabled") : colorizer.error("disabled"))
+       << "\n";
+  };
+#ifdef SEAMS_HAS_OPENMP
+  line("OpenMP", true);
+#else
+  line("OpenMP", false);
+#endif
+#ifdef SEAMS_HAS_MPI
+  line("MPI", true);
+#else
+  line("MPI", false);
+#endif
+#ifdef SEAMS_HAS_HWY
+  line("Highway SIMD", true);
+#else
+  line("Highway SIMD", false);
+#endif
+#ifdef SEAMS_HAS_VESIN
+  line("vesin neighbours", true);
+#else
+  line("vesin neighbours", false);
+#endif
+#ifdef SEAMS_HAS_CHEMFILES
+  line("chemfiles", true);
+#else
+  line("chemfiles", false);
+#endif
+#ifdef SEAMS_HAS_READCON
+  line("readcon-core", true);
+#else
+  line("readcon-core", false);
+#endif
+#ifdef SEAMS_HAS_IRA
+  line("IRA/SOFI", true);
+#else
+  line("IRA/SOFI", false);
+#endif
+#ifdef SEAMS_HAS_SPHERICART
+  line("sphericart", true);
+#else
+  line("sphericart", false);
+#endif
+#ifdef SEAMS_HAS_NAUTY
+  line("nauty", true);
+#else
+  line("nauty", false);
+#endif
+}
+
 int cmdRead(std::ostream &os, Cloud &cloud) {
   const auto box = cloud.box;
-  os << "nop " << cloud.nop << " frame " << cloud.currentFrame << " box "
-     << box[0] << " " << box[1] << " " << box[2] << "\n";
+  os << colorizer.heading("nop") << " " << cloud.nop << " "
+     << colorizer.longOption("frame") << " " << cloud.currentFrame << " "
+     << colorizer.shortOption("box") << " " << box[0] << " " << box[1] << " "
+     << box[2] << "\n";
   return 0;
 }
 
@@ -194,69 +274,132 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
     }
     tallyAtoms(hc, ddc);
   }
-  os << "nop " << cloud.nop << " graph " << graphName << " ih " << ih
-     << " ic " << ic << " water " << water << "\n";
+  os << colorizer.heading("nop") << " " << cloud.nop << " "
+     << colorizer.longOption("graph") << " " << graphName << " "
+     << iceColor("hexagonal") << " " << ih << " " << iceColor("cubic") << " "
+     << ic << " " << iceColor("water") << " " << water << "\n";
   return 0;
 }
 
 } // namespace
 
 int main(int argc, char *argv[]) {
-  cxxopts::Options opt(
-      argv[0], "d-SEAMS engine CLI. Lua is the luadseams library; Python is pydseams.");
-  opt.add_options()("h,help", "Print help")("v,version", "Print version")(
-      "f,frame", "First frame (1-based)",
-      cxxopts::value<int>()->default_value("1"))(
-      "last", "Last frame (inclusive). Omit for a single --frame.",
-      cxxopts::value<int>()->default_value("0"))(
-      "j,jobs", "Parallel frame workers (OpenMP). 1 is serial.",
-      cxxopts::value<int>()->default_value("1"))(
-      "t,type", "Atom type (0 guesses oxygen then type 1)",
-      cxxopts::value<int>()->default_value("0"))(
-      "c,cutoff", "Neighbour cutoff (Angstrom)",
-      cxxopts::value<double>()->default_value("3.5"))(
-      "k", "k for knn / seeded cages", cxxopts::value<int>()->default_value("4"))(
-      "graph",
-      "Bond graph for cages: cutoff | knn | knn-union | seeded",
-      cxxopts::value<std::string>()->default_value("seeded"))(
-      "command", "read | chill | chill-plus | cages",
-      cxxopts::value<std::string>())("file", "Trajectory file",
-                                     cxxopts::value<std::string>());
-  opt.parse_positional({"command", "file"});
-  opt.positional_help("COMMAND FILE");
+  colorizer = colorizerForFile(environmentColorStatus(), stdout);
 
-  cxxopts::ParseResult args;
-  try {
-    args = opt.parse(argc, argv);
-  } catch (const cxxopts::OptionException &e) {
-    std::cerr << e.what() << "\n";
-    return 2;
-  }
-  if (args.count("help")) {
-    std::cout << opt.help() << "\n";
-    return 0;
-  }
-  if (args.count("version")) {
+  int frame = 1;
+  int last = 0;
+  int jobs = 1;
+  int typeI = 0;
+  double cutoff = 3.5;
+  int k = 4;
+  std::string graph = "seeded";
+  std::string cmd;
+  std::string file;
+
+  const char *progname = (argc ? argv[0] : "seams");
+  Parser parser;
+
+  parser.add(Option("--help", "-h")
+                 .help("show this help message and exit")
+                 .handler([&]() {
+                   std::cout << colorizer.heading("d-SEAMS") << "\n\n";
+                   std::cout << parser.formatHelp(progname, colorizer);
+                   std::exit(EXIT_SUCCESS);
+                 }));
+
+  parser.add(Option("--version", "-v")
+                 .help("Print version information")
+                 .handler([&]() {
 #ifdef SEAMS_VERSION
-    std::cout << "seams " << SEAMS_VERSION << "\n";
+                   std::cout << colorizer.progName("seams") << " "
+                             << SEAMS_VERSION << "\n";
 #else
-    std::cout << "seams\n";
+                   std::cout << colorizer.progName("seams") << "\n";
 #endif
-    return 0;
-  }
-  if (!args.count("command") || !args.count("file")) {
-    std::cerr << opt.help() << "\n";
+                   std::exit(EXIT_SUCCESS);
+                 }));
+
+  parser.add(Option("--features")
+                 .help("Print compile-time backends")
+                 .handler([&]() {
+                   printFeatures(std::cout);
+                   std::exit(EXIT_SUCCESS);
+                 }));
+
+  parser.add(Option("--frame", "-f")
+                 .argName("N")
+                 .help("First frame (1-based)")
+                 .handler([&](std::string_view value) {
+                   frame = parseIntegral<int>(value);
+                 }));
+
+  parser.add(Option("--last")
+                 .argName("N")
+                 .help("Last frame (inclusive). Omit for a single --frame")
+                 .handler([&](std::string_view value) {
+                   last = parseIntegral<int>(value);
+                 }));
+
+  parser.add(Option("--jobs", "-j")
+                 .argName("N")
+                 .help("Parallel frame workers (OpenMP). 1 is serial")
+                 .handler([&](std::string_view value) {
+                   jobs = parseIntegral<int>(value);
+                 }));
+
+  parser.add(Option("--type", "-t")
+                 .argName("I")
+                 .help("Atom type (0 guesses oxygen then type 1)")
+                 .handler([&](std::string_view value) {
+                   typeI = parseIntegral<int>(value);
+                 }));
+
+  parser.add(Option("--cutoff", "-c")
+                 .argName("ANGSTROM")
+                 .help("Neighbour cutoff")
+                 .handler([&](std::string_view value) {
+                   cutoff = parseFloatingPoint<double>(value);
+                 }));
+
+  parser.add(Option("-k")
+                 .argName("N")
+                 .help("k for knn / seeded cages")
+                 .handler([&](std::string_view value) {
+                   k = parseIntegral<int>(value);
+                 }));
+
+  parser.add(Option("--graph")
+                 .argName("KIND")
+                 .help("Bond graph for cages: cutoff | knn | knn-union | seeded")
+                 .handler([&](std::string_view value) { graph = value; }));
+
+  parser.add(Positional("command")
+                 .help("read | chill | chill-plus | cages")
+                 .occurs(zeroOrOneTime)
+                 .handler([&](std::string_view value) { cmd = value; }));
+
+  parser.add(Positional("file")
+                 .help("Trajectory file")
+                 .occurs(zeroOrOneTime)
+                 .handler([&](std::string_view value) { file = value; }));
+
+  try {
+    parser.parse(argc, argv);
+  } catch (const ParsingException &ex) {
+    std::cerr << colorizer.error(ex.message()) << "\n";
+    std::cerr << colorizer.warning(parser.formatUsage(progname, colorizer))
+              << "\n";
     return 2;
   }
-  const std::string cmd = args["command"].as<std::string>();
-  const std::string file = args["file"].as<std::string>();
-  const int frame = args["frame"].as<int>();
-  const int last = args["last"].as<int>();
-  const int jobs = args["jobs"].as<int>();
-  const int typeI = args["type"].as<int>();
-  const double cutoff = args["cutoff"].as<double>();
-  const int k = args["k"].as<int>();
-  const std::string graph = args["graph"].as<std::string>();
+
+  if (cmd.empty() || file.empty()) {
+    std::cerr << colorizer.error(
+                     "A command and a trajectory file are required")
+              << "\n";
+    std::cerr << colorizer.warning(parser.formatUsage(progname, colorizer))
+              << "\n";
+    return 2;
+  }
 
   auto runOne = [&](std::ostream &os, Cloud &cloud) {
     if (cmd == "read") {
@@ -272,11 +415,11 @@ int main(int argc, char *argv[]) {
       try {
         return cmdCages(os, cloud, cutoff, typeI, k, graph);
       } catch (const std::exception &e) {
-        os << e.what() << "\n";
+        os << colorizer.error(e.what()) << "\n";
         return 2;
       }
     }
-    os << "unknown command: " << cmd << "\n";
+    os << colorizer.error("unknown command: ") << cmd << "\n";
     return 2;
   };
 

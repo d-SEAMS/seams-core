@@ -335,7 +335,8 @@ The following tools are used in this project:
 The libraries used are:
 
 - [backward-cpp](https://github.com/bombela/backward-cpp) for better stacktraces without `gdb`
-- [cxxopts](https://github.com/jarro2783/cxxopts) for parsing command line options
+- [Argum](https://github.com/gershnik/argum) for the `seams` CLI (same parser as eonclient; colors, `NO_COLOR`)
+- [cxxopts](https://github.com/jarro2783/cxxopts) for the Catch2 test harness
 - [rang](https://github.com/agauniyal/rang) for terminal styles (ANSI)
 - [sol2](https://github.com/ThePhD/sol2) for interfacing with lua
 - [yaml-cpp](https://github.com/jbeder/yaml-cpp) for working with `yaml`

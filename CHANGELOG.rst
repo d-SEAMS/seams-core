@@ -2,6 +2,13 @@
 Changelog
 =========
 
+Version 2.2.3 (2026-08-15)
+===========================
+
+The ``seams`` CLI uses Argum, the same parser as eonclient. Help,
+errors, ice-type counts, and ``--features`` are colorized. ``NO_COLOR``
+turns the colors off.
+
 Version 2.2.2 (2026-08-15)
 ===========================
 
