@@ -357,6 +357,13 @@ ring::AffiliationUpdater::update(const std::vector<std::vector<int>> &rings,
     }
   }
 
+  // Whole-graph churn (nucleation dumps): every neighbour row moves,
+  // so the dirty walk visits every six-ring. Batch is then cheaper.
+  if (seedAtoms.size() * 2 > nList.size()) {
+    st.primeFull(rings, nList);
+    return st.current;
+  }
+
   if (seedAtoms.empty()) {
     // Same topology; only the ring order may differ. Carry stored answers.
     st.current.hc.assign(rings.size(), false);
