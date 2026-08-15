@@ -14,6 +14,11 @@ Breaking
   an error that names that repository.
 - Python bindings remain in
   https://github.com/d-SEAMS/PydSEAMSlib (moved in 2.0.1).
+- C++ ``getCorrel``, ``getCorrelPlus``, ``getIceType``,
+  ``getIceTypeNoPrint``, ``getIceTypePlus``, ``getIceTypePlusNoPrint``
+  and ``reclassifyWater`` return ``void``. They already took the cloud
+  by reference; the extra copy was the return. PydSEAMSlib still
+  returns the object from ``_core``.
 
 Added
 -----
