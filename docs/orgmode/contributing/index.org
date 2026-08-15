@@ -38,14 +38,8 @@ C++ tests (Catch2):
 pixi run test
 #+end_src
 
-Python tests (pytest):
-
-#+begin_src bash
-pixi run pytest
-#+end_src
-
-~pixi run test~ runs the Catch2 test suite through Meson. ~pixi run pytest~ first
-installs the Python package, then runs pytest on ~tests/python/~.
+~pixi run test~ runs the Catch2 suite. Python tests live in
+[[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
 
 * Project structure
 
@@ -65,20 +59,15 @@ seams-core/
     topo_one_dim.cpp     1D topology (nanotubes)
     topo_two_dim.cpp     2D topology (sheets)
     ...
-  python/
-    bindings.cpp         nanobind bindings (_core module)
-    pydseamslib/
-      __init__.py        Python package entry point
-      adapters/
-        _ase.py          ASE Atoms to PointCloud conversion
   tests/
-    python/              Python test suite
     *.cpp                C++ test files (Catch2)
   input/
     traj/                Example LAMMPS trajectories
   meson.build            Top-level Meson build definition
   pixi.toml              pixi workspace configuration
-  pyproject.toml         Python package metadata (meson-python backend)
+#+end_src
+
+Python bindings: [[https://github.com/d-SEAMS/PydSEAMSlib][d-SEAMS/PydSEAMSlib]].
 #+end_src
 
 * Core concepts
