@@ -22,6 +22,9 @@ export LD_LIBRARY_PATH="${BUILD}/src${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
   test -f "${BUILD}/build.ninja"
   test -x "${PIXI_ENV}/bin/meson" || test -x /usr/bin/meson
 
+  echo "=== reconfigure ==="
+  meson setup --reconfigure "${BUILD}" "${ROOT}"
+
   echo "=== compile ==="
   meson compile -C "${BUILD}" \
     yodaLib \
