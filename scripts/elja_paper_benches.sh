@@ -20,7 +20,27 @@ SEAMS_ROOT=${SEAMS_ROOT:-$(dirname "$SCRIPT_DIR")}
 BASE_SHA=${BASE_SHA:-1c8efa382c4ae88ebc68e40a991260c4d57edbd5}
 JOB_ID=${SLURM_JOB_ID:-nojob}
 OUT_DIR=${OUT_DIR:-$SEAMS_ROOT/bench-elja-$JOB_ID}
-BASE_TREE=$SEAMS_ROOT/../seams-base-$JOB_ID
+BASE_TREE=${BASE_TREE:-$SEAMS_ROOT/../seams-base}
+
+# Compute nodes have no git; the prep phase runs on the login node and leaves
+# the baseline worktree plus the recorded tip SHA behind for the job body.
+if [ "${1:-}" = "prep" ]; then
+  cd "$SEAMS_ROOT"
+  export PATH=$HOME/.pixi/bin:$PATH
+  pixi install
+  pixi run -- meson subprojects download || true
+  git rev-parse HEAD > .tip_sha
+  if [ ! -d "$BASE_TREE" ]; then
+    git worktree add --detach "$BASE_TREE" "$BASE_SHA"
+  fi
+  # The baseline tree downloads its own subproject wraps; compute nodes are
+  # offline
+  (cd "$BASE_TREE" &&
+   pixi run --manifest-path "$SEAMS_ROOT/pixi.toml" -- \
+     meson subprojects download || true)
+  echo "prep done: tip $(cat .tip_sha), base tree $BASE_TREE"
+  exit 0
+fi
 
 mkdir -p "$OUT_DIR"
 cd "$SEAMS_ROOT"
@@ -28,7 +48,11 @@ cd "$SEAMS_ROOT"
 log() { printf '%s %s\n' "$(date +%H:%M:%S)" "$*" | tee -a "$OUT_DIR/driver.log"; }
 
 # ---------------------------------------------------------------- conditions
-TIP_SHA=$(git rev-parse HEAD)
+TIP_SHA=$(cat "$SEAMS_ROOT/.tip_sha" 2>/dev/null || echo unknown)
+if [ ! -d "$BASE_TREE" ]; then
+  log "baseline tree $BASE_TREE missing -- run 'elja_paper_benches.sh prep' on the login node first"
+  exit 1
+fi
 log "tip $TIP_SHA base $BASE_SHA job $JOB_ID node $(hostname)"
 {
   echo "hostname: $(hostname)"
@@ -42,8 +66,7 @@ log "tip $TIP_SHA base $BASE_SHA job $JOB_ID node $(hostname)"
 
 # ------------------------------------------------------------------ tip build
 export PATH=$HOME/.pixi/bin:$PATH
-pixi install >> "$OUT_DIR/driver.log" 2>&1
-run() { pixi run -- "$@"; }
+run() { pixi run --manifest-path "$SEAMS_ROOT/pixi.toml" -- "$@"; }
 
 log "configuring tip"
 run meson setup build-tip --buildtype=release \
@@ -65,7 +88,6 @@ log "tip suite green"
 
 # ----------------------------------------------------------------- base build
 log "configuring base at $BASE_SHA"
-git worktree add --detach "$BASE_TREE" "$BASE_SHA" >> "$OUT_DIR/driver.log" 2>&1
 (
   cd "$BASE_TREE"
   run meson setup build-base --buildtype=release \
