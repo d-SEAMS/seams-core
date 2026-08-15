@@ -320,3 +320,67 @@ TEST_CASE("cage membership is not a function of the four-neighbour star",
   // Yet the cage label of v flips
   REQUIRE_FALSE(labelOf(broken, v));
 }
+
+TEST_CASE("seeded affiliation: structural zero, consistency, recovery",
+          "[cage_affiliation]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  auto idx = nneigh::neighbourListByIndex(yCloud, nList);
+  auto six = sixMembered(primitive::ringNetwork(idx, 7));
+  REQUIRE(six.size() == 8192);
+
+  // Consistency: identical graphs reproduce the plain affiliation atoms
+  const auto both = ring::seededCageAffiliation(six, idx, six, idx);
+  const auto plain = ring::cageAffiliation(six, idx);
+  std::vector<bool> plainDdcAtoms(yCloud.nop, false);
+  for (size_t i = 0; i < six.size(); i++) {
+    if (plain.ddc[i]) {
+      for (const int a : six[i]) {
+        plainDdcAtoms[a] = true;
+      }
+    }
+  }
+  REQUIRE(both.ddc == plainDdcAtoms);
+
+  // Structural zero: an empty strict graph accepts nothing, however much
+  // the permissive graph affiliates
+  std::vector<std::vector<int>> selfOnly(idx.size());
+  for (size_t i = 0; i < idx.size(); i++) {
+    selfOnly[i].push_back(idx[i].empty() ? static_cast<int>(i) : idx[i][0]);
+  }
+  std::vector<std::vector<int>> noRings;
+  const auto zero = ring::seededCageAffiliation(noRings, selfOnly, six, idx);
+  REQUIRE(std::none_of(zero.hc.begin(), zero.hc.end(),
+                       [](bool b) { return b; }));
+  REQUIRE(std::none_of(zero.ddc.begin(), zero.ddc.end(),
+                       [](bool b) { return b; }));
+
+  // Recovery: isolating atoms in the strict graph loses them (affiliation
+  // survives single cuts, since each atom sits in many rings); seeding the
+  // intact permissive graph recovers every one of them
+  auto cut = idx;
+  for (const int victim : {17, 911, 2048, 3333, 4000}) {
+    for (size_t m = 1; m < cut[victim].size(); m++) {
+      auto &row = cut[cut[victim][m]];
+      row.erase(std::remove(row.begin() + 1, row.end(), victim), row.end());
+    }
+    cut[victim].resize(1);
+  }
+  auto sixCut = sixMembered(primitive::ringNetwork(cut, 7));
+  const auto strictOnly = ring::cageAffiliation(sixCut, cut);
+  std::vector<bool> strictAtoms(yCloud.nop, false);
+  for (size_t i = 0; i < sixCut.size(); i++) {
+    if (strictOnly.ddc[i]) {
+      for (const int a : sixCut[i]) {
+        strictAtoms[a] = true;
+      }
+    }
+  }
+  const int lost = static_cast<int>(
+      std::count(strictAtoms.begin(), strictAtoms.end(), false));
+  REQUIRE(lost > 0);
+  const auto seeded =
+      ring::seededCageAffiliation(sixCut, cut, six, idx);
+  REQUIRE(seeded.ddc == plainDdcAtoms);
+}

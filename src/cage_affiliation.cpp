@@ -467,3 +467,82 @@ ring::AffiliationUpdater::update(const std::vector<std::vector<int>> &rings,
   st.remember(rings, nList);
   return st.current;
 }
+
+ring::SeededAtomLabels ring::seededCageAffiliation(
+    const std::vector<std::vector<int>> &strictRings,
+    const std::vector<std::vector<int>> &strictNList,
+    const std::vector<std::vector<int>> &permissiveRings,
+    const std::vector<std::vector<int>> &permissiveNList) {
+  const int nAtoms = static_cast<int>(permissiveNList.size());
+  SeededAtomLabels out;
+  out.hc.assign(nAtoms, false);
+  out.ddc.assign(nAtoms, false);
+  if (nAtoms == 0) {
+    return out;
+  }
+
+  const auto toAtoms = [nAtoms](const std::vector<std::vector<int>> &rings,
+                                const CageAffiliation &affiliation) {
+    std::pair<std::vector<bool>, std::vector<bool>> flags{
+        std::vector<bool>(nAtoms, false), std::vector<bool>(nAtoms, false)};
+    for (size_t i = 0; i < rings.size(); i++) {
+      for (const int atom : rings[i]) {
+        if (atom < 0 || atom >= nAtoms) {
+          continue;
+        }
+        if (affiliation.hc[i]) {
+          flags.first[atom] = true;
+        }
+        if (affiliation.ddc[i]) {
+          flags.second[atom] = true;
+        }
+      }
+    }
+    return flags;
+  };
+
+  const auto [hcS, ddcS] =
+      toAtoms(strictRings, cageAffiliation(strictRings, strictNList));
+  const auto [hcP, ddcP] = toAtoms(
+      permissiveRings, cageAffiliation(permissiveRings, permissiveNList));
+
+  // Affiliated set and seeds; components under the permissive bonds
+  std::vector<bool> affiliated(nAtoms, false);
+  std::vector<bool> kept(nAtoms, false);
+  std::vector<int> stack;
+  for (int a = 0; a < nAtoms; a++) {
+    affiliated[a] = hcS[a] || ddcS[a] || hcP[a] || ddcP[a];
+  }
+  for (int a = 0; a < nAtoms; a++) {
+    if (!(hcS[a] || ddcS[a]) || kept[a]) {
+      continue;
+    }
+    stack.push_back(a);
+    kept[a] = true;
+    while (!stack.empty()) {
+      const int u = stack.back();
+      stack.pop_back();
+      for (size_t m = 1; m < permissiveNList[u].size(); m++) {
+        const int v = permissiveNList[u][m];
+        if (v >= 0 && v < nAtoms && affiliated[v] && !kept[v]) {
+          kept[v] = true;
+          stack.push_back(v);
+        }
+      }
+    }
+  }
+
+  for (int a = 0; a < nAtoms; a++) {
+    if (!kept[a]) {
+      continue;
+    }
+    if (hcS[a] || ddcS[a]) {
+      out.hc[a] = hcS[a];
+      out.ddc[a] = ddcS[a];
+    } else {
+      out.hc[a] = hcP[a];
+      out.ddc[a] = ddcP[a];
+    }
+  }
+  return out;
+}

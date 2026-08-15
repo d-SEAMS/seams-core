@@ -100,6 +100,33 @@ private:
   std::unique_ptr<Impl> impl_;
 };
 
+/** @struct SeededAtomLabels
+ * @brief Per-atom cage flags from seeded (hysteresis) affiliation.
+ */
+struct SeededAtomLabels {
+  std::vector<bool> hc;  //! Atom belongs to an accepted HC-affiliated ring
+  std::vector<bool> ddc; //! Atom belongs to an accepted DDC-affiliated ring
+};
+
+/** Seeded affiliation over two graphs on the same atoms: the strict graph
+ *  (typically the mutual k-nearest bonds) supplies seeds, the permissive
+ *  supergraph (typically the union bonds) supplies completions, and a
+ *  permissively affiliated atom is accepted only when its bonded component
+ *  of affiliated atoms contains a seed. Specificity on structureless input
+ *  is structural rather than statistical: when the strict pass affiliates
+ *  nothing, nothing is accepted regardless of what the permissive graph
+ *  builds. Where both graphs label an atom, the strict labels win.
+ * @param[in] strictRings Six-membered rings of the strict graph.
+ * @param[in] strictNList Strict graph, by index with leading self entries.
+ * @param[in] permissiveRings Six-membered rings of the permissive graph.
+ * @param[in] permissiveNList Permissive graph, same conventions.
+ */
+[[nodiscard]] SeededAtomLabels seededCageAffiliation(
+    const std::vector<std::vector<int>> &strictRings,
+    const std::vector<std::vector<int>> &strictNList,
+    const std::vector<std::vector<int>> &permissiveRings,
+    const std::vector<std::vector<int>> &permissiveNList);
+
 } // namespace ring
 
 #endif // SEAMS_CAGE_AFFILIATION_H_
