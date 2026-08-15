@@ -739,6 +739,42 @@ TEST_CASE("getCorrel coordination number generalizes beyond four", "[bop]") {
   }
 }
 
+TEST_CASE("classifyBonds under registered rules reproduces CHILL/CHILL+",
+          "[bop]") {
+  // The named rule sets and the water entry points are the same engine
+  auto reference = makeTetraCloud();
+  auto nList = nneigh::neighListO(3.0, reference, 1);
+  chill::getCorrelPlus(reference, nList, false);
+
+  auto viaRule = makeTetraCloud();
+  chill::classifyBonds(viaRule, nList, chill::bondClassifier("CHILL+"));
+  REQUIRE(viaRule.pts[0].c_ij.size() == reference.pts[0].c_ij.size());
+  for (size_t j = 0; j < reference.pts[0].c_ij.size(); j++) {
+    REQUIRE_THAT(viaRule.pts[0].c_ij[j].c_value,
+                 Catch::Matchers::WithinAbs(
+                     reference.pts[0].c_ij[j].c_value, 1e-12));
+    REQUIRE(viaRule.pts[0].c_ij[j].classifier ==
+            reference.pts[0].c_ij[j].classifier);
+  }
+
+  // A registered custom rule set with an all-covering eclipsed band makes
+  // every bond eclipsed or staggered; nothing lands out of range
+  chill::registerBondClassifier("everything-eclipsed",
+                                {-2.0, -1.0, 1.0, 4});
+  auto names = chill::bondClassifierNames();
+  REQUIRE(std::find(names.begin(), names.end(), "everything-eclipsed") !=
+          names.end());
+  REQUIRE(std::find(names.begin(), names.end(), "CHILL") != names.end());
+  REQUIRE(std::find(names.begin(), names.end(), "CHILL+") != names.end());
+
+  auto custom = makeTetraCloud();
+  chill::classifyBonds(custom, nList,
+                       chill::bondClassifier("everything-eclipsed"));
+  for (const auto &cij : custom.pts[0].c_ij) {
+    REQUIRE(cij.classifier == molSys::bond_type::eclipsed);
+  }
+}
+
 TEST_CASE("Steinhardt parameters reproduce the FCC reference values", "[bop]") {
   // A perfect FCC lattice has q4 = 0.190941, q6 = 0.574524 for the twelve
   // nearest neighbours (Steinhardt, Nelson and Ronchetti 1983, Table I).

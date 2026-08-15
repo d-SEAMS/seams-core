@@ -195,6 +195,37 @@ void registerRings(sol::state &lua) {
 }
 
 void registerOrder(sol::state &lua) {
+  // Bond-classification rule sets: CHILL and CHILL+ are registered
+  // instances; scripts register their own materials by name
+  const auto ruleFromTable = [](const sol::table &t) {
+    chill::BondClassifier rule = chill::chillRule();
+    rule.staggeredMax = t.get_or("staggeredMax", rule.staggeredMax);
+    rule.eclipsedMin = t.get_or("eclipsedMin", rule.eclipsedMin);
+    rule.eclipsedMax = t.get_or("eclipsedMax", rule.eclipsedMax);
+    rule.coordinationNumber =
+        t.get_or("coordinationNumber", rule.coordinationNumber);
+    return rule;
+  };
+  lua.set_function("classifyBonds",
+                   [ruleFromTable](Cloud &yCloud,
+                                   std::vector<std::vector<int>> nList,
+                                   const sol::object &ruleSpec,
+                                   sol::optional<bool> isSlice) {
+                     const chill::BondClassifier rule =
+                         ruleSpec.is<std::string>()
+                             ? chill::bondClassifier(
+                                   ruleSpec.as<std::string>())
+                             : ruleFromTable(ruleSpec.as<sol::table>());
+                     chill::classifyBonds(yCloud, nList, rule,
+                                          isSlice.value_or(false));
+                   });
+  lua.set_function("registerBondClassifier",
+                   [ruleFromTable](std::string name, const sol::table &t) {
+                     chill::registerBondClassifier(name, ruleFromTable(t));
+                   });
+  lua.set_function("bondClassifierNames", []() {
+    return sol::as_table(chill::bondClassifierNames());
+  });
   lua.set_function("getCorrelPlus",
                    [](Cloud &yCloud, std::vector<std::vector<int>> nList,
                       sol::optional<bool> isSlice,

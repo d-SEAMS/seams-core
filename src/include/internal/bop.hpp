@@ -18,6 +18,7 @@
 #include <array>
 #include <cmath>
 #include <complex>
+#include <string>
 #include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
@@ -166,6 +167,49 @@ struct YlmAtom {
 struct QlmAtom {
   std::vector<YlmAtom> ptq; // Averaged over neighbours
 };
+
+/** @struct BondClassifier
+ * @brief One rule set for classifying bond correlations @f$c_{ij}@f$.
+ * @details A bond is staggered when @f$c_{ij} \le@f$ staggeredMax, eclipsed
+ *  when it falls in [eclipsedMin, eclipsedMax], and out of range otherwise.
+ *  The CHILL and CHILL+ water rules are two instances; other hydrogen-bonded
+ *  or tetrahedral materials register their own thresholds and coordination.
+ */
+struct BondClassifier {
+  double staggeredMax;    //! c_ij at or below this is staggered
+  double eclipsedMin;     //! Lower edge of the eclipsed band
+  double eclipsedMax;     //! Upper edge of the eclipsed band
+  int coordinationNumber; //! Nearest neighbours in the bond sum; <= 0 keeps
+                          //! each atom's whole neighbour row
+};
+
+//! The CHILL rule set (Moore et al., PCCP 12, 4124, 2010): strict staggered
+//! bound, narrow eclipsed band, four nearest neighbours
+[[nodiscard]] BondClassifier chillRule();
+
+//! The CHILL+ rule set (Nguyen and Molinero, JPCB 119, 9369, 2015): wider
+//! eclipsed band for interfacial and clathrate recognition
+[[nodiscard]] BondClassifier chillPlusRule();
+
+//! Look up a registered rule set by name. "CHILL" and "CHILL+" are always
+//! present; registerBondClassifier adds more. Throws std::out_of_range for
+//! unknown names.
+[[nodiscard]] BondClassifier bondClassifier(const std::string &name);
+
+//! Register (or replace) a named rule set at runtime, making the material's
+//! thresholds available to every front end by name
+void registerBondClassifier(const std::string &name,
+                            const BondClassifier &rule);
+
+//! Names of every registered rule set
+[[nodiscard]] std::vector<std::string> bondClassifierNames();
+
+//! Compute and classify the bond correlations c_ij under an arbitrary rule
+//! set, filling yCloud.pts[i].c_ij. getCorrel and getCorrelPlus are this
+//! engine under their canonical water rules.
+void classifyBonds(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                   const std::vector<std::vector<int>> &nList,
+                   const BondClassifier &rule, bool isSlice = false);
 
 /**
  *  Function for getting the bond order correlations @f$c_{ij}@f$  (or

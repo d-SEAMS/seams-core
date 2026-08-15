@@ -18,6 +18,7 @@
 #include <complex>
 #include <iostream>
 #include <numbers>
+#include <unordered_map>
 #include <utility>
 
 namespace {
@@ -481,128 +482,139 @@ std::complex<double> sph::lookupTableQ6(int m, std::array<double, 2> angles) {
   return (order < 0) ? negative : positive;
 }
 
-//! Uses Boost for spherical harmonics, and gets c_ij according to the CHILL
-//! algorithm
-void
-chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-                 const std::vector<std::vector<int>> &nList, bool isSlice,
-                 int coordinationNumber) {
-  //
-  int l = 3;      // TODO: Don't hard-code this; change later
-  int iatomID;    // Atom ID (key) of iatom
-  int iatomIndex; // Index (value) of iatom
-  int jatomID;    // Atom ID (key) of jatom
-  int jatomIndex; // Index (value) of nearest neighbour
-  std::array<double, 3> delta;
-  std::array<double, 2> angles;
+/**
+ * @details The bond-correlation engine shared by every rule set. Averages the
+ *  l=3 spherical harmonics over the rule's nearest-neighbour count, forms the
+ *  normalised correlation @f$c_{ij}@f$ for the same bonds, and classifies
+ *  each bond against the rule's thresholds (boundaries inclusive). getCorrel
+ *  and getCorrelPlus call this with the CHILL and CHILL+ water rules; other
+ *  materials pass their own registered rules.
+ */
+void chill::classifyBonds(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<std::vector<int>> &nList, const chill::BondClassifier &rule,
+    bool isSlice) {
+  constexpr int l = 3;
   chill::QlmAtom QlmTotal; // Qlm for each iatom
   std::vector<std::complex<double>>
       yl; // temp q_lm for each pair of iatom and jatom
-  std::complex<double> dot_product = {0, 0};
-  std::complex<double> qI = {0, 0};
-  std::complex<double> qJ = {0, 0};
-  std::complex<double> Inorm = {0, 0};
-  std::complex<double> Jnorm = {0, 0};
-  std::complex<double> complexDenominator = {0, 0};
-  std::complex<double> complexCij = {0, 0};
-  molSys::Result temp_cij; // Holds the c_ij value
-  double cij_real;
-  int nnumNeighbours; // Number of nearest neighbours for iatom
 
   QlmTotal.ptq.resize(yCloud.nop);
 
   // Loop through the neighbour list
   for (int iatom = 0; iatom < nList.size(); iatom++) {
-    // The atom index is iatom
-    iatomIndex = iatom;
-    iatomID =
-        nList[iatomIndex][0]; // The first element in nList is the ID of iatom
     // CHILL and CHILL+ average over the four nearest neighbours, not over
-    // every neighbour that falls inside the cutoff; other coordination
-    // numbers reuse the same machinery for non-tetrahedral systems
-    const std::vector<int> nearest =
-        nearestNeighbourIndices(yCloud, nList, iatomIndex, coordinationNumber);
-    nnumNeighbours = static_cast<int>(nearest.size());
+    // every neighbour that falls inside the cutoff; other rule sets bring
+    // their own coordination
+    const std::vector<int> nearest = nearestNeighbourIndices(
+        yCloud, nList, iatom, rule.coordinationNumber);
+    const int nnumNeighbours = static_cast<int>(nearest.size());
     for (int j = 0; j < nnumNeighbours; j++) {
-      jatomIndex = nearest[j];
+      const int jatomIndex = nearest[j];
 
       // Get the relative distance now that the index values are known
-      delta = gen::relDist(yCloud, iatomIndex, jatomIndex);
+      const std::array<double, 3> delta =
+          gen::relDist(yCloud, iatom, jatomIndex);
       // radialCoord carries the r > 0 guard, so coincident atoms yield a
       // defined angle instead of acos(0/0)
-      angles = sph::radialCoord(delta);
+      const std::array<double, 2> angles = sph::radialCoord(delta);
 
       // Now add over all nearest neighbours
       if (j == 0) {
-        QlmTotal.ptq[iatomIndex].ylm = sph::spheriHarmo(3, angles);
-        // QlmTotal.ptq[iatom].ylm = sph::lookupTableQ3Vec(angles);
+        QlmTotal.ptq[iatom].ylm = sph::spheriHarmo(l, angles);
         continue;
       }
-      // Not for the first jatom
-      yl = sph::spheriHarmo(3, angles);
+      yl = sph::spheriHarmo(l, angles);
       for (int m = 0; m < 2 * l + 1; m++) {
-        QlmTotal.ptq[iatomIndex].ylm[m] += yl[m];
-        // QlmTotal.ptq[iatom].ylm[m] += sph::lookupTableQ3(m, angles);
+        QlmTotal.ptq[iatom].ylm[m] += yl[m];
       }
-    } // End of loop over 4 nearest neighbours
+    } // End of loop over nearest neighbours
 
-    // Divide by 4
-    QlmTotal.ptq[iatomIndex].ylm =
+    // Average over the bond count
+    QlmTotal.ptq[iatom].ylm =
         gen::avgVector(QlmTotal.ptq[iatom].ylm, l, nnumNeighbours);
   } // End of looping over all iatom
 
   // ------------------------------------------------
-  // Now that you have all qlm for the particles,
-  // find c_ij
+  // Now that you have all qlm for the particles, find c_ij
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-    // if(yCloud.pts[iatom].type!=typeO){continue;}
-    // if this is a slice and the particle is not in the slice
-    // then skip
-    if (isSlice) {
-      if (yCloud.pts[iatom].inSlice == false) {
-        continue;
-      }
+    // if this is a slice and the particle is not in the slice then skip
+    if (isSlice && !yCloud.pts[iatom].inSlice) {
+      continue;
     }
-    // The index is what we are looping through
-    iatomIndex = iatom;
     // The same neighbours the q_lm were averaged over, so that the bond
     // count the classification tables are written against matches
-    const std::vector<int> nearestBonds =
-        nearestNeighbourIndices(yCloud, nList, iatomIndex, coordinationNumber);
-    nnumNeighbours = static_cast<int>(nearestBonds.size());
-    yCloud.pts[iatomIndex].c_ij.reserve(nnumNeighbours);
-    for (int j = 0; j < nnumNeighbours; j++) {
-      // Init to zero
-      dot_product = {0, 0};
-      Inorm = {0, 0};
-      Jnorm = {0, 0};
-      jatomIndex = nearestBonds[j];
-      // Spherical harmonics
+    const std::vector<int> nearestBonds = nearestNeighbourIndices(
+        yCloud, nList, iatom, rule.coordinationNumber);
+    yCloud.pts[iatom].c_ij.reserve(nearestBonds.size());
+    for (const int jatomIndex : nearestBonds) {
+      std::complex<double> dot_product = {0, 0};
+      std::complex<double> Inorm = {0, 0};
+      std::complex<double> Jnorm = {0, 0};
       for (int m = 0; m < 2 * l + 1; m++) {
-        qI = QlmTotal.ptq[iatomIndex].ylm[m];
-        qJ = QlmTotal.ptq[jatomIndex].ylm[m];
-        dot_product = dot_product + (qI * std::conj(qJ)); // unnormalized
-        Inorm = Inorm + (qI * std::conj(qI));
-        Jnorm = Jnorm + (qJ * std::conj(qJ));
+        const std::complex<double> qI = QlmTotal.ptq[iatom].ylm[m];
+        const std::complex<double> qJ = QlmTotal.ptq[jatomIndex].ylm[m];
+        dot_product += qI * std::conj(qJ); // unnormalized
+        Inorm += qI * std::conj(qI);
+        Jnorm += qJ * std::conj(qJ);
       } // end loop over m components
-      // Get the denominator
-      complexDenominator = std::sqrt(Inorm * Jnorm);
-      complexCij = dot_product / complexDenominator;
-      // Update c_ij and type
-      cij_real = complexCij.real();
+      const std::complex<double> complexCij =
+          dot_product / std::sqrt(Inorm * Jnorm);
+      molSys::Result temp_cij;
+      const double cij_real = complexCij.real();
       temp_cij.c_value = cij_real;
-      if (cij_real < -0.8) {
+      if (cij_real <= rule.staggeredMax) {
         temp_cij.classifier = molSys::bond_type::staggered;
-      } else if (cij_real > -0.2 && cij_real < -0.05) {
+      } else if (cij_real >= rule.eclipsedMin &&
+                 cij_real <= rule.eclipsedMax) {
         temp_cij.classifier = molSys::bond_type::eclipsed;
       } else {
         temp_cij.classifier = molSys::bond_type::out_of_range;
       }
-      yCloud.pts[iatomIndex].c_ij.push_back(temp_cij);
+      yCloud.pts[iatom].c_ij.push_back(temp_cij);
     } // end loop over nearest neighbours
   }
+}
 
-  return;
+chill::BondClassifier chill::chillRule() { return {-0.8, -0.2, -0.05, 4}; }
+
+chill::BondClassifier chill::chillPlusRule() { return {-0.8, -0.35, 0.25, 4}; }
+
+namespace {
+std::unordered_map<std::string, chill::BondClassifier> &bondRuleRegistry() {
+  static std::unordered_map<std::string, chill::BondClassifier> registry = {
+      {"CHILL", chill::chillRule()}, {"CHILL+", chill::chillPlusRule()}};
+  return registry;
+}
+} // namespace
+
+chill::BondClassifier chill::bondClassifier(const std::string &name) {
+  return bondRuleRegistry().at(name);
+}
+
+void chill::registerBondClassifier(const std::string &name,
+                                   const chill::BondClassifier &rule) {
+  bondRuleRegistry()[name] = rule;
+}
+
+std::vector<std::string> chill::bondClassifierNames() {
+  std::vector<std::string> names;
+  names.reserve(bondRuleRegistry().size());
+  for (const auto &entry : bondRuleRegistry()) {
+    names.push_back(entry.first);
+  }
+  std::sort(names.begin(), names.end());
+  return names;
+}
+
+//! Gets c_ij according to the CHILL rule set
+void
+chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                 const std::vector<std::vector<int>> &nList, bool isSlice,
+                 int coordinationNumber) {
+  chill::BondClassifier rule = chill::chillRule();
+  rule.coordinationNumber = coordinationNumber;
+  chill::classifyBonds(yCloud, nList, rule, isSlice);
 }
 
 //! Classifies each atom according to the CHILL algorithm without printing
@@ -778,124 +790,9 @@ void
 chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      const std::vector<std::vector<int>> &nList, bool isSlice,
                      int coordinationNumber) {
-  //
-  int l = 3;      // TODO: Don't hard-code this; change later
-  int iatomID;    // Atom ID (key) of iatom
-  int iatomIndex; // Index (value) of iatom
-  int jatomID;    // Atom ID (key) of jatom
-  int jatomIndex; // Index (value) of nearest neighbour
-  std::array<double, 3> delta;
-  std::array<double, 2> angles;
-  chill::QlmAtom QlmTotal; // Qlm for each iatom
-  std::vector<std::complex<double>>
-      yl; // temp q_lm for each pair of iatom and jatom
-  std::complex<double> dot_product = {0, 0};
-  std::complex<double> qI = {0, 0};
-  std::complex<double> qJ = {0, 0};
-  std::complex<double> Inorm = {0, 0};
-  std::complex<double> Jnorm = {0, 0};
-  std::complex<double> complexDenominator = {0, 0};
-  std::complex<double> complexCij = {0, 0};
-  molSys::Result temp_cij; // Holds the c_ij value
-  double cij_real;
-  int nnumNeighbours; // Number of nearest neighbours for iatom
-
-  QlmTotal.ptq.resize(yCloud.nop);
-
-  // Loop through the neighbour list
-  for (int iatom = 0; iatom < nList.size(); iatom++) {
-    // The atom index is iatom
-    iatomIndex = iatom;
-    iatomID =
-        nList[iatomIndex][0]; // The first element in nList is the ID of iatom
-    // CHILL and CHILL+ average over the four nearest neighbours, not over
-    // every neighbour that falls inside the cutoff; other coordination
-    // numbers reuse the same machinery for non-tetrahedral systems
-    const std::vector<int> nearest =
-        nearestNeighbourIndices(yCloud, nList, iatomIndex, coordinationNumber);
-    nnumNeighbours = static_cast<int>(nearest.size());
-    for (int j = 0; j < nnumNeighbours; j++) {
-      jatomIndex = nearest[j];
-
-      // Get the relative distance now that the index values are known
-      delta = gen::relDist(yCloud, iatomIndex, jatomIndex);
-      // radialCoord carries the r > 0 guard, so coincident atoms yield a
-      // defined angle instead of acos(0/0)
-      angles = sph::radialCoord(delta);
-
-      // Now add over all nearest neighbours
-      if (j == 0) {
-        QlmTotal.ptq[iatomIndex].ylm = sph::spheriHarmo(3, angles);
-        // QlmTotal.ptq[iatom].ylm = sph::lookupTableQ3Vec(angles);
-        continue;
-      }
-      // Not for the first jatom
-      yl = sph::spheriHarmo(3, angles);
-      for (int m = 0; m < 2 * l + 1; m++) {
-        QlmTotal.ptq[iatomIndex].ylm[m] += yl[m];
-        // QlmTotal.ptq[iatom].ylm[m] += sph::lookupTableQ3(m, angles);
-      }
-    } // End of loop over 4 nearest neighbours
-
-    // Divide by 4
-    QlmTotal.ptq[iatomIndex].ylm =
-        gen::avgVector(QlmTotal.ptq[iatom].ylm, l, nnumNeighbours);
-  } // End of looping over all iatom
-
-  // ------------------------------------------------
-  // Now that you have all qlm for the particles,
-  // find c_ij
-  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-    // if(yCloud.pts[iatom].type!=typeO){continue;}
-    // if this is a slice and the particle is not in the slice
-    // then skip
-    if (isSlice) {
-      if (yCloud.pts[iatom].inSlice == false) {
-        continue;
-      }
-    }
-    // The index is what we are looping through
-    iatomIndex = iatom;
-    // The same neighbours the q_lm were averaged over, so that the bond
-    // count the classification tables are written against matches
-    const std::vector<int> nearestBonds =
-        nearestNeighbourIndices(yCloud, nList, iatomIndex, coordinationNumber);
-    nnumNeighbours = static_cast<int>(nearestBonds.size());
-    yCloud.pts[iatomIndex].c_ij.reserve(nnumNeighbours);
-    for (int j = 0; j < nnumNeighbours; j++) {
-      // Init to zero
-      dot_product = {0, 0};
-      Inorm = {0, 0};
-      Jnorm = {0, 0};
-      jatomIndex = nearestBonds[j];
-      // Spherical harmonics
-      for (int m = 0; m < 2 * l + 1; m++) {
-        qI = QlmTotal.ptq[iatomIndex].ylm[m];
-        qJ = QlmTotal.ptq[jatomIndex].ylm[m];
-        dot_product = dot_product + (qI * std::conj(qJ)); // unnormalized
-        Inorm = Inorm + (qI * std::conj(qI));
-        Jnorm = Jnorm + (qJ * std::conj(qJ));
-      } // end loop over m components
-      // Get the denominator
-      complexDenominator = std::sqrt(Inorm * Jnorm);
-      complexCij = dot_product / complexDenominator;
-      // Update c_ij and type
-      cij_real = complexCij.real();
-      temp_cij.c_value = cij_real;
-      if (cij_real <= -0.8) {
-        temp_cij.classifier = molSys::bond_type::staggered;
-      } else if (cij_real >= -0.35 && cij_real <= 0.25) {
-        temp_cij.classifier = molSys::bond_type::eclipsed;
-      } else {
-        temp_cij.classifier = molSys::bond_type::out_of_range;
-      }
-      yCloud.pts[iatomIndex].c_ij.push_back(temp_cij);
-    } // end loop over nearest neighbours
-  }
-
-  // ------------------------------------------------
-
-  return;
+  chill::BondClassifier rule = chill::chillPlusRule();
+  rule.coordinationNumber = coordinationNumber;
+  chill::classifyBonds(yCloud, nList, rule, isSlice);
 }
 
 /**

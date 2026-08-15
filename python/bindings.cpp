@@ -380,6 +380,49 @@ NB_MODULE(_core, m) {
           nb::arg("path"), nb::arg("rings"), nb::arg("oCloud"), nb::arg("yCloud"),
           nb::arg("coordLow"), nb::arg("coordHigh"), nb::arg("identicalCloud"));
 
+    // Bond-classification rule sets: CHILL and CHILL+ are two registered
+    // instances of the same engine, and other materials register their own
+    nb::class_<chill::BondClassifier>(m, "BondClassifier")
+        .def(nb::init<>())
+        .def("__init__",
+             [](chill::BondClassifier *self, double staggeredMax,
+                double eclipsedMin, double eclipsedMax,
+                int coordinationNumber) {
+               new (self) chill::BondClassifier{staggeredMax, eclipsedMin,
+                                                eclipsedMax,
+                                                coordinationNumber};
+             },
+             nb::arg("staggeredMax"), nb::arg("eclipsedMin"),
+             nb::arg("eclipsedMax"), nb::arg("coordinationNumber") = 4)
+        .def_rw("staggeredMax", &chill::BondClassifier::staggeredMax)
+        .def_rw("eclipsedMin", &chill::BondClassifier::eclipsedMin)
+        .def_rw("eclipsedMax", &chill::BondClassifier::eclipsedMax)
+        .def_rw("coordinationNumber",
+                &chill::BondClassifier::coordinationNumber);
+    m.def("chillRule", &chill::chillRule, "The CHILL water rule set.");
+    m.def("chillPlusRule", &chill::chillPlusRule,
+          "The CHILL+ water rule set.");
+    m.def("bondClassifier", &chill::bondClassifier,
+          "Look up a registered bond-classification rule set by name.",
+          nb::arg("name"));
+    m.def("registerBondClassifier", &chill::registerBondClassifier,
+          "Register (or replace) a named bond-classification rule set.",
+          nb::arg("name"), nb::arg("rule"));
+    m.def("bondClassifierNames", &chill::bondClassifierNames,
+          "Names of every registered bond-classification rule set.");
+    m.def(
+        "classifyBonds",
+        [](molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+           const std::vector<std::vector<int>> &nList,
+           const chill::BondClassifier &rule, bool isSlice)
+            -> molSys::PointCloud<molSys::Point<double>, double> & {
+          chill::classifyBonds(yCloud, nList, rule, isSlice);
+          return yCloud;
+        },
+        "Compute and classify bond correlations under an arbitrary rule set.",
+        nb::arg("yCloud"), nb::arg("nList"), nb::arg("rule"),
+        nb::arg("isSlice") = false, nb::rv_policy::reference);
+
     // CHILL/CHILL+ classification. The C++ routines mutate yCloud in place
     // and return void. The Python bindings return the same object so that
     // `cloud = _core.getCorrel(yCloud=cloud, ...)` keeps the caller's
