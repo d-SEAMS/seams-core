@@ -112,6 +112,21 @@ void registerIO(sol::state &lua) {
                                           high.value_or(zeroBounds));
       });
   lua.set_function("readXYZ", sinp::readXYZ);
+#ifdef SEAMS_HAS_CHEMFILES
+  lua.set_function("readChemfiles",
+                   [](std::string filename, int targetFrame,
+                      sol::optional<int> typeFilter) {
+                     Cloud scratch;
+                     return sinp::readChemfiles(filename, targetFrame, scratch,
+                                                typeFilter.value_or(-1));
+                   });
+#endif
+#ifdef SEAMS_HAS_READCON
+  lua.set_function("readCon", [](std::string filename, int targetFrame) {
+    Cloud scratch;
+    return sinp::readCon(filename, targetFrame, scratch);
+  });
+#endif
   // Legacy spellings, container-userdata semantics
   lua.set_function("readFrameOnlyOne", sinp::readLammpsTrjreduced);
   lua.set_function("readFrameOnlyOneAllAtoms", sinp::readLammpsTrj);

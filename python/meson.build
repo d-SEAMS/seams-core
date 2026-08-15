@@ -14,6 +14,9 @@ py.extension_module('_core',
   dependencies: [yds_dep, nanobind_dep],
   cpp_args: _args,
   link_args: _py_link_args,
+  # Resolve the freshly built libyodaLib over a stale installed copy: the
+  # conda LDFLAGS rpath to the env prefix otherwise wins
+  build_rpath: meson.project_build_root() / 'src',
   install: true,
   subdir: 'pydseamslib')
 

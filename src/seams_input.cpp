@@ -926,52 +926,71 @@ sinp::readChemfiles(std::string filename, int targetFrame,
 #endif // SEAMS_HAS_CHEMFILES
 
 #ifdef SEAMS_HAS_READCON
-#include <readcon-core.hpp>
+// The C API rather than readcon-core.hpp: the C++ wrapper is a convenience
+// layer over exactly these calls, and the C ABI is the surface cargo-c
+// versions
+#include <readcon-core.h>
 
 molSys::PointCloud<molSys::Point<double>, double>
 sinp::readCon(std::string filename, int targetFrame,
               molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   yCloud = molSys::clearPointCloud(yCloud);
 
-  try {
-    int frameIdx = 0;
-    readcon::ConFrameIterator frames(filename);
-    for (auto &&frame : frames) {
-      frameIdx++;
-      if (frameIdx != targetFrame) continue;
-
-      // Found target frame
-      auto &cell = frame.cell();
-      yCloud.box = {cell[0], cell[1], cell[2]};
-      yCloud.boxLow = {0.0, 0.0, 0.0};
-
-      auto &atoms = frame.atoms();
-      yCloud.pts.reserve(atoms.size());
-
-      for (size_t i = 0; i < atoms.size(); i++) {
-        molSys::Point<double> pt;
-        pt.type = static_cast<int>(atoms[i].atomic_number);
-        pt.atomID = static_cast<int>(atoms[i].atom_id);
-        pt.molID = pt.atomID;
-        pt.x = atoms[i].x;
-        pt.y = atoms[i].y;
-        pt.z = atoms[i].z;
-
-        yCloud.pts.push_back(pt);
-        mapAtomIdToIndex(yCloud);
-      }
-
-      yCloud.nop = static_cast<int>(yCloud.pts.size());
-      yCloud.currentFrame = targetFrame;
-      return yCloud;
-    }
-
-    std::cerr << "Frame " << targetFrame << " not found in " << filename
-              << " (has " << frameIdx << " frames).\n";
-  } catch (const std::exception &e) {
-    std::cerr << "Error reading .con file: " << e.what() << "\n";
+  readcon::CConFrameIterator *frames =
+      readcon::read_con_file_iterator(filename.c_str());
+  if (frames == nullptr) {
+    std::cerr << "Cannot open .con file " << filename << "\n";
+    return yCloud;
   }
 
+  int frameIdx = 0;
+  while (readcon::RKRConFrame *handle =
+             readcon::con_frame_iterator_next(frames)) {
+    frameIdx++;
+    if (frameIdx != targetFrame) {
+      readcon::free_rkr_frame(handle);
+      continue;
+    }
+
+    // Found the target frame; extract the transparent atom records
+    readcon::CFrame *frame = readcon::rkr_frame_to_c_frame(handle);
+    readcon::free_rkr_frame(handle);
+    if (frame == nullptr) {
+      std::cerr << "Cannot extract frame " << targetFrame << " from "
+                << filename << "\n";
+      break;
+    }
+
+    yCloud.box = {frame->cell[0], frame->cell[1], frame->cell[2]};
+    yCloud.boxLow = {0.0, 0.0, 0.0};
+    yCloud.pts.reserve(frame->num_atoms);
+
+    for (size_t i = 0; i < frame->num_atoms; i++) {
+      const readcon::CAtom &atom = frame->atoms[i];
+      molSys::Point<double> pt;
+      pt.type = static_cast<int>(atom.atomic_number);
+      pt.atomID = static_cast<int>(atom.atom_id);
+      pt.molID = pt.atomID;
+      pt.x = atom.x;
+      pt.y = atom.y;
+      pt.z = atom.z;
+
+      yCloud.pts.push_back(pt);
+      mapAtomIdToIndex(yCloud);
+    }
+    readcon::free_c_frame(frame);
+
+    yCloud.nop = static_cast<int>(yCloud.pts.size());
+    yCloud.currentFrame = targetFrame;
+    readcon::free_con_frame_iterator(frames);
+    return yCloud;
+  }
+
+  if (yCloud.pts.empty()) {
+    std::cerr << "Frame " << targetFrame << " not found in " << filename
+              << " (has " << frameIdx << " frames).\n";
+  }
+  readcon::free_con_frame_iterator(frames);
   return yCloud;
 }
 #endif // SEAMS_HAS_READCON

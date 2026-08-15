@@ -30,6 +30,10 @@ test_sources = {
   'structure_desc': 'test_structure_desc.cpp',
 }
 
+if readcon_dep.found()
+  test_sources += {'readcon': 'test_readcon.cpp'}
+endif
+
 # Ensure test binaries load the freshly-built libyodaLib.so instead of any
 # version installed in the conda env.  The conda toolchain injects
 # --disable-new-dtags + -rpath=<pixi-env>/lib via LDFLAGS, which creates a
