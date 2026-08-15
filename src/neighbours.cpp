@@ -638,12 +638,19 @@ std::vector<std::vector<int>> nominateByCellList(
   }
 
   const int maxReach = std::max({nx, ny, nz}) / 2 + 1;
+  std::vector<unsigned> seen(static_cast<std::size_t>(ncell), 0);
+  unsigned stamp = 1;
   for (const int i : owners) {
     std::priority_queue<std::pair<double, int>> heap;
     int ix = 0;
     int iy = 0;
     int iz = 0;
     cellOf(i, ix, iy, iz);
+    ++stamp;
+    if (stamp == 0) {
+      std::fill(seen.begin(), seen.end(), 0);
+      stamp = 1;
+    }
     int reach = 1;
     while (reach <= maxReach) {
       for (int dx = -reach; dx <= reach; dx++) {
@@ -655,8 +662,12 @@ std::vector<std::vector<int>> nominateByCellList(
             if (!shell && reach > 1) {
               continue;
             }
-            int j = head[static_cast<std::size_t>(
-                cellIndex(ix + dx, iy + dy, iz + dz))];
+            const int c = cellIndex(ix + dx, iy + dy, iz + dz);
+            if (seen[static_cast<std::size_t>(c)] == stamp) {
+              continue;
+            }
+            seen[static_cast<std::size_t>(c)] = stamp;
+            int j = head[static_cast<std::size_t>(c)];
             while (j >= 0) {
               if (j != i) {
                 const double d2 = gen::periodicDistSq(yCloud, i, j);
