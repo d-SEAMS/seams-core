@@ -15,6 +15,167 @@
 #include <seams_input.hpp>
 #include <seams_output.hpp>
 
+#include <algorithm>
+#include <array>
+
+
+namespace {
+
+/**
+ * @details Writes the fixed part of a LAMMPS dump frame: the timestep, the
+ *  atom count, the box bounds and the column header.
+ * @param[in,out] outputFile The open output stream.
+ * @param[in] yCloud The point cloud supplying the frame number and the box.
+ * @param[in] nAtoms Number of atoms the frame will contain, which is not
+ *  always the size of the cloud.
+ * @param[in] columns The trailing "ITEM: ATOMS ..." column specification.
+ */
+void writeDumpHeader(
+    std::ofstream &outputFile,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    size_t nAtoms, const std::string &columns) {
+  outputFile << "ITEM: TIMESTEP\n";
+  outputFile << yCloud.currentFrame << "\n";
+  outputFile << "ITEM: NUMBER OF ATOMS\n";
+  outputFile << nAtoms << "\n";
+  outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
+  for (int k = 0; k < 3; k++) {
+    const double lo = (static_cast<size_t>(k) < yCloud.boxLow.size())
+                          ? yCloud.boxLow[k]
+                          : 0.0;
+    const double len =
+        (static_cast<size_t>(k) < yCloud.box.size()) ? yCloud.box[k] : 0.0;
+    outputFile << lo << " " << lo + len << "\n";
+  }
+  outputFile << "ITEM: ATOMS " << columns << "\n";
+}
+
+/**
+ * @details Writes the fixed part of a LAMMPS data file: the comment line, the
+ *  section counts, the type counts and the orthogonal box bounds. Every data
+ *  writer shares this skeleton; only the counts and the box origin differ.
+ * @param[in,out] outputFile The open output stream.
+ * @param[in] nAtoms Number of atoms the Atoms section will contain.
+ * @param[in] nBonds Number of bonds the Bonds section will contain.
+ * @param[in] numAtomTypes Number of atom types declared in the header.
+ * @param[in] bondTypes Number of bond types declared in the header.
+ * @param[in] boxLo Lower box bound per dimension.
+ * @param[in] boxHi Upper box bound per dimension.
+ */
+void writeDataHeader(std::ofstream &outputFile, size_t nAtoms, size_t nBonds,
+                     int numAtomTypes, int bondTypes,
+                     const std::array<double, 3> &boxLo,
+                     const std::array<double, 3> &boxHi) {
+  outputFile << "Written out by D-SEAMS\n";
+  outputFile << nAtoms << " atoms\n";
+  outputFile << nBonds << " bonds\n";
+  outputFile << "0 angles\n0 dihedrals\n0 impropers\n";
+  outputFile << numAtomTypes << " atom types\n";
+  outputFile
+      << bondTypes
+      << " bond types\n0 angle types\n0 dihedral types\n0 improper types\n";
+  outputFile << boxLo[0] << " " << boxHi[0] << " xlo xhi\n";
+  outputFile << boxLo[1] << " " << boxHi[1] << " ylo yhi\n";
+  outputFile << boxLo[2] << " " << boxHi[2] << " zlo zhi\n";
+}
+
+//! Box bounds for a data file anchored at the cloud's lower box coordinate
+std::array<std::array<double, 3>, 2> dataBoxBounds(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  std::array<double, 3> lo{0.0, 0.0, 0.0};
+  std::array<double, 3> hi{0.0, 0.0, 0.0};
+  for (int k = 0; k < 3; k++) {
+    lo[k] = yCloud.boxLow[k];
+    hi[k] = yCloud.boxLow[k] + yCloud.box[k];
+  }
+  return {lo, hi};
+}
+
+//! Box bounds for a data file anchored at the origin
+std::array<std::array<double, 3>, 2> dataBoxBoundsZero(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  return {std::array<double, 3>{0.0, 0.0, 0.0},
+          std::array<double, 3>{yCloud.box[0], yCloud.box[1], yCloud.box[2]}};
+}
+
+//! Sorts atom IDs and drops duplicates, for writers that collect the IDs by
+//! flattening ring or cage membership
+std::vector<int> sortedUniqueIDs(std::vector<int> atoms) {
+  std::sort(atoms.begin(), atoms.end());
+  atoms.erase(std::unique(atoms.begin(), atoms.end()), atoms.end());
+  return atoms;
+}
+
+/**
+ * @details Writes the Atoms section for every point in the cloud, one
+ *  "atomID molecule-tag atom-type q x y z" row per point, with the atom type
+ *  supplied per index by the caller.
+ */
+template <typename TypeOfIndex>
+void writeDataAtomsAll(
+    std::ofstream &outputFile,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    TypeOfIndex typeOf) {
+  for (size_t i = 0; i < yCloud.pts.size(); i++) {
+    outputFile << yCloud.pts[i].atomID << " " << yCloud.pts[i].molID << " "
+               << typeOf(i) << " 0 " << yCloud.pts[i].x << " "
+               << yCloud.pts[i].y << " " << yCloud.pts[i].z << "\n";
+  }
+}
+
+/**
+ * @details Writes the Atoms section for a sorted unique ID selection, padding
+ *  ID gaps with dummy atoms of type 2 so that LAMMPS sees a contiguous ID
+ *  range. Selected atoms take type 1.
+ * @param[in] fillTrailing Also pad with dummies from the last selected ID up
+ *  to the cloud size.
+ */
+void writeDataAtomsPadded(
+    std::ofstream &outputFile,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &atoms, bool fillTrailing) {
+  int prevAtomID = 0;
+  for (size_t i = 0; i < atoms.size(); i++) {
+    const int iatom = atoms[i] - 1; // The actual index is one less than the ID
+    // Fill in dummy atoms if some IDs have been skipped
+    if (atoms[i] != prevAtomID + 1) {
+      int dummyID = prevAtomID;
+      for (int j = 0; j < atoms[i] - prevAtomID - 1; j++) {
+        dummyID++;
+        const int jatom = dummyID - 1;
+        outputFile << dummyID << " " << yCloud.pts[jatom].molID << " 2 0 "
+                   << yCloud.pts[jatom].x << " " << yCloud.pts[jatom].y << " "
+                   << yCloud.pts[jatom].z << "\n";
+      }
+    }
+    outputFile << atoms[i] << " " << yCloud.pts[iatom].molID << " 1 0 "
+               << yCloud.pts[iatom].x << " " << yCloud.pts[iatom].y << " "
+               << yCloud.pts[iatom].z << "\n";
+    prevAtomID = atoms[i];
+  }
+  // Fill in the rest of the dummy atoms up to the cloud size
+  if (fillTrailing && !atoms.empty() && atoms.back() != yCloud.nop) {
+    for (int id = atoms.back() + 1; id <= yCloud.nop; id++) {
+      const int jatom = id - 1;
+      outputFile << id << " " << yCloud.pts[jatom].molID << " 2 0 "
+                 << yCloud.pts[jatom].x << " " << yCloud.pts[jatom].y << " "
+                 << yCloud.pts[jatom].z << "\n";
+    }
+  }
+}
+
+//! Writes the Bonds section with every bond carrying bond type 1
+void writeDataBonds(std::ofstream &outputFile,
+                    const std::vector<std::vector<int>> &bonds) {
+  outputFile << "\nBonds\n\n";
+  for (size_t ibond = 0; ibond < bonds.size(); ibond++) {
+    outputFile << ibond + 1 << " 1 " << bonds[ibond][0] << " "
+               << bonds[ibond][1] << "\n";
+  }
+}
+
+} // namespace
+
 /**
  * @details  Prints out a LAMMPS data file, with some default options. Only
  * Oxygen atoms are printed out
@@ -24,13 +185,8 @@ int sout::writeLAMMPSdata(
     std::vector<std::vector<int>> rings, std::vector<std::vector<int>> bonds,
     std::string filename) {
   std::ofstream outputFile;
-  std::vector<int> atoms;         // Holds all atom IDs to print
-  int iatom;                      // Index, not atom ID
-  bool padAtoms = false;          // Add extra atoms if the atom IDs are skipped
-  int prevAtomID = 0;             // Check for previous atom ID
-  int dummyAtoms = 0;             // Number of dummy atoms to fill
-  int dummyID;
-  int jatom; // Array index is 1 less than the ID (index for dummy atom)
+  std::vector<int> atoms; // Holds all atom IDs to print
+  bool padAtoms = false;  // Add extra atoms if the atom IDs are skipped
   // ----------------
   // Return if there are no rings
   if (rings.empty()) {
@@ -38,34 +194,16 @@ int sout::writeLAMMPSdata(
   }
   int ringSize = rings[0].size(); // Ring size of each ring in rings
   // ----------------
-  // Otherwise create file
-  // Create output dir if it doesn't exist already
-  const char *path = "../output"; // relative to the build directory
-  fs::path dir(path);
-  // if (fs::create_directory(dir)) {
-  //   std::cerr << "Output directory created\n";
-  // }
+  // Create the output dir if it doesn't exist already
+  sout::makePath("../output"); // relative to the build directory
   // ----------------
   // Get all the unique atomIDs of the atoms in the rings of this type
-  // Put all atom IDs into one 1-D vector
-  size_t total_size{0};
-  // Get the total number of atoms (repeated)
-  total_size = rings.size() * ringSize;
-  // Reserve this size inside atoms
-  atoms.reserve(total_size);
-  // Fill up all these atom IDs
+  atoms.reserve(rings.size() * ringSize);
   for (int iring = 0; iring < rings.size(); iring++) {
     std::move(rings[iring].begin(), rings[iring].end(),
               std::back_inserter(atoms));
   } // end of loop through all rings in the list
-
-  // Sort the array according to atom ID, which will be needed to get the
-  // unique IDs and to remove duplicates
-  sort(atoms.begin(), atoms.end());
-  // Get the unique atom IDs
-  auto ip = std::unique(atoms.begin(), atoms.end());
-  // Resize the vector to remove undefined terms
-  atoms.resize(std::distance(atoms.begin(), ip));
+  atoms = sortedUniqueIDs(std::move(atoms));
   // If the number of atoms is less than the total nop, add dummy atoms
   if (atoms.size() != yCloud.nop) {
     padAtoms = true;
@@ -73,56 +211,9 @@ int sout::writeLAMMPSdata(
   // ----------------
   // Write output to file inside the output directory
   outputFile.open("../output/" + filename);
-  // FORMAT:
-  //  Comment Line
-  //  4 atoms
-  //  4 bonds
-  //  0 angles
-  //  0 dihedrals
-  //  0 impropers
-  //  1 atom types
-  //  1 bond types
-  //  0 angle types
-  //  0 dihedral types
-  //  0 improper types
-  //  -1.124000 52.845002  xlo xhi
-  //  0.000000 54.528999  ylo yhi
-  //  1.830501 53.087501  zlo zhi
-
-  //  Masses
-
-  //  1 15.999400 # O
-
-  //  Atoms
-
-  // 1 1 1 0 20.239  1.298 6.873 # O
-  // 2 1 1 0 0 5.193 6.873 # O
-  // 3 1 1 0 2.249 1.298 6.873 # O
-
-  // -------
-  // Write the header
-  // Write comment line
-  outputFile << "Written out by D-SEAMS\n";
-  // Write out the number of atoms
-  outputFile << atoms[atoms.size() - 1] << " "
-             << "atoms"
-             << "\n";
-  // Number of bonds
-  outputFile << bonds.size() << " bonds"
-             << "\n";
-  outputFile << "0 angles\n0 dihedrals\n0 impropers\n";
-  // If padded atoms are required, two atom types will be required
-  if (padAtoms) {
-    outputFile << "2 atom types\n";
-  } else {
-    outputFile << "1 atom types\n";
-  } // end of atom types
-  outputFile
-      << "1 bond types\n0 angle types\n0 dihedral types\n0 improper types\n";
-  // Box lengths
-  outputFile << "0 " << yCloud.box[0] << " xlo xhi\n";
-  outputFile << "0 " << yCloud.box[1] << " ylo yhi\n";
-  outputFile << "0 " << yCloud.box[2] << " zlo zhi\n";
+  const auto box = dataBoxBoundsZero(yCloud);
+  writeDataHeader(outputFile, atoms[atoms.size() - 1], bonds.size(),
+                  padAtoms ? 2 : 1, 1, box[0], box[1]);
   // Masses
   outputFile << "\nMasses\n\n";
   outputFile << "1 15.999400 # O\n";
@@ -131,44 +222,8 @@ int sout::writeLAMMPSdata(
   }
   // Atoms
   outputFile << "\nAtoms\n\n";
-  // -------
-  // Write out the atom coordinates
-  // Loop through atoms
-  for (int i = 0; i < atoms.size(); i++) {
-    iatom = atoms[i] - 1; // The actual index is one less than the ID
-    // -----------
-    // Pad out
-    // Fill in dummy atoms if some have been skipped
-    if (atoms[i] != prevAtomID + 1) {
-      dummyAtoms = atoms[i] - prevAtomID - 1;
-      dummyID = prevAtomID;
-      // Loop to write out dummy atoms
-      for (int j = 0; j < dummyAtoms; j++) {
-        dummyID++;
-        jatom = dummyID - 1;
-        // 1 molecule-tag atom-type q x y z
-        outputFile << dummyID << " " << yCloud.pts[jatom].molID << " 2 0 "
-                   << yCloud.pts[jatom].x << " " << yCloud.pts[jatom].y << " "
-                   << yCloud.pts[jatom].z << "\n";
-      } // end of dummy atom write-out
-    }   // end of check for dummy atom printing
-    // -----------
-    // Write out coordinates
-    // 1 molecule-tag atom-type q x y z
-    outputFile << atoms[i] << " " << yCloud.pts[iatom].molID << " 1 0 "
-               << yCloud.pts[iatom].x << " " << yCloud.pts[iatom].y << " "
-               << yCloud.pts[iatom].z << "\n";
-    // update the previous atom ID
-    prevAtomID = atoms[i];
-  } // end of loop through all atoms in atomID
-
-  // Print the bonds now!
-  outputFile << "\nBonds\n\n";
-  // Loop through all bonds
-  for (int ibond = 0; ibond < bonds.size(); ibond++) {
-    outputFile << ibond + 1 << " 1 " << bonds[ibond][0] << " "
-               << bonds[ibond][1] << "\n";
-  }
+  writeDataAtomsPadded(outputFile, yCloud, atoms, false);
+  writeDataBonds(outputFile, bonds);
 
   // Once the datafile has been printed, exit
   return 0;
@@ -1333,24 +1388,7 @@ int sout::writeLAMMPSdumpCages(
   // -------
   // Write the header
   // ITEM: TIMESTEP
-  outputFile << "ITEM: TIMESTEP\n";
-  // Write out frame number
-  outputFile << yCloud.currentFrame << "\n";
-  // ITEM: NUMBER OF ATOMS
-  outputFile << "ITEM: NUMBER OF ATOMS\n";
-  // Number of atoms
-  outputFile << yCloud.pts.size() << "\n";
-  // ITEM: BOX BOUNDS pp pp pp
-  outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
-  // Box lengths
-  outputFile << yCloud.boxLow[0] << " " << yCloud.boxLow[0] + yCloud.box[0]
-             << "\n";
-  outputFile << yCloud.boxLow[1] << " " << yCloud.boxLow[1] + yCloud.box[1]
-             << "\n";
-  outputFile << yCloud.boxLow[2] << " " << yCloud.boxLow[2] + yCloud.box[2]
-             << "\n";
-  // ITEM: ATOMS id mol type x y z rmsd
-  outputFile << "ITEM: ATOMS id mol type x y z rmsd\n";
+  writeDumpHeader(outputFile, yCloud, yCloud.pts.size(), "id mol type x y z rmsd");
   // -------
   // Write out the atom coordinates
   // Format
@@ -1408,24 +1446,7 @@ int sout::writeLAMMPSdumpINT(
   // -------
   // Write the header
   // ITEM: TIMESTEP
-  outputFile << "ITEM: TIMESTEP\n";
-  // Write out frame number
-  outputFile << yCloud.currentFrame << "\n";
-  // ITEM: NUMBER OF ATOMS
-  outputFile << "ITEM: NUMBER OF ATOMS\n";
-  // Number of atoms
-  outputFile << yCloud.pts.size() << "\n";
-  // ITEM: BOX BOUNDS pp pp pp
-  outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
-  // Box lengths
-  outputFile << yCloud.boxLow[0] << " " << yCloud.boxLow[0] + yCloud.box[0]
-             << "\n";
-  outputFile << yCloud.boxLow[1] << " " << yCloud.boxLow[1] + yCloud.box[1]
-             << "\n";
-  outputFile << yCloud.boxLow[2] << " " << yCloud.boxLow[2] + yCloud.box[2]
-             << "\n";
-  // ITEM: ATOMS id mol type x y z rmsd
-  outputFile << "ITEM: ATOMS id mol type x y z rmsd\n";
+  writeDumpHeader(outputFile, yCloud, yCloud.pts.size(), "id mol type x y z rmsd");
   // -------
   // Write out the atom coordinates
   // Format
@@ -1482,24 +1503,7 @@ int sout::writeLAMMPSdumpSlice(
   // -------
   // Write the header
   // ITEM: TIMESTEP
-  outputFile << "ITEM: TIMESTEP\n";
-  // Write out frame number
-  outputFile << yCloud.currentFrame << "\n";
-  // ITEM: NUMBER OF ATOMS
-  outputFile << "ITEM: NUMBER OF ATOMS\n";
-  // Number of atoms
-  outputFile << yCloud.pts.size() << "\n";
-  // ITEM: BOX BOUNDS pp pp pp
-  outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
-  // Box lengths
-  outputFile << yCloud.boxLow[0] << " " << yCloud.boxLow[0] + yCloud.box[0]
-             << "\n";
-  outputFile << yCloud.boxLow[1] << " " << yCloud.boxLow[1] + yCloud.box[1]
-             << "\n";
-  outputFile << yCloud.boxLow[2] << " " << yCloud.boxLow[2] + yCloud.box[2]
-             << "\n";
-  // ITEM: ATOMS id mol type x y z rmsd
-  outputFile << "ITEM: ATOMS id mol type x y z inSlice\n";
+  writeDumpHeader(outputFile, yCloud, yCloud.pts.size(), "id mol type x y z inSlice");
   // -------
   // Write out the atom coordinates
   // Format
@@ -1530,7 +1534,6 @@ int sout::writeLAMMPSdataAllPrisms(
     int maxDepth, std::string path, bool doShapeMatching) {
   //
   std::ofstream outputFile;
-  int iatom; // Index, not atom ID
   int bondTypes = 1;
   // Bond stuff
   std::vector<std::vector<int>> bonds; // Vector of vector, with each row
@@ -1552,61 +1555,11 @@ int sout::writeLAMMPSdataAllPrisms(
   // ----------------
   // Write output to file inside the output directory
   outputFile.open(path + "topoINT/dataFiles/" + filename);
-  // FORMAT:
-  //  Comment Line
-  //  4 atoms
-  //  4 bonds
-  //  0 angles
-  //  0 dihedrals
-  //  0 impropers
-  //  1 atom types
-  //  1 bond types
-  //  0 angle types
-  //  0 dihedral types
-  //  0 improper types
-  //  -1.124000 52.845002  xlo xhi
-  //  0.000000 54.528999  ylo yhi
-  //  1.830501 53.087501  zlo zhi
-
-  //  Masses
-
-  //  1 15.999400 # O
-
-  //  Atoms
-
-  // 1 1 1 0 20.239  1.298 6.873 # O
-  // 2 1 1 0 0 5.193 6.873 # O
-  // 3 1 1 0 2.249 1.298 6.873 # O
-
-  // -------
-  // Write the header
-  // Write comment line
-  outputFile << "Written out by D-SEAMS\n";
-  // Write out the number of atoms
-  outputFile << yCloud.pts.size() << " "
-             << "atoms"
-             << "\n";
-  // Number of bonds
-  outputFile << bonds.size() << " bonds"
-             << "\n";
-  outputFile << "0 angles\n0 dihedrals\n0 impropers\n";
   // There are maxDepth-2 total types of prisms + dummy
-  if (doShapeMatching) {
-    outputFile << 2 * maxDepth - 2 << " atom types\n";
-  } else {
-    outputFile << maxDepth << " atom types\n";
-  }
-  // Bond types
-  outputFile
-      << bondTypes
-      << " bond types\n0 angle types\n0 dihedral types\n0 improper types\n";
-  // Box lengths
-  outputFile << yCloud.boxLow[0] << " " << yCloud.boxLow[0] + yCloud.box[0]
-             << " xlo xhi\n";
-  outputFile << yCloud.boxLow[1] << " " << yCloud.boxLow[1] + yCloud.box[1]
-             << " ylo yhi\n";
-  outputFile << yCloud.boxLow[2] << " " << yCloud.boxLow[2] + yCloud.box[2]
-             << " zlo zhi\n";
+  const auto box = dataBoxBounds(yCloud);
+  writeDataHeader(outputFile, yCloud.pts.size(), bonds.size(),
+                  doShapeMatching ? 2 * maxDepth - 2 : maxDepth, bondTypes,
+                  box[0], box[1]);
   // Masses
   outputFile << "\nMasses\n\n";
   outputFile << "1 15.999400 # dummy\n";
@@ -1625,28 +1578,9 @@ int sout::writeLAMMPSdataAllPrisms(
   }   // Deformed prism types
   // Atoms
   outputFile << "\nAtoms\n\n";
-  // -------
-  // Write out the atom coordinates
-  // Loop through atoms
-  for (int i = 0; i < yCloud.pts.size(); i++) {
-    iatom =
-        yCloud.pts[i].atomID; // The actual ID can be different from the index
-    // Write out coordinates
-    // atomID molecule-tag atom-type q x y z
-    outputFile << iatom << " " << yCloud.pts[i].molID << " " << atomTypes[i]
-               << " 0 " << yCloud.pts[i].x << " " << yCloud.pts[i].y << " "
-               << yCloud.pts[i].z << "\n";
-
-  } // end of loop through all atoms in pointCloud
-
-  // Print the bonds now!
-  outputFile << "\nBonds\n\n";
-  // Loop through all bonds
-  for (int ibond = 0; ibond < bonds.size(); ibond++) {
-    //
-    outputFile << ibond + 1 << " 1 " << bonds[ibond][0] << " "
-               << bonds[ibond][1] << "\n";
-  } // end of for loop for bonds
+  writeDataAtomsAll(outputFile, yCloud,
+                    [&atomTypes](size_t i) { return atomTypes[i]; });
+  writeDataBonds(outputFile, bonds);
 
   outputFile.close();
   // Once the datafile has been printed, exit
@@ -1664,7 +1598,6 @@ int sout::writeLAMMPSdataAllRings(
     int maxDepth, std::string path, bool isMonolayer) {
   //
   std::ofstream outputFile;
-  int iatom; // Index, not atom ID
   int bondTypes = 1;
   // Bond stuff
   std::vector<std::vector<int>> bonds; // Vector of vector, with each row
@@ -1696,58 +1629,10 @@ int sout::writeLAMMPSdataAllRings(
 
   // Write output to file inside the output directory
   outputFile.open(path + pathName + filename);
-
-  // FORMAT:
-  //  Comment Line
-  //  4 atoms
-  //  4 bonds
-  //  0 angles
-  //  0 dihedrals
-  //  0 impropers
-  //  1 atom types
-  //  1 bond types
-  //  0 angle types
-  //  0 dihedral types
-  //  0 improper types
-  //  -1.124000 52.845002  xlo xhi
-  //  0.000000 54.528999  ylo yhi
-  //  1.830501 53.087501  zlo zhi
-
-  //  Masses
-
-  //  1 15.999400 # O
-
-  //  Atoms
-
-  // 1 1 1 0 20.239  1.298 6.873 # O
-  // 2 1 1 0 0 5.193 6.873 # O
-  // 3 1 1 0 2.249 1.298 6.873 # O
-
-  // -------
-  // Write the header
-  // Write comment line
-  outputFile << "Written out by D-SEAMS\n";
-  // Write out the number of atoms
-  outputFile << yCloud.pts.size() << " "
-             << "atoms"
-             << "\n";
-  // Number of bonds
-  outputFile << bonds.size() << " bonds"
-             << "\n";
-  outputFile << "0 angles\n0 dihedrals\n0 impropers\n";
-  // There are maxDepth-2 total types of prisms + dummy
-  outputFile << maxDepth << " atom types\n";
-  // Bond types
-  outputFile
-      << bondTypes
-      << " bond types\n0 angle types\n0 dihedral types\n0 improper types\n";
-  // Box lengths
-  outputFile << yCloud.boxLow[0] << " " << yCloud.boxLow[0] + yCloud.box[0]
-             << " xlo xhi\n";
-  outputFile << yCloud.boxLow[1] << " " << yCloud.boxLow[1] + yCloud.box[1]
-             << " ylo yhi\n";
-  outputFile << yCloud.boxLow[2] << " " << yCloud.boxLow[2] + yCloud.box[2]
-             << " zlo zhi\n";
+  // There are maxDepth-2 total types of rings + dummy
+  const auto box = dataBoxBounds(yCloud);
+  writeDataHeader(outputFile, yCloud.pts.size(), bonds.size(), maxDepth,
+                  bondTypes, box[0], box[1]);
   // Masses
   outputFile << "\nMasses\n\n";
   outputFile << "1 15.999400 # dummy\n";
@@ -1758,28 +1643,9 @@ int sout::writeLAMMPSdataAllRings(
   } // end of writing out atom types
   // Atoms
   outputFile << "\nAtoms\n\n";
-  // -------
-  // Write out the atom coordinates
-  // Loop through atoms
-  for (int i = 0; i < yCloud.pts.size(); i++) {
-    iatom =
-        yCloud.pts[i].atomID; // The actual ID can be different from the index
-    // Write out coordinates
-    // atomID molecule-tag atom-type q x y z
-    outputFile << iatom << " " << yCloud.pts[i].molID << " " << atomTypes[i]
-               << " 0 " << yCloud.pts[i].x << " " << yCloud.pts[i].y << " "
-               << yCloud.pts[i].z << "\n";
-
-  } // end of loop through all atoms in pointCloud
-
-  // Print the bonds now!
-  outputFile << "\nBonds\n\n";
-  // Loop through all bonds
-  for (int ibond = 0; ibond < bonds.size(); ibond++) {
-    //
-    outputFile << ibond + 1 << " 1 " << bonds[ibond][0] << " "
-               << bonds[ibond][1] << "\n";
-  } // end of for loop for bonds
+  writeDataAtomsAll(outputFile, yCloud,
+                    [&atomTypes](size_t i) { return atomTypes[i]; });
+  writeDataBonds(outputFile, bonds);
 
   outputFile.close();
   // Once the datafile has been printed, exit
@@ -1798,12 +1664,7 @@ int sout::writeLAMMPSdataPrisms(
   std::ofstream outputFile;
   std::vector<int> atoms;         // Holds all atom IDs to print
   int ringSize = rings[0].size(); // Ring size of each ring in rings
-  int iatom;                      // Index, not atom ID
   bool padAtoms = false;          // Add extra atoms if the atom IDs are skipped
-  int prevAtomID = 0;             // Check for previous atom ID
-  int dummyAtoms = 0;             // Number of dummy atoms to fill
-  int dummyID;
-  int jatom; // Array index is 1 less than the ID (index for dummy atom)
   int bondTypes = 1;
   // Bond stuff
   std::vector<std::vector<int>> bonds; // Vector of vector, with each row
@@ -1828,34 +1689,16 @@ int sout::writeLAMMPSdataPrisms(
   } // Bonds from rings
   //
   // ----------------
-  // Otherwise create file
-  // Create output dir if it doesn't exist already
-  const char *path = "../output"; // relative to the build directory
-  fs::path dir(path);
-  // if (fs::create_directory(dir)) {
-  //   std::cerr << "Output directory created\n";
-  // }
+  // Create the output dir if it doesn't exist already
+  sout::makePath("../output"); // relative to the build directory
   // ----------------
   // Get all the unique atomIDs of the atoms in the rings of this type
-  // Put all atom IDs into one 1-D vector
-  size_t total_size{0};
-  // Get the total number of atoms (repeated)
-  total_size = listPrism.size() * ringSize;
-  // Reserve this size inside atoms
-  atoms.reserve(total_size);
-  // Fill up all these atom IDs
+  atoms.reserve(listPrism.size() * ringSize);
   for (int iring = 0; iring < listPrism.size(); iring++) {
     std::move(rings[listPrism[iring]].begin(), rings[listPrism[iring]].end(),
               std::back_inserter(atoms));
   } // end of loop through all rings in the list
-
-  // Sort the array according to atom ID, which will be needed to get the
-  // unique IDs and to remove duplicates
-  sort(atoms.begin(), atoms.end());
-  // Get the unique atom IDs
-  auto ip = std::unique(atoms.begin(), atoms.end());
-  // Resize the vector to remove undefined terms
-  atoms.resize(std::distance(atoms.begin(), ip));
+  atoms = sortedUniqueIDs(std::move(atoms));
   // If the number of atoms is less than the total nop, add dummy atoms
   if (atoms.size() != yCloud.nop) {
     padAtoms = true;
@@ -1864,57 +1707,9 @@ int sout::writeLAMMPSdataPrisms(
   // ----------------
   // Write output to file inside the output directory
   outputFile.open("../output/" + filename);
-  // FORMAT:
-  //  Comment Line
-  //  4 atoms
-  //  4 bonds
-  //  0 angles
-  //  0 dihedrals
-  //  0 impropers
-  //  1 atom types
-  //  1 bond types
-  //  0 angle types
-  //  0 dihedral types
-  //  0 improper types
-  //  -1.124000 52.845002  xlo xhi
-  //  0.000000 54.528999  ylo yhi
-  //  1.830501 53.087501  zlo zhi
-
-  //  Masses
-
-  //  1 15.999400 # O
-
-  //  Atoms
-
-  // 1 1 1 0 20.239  1.298 6.873 # O
-  // 2 1 1 0 0 5.193 6.873 # O
-  // 3 1 1 0 2.249 1.298 6.873 # O
-
-  // -------
-  // Write the header
-  // Write comment line
-  outputFile << "Written out by D-SEAMS\n";
-  // Write out the number of atoms
-  outputFile << yCloud.pts.size() << " "
-             << "atoms"
-             << "\n";
-  // Number of bonds
-  outputFile << bonds.size() << " bonds"
-             << "\n";
-  outputFile << "0 angles\n0 dihedrals\n0 impropers\n";
-  // If padded atoms are required, two atom types will be required
-  if (padAtoms) {
-    outputFile << "2 atom types\n";
-  } else {
-    outputFile << "1 atom types\n";
-  } // end of atom types
-  outputFile
-      << bondTypes
-      << " bond types\n0 angle types\n0 dihedral types\n0 improper types\n";
-  // Box lengths
-  outputFile << "0 " << yCloud.box[0] << " xlo xhi\n";
-  outputFile << "0 " << yCloud.box[1] << " ylo yhi\n";
-  outputFile << "0 " << yCloud.box[2] << " zlo zhi\n";
+  const auto box = dataBoxBoundsZero(yCloud);
+  writeDataHeader(outputFile, yCloud.pts.size(), bonds.size(),
+                  padAtoms ? 2 : 1, bondTypes, box[0], box[1]);
   // Masses
   outputFile << "\nMasses\n\n";
   outputFile << "1 15.999400 # O\n";
@@ -1923,47 +1718,7 @@ int sout::writeLAMMPSdataPrisms(
   }
   // Atoms
   outputFile << "\nAtoms\n\n";
-  // -------
-  // Write out the atom coordinates
-  // Loop through atoms
-  for (int i = 0; i < atoms.size(); i++) {
-    iatom = atoms[i] - 1; // The actual index is one less than the ID
-    // -----------
-    // Pad out
-    // Fill in dummy atoms if some have been skipped
-    if (atoms[i] != prevAtomID + 1) {
-      dummyAtoms = atoms[i] - prevAtomID - 1;
-      dummyID = prevAtomID;
-      // Loop to write out dummy atoms
-      for (int j = 0; j < dummyAtoms; j++) {
-        dummyID++;
-        jatom = dummyID - 1;
-        // 1 molecule-tag atom-type q x y z
-        outputFile << dummyID << " " << yCloud.pts[jatom].molID << " 2 0 "
-                   << yCloud.pts[jatom].x << " " << yCloud.pts[jatom].y << " "
-                   << yCloud.pts[jatom].z << "\n";
-      } // end of dummy atom write-out
-    }   // end of check for dummy atom printing
-    // -----------
-    // Write out coordinates
-    // 1 molecule-tag atom-type q x y z
-    outputFile << atoms[i] << " " << yCloud.pts[iatom].molID << " 1 0 "
-               << yCloud.pts[iatom].x << " " << yCloud.pts[iatom].y << " "
-               << yCloud.pts[iatom].z << "\n";
-    // update the previous atom ID
-    prevAtomID = atoms[i];
-  } // end of loop through all atoms in atomID
-
-  // Fill in the rest of the dummy atoms
-  if (atoms[atoms.size() - 1] != yCloud.nop) {
-    //
-    for (int id = atoms[atoms.size() - 1] + 1; id <= yCloud.nop; id++) {
-      jatom = id - 1;
-      outputFile << id << " " << yCloud.pts[jatom].molID << " 2 0 "
-                 << yCloud.pts[jatom].x << " " << yCloud.pts[jatom].y << " "
-                 << yCloud.pts[jatom].z << "\n";
-    } // end of printing out dummy atoms
-  }
+  writeDataAtomsPadded(outputFile, yCloud, atoms, true);
 
   // Print the bonds now!
   outputFile << "\nBonds\n\n";
@@ -2027,13 +1782,8 @@ int sout::writeLAMMPSdataCages(
   std::ofstream outputFile;
   std::vector<int> atoms;         // Holds all atom IDs to print
   int ringSize = rings[0].size(); // Ring size of each ring in rings
-  int iatom;                      // Index, not atom ID
   bool padAtoms = false;          // Add extra atoms if the atom IDs are skipped
-  int prevAtomID = 0;             // Check for previous atom ID
-  int dummyAtoms = 0;             // Number of dummy atoms to fill
-  int dummyID;
   int iring; // Current ring index (vector index)
-  int jatom; // Array index is 1 less than the ID (index for dummy atom)
   int bondTypes = 1;
   std::string actualCageType; // The actual name of the cage types
   // Bond stuff
@@ -2056,22 +1806,11 @@ int sout::writeLAMMPSdataCages(
   bonds = bond::createBondsFromCages(rings, cageList, type, nRings);
   //
   // ----------------
-  // Otherwise create file
-  // Create output dir if it doesn't exist already
-  const char *path = "../output"; // relative to the build directory
-  fs::path dir(path);
-  // if (fs::create_directory(dir)) {
-  //   std::cerr << "Output directory created\n";
-  // }
+  // Create the output dir if it doesn't exist already
+  sout::makePath("../output"); // relative to the build directory
   // ----------------
   // Get all the unique atomIDs of the atoms in the rings of this type
-  // Put all atom IDs into one 1-D vector
-  size_t total_size{0};
-  // Get the total number of atoms (repeated)
-  total_size = nRings * ringSize;
-  // Reserve this size inside atoms
-  atoms.reserve(total_size);
-  // Fill up all these atom IDs
+  atoms.reserve(nRings * ringSize);
   // Loop through every cage in cageList
   for (int icage = 0; icage < cageList.size(); icage++) {
     // Skip if the cage is of a different type
@@ -2086,14 +1825,7 @@ int sout::writeLAMMPSdataCages(
     } // end of loop through every ring in icage
 
   } // end of loop through all cages in cageList
-
-  // Sort the array according to atom ID, which will be needed to get the
-  // unique IDs and to remove duplicates
-  sort(atoms.begin(), atoms.end());
-  // Get the unique atom IDs
-  auto ip = std::unique(atoms.begin(), atoms.end());
-  // Resize the vector to remove undefined terms
-  atoms.resize(std::distance(atoms.begin(), ip));
+  atoms = sortedUniqueIDs(std::move(atoms));
   // If the number of atoms is less than the total nop, add dummy atoms
   if (atoms.size() != yCloud.nop) {
     padAtoms = true;
@@ -2102,57 +1834,9 @@ int sout::writeLAMMPSdataCages(
   // ----------------
   // Write output to file inside the output directory
   outputFile.open("../output/" + filename);
-  // FORMAT:
-  //  Comment Line
-  //  4 atoms
-  //  4 bonds
-  //  0 angles
-  //  0 dihedrals
-  //  0 impropers
-  //  1 atom types
-  //  1 bond types
-  //  0 angle types
-  //  0 dihedral types
-  //  0 improper types
-  //  -1.124000 52.845002  xlo xhi
-  //  0.000000 54.528999  ylo yhi
-  //  1.830501 53.087501  zlo zhi
-
-  //  Masses
-
-  //  1 15.999400 # O
-
-  //  Atoms
-
-  // 1 1 1 0 20.239  1.298 6.873 # O
-  // 2 1 1 0 0 5.193 6.873 # O
-  // 3 1 1 0 2.249 1.298 6.873 # O
-
-  // -------
-  // Write the header
-  // Write comment line
-  outputFile << "Written out by D-SEAMS\n";
-  // Write out the number of atoms
-  outputFile << yCloud.pts.size() << " "
-             << "atoms"
-             << "\n";
-  // Number of bonds
-  outputFile << bonds.size() << " bonds"
-             << "\n";
-  outputFile << "0 angles\n0 dihedrals\n0 impropers\n";
-  // If padded atoms are required, two atom types will be required
-  if (padAtoms) {
-    outputFile << "2 atom types\n";
-  } else {
-    outputFile << "1 atom types\n";
-  } // end of atom types
-  outputFile
-      << bondTypes
-      << " bond types\n0 angle types\n0 dihedral types\n0 improper types\n";
-  // Box lengths
-  outputFile << "0 " << yCloud.box[0] << " xlo xhi\n";
-  outputFile << "0 " << yCloud.box[1] << " ylo yhi\n";
-  outputFile << "0 " << yCloud.box[2] << " zlo zhi\n";
+  const auto box = dataBoxBoundsZero(yCloud);
+  writeDataHeader(outputFile, yCloud.pts.size(), bonds.size(),
+                  padAtoms ? 2 : 1, bondTypes, box[0], box[1]);
   // Masses
   outputFile << "\nMasses\n\n";
   // For DDCs and HCs
@@ -2170,57 +1854,8 @@ int sout::writeLAMMPSdataCages(
   }
   // Atoms
   outputFile << "\nAtoms\n\n";
-  // -------
-  // Write out the atom coordinates
-  // Loop through atoms
-  for (int i = 0; i < atoms.size(); i++) {
-    iatom = atoms[i] - 1; // The actual index is one less than the ID
-    // -----------
-    // Pad out
-    // Fill in dummy atoms if some have been skipped
-    if (atoms[i] != prevAtomID + 1) {
-      dummyAtoms = atoms[i] - prevAtomID - 1;
-      dummyID = prevAtomID;
-      // Loop to write out dummy atoms
-      for (int j = 0; j < dummyAtoms; j++) {
-        dummyID++;
-        jatom = dummyID - 1;
-        // 1 molecule-tag atom-type q x y z
-        outputFile << dummyID << " " << yCloud.pts[jatom].molID << " 2 0 "
-                   << yCloud.pts[jatom].x << " " << yCloud.pts[jatom].y << " "
-                   << yCloud.pts[jatom].z << "\n";
-      } // end of dummy atom write-out
-    }   // end of check for dummy atom printing
-    // -----------
-    // Write out coordinates
-    // 1 molecule-tag atom-type q x y z
-    outputFile << atoms[i] << " " << yCloud.pts[iatom].molID << " 1 0 "
-               << yCloud.pts[iatom].x << " " << yCloud.pts[iatom].y << " "
-               << yCloud.pts[iatom].z << "\n";
-    // update the previous atom ID
-    prevAtomID = atoms[i];
-  } // end of loop through all atoms in atomID
-
-  // Fill in the rest of the dummy atoms
-  if (atoms[atoms.size() - 1] != yCloud.nop) {
-    //
-    for (int id = atoms[atoms.size() - 1] + 1; id <= yCloud.nop; id++) {
-      jatom = id - 1;
-      outputFile << id << " " << yCloud.pts[jatom].molID << " 2 0 "
-                 << yCloud.pts[jatom].x << " " << yCloud.pts[jatom].y << " "
-                 << yCloud.pts[jatom].z << "\n";
-    } // end of printing out dummy atoms
-  }
-
-  // Print the bonds now!
-  outputFile << "\nBonds\n\n";
-  // Loop through all bonds
-  for (int ibond = 0; ibond < bonds.size(); ibond++) {
-    // write out the bond
-    outputFile << ibond + 1 << " 1 " << bonds[ibond][0] << " "
-               << bonds[ibond][1] << "\n";
-
-  } // end of for loop for bonds
+  writeDataAtomsPadded(outputFile, yCloud, atoms, true);
+  writeDataBonds(outputFile, bonds);
 
   outputFile.close();
   // Once the datafile has been printed, exit
@@ -2400,8 +2035,6 @@ int sout::writeLAMMPSdataTopoBulk(
     std::string path, bool bondsBetweenDummy) {
   //
   std::ofstream outputFile;
-  int iatom;            // Index, not atom ID
-  int currentAtomType;  // Current atom type: a value from 1 to 4
   int numAtomTypes = 6; // DDC, HC, Mixed, dummy, mixed2 and pnc
   int bondTypes = 1;
   // Bond stuff
@@ -2429,57 +2062,9 @@ int sout::writeLAMMPSdataTopoBulk(
   // ----------------
   // Write output to file inside the output directory
   outputFile.open(path + "bulkTopo/dataFiles/" + filename);
-  // FORMAT:
-  //  Comment Line
-  //  4 atoms
-  //  4 bonds
-  //  0 angles
-  //  0 dihedrals
-  //  0 impropers
-  //  1 atom types
-  //  1 bond types
-  //  0 angle types
-  //  0 dihedral types
-  //  0 improper types
-  //  -1.124000 52.845002  xlo xhi
-  //  0.000000 54.528999  ylo yhi
-  //  1.830501 53.087501  zlo zhi
-
-  //  Masses
-
-  //  1 15.999400 # O
-
-  //  Atoms
-
-  // 1 1 1 0 20.239  1.298 6.873 # O
-  // 2 1 1 0 0 5.193 6.873 # O
-  // 3 1 1 0 2.249 1.298 6.873 # O
-
-  // -------
-  // Write the header
-  // Write comment line
-  outputFile << "Written out by D-SEAMS\n";
-  // Write out the number of atoms
-  outputFile << yCloud.pts.size() << " "
-             << "atoms"
-             << "\n";
-  // Number of bonds
-  outputFile << bonds.size() << " bonds"
-             << "\n";
-  outputFile << "0 angles\n0 dihedrals\n0 impropers\n";
-  // There are maxDepth-2 total types of prisms + dummy
-  outputFile << numAtomTypes << " atom types\n";
-  // Bond types
-  outputFile
-      << bondTypes
-      << " bond types\n0 angle types\n0 dihedral types\n0 improper types\n";
-  // Box lengths
-  outputFile << yCloud.boxLow[0] << " " << yCloud.boxLow[0] + yCloud.box[0]
-             << " xlo xhi\n";
-  outputFile << yCloud.boxLow[1] << " " << yCloud.boxLow[1] + yCloud.box[1]
-             << " ylo yhi\n";
-  outputFile << yCloud.boxLow[2] << " " << yCloud.boxLow[2] + yCloud.box[2]
-             << " zlo zhi\n";
+  const auto box = dataBoxBounds(yCloud);
+  writeDataHeader(outputFile, yCloud.pts.size(), bonds.size(), numAtomTypes,
+                  bondTypes, box[0], box[1]);
   // Masses
   outputFile << "\nMasses\n\n";
   outputFile << "1 15.999400 # dummy\n";
@@ -2490,54 +2075,26 @@ int sout::writeLAMMPSdataTopoBulk(
   outputFile << "6 15.999400 # pncHexaMixed \n";
   // Atoms
   outputFile << "\nAtoms\n\n";
-  // -------
-  // Write out the atom coordinates
-  // Loop through atoms
-  for (int i = 0; i < yCloud.pts.size(); i++) {
-    iatom =
-        yCloud.pts[i].atomID; // The actual ID can be different from the index
-    //
-    // Get the atom type
-    // hc atom type
+  writeDataAtomsAll(outputFile, yCloud, [&atomTypes](size_t i) {
+    // Atom types 2--6 mark the cage classifications; 1 is the dummy type
     if (atomTypes[i] == cage::iceType::hc) {
-      currentAtomType = 2;
-    } // hc
-    else if (atomTypes[i] == cage::iceType::ddc) {
-      currentAtomType = 3;
-    } // ddc
-    // mixed
-    else if (atomTypes[i] == cage::iceType::mixed) {
-      currentAtomType = 4;
-    } // mixed
-    // pnc
-    else if (atomTypes[i] == cage::iceType::pnc) {
-      currentAtomType = 5;
-    } // mixed
-    // pnc and DDCs/HCs mixed
-    else if (atomTypes[i] == cage::iceType::mixed2) {
-      currentAtomType = 6;
-    } // mixed
-    // dummy
-    else {
-      currentAtomType = 1;
-    } // dummy
-    //
-    // Write out coordinates
-    // atomID molecule-tag atom-type q x y z
-    outputFile << iatom << " " << yCloud.pts[i].molID << " " << currentAtomType
-               << " 0 " << yCloud.pts[i].x << " " << yCloud.pts[i].y << " "
-               << yCloud.pts[i].z << "\n";
-
-  } // end of loop through all atoms in pointCloud
-
-  // Print the bonds now!
-  outputFile << "\nBonds\n\n";
-  // Loop through all bonds
-  for (int ibond = 0; ibond < bonds.size(); ibond++) {
-    //
-    outputFile << ibond + 1 << " 1 " << bonds[ibond][0] << " "
-               << bonds[ibond][1] << "\n";
-  } // end of for loop for bonds
+      return 2;
+    }
+    if (atomTypes[i] == cage::iceType::ddc) {
+      return 3;
+    }
+    if (atomTypes[i] == cage::iceType::mixed) {
+      return 4;
+    }
+    if (atomTypes[i] == cage::iceType::pnc) {
+      return 5;
+    }
+    if (atomTypes[i] == cage::iceType::mixed2) {
+      return 6;
+    }
+    return 1;
+  });
+  writeDataBonds(outputFile, bonds);
 
   // Once the datafile has been printed, exit
   return 0;

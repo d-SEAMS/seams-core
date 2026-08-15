@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __CLUSTER_H_
-#define __CLUSTER_H_
+#ifndef SEAMS_CLUSTER_H_
+#define SEAMS_CLUSTER_H_
 
 #include <array>
 #include <bop.hpp>
@@ -91,4 +91,4 @@ namespace clump {
 
 } // namespace clump
 
-#endif // __CLUSTER_H_
+#endif // SEAMS_CLUSTER_H_

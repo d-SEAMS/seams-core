@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __FRANZBLAU_H_
-#define __FRANZBLAU_H_
+#ifndef SEAMS_FRANZBLAU_H_
+#define SEAMS_FRANZBLAU_H_
 
 #include <algorithm>
 #include <array>
@@ -64,8 +64,8 @@
  * algorithm</a>. This is a recursive algorithm.
  *
  * 2. The non-SP rings are then removed from the list of all rings, using the
- * Franzblau shortest path criterion (primitive::removeNonSPrings). This also
- * uses recursion.
+ * Franzblau shortest path criterion (primitive::removeNonSPrings), answered
+ * by a hop-bounded breadth-first sweep per vertex.
  *
  *   ### Changelog ###
  *
@@ -115,7 +115,7 @@ struct Graph {
 //! index, given the neighbour list also by index (preferably the
 //! hydrogen-bonded neighbour list). Internally uses the Graph and Vertex
 //! objects.
-std::vector<std::vector<int>> ringNetwork(std::vector<std::vector<int>> nList,
+std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,
                                           int maxDepth);
 
 //! Creates a graph object and fills it with the information from a neighbour
@@ -123,25 +123,25 @@ std::vector<std::vector<int>> ringNetwork(std::vector<std::vector<int>> nList,
 //! the indices and NOT the atom IDs as in the neighbour list
 Graph populateGraphFromNListID(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-    std::vector<std::vector<int>> neighHbondList);
+    const std::vector<std::vector<int>> &neighHbondList);
 
 //! Creates a graph object and fills it with the information from a neighbour
 //! list of INDICES NOT ATOM IDs created before. NOTE: the neighbourListIndex
 //! contains the indices and NOT the atom IDs as in the neighbour list
-Graph populateGraphFromIndices(std::vector<std::vector<int>> nList);
+Graph populateGraphFromIndices(const std::vector<std::vector<int>> &nList);
 
 //! Re-fills the neighbour lists of a graph object from a neighbour
 //! list of INDICES NOT ATOM IDs created before. NOTE: the neighbourListIndex
 //! contains the indices and NOT the atom IDs as in the neighbour list
-Graph restoreEdgesFromIndices(Graph &fullGraph,
-                              std::vector<std::vector<int>> nList);
+void restoreEdgesFromIndices(Graph &fullGraph,
+                             const std::vector<std::vector<int>> &nList);
 
 //! Creates a vector of vectors of all possible rings
-Graph countAllRingsFromIndex(std::vector<std::vector<int>> neighHbondList,
+Graph countAllRingsFromIndex(const std::vector<std::vector<int>> &neighHbondList,
                              int maxDepth);
 
 //! Removes the non-SP rings, using the Franzblau shortest path criterion
-Graph removeNonSPrings(Graph &fullGraph);
+void removeNonSPrings(Graph &fullGraph);
 
 //! Main function that searches for all rings
 [[nodiscard]] int findRings(Graph &fullGraph, int v, std::vector<int> &visited, int maxDepth,
@@ -154,6 +154,44 @@ Graph removeNonSPrings(Graph &fullGraph);
 //! Function for clearing vectors in Graph after multiple usage
 Graph clearGraph(Graph &currentGraph);
 
+
+/** @class primitive::RingUpdater
+ * @brief Exact frame-to-frame maintenance of the primitive ring network.
+ * @details Consecutive trajectory frames share almost all of their bond
+ *  topology. Rings are stored partitioned by their lowest-indexed member, and
+ *  on a new frame only sources within a proven locality radius of a changed
+ *  edge are re-enumerated: a ring's members and every path that can decide
+ *  its primitivity lie within a bounded neighbourhood of its source, so a
+ *  source far enough from every change keeps its rings unchanged. The output
+ *  equals a full recomputation exactly, at a cost that scales with the edge
+ *  churn between frames rather than with system size.
+ */
+class RingUpdater {
+public:
+  explicit RingUpdater(int maxDepth);
+  ~RingUpdater();
+  RingUpdater(RingUpdater &&) noexcept;
+  RingUpdater &operator=(RingUpdater &&) noexcept;
+  RingUpdater(const RingUpdater &) = delete;
+  RingUpdater &operator=(const RingUpdater &) = delete;
+
+  //! Primitive rings for this frame's neighbour list (row-ordered, by index,
+  //! first element of each row the vertex itself)
+  const std::vector<std::vector<int>> &
+  update(const std::vector<std::vector<int>> &nList);
+
+  //! Sources re-enumerated by the last update; the full vertex count on the
+  //! first frame, zero when nothing changed
+  [[nodiscard]] int lastRecomputedSources() const;
+
+  //! Vertices whose bounded balls were rebuilt on the last update
+  [[nodiscard]] int lastBallsRefreshed() const;
+
+private:
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
+};
+
 } // namespace primitive
 
-#endif // __FRANZBLAU_H_
+#endif // SEAMS_FRANZBLAU_H_

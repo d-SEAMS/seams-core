@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __SELECTION_H_
-#define __SELECTION_H_
+#ifndef SEAMS_SELECTION_H_
+#define SEAMS_SELECTION_H_
 
 #include <cmath>
 #include <algorithm>
@@ -119,4 +119,4 @@ void printSliceGetEdgeMoleculesInRings(
 
 }  // namespace ring
 
-#endif  // __SELECTION_H_
+#endif  // SEAMS_SELECTION_H_

@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __PNTCORRESPONDENCE_H_
-#define __PNTCORRESPONDENCE_H_
+#ifndef SEAMS_PNTCORRESPONDENCE_H_
+#define SEAMS_PNTCORRESPONDENCE_H_
 
 #include <algorithm>
 #include <array>
@@ -108,6 +108,13 @@ Eigen::MatrixXd getPointSetCage(ring::strucType type);
 std::vector<int> relOrderDDC(int index, const std::vector<std::vector<int>> &rings,
                              const std::vector<cage::Cage> &cageList);
 
+//! As relOrderDDC, but deriving the connectivity from an explicit equatorial
+//! traversal instead of the stored ring row; passing the reversed traversal
+//! yields the mirror correspondence for the shape-matching search
+std::vector<int> relOrderDDC(const std::vector<int> &equatorial, int index,
+                             const std::vector<std::vector<int>> &rings,
+                             const std::vector<cage::Cage> &cageList);
+
 //! Fills up an eigen matrix point set using the basal rings basal1 and basal2,
 //! changing the order of the point set by filling up from the startingIndex
 //! (starting from 0 to 5)
@@ -124,4 +131,4 @@ changeDiaCageOrder(const molSys::PointCloud<molSys::Point<double>, double> &yClo
 
 } // namespace pntToPnt
 
-#endif // __PNTCORRESPONDENCE_H_
+#endif // SEAMS_PNTCORRESPONDENCE_H_

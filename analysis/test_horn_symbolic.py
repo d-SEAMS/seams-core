@@ -142,18 +142,20 @@ def _R_correct():
     )
 
 
-def _R_code():
-    """The rotation matrix as actually implemented in quat2RotMatrix (lines 298-330).
+def _R_v1():
+    """The rotation matrix as quat2RotMatrix shipped it in v1.0.
 
-    Transcribed verbatim from the C++ source:
+    The current C++ carries the correct per-component formulas; this
+    transcription of the v1.0 release is kept as the defect record the
+    verification found:
         R(0,0) = q0*q0 + qx*qx + qy*qy + qz*qz   # == ||q||^2, always 1
         R(0,1) = 2*(qx*qy - q0*qz)
         R(0,2) = 2*(qx*qz + q0*qy)
-        R(1,0) = 2*(qy*qx + q0*qz)                 # sign differs from (0,1)
+        R(1,0) = 2*(qy*qx + q0*qz)
         R(1,1) = q0*q0 + qx*qx + qy*qy + qz*qz    # == 1
-        R(1,2) = 2*(qy*qz - q0*qy)                 # BUG: should be q0*qx
+        R(1,2) = 2*(qy*qz - q0*qy)                 # defect: needs q0*qx
         R(2,0) = 2*(qz*qx - q0*qy)
-        R(2,1) = 2*(qz*qy + q0*qz)                 # BUG: should be q0*qx
+        R(2,1) = 2*(qz*qy + q0*qz)                 # defect: needs q0*qx
         R(2,2) = q0*q0 + qx*qx + qy*qy + qz*qz    # == 1
     """
     return Matrix(
@@ -218,60 +220,26 @@ class TestCorrectQuatFormula:
                 )
 
 
-class TestCodeVsCorrect:
-    """Compare the code formula against the correct formula element-by-element.
+class TestV1DefectRecord:
+    """The v1.0 formula disagrees with the correct one in exactly five elements.
 
-    This test is expected to FAIL (xfail) because the code has bugs.
-    The failure report shows exactly which elements are wrong.
+    This is the defect record: the current C++ carries the correct formula
+    (its regression test lives in tests/absor-test.cpp), and this class pins
+    what the verification found in the release it audited.
     """
 
-    @pytest.mark.xfail(reason="quat2RotMatrix has known bugs in diagonal and off-diagonal elements")
-    def test_quat2rotmatrix_code_vs_correct(self):
+    def test_v1_defect_is_exactly_five_elements(self):
         R_c = _R_correct()
-        R_impl = _R_code()
-        discrepancies = []
-        for i in range(3):
-            for j in range(3):
-                diff = _sub_unit(R_impl[i, j] - R_c[i, j])
-                if simplify(diff) != 0:
-                    discrepancies.append(
-                        f"  R[{i},{j}]: code has {R_impl[i, j]}, "
-                        f"correct is {R_c[i, j]}, diff = {simplify(diff)}"
-                    )
-        assert not discrepancies, (
-            "Discrepancies between code and correct formula:\n"
-            + "\n".join(discrepancies)
-        )
-
-    def test_report_all_discrepancies(self):
-        """Non-xfail test that enumerates every wrong element for the report."""
-        R_c = _R_correct()
-        R_impl = _R_code()
+        R_v1 = _R_v1()
         discrepancies = {}
         for i in range(3):
             for j in range(3):
-                diff = _sub_unit(R_impl[i, j] - R_c[i, j])
+                diff = _sub_unit(R_v1[i, j] - R_c[i, j])
                 if simplify(diff) != 0:
-                    discrepancies[(i, j)] = {
-                        "code": str(R_impl[i, j]),
-                        "correct": str(R_c[i, j]),
-                        "diff": str(simplify(diff)),
-                    }
-        # This test always passes but prints the bug report
-        print("\n=== quat2RotMatrix bug report ===")
-        if discrepancies:
-            for (i, j), info in sorted(discrepancies.items()):
-                print(f"R[{i},{j}]:")
-                print(f"  code:    {info['code']}")
-                print(f"  correct: {info['correct']}")
-                print(f"  diff:    {info['diff']}")
-            print(f"\nTotal: {len(discrepancies)} / 9 elements are wrong.")
-        else:
-            print("No discrepancies found (all elements match).")
-        # We want this test to succeed so the report is always visible
-        assert len(discrepancies) > 0, (
-            "Expected bugs in quat2RotMatrix but found none. "
-            "Has the code been fixed?"
+                    discrepancies[(i, j)] = str(simplify(diff))
+        assert set(discrepancies) == {(0, 0), (1, 1), (1, 2), (2, 1), (2, 2)}, (
+            "The v1.0 defect record is the three unit-norm diagonals plus the "
+            f"two copy-paste off-diagonals; found {sorted(discrepancies)}"
         )
 
 
@@ -298,27 +266,18 @@ class TestNumericalBugDemo:
                     f"R_correct[{i},{j}] = {R[i,j]}, expected {self._R_expected[i,j]}"
                 )
 
-    def test_code_formula_gives_wrong_result(self):
-        """The code formula should produce an INCORRECT result for this rotation."""
-        R = _R_code().subs(self._q_vals)
-        matches = 0
+    def test_v1_formula_gave_wrong_result(self):
+        """The v1.0 formula produces an incorrect matrix for this rotation."""
+        R = _R_v1().subs(self._q_vals)
         mismatches = []
         for i in range(3):
             for j in range(3):
-                if simplify(R[i, j] - self._R_expected[i, j]) == 0:
-                    matches += 1
-                else:
-                    mismatches.append(
-                        f"  R_code[{i},{j}] = {simplify(R[i,j])}, "
-                        f"expected {self._R_expected[i,j]}"
-                    )
-        print(f"\nCode formula: {matches}/9 elements correct, "
-              f"{len(mismatches)} wrong:")
-        for m in mismatches:
-            print(m)
-        assert len(mismatches) > 0, (
-            "Expected code formula to give wrong result but it matched. "
-            "Has the bug been fixed?"
+                if simplify(R[i, j] - self._R_expected[i, j]) != 0:
+                    mismatches.append((i, j))
+        # R(0,0) and R(1,1) read 1 where 0 is expected, and R(2,1) picks up
+        # 2*q0*qz = 1; the R(1,2) defect vanishes here because qy = 0
+        assert sorted(mismatches) == [(0, 0), (1, 1), (2, 1)], (
+            f"v1.0 quarter-turn defect signature changed: {mismatches}"
         )
 
 

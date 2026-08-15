@@ -8,6 +8,7 @@ on:
 jobs:
   build-test:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
@@ -16,11 +17,21 @@ jobs:
       - uses: prefix-dev/setup-pixi@19eac09b398e3d0c747adc7921926a6d802df4da # v0.8.8
         with:
           environments: default
+      # The conda arm64-apple-darwin20.0.0 toolchain needs the macOS 11 SDK it
+      # was built against: the runner's Xcode SDK is too new for the conda
+      # ld64, whose TAPI parser then imports nothing from libSystem and every
+      # target fails on libc symbols (_ungetc, __DefaultRuneLocale, ...)
+      - name: Install the macOS 11.0 SDK for the conda compilers
+        if: runner.os == 'macOS'
+        run: |
+          curl -sLO https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX11.0.sdk.tar.xz
+          sudo tar -xf MacOSX11.0.sdk.tar.xz -C /opt
+          echo "SDKROOT=/opt/MacOSX11.0.sdk" >> "$GITHUB_ENV"
+          echo "CONDA_BUILD_SYSROOT=/opt/MacOSX11.0.sdk" >> "$GITHUB_ENV"
       - run: pixi run setup
       - run: pixi run build
       - run: pixi run test
       - run: pixi run install
-      - run: pixi run -e default -- bash -c "LD_LIBRARY_PATH=\$CONDA_PREFIX/lib:\$GITHUB_WORKSPACE/bbdir/src:\$LD_LIBRARY_PATH pytest tests/python/ -v --ignore=tests/python/test_hypothesis_horn.py --ignore=tests/python/test_hypothesis_pbc.py --ignore=tests/python/test_hypothesis_hbond.py --ignore=tests/python/test_hypothesis_rings.py"
 
   coverage:
     runs-on: ubuntu-latest

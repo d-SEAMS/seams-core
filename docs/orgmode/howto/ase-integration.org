@@ -1,101 +1,45 @@
 #+TITLE: ASE Integration
 #+OPTIONS: toc:nil num:nil
 
-The ~pydseamslib.adapters._ase~ module converts ASE ~Atoms~ objects into d-SEAMS
-~PointCloudDouble~ objects, so you can use ASE's trajectory readers and then
-analyze the structure with d-SEAMS.
+Pass an ASE ~Atoms~ to ~pydseamslib.from_ase~. Oxygen is selected by
+default. Hydrogen bonds are used when the ~Atoms~ also contain H.
 
 * Prerequisites
 
-Install the ASE optional dependency:
-
 #+begin_src bash
-pip install pydseamslib[ase]
+pip install 'pydseamslib[ase]'
 #+end_src
 
-* Convert ASE Atoms to a PointCloud
-
-The ~to_pointcloud~ function takes an ASE ~Atoms~ object and returns a
-~PointCloudDouble~ that the d-SEAMS analysis functions accept.
+* Classify ice from ASE
 
 #+begin_src python
 import ase.io
-from pydseamslib.adapters._ase import to_pointcloud
+import pydseamslib as ds
 
-# Read a LAMMPS trajectory with ASE
 atoms = ase.io.read("input/traj/exampleTraj.lammpstrj", format="lammps-dump-text")
+# LAMMPS dumps often have numeric types; give them symbols first
+for atom in atoms:
+    atom.symbol = {1: "H", 2: "O"}.get(atom.number, atom.symbol)
 
-# Map LAMMPS numeric types to chemical symbols.
-# This dictionary maps the atom type integers from the LAMMPS file
-# to the chemical symbols that ASE expects.
-lmp_type_map = {1: "H", 2: "O"}
+frame = ds.from_ase(atoms)          # oxygen, H-bonds if H is present
+print(frame.chill_plus())
+print(frame.cages())
 
-# Create a boolean mask selecting which atoms to include.
-# Here we select all atoms.
-mask = [True] * len(atoms)
-
-# Molecule IDs for each selected atom.
-# In a water system each molecule has 3 atoms (O, H, H) sharing a mol ID.
-mol_ids = [atom.index // 3 + 1 for atom in atoms]
-
-# Convert to a d-SEAMS PointCloud
-cloud = to_pointcloud(
-    atms_a=atoms,
-    lmp_a=lmp_type_map,
-    splicemask=mask,
-    molids=mol_ids,
-    fname="input/traj/exampleTraj.lammpstrj",
-)
-
-print(f"PointCloud has {cloud.nop} atoms")
-print(f"Box: {cloud.box}")
+labelled = frame.to_ase()           # arrays['ice_type'] after CHILL
 #+end_src
 
-* Select only oxygen atoms
-
-To run neighbour list or CHILL+ analysis you typically want only the oxygen
-atoms. Filter the mask to select atoms by type:
+* Single-site models (mW)
 
 #+begin_src python
-# Select only oxygen atoms (type 2 in LAMMPS)
-oxygen_mask = [atom.symbol == "O" for atom in atoms]
-oxygen_mol_ids = [atoms[i].index // 3 + 1 for i, m in enumerate(oxygen_mask) if m]
-
-cloud_O = to_pointcloud(
-    atms_a=atoms,
-    lmp_a=lmp_type_map,
-    splicemask=oxygen_mask,
-    molids=oxygen_mol_ids,
-    fname="input/traj/exampleTraj.lammpstrj",
-)
-
-print(f"Oxygen PointCloud has {cloud_O.nop} atoms")
+frame = ds.from_ase(atoms, select="O", bonded="cutoff")
 #+end_src
 
-* Run analysis on the converted cloud
-
-Once you have a ~PointCloudDouble~, use it with any d-SEAMS function:
-
-#+begin_src python
-from pydseamslib import _core
-
-# Build neighbour list
-nList = _core.neighListO(rcutoff=3.5, yCloud=cloud_O, typeI=2)
-
-# Run CHILL+ classification
-cloud_O = _core.getCorrelPlus(yCloud=cloud_O, nList=nList, isSlice=False)
-#+end_src
+~select~ is a chemical symbol, an atomic number, or ~None~ (every atom).
 
 * Notes
 
-- The ~lmp_a~ dictionary maps LAMMPS integer types to ASE chemical symbols. The
-  ~to_pointcloud~ function internally inverts this mapping (symbol to integer) when
-  setting ~c_type~ on each point.
-
-- The ~fname~ argument is used only to extract box lower bounds from the LAMMPS
-  file header (lines 6-8). If your trajectory does not have a LAMMPS header,
-  you will need to set ~cloud.boxLow~ manually after conversion.
-
-- The ~splicemask~ controls which atoms from the full ~Atoms~ object are included
-  in the point cloud. This is equivalent to the ~isSlice~ parameter in the C++
-  reader functions.
+- ~from_ase~ does not read a LAMMPS dump header. The cell comes from
+  ~atoms.cell~; the origin from ~atoms.get_celldisp()~.
+- ~to_ase~ writes ~arrays['ice_type']~ after ~chill~ / ~chill_plus~.
+- The old ~pydseamslib.adapters._ase.to_pointcloud~ helper is gone.
+  Use ~from_ase~.

@@ -188,8 +188,8 @@ TEST_CASE("clusterAnalysis with Q6 on mW cubic trajectory", "[cluster]") {
   auto nList = nneigh::neighListO(3.5, yCloud, 1);
 
   // Run CHILL correlation + ice type classification
-  yCloud = chill::getCorrel(yCloud, nList, false);
-  yCloud = chill::getIceTypeNoPrint(yCloud, nList, false);
+  chill::getCorrel(yCloud, nList, false);
+  chill::getIceTypeNoPrint(yCloud, nList, false);
 
   // clusterAnalysis expects the full yCloud and returns the largest ice cluster
   molSys::PointCloud<molSys::Point<double>, double> iceCloud;

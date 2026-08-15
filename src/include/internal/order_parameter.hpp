@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __ORDER_PARAMETER_H_
-#define __ORDER_PARAMETER_H_
+#ifndef SEAMS_ORDER_PARAMETER_H_
+#define SEAMS_ORDER_PARAMETER_H_
 
 #include <algorithm>
 #include <array>
@@ -54,4 +54,4 @@ projAreaSingleRing(const molSys::PointCloud<molSys::Point<double>, double> &yClo
 
 } // namespace topoparam
 
-#endif // __ORDER_PARAMETER_H_
+#endif // SEAMS_ORDER_PARAMETER_H_

@@ -13,7 +13,9 @@
 * Overview
   d-SEAMS (Deferred Structural Elucidation Analysis for Molecular Simulations)
   is a set of tools for analyzing the structure of molecular simulations.
-  The Python library ~pydseamslib~ exposes the C++ core through nanobind bindings,
+  The Python library ~pydseamslib~ lives in the
+  [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] repository. This
+  tree is the C++ engine and the Lua CLI.
   providing functions for reading trajectories, building neighbour lists,
   computing hydrogen bond networks, classifying ice structures with CHILL+,
   and performing ring analysis.

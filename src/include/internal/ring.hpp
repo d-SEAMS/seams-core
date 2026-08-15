@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __RINGS_H_
-#define __RINGS_H_
+#ifndef SEAMS_RINGS_H_
+#define SEAMS_RINGS_H_
 
 #include <algorithm>
 #include <array>
@@ -158,4 +158,4 @@ std::vector<int> findsCommonElements(const std::vector<int> &ring1,
 
 } // namespace ring
 
-#endif // __RINGS_H_
+#endif // SEAMS_RINGS_H_

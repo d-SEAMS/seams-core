@@ -12,14 +12,181 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#include <iostream>
+#include <algorithm>
 #include <cmath>
+#include <iostream>
+#include <numeric>
+#include <set>
+#include <span>
+#include <utility>
+
 #include <neighbours.hpp>
 #include <simd_distance.hpp>
 
 #ifdef SEAMS_HAS_VESIN
 #include <vesin.h>
 #endif
+
+namespace {
+
+/**
+ * @details Reports whether a point cloud carries the three box lengths that
+ *  the minimum image convention needs. A cloud whose trajectory frame failed
+ *  to load leaves molSys::PointCloud::box empty, and every distance routine
+ *  indexes it unconditionally.
+ * @param[in] yCloud The input molSys::PointCloud.
+ * @return True when all three box lengths are present.
+ */
+bool hasPeriodicBox(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  if (yCloud.box.size() >= 3) {
+    return true;
+  }
+  std::cerr << "The point cloud has no simulation box; cannot build a "
+               "neighbour list.\n";
+  return false;
+}
+
+/**
+ * @details Builds the reverse of molSys::PointCloud::idIndexMap: a dense table
+ *  mapping a particle index to its atom ID. The forward map answers
+ *  ID -> index in constant time; the reverse direction is needed once per
+ *  particle when emitting neighbour lists keyed by atom ID, and a single
+ *  linear pass over the map amortises it.
+ * @param[in] yCloud The input molSys::PointCloud.
+ * @return Table of length molSys::PointCloud::nop, holding the atom ID at each
+ *  index, or -1 where the map has no entry for that index.
+ */
+std::vector<int> indexToIDTable(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  std::vector<int> indexToID(yCloud.nop, -1);
+  for (const auto &[atomID, index] : yCloud.idIndexMap) {
+    if (index >= 0 && index < yCloud.nop) {
+      indexToID[index] = atomID;
+    }
+  }
+  return indexToID;
+}
+
+#ifdef SEAMS_HAS_VESIN
+/**
+ * @details Runs the vesin cell list over the particles named by @a subset and
+ *  reports the neighbour pairs as cloud indices. Cell-list construction is
+ *  linear in the particle count, against the quadratic cost of comparing every
+ *  pair.
+ * @param[in] yCloud The input molSys::PointCloud.
+ * @param[in] subset Cloud indices of the particles to search over.
+ * @param[in] rcutoff Distance cutoff, within which two atoms are neighbours.
+ * @param[out] pairs Neighbour pairs, as cloud indices, in both directions.
+ * @return True when vesin produced a neighbour list, false when the caller
+ *  should fall back to the brute-force path.
+ */
+bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                   const std::vector<int> &subset, double rcutoff,
+                   std::vector<std::pair<int, int>> &pairs) {
+  const size_t nSubset = subset.size();
+  std::vector<std::array<double, 3>> positions(nSubset);
+  for (size_t i = 0; i < nSubset; i++) {
+    const int idx = subset[i];
+    positions[i] = {yCloud.pts[idx].x, yCloud.pts[idx].y, yCloud.pts[idx].z};
+  }
+
+  // Box matrix (row-major, diagonal for orthorhombic)
+  double box[3][3] = {{yCloud.box[0], 0.0, 0.0},
+                      {0.0, yCloud.box[1], 0.0},
+                      {0.0, 0.0, yCloud.box[2]}};
+  bool periodic[3] = {true, true, true};
+
+  VesinOptions options;
+  options.cutoff = rcutoff;
+  options.full = true; // full neighbor list (both i->j and j->i)
+  options.sorted = false;
+  options.algorithm = VesinAutoAlgorithm;
+  options.return_shifts = false;
+  options.return_distances = false;
+  options.return_vectors = false;
+
+  VesinNeighborList neighbors;
+  const char *error_message = nullptr;
+  VesinDevice device = {VesinCPU, 0};
+
+  const int status = vesin_neighbors(
+      reinterpret_cast<const double (*)[3]>(positions.data()), nSubset, box,
+      periodic, device, options, &neighbors, &error_message);
+
+  if (status != 0) {
+    std::cerr << "Vesin failed: " << (error_message ? error_message : "unknown")
+              << "; falling back to brute force.\n";
+    vesin_free(&neighbors);
+    return false;
+  }
+
+  pairs.clear();
+  pairs.reserve(neighbors.length);
+  for (size_t k = 0; k < neighbors.length; k++) {
+    const int iatom = subset[neighbors.pairs[k][0]];
+    const int jatom = subset[neighbors.pairs[k][1]];
+    // A cell list enumerates periodic images, so a particle can appear as its
+    // own neighbour through an image, and one neighbour can arrive through
+    // several images at once. Both happen as soon as the box stops being
+    // larger than twice the cutoff. The minimum image convention that the
+    // brute-force path applies admits each ordered pair once and never the
+    // self pair, so reduce to that here rather than letting box size change
+    // the meaning of a neighbour list.
+    if (iatom == jatom) {
+      continue;
+    }
+    pairs.emplace_back(iatom, jatom);
+  }
+
+  vesin_free(&neighbors);
+
+  std::sort(pairs.begin(), pairs.end());
+  pairs.erase(std::unique(pairs.begin(), pairs.end()), pairs.end());
+
+  return true;
+}
+#endif
+
+/**
+ * @details Seeds a neighbour list so that row @a i begins with the atom ID of
+ *  particle @a i, which is the row-header convention used throughout d-SEAMS.
+ * @param[in] indexToID Reverse index-to-ID table.
+ * @param[in] nop Number of particles.
+ * @return Neighbour list of @a nop rows, each holding its own atom ID.
+ */
+std::vector<std::vector<int>> seedWithSelfIDs(const std::vector<int> &indexToID,
+                                              int nop) {
+  std::vector<std::vector<int>> nList(nop);
+  for (int iatom = 0; iatom < nop; iatom++) {
+    if (indexToID[iatom] == -1) {
+      std::cerr << "Something is wrong with your idIndexMap!\n";
+      continue;
+    }
+    nList[iatom].push_back(indexToID[iatom]);
+  }
+  return nList;
+}
+
+//! True when index has a real atom ID in the reverse table.
+bool hasAtomID(const std::vector<int> &indexToID, int index) {
+  return index >= 0 && static_cast<size_t>(index) < indexToID.size() &&
+         indexToID[index] != -1;
+}
+
+//! Appends jatom's ID to iatom's row only when both particles have IDs.
+//! An unmapped index is left as an empty row, which callers treat as
+//! "no self header, skip this particle".
+void appendNeighbourID(std::vector<std::vector<int>> &nList,
+                       const std::vector<int> &indexToID, int iatom,
+                       int jatom) {
+  if (!hasAtomID(indexToID, iatom) || !hasAtomID(indexToID, jatom)) {
+    return;
+  }
+  nList[iatom].push_back(indexToID[jatom]);
+}
+
+} // namespace
 
 /**
  * @details Function for building neighbour lists for each
@@ -35,76 +202,35 @@ std::vector<std::vector<int>>
 nneigh::neighList(double rcutoff,
                   const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                   int typeI, int typeJ) {
-  std::vector<std::vector<int>> nList; // Vector of vector of ints
-  int jatomIndex;                      // Atom ID corresponding to jatom
-  int iatomIndex;                      // Atom ID corresponding to iatom
-  double r_ij;                         // cutoff
+  if (!hasPeriodicBox(yCloud)) {
+    return {};
+  }
 
-  // Initialize with nop (irrespective of type)
-  // Initialize and fill the first element with the current atom ID whose
-  // neighbour list will be filled
-  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-    // Find the atom ID (key) given the index or iatom (value)
-    auto itr = std::find_if(
-        yCloud.idIndexMap.begin(), yCloud.idIndexMap.end(),
-        [&iatom](const std::pair<int, int> &p) { return p.second == iatom; });
-    // If found:
-    if (itr == yCloud.idIndexMap.end()) {
-      std::cerr << "Something is wrong with your idIndexMap!\n";
-      continue;
-    } else {
-      iatomIndex = itr->first;
-    } // End of finding the atom ID to fill as the first element in the
-      // neighbour list
-    nList.push_back(std::vector<int>()); // Empty vector for the index iatom
-    // Fill the first element with the atom ID of iatom itself
-    nList[iatom].push_back(iatomIndex);
-  } // end of init
+  const std::vector<int> indexToID = indexToIDTable(yCloud);
+  std::vector<std::vector<int>> nList = seedWithSelfIDs(indexToID, yCloud.nop);
 
-  // pairs of atoms of type I and J
-  // Loop through every iatom and find nearest neighbours within rcutoff
+  // Compare squared distances so that the per-pair square root is avoided
+  const double rcutoffSq = rcutoff * rcutoff;
+
+  // Pairs of type I and type J. When the types coincide the full i x j
+  // product would write each unordered pair twice and accept iatom == jatom
+  // (distance 0). Walk j > i in that case, matching halfNeighList.
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     if (yCloud.pts[iatom].type != typeI) {
       continue;
     }
-    // Loop through the other atoms
-    for (int jatom = 0; jatom < yCloud.nop; jatom++) {
+    const int jStart = (typeI == typeJ) ? iatom + 1 : 0;
+    for (int jatom = jStart; jatom < yCloud.nop; jatom++) {
       if (yCloud.pts[jatom].type != typeJ) {
         continue;
       }
-      // If the distance is greater than rcutoff, continue
-      r_ij = gen::periodicDist(yCloud, iatom, jatom);
-      if (r_ij > rcutoff) {
+      if (gen::periodicDistSq(yCloud, iatom, jatom) > rcutoffSq) {
         continue;
       }
-
-      // Get the atom IDs for iatom and jatom
-      auto gotI = std::find_if(
-          yCloud.idIndexMap.begin(), yCloud.idIndexMap.end(),
-          [&iatom](const std::pair<int, int> &p) { return p.second == iatom; });
-      if (gotI == yCloud.idIndexMap.end()) {
-        std::cerr << "Something is wrong with your idIndexMap!\n";
-        return nList;
-      } else {
-        iatomIndex = gotI->first;
-      } // End of finding the atom ID for iatom
-      // Find the atom ID of jatom
-      auto gotJ = std::find_if(
-          yCloud.idIndexMap.begin(), yCloud.idIndexMap.end(),
-          [&jatom](const std::pair<int, int> &p) { return p.second == jatom; });
-      if (gotJ == yCloud.idIndexMap.end()) {
-        std::cerr << "Something is wrong with your idIndexMap!\n";
-        return nList;
-      } else {
-        jatomIndex = gotJ->first;
-      } // End of finding the atom ID for jatom
-      // Update the neighbour indices with atom IDs for iatom and jatom both
-      // (full list)
-      nList[iatom].push_back(jatomIndex);
-      nList[jatom].push_back(iatomIndex);
-
-    } // End of loop through jatom
-  }   // End of loop for iatom
+      appendNeighbourID(nList, indexToID, iatom, jatom);
+      appendNeighbourID(nList, indexToID, jatom, iatom);
+    }
+  }
 
   return nList;
 }
@@ -123,165 +249,92 @@ std::vector<std::vector<int>>
 nneigh::neighListO(double rcutoff,
                    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                    int typeI) {
+  if (!hasPeriodicBox(yCloud)) {
+    return {};
+  }
+
   std::vector<std::vector<int>>
-      nList;      // Vector of vectors of the neighbour list
-  int iatomIndex; // Atomic ID of the atom with index iatom
-  int jatomIndex; // Atomic ID of the atom with index jatom
+      nList; // Vector of vectors of the neighbour list
 
-#ifdef SEAMS_HAS_VESIN
-  // O(n) cell-list neighbor search via vesin
-  {
-    // Collect indices and positions of typeI atoms
-    std::vector<int> typeIIndices;
-    for (int i = 0; i < yCloud.nop; i++) {
-      if (yCloud.pts[i].type == typeI) {
-        typeIIndices.push_back(i);
-      }
-    }
+  // Build index-to-atomID lookup once; every path below needs it
+  const std::vector<int> indexToID = indexToIDTable(yCloud);
 
-    // Build index-to-atomID lookup
-    std::vector<int> indexToID(yCloud.nop, -1);
-    for (auto &kv : yCloud.idIndexMap) {
-      if (kv.second >= 0 && kv.second < yCloud.nop) {
-        indexToID[kv.second] = kv.first;
-      }
-    }
-
-    // Prepare positions array for vesin (only typeI atoms)
-    size_t nTypeI = typeIIndices.size();
-    std::vector<std::array<double, 3>> positions(nTypeI);
-    for (size_t i = 0; i < nTypeI; i++) {
-      int idx = typeIIndices[i];
-      positions[i] = {yCloud.pts[idx].x, yCloud.pts[idx].y, yCloud.pts[idx].z};
-    }
-
-    // Box matrix (row-major, diagonal for orthorhombic)
-    double box[3][3] = {
-        {yCloud.box[0], 0.0, 0.0},
-        {0.0, yCloud.box[1], 0.0},
-        {0.0, 0.0, yCloud.box[2]}};
-    bool periodic[3] = {true, true, true};
-
-    VesinOptions options;
-    options.cutoff = rcutoff;
-    options.full = true;  // full neighbor list (both i->j and j->i)
-    options.sorted = false;
-    options.algorithm = VesinAutoAlgorithm;
-    options.return_shifts = false;
-    options.return_distances = false;
-    options.return_vectors = false;
-
-    VesinNeighborList neighbors;
-    const char *error_message = nullptr;
-    VesinDevice device = {VesinCPU, 0};
-
-    int status = vesin_neighbors(
-        reinterpret_cast<const double(*)[3]>(positions.data()),
-        nTypeI, box, periodic, device, options, &neighbors, &error_message);
-
-    if (status == 0) {
-      // Initialize nList for ALL atoms (not just typeI)
-      nList.resize(yCloud.nop);
-      for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-        auto itr = std::find_if(
-            yCloud.idIndexMap.begin(), yCloud.idIndexMap.end(),
-            [&iatom](const std::pair<int, int> &p) { return p.second == iatom; });
-        if (itr != yCloud.idIndexMap.end()) {
-          nList[iatom].push_back(itr->first); // self atom ID
-        }
-      }
-
-      // Fill neighbor pairs from vesin output
-      for (size_t k = 0; k < neighbors.length; k++) {
-        size_t vi = neighbors.pairs[k][0]; // vesin index (into typeIIndices)
-        size_t vj = neighbors.pairs[k][1];
-        int realI = typeIIndices[vi]; // cloud index
-        int realJ = typeIIndices[vj];
-        int atomIDj = indexToID[realJ];
-        // Add j to i's neighbor list (vesin full list already has both dirs)
-        nList[realI].push_back(atomIDj);
-      }
-
-      vesin_free(&neighbors);
-      return nList;
-    }
-    // If vesin failed, fall through to brute-force
-    std::cerr << "Vesin failed: " << (error_message ? error_message : "unknown")
-              << "; falling back to brute force.\n";
-  }
-#endif
-
-  // Initialize and fill the first element with the current atom ID whose
-  // neighbour list will be filled
-  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-    // Find the atom ID (key) given the index or iatom (value)
-    auto itr = std::find_if(
-        yCloud.idIndexMap.begin(), yCloud.idIndexMap.end(),
-        [&iatom](const std::pair<int, int> &p) { return p.second == iatom; });
-    // If found:
-    if (itr == yCloud.idIndexMap.end()) {
-      std::cerr << "Something is wrong with your idIndexMap!\n";
-      continue;
-    } else {
-      iatomIndex = itr->first;
-    } // End of finding the atom ID to fill as the first element in the
-      // neighbour list
-    nList.push_back(std::vector<int>()); // Empty vector for the index iatom
-    // Fill the first element with the atom ID of iatom itself
-    nList[iatom].push_back(iatomIndex);
-  } // end of init
-
-  // Pre-build index-to-atomID lookup and collect indices of typeI atoms
-  std::vector<int> indexToID(yCloud.nop, -1);
+  // Collect indices of typeI atoms
   std::vector<int> typeIIndices;
-  for (auto &kv : yCloud.idIndexMap) {
-    if (kv.second >= 0 && kv.second < yCloud.nop) {
-      indexToID[kv.second] = kv.first;
-    }
-  }
   for (int i = 0; i < yCloud.nop; i++) {
     if (yCloud.pts[i].type == typeI) {
       typeIIndices.push_back(i);
     }
   }
 
-  double rcutoffSq = rcutoff * rcutoff;
-  double bx = yCloud.box[0];
-  double by = yCloud.box[1];
-  double bz = yCloud.box[2];
+#ifdef SEAMS_HAS_VESIN
+  // O(n) cell-list neighbor search via vesin
+  {
+    std::vector<std::pair<int, int>> pairs;
+    if (cellListPairs(yCloud, typeIIndices, rcutoff, pairs)) {
+      // Initialize nList for ALL atoms (not just typeI)
+      nList = seedWithSelfIDs(indexToID, yCloud.nop);
+
+      // Fill neighbor pairs from vesin output, which is already bidirectional
+      for (const auto &[iatom, jatom] : pairs) {
+        appendNeighbourID(nList, indexToID, iatom, jatom);
+      }
+
+      return nList;
+    }
+    // If vesin failed, fall through to brute-force
+  }
+#endif
+
+  // Initialize and fill the first element with the current atom ID whose
+  // neighbour list will be filled
+  nList = seedWithSelfIDs(indexToID, yCloud.nop);
+
+  const double rcutoffSq = rcutoff * rcutoff;
+  const double bx = yCloud.box[0];
+  const double by = yCloud.box[1];
+  const double bz = yCloud.box[2];
+
+  // Scratch buffers for the batched distance kernel, sized once for the
+  // largest batch and reused across iatom
+  const size_t nTypeIAtoms = typeIIndices.size();
+  std::vector<double> dx(nTypeIAtoms), dy(nTypeIAtoms), dz(nTypeIAtoms);
+  std::vector<double> distSq(nTypeIAtoms);
 
   // Loop through every iatom and find nearest neighbours within rcutoff
-  for (size_t ii = 0; ii < typeIIndices.size(); ii++) {
-    int iatom = typeIIndices[ii];
-    iatomIndex = indexToID[iatom];
+  for (size_t ii = 0; ii < nTypeIAtoms; ii++) {
+    const int iatom = typeIIndices[ii];
 
     // Collect coordinate differences for all j > i of typeI
-    size_t remaining = typeIIndices.size() - ii - 1;
-    if (remaining == 0) continue;
+    const size_t remaining = nTypeIAtoms - ii - 1;
+    if (remaining == 0) {
+      continue;
+    }
 
-    std::vector<double> dx(remaining), dy(remaining), dz(remaining);
-    std::vector<int> jIndices(remaining);
-
+    const double xi = yCloud.pts[iatom].x;
+    const double yi = yCloud.pts[iatom].y;
+    const double zi = yCloud.pts[iatom].z;
     for (size_t jj = 0; jj < remaining; jj++) {
-      int jatom = typeIIndices[ii + 1 + jj];
-      jIndices[jj] = jatom;
-      dx[jj] = yCloud.pts[iatom].x - yCloud.pts[jatom].x;
-      dy[jj] = yCloud.pts[iatom].y - yCloud.pts[jatom].y;
-      dz[jj] = yCloud.pts[iatom].z - yCloud.pts[jatom].z;
+      const int jatom = typeIIndices[ii + 1 + jj];
+      dx[jj] = xi - yCloud.pts[jatom].x;
+      dy[jj] = yi - yCloud.pts[jatom].y;
+      dz[jj] = zi - yCloud.pts[jatom].z;
     }
 
     // Batch compute squared periodic distances (SIMD when available)
-    std::vector<double> distSq(remaining);
-    seams::BatchPeriodicDistSq(dx.data(), dy.data(), dz.data(),
-                               bx, by, bz, distSq.data(), remaining);
+    seams::BatchPeriodicDistSq(std::span(dx).first(remaining),
+                               std::span(dy).first(remaining),
+                               std::span(dz).first(remaining), bx, by, bz,
+                               std::span(distSq).first(remaining));
 
     // Filter by cutoff and update neighbour lists
     for (size_t jj = 0; jj < remaining; jj++) {
-      if (distSq[jj] > rcutoffSq) continue;
-      int jatom = jIndices[jj];
-      jatomIndex = indexToID[jatom];
-      nList[iatom].push_back(jatomIndex);
-      nList[jatom].push_back(iatomIndex);
+      if (distSq[jj] > rcutoffSq) {
+        continue;
+      }
+      const int jatom = typeIIndices[ii + 1 + jj];
+      appendNeighbourID(nList, indexToID, iatom, jatom);
+      appendNeighbourID(nList, indexToID, jatom, iatom);
     }
   }   // End of loop for iatom
 
@@ -302,31 +355,15 @@ std::vector<std::vector<int>>
 nneigh::halfNeighList(double rcutoff,
                       const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                       int typeI) {
-  std::vector<std::vector<int>>
-      nList;      // Vector of vectors of the neighbour list
-  double r_ij;    // Distance between iatom and jatom
-  int iatomIndex; // Atomic ID of the atom with index iatom
-  int jatomIndex; // Atomic ID of the atom with index jatom
+  if (!hasPeriodicBox(yCloud)) {
+    return {};
+  }
 
-  // Initialize and fill the first element with the current atom ID whose
-  // neighbour list will be filled
-  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-    // Find the atom ID (key) given the index or iatom (value)
-    auto itr = std::find_if(
-        yCloud.idIndexMap.begin(), yCloud.idIndexMap.end(),
-        [&iatom](const std::pair<int, int> &p) { return p.second == iatom; });
-    // If found:
-    if (itr == yCloud.idIndexMap.end()) {
-      std::cerr << "Something is wrong with your idIndexMap!\n";
-      continue;
-    } else {
-      iatomIndex = itr->first;
-    } // End of finding the atom ID to fill as the first element in the
-      // neighbour list
-    nList.push_back(std::vector<int>()); // Empty vector for the index iatom
-    // Fill the first element with the atom ID of iatom itself
-    nList[iatom].push_back(iatomIndex);
-  } // end of init
+  const std::vector<int> indexToID = indexToIDTable(yCloud);
+  std::vector<std::vector<int>> nList = seedWithSelfIDs(indexToID, yCloud.nop);
+
+  // Compare squared distances so that the per-pair square root is avoided
+  const double rcutoffSq = rcutoff * rcutoff;
 
   // Loop through every iatom and find nearest neighbours within rcutoff
   for (int iatom = 0; iatom < yCloud.nop - 1; iatom++) {
@@ -339,34 +376,12 @@ nneigh::halfNeighList(double rcutoff,
         continue;
       }
       // If the distance is greater than rcutoff, continue
-      r_ij = gen::periodicDist(yCloud, iatom, jatom);
-      if (r_ij > rcutoff) {
+      if (gen::periodicDistSq(yCloud, iatom, jatom) > rcutoffSq) {
         continue;
       }
 
-      // Get the atom IDs for iatom and jatom
-      auto gotI = std::find_if(
-          yCloud.idIndexMap.begin(), yCloud.idIndexMap.end(),
-          [&iatom](const std::pair<int, int> &p) { return p.second == iatom; });
-      if (gotI == yCloud.idIndexMap.end()) {
-        std::cerr << "Something is wrong with your idIndexMap!\n";
-        return nList;
-      } else {
-        iatomIndex = gotI->first;
-      } // End of finding the atom ID for iatom
-      // Find the atom ID of jatom
-      auto gotJ = std::find_if(
-          yCloud.idIndexMap.begin(), yCloud.idIndexMap.end(),
-          [&jatom](const std::pair<int, int> &p) { return p.second == jatom; });
-      if (gotJ == yCloud.idIndexMap.end()) {
-        std::cerr << "Something is wrong with your idIndexMap!\n";
-        return nList;
-      } else {
-        jatomIndex = gotJ->first;
-      } // End of finding the atom ID for jatom
-      // Update the neighbour indices with atom IDs for iatom and jatom both
-      // (full list)
-      nList[iatom].push_back(jatomIndex);
+      // Update the neighbour indices with the atom ID of jatom (half list)
+      appendNeighbourID(nList, indexToID, iatom, jatom);
 
     } // End of loop through jatom
   }   // End of loop for iatom
@@ -387,34 +402,75 @@ nneigh::halfNeighList(double rcutoff,
 std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff) {
   //
-  std::vector<std::vector<int>> nList;
-  double r_ij; // Distance between iatom and jatom
-  std::vector<int> tempListIatom;
+  if (!hasPeriodicBox(yCloud)) {
+    return {};
+  }
 
-  // Initialize and fill the first element with the current atom ID whose
+  std::vector<std::vector<int>> nList(yCloud.nop);
+
+  // Initialize and fill the first element with the index of the atom whose
   // neighbour list will be filled
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-    //
-    nList.push_back(std::vector<int>()); // Empty vector for the index iatom
-    // Fill the first element with the atom ID of iatom itself
     nList[iatom].push_back(iatom);
   } // end of init
   // -------------------------------------------------------
-  // Loop through every iatom and find nearest neighbours within rcutoff
+#ifdef SEAMS_HAS_VESIN
+  // O(n) cell-list neighbour search via vesin, over every particle
+  {
+    std::vector<int> allIndices(yCloud.nop);
+    std::iota(allIndices.begin(), allIndices.end(), 0);
+
+    std::vector<std::pair<int, int>> pairs;
+    if (cellListPairs(yCloud, allIndices, cutoff, pairs)) {
+      // vesin returns both directions, so each row is filled from its own pairs
+      for (const auto &[iatom, jatom] : pairs) {
+        nList[iatom].push_back(jatom);
+      }
+      return nList;
+    }
+    // If vesin failed, fall through to brute-force
+  }
+#endif
+  // -------------------------------------------------------
+  // Compare squared distances so that the per-pair square root is avoided
+  const double cutoffSq = cutoff * cutoff;
+  const double bx = yCloud.box[0];
+  const double by = yCloud.box[1];
+  const double bz = yCloud.box[2];
+
+  // Scratch buffers for the batched distance kernel, sized once for the
+  // largest batch and reused across iatom
+  std::vector<double> dx(yCloud.nop), dy(yCloud.nop), dz(yCloud.nop);
+  std::vector<double> distSq(yCloud.nop);
+
+  // Loop through every iatom and find nearest neighbours within cutoff
   for (int iatom = 0; iatom < yCloud.nop - 1; iatom++) {
-    // Loop through the other atoms
-    for (int jatom = iatom + 1; jatom < yCloud.nop; jatom++) {
-      // If the distance is greater than rcutoff, continue
-      r_ij = gen::periodicDist(yCloud, iatom, jatom);
-      if (r_ij > cutoff) {
+    const size_t remaining = static_cast<size_t>(yCloud.nop - iatom - 1);
+
+    const double xi = yCloud.pts[iatom].x;
+    const double yi = yCloud.pts[iatom].y;
+    const double zi = yCloud.pts[iatom].z;
+    for (size_t jj = 0; jj < remaining; jj++) {
+      const int jatom = iatom + 1 + static_cast<int>(jj);
+      dx[jj] = xi - yCloud.pts[jatom].x;
+      dy[jj] = yi - yCloud.pts[jatom].y;
+      dz[jj] = zi - yCloud.pts[jatom].z;
+    }
+
+    // Batch compute squared periodic distances (SIMD when available)
+    seams::BatchPeriodicDistSq(std::span(dx).first(remaining),
+                               std::span(dy).first(remaining),
+                               std::span(dz).first(remaining), bx, by, bz,
+                               std::span(distSq).first(remaining));
+
+    // Update the neighbour indices for iatom and jatom both (full list)
+    for (size_t jj = 0; jj < remaining; jj++) {
+      if (distSq[jj] > cutoffSq) {
         continue;
       }
-
-      // Update the neighbour indices with atom IDs for iatom and jatom both
-      // (full list)
+      const int jatom = iatom + 1 + static_cast<int>(jj);
       nList[iatom].push_back(jatom);
       nList[jatom].push_back(iatom);
-
     } // End of loop through jatom
   }   // End of loop for iatom
 
@@ -435,41 +491,30 @@ std::vector<std::vector<int>> nneigh::neighbourListByIndex(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList) {
   //
-  std::vector<std::vector<int>> indexNlist; // Desired neighbour list of indices
-  int iatomID, jatomID;                     // Atom IDs
-  int iatomIndex, jatomIndex;               // Indices of iatom and jatom
-  int nnumNeighbours;                       // Number of nearest neighbours
+  std::vector<std::vector<int>> indexNlist(nList.size());
+  int iatomID, jatomID;
+  int iatomIndex;
 
-  // Loop through every atom whose neighbours are contained in the neighbour
-  // list
-  for (int iatom = 0; iatom < nList.size(); iatom++) {
-    iatomID = nList[iatom][0]; // Atom ID
-    // Get the index of iatom
+  for (size_t iatom = 0; iatom < nList.size(); iatom++) {
+    if (nList[iatom].empty()) {
+      continue;
+    }
+    iatomID = nList[iatom][0];
     auto gotI = yCloud.idIndexMap.find(iatomID);
-    if (gotI != yCloud.idIndexMap.end()) {
-      iatomIndex = gotI->second;
-    } // found iatomIndex
-    //
-    nnumNeighbours = nList[iatomIndex].size() - 1;
-    // Update the new neighbour list
-    indexNlist.push_back(
-        std::vector<int>()); // Empty vector for the index iatom
-    // Fill the first element with the atom ID of iatom itself
+    if (gotI == yCloud.idIndexMap.end()) {
+      continue;
+    }
+    iatomIndex = gotI->second;
     indexNlist[iatom].push_back(iatomIndex);
-    //
-    // Loop through the neighbours of iatom
-    for (int jatom = 1; jatom <= nnumNeighbours; jatom++) {
-      jatomID = nList[iatomIndex][jatom]; // Atom ID of neighbour
-      //
-      // Get the index of the j^th atom
+    for (size_t j = 1; j < nList[iatom].size(); j++) {
+      jatomID = nList[iatom][j];
       auto gotJ = yCloud.idIndexMap.find(jatomID);
-      if (gotJ != yCloud.idIndexMap.end()) {
-        jatomIndex = gotJ->second;
-      } // found jatomIndex
-      // Add to the neighbour list
-      indexNlist[iatom].push_back(jatomIndex);
-    } // end of loop through neighbours
-  }   // end of loop through every atom
+      if (gotJ == yCloud.idIndexMap.end()) {
+        continue;
+      }
+      indexNlist[iatom].push_back(gotJ->second);
+    }
+  }
 
   // Return the new neighbour list
   return indexNlist;
@@ -485,4 +530,157 @@ int nneigh::clearNeighbourList(std::vector<std::vector<int>> &nList) {
   nList.clear();
   nList.shrink_to_fit();
   return 0;
+}
+
+/**
+ * @details Bonded graph from the k nearest neighbours of each particle,
+ *  union-symmetrized: i and j are bonded when either lists the other among
+ *  its k nearest. Candidates come from the same cell-list search as
+ *  neighListO at @a candidateCutoff, which must comfortably exceed the k-th
+ *  neighbour distance. On an undistorted tetrahedral lattice with k = 4 this
+ *  equals the first-shell cutoff graph; under thermal distortion it keeps
+ *  the neighbour identities a hard cutoff loses, which is what the ring and
+ *  cage predicates consume.
+ * @param[in] yCloud The input molSys::PointCloud.
+ * @param[in] k Number of nearest neighbours each particle nominates.
+ * @param[in] candidateCutoff Cell-list search radius for the candidates.
+ * @param[in] typeI Type ID of the particles in the graph.
+ * @return Row-ordered full neighbour list by atom ID, one row per atom with
+ *  the leading self entry, like neighListO.
+ */
+std::vector<std::vector<int>>
+nneigh::kNearestNeighbourList(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, int typeI, bool mutual) {
+  std::vector<std::vector<int>> candidateRows =
+      nneigh::neighListO(candidateCutoff, yCloud, typeI);
+  if (candidateRows.empty() || k <= 0) {
+    return candidateRows;
+  }
+
+  // Directed nominations: each atom's k nearest among the candidates
+  std::vector<std::vector<int>> nominated(yCloud.nop);
+  std::vector<std::pair<double, int>> byDist; // (distance^2, neighbour index)
+  for (int i = 0; i < yCloud.nop; i++) {
+    const auto &row = candidateRows[i];
+    if (row.size() <= 1) {
+      continue;
+    }
+    byDist.clear();
+    for (size_t m = 1; m < row.size(); m++) {
+      const auto it = yCloud.idIndexMap.find(row[m]);
+      if (it == yCloud.idIndexMap.end()) {
+        continue;
+      }
+      byDist.emplace_back(gen::periodicDistSq(yCloud, i, it->second),
+                          it->second);
+    }
+    const size_t keep = std::min(static_cast<size_t>(k), byDist.size());
+    std::partial_sort(byDist.begin(), byDist.begin() + keep, byDist.end());
+    nominated[i].reserve(keep);
+    for (size_t m = 0; m < keep; m++) {
+      nominated[i].push_back(byDist[m].second);
+    }
+  }
+
+  // Exactness fallback: an atom whose k-th neighbour lies beyond the
+  // candidate cutoff got a truncated nomination; recompute those few by a
+  // brute-force scan so the k nearest are exact regardless of the cutoff
+  for (int i = 0; i < yCloud.nop; i++) {
+    if (yCloud.pts[i].type != typeI ||
+        static_cast<int>(nominated[i].size()) >= k) {
+      continue;
+    }
+    byDist.clear();
+    for (int j = 0; j < yCloud.nop; j++) {
+      if (j == i || yCloud.pts[j].type != typeI) {
+        continue;
+      }
+      byDist.emplace_back(gen::periodicDistSq(yCloud, i, j), j);
+    }
+    const size_t keep = std::min(static_cast<size_t>(k), byDist.size());
+    std::partial_sort(byDist.begin(), byDist.begin() + keep, byDist.end());
+    nominated[i].clear();
+    for (size_t m = 0; m < keep; m++) {
+      nominated[i].push_back(byDist[m].second);
+    }
+  }
+
+  // Union symmetrization into ID rows with the leading self entry
+  std::vector<std::vector<int>> out(yCloud.nop);
+  for (int i = 0; i < yCloud.nop; i++) {
+    out[i].push_back(candidateRows[i].empty() ? yCloud.pts[i].atomID
+                                              : candidateRows[i][0]);
+  }
+  std::set<std::pair<int, int>> bonds;
+  if (mutual) {
+    // Intersection symmetrization: a bond requires both nominations. In a
+    // crystal the first shell is mutual, so this equals the union graph
+    // there; on disordered packings one-sided nominations vanish, which is
+    // what starves the accidental ring complexes
+    std::set<std::pair<int, int>> directed;
+    for (int i = 0; i < yCloud.nop; i++) {
+      for (const int j : nominated[i]) {
+        directed.emplace(i, j);
+      }
+    }
+    for (const auto &[i, j] : directed) {
+      if (directed.count({j, i})) {
+        bonds.emplace(std::min(i, j), std::max(i, j));
+      }
+    }
+  } else {
+    for (int i = 0; i < yCloud.nop; i++) {
+      for (const int j : nominated[i]) {
+        bonds.emplace(std::min(i, j), std::max(i, j));
+      }
+    }
+  }
+  for (const auto &[i, j] : bonds) {
+    out[i].push_back(yCloud.pts[j].atomID);
+    out[j].push_back(yCloud.pts[i].atomID);
+  }
+  return out;
+}
+
+/**
+ * @details The shell-separation certificate for the exact reduction of the
+ *  k-nearest bonded graph to the cutoff graph. Returns the largest k-th
+ *  neighbour distance and the smallest (k+1)-th neighbour distance over all
+ *  particles of the type. Whenever
+ *  max_i d_k(i) <= rcutoff <= min_i d_{k+1}(i), every particle's cutoff
+ *  neighbourhood is exactly its k nearest, so the union-symmetrized
+ *  k-nearest graph and the cutoff graph coincide edge for edge and every
+ *  graph predicate downstream -- rings, cages, affiliation -- is identical.
+ * @return {max over i of d_k(i), min over i of d_{k+1}(i)}; zeros when the
+ *  system has too few particles.
+ */
+std::pair<double, double> nneigh::shellSeparation(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    int typeI) {
+  double maxKth = 0.0;
+  double minNext = 0.0;
+  bool haveNext = false;
+  std::vector<double> dists;
+  for (int i = 0; i < yCloud.nop; i++) {
+    if (yCloud.pts[i].type != typeI) {
+      continue;
+    }
+    dists.clear();
+    for (int j = 0; j < yCloud.nop; j++) {
+      if (j == i || yCloud.pts[j].type != typeI) {
+        continue;
+      }
+      dists.push_back(gen::periodicDistSq(yCloud, i, j));
+    }
+    if (static_cast<int>(dists.size()) < k + 1) {
+      continue;
+    }
+    std::partial_sort(dists.begin(), dists.begin() + k + 1, dists.end());
+    maxKth = std::max(maxKth, std::sqrt(dists[k - 1]));
+    const double next = std::sqrt(dists[k]);
+    minNext = haveNext ? std::min(minNext, next) : next;
+    haveNext = true;
+  }
+  return {maxKth, haveNext ? minNext : 0.0};
 }

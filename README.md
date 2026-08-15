@@ -17,6 +17,11 @@
 
 \brief The C++ core of d-SEAMS, a molecular dynamics trajectory analysis engine.
 
+This repository is the C++ engine. Front ends live in their own repos:
+
+- Python: [d-SEAMS/PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib)
+- Lua and Fennel CLI: [d-SEAMS/yodaStruct](https://github.com/d-SEAMS/yodaStruct)
+
 \note The <a href="pages.html">related pages</a> describe the examples and how to obtain
 the data-sets (trajectories) <a
 href="https://figshare.com/projects/d-SEAMS_Datasets/73545">from figshare</a>.
@@ -52,9 +57,10 @@ The corresponding `bibtex` entry is:
 # Compilation
 
 We use a deterministic build system to generate both bug reports and uniform
-usage statistics. This also handles the `lua` scripting engine.
-
-\note The lua functions are documented on the [on the API Docs](https://docs.dseams.info/md_markdown_luafunctions)
+usage statistics. The Lua and Fennel CLI is
+[yodaStruct](https://github.com/d-SEAMS/yodaStruct); the functions it
+registers are documented
+[there](https://github.com/d-SEAMS/yodaStruct/blob/main/docs/luaFunctions.md).
 
 We also provide a `conda` environment as a fallback, which is also recommended for MacOS users.
 
@@ -72,7 +78,10 @@ micromamba activate dseams
 luarocks install luafilesystem
 ```
 
-Now the installation can proceed.
+Now the installation can proceed. The commands below that invoke
+`yodaStruct` belong in a
+[yodaStruct](https://github.com/d-SEAMS/yodaStruct) checkout. This
+repository builds `libyodaLib`.
 
 \note we do not install `lua-luafilesystem` within the `conda` environment because it is outdated on `osx`
 

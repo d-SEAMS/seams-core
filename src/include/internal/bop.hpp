@@ -12,12 +12,13 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __BOP_H_
-#define __BOP_H_
+#ifndef SEAMS_BOP_H_
+#define SEAMS_BOP_H_
 
 #include <array>
 #include <cmath>
 #include <complex>
+#include <string>
 #include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
@@ -69,9 +70,9 @@ normalized dot product of the local orientational bond order parameter,
 by:
 
   @f[
-  a(i,j) = \frac{q_l(i).q_l(j)}{|q_l(i)||q_l(j)|} = \frac{ \Sigma_{m=-l}^{l}
-q_l(i) q_l^*(j)}{ (\Sigma_{m=-l}^{l} q_l(j) q_l^*(i))^{1/2} (\Sigma_{m=-l}^{l}
-q_l(j) q_l^*(i))^{1/2} } @f]
+  a(i,j) = \frac{\sum_{m=-l}^{l} q_{lm}(i)\, q_{lm}^*(j)}
+  {|q_l(i)|\,|q_l(j)|}
+  @f]
 
   where, @f$q_{lm}^*@f$ is the complex conjugate of @f$q_{lm}@f$.
 
@@ -167,6 +168,49 @@ struct QlmAtom {
   std::vector<YlmAtom> ptq; // Averaged over neighbours
 };
 
+/** @struct BondClassifier
+ * @brief One rule set for classifying bond correlations @f$c_{ij}@f$.
+ * @details A bond is staggered when @f$c_{ij} \le@f$ staggeredMax, eclipsed
+ *  when it falls in [eclipsedMin, eclipsedMax], and out of range otherwise.
+ *  The CHILL and CHILL+ water rules are two instances; other hydrogen-bonded
+ *  or tetrahedral materials register their own thresholds and coordination.
+ */
+struct BondClassifier {
+  double staggeredMax;    //! c_ij at or below this is staggered
+  double eclipsedMin;     //! Lower edge of the eclipsed band
+  double eclipsedMax;     //! Upper edge of the eclipsed band
+  int coordinationNumber; //! Nearest neighbours in the bond sum; <= 0 keeps
+                          //! each atom's whole neighbour row
+};
+
+//! The CHILL rule set (Moore et al., PCCP 12, 4124, 2010): strict staggered
+//! bound, narrow eclipsed band, four nearest neighbours
+[[nodiscard]] BondClassifier chillRule();
+
+//! The CHILL+ rule set (Nguyen and Molinero, JPCB 119, 9369, 2015): wider
+//! eclipsed band for interfacial and clathrate recognition
+[[nodiscard]] BondClassifier chillPlusRule();
+
+//! Look up a registered rule set by name. "CHILL" and "CHILL+" are always
+//! present; registerBondClassifier adds more. Throws std::out_of_range for
+//! unknown names.
+[[nodiscard]] BondClassifier bondClassifier(const std::string &name);
+
+//! Register (or replace) a named rule set at runtime, making the material's
+//! thresholds available to every front end by name
+void registerBondClassifier(const std::string &name,
+                            const BondClassifier &rule);
+
+//! Names of every registered rule set
+[[nodiscard]] std::vector<std::string> bondClassifierNames();
+
+//! Compute and classify the bond correlations c_ij under an arbitrary rule
+//! set, filling yCloud.pts[i].c_ij. getCorrel and getCorrelPlus are this
+//! engine under their canonical water rules.
+void classifyBonds(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                   const std::vector<std::vector<int>> &nList,
+                   const BondClassifier &rule, bool isSlice = false);
+
 /**
  *  Function for getting the bond order correlations @f$c_{ij}@f$  (or
  @f$a_{ij}@f$ in some treatments) according to the CHILL algorithm.
@@ -175,10 +219,17 @@ struct QlmAtom {
  The first element of each row is the particle ID, followed by the IDs of the
  neighbours
  *  @param[in] isSlice This decides whether there is a slice or not
+ *  @param[in] coordinationNumber How many nearest neighbours the bond sum
+ runs over. The default of four is the coordination CHILL is defined and
+ validated against (tetrahedral water); other values reuse the c_ij machinery
+ for differently coordinated systems, and a non-positive value gives each
+ atom its own count from its neighbour-list row. The ice-classification
+ tables in getIceType remain four-bond rules
  */
-molSys::PointCloud<molSys::Point<double>, double>
+void
 getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-          const std::vector<std::vector<int>> &nList, bool isSlice = false);
+          const std::vector<std::vector<int>> &nList, bool isSlice = false,
+          int coordinationNumber = 4);
 
 /**
  *  Function that classifies every particle's #molSys::atom_state_type ice
@@ -187,7 +238,7 @@ getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
  *  @param[in] isSlice This decides whether there is a slice or not
  *  @param[in] nList Row-ordered neighbour list by atom ID
  */
-molSys::PointCloud<molSys::Point<double>, double>
+void
 getIceTypeNoPrint(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                   const std::vector<std::vector<int>> &nList, bool isSlice = false);
 
@@ -204,23 +255,32 @@ getIceTypeNoPrint(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
  *  @param[in] outputFileName Name of the output file, to which the ice types
  will be written out.
  */
-molSys::PointCloud<molSys::Point<double>, double>
+void
 getIceType(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
            const std::vector<std::vector<int>> &nList, std::string path,
            int firstFrame, bool isSlice = false,
            std::string outputFileName = "chill.txt");
 
-//! Gets c_ij and then classifies bond types according to the CHILL+ algorithm
-molSys::PointCloud<molSys::Point<double>, double>
+//! Gets c_ij and then classifies bond types according to the CHILL+
+//! algorithm. coordinationNumber as in getCorrel: four is the validated
+//! CHILL+ water scheme, non-positive keeps each atom's whole neighbour row
+void
 getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-              const std::vector<std::vector<int>> &nList, bool isSlice = false);
+              const std::vector<std::vector<int>> &nList, bool isSlice = false,
+              int coordinationNumber = 4);
 
 //! Classifies each atom according to the CHILL+ algorithm
-molSys::PointCloud<molSys::Point<double>, double>
+void
 getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                const std::vector<std::vector<int>> &nList, std::string path,
                int firstFrame, bool isSlice = false,
                std::string outputFileName = "chillPlus.txt");
+
+//! CHILL+ ice types on the cloud. Does not write a file.
+void
+getIceTypePlusNoPrint(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<std::vector<int>> &nList, bool isSlice = false);
 
 //! q6 can distinguish between water and ice. Use this for the largest ice
 //! cluster
@@ -232,7 +292,7 @@ getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 //! Checks water
 //! According to https://!pubs.rsc.org/en/content/articlehtml/2011/cp/c1cp22167a
 //! Gets c_ij and then classifies bond types according to the CHILL+ algorithm
-molSys::PointCloud<molSys::Point<double>, double>
+void
 reclassifyWater(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                 std::vector<double> &q6);
 
@@ -241,15 +301,38 @@ reclassifyWater(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                  std::string path, int firstFrame, bool isSlice = false,
                  std::string outputFileName = "superChill.txt");
 
-//! Checks if a given iatom is interfacial ice or not, according to the CHILL
-//! algorithm
+//! Interfacial ice. Moore CHILL uses a neighbour with exactly two staggered
+//! bonds; Nguyen CHILL+ uses a neighbour with more than one. Pass
+//! chillPlus=true for the latter.
 bool isInterfacial(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                    const std::vector<std::vector<int>> &nList, int iatom,
-                   int num_staggrd, int num_eclipsd);
+                   int num_staggrd, int num_eclipsd, bool chillPlus = false);
 
 //! Finds the number of staggered bonds for a given atom of index jatom
 [[nodiscard]] int numStaggered(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                  const std::vector<std::vector<int>> &nList, int jatom);
+
+/** @struct SteinhardtQl
+ * @brief Per-particle Steinhardt order parameters of a single degree @f$l@f$.
+ * @details Holds both the local parameter and its neighbour-averaged
+ *  counterpart. The averaged form of Lechner and Dellago folds in the second
+ *  coordination shell, which separates the distributions of competing
+ *  structures far more cleanly than the local form alone.
+ */
+struct SteinhardtQl {
+  std::vector<double> ql;    //! Local @f$q_l(i)@f$
+  std::vector<double> qlBar; //! Averaged @f$\bar{q}_l(i)@f$
+};
+
+//! Local and neighbour-averaged Steinhardt parameters of degree 3, 4 or 6.
+//! Local ql is Steinhardt, Nelson and Ronchetti; qlBar is the Lechner-Dellago
+//! average of q_lm over the particle and its neighbours. The compute path
+//! flattens the neighbour list to CSR so the same kernel can run on the
+//! host (OpenMP), across MPI ranks (atom split plus Allgatherv of q_lm),
+//! or under OpenMP target offload when the build provides a device.
+[[nodiscard]] SteinhardtQl
+steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+             const std::vector<std::vector<int>> &nList, int orderL);
 
 } // namespace chill
 
@@ -280,13 +363,27 @@ lookupTableQ3Vec(std::array<double, 2> angles);
 //! Lookup table for Q3 (m=0 to m=6)
 std::complex<double> lookupTableQ3(int m, std::array<double, 2> angles);
 
+//! Lookup table for Q4
+std::vector<std::complex<double>>
+lookupTableQ4Vec(std::array<double, 2> angles);
+
+//! Lookup table for Q4 (m=0 to m=8)
+std::complex<double> lookupTableQ4(int m, std::array<double, 2> angles);
+
 //! Lookup table for Q6
 std::vector<std::complex<double>>
 lookupTableQ6Vec(std::array<double, 2> angles);
+
+//! Lookup table for Q8
+std::vector<std::complex<double>>
+lookupTableQ8Vec(std::array<double, 2> angles);
+
+//! Lookup table for Q8 (m=0 to m=16)
+std::complex<double> lookupTableQ8(int m, std::array<double, 2> angles);
 
 //! Lookup table for Q6 (m=0 to m=12)
 std::complex<double> lookupTableQ6(int m, std::array<double, 2> angles);
 
 } // namespace sph
 
-#endif // __BOP_H_
+#endif // SEAMS_BOP_H_

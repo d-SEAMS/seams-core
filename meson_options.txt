@@ -1,4 +1,18 @@
 option('with_tests', type: 'boolean', value: true,
   description: 'Build Catch2 C++ tests')
-option('with_python', type: 'boolean', value: true,
-  description: 'Build nanobind Python bindings')
+option('with_python', type: 'boolean', value: false,
+  description: 'Unused. Python bindings are the PydSEAMSlib repo, not this one')
+option('with_mpi', type: 'feature', value: 'disabled',
+  description: 'Link MPI and split Steinhardt atoms across ranks')
+option('with_openmp_offload', type: 'feature', value: 'disabled',
+  description: 'Compile OpenMP target offload for the Steinhardt kernel')
+option('offload_triple', type: 'string', value: 'nvptx64-nvidia-cuda',
+  description: 'OpenMP offload target triple when with_openmp_offload is enabled')
+option('with_ira', type: 'feature', value: 'auto',
+  description: 'Link libira (IRA match and SOFI point groups)')
+option('with_sphericart', type: 'feature', value: 'auto',
+  description: 'Batch Cartesian Ylm for host Steinhardt via sphericart')
+option('with_nauty', type: 'feature', value: 'auto',
+  description: 'Canonical cage certificates via nauty')
+option('with_lua', type: 'feature', value: 'disabled',
+  description: 'Unused. The yodaStruct CLI is the yodaStruct repo, not this one')

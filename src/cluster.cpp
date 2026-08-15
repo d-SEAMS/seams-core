@@ -13,7 +13,9 @@
 //-----------------------------------------------------------------------------------
 
 #include <cluster.hpp>
+#include <algorithm>
 #include <iostream>
+#include <seams_output.hpp>
 
 /**
  * @details Finds the number of particles in the largest ice cluster, for a
@@ -55,9 +57,11 @@ int clump::largestIceCluster(
   molSys::Point<double> iPoint; // Current point
   int currentIndex;             // Current index
 
+  iceCloud = molSys::clearPointCloud(iceCloud);
+  nClusters.clear();
   // -----------------------------------------------------------
   // INITIALIZATION
-  linkedList.resize(yCloud.nop, -1); // init to dummy value
+  linkedList.assign(yCloud.nop, -1);
   // Initial values of the list. -1 is a dummy value if the molecule is
   // water or not in the slice
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
@@ -151,13 +155,21 @@ int clump::largestIceCluster(
     nClusters.push_back(iClusterNumber);
   } // end of loop through
   // -----------------------------------------------------------
+  if (nClusters.empty()) {
+    iceCloud.currentFrame = yCloud.currentFrame;
+    iceCloud.nop = 0;
+    iceCloud.box = yCloud.box;
+    iceCloud.boxLow = yCloud.boxLow;
+    sout::writeClusterStats(path, yCloud.currentFrame, 0, 0, 0, 0.0,
+                            firstFrame);
+    return 0;
+  }
+
   // Get the largest cluster and save the atoms to the iceCloud pointCloud
   nLargestCluster = *std::max_element(nClusters.begin(), nClusters.end());
-  int lClusIndex = distance(
-      nClusters.begin(),
-      max_element(
-          nClusters.begin(),
-          nClusters.end())); // index of the cluster with the largest number
+  int lClusIndex = static_cast<int>(
+      std::distance(nClusters.begin(),
+                    std::max_element(nClusters.begin(), nClusters.end())));
   // -----------------------------------------------------------
   // Loop through the linked list from the starting element
   // startingIndex[lClusIndex].
@@ -355,9 +367,9 @@ int clump::clusterAnalysis(
   // Q6
   if (bopAnalysis == "chill") {
     //
-    yCloud = chill::getCorrel(yCloud, nList, false);
+    chill::getCorrel(yCloud, nList, false);
     // Get the ice types
-    yCloud = chill::getIceTypeNoPrint(yCloud, nList, false);
+    chill::getIceTypeNoPrint(yCloud, nList, false);
     // Assign values to isIce according to the CHILL algorithm
     for (int iatom = 0; iatom < yCloud.nop; iatom++) {
       // If it is an ice-like molecule, add it, otherwise skip

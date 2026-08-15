@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __TOPO_BULK_H_
-#define __TOPO_BULK_H_
+#ifndef SEAMS_TOPO_BULK_H_
+#define SEAMS_TOPO_BULK_H_
 
 #include <algorithm>
 #include <array>
@@ -64,12 +64,35 @@ namespace ring {
                      molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      int firstFrame, bool onlyTetrahedral = true);
 
+/** @struct ring::RingSearchIndex
+ * @brief Inverted index from an atom to the rings that contain it.
+ * @details The cage searches repeatedly ask which rings a given atom belongs
+ *  to. Answering that by scanning every ring makes the searches quadratic in
+ *  the ring count. One pass over the ring network answers it in constant time
+ *  thereafter, and the ring indices in each row stay ascending, which is the
+ *  order the searches previously visited them in.
+ */
+struct RingSearchIndex {
+  std::vector<std::vector<int>> ringsContainingAtom;
+};
+
+//! Builds the inverted atom-to-rings index used by the cage searches
+[[nodiscard]] RingSearchIndex
+buildRingSearchIndex(const std::vector<std::vector<int>> &rings, int numAtoms);
+
 //! Find out which hexagonal rings are DDC (Double Diamond Cages) rings.
 //! Returns a vector containing all the ring IDs which are DDC rings
 std::vector<int> findDDC(const std::vector<std::vector<int>> &rings,
                          std::vector<strucType> &ringType,
                          const std::vector<int> &listHC,
                          std::vector<cage::Cage> &cageList);
+
+//! As findDDC, reusing an index the caller has already built
+std::vector<int> findDDC(const std::vector<std::vector<int>> &rings,
+                         std::vector<strucType> &ringType,
+                         const std::vector<int> &listHC,
+                         std::vector<cage::Cage> &cageList,
+                         const RingSearchIndex &index);
 
 //! Find out which hexagonal rings are both DDCs (Double Diamond Cages) and HCs
 //! (Hexagonal Cages). Returns a vector containing all the ring IDs which are
@@ -86,15 +109,32 @@ std::vector<int> findHC(const std::vector<std::vector<int>> &rings,
                         const std::vector<std::vector<int>> &nList,
                         std::vector<cage::Cage> &cageList);
 
+//! As findHC, reusing an index the caller has already built
+std::vector<int> findHC(const std::vector<std::vector<int>> &rings,
+                        std::vector<strucType> &ringType,
+                        const std::vector<std::vector<int>> &nList,
+                        std::vector<cage::Cage> &cageList,
+                        const RingSearchIndex &index);
+
 //! First condition for the DDC: There must be at least 3 other
 //! rings in which each element of the equatorial  ring is present
 bool conditionOneDDC(const std::vector<std::vector<int>> &rings,
                      std::vector<int> &peripheralRings, int iring);
 
+//! As conditionOneDDC, reusing an index the caller has already built
+bool conditionOneDDC(const std::vector<std::vector<int>> &rings,
+                     std::vector<int> &peripheralRings, int iring,
+                     const RingSearchIndex &index);
+
 //! Second condition for the DDC: There must be at least 1 other
 //! ring for every triplet in the equatorial  ring
 bool conditionTwoDDC(const std::vector<std::vector<int>> &rings,
                      std::vector<int> &peripheralRings, int iring);
+
+//! As conditionTwoDDC, answering each triplet from the inverted index
+bool conditionTwoDDC(const std::vector<std::vector<int>> &rings,
+                     std::vector<int> &peripheralRings, int iring,
+                     const RingSearchIndex &index);
 
 //! Third condition for the DDC: Even (by vector index) numbered index triplets
 //! and odd triplets must have at least one element in common
@@ -119,6 +159,13 @@ bool notNeighboursOfRing(const std::vector<std::vector<int>> &nList,
 [[nodiscard]] int findPrismatic(const std::vector<std::vector<int>> &rings, std::vector<int> &listHC,
                   std::vector<strucType> &ringType, int iring, int jring,
                   std::vector<int> &prismaticRings);
+
+//! As findPrismatic, drawing candidate rings from the inverted index
+[[nodiscard]] int findPrismatic(const std::vector<std::vector<int>> &rings,
+                                std::vector<int> &listHC,
+                                std::vector<strucType> &ringType, int iring,
+                                int jring, std::vector<int> &prismaticRings,
+                                const RingSearchIndex &index);
 
 //! Assigns a type of enum class iceType, to every atom, using information from
 //! ringType, which has the information of every ring
@@ -163,4 +210,4 @@ bool basalRingsSeparation(
     const std::vector<int> &basal1, const std::vector<int> &basal2, double heightCutoff = 8);
 } // namespace prism3
 
-#endif // __TOPO_BULK_H_
+#endif // SEAMS_TOPO_BULK_H_

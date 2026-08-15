@@ -9,6 +9,7 @@
 #include <topo_bulk.hpp>
 
 // Standard
+#include <algorithm>
 #include <filesystem>
 #include <iostream>
 
@@ -372,6 +373,98 @@ TEST_CASE("findMixedRings identifies shared DDC/HC rings", "[topo_bulk]") {
   REQUIRE(mixedList.empty());
 }
 
+TEST_CASE("buildRingSearchIndex lists every ring that contains an atom",
+          "[topo_bulk]") {
+  const std::vector<std::vector<int>> rings = {
+      {0, 1, 2}, {2, 3, 4}, {0, 4, 5}, {9}};
+  const auto index = ring::buildRingSearchIndex(rings, 6);
+
+  REQUIRE(index.ringsContainingAtom.size() == 6);
+  REQUIRE(index.ringsContainingAtom[0] == std::vector<int>{0, 2});
+  REQUIRE(index.ringsContainingAtom[1] == std::vector<int>{0});
+  REQUIRE(index.ringsContainingAtom[2] == std::vector<int>{0, 1});
+  REQUIRE(index.ringsContainingAtom[3] == std::vector<int>{1});
+  REQUIRE(index.ringsContainingAtom[4] == std::vector<int>{1, 2});
+  REQUIRE(index.ringsContainingAtom[5] == std::vector<int>{2});
+}
+
+TEST_CASE("buildRingSearchIndex ignores atoms outside numAtoms",
+          "[topo_bulk]") {
+  const std::vector<std::vector<int>> rings = {{0, 1, 99}, {-1, 2}};
+  const auto index = ring::buildRingSearchIndex(rings, 3);
+  REQUIRE(index.ringsContainingAtom.size() == 3);
+  REQUIRE(index.ringsContainingAtom[0] == std::vector<int>{0});
+  REQUIRE(index.ringsContainingAtom[1] == std::vector<int>{0});
+  REQUIRE(index.ringsContainingAtom[2] == std::vector<int>{1});
+}
+
+TEST_CASE("conditionOneDDC rejects an atom outside the ring index",
+          "[topo_bulk]") {
+  const std::vector<std::vector<int>> rings = {{0, 1, 2, 3, 4, 5}};
+  ring::RingSearchIndex index;
+  index.ringsContainingAtom.resize(3);
+  std::vector<int> peripheral;
+  REQUIRE_FALSE(ring::conditionOneDDC(rings, peripheral, 0, index));
+}
+
+TEST_CASE("findHC on the twelve-atom HC reports one HexC of five rings",
+          "[topo_bulk]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  buildHCCloud(yCloud);
+
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  nList = nneigh::neighbourListByIndex(yCloud, nList);
+  auto rings = primitive::ringNetwork(nList, 7);
+
+  std::vector<ring::strucType> ringType(rings.size());
+  std::vector<cage::Cage> cageList;
+  auto listHC = ring::findHC(rings, ringType, nList, cageList);
+
+  REQUIRE(cageList.size() == 1);
+  REQUIRE(cageList[0].type == cage::cageType::HexC);
+  REQUIRE(cageList[0].rings.size() == 5);
+  REQUIRE_FALSE(listHC.empty());
+}
+
+TEST_CASE("indexed findHC and findDDC match the convenience overloads",
+          "[topo_bulk]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  buildHCCloud(yCloud);
+
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  nList = nneigh::neighbourListByIndex(yCloud, nList);
+  auto rings = primitive::ringNetwork(nList, 7);
+
+  std::vector<std::vector<int>> sixRings;
+  int maxAtom = 0;
+  for (const auto &r : rings) {
+    if (r.size() == 6) {
+      sixRings.push_back(r);
+      for (int atom : r) {
+        maxAtom = std::max(maxAtom, atom);
+      }
+    }
+  }
+
+  const auto index =
+      ring::buildRingSearchIndex(sixRings, maxAtom + 1);
+
+  std::vector<ring::strucType> typeWrap(sixRings.size());
+  std::vector<ring::strucType> typeIdx(sixRings.size());
+  std::vector<cage::Cage> cagesWrap;
+  std::vector<cage::Cage> cagesIdx;
+
+  auto hcWrap = ring::findHC(sixRings, typeWrap, nList, cagesWrap);
+  auto hcIdx = ring::findHC(sixRings, typeIdx, nList, cagesIdx, index);
+  REQUIRE(hcWrap == hcIdx);
+  REQUIRE(typeWrap == typeIdx);
+
+  auto ddcWrap = ring::findDDC(sixRings, typeWrap, hcWrap, cagesWrap);
+  auto ddcIdx = ring::findDDC(sixRings, typeIdx, hcIdx, cagesIdx, index);
+  REQUIRE(ddcWrap == ddcIdx);
+  REQUIRE(typeWrap == typeIdx);
+}
+
 TEST_CASE("topoBulkAnalysis on mW cubic trajectory", "[topo_bulk]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
   yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
@@ -590,5 +683,49 @@ TEST_CASE("findPrismatic identifies prismatic rings between HC basals",
     REQUIRE(ret == 0);
     // HC has 3 prismatic rings between its 2 basal rings
     REQUIRE(prismaticRings.size() == 3);
+  }
+}
+
+TEST_CASE("DDC cage assembly is independent of ring enumeration order",
+          "[topo_bulk]") {
+  // The greedy assembly claims peripheral rings as it accepts cages, so
+  // without a canonical visiting order the cage-object count depends on the
+  // order the ring network was enumerated in. The per-ring classification
+  // and the cage partition must both survive any permutation of the input.
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  REQUIRE(yCloud.nop > 0);
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  auto idx = nneigh::neighbourListByIndex(yCloud, nList);
+  auto rings = primitive::ringNetwork(idx, 7);
+  std::vector<std::vector<int>> six;
+  for (const auto &r : rings) {
+    if (r.size() == 6) {
+      six.push_back(r);
+    }
+  }
+
+  size_t referenceCages = 0;
+  size_t referenceDDCRings = 0;
+  for (int variant = 0; variant < 3; variant++) {
+    auto shuffled = six;
+    if (variant == 1) {
+      std::sort(shuffled.begin(), shuffled.end());
+    } else if (variant == 2) {
+      std::sort(shuffled.rbegin(), shuffled.rend());
+    }
+    std::vector<ring::strucType> rt(shuffled.size(),
+                                    ring::strucType::unclassified);
+    std::vector<cage::Cage> cl;
+    auto hc = ring::findHC(shuffled, rt, idx, cl);
+    auto ddc = ring::findDDC(shuffled, rt, hc, cl);
+    if (variant == 0) {
+      referenceCages = cl.size();
+      referenceDDCRings = ddc.size();
+      REQUIRE(referenceDDCRings == 8192);
+    } else {
+      REQUIRE(cl.size() == referenceCages);
+      REQUIRE(ddc.size() == referenceDDCRings);
+    }
   }
 }

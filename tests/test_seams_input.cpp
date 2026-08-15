@@ -37,6 +37,14 @@ TEST_CASE("readXYZ creates a synthetic file and reads it back",
   REQUIRE_THAT(cloud.pts[0].x, Catch::Matchers::WithinAbs(1.0, 1e-10));
   REQUIRE_THAT(cloud.pts[1].y, Catch::Matchers::WithinAbs(5.0, 1e-10));
   REQUIRE_THAT(cloud.pts[2].z, Catch::Matchers::WithinAbs(9.0, 1e-10));
+  REQUIRE(cloud.box.size() == 3);
+  REQUIRE(cloud.boxLow.size() == 3);
+  REQUIRE_THAT(cloud.boxLow[0], Catch::Matchers::WithinAbs(1.0, 1e-10));
+  REQUIRE_THAT(cloud.boxLow[1], Catch::Matchers::WithinAbs(2.0, 1e-10));
+  REQUIRE_THAT(cloud.boxLow[2], Catch::Matchers::WithinAbs(3.0, 1e-10));
+  REQUIRE_THAT(cloud.box[0], Catch::Matchers::WithinAbs(6.0, 1e-10));
+  REQUIRE_THAT(cloud.box[1], Catch::Matchers::WithinAbs(6.0, 1e-10));
+  REQUIRE_THAT(cloud.box[2], Catch::Matchers::WithinAbs(6.0, 1e-10));
 
   fs::remove(tmpFile);
 }
@@ -211,3 +219,46 @@ TEST_CASE("atomInSlice boundary check", "[seams_input]") {
   REQUIRE(sinp::atomInSlice(5.0, 5.0, 5.0, lo, hi) == true);
 }
 
+
+#ifdef SEAMS_HAS_CHEMFILES
+TEST_CASE("readChemfiles matches the hand-rolled LAMMPS reader", "[seams_input]") {
+  // Same IDs, types and coordinates on both repo dump fixtures, including
+  // the type filter. The chemfiles path loses the box origin (its cell has
+  // no origin concept), so boxLow is not compared.
+  struct Fixture {
+    const char *path;
+    int filter;
+  } cases[] = {{"traj/mW_cubic.lammpstrj", 1},
+               {"traj/exampleTraj.lammpstrj", 2}};
+
+  for (const auto &fx : cases) {
+    molSys::PointCloud<molSys::Point<double>, double> hand, chem;
+    hand = sinp::readLammpsTrjO(fx.path, 1, hand, fx.filter);
+    chem = sinp::readChemfiles(fx.path, 1, chem, fx.filter);
+
+    REQUIRE(hand.nop > 0);
+    REQUIRE(chem.nop == hand.nop);
+    for (int k = 0; k < 3; k++) {
+      REQUIRE_THAT(chem.box[k],
+                   Catch::Matchers::WithinAbs(hand.box[k], 1e-9));
+    }
+    for (int i = 0; i < hand.nop; i++) {
+      REQUIRE(chem.pts[i].atomID == hand.pts[i].atomID);
+      REQUIRE(chem.pts[i].type == hand.pts[i].type);
+      REQUIRE_THAT(chem.pts[i].x,
+                   Catch::Matchers::WithinAbs(hand.pts[i].x, 1e-9));
+      REQUIRE_THAT(chem.pts[i].y,
+                   Catch::Matchers::WithinAbs(hand.pts[i].y, 1e-9));
+      REQUIRE_THAT(chem.pts[i].z,
+                   Catch::Matchers::WithinAbs(hand.pts[i].z, 1e-9));
+    }
+  }
+}
+
+TEST_CASE("readChemfiles reports unreadable files without terminating",
+          "[seams_input]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud = sinp::readChemfiles("no/such/file.lammpstrj", 1, cloud, -1);
+  REQUIRE(cloud.nop == 0);
+}
+#endif // SEAMS_HAS_CHEMFILES

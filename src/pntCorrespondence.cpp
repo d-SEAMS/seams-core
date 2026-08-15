@@ -841,6 +841,18 @@ Eigen::MatrixXd pntToPnt::changeHexCageOrder(
 std::vector<int> pntToPnt::relOrderDDC(int index,
                                        const std::vector<std::vector<int>> &rings,
                                        const std::vector<cage::Cage> &cageList) {
+  if (index < 0 || index >= static_cast<int>(cageList.size()) ||
+      cageList[index].rings.empty()) {
+    return std::vector<int>();
+  }
+  return pntToPnt::relOrderDDC(rings[cageList[index].rings[0]], index, rings,
+                               cageList);
+}
+
+std::vector<int> pntToPnt::relOrderDDC(const std::vector<int> &equatorial,
+                                       int index,
+                                       const std::vector<std::vector<int>> &rings,
+                                       const std::vector<cage::Cage> &cageList) {
   //
   std::vector<int> ddcOrder; // Order of the particles in the DDC.
   int nop = 14;              // Number of elements in the DDC
@@ -856,17 +868,14 @@ std::vector<int> pntToPnt::relOrderDDC(int index,
 
   // Validate cage structure (DDC has 1 equatorial + 6 peripheral rings)
   if (index < 0 || index >= static_cast<int>(cageList.size()) ||
-      static_cast<int>(cageList[index].rings.size()) < 7) {
+      static_cast<int>(cageList[index].rings.size()) < 7 ||
+      static_cast<int>(equatorial.size()) != ringSize) {
     return std::vector<int>();
   }
-  // Add the equatorial ring particles
-  //
-  iring = cageList[index]
-              .rings[0]; // Equatorial ring index in rings vector of vectors
-  //
-  // Loop through all the atoms of the equatorial ring
+  // Add the equatorial ring particles in the traversal supplied by the
+  // caller; the connectivity below derives from this order
   for (int i = 0; i < ringSize; i++) {
-    ddcOrder.push_back(rings[iring][i]);
+    ddcOrder.push_back(equatorial[i]);
   } // end of adding equatorial ring particles
   //
   // ------------------------------

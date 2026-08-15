@@ -169,41 +169,38 @@ double gen::eigenVecAngle(std::vector<double> OO, std::vector<double> OH) {
  * @return The desired average value
  */
 double gen::getAverageWithoutOutliers(std::vector<double> inpVec) {
-  //
-  double avgVal = 0.0;   // Average value, excluding the outliers
-  double median;         // Median value
-  int n = inpVec.size(); // Number of values
-  std::vector<double> lowerRange,
-      upperRange;                       // n/2 smallest and n/2 largest numbers
-  double firstQuartile, thirdQuartile;  // First and third quartiles
-  double iqr;                           // Interquartile range
-  double outlierLimLow, outlierLimHigh; // Outliers limit
-  int numOfObservations = 0; // Number of observations used for the average
-  // ----------------------
-  // Calculate the median (the vector is sorted inside the function)
-  median = calcMedian(&inpVec);
-  // ----------------------
-  // Get the n/2 smallest and largest numbers
-  //
+  double avgVal = 0.0;
+  const int n = static_cast<int>(inpVec.size());
+  if (n == 0) {
+    return 0.0;
+  }
+  std::vector<double> sorted = inpVec;
+  std::sort(sorted.begin(), sorted.end());
+  if (n < 4) {
+    double sumVal = 0.0;
+    for (double v : sorted) {
+      sumVal += v;
+    }
+    return sumVal / n;
+  }
+  std::vector<double> lowerRange;
+  std::vector<double> upperRange;
+  double firstQuartile, thirdQuartile;
+  double iqr;
+  double outlierLimLow, outlierLimHigh;
+  int numOfObservations = 0;
   if (n % 2 == 0) {
     for (int i = 0; i < n / 2; i++) {
-      // n/2 smallest numbers
-      lowerRange.push_back(inpVec[i]);
-      // n/2 largest numbers
-      upperRange.push_back(inpVec[n / 2 + i]);
-    } // end of loop to fill up the n/2 smallest and n/2 largest
-  }   // even
-  else {
-    //
-    int halfN = (n + 1) / 2;
-    // Exclude the median
-    for (int i = 0; i < halfN; i++) {
-      // (n+1)/2 smallest numbers
-      lowerRange.push_back(inpVec[i]);
-      // (n+1)/2 largest numbers
-      upperRange.push_back(inpVec[halfN + i]);
-    } // end of filling up the smallest and largest half-ranges
-  }   // for odd numbers
+      lowerRange.push_back(sorted[i]);
+      upperRange.push_back(sorted[n / 2 + i]);
+    }
+  } else {
+    const int mid = n / 2;
+    for (int i = 0; i < mid; i++) {
+      lowerRange.push_back(sorted[i]);
+      upperRange.push_back(sorted[mid + 1 + i]);
+    }
+  }
   // ----------------------
   // Calculate the first and third quartiles, and interquartile range
   //
@@ -225,20 +222,12 @@ double gen::getAverageWithoutOutliers(std::vector<double> inpVec) {
   //
   // Loop through the values in inpVec to get the average, excluding outliers
   for (int i = 0; i < n; i++) {
-    //
-    if (inpVec[i] < outlierLimLow) {
+    if (sorted[i] < outlierLimLow || sorted[i] > outlierLimHigh) {
       continue;
-    } // lower limit outlier
-    else if (inpVec[i] > outlierLimHigh) {
-      continue;
-    } // higher limit outlier
-    else {
-      // Number of observations added
-      numOfObservations++;
-      // Add to the average
-      avgVal += inpVec[i];
-    } // take the average
-  }   // end of loop for getting the average
+    }
+    numOfObservations++;
+    avgVal += sorted[i];
+  }
   // ----------------------
   // This fails if there are not enough observations (ring size = 3)
   if (numOfObservations == 0) {

@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __CAGE_H_
-#define __CAGE_H_
+#ifndef SEAMS_CAGE_H_
+#define SEAMS_CAGE_H_
 #include <vector>
 
 /** @file cage.hpp
@@ -90,4 +90,4 @@ struct Cage {
 
 } // namespace cage
 
-#endif // __CAGE_H_
+#endif // SEAMS_CAGE_H_

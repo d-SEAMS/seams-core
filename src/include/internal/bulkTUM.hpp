@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __BULKTUM_H_
-#define __BULKTUM_H_
+#ifndef SEAMS_BULKTUM_H_
+#define SEAMS_BULKTUM_H_
 
 #include <algorithm>
 #include <array>
@@ -106,4 +106,4 @@ std::vector<int> atomsFromCages(const std::vector<std::vector<int>> &rings,
 
 } // namespace tum3
 
-#endif // __BULKTUM_H_
+#endif // SEAMS_BULKTUM_H_

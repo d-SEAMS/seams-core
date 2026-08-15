@@ -12,8 +12,29 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
+#include <algorithm>
 #include <generic.hpp>
 #include <seams_input.hpp>
+
+namespace {
+/**
+ * @details Record the ID-to-index entry for the most recently appended point.
+ *  A duplicate atom ID means the input is corrupt (two atoms cannot share an
+ *  ID within one frame); the map can only keep one of the colliding atoms, so
+ *  name the ID loudly instead of failing silently downstream.
+ */
+void mapAtomIdToIndex(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  const int idx = static_cast<int>(yCloud.pts.size()) - 1;
+  const int id = yCloud.pts.back().atomID;
+  if (!yCloud.idIndexMap.emplace(id, idx).second) {
+    std::cerr << "Warning: duplicate atom ID " << id
+              << " in the input frame; the ID-to-index map keeps only the "
+                 "last atom read with this ID\n";
+    yCloud.idIndexMap[id] = idx;
+  }
+}
+} // namespace
 
 /**
  * @details Get all the ring information, from the R.I.N.G.S. file. Each line
@@ -79,10 +100,9 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
   std::vector<std::string> tokens; // Vector containing word tokens
   std::vector<double> numbers;     // Vector containing type double numbers
   int nop = -1;                    // Number of atoms in targetFrame
-  int iatom = 1;                // Current atom being filled into the PointCloud
+  int iatom = 0;
   molSys::Point<double> iPoint; // Current point being read in from the file
-  double xLo, xHi, yLo, yHi, zLo,
-      zHi; // Box lengths extrapolated from the least and greatest coordinates
+  double xLo = 0.0, xHi = 0.0, yLo = 0.0, yHi = 0.0, zLo = 0.0, zHi = 0.0;
 
   if (!(gen::file_exists(filename))) {
     std::cout
@@ -130,46 +150,26 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
 
       // Put logic for checking atom type here later
       iPoint.type = 1; // Oxygen type; hard-coded!
-      iPoint.molID = iatom;
-      iPoint.atomID = iatom;
       iPoint.x = std::stod(tokens[1]);
       iPoint.y = std::stod(tokens[2]);
       iPoint.z = std::stod(tokens[3]);
-
+      if (yCloud.pts.empty()) {
+        xLo = xHi = iPoint.x;
+        yLo = yHi = iPoint.y;
+        zLo = zHi = iPoint.z;
+      } else {
+        xLo = std::min(xLo, iPoint.x);
+        xHi = std::max(xHi, iPoint.x);
+        yLo = std::min(yLo, iPoint.y);
+        yHi = std::max(yHi, iPoint.y);
+        zLo = std::min(zLo, iPoint.z);
+        zHi = std::max(zHi, iPoint.z);
+      }
+      iatom++;
+      iPoint.molID = iatom;
+      iPoint.atomID = iatom;
       yCloud.pts.push_back(iPoint);
-      yCloud.idIndexMap[iPoint.atomID] = yCloud.pts.size() - 1;
-      iatom++; // Increase index
-
-      // First point
-      if (iatom == 1) {
-        // Loop through the dimensions
-        xLo = iPoint.x;
-        xHi = iPoint.x;
-        yLo = iPoint.y;
-        yHi = iPoint.y;
-        zLo = iPoint.z;
-        zHi = iPoint.z;
-      } // first point
-      else {
-        if (iPoint.x < xLo) {
-          xLo = iPoint.x;
-        } // xLo
-        else if (iPoint.x > xHi) {
-          xHi = iPoint.x;
-        } // xHi
-        else if (iPoint.y < yLo) {
-          yLo = iPoint.y;
-        } // yLo
-        else if (iPoint.y > yHi) {
-          yHi = iPoint.y;
-        } // yHi
-        else if (iPoint.z < zLo) {
-          zLo = iPoint.z;
-        } // zLo
-        else if (iPoint.z > zHi) {
-          zHi = iPoint.z;
-        } // zHi
-      }   // update
+      mapAtomIdToIndex(yCloud);
     } // end of while, looping through lines till EOF
     // ----------------------------------------------------------
   } // End of if file open statement
@@ -182,10 +182,8 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
     zHi = zLo + 10;
   } // for a single point in the system (never happens)
 
-  // Fill up the box lengths
-  yCloud.box.push_back(xHi - xLo);
-  yCloud.box.push_back(yHi - yLo);
-  yCloud.box.push_back(zHi - zLo);
+  yCloud.box = {xHi - xLo, yHi - yLo, zHi - zLo};
+  yCloud.boxLow = {xLo, yLo, zLo};
 
   if (yCloud.pts.size() != yCloud.nop) {
     std::cout << "Atoms didn't get filled in properly.\n";
@@ -349,7 +347,7 @@ sinp::readLammpsTrj(std::string filename, int targetFrame,
                                                coordLow, coordHigh);
           }
           yCloud.pts.push_back(iPoint);
-          yCloud.idIndexMap[iPoint.atomID] = yCloud.pts.size() - 1;
+          mapAtomIdToIndex(yCloud);
         }
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
@@ -571,7 +569,7 @@ sinp::readLammpsTrjO(std::string filename, int targetFrame,
             nOxy++;
             // yCloud.pts.resize(yCloud.pts.size()+1);
             yCloud.pts.push_back(iPoint);
-            yCloud.idIndexMap[iPoint.atomID] = yCloud.pts.size() - 1;
+            mapAtomIdToIndex(yCloud);
           }
         }
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -801,8 +799,7 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
             nOxy++;
             // yCloud.pts.resize(yCloud.pts.size()+1);
             yCloud.pts.push_back(iPoint);
-            yCloud.idIndexMap[iPoint.atomID] =
-                yCloud.pts.size() - 1; // array index
+            mapAtomIdToIndex(yCloud);
           }
         }
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -879,6 +876,7 @@ molSys::PointCloud<molSys::Point<double>, double>
 sinp::readChemfiles(std::string filename, int targetFrame,
                     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                     int typeFilter) {
+  try {
   chemfiles::Trajectory trajectory(filename);
 
   if (targetFrame < 1 ||
@@ -901,8 +899,22 @@ sinp::readChemfiles(std::string filename, int targetFrame,
   auto &topology = frame.topology();
 
   for (size_t i = 0; i < frame.size(); i++) {
-    auto atomType =
-        static_cast<int>(topology[i].atomic_number().value_or(1));
+    // LAMMPS dumps carry numeric type identifiers, which chemfiles stores as
+    // the atom type string with no atomic number; chemical formats carry
+    // element names with an atomic number. Prefer a numeric type string,
+    // fall back to the atomic number.
+    const auto numeric = [](const std::string &s) {
+      return !s.empty() &&
+             s.find_first_not_of("0123456789") == std::string::npos;
+    };
+    int atomType = 0;
+    if (numeric(topology[i].type())) {
+      atomType = std::stoi(topology[i].type());
+    } else if (numeric(topology[i].name())) {
+      atomType = std::stoi(topology[i].name());
+    } else {
+      atomType = static_cast<int>(topology[i].atomic_number().value_or(1));
+    }
 
     // Apply type filter if requested (-1 means accept all)
     if (typeFilter >= 0 && atomType != typeFilter) {
@@ -911,70 +923,104 @@ sinp::readChemfiles(std::string filename, int targetFrame,
 
     molSys::Point<double> pt;
     pt.type = atomType;
-    pt.atomID = static_cast<int>(i);
-    pt.molID = static_cast<int>(i); // chemfiles doesn't always have mol IDs
+    // chemfiles orders LAMMPS dump atoms by their id, so index + 1 recovers
+    // the 1-based dump id for the contiguous case; other formats have no ID
+    // notion beyond position
+    pt.atomID = static_cast<int>(i) + 1;
+    // Molecule IDs surface as chemfiles residues where the format has them
+    const auto residue = topology.residue_for_atom(i);
+    pt.molID = (residue && residue->id())
+                   ? static_cast<int>(*residue->id())
+                   : pt.atomID;
     pt.x = positions[i][0];
     pt.y = positions[i][1];
     pt.z = positions[i][2];
 
     yCloud.pts.push_back(pt);
-    yCloud.idIndexMap[pt.atomID] = static_cast<int>(yCloud.pts.size()) - 1;
+    mapAtomIdToIndex(yCloud);
   }
 
   yCloud.nop = static_cast<int>(yCloud.pts.size());
   yCloud.currentFrame = targetFrame;
 
   return yCloud;
+  } catch (const std::exception &e) {
+    // chemfiles throws on unreadable or malformed files; report and return
+    // the empty cloud instead of terminating the caller
+    std::cerr << "chemfiles cannot read " << filename << ": " << e.what()
+              << "\n";
+    yCloud = molSys::clearPointCloud(yCloud);
+    return yCloud;
+  }
 }
 #endif // SEAMS_HAS_CHEMFILES
 
 #ifdef SEAMS_HAS_READCON
-#include <readcon-core.hpp>
+// The C API rather than readcon-core.hpp: the C++ wrapper is a convenience
+// layer over exactly these calls, and the C ABI is the surface cargo-c
+// versions
+#include <readcon-core.h>
 
 molSys::PointCloud<molSys::Point<double>, double>
 sinp::readCon(std::string filename, int targetFrame,
               molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   yCloud = molSys::clearPointCloud(yCloud);
 
-  try {
-    int frameIdx = 0;
-    readcon::ConFrameIterator frames(filename);
-    for (auto &&frame : frames) {
-      frameIdx++;
-      if (frameIdx != targetFrame) continue;
-
-      // Found target frame
-      auto &cell = frame.cell();
-      yCloud.box = {cell[0], cell[1], cell[2]};
-      yCloud.boxLow = {0.0, 0.0, 0.0};
-
-      auto &atoms = frame.atoms();
-      yCloud.pts.reserve(atoms.size());
-
-      for (size_t i = 0; i < atoms.size(); i++) {
-        molSys::Point<double> pt;
-        pt.type = static_cast<int>(atoms[i].atomic_number);
-        pt.atomID = static_cast<int>(atoms[i].atom_id);
-        pt.molID = pt.atomID;
-        pt.x = atoms[i].x;
-        pt.y = atoms[i].y;
-        pt.z = atoms[i].z;
-
-        yCloud.pts.push_back(pt);
-        yCloud.idIndexMap[pt.atomID] = static_cast<int>(yCloud.pts.size()) - 1;
-      }
-
-      yCloud.nop = static_cast<int>(yCloud.pts.size());
-      yCloud.currentFrame = targetFrame;
-      return yCloud;
-    }
-
-    std::cerr << "Frame " << targetFrame << " not found in " << filename
-              << " (has " << frameIdx << " frames).\n";
-  } catch (const std::exception &e) {
-    std::cerr << "Error reading .con file: " << e.what() << "\n";
+  readcon::CConFrameIterator *frames =
+      readcon::read_con_file_iterator(filename.c_str());
+  if (frames == nullptr) {
+    std::cerr << "Cannot open .con file " << filename << "\n";
+    return yCloud;
   }
 
+  int frameIdx = 0;
+  while (readcon::RKRConFrame *handle =
+             readcon::con_frame_iterator_next(frames)) {
+    frameIdx++;
+    if (frameIdx != targetFrame) {
+      readcon::free_rkr_frame(handle);
+      continue;
+    }
+
+    // Found the target frame; extract the transparent atom records
+    readcon::CFrame *frame = readcon::rkr_frame_to_c_frame(handle);
+    readcon::free_rkr_frame(handle);
+    if (frame == nullptr) {
+      std::cerr << "Cannot extract frame " << targetFrame << " from "
+                << filename << "\n";
+      break;
+    }
+
+    yCloud.box = {frame->cell[0], frame->cell[1], frame->cell[2]};
+    yCloud.boxLow = {0.0, 0.0, 0.0};
+    yCloud.pts.reserve(frame->num_atoms);
+
+    for (size_t i = 0; i < frame->num_atoms; i++) {
+      const readcon::CAtom &atom = frame->atoms[i];
+      molSys::Point<double> pt;
+      pt.type = static_cast<int>(atom.atomic_number);
+      pt.atomID = static_cast<int>(atom.atom_id);
+      pt.molID = pt.atomID;
+      pt.x = atom.x;
+      pt.y = atom.y;
+      pt.z = atom.z;
+
+      yCloud.pts.push_back(pt);
+      mapAtomIdToIndex(yCloud);
+    }
+    readcon::free_c_frame(frame);
+
+    yCloud.nop = static_cast<int>(yCloud.pts.size());
+    yCloud.currentFrame = targetFrame;
+    readcon::free_con_frame_iterator(frames);
+    return yCloud;
+  }
+
+  if (yCloud.pts.empty()) {
+    std::cerr << "Frame " << targetFrame << " not found in " << filename
+              << " (has " << frameIdx << " frames).\n";
+  }
+  readcon::free_con_frame_iterator(frames);
   return yCloud;
 }
 #endif // SEAMS_HAS_READCON

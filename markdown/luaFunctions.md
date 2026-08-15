@@ -1,10 +1,26 @@
 # Lua Function Documentation
 
+The `yodaStruct` CLI and these bindings live in
+[d-SEAMS/yodaStruct](https://github.com/d-SEAMS/yodaStruct). The live
+list is [`docs/luaFunctions.md`](https://github.com/d-SEAMS/yodaStruct/blob/main/docs/luaFunctions.md)
+there.
+
 In the _functions.lua_ file, lua functions are called, which are registered on the C++ side to inferface with the C++ functions. Here, we document the lua functions currently available to the user. 
 
 ## Currently Registered Lua Functions
 
 The workflows for quasi-two-dimensional ice, quasi-one-dimensional ice and bulk systems are separated. The `Lua` functions for each work-flow are registered in different blocks in the `C++` code.
+
+### Structure descriptors
+
+Enabled when `structureDesc.use` is true in the YAML config
+(`example_lua/structureDesc/`).
+
+- **classifyTemplates**: overlay each neighbour shell onto FCC, HCP, BCC and SC. Returns a 1-based array of `{name, rmsd}` tables.
+- **soapSpectrum**: Bartok SOAP of one particle (`nMax`, `lMax`, `rcut`). Returns a flat array of length `nMax*nMax*(lMax+1)`.
+- **soapSpectrumAll**: SOAP of every particle.
+- **steinhardtQl** / **steinhardtQlVoronoi**: tables with `ql` and `qlBar` arrays.
+- **voronoiFeatures**: per-atom `{q4, q6, q8}` from one Voronoi pass per order.
 
 ### Common Functions
 
@@ -126,6 +142,38 @@ The following `Lua` functions interface to the same `C++` functions in every wor
   + *nList* - Row-ordered neighbour list by index. Passed to the `Lua` side. 
   + *resCloud* - The input \ref molSys::PointCloud, which has been passed to the `Lua` side.
   + *printCages* - Flag for printing the information of each cage in the frame (true) or not printing the coordinates/connectivity of each cage (false). Defined in _vars.lua_. 
+
+## Readers, Bond Rules, and Hydrogen Bonds
+
+The registered surface (see `src/lua_api.cpp` and the walkthrough in
+`example_lua/full_api/script.lua`) also carries:
+
+- *readCon(filename, frame)* - Reads one frame of an eOn `.con` file into a
+  PointCloud. Registered only when the readcon-core backend is compiled in,
+  so scripts feature-test it with `if readCon ~= nil then ... end`.
+- *readChemfiles(filename, frame, typeFilter)* - Reads any chemfiles-supported
+  trajectory format; registered only when chemfiles is compiled in. The
+  optional *typeFilter* keeps one atom type (-1 keeps all).
+- *getHbondNetwork(filename, yCloud, nList, frame, Htype, distCutoff,
+  angleCutoff)* - The last two arguments are optional and default to the
+  water criterion (2.42 Angstrom acceptor-H distance, 30 degree O-O-H
+  angle); other hydrogen-bonded systems pass their own thresholds.
+  *getHbondNetworkFromClouds* accepts the same optional pair.
+- *classifyBonds(yCloud, nList, rule, isSlice)* - Computes and classifies the
+  bond correlations under a rule set given either as a registered name
+  (`"CHILL"`, `"CHILL+"`) or as a table
+  `{staggeredMax = ..., eclipsedMin = ..., eclipsedMax = ...,
+  coordinationNumber = ...}`.
+- *registerBondClassifier(name, ruleTable)* - Registers (or replaces) a named
+  rule set for later lookup by name; *bondClassifierNames()* returns every
+  registered name.
+- *getCorrel* and *getCorrelPlus* accept an optional trailing coordination
+  number (default 4, the validated water scheme; non-positive keeps each
+  atom's whole neighbour row).
+
+## Fennel Scripts
+
+Any script path ending in `.fnl` (the `variables` file or the `functionScript` it names) compiles through the vendored [Fennel](https://fennel-lang.org) 1.5.3 (`src/include/external/fennel/fennel.lua`) and runs against the same registered globals as a Lua script. The compiler path is baked in at configure time from the source root; set `YODA_FENNEL_PATH` to point an installed binary at a `fennel.lua` elsewhere. See `example_lua/fennel/` for a ring-network example on mW cubic ice.
 
 ## Extending d-SEAMS 
 

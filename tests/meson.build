@@ -23,7 +23,17 @@ test_sources = {
   'bulkTUM': 'test_bulkTUM.cpp',
   'pntCorrespondence': 'test_pntCorrespondence.cpp',
   'franzblau_extra': 'test_franzblau_extra.cpp',
+  'ira_sofi': 'test_ira_sofi.cpp',
+  'sphericart': 'test_sphericart.cpp',
+  'cage_canon': 'test_cage_canon.cpp',
+  'voronoi': 'test_voronoi.cpp',
+  'structure_desc': 'test_structure_desc.cpp',
+  'cage_affiliation': 'test_cage_affiliation.cpp',
 }
+
+if readcon_dep.found()
+  test_sources += {'readcon': 'test_readcon.cpp'}
+endif
 
 # Ensure test binaries load the freshly-built libyodaLib.so instead of any
 # version installed in the conda env.  The conda toolchain injects
@@ -71,9 +81,76 @@ test('simd',
     build_rpath: '$ORIGIN/../src'),
   env: _test_env)
 
-# Performance benchmark binary (not in regular test suite)
+# Performance benchmark binaries (not in regular test suite)
 executable('bench_algorithms', 'bench_algorithms.cpp',
   dependencies: [yds_dep, catch2_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('bench_scaling', 'bench_scaling.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+_overhead_deps = [yds_dep]
+if vesin_dep.found()
+  _overhead_deps += [vesin_dep]
+endif
+executable('bench_overhead', 'bench_overhead.cpp',
+  dependencies: _overhead_deps,
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('bench_cages', 'bench_cages.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('bench_strong', 'bench_strong.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('bench_rings_incremental', 'bench_rings_incremental.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('bench_trajectory_incremental', 'bench_trajectory_incremental.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('bench_structure_desc', 'bench_structure_desc.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('compare_structure_desc', 'compare_structure_desc.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('gen_figure_data', 'gen_figure_data.cpp',
+  dependencies: [yds_dep],
   cpp_args: _args,
   link_args: _test_link_args,
   include_directories: _incdirs,

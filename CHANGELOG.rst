@@ -2,6 +2,30 @@
 Changelog
 =========
 
+Version 2.1.0 (2026-08-15)
+===========================
+
+The C++ engine is this repository. Front ends are not.
+
+Breaking
+--------
+- The ``yodaStruct`` Lua and Fennel CLI moved to
+  https://github.com/d-SEAMS/yodaStruct . ``-Dwith_lua=enabled`` is now
+  an error that names that repository.
+- Python bindings remain in
+  https://github.com/d-SEAMS/PydSEAMSlib (moved in 2.0.1).
+- C++ ``getCorrel``, ``getCorrelPlus``, ``getIceType``,
+  ``getIceTypeNoPrint``, ``getIceTypePlus``, ``getIceTypePlusNoPrint``
+  and ``reclassifyWater`` return ``void``. They already took the cloud
+  by reference; the extra copy was the return. PydSEAMSlib still
+  returns the object from ``_core``.
+
+Added
+-----
+- Incremental Franzblau rings, order-free HC/DDC affiliation, seeded
+  hysteresis, Voronoi ``c/2`` certificate, scalar Steinhardt parameters,
+  and the neighbour-list reverse-index that makes those paths linear.
+
 Version 2.0.1 (2026-04-07)
 ===========================
 
@@ -9,7 +33,9 @@ Build and CI fixes following v2.0.0 release.
 
 Fixed
 ------
-- Pin Python to 3.12 for nanobind compatibility, drop limited_api
+- Python bindings moved to
+  https://github.com/d-SEAMS/PydSEAMSlib . This repository is the C++
+  engine. The Lua CLI later moved to yodaStruct (2.1.0).
 - Fix Eigen install path in wheel builds
 - Fix macOS deployment target (bump to 14), remove --enable-new-dtags on macOS
 - Regenerate pixi.lock for chemfiles compatibility

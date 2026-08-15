@@ -19,8 +19,11 @@ Ice type statistics for frame 1:
 
 * Install pydseamslib
 
+Python bindings are the ~PydSEAMSlib~ repository, not this tree.
+
 #+begin_src bash
-pip install pydseamslib
+# from a PydSEAMSlib checkout, or after a 2.0 upload to PyPI:
+pip install 'pydseamslib[ase]'
 #+end_src
 
 Verify:
@@ -30,37 +33,62 @@ python -c "import pydseamslib; print(pydseamslib.__version__)"
 # 2.0.0
 #+end_src
 
-* Classify ice with the Trajectory class
+* Classify ice
 
-The high-level ~Trajectory~ class handles trajectory reading, neighbour list
-construction, and hydrogen bond computation automatically. This is the
-recommended way to use d-SEAMS from Python.
+~read~ loads a LAMMPS dump (oxygen if type 2 is present, otherwise the
+single-site type). ~chill_plus~ does not write files.
 
 The example trajectory ships with the repository at
 ~input/traj/exampleTraj.lammpstrj~. It contains 750 atoms (250 water molecules
 with atom types 1=H and 2=O) in a periodic box.
 
 #+begin_src python
-from pydseamslib import Trajectory
+import pydseamslib as ds
 
-traj = Trajectory("input/traj/exampleTraj.lammpstrj")
-print(f"Loaded {traj.n_atoms} atoms, box: {traj.box}")
+frame = ds.read("input/traj/exampleTraj.lammpstrj")
+print(f"Loaded {frame.n_atoms} atoms, box: {frame.box}")
 
-ice_types = traj.classify_chill_plus()
-for ice_type, count in sorted(ice_types.items()):
-    print(f"  {ice_type}: {count}")
+print(frame.chill_plus())
+print(frame.cages())
 #+end_src
 
 You should see 250 oxygen atoms classified into cubic, hexagonal, interfacial,
 and water categories.
 
-The ~Trajectory~ class builds the neighbour list and hydrogen bond network
-lazily on first access. You can also access them directly:
+The frame builds the neighbour list and hydrogen bond network lazily.
+You can also access them directly:
 
 #+begin_src python
-print(f"Neighbours per atom: {len(traj.neighbor_list[0]) - 1}")
-print(f"H-bonds per atom: {len(traj.hbonds[0]) - 1}")
-print(f"Number of rings found: {len(traj.rings)}")
+print(f"Neighbours per atom: {len(frame.neighbor_list[0]) - 1}")
+print(f"H-bonds per atom: {len(frame.hbonds[0]) - 1}")
+print(f"Number of rings found: {len(frame.rings)}")
+#+end_src
+
+* Steinhardt order parameters
+
+The frame computes the local Steinhardt ~q_l~ and the
+neighbour-averaged ~q_l~ bar for every atom:
+
+#+begin_src python
+ql = frame.steinhardt(order_l=6)
+print(len(ql["ql"]), len(ql["ql_bar"]))
+#+end_src
+
+* Template overlay, SOAP and Voronoi features
+
+Each neighbour shell can be overlaid onto FCC, HCP, BCC and SC templates.
+SOAP spectra and Voronoi-weighted Steinhardt parameters use the same
+loaded frame:
+
+#+begin_src python
+hits = frame.classify_templates()
+print(hits[0]["name"], hits[0]["rmsd"], hits[0]["kind"])
+
+spectra = frame.soap()
+print(len(spectra), len(spectra[0]))
+
+ql_voro = frame.steinhardt_voronoi()
+print(len(ql_voro["ql"]))
 #+end_src
 
 * Low-level API (step by step)

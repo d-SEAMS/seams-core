@@ -12,8 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
-#ifndef __ABSORIENTATION_H_
-#define __ABSORIENTATION_H_
+#ifndef SEAMS_ABSORIENTATION_H_
+#define SEAMS_ABSORIENTATION_H_
 
 #include <algorithm>
 #include <array>
@@ -76,4 +76,4 @@ double getRMSD(const Eigen::MatrixXd &centeredRefPnts,
 
 } // namespace absor
 
-#endif // __ABSORIENTATION_H_
+#endif // SEAMS_ABSORIENTATION_H_

@@ -72,40 +72,30 @@ def test_trapezoid_equals_shoelace():
 # test_return_order
 # ---------------------------------------------------------------------------
 def test_return_order():
-    """Document the swap in projAreaSingleRing return order.
+    """Defect record: the v1.0 projAreaSingleRing return-order swap.
 
-    projAreaSingleRing (order_parameter.cpp:173) computes areaXY, areaXZ, areaYZ
-    but returns {areaXY, areaYZ, areaXZ}  -- note the swap of indices 1 and 2.
-
-    calcCoverageArea (order_parameter.cpp:88-90) reads:
-        areaXY += singleAreas[0]    # gets areaXY  -- correct
-        areaXZ += singleAreas[1]    # gets areaYZ  -- MISMATCH
-        areaYZ += singleAreas[2]    # gets areaXZ  -- MISMATCH
-
-    This test documents the inconsistency. The swap means that what
-    calcCoverageArea calls "areaXZ" is actually areaYZ, and vice versa.
-    For isotropic systems this makes no difference, but for anisotropic
-    geometries the XZ and YZ labels are silently exchanged.
+    v1.0's projAreaSingleRing computed areaXY, areaXZ, areaYZ but returned
+    {areaXY, areaYZ, areaXZ}, so calcCoverageArea read areaYZ where it
+    expected areaXZ and vice versa. Invisible for isotropic systems, wrong
+    for any anisotropic geometry. The current C++ returns {areaXY, areaXZ,
+    areaYZ}, matching the caller; this test pins both the historical
+    mislabeling and the contract the fix restored.
     """
-    # Simulate projAreaSingleRing returning {areaXY, areaYZ, areaXZ}
     areaXY_val, areaXZ_val, areaYZ_val = symbols(
         "aXY aXZ aYZ", positive=True
     )
 
-    # What the function returns (line 173)
-    returned = [areaXY_val, areaYZ_val, areaXZ_val]
+    # What v1.0 returned
+    v1_returned = [areaXY_val, areaYZ_val, areaXZ_val]
+    # The caller's reading (unchanged across versions)
+    assert v1_returned[0] == areaXY_val
+    assert v1_returned[1] == areaYZ_val, "v1 slot 1 carried areaYZ, not areaXZ"
+    assert v1_returned[2] == areaXZ_val, "v1 slot 2 carried areaXZ, not areaYZ"
 
-    # What calcCoverageArea thinks it gets (lines 88-90)
-    caller_areaXY = returned[0]
-    caller_areaXZ = returned[1]  # caller thinks this is XZ
-    caller_areaYZ = returned[2]  # caller thinks this is YZ
-
-    # Index 0 is correct
-    assert caller_areaXY == areaXY_val
-
-    # Indices 1 and 2 are swapped: this IS the bug
-    assert caller_areaXZ == areaYZ_val, "singleAreas[1] is areaYZ, not areaXZ"
-    assert caller_areaYZ == areaXZ_val, "singleAreas[2] is areaXZ, not areaYZ"
+    # The corrected contract: slot order matches the caller's labels
+    corrected = [areaXY_val, areaXZ_val, areaYZ_val]
+    assert corrected[1] == areaXZ_val
+    assert corrected[2] == areaYZ_val
 
 
 # ---------------------------------------------------------------------------
