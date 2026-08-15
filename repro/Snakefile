@@ -77,7 +77,7 @@ rule build_tip:
     output:
         touch(R + "/tip-build.done"),
     params:
-        hq=hq(8),
+        hq=lambda wc: hq(8),
         bdir=TIP_BUILD,
     shell:
         "{params.hq} meson compile -C {params.bdir}"
@@ -90,7 +90,7 @@ rule identity_gate:
     output:
         R + "/tip-test.log",
     params:
-        hq=hq(8),
+        hq=lambda wc: hq(8),
         bdir=TIP_BUILD,
     shell:
         "{params.hq} bash -c 'meson test -C {params.bdir} > {output} 2>&1'"
@@ -112,7 +112,7 @@ rule build_base:
     params:
         tree=BASE_TREE,
         bbuild=BASE_BUILD,
-        hq=hq(8),
+        hq=lambda wc: hq(8),
     shell:
         r"""
         test -d {params.tree} || {{ echo "baseline tree missing; run repro/elja_submit.sh prep" >&2; exit 1; }}
@@ -149,7 +149,7 @@ rule tip_scaling:
     output:
         R + "/tip-scaling.txt",
     params:
-        hq=hq(1),
+        hq=lambda wc: hq(1),
         tbuild=TIP_BUILD,
         sizes=" ".join(str(s) for s in config["scaling_sizes"]),
     shell:
@@ -163,7 +163,7 @@ rule base_scaling:
     output:
         R + "/base-scaling.txt",
     params:
-        hq=hq(1),
+        hq=lambda wc: hq(1),
         sizes=" ".join(str(s) for s in config["scaling_sizes"]),
     shell:
         "{params.hq} bash -c 'cd input && OMP_NUM_THREADS=1 "
@@ -176,7 +176,7 @@ rule tip_cages:
     output:
         R + "/tip-cages.txt",
     params:
-        hq=hq(1),
+        hq=lambda wc: hq(1),
         tbuild=TIP_BUILD,
         traj=config["trajectory"],
         reps=config["cage_reps"],
@@ -192,7 +192,7 @@ rule base_cages:
     output:
         R + "/base-cages.txt",
     params:
-        hq=hq(1),
+        hq=lambda wc: hq(1),
         traj=config["trajectory"],
         reps=config["cage_reps"],
     shell:
@@ -206,7 +206,7 @@ rule tip_overhead:
     output:
         R + "/tip-overhead.txt",
     params:
-        hq=hq(1),
+        hq=lambda wc: hq(1),
         tbuild=TIP_BUILD,
         sizes=" ".join(str(s) for s in config["overhead_sizes"]),
     shell:
@@ -220,7 +220,7 @@ rule tip_strong:
     output:
         R + "/tip-strong-t{threads}.txt",
     params:
-        hq=hq(4),
+        hq=lambda wc: hq(4),
         tbuild=TIP_BUILD,
         atoms=config["strong_atoms"],
     shell:
@@ -236,7 +236,7 @@ rule trajectory_incremental:
     output:
         R + "/trajectory-incremental.txt",
     params:
-        hq=hq(1),
+        hq=lambda wc: hq(1),
         tbuild=TIP_BUILD,
         traj=config["trajectory"],
         frames=config["trajectory_frames"],
@@ -252,7 +252,7 @@ rule ql_compare_dseams:
     output:
         R + "/ql-dseams.txt",
     params:
-        hq=hq(1),
+        hq=lambda wc: hq(1),
         tbuild=TIP_BUILD,
     shell:
         "{params.hq} bash -c 'OMP_NUM_THREADS=1 "
@@ -265,7 +265,7 @@ rule ql_compare_python:
     output:
         R + "/ql-python.txt",
     params:
-        hq=hq(1),
+        hq=lambda wc: hq(1),
     shell:
         "{params.hq} bash -c "
         "'LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH "
