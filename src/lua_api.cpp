@@ -158,9 +158,11 @@ void registerNeighbours(sol::state &lua) {
   lua.set_function("neighborList", nneigh::neighListO);
   lua.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);
   // distCutoff/angleCutoff default to the water criterion (2.42 A, 30 deg)
+  // Neighbour lists arrive as plain Lua tables; container parameters must be
+  // taken by value or sol2 dereferences a null userdata
   lua.set_function("getHbondNetwork",
                    [](std::string filename, Cloud &yCloud,
-                      const std::vector<std::vector<int>> &nList,
+                      std::vector<std::vector<int>> nList,
                       int targetFrame, int Htype, sol::optional<double> dist,
                       sol::optional<double> angle) {
                      return bond::populateHbonds(filename, yCloud, nList,
@@ -170,7 +172,7 @@ void registerNeighbours(sol::state &lua) {
                    });
   lua.set_function("getHbondNetworkFromClouds",
                    [](Cloud &yCloud, Cloud &hCloud,
-                      const std::vector<std::vector<int>> &nList,
+                      std::vector<std::vector<int>> nList,
                       sol::optional<double> dist, sol::optional<double> angle) {
                      return bond::populateHbondsWithInputClouds(
                          yCloud, hCloud, nList, dist.value_or(2.42),

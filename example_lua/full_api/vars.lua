@@ -6,4 +6,5 @@ maxDepth = 6
 mwTrajectory = "input/traj/mW_cubic.lammpstrj"
 mwAtomType = 1
 xyzFile = "example_lua/full_api/cube.xyz"
+conFile = "input/con/tiny_multi_cuh2.con"
 functionScript = "example_lua/full_api/script.lua"

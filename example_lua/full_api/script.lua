@@ -90,6 +90,54 @@ end
 print(string.format("voronoi cells=%d facets1=%d weight_sum1=%.3f",
   #cells, #cells[1].neighbours, weightSum))
 
+-- Hydrogen bonds with explicit geometric thresholds --------------------------
+-- The defaults are the water criterion (2.42 A, 30 deg); a cutoff below any
+-- O-H separation must produce an edge-free network
+local hbWater = getHbondNetwork(trajectory, water, nlWater, targetFrame, 1)
+local hbNone = getHbondNetwork(trajectory, water, nlWater, targetFrame, 1,
+  0.1, 30.0)
+local edges, noneEdges = 0, 0
+for i = 1, #hbWater do
+  edges = edges + #hbWater[i] - 1
+  noneEdges = noneEdges + #hbNone[i] - 1
+end
+assert(edges > 0 and noneEdges == 0)
+print(string.format("hbonds default_edges=%d tight_cutoff_edges=%d",
+  edges, noneEdges))
+
+-- Bond-classification registry ----------------------------------------------
+-- CHILL and CHILL+ are registered rule sets; scripts add their own
+local ruleNames = bondClassifierNames()
+local haveChill, haveChillPlus = false, false
+for i = 1, #ruleNames do
+  if ruleNames[i] == "CHILL" then haveChill = true end
+  if ruleNames[i] == "CHILL+" then haveChillPlus = true end
+end
+assert(haveChill and haveChillPlus)
+
+local mwByName = readLammpsTrjO(mwTrajectory, targetFrame, mwAtomType)
+classifyBonds(mwByName, nlMw, "CHILL")
+local namedTypes = getIceType(mwByName, nlMw, scratch, targetFrame, false,
+  "chillNamed.txt")
+assert(#namedTypes == mw.nop)
+
+registerBondClassifier("everything-staggered",
+  { staggeredMax = 1.0, eclipsedMin = 2.0, eclipsedMax = 3.0,
+    coordinationNumber = 4 })
+local mwCustom = readLammpsTrjO(mwTrajectory, targetFrame, mwAtomType)
+classifyBonds(mwCustom, nlMw, "everything-staggered")
+print(string.format("bond_rules n=%d chill_by_name=%s custom_registered=true",
+  #ruleNames, histogram(namedTypes)))
+
+-- The .con reader, when the readcon-core backend is compiled in --------------
+if readCon ~= nil then
+  local con = readCon(conFile, 2)
+  assert(con.nop == 4 and con.currentFrame == 2)
+  print(string.format("readcon nop=%d frame=%d", con.nop, con.currentFrame))
+else
+  print("readcon backend absent; readCon not registered")
+end
+
 -- Structure descriptors -----------------------------------------------------
 local hits = classifyTemplates(mw, nlMw, 12)
 local names = {}
@@ -108,6 +156,7 @@ print(string.format("soap len=%d all_rows=%d voronoi_feat_len=%d",
 -- Clean up the scratch output -----------------------------------------------
 os.remove(scratch .. "bop/chillPlus.txt")
 os.remove(scratch .. "bop/chill.txt")
+os.remove(scratch .. "bop/chillNamed.txt")
 os.remove(scratch .. "bop")
 os.remove(scratch)
 
