@@ -42,11 +42,10 @@ that fact: cage membership is not a function of the four-neighbour
 star.
 
 On the in-tree mixed TIP4P dump
-(~input/traj/exampleTraj.lammpstrj~), CHILL+ reports 42 cubic, 65
-hexagonal, 58 interfacial, and 85 water (107 bulk-ice stars). Seeded
-cages report zero HC and zero DDC. Local tetrahedral order is not
-cage membership. Walk through the commands in
-[[file:../tutorials/bulk-ice.org][the mixed TIP4P tutorial]].
+(~input/traj/exampleTraj.lammpstrj~), CHILL+ reports 12 interfacial
+clathrate and 238 water. Seeded cages report zero HC and zero DDC.
+A three-eclipsed star is not cage membership. Walk through the
+commands in [[file:../tutorials/bulk-ice.org][the mixed TIP4P tutorial]].
 
 * Bond graph
 

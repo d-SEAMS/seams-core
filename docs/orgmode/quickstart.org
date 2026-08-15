@@ -56,8 +56,8 @@ seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
 seams cages input/traj/exampleTraj.lammpstrj --type 2
 #+end_src
 
-On this fixture the four-neighbour labels are 42 cubic, 65 hexagonal,
-58 interfacial and 85 water. The default bond graph is ~--graph seeded~
+On this fixture the four-neighbour labels are 12 interfacial
+clathrate and 238 water. The default bond graph is ~--graph seeded~
 (mutual four-nearest seeds, union completions). This mixed frame has
 no complete HC or DDC: cage membership is not the CHILL+ star.
 

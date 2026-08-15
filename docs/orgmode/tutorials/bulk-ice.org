@@ -44,12 +44,14 @@ CHILL+ looks at each oxygen's four nearest neighbours inside the
 cutoff. Each of those four bonds is staggered or eclipsed from the
 pair correlation ~c_ij~. The star of four labels is the ice type:
 
-| label       | four-neighbour star              |
-|-------------+----------------------------------|
-| cubic       | four staggered                   |
-| hexagonal   | three staggered and one eclipsed |
-| interfacial | ice-like, not cubic or hexagonal |
-| water       | none of the above                |
+| label           | four-neighbour star              |
+|-----------------+----------------------------------|
+| cubic           | four staggered                   |
+| hexagonal       | three staggered and one eclipsed |
+| clathrate       | four eclipsed                    |
+| interClathrate  | three eclipsed                   |
+| interfacial     | ice-like, not one of the above   |
+| water           | fewer than four bonds, or none of the above |
 
 #+begin_src bash
 seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
@@ -58,20 +60,18 @@ seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
 Expected output:
 
 #+begin_example
-nop 250 cubic 42 hexagonal 65 interfacial 58 water 85
+nop 250 interClathrate 12 water 238
 #+end_example
 
-| label       | atoms |
-|-------------+-------|
-| cubic       |    42 |
-| hexagonal   |    65 |
-| interfacial |    58 |
-| water       |    85 |
-| bulk ice    |   107 |
+| label          | atoms |
+|----------------+-------|
+| interClathrate |    12 |
+| water          |   238 |
 
-Bulk ice is cubic plus hexagonal (42 + 65 = 107). Interfacial is
-ice-like at the surface of those stars and is not in that sum. The
-four labels add to 250.
+This dump is confined mixed TIP4P. Twelve oxygens have four
+neighbours and three eclipsed bonds. The rest are water. Original
+CHILL (~seams chill~) labels every oxygen water. The four-neighbour
+stars do not close a cubic or hexagonal ice motif.
 
 * Step 3: Cages from the CLI
 
@@ -103,9 +103,9 @@ Cages are topological unit matching (TUM). A molecule is ice Ih only
 as a member of an HC, ice Ic only as a member of a DDC, and water
 otherwise. Partial ice-like order is water on that score.
 
-On this mixed frame 107 oxygens have a bulk-ice star and 58 more are
-interfacial, yet TUM finds no complete HC or DDC. Local tetrahedral
-order is not cage membership.
+On this mixed frame CHILL+ finds twelve interfacial-clathrate
+oxygens and TUM finds no complete HC or DDC. A three-eclipsed star
+is not cage membership.
 
 The longer argument is
 [[file:../explanation/chill-plus-vs-cages.org][CHILL+ versus cages]].
@@ -140,7 +140,7 @@ print(frame.cages())
 Expected print on this fixture:
 
 #+begin_example
-IceCounts(cubic=42, hexagonal=65, interfacial=58, water=85)
+IceCounts(interClathrate=12, water=238)
 CageScore(n_ih=0, n_ic=0, n_water=250)
 #+end_example
 
@@ -169,6 +169,6 @@ repository does not install Python.
 
 * Summary
 
-You read one mixed TIP4P frame, printed the CHILL+ star (42 / 65 / 58
-/ 85), printed the seeded cage score (zero HC, zero DDC), and stated
-why those two answers differ.
+You read one mixed TIP4P frame, printed the CHILL+ star (12
+interfacial clathrate, 238 water), printed the seeded cage score
+(zero HC, zero DDC), and stated why those two answers differ.

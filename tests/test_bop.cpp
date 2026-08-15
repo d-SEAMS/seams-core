@@ -5,6 +5,7 @@
 #include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <seams_input.hpp>
 #include <steinhardt_device.hpp>
 
 #include <algorithm>
@@ -327,6 +328,31 @@ TEST_CASE("numStaggered counts staggered bonds for an atom", "[bop]") {
   int nStag = chill::numStaggered(cloud, nList, 0);
   REQUIRE(nStag >= 0);
   REQUIRE(nStag <= 4);
+}
+
+TEST_CASE("CHILL+ on the mixed TIP4P example is twelve interClathrate",
+          "[bop][fixture]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud = sinp::readLammpsTrjO("traj/exampleTraj.lammpstrj", 1, cloud, 2);
+  REQUIRE(cloud.nop == 250);
+  auto nList = nneigh::neighListO(3.5, cloud, 2);
+  chill::getCorrelPlus(cloud, nList, false);
+  chill::getIceTypePlusNoPrint(cloud, nList, false);
+  int interClath = 0;
+  int water = 0;
+  int other = 0;
+  for (const auto &pt : cloud.pts) {
+    if (pt.iceType == molSys::atom_state_type::interClathrate) {
+      interClath++;
+    } else if (pt.iceType == molSys::atom_state_type::water) {
+      water++;
+    } else {
+      other++;
+    }
+  }
+  REQUIRE(interClath == 12);
+  REQUIRE(water == 238);
+  REQUIRE(other == 0);
 }
 
 TEST_CASE("getIceTypePlusNoPrint classifies without writing", "[bop]") {
