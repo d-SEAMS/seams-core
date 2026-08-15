@@ -16,6 +16,26 @@
 #include <generic.hpp>
 #include <seams_input.hpp>
 
+namespace {
+/**
+ * @details Record the ID-to-index entry for the most recently appended point.
+ *  A duplicate atom ID means the input is corrupt (two atoms cannot share an
+ *  ID within one frame); the map can only keep one of the colliding atoms, so
+ *  name the ID loudly instead of failing silently downstream.
+ */
+void mapAtomIdToIndex(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  const int idx = static_cast<int>(yCloud.pts.size()) - 1;
+  const int id = yCloud.pts.back().atomID;
+  if (!yCloud.idIndexMap.emplace(id, idx).second) {
+    std::cerr << "Warning: duplicate atom ID " << id
+              << " in the input frame; the ID-to-index map keeps only the "
+                 "last atom read with this ID\n";
+    yCloud.idIndexMap[id] = idx;
+  }
+}
+} // namespace
+
 /**
  * @details Get all the ring information, from the R.I.N.G.S. file. Each line
  * contains the IDs of the atoms in the ring. This is saved inside a vector of
@@ -149,7 +169,7 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
       iPoint.molID = iatom;
       iPoint.atomID = iatom;
       yCloud.pts.push_back(iPoint);
-      yCloud.idIndexMap[iPoint.atomID] = static_cast<int>(yCloud.pts.size()) - 1;
+      mapAtomIdToIndex(yCloud);
     } // end of while, looping through lines till EOF
     // ----------------------------------------------------------
   } // End of if file open statement
@@ -327,7 +347,7 @@ sinp::readLammpsTrj(std::string filename, int targetFrame,
                                                coordLow, coordHigh);
           }
           yCloud.pts.push_back(iPoint);
-          yCloud.idIndexMap[iPoint.atomID] = yCloud.pts.size() - 1;
+          mapAtomIdToIndex(yCloud);
         }
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
@@ -549,7 +569,7 @@ sinp::readLammpsTrjO(std::string filename, int targetFrame,
             nOxy++;
             // yCloud.pts.resize(yCloud.pts.size()+1);
             yCloud.pts.push_back(iPoint);
-            yCloud.idIndexMap[iPoint.atomID] = yCloud.pts.size() - 1;
+            mapAtomIdToIndex(yCloud);
           }
         }
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -779,8 +799,7 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
             nOxy++;
             // yCloud.pts.resize(yCloud.pts.size()+1);
             yCloud.pts.push_back(iPoint);
-            yCloud.idIndexMap[iPoint.atomID] =
-                yCloud.pts.size() - 1; // array index
+            mapAtomIdToIndex(yCloud);
           }
         }
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -896,7 +915,7 @@ sinp::readChemfiles(std::string filename, int targetFrame,
     pt.z = positions[i][2];
 
     yCloud.pts.push_back(pt);
-    yCloud.idIndexMap[pt.atomID] = static_cast<int>(yCloud.pts.size()) - 1;
+    mapAtomIdToIndex(yCloud);
   }
 
   yCloud.nop = static_cast<int>(yCloud.pts.size());
@@ -939,7 +958,7 @@ sinp::readCon(std::string filename, int targetFrame,
         pt.z = atoms[i].z;
 
         yCloud.pts.push_back(pt);
-        yCloud.idIndexMap[pt.atomID] = static_cast<int>(yCloud.pts.size()) - 1;
+        mapAtomIdToIndex(yCloud);
       }
 
       yCloud.nop = static_cast<int>(yCloud.pts.size());
