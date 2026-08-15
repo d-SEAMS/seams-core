@@ -16,8 +16,8 @@ Added
 - ``forEachLammpsFrame``: OpenMP walk over a frame range. Each worker
   opens its own handle and seeks. ``seams --frame N --last M --jobs J``.
 - ``SkinNeighborList``: vesin candidates at cutoff+skin (the ghost
-  halo), rebuilt when an atom moves more than skin/2. Bonds form at
-  cutoff and break at cutoff+skin.
+  halo), rebuilt when an atom moves more than skin/2. The bond graph
+  is the candidates currently inside the analysis cutoff.
 
 Fixed
 -----

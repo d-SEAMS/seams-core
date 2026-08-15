@@ -125,9 +125,9 @@ std::pair<double, double> shellSeparation(
  *  Vesin (or the brute-force fallback) builds candidates at cutoff+skin,
  *  which is the ghost halo: periodic images already sit in that shell.
  *  The cell list is rebuilt only when some atom has moved more than
- *  skin/2 from the last rebuild, the Verlet trigger. Bonds for rings
- *  form at cutoff and break at cutoff+skin, so a pair that flickers
- *  across the analysis cutoff does not rewrite the graph.
+ *  skin/2 from the last rebuild, the Verlet trigger. The bond graph
+ *  for rings is the candidate pairs whose current distance is inside
+ *  the analysis cutoff.
  */
 class SkinNeighborList {
 public:
@@ -149,7 +149,6 @@ private:
   double cutoff_;
   double skin_;
   double cutoffSq_;
-  double breakSq_;
   double triggerSq_;
   int typeI_;
   bool rebuilt_{true};

@@ -362,21 +362,17 @@ TEST_CASE("SkinNeighborList rebuilds only after the Verlet trigger",
   REQUIRE(skin.lastRebuilt());
 }
 
-TEST_CASE("SkinNeighborList keeps a bond until cutoff plus skin",
+TEST_CASE("SkinNeighborList drops a bond as soon as it leaves the cutoff",
           "[neighbours]") {
   auto cloud = makeFourAtomCloud();
-  nneigh::SkinNeighborList skin(1.5, 0.6, 1);
+  nneigh::SkinNeighborList skin(1.5, 2.0, 1);
   (void)skin.update(cloud);
   REQUIRE(std::find(skin.bonds()[0].begin() + 1, skin.bonds()[0].end(), 1) !=
           skin.bonds()[0].end());
 
-  cloud.pts[1].x = 1.8; // 1.8 > 1.5, still < 2.1
+  cloud.pts[1].x = 1.8; // 1.8 > 1.5, still inside the skin halo
   (void)skin.update(cloud);
-  REQUIRE(std::find(skin.bonds()[0].begin() + 1, skin.bonds()[0].end(), 1) !=
-          skin.bonds()[0].end());
-
-  cloud.pts[1].x = 2.3; // 2.3 > 2.1
-  (void)skin.update(cloud);
+  REQUIRE_FALSE(skin.lastRebuilt());
   REQUIRE(std::find(skin.bonds()[0].begin() + 1, skin.bonds()[0].end(), 1) ==
           skin.bonds()[0].end());
 }

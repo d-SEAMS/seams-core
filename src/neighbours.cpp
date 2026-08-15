@@ -688,7 +688,6 @@ std::pair<double, double> nneigh::shellSeparation(
 nneigh::SkinNeighborList::SkinNeighborList(double cutoff, double skin,
                                            int typeI)
     : cutoff_(cutoff), skin_(skin), cutoffSq_(cutoff * cutoff),
-      breakSq_((cutoff + skin) * (cutoff + skin)),
       triggerSq_((0.5 * skin) * (0.5 * skin)), typeI_(typeI) {}
 
 bool nneigh::SkinNeighborList::mustRebuild(
@@ -777,8 +776,6 @@ void nneigh::SkinNeighborList::refreshBonds(
     }
     const double r2 = gen::periodicDistSq(yCloud, i, j);
     if (r2 <= cutoffSq_) {
-      next.emplace(i, j);
-    } else if (r2 <= breakSq_ && bonded_.count({i, j}) != 0) {
       next.emplace(i, j);
     }
   }
