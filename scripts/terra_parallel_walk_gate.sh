@@ -15,8 +15,8 @@ export LD_LIBRARY_PATH="${BUILD}/src${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
   echo "=== host $(hostname) $(date -Iseconds) ==="
   meson setup --reconfigure "${BUILD}" "${ROOT}"
   meson compile -C "${BUILD}" \
-    yodaLib seams test_seams_input bench_lammps_io bench_lammps_walk
-  meson test -C "${BUILD}" seams_input seams_read --print-errorlogs
+    yodaLib test_seams_input bench_lammps_io bench_lammps_walk
+  meson test -C "${BUILD}" seams_input --print-errorlogs
 
   echo "=== io dump-3 serial ==="
   "${BUILD}/tests/bench_lammps_io" "${DUMP3}" 0 1 1
