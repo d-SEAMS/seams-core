@@ -14,5 +14,5 @@ option('with_sphericart', type: 'feature', value: 'auto',
   description: 'Batch Cartesian Ylm for host Steinhardt via sphericart')
 option('with_nauty', type: 'feature', value: 'auto',
   description: 'Canonical cage certificates via nauty')
-option('with_lua', type: 'feature', value: 'auto',
-  description: 'Build the yodaStruct Lua CLI')
+option('with_lua', type: 'feature', value: 'disabled',
+  description: 'Unused. The yodaStruct CLI is the yodaStruct repo, not this one')

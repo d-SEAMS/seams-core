@@ -1,5 +1,10 @@
 # Lua Function Documentation
 
+The `yodaStruct` CLI and these bindings live in
+[d-SEAMS/yodaStruct](https://github.com/d-SEAMS/yodaStruct). The live
+list is [`docs/luaFunctions.md`](https://github.com/d-SEAMS/yodaStruct/blob/main/docs/luaFunctions.md)
+there.
+
 In the _functions.lua_ file, lua functions are called, which are registered on the C++ side to inferface with the C++ functions. Here, we document the lua functions currently available to the user. 
 
 ## Currently Registered Lua Functions

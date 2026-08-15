@@ -60,9 +60,10 @@ FILES = {
 }
 
 # Each demo pairs a figshare trajectory with the example workflow that
-# consumed it in the 1.0 paper. frame="last" retargets the workflow at
-# the final frame of the deposit (the crystallized end of the
-# nucleation run); frame=None keeps the example's own frame settings.
+# consumed it in the 1.0 paper. The example_lua trees live in
+# https://github.com/d-SEAMS/yodaStruct . frame="last" retargets the
+# workflow at the final frame of the deposit (the crystallized end of
+# the nucleation run); frame=None keeps the example's own frame settings.
 DEMOS = [
     {
         "key": "chillPlus",

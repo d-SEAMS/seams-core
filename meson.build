@@ -7,7 +7,7 @@
 #-----------------------------------------------------------------------------------
 
 project('seams-core', ['cpp', 'c'],
-  version: '2.0.0',
+  version: '2.1.0',
   default_options: ['warning_level=2', 'cpp_std=c++20'],
   meson_version: '>=1.3.0')
 
@@ -353,56 +353,9 @@ if get_option('with_python')
   error('Python bindings live in https://github.com/d-SEAMS/PydSEAMSlib')
 endif
 
-# yodaStruct Lua CLI (optional; Lua via pkg-config or the wrap)
-lua_dep = dependency('lua', required: false)
-if not lua_dep.found()
-  lua_dep = dependency('lua-5.4', required: false)
+# Front ends are not in this repository.
+# Lua/Fennel: https://github.com/d-SEAMS/yodaStruct
+# Python:     https://github.com/d-SEAMS/PydSEAMSlib
+if get_option('with_lua').enabled()
+  error('The yodaStruct Lua CLI lives in https://github.com/d-SEAMS/yodaStruct')
 endif
-if not lua_dep.found()
-  lua_dep = dependency('lua-5.3', required: false)
-endif
-if not lua_dep.found() and get_option('with_lua').allowed()
-  lua_dep = dependency('lua-5.4', fallback: ['lua', 'lua_dep'],
-                       required: get_option('with_lua').enabled())
-endif
-yoda_struct = disabler()
-if get_option('with_lua').allowed() and lua_dep.found()
-  # Same counter-measure as the test binaries: conda LDFLAGS inject a
-  # DT_RPATH to the env prefix, which outranks LD_LIBRARY_PATH and resolves a
-  # stale installed libyodaLib over the freshly built one
-  yoda_link_args = []
-  if host_machine.system() == 'linux'
-    yoda_link_args += ['-Wl,--enable-new-dtags']
-  endif
-  # Vendored Fennel compiler for .fnl scripts; the binary falls back to this
-  # source-root path unless YODA_FENNEL_PATH overrides it at runtime.
-  fennel_lua = meson.project_source_root() / 'src/include/external/fennel/fennel.lua'
-  yoda_struct = executable('yodaStruct',
-    files('src/main.cpp', 'src/lua_api.cpp', 'src/opt_parser.cpp'),
-    dependencies: [yds_dep, lua_dep],
-    cpp_args: _args + ['-DYODA_FENNEL_LUA="' + fennel_lua + '"'],
-    include_directories: _incdirs,
-    link_args: yoda_link_args,
-    build_rpath: meson.project_build_root() / 'src',
-    install: true)
-  test('yoda_structure_desc', yoda_struct,
-    args: ['-c', 'example_lua/structureDesc/config.yml'],
-    workdir: meson.project_source_root(),
-    timeout: 120)
-  test('yoda_full_api', yoda_struct,
-    args: ['-c', 'example_lua/full_api/config.yml'],
-    workdir: meson.project_source_root(),
-    timeout: 240)
-  test('yoda_fennel', yoda_struct,
-    args: ['-c', 'example_lua/fennel/config.yml'],
-    workdir: meson.project_source_root(),
-    timeout: 120)
-  test('yoda_fennel_full', yoda_struct,
-    args: ['-c', 'example_lua/fennel_full/config.yml'],
-    workdir: meson.project_source_root(),
-    timeout: 240)
-endif
-
-summary({
-  'yodaStruct Lua CLI': lua_dep.found() and get_option('with_lua').allowed(),
-}, section: 'Front ends', bool_yn: true)
