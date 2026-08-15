@@ -27,6 +27,7 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable", None),
     "ase": ("https://wiki.fysik.dtu.dk/ase/", None),
+    "pydseams": ("https://d-seams.github.io/PydSEAMSlib/", None),
 }
 
 # -- Options for HTML output -------------------------------------------------
@@ -48,8 +49,13 @@ html_theme_options = {
     "globaltoc_expand_depth": 1,
     "nav_links": [
         {
-            "title": "PyPI",
-            "url": "https://pypi.org/project/pydseamslib",
+            "title": "pydseams",
+            "url": "https://github.com/d-SEAMS/PydSEAMSlib",
+            "external": True,
+        },
+        {
+            "title": "dseams (Lua)",
+            "url": "https://github.com/d-SEAMS/yodaStruct",
             "external": True,
         },
     ],
@@ -63,4 +69,4 @@ html_sidebars = {
     ],
 }
 
-html_baseurl = "dseams.info"
+html_baseurl = "https://docs.dseams.info"

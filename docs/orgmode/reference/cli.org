@@ -1,0 +1,41 @@
+#+TITLE: seams CLI
+#+OPTIONS: toc:nil num:nil
+
+The engine command is ~seams~. It uses Argum (the same parser as
+eonclient). Help, errors and ice-type counts are colorized.
+~NO_COLOR~ / ~FORCE_COLOR~ apply.
+
+#+begin_src text
+seams --help
+seams --version
+seams --features
+seams read FILE
+seams chill FILE
+seams chill-plus FILE
+seams cages FILE
+#+end_src
+
+* Options
+
+| flag | meaning |
+|------+---------|
+| ~-f~, ~--frame N~ | first frame, 1-based |
+| ~--last N~ | last frame inclusive; omit for one frame |
+| ~-j~, ~--jobs N~ | OpenMP workers over a frame range |
+| ~-t~, ~--type I~ | atom type; ~0~ guesses oxygen then type 1 |
+| ~-c~, ~--cutoff A~ | neighbour cutoff (Å) |
+| ~-k N~ | ~k~ for knn / seeded cages |
+| ~--graph KIND~ | ~cutoff~ / ~knn~ / ~knn-union~ / ~seeded~ |
+
+* Examples
+
+#+begin_src bash
+seams read input/traj/exampleTraj.lammpstrj
+seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
+seams cages input/traj/mW_cubic.lammpstrj --type 1 --graph seeded
+seams chill-plus dump.lammpstrj --frame 1 --last 50 --jobs 8
+#+end_src
+
+Lua and Python are not this binary. See
+[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] and
+[[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].

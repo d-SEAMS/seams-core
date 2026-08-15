@@ -1,0 +1,35 @@
+#+TITLE: Nix flake
+#+OPTIONS: toc:nil num:nil
+
+#+begin_src bash
+nix build                  # ./result/bin/seams
+nix run . -- read input/traj/exampleTraj.lammpstrj
+nix develop
+nix flake update nixpkgs
+nix fmt
+#+end_src
+
+~nix build~ runs the Catch2 suite (Meson install check).
+
+* What the flake enables
+
+Eigen, BLAS/LAPACK, Catch2, Highway when nixpkgs has them. OpenMP when
+the toolchain links it. Optional wrap-git backends (vesin,
+readcon-core) and chemfiles stay off unless a nixpkgs package is
+already in the closure.
+
+* Front-end flakes
+
+[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] and
+[[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] have matching
+flakes. They take seams-core as a locked source input and build it as
+the Meson subproject.
+
+* Cachix
+
+The [[https://dseams.cachix.org/][dseams]] cache is optional:
+
+#+begin_src bash
+nix-env -iA cachix -f https://cachix.org/api/v1/install
+cachix use dseams
+#+end_src

@@ -11,6 +11,13 @@
 (require 'ox-rst)
 (require 'ox-publish)
 
+;; ox-rst 2025-04 needs org-element-type-p (Org 9.7+).
+(require 'org-element)
+(unless (fboundp 'org-element-type-p)
+  (defun org-element-type-p (node types)
+    (memq (org-element-type node)
+          (if (listp types) types (list types)))))
+
 ;; Define the Publishing Project
 (setq org-publish-project-alist
       '(("sphinx-rst"
