@@ -2,6 +2,18 @@
 Changelog
 =========
 
+Version 2.1.1 (2026-08-15)
+===========================
+
+Fixed
+-----
+- CHILL ``isInterfacial`` walks the four nearest neighbours, the same
+  star as ``c_ij``.
+- CHILL ``getIceType`` / ``getIceTypeNoPrint`` send atoms without four
+  recorded bonds to water, matching CHILL+.
+- Seeded affiliation floods HC and DDC separately so an HC seed does
+  not keep a DDC-only atom in the same H-bond component.
+
 Version 2.1.0 (2026-08-15)
 ===========================
 

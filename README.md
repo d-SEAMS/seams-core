@@ -2,7 +2,7 @@
 
 **Deferred Structural Elucidation Analysis for Molecular Simulations**
 
-[![Build Status](https://github.com/d-SEAMS/seams-core/actions/workflows/build_pkg.yml/badge.svg)](https://github.com/d-SEAMS/seams-core/actions/workflows/build_pkg.yml)
+[![Build Status](https://github.com/d-SEAMS/seams-core/actions/workflows/ci_test.yml/badge.svg)](https://github.com/d-SEAMS/seams-core/actions/workflows/ci_test.yml)
 
 [![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
 
@@ -17,10 +17,15 @@
 
 \brief The C++ core of d-SEAMS, a molecular dynamics trajectory analysis engine.
 
-This repository is the C++ engine. Front ends live in their own repos:
+This repository is the C++ engine (`libyodaLib`). It does not install
+`yodaStruct`. Front ends live in their own repos:
 
 - Python: [d-SEAMS/PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib)
 - Lua and Fennel CLI: [d-SEAMS/yodaStruct](https://github.com/d-SEAMS/yodaStruct)
+
+Build the engine with `pixi run setup && pixi run build && pixi run test`.
+Commands below that invoke `yodaStruct -c lua_inputs/...` belong in a
+yodaStruct checkout.
 
 \note The <a href="pages.html">related pages</a> describe the examples and how to obtain
 the data-sets (trajectories) <a

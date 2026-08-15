@@ -656,26 +656,21 @@ void chill::getIceTypeNoPrint(
       }
     } // End of loop through neighbours
 
-    // Add more tests later
     yCloud.pts[iatom].iceType = molSys::atom_state_type::unclassified; // default
-    // Cubic ice
-    // if (num_eclipsd==0 && num_staggrd==4){
-    //  yCloud.pts[iatom].iceType = molSys::cubic;
-    //  ic++;
-    // }
-    if (num_staggrd >= 4) {
-      yCloud.pts[iatom].iceType = molSys::atom_state_type::cubic;
-      ic++;
-    }
-    // Hexagonal
-    else if (num_eclipsd == 1 && num_staggrd == 3) {
-      yCloud.pts[iatom].iceType = molSys::atom_state_type::hexagonal;
-      ih++;
-    }
-    // Interfacial
-    else if (isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd)) {
-      yCloud.pts[iatom].iceType = molSys::atom_state_type::interfacial;
-      interIce++;
+    if (nnumNeighbours == 4) {
+      if (num_staggrd >= 4) {
+        yCloud.pts[iatom].iceType = molSys::atom_state_type::cubic;
+        ic++;
+      } else if (num_eclipsd == 1 && num_staggrd == 3) {
+        yCloud.pts[iatom].iceType = molSys::atom_state_type::hexagonal;
+        ih++;
+      } else if (isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd)) {
+        yCloud.pts[iatom].iceType = molSys::atom_state_type::interfacial;
+        interIce++;
+      } else {
+        yCloud.pts[iatom].iceType = molSys::atom_state_type::water;
+        water++;
+      }
     } else {
       yCloud.pts[iatom].iceType = molSys::atom_state_type::water;
       water++;
@@ -726,26 +721,21 @@ chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
       }
     } // End of loop through neighbours
 
-    // Add more tests later
     yCloud.pts[iatom].iceType = molSys::atom_state_type::unclassified; // default
-    // Cubic ice
-    // if (num_eclipsd==0 && num_staggrd==4){
-    // 	yCloud.pts[iatom].iceType = molSys::cubic;
-    // 	ic++;
-    // }
-    if (num_staggrd >= 4) {
-      yCloud.pts[iatom].iceType = molSys::atom_state_type::cubic;
-      ic++;
-    }
-    // Hexagonal
-    else if (num_eclipsd == 1 && num_staggrd == 3) {
-      yCloud.pts[iatom].iceType = molSys::atom_state_type::hexagonal;
-      ih++;
-    }
-    // Interfacial
-    else if (isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd)) {
-      yCloud.pts[iatom].iceType = molSys::atom_state_type::interfacial;
-      interIce++;
+    if (nnumNeighbours == 4) {
+      if (num_staggrd >= 4) {
+        yCloud.pts[iatom].iceType = molSys::atom_state_type::cubic;
+        ic++;
+      } else if (num_eclipsd == 1 && num_staggrd == 3) {
+        yCloud.pts[iatom].iceType = molSys::atom_state_type::hexagonal;
+        ih++;
+      } else if (isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd)) {
+        yCloud.pts[iatom].iceType = molSys::atom_state_type::interfacial;
+        interIce++;
+      } else {
+        yCloud.pts[iatom].iceType = molSys::atom_state_type::water;
+        water++;
+      }
     } else {
       yCloud.pts[iatom].iceType = molSys::atom_state_type::water;
       water++;
@@ -1163,31 +1153,20 @@ bool chill::isInterfacial(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList, int iatom, int num_staggrd,
     int num_eclipsd, bool chillPlus) {
-  int nnumNeighbours =
-      nList[iatom].size() - 1; // number of nearest neighbours of iatom
+  const std::vector<int> nearest =
+      nearestNeighbourIndices(yCloud, nList, iatom, 4);
   int neighStaggered =
-      0;          // number of staggered bonds in the neighbours of iatom
-  int jatomID;    // ID of the nearest neighbour
-  int jatomIndex; // Index (value) of nearest neighbour
+      0; // number of staggered bonds in the neighbours of iatom
 
   // INTERFACIAL
   // Condition 1 : only two staggered bonds and at least
   // one neighbor with more than two staggered bonds
   if (num_staggrd == 2) {
-    // Loop over the nearest neighbours
-    for (int j = 1; j <= nnumNeighbours; j++) {
-      // Get index of the nearest neighbour
-      jatomID = nList[iatom][j];
-      // Get the index (value) from the ID (key)
-      auto it = yCloud.idIndexMap.find(jatomID);
-
-      if (it != yCloud.idIndexMap.end()) {
-        jatomIndex = it->second;
-      } else {
-        std::cerr << "Something is gravely wrong with your map.\n";
-        return false;
+    // Loop over the four nearest neighbours, the same star as c_ij
+    for (int jatomIndex : nearest) {
+      if (jatomIndex < 0 || jatomIndex >= yCloud.nop) {
+        continue;
       }
-      //
       neighStaggered = chill::numStaggered(yCloud, nList, jatomIndex);
       if (neighStaggered > 2) {
         return true;
@@ -1197,21 +1176,10 @@ bool chill::isInterfacial(
   // Condition 2 : three staggered bonds, no eclipsed bond,
   // and at least one neighbor with two staggered bonds
   if (num_staggrd == 3 && num_eclipsd == 0) {
-    // Loop over the nearest neighbours
-    for (int j = 1; j <= nnumNeighbours; j++) {
-      // Get index of the nearest neighbour
-      // ID of the nearest neighbour
-      jatomID = nList[iatom][j];
-      // Get the index (value) from the ID (key)
-      auto it = yCloud.idIndexMap.find(jatomID);
-
-      if (it != yCloud.idIndexMap.end()) {
-        jatomIndex = it->second;
-      } else {
-        std::cerr << "Something is gravely wrong with your map.\n";
-        return false;
+    for (int jatomIndex : nearest) {
+      if (jatomIndex < 0 || jatomIndex >= yCloud.nop) {
+        continue;
       }
-      //
       neighStaggered = chill::numStaggered(yCloud, nList, jatomIndex);
       if (chillPlus) {
         if (neighStaggered > 1) {
