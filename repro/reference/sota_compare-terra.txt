@@ -1,0 +1,92 @@
+# ic n=512 ih n=360 null n=360
+method=dseams-topo system=ic sigma=0.00 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=225.7
+method=chill+ system=ic sigma=0.00 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=4.4
+method=freud-ld system=ic sigma=0.00 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=-1
+method=freud-q6 system=ic sigma=0.00 acc=nan cubic=nan hex=nan crystal=1.000 ms=-1 note=ice-vs-not-only
+method=ovito-ptm system=ic sigma=0.00 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=-1
+method=twist-op system=ic sigma=0.00 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=-1
+method=dseams-topo system=ic sigma=0.05 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=219.6
+method=chill+ system=ic sigma=0.05 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=7.0
+method=freud-ld system=ic sigma=0.05 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=-1
+method=freud-q6 system=ic sigma=0.05 acc=nan cubic=nan hex=nan crystal=1.000 ms=-1 note=ice-vs-not-only
+method=ovito-ptm system=ic sigma=0.05 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=-1
+method=twist-op system=ic sigma=0.05 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=-1
+method=dseams-topo system=ic sigma=0.10 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=136.3
+method=chill+ system=ic sigma=0.10 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=3.6
+method=freud-ld system=ic sigma=0.10 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=-1
+method=freud-q6 system=ic sigma=0.10 acc=nan cubic=nan hex=nan crystal=0.998 ms=-1 note=ice-vs-not-only
+method=ovito-ptm system=ic sigma=0.10 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=-1
+method=twist-op system=ic sigma=0.10 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=-1
+method=dseams-topo system=ic sigma=0.15 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=142.6
+method=chill+ system=ic sigma=0.15 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=5.3
+method=freud-ld system=ic sigma=0.15 acc=0.977 cubic=0.977 hex=0.023 crystal=1.000 ms=-1
+method=freud-q6 system=ic sigma=0.15 acc=nan cubic=nan hex=nan crystal=0.865 ms=-1 note=ice-vs-not-only
+method=ovito-ptm system=ic sigma=0.15 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=-1
+method=twist-op system=ic sigma=0.15 acc=0.994 cubic=0.994 hex=0.006 crystal=1.000 ms=-1
+method=dseams-topo system=ic sigma=0.20 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=124.0
+method=chill+ system=ic sigma=0.20 acc=0.961 cubic=0.961 hex=0.000 crystal=0.961 ms=5.5
+method=freud-ld system=ic sigma=0.20 acc=0.541 cubic=0.541 hex=0.449 crystal=0.990 ms=-1
+method=freud-q6 system=ic sigma=0.20 acc=nan cubic=nan hex=nan crystal=0.619 ms=-1 note=ice-vs-not-only
+method=ovito-ptm system=ic sigma=0.20 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=-1
+method=twist-op system=ic sigma=0.20 acc=0.898 cubic=0.898 hex=0.100 crystal=0.998 ms=-1
+method=dseams-topo system=ic sigma=0.25 acc=0.994 cubic=0.994 hex=0.000 crystal=0.994 ms=119.6
+method=chill+ system=ic sigma=0.25 acc=0.844 cubic=0.844 hex=0.000 crystal=0.844 ms=4.6
+method=freud-ld system=ic sigma=0.25 acc=0.111 cubic=0.111 hex=0.855 crystal=0.967 ms=-1
+method=freud-q6 system=ic sigma=0.25 acc=nan cubic=nan hex=nan crystal=0.416 ms=-1 note=ice-vs-not-only
+method=ovito-ptm system=ic sigma=0.25 acc=1.000 cubic=1.000 hex=0.000 crystal=1.000 ms=-1
+method=twist-op system=ic sigma=0.25 acc=0.602 cubic=0.602 hex=0.377 crystal=0.979 ms=-1
+method=dseams-topo system=ic sigma=0.30 acc=0.938 cubic=0.938 hex=0.000 crystal=0.938 ms=210.6
+method=chill+ system=ic sigma=0.30 acc=0.584 cubic=0.584 hex=0.000 crystal=0.584 ms=3.9
+method=freud-ld system=ic sigma=0.30 acc=0.023 cubic=0.023 hex=0.742 crystal=0.766 ms=-1
+method=freud-q6 system=ic sigma=0.30 acc=nan cubic=nan hex=nan crystal=0.346 ms=-1 note=ice-vs-not-only
+method=ovito-ptm system=ic sigma=0.30 acc=0.977 cubic=0.977 hex=0.000 crystal=0.977 ms=-1
+method=twist-op system=ic sigma=0.30 acc=0.361 cubic=0.361 hex=0.570 crystal=0.932 ms=-1
+method=dseams-topo system=ih sigma=0.00 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=130.5
+method=chill+ system=ih sigma=0.00 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=2.9
+method=freud-ld system=ih sigma=0.00 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=-1
+method=freud-q6 system=ih sigma=0.00 acc=nan cubic=nan hex=nan crystal=1.000 ms=-1 note=ice-vs-not-only
+method=ovito-ptm system=ih sigma=0.00 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=-1
+method=twist-op system=ih sigma=0.00 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=-1
+method=dseams-topo system=ih sigma=0.05 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=138.6
+method=chill+ system=ih sigma=0.05 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=3.2
+method=freud-ld system=ih sigma=0.05 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=-1
+method=freud-q6 system=ih sigma=0.05 acc=nan cubic=nan hex=nan crystal=1.000 ms=-1 note=ice-vs-not-only
+method=ovito-ptm system=ih sigma=0.05 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=-1
+method=twist-op system=ih sigma=0.05 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=-1
+method=dseams-topo system=ih sigma=0.10 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=81.3
+method=chill+ system=ih sigma=0.10 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=1.7
+method=freud-ld system=ih sigma=0.10 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=-1
+method=freud-q6 system=ih sigma=0.10 acc=nan cubic=nan hex=nan crystal=0.994 ms=-1 note=ice-vs-not-only
+method=ovito-ptm system=ih sigma=0.10 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=-1
+method=twist-op system=ih sigma=0.10 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=-1
+method=dseams-topo system=ih sigma=0.15 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=121.3
+method=chill+ system=ih sigma=0.15 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=2.7
+method=freud-ld system=ih sigma=0.15 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=-1
+method=freud-q6 system=ih sigma=0.15 acc=nan cubic=nan hex=nan crystal=0.878 ms=-1 note=ice-vs-not-only
+method=ovito-ptm system=ih sigma=0.15 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=-1
+method=twist-op system=ih sigma=0.15 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=-1
+method=dseams-topo system=ih sigma=0.20 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=132.1
+method=chill+ system=ih sigma=0.20 acc=0.919 cubic=0.000 hex=0.919 crystal=0.919 ms=3.6
+method=freud-ld system=ih sigma=0.20 acc=0.936 cubic=0.000 hex=0.936 crystal=0.936 ms=-1
+method=freud-q6 system=ih sigma=0.20 acc=nan cubic=nan hex=nan crystal=0.622 ms=-1 note=ice-vs-not-only
+method=ovito-ptm system=ih sigma=0.20 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=-1
+method=twist-op system=ih sigma=0.20 acc=0.969 cubic=0.006 hex=0.969 crystal=0.975 ms=-1
+method=dseams-topo system=ih sigma=0.25 acc=0.978 cubic=0.000 hex=0.978 crystal=0.978 ms=129.8
+method=chill+ system=ih sigma=0.25 acc=0.797 cubic=0.000 hex=0.797 crystal=0.797 ms=2.2
+method=freud-ld system=ih sigma=0.25 acc=0.667 cubic=0.000 hex=0.667 crystal=0.667 ms=-1
+method=freud-q6 system=ih sigma=0.25 acc=nan cubic=nan hex=nan crystal=0.425 ms=-1 note=ice-vs-not-only
+method=ovito-ptm system=ih sigma=0.25 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=-1
+method=twist-op system=ih sigma=0.25 acc=0.886 cubic=0.006 hex=0.886 crystal=0.892 ms=-1
+method=dseams-topo system=ih sigma=0.30 acc=0.842 cubic=0.000 hex=0.842 crystal=0.842 ms=160.1
+method=chill+ system=ih sigma=0.30 acc=0.547 cubic=0.000 hex=0.547 crystal=0.547 ms=3.6
+method=freud-ld system=ih sigma=0.30 acc=0.347 cubic=0.000 hex=0.347 crystal=0.347 ms=-1
+method=freud-q6 system=ih sigma=0.30 acc=nan cubic=nan hex=nan crystal=0.300 ms=-1 note=ice-vs-not-only
+method=ovito-ptm system=ih sigma=0.30 acc=1.000 cubic=0.000 hex=1.000 crystal=1.000 ms=-1
+method=twist-op system=ih sigma=0.30 acc=0.750 cubic=0.014 hex=0.750 crystal=0.764 ms=-1
+method=dseams-topo system=null sigma=0.00 acc=1.000 false_crystal=0.000
+method=chill+ system=null sigma=0.00 acc=0.897 false_crystal=0.000
+method=freud-ld system=null sigma=0.00 acc=0.994 false_crystal=0.006
+method=freud-q6 system=null sigma=0.00 acc=nan false_crystal=0.231
+method=ovito-ptm system=null sigma=0.00 acc=1.000 false_crystal=0.000
+method=twist-op system=null sigma=0.00 acc=0.925 false_crystal=0.075
+# availability deepice=no-public-code icecoder=no-public-code zeron2024=no-public-code (searched GitHub and package indexes)
