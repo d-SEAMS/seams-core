@@ -15,6 +15,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <map>
+#include <mutex>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -83,46 +85,46 @@ int typeOf(const Cloud &cloud, int requested) {
   return cloud.pts[0].type;
 }
 
-void printCounts(const Cloud &cloud) {
+void printCounts(std::ostream &os, const Cloud &cloud) {
   std::map<std::string, int> hist;
   for (const auto &pt : cloud.pts) {
     hist[iceName(pt.iceType)]++;
   }
-  std::cout << "nop " << cloud.nop;
+  os << "nop " << cloud.nop;
   for (const auto &[name, n] : hist) {
     if (n > 0) {
-      std::cout << " " << name << " " << n;
+      os << " " << name << " " << n;
     }
   }
-  std::cout << "\n";
+  os << "\n";
 }
 
-int cmdRead(Cloud &cloud) {
+int cmdRead(std::ostream &os, Cloud &cloud) {
   const auto box = cloud.box;
-  std::cout << "nop " << cloud.nop << " frame " << cloud.currentFrame
-            << " box " << box[0] << " " << box[1] << " " << box[2] << "\n";
+  os << "nop " << cloud.nop << " frame " << cloud.currentFrame << " box "
+     << box[0] << " " << box[1] << " " << box[2] << "\n";
   return 0;
 }
 
-int cmdChillPlus(Cloud &cloud, double cutoff, int typeI) {
+int cmdChillPlus(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
   const int typ = typeOf(cloud, typeI);
   auto nList = nneigh::neighListO(cutoff, cloud, typ);
   chill::getCorrelPlus(cloud, nList, false);
   chill::getIceTypePlusNoPrint(cloud, nList, false);
-  printCounts(cloud);
+  printCounts(os, cloud);
   return 0;
 }
 
-int cmdChill(Cloud &cloud, double cutoff, int typeI) {
+int cmdChill(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
   const int typ = typeOf(cloud, typeI);
   auto nList = nneigh::neighListO(cutoff, cloud, typ);
   chill::getCorrel(cloud, nList, false);
   chill::getIceTypeNoPrint(cloud, nList, false);
-  printCounts(cloud);
+  printCounts(os, cloud);
   return 0;
 }
 
-int cmdCages(Cloud &cloud, double cutoff, int typeI, int k) {
+int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k) {
   const int typ = typeOf(cloud, typeI);
   const double cand = cutoff + 1.5;
   auto mutual = nneigh::kNearestNeighbourList(cloud, k, cand, typ, true);
@@ -156,8 +158,8 @@ int cmdCages(Cloud &cloud, double cutoff, int typeI, int k) {
       ++water;
     }
   }
-  std::cout << "nop " << cloud.nop << " ih " << ih << " ic " << ic << " water "
-            << water << "\n";
+  os << "nop " << cloud.nop << " ih " << ih << " ic " << ic << " water "
+     << water << "\n";
   return 0;
 }
 
@@ -167,7 +169,11 @@ int main(int argc, char *argv[]) {
   cxxopts::Options opt(
       argv[0], "d-SEAMS engine CLI. Lua is the luadseams library; Python is pydseams.");
   opt.add_options()("h,help", "Print help")("v,version", "Print version")(
-      "f,frame", "Frame number (1-based)",
+      "f,frame", "First frame (1-based)",
+      cxxopts::value<int>()->default_value("1"))(
+      "last", "Last frame (inclusive). Omit for a single --frame.",
+      cxxopts::value<int>()->default_value("0"))(
+      "j,jobs", "Parallel frame workers (OpenMP). 1 is serial.",
       cxxopts::value<int>()->default_value("1"))(
       "t,type", "Atom type (0 guesses oxygen then type 1)",
       cxxopts::value<int>()->default_value("0"))(
@@ -206,23 +212,53 @@ int main(int argc, char *argv[]) {
   const std::string cmd = args["command"].as<std::string>();
   const std::string file = args["file"].as<std::string>();
   const int frame = args["frame"].as<int>();
+  const int last = args["last"].as<int>();
+  const int jobs = args["jobs"].as<int>();
   const int typeI = args["type"].as<int>();
   const double cutoff = args["cutoff"].as<double>();
   const int k = args["k"].as<int>();
 
-  Cloud cloud = load(file, frame, typeI);
-  if (cmd == "read") {
-    return cmdRead(cloud);
+  auto runOne = [&](std::ostream &os, Cloud &cloud) {
+    if (cmd == "read") {
+      return cmdRead(os, cloud);
+    }
+    if (cmd == "chill-plus" || cmd == "chill_plus") {
+      return cmdChillPlus(os, cloud, cutoff, typeI);
+    }
+    if (cmd == "chill") {
+      return cmdChill(os, cloud, cutoff, typeI);
+    }
+    if (cmd == "cages") {
+      return cmdCages(os, cloud, cutoff, typeI, k);
+    }
+    os << "unknown command: " << cmd << "\n";
+    return 2;
+  };
+
+  if (last <= 0 || last == frame) {
+    Cloud cloud = load(file, frame, typeI);
+    return runOne(std::cout, cloud);
   }
-  if (cmd == "chill-plus" || cmd == "chill_plus") {
-    return cmdChillPlus(cloud, cutoff, typeI);
-  }
-  if (cmd == "chill") {
-    return cmdChill(cloud, cutoff, typeI);
-  }
-  if (cmd == "cages") {
-    return cmdCages(cloud, cutoff, typeI, k);
-  }
-  std::cerr << "unknown command: " << cmd << "\n";
-  return 2;
+
+  std::mutex outMu;
+  int rc = 0;
+  const int typeFilter = typeI > 0 ? typeI : 0;
+  sinp::forEachLammpsFrame(
+      file, frame, last, typeFilter,
+      [&](int /*fr*/, Cloud &cloud) {
+        if (typeFilter <= 0 && cloud.nop == 0) {
+          cloud = load(file, cloud.currentFrame, typeI);
+        }
+        std::ostringstream line;
+        const int one = runOne(line, cloud);
+        {
+          std::lock_guard<std::mutex> lock(outMu);
+          std::cout << line.str();
+          if (one != 0) {
+            rc = one;
+          }
+        }
+      },
+      jobs);
+  return rc;
 }

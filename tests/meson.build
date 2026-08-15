@@ -142,6 +142,13 @@ executable('bench_lammps_io', 'bench_lammps_io.cpp',
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
 
+executable('bench_lammps_walk', 'bench_lammps_walk.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
 executable('bench_structure_desc', 'bench_structure_desc.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,

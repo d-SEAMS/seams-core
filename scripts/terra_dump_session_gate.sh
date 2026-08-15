@@ -28,9 +28,11 @@ export LD_LIBRARY_PATH="${BUILD}/src${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
   echo "=== compile ==="
   meson compile -C "${BUILD}" \
     yodaLib \
+    seams \
     test_seams_input \
     test_cage_affiliation \
     bench_lammps_io \
+    bench_lammps_walk \
     bench_trajectory_incremental
 
   echo "=== catch2 ==="

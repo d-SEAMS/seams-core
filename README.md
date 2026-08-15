@@ -222,6 +222,7 @@ meson test -C bbdir
 ```bash
 nix build
 ./result/bin/seams --help
+./result/bin/seams --frame 1 --last 100 --jobs 8 --type 1 cages dump.lammpstrj
 ```
 
 To run the sample inputs, stay in the repository root so `input/` is a

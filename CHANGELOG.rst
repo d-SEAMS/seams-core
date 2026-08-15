@@ -13,6 +13,8 @@ Added
   lazy ``ITEM: TIMESTEP`` offset table (LAMMPS ``ReaderNative`` cursor,
   chemfiles ``read_step``, readcon frame offsets). Sequential
   ``load_frame`` walks no longer rescan prior snapshots.
+- ``forEachLammpsFrame``: OpenMP walk over a frame range. Each worker
+  opens its own handle and seeks. ``seams --frame N --last M --jobs J``.
 
 Fixed
 -----

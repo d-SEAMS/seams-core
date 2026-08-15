@@ -243,6 +243,31 @@ TEST_CASE("indexed last-frame read of mW_cubic matches a full scan",
   REQUIRE(first.currentFrame == 1);
 }
 
+TEST_CASE("forEachLammpsFrame matches sequential reads", "[seams_input]") {
+  const auto tiny = writeTinyDump();
+  sinp::dropLammpsDumpIndex(tiny);
+  std::vector<double> xs(3, -1.0);
+  std::vector<int> nops(3, 0);
+  sinp::forEachLammpsFrame(
+      tiny, 1, 3, 1,
+      [&](int frame, molSys::PointCloud<molSys::Point<double>, double> &cloud) {
+        const auto i = static_cast<std::size_t>(frame - 1);
+        nops[i] = cloud.nop;
+        if (!cloud.pts.empty()) {
+          xs[i] = cloud.pts[0].x;
+        }
+      },
+      2);
+  REQUIRE(nops[0] == 2);
+  REQUIRE(nops[1] == 2);
+  REQUIRE(nops[2] == 2);
+  REQUIRE_THAT(xs[0], Catch::Matchers::WithinAbs(0.25, 1e-10));
+  REQUIRE_THAT(xs[1], Catch::Matchers::WithinAbs(1.25, 1e-10));
+  REQUIRE_THAT(xs[2], Catch::Matchers::WithinAbs(2.25, 1e-10));
+  fs::remove(tiny);
+  sinp::dropLammpsDumpIndex(tiny);
+}
+
 TEST_CASE("readLammpsTrj binds xu yu zu when x y z are absent",
           "[seams_input]") {
   const auto path = writeUnwrappedDump();

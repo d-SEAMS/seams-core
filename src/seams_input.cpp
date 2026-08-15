@@ -22,6 +22,10 @@
 #include <seams_input.hpp>
 #include <unordered_map>
 
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
+
 namespace {
 /**
  * @details Record the ID-to-index entry for the most recently appended point.
@@ -152,6 +156,18 @@ struct LammpsDumpSession {
     }
     return static_cast<int>(offsets.size());
   }
+
+  bool ensureIndexed(int frame) {
+    if (frame < 1) {
+      return false;
+    }
+    while (static_cast<int>(offsets.size()) < frame) {
+      if (!discoverNext()) {
+        return false;
+      }
+    }
+    return true;
+  }
 };
 
 std::mutex gDumpMu;
@@ -206,6 +222,41 @@ int sinp::nLammpsFrames(const std::string &filename) {
 void sinp::dropLammpsDumpIndex(const std::string &filename) {
   std::lock_guard<std::mutex> lock(gDumpMu);
   gDumps.erase(filename);
+}
+
+void sinp::forEachLammpsFrame(
+    const std::string &filename, int first, int last, int typeFilter,
+    const std::function<void(
+        int, molSys::PointCloud<molSys::Point<double>, double> &)> &fn,
+    int nThreads) {
+  const int nframes = nLammpsFrames(filename);
+  if (nframes <= 0) {
+    return;
+  }
+  if (first < 1) {
+    first = 1;
+  }
+  if (last <= 0 || last > nframes) {
+    last = nframes;
+  }
+  if (first > last) {
+    return;
+  }
+
+#ifdef SEAMS_HAS_OPENMP
+  const int threads = nThreads > 0 ? nThreads : omp_get_max_threads();
+#pragma omp parallel for schedule(dynamic, 1) num_threads(threads)             \
+    if (threads > 1 && last > first)
+#endif
+  for (int frame = first; frame <= last; ++frame) {
+    molSys::PointCloud<molSys::Point<double>, double> cloud;
+    if (typeFilter > 0) {
+      cloud = readLammpsTrjO(filename, frame, cloud, typeFilter);
+    } else {
+      cloud = readLammpsTrj(filename, frame, cloud);
+    }
+    fn(frame, cloud);
+  }
 }
 
 /**
@@ -501,6 +552,28 @@ void parseLammpsFrameBody(
   }
 }
 
+bool openCloneAt(const std::string &filename, int frame, std::ifstream &in) {
+  auto sess = sessionFor(filename);
+  if (sess == nullptr) {
+    return false;
+  }
+  std::uint64_t off = 0;
+  {
+    std::lock_guard<std::mutex> lock(sess->mu);
+    if (!sess->ensureIndexed(frame)) {
+      return false;
+    }
+    off = sess->offsets[static_cast<std::size_t>(frame - 1)];
+  }
+  in.open(filename, std::ios::in | std::ios::binary);
+  if (!in.is_open()) {
+    return false;
+  }
+  in.seekg(static_cast<std::streamoff>(off));
+  std::string line;
+  return static_cast<bool>(std::getline(in, line)) && isLammpsTimestep(line);
+}
+
 void loadLammpsFrame(
     const std::string &filename, int targetFrame,
     molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeFilter,
@@ -520,13 +593,25 @@ void loadLammpsFrame(
     yCloud.currentFrame = targetFrame;
     return;
   }
-  std::lock_guard<std::mutex> lock(sess->mu);
-  if (!sess->positionAt(targetFrame)) {
+  std::unique_lock<std::mutex> lock(sess->mu, std::try_to_lock);
+  if (lock.owns_lock()) {
+    if (!sess->positionAt(targetFrame)) {
+      std::cout << "You entered a frame that doesn't exist.\n";
+      yCloud.currentFrame = targetFrame;
+      return;
+    }
+    parseLammpsFrameBody(sess->file, yCloud, typeFilter, keep, isSlice,
+                         coordLow, coordHigh);
+    yCloud.currentFrame = targetFrame;
+    return;
+  }
+  std::ifstream clone;
+  if (!openCloneAt(filename, targetFrame, clone)) {
     std::cout << "You entered a frame that doesn't exist.\n";
     yCloud.currentFrame = targetFrame;
     return;
   }
-  parseLammpsFrameBody(sess->file, yCloud, typeFilter, keep, isSlice, coordLow,
+  parseLammpsFrameBody(clone, yCloud, typeFilter, keep, isSlice, coordLow,
                        coordHigh);
   yCloud.currentFrame = targetFrame;
 }
