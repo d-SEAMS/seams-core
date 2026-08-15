@@ -685,3 +685,47 @@ TEST_CASE("findPrismatic identifies prismatic rings between HC basals",
     REQUIRE(prismaticRings.size() == 3);
   }
 }
+
+TEST_CASE("DDC cage assembly is independent of ring enumeration order",
+          "[topo_bulk]") {
+  // The greedy assembly claims peripheral rings as it accepts cages, so
+  // without a canonical visiting order the cage-object count depends on the
+  // order the ring network was enumerated in. The per-ring classification
+  // and the cage partition must both survive any permutation of the input.
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  REQUIRE(yCloud.nop > 0);
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  auto idx = nneigh::neighbourListByIndex(yCloud, nList);
+  auto rings = primitive::ringNetwork(idx, 7);
+  std::vector<std::vector<int>> six;
+  for (const auto &r : rings) {
+    if (r.size() == 6) {
+      six.push_back(r);
+    }
+  }
+
+  size_t referenceCages = 0;
+  size_t referenceDDCRings = 0;
+  for (int variant = 0; variant < 3; variant++) {
+    auto shuffled = six;
+    if (variant == 1) {
+      std::sort(shuffled.begin(), shuffled.end());
+    } else if (variant == 2) {
+      std::sort(shuffled.rbegin(), shuffled.rend());
+    }
+    std::vector<ring::strucType> rt(shuffled.size(),
+                                    ring::strucType::unclassified);
+    std::vector<cage::Cage> cl;
+    auto hc = ring::findHC(shuffled, rt, idx, cl);
+    auto ddc = ring::findDDC(shuffled, rt, hc, cl);
+    if (variant == 0) {
+      referenceCages = cl.size();
+      referenceDDCRings = ddc.size();
+      REQUIRE(referenceDDCRings == 8192);
+    } else {
+      REQUIRE(cl.size() == referenceCages);
+      REQUIRE(ddc.size() == referenceDDCRings);
+    }
+  }
+}

@@ -21,6 +21,28 @@ namespace {
 
 const std::vector<int> kEmptyRings;
 
+/**
+ * @details Visiting order for the greedy cage assembly, derived from each
+ *  ring's sorted atom content rather than its position in the input. The
+ *  assembly claims rings as it accepts cages, so the accepted set depends on
+ *  the order rings are tested; keying that order to the rings themselves
+ *  makes the result independent of how the ring network was enumerated.
+ */
+std::vector<int> canonicalRingOrder(const std::vector<std::vector<int>> &rings) {
+  std::vector<std::vector<int>> keys(rings.size());
+  for (size_t i = 0; i < rings.size(); i++) {
+    keys[i] = rings[i];
+    std::sort(keys[i].begin(), keys[i].end());
+  }
+  std::vector<int> order(rings.size());
+  for (size_t i = 0; i < rings.size(); i++) {
+    order[i] = static_cast<int>(i);
+  }
+  std::sort(order.begin(), order.end(),
+            [&keys](int a, int b) { return keys[a] < keys[b]; });
+  return order;
+}
+
 const std::vector<int> &atomRow(const ring::RingSearchIndex &index, int atom) {
   if (atom < 0 ||
       static_cast<size_t>(atom) >= index.ringsContainingAtom.size()) {
@@ -445,9 +467,11 @@ std::vector<int> ring::findDDC(const std::vector<std::vector<int>> &rings,
   } // end of update of notEquatorial
   // --------
 
-  // To search for equatorial rings, loop through all
-  // the hexagonal rings
-  for (int iring = 0; iring < totalRingNum; iring++) {
+  // To search for equatorial rings, loop through all the hexagonal rings, in
+  // the canonical order so that the greedy claiming below is independent of
+  // the enumeration order of the ring network
+  const std::vector<int> visitOrder = canonicalRingOrder(rings);
+  for (const int iring : visitOrder) {
     // ------------
     // Step zero: If the ring has been classified as a basal or prismatic ring
     // in an HC or is a peripheral ring, then it cannot be the equatiorial ring
