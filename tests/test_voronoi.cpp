@@ -57,6 +57,7 @@ TEST_CASE("Voronoi cell of simple cubic is a cube", "[voronoi]") {
   auto cells = chill::voronoiFacetWeights(cloud, 2.2 * a);
 
   for (int i = 0; i < cloud.nop; i++) {
+    REQUIRE(cells[i].certified);
     REQUIRE(cells[i].neighbours.size() == 6);
     for (const double w : cells[i].weights) {
       REQUIRE_THAT(w, Catch::Matchers::WithinAbs(1.0 / 6.0, 1e-9));
@@ -69,6 +70,28 @@ TEST_CASE("Voronoi cell of simple cubic is a cube", "[voronoi]") {
   }
 }
 
+TEST_CASE("the exactness certificate repairs an undersized cutoff",
+          "[voronoi]") {
+  // At 1.05a only the six face neighbours are candidates, but the cube
+  // cell's corner vertices sit at (sqrt(3)/2)a > cutoff/2, so the
+  // certificate fails and the cutoff grows until the cell is provably
+  // closed; the result matches the comfortably-cut reference exactly
+  const double a = 3.0;
+  auto cloud = lattice({{0.0, 0.0, 0.0}}, 4, a);
+  auto tight = chill::voronoiFacetWeights(cloud, 1.05 * a);
+  auto reference = chill::voronoiFacetWeights(cloud, 2.2 * a);
+
+  for (int i = 0; i < cloud.nop; i++) {
+    REQUIRE(tight[i].certified);
+    REQUIRE(tight[i].neighbours == reference[i].neighbours);
+    REQUIRE(tight[i].weights.size() == reference[i].weights.size());
+    for (size_t k = 0; k < tight[i].weights.size(); k++) {
+      REQUIRE_THAT(tight[i].weights[k],
+                   Catch::Matchers::WithinAbs(reference[i].weights[k], 1e-9));
+    }
+  }
+}
+
 TEST_CASE("Voronoi cell of FCC is a rhombic dodecahedron", "[voronoi]") {
   const double a = 4.0;
   auto cloud = lattice(
@@ -77,6 +100,7 @@ TEST_CASE("Voronoi cell of FCC is a rhombic dodecahedron", "[voronoi]") {
   auto cells = chill::voronoiFacetWeights(cloud, 1.2 * a);
 
   for (int i = 0; i < cloud.nop; i++) {
+    REQUIRE(cells[i].certified);
     REQUIRE(cells[i].neighbours.size() == 12);
     for (const double w : cells[i].weights) {
       REQUIRE_THAT(w, Catch::Matchers::WithinAbs(1.0 / 12.0, 1e-9));

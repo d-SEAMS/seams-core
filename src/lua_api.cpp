@@ -311,9 +311,10 @@ void registerOrder(sol::state &lua) {
         const auto cells = chill::voronoiFacetWeights(yCloud, candidateCutoff);
         sol::table out = lua.create_table(static_cast<int>(cells.size()), 0);
         for (size_t i = 0; i < cells.size(); i++) {
-          sol::table cell = lua.create_table(0, 2);
+          sol::table cell = lua.create_table(0, 3);
           cell["neighbours"] = sol::as_table(cells[i].neighbours);
           cell["weights"] = sol::as_table(cells[i].weights);
+          cell["certified"] = cells[i].certified;
           out[i + 1] = cell;
         }
         return out;

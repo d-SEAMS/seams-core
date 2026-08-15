@@ -32,10 +32,13 @@ using Vec3 = std::array<double, 3>;
  * @param[in] target Index into @a disp of the neighbour whose facet is wanted.
  * @param[in] disp Minimum-image displacements to every candidate.
  * @param[in] halfExtent Half-width of the starting square on the plane.
+ * @param[in,out] maxVertexDistSq Running maximum of the squared distance
+ *  from the central particle to any vertex of a surviving facet polygon;
+ *  feeds the exactness certificate.
  * @return The facet area; zero when the candidates close the facet off.
  */
 double facetArea(size_t target, const std::vector<Vec3> &disp,
-                 double halfExtent) {
+                 double halfExtent, double &maxVertexDistSq) {
   const Vec3 &d = disp[target];
   const double r = std::sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
   if (r <= 0.0) {
@@ -109,6 +112,10 @@ double facetArea(size_t target, const std::vector<Vec3> &disp,
     const auto &p = poly[v];
     const auto &q = poly[(v + 1) % poly.size()];
     area += p[0] * q[1] - q[0] * p[1];
+    // A vertex at in-plane (a, b) sits at squared distance h^2 + a^2 + b^2
+    // from the central particle
+    maxVertexDistSq =
+        std::max(maxVertexDistSq, h * h + p[0] * p[0] + p[1] * p[1]);
   }
   return 0.5 * std::fabs(area);
 }
@@ -122,47 +129,66 @@ std::vector<chill::VoronoiWeights> chill::voronoiFacetWeights(
   if (yCloud.box.size() < 3 || candidateCutoff <= 0.0) {
     return result;
   }
-  const double cutoffSq = candidateCutoff * candidateCutoff;
+  // Growth schedule for cells failing the exactness certificate; 1.5^6 gives
+  // an order of magnitude before the honest certified=false verdict
+  constexpr int kMaxEnlarge = 6;
 
   for (int i = 0; i < yCloud.nop; i++) {
-    std::vector<Vec3> disp;
-    std::vector<int> who;
-    for (int j = 0; j < yCloud.nop; j++) {
-      if (j == i) {
-        continue;
+    double cutoff = candidateCutoff;
+    for (int attempt = 0; attempt <= kMaxEnlarge; attempt++) {
+      const double cutoffSq = cutoff * cutoff;
+      std::vector<Vec3> disp;
+      std::vector<int> who;
+      for (int j = 0; j < yCloud.nop; j++) {
+        if (j == i) {
+          continue;
+        }
+        const auto d = gen::relDist(yCloud, i, j);
+        const double r2 = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
+        if (r2 > 0.0 && r2 <= cutoffSq) {
+          disp.push_back({d[0], d[1], d[2]});
+          who.push_back(j);
+        }
       }
-      const auto d = gen::relDist(yCloud, i, j);
-      const double r2 = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
-      if (r2 > 0.0 && r2 <= cutoffSq) {
-        disp.push_back({d[0], d[1], d[2]});
-        who.push_back(j);
-      }
-    }
 
-    double total = 0.0;
-    std::vector<double> areas(disp.size(), 0.0);
-    for (size_t t = 0; t < disp.size(); t++) {
-      areas[t] = facetArea(t, disp, candidateCutoff);
-      total += areas[t];
-    }
-    if (total <= 0.0) {
-      continue;
-    }
-    for (size_t t = 0; t < disp.size(); t++) {
-      // Facets thinner than one part in 1e9 of the cell surface are clipping
-      // residue, not neighbours
-      if (areas[t] > 1e-9 * total) {
-        result[i].neighbours.push_back(who[t]);
-        result[i].weights.push_back(areas[t] / total);
+      double total = 0.0;
+      double maxVertexDistSq = 0.0;
+      std::vector<double> areas(disp.size(), 0.0);
+      for (size_t t = 0; t < disp.size(); t++) {
+        areas[t] = facetArea(t, disp, cutoff, maxVertexDistSq);
+        total += areas[t];
       }
-    }
-    // Renormalise after dropping residue
-    double kept = 0.0;
-    for (const double w : result[i].weights) {
-      kept += w;
-    }
-    for (double &w : result[i].weights) {
-      w /= kept;
+
+      result[i].neighbours.clear();
+      result[i].weights.clear();
+      // Certificate: every cell vertex within cutoff/2 of the particle, so
+      // no bisector from beyond the cutoff could have cut the cell
+      result[i].certified =
+          total > 0.0 && maxVertexDistSq <= 0.25 * cutoffSq;
+
+      if (total > 0.0) {
+        for (size_t t = 0; t < disp.size(); t++) {
+          // Facets thinner than one part in 1e9 of the cell surface are
+          // clipping residue, not neighbours
+          if (areas[t] > 1e-9 * total) {
+            result[i].neighbours.push_back(who[t]);
+            result[i].weights.push_back(areas[t] / total);
+          }
+        }
+        // Renormalise after dropping residue
+        double kept = 0.0;
+        for (const double w : result[i].weights) {
+          kept += w;
+        }
+        for (double &w : result[i].weights) {
+          w /= kept;
+        }
+      }
+
+      if (result[i].certified) {
+        break;
+      }
+      cutoff *= 1.5;
     }
   }
   return result;

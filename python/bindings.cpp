@@ -630,7 +630,8 @@ NB_MODULE(_core, m) {
         "weights, normalised to sum to one.")
         .def(nb::init<>())
         .def_ro("neighbours", &chill::VoronoiWeights::neighbours)
-        .def_ro("weights", &chill::VoronoiWeights::weights);
+        .def_ro("weights", &chill::VoronoiWeights::weights)
+        .def_ro("certified", &chill::VoronoiWeights::certified);
     m.def("voronoiFacetWeights", &chill::voronoiFacetWeights,
           "Voronoi facet neighbours and area weights for every particle.",
           nb::arg("yCloud"), nb::arg("candidateCutoff"));
