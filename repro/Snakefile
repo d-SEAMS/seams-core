@@ -67,7 +67,7 @@ rule setup_tip:
         log=R + "/tip-setup.log",
         bdir=TIP_BUILD,
     shell:
-        "meson setup {params.bdir} --buildtype=release "
+        "meson setup {params.bdir} --prefix=$CONDA_PREFIX --buildtype=release "
         "-Dwith_python=true -Dwith_tests=true > {params.log} 2>&1"
 
 
