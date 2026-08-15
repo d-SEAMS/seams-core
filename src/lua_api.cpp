@@ -155,6 +155,12 @@ void registerNeighbours(sol::state &lua) {
       [](const Cloud &yCloud, std::vector<std::vector<int>> nList) {
         return sol::as_nested(nneigh::neighbourListByIndex(yCloud, nList));
       });
+  lua.set_function("kNearestNeighbourList",
+                   [](const Cloud &yCloud, int k, double candidateCutoff,
+                      int typeI) {
+                     return sol::as_nested(nneigh::kNearestNeighbourList(
+                         yCloud, k, candidateCutoff, typeI));
+                   });
   // Legacy spellings, container-userdata semantics
   lua.set_function("neighborList", nneigh::neighListO);
   lua.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);

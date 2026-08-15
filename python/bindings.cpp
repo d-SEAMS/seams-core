@@ -184,6 +184,15 @@ NB_MODULE(_core, m) {
     m.def("getNewNeighbourListByIndex", &nneigh::getNewNeighbourListByIndex,
           "Build a neighbour list by index using a distance cutoff.",
           nb::arg("yCloud"), nb::arg("cutoff"));
+    m.def("kNearestNeighbourList", &nneigh::kNearestNeighbourList,
+          "Union-symmetrized k-nearest bonded graph (exact; cell-list "
+          "candidates with a brute-force fallback).",
+          nb::arg("yCloud"), nb::arg("k"), nb::arg("candidateCutoff"),
+          nb::arg("typeI"));
+    m.def("shellSeparation", &nneigh::shellSeparation,
+          "Certificate pair (max k-th distance, min (k+1)-th distance) for "
+          "the exact reduction of the k-nearest graph to a cutoff graph.",
+          nb::arg("yCloud"), nb::arg("k"), nb::arg("typeI"));
     m.def("halfNeighList", &nneigh::halfNeighList,
           "Build a half neighbour list (each pair stored once) for one atom type.",
           nb::arg("yCloud"), nb::arg("rcutoff"), nb::arg("typeI"));

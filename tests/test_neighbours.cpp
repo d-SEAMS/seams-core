@@ -4,6 +4,7 @@
 #include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <seams_input.hpp>
 
 #include <algorithm>
 #include <array>
@@ -337,4 +338,54 @@ TEST_CASE("neighListO returns empty when the cloud has no atoms",
 
   auto nList = nneigh::neighListO(3.5, cloud, 1);
   REQUIRE(nList.empty());
+}
+
+TEST_CASE("k-nearest graph reduces exactly to the cutoff graph when the "
+          "shell-separation certificate holds",
+          "[neighbours]") {
+  // Theorem: when max_i d_k(i) <= rcutoff <= min_i d_{k+1}(i), the cutoff
+  // neighbourhood of every particle is exactly its k nearest, so the
+  // union-symmetrized k-nearest graph equals the cutoff graph edge for edge
+  // and every downstream graph predicate is identical. Checked here on the
+  // thermal mW frame at k = 4, rcutoff = 3.5.
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  REQUIRE(yCloud.nop > 0);
+
+  const auto [maxKth, minNext] = nneigh::shellSeparation(yCloud, 4, 1);
+  REQUIRE(maxKth > 0.0);
+  REQUIRE(maxKth <= 3.5);
+  REQUIRE(minNext >= 3.5);
+
+  auto cutoffRows = nneigh::neighListO(3.5, yCloud, 1);
+  auto knnRows = nneigh::kNearestNeighbourList(yCloud, 4, 3.5, 1);
+  REQUIRE(cutoffRows.size() == knnRows.size());
+  for (size_t i = 0; i < cutoffRows.size(); i++) {
+    REQUIRE_FALSE(cutoffRows[i].empty());
+    REQUIRE(cutoffRows[i][0] == knnRows[i][0]);
+    std::vector<int> a(cutoffRows[i].begin() + 1, cutoffRows[i].end());
+    std::vector<int> b(knnRows[i].begin() + 1, knnRows[i].end());
+    std::sort(a.begin(), a.end());
+    std::sort(b.begin(), b.end());
+    REQUIRE(a == b);
+  }
+}
+
+TEST_CASE("k-nearest graph is exact under an undersized candidate cutoff",
+          "[neighbours]") {
+  // The brute-force fallback recomputes any atom whose k-th neighbour lies
+  // beyond the candidate cutoff, so the nominations are exact regardless
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+
+  auto generous = nneigh::kNearestNeighbourList(yCloud, 4, 3.5, 1);
+  auto starved = nneigh::kNearestNeighbourList(yCloud, 4, 1.0, 1);
+  REQUIRE(generous.size() == starved.size());
+  for (size_t i = 0; i < generous.size(); i++) {
+    std::vector<int> a(generous[i].begin() + 1, generous[i].end());
+    std::vector<int> b(starved[i].begin() + 1, starved[i].end());
+    std::sort(a.begin(), a.end());
+    std::sort(b.begin(), b.end());
+    REQUIRE(a == b);
+  }
 }

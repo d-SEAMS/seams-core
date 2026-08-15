@@ -16,6 +16,7 @@
 #include <cmath>
 #include <iostream>
 #include <numeric>
+#include <set>
 #include <span>
 #include <utility>
 
@@ -529,4 +530,139 @@ int nneigh::clearNeighbourList(std::vector<std::vector<int>> &nList) {
   nList.clear();
   nList.shrink_to_fit();
   return 0;
+}
+
+/**
+ * @details Bonded graph from the k nearest neighbours of each particle,
+ *  union-symmetrized: i and j are bonded when either lists the other among
+ *  its k nearest. Candidates come from the same cell-list search as
+ *  neighListO at @a candidateCutoff, which must comfortably exceed the k-th
+ *  neighbour distance. On an undistorted tetrahedral lattice with k = 4 this
+ *  equals the first-shell cutoff graph; under thermal distortion it keeps
+ *  the neighbour identities a hard cutoff loses, which is what the ring and
+ *  cage predicates consume.
+ * @param[in] yCloud The input molSys::PointCloud.
+ * @param[in] k Number of nearest neighbours each particle nominates.
+ * @param[in] candidateCutoff Cell-list search radius for the candidates.
+ * @param[in] typeI Type ID of the particles in the graph.
+ * @return Row-ordered full neighbour list by atom ID, one row per atom with
+ *  the leading self entry, like neighListO.
+ */
+std::vector<std::vector<int>>
+nneigh::kNearestNeighbourList(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, int typeI) {
+  std::vector<std::vector<int>> candidateRows =
+      nneigh::neighListO(candidateCutoff, yCloud, typeI);
+  if (candidateRows.empty() || k <= 0) {
+    return candidateRows;
+  }
+
+  // Directed nominations: each atom's k nearest among the candidates
+  std::vector<std::vector<int>> nominated(yCloud.nop);
+  std::vector<std::pair<double, int>> byDist; // (distance^2, neighbour index)
+  for (int i = 0; i < yCloud.nop; i++) {
+    const auto &row = candidateRows[i];
+    if (row.size() <= 1) {
+      continue;
+    }
+    byDist.clear();
+    for (size_t m = 1; m < row.size(); m++) {
+      const auto it = yCloud.idIndexMap.find(row[m]);
+      if (it == yCloud.idIndexMap.end()) {
+        continue;
+      }
+      byDist.emplace_back(gen::periodicDistSq(yCloud, i, it->second),
+                          it->second);
+    }
+    const size_t keep = std::min(static_cast<size_t>(k), byDist.size());
+    std::partial_sort(byDist.begin(), byDist.begin() + keep, byDist.end());
+    nominated[i].reserve(keep);
+    for (size_t m = 0; m < keep; m++) {
+      nominated[i].push_back(byDist[m].second);
+    }
+  }
+
+  // Exactness fallback: an atom whose k-th neighbour lies beyond the
+  // candidate cutoff got a truncated nomination; recompute those few by a
+  // brute-force scan so the k nearest are exact regardless of the cutoff
+  for (int i = 0; i < yCloud.nop; i++) {
+    if (yCloud.pts[i].type != typeI ||
+        static_cast<int>(nominated[i].size()) >= k) {
+      continue;
+    }
+    byDist.clear();
+    for (int j = 0; j < yCloud.nop; j++) {
+      if (j == i || yCloud.pts[j].type != typeI) {
+        continue;
+      }
+      byDist.emplace_back(gen::periodicDistSq(yCloud, i, j), j);
+    }
+    const size_t keep = std::min(static_cast<size_t>(k), byDist.size());
+    std::partial_sort(byDist.begin(), byDist.begin() + keep, byDist.end());
+    nominated[i].clear();
+    for (size_t m = 0; m < keep; m++) {
+      nominated[i].push_back(byDist[m].second);
+    }
+  }
+
+  // Union symmetrization into ID rows with the leading self entry
+  std::vector<std::vector<int>> out(yCloud.nop);
+  for (int i = 0; i < yCloud.nop; i++) {
+    out[i].push_back(candidateRows[i].empty() ? yCloud.pts[i].atomID
+                                              : candidateRows[i][0]);
+  }
+  std::set<std::pair<int, int>> bonds;
+  for (int i = 0; i < yCloud.nop; i++) {
+    for (const int j : nominated[i]) {
+      bonds.emplace(std::min(i, j), std::max(i, j));
+    }
+  }
+  for (const auto &[i, j] : bonds) {
+    out[i].push_back(yCloud.pts[j].atomID);
+    out[j].push_back(yCloud.pts[i].atomID);
+  }
+  return out;
+}
+
+/**
+ * @details The shell-separation certificate for the exact reduction of the
+ *  k-nearest bonded graph to the cutoff graph. Returns the largest k-th
+ *  neighbour distance and the smallest (k+1)-th neighbour distance over all
+ *  particles of the type. Whenever
+ *  max_i d_k(i) <= rcutoff <= min_i d_{k+1}(i), every particle's cutoff
+ *  neighbourhood is exactly its k nearest, so the union-symmetrized
+ *  k-nearest graph and the cutoff graph coincide edge for edge and every
+ *  graph predicate downstream -- rings, cages, affiliation -- is identical.
+ * @return {max over i of d_k(i), min over i of d_{k+1}(i)}; zeros when the
+ *  system has too few particles.
+ */
+std::pair<double, double> nneigh::shellSeparation(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    int typeI) {
+  double maxKth = 0.0;
+  double minNext = 0.0;
+  bool haveNext = false;
+  std::vector<double> dists;
+  for (int i = 0; i < yCloud.nop; i++) {
+    if (yCloud.pts[i].type != typeI) {
+      continue;
+    }
+    dists.clear();
+    for (int j = 0; j < yCloud.nop; j++) {
+      if (j == i || yCloud.pts[j].type != typeI) {
+        continue;
+      }
+      dists.push_back(gen::periodicDistSq(yCloud, i, j));
+    }
+    if (static_cast<int>(dists.size()) < k + 1) {
+      continue;
+    }
+    std::partial_sort(dists.begin(), dists.begin() + k + 1, dists.end());
+    maxKth = std::max(maxKth, std::sqrt(dists[k - 1]));
+    const double next = std::sqrt(dists[k]);
+    minNext = haveNext ? std::min(minNext, next) : next;
+    haveNext = true;
+  }
+  return {maxKth, haveNext ? minNext : 0.0};
 }

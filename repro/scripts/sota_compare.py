@@ -151,6 +151,39 @@ def dseams_lists(pos, box):
     return cloud, nl, idx
 
 
+def _affiliation_labels(cloud, idx, n):
+    rings = [r for r in _core.ringNetwork(idx, 7) if len(r) == 6]
+    if not rings:
+        return ["water"] * n
+    hc, ddc = _core.cageAffiliation(rings, idx)
+    in_hc = np.zeros(n, dtype=bool)
+    in_ddc = np.zeros(n, dtype=bool)
+    for ring, h, d in zip(rings, hc, ddc):
+        for atom in ring:
+            in_hc[atom] |= h
+            in_ddc[atom] |= d
+    labels = []
+    for i in range(n):
+        if in_hc[i] and in_ddc[i]:
+            labels.append("mixed")
+        elif in_hc[i]:
+            labels.append("hexagonal")
+        elif in_ddc[i]:
+            labels.append("cubic")
+        else:
+            labels.append("water")
+    return labels
+
+
+def dseams_topo_4nn(pos, box):
+    """TUM v2: the same cage predicates on the union-symmetrized 4-nearest
+    bonded graph, which keeps neighbour identity where a cutoff loses it."""
+    cloud = make_cloud(pos, box)
+    knn = _core.kNearestNeighbourList(cloud, 4, 5.0, 1)
+    idx = _core.neighbourListByIndex(cloud, knn)
+    return _affiliation_labels(cloud, idx, len(pos))
+
+
 def dseams_topo(pos, box):
     """Per-atom label from cage affiliation: an atom in any HC-affiliated
     six-ring is hexagonal, in a DDC-affiliated ring cubic, in both mixed,
@@ -381,6 +414,7 @@ def main():
 
             for method, run in (
                 ("dseams-topo", lambda: dseams_topo(pos, box)),
+                ("dseams-topo-4nn", lambda: dseams_topo_4nn(pos, box)),
                 ("chill+", lambda: chill_plus(pos, box, scratch)),
             ):
                 t0 = time.perf_counter()
@@ -438,6 +472,7 @@ def main():
     # False-crystal rate on the null, per label-producing method
     for method, run in (
         ("dseams-topo", lambda: dseams_topo(null_pos, ic_box)),
+        ("dseams-topo-4nn", lambda: dseams_topo_4nn(null_pos, ic_box)),
         ("chill+", lambda: chill_plus(null_pos, ic_box, scratch)),
     ):
         labels = run()
