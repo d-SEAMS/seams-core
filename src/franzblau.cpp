@@ -352,6 +352,35 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth)
   BoundedBalls balls;
   balls.fillAll(adjacency, radius);
 
+#ifdef SEAMS_HAS_OPENMP
+  if (nVertices >= 256) {
+    // Sources are independent given the shared read-only balls; per-source
+    // collection keeps the output identical to the serial ascending-source
+    // order
+    std::vector<std::vector<std::vector<int>>> perSource(nVertices);
+#pragma omp parallel
+    {
+      RingScratch scratch;
+#pragma omp for schedule(dynamic, 64)
+      for (int src = 0; src < nVertices; src++) {
+        enumerateFromSource(adjacency, balls, src, maxDepth, maxLvl, scratch,
+                            perSource[src]);
+      }
+    }
+    size_t total = 0;
+    for (const auto &group : perSource) {
+      total += group.size();
+    }
+    rings.reserve(total);
+    for (auto &group : perSource) {
+      for (auto &ring : group) {
+        rings.push_back(std::move(ring));
+      }
+    }
+    return rings;
+  }
+#endif
+
   RingScratch scratch;
   for (int src = 0; src < nVertices; src++) {
     enumerateFromSource(adjacency, balls, src, maxDepth, maxLvl, scratch,
