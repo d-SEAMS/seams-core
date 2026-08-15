@@ -12,6 +12,18 @@ Overview
 
 Functions for building neighbour lists. :ref:`More...<details-namespacenneigh>`
 
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace nneigh {
+
+	// classes
+
+	class :ref:`SkinNeighborList<doxid-classnneigh_1_1_skin_neighbor_list>`;
+
+	} // namespace nneigh
 .. _details-namespacenneigh:
 
 Detailed Documentation

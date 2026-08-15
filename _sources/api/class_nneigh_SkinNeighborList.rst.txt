@@ -1,0 +1,23 @@
+.. index:: pair: class; nneigh::SkinNeighborList
+.. _doxid-classnneigh_1_1_skin_neighbor_list:
+
+class nneigh::SkinNeighborList
+==============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Persistent neighbour list with a LAMMPS skin. :ref:`More...<details-classnneigh_1_1_skin_neighbor_list>`
+
+.. _details-classnneigh_1_1_skin_neighbor_list:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Persistent neighbour list with a LAMMPS skin.
+
+Vesin (or the brute-force fallback) builds candidates at cutoff+skin, which is the ghost halo: periodic images already sit in that shell. The cell list is rebuilt only when some atom has moved more than skin/2 from the last rebuild, the Verlet trigger. The bond graph for rings is the candidate pairs whose current distance is inside the analysis cutoff.
+
