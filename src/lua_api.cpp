@@ -8,6 +8,7 @@
 #include <bond.hpp>
 #include <bop.hpp>
 #include <bulkTUM.hpp>
+#include <cage_affiliation.hpp>
 #include <cluster.hpp>
 #include <franzblau.hpp>
 #include <generic.hpp>
@@ -194,6 +195,32 @@ void registerRings(sol::state &lua) {
       "lastBallsRefreshed", &primitive::RingUpdater::lastBallsRefreshed);
   // Legacy spelling, container-userdata semantics
   lua.set_function("getPrimitiveRings", primitive::ringNetwork);
+  // Order-free per-ring cage classification and its exact incremental form
+  lua.set_function("cageAffiliation",
+                   [](sol::this_state ts,
+                      std::vector<std::vector<int>> rings,
+                      std::vector<std::vector<int>> nList) {
+                     sol::state_view lua(ts);
+                     const auto a = ring::cageAffiliation(rings, nList);
+                     sol::table out = lua.create_table(0, 2);
+                     out["hc"] = sol::as_table(a.hc);
+                     out["ddc"] = sol::as_table(a.ddc);
+                     return out;
+                   });
+  lua.new_usertype<ring::AffiliationUpdater>(
+      "AffiliationUpdater", sol::constructors<ring::AffiliationUpdater()>(),
+      "update",
+      [](sol::this_state ts, ring::AffiliationUpdater &self,
+         std::vector<std::vector<int>> rings,
+         std::vector<std::vector<int>> nList) {
+        sol::state_view lua(ts);
+        const auto &a = self.update(rings, nList);
+        sol::table out = lua.create_table(0, 2);
+        out["hc"] = sol::as_table(a.hc);
+        out["ddc"] = sol::as_table(a.ddc);
+        return out;
+      },
+      "lastReclassified", &ring::AffiliationUpdater::lastReclassified);
 }
 
 void registerOrder(sol::state &lua) {

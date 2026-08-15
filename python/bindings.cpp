@@ -11,11 +11,13 @@
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
 #include <nanobind/stl/complex.h>
+#include <nanobind/stl/pair.h>
 #include <nanobind/stl/unordered_map.h>
 
 #include <bond.hpp>
 #include <bop.hpp>
 #include <bulkTUM.hpp>
+#include <cage_affiliation.hpp>
 #include <cluster.hpp>
 #include <franzblau.hpp>
 #include <ira_sofi.hpp>
@@ -238,6 +240,29 @@ NB_MODULE(_core, m) {
              &primitive::RingUpdater::lastRecomputedSources)
         .def("lastBallsRefreshed",
              &primitive::RingUpdater::lastBallsRefreshed);
+    m.def(
+        "cageAffiliation",
+        [](const std::vector<std::vector<int>> &rings,
+           const std::vector<std::vector<int>> &nList) {
+          const auto a = ring::cageAffiliation(rings, nList);
+          return std::make_pair(a.hc, a.ddc);
+        },
+        "Order-free per-ring cage classification: (hc, ddc) flag vectors.",
+        nb::arg("rings"), nb::arg("nList"));
+    nb::class_<ring::AffiliationUpdater>(m, "AffiliationUpdater")
+        .def(nb::init<>())
+        .def(
+            "update",
+            [](ring::AffiliationUpdater &self,
+               const std::vector<std::vector<int>> &rings,
+               const std::vector<std::vector<int>> &nList) {
+              const auto &a = self.update(rings, nList);
+              return std::make_pair(a.hc, a.ddc);
+            },
+            "Exact incremental per-ring cage classification for this frame.",
+            nb::arg("rings"), nb::arg("nList"))
+        .def("lastReclassified",
+             &ring::AffiliationUpdater::lastReclassified);
     m.def("populateGraphFromIndices", &primitive::populateGraphFromIndices,
           "Create a graph object from an index-based neighbour list.",
           nb::arg("nList"));
