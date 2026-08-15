@@ -563,5 +563,8 @@ TEST_CASE("sheared box k-nearest uses the periodic image",
   REQUIRE(knn[1][0] == 2);
   REQUIRE(knn[0][1] == 2);
   REQUIRE(knn[1][1] == 1);
+  // Bound span 15 is not lx. The a-image distance is 0.5.
+  REQUIRE_THAT(gen::periodicDistSq(cloud, 0, 1),
+               Catch::Matchers::WithinAbs(0.25, 1e-9));
 }
 #endif
