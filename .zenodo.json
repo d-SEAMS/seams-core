@@ -1,0 +1,43 @@
+{
+  "title": "d-SEAMS 2.0: Incremental ring and cage algorithms for ice structure analysis (reproducibility archive)",
+  "upload_type": "software",
+  "license": "MIT",
+  "creators": [
+    {
+      "name": "Goswami, Rohit",
+      "orcid": "0000-0002-2393-8056"
+    },
+    {
+      "name": "Goswami, Amrita",
+      "orcid": "0000-0001-8706-2383"
+    },
+    {
+      "name": "S, Ruhila"
+    }
+  ],
+  "description": "Reproducibility archive for the d-SEAMS 2.0 paper: the Snakemake workflow that rebuilds the tip and baseline trees, gates on a green test suite, runs every benchmark behind the paper's tables through HyperQueue inside one Slurm allocation, and writes a single manifest; the reference manifest, run-conditions record, and state-of-the-art comparison sweep produced by that workflow; and the software source at the tagged release together with its exact external inputs (meson subproject wraps and the pixi lockfile).",
+  "communities": [
+    {
+      "identifier": "d-seams"
+    }
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isSupplementTo",
+      "identifier": "https://github.com/d-SEAMS/seams-core",
+      "resource_type": "software"
+    },
+    {
+      "relation": "isDerivedFrom",
+      "identifier": "10.1021/acs.jcim.0c00031",
+      "resource_type": "publication-article"
+    }
+  ],
+  "keywords": [
+    "molecular simulation",
+    "ice nucleation",
+    "topological network criteria",
+    "ring analysis",
+    "reproducibility"
+  ]
+}
