@@ -59,7 +59,8 @@ int main(int argc, char **argv) {
 
   primitive::RingUpdater ringUpd(maxDepth);
   ring::AffiliationUpdater affilUpd;
-  nneigh::SkinNeighborList skin(3.5, 2.0, atomType);
+  const double skinWidth = argc > 5 ? std::atof(argv[5]) : 2.0;
+  nneigh::SkinNeighborList skin(3.5, skinWidth, atomType);
 
   double ringFullSum = 0.0, ringIncSum = 0.0;
   double affilBatchSum = 0.0, affilIncSum = 0.0;
