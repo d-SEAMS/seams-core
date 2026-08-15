@@ -48,7 +48,8 @@ struct FrameContext {
   const std::vector<std::vector<int>> &nList;
   ring::RingSearchIndex index;
   std::vector<std::vector<int>> sortedRings;
-  std::vector<std::vector<int>> basalCand;
+  mutable std::vector<std::vector<int>> basalCand;
+  mutable std::vector<char> basalReady;
   mutable std::vector<std::vector<int>> adjRings;
   mutable std::vector<char> adjReady;
   // Scratch for findPrismatic, which appends to a list and stamps a type
@@ -79,9 +80,7 @@ struct FrameContext {
     basalCand.resize(static_cast<std::size_t>(nR));
     adjRings.resize(static_cast<std::size_t>(nR));
     adjReady.assign(static_cast<std::size_t>(nR), 0);
-    for (int i = 0; i < nR; i++) {
-      basalCand[static_cast<std::size_t>(i)] = collectBasalCandidates(i);
-    }
+    basalReady.assign(static_cast<std::size_t>(nR), 0);
   }
 
   [[nodiscard]] bool shareAtoms(int i, int j) const {
@@ -177,6 +176,10 @@ struct FrameContext {
     static const std::vector<int> empty;
     if (i < 0 || i >= static_cast<int>(basalCand.size())) {
       return empty;
+    }
+    if (!basalReady[static_cast<std::size_t>(i)]) {
+      basalCand[static_cast<std::size_t>(i)] = collectBasalCandidates(i);
+      basalReady[static_cast<std::size_t>(i)] = 1;
     }
     return basalCand[static_cast<std::size_t>(i)];
   }

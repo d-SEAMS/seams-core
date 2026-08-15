@@ -16,9 +16,9 @@
 #define SEAMS_NEIGHBOURS_H_
 
 #include <array>
-#include <set>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <generic.hpp>
 #include <mol_sys.hpp>
@@ -186,7 +186,7 @@ private:
   std::vector<double> z0_;
   std::array<double, 3> box0_{};
   std::vector<std::pair<int, int>> candidates_;
-  std::set<std::pair<int, int>> bonded_;
+  std::vector<std::pair<int, int>> bonded_;
   std::vector<std::vector<int>> nList_;
 
   bool mustRebuild(

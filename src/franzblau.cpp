@@ -352,8 +352,8 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth)
   const int nVertices = static_cast<int>(nList.size());
   std::vector<std::vector<int>> adjacency(nVertices);
   for (int i = 0; i < nVertices; i++) {
-    for (size_t j = 1; j < nList[i].size(); j++) {
-      adjacency[i].push_back(nList[i][j]);
+    if (nList[i].size() > 1) {
+      adjacency[i].assign(nList[i].begin() + 1, nList[i].end());
     }
   }
 
