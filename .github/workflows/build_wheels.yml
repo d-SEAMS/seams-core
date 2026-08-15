@@ -71,8 +71,11 @@ jobs:
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_BUILD: "cp312-* cp313-*"
-          CIBW_SKIP: "*musllinux* *i686*"
+          # One CPython 3.12 build per platform. meson limited_api: '3.12'
+          # tags the wheel abi3 (3.12+ GIL). Free-threaded CPython has no
+          # stable ABI; do not add cp31xt here.
+          CIBW_BUILD: "cp312-*"
+          CIBW_SKIP: "*musllinux* *i686* *t"
           CIBW_ARCHS: ${{ matrix.cibw-arch }}
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ENVIRONMENT: >

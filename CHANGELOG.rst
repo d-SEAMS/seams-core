@@ -9,7 +9,14 @@ Build and CI fixes following v2.0.0 release.
 
 Fixed
 ------
-- Pin Python to 3.12 for nanobind compatibility, drop limited_api
+- Python extension builds against the CPython 3.12 stable ABI
+  (=limited_api: '3.12'=). Wheels are one abi3 artifact per platform
+  (GIL). Free-threaded CPython has no limited ABI and is not a wheel
+  target.
+- =Frame= / =read= / =from_ase= / =from_arrays= are the public Python
+  API. CHILL and CHILL+ classify without writing scratch files.
+  =Trajectory= remains an alias of =Frame=.
+- Pin Python to 3.12 for the abi3 build host
 - Fix Eigen install path in wheel builds
 - Fix macOS deployment target (bump to 14), remove --enable-new-dtags on macOS
 - Regenerate pixi.lock for chemfiles compatibility
