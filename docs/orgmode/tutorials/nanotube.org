@@ -1,4 +1,7 @@
 #+TITLE: Quasi-one-dimensional ice
 #+OPTIONS: toc:nil num:nil
 
-Classify a frame with CHILL+ and cages in [[file:bulk-ice.org][the mixed TIP4P tutorial]].
+The ~seams~ CLI has no prism command. Confined ice (nanotube and
+monolayer) is [[file:../howto/confined-ice.org][the confined-ice howto]].
+Bulk CHILL+ and cages on the in-tree dump are
+[[file:bulk-ice.org][the mixed TIP4P tutorial]].

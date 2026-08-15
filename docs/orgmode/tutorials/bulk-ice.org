@@ -6,30 +6,43 @@ staggered/eclipsed star per oxygen) and topological cages (HC/DDC
 membership). The result is a labelled oxygen set and a reason the two
 scores disagree.
 
-Work from a seams-core checkout with =seams= on =PATH=. The dump is
-=input/traj/exampleTraj.lammpstrj=: one frame, 250 TIP4P waters, 750
-atoms, type 2 oxygen and type 1 hydrogen. Both classifiers use the
-oxygens.
+* Prerequisites
 
-Python is a separate package
-([[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]). The engine
-CLI is not a scripting host.
+- A seams-core checkout. Work from the repository root so
+  ~input/traj/~ is a child.
+- ~seams~ on ~PATH~ (~pixi run build~ produces ~./bbdir/seams~;
+  ~nix build~ produces ~./result/bin/seams~).
+- The in-tree dump ~input/traj/exampleTraj.lammpstrj~ (one frame, 750
+  atoms, 250 TIP4P waters; LAMMPS type 2 oxygen, type 1 hydrogen).
 
-* Read the frame
+Python and Lua are not required. The Frame tutorial lives in
+[[https://d-seams.github.io/PydSEAMSlib/][pydseams]]. Lua is
+[[https://d-seams.github.io/yodaStruct/][dseams]].
+
+* Learning Objectives
+
+By the end of this tutorial you will be able to:
+
+1. Read a LAMMPS dump with ~seams read~ and name the oxygen type.
+2. Run CHILL+ and read the four-neighbour star histogram.
+3. Run cages on the same oxygens and read HC / DDC membership.
+4. State why the two scores disagree on this mixed frame.
+
+* Step 1: Read the frame
 
 #+begin_src bash
 seams read input/traj/exampleTraj.lammpstrj
 #+end_src
 
-The line starts =nop 250 frame 1 box ...=. The CLI guesses oxygen
-(type 2) and falls back to type 1. Pass =--type 2= on the classifiers
-so the type is explicit.
+Expected output starts ~nop 250 frame 1 box ...~. The CLI guesses
+oxygen (type 2, then type 1). Pass ~--type 2~ on the classifiers so
+the type is explicit.
 
-* CHILL+ from the CLI
+* Step 2: CHILL+ from the CLI
 
 CHILL+ looks at each oxygen's four nearest neighbours inside the
 cutoff. Each of those four bonds is staggered or eclipsed from the
-pair correlation =c_ij=. The star of four labels is the ice type:
+pair correlation ~c_ij~. The star of four labels is the ice type:
 
 | label       | four-neighbour star              |
 |-------------+----------------------------------|
@@ -42,7 +55,7 @@ pair correlation =c_ij=. The star of four labels is the ice type:
 seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
 #+end_src
 
-The line is:
+Expected output:
 
 #+begin_example
 nop 250 cubic 42 hexagonal 65 interfacial 58 water 85
@@ -60,45 +73,27 @@ Bulk ice is cubic plus hexagonal (42 + 65 = 107). Interfacial is
 ice-like at the surface of those stars and is not in that sum. The
 four labels add to 250.
 
-* The same path in Python
-
-From the same checkout, so the relative path holds:
-
-#+begin_src python
-import pydseams as ds
-
-frame = ds.read("input/traj/exampleTraj.lammpstrj")
-print(frame.chill_plus())
-print(frame.cages())
-#+end_src
-
-=ds.read= picks type 2 when that type is present. =Frame.chill_plus=
-is the four-neighbour classifier. The histogram is cubic 42,
-hexagonal 65, interfacial 58, water 85 (attributes =cubic=,
-=hexagonal=, =interfacial=, and =["water"]=). =Frame.cages= is cage
-membership on the same oxygens: =n_ih= 0, =n_ic= 0, =n_water= 250.
-
-* Cages from the CLI
+* Step 3: Cages from the CLI
 
 Cages ask a different question: does this oxygen belong to a complete
 hexagonal cage (HC, ice Ih, 12 waters) or a complete double-diamond
 cage (DDC, ice Ic, 14 waters)? The search walks primitive six-rings on
-a bonded graph.
+a bonded graph. The default graph is ~--graph seeded~: mutual
+four-nearest seeds, union completions.
 
 #+begin_src bash
 seams cages input/traj/exampleTraj.lammpstrj --type 2
 #+end_src
 
-The default graph is =--graph seeded=: mutual four-nearest seeds,
-union completions. This mixed frame has no complete HC or DDC:
+Expected output:
 
 #+begin_example
 nop 250 graph seeded hexagonal 0 cubic 0 water 250
 #+end_example
 
-That is the same zero-cage result as =frame.cages()=.
+This mixed frame has no complete HC or DDC.
 
-* Why the two scores differ
+* Step 4: Why the two scores differ
 
 CHILL+ is a four-neighbour star. A molecule is cubic or hexagonal when
 its four bonds look like ice, even if those neighbours do not close a
@@ -112,10 +107,13 @@ On this mixed frame 107 oxygens have a bulk-ice star and 58 more are
 interfacial, yet TUM finds no complete HC or DDC. Local tetrahedral
 order is not cage membership.
 
-* A cubic crystal
+The longer argument is
+[[file:../explanation/chill-plus-vs-cages.org][CHILL+ versus cages]].
 
-The 4096-molecule cubic mW dump (=input/traj/mW_cubic.lammpstrj=, type
-1) is the opposite case: every molecule is in a DDC, and CHILL+
+* Step 5: A cubic crystal
+
+The 4096-molecule cubic mW dump (~input/traj/mW_cubic.lammpstrj~,
+type 1) is the opposite case: every molecule is in a DDC, and CHILL+
 reports cubic ice.
 
 #+begin_src bash
@@ -123,14 +121,54 @@ seams cages input/traj/mW_cubic.lammpstrj --type 1
 seams chill-plus input/traj/mW_cubic.lammpstrj --type 1
 #+end_src
 
-On a perfect cubic lattice the four cage graphs (=cutoff=, =knn=,
-=knn-union=, =seeded=) coincide. The mixed TIP4P frame is the one that
+On a perfect cubic lattice the four cage graphs (~cutoff~, ~knn~,
+~knn-union~, ~seeded~) coincide. The mixed TIP4P frame is the one that
 separates the two scores.
 
-* What you can do
+* Step 6: The same numbers in Python
 
-You can classify any LAMMPS water dump the same two ways: pass
-=--type= for the oxygen (or single-site) type, read CHILL+ as a
-four-neighbour star, and read cages as HC/DDC membership. Use
-=frame.chill_plus()= and =frame.cages()= when you want those scores in
-Python.
+From the same checkout, so the relative path holds:
+
+#+begin_src python
+import pydseams as ds
+
+frame = ds.read("input/traj/exampleTraj.lammpstrj")
+print(frame.chill_plus())
+print(frame.cages())
+#+end_src
+
+Expected print on this fixture:
+
+#+begin_example
+IceCounts(cubic=42, hexagonal=65, interfacial=58, water=85)
+CageScore(n_ih=0, n_ic=0, n_water=250)
+#+end_example
+
+That is a pointer, not a Frame tutorial. The Frame walkthrough is
+[[https://d-seams.github.io/PydSEAMSlib/][pydseams]]. Lua is
+[[https://d-seams.github.io/yodaStruct/][require("dseams")]]. This
+repository does not install Python.
+
+* Troubleshooting
+
+- ~nop 0~ or an empty histogram: wrong ~--type~. Mixed TIP4P in this
+  tree is type 2. mW is type 1.
+- Unknown command, exit 2: the binary is ~seams~, not ~yodaStruct~.
+  Commands are ~read~, ~chill~, ~chill-plus~, and ~cages~.
+- ~ModuleNotFoundError: pydseams~: this repo does not install Python.
+  ~pip install pydseams~.
+- Lua ~require("dseams")~: that module lives in yodaStruct.
+
+* Next steps
+
+- [[file:../howto/classify-cli.org][Classify a dump you already have]]
+  (frame ranges, ~--graph~, ~--jobs~)
+- [[file:../explanation/chill-plus-vs-cages.org][CHILL+ versus cages]]
+- [[https://d-seams.github.io/PydSEAMSlib/][pydseams Frame tutorial]]
+- [[https://d-seams.github.io/yodaStruct/][Lua read-and-classify]]
+
+* Summary
+
+You read one mixed TIP4P frame, printed the CHILL+ star (42 / 65 / 58
+/ 85), printed the seeded cage score (zero HC, zero DDC), and stated
+why those two answers differ.

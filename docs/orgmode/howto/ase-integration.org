@@ -1,58 +1,26 @@
 #+TITLE: ASE integration
 #+OPTIONS: toc:nil num:nil
 
-Turn an ASE ~Atoms~ into a ~pydseams.Frame~, classify ice, and write
-labels back onto the ~Atoms~.
-
-* Prerequisites
-
-The engine repository does not install Python. Build or install
-[[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]:
+Turn an ASE ~Atoms~ into labels. The engine repository does not
+install Python. The full howto is
+[[https://d-seams.github.io/PydSEAMSlib/][pydseams ASE]].
 
 #+begin_src bash
 pip install 'pydseams[ase]'
 #+end_src
-
-~import pydseamslib~ still resolves to the same package.
-
-* Classify ice from ASE
 
 #+begin_src python
 import ase.io
 import pydseams as ds
 
 atoms = ase.io.read("input/traj/exampleTraj.lammpstrj", format="lammps-dump-text")
-# LAMMPS dumps often have numeric types; give them symbols first
-for atom in atoms:
-    atom.symbol = {1: "H", 2: "O"}.get(atom.number, atom.symbol)
-
-frame = ds.from_ase(atoms)          # oxygen; H-bonds if H is present
+frame = ds.from_ase(atoms)
 print(frame.chill_plus())
-print(frame.cages())
-
-labelled = frame.to_ase()           # arrays['ice_type'] after CHILL
-# arrays['hc'] / arrays['ddc'] after cages()
+labelled = frame.to_ase()
 #+end_src
 
 ~from_ase~ needs an orthorhombic cell. The analysed species is oxygen
-by default (~select="O"~). Hydrogen positions stay on the frame so
-~bonded="auto"~ can build a hydrogen-bond graph.
-
-* Single-site models (mW)
-
-#+begin_src python
-frame = ds.from_ase(atoms, select="O", bonded="cutoff")
-#+end_src
-
-~select~ is a chemical symbol, an atomic number, or ~None~ (every
-atom). ~bonded~ is ~auto~, ~hbond~, or ~cutoff~. Use ~cutoff~ when the
-~Atoms~ have no hydrogen.
-
-* Notes
-
-- ~Frame~ is the high-level object. ~pydseams.yoda~ is the compiled
-  engine module (~_core~ and ~cyoda~ are aliases of ~yoda~).
-- ~to_ase~ writes ~arrays['ice_type']~ after ~chill~ / ~chill_plus~.
-  After ~cages()~ it also writes per-atom ~hc~ and ~ddc~ flags.
-- Optional extra ~pydseams[solvis]~ builds a solvis ~System~ from the
-  same frame (~frame.to_solvis()~).
+by default (~select="O"~). ~bonded~ is ~auto~, ~hbond~, or ~cutoff~.
+~to_ase~ writes ~arrays['ice_type']~ after CHILL, and ~hc~ / ~ddc~
+after ~cages()~. Optional extra ~pydseams[solvis]~ builds a solvis
+~System~ (~frame.to_solvis()~).

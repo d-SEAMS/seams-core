@@ -107,6 +107,7 @@ sphinx = ">=8.0, <9"
 sphinx-sitemap = ">=2.9, <3"
 sphinx-design = ">=0.6, <1"
 myst-parser = ">=4.0, <5"
+sphinxcontrib-mermaid = ">=1.0, <2"
 
 [feature.docs.tasks.setup-doxyrest]
 description = "Clones the doxyrest dependency into the subprojects directory"

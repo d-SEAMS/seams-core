@@ -1,0 +1,52 @@
+#+TITLE: FAQ
+#+OPTIONS: toc:nil num:nil
+
+* How do I install the engine?
+
+[[file:install.org][Install the engine]]. pixi or ~nix build~.
+
+* Where is Python?
+
+[[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
+~pip install pydseams~. ~import pydseamslib~ is an alias of
+~pydseams~. The compiled module is ~yoda~.
+
+* Where is Lua / Fennel?
+
+[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]].
+~require("dseams")~. ~require("yoda")~ still resolves to that table.
+There is no ~yodaStruct~ executable.
+
+* Why do CHILL+ and cages disagree?
+
+They answer different questions.
+[[file:../explanation/chill-plus-vs-cages.org][CHILL+ versus cages]].
+
+* What does ~--graph seeded~ mean?
+
+Mutual four-nearest seeds, union completions. It is the CLI default
+for ~cages~ only.
+
+* Which ~--type~ do I pass?
+
+Mixed water dumps in this tree: type 2 oxygen. Single-site mW dumps:
+type 1. Default ~0~ guesses type 2 then type 1.
+
+* Why is chemfiles disabled on ~nix build~?
+
+chemfiles is not in the flake closure. The default pixi lock enables
+it.
+
+* How do I turn colors off?
+
+~NO_COLOR~. ~FORCE_COLOR~ forces them on.
+
+* Does ~seams~ walk a trajectory?
+
+Yes: ~--frame N --last M --jobs J~ via ~forEachLammpsFrame~.
+~--jobs 1~ is serial.
+
+* How do I cite this?
+
+[[file:../explanation/citation.org][Citation]]. The preferred citation
+is the 2020 JCIM paper.

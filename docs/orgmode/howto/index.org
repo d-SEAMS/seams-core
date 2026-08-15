@@ -1,0 +1,25 @@
+#+TITLE: How-to
+#+OPTIONS: toc:nil num:nil
+
+A how-to solves a goal you already have. It is not a learning path.
+
+| guide | goal |
+|-------+------|
+| [[file:install.org][Install the engine]] | Get a ~seams~ binary |
+| [[file:classify-cli.org][Classify a dump]] | Run ~read~ / ~chill-plus~ / ~cages~ on a file you have |
+| [[file:ase-integration.org][ASE]] | Pointer to the pydseams ASE howto |
+| [[file:confined-ice.org][Confined ice]] | Nanotube and monolayer classification |
+| [[file:faq.org][FAQ]] | Short answers |
+| [[file:troubleshooting.org][Troubleshooting]] | Symptom, cause, fix |
+
+#+begin_export rst
+.. toctree::
+   :maxdepth: 1
+
+   install
+   classify-cli
+   ase-integration
+   confined-ice
+   faq
+   troubleshooting
+#+end_export

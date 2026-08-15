@@ -1,0 +1,64 @@
+#+TITLE: CHILL+ versus cages
+#+OPTIONS: toc:nil num:nil
+
+Two classifiers live in ~libyodaLib~. They answer different questions
+and they do not imply each other.
+
+* Four-neighbour star
+
+CHILL and CHILL+ (~seams chill~ / ~seams chill-plus~,
+~chill::getCorrelPlus~ / ~getIceTypePlus~) look at the four-neighbour
+star. They compute bond-order correlations ~c_ij~ on the four nearest
+neighbours of each oxygen (or each mW site) and label the atom cubic,
+hexagonal, interfacial, clathrate, or water from the staggered and
+eclipsed pattern of that star.
+
+A molecule is cubic or hexagonal when its four bonds look like ice,
+even if those neighbours do not close a cage.
+
+CHILL+: Nguyen and Molinero, *J. Phys. Chem. B* 2015
+([[https://doi.org/10.1021/jp510289t][10.1021/jp510289t]]).
+CHILL: Moore et al., *Phys. Chem. Chem. Phys.* 2010.
+
+* Cage membership
+
+The ice score (~seams cages~, ~ring::seededCageAffiliation~ by
+default) is cage membership. A molecule in a hexagonal cage (HC) is
+ice Ih. A molecule in a double-diamond cage (DDC) is ice Ic. A
+molecule in neither is water. The cages are assembled from
+six-membered primitive rings on a chosen bond graph, not from the
+four-neighbour star.
+
+This is topological unit matching (TUM). The methods paper is the
+2020 JCIM article (see [[file:citation.org][Citation]]).
+
+* Why they disagree
+
+A configuration can agree exactly on the closed star of a vertex
+(same induced graph, same coordinates on those five atoms) and still
+disagree on that vertex's cage label, because the cage predicates
+read a larger neighbourhood of six-rings. The Catch2 suite encodes
+that fact: cage membership is not a function of the four-neighbour
+star.
+
+On the in-tree mixed TIP4P dump
+(~input/traj/exampleTraj.lammpstrj~), CHILL+ reports 42 cubic, 65
+hexagonal, 58 interfacial, and 85 water (107 bulk-ice stars). Seeded
+cages report zero HC and zero DDC. Local tetrahedral order is not
+cage membership. Walk through the commands in
+[[file:../tutorials/bulk-ice.org][the mixed TIP4P tutorial]].
+
+* Bond graph
+
+~seams cages --graph~ chooses the bond graph those rings are found
+on:
+
+| value | graph |
+|-------+-------|
+| ~cutoff~ | pairs inside the distance cutoff |
+| ~knn~ | mutual k-nearest (default ~k=4~) |
+| ~knn-union~ | union k-nearest (completion graph of the seeded rule) |
+| ~seeded~ | mutual seeds, union completions (CLI default) |
+
+On a perfect cubic crystal the four graphs coincide. On a mixed
+nucleation dump they do not have to.

@@ -6,6 +6,10 @@ Python bindings are [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
 Lua/Fennel is [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]].
 Do not add a language binding here.
 
+Documentation is authored in ~docs/orgmode/~ and exported with
+~docs/export.el~ (ox-rst) before Sphinx. Run ~pixi run -e docs docbld~
+to export, run doxyrest, and build the Shibuya site.
+
 * Prerequisites
 
 Two supported compiler shells:

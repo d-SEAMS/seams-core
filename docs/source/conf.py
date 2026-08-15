@@ -19,6 +19,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx_sitemap",
     "sphinx_design",
+    "sphinxcontrib.mermaid",
 ]
 
 templates_path = ["_templates"]
@@ -35,6 +36,12 @@ intersphinx_mapping = {
 # -- Options for HTML output -------------------------------------------------
 html_theme = "shibuya"
 html_static_path = ["_static"]
+html_css_files = []  # sphinx-design ships its own CSS
+html_js_files = []
+
+# Mermaid: default CDN; diagrams via ``.. mermaid::`` from Org RST export.
+mermaid_version = "11.4.0"
+mermaid_init_js = "mermaid.initialize({startOnLoad:true, theme:'neutral'});"
 
 html_context = {
     "source_type": "github",
@@ -49,6 +56,9 @@ html_theme_options = {
     "accent_color": "teal",
     "dark_code": True,
     "globaltoc_expand_depth": 1,
+    "toctree_collapse": True,
+    "toctree_maxdepth": 3,
+    "toctree_titles_only": True,
     "nav_links": [
         {
             "title": "Ecosystem",

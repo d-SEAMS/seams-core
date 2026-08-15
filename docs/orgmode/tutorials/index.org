@@ -1,0 +1,20 @@
+#+TITLE: Tutorials
+#+OPTIONS: toc:nil num:nil
+
+A tutorial is a learning path. You finish it with a skill, not a
+lookup table. The one good tutorial on this site classifies the
+in-tree mixed TIP4P dump two ways.
+
+| tutorial | you learn |
+|----------+-----------|
+| [[file:bulk-ice.org][Classify ice on the mixed TIP4P example]] | ~seams read~, CHILL+, cages, and why the scores disagree |
+
+How-tos solve a goal you already have. Reference names flags and
+headers. Explanation is why the two classifiers exist.
+
+#+begin_export rst
+.. toctree::
+   :maxdepth: 1
+
+   bulk-ice
+#+end_export
