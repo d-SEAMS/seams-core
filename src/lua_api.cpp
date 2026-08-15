@@ -131,9 +131,12 @@ void registerNeighbours(sol::state &lua) {
                      return sol::as_nested(
                          nneigh::getNewNeighbourListByIndex(yCloud, cutoff));
                    });
+  // New-style bindings take the neighbour list by value: sol2 can build a
+  // container from a plain Lua table only when the parameter owns it, while
+  // a reference parameter binds container userdata alone.
   lua.set_function(
       "neighbourListByIndex",
-      [](const Cloud &yCloud, const std::vector<std::vector<int>> &nList) {
+      [](const Cloud &yCloud, std::vector<std::vector<int>> nList) {
         return sol::as_nested(nneigh::neighbourListByIndex(yCloud, nList));
       });
   // Legacy spellings, container-userdata semantics
@@ -146,14 +149,12 @@ void registerNeighbours(sol::state &lua) {
 
 void registerRings(sol::state &lua) {
   lua.set_function("ringNetwork",
-                   [](const std::vector<std::vector<int>> &nList,
-                      int maxDepth) {
+                   [](std::vector<std::vector<int>> nList, int maxDepth) {
                      return sol::as_nested(primitive::ringNetwork(nList, maxDepth));
                    });
   lua.new_usertype<primitive::RingUpdater>(
       "RingUpdater", sol::constructors<primitive::RingUpdater(int)>(), "update",
-      [](primitive::RingUpdater &self,
-         const std::vector<std::vector<int>> &nList) {
+      [](primitive::RingUpdater &self, std::vector<std::vector<int>> nList) {
         return sol::as_nested(self.update(nList));
       },
       "lastRecomputedSources", &primitive::RingUpdater::lastRecomputedSources,
@@ -164,15 +165,15 @@ void registerRings(sol::state &lua) {
 
 void registerOrder(sol::state &lua) {
   lua.set_function("getCorrelPlus",
-                   [](Cloud &yCloud, const std::vector<std::vector<int>> &nList,
+                   [](Cloud &yCloud, std::vector<std::vector<int>> nList,
                       sol::optional<bool> isSlice) {
                      chill::getCorrelPlus(yCloud, nList,
                                           isSlice.value_or(false));
                    });
   lua.set_function(
       "getIceTypePlus",
-      [](Cloud &yCloud, const std::vector<std::vector<int>> &nList,
-         std::string path, int firstFrame, sol::optional<bool> isSlice,
+      [](Cloud &yCloud, std::vector<std::vector<int>> nList, std::string path,
+         int firstFrame, sol::optional<bool> isSlice,
          sol::optional<std::string> outputFileName) {
         chill::getIceTypePlus(yCloud, nList, path, firstFrame,
                               isSlice.value_or(false),
@@ -180,14 +181,14 @@ void registerOrder(sol::state &lua) {
         return sol::as_table(iceStateNames(yCloud));
       });
   lua.set_function("getCorrel",
-                   [](Cloud &yCloud, const std::vector<std::vector<int>> &nList,
+                   [](Cloud &yCloud, std::vector<std::vector<int>> nList,
                       sol::optional<bool> isSlice) {
                      chill::getCorrel(yCloud, nList, isSlice.value_or(false));
                    });
   lua.set_function(
       "getIceType",
-      [](Cloud &yCloud, const std::vector<std::vector<int>> &nList,
-         std::string path, int firstFrame, sol::optional<bool> isSlice,
+      [](Cloud &yCloud, std::vector<std::vector<int>> nList, std::string path,
+         int firstFrame, sol::optional<bool> isSlice,
          sol::optional<std::string> outputFileName) {
         chill::getIceType(yCloud, nList, path, firstFrame,
                           isSlice.value_or(false),
@@ -196,7 +197,7 @@ void registerOrder(sol::state &lua) {
       });
   lua.set_function("steinhardtQl",
                    [](sol::this_state ts, const Cloud &yCloud,
-                      const std::vector<std::vector<int>> &nList, int orderL) {
+                      std::vector<std::vector<int>> nList, int orderL) {
                      return packSteinhardt(
                          sol::state_view(ts),
                          chill::steinhardtQl(yCloud, nList, orderL));
@@ -262,7 +263,7 @@ void registerDescriptors(sol::state &lua) {
   lua.set_function(
       "classifyTemplates",
       [](sol::this_state ts, const Cloud &cloud,
-         const std::vector<std::vector<int>> &nList, int kNeigh) {
+         std::vector<std::vector<int>> nList, int kNeigh) {
         sol::state_view lua(ts);
         const auto hits = chill::classifyTemplates(cloud, nList, kNeigh);
         sol::table out = lua.create_table(static_cast<int>(hits.size()), 0);
@@ -276,14 +277,14 @@ void registerDescriptors(sol::state &lua) {
       });
   lua.set_function("soapSpectrum",
                    [](const Cloud &yCloud, int iatom,
-                      const std::vector<std::vector<int>> &nList, int nMax,
-                      int lMax, double rcut) {
+                      std::vector<std::vector<int>> nList, int nMax, int lMax,
+                      double rcut) {
                      return sol::as_table(chill::soapSpectrum(
                          yCloud, iatom, nList, nMax, lMax, rcut));
                    });
   lua.set_function("soapSpectrumAll",
                    [](const Cloud &yCloud,
-                      const std::vector<std::vector<int>> &nList, int nMax,
+                      std::vector<std::vector<int>> nList, int nMax,
                       int lMax, double rcut) {
                      return sol::as_nested(chill::soapSpectrumAll(yCloud, nList,
                                                                nMax, lMax,
