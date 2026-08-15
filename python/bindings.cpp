@@ -381,14 +381,17 @@ NB_MODULE(_core, m) {
     m.def(
         "getCorrelPlus",
         [](molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-           const std::vector<std::vector<int>> &nList, bool isSlice)
+           const std::vector<std::vector<int>> &nList, bool isSlice,
+           int coordinationNumber)
             -> molSys::PointCloud<molSys::Point<double>, double> & {
-          chill::getCorrelPlus(yCloud, nList, isSlice);
+          chill::getCorrelPlus(yCloud, nList, isSlice, coordinationNumber);
           return yCloud;
         },
-        "Compute CHILL+ bond-order correlations and classify bond types.",
+        "Compute CHILL+ bond-order correlations and classify bond types. "
+        "coordinationNumber=4 is the validated water scheme; non-positive "
+        "uses each atom's whole neighbour row.",
         nb::arg("yCloud"), nb::arg("nList"), nb::arg("isSlice"),
-        nb::rv_policy::reference);
+        nb::arg("coordinationNumber") = 4, nb::rv_policy::reference);
     m.def(
         "getIceTypePlus",
         [](molSys::PointCloud<molSys::Point<double>, double> &yCloud,
@@ -406,14 +409,17 @@ NB_MODULE(_core, m) {
     m.def(
         "getCorrel",
         [](molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-           const std::vector<std::vector<int>> &nList, bool isSlice)
+           const std::vector<std::vector<int>> &nList, bool isSlice,
+           int coordinationNumber)
             -> molSys::PointCloud<molSys::Point<double>, double> & {
-          chill::getCorrel(yCloud, nList, isSlice);
+          chill::getCorrel(yCloud, nList, isSlice, coordinationNumber);
           return yCloud;
         },
-        "Compute CHILL bond-order correlations and classify bond types.",
+        "Compute CHILL bond-order correlations and classify bond types. "
+        "coordinationNumber=4 is the validated water scheme; non-positive "
+        "uses each atom's whole neighbour row.",
         nb::arg("yCloud"), nb::arg("nList"), nb::arg("isSlice"),
-        nb::rv_policy::reference);
+        nb::arg("coordinationNumber") = 4, nb::rv_policy::reference);
     m.def(
         "getIceType",
         [](molSys::PointCloud<molSys::Point<double>, double> &yCloud,

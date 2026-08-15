@@ -233,18 +233,21 @@ harmonicPair(int orderL, int absM, const AngularTerms &terms) {
  *  disordered or interfacial water they do not, which is where the
  *  classification is actually used.
  *
- *  Where fewer than four neighbours are available the shorter list is
- *  returned, since there is no fourth neighbour to choose.
+ *  Where fewer than the requested neighbours are available the shorter list
+ *  is returned, since there is no further neighbour to choose. A
+ *  non-positive @a coordination keeps the whole row, which gives each atom
+ *  its own neighbour count for systems without a fixed coordination.
  * @param[in] yCloud The input molSys::PointCloud.
  * @param[in] nList Row-ordered neighbour list, by atom ID.
  * @param[in] iatomIndex Index of the particle whose neighbours are wanted.
- * @return Cloud indices of the four nearest neighbours, nearest first.
+ * @param[in] coordination How many nearest neighbours to keep; non-positive
+ *  keeps every neighbour in the row.
+ * @return Cloud indices of the nearest neighbours, nearest first.
  */
 std::vector<int> nearestNeighbourIndices(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-    const std::vector<std::vector<int>> &nList, int iatomIndex) {
-  constexpr size_t kCoordination = 4;
-
+    const std::vector<std::vector<int>> &nList, int iatomIndex,
+    int coordination) {
   std::vector<std::pair<double, int>> candidates;
   candidates.reserve(nList[iatomIndex].size());
   for (size_t j = 1; j < nList[iatomIndex].size(); j++) {
@@ -256,7 +259,10 @@ std::vector<int> nearestNeighbourIndices(
                             it->second);
   }
 
-  const size_t keep = std::min(kCoordination, candidates.size());
+  const size_t keep = (coordination > 0)
+                          ? std::min(static_cast<size_t>(coordination),
+                                     candidates.size())
+                          : candidates.size();
   std::partial_sort(candidates.begin(), candidates.begin() + keep,
                     candidates.end());
 
@@ -479,7 +485,8 @@ std::complex<double> sph::lookupTableQ6(int m, std::array<double, 2> angles) {
 //! algorithm
 void
 chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-                 const std::vector<std::vector<int>> &nList, bool isSlice) {
+                 const std::vector<std::vector<int>> &nList, bool isSlice,
+                 int coordinationNumber) {
   //
   int l = 3;      // TODO: Don't hard-code this; change later
   int iatomID;    // Atom ID (key) of iatom
@@ -511,9 +518,10 @@ chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     iatomID =
         nList[iatomIndex][0]; // The first element in nList is the ID of iatom
     // CHILL and CHILL+ average over the four nearest neighbours, not over
-    // every neighbour that falls inside the cutoff
+    // every neighbour that falls inside the cutoff; other coordination
+    // numbers reuse the same machinery for non-tetrahedral systems
     const std::vector<int> nearest =
-        nearestNeighbourIndices(yCloud, nList, iatomIndex);
+        nearestNeighbourIndices(yCloud, nList, iatomIndex, coordinationNumber);
     nnumNeighbours = static_cast<int>(nearest.size());
     for (int j = 0; j < nnumNeighbours; j++) {
       jatomIndex = nearest[j];
@@ -557,10 +565,10 @@ chill::getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     }
     // The index is what we are looping through
     iatomIndex = iatom;
-    // The same four neighbours the q_lm were averaged over, so that the bond
+    // The same neighbours the q_lm were averaged over, so that the bond
     // count the classification tables are written against matches
     const std::vector<int> nearestBonds =
-        nearestNeighbourIndices(yCloud, nList, iatomIndex);
+        nearestNeighbourIndices(yCloud, nList, iatomIndex, coordinationNumber);
     nnumNeighbours = static_cast<int>(nearestBonds.size());
     yCloud.pts[iatomIndex].c_ij.reserve(nnumNeighbours);
     for (int j = 0; j < nnumNeighbours; j++) {
@@ -768,7 +776,8 @@ chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
  */
 void
 chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-                     const std::vector<std::vector<int>> &nList, bool isSlice) {
+                     const std::vector<std::vector<int>> &nList, bool isSlice,
+                     int coordinationNumber) {
   //
   int l = 3;      // TODO: Don't hard-code this; change later
   int iatomID;    // Atom ID (key) of iatom
@@ -800,9 +809,10 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     iatomID =
         nList[iatomIndex][0]; // The first element in nList is the ID of iatom
     // CHILL and CHILL+ average over the four nearest neighbours, not over
-    // every neighbour that falls inside the cutoff
+    // every neighbour that falls inside the cutoff; other coordination
+    // numbers reuse the same machinery for non-tetrahedral systems
     const std::vector<int> nearest =
-        nearestNeighbourIndices(yCloud, nList, iatomIndex);
+        nearestNeighbourIndices(yCloud, nList, iatomIndex, coordinationNumber);
     nnumNeighbours = static_cast<int>(nearest.size());
     for (int j = 0; j < nnumNeighbours; j++) {
       jatomIndex = nearest[j];
@@ -846,10 +856,10 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     }
     // The index is what we are looping through
     iatomIndex = iatom;
-    // The same four neighbours the q_lm were averaged over, so that the bond
+    // The same neighbours the q_lm were averaged over, so that the bond
     // count the classification tables are written against matches
     const std::vector<int> nearestBonds =
-        nearestNeighbourIndices(yCloud, nList, iatomIndex);
+        nearestNeighbourIndices(yCloud, nList, iatomIndex, coordinationNumber);
     nnumNeighbours = static_cast<int>(nearestBonds.size());
     yCloud.pts[iatomIndex].c_ij.reserve(nnumNeighbours);
     for (int j = 0; j < nnumNeighbours; j++) {
@@ -1043,7 +1053,7 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     // if(yCloud.pts[iatom].type!=typeO){continue;}
 
-    const auto nearest = nearestNeighbourIndices(yCloud, nList, iatom);
+    const auto nearest = nearestNeighbourIndices(yCloud, nList, iatom, 4);
     bool first = true;
     for (int jatomIndex : nearest) {
       delta = gen::relDist(yCloud, iatom, jatomIndex);
@@ -1083,7 +1093,7 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     // 	if(yCloud.pts[iatom].inSlice==false){continue;}
     // }
 
-    const auto nearest = nearestNeighbourIndices(yCloud, nList, iatom);
+    const auto nearest = nearestNeighbourIndices(yCloud, nList, iatom, 4);
     q_value = 0.0;
     for (int jatomIndex : nearest) {
       dot_product = {0, 0};

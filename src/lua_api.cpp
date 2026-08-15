@@ -166,9 +166,11 @@ void registerRings(sol::state &lua) {
 void registerOrder(sol::state &lua) {
   lua.set_function("getCorrelPlus",
                    [](Cloud &yCloud, std::vector<std::vector<int>> nList,
-                      sol::optional<bool> isSlice) {
+                      sol::optional<bool> isSlice,
+                      sol::optional<int> coordinationNumber) {
                      chill::getCorrelPlus(yCloud, nList,
-                                          isSlice.value_or(false));
+                                          isSlice.value_or(false),
+                                          coordinationNumber.value_or(4));
                    });
   lua.set_function(
       "getIceTypePlus",
@@ -182,8 +184,10 @@ void registerOrder(sol::state &lua) {
       });
   lua.set_function("getCorrel",
                    [](Cloud &yCloud, std::vector<std::vector<int>> nList,
-                      sol::optional<bool> isSlice) {
-                     chill::getCorrel(yCloud, nList, isSlice.value_or(false));
+                      sol::optional<bool> isSlice,
+                      sol::optional<int> coordinationNumber) {
+                     chill::getCorrel(yCloud, nList, isSlice.value_or(false),
+                                      coordinationNumber.value_or(4));
                    });
   lua.set_function(
       "getIceType",

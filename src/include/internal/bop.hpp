@@ -175,10 +175,17 @@ struct QlmAtom {
  The first element of each row is the particle ID, followed by the IDs of the
  neighbours
  *  @param[in] isSlice This decides whether there is a slice or not
+ *  @param[in] coordinationNumber How many nearest neighbours the bond sum
+ runs over. The default of four is the coordination CHILL is defined and
+ validated against (tetrahedral water); other values reuse the c_ij machinery
+ for differently coordinated systems, and a non-positive value gives each
+ atom its own count from its neighbour-list row. The ice-classification
+ tables in getIceType remain four-bond rules
  */
 void
 getCorrel(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-          const std::vector<std::vector<int>> &nList, bool isSlice = false);
+          const std::vector<std::vector<int>> &nList, bool isSlice = false,
+          int coordinationNumber = 4);
 
 /**
  *  Function that classifies every particle's #molSys::atom_state_type ice
@@ -210,10 +217,13 @@ getIceType(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
            int firstFrame, bool isSlice = false,
            std::string outputFileName = "chill.txt");
 
-//! Gets c_ij and then classifies bond types according to the CHILL+ algorithm
+//! Gets c_ij and then classifies bond types according to the CHILL+
+//! algorithm. coordinationNumber as in getCorrel: four is the validated
+//! CHILL+ water scheme, non-positive keeps each atom's whole neighbour row
 void
 getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-              const std::vector<std::vector<int>> &nList, bool isSlice = false);
+              const std::vector<std::vector<int>> &nList, bool isSlice = false,
+              int coordinationNumber = 4);
 
 //! Classifies each atom according to the CHILL+ algorithm
 void

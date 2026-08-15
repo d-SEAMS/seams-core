@@ -701,6 +701,44 @@ TEST_CASE("steinhardtQl l=3 vanishes on an inversion-symmetric FCC lattice",
   }
 }
 
+TEST_CASE("getCorrel coordination number generalizes beyond four", "[bop]") {
+  // The FCC first shell holds twelve neighbours. The tetrahedral default
+  // keeps the four nearest, a coordination of twelve keeps the shell, and a
+  // non-positive coordination keeps each atom's whole neighbour-list row.
+  const double lattice = 4.0;
+  const double cutoff = 0.85 * lattice; // first shell at a/sqrt(2)
+
+  auto cloudDefault = fccCloud(3, lattice);
+  auto nList = nneigh::neighListO(cutoff, cloudDefault, 1);
+  chill::getCorrel(cloudDefault, nList, false);
+  for (int i = 0; i < cloudDefault.nop; i++) {
+    REQUIRE(cloudDefault.pts[i].c_ij.size() == 4);
+  }
+
+  auto cloudTwelve = fccCloud(3, lattice);
+  chill::getCorrel(cloudTwelve, nList, false, 12);
+  for (int i = 0; i < cloudTwelve.nop; i++) {
+    REQUIRE(cloudTwelve.pts[i].c_ij.size() == 12);
+    for (const auto &cij : cloudTwelve.pts[i].c_ij) {
+      REQUIRE(cij.c_value >= -1.0);
+      REQUIRE(cij.c_value <= 1.0);
+    }
+  }
+
+  auto cloudRow = fccCloud(3, lattice);
+  chill::getCorrel(cloudRow, nList, false, 0);
+  for (int i = 0; i < cloudRow.nop; i++) {
+    // Row layout: the first entry is the atom's own ID
+    REQUIRE(cloudRow.pts[i].c_ij.size() == nList[i].size() - 1);
+  }
+
+  auto cloudPlus = fccCloud(3, lattice);
+  chill::getCorrelPlus(cloudPlus, nList, false, 12);
+  for (int i = 0; i < cloudPlus.nop; i++) {
+    REQUIRE(cloudPlus.pts[i].c_ij.size() == 12);
+  }
+}
+
 TEST_CASE("Steinhardt parameters reproduce the FCC reference values", "[bop]") {
   // A perfect FCC lattice has q4 = 0.190941, q6 = 0.574524 for the twelve
   // nearest neighbours (Steinhardt, Nelson and Ronchetti 1983, Table I).
