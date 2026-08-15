@@ -15,6 +15,7 @@
 #ifndef SEAMS_SEAMS_INPUT_H_
 #define SEAMS_SEAMS_INPUT_H_
 
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <mol_sys.hpp>
@@ -49,6 +50,28 @@ namespace sinp {
 
 //! Get file list inside the input folder
 std::vector<std::string> getInpFileList(std::string inputFolder);
+
+//! Number of ITEM: TIMESTEP frames in a LAMMPS dump, or 0 if the file
+//! cannot be read. The first full count per path walks the file once
+//! and later reads seek, matching chemfiles Trajectory::nsteps and
+//! readcon's frame-offset table. Sequential load_frame walks reuse a
+//! live cursor the way LAMMPS ReaderNative does on rerun.
+int nLammpsFrames(const std::string &filename);
+
+//! Drop a cached dump session (tests that rewrite a path in place).
+void dropLammpsDumpIndex(const std::string &filename);
+
+//! Call fn(frame, cloud) for each frame in [first, last] (1-based,
+//! inclusive). last <= 0 means every ITEM: TIMESTEP. typeFilter <= 0
+//! keeps every atom. nThreads <= 0 uses the OpenMP default; 1 is
+//! serial. Each worker opens its own handle and seeks the shared
+//! offset table. Incremental RingUpdater / AffiliationUpdater state
+//! cannot be shared across workers: use the batch classifiers.
+void forEachLammpsFrame(
+    const std::string &filename, int first, int last, int typeFilter,
+    const std::function<void(
+        int, molSys::PointCloud<molSys::Point<double>, double> &)> &fn,
+    int nThreads = 0);
 
 //! Function for reading in a specified frame (frame number and not timestep
 //! value)

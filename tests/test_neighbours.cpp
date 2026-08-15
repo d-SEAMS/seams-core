@@ -8,6 +8,8 @@
 
 #include <algorithm>
 #include <array>
+#include <stdexcept>
+#include <string>
 #include <vector>
 
 // Helper: build a 4-atom system in a 10x10x10 box
@@ -329,6 +331,54 @@ TEST_CASE("neighListO leaves an unmapped atom as an empty row",
   REQUIRE(nList[2].empty());
 }
 
+TEST_CASE("SkinNeighborList matches neighListO on a static cloud",
+          "[neighbours]") {
+  auto cloud = makeFourAtomCloud();
+  nneigh::SkinNeighborList skin(1.5, 0.5, 1, nneigh::BondGraph::Cutoff);
+  const auto &bonds = skin.update(cloud);
+  auto hard = nneigh::neighListO(1.5, cloud, 1);
+  REQUIRE(skin.lastRebuilt());
+  REQUIRE(bonds.size() == hard.size());
+  for (std::size_t i = 0; i < bonds.size(); i++) {
+    auto a = bonds[i];
+    auto b = hard[i];
+    std::sort(a.begin() + 1, a.end());
+    std::sort(b.begin() + 1, b.end());
+    REQUIRE(a == b);
+  }
+}
+
+TEST_CASE("SkinNeighborList rebuilds only after the Verlet trigger",
+          "[neighbours]") {
+  auto cloud = makeFourAtomCloud();
+  nneigh::SkinNeighborList skin(1.5, 1.0, 1, nneigh::BondGraph::Cutoff);
+  (void)skin.update(cloud);
+  REQUIRE(skin.lastRebuilt());
+
+  cloud.pts[1].x += 0.2; // skin/2 = 0.5
+  (void)skin.update(cloud);
+  REQUIRE_FALSE(skin.lastRebuilt());
+
+  cloud.pts[1].x += 0.5;
+  (void)skin.update(cloud);
+  REQUIRE(skin.lastRebuilt());
+}
+
+TEST_CASE("SkinNeighborList drops a bond as soon as it leaves the cutoff",
+          "[neighbours]") {
+  auto cloud = makeFourAtomCloud();
+  nneigh::SkinNeighborList skin(1.5, 2.0, 1, nneigh::BondGraph::Cutoff);
+  (void)skin.update(cloud);
+  REQUIRE(std::find(skin.bonds()[0].begin() + 1, skin.bonds()[0].end(), 1) !=
+          skin.bonds()[0].end());
+
+  cloud.pts[1].x = 1.8; // 1.8 > 1.5, still inside the skin halo
+  (void)skin.update(cloud);
+  REQUIRE_FALSE(skin.lastRebuilt());
+  REQUIRE(std::find(skin.bonds()[0].begin() + 1, skin.bonds()[0].end(), 1) ==
+          skin.bonds()[0].end());
+}
+
 TEST_CASE("neighListO returns empty when the cloud has no atoms",
           "[neighbours]") {
   auto cloud = makeFourAtomCloud();
@@ -403,6 +453,35 @@ TEST_CASE("mutual and union k-nearest graphs coincide on the crystal",
   for (size_t i = 0; i < unionRows.size(); i++) {
     std::vector<int> a(unionRows[i].begin() + 1, unionRows[i].end());
     std::vector<int> b(mutualRows[i].begin() + 1, mutualRows[i].end());
+    std::sort(a.begin(), a.end());
+    std::sort(b.begin(), b.end());
+    REQUIRE(a == b);
+  }
+}
+
+TEST_CASE("bondGraphFromName accepts the published graph names",
+          "[neighbours]") {
+  REQUIRE(nneigh::bondGraphFromName("cutoff") == nneigh::BondGraph::Cutoff);
+  REQUIRE(nneigh::bondGraphFromName("knn") == nneigh::BondGraph::KnnMutual);
+  REQUIRE(nneigh::bondGraphFromName("knn-union") ==
+          nneigh::BondGraph::KnnUnion);
+  REQUIRE(std::string(nneigh::bondGraphName(nneigh::BondGraph::KnnMutual)) ==
+          "knn");
+  REQUIRE_THROWS_AS(nneigh::bondGraphFromName("not-a-graph"),
+                    std::invalid_argument);
+}
+
+TEST_CASE("SkinNeighborList default is the mutual four-nearest graph",
+          "[neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  nneigh::SkinNeighborList skin(3.5, 2.0, 1);
+  const auto &bonds = skin.update(yCloud);
+  auto knn = nneigh::kNearestNeighbourList(yCloud, 4, 5.5, 1, true);
+  REQUIRE(bonds.size() == knn.size());
+  for (std::size_t i = 0; i < bonds.size(); i++) {
+    std::vector<int> a(bonds[i].begin() + 1, bonds[i].end());
+    std::vector<int> b(knn[i].begin() + 1, knn[i].end());
     std::sort(a.begin(), a.end());
     std::sort(b.begin(), b.end());
     REQUIRE(a == b);

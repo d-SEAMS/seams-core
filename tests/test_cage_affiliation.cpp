@@ -153,10 +153,11 @@ TEST_CASE("cageAffiliation is invariant under ring permutation",
 TEST_CASE("AffiliationUpdater equals batch across the mW trajectory",
           "[cage_affiliation]") {
   ring::AffiliationUpdater updater;
+  nneigh::SkinNeighborList skin(3.5, 2.0, 1);
   for (int frame = 1; frame <= 11; frame++) {
     molSys::PointCloud<molSys::Point<double>, double> yCloud;
     yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", frame, yCloud, 1);
-    auto nList = nneigh::neighListO(3.5, yCloud, 1);
+    auto nList = skin.update(yCloud);
     auto idx = nneigh::neighbourListByIndex(yCloud, nList);
     auto six = sixMembered(primitive::ringNetwork(idx, 7));
 
@@ -215,6 +216,30 @@ TEST_CASE("AffiliationUpdater tracks synthetic topology churn exactly",
       REQUIRE(updater.lastReclassified() < static_cast<int>(six.size()) / 2);
     }
   }
+}
+
+TEST_CASE("AffiliationUpdater matches batch when every neighbour row changes",
+          "[cage_affiliation]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  auto idx = nneigh::neighbourListByIndex(yCloud, nList);
+  auto six = sixMembered(primitive::ringNetwork(idx, 7));
+
+  ring::AffiliationUpdater updater;
+  (void)updater.update(six, idx);
+
+  auto emptyRows = idx;
+  for (auto &row : emptyRows) {
+    if (!row.empty()) {
+      row.resize(1);
+    }
+  }
+  const auto &incremental = updater.update(six, emptyRows);
+  const auto batch = ring::cageAffiliation(six, emptyRows);
+  REQUIRE(incremental.hc == batch.hc);
+  REQUIRE(incremental.ddc == batch.ddc);
+  REQUIRE(updater.lastReclassified() == static_cast<int>(six.size()));
 }
 
 TEST_CASE("cage membership is not a function of the four-neighbour star",

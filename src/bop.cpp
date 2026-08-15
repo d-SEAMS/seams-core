@@ -664,7 +664,7 @@ void chill::getIceTypeNoPrint(
       } else if (num_eclipsd == 1 && num_staggrd == 3) {
         yCloud.pts[iatom].iceType = molSys::atom_state_type::hexagonal;
         ih++;
-      } else if (isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd)) {
+      } else if (chill::isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd)) {
         yCloud.pts[iatom].iceType = molSys::atom_state_type::interfacial;
         interIce++;
       } else {
@@ -729,7 +729,7 @@ chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
       } else if (num_eclipsd == 1 && num_staggrd == 3) {
         yCloud.pts[iatom].iceType = molSys::atom_state_type::hexagonal;
         ih++;
-      } else if (isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd)) {
+      } else if (chill::isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd)) {
         yCloud.pts[iatom].iceType = molSys::atom_state_type::interfacial;
         interIce++;
       } else {
@@ -850,7 +850,7 @@ void assignIceTypePlus(
         ih++;
       }
       // Interfacial
-      else if (isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd,
+      else if (chill::isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd,
                              true)) {
         yCloud.pts[iatom].iceType = molSys::atom_state_type::interfacial;
         interIce++;

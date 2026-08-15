@@ -3,6 +3,7 @@
 **Deferred Structural Elucidation Analysis for Molecular Simulations**
 
 [![Build Status](https://github.com/d-SEAMS/seams-core/actions/workflows/ci_test.yml/badge.svg)](https://github.com/d-SEAMS/seams-core/actions/workflows/ci_test.yml)
+[![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
 
 
 
@@ -30,15 +31,17 @@ Scripting front ends are separate packages:
 - Python: `pydseams` ([PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib))
 - Lua/Fennel: `dseams` ([yodaStruct](https://github.com/d-SEAMS/yodaStruct))
 
-Build with `pixi run setup && pixi run build && pixi run test`.
+Build with `pixi run setup && pixi run build && pixi run test`, or with
+the Nix flake: `nix build` and `nix develop`.
 
 \note The <a href="pages.html">related pages</a> describe the examples and how to obtain
 the data-sets (trajectories) <a
 href="https://figshare.com/projects/d-SEAMS_Datasets/73545">from figshare</a>.
 
-\warning The live build is `pixi` + meson. The old Nix/CMake `yodaStruct`
-derivation is gone. Manage compiler and library versions yourself if you
-do not use the provided `pixi` or `conda` environment.
+\warning The live builds are `pixi` + meson, or the Nix flake. The
+CMake-era `yodaStruct` derivation is gone. Manage compiler and library
+versions yourself if you do not use `pixi`, `nix`, or the `conda`
+environment.
 
 # Citation
 
@@ -78,10 +81,10 @@ We also provide a `conda` environment as a fallback, which is also recommended f
 
 ## Build
 
-### Conda (working now)
+### Conda
 
-Although we strongly suggest using `nix`, for MacOS systems, the following
-instructions may be more suitable. We will assume the presence of [micromamba](https://mamba.readthedocs.io/en/latest/installation.html):
+For MacOS systems without Nix, the following instructions may be more
+suitable. We will assume the presence of [micromamba](https://mamba.readthedocs.io/en/latest/installation.html):
 
 ```bash
 cd ~/seams-core
@@ -156,138 +159,93 @@ cd ../
 yodaStruct -c lua_inputs/config.yml
 ```
 
-### Nix (not working at the moment)
+### Nix
 
-Since this project is built with `nix`, we can simply do the following from the
-root directory (longer method):
-
-```sh
-# Make sure there are no artifacts
-rm -rf build
-# This will take a long time the first time as it builds the dependencies
-nix-build . # Optional
-# Install into your path
-nix-env -if . # Required
-# Run the command anywhere
-yodaStruct -c lua_inputs/config.yml
-```
-
-A faster method of building the software is by using the [cachix binary cache](https://dseams.cachix.org/) as shown:
+The flake builds `libyodaLib` and the `seams` CLI with meson. Optional
+backends that meson would otherwise wrap-git (vesin, readcon-core) or
+that nixpkgs does not ship (chemfiles) stay off unless a package is
+already in the closure.
 
 ```bash
-# Install cachix
+nix build                  # ./result/bin/seams
+nix run . -- read input/traj/exampleTraj.lammpstrj
+nix develop                # compiler, Eigen, BLAS, Catch2, gdb
+nix flake update           # refresh the nixpkgs pin
+nix fmt
+```
+
+`nix build` runs the Catch2 suite. The Lua library is
+[yodaStruct](https://github.com/d-SEAMS/yodaStruct); Python is
+[PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib). Those
+repositories have matching flakes.
+
+The [dseams Cachix](https://dseams.cachix.org/) cache is optional:
+
+```bash
 nix-env -iA cachix -f https://cachix.org/api/v1/install
-# Use the binary cache
 cachix use dseams
-# Faster with the cache than building from scratch
-nix-build . # Optional
-# Install into your path
-nix-env -if . # Required
-# Run the command anywhere
-yodaStruct -c lua_inputs/config.yml
 ```
 
 ### Usage
 
-Having installed the `yodaStruct` binary and library, we can now use it.
-
 ```bash
-yodaStruct -c lua_inputs/config.yml
+seams read input/traj/exampleTraj.lammpstrj
+seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5
+seams cages input/traj/exampleTraj.lammpstrj
 ```
 
-\note The paths in the `.yml` should be **relative to the folder from which the binary is called**.
-
-If you're confused about how to handle the relative paths, run the command `yodaStruct -c lua_inputs/config.yml` in the top-level directory, and set the paths relative to the top-level directory. This is the convention used in the examples as well.
+Lua scripts live in the [yodaStruct](https://github.com/d-SEAMS/yodaStruct)
+checkout (`require("dseams")`). Paths in those examples are relative to
+the directory you invoke them from.
 
 ### Language Server Support
 
-To generate a `compile_commands.json` file for working with a language server
-like [ccls](https://github.com/MaskRay/ccls) use the following commands:
-
-```sh
-# Pure environment
-nix-shell --pure
-mkdir -p build && cd build
-cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES ../
-cp compile_commands.json ../
+```bash
+nix develop
+meson setup bbdir -Dwith_tests=true
+ln -s bbdir/compile_commands.json .
 ```
 
-Note that there is no need to actually compile the project if you simply need to
-get the compiler database for the language server.
-
-**Do Not** commit the `.json` file.
+**Do Not** commit `compile_commands.json`.
 
 ## Development
 
-We can simply use the `nix` environment:
-
-```sh
-# From the project root
-nix-shell --pure
+```bash
+nix develop
+meson setup bbdir -Dwith_tests=true
+meson compile -C bbdir
+meson test -C bbdir
 ```
 
 # Running
 
-This is built completely with nix:
-
-```{bash}
-# Install systemwide
-nix-env -if .
+```bash
+nix build
+./result/bin/seams --help
+./result/bin/seams --frame 1 --last 100 --jobs 8 --type 1 --graph seeded cages dump.lammpstrj
+./result/bin/seams --graph cutoff cages dump.lammpstrj
+./result/bin/seams --graph knn cages dump.lammpstrj
 ```
 
-To run the sample inputs, simply install the software, and ensure that `input/` is a child directory.
-
-```{bash}
-# Assuming you are in the src directory
-# Check help with -h
-yodaStruct -c lua_inputs/config.yml
-```
+To run the sample inputs, stay in the repository root so `input/` is a
+child directory.
 
 ## Tests
 
-Apart from the [examples](https://docs.dseams.info/pages.html), the test-suite
-can be run with the `yodaStruct_test` binary, which will drop into the
-`nix` environment before building and executing `gdb`:
-
-```{bash}
-# Just run this
-./testBuild.sh
-# At this point the binary and library are copied into the root
-# One might, in a foolhardy attempt, use gdb at this point
-# Here be dragons :)
-# USE NIX
-# Anyway
-gdb --args ./yodaStruct -c lua_inputs/config.yml
-# quit gdb with quit
-# Go run the test binary
-cd shellBuild
-./yodaStruct_test
+```bash
+nix build          # meson test is the install check
+nix develop --command meson test -C bbdir
 ```
-
-Do note that the regular installation via `nix-env` runs the tests before the installation
 
 # Developer Documentation
 
-<!-- TODO: Move this to some other location. -->
-
-While developing, it is sometimes expedient to update the packages used. It is
-then useful to note that we use [niv](https://github.com/nmattia/niv/) to handle our pinned packages (apart from
-the ones built from Github). Thus, one might need, say:
+The flake pins nixpkgs. To move the pin:
 
 ```bash
-niv update nixpkgs -b nixpkgs-unstable
+nix flake update nixpkgs
 ```
 
-Test the build with nix:
-
-```bash
-nix-build .
-# Outputs are in ./result
-# If you get a CMake error
-rm -rf build
-nix-store --delete /nix/store/$whatever # $whatever is the derivation complaining
-nix-collect-garbage # then try again [worst case scenario]
-```
+Then `nix build` from the project root. Outputs land in `./result`.
 
 ## Leaks and performance
 
@@ -340,28 +298,21 @@ This will ensure that new commits are in accordance to the `clang-format` file.
 
 ## Development Builds
 
-The general idea is to drop into an interactive shell with the dependencies and then use `cmake` as usual.
+```bash
+nix develop
+meson setup bbdir -Dwith_tests=true
+meson compile -C bbdir
+./bbdir/src/seams read input/traj/exampleTraj.lammpstrj
+gdb --args ./bbdir/src/seams read input/traj/exampleTraj.lammpstrj
+```
+
+To load debugging symbols from the shared library inside `gdb`:
 
 ```bash
-nix-shell --pure --run bash --show-trace --verbose
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Debug -DNO_WARN=TRUE \
- -DFIND_EIGEN=TRUE \
- -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
- -G "Ninja"
-ninja
-# Test
-cd ../
-yodaStruct -c lua_inputs/config.yml
-# Debug
-gdb --args yodaStruct -c lua_inputs/config.yml
+add-symbol-file bbdir/src/libyodaLib.so
 ```
-To load debugging symbols from the shared library, when you are inside `gdb` (from the top-level directory, for instance), use the following command:
 
-```bash
-add-symbol-file build/libyodaLib.so
-```
-Then you can set breakpoints in the C++ code; for instance: 
+Then you can set breakpoints in the C++ code; for instance:
 
 ```bash
 b seams_input.cpp:408

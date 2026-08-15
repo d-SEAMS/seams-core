@@ -15,6 +15,9 @@
 #include <cstdlib>
 #include <iostream>
 #include <map>
+#include <mutex>
+#include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -83,81 +86,116 @@ int typeOf(const Cloud &cloud, int requested) {
   return cloud.pts[0].type;
 }
 
-void printCounts(const Cloud &cloud) {
+void printCounts(std::ostream &os, const Cloud &cloud) {
   std::map<std::string, int> hist;
   for (const auto &pt : cloud.pts) {
     hist[iceName(pt.iceType)]++;
   }
-  std::cout << "nop " << cloud.nop;
+  os << "nop " << cloud.nop;
   for (const auto &[name, n] : hist) {
     if (n > 0) {
-      std::cout << " " << name << " " << n;
+      os << " " << name << " " << n;
     }
   }
-  std::cout << "\n";
+  os << "\n";
 }
 
-int cmdRead(Cloud &cloud) {
+int cmdRead(std::ostream &os, Cloud &cloud) {
   const auto box = cloud.box;
-  std::cout << "nop " << cloud.nop << " frame " << cloud.currentFrame
-            << " box " << box[0] << " " << box[1] << " " << box[2] << "\n";
+  os << "nop " << cloud.nop << " frame " << cloud.currentFrame << " box "
+     << box[0] << " " << box[1] << " " << box[2] << "\n";
   return 0;
 }
 
-int cmdChillPlus(Cloud &cloud, double cutoff, int typeI) {
+int cmdChillPlus(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
   const int typ = typeOf(cloud, typeI);
   auto nList = nneigh::neighListO(cutoff, cloud, typ);
   chill::getCorrelPlus(cloud, nList, false);
   chill::getIceTypePlusNoPrint(cloud, nList, false);
-  printCounts(cloud);
+  printCounts(os, cloud);
   return 0;
 }
 
-int cmdChill(Cloud &cloud, double cutoff, int typeI) {
+int cmdChill(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
   const int typ = typeOf(cloud, typeI);
   auto nList = nneigh::neighListO(cutoff, cloud, typ);
   chill::getCorrel(cloud, nList, false);
   chill::getIceTypeNoPrint(cloud, nList, false);
-  printCounts(cloud);
+  printCounts(os, cloud);
   return 0;
 }
 
-int cmdCages(Cloud &cloud, double cutoff, int typeI, int k) {
+int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
+             const std::string &graphName) {
   const int typ = typeOf(cloud, typeI);
   const double cand = cutoff + 1.5;
-  auto mutual = nneigh::kNearestNeighbourList(cloud, k, cand, typ, true);
-  auto uni = nneigh::kNearestNeighbourList(cloud, k, cand, typ, false);
-  auto idxS = nneigh::neighbourListByIndex(cloud, mutual);
-  auto idxU = nneigh::neighbourListByIndex(cloud, uni);
-  auto ringsS = primitive::ringNetwork(idxS, 6);
-  auto ringsU = primitive::ringNetwork(idxU, 6);
-  std::vector<std::vector<int>> sixS;
-  std::vector<std::vector<int>> sixU;
-  for (const auto &r : ringsS) {
-    if (r.size() == 6) {
-      sixS.push_back(r);
+
+  auto sixOf = [](const std::vector<std::vector<int>> &rings) {
+    std::vector<std::vector<int>> six;
+    for (const auto &r : rings) {
+      if (r.size() == 6) {
+        six.push_back(r);
+      }
     }
-  }
-  for (const auto &r : ringsU) {
-    if (r.size() == 6) {
-      sixU.push_back(r);
-    }
-  }
-  const auto aff = ring::seededCageAffiliation(sixS, idxS, sixU, idxU);
+    return six;
+  };
+
   int ih = 0;
   int ic = 0;
   int water = 0;
-  for (size_t i = 0; i < aff.hc.size(); ++i) {
-    if (aff.hc[i]) {
-      ++ih;
-    } else if (aff.ddc[i]) {
-      ++ic;
-    } else {
-      ++water;
+  const auto tallyAtoms = [&](const std::vector<bool> &hc,
+                              const std::vector<bool> &ddc) {
+    ih = ic = water = 0;
+    const int n = static_cast<int>(hc.size());
+    for (int i = 0; i < n; ++i) {
+      if (hc[static_cast<std::size_t>(i)]) {
+        ++ih;
+      } else if (ddc[static_cast<std::size_t>(i)]) {
+        ++ic;
+      } else {
+        ++water;
+      }
     }
+  };
+
+  if (graphName == "seeded") {
+    auto mutual = nneigh::kNearestNeighbourList(cloud, k, cand, typ, true);
+    auto uni = nneigh::kNearestNeighbourList(cloud, k, cand, typ, false);
+    auto idxS = nneigh::neighbourListByIndex(cloud, mutual);
+    auto idxU = nneigh::neighbourListByIndex(cloud, uni);
+    auto sixS = sixOf(primitive::ringNetwork(idxS, 6));
+    auto sixU = sixOf(primitive::ringNetwork(idxU, 6));
+    const auto aff = ring::seededCageAffiliation(sixS, idxS, sixU, idxU);
+    tallyAtoms(aff.hc, aff.ddc);
+  } else {
+    const auto graph = nneigh::bondGraphFromName(graphName);
+    std::vector<std::vector<int>> nList;
+    if (graph == nneigh::BondGraph::Cutoff) {
+      nList = nneigh::neighListO(cutoff, cloud, typ);
+    } else {
+      const bool mutual = graph == nneigh::BondGraph::KnnMutual;
+      nList = nneigh::kNearestNeighbourList(cloud, k, cand, typ, mutual);
+    }
+    auto idx = nneigh::neighbourListByIndex(cloud, nList);
+    auto six = sixOf(primitive::ringNetwork(idx, 6));
+    const auto aff = ring::cageAffiliation(six, idx);
+    // cageAffiliation is per-ring; map to atoms
+    std::vector<bool> hc(static_cast<std::size_t>(cloud.nop), false);
+    std::vector<bool> ddc(static_cast<std::size_t>(cloud.nop), false);
+    for (std::size_t r = 0; r < six.size(); ++r) {
+      for (const int a : six[r]) {
+        if (a >= 0 && a < cloud.nop) {
+          hc[static_cast<std::size_t>(a)] =
+              hc[static_cast<std::size_t>(a)] || aff.hc[r];
+          ddc[static_cast<std::size_t>(a)] =
+              ddc[static_cast<std::size_t>(a)] || aff.ddc[r];
+        }
+      }
+    }
+    tallyAtoms(hc, ddc);
   }
-  std::cout << "nop " << cloud.nop << " ih " << ih << " ic " << ic << " water "
-            << water << "\n";
+  os << "nop " << cloud.nop << " graph " << graphName << " ih " << ih
+     << " ic " << ic << " water " << water << "\n";
   return 0;
 }
 
@@ -167,13 +205,20 @@ int main(int argc, char *argv[]) {
   cxxopts::Options opt(
       argv[0], "d-SEAMS engine CLI. Lua is the luadseams library; Python is pydseams.");
   opt.add_options()("h,help", "Print help")("v,version", "Print version")(
-      "f,frame", "Frame number (1-based)",
+      "f,frame", "First frame (1-based)",
+      cxxopts::value<int>()->default_value("1"))(
+      "last", "Last frame (inclusive). Omit for a single --frame.",
+      cxxopts::value<int>()->default_value("0"))(
+      "j,jobs", "Parallel frame workers (OpenMP). 1 is serial.",
       cxxopts::value<int>()->default_value("1"))(
       "t,type", "Atom type (0 guesses oxygen then type 1)",
       cxxopts::value<int>()->default_value("0"))(
       "c,cutoff", "Neighbour cutoff (Angstrom)",
       cxxopts::value<double>()->default_value("3.5"))(
-      "k", "k for seeded cages", cxxopts::value<int>()->default_value("4"))(
+      "k", "k for knn / seeded cages", cxxopts::value<int>()->default_value("4"))(
+      "graph",
+      "Bond graph for cages: cutoff | knn | knn-union | seeded",
+      cxxopts::value<std::string>()->default_value("seeded"))(
       "command", "read | chill | chill-plus | cages",
       cxxopts::value<std::string>())("file", "Trajectory file",
                                      cxxopts::value<std::string>());
@@ -206,23 +251,59 @@ int main(int argc, char *argv[]) {
   const std::string cmd = args["command"].as<std::string>();
   const std::string file = args["file"].as<std::string>();
   const int frame = args["frame"].as<int>();
+  const int last = args["last"].as<int>();
+  const int jobs = args["jobs"].as<int>();
   const int typeI = args["type"].as<int>();
   const double cutoff = args["cutoff"].as<double>();
   const int k = args["k"].as<int>();
+  const std::string graph = args["graph"].as<std::string>();
 
-  Cloud cloud = load(file, frame, typeI);
-  if (cmd == "read") {
-    return cmdRead(cloud);
+  auto runOne = [&](std::ostream &os, Cloud &cloud) {
+    if (cmd == "read") {
+      return cmdRead(os, cloud);
+    }
+    if (cmd == "chill-plus" || cmd == "chill_plus") {
+      return cmdChillPlus(os, cloud, cutoff, typeI);
+    }
+    if (cmd == "chill") {
+      return cmdChill(os, cloud, cutoff, typeI);
+    }
+    if (cmd == "cages") {
+      try {
+        return cmdCages(os, cloud, cutoff, typeI, k, graph);
+      } catch (const std::exception &e) {
+        os << e.what() << "\n";
+        return 2;
+      }
+    }
+    os << "unknown command: " << cmd << "\n";
+    return 2;
+  };
+
+  if (last <= 0 || last == frame) {
+    Cloud cloud = load(file, frame, typeI);
+    return runOne(std::cout, cloud);
   }
-  if (cmd == "chill-plus" || cmd == "chill_plus") {
-    return cmdChillPlus(cloud, cutoff, typeI);
-  }
-  if (cmd == "chill") {
-    return cmdChill(cloud, cutoff, typeI);
-  }
-  if (cmd == "cages") {
-    return cmdCages(cloud, cutoff, typeI, k);
-  }
-  std::cerr << "unknown command: " << cmd << "\n";
-  return 2;
+
+  std::mutex outMu;
+  int rc = 0;
+  const int typeFilter = typeI > 0 ? typeI : 0;
+  sinp::forEachLammpsFrame(
+      file, frame, last, typeFilter,
+      [&](int /*fr*/, Cloud &cloud) {
+        if (typeFilter <= 0 && cloud.nop == 0) {
+          cloud = load(file, cloud.currentFrame, typeI);
+        }
+        std::ostringstream line;
+        const int one = runOne(line, cloud);
+        {
+          std::lock_guard<std::mutex> lock(outMu);
+          std::cout << line.str();
+          if (one != 0) {
+            rc = one;
+          }
+        }
+      },
+      jobs);
+  return rc;
 }

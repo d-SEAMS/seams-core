@@ -2,6 +2,29 @@
 Changelog
 =========
 
+Version 2.2.1 (2026-08-15)
+===========================
+
+Added
+-----
+- Flake-based Nix package for ``libyodaLib`` and the ``seams`` CLI
+  (meson, not the CMake-era ``yodaStruct`` derivation).
+- ``nLammpsFrames`` / ``dropLammpsDumpIndex``: live dump session with a
+  lazy ``ITEM: TIMESTEP`` offset table (LAMMPS ``ReaderNative`` cursor,
+  chemfiles ``read_step``, readcon frame offsets). Sequential
+  ``load_frame`` walks no longer rescan prior snapshots.
+- ``forEachLammpsFrame``: OpenMP walk over a frame range. Each worker
+  opens its own handle and seeks. ``seams --frame N --last M --jobs J``.
+- ``SkinNeighborList``: vesin candidates at cutoff+skin, rebuilt on
+  the Verlet trigger. ``BondGraph`` is chosen at runtime
+  (``cutoff``, ``knn``, ``knn-union``). ``seams cages --graph``
+  adds ``seeded``.
+
+Fixed
+-----
+- LAMMPS readers bind ``xu``/``yu``/``zu`` and ``xs``/``ys``/``zs``
+  when ``x y z`` are absent (Niu/Parrinello TIP4P/Ice dumps).
+
 Version 2.2.0 (2026-08-15)
 ===========================
 

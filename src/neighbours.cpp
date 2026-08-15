@@ -18,6 +18,8 @@
 #include <numeric>
 #include <set>
 #include <span>
+#include <stdexcept>
+#include <string>
 #include <utility>
 
 #include <neighbours.hpp>
@@ -683,4 +685,199 @@ std::pair<double, double> nneigh::shellSeparation(
     haveNext = true;
   }
   return {maxKth, haveNext ? minNext : 0.0};
+}
+
+nneigh::BondGraph nneigh::bondGraphFromName(const std::string &name) {
+  if (name == "cutoff") {
+    return BondGraph::Cutoff;
+  }
+  if (name == "knn" || name == "knn-mutual" || name == "mutual") {
+    return BondGraph::KnnMutual;
+  }
+  if (name == "knn-union" || name == "union") {
+    return BondGraph::KnnUnion;
+  }
+  throw std::invalid_argument(
+      "unknown bond graph '" + name +
+      "' (use cutoff, knn, knn-union)");
+}
+
+const char *nneigh::bondGraphName(BondGraph graph) {
+  switch (graph) {
+  case BondGraph::Cutoff:
+    return "cutoff";
+  case BondGraph::KnnMutual:
+    return "knn";
+  case BondGraph::KnnUnion:
+    return "knn-union";
+  }
+  return "cutoff";
+}
+
+nneigh::SkinNeighborList::SkinNeighborList(double cutoff, double skin,
+                                           int typeI, BondGraph graph, int k)
+    : cutoff_(cutoff), skin_(skin), cutoffSq_(cutoff * cutoff),
+      triggerSq_((0.5 * skin) * (0.5 * skin)), typeI_(typeI),
+      k_(graph == BondGraph::Cutoff ? 0 : k), graph_(graph),
+      mutual_(graph != BondGraph::KnnUnion) {}
+
+bool nneigh::SkinNeighborList::mustRebuild(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) const {
+  if (static_cast<int>(x0_.size()) != yCloud.nop || yCloud.box.size() < 3) {
+    return true;
+  }
+  for (int k = 0; k < 3; k++) {
+    if (std::fabs(yCloud.box[k] - box0_[static_cast<std::size_t>(k)]) >
+        1e-8) {
+      return true;
+    }
+  }
+  std::vector<double> old(3);
+  for (int i = 0; i < yCloud.nop; i++) {
+    if (yCloud.pts[i].type != typeI_) {
+      continue;
+    }
+    old[0] = x0_[static_cast<std::size_t>(i)];
+    old[1] = y0_[static_cast<std::size_t>(i)];
+    old[2] = z0_[static_cast<std::size_t>(i)];
+    const double r = gen::unWrappedDistFromPoint(yCloud, i, old);
+    if (r * r > triggerSq_) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void nneigh::SkinNeighborList::rebuildCandidates(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  candidates_.clear();
+  const double wide = cutoff_ + skin_;
+#ifdef SEAMS_HAS_VESIN
+  std::vector<int> subset;
+  subset.reserve(static_cast<std::size_t>(yCloud.nop));
+  for (int i = 0; i < yCloud.nop; i++) {
+    if (yCloud.pts[i].type == typeI_) {
+      subset.push_back(i);
+    }
+  }
+  std::vector<std::pair<int, int>> pairs;
+  if (cellListPairs(yCloud, subset, wide, pairs)) {
+    for (const auto &[i, j] : pairs) {
+      if (i < j) {
+        candidates_.emplace_back(i, j);
+      }
+    }
+  } else
+#endif
+  {
+    const auto wideList = nneigh::neighListO(wide, yCloud, typeI_);
+    for (int i = 0; i < yCloud.nop; i++) {
+      if (static_cast<int>(wideList.size()) <= i || wideList[i].size() <= 1) {
+        continue;
+      }
+      for (std::size_t n = 1; n < wideList[i].size(); n++) {
+        const auto it = yCloud.idIndexMap.find(wideList[i][n]);
+        if (it == yCloud.idIndexMap.end()) {
+          continue;
+        }
+        const int j = it->second;
+        if (i < j) {
+          candidates_.emplace_back(i, j);
+        }
+      }
+    }
+  }
+  x0_.resize(static_cast<std::size_t>(yCloud.nop));
+  y0_.resize(static_cast<std::size_t>(yCloud.nop));
+  z0_.resize(static_cast<std::size_t>(yCloud.nop));
+  for (int i = 0; i < yCloud.nop; i++) {
+    x0_[static_cast<std::size_t>(i)] = yCloud.pts[i].x;
+    y0_[static_cast<std::size_t>(i)] = yCloud.pts[i].y;
+    z0_[static_cast<std::size_t>(i)] = yCloud.pts[i].z;
+  }
+  box0_ = {yCloud.box[0], yCloud.box[1], yCloud.box[2]};
+}
+
+void nneigh::SkinNeighborList::refreshBonds(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  std::set<std::pair<int, int>> next;
+  if (k_ <= 0) {
+    for (const auto &[i, j] : candidates_) {
+      if (i < 0 || j < 0 || i >= yCloud.nop || j >= yCloud.nop) {
+        continue;
+      }
+      if (gen::periodicDistSq(yCloud, i, j) <= cutoffSq_) {
+        next.emplace(i, j);
+      }
+    }
+  } else {
+    std::vector<std::vector<std::pair<double, int>>> byDist(
+        static_cast<std::size_t>(yCloud.nop));
+    for (const auto &[i, j] : candidates_) {
+      if (i < 0 || j < 0 || i >= yCloud.nop || j >= yCloud.nop) {
+        continue;
+      }
+      const double r2 = gen::periodicDistSq(yCloud, i, j);
+      byDist[static_cast<std::size_t>(i)].emplace_back(r2, j);
+      byDist[static_cast<std::size_t>(j)].emplace_back(r2, i);
+    }
+    std::vector<std::vector<int>> nominated(static_cast<std::size_t>(yCloud.nop));
+    for (int i = 0; i < yCloud.nop; i++) {
+      auto &row = byDist[static_cast<std::size_t>(i)];
+      if (row.empty()) {
+        continue;
+      }
+      const int take = std::min(k_, static_cast<int>(row.size()));
+      std::partial_sort(row.begin(), row.begin() + take, row.end());
+      nominated[static_cast<std::size_t>(i)].reserve(static_cast<std::size_t>(take));
+      for (int n = 0; n < take; n++) {
+        nominated[static_cast<std::size_t>(i)].push_back(row[static_cast<std::size_t>(n)].second);
+      }
+    }
+    for (int i = 0; i < yCloud.nop; i++) {
+      for (const int j : nominated[static_cast<std::size_t>(i)]) {
+        const int a = std::min(i, j);
+        const int b = std::max(i, j);
+        if (mutual_) {
+          const auto &other = nominated[static_cast<std::size_t>(j)];
+          if (std::find(other.begin(), other.end(), i) == other.end()) {
+            continue;
+          }
+        }
+        next.emplace(a, b);
+      }
+    }
+  }
+  std::set<int> touched;
+  for (const auto &p : bonded_) {
+    if (next.count(p) == 0) {
+      touched.insert(p.first);
+      touched.insert(p.second);
+    }
+  }
+  for (const auto &p : next) {
+    if (bonded_.count(p) == 0) {
+      touched.insert(p.first);
+      touched.insert(p.second);
+    }
+  }
+  changedAtoms_ = static_cast<int>(touched.size());
+  bonded_.swap(next);
+
+  const auto indexToID = indexToIDTable(yCloud);
+  nList_ = seedWithSelfIDs(indexToID, yCloud.nop);
+  for (const auto &[i, j] : bonded_) {
+    appendNeighbourID(nList_, indexToID, i, j);
+    appendNeighbourID(nList_, indexToID, j, i);
+  }
+}
+
+const std::vector<std::vector<int>> &nneigh::SkinNeighborList::update(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  rebuilt_ = mustRebuild(yCloud);
+  if (rebuilt_) {
+    rebuildCandidates(yCloud);
+  }
+  refreshBonds(yCloud);
+  return nList_;
 }
