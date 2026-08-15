@@ -17,6 +17,7 @@
 
 #include <array>
 #include <set>
+#include <string>
 #include <utility>
 
 #include <generic.hpp>
@@ -121,6 +122,17 @@ std::pair<double, double> shellSeparation(
 //! Erases memory for a vector of vectors for the neighbour list
 [[nodiscard]] int clearNeighbourList(std::vector<std::vector<int>> &nList);
 
+/** Bond graph for TUM. Chosen at runtime so the three published
+ *  assignments can be compared on the same frames.
+ *  cutoff: pairs inside the distance cutoff (2020 graph).
+ *  knn: mutual k-nearest (TUM v2 without hysteresis).
+ *  knn-union: union k-nearest (the completion graph of the seeded rule).
+ */
+enum class BondGraph { Cutoff, KnnMutual, KnnUnion };
+
+BondGraph bondGraphFromName(const std::string &name);
+const char *bondGraphName(BondGraph graph);
+
 /** Persistent neighbour list with a LAMMPS skin.
  *  Vesin (or the brute-force fallback) builds candidates at cutoff+skin,
  *  which is the ghost halo: periodic images already sit in that shell.
@@ -131,10 +143,12 @@ std::pair<double, double> shellSeparation(
  */
 class SkinNeighborList {
 public:
-  //! k <= 0: bonds are candidate pairs inside cutoff. k > 0 (default 4):
-  //! bonds are the mutual k-nearest among the skin candidates, the TUM
-  //! v2 graph. 3.5 A is only the candidate search, not the bond rule.
-  SkinNeighborList(double cutoff, double skin, int typeI, int k = 4);
+  //! graph selects cutoff vs k-nearest (mutual or union). k is the
+  //! neighbour count for the knn graphs (default 4).
+  SkinNeighborList(double cutoff, double skin, int typeI,
+                   BondGraph graph = BondGraph::KnnMutual, int k = 4);
+
+  [[nodiscard]] BondGraph graph() const { return graph_; }
 
   //! Refresh from a new frame. The returned list is ID-keyed with a
   //! leading self entry, the same shape as neighListO.
@@ -155,6 +169,8 @@ private:
   double triggerSq_;
   int typeI_;
   int k_;
+  BondGraph graph_{BondGraph::KnnMutual};
+  bool mutual_{true};
   bool rebuilt_{true};
   int changedAtoms_{0};
   std::vector<double> x0_;

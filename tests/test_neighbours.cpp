@@ -8,6 +8,8 @@
 
 #include <algorithm>
 #include <array>
+#include <stdexcept>
+#include <string>
 #include <vector>
 
 // Helper: build a 4-atom system in a 10x10x10 box
@@ -332,7 +334,7 @@ TEST_CASE("neighListO leaves an unmapped atom as an empty row",
 TEST_CASE("SkinNeighborList matches neighListO on a static cloud",
           "[neighbours]") {
   auto cloud = makeFourAtomCloud();
-  nneigh::SkinNeighborList skin(1.5, 0.5, 1, 0);
+  nneigh::SkinNeighborList skin(1.5, 0.5, 1, nneigh::BondGraph::Cutoff);
   const auto &bonds = skin.update(cloud);
   auto hard = nneigh::neighListO(1.5, cloud, 1);
   REQUIRE(skin.lastRebuilt());
@@ -349,7 +351,7 @@ TEST_CASE("SkinNeighborList matches neighListO on a static cloud",
 TEST_CASE("SkinNeighborList rebuilds only after the Verlet trigger",
           "[neighbours]") {
   auto cloud = makeFourAtomCloud();
-  nneigh::SkinNeighborList skin(1.5, 1.0, 1, 0);
+  nneigh::SkinNeighborList skin(1.5, 1.0, 1, nneigh::BondGraph::Cutoff);
   (void)skin.update(cloud);
   REQUIRE(skin.lastRebuilt());
 
@@ -365,7 +367,7 @@ TEST_CASE("SkinNeighborList rebuilds only after the Verlet trigger",
 TEST_CASE("SkinNeighborList drops a bond as soon as it leaves the cutoff",
           "[neighbours]") {
   auto cloud = makeFourAtomCloud();
-  nneigh::SkinNeighborList skin(1.5, 2.0, 1, 0);
+  nneigh::SkinNeighborList skin(1.5, 2.0, 1, nneigh::BondGraph::Cutoff);
   (void)skin.update(cloud);
   REQUIRE(std::find(skin.bonds()[0].begin() + 1, skin.bonds()[0].end(), 1) !=
           skin.bonds()[0].end());
@@ -455,6 +457,18 @@ TEST_CASE("mutual and union k-nearest graphs coincide on the crystal",
     std::sort(b.begin(), b.end());
     REQUIRE(a == b);
   }
+}
+
+TEST_CASE("bondGraphFromName accepts the published graph names",
+          "[neighbours]") {
+  REQUIRE(nneigh::bondGraphFromName("cutoff") == nneigh::BondGraph::Cutoff);
+  REQUIRE(nneigh::bondGraphFromName("knn") == nneigh::BondGraph::KnnMutual);
+  REQUIRE(nneigh::bondGraphFromName("knn-union") ==
+          nneigh::BondGraph::KnnUnion);
+  REQUIRE(std::string(nneigh::bondGraphName(nneigh::BondGraph::KnnMutual)) ==
+          "knn");
+  REQUIRE_THROWS_AS(nneigh::bondGraphFromName("not-a-graph"),
+                    std::invalid_argument);
 }
 
 TEST_CASE("SkinNeighborList default is the mutual four-nearest graph",

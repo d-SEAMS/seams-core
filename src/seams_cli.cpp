@@ -17,6 +17,7 @@
 #include <map>
 #include <mutex>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -124,42 +125,77 @@ int cmdChill(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
   return 0;
 }
 
-int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k) {
+int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
+             const std::string &graphName) {
   const int typ = typeOf(cloud, typeI);
   const double cand = cutoff + 1.5;
-  auto mutual = nneigh::kNearestNeighbourList(cloud, k, cand, typ, true);
-  auto uni = nneigh::kNearestNeighbourList(cloud, k, cand, typ, false);
-  auto idxS = nneigh::neighbourListByIndex(cloud, mutual);
-  auto idxU = nneigh::neighbourListByIndex(cloud, uni);
-  auto ringsS = primitive::ringNetwork(idxS, 6);
-  auto ringsU = primitive::ringNetwork(idxU, 6);
-  std::vector<std::vector<int>> sixS;
-  std::vector<std::vector<int>> sixU;
-  for (const auto &r : ringsS) {
-    if (r.size() == 6) {
-      sixS.push_back(r);
+
+  auto sixOf = [](const std::vector<std::vector<int>> &rings) {
+    std::vector<std::vector<int>> six;
+    for (const auto &r : rings) {
+      if (r.size() == 6) {
+        six.push_back(r);
+      }
     }
-  }
-  for (const auto &r : ringsU) {
-    if (r.size() == 6) {
-      sixU.push_back(r);
-    }
-  }
-  const auto aff = ring::seededCageAffiliation(sixS, idxS, sixU, idxU);
+    return six;
+  };
+
   int ih = 0;
   int ic = 0;
   int water = 0;
-  for (size_t i = 0; i < aff.hc.size(); ++i) {
-    if (aff.hc[i]) {
-      ++ih;
-    } else if (aff.ddc[i]) {
-      ++ic;
-    } else {
-      ++water;
+  const auto tallyAtoms = [&](const std::vector<bool> &hc,
+                              const std::vector<bool> &ddc) {
+    ih = ic = water = 0;
+    const int n = static_cast<int>(hc.size());
+    for (int i = 0; i < n; ++i) {
+      if (hc[static_cast<std::size_t>(i)]) {
+        ++ih;
+      } else if (ddc[static_cast<std::size_t>(i)]) {
+        ++ic;
+      } else {
+        ++water;
+      }
     }
+  };
+
+  if (graphName == "seeded") {
+    auto mutual = nneigh::kNearestNeighbourList(cloud, k, cand, typ, true);
+    auto uni = nneigh::kNearestNeighbourList(cloud, k, cand, typ, false);
+    auto idxS = nneigh::neighbourListByIndex(cloud, mutual);
+    auto idxU = nneigh::neighbourListByIndex(cloud, uni);
+    auto sixS = sixOf(primitive::ringNetwork(idxS, 6));
+    auto sixU = sixOf(primitive::ringNetwork(idxU, 6));
+    const auto aff = ring::seededCageAffiliation(sixS, idxS, sixU, idxU);
+    tallyAtoms(aff.hc, aff.ddc);
+  } else {
+    const auto graph = nneigh::bondGraphFromName(graphName);
+    std::vector<std::vector<int>> nList;
+    if (graph == nneigh::BondGraph::Cutoff) {
+      nList = nneigh::neighListO(cutoff, cloud, typ);
+    } else {
+      const bool mutual = graph == nneigh::BondGraph::KnnMutual;
+      nList = nneigh::kNearestNeighbourList(cloud, k, cand, typ, mutual);
+    }
+    auto idx = nneigh::neighbourListByIndex(cloud, nList);
+    auto six = sixOf(primitive::ringNetwork(idx, 6));
+    const auto aff = ring::cageAffiliation(six, idx);
+    // cageAffiliation is per-ring; map to atoms
+    std::vector<bool> hc(static_cast<std::size_t>(cloud.nop), false);
+    std::vector<bool> ddc(static_cast<std::size_t>(cloud.nop), false);
+    for (std::size_t r = 0; r < six.size(); ++r) {
+      for (const int a : six[r]) {
+        if (a >= 0 && a < cloud.nop) {
+          hc[static_cast<std::size_t>(a)] =
+              hc[static_cast<std::size_t>(a)] || aff.hc[r];
+          ddc[static_cast<std::size_t>(a)] =
+              ddc[static_cast<std::size_t>(a)] || aff.ddc[r];
+        }
+      }
+    }
+    tallyAtoms(hc, ddc);
   }
-  os << "nop " << cloud.nop << " ih " << ih << " ic " << ic << " water "
-     << water << "\n";
+  os << "nop " << cloud.nop << " graph " << graphName << " ih " << ih
+     << " ic " << ic << " water " << water << "\n";
   return 0;
 }
 
@@ -179,7 +215,10 @@ int main(int argc, char *argv[]) {
       cxxopts::value<int>()->default_value("0"))(
       "c,cutoff", "Neighbour cutoff (Angstrom)",
       cxxopts::value<double>()->default_value("3.5"))(
-      "k", "k for seeded cages", cxxopts::value<int>()->default_value("4"))(
+      "k", "k for knn / seeded cages", cxxopts::value<int>()->default_value("4"))(
+      "graph",
+      "Bond graph for cages: cutoff | knn | knn-union | seeded",
+      cxxopts::value<std::string>()->default_value("seeded"))(
       "command", "read | chill | chill-plus | cages",
       cxxopts::value<std::string>())("file", "Trajectory file",
                                      cxxopts::value<std::string>());
@@ -217,6 +256,7 @@ int main(int argc, char *argv[]) {
   const int typeI = args["type"].as<int>();
   const double cutoff = args["cutoff"].as<double>();
   const int k = args["k"].as<int>();
+  const std::string graph = args["graph"].as<std::string>();
 
   auto runOne = [&](std::ostream &os, Cloud &cloud) {
     if (cmd == "read") {
@@ -229,7 +269,12 @@ int main(int argc, char *argv[]) {
       return cmdChill(os, cloud, cutoff, typeI);
     }
     if (cmd == "cages") {
-      return cmdCages(os, cloud, cutoff, typeI, k);
+      try {
+        return cmdCages(os, cloud, cutoff, typeI, k, graph);
+      } catch (const std::exception &e) {
+        os << e.what() << "\n";
+        return 2;
+      }
     }
     os << "unknown command: " << cmd << "\n";
     return 2;

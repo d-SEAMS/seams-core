@@ -10,7 +10,9 @@
 ** summary, machine-parsable for the reproducibility workflow.
 **
 ** Run from the input/ directory:
-**   bench_trajectory_incremental [trajectory] [frames] [atomType] [maxDepth]
+**   bench_trajectory_incremental TRAJ [frames] [atomType] [maxDepth]
+**                                 [skin] [graph]
+** graph is cutoff | knn | knn-union (default knn).
 */
 
 #include <cage_affiliation.hpp>
@@ -23,6 +25,7 @@
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <set>
 #include <string>
 #include <vector>
@@ -60,16 +63,26 @@ int main(int argc, char **argv) {
   primitive::RingUpdater ringUpd(maxDepth);
   ring::AffiliationUpdater affilUpd;
   const double skinWidth = argc > 5 ? std::atof(argv[5]) : 2.0;
-  nneigh::SkinNeighborList skin(3.5, skinWidth, atomType);
+  const std::string graphName = argc > 6 ? argv[6] : "knn";
+  nneigh::BondGraph graph;
+  try {
+    graph = nneigh::bondGraphFromName(graphName);
+  } catch (const std::exception &e) {
+    std::fprintf(stderr, "%s\n", e.what());
+    return 2;
+  }
+  nneigh::SkinNeighborList skin(3.5, skinWidth, atomType, graph);
 
   double ringFullSum = 0.0, ringIncSum = 0.0;
   double affilBatchSum = 0.0, affilIncSum = 0.0;
   int steadyFrames = 0;
   bool allEqual = true;
 
-  std::printf("# frame nAtoms nRings ringFull_ms ringInc_ms ringRecomp "
-              "affilBatch_ms affilInc_ms affilReclass skinRebuild "
-              "bondChurn ringsEqual affilEqual\n");
+  std::printf("# graph %s skin %.2f\n", nneigh::bondGraphName(graph),
+              skinWidth);
+  std::printf("# frame nAtoms nRings nSix nHC nDDC ringFull_ms ringInc_ms "
+              "ringRecomp affilBatch_ms affilInc_ms affilReclass "
+              "skinRebuild bondChurn ringsEqual affilEqual\n");
 
   for (int frame = 1; frame <= frames; frame++) {
     molSys::PointCloud<molSys::Point<double>, double> cloud;
@@ -104,13 +117,20 @@ int main(int argc, char **argv) {
     const bool affilEqual =
         batchAffil.hc == incAffil.hc && batchAffil.ddc == incAffil.ddc;
 
+    int nHC = 0;
+    int nDDC = 0;
+    for (std::size_t i = 0; i < batchAffil.hc.size(); i++) {
+      nHC += batchAffil.hc[i] ? 1 : 0;
+      nDDC += batchAffil.ddc[i] ? 1 : 0;
+    }
+
     allEqual = allEqual && ringsEqual && affilEqual;
-    std::printf("%d %d %zu %.3f %.3f %d %.3f %.3f %d %s %d %s %s\n", frame,
-                cloud.nop, full.size(), ms(t0, t1), ms(t1, t2),
-                ringUpd.lastRecomputedSources(), ms(t3, t4), ms(t4, t5),
-                affilUpd.lastReclassified(), skin.lastRebuilt() ? "R" : ".",
-                skin.lastChangedAtoms(), ringsEqual ? "yes" : "NO",
-                affilEqual ? "yes" : "NO");
+    std::printf("%d %d %zu %zu %d %d %.3f %.3f %d %.3f %.3f %d %s %d %s %s\n",
+                frame, cloud.nop, full.size(), six.size(), nHC, nDDC,
+                ms(t0, t1), ms(t1, t2), ringUpd.lastRecomputedSources(),
+                ms(t3, t4), ms(t4, t5), affilUpd.lastReclassified(),
+                skin.lastRebuilt() ? "R" : ".", skin.lastChangedAtoms(),
+                ringsEqual ? "yes" : "NO", affilEqual ? "yes" : "NO");
 
     if (frame > 1) {
       ringFullSum += ms(t0, t1);

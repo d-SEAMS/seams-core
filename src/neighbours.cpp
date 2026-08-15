@@ -18,6 +18,8 @@
 #include <numeric>
 #include <set>
 #include <span>
+#include <stdexcept>
+#include <string>
 #include <utility>
 
 #include <neighbours.hpp>
@@ -685,10 +687,39 @@ std::pair<double, double> nneigh::shellSeparation(
   return {maxKth, haveNext ? minNext : 0.0};
 }
 
+nneigh::BondGraph nneigh::bondGraphFromName(const std::string &name) {
+  if (name == "cutoff") {
+    return BondGraph::Cutoff;
+  }
+  if (name == "knn" || name == "knn-mutual" || name == "mutual") {
+    return BondGraph::KnnMutual;
+  }
+  if (name == "knn-union" || name == "union") {
+    return BondGraph::KnnUnion;
+  }
+  throw std::invalid_argument(
+      "unknown bond graph '" + name +
+      "' (use cutoff, knn, knn-union)");
+}
+
+const char *nneigh::bondGraphName(BondGraph graph) {
+  switch (graph) {
+  case BondGraph::Cutoff:
+    return "cutoff";
+  case BondGraph::KnnMutual:
+    return "knn";
+  case BondGraph::KnnUnion:
+    return "knn-union";
+  }
+  return "cutoff";
+}
+
 nneigh::SkinNeighborList::SkinNeighborList(double cutoff, double skin,
-                                           int typeI, int k)
+                                           int typeI, BondGraph graph, int k)
     : cutoff_(cutoff), skin_(skin), cutoffSq_(cutoff * cutoff),
-      triggerSq_((0.5 * skin) * (0.5 * skin)), typeI_(typeI), k_(k) {}
+      triggerSq_((0.5 * skin) * (0.5 * skin)), typeI_(typeI),
+      k_(graph == BondGraph::Cutoff ? 0 : k), graph_(graph),
+      mutual_(graph != BondGraph::KnnUnion) {}
 
 bool nneigh::SkinNeighborList::mustRebuild(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud) const {
@@ -805,13 +836,15 @@ void nneigh::SkinNeighborList::refreshBonds(
     }
     for (int i = 0; i < yCloud.nop; i++) {
       for (const int j : nominated[static_cast<std::size_t>(i)]) {
-        if (j <= i) {
-          continue;
+        const int a = std::min(i, j);
+        const int b = std::max(i, j);
+        if (mutual_) {
+          const auto &other = nominated[static_cast<std::size_t>(j)];
+          if (std::find(other.begin(), other.end(), i) == other.end()) {
+            continue;
+          }
         }
-        const auto &other = nominated[static_cast<std::size_t>(j)];
-        if (std::find(other.begin(), other.end(), i) != other.end()) {
-          next.emplace(i, j);
-        }
+        next.emplace(a, b);
       }
     }
   }
