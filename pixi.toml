@@ -47,6 +47,7 @@ mpi = { features = ["mpi"] }
 ira = { features = ["ira"] }
 sphericart = { features = ["sphericart"] }
 nauty = { features = ["nauty"] }
+repro = { features = ["repro"] }
 
 [feature.ira]
 platforms = ["linux-64"]
@@ -150,3 +151,15 @@ rm -rf source/howto
 rm -rf source/reference
 rm -rf source/*.rst
 """
+
+[feature.repro]
+# Reproducibility workflow: Snakemake DAG over the paper benches, literature
+# descriptor comparison, and the aggregation into the results manifest
+platforms = ["linux-64"]
+
+[feature.repro.dependencies]
+freud = ">=3.0"
+pyscal3 = ">=3.0"
+
+[feature.repro.pypi-dependencies]
+snakemake = ">=8.0"

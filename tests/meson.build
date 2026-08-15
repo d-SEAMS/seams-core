@@ -128,6 +128,13 @@ executable('bench_rings_incremental', 'bench_rings_incremental.cpp',
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
 
+executable('bench_trajectory_incremental', 'bench_trajectory_incremental.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
 executable('bench_structure_desc', 'bench_structure_desc.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
