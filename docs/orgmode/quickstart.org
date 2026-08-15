@@ -19,13 +19,11 @@ Ice type statistics for frame 1:
 
 * Install pydseamslib
 
-PyPI currently publishes the older ~pydseamslib~ 0.0.2 package (CPython
-3.10--3.12 wheels, not this tree). Install 2.0 from the repository until
-that name is updated:
+Python bindings are the ~PydSEAMSlib~ repository, not this tree.
 
 #+begin_src bash
-pip install .
-# or: pip install '.[ase]'
+# from a PydSEAMSlib checkout, or after a 2.0 upload to PyPI:
+pip install 'pydseamslib[ase]'
 #+end_src
 
 Verify:

@@ -1,7 +1,7 @@
 option('with_tests', type: 'boolean', value: true,
   description: 'Build Catch2 C++ tests')
-option('with_python', type: 'boolean', value: true,
-  description: 'Build nanobind Python bindings')
+option('with_python', type: 'boolean', value: false,
+  description: 'Unused. Python bindings are the PydSEAMSlib repo, not this one')
 option('with_mpi', type: 'feature', value: 'disabled',
   description: 'Link MPI and split Steinhardt atoms across ranks')
 option('with_openmp_offload', type: 'feature', value: 'disabled',

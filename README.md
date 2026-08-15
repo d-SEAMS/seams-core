@@ -17,6 +17,10 @@
 
 \brief The C++ core of d-SEAMS, a molecular dynamics trajectory analysis engine.
 
+Python bindings are a separate repository:
+[d-SEAMS/PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib). This repo is
+the engine and the Lua `yodaStruct` CLI, not a monolith.
+
 \note The <a href="pages.html">related pages</a> describe the examples and how to obtain
 the data-sets (trajectories) <a
 href="https://figshare.com/projects/d-SEAMS_Datasets/73545">from figshare</a>.

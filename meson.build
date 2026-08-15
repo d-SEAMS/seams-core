@@ -347,9 +347,10 @@ if get_option('with_tests')
   subdir('tests')
 endif
 
-# Python bindings
+# Python bindings are not in this repository.
+# See https://github.com/d-SEAMS/PydSEAMSlib
 if get_option('with_python')
-  subdir('python')
+  error('Python bindings live in https://github.com/d-SEAMS/PydSEAMSlib')
 endif
 
 # yodaStruct Lua CLI (optional; Lua via pkg-config or the wrap)
