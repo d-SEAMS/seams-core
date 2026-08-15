@@ -216,3 +216,107 @@ TEST_CASE("AffiliationUpdater tracks synthetic topology churn exactly",
     }
   }
 }
+
+TEST_CASE("cage membership is not a function of the four-neighbour star",
+          "[cage_affiliation]") {
+  // Two configurations that agree exactly on the closed star of a vertex --
+  // same induced graph on {v} and its four neighbours, same coordinates for
+  // those five atoms -- but differ in the vertex's cage label. Any per-atom
+  // score that reads only the star must therefore assign both the same
+  // label, and cannot equal the topological classification. The second
+  // configuration displaces second-shell atoms only, which changes no
+  // coordinate and no edge inside the star.
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  auto idx = nneigh::neighbourListByIndex(yCloud, nList);
+
+  const int v = 137; // an arbitrary bulk vertex
+  REQUIRE(idx[v].size() == 5);
+  std::vector<int> star(idx[v].begin(), idx[v].end()); // v plus neighbours
+  std::vector<bool> inStar(yCloud.nop, false);
+  for (const int a : star) {
+    inStar[a] = true;
+  }
+
+  // Second shell: neighbours of v's neighbours, outside the star
+  std::vector<int> secondShell;
+  for (size_t k = 1; k < idx[v].size(); k++) {
+    for (size_t m = 1; m < idx[idx[v][k]].size(); m++) {
+      const int w = idx[idx[v][k]][m];
+      if (!inStar[w]) {
+        secondShell.push_back(w);
+      }
+    }
+  }
+  std::sort(secondShell.begin(), secondShell.end());
+  secondShell.erase(std::unique(secondShell.begin(), secondShell.end()),
+                    secondShell.end());
+  REQUIRE_FALSE(secondShell.empty());
+
+  auto labelOf = [](const molSys::PointCloud<molSys::Point<double>, double>
+                        &cloud,
+                    int vertex) {
+    auto nl = nneigh::neighListO(3.5, cloud, 1);
+    auto ix = nneigh::neighbourListByIndex(cloud, nl);
+    auto rings = primitive::ringNetwork(ix, 7);
+    std::vector<std::vector<int>> six;
+    for (const auto &r : rings) {
+      if (r.size() == 6) {
+        six.push_back(r);
+      }
+    }
+    bool ddc = false;
+    if (!six.empty()) {
+      const auto affiliation = ring::cageAffiliation(six, ix);
+      for (size_t i = 0; i < six.size(); i++) {
+        if (!affiliation.ddc[i]) {
+          continue;
+        }
+        if (std::find(six[i].begin(), six[i].end(), vertex) != six[i].end()) {
+          ddc = true;
+          break;
+        }
+      }
+    }
+    return ddc;
+  };
+
+  REQUIRE(labelOf(yCloud, v)); // cubic in the pristine crystal
+
+  // Displace every second-shell atom far away: outside the star, so the
+  // star's coordinates and induced edges are untouched
+  auto broken = yCloud;
+  for (const int w : secondShell) {
+    broken.pts[w].x += 20.0;
+  }
+
+  // The closed star is bit-identical between the two configurations
+  auto brokenIdx = nneigh::neighbourListByIndex(
+      broken, nneigh::neighListO(3.5, broken, 1));
+  for (const int a : star) {
+    REQUIRE(yCloud.pts[a].x == broken.pts[a].x);
+    REQUIRE(yCloud.pts[a].y == broken.pts[a].y);
+    REQUIRE(yCloud.pts[a].z == broken.pts[a].z);
+  }
+  // Induced star edges: neighbour rows restricted to star members agree
+  for (const int a : star) {
+    std::vector<int> before, after;
+    for (size_t m = 1; m < idx[a].size(); m++) {
+      if (inStar[idx[a][m]]) {
+        before.push_back(idx[a][m]);
+      }
+    }
+    for (size_t m = 1; m < brokenIdx[a].size(); m++) {
+      if (inStar[brokenIdx[a][m]]) {
+        after.push_back(brokenIdx[a][m]);
+      }
+    }
+    std::sort(before.begin(), before.end());
+    std::sort(after.begin(), after.end());
+    REQUIRE(before == after);
+  }
+
+  // Yet the cage label of v flips
+  REQUIRE_FALSE(labelOf(broken, v));
+}
