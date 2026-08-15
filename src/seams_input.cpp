@@ -13,6 +13,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <algorithm>
+#include <charconv>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
@@ -20,6 +21,7 @@
 #include <memory>
 #include <mutex>
 #include <seams_input.hpp>
+#include <string_view>
 #include <unordered_map>
 
 #ifdef SEAMS_HAS_OPENMP
@@ -47,6 +49,50 @@ void mapAtomIdToIndex(
 
 bool isLammpsTimestep(const std::string &line) {
   return line.size() >= 14 && line.compare(0, 14, "ITEM: TIMESTEP") == 0;
+}
+
+bool isLammpsItem(const std::string &line) {
+  return line.size() >= 5 && line.compare(0, 5, "ITEM:") == 0;
+}
+
+// Locale-independent field scan. istringstream >> double copies the line
+// and walks a facet; from_chars is the C++17 path Lemire measured at
+// gigabyte-per-second scale on the same decimal grammar LAMMPS writes.
+constexpr int kMaxDumpFields = 32;
+
+int parseDumpFields(std::string_view line, double *out, int cap) {
+  const char *p = line.data();
+  const char *const end = p + line.size();
+  int n = 0;
+  while (p < end && n < cap) {
+    while (p < end && (*p == ' ' || *p == '\t' || *p == '\r')) {
+      ++p;
+    }
+    if (p >= end) {
+      break;
+    }
+    double value = 0;
+    const auto parsed = std::from_chars(p, end, value);
+    if (parsed.ec != std::errc{}) {
+      while (p < end && *p != ' ' && *p != '\t') {
+        ++p;
+      }
+      continue;
+    }
+    out[n++] = value;
+    p = parsed.ptr;
+  }
+  return n;
+}
+
+bool parseDumpInt(std::string_view line, int &out) {
+  const char *p = line.data();
+  const char *const end = p + line.size();
+  while (p < end && (*p == ' ' || *p == '\t')) {
+    ++p;
+  }
+  const auto parsed = std::from_chars(p, end, out);
+  return parsed.ec == std::errc{};
 }
 
 // Live dump cursor, matching LAMMPS ReaderNative (rerun keeps FILE* at
@@ -430,7 +476,6 @@ void parseLammpsFrameBody(
     std::array<double, 3> coordHigh) {
   std::string line;
   std::vector<std::string> tokens;
-  std::vector<double> numbers;
   std::vector<double> tilt;
   int nop = -1;
   bool readNOP = false;
@@ -459,62 +504,73 @@ void parseLammpsFrameBody(
       break;
     }
 
-    tokens = gen::tokenizer(line);
-    numbers = gen::tokenizerDouble(line);
+    const bool itemLine = isLammpsItem(line);
+    if (itemLine) {
+      tokens = gen::tokenizer(line);
+    } else {
+      tokens.clear();
+    }
 
-    if (readNOP) {
-      nop = std::stoi(line.data());
-      readNOP = false;
-      if (keep == LammpsKeep::All) {
+    if (readNOP && !itemLine) {
+      if (parseDumpInt(line, nop) && nop >= 0) {
         yCloud.pts.reserve(static_cast<std::size_t>(nop));
-        yCloud.nop = nop;
+        if (keep == LammpsKeep::All) {
+          yCloud.nop = nop;
+        }
       }
+      readNOP = false;
     }
     if (readBox) {
-      if (!tokens.empty() && tokens[0] == "ITEM:") {
+      if (itemLine) {
         readBox = false;
         if (isTriclinic) {
           for (std::size_t k = 0; k < tilt.size(); k++) {
             yCloud.box.push_back(tilt[k]);
           }
         }
-      } else if (numbers.size() >= 2) {
-        yCloud.box.push_back(numbers[1] - numbers[0]);
-        yCloud.boxLow.push_back(numbers[0]);
-        if (numbers.size() == 3) {
-          isTriclinic = true;
-          tilt.push_back(numbers[2]);
+      } else {
+        double fields[kMaxDumpFields];
+        const int n = parseDumpFields(line, fields, kMaxDumpFields);
+        if (n >= 2) {
+          yCloud.box.push_back(fields[1] - fields[0]);
+          yCloud.boxLow.push_back(fields[0]);
+          if (n >= 3) {
+            isTriclinic = true;
+            tilt.push_back(fields[2]);
+          }
         }
       }
     }
-    if (readAtoms && typeIndex >= 0 && xIndex >= 0 && yIndex >= 0 &&
-        zIndex >= 0 &&
-        numbers.size() >
-            static_cast<std::size_t>(
-                std::max({typeIndex, xIndex, yIndex, zIndex, molIndex,
-                          atomIndex}))) {
-      iPoint.type = static_cast<int>(numbers[typeIndex]);
-      iPoint.molID = static_cast<int>(numbers[molIndex]);
-      iPoint.atomID = static_cast<int>(numbers[atomIndex]);
-      iPoint.x = numbers[xIndex];
-      iPoint.y = numbers[yIndex];
-      iPoint.z = numbers[zIndex];
-      if (isSlice) {
-        iPoint.inSlice = sinp::atomInSlice(iPoint.x, iPoint.y, iPoint.z,
-                                           coordLow, coordHigh);
-        if (keep == LammpsKeep::TypeInSlice && !iPoint.inSlice) {
+    if (readAtoms && !itemLine && typeIndex >= 0 && xIndex >= 0 &&
+        yIndex >= 0 && zIndex >= 0) {
+      double fields[kMaxDumpFields];
+      const int n = parseDumpFields(line, fields, kMaxDumpFields);
+      const int need = std::max({typeIndex, xIndex, yIndex, zIndex, molIndex,
+                                 atomIndex});
+      if (n > need) {
+        iPoint.type = static_cast<int>(fields[typeIndex]);
+        iPoint.molID = static_cast<int>(fields[molIndex]);
+        iPoint.atomID = static_cast<int>(fields[atomIndex]);
+        iPoint.x = fields[xIndex];
+        iPoint.y = fields[yIndex];
+        iPoint.z = fields[zIndex];
+        if (isSlice) {
+          iPoint.inSlice = sinp::atomInSlice(iPoint.x, iPoint.y, iPoint.z,
+                                             coordLow, coordHigh);
+          if (keep == LammpsKeep::TypeInSlice && !iPoint.inSlice) {
+            continue;
+          }
+        }
+        if (keep != LammpsKeep::All && iPoint.type != typeFilter) {
           continue;
         }
+        nKept++;
+        yCloud.pts.push_back(iPoint);
+        mapAtomIdToIndex(yCloud);
       }
-      if (keep != LammpsKeep::All && iPoint.type != typeFilter) {
-        continue;
-      }
-      nKept++;
-      yCloud.pts.push_back(iPoint);
-      mapAtomIdToIndex(yCloud);
     }
 
-    if (!tokens.empty() && tokens[0] == "ITEM:" && tokens.size() > 1) {
+    if (itemLine && tokens.size() > 1) {
       if (tokens[1] == "NUMBER") {
         readNOP = true;
       } else if (tokens[1] == "BOX") {

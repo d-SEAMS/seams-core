@@ -337,6 +337,31 @@ TEST_CASE("readLammpsTrj binds xu yu zu when x y z are absent",
   sinp::dropLammpsDumpIndex(path);
 }
 
+TEST_CASE("readLammpsTrjO parses scientific-notation dump coordinates",
+          "[seams_input]") {
+  auto path = fs::temp_directory_path() / "dseams_test_lammps_sci.lammpstrj";
+  {
+    std::ofstream f(path);
+    f << "ITEM: TIMESTEP\n0\nITEM: NUMBER OF ATOMS\n2\n";
+    f << "ITEM: BOX BOUNDS pp pp pp\n0 1.0e1\n0 1e1\n0 10\n";
+    f << "ITEM: ATOMS id type x y z\n";
+    f << "1 1 1.25e0 2.5E-1 -3.0e0\n";
+    f << "2 1 4.2e1 0 1.5e-1\n";
+  }
+  sinp::dropLammpsDumpIndex(path.string());
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  auto cloud = sinp::readLammpsTrjO(path.string(), 1, yCloud, 1);
+  REQUIRE(cloud.nop == 2);
+  REQUIRE_THAT(cloud.box[0], Catch::Matchers::WithinAbs(10.0, 1e-10));
+  REQUIRE_THAT(cloud.pts[0].x, Catch::Matchers::WithinAbs(1.25, 1e-10));
+  REQUIRE_THAT(cloud.pts[0].y, Catch::Matchers::WithinAbs(0.25, 1e-10));
+  REQUIRE_THAT(cloud.pts[0].z, Catch::Matchers::WithinAbs(-3.0, 1e-10));
+  REQUIRE_THAT(cloud.pts[1].x, Catch::Matchers::WithinAbs(42.0, 1e-10));
+  REQUIRE_THAT(cloud.pts[1].z, Catch::Matchers::WithinAbs(0.15, 1e-10));
+  fs::remove(path);
+  sinp::dropLammpsDumpIndex(path.string());
+}
+
 // -- readBonds tests --
 
 TEST_CASE("readBonds returns empty for nonexistent file", "[seams_input]") {
