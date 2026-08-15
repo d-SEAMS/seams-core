@@ -808,18 +808,16 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
  *   will be written out.
  *   The default file name is "chillPlus.txt"
  */
-void
-chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-                      const std::vector<std::vector<int>> &nList, std::string path,
-                      int firstFrame, bool isSlice,
-                      std::string outputFileName) {
-  int ih, ic, interIce, water, unknown, clath, interClath,
-      total; // No. of particles of each type
-  ih = ic = water = unknown = interIce = total = 0;
+namespace {
+void assignIceTypePlus(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<std::vector<int>> &nList, bool isSlice, int &ih, int &ic,
+    int &interIce, int &water, int &clath, int &interClath, int &total) {
+  ih = ic = water = interIce = total = 0;
   clath = interClath = 0;
   int num_staggrd, num_eclipsd, na;
   molSys::bond_type bondType;
-  int nnumNeighbours; // number of nearest neighbours
+  int nnumNeighbours;
 
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     // if(yCloud.pts[iatom].type!=typeO){continue;}
@@ -888,30 +886,40 @@ chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     }
 
   } // End of loop through every iatom
+}
+} // namespace
 
-  // water = total - ic -ih;
+void
+chill::getIceTypePlusNoPrint(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<std::vector<int>> &nList, bool isSlice) {
+  int ih, ic, interIce, water, clath, interClath, total;
+  assignIceTypePlus(yCloud, nList, isSlice, ih, ic, interIce, water, clath,
+                    interClath, total);
+}
 
-  // --------------------
-  // Create the directories if needed
+void
+chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                      const std::vector<std::vector<int>> &nList, std::string path,
+                      int firstFrame, bool isSlice,
+                      std::string outputFileName) {
+  int ih, ic, interIce, water, clath, interClath, total;
+  assignIceTypePlus(yCloud, nList, isSlice, ih, ic, interIce, water, clath,
+                    interClath, total);
+
   sout::makePath(path);
   std::string outputDirName = path + "bop";
   sout::makePath(outputDirName);
-  // --------------------
 
   std::ofstream outputFile;
   outputFile.open(path + "bop/" + outputFileName, std::ios_base::app);
-  // --------------------
-  // Comment line for the first line
   if (yCloud.currentFrame == firstFrame) {
     outputFile << "Frame Ic Ih Interfacial Clath InterClath Water Total\n";
   }
-  // --------------------
   outputFile << yCloud.currentFrame << " " << ic << " " << ih << " "
              << interIce << " " << clath << " " << interClath << " " << water
              << " " << total << "\n";
   outputFile.close();
-
-  return;
 }
 
 // TODO: Add code for slices!

@@ -276,6 +276,12 @@ getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                int firstFrame, bool isSlice = false,
                std::string outputFileName = "chillPlus.txt");
 
+//! CHILL+ ice types on the cloud. Does not write a file.
+void
+getIceTypePlusNoPrint(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<std::vector<int>> &nList, bool isSlice = false);
+
 //! q6 can distinguish between water and ice. Use this for the largest ice
 //! cluster
 std::vector<double>

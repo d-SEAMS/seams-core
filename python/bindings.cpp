@@ -504,6 +504,28 @@ NB_MODULE(_core, m) {
         nb::arg("firstFrame"), nb::arg("isSlice"), nb::arg("outputFileName"),
         nb::rv_policy::reference);
     m.def(
+        "getIceTypePlusNoPrint",
+        [](molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+           const std::vector<std::vector<int>> &nList, bool isSlice)
+            -> molSys::PointCloud<molSys::Point<double>, double> & {
+          chill::getIceTypePlusNoPrint(yCloud, nList, isSlice);
+          return yCloud;
+        },
+        "Classify each atom's ice type using CHILL+. Does not write a file.",
+        nb::arg("yCloud"), nb::arg("nList"), nb::arg("isSlice") = false,
+        nb::rv_policy::reference);
+    m.def(
+        "getIceTypeNoPrint",
+        [](molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+           const std::vector<std::vector<int>> &nList, bool isSlice)
+            -> molSys::PointCloud<molSys::Point<double>, double> & {
+          chill::getIceTypeNoPrint(yCloud, nList, isSlice);
+          return yCloud;
+        },
+        "Classify each atom's ice type using CHILL. Does not write a file.",
+        nb::arg("yCloud"), nb::arg("nList"), nb::arg("isSlice") = false,
+        nb::rv_policy::reference);
+    m.def(
         "getCorrel",
         [](molSys::PointCloud<molSys::Point<double>, double> &yCloud,
            const std::vector<std::vector<int>> &nList, bool isSlice,

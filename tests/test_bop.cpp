@@ -329,6 +329,14 @@ TEST_CASE("numStaggered counts staggered bonds for an atom", "[bop]") {
   REQUIRE(nStag <= 4);
 }
 
+TEST_CASE("getIceTypePlusNoPrint classifies without writing", "[bop]") {
+  auto cloud = makeTetraCloud();
+  auto nList = nneigh::neighListO(3.0, cloud, 1);
+  chill::getCorrelPlus(cloud, nList, false);
+  chill::getIceTypePlusNoPrint(cloud, nList, false);
+  REQUIRE(cloud.pts[0].iceType != molSys::atom_state_type::unclassified);
+}
+
 TEST_CASE("getIceTypePlus classifies with CHILL+ and writes output", "[bop]") {
   auto cloud = makeTetraCloud();
   auto nList = nneigh::neighListO(3.0, cloud, 1);
