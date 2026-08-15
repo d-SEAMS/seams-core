@@ -68,8 +68,8 @@ int main(int argc, char **argv) {
   bool allEqual = true;
 
   std::printf("# frame nAtoms nRings ringFull_ms ringInc_ms ringRecomp "
-              "affilBatch_ms affilInc_ms affilReclass ringsEqual "
-              "affilEqual\n");
+              "affilBatch_ms affilInc_ms affilReclass skinRebuild "
+              "bondChurn ringsEqual affilEqual\n");
 
   for (int frame = 1; frame <= frames; frame++) {
     molSys::PointCloud<molSys::Point<double>, double> cloud;
@@ -105,10 +105,11 @@ int main(int argc, char **argv) {
         batchAffil.hc == incAffil.hc && batchAffil.ddc == incAffil.ddc;
 
     allEqual = allEqual && ringsEqual && affilEqual;
-    std::printf("%d %d %zu %.3f %.3f %d %.3f %.3f %d %s %s\n", frame,
+    std::printf("%d %d %zu %.3f %.3f %d %.3f %.3f %d %s %d %s %s\n", frame,
                 cloud.nop, full.size(), ms(t0, t1), ms(t1, t2),
                 ringUpd.lastRecomputedSources(), ms(t3, t4), ms(t4, t5),
-                affilUpd.lastReclassified(), ringsEqual ? "yes" : "NO",
+                affilUpd.lastReclassified(), skin.lastRebuilt() ? "R" : ".",
+                skin.lastChangedAtoms(), ringsEqual ? "yes" : "NO",
                 affilEqual ? "yes" : "NO");
 
     if (frame > 1) {
