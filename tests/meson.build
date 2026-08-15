@@ -156,6 +156,13 @@ executable('report_ice_graphs', 'report_ice_graphs.cpp',
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
 
+executable('walk_seeded', 'walk_seeded.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
 executable('bench_structure_desc', 'bench_structure_desc.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,

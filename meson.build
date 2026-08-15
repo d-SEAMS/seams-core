@@ -376,4 +376,7 @@ if get_option('with_cli')
     args: ['read', 'input/traj/exampleTraj.lammpstrj'],
     workdir: meson.project_source_root(),
     timeout: 60)
+  test('seams_help', seams_exe, args: ['--help'])
+  test('seams_version', seams_exe, args: ['--version'])
+  test('seams_features', seams_exe, args: ['--features'])
 endif
