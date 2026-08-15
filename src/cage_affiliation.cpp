@@ -49,7 +49,6 @@ struct FrameContext {
   const std::vector<std::vector<int>> &nList;
   ring::RingSearchIndex index;
   std::vector<std::vector<int>> sortedRings;
-  std::vector<std::vector<int>> ringsMut;
   // Scratch for findPrismatic, which appends to a list and stamps a type
   // vector neither of which affiliation reads
   std::vector<int> scratchListHC;
@@ -70,7 +69,6 @@ struct FrameContext {
       sortedRings[i] = rings[i];
       std::sort(sortedRings[i].begin(), sortedRings[i].end());
     }
-    ringsMut = rings;
     scratchType.assign(rings.size(), ring::strucType::unclassified);
   }
 
@@ -126,7 +124,7 @@ struct FrameContext {
     if (i == j || shareAtoms(i, j)) {
       return false;
     }
-    return ring::basalConditions(nList, ringsMut[i], ringsMut[j]);
+    return ring::basalConditions(nList, rings[i], rings[j]);
   }
 
   //! Candidate second-basal rings for i in the findHC gathering order:

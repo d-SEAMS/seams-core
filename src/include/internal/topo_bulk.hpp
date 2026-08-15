@@ -143,7 +143,8 @@ bool conditionThreeDDC(const std::vector<std::vector<int>> &rings,
 
 //! Tests whether two rings are basal rings (true) or not (false)
 bool basalConditions(const std::vector<std::vector<int>> &nList,
-                     std::vector<int> &basal1, std::vector<int> &basal2);
+                     const std::vector<int> &basal1,
+                     const std::vector<int> &basal2);
 
 //! Tests whether the last two elements of a triplet are neighbours of two atom
 //! IDs passed in
