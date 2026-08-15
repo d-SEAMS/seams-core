@@ -17,15 +17,20 @@
 
 \brief The C++ core of d-SEAMS, a molecular dynamics trajectory analysis engine.
 
-This repository is the C++ engine (`libyodaLib`). It does not install
-`yodaStruct`. Front ends live in their own repos:
+This repository is the C++ engine (`libyodaLib`) and the `seams` CLI.
 
-- Python: [d-SEAMS/PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib)
-- Lua and Fennel CLI: [d-SEAMS/yodaStruct](https://github.com/d-SEAMS/yodaStruct)
+```bash
+seams read water.lammpstrj
+seams chill-plus water.lammpstrj --cutoff 3.5
+seams cages water.lammpstrj
+```
 
-Build the engine with `pixi run setup && pixi run build && pixi run test`.
-Commands below that invoke `yodaStruct -c lua_inputs/...` belong in a
-yodaStruct checkout.
+Scripting front ends are separate packages:
+
+- Python: `pydseams` ([PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib))
+- Lua/Fennel: `dseams` ([yodaStruct](https://github.com/d-SEAMS/yodaStruct))
+
+Build with `pixi run setup && pixi run build && pixi run test`.
 
 \note The <a href="pages.html">related pages</a> describe the examples and how to obtain
 the data-sets (trajectories) <a

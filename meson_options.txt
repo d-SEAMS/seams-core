@@ -1,7 +1,9 @@
 option('with_tests', type: 'boolean', value: true,
   description: 'Build Catch2 C++ tests')
 option('with_python', type: 'boolean', value: false,
-  description: 'Unused. Python bindings are the PydSEAMSlib repo, not this one')
+  description: 'Unused. Python is the pydseams package (PydSEAMSlib repo)')
+option('with_cli', type: 'boolean', value: true,
+  description: 'Build the seams engine CLI')
 option('with_mpi', type: 'feature', value: 'disabled',
   description: 'Link MPI and split Steinhardt atoms across ranks')
 option('with_openmp_offload', type: 'feature', value: 'disabled',
@@ -15,4 +17,4 @@ option('with_sphericart', type: 'feature', value: 'auto',
 option('with_nauty', type: 'feature', value: 'auto',
   description: 'Canonical cage certificates via nauty')
 option('with_lua', type: 'feature', value: 'disabled',
-  description: 'Unused. The yodaStruct CLI is the yodaStruct repo, not this one')
+  description: 'Unused. Lua is the dseams library in the yodaStruct repo')

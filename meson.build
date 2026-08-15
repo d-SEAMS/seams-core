@@ -7,7 +7,7 @@
 #-----------------------------------------------------------------------------------
 
 project('seams-core', ['cpp', 'c'],
-  version: '2.1.2',
+  version: '2.2.0',
   default_options: ['warning_level=2', 'cpp_std=c++20'],
   meson_version: '>=1.3.0')
 
@@ -348,14 +348,32 @@ if get_option('with_tests')
 endif
 
 # Python bindings are not in this repository.
-# See https://github.com/d-SEAMS/PydSEAMSlib
 if get_option('with_python')
-  error('Python bindings live in https://github.com/d-SEAMS/PydSEAMSlib')
+  error('Python is pydseams: https://github.com/d-SEAMS/PydSEAMSlib')
 endif
 
-# Front ends are not in this repository.
-# Lua/Fennel: https://github.com/d-SEAMS/yodaStruct
-# Python:     https://github.com/d-SEAMS/PydSEAMSlib
+# Lua is a library in the yodaStruct / luadseams repo, not this one.
 if not get_option('with_lua').disabled()
-  error('The yodaStruct Lua CLI lives in https://github.com/d-SEAMS/yodaStruct')
+  error('Lua/Fennel is the dseams library: https://github.com/d-SEAMS/yodaStruct')
+endif
+
+if get_option('with_cli')
+  seams_cli_link = []
+  if host_machine.system() == 'linux'
+    seams_cli_link += ['-Wl,--enable-new-dtags']
+  endif
+  seams_exe = executable(
+    'seams',
+    files('src/seams_cli.cpp'),
+    dependencies: [yds_dep],
+    include_directories: _incdirs,
+    cpp_args: _args + ['-DSEAMS_VERSION="' + meson.project_version() + '"'],
+    link_args: seams_cli_link,
+    install: true)
+  test(
+    'seams_read',
+    seams_exe,
+    args: ['read', 'input/traj/exampleTraj.lammpstrj'],
+    workdir: meson.project_source_root(),
+    timeout: 60)
 endif
