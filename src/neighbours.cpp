@@ -29,6 +29,9 @@
 #ifdef SEAMS_HAS_VESIN
 #include <vesin.h>
 #endif
+#ifdef SEAMS_HAS_LINKCELL
+#include <linkcell.h>
+#endif
 
 namespace {
 
@@ -557,9 +560,78 @@ int nneigh::clearNeighbourList(std::vector<std::vector<int>> &nList) {
  */
 namespace {
 
-// Periodic cell-list k-nearest (Allen and Tildesley, Computer Simulation
-// of Liquids). vesin is cutoff-only; nanoflann KD-trees have no MIC, so
-// the linked-cell walk with a k-heap is the right search on a dump cell.
+#ifdef SEAMS_HAS_LINKCELL
+// Packs the cloud and asks linkcell for the k-heap walk. mask drops
+// particles that are not typeI as both sources and candidates. Origin
+// is the dump boxLow so wrapped images match the in-tree MIC.
+bool nominateByLinkcell(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    int typeI, double cellHint, std::vector<std::vector<int>> &nominated) {
+  const int n = yCloud.nop;
+  if (n <= 0 || k <= 0 || yCloud.box.size() < 3) {
+    return true;
+  }
+  const double bx = yCloud.box[0];
+  const double by = yCloud.box[1];
+  const double bz = yCloud.box[2];
+  if (!(bx > 0.0 && by > 0.0 && bz > 0.0)) {
+    return true;
+  }
+  std::vector<double> xyz(static_cast<std::size_t>(n) * 3);
+  std::vector<int> mask(static_cast<std::size_t>(n), 0);
+  int nSrc = 0;
+  for (int i = 0; i < n; i++) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+    xyz[static_cast<std::size_t>(i) * 3 + 0] = p.x;
+    xyz[static_cast<std::size_t>(i) * 3 + 1] = p.y;
+    xyz[static_cast<std::size_t>(i) * 3 + 2] = p.z;
+    if (p.type == typeI) {
+      mask[static_cast<std::size_t>(i)] = 1;
+      ++nSrc;
+    }
+  }
+  if (nSrc == 0) {
+    return true;
+  }
+  lc_cell box = lc_cell_ortho(bx, by, bz);
+  if (yCloud.boxLow.size() >= 3) {
+    box.ox = yCloud.boxLow[0];
+    box.oy = yCloud.boxLow[1];
+    box.oz = yCloud.boxLow[2];
+  }
+  std::vector<int> out(static_cast<std::size_t>(n) * static_cast<std::size_t>(k),
+                       -1);
+  if (lc_knearest(xyz.data(), n, &box, k, mask.data(), cellHint, out.data()) !=
+      0) {
+    const char *msg = lc_last_error();
+    std::cerr << "linkcell failed: " << (msg ? msg : "unknown")
+              << "; falling back to the in-tree cell list.\n";
+    return false;
+  }
+  for (int i = 0; i < n; i++) {
+    if (mask[static_cast<std::size_t>(i)] == 0) {
+      continue;
+    }
+    auto &row = nominated[static_cast<std::size_t>(i)];
+    row.clear();
+    row.reserve(static_cast<std::size_t>(k));
+    for (int t = 0; t < k; t++) {
+      const int j =
+          out[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+              static_cast<std::size_t>(t)];
+      if (j >= 0) {
+        row.push_back(j);
+      }
+    }
+  }
+  return true;
+}
+#endif
+
+// Periodic cell-list k-nearest (Allen and Tildesley). linkcell is the
+// library that owns this walk; vesin is cutoff-only and nanoflann
+// KD-trees have no MIC. The in-tree copy is the fallback when the
+// wrap is absent.
 std::vector<std::vector<int>> nominateByCellList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     int typeI, double cellHint) {
@@ -568,6 +640,11 @@ std::vector<std::vector<int>> nominateByCellList(
   if (yCloud.nop <= 0 || k <= 0 || yCloud.box.size() < 3) {
     return nominated;
   }
+#ifdef SEAMS_HAS_LINKCELL
+  if (nominateByLinkcell(yCloud, k, typeI, cellHint, nominated)) {
+    return nominated;
+  }
+#endif
   const double bx = yCloud.box[0];
   const double by = yCloud.box[1];
   const double bz = yCloud.box[2];

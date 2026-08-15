@@ -97,9 +97,10 @@ std::vector<std::vector<int>> getNewNeighbourListByIndex(
  *  shell is mutual and the two coincide; on disordered packings the mutual
  *  graph is sparser, which starves accidental ring structure -- measured on
  *  the dense null, mutual scores zero false crystal where union reaches
- *  2.5%. Nominations are a periodic linked-cell k-nearest search
- *  (Allen and Tildesley): vesin is cutoff-only and KD-trees have no
- *  minimum-image convention. candidateCutoff is only a cell-size hint.
+ *  2.5%. Nominations are a periodic linked-cell k-nearest search via
+ *  linkcell (Allen and Tildesley): vesin is cutoff-only and KD-trees
+ *  have no minimum-image convention. candidateCutoff is only a
+ *  cell-size hint.
  *  On an undistorted tetrahedral lattice with k = 4 this graph equals
  *  the first-shell cutoff graph. Rows are by atom ID with the leading
  *  self entry, like neighListO.

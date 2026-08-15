@@ -1,0 +1,7 @@
+[wrap-git]
+url = https://github.com/HaoZeke/linkcell.git
+revision = v0.1.0
+depth = 1
+
+[provide]
+linkcell = linkcell_dep

@@ -151,6 +151,11 @@ void printFeatures(std::ostream &os) {
 #else
   line("vesin neighbours", false);
 #endif
+#ifdef SEAMS_HAS_LINKCELL
+  line("linkcell k-nearest", true);
+#else
+  line("linkcell k-nearest", false);
+#endif
 #ifdef SEAMS_HAS_CHEMFILES
   line("chemfiles", true);
 #else
