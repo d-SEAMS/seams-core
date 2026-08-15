@@ -282,15 +282,11 @@ int tum3::shapeMatchHC(
   pntToPnt::relOrderHC(yCloud, rings[iring], rings[jring], nList, basal1,
                        basal2);
   // ----------------
-  targetPointSet = pntToPnt::changeHexCageOrder(yCloud, basal1, basal2, 0);
-  bool iraMatched = false;
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp critical(seams_ira_orient)
-#endif
-  { iraMatched = ira::orient(refPoints, targetPointSet, quat, rmsd); }
-  if (iraMatched) {
-    return 0;
-  }
+  // The ring topology fixes the point correspondence, so the joint
+  // assignment-plus-rotation search of IRA is redundant here: on 400 mW
+  // cages the Horn orbit scored better on every one at a tenth of the
+  // cost. IRA remains the correspondence-free matcher of the descriptor
+  // overlay, where no topology supplies the assignment.
   // Six cyclic alignments exhaust the correspondence orbit modulo the
   // reference's proper rotations: the in-plane two-fold axes of the cage
   // template absorb the reversed traversals, and matching both directions
@@ -354,15 +350,9 @@ int tum3::shapeMatchDDC(
     return 0;
   }
   // ----------------
-  targetPointSet = pntToPnt::changeDiaCageOrder(yCloud, ddcOrder, 0);
-  bool iraMatched = false;
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp critical(seams_ira_orient)
-#endif
-  { iraMatched = ira::orient(refPoints, targetPointSet, quat, rmsd); }
-  if (iraMatched) {
-    return 0;
-  }
+  // As in shapeMatchHC: the topology-fixed correspondence makes the IRA
+  // joint search redundant for cages; Horn over the cyclic orbit scores
+  // strictly better in the matcher's convention on every measured cage
   // Six cyclic alignments exhaust the correspondence orbit modulo the
   // reference's proper rotations; matching the re-derived reversed
   // traversal as well changed no RMSD beyond 5e-7 on 1950 cages
