@@ -49,7 +49,8 @@ struct FrameContext {
   ring::RingSearchIndex index;
   std::vector<std::vector<int>> sortedRings;
   std::vector<std::vector<int>> basalCand;
-  std::vector<std::vector<int>> adjRings;
+  mutable std::vector<std::vector<int>> adjRings;
+  mutable std::vector<char> adjReady;
   // Scratch for findPrismatic, which appends to a list and stamps a type
   // vector neither of which affiliation reads
   std::vector<int> scratchListHC;
@@ -77,9 +78,9 @@ struct FrameContext {
                        ring::strucType::unclassified);
     basalCand.resize(static_cast<std::size_t>(nR));
     adjRings.resize(static_cast<std::size_t>(nR));
+    adjReady.assign(static_cast<std::size_t>(nR), 0);
     for (int i = 0; i < nR; i++) {
       basalCand[static_cast<std::size_t>(i)] = collectBasalCandidates(i);
-      adjRings[static_cast<std::size_t>(i)] = collectAdjacentRings(i);
     }
   }
 
@@ -140,6 +141,10 @@ struct FrameContext {
     static const std::vector<int> empty;
     if (r < 0 || r >= static_cast<int>(adjRings.size())) {
       return empty;
+    }
+    if (!adjReady[static_cast<std::size_t>(r)]) {
+      adjRings[static_cast<std::size_t>(r)] = collectAdjacentRings(r);
+      adjReady[static_cast<std::size_t>(r)] = 1;
     }
     return adjRings[static_cast<std::size_t>(r)];
   }
