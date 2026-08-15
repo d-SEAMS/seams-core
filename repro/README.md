@@ -42,8 +42,9 @@ fetches those exact deposits (MD5-verified against figshare's records,
   (CHILL+ on the Ic lattice, the bulk topological criterion on the
   crystallized end of the nucleation run, the quasi-one-dimensional
   nanotube, the monolayer, and the in-plane 2D RDF).
-- The jupytext notebooks under `repro/notebooks/` rerun the same
-  analyses through the `pydseamslib` Python bindings; execution is the
+- The percent-format notebooks under `repro/notebooks/` rerun the same
+  analyses through the `pydseamslib` Python bindings. Jupytext converts
+  each source to ipynb and papermill executes it; execution is the
   test (each notebook asserts its own headline numbers) and the
   executed `.ipynb` files are the artifacts. The nucleation notebook
   classifies every frame with the incremental ring and affiliation

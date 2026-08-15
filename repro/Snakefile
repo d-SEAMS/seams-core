@@ -319,13 +319,15 @@ NOTEBOOKS = [
 
 
 rule figshare_notebook:
-    # The Python-bindings demonstrations on the v1 deposits are jupytext
-    # notebooks; execution is the test (each notebook asserts its own
-    # headline numbers) and the executed .ipynb is the artifact. The
-    # nucleation notebook also writes figshare-incremental.json.
+    # Percent-format sources under repro/notebooks/; jupytext converts
+    # and papermill executes. Execution is the test (each notebook
+    # asserts its own headline numbers) and the executed .ipynb is the
+    # artifact. The nucleation notebook also writes
+    # figshare-incremental.json.
     input:
         py=R + "/py-install.done",
         nb="repro/notebooks/{nb}.py",
+        runner="repro/scripts/execute_notebook.sh",
         traj=expand(FIGSHARE_DIR + "/{f}", f=FIGSHARE_FILES),
     output:
         R + "/notebooks/{nb}.ipynb",
@@ -334,8 +336,7 @@ rule figshare_notebook:
     shell:
         "{params.hq} bash -c "
         "'LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH "
-        "OMP_NUM_THREADS=2 jupytext --to ipynb --execute "
-        "--output {output} {input.nb}'"
+        "OMP_NUM_THREADS=2 repro/scripts/execute_notebook.sh {input.nb} {output}'"
 
 
 rule figshare_incremental:

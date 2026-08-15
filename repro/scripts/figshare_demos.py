@@ -13,8 +13,9 @@ Subcommands (all paths relative to the repository root):
   fetch <trajdir>                       download + verify the deposits
   demos <yoda> <trajdir> <outdir>       run the five example workflows (Lua CLI)
 
-The Python-bindings demonstrations live as jupytext notebooks under
-repro/notebooks/, executed by the figshare_notebooks Snakemake rule.
+The Python-bindings demonstrations live as percent-format notebooks
+under repro/notebooks/; jupytext converts them and papermill executes
+them via the figshare_notebook Snakemake rule.
 """
 import hashlib
 import json

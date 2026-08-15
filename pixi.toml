@@ -162,8 +162,7 @@ freud = ">=3.0"
 pyscal3 = ">=3.0"
 jupytext = ">=1.16"
 ipykernel = ">=6.0"
-nbclient = ">=0.10"
-nbconvert-core = ">=7.0"
+papermill = ">=2.4"
 matplotlib-base = ">=3.8"
 
 [feature.repro.pypi-dependencies]
