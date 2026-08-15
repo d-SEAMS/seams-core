@@ -6,6 +6,7 @@ ydslib_sources = files(
   'bond.cpp',
   'bop.cpp',
   'bulkTUM.cpp',
+  'cage_affiliation.cpp',
   'cluster.cpp',
   'franzblau.cpp',
   'generic.cpp',

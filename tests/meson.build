@@ -28,6 +28,7 @@ test_sources = {
   'cage_canon': 'test_cage_canon.cpp',
   'voronoi': 'test_voronoi.cpp',
   'structure_desc': 'test_structure_desc.cpp',
+  'cage_affiliation': 'test_cage_affiliation.cpp',
 }
 
 if readcon_dep.found()
