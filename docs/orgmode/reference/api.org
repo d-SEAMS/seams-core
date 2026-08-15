@@ -1,7 +1,7 @@
 #+TITLE: API Reference
 #+OPTIONS: toc:nil num:nil
 
-This page documents all types and functions exposed by ~pydseamslib._core~.
+This page documents all types and functions exposed by ~pydseams.yoda~.
 
 * Data types
 
@@ -68,7 +68,7 @@ A single bond-order correlation measurement.
 ** readLammpsTrjreduced
 
 #+begin_src python
-cloud = _core.readLammpsTrjreduced(
+cloud = yoda.readLammpsTrjreduced(
     filename, targetFrame, typeI, isSlice, coordLow, coordHigh
 )
 #+end_src
@@ -96,7 +96,7 @@ Read all atoms from a LAMMPS trajectory (no type filtering).
 ** readXYZ
 
 #+begin_src python
-cloud = _core.readXYZ(filename)
+cloud = yoda.readXYZ(filename)
 #+end_src
 
 Read an XYZ format file. Returns a ~PointCloudDouble~.
@@ -104,7 +104,7 @@ Read an XYZ format file. Returns a ~PointCloudDouble~.
 ** readChemfiles (optional, requires chemfiles)
 
 #+begin_src python
-cloud = _core.readChemfiles(filename, targetFrame, typeFilter=-1)
+cloud = yoda.readChemfiles(filename, targetFrame, typeFilter=-1)
 #+end_src
 
 Read any trajectory format supported by chemfiles (PDB, GRO, DCD, TRR, and
@@ -119,7 +119,7 @@ Read any trajectory format supported by chemfiles (PDB, GRO, DCD, TRR, and
 ** readCon (optional, requires readcon-core)
 
 #+begin_src python
-cloud = _core.readCon(filename, targetFrame)
+cloud = yoda.readCon(filename, targetFrame)
 #+end_src
 
 Read a =.con= format file used by eOn for saddle point searches. Available when
@@ -130,7 +130,7 @@ d-SEAMS is built with readcon-core.
 ** neighListO
 
 #+begin_src python
-nList = _core.neighListO(rcutoff, yCloud, typeI)
+nList = yoda.neighListO(rcutoff, yCloud, typeI)
 #+end_src
 
 Build a neighbour list for atoms of a given type within a cutoff distance.
@@ -149,7 +149,7 @@ by the IDs of its neighbours.
 ** neighbourListByIndex
 
 #+begin_src python
-nListIdx = _core.neighbourListByIndex(yCloud, nList)
+nListIdx = yoda.neighbourListByIndex(yCloud, nList)
 #+end_src
 
 Convert an ID-based neighbour list to an index-based neighbour list.
@@ -157,7 +157,7 @@ Convert an ID-based neighbour list to an index-based neighbour list.
 ** getNewNeighbourListByIndex
 
 #+begin_src python
-nListIdx = _core.getNewNeighbourListByIndex(yCloud, cutoff)
+nListIdx = yoda.getNewNeighbourListByIndex(yCloud, cutoff)
 #+end_src
 
 Build a neighbour list directly by index (combining neighbour search and index
@@ -168,7 +168,7 @@ conversion in one step).
 ** populateHbonds
 
 #+begin_src python
-hbonds = _core.populateHbonds(filename, yCloud, nList, targetFrame, Htype)
+hbonds = yoda.populateHbonds(filename, yCloud, nList, targetFrame, Htype)
 #+end_src
 
 Build a hydrogen bond network by reading hydrogen positions from the trajectory
@@ -190,7 +190,7 @@ containing only hydrogen-bonded pairs.
 ** getCorrelPlus
 
 #+begin_src python
-cloud = _core.getCorrelPlus(yCloud, nList, isSlice)
+cloud = yoda.getCorrelPlus(yCloud, nList, isSlice)
 #+end_src
 
 Compute CHILL+ bond-order correlations. Populates the ~c_ij~ field on each atom
@@ -199,7 +199,7 @@ in the returned cloud.
 ** getIceTypePlus
 
 #+begin_src python
-cloud = _core.getIceTypePlus(yCloud, nList, path, firstFrame, isSlice, outputFileName)
+cloud = yoda.getIceTypePlus(yCloud, nList, path, firstFrame, isSlice, outputFileName)
 #+end_src
 
 Run full CHILL+ classification and write results to a file. Sets the ~iceType~
@@ -208,7 +208,7 @@ field on each atom.
 ** getq6
 
 #+begin_src python
-q6 = _core.getq6(yCloud, nList, isSlice)
+q6 = yoda.getq6(yCloud, nList, isSlice)
 #+end_src
 
 Compute the q6 bond order parameter for each atom.
@@ -216,7 +216,7 @@ Compute the q6 bond order parameter for each atom.
 ** reclassifyWater
 
 #+begin_src python
-cloud = _core.reclassifyWater(yCloud, q6)
+cloud = yoda.reclassifyWater(yCloud, q6)
 #+end_src
 
 Reclassify water molecules using q6 values.
@@ -226,7 +226,7 @@ Reclassify water molecules using q6 values.
 ** ringNetwork
 
 #+begin_src python
-rings = _core.ringNetwork(nList, maxDepth)
+rings = yoda.ringNetwork(nList, maxDepth)
 #+end_src
 
 Find primitive rings in the network using the Franzblau algorithm.
@@ -255,7 +255,7 @@ Find and classify prismatic cages in the ring network.
 ** topoBulkCriteria
 
 #+begin_src python
-_core.topoBulkCriteria(path, rings, nList, yCloud, firstFrame, numHC, numDDC, ringType)
+yoda.topoBulkCriteria(path, rings, nList, yCloud, firstFrame, numHC, numDDC, ringType)
 #+end_src
 
 Apply topological criteria to identify hexagonal cages (HC) and double-diamond
@@ -270,7 +270,7 @@ Run full TUM analysis for bulk systems, including optional cluster analysis.
 ** writeDump
 
 #+begin_src python
-_core.writeDump(yCloud, path, outFile)
+yoda.writeDump(yCloud, path, outFile)
 #+end_src
 
 Write the point cloud to a LAMMPS dump file.

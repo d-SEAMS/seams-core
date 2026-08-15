@@ -31,7 +31,7 @@ import json
 import time
 from pathlib import Path
 
-from pydseamslib import Trajectory, _core
+from pydseams import Trajectory, yoda
 
 ROOT = next(
     p
@@ -64,7 +64,7 @@ for f in range(1, n_frames + 1):
     t_incr += time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    batch = _core.ringNetwork(traj.bonds_by_index, 6)
+    batch = yoda.ringNetwork(traj.bonds_by_index, 6)
     t_batch += time.perf_counter() - t0
     assert sorted(map(sorted, rings)) == sorted(map(sorted, batch)), f
 
