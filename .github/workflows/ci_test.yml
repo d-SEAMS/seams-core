@@ -17,6 +17,12 @@ jobs:
       - uses: prefix-dev/setup-pixi@19eac09b398e3d0c747adc7921926a6d802df4da # v0.8.8
         with:
           environments: default
+      # The conda cross-clang looks for the sysroot in CONDA_BUILD_SYSROOT,
+      # which points at /opt/MacOSX*.sdk on a bare runner; without a real SDK
+      # libSystem never links and every target fails on libc symbols
+      - name: Point the conda compilers at the runner SDK
+        if: runner.os == 'macOS'
+        run: echo "SDKROOT=$(xcrun --show-sdk-path)" >> "$GITHUB_ENV"
       - run: pixi run setup
       - run: pixi run build
       - run: pixi run test
