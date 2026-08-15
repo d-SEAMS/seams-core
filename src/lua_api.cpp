@@ -155,11 +155,14 @@ void registerNeighbours(sol::state &lua) {
       [](const Cloud &yCloud, std::vector<std::vector<int>> nList) {
         return sol::as_nested(nneigh::neighbourListByIndex(yCloud, nList));
       });
+  // Optional trailing flag selects the symmetrization: mutual (default) or
+  // union
   lua.set_function("kNearestNeighbourList",
                    [](const Cloud &yCloud, int k, double candidateCutoff,
-                      int typeI) {
+                      int typeI, sol::optional<bool> mutual) {
                      return sol::as_nested(nneigh::kNearestNeighbourList(
-                         yCloud, k, candidateCutoff, typeI));
+                         yCloud, k, candidateCutoff, typeI,
+                         mutual.value_or(true)));
                    });
   // Legacy spellings, container-userdata semantics
   lua.set_function("neighborList", nneigh::neighListO);
@@ -227,6 +230,23 @@ void registerRings(sol::state &lua) {
         return out;
       },
       "lastReclassified", &ring::AffiliationUpdater::lastReclassified);
+  // Seeded (hysteresis) affiliation: strict-graph seeds, permissive-graph
+  // completion, component-gated acceptance
+  lua.set_function("seededCageAffiliation",
+                   [](sol::this_state ts,
+                      std::vector<std::vector<int>> strictRings,
+                      std::vector<std::vector<int>> strictNList,
+                      std::vector<std::vector<int>> permissiveRings,
+                      std::vector<std::vector<int>> permissiveNList) {
+                     sol::state_view lua(ts);
+                     const auto a = ring::seededCageAffiliation(
+                         strictRings, strictNList, permissiveRings,
+                         permissiveNList);
+                     sol::table out = lua.create_table(0, 2);
+                     out["hc"] = sol::as_table(a.hc);
+                     out["ddc"] = sol::as_table(a.ddc);
+                     return out;
+                   });
 }
 
 void registerOrder(sol::state &lua) {

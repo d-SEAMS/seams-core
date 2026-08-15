@@ -52,6 +52,36 @@ print(string.format("rings n=%d updater_first_sources=%d repeat_sources=%d repea
   #rings, sourcesFirst, updater:lastRecomputedSources(),
   updater:lastBallsRefreshed()))
 
+-- Cage affiliation, batch, incremental, and seeded ---------------------------
+local six = {}
+for _, r in ipairs(rings) do
+  if #r == 6 then six[#six + 1] = r end
+end
+local affil = cageAffiliation(six, nlWaterIdx)
+assert(#affil.hc == #six and #affil.ddc == #six)
+local affilUpdater = AffiliationUpdater.new()
+local affilFirst = affilUpdater:update(six, nlWaterIdx)
+assert(#affilFirst.hc == #six)
+affilUpdater:update(six, nlWaterIdx)
+assert(affilUpdater:lastReclassified() == 0)
+
+local knnMutual = neighbourListByIndex(water,
+  kNearestNeighbourList(water, 4, cutoffRadius + 1.5, oxygenAtomType, true))
+local knnUnion = neighbourListByIndex(water,
+  kNearestNeighbourList(water, 4, cutoffRadius + 1.5, oxygenAtomType, false))
+local function sixRings(nl)
+  local out = {}
+  for _, r in ipairs(ringNetwork(nl, maxDepth)) do
+    if #r == 6 then out[#out + 1] = r end
+  end
+  return out
+end
+local seeded = seededCageAffiliation(sixRings(knnMutual), knnMutual,
+  sixRings(knnUnion), knnUnion)
+assert(#seeded.hc == water.nop and #seeded.ddc == water.nop)
+print(string.format("affiliation six_rings=%d seeded_atoms=%d",
+  #six, #seeded.hc))
+
 -- CHILL+ on the water frame -------------------------------------------------
 getCorrelPlus(water, nlWater, false)
 local plusTypes = getIceTypePlus(water, nlWater, scratch, targetFrame, false,

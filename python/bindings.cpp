@@ -272,6 +272,20 @@ NB_MODULE(_core, m) {
             nb::arg("rings"), nb::arg("nList"))
         .def("lastReclassified",
              &ring::AffiliationUpdater::lastReclassified);
+    m.def(
+        "seededCageAffiliation",
+        [](const std::vector<std::vector<int>> &strictRings,
+           const std::vector<std::vector<int>> &strictNList,
+           const std::vector<std::vector<int>> &permissiveRings,
+           const std::vector<std::vector<int>> &permissiveNList) {
+          const auto a = ring::seededCageAffiliation(
+              strictRings, strictNList, permissiveRings, permissiveNList);
+          return std::make_pair(a.hc, a.ddc);
+        },
+        "Seeded (hysteresis) per-atom cage flags: strict-graph seeds, "
+        "permissive-graph completion, component-gated acceptance.",
+        nb::arg("strictRings"), nb::arg("strictNList"),
+        nb::arg("permissiveRings"), nb::arg("permissiveNList"));
     m.def("populateGraphFromIndices", &primitive::populateGraphFromIndices,
           "Create a graph object from an index-based neighbour list.",
           nb::arg("nList"));
