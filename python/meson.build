@@ -18,10 +18,15 @@ py.extension_module('_core',
   # conda LDFLAGS rpath to the env prefix otherwise wins
   build_rpath: meson.project_build_root() / 'src',
   install: true,
-  subdir: 'pydseamslib')
+  subdir: 'pydseamslib',
+  # CPython 3.12+ stable ABI. One wheel per platform; not valid on
+  # free-threaded interpreters (no limited ABI there).
+  limited_api: '3.12')
 
 py.install_sources(
-  ['pydseamslib/__init__.py'],
+  ['pydseamslib/__init__.py',
+   'pydseamslib/frame.py',
+   'pydseamslib/aseio.py'],
   pure: false,
   subdir: 'pydseamslib')
 
