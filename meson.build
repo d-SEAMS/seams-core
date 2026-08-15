@@ -35,6 +35,11 @@ _args += ['-Wno-unused-result']
 # Platform conditionals
 if host_system == 'darwin'
   _args += ['-DOSX=TRUE']
+  # The conda toolchain targets the macOS 11 SDK, whose availability
+  # annotations forbid libc++ features (std::to_chars for floating point,
+  # required by <format>) that the runtime libc++ we ship actually provides;
+  # conda-forge's documented remedy is to disable the availability guards
+  _args += ['-D_LIBCPP_DISABLE_AVAILABILITY']
 endif
 
 # Core dependencies

@@ -2182,16 +2182,20 @@ namespace sol {
 			return *this;
 		}
 
-		/// Constructs the value in-place, destroying the current one if there is
-		/// one.
+		/// Rebinds the reference, releasing the current one if there is one.
+		/// A reference optional stores a pointer, so "construction" is a
+		/// rebind; the primary template's placement-new construct member does
+		/// not exist in this specialization (newer clang diagnoses the
+		/// original this->construct call at parse time).
 		///
 		/// \group emplace
-		template <class... Args>
-		T& emplace(Args&&... args) noexcept {
-			static_assert(std::is_constructible<T, Args&&...>::value, "T must be constructible with Args");
-
+		template <class U = T>
+		T& emplace(U&& u) noexcept {
+			static_assert(std::is_lvalue_reference<U&&>::value,
+			              "emplace on an optional reference must rebind to an lvalue");
 			*this = nullopt;
-			this->construct(std::forward<Args>(args)...);
+			this->m_value = std::addressof(u);
+			return *this->m_value;
 		}
 
 		/// Swaps this optional with the other.
