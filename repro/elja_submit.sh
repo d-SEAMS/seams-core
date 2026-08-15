@@ -63,6 +63,10 @@ run)
   sleep 2
   trap 'hq server stop > /dev/null 2>&1 || true; kill $HQ_WORKER_PID $HQ_SERVER_PID 2> /dev/null || true' EXIT
 
+  # Node-local build root: the cluster NFS clock skews against the nodes,
+  # which meson refuses at configure time
+  export SEAMS_BUILD_ROOT=/tmp/seams-repro-${SLURM_JOB_ID:-manual}
+  mkdir -p "$SEAMS_BUILD_ROOT"
   LOAD=$(cut -d' ' -f1 /proc/loadavg)
   echo "loadavg_before_workflow: $LOAD"
   pixi run -e repro -- snakemake -s repro/Snakefile --cores all --printshellcmds

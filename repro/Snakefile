@@ -19,6 +19,12 @@ configfile: "repro/config.yaml"
 
 R = "repro/results"
 BASE_TREE = config["base_tree"]
+# Build directories default to the working tree but move to node-local
+# storage (SEAMS_BUILD_ROOT) on clusters whose NFS clocks skew against
+# the nodes, which meson refuses
+BUILD = os.path.abspath(os.environ.get("SEAMS_BUILD_ROOT", "."))
+TIP_BUILD = os.path.join(BUILD, "build-repro")
+BASE_BUILD = os.path.join(BUILD, "build-base")
 
 
 def hq(cpus):
@@ -57,8 +63,9 @@ rule setup_tip:
         touch(R + "/tip-setup.done"),
     params:
         log=R + "/tip-setup.log",
+        bdir=TIP_BUILD,
     shell:
-        "meson setup build-repro --buildtype=release "
+        "meson setup {params.bdir} --buildtype=release "
         "-Dwith_python=true -Dwith_tests=true > {params.log} 2>&1"
 
 
@@ -69,8 +76,9 @@ rule build_tip:
         touch(R + "/tip-build.done"),
     params:
         hq=hq(8),
+        bdir=TIP_BUILD,
     shell:
-        "{params.hq} meson compile -C build-repro"
+        "{params.hq} meson compile -C {params.bdir}"
 
 
 rule identity_gate:
@@ -81,8 +89,9 @@ rule identity_gate:
         R + "/tip-test.log",
     params:
         hq=hq(8),
+        bdir=TIP_BUILD,
     shell:
-        "{params.hq} bash -c 'meson test -C build-repro > {output} 2>&1'"
+        "{params.hq} bash -c 'meson test -C {params.bdir} > {output} 2>&1'"
 
 
 rule install_python:
@@ -92,7 +101,7 @@ rule install_python:
     output:
         touch(R + "/py-install.done"),
     shell:
-        "meson install -C build-repro > /dev/null 2>&1"
+        "meson install -C " + TIP_BUILD + " > /dev/null 2>&1"
 
 
 rule build_base:
@@ -100,13 +109,14 @@ rule build_base:
         touch(R + "/base-build.done"),
     params:
         tree=BASE_TREE,
+        bbuild=BASE_BUILD,
         hq=hq(8),
     shell:
         r"""
         test -d {params.tree} || {{ echo "baseline tree missing; run repro/elja_submit.sh prep" >&2; exit 1; }}
-        (cd {params.tree} && meson setup build-base --buildtype=release \
-          -Dwith_python=false -Dwith_tests=false > /dev/null 2>&1 || true)
-        {params.hq} meson compile -C {params.tree}/build-base
+        meson setup {params.bbuild} {params.tree} --buildtype=release \
+          -Dwith_python=false -Dwith_tests=false > repro/results/base-setup.log 2>&1
+        {params.hq} meson compile -C {params.bbuild}
         """
 
 
@@ -120,11 +130,12 @@ rule base_drivers:
         cages=R + "/base_bench_cages",
     params:
         tree=BASE_TREE,
+        bbuild=BASE_BUILD,
     shell:
         r"""
         EIGEN=$CONDA_PREFIX/include/eigen3
         INC="-I{params.tree}/src/include/internal -I{params.tree}/src/include/external -I$EIGEN"
-        LINK="-L{params.tree}/build-base/src -lyodaLib -Wl,-rpath,$(readlink -f {params.tree})/build-base/src -Wl,--enable-new-dtags -Wl,--allow-shlib-undefined"
+        LINK="-L{params.bbuild}/src -lyodaLib -Wl,-rpath,{params.bbuild}/src -Wl,--enable-new-dtags -Wl,--allow-shlib-undefined"
         g++ -std=c++20 -O2 -o {output.scaling} tests/bench_scaling.cpp $INC $LINK
         g++ -std=c++20 -O2 -o {output.cages} tests/bench_cages_base.cpp $INC $LINK
         """
@@ -137,10 +148,11 @@ rule tip_scaling:
         R + "/tip-scaling.txt",
     params:
         hq=hq(1),
+        tbuild=TIP_BUILD,
         sizes=" ".join(str(s) for s in config["scaling_sizes"]),
     shell:
         "{params.hq} bash -c 'cd input && OMP_NUM_THREADS=1 "
-        "../build-repro/tests/bench_scaling {params.sizes} > ../{output}'"
+        "{params.tbuild}/tests/bench_scaling {params.sizes} > ../{output}'"
 
 
 rule base_scaling:
@@ -163,11 +175,12 @@ rule tip_cages:
         R + "/tip-cages.txt",
     params:
         hq=hq(1),
+        tbuild=TIP_BUILD,
         traj=config["trajectory"],
         reps=config["cage_reps"],
     shell:
         "{params.hq} bash -c 'cd input && OMP_NUM_THREADS=1 "
-        "../build-repro/tests/bench_cages {params.traj} 1 {params.reps} "
+        "{params.tbuild}/tests/bench_cages {params.traj} 1 {params.reps} "
         "> ../{output}'"
 
 
@@ -192,10 +205,11 @@ rule tip_overhead:
         R + "/tip-overhead.txt",
     params:
         hq=hq(1),
+        tbuild=TIP_BUILD,
         sizes=" ".join(str(s) for s in config["overhead_sizes"]),
     shell:
         "{params.hq} bash -c 'cd input && OMP_NUM_THREADS=1 "
-        "../build-repro/tests/bench_overhead {params.sizes} > ../{output}'"
+        "{params.tbuild}/tests/bench_overhead {params.sizes} > ../{output}'"
 
 
 rule tip_strong:
@@ -205,10 +219,11 @@ rule tip_strong:
         R + "/tip-strong-t{threads}.txt",
     params:
         hq=hq(4),
+        tbuild=TIP_BUILD,
         atoms=config["strong_atoms"],
     shell:
         "{params.hq} bash -c 'cd input && OMP_NUM_THREADS={wildcards.threads} "
-        "../build-repro/tests/bench_strong {params.atoms} > ../{output}'"
+        "{params.tbuild}/tests/bench_strong {params.atoms} > ../{output}'"
 
 
 rule trajectory_incremental:
@@ -220,11 +235,12 @@ rule trajectory_incremental:
         R + "/trajectory-incremental.txt",
     params:
         hq=hq(1),
+        tbuild=TIP_BUILD,
         traj=config["trajectory"],
         frames=config["trajectory_frames"],
     shell:
         "{params.hq} bash -c 'cd input && OMP_NUM_THREADS=1 "
-        "../build-repro/tests/bench_trajectory_incremental {params.traj} "
+        "{params.tbuild}/tests/bench_trajectory_incremental {params.traj} "
         "{params.frames} > ../{output}'"
 
 
@@ -235,9 +251,10 @@ rule ql_compare_dseams:
         R + "/ql-dseams.txt",
     params:
         hq=hq(1),
+        tbuild=TIP_BUILD,
     shell:
         "{params.hq} bash -c 'OMP_NUM_THREADS=1 "
-        "build-repro/tests/compare_structure_desc > {output}'"
+        "{params.tbuild}/tests/compare_structure_desc > {output}'"
 
 
 rule ql_compare_python:
