@@ -1,12 +1,82 @@
-=================
-Bulk Ice Analysis
-=================
+===================================
+Bulk ice on the mixed TIP4P example
+===================================
 
 
-\.. note\:\:
+This walk uses ``input/traj/exampleTraj.lammpstrj`` from a seams-core
+checkout (250 waters, type 2 is oxygen).
 
-This tutorial is under construction.
+CHILL+ from the CLI
+-------------------
 
-This tutorial will cover analyzing bulk ice systems across multiple frames,
-computing ice type fractions over time, and generating time-series plots of
-ice nucleation.
+.. code:: bash
+
+    seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
+
+Four-neighbour staggered/eclipsed counts on this frame:
+
+.. table::
+
+    +-------------+-------+
+    | label       | atoms |
+    +=============+=======+
+    | cubic       |    42 |
+    +-------------+-------+
+    | hexagonal   |    65 |
+    +-------------+-------+
+    | interfacial |    58 |
+    +-------------+-------+
+    | water       |    85 |
+    +-------------+-------+
+    | bulk ice    |   107 |
+    +-------------+-------+
+
+The same path in Python
+-----------------------
+
+.. code:: python
+
+    import pydseams as ds
+
+    frame = ds.read("input/traj/exampleTraj.lammpstrj")
+    print(frame.chill_plus())
+    print(frame.cages())
+
+``Frame.chill_plus`` is the four-neighbour classifier.
+``Frame.cages`` is topological unit matching on six-rings. On this
+mixed frame TUM finds no complete HC or DDC: cage membership is not
+the CHILL+ star.
+
+Cubic mW
+--------
+
+The 4096-molecule cubic mW dump (``input/traj/mW_cubic.lammpstrj``)
+is the opposite case: every molecule is in a double-diamond cage and
+CHILL+ reports cubic ice.
+
+.. code:: bash
+
+    seams cages input/traj/mW_cubic.lammpstrj --type 1
+    seams chill-plus input/traj/mW_cubic.lammpstrj --type 1
+
+Bond graphs for cages
+---------------------
+
+``seams cages --graph`` selects the neighbour graph:
+
+.. table::
+
+    +---------------+-------------------------------------------+
+    | value         | graph                                     |
+    +===============+===========================================+
+    | ``cutoff``    | distance cutoff (2020 default)            |
+    +---------------+-------------------------------------------+
+    | ``knn``       | mutual four-nearest                       |
+    +---------------+-------------------------------------------+
+    | ``knn-union`` | union four-nearest                        |
+    +---------------+-------------------------------------------+
+    | ``seeded``    | mutual seeds, union completions (default) |
+    +---------------+-------------------------------------------+
+
+On a perfect cubic crystal the four graphs coincide. On a disordered
+nucleation dump they do not.

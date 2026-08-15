@@ -2,8 +2,8 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Nanotube Ring Analysis - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="ASE Integration" href="../howto/ase-integration.html" /><link rel="prev" title="Bulk Ice Analysis" href="bulk-ice.html" />
-      <link rel="canonical" href="dseams.info/tutorials/nanotube.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Quasi-one-dimensional ice - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="ASE integration" href="../howto/ase-integration.html" /><link rel="prev" title="Bulk ice on the mixed TIP4P example" href="bulk-ice.html" />
+      <link rel="canonical" href="https://docs.dseams.info/tutorials/nanotube.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
@@ -21,8 +21,8 @@
 }
 </style>
     <meta property="og:type" content="website"/>
-  <meta property="og:url" content="dseams.info/tutorials/nanotube.html"/>
-  <meta property="og:title" content="Nanotube Ring Analysis"/>
+  <meta property="og:url" content="https://docs.dseams.info/tutorials/nanotube.html"/>
+  <meta property="og:title" content="Quasi-one-dimensional ice"/>
     <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
@@ -35,8 +35,11 @@
     </a>
     <div class="sy-head-nav" id="head-nav">
       <nav class="sy-head-links"><ul><li class="link">
-          <a href="https://pypi.org/project/pydseamslib">
-            <span>PyPI</span><i class="i-lucide external-link"></i></a>
+          <a href="https://github.com/d-SEAMS/PydSEAMSlib">
+            <span>pydseams</span><i class="i-lucide external-link"></i></a>
+        </li><li class="link">
+          <a href="https://github.com/d-SEAMS/yodaStruct">
+            <span>dseams (Lua)</span><i class="i-lucide external-link"></i></a>
         </li></ul></nav>
       <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
   <input type="text" name="q" placeholder="Search" />
@@ -67,19 +70,25 @@ data-aria-dark="Switch to auto color mode">
       <div class="sy-scrollbar p-6">
         <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../quickstart.html">Tutorial</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
 <ul class="current">
-<li class="toctree-l1 _expand"><a class="reference internal" href="bulk-ice.html">Bulk Ice Analysis</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Nanotube Ring Analysis</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="bulk-ice.html">Bulk ice on the mixed TIP4P example</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quasi-one-dimensional ice</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">How-To Guides</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ase-integration.html">ASE Integration</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ase-integration.html">ASE integration</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Three repositories</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API Reference</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
 </ul>
@@ -97,7 +106,12 @@ data-aria-dark="Switch to auto color mode">
     <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
       <i class="i-lucide close"></i>
     </button>
-    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#where-the-code-lives">Where the code lives</a></li>
+<li><a class="reference internal" href="#from-python">From Python</a></li>
+<li><a class="reference internal" href="#trajectories">Trajectories</a></li>
+</ul>
+</div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
   data-type="github" data-user="d-SEAMS" data-repo="seams-core">
   <span class="w-8 flex items-center justify-around shrink-0 text-3xl">
     <iconify-icon icon="simple-icons:github"></iconify-icon>
@@ -136,7 +150,7 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">Nanotube Ring Analysis</strong>
+        <strong itemprop="name">Quasi-one-dimensional ice</strong>
         <meta itemprop="position" content="2" />
       </li></ol>
     <div class="xl:hidden ml-1">
@@ -153,7 +167,7 @@ data-aria-dark="Switch to auto color mode">
     <button
       type="button"
       class="js-copy px-3 py-1 inline-flex items-center gap-1"
-      data-url="dseams.info/_sources/tutorials/nanotube.rst.txt"
+      data-url="https://docs.dseams.info/_sources/tutorials/nanotube.rst.txt"
     >
       <i class="i-lucide" data-icon="copy"></i>
       <span>Copy page</span>
@@ -167,29 +181,53 @@ data-aria-dark="Switch to auto color mode">
     <div role="presentation">
       <div class="flex flex-col" role="group">
         <button class="js-copy" type="button" role="menuitem"
-          data-url="dseams.info/_sources/tutorials/nanotube.rst.txt">
+          data-url="https://docs.dseams.info/_sources/tutorials/nanotube.rst.txt">
           <span class="iconify-icon">
             <i class="i-lucide" data-icon="copy"></i>
           </span>
           <span>Copy page</span>
         </button>
-        <a role="menuitem" href="dseams.info/_sources/tutorials/nanotube.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
-            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20dseams.info/_sources/tutorials/nanotube.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+        <a role="menuitem" href="https://docs.dseams.info/_sources/tutorials/nanotube.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
+            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20https%3A//docs.dseams.info/_sources/tutorials/nanotube.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
           <iconify-icon icon="bi:openai"></iconify-icon>
           <span>Open in ChatGPT</span>
-        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20dseams.info/_sources/tutorials/nanotube.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20https%3A//docs.dseams.info/_sources/tutorials/nanotube.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
           <iconify-icon icon="bi:claude"></iconify-icon>
           <span>Open in Claude</span>
         </a></div>
     </div>
   </div>
 </div><article class="yue dark-code" role="main">
-          <section id="nanotube-ring-analysis">
-<h1>Nanotube Ring Analysis<a class="headerlink" href="#nanotube-ring-analysis" title="Link to this heading">¶</a></h1>
-<p>.. note::</p>
-<p>This tutorial is under construction.</p>
-<p>This tutorial will cover using Franzblau ring analysis to characterize
-the ring topology of carbon nanotubes and similar one-dimensional structures.</p>
+          <section id="quasi-one-dimensional-ice">
+<h1>Quasi-one-dimensional ice<a class="headerlink" href="#quasi-one-dimensional-ice" title="Link to this heading">¶</a></h1>
+<p>Ice nanotubes and confined prisms are the 2020 quasi-one-dimensional
+path: primitive rings, then prism identification on that ring set.</p>
+<section id="where-the-code-lives">
+<h2>Where the code lives<a class="headerlink" href="#where-the-code-lives" title="Link to this heading">¶</a></h2>
+<p>C++: <code class="docutils literal notranslate"><span class="pre">topo_one_dim.cpp</span></code> / <code class="docutils literal notranslate"><span class="pre">prismAnalysis</span></code>. The Catch2 binary
+<code class="docutils literal notranslate"><span class="pre">topo_one_dim</span></code> exercises the path.</p>
+<p>Lua: <code class="docutils literal notranslate"><span class="pre">example_lua/iceNanotube/</span></code> in
+<a class="reference external" href="https://github.com/d-SEAMS/yodaStruct">yodaStruct</a> still runs the
+registered prism helpers (<code class="docutils literal notranslate"><span class="pre">prismAnalysis</span></code>, <code class="docutils literal notranslate"><span class="pre">ringAnalysis</span></code>) through
+<code class="docutils literal notranslate"><span class="pre">require(&quot;dseams&quot;)</span></code>.</p>
+</section>
+<section id="from-python">
+<h2>From Python<a class="headerlink" href="#from-python" title="Link to this heading">¶</a></h2>
+<p>There is no separate <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">nanotube</span></code> subcommand. Load a frame and
+call the compiled registrations on <code class="docutils literal notranslate"><span class="pre">pydseams.yoda</span></code> (or the Lua
+helpers) after you have a bonded graph and a ring set. The high-level
+<code class="docutils literal notranslate"><span class="pre">Frame</span></code> API is CHILL+ and cages; prism analysis stays on <code class="docutils literal notranslate"><span class="pre">yoda</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">pydseams</span><span class="w"> </span><span class="kn">import</span> <span class="n">yoda</span>
+</span><span data-line="2"><span class="c1"># yoda.prismAnalysis(...) after rings and a neighbour list</span>
+</span></pre></div>
+</div>
+</section>
+<section id="trajectories">
+<h2>Trajectories<a class="headerlink" href="#trajectories" title="Link to this heading">¶</a></h2>
+<p>The 2020 INT dumps live on the
+<a class="reference external" href="https://figshare.com/projects/d-SEAMS_Datasets/73545">figshare project</a>.
+Keep paths relative to the directory you invoke <code class="docutils literal notranslate"><span class="pre">dseams</span></code> from.</p>
+</section>
 </section>
 
         </article><button class="back-to-top" type="button">
@@ -201,13 +239,13 @@ the ring topology of carbon nanotubes and similar one-dimensional structures.</p
     <a href="bulk-ice.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">Bulk Ice Analysis</div></div>
+        <span>Previous</span><div class="title">Bulk ice on the mixed TIP4P example</div></div>
     </a>
   </div><div class="navigation-next">
     <a href="../howto/ase-integration.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">ASE Integration</div>
+        <div class="title">ASE integration</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

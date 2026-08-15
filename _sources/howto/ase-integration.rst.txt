@@ -1,9 +1,9 @@
 ===============
-ASE Integration
+ASE integration
 ===============
 
 
-Pass an ASE ``Atoms`` to ``pydseamslib.from_ase``. Oxygen is selected by
+Pass an ASE ``Atoms`` to ``pydseams.from_ase``. Oxygen is selected by
 default. Hydrogen bonds are used when the ``Atoms`` also contain H.
 
 Prerequisites
@@ -11,7 +11,7 @@ Prerequisites
 
 .. code:: bash
 
-    pip install 'pydseamslib[ase]'
+    pip install 'pydseams[ase]'
 
 Classify ice from ASE
 ---------------------
@@ -19,7 +19,7 @@ Classify ice from ASE
 .. code:: python
 
     import ase.io
-    import pydseamslib as ds
+    import pydseams as ds
 
     atoms = ase.io.read("input/traj/exampleTraj.lammpstrj", format="lammps-dump-text")
     # LAMMPS dumps often have numeric types; give them symbols first
@@ -44,10 +44,5 @@ Single-site models (mW)
 Notes
 -----
 
-- ``from_ase`` does not read a LAMMPS dump header. The cell comes from
-  ``atoms.cell``; the origin from ``atoms.get_celldisp()``.
-
-- ``to_ase`` writes ``arrays['ice_type']`` after ``chill`` / ``chill_plus``.
-
-- The old ``pydseamslib.adapters._ase.to_pointcloud`` helper is gone.
-  Use ``from_ase``.
+The engine repository does not install Python. Build or install
+`PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_.

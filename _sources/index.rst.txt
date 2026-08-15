@@ -8,14 +8,27 @@
 Overview
 --------
 
-d-SEAMS (Deferred Structural Elucidation Analysis for Molecular Simulations)
-is a set of tools for analyzing the structure of molecular simulations.
-The Python library ``pydseamslib`` lives in the
-`PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_ repository. This
-tree is the C++ engine and the Lua CLI.
-providing functions for reading trajectories, building neighbour lists,
-computing hydrogen bond networks, classifying ice structures with CHILL+,
-and performing ring analysis.
+d-SEAMS (Deferred Structural Elucidation Analysis for Molecular
+Simulations) classifies ice in molecular-dynamics trajectories: CHILL
+and CHILL+, Franzblau / Yuan--Cormack primitive rings, and hexagonal /
+double-diamond cage membership.
+
+This repository is the C++ engine (``libyodaLib``) and the ``seams`` CLI.
+
+.. code:: bash
+
+    seams read water.lammpstrj
+    seams chill-plus water.lammpstrj --cutoff 3.5
+    seams cages water.lammpstrj
+
+Scripting front ends are separate packages:
+
+- Python: ``pydseams`` (`PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_), compiled module ``yoda``
+
+- Lua/Fennel: ``dseams`` (`yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_), ``require("dseams")``
+
+Build with a Nix flake (``nix build``, ``nix develop``) or with
+``pixi run setup && pixi run build && pixi run test``.
 
 Getting Started
 ---------------
@@ -45,6 +58,15 @@ How-To Guides
 
      howto/ase-integration
 
+Explanation
+-----------
+
+  .. toctree::
+     :maxdepth: 1
+     :caption: Explanation
+
+     explanation/architecture
+
 Reference
 ---------
 
@@ -52,6 +74,8 @@ Reference
      :maxdepth: 2
      :caption: Reference
 
+     reference/cli
+     reference/nix
      reference/api
      reference/data-formats
 

@@ -13,8 +13,10 @@ d-SEAMS uses `pixi <https://pixi.sh>`_ for environment and task management. Inst
 
     curl -fsSL https://pixi.sh/install.sh | bash
 
-The pixi environment provides all build dependencies: a C++ compiler, Eigen,
-BLAS/LAPACK, Catch2, Meson, Ninja, nanobind, NumPy, and pytest.
+The pixi environment provides the C++ toolchain: a compiler, Eigen,
+BLAS/LAPACK, Catch2, Meson and Ninja. Python bindings are
+`PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_, not this
+tree. ``nix develop`` is the other supported compiler shell.
 
 Clone and build
 ---------------
@@ -31,9 +33,9 @@ Set up the Meson build directory and compile:
     pixi run setup
     pixi run build
 
-``pixi run setup`` configures a Meson build directory at ``bbdir/`` with tests and
-Python bindings enabled. ``pixi run build`` compiles the C++ library and the
-nanobind extension module.
+``pixi run setup`` configures a Meson build directory at ``bbdir/`` with
+tests and the ``seams`` CLI. ``pixi run build`` compiles ``libyodaLib`` and
+``seams``.
 
 Running tests
 -------------

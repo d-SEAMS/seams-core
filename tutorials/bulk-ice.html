@@ -2,8 +2,8 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Bulk Ice Analysis - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Nanotube Ring Analysis" href="nanotube.html" /><link rel="prev" title="Tutorial" href="../quickstart.html" />
-      <link rel="canonical" href="dseams.info/tutorials/bulk-ice.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Bulk ice on the mixed TIP4P example - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Quasi-one-dimensional ice" href="nanotube.html" /><link rel="prev" title="Quickstart" href="../quickstart.html" />
+      <link rel="canonical" href="https://docs.dseams.info/tutorials/bulk-ice.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
@@ -21,8 +21,8 @@
 }
 </style>
     <meta property="og:type" content="website"/>
-  <meta property="og:url" content="dseams.info/tutorials/bulk-ice.html"/>
-  <meta property="og:title" content="Bulk Ice Analysis"/>
+  <meta property="og:url" content="https://docs.dseams.info/tutorials/bulk-ice.html"/>
+  <meta property="og:title" content="Bulk ice on the mixed TIP4P example"/>
     <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
@@ -35,8 +35,11 @@
     </a>
     <div class="sy-head-nav" id="head-nav">
       <nav class="sy-head-links"><ul><li class="link">
-          <a href="https://pypi.org/project/pydseamslib">
-            <span>PyPI</span><i class="i-lucide external-link"></i></a>
+          <a href="https://github.com/d-SEAMS/PydSEAMSlib">
+            <span>pydseams</span><i class="i-lucide external-link"></i></a>
+        </li><li class="link">
+          <a href="https://github.com/d-SEAMS/yodaStruct">
+            <span>dseams (Lua)</span><i class="i-lucide external-link"></i></a>
         </li></ul></nav>
       <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
   <input type="text" name="q" placeholder="Search" />
@@ -67,19 +70,25 @@ data-aria-dark="Switch to auto color mode">
       <div class="sy-scrollbar p-6">
         <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../quickstart.html">Tutorial</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Bulk Ice Analysis</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="nanotube.html">Nanotube Ring Analysis</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Bulk ice on the mixed TIP4P example</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="nanotube.html">Quasi-one-dimensional ice</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">How-To Guides</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ase-integration.html">ASE Integration</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ase-integration.html">ASE integration</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Three repositories</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API Reference</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
 </ul>
@@ -97,7 +106,13 @@ data-aria-dark="Switch to auto color mode">
     <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
       <i class="i-lucide close"></i>
     </button>
-    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#chill-from-the-cli">CHILL+ from the CLI</a></li>
+<li><a class="reference internal" href="#the-same-path-in-python">The same path in Python</a></li>
+<li><a class="reference internal" href="#cubic-mw">Cubic mW</a></li>
+<li><a class="reference internal" href="#bond-graphs-for-cages">Bond graphs for cages</a></li>
+</ul>
+</div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
   data-type="github" data-user="d-SEAMS" data-repo="seams-core">
   <span class="w-8 flex items-center justify-around shrink-0 text-3xl">
     <iconify-icon icon="simple-icons:github"></iconify-icon>
@@ -136,7 +151,7 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">Bulk Ice Analysis</strong>
+        <strong itemprop="name">Bulk ice on the mixed TIP4P example</strong>
         <meta itemprop="position" content="2" />
       </li></ol>
     <div class="xl:hidden ml-1">
@@ -153,7 +168,7 @@ data-aria-dark="Switch to auto color mode">
     <button
       type="button"
       class="js-copy px-3 py-1 inline-flex items-center gap-1"
-      data-url="dseams.info/_sources/tutorials/bulk-ice.rst.txt"
+      data-url="https://docs.dseams.info/_sources/tutorials/bulk-ice.rst.txt"
     >
       <i class="i-lucide" data-icon="copy"></i>
       <span>Copy page</span>
@@ -167,30 +182,113 @@ data-aria-dark="Switch to auto color mode">
     <div role="presentation">
       <div class="flex flex-col" role="group">
         <button class="js-copy" type="button" role="menuitem"
-          data-url="dseams.info/_sources/tutorials/bulk-ice.rst.txt">
+          data-url="https://docs.dseams.info/_sources/tutorials/bulk-ice.rst.txt">
           <span class="iconify-icon">
             <i class="i-lucide" data-icon="copy"></i>
           </span>
           <span>Copy page</span>
         </button>
-        <a role="menuitem" href="dseams.info/_sources/tutorials/bulk-ice.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
-            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20dseams.info/_sources/tutorials/bulk-ice.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+        <a role="menuitem" href="https://docs.dseams.info/_sources/tutorials/bulk-ice.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
+            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20https%3A//docs.dseams.info/_sources/tutorials/bulk-ice.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
           <iconify-icon icon="bi:openai"></iconify-icon>
           <span>Open in ChatGPT</span>
-        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20dseams.info/_sources/tutorials/bulk-ice.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20https%3A//docs.dseams.info/_sources/tutorials/bulk-ice.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
           <iconify-icon icon="bi:claude"></iconify-icon>
           <span>Open in Claude</span>
         </a></div>
     </div>
   </div>
 </div><article class="yue dark-code" role="main">
-          <section id="bulk-ice-analysis">
-<h1>Bulk Ice Analysis<a class="headerlink" href="#bulk-ice-analysis" title="Link to this heading">¶</a></h1>
-<p>.. note::</p>
-<p>This tutorial is under construction.</p>
-<p>This tutorial will cover analyzing bulk ice systems across multiple frames,
-computing ice type fractions over time, and generating time-series plots of
-ice nucleation.</p>
+          <section id="bulk-ice-on-the-mixed-tip4p-example">
+<h1>Bulk ice on the mixed TIP4P example<a class="headerlink" href="#bulk-ice-on-the-mixed-tip4p-example" title="Link to this heading">¶</a></h1>
+<p>This walk uses <code class="docutils literal notranslate"><span class="pre">input/traj/exampleTraj.lammpstrj</span></code> from a seams-core
+checkout (250 waters, type 2 is oxygen).</p>
+<section id="chill-from-the-cli">
+<h2>CHILL+ from the CLI<a class="headerlink" href="#chill-from-the-cli" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span>chill-plus<span class="w"> </span>input/traj/exampleTraj.lammpstrj<span class="w"> </span>--cutoff<span class="w"> </span><span class="m">3</span>.5<span class="w"> </span>--type<span class="w"> </span><span class="m">2</span>
+</span></pre></div>
+</div>
+<p>Four-neighbour staggered/eclipsed counts on this frame:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>label</p></th>
+<th class="head"><p>atoms</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>cubic</p></td>
+<td><p>42</p></td>
+</tr>
+<tr class="row-odd"><td><p>hexagonal</p></td>
+<td><p>65</p></td>
+</tr>
+<tr class="row-even"><td><p>interfacial</p></td>
+<td><p>58</p></td>
+</tr>
+<tr class="row-odd"><td><p>water</p></td>
+<td><p>85</p></td>
+</tr>
+<tr class="row-even"><td><p>bulk ice</p></td>
+<td><p>107</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="the-same-path-in-python">
+<h2>The same path in Python<a class="headerlink" href="#the-same-path-in-python" title="Link to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">pydseams</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ds</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="n">frame</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;input/traj/exampleTraj.lammpstrj&quot;</span><span class="p">)</span>
+</span><span data-line="4"><span class="nb">print</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">chill_plus</span><span class="p">())</span>
+</span><span data-line="5"><span class="nb">print</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">cages</span><span class="p">())</span>
+</span></pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Frame.chill_plus</span></code> is the four-neighbour classifier.
+<code class="docutils literal notranslate"><span class="pre">Frame.cages</span></code> is topological unit matching on six-rings. On this
+mixed frame TUM finds no complete HC or DDC: cage membership is not
+the CHILL+ star.</p>
+</section>
+<section id="cubic-mw">
+<h2>Cubic mW<a class="headerlink" href="#cubic-mw" title="Link to this heading">¶</a></h2>
+<p>The 4096-molecule cubic mW dump (<code class="docutils literal notranslate"><span class="pre">input/traj/mW_cubic.lammpstrj</span></code>)
+is the opposite case: every molecule is in a double-diamond cage and
+CHILL+ reports cubic ice.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span>cages<span class="w"> </span>input/traj/mW_cubic.lammpstrj<span class="w"> </span>--type<span class="w"> </span><span class="m">1</span>
+</span><span data-line="2">seams<span class="w"> </span>chill-plus<span class="w"> </span>input/traj/mW_cubic.lammpstrj<span class="w"> </span>--type<span class="w"> </span><span class="m">1</span>
+</span></pre></div>
+</div>
+</section>
+<section id="bond-graphs-for-cages">
+<h2>Bond graphs for cages<a class="headerlink" href="#bond-graphs-for-cages" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span> <span class="pre">--graph</span></code> selects the neighbour graph:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>value</p></th>
+<th class="head"><p>graph</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cutoff</span></code></p></td>
+<td><p>distance cutoff (2020 default)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">knn</span></code></p></td>
+<td><p>mutual four-nearest</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">knn-union</span></code></p></td>
+<td><p>union four-nearest</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seeded</span></code></p></td>
+<td><p>mutual seeds, union completions (default)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>On a perfect cubic crystal the four graphs coincide. On a disordered
+nucleation dump they do not.</p>
+</section>
 </section>
 
         </article><button class="back-to-top" type="button">
@@ -202,13 +300,13 @@ ice nucleation.</p>
     <a href="../quickstart.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">Tutorial</div></div>
+        <span>Previous</span><div class="title">Quickstart</div></div>
     </a>
   </div><div class="navigation-next">
     <a href="nanotube.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">Nanotube Ring Analysis</div>
+        <div class="title">Quasi-one-dimensional ice</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

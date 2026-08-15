@@ -1,256 +1,90 @@
-========
-Tutorial
-========
+==========
+Quickstart
+==========
 
 
-In this tutorial you will analyze the ice structure of a water simulation
-trajectory using d-SEAMS. By the end you will have classified every molecule
-as cubic ice, hexagonal ice, or liquid water.
+Classify ice on the in-tree mixed TIP4P example
+(``input/traj/exampleTraj.lammpstrj``, 250 waters).
 
-Here is what the final output looks like:
+Install the engine
+------------------
 
-.. code:: text
-
-    Ice type statistics for frame 1:
-      Cubic ice (Ic):     42 atoms
-      Hexagonal ice (Ih): 65 atoms
-      Interfacial:        58 atoms
-      Clathrate:           0 atoms
-      Water:              85 atoms
-      Total classified:  250 atoms
-
-Install pydseamslib
--------------------
-
-Python bindings are the ``PydSEAMSlib`` repository, not this tree.
+Nix flake:
 
 .. code:: bash
 
-    # from a PydSEAMSlib checkout, or after a 2.0 upload to PyPI:
-    pip install 'pydseamslib[ase]'
+    nix build
+    ./result/bin/seams --help
+    nix develop   # compiler, Eigen, BLAS, Catch2
 
-Verify:
+pixi:
 
 .. code:: bash
 
-    python -c "import pydseamslib; print(pydseamslib.__version__)"
-    # 2.0.0
+    pixi run setup
+    pixi run build
+    ./bbdir/src/seams --help
 
-Classify ice
+Read a frame
 ------------
 
-``read`` loads a LAMMPS dump (oxygen if type 2 is present, otherwise the
-single-site type). ``chill_plus`` does not write files.
+.. code:: bash
 
-The example trajectory ships with the repository at
-``input/traj/exampleTraj.lammpstrj``. It contains 750 atoms (250 water molecules
-with atom types 1=H and 2=O) in a periodic box.
+    seams read input/traj/exampleTraj.lammpstrj
+
+Expected shape of the line: ``nop 250 frame 1 box ...``.
+
+CHILL+
+------
+
+.. code:: bash
+
+    seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
+
+On this fixture the four-neighbour labels are 42 cubic, 65 hexagonal,
+58 interfacial and 85 water.
+
+Cages
+-----
+
+.. code:: bash
+
+    seams cages input/traj/exampleTraj.lammpstrj --type 2
+
+The default bond graph is ``--graph seeded`` (mutual four-nearest seeds,
+union completions). This mixed frame has no complete HC or DDC.
+
+Python and Lua
+--------------
+
+The engine CLI is not a scripting host.
 
 .. code:: python
 
-    import pydseamslib as ds
+    import pydseams as ds
 
     frame = ds.read("input/traj/exampleTraj.lammpstrj")
-    print(f"Loaded {frame.n_atoms} atoms, box: {frame.box}")
-
     print(frame.chill_plus())
     print(frame.cages())
 
-You should see 250 oxygen atoms classified into cubic, hexagonal, interfacial,
-and water categories.
+.. code:: lua
 
-The frame builds the neighbour list and hydrogen bond network lazily.
-You can also access them directly:
+    local dseams = require("dseams")
+    local cloud = dseams.read("input/traj/exampleTraj.lammpstrj")
+    print(dseams.chill_plus(cloud, {cutoff = 3.5}))
 
-.. code:: python
+Install those from
+`PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_ and
+`yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_.
 
-    print(f"Neighbours per atom: {len(frame.neighbor_list[0]) - 1}")
-    print(f"H-bonds per atom: {len(frame.hbonds[0]) - 1}")
-    print(f"Number of rings found: {len(frame.rings)}")
+Features of this build
+----------------------
 
-Steinhardt order parameters
----------------------------
+.. code:: bash
 
-The frame computes the local Steinhardt ``q_l`` and the
-neighbour-averaged ``q_l`` bar for every atom:
+    seams --features
 
-.. code:: python
-
-    ql = frame.steinhardt(order_l=6)
-    print(len(ql["ql"]), len(ql["ql_bar"]))
-
-Template overlay, SOAP and Voronoi features
--------------------------------------------
-
-Each neighbour shell can be overlaid onto FCC, HCP, BCC and SC templates.
-SOAP spectra and Voronoi-weighted Steinhardt parameters use the same
-loaded frame:
-
-.. code:: python
-
-    hits = frame.classify_templates()
-    print(hits[0]["name"], hits[0]["rmsd"], hits[0]["kind"])
-
-    spectra = frame.soap()
-    print(len(spectra), len(spectra[0]))
-
-    ql_voro = frame.steinhardt_voronoi()
-    print(len(ql_voro["ql"]))
-
-Low-level API (step by step)
-----------------------------
-
-For full control over each analysis step, use the ``yoda`` module directly.
-
-Read a LAMMPS trajectory
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code:: python
-
-    from pydseams import yoda
-
-    # Read frame 1 from the trajectory, selecting oxygen atoms (type 2).
-    # isSlice=False means we read the full box (coordLow/coordHigh are ignored).
-    cloud = yoda.readLammpsTrjreduced(
-        filename="input/traj/exampleTraj.lammpstrj",
-        targetFrame=1,
-        typeI=2,       # oxygen atom type in the LAMMPS file
-        isSlice=False,
-        coordLow=[0, 0, 0],
-        coordHigh=[0, 0, 0],
-    )
-
-    print(f"Read {cloud.nop} oxygen atoms")
-    print(f"Box dimensions: {cloud.box}")
-
-You should see 250 oxygen atoms and a box with three positive dimensions.
-
-Build the neighbour list
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-d-SEAMS builds neighbour lists based on a distance cutoff. For water, 3.5
-Angstroms captures the first coordination shell.
-
-.. code:: python
-
-    # Build a neighbour list for oxygens within 3.5 Angstroms
-    nList = yoda.neighListO(rcutoff=3.5, yCloud=cloud, typeI=2)
-
-    print(f"Neighbour list has {len(nList)} entries (one per atom)")
-    # Each entry is a list of atom IDs: [self, neighbour1, neighbour2, ...]
-    print(f"Atom 0 neighbours: {len(nList[0]) - 1}")
-
-Compute hydrogen bonds
-~~~~~~~~~~~~~~~~~~~~~~
-
-The hydrogen bond network is built by re-reading the trajectory (to access
-hydrogen positions) and applying geometric criteria to the oxygen neighbour
-list.
-
-.. code:: python
-
-    # Build the hydrogen bond network.
-    # Htype=1 is the hydrogen atom type in the LAMMPS file.
-    hbonds = yoda.populateHbonds(
-        filename="input/traj/exampleTraj.lammpstrj",
-        yCloud=cloud,
-        nList=nList,
-        targetFrame=1,
-        Htype=1,
-    )
-
-    print(f"H-bond list has {len(hbonds)} entries")
-    # Count average number of H-bonds per oxygen
-    total_hbonds = sum(len(hb) - 1 for hb in hbonds)  # subtract self from each
-    avg_hbonds = total_hbonds / len(hbonds)
-    print(f"Average H-bonds per oxygen: {avg_hbonds:.2f}")
-
-In bulk water/ice you should see roughly 3.5-4.0 hydrogen bonds per oxygen.
-
-Run CHILL+ classification
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-CHILL+ classifies each molecule by computing bond-order correlations between
-neighbours. The function modifies the point cloud in-place, populating the
-``c_ij`` field on each point.
-
-.. code:: python
-
-    # Compute CHILL+ bond-order correlations
-    cloud = yoda.getCorrelPlus(yCloud=cloud, nList=nList, isSlice=False)
-
-    # Check that atoms now have correlation data
-    n_classified = sum(1 for pt in cloud.pts if len(pt.c_ij) > 0)
-    print(f"Atoms with bond-order data: {n_classified}/{cloud.nop}")
-
-Print ice type statistics
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-After CHILL+ correlation, each atom has a list of ``Result`` objects in ``c_ij``.
-Each result contains a ``classifier`` (the bond type) and a ``c_value`` (the
-correlation value). The ``iceType`` field on each point gives the final
-classification.
-
-.. code:: python
-
-    # Write the full CHILL+ classification to disk and get the typed cloud back.
-    # This writes an output file and classifies each atom.
-    cloud = yoda.getIceTypePlus(
-        yCloud=cloud,
-        nList=nList,
-        path=".",
-        firstFrame=1,
-        isSlice=False,
-        outputFileName="ice_classification.dat",
-    )
-
-    # Count ice types from the iceType enum on each atom
-    from collections import Counter
-
-    ice_counts = Counter()
-    for pt in cloud.pts:
-        ice_counts[str(pt.iceType)] += 1
-
-    print("Ice type statistics for frame 1:")
-    for ice_type, count in sorted(ice_counts.items()):
-        print(f"  {ice_type}: {count} atoms")
-    print(f"  Total classified: {cloud.nop} atoms")
-
-The output file ``ice_classification.dat`` contains per-atom classifications that
-you can load into visualization tools.
-
-Verify
-------
-
-After running the tutorial you should have:
-
-1. A ``cloud`` object with ``nop`` equal to 250 (one entry per oxygen)
-
-2. A neighbour list with 250 entries, each oxygen having roughly 4 neighbours
-
-3. A hydrogen bond network with similar connectivity
-
-4. Bond-order correlation data on most atoms
-
-5. An output file ``ice_classification.dat`` with per-atom ice types
-
-If any step fails, check that:
-
-- The trajectory path is correct (run from the repository root)
-
-- Atom types match your trajectory (type 2 = oxygen, type 1 = hydrogen)
-
-- The cutoff (3.5 A) is appropriate for your water model
-
-Next steps
-----------
-
-- `Bulk ice analysis <tutorials/bulk-ice.rst>`_ -- analyze larger systems and multiple frames
-
-- `Nanotube analysis <tutorials/nanotube.rst>`_ -- ring analysis for carbon nanostructures
-
-- `ASE integration <howto/ase-integration.rst>`_ -- convert ASE Atoms objects to d-SEAMS point clouds
-
-- `API reference <reference/api.rst>`_ -- all bound functions and types
-
-- `Data formats <reference/data-formats.rst>`_ -- LAMMPS trajectory format specification
+Optional backends (vesin, chemfiles, readcon-core, IRA, sphericart,
+nauty, MPI) stay off unless the Meson probe finds them. The Nix flake
+enables Eigen, BLAS/LAPACK, Catch2 and Highway when nixpkgs provides
+them.

@@ -2,8 +2,8 @@
 <html lang="en" data-accent-color="teal" data-content_root="./">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Tutorial - d-SEAMS documentation</title><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Bulk Ice Analysis" href="tutorials/bulk-ice.html" /><link rel="prev" title="d-SEAMS" href="index.html" />
-      <link rel="canonical" href="dseams.info/quickstart.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Quickstart - d-SEAMS documentation</title><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Bulk ice on the mixed TIP4P example" href="tutorials/bulk-ice.html" /><link rel="prev" title="d-SEAMS" href="index.html" />
+      <link rel="canonical" href="https://docs.dseams.info/quickstart.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=e1a1ceaf" />
@@ -21,8 +21,8 @@
 }
 </style>
     <meta property="og:type" content="website"/>
-  <meta property="og:url" content="dseams.info/quickstart.html"/>
-  <meta property="og:title" content="Tutorial"/>
+  <meta property="og:url" content="https://docs.dseams.info/quickstart.html"/>
+  <meta property="og:title" content="Quickstart"/>
     <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
@@ -35,8 +35,11 @@
     </a>
     <div class="sy-head-nav" id="head-nav">
       <nav class="sy-head-links"><ul><li class="link">
-          <a href="https://pypi.org/project/pydseamslib">
-            <span>PyPI</span><i class="i-lucide external-link"></i></a>
+          <a href="https://github.com/d-SEAMS/PydSEAMSlib">
+            <span>pydseams</span><i class="i-lucide external-link"></i></a>
+        </li><li class="link">
+          <a href="https://github.com/d-SEAMS/yodaStruct">
+            <span>dseams (Lua)</span><i class="i-lucide external-link"></i></a>
         </li></ul></nav>
       <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="search.html" method="get">
   <input type="text" name="q" placeholder="Search" />
@@ -67,19 +70,25 @@ data-aria-dark="Switch to auto color mode">
       <div class="sy-scrollbar p-6">
         <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="tutorials/bulk-ice.html">Bulk Ice Analysis</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="tutorials/nanotube.html">Nanotube Ring Analysis</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="tutorials/bulk-ice.html">Bulk ice on the mixed TIP4P example</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="tutorials/nanotube.html">Quasi-one-dimensional ice</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">How-To Guides</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="howto/ase-integration.html">ASE Integration</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="howto/ase-integration.html">ASE integration</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="explanation/architecture.html">Three repositories</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="reference/cli.html">seams CLI</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="reference/nix.html">Nix flake</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="reference/api.html">API Reference</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="reference/data-formats.html">Data Formats</a></li>
 </ul>
@@ -98,20 +107,12 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#install-pydseamslib">Install pydseamslib</a></li>
-<li><a class="reference internal" href="#classify-ice">Classify ice</a></li>
-<li><a class="reference internal" href="#steinhardt-order-parameters">Steinhardt order parameters</a></li>
-<li><a class="reference internal" href="#template-overlay-soap-and-voronoi-features">Template overlay, SOAP and Voronoi features</a></li>
-<li><a class="reference internal" href="#low-level-api-step-by-step">Low-level API (step by step)</a><ul>
-<li><a class="reference internal" href="#read-a-lammps-trajectory">Read a LAMMPS trajectory</a></li>
-<li><a class="reference internal" href="#build-the-neighbour-list">Build the neighbour list</a></li>
-<li><a class="reference internal" href="#compute-hydrogen-bonds">Compute hydrogen bonds</a></li>
-<li><a class="reference internal" href="#run-chill-classification">Run CHILL+ classification</a></li>
-<li><a class="reference internal" href="#print-ice-type-statistics">Print ice type statistics</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#verify">Verify</a></li>
-<li><a class="reference internal" href="#next-steps">Next steps</a></li>
+<li><a class="reference internal" href="#install-the-engine">Install the engine</a></li>
+<li><a class="reference internal" href="#read-a-frame">Read a frame</a></li>
+<li><a class="reference internal" href="#chill">CHILL+</a></li>
+<li><a class="reference internal" href="#cages">Cages</a></li>
+<li><a class="reference internal" href="#python-and-lua">Python and Lua</a></li>
+<li><a class="reference internal" href="#features-of-this-build">Features of this build</a></li>
 </ul>
 </div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
   data-type="github" data-user="d-SEAMS" data-repo="seams-core">
@@ -152,7 +153,7 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">Tutorial</strong>
+        <strong itemprop="name">Quickstart</strong>
         <meta itemprop="position" content="2" />
       </li></ol>
     <div class="xl:hidden ml-1">
@@ -169,7 +170,7 @@ data-aria-dark="Switch to auto color mode">
     <button
       type="button"
       class="js-copy px-3 py-1 inline-flex items-center gap-1"
-      data-url="dseams.info/_sources/quickstart.rst.txt"
+      data-url="https://docs.dseams.info/_sources/quickstart.rst.txt"
     >
       <i class="i-lucide" data-icon="copy"></i>
       <span>Copy page</span>
@@ -183,237 +184,93 @@ data-aria-dark="Switch to auto color mode">
     <div role="presentation">
       <div class="flex flex-col" role="group">
         <button class="js-copy" type="button" role="menuitem"
-          data-url="dseams.info/_sources/quickstart.rst.txt">
+          data-url="https://docs.dseams.info/_sources/quickstart.rst.txt">
           <span class="iconify-icon">
             <i class="i-lucide" data-icon="copy"></i>
           </span>
           <span>Copy page</span>
         </button>
-        <a role="menuitem" href="dseams.info/_sources/quickstart.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
-            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20dseams.info/_sources/quickstart.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+        <a role="menuitem" href="https://docs.dseams.info/_sources/quickstart.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
+            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20https%3A//docs.dseams.info/_sources/quickstart.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
           <iconify-icon icon="bi:openai"></iconify-icon>
           <span>Open in ChatGPT</span>
-        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20dseams.info/_sources/quickstart.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20https%3A//docs.dseams.info/_sources/quickstart.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
           <iconify-icon icon="bi:claude"></iconify-icon>
           <span>Open in Claude</span>
         </a></div>
     </div>
   </div>
 </div><article class="yue dark-code" role="main">
-          <section id="tutorial">
-<h1>Tutorial<a class="headerlink" href="#tutorial" title="Link to this heading">¶</a></h1>
-<p>In this tutorial you will analyze the ice structure of a water simulation
-trajectory using d-SEAMS. By the end you will have classified every molecule
-as cubic ice, hexagonal ice, or liquid water.</p>
-<p>Here is what the final output looks like:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">Ice type statistics for frame 1:
-</span><span data-line="2">  Cubic ice (Ic):     42 atoms
-</span><span data-line="3">  Hexagonal ice (Ih): 65 atoms
-</span><span data-line="4">  Interfacial:        58 atoms
-</span><span data-line="5">  Clathrate:           0 atoms
-</span><span data-line="6">  Water:              85 atoms
-</span><span data-line="7">  Total classified:  250 atoms
+          <section id="quickstart">
+<h1>Quickstart<a class="headerlink" href="#quickstart" title="Link to this heading">¶</a></h1>
+<p>Classify ice on the in-tree mixed TIP4P example
+(<code class="docutils literal notranslate"><span class="pre">input/traj/exampleTraj.lammpstrj</span></code>, 250 waters).</p>
+<section id="install-the-engine">
+<h2>Install the engine<a class="headerlink" href="#install-the-engine" title="Link to this heading">¶</a></h2>
+<p>Nix flake:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">nix<span class="w"> </span>build
+</span><span data-line="2">./result/bin/seams<span class="w"> </span>--help
+</span><span data-line="3">nix<span class="w"> </span>develop<span class="w">   </span><span class="c1"># compiler, Eigen, BLAS, Catch2</span>
 </span></pre></div>
 </div>
-<section id="install-pydseamslib">
-<h2>Install pydseamslib<a class="headerlink" href="#install-pydseamslib" title="Link to this heading">¶</a></h2>
-<p>Python bindings are the <code class="docutils literal notranslate"><span class="pre">PydSEAMSlib</span></code> repository, not this tree.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># from a PydSEAMSlib checkout, or after a 2.0 upload to PyPI:</span>
-</span><span data-line="2">pip<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;pydseamslib[ase]&#39;</span>
-</span></pre></div>
-</div>
-<p>Verify:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import pydseamslib; print(pydseamslib.__version__)&quot;</span>
-</span><span data-line="2"><span class="c1"># 2.0.0</span>
+<p>pixi:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">pixi<span class="w"> </span>run<span class="w"> </span>setup
+</span><span data-line="2">pixi<span class="w"> </span>run<span class="w"> </span>build
+</span><span data-line="3">./bbdir/src/seams<span class="w"> </span>--help
 </span></pre></div>
 </div>
 </section>
-<section id="classify-ice">
-<h2>Classify ice<a class="headerlink" href="#classify-ice" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">read</span></code> loads a LAMMPS dump (oxygen if type 2 is present, otherwise the
-single-site type). <code class="docutils literal notranslate"><span class="pre">chill_plus</span></code> does not write files.</p>
-<p>The example trajectory ships with the repository at
-<code class="docutils literal notranslate"><span class="pre">input/traj/exampleTraj.lammpstrj</span></code>. It contains 750 atoms (250 water molecules
-with atom types 1=H and 2=O) in a periodic box.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">pydseamslib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ds</span>
+<section id="read-a-frame">
+<h2>Read a frame<a class="headerlink" href="#read-a-frame" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span><span class="nb">read</span><span class="w"> </span>input/traj/exampleTraj.lammpstrj
+</span></pre></div>
+</div>
+<p>Expected shape of the line: <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">250</span> <span class="pre">frame</span> <span class="pre">1</span> <span class="pre">box</span> <span class="pre">...</span></code>.</p>
+</section>
+<section id="chill">
+<h2>CHILL+<a class="headerlink" href="#chill" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span>chill-plus<span class="w"> </span>input/traj/exampleTraj.lammpstrj<span class="w"> </span>--cutoff<span class="w"> </span><span class="m">3</span>.5<span class="w"> </span>--type<span class="w"> </span><span class="m">2</span>
+</span></pre></div>
+</div>
+<p>On this fixture the four-neighbour labels are 42 cubic, 65 hexagonal,
+58 interfacial and 85 water.</p>
+</section>
+<section id="cages">
+<h2>Cages<a class="headerlink" href="#cages" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span>cages<span class="w"> </span>input/traj/exampleTraj.lammpstrj<span class="w"> </span>--type<span class="w"> </span><span class="m">2</span>
+</span></pre></div>
+</div>
+<p>The default bond graph is <code class="docutils literal notranslate"><span class="pre">--graph</span> <span class="pre">seeded</span></code> (mutual four-nearest seeds,
+union completions). This mixed frame has no complete HC or DDC.</p>
+</section>
+<section id="python-and-lua">
+<h2>Python and Lua<a class="headerlink" href="#python-and-lua" title="Link to this heading">¶</a></h2>
+<p>The engine CLI is not a scripting host.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">pydseams</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ds</span>
 </span><span data-line="2">
 </span><span data-line="3"><span class="n">frame</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;input/traj/exampleTraj.lammpstrj&quot;</span><span class="p">)</span>
-</span><span data-line="4"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded </span><span class="si">{</span><span class="n">frame</span><span class="o">.</span><span class="n">n_atoms</span><span class="si">}</span><span class="s2"> atoms, box: </span><span class="si">{</span><span class="n">frame</span><span class="o">.</span><span class="n">box</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span data-line="5">
-</span><span data-line="6"><span class="nb">print</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">chill_plus</span><span class="p">())</span>
-</span><span data-line="7"><span class="nb">print</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">cages</span><span class="p">())</span>
+</span><span data-line="4"><span class="nb">print</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">chill_plus</span><span class="p">())</span>
+</span><span data-line="5"><span class="nb">print</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">cages</span><span class="p">())</span>
 </span></pre></div>
 </div>
-<p>You should see 250 oxygen atoms classified into cubic, hexagonal, interfacial,
-and water categories.</p>
-<p>The frame builds the neighbour list and hydrogen bond network lazily.
-You can also access them directly:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Neighbours per atom: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">neighbor_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span data-line="2"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;H-bonds per atom: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">hbonds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span data-line="3"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of rings found: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">rings</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="highlight-lua notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kd">local</span><span class="w"> </span><span class="nv">dseams</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="p">(</span><span class="s2">&quot;dseams&quot;</span><span class="p">)</span>
+</span><span data-line="2"><span class="kd">local</span><span class="w"> </span><span class="nv">cloud</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">dseams</span><span class="p">.</span><span class="nf">read</span><span class="p">(</span><span class="s2">&quot;input/traj/exampleTraj.lammpstrj&quot;</span><span class="p">)</span>
+</span><span data-line="3"><span class="nb">print</span><span class="p">(</span><span class="nv">dseams</span><span class="p">.</span><span class="nf">chill_plus</span><span class="p">(</span><span class="nv">cloud</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="nv">cutoff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">3.5</span><span class="p">}))</span>
 </span></pre></div>
 </div>
+<p>Install those from
+<a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib">PydSEAMSlib</a> and
+<a class="reference external" href="https://github.com/d-SEAMS/yodaStruct">yodaStruct</a>.</p>
 </section>
-<section id="steinhardt-order-parameters">
-<h2>Steinhardt order parameters<a class="headerlink" href="#steinhardt-order-parameters" title="Link to this heading">¶</a></h2>
-<p>The frame computes the local Steinhardt <code class="docutils literal notranslate"><span class="pre">q_l</span></code> and the
-neighbour-averaged <code class="docutils literal notranslate"><span class="pre">q_l</span></code> bar for every atom:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">ql</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">steinhardt</span><span class="p">(</span><span class="n">order_l</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
-</span><span data-line="2"><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ql</span><span class="p">[</span><span class="s2">&quot;ql&quot;</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">ql</span><span class="p">[</span><span class="s2">&quot;ql_bar&quot;</span><span class="p">]))</span>
+<section id="features-of-this-build">
+<h2>Features of this build<a class="headerlink" href="#features-of-this-build" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span>--features
 </span></pre></div>
 </div>
-</section>
-<section id="template-overlay-soap-and-voronoi-features">
-<h2>Template overlay, SOAP and Voronoi features<a class="headerlink" href="#template-overlay-soap-and-voronoi-features" title="Link to this heading">¶</a></h2>
-<p>Each neighbour shell can be overlaid onto FCC, HCP, BCC and SC templates.
-SOAP spectra and Voronoi-weighted Steinhardt parameters use the same
-loaded frame:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">hits</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">classify_templates</span><span class="p">()</span>
-</span><span data-line="2"><span class="nb">print</span><span class="p">(</span><span class="n">hits</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">hits</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;rmsd&quot;</span><span class="p">],</span> <span class="n">hits</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;kind&quot;</span><span class="p">])</span>
-</span><span data-line="3">
-</span><span data-line="4"><span class="n">spectra</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">soap</span><span class="p">()</span>
-</span><span data-line="5"><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-</span><span data-line="6">
-</span><span data-line="7"><span class="n">ql_voro</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">steinhardt_voronoi</span><span class="p">()</span>
-</span><span data-line="8"><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ql_voro</span><span class="p">[</span><span class="s2">&quot;ql&quot;</span><span class="p">]))</span>
-</span></pre></div>
-</div>
-</section>
-<section id="low-level-api-step-by-step">
-<h2>Low-level API (step by step)<a class="headerlink" href="#low-level-api-step-by-step" title="Link to this heading">¶</a></h2>
-<p>For full control over each analysis step, use the <code class="docutils literal notranslate"><span class="pre">yoda</span></code> module directly.</p>
-<section id="read-a-lammps-trajectory">
-<h3>Read a LAMMPS trajectory<a class="headerlink" href="#read-a-lammps-trajectory" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">pydseams</span><span class="w"> </span><span class="kn">import</span> <span class="n">yoda</span>
-</span><span data-line="2">
-</span><span data-line="3"><span class="c1"># Read frame 1 from the trajectory, selecting oxygen atoms (type 2).</span>
-</span><span data-line="4"><span class="c1"># isSlice=False means we read the full box (coordLow/coordHigh are ignored).</span>
-</span><span data-line="5"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">readLammpsTrjreduced</span><span class="p">(</span>
-</span><span data-line="6">    <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;input/traj/exampleTraj.lammpstrj&quot;</span><span class="p">,</span>
-</span><span data-line="7">    <span class="n">targetFrame</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-</span><span data-line="8">    <span class="n">typeI</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>       <span class="c1"># oxygen atom type in the LAMMPS file</span>
-</span><span data-line="9">    <span class="n">isSlice</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span data-line="10">    <span class="n">coordLow</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-</span><span data-line="11">    <span class="n">coordHigh</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-</span><span data-line="12"><span class="p">)</span>
-</span><span data-line="13">
-</span><span data-line="14"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Read </span><span class="si">{</span><span class="n">cloud</span><span class="o">.</span><span class="n">nop</span><span class="si">}</span><span class="s2"> oxygen atoms&quot;</span><span class="p">)</span>
-</span><span data-line="15"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Box dimensions: </span><span class="si">{</span><span class="n">cloud</span><span class="o">.</span><span class="n">box</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span></pre></div>
-</div>
-<p>You should see 250 oxygen atoms and a box with three positive dimensions.</p>
-</section>
-<section id="build-the-neighbour-list">
-<h3>Build the neighbour list<a class="headerlink" href="#build-the-neighbour-list" title="Link to this heading">¶</a></h3>
-<p>d-SEAMS builds neighbour lists based on a distance cutoff. For water, 3.5
-Angstroms captures the first coordination shell.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Build a neighbour list for oxygens within 3.5 Angstroms</span>
-</span><span data-line="2"><span class="n">nList</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">neighListO</span><span class="p">(</span><span class="n">rcutoff</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">yCloud</span><span class="o">=</span><span class="n">cloud</span><span class="p">,</span> <span class="n">typeI</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="3">
-</span><span data-line="4"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Neighbour list has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nList</span><span class="p">)</span><span class="si">}</span><span class="s2"> entries (one per atom)&quot;</span><span class="p">)</span>
-</span><span data-line="5"><span class="c1"># Each entry is a list of atom IDs: [self, neighbour1, neighbour2, ...]</span>
-</span><span data-line="6"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Atom 0 neighbours: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nList</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span></pre></div>
-</div>
-</section>
-<section id="compute-hydrogen-bonds">
-<h3>Compute hydrogen bonds<a class="headerlink" href="#compute-hydrogen-bonds" title="Link to this heading">¶</a></h3>
-<p>The hydrogen bond network is built by re-reading the trajectory (to access
-hydrogen positions) and applying geometric criteria to the oxygen neighbour
-list.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Build the hydrogen bond network.</span>
-</span><span data-line="2"><span class="c1"># Htype=1 is the hydrogen atom type in the LAMMPS file.</span>
-</span><span data-line="3"><span class="n">hbonds</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">populateHbonds</span><span class="p">(</span>
-</span><span data-line="4">    <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;input/traj/exampleTraj.lammpstrj&quot;</span><span class="p">,</span>
-</span><span data-line="5">    <span class="n">yCloud</span><span class="o">=</span><span class="n">cloud</span><span class="p">,</span>
-</span><span data-line="6">    <span class="n">nList</span><span class="o">=</span><span class="n">nList</span><span class="p">,</span>
-</span><span data-line="7">    <span class="n">targetFrame</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-</span><span data-line="8">    <span class="n">Htype</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-</span><span data-line="9"><span class="p">)</span>
-</span><span data-line="10">
-</span><span data-line="11"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;H-bond list has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">hbonds</span><span class="p">)</span><span class="si">}</span><span class="s2"> entries&quot;</span><span class="p">)</span>
-</span><span data-line="12"><span class="c1"># Count average number of H-bonds per oxygen</span>
-</span><span data-line="13"><span class="n">total_hbonds</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hb</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">hb</span> <span class="ow">in</span> <span class="n">hbonds</span><span class="p">)</span>  <span class="c1"># subtract self from each</span>
-</span><span data-line="14"><span class="n">avg_hbonds</span> <span class="o">=</span> <span class="n">total_hbonds</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">hbonds</span><span class="p">)</span>
-</span><span data-line="15"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Average H-bonds per oxygen: </span><span class="si">{</span><span class="n">avg_hbonds</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span></pre></div>
-</div>
-<p>In bulk water/ice you should see roughly 3.5-4.0 hydrogen bonds per oxygen.</p>
-</section>
-<section id="run-chill-classification">
-<h3>Run CHILL+ classification<a class="headerlink" href="#run-chill-classification" title="Link to this heading">¶</a></h3>
-<p>CHILL+ classifies each molecule by computing bond-order correlations between
-neighbours. The function modifies the point cloud in-place, populating the
-<code class="docutils literal notranslate"><span class="pre">c_ij</span></code> field on each point.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Compute CHILL+ bond-order correlations</span>
-</span><span data-line="2"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">getCorrelPlus</span><span class="p">(</span><span class="n">yCloud</span><span class="o">=</span><span class="n">cloud</span><span class="p">,</span> <span class="n">nList</span><span class="o">=</span><span class="n">nList</span><span class="p">,</span> <span class="n">isSlice</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</span><span data-line="3">
-</span><span data-line="4"><span class="c1"># Check that atoms now have correlation data</span>
-</span><span data-line="5"><span class="n">n_classified</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">cloud</span><span class="o">.</span><span class="n">pts</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pt</span><span class="o">.</span><span class="n">c_ij</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
-</span><span data-line="6"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Atoms with bond-order data: </span><span class="si">{</span><span class="n">n_classified</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">cloud</span><span class="o">.</span><span class="n">nop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span></pre></div>
-</div>
-</section>
-<section id="print-ice-type-statistics">
-<h3>Print ice type statistics<a class="headerlink" href="#print-ice-type-statistics" title="Link to this heading">¶</a></h3>
-<p>After CHILL+ correlation, each atom has a list of <code class="docutils literal notranslate"><span class="pre">Result</span></code> objects in <code class="docutils literal notranslate"><span class="pre">c_ij</span></code>.
-Each result contains a <code class="docutils literal notranslate"><span class="pre">classifier</span></code> (the bond type) and a <code class="docutils literal notranslate"><span class="pre">c_value</span></code> (the
-correlation value). The <code class="docutils literal notranslate"><span class="pre">iceType</span></code> field on each point gives the final
-classification.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Write the full CHILL+ classification to disk and get the typed cloud back.</span>
-</span><span data-line="2"><span class="c1"># This writes an output file and classifies each atom.</span>
-</span><span data-line="3"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">getIceTypePlus</span><span class="p">(</span>
-</span><span data-line="4">    <span class="n">yCloud</span><span class="o">=</span><span class="n">cloud</span><span class="p">,</span>
-</span><span data-line="5">    <span class="n">nList</span><span class="o">=</span><span class="n">nList</span><span class="p">,</span>
-</span><span data-line="6">    <span class="n">path</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span>
-</span><span data-line="7">    <span class="n">firstFrame</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-</span><span data-line="8">    <span class="n">isSlice</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span data-line="9">    <span class="n">outputFileName</span><span class="o">=</span><span class="s2">&quot;ice_classification.dat&quot;</span><span class="p">,</span>
-</span><span data-line="10"><span class="p">)</span>
-</span><span data-line="11">
-</span><span data-line="12"><span class="c1"># Count ice types from the iceType enum on each atom</span>
-</span><span data-line="13"><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
-</span><span data-line="14">
-</span><span data-line="15"><span class="n">ice_counts</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
-</span><span data-line="16"><span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">cloud</span><span class="o">.</span><span class="n">pts</span><span class="p">:</span>
-</span><span data-line="17">    <span class="n">ice_counts</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">pt</span><span class="o">.</span><span class="n">iceType</span><span class="p">)]</span> <span class="o">+=</span> <span class="mi">1</span>
-</span><span data-line="18">
-</span><span data-line="19"><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ice type statistics for frame 1:&quot;</span><span class="p">)</span>
-</span><span data-line="20"><span class="k">for</span> <span class="n">ice_type</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ice_counts</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
-</span><span data-line="21">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">ice_type</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2"> atoms&quot;</span><span class="p">)</span>
-</span><span data-line="22"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Total classified: </span><span class="si">{</span><span class="n">cloud</span><span class="o">.</span><span class="n">nop</span><span class="si">}</span><span class="s2"> atoms&quot;</span><span class="p">)</span>
-</span></pre></div>
-</div>
-<p>The output file <code class="docutils literal notranslate"><span class="pre">ice_classification.dat</span></code> contains per-atom classifications that
-you can load into visualization tools.</p>
-</section>
-</section>
-<section id="verify">
-<h2>Verify<a class="headerlink" href="#verify" title="Link to this heading">¶</a></h2>
-<p>After running the tutorial you should have:</p>
-<ol class="arabic simple">
-<li><p>A <code class="docutils literal notranslate"><span class="pre">cloud</span></code> object with <code class="docutils literal notranslate"><span class="pre">nop</span></code> equal to 250 (one entry per oxygen)</p></li>
-<li><p>A neighbour list with 250 entries, each oxygen having roughly 4 neighbours</p></li>
-<li><p>A hydrogen bond network with similar connectivity</p></li>
-<li><p>Bond-order correlation data on most atoms</p></li>
-<li><p>An output file <code class="docutils literal notranslate"><span class="pre">ice_classification.dat</span></code> with per-atom ice types</p></li>
-</ol>
-<p>If any step fails, check that:</p>
-<ul class="simple">
-<li><p>The trajectory path is correct (run from the repository root)</p></li>
-<li><p>Atom types match your trajectory (type 2 = oxygen, type 1 = hydrogen)</p></li>
-<li><p>The cutoff (3.5 A) is appropriate for your water model</p></li>
-</ul>
-</section>
-<section id="next-steps">
-<h2>Next steps<a class="headerlink" href="#next-steps" title="Link to this heading">¶</a></h2>
-<ul class="simple">
-<li><p><a class="reference external" href="tutorials/bulk-ice.rst">Bulk ice analysis</a> – analyze larger systems and multiple frames</p></li>
-<li><p><a class="reference external" href="tutorials/nanotube.rst">Nanotube analysis</a> – ring analysis for carbon nanostructures</p></li>
-<li><p><a class="reference external" href="howto/ase-integration.rst">ASE integration</a> – convert ASE Atoms objects to d-SEAMS point clouds</p></li>
-<li><p><a class="reference external" href="reference/api.rst">API reference</a> – all bound functions and types</p></li>
-<li><p><a class="reference external" href="reference/data-formats.rst">Data formats</a> – LAMMPS trajectory format specification</p></li>
-</ul>
+<p>Optional backends (vesin, chemfiles, readcon-core, IRA, sphericart,
+nauty, MPI) stay off unless the Meson probe finds them. The Nix flake
+enables Eigen, BLAS/LAPACK, Catch2 and Highway when nixpkgs provides
+them.</p>
 </section>
 </section>
 
@@ -432,7 +289,7 @@ you can load into visualization tools.</p>
     <a href="tutorials/bulk-ice.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">Bulk Ice Analysis</div>
+        <div class="title">Bulk ice on the mixed TIP4P example</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

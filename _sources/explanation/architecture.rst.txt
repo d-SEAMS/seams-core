@@ -1,0 +1,48 @@
+==================
+Three repositories
+==================
+
+
+d-SEAMS 2 is not a monolith.
+
+.. table::
+
+    +---------------------------------------------------------+---------------------------+----------------------------+
+    | repository                                              | product                   | role                       |
+    +=========================================================+===========================+============================+
+    | `seams-core <https://github.com/d-SEAMS/seams-core>`_   | ``libyodaLib``, ``seams`` | C++ engine and CLI         |
+    +---------------------------------------------------------+---------------------------+----------------------------+
+    | `PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_ | ``pydseams``              | Python helpers on ``yoda`` |
+    +---------------------------------------------------------+---------------------------+----------------------------+
+    | `yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_   | ``dseams``                | Lua/Fennel library         |
+    +---------------------------------------------------------+---------------------------+----------------------------+
+
+The front ends take seams-core as a Meson subproject (static library)
+or as a flake input. They do not vendor a second engine.
+
+Why ``yoda``
+------------
+
+The 2020 executable was ``yodaStruct``. The compiled Python module is
+``pydseams.yoda`` so that name stays on the C++ surface.
+``_core`` and ``cyoda`` are aliases of ``yoda``. Lua helpers are
+``require("dseams")``; ``require("yoda")`` still resolves to that table.
+
+Builds
+------
+
+- **Nix flake**: ``nix build`` / ``nix develop`` in each repo. Optional
+  wrap-git backends stay off unless nixpkgs already provides them.
+
+- **pixi**: locked conda-forge toolchain in seams-core.
+
+- **Wheels**: cibuildwheel on PydSEAMSlib, CPython 3.12 limited ABI.
+
+The 2020 CMake Nix derivation of ``yodaStruct`` is gone.
+
+Ice score
+---------
+
+A molecule in an HC is ice Ih. A molecule in a DDC is ice Ic. A
+molecule in neither is water. That is cage membership, not the
+four-neighbour CHILL+ star. Both live in ``libyodaLib``.
