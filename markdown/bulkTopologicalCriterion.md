@@ -1,5 +1,8 @@
 # Bulk Ice Classification Using Topological Network Criteria
 
+The Lua scripts live in [yodaStruct](https://github.com/d-SEAMS/yodaStruct).
+This repository is the C++ engine.
+
 The trajectory file for this example is [here on figshare](https://figshare.com/articles/Nucleation_LAMMPS_Trajectory/11448702). The trajectory file details a portion of a long run of 4096 molecules of mW water, which have undergone crystallization. In this example, DDCs (Double-diamond Cages), HCs (Hexagonal Cages), and mixed rings are identified inside the largest ice cluster. On running the example, an output top-level directory named *runOne* is created. 
 
 ## Steps to Run the Example

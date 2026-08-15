@@ -506,42 +506,51 @@ ring::SeededAtomLabels ring::seededCageAffiliation(
   const auto [hcP, ddcP] = toAtoms(
       permissiveRings, cageAffiliation(permissiveRings, permissiveNList));
 
-  // Affiliated set and seeds; components under the permissive bonds
-  std::vector<bool> affiliated(nAtoms, false);
-  std::vector<bool> kept(nAtoms, false);
-  std::vector<int> stack;
-  for (int a = 0; a < nAtoms; a++) {
-    affiliated[a] = hcS[a] || ddcS[a] || hcP[a] || ddcP[a];
-  }
-  for (int a = 0; a < nAtoms; a++) {
-    if (!(hcS[a] || ddcS[a]) || kept[a]) {
-      continue;
-    }
-    stack.push_back(a);
-    kept[a] = true;
-    while (!stack.empty()) {
-      const int u = stack.back();
-      stack.pop_back();
-      for (size_t m = 1; m < permissiveNList[u].size(); m++) {
-        const int v = permissiveNList[u][m];
-        if (v >= 0 && v < nAtoms && affiliated[v] && !kept[v]) {
-          kept[v] = true;
-          stack.push_back(v);
+  // One flood per cage type: an HC seed must not keep a DDC-only atom
+  // that happens to sit in the same permissive H-bond component.
+  auto flood = [&](const std::vector<bool> &seeds,
+                   const std::vector<bool> &affiliated) {
+    std::vector<bool> kept(nAtoms, false);
+    std::vector<int> stack;
+    for (int a = 0; a < nAtoms; a++) {
+      if (!seeds[a] || kept[a]) {
+        continue;
+      }
+      stack.push_back(a);
+      kept[a] = true;
+      while (!stack.empty()) {
+        const int u = stack.back();
+        stack.pop_back();
+        if (u < 0 || static_cast<size_t>(u) >= permissiveNList.size()) {
+          continue;
+        }
+        for (size_t m = 1; m < permissiveNList[u].size(); m++) {
+          const int v = permissiveNList[u][m];
+          if (v >= 0 && v < nAtoms && affiliated[v] && !kept[v]) {
+            kept[v] = true;
+            stack.push_back(v);
+          }
         }
       }
     }
+    return kept;
+  };
+
+  std::vector<bool> affiliatedHC(nAtoms, false);
+  std::vector<bool> affiliatedDDC(nAtoms, false);
+  for (int a = 0; a < nAtoms; a++) {
+    affiliatedHC[a] = hcS[a] || hcP[a];
+    affiliatedDDC[a] = ddcS[a] || ddcP[a];
   }
+  const auto keptHC = flood(hcS, affiliatedHC);
+  const auto keptDDC = flood(ddcS, affiliatedDDC);
 
   for (int a = 0; a < nAtoms; a++) {
-    if (!kept[a]) {
-      continue;
+    if (keptHC[a]) {
+      out.hc[a] = hcS[a] || hcP[a];
     }
-    if (hcS[a] || ddcS[a]) {
-      out.hc[a] = hcS[a];
-      out.ddc[a] = ddcS[a];
-    } else {
-      out.hc[a] = hcP[a];
-      out.ddc[a] = ddcP[a];
+    if (keptDDC[a]) {
+      out.ddc[a] = ddcS[a] || ddcP[a];
     }
   }
   return out;

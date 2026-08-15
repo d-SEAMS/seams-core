@@ -1,5 +1,8 @@
 # Bulk Ice Classification Using the CHILL+ Criterion
 
+The Lua scripts live in [yodaStruct](https://github.com/d-SEAMS/yodaStruct)
+(`example_lua/chillPlus`). This repository is the C++ engine.
+
 The trajectory file for this example is [here on figshare](https://figshare.com/articles/CHILL_LAMMPS_Trajectory/11448720). The trajectory file details a portion of a long run of 4096 molecules of a perfect Ic (cubic ice) lattice. In this example, the all 4096 molecules are identified as Ic, according to the CHILL+ algorithm [1]. On running the example, an output top-level directory named _runOne_ is created.
 
 ## Steps to Run the Example
