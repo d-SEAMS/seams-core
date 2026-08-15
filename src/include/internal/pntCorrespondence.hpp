@@ -108,6 +108,13 @@ Eigen::MatrixXd getPointSetCage(ring::strucType type);
 std::vector<int> relOrderDDC(int index, const std::vector<std::vector<int>> &rings,
                              const std::vector<cage::Cage> &cageList);
 
+//! As relOrderDDC, but deriving the connectivity from an explicit equatorial
+//! traversal instead of the stored ring row; passing the reversed traversal
+//! yields the mirror correspondence for the shape-matching search
+std::vector<int> relOrderDDC(const std::vector<int> &equatorial, int index,
+                             const std::vector<std::vector<int>> &rings,
+                             const std::vector<cage::Cage> &cageList);
+
 //! Fills up an eigen matrix point set using the basal rings basal1 and basal2,
 //! changing the order of the point set by filling up from the startingIndex
 //! (starting from 0 to 5)

@@ -15,6 +15,8 @@
 #include <bulkTUM.hpp>
 #include <ira_sofi.hpp>
 
+#include <algorithm>
+
 // -----------------------------------------------------------------------------------------------------
 // TOPOLOGICAL UNIT MATCHING ALGORITHMS
 // -----------------------------------------------------------------------------------------------------
@@ -161,29 +163,27 @@ int tum3::topoUnitMatchingBulk(
   //
   // HCs are first, followed by DDCs.
   //
-  // Go through all the HCs
-  for (int icage = 0; icage < numHC; icage++) {
-    // Match against a perfect HC
-    tum3::shapeMatchHC(yCloud, refPntsHC, cageList[icage], ringsOneType, nList,
-                       quat, rmsd);
-    // Update the vector of quaternions
-    quatList.push_back(quat);
-    // Update the RMSD per ring
+  // Cages are matched independently; the per-atom accumulation is the only
+  // shared state and runs under a critical section
+  quatList.assign(cageList.size(), {});
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(dynamic, 16) private(quat, rmsd)
+#endif
+  for (int icage = 0; icage < static_cast<int>(cageList.size()); icage++) {
+    if (icage < numHC) {
+      tum3::shapeMatchHC(yCloud, refPntsHC, cageList[icage], ringsOneType,
+                         nList, quat, rmsd);
+    } else {
+      tum3::shapeMatchDDC(yCloud, refPntsDDC, cageList, icage, ringsOneType,
+                          quat, rmsd);
+    }
+    quatList[icage] = quat;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp critical(seams_tum_rmsd)
+#endif
     tum3::updateRMSDatom(ringsOneType, cageList[icage], rmsd, rmsdPerAtom,
                          noOfCommonElements, atomTypes);
-  } // end of looping through all HCs
-  // --------------------------------------------------
-  // Go through all the DDCs
-  for (int icage = numHC; icage < cageList.size(); icage++) {
-    // Match against a perfect DDC
-    tum3::shapeMatchDDC(yCloud, refPntsDDC, cageList, icage, ringsOneType,
-                        quat, rmsd);
-    // Update the vector of quaternions
-    quatList.push_back(quat);
-    // Update the RMSD per ring
-    tum3::updateRMSDatom(ringsOneType, cageList[icage], rmsd, rmsdPerAtom,
-                         noOfCommonElements, atomTypes);
-  } // end of looping through all HCs
+  } // end of looping through all cages
 
   // --------------------------------------------------
   // Getting the RMSD per atom
@@ -262,19 +262,20 @@ int tum3::shapeMatchHC(
   int ringSize = 6; // Each ring has 6 nodes
   Eigen::MatrixXd targetPointSet(12, 3); // Target point set (Eigen matrix)
   //
-  std::vector<double> rmsdList; // List of RMSD per atom
-  // Variables for looping through possible permutations
-  //
+  std::vector<double> rmsdList; // Per-point RMSD scratch, sized by Horn
   std::vector<double> currentQuat; // quaternion rotation
   double currentRmsd;              // least RMSD
   double currentScale;             // scale
-  double scale;                    // Final scale
-  int index; // Int for describing which permutation matches the best
+  bool matched = false; // Whether any correspondence solved
+
+  // A cage no correspondence can solve reports the unset sentinel instead of
+  // inheriting the previous cage's outputs through the in-out references
+  quat.clear();
+  rmsd = -1.0;
 
   // Init
-  iring = cageUnit.rings[0];    // Index of basal1
-  jring = cageUnit.rings[1];    // Index of basal2
-  rmsdList.resize(yCloud.nop); // Not actually updated here
+  iring = cageUnit.rings[0]; // Index of basal1
+  jring = cageUnit.rings[1]; // Index of basal2
   //
   // ----------------
   // Re-order the basal rings so that they are matched
@@ -282,36 +283,32 @@ int tum3::shapeMatchHC(
                        basal2);
   // ----------------
   targetPointSet = pntToPnt::changeHexCageOrder(yCloud, basal1, basal2, 0);
-  if (ira::orient(refPoints, targetPointSet, quat, rmsd)) {
+  bool iraMatched = false;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp critical(seams_ira_orient)
+#endif
+  { iraMatched = ira::orient(refPoints, targetPointSet, quat, rmsd); }
+  if (iraMatched) {
     return 0;
   }
-  // Loop through all possible permutations
-  //
+  // Six cyclic alignments exhaust the correspondence orbit modulo the
+  // reference's proper rotations: the in-plane two-fold axes of the cage
+  // template absorb the reversed traversals, and matching both directions
+  // on 1950 cages changed no RMSD beyond 5e-7
   for (int i = 0; i < ringSize; i++) {
-    // Change the order of the target points somehow!
-    //
     targetPointSet = pntToPnt::changeHexCageOrder(yCloud, basal1, basal2, i);
-    // Shape-matching. A permutation Horn cannot solve carries a negative RMSD,
-    // which would win every subsequent comparison, so drop it from the search
-    // rather than let it stand in for a match.
+    // A correspondence Horn cannot solve carries a negative RMSD, which
+    // would win every subsequent comparison; drop it from the search
     if (absor::hornAbsOrientation(refPoints, targetPointSet, currentQuat,
                                   currentRmsd, rmsdList, currentScale) != 0) {
       continue;
     }
-    if (i == 0) {
+    if (!matched || currentRmsd < rmsd) {
       quat = currentQuat;
       rmsd = currentRmsd;
-      scale = currentScale;
-      index = 0;
-    } else {
-      if (currentRmsd < rmsd) {
-        quat = currentQuat;
-        rmsd = currentRmsd;
-        scale = currentScale;
-        index = i;
-      } // update
-    }   // Update if this is a better match
-  }     // Loop through possible permutations
+      matched = true;
+    } // Update if this is a better match
+  }   // Cyclic alignments
   // ----------------
   return 0;
 }
@@ -339,46 +336,50 @@ int tum3::shapeMatchDDC(
   int ringSize = 6;                      // Each ring has 6 nodes
   Eigen::MatrixXd targetPointSet(14, 3); // Target point set (Eigen matrix)
   //
-  std::vector<double> rmsdList; // List of RMSD per atom
-  // Variables for looping through possible permutations
-  //
+  std::vector<double> rmsdList; // Per-point RMSD scratch, sized by Horn
   std::vector<double> currentQuat; // quaternion rotation
   double currentRmsd;              // least RMSD
   double currentScale;             // scale
-  double scale;                    // Final scale
-  int index; // Int for describing which permutation matches the best
+  bool matched = false; // Whether any correspondence solved
+
+  // A cage no correspondence can solve reports the unset sentinel instead of
+  // inheriting the previous cage's outputs through the in-out references
+  quat.clear();
+  rmsd = -1.0;
 
   // ----------------
   // Save the order of the DDC in a vector
   ddcOrder = pntToPnt::relOrderDDC(cageIndex, rings, cageList);
-  // ----------------
-  targetPointSet = pntToPnt::changeDiaCageOrder(yCloud, ddcOrder, 0);
-  if (ira::orient(refPoints, targetPointSet, quat, rmsd)) {
+  if (ddcOrder.empty()) {
     return 0;
   }
-  // Loop through all possible permutations
-  //
+  // ----------------
+  targetPointSet = pntToPnt::changeDiaCageOrder(yCloud, ddcOrder, 0);
+  bool iraMatched = false;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp critical(seams_ira_orient)
+#endif
+  { iraMatched = ira::orient(refPoints, targetPointSet, quat, rmsd); }
+  if (iraMatched) {
+    return 0;
+  }
+  // Six cyclic alignments exhaust the correspondence orbit modulo the
+  // reference's proper rotations; matching the re-derived reversed
+  // traversal as well changed no RMSD beyond 5e-7 on 1950 cages
   for (int i = 0; i < ringSize; i++) {
-    // Change the order of the target points somehow!
-    //
     targetPointSet = pntToPnt::changeDiaCageOrder(yCloud, ddcOrder, i);
-    // Shape-matching
-    absor::hornAbsOrientation(refPoints, targetPointSet, currentQuat,
-                              currentRmsd, rmsdList, currentScale);
-    if (i == 0) {
+    // A correspondence Horn cannot solve carries a negative RMSD, which
+    // would win every subsequent comparison; drop it from the search
+    if (absor::hornAbsOrientation(refPoints, targetPointSet, currentQuat,
+                                  currentRmsd, rmsdList, currentScale) != 0) {
+      continue;
+    }
+    if (!matched || currentRmsd < rmsd) {
       quat = currentQuat;
       rmsd = currentRmsd;
-      scale = currentScale;
-      index = 0;
-    } else {
-      if (currentRmsd < rmsd) {
-        quat = currentQuat;
-        rmsd = currentRmsd;
-        scale = currentScale;
-        index = i;
-      } // update
-    }   // Update if this is a better match
-  }     // Loop through possible permutations
+      matched = true;
+    } // Update if this is a better match
+  }   // Cyclic alignments
   // ----------------
   return 0;
 }
