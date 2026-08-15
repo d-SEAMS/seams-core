@@ -75,8 +75,8 @@ struct CageAffiliation {
  *  rows against the previous frame, recomputes affiliation inside the
  *  locality closure of the changes, and carries stored answers elsewhere.
  *  The result is identical to cageAffiliation on the new frame. When
- *  more than half the rings sit in the dirty closure, the update is
- *  the batch classifier.
+ *  more than half the neighbour rows change, or more than half the
+ *  rings sit in the dirty closure, the update is the batch classifier.
  */
 class AffiliationUpdater {
 public:

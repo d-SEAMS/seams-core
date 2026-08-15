@@ -19,7 +19,8 @@ Fixed
 - LAMMPS readers bind ``xu``/``yu``/``zu`` and ``xs``/``ys``/``zs``
   when ``x y z`` are absent (Niu/Parrinello TIP4P/Ice dumps).
 - ``AffiliationUpdater`` uses the batch classifier when more than half
-  the six-rings sit in the dirty closure.
+  the neighbour rows change, or when more than half the six-rings sit
+  in the dirty closure.
 
 Version 2.2.0 (2026-08-15)
 ===========================
