@@ -1211,7 +1211,7 @@ bool ring::basalNeighbours(const std::vector<std::vector<int>> &nList,
  */
 bool ring::notNeighboursOfRing(const std::vector<std::vector<int>> &nList,
                                std::vector<int> &triplet,
-                               std::vector<int> &ring) {
+                               const std::vector<int> &ring) {
   int iatom; // AtomID of the atom to be searched for inside the neighbour
              // lists
   int jatom; // AtomID of in whose neighbour list iatom will be searched for

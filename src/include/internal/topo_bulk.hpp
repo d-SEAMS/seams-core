@@ -154,7 +154,8 @@ bool basalNeighbours(const std::vector<std::vector<int>> &nList,
 //! Tests to check that elements of a triplet are not neighbours of a ring
 //! (vector) passed
 bool notNeighboursOfRing(const std::vector<std::vector<int>> &nList,
-                         std::vector<int> &triplet, std::vector<int> &ring);
+                         std::vector<int> &triplet,
+                         const std::vector<int> &ring);
 
 //! Finds the prismatic rings from basal rings iring and jring
 [[nodiscard]] int findPrismatic(const std::vector<std::vector<int>> &rings, std::vector<int> &listHC,
