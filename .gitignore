@@ -358,3 +358,4 @@ proofs/*.glob
 proofs/CoqMakefile
 proofs/CoqMakefile.conf
 .hypothesis/
+repro/figshare/

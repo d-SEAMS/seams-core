@@ -125,6 +125,40 @@ def parse_ql(text):
     return tools
 
 
+def load_json(path):
+    try:
+        return json.loads(path.read_text())
+    except (OSError, ValueError):
+        return None
+
+
+def digest_figshare_demos(obj):
+    if not obj:
+        return None
+    return {
+        key: {k: v for k, v in entry.items() if k != "outputs"}
+        for key, entry in obj.items()
+    }
+
+
+def digest_figshare_incremental(obj):
+    if not obj:
+        return None
+    rows = obj.get("per_frame", [])
+    return {
+        "trajectory": obj.get("trajectory"),
+        "doi": obj.get("doi"),
+        "frames": obj.get("frames"),
+        "batch_ring_seconds": obj.get("batch_ring_seconds"),
+        "incremental_ring_seconds": obj.get("incremental_ring_seconds"),
+        "first_frame": rows[0] if rows else None,
+        "last_frame": rows[-1] if rows else None,
+        "peak_seeded_ddc_atoms": max(
+            (r["seeded_ddc_atoms"] for r in rows), default=None
+        ),
+    }
+
+
 def main():
     out_dir = pathlib.Path(sys.argv[1])
     conditions = {}
@@ -159,6 +193,16 @@ def main():
             read(out_dir / "trajectory-incremental.txt")
         ),
         "ql_compare": ql,
+        "figshare": {
+            "demos": digest_figshare_demos(
+                load_json(
+                    out_dir / "figshare-demos" / "figshare-demos.json"
+                )
+            ),
+            "incremental": digest_figshare_incremental(
+                load_json(out_dir / "figshare-incremental.json")
+            ),
+        },
     }
     json.dump(manifest, sys.stdout, indent=2, sort_keys=True)
     print()

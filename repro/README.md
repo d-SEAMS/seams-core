@@ -30,6 +30,23 @@ repro/elja_submit.sh prep       # or perform its steps by hand
 SEAMS_NO_HQ=1 pixi run -e repro -- snakemake -s repro/Snakefile --cores all
 ```
 
+## The v1 figshare demonstrations
+
+The 1.0 paper demonstrated on five LAMMPS trajectories archived in the
+figshare project [d-SEAMS
+Datasets](https://figshare.com/projects/d-SEAMS_Datasets/73545). The DAG
+fetches those exact deposits (MD5-verified against figshare's records,
+`repro/scripts/figshare_demos.py`), runs each corresponding example
+workflow with the current binary (CHILL+ on the Ic lattice, the bulk
+topological criterion on the crystallized end of the nucleation run,
+the quasi-one-dimensional nanotube, the monolayer, and the in-plane
+2D RDF), and runs the incremental ring/affiliation pipeline with the
+seeded classification across every frame of the nucleation trajectory,
+refereeing the incremental rings against a batch recomputation on each
+frame. On clusters whose compute nodes are offline the download happens
+during `prep`; anywhere else the `figshare_fetch` rule downloads on
+first use into `repro/figshare/`.
+
 ## What the DAG produces
 
 | Output | Feeds |
@@ -38,6 +55,8 @@ SEAMS_NO_HQ=1 pixi run -e repro -- snakemake -s repro/Snakefile --cores all
 | `tip-cages.txt`, `base-cages.txt` | the ring-and-cage pipeline paragraph |
 | `tip-overhead.txt` | the vesin-overhead note |
 | `tip-strong-t{1,2,4}.txt` | the thread sweep |
+| `figshare-demos/figshare-demos.json` | the five v1 example workflows on the figshare deposits |
+| `figshare-incremental.json` | per-frame incremental + seeded run over the nucleation deposit |
 | `trajectory-incremental.txt` | incremental rings and cage affiliation, with the exactness referee (nonzero exit on any inequality) |
 | `ql-dseams.txt`, `ql-python.txt` | the freud/pyscal3 descriptor comparison |
 | `tip-test.log` | the identity gate: a red suite aborts the DAG |

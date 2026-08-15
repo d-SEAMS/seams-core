@@ -31,6 +31,8 @@ prep)
   (cd "$BASE_TREE" &&
    pixi run -e repro --manifest-path "$ROOT/pixi.toml" -- \
      meson subprojects download || true)
+  # Compute nodes are offline; the figshare deposits download here
+  pixi run -e repro -- python repro/scripts/figshare_demos.py fetch repro/figshare
   # HyperQueue is a single static binary
   if ! command -v hq > /dev/null; then
     mkdir -p repro/bin

@@ -35,6 +35,16 @@ def hq(cpus):
             "--stderr repro/results/hq-%{{JOB_ID}}.stderr --").format(cpus)
 
 
+FIGSHARE_DIR = config.get("figshare_dir", "repro/figshare")
+FIGSHARE_FILES = [
+    "nucleation.lammpstrj",
+    "mW_cubic.lammpstrj",
+    "dump-240-square.lammpstrj",
+    "dump-6-320-310.lammpstrj",
+    "dump-320.lammpstrj",
+]
+
+
 rule all:
     input:
         R + "/paper_manifest.json",
@@ -272,6 +282,52 @@ rule ql_compare_python:
         "python scripts/compare_ql_literature.py > {output}'"
 
 
+rule figshare_fetch:
+    # Network access; on clusters whose compute nodes are offline this
+    # runs during `repro/elja_submit.sh prep` and verifies here as a no-op
+    output:
+        expand(FIGSHARE_DIR + "/{f}", f=FIGSHARE_FILES),
+    shell:
+        "python repro/scripts/figshare_demos.py fetch " + FIGSHARE_DIR
+
+
+rule figshare_demos:
+    # The five example workflows of the 1.0 paper on the exact figshare
+    # deposits they were published with; nonzero exit on any failed demo
+    input:
+        gate=R + "/tip-test.log",
+        traj=expand(FIGSHARE_DIR + "/{f}", f=FIGSHARE_FILES),
+    output:
+        R + "/figshare-demos/figshare-demos.json",
+    params:
+        hq=lambda wc: hq(4),
+        tbuild=TIP_BUILD,
+    shell:
+        "{params.hq} bash -c 'OMP_NUM_THREADS=4 "
+        "python repro/scripts/figshare_demos.py demos "
+        "{params.tbuild}/yodaStruct " + FIGSHARE_DIR + " "
+        + R + "/figshare-demos'"
+
+
+rule figshare_incremental:
+    # Per-frame incremental rings (refereed against batch every frame),
+    # incremental affiliation, and seeded classification across the whole
+    # nucleation trajectory
+    input:
+        py=R + "/py-install.done",
+        traj=FIGSHARE_DIR + "/nucleation.lammpstrj",
+    output:
+        R + "/figshare-incremental.json",
+    params:
+        hq=lambda wc: hq(1),
+    shell:
+        "{params.hq} bash -c "
+        "'LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH "
+        "PYTHONPATH=$(ls -d $CONDA_PREFIX/lib/python3*/site-packages/pydseamslib):$PYTHONPATH "
+        "OMP_NUM_THREADS=1 python repro/scripts/figshare_demos.py "
+        "incremental " + FIGSHARE_DIR + " {output}'"
+
+
 rule aggregate:
     input:
         conditions=R + "/conditions.txt",
@@ -287,6 +343,8 @@ rule aggregate:
         trajectory=R + "/trajectory-incremental.txt",
         ql_dseams=R + "/ql-dseams.txt",
         ql_python=R + "/ql-python.txt",
+        figshare_demos=R + "/figshare-demos/figshare-demos.json",
+        figshare_incremental=R + "/figshare-incremental.json",
     output:
         R + "/paper_manifest.json",
     params:
