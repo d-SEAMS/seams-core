@@ -102,10 +102,10 @@ EIGEN_INC=$(run bash -c 'echo $CONDA_PREFIX/include/eigen3')
 BASE_INC="-I$BASE_TREE/src/include/internal -I$BASE_TREE/src/include/external -I$EIGEN_INC"
 BASE_LINK="-L$BASE_TREE/build-base/src -lyodaLib -Wl,-rpath,$BASE_TREE/build-base/src -Wl,--enable-new-dtags -Wl,--allow-shlib-undefined"
 log "compiling baseline drivers"
-run g++ -std=c++17 -O2 -o "$OUT_DIR/base_bench_scaling" \
+run g++ -std=c++20 -O2 -o "$OUT_DIR/base_bench_scaling" \
   tests/bench_scaling.cpp $BASE_INC $BASE_LINK \
   >> "$OUT_DIR/driver.log" 2>&1
-run g++ -std=c++17 -O2 -o "$OUT_DIR/base_bench_cages" \
+run g++ -std=c++20 -O2 -o "$OUT_DIR/base_bench_cages" \
   tests/bench_cages_base.cpp $BASE_INC $BASE_LINK \
   >> "$OUT_DIR/driver.log" 2>&1
 
