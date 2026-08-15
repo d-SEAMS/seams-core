@@ -241,7 +241,7 @@ data-aria-dark="Switch to auto color mode">
 </div><article class="yue dark-code" role="main">
           <section id="api-reference">
 <h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h1>
-<p>This page documents all types and functions exposed by <code class="docutils literal notranslate"><span class="pre">pydseamslib._core</span></code>.</p>
+<p>This page documents all types and functions exposed by <code class="docutils literal notranslate"><span class="pre">pydseams.yoda</span></code>.</p>
 <section id="data-types">
 <h2>Data types<a class="headerlink" href="#data-types" title="Link to this heading">¶</a></h2>
 <section id="pointdouble">
@@ -390,7 +390,7 @@ data-aria-dark="Switch to auto color mode">
 <h2>I/O functions<a class="headerlink" href="#i-o-functions" title="Link to this heading">¶</a></h2>
 <section id="readlammpstrjreduced">
 <h3>readLammpsTrjreduced<a class="headerlink" href="#readlammpstrjreduced" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">_core</span><span class="o">.</span><span class="n">readLammpsTrjreduced</span><span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">readLammpsTrjreduced</span><span class="p">(</span>
 </span><span data-line="2">    <span class="n">filename</span><span class="p">,</span> <span class="n">targetFrame</span><span class="p">,</span> <span class="n">typeI</span><span class="p">,</span> <span class="n">isSlice</span><span class="p">,</span> <span class="n">coordLow</span><span class="p">,</span> <span class="n">coordHigh</span>
 </span><span data-line="3"><span class="p">)</span>
 </span></pre></div>
@@ -444,14 +444,14 @@ data-aria-dark="Switch to auto color mode">
 </section>
 <section id="readxyz">
 <h3>readXYZ<a class="headerlink" href="#readxyz" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">_core</span><span class="o">.</span><span class="n">readXYZ</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">readXYZ</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 </span></pre></div>
 </div>
 <p>Read an XYZ format file. Returns a <code class="docutils literal notranslate"><span class="pre">PointCloudDouble</span></code>.</p>
 </section>
 <section id="readchemfiles-optional-requires-chemfiles">
 <h3>readChemfiles (optional, requires chemfiles)<a class="headerlink" href="#readchemfiles-optional-requires-chemfiles" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">_core</span><span class="o">.</span><span class="n">readChemfiles</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">targetFrame</span><span class="p">,</span> <span class="n">typeFilter</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">readChemfiles</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">targetFrame</span><span class="p">,</span> <span class="n">typeFilter</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 </span></pre></div>
 </div>
 <p>Read any trajectory format supported by chemfiles (PDB, GRO, DCD, TRR, and
@@ -483,7 +483,7 @@ data-aria-dark="Switch to auto color mode">
 </section>
 <section id="readcon-optional-requires-readcon-core">
 <h3>readCon (optional, requires readcon-core)<a class="headerlink" href="#readcon-optional-requires-readcon-core" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">_core</span><span class="o">.</span><span class="n">readCon</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">targetFrame</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">readCon</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">targetFrame</span><span class="p">)</span>
 </span></pre></div>
 </div>
 <p>Read a <code class="docutils literal notranslate"><span class="pre">.con</span></code> format file used by eOn for saddle point searches. Available when
@@ -494,7 +494,7 @@ d-SEAMS is built with readcon-core.</p>
 <h2>Neighbour list functions<a class="headerlink" href="#neighbour-list-functions" title="Link to this heading">¶</a></h2>
 <section id="neighlisto">
 <h3>neighListO<a class="headerlink" href="#neighlisto" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">nList</span> <span class="o">=</span> <span class="n">_core</span><span class="o">.</span><span class="n">neighListO</span><span class="p">(</span><span class="n">rcutoff</span><span class="p">,</span> <span class="n">yCloud</span><span class="p">,</span> <span class="n">typeI</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">nList</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">neighListO</span><span class="p">(</span><span class="n">rcutoff</span><span class="p">,</span> <span class="n">yCloud</span><span class="p">,</span> <span class="n">typeI</span><span class="p">)</span>
 </span></pre></div>
 </div>
 <p>Build a neighbour list for atoms of a given type within a cutoff distance.
@@ -529,14 +529,14 @@ by the IDs of its neighbours.</p>
 </section>
 <section id="neighbourlistbyindex">
 <h3>neighbourListByIndex<a class="headerlink" href="#neighbourlistbyindex" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">nListIdx</span> <span class="o">=</span> <span class="n">_core</span><span class="o">.</span><span class="n">neighbourListByIndex</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">nList</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">nListIdx</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">neighbourListByIndex</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">nList</span><span class="p">)</span>
 </span></pre></div>
 </div>
 <p>Convert an ID-based neighbour list to an index-based neighbour list.</p>
 </section>
 <section id="getnewneighbourlistbyindex">
 <h3>getNewNeighbourListByIndex<a class="headerlink" href="#getnewneighbourlistbyindex" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">nListIdx</span> <span class="o">=</span> <span class="n">_core</span><span class="o">.</span><span class="n">getNewNeighbourListByIndex</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">nListIdx</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">getNewNeighbourListByIndex</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">)</span>
 </span></pre></div>
 </div>
 <p>Build a neighbour list directly by index (combining neighbour search and index
@@ -547,7 +547,7 @@ conversion in one step).</p>
 <h2>Bond functions<a class="headerlink" href="#bond-functions" title="Link to this heading">¶</a></h2>
 <section id="populatehbonds">
 <h3>populateHbonds<a class="headerlink" href="#populatehbonds" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">hbonds</span> <span class="o">=</span> <span class="n">_core</span><span class="o">.</span><span class="n">populateHbonds</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">yCloud</span><span class="p">,</span> <span class="n">nList</span><span class="p">,</span> <span class="n">targetFrame</span><span class="p">,</span> <span class="n">Htype</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">hbonds</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">populateHbonds</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">yCloud</span><span class="p">,</span> <span class="n">nList</span><span class="p">,</span> <span class="n">targetFrame</span><span class="p">,</span> <span class="n">Htype</span><span class="p">)</span>
 </span></pre></div>
 </div>
 <p>Build a hydrogen bond network by reading hydrogen positions from the trajectory
@@ -592,7 +592,7 @@ containing only hydrogen-bonded pairs.</p>
 <h2>CHILL+ functions<a class="headerlink" href="#chill-functions" title="Link to this heading">¶</a></h2>
 <section id="getcorrelplus">
 <h3>getCorrelPlus<a class="headerlink" href="#getcorrelplus" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">_core</span><span class="o">.</span><span class="n">getCorrelPlus</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">nList</span><span class="p">,</span> <span class="n">isSlice</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">getCorrelPlus</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">nList</span><span class="p">,</span> <span class="n">isSlice</span><span class="p">)</span>
 </span></pre></div>
 </div>
 <p>Compute CHILL+ bond-order correlations. Populates the <code class="docutils literal notranslate"><span class="pre">c_ij</span></code> field on each atom
@@ -600,7 +600,7 @@ in the returned cloud.</p>
 </section>
 <section id="geticetypeplus">
 <h3>getIceTypePlus<a class="headerlink" href="#geticetypeplus" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">_core</span><span class="o">.</span><span class="n">getIceTypePlus</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">nList</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">firstFrame</span><span class="p">,</span> <span class="n">isSlice</span><span class="p">,</span> <span class="n">outputFileName</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">getIceTypePlus</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">nList</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">firstFrame</span><span class="p">,</span> <span class="n">isSlice</span><span class="p">,</span> <span class="n">outputFileName</span><span class="p">)</span>
 </span></pre></div>
 </div>
 <p>Run full CHILL+ classification and write results to a file. Sets the <code class="docutils literal notranslate"><span class="pre">iceType</span></code>
@@ -608,14 +608,14 @@ field on each atom.</p>
 </section>
 <section id="getq6">
 <h3>getq6<a class="headerlink" href="#getq6" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">q6</span> <span class="o">=</span> <span class="n">_core</span><span class="o">.</span><span class="n">getq6</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">nList</span><span class="p">,</span> <span class="n">isSlice</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">q6</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">getq6</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">nList</span><span class="p">,</span> <span class="n">isSlice</span><span class="p">)</span>
 </span></pre></div>
 </div>
 <p>Compute the q6 bond order parameter for each atom.</p>
 </section>
 <section id="reclassifywater">
 <h3>reclassifyWater<a class="headerlink" href="#reclassifywater" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">_core</span><span class="o">.</span><span class="n">reclassifyWater</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">q6</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">reclassifyWater</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">q6</span><span class="p">)</span>
 </span></pre></div>
 </div>
 <p>Reclassify water molecules using q6 values.</p>
@@ -625,7 +625,7 @@ field on each atom.</p>
 <h2>Ring analysis functions<a class="headerlink" href="#ring-analysis-functions" title="Link to this heading">¶</a></h2>
 <section id="ringnetwork">
 <h3>ringNetwork<a class="headerlink" href="#ringnetwork" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">rings</span> <span class="o">=</span> <span class="n">_core</span><span class="o">.</span><span class="n">ringNetwork</span><span class="p">(</span><span class="n">nList</span><span class="p">,</span> <span class="n">maxDepth</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">rings</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">ringNetwork</span><span class="p">(</span><span class="n">nList</span><span class="p">,</span> <span class="n">maxDepth</span><span class="p">)</span>
 </span></pre></div>
 </div>
 <p>Find primitive rings in the network using the Franzblau algorithm.</p>
@@ -668,7 +668,7 @@ field on each atom.</p>
 <h2>Topological unit matching (TUM)<a class="headerlink" href="#topological-unit-matching-tum" title="Link to this heading">¶</a></h2>
 <section id="topobulkcriteria">
 <h3>topoBulkCriteria<a class="headerlink" href="#topobulkcriteria" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">_core</span><span class="o">.</span><span class="n">topoBulkCriteria</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">rings</span><span class="p">,</span> <span class="n">nList</span><span class="p">,</span> <span class="n">yCloud</span><span class="p">,</span> <span class="n">firstFrame</span><span class="p">,</span> <span class="n">numHC</span><span class="p">,</span> <span class="n">numDDC</span><span class="p">,</span> <span class="n">ringType</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">yoda</span><span class="o">.</span><span class="n">topoBulkCriteria</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">rings</span><span class="p">,</span> <span class="n">nList</span><span class="p">,</span> <span class="n">yCloud</span><span class="p">,</span> <span class="n">firstFrame</span><span class="p">,</span> <span class="n">numHC</span><span class="p">,</span> <span class="n">numDDC</span><span class="p">,</span> <span class="n">ringType</span><span class="p">)</span>
 </span></pre></div>
 </div>
 <p>Apply topological criteria to identify hexagonal cages (HC) and double-diamond
@@ -683,7 +683,7 @@ cages (DDC) in bulk ice.</p>
 <h2>Output functions<a class="headerlink" href="#output-functions" title="Link to this heading">¶</a></h2>
 <section id="writedump">
 <h3>writeDump<a class="headerlink" href="#writedump" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">_core</span><span class="o">.</span><span class="n">writeDump</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">outFile</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">yoda</span><span class="o">.</span><span class="n">writeDump</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">outFile</span><span class="p">)</span>
 </span></pre></div>
 </div>
 <p>Write the point cloud to a LAMMPS dump file.</p>

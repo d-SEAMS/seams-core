@@ -281,14 +281,14 @@ loaded frame:</p>
 </section>
 <section id="low-level-api-step-by-step">
 <h2>Low-level API (step by step)<a class="headerlink" href="#low-level-api-step-by-step" title="Link to this heading">¶</a></h2>
-<p>For full control over each analysis step, use the <code class="docutils literal notranslate"><span class="pre">_core</span></code> module directly.</p>
+<p>For full control over each analysis step, use the <code class="docutils literal notranslate"><span class="pre">yoda</span></code> module directly.</p>
 <section id="read-a-lammps-trajectory">
 <h3>Read a LAMMPS trajectory<a class="headerlink" href="#read-a-lammps-trajectory" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">pydseamslib</span><span class="w"> </span><span class="kn">import</span> <span class="n">_core</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">pydseams</span><span class="w"> </span><span class="kn">import</span> <span class="n">yoda</span>
 </span><span data-line="2">
 </span><span data-line="3"><span class="c1"># Read frame 1 from the trajectory, selecting oxygen atoms (type 2).</span>
 </span><span data-line="4"><span class="c1"># isSlice=False means we read the full box (coordLow/coordHigh are ignored).</span>
-</span><span data-line="5"><span class="n">cloud</span> <span class="o">=</span> <span class="n">_core</span><span class="o">.</span><span class="n">readLammpsTrjreduced</span><span class="p">(</span>
+</span><span data-line="5"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">readLammpsTrjreduced</span><span class="p">(</span>
 </span><span data-line="6">    <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;input/traj/exampleTraj.lammpstrj&quot;</span><span class="p">,</span>
 </span><span data-line="7">    <span class="n">targetFrame</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
 </span><span data-line="8">    <span class="n">typeI</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>       <span class="c1"># oxygen atom type in the LAMMPS file</span>
@@ -308,7 +308,7 @@ loaded frame:</p>
 <p>d-SEAMS builds neighbour lists based on a distance cutoff. For water, 3.5
 Angstroms captures the first coordination shell.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Build a neighbour list for oxygens within 3.5 Angstroms</span>
-</span><span data-line="2"><span class="n">nList</span> <span class="o">=</span> <span class="n">_core</span><span class="o">.</span><span class="n">neighListO</span><span class="p">(</span><span class="n">rcutoff</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">yCloud</span><span class="o">=</span><span class="n">cloud</span><span class="p">,</span> <span class="n">typeI</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="2"><span class="n">nList</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">neighListO</span><span class="p">(</span><span class="n">rcutoff</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">yCloud</span><span class="o">=</span><span class="n">cloud</span><span class="p">,</span> <span class="n">typeI</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </span><span data-line="3">
 </span><span data-line="4"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Neighbour list has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nList</span><span class="p">)</span><span class="si">}</span><span class="s2"> entries (one per atom)&quot;</span><span class="p">)</span>
 </span><span data-line="5"><span class="c1"># Each entry is a list of atom IDs: [self, neighbour1, neighbour2, ...]</span>
@@ -323,7 +323,7 @@ hydrogen positions) and applying geometric criteria to the oxygen neighbour
 list.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Build the hydrogen bond network.</span>
 </span><span data-line="2"><span class="c1"># Htype=1 is the hydrogen atom type in the LAMMPS file.</span>
-</span><span data-line="3"><span class="n">hbonds</span> <span class="o">=</span> <span class="n">_core</span><span class="o">.</span><span class="n">populateHbonds</span><span class="p">(</span>
+</span><span data-line="3"><span class="n">hbonds</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">populateHbonds</span><span class="p">(</span>
 </span><span data-line="4">    <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;input/traj/exampleTraj.lammpstrj&quot;</span><span class="p">,</span>
 </span><span data-line="5">    <span class="n">yCloud</span><span class="o">=</span><span class="n">cloud</span><span class="p">,</span>
 </span><span data-line="6">    <span class="n">nList</span><span class="o">=</span><span class="n">nList</span><span class="p">,</span>
@@ -346,7 +346,7 @@ list.</p>
 neighbours. The function modifies the point cloud in-place, populating the
 <code class="docutils literal notranslate"><span class="pre">c_ij</span></code> field on each point.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Compute CHILL+ bond-order correlations</span>
-</span><span data-line="2"><span class="n">cloud</span> <span class="o">=</span> <span class="n">_core</span><span class="o">.</span><span class="n">getCorrelPlus</span><span class="p">(</span><span class="n">yCloud</span><span class="o">=</span><span class="n">cloud</span><span class="p">,</span> <span class="n">nList</span><span class="o">=</span><span class="n">nList</span><span class="p">,</span> <span class="n">isSlice</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span data-line="2"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">getCorrelPlus</span><span class="p">(</span><span class="n">yCloud</span><span class="o">=</span><span class="n">cloud</span><span class="p">,</span> <span class="n">nList</span><span class="o">=</span><span class="n">nList</span><span class="p">,</span> <span class="n">isSlice</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span><span data-line="3">
 </span><span data-line="4"><span class="c1"># Check that atoms now have correlation data</span>
 </span><span data-line="5"><span class="n">n_classified</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">cloud</span><span class="o">.</span><span class="n">pts</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pt</span><span class="o">.</span><span class="n">c_ij</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
@@ -362,7 +362,7 @@ correlation value). The <code class="docutils literal notranslate"><span class="
 classification.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Write the full CHILL+ classification to disk and get the typed cloud back.</span>
 </span><span data-line="2"><span class="c1"># This writes an output file and classifies each atom.</span>
-</span><span data-line="3"><span class="n">cloud</span> <span class="o">=</span> <span class="n">_core</span><span class="o">.</span><span class="n">getIceTypePlus</span><span class="p">(</span>
+</span><span data-line="3"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">getIceTypePlus</span><span class="p">(</span>
 </span><span data-line="4">    <span class="n">yCloud</span><span class="o">=</span><span class="n">cloud</span><span class="p">,</span>
 </span><span data-line="5">    <span class="n">nList</span><span class="o">=</span><span class="n">nList</span><span class="p">,</span>
 </span><span data-line="6">    <span class="n">path</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span>

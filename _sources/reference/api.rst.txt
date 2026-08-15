@@ -3,7 +3,7 @@ API Reference
 =============
 
 
-This page documents all types and functions exposed by ``pydseamslib._core``.
+This page documents all types and functions exposed by ``pydseams.yoda``.
 
 Data types
 ----------
@@ -116,7 +116,7 @@ readLammpsTrjreduced
 
 .. code:: python
 
-    cloud = _core.readLammpsTrjreduced(
+    cloud = yoda.readLammpsTrjreduced(
         filename, targetFrame, typeI, isSlice, coordLow, coordHigh
     )
 
@@ -156,7 +156,7 @@ readXYZ
 
 .. code:: python
 
-    cloud = _core.readXYZ(filename)
+    cloud = yoda.readXYZ(filename)
 
 Read an XYZ format file. Returns a ``PointCloudDouble``.
 
@@ -165,7 +165,7 @@ readChemfiles (optional, requires chemfiles)
 
 .. code:: python
 
-    cloud = _core.readChemfiles(filename, targetFrame, typeFilter=-1)
+    cloud = yoda.readChemfiles(filename, targetFrame, typeFilter=-1)
 
 Read any trajectory format supported by chemfiles (PDB, GRO, DCD, TRR, and
 40+ others). Available when d-SEAMS is built with chemfiles.
@@ -187,7 +187,7 @@ readCon (optional, requires readcon-core)
 
 .. code:: python
 
-    cloud = _core.readCon(filename, targetFrame)
+    cloud = yoda.readCon(filename, targetFrame)
 
 Read a ``.con`` format file used by eOn for saddle point searches. Available when
 d-SEAMS is built with readcon-core.
@@ -200,7 +200,7 @@ neighListO
 
 .. code:: python
 
-    nList = _core.neighListO(rcutoff, yCloud, typeI)
+    nList = yoda.neighListO(rcutoff, yCloud, typeI)
 
 Build a neighbour list for atoms of a given type within a cutoff distance.
 Uses O(n) cell-list algorithm (vesin) when available, with automatic fallback
@@ -226,7 +226,7 @@ neighbourListByIndex
 
 .. code:: python
 
-    nListIdx = _core.neighbourListByIndex(yCloud, nList)
+    nListIdx = yoda.neighbourListByIndex(yCloud, nList)
 
 Convert an ID-based neighbour list to an index-based neighbour list.
 
@@ -235,7 +235,7 @@ getNewNeighbourListByIndex
 
 .. code:: python
 
-    nListIdx = _core.getNewNeighbourListByIndex(yCloud, cutoff)
+    nListIdx = yoda.getNewNeighbourListByIndex(yCloud, cutoff)
 
 Build a neighbour list directly by index (combining neighbour search and index
 conversion in one step).
@@ -248,7 +248,7 @@ populateHbonds
 
 .. code:: python
 
-    hbonds = _core.populateHbonds(filename, yCloud, nList, targetFrame, Htype)
+    hbonds = yoda.populateHbonds(filename, yCloud, nList, targetFrame, Htype)
 
 Build a hydrogen bond network by reading hydrogen positions from the trajectory
 and applying geometric criteria.
@@ -280,7 +280,7 @@ getCorrelPlus
 
 .. code:: python
 
-    cloud = _core.getCorrelPlus(yCloud, nList, isSlice)
+    cloud = yoda.getCorrelPlus(yCloud, nList, isSlice)
 
 Compute CHILL+ bond-order correlations. Populates the ``c_ij`` field on each atom
 in the returned cloud.
@@ -290,7 +290,7 @@ getIceTypePlus
 
 .. code:: python
 
-    cloud = _core.getIceTypePlus(yCloud, nList, path, firstFrame, isSlice, outputFileName)
+    cloud = yoda.getIceTypePlus(yCloud, nList, path, firstFrame, isSlice, outputFileName)
 
 Run full CHILL+ classification and write results to a file. Sets the ``iceType``
 field on each atom.
@@ -300,7 +300,7 @@ getq6
 
 .. code:: python
 
-    q6 = _core.getq6(yCloud, nList, isSlice)
+    q6 = yoda.getq6(yCloud, nList, isSlice)
 
 Compute the q6 bond order parameter for each atom.
 
@@ -309,7 +309,7 @@ reclassifyWater
 
 .. code:: python
 
-    cloud = _core.reclassifyWater(yCloud, q6)
+    cloud = yoda.reclassifyWater(yCloud, q6)
 
 Reclassify water molecules using q6 values.
 
@@ -321,7 +321,7 @@ ringNetwork
 
 .. code:: python
 
-    rings = _core.ringNetwork(nList, maxDepth)
+    rings = yoda.ringNetwork(nList, maxDepth)
 
 Find primitive rings in the network using the Franzblau algorithm.
 
@@ -360,7 +360,7 @@ topoBulkCriteria
 
 .. code:: python
 
-    _core.topoBulkCriteria(path, rings, nList, yCloud, firstFrame, numHC, numDDC, ringType)
+    yoda.topoBulkCriteria(path, rings, nList, yCloud, firstFrame, numHC, numDDC, ringType)
 
 Apply topological criteria to identify hexagonal cages (HC) and double-diamond
 cages (DDC) in bulk ice.
@@ -378,6 +378,6 @@ writeDump
 
 .. code:: python
 
-    _core.writeDump(yCloud, path, outFile)
+    yoda.writeDump(yCloud, path, outFile)
 
 Write the point cloud to a LAMMPS dump file.
