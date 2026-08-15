@@ -175,11 +175,12 @@ def _affiliation_labels(cloud, idx, n):
     return labels
 
 
-def dseams_topo_4nn(pos, box):
-    """TUM v2: the same cage predicates on the union-symmetrized 4-nearest
-    bonded graph, which keeps neighbour identity where a cutoff loses it."""
+def dseams_topo_4nn(pos, box, mutual=True):
+    """TUM v2: the same cage predicates on the mutual 4-nearest bonded
+    graph, which keeps neighbour identity where a cutoff loses it while a
+    one-sided nomination never creates a bond."""
     cloud = make_cloud(pos, box)
-    knn = _core.kNearestNeighbourList(cloud, 4, 5.0, 1)
+    knn = _core.kNearestNeighbourList(cloud, 4, 5.0, 1, mutual)
     idx = _core.neighbourListByIndex(cloud, knn)
     return _affiliation_labels(cloud, idx, len(pos))
 

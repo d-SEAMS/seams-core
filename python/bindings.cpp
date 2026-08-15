@@ -185,10 +185,10 @@ NB_MODULE(_core, m) {
           "Build a neighbour list by index using a distance cutoff.",
           nb::arg("yCloud"), nb::arg("cutoff"));
     m.def("kNearestNeighbourList", &nneigh::kNearestNeighbourList,
-          "Union-symmetrized k-nearest bonded graph (exact; cell-list "
-          "candidates with a brute-force fallback).",
+          "Exact k-nearest bonded graph, union- or mutually-symmetrized "
+          "(cell-list candidates with a brute-force fallback).",
           nb::arg("yCloud"), nb::arg("k"), nb::arg("candidateCutoff"),
-          nb::arg("typeI"));
+          nb::arg("typeI"), nb::arg("mutual") = true);
     m.def("shellSeparation", &nneigh::shellSeparation,
           "Certificate pair (max k-th distance, min (k+1)-th distance) for "
           "the exact reduction of the k-nearest graph to a cutoff graph.",

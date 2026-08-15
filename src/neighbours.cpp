@@ -551,7 +551,7 @@ int nneigh::clearNeighbourList(std::vector<std::vector<int>> &nList) {
 std::vector<std::vector<int>>
 nneigh::kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
-    double candidateCutoff, int typeI) {
+    double candidateCutoff, int typeI, bool mutual) {
   std::vector<std::vector<int>> candidateRows =
       nneigh::neighListO(candidateCutoff, yCloud, typeI);
   if (candidateRows.empty() || k <= 0) {
@@ -613,9 +613,27 @@ nneigh::kNearestNeighbourList(
                                               : candidateRows[i][0]);
   }
   std::set<std::pair<int, int>> bonds;
-  for (int i = 0; i < yCloud.nop; i++) {
-    for (const int j : nominated[i]) {
-      bonds.emplace(std::min(i, j), std::max(i, j));
+  if (mutual) {
+    // Intersection symmetrization: a bond requires both nominations. In a
+    // crystal the first shell is mutual, so this equals the union graph
+    // there; on disordered packings one-sided nominations vanish, which is
+    // what starves the accidental ring complexes
+    std::set<std::pair<int, int>> directed;
+    for (int i = 0; i < yCloud.nop; i++) {
+      for (const int j : nominated[i]) {
+        directed.emplace(i, j);
+      }
+    }
+    for (const auto &[i, j] : directed) {
+      if (directed.count({j, i})) {
+        bonds.emplace(std::min(i, j), std::max(i, j));
+      }
+    }
+  } else {
+    for (int i = 0; i < yCloud.nop; i++) {
+      for (const int j : nominated[i]) {
+        bonds.emplace(std::min(i, j), std::max(i, j));
+      }
     }
   }
   for (const auto &[i, j] : bonds) {

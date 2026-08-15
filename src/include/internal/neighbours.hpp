@@ -88,8 +88,13 @@ std::vector<std::vector<int>> getNewNeighbourListByIndex(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff);
 
 /** Bonded graph from the k nearest neighbours of each particle rather than a
- *  distance cutoff, union-symmetrized: i and j are bonded when either lists
- *  the other among its k nearest. Candidates come from the cell list at
+ *  distance cutoff. The default intersection symmetrization (mutual = true)
+ *  bonds i and j only when each lists the other among its k nearest; the
+ *  union alternative bonds on either nomination. In a crystal the first
+ *  shell is mutual and the two coincide; on disordered packings the mutual
+ *  graph is sparser, which starves accidental ring structure -- measured on
+ *  the dense null, mutual scores zero false crystal where union reaches
+ *  2.5%. Candidates come from the cell list at
  *  candidateCutoff, which must comfortably exceed the k-th neighbour
  *  distance. On an undistorted tetrahedral lattice with k = 4 this graph
  *  equals the first-shell cutoff graph; under thermal distortion it keeps
@@ -99,7 +104,7 @@ std::vector<std::vector<int>> getNewNeighbourListByIndex(
  */
 std::vector<std::vector<int>> kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
-    double candidateCutoff, int typeI);
+    double candidateCutoff, int typeI, bool mutual = true);
 
 /** The shell-separation certificate for the exact reduction of the k-nearest
  *  graph to the cutoff graph: returns {max_i d_k(i), min_i d_{k+1}(i)} over

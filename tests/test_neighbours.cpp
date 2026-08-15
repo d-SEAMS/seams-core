@@ -389,3 +389,22 @@ TEST_CASE("k-nearest graph is exact under an undersized candidate cutoff",
     REQUIRE(a == b);
   }
 }
+
+TEST_CASE("mutual and union k-nearest graphs coincide on the crystal",
+          "[neighbours]") {
+  // In a crystal the first shell is mutual, so the intersection and union
+  // symmetrizations produce the same graph, and both reduce to the cutoff
+  // graph under the shell-separation certificate
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  auto unionRows = nneigh::kNearestNeighbourList(yCloud, 4, 3.5, 1, false);
+  auto mutualRows = nneigh::kNearestNeighbourList(yCloud, 4, 3.5, 1, true);
+  REQUIRE(unionRows.size() == mutualRows.size());
+  for (size_t i = 0; i < unionRows.size(); i++) {
+    std::vector<int> a(unionRows[i].begin() + 1, unionRows[i].end());
+    std::vector<int> b(mutualRows[i].begin() + 1, mutualRows[i].end());
+    std::sort(a.begin(), a.end());
+    std::sort(b.begin(), b.end());
+    REQUIRE(a == b);
+  }
+}
