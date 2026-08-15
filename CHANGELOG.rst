@@ -2,6 +2,12 @@
 Changelog
 =========
 
+Version 2.2.2 (2026-08-15)
+===========================
+
+The compiled Python surface is ``pydseams.yoda``. Docs and the
+repro scripts use that name. ``_core`` remains an alias.
+
 Version 2.2.1 (2026-08-15)
 ===========================
 

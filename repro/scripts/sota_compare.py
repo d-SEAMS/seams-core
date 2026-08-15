@@ -120,15 +120,15 @@ def jitter(pos: np.ndarray, box: np.ndarray, sigma: float, rng):
 
 
 # ---------------------------------------------------------------- d-SEAMS
-import _core  # noqa: E402
+from pydseams import yoda
 
 
 def make_cloud(pos: np.ndarray, box: np.ndarray):
-    cloud = _core.PointCloudDouble()
+    cloud = yoda.PointCloudDouble()
     pts = []
     id_map = {}
     for i, (x, y, z) in enumerate(pos):
-        p = _core.PointDouble()
+        p = yoda.PointDouble()
         p.c_type = 1
         p.atomID = i + 1
         p.molID = i + 1
@@ -146,16 +146,16 @@ def make_cloud(pos: np.ndarray, box: np.ndarray):
 
 def dseams_lists(pos, box):
     cloud = make_cloud(pos, box)
-    nl = _core.neighListO(CUTOFF, cloud, 1)
-    idx = _core.neighbourListByIndex(cloud, nl)
+    nl = yoda.neighListO(CUTOFF, cloud, 1)
+    idx = yoda.neighbourListByIndex(cloud, nl)
     return cloud, nl, idx
 
 
 def _affiliation_labels(cloud, idx, n):
-    rings = [r for r in _core.ringNetwork(idx, 7) if len(r) == 6]
+    rings = [r for r in yoda.ringNetwork(idx, 7) if len(r) == 6]
     if not rings:
         return ["water"] * n
-    hc, ddc = _core.cageAffiliation(rings, idx)
+    hc, ddc = yoda.cageAffiliation(rings, idx)
     in_hc = np.zeros(n, dtype=bool)
     in_ddc = np.zeros(n, dtype=bool)
     for ring, h, d in zip(rings, hc, ddc):
@@ -180,8 +180,8 @@ def dseams_topo_4nn(pos, box, mutual=True):
     graph, which keeps neighbour identity where a cutoff loses it while a
     one-sided nomination never creates a bond."""
     cloud = make_cloud(pos, box)
-    knn = _core.kNearestNeighbourList(cloud, 4, 5.0, 1, mutual)
-    idx = _core.neighbourListByIndex(cloud, knn)
+    knn = yoda.kNearestNeighbourList(cloud, 4, 5.0, 1, mutual)
+    idx = yoda.neighbourListByIndex(cloud, knn)
     return _affiliation_labels(cloud, idx, len(pos))
 
 
@@ -191,18 +191,18 @@ def dseams_topo_seeded(pos, box, permissive_k=4, permissive_mutual=False):
     specificity)."""
     n = len(pos)
     cloud = make_cloud(pos, box)
-    strict = _core.neighbourListByIndex(
-        cloud, _core.kNearestNeighbourList(cloud, 4, 5.0, 1, True)
+    strict = yoda.neighbourListByIndex(
+        cloud, yoda.kNearestNeighbourList(cloud, 4, 5.0, 1, True)
     )
-    perm_rows = _core.neighbourListByIndex(
+    perm_rows = yoda.neighbourListByIndex(
         cloud,
-        _core.kNearestNeighbourList(
+        yoda.kNearestNeighbourList(
             cloud, permissive_k, 5.0, 1, permissive_mutual
         ),
     )
-    six_s = [r for r in _core.ringNetwork(strict, 7) if len(r) == 6]
-    six_p = [r for r in _core.ringNetwork(perm_rows, 7) if len(r) == 6]
-    hc, ddc = _core.seededCageAffiliation(six_s, strict, six_p, perm_rows)
+    six_s = [r for r in yoda.ringNetwork(strict, 7) if len(r) == 6]
+    six_p = [r for r in yoda.ringNetwork(perm_rows, 7) if len(r) == 6]
+    hc, ddc = yoda.seededCageAffiliation(six_s, strict, six_p, perm_rows)
     labels = []
     for i in range(n):
         if hc[i] and ddc[i]:
@@ -221,11 +221,11 @@ def dseams_topo(pos, box):
     six-ring is hexagonal, in a DDC-affiliated ring cubic, in both mixed,
     in neither water. Six-rings come from the primitive ring network."""
     cloud, nl, idx = dseams_lists(pos, box)
-    rings = [r for r in _core.ringNetwork(idx, 7) if len(r) == 6]
+    rings = [r for r in yoda.ringNetwork(idx, 7) if len(r) == 6]
     n = len(pos)
     if not rings:
         return ["water"] * n
-    hc, ddc = _core.cageAffiliation(rings, idx)
+    hc, ddc = yoda.cageAffiliation(rings, idx)
     in_hc = np.zeros(n, dtype=bool)
     in_ddc = np.zeros(n, dtype=bool)
     for ring, h, d in zip(rings, hc, ddc):
@@ -247,16 +247,16 @@ def dseams_topo(pos, box):
 
 def chill_plus(pos, box, scratch):
     cloud, nl, idx = dseams_lists(pos, box)
-    _core.getCorrelPlus(cloud, nl, False)
-    _core.getIceTypePlus(cloud, nl, scratch, 1, False, "sota.txt")
+    yoda.getCorrelPlus(cloud, nl, False)
+    yoda.getIceTypePlus(cloud, nl, scratch, 1, False, "sota.txt")
     state = {
-        _core.AtomStateType.cubic: "cubic",
-        _core.AtomStateType.reCubic: "cubic",
-        _core.AtomStateType.hexagonal: "hexagonal",
-        _core.AtomStateType.reHex: "hexagonal",
-        _core.AtomStateType.interfacial: "interfacial",
-        _core.AtomStateType.clathrate: "clathrate",
-        _core.AtomStateType.interClathrate: "clathrate",
+        yoda.AtomStateType.cubic: "cubic",
+        yoda.AtomStateType.reCubic: "cubic",
+        yoda.AtomStateType.hexagonal: "hexagonal",
+        yoda.AtomStateType.reHex: "hexagonal",
+        yoda.AtomStateType.interfacial: "interfacial",
+        yoda.AtomStateType.clathrate: "clathrate",
+        yoda.AtomStateType.interClathrate: "clathrate",
     }
     return [state.get(pt.iceType, "water") for pt in cloud.pts]
 

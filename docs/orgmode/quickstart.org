@@ -93,16 +93,16 @@ print(len(ql_voro["ql"]))
 
 * Low-level API (step by step)
 
-For full control over each analysis step, use the ~_core~ module directly.
+For full control over each analysis step, use the ~yoda~ module directly.
 
 ** Read a LAMMPS trajectory
 
 #+begin_src python
-from pydseamslib import _core
+from pydseams import yoda
 
 # Read frame 1 from the trajectory, selecting oxygen atoms (type 2).
 # isSlice=False means we read the full box (coordLow/coordHigh are ignored).
-cloud = _core.readLammpsTrjreduced(
+cloud = yoda.readLammpsTrjreduced(
     filename="input/traj/exampleTraj.lammpstrj",
     targetFrame=1,
     typeI=2,       # oxygen atom type in the LAMMPS file
@@ -124,7 +124,7 @@ Angstroms captures the first coordination shell.
 
 #+begin_src python
 # Build a neighbour list for oxygens within 3.5 Angstroms
-nList = _core.neighListO(rcutoff=3.5, yCloud=cloud, typeI=2)
+nList = yoda.neighListO(rcutoff=3.5, yCloud=cloud, typeI=2)
 
 print(f"Neighbour list has {len(nList)} entries (one per atom)")
 # Each entry is a list of atom IDs: [self, neighbour1, neighbour2, ...]
@@ -140,7 +140,7 @@ list.
 #+begin_src python
 # Build the hydrogen bond network.
 # Htype=1 is the hydrogen atom type in the LAMMPS file.
-hbonds = _core.populateHbonds(
+hbonds = yoda.populateHbonds(
     filename="input/traj/exampleTraj.lammpstrj",
     yCloud=cloud,
     nList=nList,
@@ -165,7 +165,7 @@ neighbours. The function modifies the point cloud in-place, populating the
 
 #+begin_src python
 # Compute CHILL+ bond-order correlations
-cloud = _core.getCorrelPlus(yCloud=cloud, nList=nList, isSlice=False)
+cloud = yoda.getCorrelPlus(yCloud=cloud, nList=nList, isSlice=False)
 
 # Check that atoms now have correlation data
 n_classified = sum(1 for pt in cloud.pts if len(pt.c_ij) > 0)
@@ -182,7 +182,7 @@ classification.
 #+begin_src python
 # Write the full CHILL+ classification to disk and get the typed cloud back.
 # This writes an output file and classifies each atom.
-cloud = _core.getIceTypePlus(
+cloud = yoda.getIceTypePlus(
     yCloud=cloud,
     nList=nList,
     path=".",
