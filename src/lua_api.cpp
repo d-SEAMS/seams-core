@@ -157,9 +157,25 @@ void registerNeighbours(sol::state &lua) {
   // Legacy spellings, container-userdata semantics
   lua.set_function("neighborList", nneigh::neighListO);
   lua.set_function("bondNetworkByIndex", nneigh::neighbourListByIndex);
-  lua.set_function("getHbondNetwork", bond::populateHbonds);
+  // distCutoff/angleCutoff default to the water criterion (2.42 A, 30 deg)
+  lua.set_function("getHbondNetwork",
+                   [](std::string filename, Cloud &yCloud,
+                      const std::vector<std::vector<int>> &nList,
+                      int targetFrame, int Htype, sol::optional<double> dist,
+                      sol::optional<double> angle) {
+                     return bond::populateHbonds(filename, yCloud, nList,
+                                                 targetFrame, Htype,
+                                                 dist.value_or(2.42),
+                                                 angle.value_or(30.0));
+                   });
   lua.set_function("getHbondNetworkFromClouds",
-                   bond::populateHbondsWithInputClouds);
+                   [](Cloud &yCloud, Cloud &hCloud,
+                      const std::vector<std::vector<int>> &nList,
+                      sol::optional<double> dist, sol::optional<double> angle) {
+                     return bond::populateHbondsWithInputClouds(
+                         yCloud, hCloud, nList, dist.value_or(2.42),
+                         angle.value_or(30.0));
+                   });
 }
 
 void registerRings(sol::state &lua) {

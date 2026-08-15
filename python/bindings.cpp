@@ -203,12 +203,18 @@ NB_MODULE(_core, m) {
           "Compute the O-H hydrogen bond distance between two atoms.",
           nb::arg("oCloud"), nb::arg("hCloud"), nb::arg("oAtomIndex"), nb::arg("hAtomIndex"));
     m.def("populateHbonds", &bond::populateHbonds,
-          "Build the hydrogen bond network from a trajectory and neighbour list.",
+          "Build the hydrogen bond network from a trajectory and neighbour "
+          "list. distCutoff/angleCutoff default to the water criterion "
+          "(2.42 Angstrom, 30 degrees).",
           nb::arg("filename"), nb::arg("yCloud"), nb::arg("nList"),
-          nb::arg("targetFrame"), nb::arg("Htype"));
+          nb::arg("targetFrame"), nb::arg("Htype"),
+          nb::arg("distCutoff") = 2.42, nb::arg("angleCutoff") = 30.0);
     m.def("populateHbondsWithInputClouds", &bond::populateHbondsWithInputClouds,
-          "Build hydrogen bonds using pre-loaded oxygen and hydrogen point clouds.",
-          nb::arg("yCloud"), nb::arg("hCloud"), nb::arg("nList"));
+          "Build hydrogen bonds using pre-loaded oxygen and hydrogen point "
+          "clouds. distCutoff/angleCutoff default to the water criterion "
+          "(2.42 Angstrom, 30 degrees).",
+          nb::arg("yCloud"), nb::arg("hCloud"), nb::arg("nList"),
+          nb::arg("distCutoff") = 2.42, nb::arg("angleCutoff") = 30.0);
     m.def("trimBonds", &bond::trimBonds,
           "Remove duplicate bonds from a bond list.",
           nb::arg("bonds"));

@@ -70,21 +70,25 @@ namespace bond {
 //! Create a vector of vectors (similar to the neighbour list conventions)
 //! containing the hydrogen bond connectivity information. Decides the
 //! existence of the hydrogen bond depending on the O--O and O--H vectors from
-//! the neighbour list already constructed
+//! the neighbour list already constructed. The geometric criterion defaults
+//! to the water values (acceptor--H distance below 2.42 Angstrom, O-O-H angle
+//! below 30 degrees); other hydrogen-bonded systems pass their own thresholds
 std::vector<std::vector<int>>
 populateHbonds(std::string filename,
                molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-               const std::vector<std::vector<int>> &nList, int targetFrame, int Htype);
+               const std::vector<std::vector<int>> &nList, int targetFrame,
+               int Htype, double distCutoff = 2.42, double angleCutoff = 30.0);
 
 //! Create a vector of vectors (similar to the neighbour list conventions)
 //! containing the hydrogen bond connectivity information. Decides the
 //! existence of the hydrogen bond depending on the O--O and O--H vectors from
 //! the neighbour list already constructed, taking a PointCloud for the H atoms as input
-// ! The H atom PointCloud should be for the entire system 
+// ! The H atom PointCloud should be for the entire system
 std::vector<std::vector<int>>
 populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                molSys::PointCloud<molSys::Point<double>, double> &hCloud,
-               const std::vector<std::vector<int>> &nList);
+               const std::vector<std::vector<int>> &nList,
+               double distCutoff = 2.42, double angleCutoff = 30.0);
 
 //! Calculates the distance of the hydrogen bond between O and H (of different
 //! atoms), given the respective pointClouds and the indices to each atom

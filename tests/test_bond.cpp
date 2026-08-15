@@ -216,6 +216,45 @@ TEST_CASE("populateHbondsWithInputClouds detects H-bonds from O+H clouds",
   REQUIRE(bonded > 0);
 }
 
+TEST_CASE("H-bond thresholds are configurable", "[bond]") {
+  molSys::PointCloud<molSys::Point<double>, double> oCloud;
+  oCloud = sinp::readLammpsTrjO("traj/exampleTraj.lammpstrj", 1, oCloud, 2);
+  molSys::PointCloud<molSys::Point<double>, double> hCloud;
+  hCloud = sinp::readLammpsTrjO("traj/exampleTraj.lammpstrj", 1, hCloud, 1);
+  auto nList = nneigh::neighListO(3.5, oCloud, 2);
+
+  auto countEdges = [](const std::vector<std::vector<int>> &net) {
+    size_t edges = 0;
+    for (const auto &row : net) {
+      edges += row.size() - 1;
+    }
+    return edges;
+  };
+
+  // Defaults reproduce the water criterion
+  const auto waterNet =
+      bond::populateHbondsWithInputClouds(oCloud, hCloud, nList);
+  const auto explicitNet =
+      bond::populateHbondsWithInputClouds(oCloud, hCloud, nList, 2.42, 30.0);
+  REQUIRE(countEdges(waterNet) == countEdges(explicitNet));
+  REQUIRE(countEdges(waterNet) > 0);
+
+  // A distance cutoff below any O-H separation removes every bond
+  const auto noneNet =
+      bond::populateHbondsWithInputClouds(oCloud, hCloud, nList, 0.1, 30.0);
+  REQUIRE(countEdges(noneNet) == 0);
+
+  // A zero-degree angle cutoff also removes every bond
+  const auto noAngleNet =
+      bond::populateHbondsWithInputClouds(oCloud, hCloud, nList, 2.42, 0.0);
+  REQUIRE(countEdges(noAngleNet) == 0);
+
+  // Looser thresholds can only add bonds
+  const auto looseNet =
+      bond::populateHbondsWithInputClouds(oCloud, hCloud, nList, 3.0, 45.0);
+  REQUIRE(countEdges(looseNet) >= countEdges(waterNet));
+}
+
 TEST_CASE("createBondsFromCages with no matching cage type returns empty",
           "[bond]") {
   std::vector<std::vector<int>> rings = {{1, 2, 3, 4, 5, 6}};

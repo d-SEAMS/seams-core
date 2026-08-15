@@ -231,12 +231,13 @@ std::vector<std::vector<int>>
 bond::populateHbonds(std::string filename,
                      molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      const std::vector<std::vector<int>> &nList, int targetFrame,
-                     int Htype) {
+                     int Htype, double distCutoff, double angleCutoff) {
   // Read hydrogen atoms from the trajectory file
   molSys::PointCloud<molSys::Point<double>, double> hCloud;
   hCloud = sinp::readLammpsTrjreduced(filename, targetFrame, hCloud, Htype);
   // Delegate to the cloud-based overload
-  return bond::populateHbondsWithInputClouds(yCloud, hCloud, nList);
+  return bond::populateHbondsWithInputClouds(yCloud, hCloud, nList, distCutoff,
+                                             angleCutoff);
 }
 
 /********************************************/ /**
@@ -255,7 +256,8 @@ bond::populateHbonds(std::string filename,
 std::vector<std::vector<int>>
 bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      molSys::PointCloud<molSys::Point<double>, double> &hCloud,
-                     const std::vector<std::vector<int>> &nList) {
+                     const std::vector<std::vector<int>> &nList,
+                     double distCutoff, double angleCutoff) {
   //
   std::vector<std::vector<int>>
       hBondNet; // Output vector of vectors containing the HBN
@@ -268,8 +270,6 @@ bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, do
   int nnumNeighbours;
   int iatomID, jatomID;
   int iatomIndex, jatomIndex;
-  const double distCutoff = 2.42;
-  const double angleCutoff = 30;
 
   // --------------------
   // Get the unordered map of the oxygen atom IDs (keys) and the molecular IDs
