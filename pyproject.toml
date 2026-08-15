@@ -10,9 +10,9 @@ license = {text = "MIT"}
 requires-python = ">=3.12"
 dependencies = ["numpy>=1.24"]
 authors = [
+  {name = "Ruhila S", email = "ruhiresearcher209@gmail.com"},
   {name = "Amrita Goswami", email = "amrita16thaug646@gmail.com"},
   {name = "Rohit Goswami", email = "rgoswami@ieee.org"},
-  {name = "Ruhila S", email = "ruhiresearcher209@gmail.com"},
 ]
 
 [project.urls]
