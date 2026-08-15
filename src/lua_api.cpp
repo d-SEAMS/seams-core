@@ -441,7 +441,19 @@ void registerTopology(sol::state &lua) {
                    ring::printSliceGetEdgeMoleculesInRings);
   lua.set_function("bulkRingNumberAnalysis", ring::bulkPolygonRingAnalysis);
   lua.set_function("bulkTopologicalNetworkCriterion", ring::topoBulkAnalysis);
-  lua.set_function("bulkTopoUnitMatching", tum3::topoUnitMatchingBulk);
+  // sol2 does not apply C++ default arguments, so the trailing
+  // templatePath is optional here explicitly
+  lua.set_function("bulkTopoUnitMatching",
+                   [](std::string path, std::vector<std::vector<int>> rings,
+                      std::vector<std::vector<int>> nList,
+                      molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                      int firstFrame, bool printClusters, bool onlyTetrahedral,
+                      sol::optional<std::string> templatePath) {
+                     return tum3::topoUnitMatchingBulk(
+                         path, rings, nList, yCloud, firstFrame, printClusters,
+                         onlyTetrahedral,
+                         templatePath.value_or("templates"));
+                   });
 }
 
 void registerAll(sol::state &lua) {
