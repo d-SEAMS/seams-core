@@ -3,9 +3,13 @@
 
 #include <bond.hpp>
 #include <cage.hpp>
+#include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <seams_input.hpp>
+
+#include <array>
+#include <cmath>
 
 // Helper: build a minimal cloud for bond tests
 // 4 atoms forming a square in the xy-plane
@@ -141,6 +145,96 @@ TEST_CASE("getHbondDistanceOH uses dump H on a mixed image", "[bond]") {
   const double dist = bond::getHbondDistanceOH(oCloud, hCloud, 0, 0);
   const double expect = std::sqrt(4.5 * 4.5 + 1.160254037844386 * 1.160254037844386);
   REQUIRE_THAT(dist, Catch::Matchers::WithinAbs(expect, 1e-10));
+}
+
+static molSys::Point<double> makeAtom(int atomID, int molID, double x,
+                                      double y, double z) {
+  molSys::Point<double> p;
+  p.atomID = atomID;
+  p.molID = molID;
+  p.type = 1;
+  p.x = x;
+  p.y = y;
+  p.z = z;
+  return p;
+}
+
+TEST_CASE("populateHbondsWithInputClouds accepts acceptor-first angle",
+          "[bond]") {
+  molSys::PointCloud<molSys::Point<double>, double> oCloud, hCloud;
+  oCloud.box = {10.0, 10.0, 10.0};
+  oCloud.boxLow = {0.0, 0.0, 0.0};
+  hCloud.box = oCloud.box;
+  hCloud.boxLow = oCloud.boxLow;
+  oCloud.pts.push_back(makeAtom(1, 1, 0.0, 0.0, 0.0));
+  oCloud.pts.push_back(makeAtom(2, 2, 2.8, 0.0, 0.0));
+  oCloud.nop = 2;
+  oCloud.idIndexMap[1] = 0;
+  oCloud.idIndexMap[2] = 1;
+  hCloud.pts.push_back(makeAtom(11, 1, 1.0, 0.0, 0.0));
+  hCloud.pts.push_back(makeAtom(12, 1, -0.96, 0.76, 0.0));
+  hCloud.pts.push_back(makeAtom(21, 2, 3.8, 0.0, 0.0));
+  hCloud.pts.push_back(makeAtom(22, 2, 2.8, 0.96, 0.0));
+  hCloud.nop = 4;
+  const auto ooAccFirst = gen::relDist(oCloud, 1, 0);
+  const auto ooDonFirst = gen::relDist(oCloud, 0, 1);
+  std::vector<double> ooA = {ooAccFirst[0], ooAccFirst[1], ooAccFirst[2]};
+  std::vector<double> ooD = {ooDonFirst[0], ooDonFirst[1], ooDonFirst[2]};
+  std::vector<double> oh = {2.8 - 1.0, 0.0, 0.0};
+  REQUIRE_THAT(gen::radDeg(gen::eigenVecAngle(ooA, oh)),
+               Catch::Matchers::WithinAbs(0.0, 1e-8));
+  REQUIRE_THAT(gen::radDeg(gen::eigenVecAngle(ooD, oh)),
+               Catch::Matchers::WithinAbs(180.0, 1e-8));
+  const std::vector<std::vector<int>> nList = {{1, 2}, {2, 1}};
+  const auto net =
+      bond::populateHbondsWithInputClouds(oCloud, hCloud, nList, 2.42, 30.0);
+  REQUIRE(net.size() == 2);
+  REQUIRE(net[0].size() == 2);
+  REQUIRE(net[1].size() == 2);
+  REQUIRE(net[0][1] == 2);
+  REQUIRE(net[1][1] == 1);
+}
+
+TEST_CASE("populateHbondsWithInputClouds accepts a mixed-image dump-H bond",
+          "[bond]") {
+  molSys::PointCloud<molSys::Point<double>, double> oCloud, hCloud;
+  oCloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  oCloud.boxLow = {0.0, 0.0, 0.0};
+  hCloud.box = oCloud.box;
+  hCloud.boxLow = oCloud.boxLow;
+  oCloud.pts.push_back(makeAtom(1, 1, 5.5, 6.360254037844386, 1.0));
+  oCloud.pts.push_back(makeAtom(2, 2, 0.5, 0.5, 1.0));
+  oCloud.nop = 2;
+  oCloud.idIndexMap[1] = 0;
+  oCloud.idIndexMap[2] = 1;
+  hCloud.pts.push_back(makeAtom(11, 1, 0.5, 0.1, 1.0));
+  hCloud.pts.push_back(makeAtom(12, 1, 6.5, 6.360254037844386, 1.0));
+  hCloud.pts.push_back(makeAtom(21, 2, 0.5, 1.5, 1.0));
+  hCloud.pts.push_back(makeAtom(22, 2, 1.5, 0.5, 1.0));
+  hCloud.nop = 4;
+  const auto oo = gen::relDist(oCloud, 1, 0);
+  REQUIRE_THAT(oo[0], Catch::Matchers::WithinAbs(0.0, 1e-10));
+  REQUIRE_THAT(oo[1], Catch::Matchers::WithinAbs(2.8, 1e-10));
+  REQUIRE_THAT(oo[2], Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(bond::getHbondDistanceOH(oCloud, hCloud, 1, 0),
+               Catch::Matchers::WithinAbs(0.4, 1e-10));
+  std::array<double, 3> span = {0.5 - 5.5, 0.5 - 6.360254037844386, 0.0};
+  for (int k = 0; k < 3; k++) {
+    span[k] -= oCloud.box[static_cast<size_t>(k)] *
+               std::round(span[k] / oCloud.box[static_cast<size_t>(k)]);
+  }
+  std::vector<double> ooDump = {oo[0], oo[1], oo[2]};
+  std::vector<double> ooSpan = {span[0], span[1], span[2]};
+  std::vector<double> oh = {0.5 - 0.5, 0.5 - 0.1, 0.0};
+  REQUIRE(gen::radDeg(gen::eigenVecAngle(ooDump, oh)) < 30.0);
+  REQUIRE(gen::radDeg(gen::eigenVecAngle(ooSpan, oh)) > 30.0);
+  const std::vector<std::vector<int>> nList = {{1, 2}, {2, 1}};
+  const auto net =
+      bond::populateHbondsWithInputClouds(oCloud, hCloud, nList, 2.42, 30.0);
+  REQUIRE(net[0].size() == 2);
+  REQUIRE(net[1].size() == 2);
+  REQUIRE(net[0][1] == 2);
+  REQUIRE(net[1][1] == 1);
 }
 
 TEST_CASE("populateBonds with cage iceType filters dummy atoms", "[bond]") {
