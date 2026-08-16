@@ -4,7 +4,9 @@
 #include <linkcell_gpu.hpp>
 #endif
 
+#include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <stdexcept>
 #include <vector>
@@ -633,38 +635,40 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
     int kM = kMax;
     int mR = maxRings;
     int mP = maxPer;
-    {
-      static linkcell::gpu::Workspace knn;
-      auto *xyzDev = static_cast<double *>(ws.dxyz.p);
-      auto *colsDev = static_cast<int *>(ws.dcols.p);
-      const std::size_t kSz = static_cast<std::size_t>(kMax);
-      const std::size_t nSz = static_cast<std::size_t>(nAtoms);
-      const std::size_t fSz = static_cast<std::size_t>(nF);
-      const linkcell::Cell cell0 = linkcell::Cell::ortho(
-          box[0], box[1], box[2]);
-      bool sameBox = true;
-      for (int f = 1; f < nF; ++f) {
-        if (box[static_cast<std::size_t>(f) * 3 + 0] != box[0] ||
-            box[static_cast<std::size_t>(f) * 3 + 1] != box[1] ||
-            box[static_cast<std::size_t>(f) * 3 + 2] != box[2]) {
-          sameBox = false;
-          break;
-        }
+    static linkcell::gpu::Workspace knn;
+    auto *xyzDev = static_cast<double *>(ws.dxyz.p);
+    auto *colsDev = static_cast<int *>(ws.dcols.p);
+    const std::size_t kSz = static_cast<std::size_t>(kMax);
+    const std::size_t nSz = static_cast<std::size_t>(nAtoms);
+    const std::size_t fSz = static_cast<std::size_t>(nF);
+    const linkcell::Cell cell0 =
+        linkcell::Cell::ortho(box[0], box[1], box[2]);
+    auto boxClose = [](double a, double b) {
+      return std::fabs(a - b) <= 1.0e-8 * std::max(1.0, std::fabs(a));
+    };
+    bool sameBox = true;
+    for (int f = 1; f < nF; ++f) {
+      if (!boxClose(box[static_cast<std::size_t>(f) * 3 + 0], box[0]) ||
+          !boxClose(box[static_cast<std::size_t>(f) * 3 + 1], box[1]) ||
+          !boxClose(box[static_cast<std::size_t>(f) * 3 + 2], box[2])) {
+        sameBox = false;
+        break;
       }
-      if (sameBox) {
-        knn.knearest_into_many(xyzDev, nSz, fSz, cell0, kSz, colsDev,
-                               fSz * nSz * kSz, nullptr, rc);
-      } else {
-        for (int f = 0; f < nF; ++f) {
-          const linkcell::Cell cell = linkcell::Cell::ortho(
-              box[static_cast<std::size_t>(f) * 3 + 0],
-              box[static_cast<std::size_t>(f) * 3 + 1],
-              box[static_cast<std::size_t>(f) * 3 + 2]);
-          knn.knearest_into(xyzDev + static_cast<std::size_t>(f) * nSz * 3, nSz,
-                            cell, kSz,
-                            colsDev + static_cast<std::size_t>(f) * nSz * kSz,
-                            nSz * kSz, nullptr, rc);
-        }
+    }
+    void *q = knn.queue();
+    if (sameBox) {
+      knn.knearest_into_many(xyzDev, nSz, fSz, cell0, kSz, colsDev,
+                             fSz * nSz * kSz, nullptr, rc, false);
+    } else {
+      for (int f = 0; f < nF; ++f) {
+        const linkcell::Cell cell = linkcell::Cell::ortho(
+            box[static_cast<std::size_t>(f) * 3 + 0],
+            box[static_cast<std::size_t>(f) * 3 + 1],
+            box[static_cast<std::size_t>(f) * 3 + 2]);
+        knn.knearest_into(xyzDev + static_cast<std::size_t>(f) * nSz * 3, nSz,
+                          cell, kSz,
+                          colsDev + static_cast<std::size_t>(f) * nSz * kSz,
+                          nSz * kSz, nullptr, rc);
       }
     }
     auto launchArgs = [](void **raw, std::size_t n) {
@@ -673,24 +677,24 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
     {
       void *raw[] = {&ws.dcols.p, &nA, &nF, &kM, &ws.dmdeg.p, &ws.dmcols.p};
       auto a = launchArgs(raw, sizeof(raw) / sizeof(raw[0]));
-      kMut->launch(dim3(grid), dim3(block), 0, nullptr, a, true);
+      kMut->launch(dim3(grid), dim3(block), 0, q, a, false);
     }
     {
       void *raw[] = {&ws.dmdeg.p, &ws.dmcols.p, &nA, &nF, &mR, &ws.dnRings.p,
                      &ws.dringAtoms.p, &ws.ddropped.p};
       auto a = launchArgs(raw, sizeof(raw) / sizeof(raw[0]));
-      kSix->launch(dim3(grid), dim3(block), 0, nullptr, a, true);
+      kSix->launch(dim3(grid), dim3(block), 0, q, a, false);
     }
     {
       void *raw[] = {&ws.dnRings.p, &ws.dringAtoms.p, &nA, &nF, &mR, &mP,
                      &ws.dthroughCount.p, &ws.dthrough.p};
       auto a = launchArgs(raw, sizeof(raw) / sizeof(raw[0]));
-      kInv->launch(dim3(ringGrid), dim3(block), 0, nullptr, a, true);
+      kInv->launch(dim3(ringGrid), dim3(block), 0, q, a, false);
     }
     {
       void *raw[] = {&ws.dthroughCount.p, &ws.dthrough.p, &nA, &nF, &mP};
       auto a = launchArgs(raw, sizeof(raw) / sizeof(raw[0]));
-      kSort->launch(dim3(grid), dim3(block), 0, nullptr, a, true);
+      kSort->launch(dim3(grid), dim3(block), 0, q, a, false);
     }
     {
       int maxPairs = maxRings * 8;
@@ -701,13 +705,13 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
                          &mR,                  &mP,              &maxPairs,
                          &ws.dnPairs.p,        &ws.dpairs.p};
       auto a = launchArgs(emitRaw, sizeof(emitRaw) / sizeof(emitRaw[0]));
-      kEmit->launch(dim3(ringGrid), dim3(block), 0, nullptr, a, true);
+      kEmit->launch(dim3(ringGrid), dim3(block), 0, q, a, false);
       void *hcRaw[] = {&ws.dnPairs.p,  &ws.dpairs.p,        &ws.dringAtoms.p,
                        &ws.dthroughCount.p, &ws.dthrough.p, &nA,
                        &nF,            &mR,                 &mP,
                        &maxPairs,      &ws.dhc.p};
       auto b = launchArgs(hcRaw, sizeof(hcRaw) / sizeof(hcRaw[0]));
-      kHc->launch(dim3(pairGrid), dim3(block), 0, nullptr, b, true);
+      kHc->launch(dim3(pairGrid), dim3(block), 0, q, b, false);
     }
     {
       void *raw[] = {&ws.dnRings.p,        &ws.dringAtoms.p, &ws.dthroughCount.p,
@@ -715,15 +719,16 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
                      &nF,                  &mR,              &mP,
                      &ws.dddc.p};
       auto a = launchArgs(raw, sizeof(raw) / sizeof(raw[0]));
-      kDdc->launch(dim3(ringGrid), dim3(block), 0, nullptr, a, true);
+      kDdc->launch(dim3(ringGrid), dim3(block), 0, q, a, false);
     }
     {
       void *raw[] = {&ws.dnRings.p,  &ws.dringAtoms.p, &ws.dhc.p,    &ws.dddc.p,
                      &nA,            &nF,              &mR,          &ws.datomHc.p,
                      &ws.datomDdc.p, &ws.dsix.p};
       auto a = launchArgs(raw, sizeof(raw) / sizeof(raw[0]));
-      kAtom->launch(dim3(ringGrid), dim3(block), 0, nullptr, a, true);
+      kAtom->launch(dim3(ringGrid), dim3(block), 0, q, a, false);
     }
+    knn.wait();
     out.computeMs = msSince(t0);
 
     out.sixCount.assign(nN, 0);
