@@ -29,6 +29,7 @@ test_sources = {
   'voronoi': 'test_voronoi.cpp',
   'structure_desc': 'test_structure_desc.cpp',
   'cage_affiliation': 'test_cage_affiliation.cpp',
+  'gpu_residency': 'test_gpu_residency.cpp',
 }
 
 if readcon_dep.found()
@@ -102,6 +103,13 @@ if vesin_dep.found()
 endif
 executable('bench_overhead', 'bench_overhead.cpp',
   dependencies: _overhead_deps,
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('bench_gpu_batch', 'bench_gpu_batch.cpp',
+  dependencies: [yds_dep],
   cpp_args: _args,
   link_args: _test_link_args,
   include_directories: _incdirs,

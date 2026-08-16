@@ -9,6 +9,8 @@ ydslib_sources = files(
   'cage_affiliation.cpp',
   'cluster.cpp',
   'franzblau.cpp',
+  'gpu_residency.cpp',
+  'gpu_batch.cpp',
   'generic.cpp',
   'ira_sofi.cpp',
   'cage_canon.cpp',
