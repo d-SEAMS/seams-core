@@ -1,0 +1,64 @@
+.. index:: pair: namespace; gpu
+.. _doxid-namespacegpu:
+
+namespace gpu
+=============
+
+.. toctree::
+	:hidden:
+
+	struct_gpu_BatchResult.rst
+	struct_gpu_DeviceInfo.rst
+	struct_gpu_Footprint.rst
+	struct_gpu_Plan.rst
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace gpu {
+
+	// structs
+
+	struct :ref:`BatchResult<doxid-structgpu_1_1_batch_result>`;
+	struct :ref:`DeviceInfo<doxid-structgpu_1_1_device_info>`;
+	struct :ref:`Footprint<doxid-structgpu_1_1_footprint>`;
+	struct :ref:`Plan<doxid-structgpu_1_1_plan>`;
+
+	// global functions
+
+	:ref:`BatchResult<doxid-structgpu_1_1_batch_result>` :ref:`analyzeResident<doxid-namespacegpu_1a248cd4f5d936bc2c0a05bd668737c7b6>`(const double* xyz, const double* box, int nAtoms, int nFrames, double rc = 5.5);
+	:ref:`DeviceInfo<doxid-structgpu_1_1_device_info>` :target:`probeDevice<doxid-namespacegpu_1aa686ad342cce27d1a34ebd5ba5878f79>`();
+	:ref:`Footprint<doxid-structgpu_1_1_footprint>` :target:`estimateFootprint<doxid-namespacegpu_1a5e96b0fb97bcce4c6cca5e5888bea7a6>`(int nAtoms, int nFrames, int kMax = 16, int maxSixRingsPerAtom = 16);
+	int :target:`maxResidentFrames<doxid-namespacegpu_1a423e858b483752f380c8f4939a899e78>`(const :ref:`DeviceInfo<doxid-structgpu_1_1_device_info>`& dev, int nAtoms, int kMax = 16, int maxSixRingsPerAtom = 16, double safety = 0.80);
+	:ref:`Plan<doxid-structgpu_1_1_plan>` :target:`planBatch<doxid-namespacegpu_1a36de5ad975f1dee03bd8b55ccd15a4c3>`(int nAtoms, int requestedFrames, int kMax = 16, int maxSixRingsPerAtom = 16, double safety = 0.80);
+
+	} // namespace gpu
+.. _details-namespacegpu:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Global Functions
+----------------
+
+.. index:: pair: function; analyzeResident
+.. _doxid-namespacegpu_1a248cd4f5d936bc2c0a05bd668737c7b6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`BatchResult<doxid-structgpu_1_1_batch_result>` analyzeResident(const double* xyz, const double* box, int nAtoms, int nFrames, double rc = 5.5)
+
+xyz is frame-major, atom, xyz.
+
+box is frame-major, three lengths. rc is the cell-list cutoff; 5.5 matches the host k-NN candidate shell.
+

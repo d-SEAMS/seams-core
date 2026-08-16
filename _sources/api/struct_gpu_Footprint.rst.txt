@@ -1,0 +1,30 @@
+.. index:: pair: struct; gpu::Footprint
+.. _doxid-structgpu_1_1_footprint:
+
+struct gpu::Footprint
+=====================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <gpu_residency.hpp>
+	
+	struct Footprint {
+		// fields
+	
+		int :target:`nAtoms<doxid-structgpu_1_1_footprint_1a9465d5bc892337f8c15b80c98b71e216>` = 0;
+		int :target:`nFrames<doxid-structgpu_1_1_footprint_1a0e4fc0f777fae3d42f0b19b2326b42f0>` = 0;
+		int :target:`kMax<doxid-structgpu_1_1_footprint_1aaad6c2ec782a264df743ce61cef37ba8>` = 16;
+		int :target:`maxSixRingsPerAtom<doxid-structgpu_1_1_footprint_1ab16986c20c49edf9ff98cb97867fc38a>` = 16;
+		std::size_t :target:`xyzBytes<doxid-structgpu_1_1_footprint_1a44eccf2be130cc06d484a426683557e3>` = 0;
+		std::size_t :target:`nlistBytes<doxid-structgpu_1_1_footprint_1ab473038da5c197da756b2f3812d3258f>` = 0;
+		std::size_t :target:`ringsBytes<doxid-structgpu_1_1_footprint_1a0c4b0995a0210b0def820bd933d79d9b>` = 0;
+		std::size_t :target:`labelBytes<doxid-structgpu_1_1_footprint_1a7575de4c305fb2b5c0cb88d4aa06e9ae>` = 0;
+		std::size_t :target:`totalBytes<doxid-structgpu_1_1_footprint_1a453d9e67f3164e9cac5670675e5e0554>` = 0;
+	};

@@ -8,6 +8,7 @@ Global Namespace
 	:hidden:
 
 	namespace_absor.rst
+	namespace_gpu.rst
 	namespace_ira.rst
 	namespace_match.rst
 	namespace_pntToPnt.rst
@@ -31,6 +32,7 @@ Global Namespace
 	namespace :ref:`chill<doxid-namespacechill>`;
 	namespace :ref:`clump<doxid-namespaceclump>`;
 	namespace :ref:`gen<doxid-namespacegen>`;
+	namespace :ref:`gpu<doxid-namespacegpu>`;
 	namespace :ref:`ira<doxid-namespaceira>`;
 	namespace :ref:`match<doxid-namespacematch>`;
 	namespace :ref:`molSys<doxid-namespacemol_sys>`;
@@ -41,6 +43,7 @@ Global Namespace
 	namespace :ref:`rdf2<doxid-namespacerdf2>`;
 	namespace :ref:`ring<doxid-namespacering>`;
 	namespace :ref:`seams<doxid-namespaceseams>`;
+		namespace :ref:`seams::cfg<doxid-namespaceseams_1_1cfg>`;
 		namespace :ref:`seams::sphericart_ylm<doxid-namespaceseams_1_1sphericart__ylm>`;
 		namespace :ref:`seams::steinhardt<doxid-namespaceseams_1_1steinhardt>`;
 	namespace :ref:`sinp<doxid-namespacesinp>`;

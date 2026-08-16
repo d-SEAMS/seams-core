@@ -1,0 +1,26 @@
+.. index:: pair: struct; gpu::Plan
+.. _doxid-structgpu_1_1_plan:
+
+struct gpu::Plan
+================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <gpu_residency.hpp>
+	
+	struct Plan {
+		// fields
+	
+		bool :target:`resident<doxid-structgpu_1_1_plan_1ab1c938c085ac443d1be9df17c54dc15c>` = false;
+		int :target:`frames<doxid-structgpu_1_1_plan_1ad96d06fdc72c18378dd452832a70ea83>` = 0;
+		:ref:`Footprint<doxid-structgpu_1_1_footprint>` :target:`foot<doxid-structgpu_1_1_plan_1a1086b17671aa3043e3228c29c0c783af>`;
+		:ref:`DeviceInfo<doxid-structgpu_1_1_device_info>` :target:`device<doxid-structgpu_1_1_plan_1a51255a1bbc92f0f62657f764bd44fe29>`;
+		std::string :target:`reason<doxid-structgpu_1_1_plan_1a3e9b7b27194f7d4dc9ee50d024aa628a>`;
+	};

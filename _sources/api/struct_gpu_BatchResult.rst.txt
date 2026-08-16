@@ -1,0 +1,31 @@
+.. index:: pair: struct; gpu::BatchResult
+.. _doxid-structgpu_1_1_batch_result:
+
+struct gpu::BatchResult
+=======================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <gpu_batch.hpp>
+	
+	struct BatchResult {
+		// fields
+	
+		:ref:`Plan<doxid-structgpu_1_1_plan>` :target:`plan<doxid-structgpu_1_1_batch_result_1a904866eb6e3bc39730f2e2626530a129>`;
+		std::vector<int> :target:`sixCount<doxid-structgpu_1_1_batch_result_1a7ad83b1890c8860121d34b52669ece96>`;
+		std::vector<int> :target:`atomHc<doxid-structgpu_1_1_batch_result_1af4536b2e33674151f4082c28f6fa752e>`;
+		std::vector<int> :target:`atomDdc<doxid-structgpu_1_1_batch_result_1af9aeedd1d67929018064906cb44cfb4c>`;
+		std::vector<int> :target:`nRings<doxid-structgpu_1_1_batch_result_1ab851d787241b52d9210cd08b9dc3c361>`;
+		int :target:`ringsDropped<doxid-structgpu_1_1_batch_result_1aa2bf91a0e7f7a2dccfc3c4139e54f6fa>` = 0;
+		double :target:`uploadMs<doxid-structgpu_1_1_batch_result_1a32c3a277a79bbc9a6c0fa6901117cac2>` = 0.0;
+		double :target:`computeMs<doxid-structgpu_1_1_batch_result_1a7db619777f01296286cb224c04ff6ba7>` = 0.0;
+		double :target:`downloadMs<doxid-structgpu_1_1_batch_result_1ad4ba81e3f6d6bb265a5e689aee0de4fc>` = 0.0;
+		std::string :target:`error<doxid-structgpu_1_1_batch_result_1a9b8289baca55bd98812d4e30239ac4c9>`;
+	};

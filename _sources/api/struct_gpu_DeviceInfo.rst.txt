@@ -1,0 +1,28 @@
+.. index:: pair: struct; gpu::DeviceInfo
+.. _doxid-structgpu_1_1_device_info:
+
+struct gpu::DeviceInfo
+======================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <gpu_residency.hpp>
+	
+	struct DeviceInfo {
+		// fields
+	
+		bool :target:`available<doxid-structgpu_1_1_device_info_1aa906d2f24ad5737eb03a4766f5866f24>` = false;
+		std::string :target:`name<doxid-structgpu_1_1_device_info_1a65c0117d3c9104a8e938319372ac666b>`;
+		int :target:`computeMajor<doxid-structgpu_1_1_device_info_1ab85fa71864d523b0c41d735a053fb064>` = 0;
+		int :target:`computeMinor<doxid-structgpu_1_1_device_info_1ad07d8780126008d9aad09d8b9da844b1>` = 0;
+		std::size_t :target:`totalBytes<doxid-structgpu_1_1_device_info_1a2740e6fd1b274ef8fdba12b2dd1eec48>` = 0;
+		std::size_t :target:`freeBytes<doxid-structgpu_1_1_device_info_1ac316ae8f9bd37bee8327159b7d06e1be>` = 0;
+		std::string :target:`reason<doxid-structgpu_1_1_device_info_1a858e8921bb84be9d553e8a358630d588>`;
+	};
