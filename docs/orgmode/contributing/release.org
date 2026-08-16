@@ -55,7 +55,10 @@ Do not add a language binding here. Do not resurrect
 8. Point PydSEAMSlib and yodaStruct
    ~subprojects/seams-core.wrap~ ~revision~ at that tag. Bump
    those package versions to the same ~X.Y.Z~ when the wrap is
-   the only change. Tag those repositories on their own schedule.
+   the only change. When the wrap stays and a front end binds new
+   engine surfaces, cut a frontend-only minor: keep the wrap tag,
+   bump the package version, and tag that repository. Tag those
+   repositories on their own schedule.
 9. Zenodo: run ~repro/stage_zenodo.sh~ and pin the software in
    that record to the release tag, never a commit. Do not mint a
    new DOI version for prose. See ~repro/zenodo/README.md~.
@@ -86,7 +89,9 @@ Front ends, after the engine tag exists:
 |------+-------|
 | ~subprojects/seams-core.wrap~ | ~revision = vX.Y.Z~ |
 | PydSEAMSlib ~pyproject.toml~, ~meson.build~, ~CITATION.cff~ | package version |
+| PydSEAMSlib ~docs/source/conf.py~ | ~release~ |
 | yodaStruct ~meson.build~, ~CITATION.cff~ | package version |
+| yodaStruct ~docs/source/conf.py~ | ~release~ |
 
 * Newsfragments
 
