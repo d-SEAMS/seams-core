@@ -19,30 +19,30 @@ some changes or improvements or alternatives.
 
 Some things that will increase the chance that your pull request is accepted:
 
-- Write tests (Catch2; `pixi run test` or `meson test -C bbdir`).
-- Follow Conventional Commits below.
+- Write tests.
+- Follow the commit-style below.
 
-## Commit style
+## Commit Style
 
-Subjects use Conventional Commits:
-
-```
-feat(cli): add --print-config for the twelve-factor table
-fix(neighbours): take the LAMMPS dump 3x3 for cutoff lists
-docs(book): document vesin versus linkcell
-```
-
-Prefixes that land here: `feat`, `fix`, `docs`, `chore`, `refactor`,
-`test`. Scope is optional (`cli`, `gpu`, `book`). The 2020
-`fileName: ...` sandwich sample is not the house style.
-
-Name every co-author with a trailer when the work is shared:
+A sample **good commit** is:
 
 ```
-Co-authored-by: Name <email>
+fileName: Thing I did
+Some subHeading things
+
+So this change was to do that thing I thought was good. Also there was this
+other person who thought so too, so then I ate a sandwich and we got the code
+done. I am writing this but really, honestly, two people did this.
+
+
+Co-authored-by: Joel Doe <joel@iexistreally.com>
 ```
 
-Build with pixi or the Nix flake. The engine binary is `seams`
-(`./bbdir/seams` after `pixi run build`). Python is PydSEAMSlib;
-Lua is yodaStruct. Do not add a `yodaStruct -c` / `conf.yaml`
-driver here.
+As is evident, the commit should clearly have:
+
+- The name of the file, or the topic or the subject you have changed or the
+  namespace or the functionality you have added **something:**
+- A line describing **something:**
+- An _(optional)_ subheading with more details
+- An _(optional)_ paragraph or essay on why the change was done and anything else you want to share with the devs.
+- **Co-authorship** IS MANDATORY if applicable. Even if you just had a sandwich with the other person. It won't kill you to share, or to write that.
