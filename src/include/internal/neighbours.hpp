@@ -97,6 +97,22 @@ inline void dumpBoundsToH(const std::vector<double> &box,
   origin[2] = zlo_b;
 }
 
+/// Triclinic dump-cell volume |det(H)| from dumpBoundsToH.
+/// Bound spans Lx*Ly*Lz are not the cell volume when tilt is present.
+inline double dumpVolume(const std::vector<double> &box,
+                         const std::vector<double> &boxLow) {
+  double H[3][3];
+  double origin[3];
+  dumpBoundsToH(box, boxLow, H, origin);
+  const double vol = H[0][0] * H[1][1] * H[2][2];
+  return vol < 0.0 ? -vol : vol;
+}
+
+inline double dumpVolume(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  return dumpVolume(yCloud.box, yCloud.boxLow);
+}
+
 #ifdef SEAMS_HAS_LINKCELL
 /// Map a LAMMPS dump box onto lc_cell.
 inline lc_cell lammpsBoxToLcCell(const std::vector<double> &box,
@@ -154,6 +170,12 @@ inline void residentFrameCell(const double *box, const double *boxLow,
 //! brute-force fallback). The neighbour list does not differentiate
 //! between the types of atoms
 std::vector<std::vector<int>> neighList(
+    double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    int typeI, int typeJ);
+
+//! I-J neighbour list (I==J is like-type and reuses neighListO).
+//! Unlike-type pairs use the same dump MIC as neighListO.
+std::vector<std::vector<int>> neighListPair(
     double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     int typeI, int typeJ);
 

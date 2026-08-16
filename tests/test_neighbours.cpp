@@ -288,8 +288,82 @@ TEST_CASE("neighbour builders return empty when the cloud has no box",
   REQUIRE(cloud.box.empty());
   REQUIRE(nneigh::neighListO(3.5, cloud, 1).empty());
   REQUIRE(nneigh::neighList(3.5, cloud, 1, 1).empty());
+  REQUIRE(nneigh::neighListPair(3.5, cloud, 1, 2).empty());
   REQUIRE(nneigh::halfNeighList(3.5, cloud, 1).empty());
   REQUIRE(nneigh::getNewNeighbourListByIndex(cloud, 3.5).empty());
+}
+
+TEST_CASE("neighListPair finds unlike pair in an orthogonal cell",
+          "[neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  const double lx = 10.0;
+  cloud.box = {lx, lx, lx};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  cloud.currentFrame = 1;
+  const double coords[2][3] = {{0.0, 0.0, 0.0}, {0.5 * lx, 0.0, 0.0}};
+  const int types[2] = {1, 2};
+  for (int i = 0; i < 2; i++) {
+    molSys::Point<double> pt;
+    pt.type = types[i];
+    pt.atomID = i + 1;
+    pt.molID = i + 1;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+
+  auto unlike = nneigh::neighListPair(6.0, cloud, 1, 2);
+  REQUIRE(unlike.size() == 2);
+  REQUIRE(unlike[0][0] == 1);
+  REQUIRE(unlike[1][0] == 2);
+  const bool oneHasTwo =
+      std::find(unlike[0].begin() + 1, unlike[0].end(), 2) != unlike[0].end();
+  const bool twoHasOne =
+      std::find(unlike[1].begin() + 1, unlike[1].end(), 1) != unlike[1].end();
+  REQUIRE(oneHasTwo);
+  REQUIRE(twoHasOne);
+
+  auto like = nneigh::neighListPair(6.0, cloud, 1, 1);
+  REQUIRE(like.size() == 2);
+  REQUIRE(like[0][0] == 1);
+  REQUIRE(like[0].size() == 1);
+  const bool likeHasType2 =
+      std::find(like[0].begin() + 1, like[0].end(), 2) != like[0].end();
+  REQUIRE_FALSE(likeHasType2);
+}
+
+TEST_CASE("neighListPair sees the sheared a-image unlike pair",
+          "[neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  const double coords[2][3] = {{0.2, 0.1, 1.0}, {9.7, 0.1, 1.0}};
+  const int types[2] = {1, 2};
+  for (int i = 0; i < 2; i++) {
+    molSys::Point<double> pt;
+    pt.type = types[i];
+    pt.atomID = i + 1;
+    pt.molID = i + 1;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+  REQUIRE_THAT(gen::periodicDistSq(cloud, 0, 1),
+               Catch::Matchers::WithinAbs(0.25, 1e-9));
+  auto nList = nneigh::neighListPair(1.0, cloud, 1, 2);
+  REQUIRE(nList.size() == 2);
+  const bool oneHasTwo =
+      std::find(nList[0].begin() + 1, nList[0].end(), 2) != nList[0].end();
+  const bool twoHasOne =
+      std::find(nList[1].begin() + 1, nList[1].end(), 1) != nList[1].end();
+  REQUIRE(oneHasTwo);
+  REQUIRE(twoHasOne);
 }
 
 TEST_CASE("neighList same type does not self-include or double-count",
