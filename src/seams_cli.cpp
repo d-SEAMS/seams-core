@@ -10,6 +10,7 @@
 #include <mol_sys.hpp>
 #include <generic.hpp>
 #include <neighbours.hpp>
+#include <density.hpp>
 #include <rdf.hpp>
 #include <seams_config.hpp>
 #include <seams_input.hpp>
@@ -399,6 +400,23 @@ int cmdPairs(std::ostream &os, Cloud &cloud, const site::Table &table) {
   return 0;
 }
 
+int cmdDensityZ(std::ostream &os, Cloud &cloud, int typeI, int bins, int axis) {
+  if (bins <= 0) {
+    const int a = (axis >= 0 && axis <= 2) ? axis : 2;
+    const double span =
+        (static_cast<int>(cloud.box.size()) > a)
+            ? cloud.box[static_cast<std::size_t>(a)]
+            : 0.0;
+    bins = std::max(1, static_cast<int>(std::lround(span / 0.1)));
+  }
+  const auto d = site::densityZ(cloud, typeI, bins, axis);
+  os << "# z rho\n";
+  for (std::size_t i = 0; i < d.z.size(); ++i) {
+    os << d.z[i] << " " << d.rho[i] << "\n";
+  }
+  return 0;
+}
+
 int cmdRdf(std::ostream &os, Cloud &cloud, double rmax, int bins, int typeI,
            int typeJ) {
   if (bins <= 0) {
@@ -552,6 +570,8 @@ int main(int argc, char *argv[]) {
   int rdfTypeJ = 0;
   bool typesSet = false;
   int bins = 0;
+  int densAxis = 2;
+  std::string axisFlag;
 
   const char *progname = (argc ? argv[0] : "seams");
   Parser parser;
@@ -606,7 +626,8 @@ int main(int argc, char *argv[]) {
 
   parser.add(Option("--type", "-t")
                  .argName("I")
-                 .help("Atom type (0 guesses oxygen then type 1)")
+                 .help("Atom type (0 guesses oxygen then type 1; "
+                       "density-z: 0 is every atom)")
                  .handler([&](std::string_view value) {
                    typeI = parseIntegral<int>(value);
                  }));
@@ -648,9 +669,16 @@ int main(int argc, char *argv[]) {
 
   parser.add(Option("--bins")
                  .argName("N")
-                 .help("RDF histogram bins (default rmax/0.1)")
+                 .help("Histogram bins (rdf: rmax/0.1; density-z: L/0.1)")
                  .handler([&](std::string_view value) {
                    bins = parseIntegral<int>(value);
+                 }));
+
+  parser.add(Option("--axis")
+                 .argName("XYZ")
+                 .help("Histogram axis for density-z (x|y|z, default z)")
+                 .handler([&](std::string_view value) {
+                   axisFlag = std::string(value);
                  }));
 
   parser.add(Option("-k")
@@ -707,7 +735,8 @@ int main(int argc, char *argv[]) {
                  }));
 
   parser.add(Positional("command")
-                 .help("read | chill | chill-plus | cages | rdf | cn | pairs")
+                 .help("read | chill | chill-plus | cages | rdf | cn | pairs | "
+                       "density-z")
                  .occurs(zeroOrOneTime)
                  .handler([&](std::string_view value) { cmd = value; }));
 
@@ -765,6 +794,21 @@ int main(int argc, char *argv[]) {
   if (bins < 0) {
     std::cerr << colorizer.error("bad --bins (want N > 0)") << "\n";
     return 2;
+  }
+  if (!axisFlag.empty()) {
+    const auto axisView = trimView(axisFlag);
+    if (axisView == "x" || axisView == "X" || axisView == "0") {
+      densAxis = 0;
+    } else if (axisView == "y" || axisView == "Y" || axisView == "1") {
+      densAxis = 1;
+    } else if (axisView == "z" || axisView == "Z" || axisView == "2") {
+      densAxis = 2;
+    } else {
+      std::cerr << colorizer.error("bad --axis (want x|y|z)") << "\n";
+      std::cerr << colorizer.warning(parser.formatUsage(progname, colorizer))
+                << "\n";
+      return 2;
+    }
   }
 
   if (cmd.empty() || file.empty()) {
@@ -839,13 +883,17 @@ int main(int argc, char *argv[]) {
     if (cmd == "pairs") {
       return cmdPairs(os, cloud, siteTable);
     }
+    if (cmd == "density-z") {
+      return cmdDensityZ(os, cloud, typeI, bins, densAxis);
+    }
     os << colorizer.error("unknown command: ") << cmd << "\n";
     return 2;
   };
 
   const bool loadAll =
       cmd == "pairs" || (cmd == "cn" && ionsFlag) ||
-      ((cmd == "rdf" || cmd == "cn") && typesSet && rdfTypeI != rdfTypeJ);
+      ((cmd == "rdf" || cmd == "cn") && typesSet && rdfTypeI != rdfTypeJ) ||
+      (cmd == "density-z" && typeI <= 0);
   const int loadType = loadAll ? -1 : typeI;
 
   if (last <= 0 || last == frame) {

@@ -419,6 +419,15 @@ if get_option('with_cli')
     ],
     depends: [seams_exe])
   test(
+    'seams_help_mentions_density_z',
+    python3,
+    args: [
+      '-c',
+      'import subprocess,sys; p=subprocess.run([sys.argv[1],"--help"],capture_output=True,text=True); text=p.stdout+p.stderr; sys.exit(0 if p.returncode==0 and "density-z" in text and "--axis" in text else 1)',
+      seams_exe.full_path(),
+    ],
+    depends: [seams_exe])
+  test(
     'seams_unknown_command_exit_2',
     python3,
     args: [
