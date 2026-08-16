@@ -130,6 +130,20 @@ TEST_CASE("SIMD handles exact half-box displacements", "[simd]") {
   }
 }
 
+TEST_CASE("ortho SIMD wrap on dump bound spans misses the a-image", "[simd]") {
+  // Sheared pair (0.2, 0.1, 1) and (9.7, 0.1, 1) on dump box
+  // {15, 8.66, 10, xy=5}. H-image r^2 is 0.25. Independent wrap
+  // on the bound span 15 yields 5.5^2 = 30.25.
+  constexpr size_t n = 1;
+  const double dx[n] = {0.2 - 9.7};
+  const double dy[n] = {0.1 - 0.1};
+  const double dz[n] = {1.0 - 1.0};
+  double out[n] = {-1.0};
+  seams::BatchPeriodicDistSq(dx, dy, dz, 15.0, 8.660254037844386, 10.0, out, n);
+  REQUIRE_THAT(out[0], Catch::Matchers::WithinAbs(30.25, 1e-12));
+  REQUIRE(std::abs(out[0] - 0.25) > 1.0);
+}
+
 TEST_CASE("SIMD with negative displacements matches scalar", "[simd]") {
   constexpr size_t n = 16;
   std::mt19937_64 rng(999);

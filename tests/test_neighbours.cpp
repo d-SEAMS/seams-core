@@ -591,6 +591,8 @@ TEST_CASE("tilt dump cutoff list finds the a-image pair", "[neighbours]") {
     cloud.pts.push_back(pt);
     cloud.idIndexMap[i + 1] = i;
   }
+  REQUIRE_THAT(gen::periodicDistSq(cloud, 0, 1),
+               Catch::Matchers::WithinAbs(0.25, 1e-9));
   auto nList = nneigh::neighListO(1.0, cloud, 1);
   REQUIRE(nList.size() == 2);
   REQUIRE(nList[0][0] == 1);

@@ -13,6 +13,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -131,6 +132,42 @@ TEST_CASE("writeCluster writes ice cluster info", "[seams_output]") {
 }
 
 // -- writeDump tests --
+
+TEST_CASE("writeDump emits tilt on a sheared dump box", "[seams_output]") {
+  auto cloud = makeTestCloud(2);
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  std::string tmpPath =
+      fs::temp_directory_path().append("dseams_test_dump_tilt/").string();
+  REQUIRE(sout::writeDump(cloud, tmpPath, "tilt.lammpstrj") == 0);
+  std::ifstream in(tmpPath + "tilt.lammpstrj");
+  REQUIRE(in.good());
+  std::string line;
+  std::getline(in, line);
+  REQUIRE(line == "ITEM: TIMESTEP");
+  std::getline(in, line);
+  std::getline(in, line);
+  REQUIRE(line == "ITEM: NUMBER OF ATOMS");
+  std::getline(in, line);
+  std::getline(in, line);
+  REQUIRE(line == "ITEM: BOX BOUNDS xy xz yz pp pp pp");
+  std::getline(in, line);
+  REQUIRE(line == "0 15 5");
+  std::getline(in, line);
+  {
+    std::istringstream ys(line);
+    double lo = 0.0, hi = 0.0, xy = 1.0;
+    REQUIRE(static_cast<bool>(ys >> lo >> hi >> xy));
+    REQUIRE_THAT(lo, Catch::Matchers::WithinAbs(0.0, 1e-12));
+    REQUIRE_THAT(hi, Catch::Matchers::WithinAbs(8.660254037844386, 1e-5));
+    REQUIRE_THAT(xy, Catch::Matchers::WithinAbs(0.0, 1e-12));
+  }
+  std::getline(in, line);
+  REQUIRE(line == "0 10 0");
+
+  std::error_code _ec_;
+  fs::remove_all(tmpPath, _ec_);
+}
 
 TEST_CASE("writeDump writes LAMMPS dump format", "[seams_output]") {
   auto cloud = makeTestCloud(4);

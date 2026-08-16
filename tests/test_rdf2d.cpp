@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <generic.hpp>
 #include <mol_sys.hpp>
 #include <rdf2d.hpp>
 
@@ -139,6 +140,8 @@ TEST_CASE("sampleRDF_AA histograms the tilt a-image pair", "[rdf2d]") {
     cloud.pts.push_back(pt);
     cloud.idIndexMap[i + 1] = i;
   }
+  REQUIRE_THAT(gen::periodicDistSq(cloud, 0, 1),
+               Catch::Matchers::WithinAbs(0.25, 1e-9));
   const double cutoff = 1.0;
   const double binwidth = 0.1;
   const int nbin = 10;
