@@ -79,36 +79,23 @@ int parseDumpFields(std::string_view line, double *out, int cap) {
       break;
     }
     double value = 0;
-    const char *next = p;
-    if constexpr (requires(const char *a, const char *b, double v) {
-                    std::from_chars(a, b, v);
-                  }) {
-      const auto parsed = std::from_chars(p, end, value);
-      if (parsed.ec != std::errc{}) {
-        while (p < end && *p != ' ' && *p != '\t') {
-          ++p;
-        }
-        continue;
+    // libc++ on the macOS 11 conda SDK deletes from_chars(double).
+    // Dump fields are C-locale decimals; copy one token and use strtod.
+    char buf[64];
+    const auto ntok = std::min<std::size_t>(static_cast<std::size_t>(end - p),
+                                            sizeof(buf) - 1);
+    std::memcpy(buf, p, ntok);
+    buf[ntok] = '\0';
+    char *endp = nullptr;
+    value = std::strtod(buf, &endp);
+    if (endp == buf) {
+      while (p < end && *p != ' ' && *p != '\t') {
+        ++p;
       }
-      next = parsed.ptr;
-    } else {
-      char buf[64];
-      const auto ntok = std::min<std::size_t>(static_cast<std::size_t>(end - p),
-                                              sizeof(buf) - 1);
-      std::memcpy(buf, p, ntok);
-      buf[ntok] = '\0';
-      char *endp = nullptr;
-      value = std::strtod(buf, &endp);
-      if (endp == buf) {
-        while (p < end && *p != ' ' && *p != '\t') {
-          ++p;
-        }
-        continue;
-      }
-      next = p + (endp - buf);
+      continue;
     }
     out[n++] = value;
-    p = next;
+    p += (endp - buf);
   }
   return n;
 }
