@@ -608,4 +608,38 @@ TEST_CASE("tilt dump cutoff list finds the a-image pair", "[neighbours]") {
       std::find(byIndex[0].begin() + 1, byIndex[0].end(), 1) !=
       byIndex[0].end();
   REQUIRE(idx01);
+
+  nneigh::SkinNeighborList skin(1.0, 0.5, 1, nneigh::BondGraph::Cutoff);
+  const auto &skinList = skin.update(cloud);
+  REQUIRE(skin.lastRebuilt());
+  const bool skin01 =
+      std::find(skinList[0].begin() + 1, skinList[0].end(), 2) !=
+      skinList[0].end();
+  REQUIRE(skin01);
+  cloud.box[3] = 4.0;
+  skin.update(cloud);
+  REQUIRE(skin.lastRebuilt());
 }
+
+#ifdef SEAMS_HAS_LINKCELL
+TEST_CASE("residentFrameCell uses dump H when nBox is 6", "[neighbours]") {
+  const double box[6] = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  linkcell::Cell cell = linkcell::Cell::ortho(1.0, 1.0, 1.0);
+  const double *frameLens = box;
+  nneigh::residentFrameCell(box, nullptr, 6, cell, frameLens);
+  REQUIRE(frameLens == nullptr);
+  REQUIRE_THAT(cell.a[0], Catch::Matchers::WithinAbs(10.0, 1e-12));
+  REQUIRE_THAT(cell.b[0], Catch::Matchers::WithinAbs(5.0, 1e-12));
+}
+
+TEST_CASE("residentFrameCell stays ortho for three lengths", "[neighbours]") {
+  const double box[3] = {10.0, 11.0, 12.0};
+  linkcell::Cell cell = linkcell::Cell::ortho(1.0, 1.0, 1.0);
+  const double *frameLens = nullptr;
+  nneigh::residentFrameCell(box, nullptr, 3, cell, frameLens);
+  REQUIRE(frameLens == box);
+  REQUIRE_THAT(cell.a[0], Catch::Matchers::WithinAbs(10.0, 1e-12));
+  REQUIRE_THAT(cell.b[1], Catch::Matchers::WithinAbs(11.0, 1e-12));
+  REQUIRE_THAT(cell.c[2], Catch::Matchers::WithinAbs(12.0, 1e-12));
+}
+#endif

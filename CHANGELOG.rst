@@ -5,6 +5,12 @@ Changelog
 Unreleased
 ==========
 
+Version 2.3.3 (2026-08-16)
+===========================
+
+Cutoff fallbacks and the skin Verlet refresh use the dump 3x3
+minimum image, not a diagonal of bound spans.
+
 Version 2.3.2 (2026-08-16)
 ===========================
 

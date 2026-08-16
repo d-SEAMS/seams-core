@@ -648,18 +648,7 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
     const std::size_t fSz = static_cast<std::size_t>(nF);
     linkcell::Cell cell0 = linkcell::Cell::ortho(box[0], box[1], box[2]);
     const double *frameLens = box;
-    if (boxLow != nullptr || nBox >= 6) {
-      std::vector<double> dump(static_cast<std::size_t>(std::max(nBox, 3)));
-      for (int i = 0; i < nBox && i < static_cast<int>(dump.size()); ++i) {
-        dump[static_cast<std::size_t>(i)] = box[i];
-      }
-      std::vector<double> lo;
-      if (boxLow != nullptr) {
-        lo = {boxLow[0], boxLow[1], boxLow[2]};
-      }
-      cell0 = nneigh::lammpsBoxToLinkcell(dump, lo);
-      frameLens = nullptr;
-    }
+    nneigh::residentFrameCell(box, boxLow, nBox, cell0, frameLens);
     void *q = knn.queue();
     // One multi-frame launch on the workspace stream. Per-frame box
     // walks serialize on the same bin buffers and leave the SMs idle.

@@ -73,6 +73,32 @@ std::vector<int> indexToIDTable(
   return indexToID;
 }
 
+// Ortho SIMD wrap on box[0..2] is wrong for a tilt dump: those
+// entries are bound spans, not lx, ly, lz. gen::periodicDistSq
+// already inverts the dump 3x3 when box.size() >= 6.
+void fillPairDistSq(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
+    const int *jatom, std::size_t n, double *dx, double *dy, double *dz,
+    double *distSq) {
+  if (yCloud.box.size() >= 6) {
+    for (std::size_t k = 0; k < n; k++) {
+      distSq[k] = gen::periodicDistSq(yCloud, iatom, jatom[k]);
+    }
+    return;
+  }
+  const double xi = yCloud.pts[static_cast<std::size_t>(iatom)].x;
+  const double yi = yCloud.pts[static_cast<std::size_t>(iatom)].y;
+  const double zi = yCloud.pts[static_cast<std::size_t>(iatom)].z;
+  for (std::size_t k = 0; k < n; k++) {
+    const auto &pj = yCloud.pts[static_cast<std::size_t>(jatom[k])];
+    dx[k] = xi - pj.x;
+    dy[k] = yi - pj.y;
+    dz[k] = zi - pj.z;
+  }
+  seams::BatchPeriodicDistSq(dx, dy, dz, yCloud.box[0], yCloud.box[1],
+                             yCloud.box[2], distSq, n);
+}
+
 #ifdef SEAMS_HAS_VESIN
 /**
  * @details Runs the vesin cell list over the particles named by @a subset and
@@ -326,9 +352,6 @@ nneigh::neighListO(double rcutoff,
   nList = seedWithSelfIDs(indexToID, yCloud.nop);
 
   const double rcutoffSq = rcutoff * rcutoff;
-  const double bx = yCloud.box[0];
-  const double by = yCloud.box[1];
-  const double bz = yCloud.box[2];
 
   // Scratch buffers for the batched distance kernel, sized once for the
   // largest batch and reused across iatom
@@ -346,21 +369,8 @@ nneigh::neighListO(double rcutoff,
       continue;
     }
 
-    const double xi = yCloud.pts[iatom].x;
-    const double yi = yCloud.pts[iatom].y;
-    const double zi = yCloud.pts[iatom].z;
-    for (size_t jj = 0; jj < remaining; jj++) {
-      const int jatom = typeIIndices[ii + 1 + jj];
-      dx[jj] = xi - yCloud.pts[jatom].x;
-      dy[jj] = yi - yCloud.pts[jatom].y;
-      dz[jj] = zi - yCloud.pts[jatom].z;
-    }
-
-    // Batch compute squared periodic distances (SIMD when available)
-    seams::BatchPeriodicDistSq(std::span(dx).first(remaining),
-                               std::span(dy).first(remaining),
-                               std::span(dz).first(remaining), bx, by, bz,
-                               std::span(distSq).first(remaining));
+    fillPairDistSq(yCloud, iatom, typeIIndices.data() + ii + 1, remaining,
+                   dx.data(), dy.data(), dz.data(), distSq.data());
 
     // Filter by cutoff and update neighbour lists
     for (size_t jj = 0; jj < remaining; jj++) {
@@ -492,34 +502,20 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
   // -------------------------------------------------------
   // Compare squared distances so that the per-pair square root is avoided
   const double cutoffSq = cutoff * cutoff;
-  const double bx = yCloud.box[0];
-  const double by = yCloud.box[1];
-  const double bz = yCloud.box[2];
 
   // Scratch buffers for the batched distance kernel, sized once for the
   // largest batch and reused across iatom
   std::vector<double> dx(yCloud.nop), dy(yCloud.nop), dz(yCloud.nop);
   std::vector<double> distSq(yCloud.nop);
+  std::vector<int> allIdx(static_cast<std::size_t>(yCloud.nop));
+  std::iota(allIdx.begin(), allIdx.end(), 0);
 
   // Loop through every iatom and find nearest neighbours within cutoff
   for (int iatom = 0; iatom < yCloud.nop - 1; iatom++) {
     const size_t remaining = static_cast<size_t>(yCloud.nop - iatom - 1);
 
-    const double xi = yCloud.pts[iatom].x;
-    const double yi = yCloud.pts[iatom].y;
-    const double zi = yCloud.pts[iatom].z;
-    for (size_t jj = 0; jj < remaining; jj++) {
-      const int jatom = iatom + 1 + static_cast<int>(jj);
-      dx[jj] = xi - yCloud.pts[jatom].x;
-      dy[jj] = yi - yCloud.pts[jatom].y;
-      dz[jj] = zi - yCloud.pts[jatom].z;
-    }
-
-    // Batch compute squared periodic distances (SIMD when available)
-    seams::BatchPeriodicDistSq(std::span(dx).first(remaining),
-                               std::span(dy).first(remaining),
-                               std::span(dz).first(remaining), bx, by, bz,
-                               std::span(distSq).first(remaining));
+    fillPairDistSq(yCloud, iatom, allIdx.data() + iatom + 1, remaining,
+                   dx.data(), dy.data(), dz.data(), distSq.data());
 
     // Update the neighbour indices for iatom and jatom both (full list)
     for (size_t jj = 0; jj < remaining; jj++) {
@@ -669,6 +665,37 @@ std::vector<int> nominatePacked(
     return nom;
   }
 #endif
+  std::vector<int> owners;
+  owners.reserve(static_cast<std::size_t>(n));
+  for (int i = 0; i < n; i++) {
+    if (yCloud.pts[static_cast<std::size_t>(i)].type == typeI) {
+      owners.push_back(i);
+    }
+  }
+  if (yCloud.box.size() >= 6) {
+    for (const int i : owners) {
+      std::priority_queue<std::pair<double, int>> heap;
+      for (const int j : owners) {
+        if (j == i) {
+          continue;
+        }
+        const double d2 = gen::periodicDistSq(yCloud, i, j);
+        if (static_cast<int>(heap.size()) < k) {
+          heap.push({d2, j});
+        } else if (d2 < heap.top().first) {
+          heap.pop();
+          heap.push({d2, j});
+        }
+      }
+      const int take = std::min(k, static_cast<int>(heap.size()));
+      for (int t = take - 1; t >= 0; t--) {
+        nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+            static_cast<std::size_t>(t)] = heap.top().second;
+        heap.pop();
+      }
+    }
+    return nom;
+  }
   const double bx = yCloud.box[0];
   const double by = yCloud.box[1];
   const double bz = yCloud.box[2];
@@ -691,8 +718,6 @@ std::vector<int> nominatePacked(
 
   std::vector<int> head(static_cast<std::size_t>(ncell), -1);
   std::vector<int> next(static_cast<std::size_t>(yCloud.nop), -1);
-  std::vector<int> owners;
-  owners.reserve(static_cast<std::size_t>(yCloud.nop));
 
   auto wrap = [](double x, double L) {
     double t = x / L;
@@ -724,10 +749,7 @@ std::vector<int> nominatePacked(
     return (iz * ny + iy) * nx + ix;
   };
 
-  for (int i = 0; i < yCloud.nop; i++) {
-    if (yCloud.pts[static_cast<std::size_t>(i)].type != typeI) {
-      continue;
-    }
+  for (const int i : owners) {
     int ix = 0;
     int iy = 0;
     int iz = 0;
@@ -735,7 +757,6 @@ std::vector<int> nominatePacked(
     const int c = cellIndex(ix, iy, iz);
     next[static_cast<std::size_t>(i)] = head[static_cast<std::size_t>(c)];
     head[static_cast<std::size_t>(c)] = i;
-    owners.push_back(i);
   }
 
   const int maxReach = std::max({nx, ny, nz}) / 2 + 1;
@@ -1001,9 +1022,11 @@ bool nneigh::SkinNeighborList::mustRebuild(
   if (static_cast<int>(x0_.size()) != yCloud.nop || yCloud.box.size() < 3) {
     return true;
   }
-  for (int k = 0; k < 3; k++) {
-    if (std::fabs(yCloud.box[k] - box0_[static_cast<std::size_t>(k)]) >
-        1e-8) {
+  if (yCloud.box.size() != box0_.size()) {
+    return true;
+  }
+  for (std::size_t k = 0; k < yCloud.box.size(); k++) {
+    if (std::fabs(yCloud.box[k] - box0_[k]) > 1e-8) {
       return true;
     }
   }
@@ -1070,7 +1093,7 @@ void nneigh::SkinNeighborList::rebuildCandidates(
     y0_[static_cast<std::size_t>(i)] = yCloud.pts[i].y;
     z0_[static_cast<std::size_t>(i)] = yCloud.pts[i].z;
   }
-  box0_ = {yCloud.box[0], yCloud.box[1], yCloud.box[2]};
+  box0_ = yCloud.box;
 }
 
 void nneigh::SkinNeighborList::refreshBonds(
@@ -1093,7 +1116,17 @@ void nneigh::SkinNeighborList::refreshBonds(
     dz[t] = yCloud.pts[static_cast<std::size_t>(j)].z -
             yCloud.pts[static_cast<std::size_t>(i)].z;
   }
-  if (yCloud.box.size() >= 3 && m > 0) {
+  if (yCloud.box.size() >= 6 && m > 0) {
+    for (std::size_t t = 0; t < m; t++) {
+      const int i = candidates_[t].first;
+      const int j = candidates_[t].second;
+      if (i < 0 || j < 0 || i >= yCloud.nop || j >= yCloud.nop) {
+        r2[t] = 0.0;
+        continue;
+      }
+      r2[t] = gen::periodicDistSq(yCloud, i, j);
+    }
+  } else if (yCloud.box.size() >= 3 && m > 0) {
     seams::BatchPeriodicDistSq(dx.data(), dy.data(), dz.data(), yCloud.box[0],
                                yCloud.box[1], yCloud.box[2], r2.data(), m);
   }
