@@ -81,9 +81,7 @@ void fillPairDistSq(
     const int *jatom, std::size_t n, double *dx, double *dy, double *dz,
     double *distSq) {
   if (yCloud.box.size() >= 6) {
-    for (std::size_t k = 0; k < n; k++) {
-      distSq[k] = gen::periodicDistSq(yCloud, iatom, jatom[k]);
-    }
+    gen::batchPeriodicDistSq(yCloud, iatom, jatom, n, distSq);
     return;
   }
   const double xi = yCloud.pts[static_cast<std::size_t>(iatom)].x;

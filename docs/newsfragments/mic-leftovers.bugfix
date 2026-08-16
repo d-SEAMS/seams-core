@@ -1,2 +1,3 @@
-Steinhardt, hydrogen-bond, and cluster wraps use the dump
-minimum image, not an independent-axis wrap on bound spans.
+Pair distances and leftover wraps use the dump minimum image,
+not an independent-axis wrap on bound spans. Dump writers emit
+xy, xz, yz when the cloud carries tilt.

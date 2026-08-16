@@ -38,15 +38,7 @@ void writeDumpHeader(
   outputFile << yCloud.currentFrame << "\n";
   outputFile << "ITEM: NUMBER OF ATOMS\n";
   outputFile << nAtoms << "\n";
-  outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
-  for (int k = 0; k < 3; k++) {
-    const double lo = (static_cast<size_t>(k) < yCloud.boxLow.size())
-                          ? yCloud.boxLow[k]
-                          : 0.0;
-    const double len =
-        (static_cast<size_t>(k) < yCloud.box.size()) ? yCloud.box[k] : 0.0;
-    outputFile << lo << " " << lo + len << "\n";
-  }
+  gen::writeDumpBoxBounds(outputFile, yCloud);
   outputFile << "ITEM: ATOMS " << columns << "\n";
 }
 
@@ -1896,18 +1888,7 @@ int sout::writeDump(const molSys::PointCloud<molSys::Point<double>, double> &yCl
   outputFile << yCloud.currentFrame << "\n";
   outputFile << "ITEM: NUMBER OF ATOMS\n";
   outputFile << yCloud.nop << "\n";
-  outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
-  for (int k = 0; k < yCloud.boxLow.size(); k++) {
-    outputFile << yCloud.boxLow[k] << " "
-               << yCloud.boxLow[k] + yCloud.box[k]; // print xlo xhi etc
-    // print out the tilt factors too if it is a triclinic box
-    if (yCloud.box.size() == 2 * yCloud.boxLow.size()) {
-      outputFile << " "
-                 << yCloud.box[k + yCloud.boxLow.size()]; // this would be +2
-                                                            // for a 2D box
-    }
-    outputFile << "\n"; // print end of line
-  }                     // end of printing box lengths
+  gen::writeDumpBoxBounds(outputFile, yCloud);
   outputFile << "ITEM: ATOMS id mol type x y z\n";
   // -----------------------
   // Atom lines

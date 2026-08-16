@@ -18,8 +18,12 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstddef>
 #include <filesystem>
 #include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 #include <mol_sys.hpp>
 
 // C++20
@@ -192,6 +196,53 @@ inline double
 periodicDist(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
              int iatom, int jatom) {
   return std::sqrt(periodicDistSq(yCloud, iatom, jatom));
+}
+
+// Scalar pair batch. Highway BatchPeriodicDistSq is ortho-only; a
+// tilt dump (box.size() >= 6) must go through periodicDistSq.
+inline void batchPeriodicDistSq(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
+    const int *jatom, std::size_t n, double *distSq) {
+  for (std::size_t k = 0; k < n; k++) {
+    distSq[k] = periodicDistSq(yCloud, iatom, jatom[k]);
+  }
+}
+
+// Bound spans, then tilt when box.size() >= 6.
+inline std::string formatDumpBox(const std::vector<double> &box) {
+  std::ostringstream oss;
+  if (box.size() >= 3) {
+    oss << box[0] << ' ' << box[1] << ' ' << box[2];
+  }
+  if (box.size() >= 6) {
+    oss << " xy " << box[3] << " xz " << box[4] << " yz " << box[5];
+  }
+  return oss.str();
+}
+
+// ITEM line plus three bound lines. Tilt is a third field per line.
+inline void writeDumpBoxBounds(
+    std::ostream &os,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  const bool tilt = yCloud.box.size() >= 6;
+  if (tilt) {
+    os << "ITEM: BOX BOUNDS xy xz yz pp pp pp\n";
+  } else {
+    os << "ITEM: BOX BOUNDS pp pp pp\n";
+  }
+  for (int k = 0; k < 3; k++) {
+    const double lo = (static_cast<std::size_t>(k) < yCloud.boxLow.size())
+                          ? yCloud.boxLow[k]
+                          : 0.0;
+    const double len = (static_cast<std::size_t>(k) < yCloud.box.size())
+                           ? yCloud.box[k]
+                           : 0.0;
+    os << lo << ' ' << lo + len;
+    if (tilt) {
+      os << ' ' << yCloud.box[static_cast<std::size_t>(k + 3)];
+    }
+    os << '\n';
+  }
 }
 
 /**
