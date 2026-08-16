@@ -11,6 +11,9 @@
 | ~--jobs~ does nothing useful | OpenMP off | ~seams --features~ |
 | ~ModuleNotFoundError: pydseams~ | Wrong repository | PydSEAMSlib, not ~pixi run~ in seams-core |
 | Looking for ~yodaStruct -c lua_inputs/config.yml~ | 2020 executable | ~seams~ here; Lua library in yodaStruct |
+| ~seams: command not found~ | Binary not on ~PATH~ | After ~pixi run build~ / ~meson compile -C bbdir~ the binary is ~./bbdir/seams~. Install with ~pixi run install~ or ~meson install~ |
+| Meson rejects ~-Dwith_python=true~ or ~-Dwith_lua=enabled~ | Bindings are other repos | Build PydSEAMSlib or yodaStruct; engine Meson is ~-Dwith_python=false~ |
+| Wrap pin / ~nodownload~ miss | Flake does not fetch wrap-git | Pins live in ~subprojects/~ (~linkcell~ v0.3.1, ~vesin~ v0.5.7, ~readcon-core~ v0.14.0, ~gpulite~). The flake uses ~mesonAutoFeatures=disabled~ and wrap ~nodownload~ |
 
 When you file an issue, include ~seams --version~, ~seams --features~,
 the command line, and a minimal dump.

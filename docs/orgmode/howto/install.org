@@ -14,7 +14,8 @@ pixi run build
 #+end_src
 
 The default pixi lock includes Highway and chemfiles. Optional pixi
-environments: ~ira~, ~sphericart~, ~nauty~, ~mpi~, ~docs~.
+environments: ~ira~, ~sphericart~, ~nauty~, ~mpi~, ~docs~,
+~formalanalysis~, ~repro~.
 
 * Nix flake
 
@@ -25,10 +26,11 @@ nix develop
 nix run . -- read input/traj/exampleTraj.lammpstrj
 #+end_src
 
-The flake turns Eigen, BLAS/LAPACK, Catch2, and Highway on when
-nixpkgs provides them. Optional wrap-git backends (vesin, chemfiles,
-readcon-core, IRA, sphericart, nauty, MPI) stay off unless the package
-is already in the closure. Binary cache: ~cachix use dseams~.
+The flake links Eigen, BLAS/LAPACK, Catch2, and Highway from nixpkgs.
+Wrap-git backends (vesin, readcon-core, linkcell) and chemfiles stay
+off unless the package is already in the closure. IRA, sphericart,
+nauty, and MPI stay off. vesin is cutoff; linkcell is k-NN. Binary
+cache: ~cachix use dseams~.
 
 The flake on/off table lives on [[file:../reference/nix.org][Nix]].
 

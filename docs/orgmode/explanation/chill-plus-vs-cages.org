@@ -6,12 +6,13 @@ and they do not imply each other.
 
 * Four-neighbour star
 
-CHILL and CHILL+ (~seams chill~ / ~seams chill-plus~,
-~chill::getCorrelPlus~ / ~getIceTypePlus~) look at the four-neighbour
-star. They compute bond-order correlations ~c_ij~ on the four nearest
-neighbours of each oxygen (or each mW site) and label the atom cubic,
-hexagonal, interfacial, clathrate, or water from the staggered and
-eclipsed pattern of that star.
+CHILL (~seams chill~, ~chill::getCorrel~ / ~getIceTypeNoPrint~) and
+CHILL+ (~seams chill-plus~, ~chill::getCorrelPlus~ /
+~getIceTypePlusNoPrint~) look at the four-neighbour star. Both stay
+on the host. They compute bond-order correlations ~c_ij~ on the four
+nearest neighbours of each oxygen (or each mW site) and label the
+atom cubic, hexagonal, interfacial, clathrate, or water from the
+staggered and eclipsed pattern of that star.
 
 A molecule is cubic or hexagonal when its four bonds look like ice,
 even if those neighbours do not close a cage.
@@ -31,6 +32,11 @@ four-neighbour star.
 
 This is topological unit matching (TUM). The methods paper is the
 2020 JCIM article (see [[file:citation.org][Citation]]).
+
+The GPU path (~gpu::analyzeResident~) is that TUM ice score only:
+~linkcell::gpu~ k-nearest, the mutual four-nearest graph, primitive
+six-rings, and HC/DDC affiliation. CHILL, CHILL+, and \(q_{lm}\)
+stay on the host. Only cage labels come back.
 
 * Why they disagree
 
