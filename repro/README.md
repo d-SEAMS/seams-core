@@ -5,6 +5,17 @@ every bench behind the paper's tables, and writes a single manifest. On a
 Slurm cluster the heavy rules execute through HyperQueue inside one
 exclusive allocation.
 
+Paper timings run on Elja (`repro/elja_submit.sh`, exclusive
+`64cpu_256mem`, account `chem-ui`). The device-resident N-frame batch is `repro/elja_gpu_job.sh` on
+`gpu-2xA100`. A gpulite probe sizes the working set; the device
+path calls `linkcell::gpu` for the periodic k-nearest walk, then
+the mutual four-nearest graph, primitive six-rings and HC/DDC
+affiliation (the TUM ice score). CHILL and \(q_{lm}\) stay on the
+host. Only cage labels come back. The GPU job wraps the bench in
+`nsys profile` and writes `tip-gpu-nsys.nsys-rep` plus
+`tip-gpu-nsys-stats.txt`.
+Terra is not the perf host.
+
 ## On a Slurm cluster
 
 From a login node with network access, in the repository root:

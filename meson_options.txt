@@ -6,6 +6,8 @@ option('with_cli', type: 'boolean', value: true,
   description: 'Build the seams engine CLI')
 option('with_mpi', type: 'feature', value: 'disabled',
   description: 'Link MPI and split Steinhardt atoms across ranks')
+option('with_gpulite', type: 'feature', value: 'auto',
+  description: 'Runtime CUDA via gpulite (device-resident N-frame batches)')
 option('with_openmp_offload', type: 'feature', value: 'disabled',
   description: 'Compile OpenMP target offload for the Steinhardt kernel')
 option('offload_triple', type: 'string', value: 'nvptx64-nvidia-cuda',

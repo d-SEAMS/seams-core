@@ -42,10 +42,10 @@ prep)
   echo "prep done: tip $(cat .tip_sha), base tree $BASE_TREE, hq $(hq --version)"
   ;;
 submit)
-  : "${ELJA_ACCOUNT:?set ELJA_ACCOUNT to the Slurm account}"
+  : "${ELJA_ACCOUNT:=chem-ui}"
   cd "$ROOT"
   sbatch --partition="${ELJA_PARTITION:-64cpu_256mem}" --exclusive \
-    --ntasks=1 --cpus-per-task=8 --hint=nomultithread --time=01:30:00 \
+    --ntasks=1 --cpus-per-task=8 --hint=nomultithread --time=04:00:00 \
     --mem=32G --account="$ELJA_ACCOUNT" --job-name=seams-repro \
     --output=repro-%j.out --wrap "repro/elja_submit.sh run"
   ;;

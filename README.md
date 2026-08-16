@@ -37,6 +37,33 @@ Periodic k-nearest neighbour search is
 Build with `pixi run setup && pixi run build && pixi run test`, or with
 the Nix flake: `nix build` and `nix develop`.
 
+# Runtime configuration
+
+Knobs that change between machines and jobs are twelve-factor: they
+are not compiled in. Defaults live in the binary. An optional dotenv
+file (`SEAMS_CONFIG` or `./seams.env`) fills unset variables. The
+process environment wins over the file. CLI flags win over the
+environment. `seams --print-config` prints the resolved table.
+
+| Variable | Meaning | Default |
+| --- | --- | --- |
+| `SEAMS_FRAME` / `SEAMS_LAST` | Frame range (1-based) | `1` / unset |
+| `SEAMS_JOBS` | OpenMP frame workers | `1` |
+| `SEAMS_TYPE` | Atom type (`0` guesses) | `0` |
+| `SEAMS_CUTOFF` | Neighbour cutoff (Å) | `3.5` |
+| `SEAMS_K` | *k* for k-NN / seeded cages | `4` |
+| `SEAMS_GRAPH` | `cutoff` / `knn` / `knn-union` / `seeded` | `seeded` |
+| `SEAMS_RESIDENT` | Fraction of free GPU memory for a TUM batch | `0.80` |
+| `SEAMS_CELL` | Link-cell hint so NPT frames share a grid (Å) | `3.0` |
+| `SEAMS_OFFLOAD` | OpenMP target Steinhardt (`0` disables) | on if devices exist |
+| `LINKCELL_TPP` | Threads per particle on the device k-NN | occupancy picker |
+| `LINKCELL_BLOCK` | CUDA block size | occupancy picker |
+| `YODA_FENNEL_PATH` / `YODA_LUA_PATH` | Installed Lua/Fennel search roots | build paths |
+
+`OMP_NUM_THREADS` and `CUDA_VISIBLE_DEVICES` keep their usual meaning.
+A commented template is `seams.env.example`. Analysis choice (which
+command, which Lua script, which Python call) is not this table.
+
 \note The <a href="pages.html">related pages</a> describe the examples and how to obtain
 the data-sets (trajectories) <a
 href="https://figshare.com/projects/d-SEAMS_Datasets/73545">from figshare</a>.
@@ -74,93 +101,19 @@ The corresponding `bibtex` entry is:
 
 # Compilation
 
-We use a deterministic build system to generate both bug reports and uniform
-usage statistics. The Lua and Fennel CLI is
-[yodaStruct](https://github.com/d-SEAMS/yodaStruct); the functions it
-registers are documented
-[there](https://github.com/d-SEAMS/yodaStruct/blob/main/docs/luaFunctions.md).
-
-We also provide a `conda` environment as a fallback, which is also recommended for MacOS users.
-
-## Build
-
-### Conda
-
-For MacOS systems without Nix, the following instructions may be more
-suitable. We will assume the presence of [micromamba](https://mamba.readthedocs.io/en/latest/installation.html):
+The live builds are `pixi` + meson, or the Nix flake. This repository
+builds `libyodaLib` and the `seams` CLI. Lua is
+[yodaStruct](https://github.com/d-SEAMS/yodaStruct)
+(`require("dseams")`). Python is
+[PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib).
 
 ```bash
-cd ~/seams-core
-micromamba create -f environment.yml
-micromamba activate dseams
-luarocks install luafilesystem
+pixi run setup && pixi run build && pixi run test
+./bbdir/src/seams read input/traj/exampleTraj.lammpstrj
 ```
 
-Now the installation can proceed. The commands below that invoke
-`yodaStruct` belong in a
-[yodaStruct](https://github.com/d-SEAMS/yodaStruct) checkout. This
-repository builds `libyodaLib`.
-
-\note we do not install `lua-luafilesystem` within the `conda` environment because it is outdated on `osx`
-
-```bash
-mkdir build
-cd build
-export EIGEN3_INCLUDE_DIR=$CONDA_PREFIX/include/eigen3
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -DCMAKE_INSTALL_PREFIX:PATH=$CONDA_PREFIX ../
-make -j$(nproc)
-make install
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib $CONDA_PREFIX/bin/yodaStruct -c lua_inputs/config.yml
-```
-
-We have opted to install into the `conda` environment, if this is not the
-intended behavior, use `/usr/local` instead.
-
-### Spack (not working at the moment)
-
-Manually this can be done in a painful way as follows:
-
-```bash
-spack install eigen@3.3.9 lua@5.2
-spack install catch2 fmt yaml-cpp openblas boost cmake ninja meson
-spack load catch2 fmt yaml-cpp openblas boost cmake ninja meson eigen@3.3.9 lua@5.2
-luarocks install luafilesystem
-```
-
-Or better:
-
-```bash
-spack env activate $(pwd)
-# After loading the packages
-luarocks install luafilesystem
-```
-
-Now we can build and install as usual.
-
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo \
- -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -GNinja \
- -DCMAKE_INSTALL_PREFIX=$HOME/.local \
- -DCMAKE_CXX_FLAGS="-pg -fsanitize=address " \
- -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg \
- -DBUILD_TESTING=NO
-cmake --build build
-```
-
-Or more reasonably:
-
-```bash
-export INST_DIR=$HOME/.local
-cd src
-meson setup bbdir --prefix $INST_DIR
-meson compile -C bbdir
-meson install -C bbdir
-# if not done
-export PATH=$PATH:$INST_DIR/bin
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INST_DIR/lib
-cd ../
-yodaStruct -c lua_inputs/config.yml
-```
+`environment.yml` is a micromamba fallback (meson, Eigen, BLAS,
+Catch2). It does not install Lua or yaml-cpp.
 
 ### Nix
 
@@ -259,10 +212,12 @@ and
 [LeakSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer))
 and the following:
 
-```{bash}
+```bash
 # From the developer shell
-export CXX=/usr/bin/clang++ && export CC=/usr/bin/clang
-cmake .. -DCMAKE_CXX_FLAGS="-pg -fsanitize=address " -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg
+export CXX=clang++ CC=clang
+meson setup bbdir -Dwith_tests=true -Db_sanitize=address
+meson compile -C bbdir
+meson test -C bbdir
 ```
 
 # Overview
@@ -326,13 +281,13 @@ b seams_input.cpp:408
 
 The following tools are used in this project:
 
-- [CMake](https://cmake.org/) for compilation ([cmake-init](https://github.com/cginternals/cmake-init) was used as a reference)
+- [Meson](https://mesonbuild.com/) for compilation
 - [Clang](https://clang.llvm.org/) because it is more descriptive with better tools
 - [Doxygen](https://www.doxygen.org) for the developer API
 - [clang-format](https://clang.llvm.org/docs/ClangFormat.html) for code formatting
   - [clang-format-hooks](https://github.com/barisione/clang-format-hooks) for `git` hooks to enforce formatting
-- [lua](https://www.lua.org) for the scripting engine
-- [yaml](http://yaml.org/) for the configuration
+- [lua](https://www.lua.org) for the yodaStruct front end
+- environment variables and `seams.env` for runtime knobs
 
 ## Third Party Libraries
 
@@ -342,9 +297,7 @@ The libraries used are:
 - [Argum](https://github.com/gershnik/argum) for the `seams` CLI (same parser as eonclient; colors, `NO_COLOR`)
 - [cxxopts](https://github.com/jarro2783/cxxopts) for the Catch2 test harness
 - [rang](https://github.com/agauniyal/rang) for terminal styles (ANSI)
-- [sol2](https://github.com/ThePhD/sol2) for interfacing with lua
-- [yaml-cpp](https://github.com/jbeder/yaml-cpp) for working with `yaml`
-- [fmt](https://github.com/fmtlib/fmt) for safe and fast formatting
+- [sol2](https://github.com/ThePhD/sol2) for the yodaStruct Lua bindings
 - [Linear Algebra PACKage (LAPACK)](http://www.netlib.org/lapack/)
 - [Basic Linear Algebra Subprograms (BLAS)](http://www.netlib.org/blas/)
 - [Spectra](https://github.com/yixuan/spectra/)

@@ -7,7 +7,7 @@
 #-----------------------------------------------------------------------------------
 
 project('seams-core', ['cpp', 'c'],
-  version: '2.2.5',
+  version: '2.3.0',
   default_options: ['warning_level=2', 'cpp_std=c++20'],
   meson_version: '>=1.3.0')
 
@@ -139,14 +139,30 @@ if hwy_dep.found()
   _args += ['-DSEAMS_HAS_HWY=1']
 endif
 
+gpulite_opt = get_option('with_gpulite')
+gpulite_dep = dependency('gpulite', required: false,
+                         fallback: ['gpulite', 'gpulite_dep'])
+if gpulite_opt.enabled() and not gpulite_dep.found()
+  error('with_gpulite=enabled but gpulite was not found')
+endif
+if gpulite_dep.found() and not gpulite_opt.disabled()
+  _deps += [gpulite_dep]
+  _args += ['-DSEAMS_HAS_GPULITE=1']
+endif
+
 vesin_dep = dependency('vesin', required: false, fallback: ['vesin', 'vesin_dep'])
 if vesin_dep.found()
   _deps += [vesin_dep]
   _args += ['-DSEAMS_HAS_VESIN=1']
 endif
 
+_linkcell_opts = []
+if gpulite_dep.found() and not gpulite_opt.disabled()
+  _linkcell_opts += ['with_gpulite=enabled']
+endif
 linkcell_dep = dependency('linkcell', required: false,
-                          fallback: ['linkcell', 'linkcell_dep'])
+                          fallback: ['linkcell', 'linkcell_dep'],
+                          default_options: _linkcell_opts)
 if linkcell_dep.found()
   _deps += [linkcell_dep]
   _args += ['-DSEAMS_HAS_LINKCELL=1']
@@ -326,6 +342,7 @@ summary({
   'Shared-memory parallelism (OpenMP)': openmp_found,
   'MPI atom split (Steinhardt)': mpi_found,
   'OpenMP target offload': offload_enabled,
+  'Device-resident batches (gpulite)': gpulite_dep.found() and not gpulite_opt.disabled(),
   'Cell-list neighbours (vesin)': vesin_dep.found(),
   'Periodic k-nearest (linkcell)': linkcell_dep.found(),
   'PDB/GRO/DCD readers (chemfiles)': chemfiles_dep.found(),
@@ -389,4 +406,5 @@ if get_option('with_cli')
   test('seams_help', seams_exe, args: ['--help'])
   test('seams_version', seams_exe, args: ['--version'])
   test('seams_features', seams_exe, args: ['--features'])
+  test('seams_print_config', seams_exe, args: ['--print-config'])
 endif

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Reproducibility campaign on the Terra Slurm cluster (partition cpu).
+# Not the paper campaign. Paper timings are Elja
+# (repro/elja_submit.sh, scripts/elja_paper_benches.sh, repro/elja_gpu_job.sh).
+# Terra Slurm cluster helper only (partition cpu).
 #
 #   repro/terra_submit.sh prep
 #   repro/terra_submit.sh submit

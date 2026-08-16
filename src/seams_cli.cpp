@@ -9,6 +9,7 @@
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <seams_config.hpp>
 #include <seams_input.hpp>
 
 #include <algorithm>
@@ -307,13 +308,15 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
 int main(int argc, char *argv[]) {
   colorizer = colorizerForFile(environmentColorStatus(), stdout);
 
-  int frame = 1;
-  int last = 0;
-  int jobs = 1;
-  int typeI = 0;
-  double cutoff = 3.5;
-  int k = 4;
-  std::string graph = "seeded";
+  auto cfg = seams::cfg::load(seams::cfg::pathFromArgv(argc, argv));
+  int frame = cfg.frame;
+  int last = cfg.last;
+  int jobs = cfg.jobs;
+  int typeI = cfg.type;
+  double cutoff = cfg.cutoff;
+  int k = cfg.k;
+  std::string graph = cfg.graph;
+  bool printConfig = false;
   std::string cmd;
   std::string file;
 
@@ -394,6 +397,47 @@ int main(int argc, char *argv[]) {
                  .help("Bond graph for cages: cutoff | knn | knn-union | seeded")
                  .handler([&](std::string_view value) { graph = value; }));
 
+  parser.add(Option("--config")
+                 .argName("FILE")
+                 .help("Dotenv file of SEAMS_* / LINKCELL_* knobs "
+                       "(or set SEAMS_CONFIG). Env wins over the file")
+                 .handler([&](std::string_view) {}));
+
+  parser.add(Option("--print-config")
+                 .help("Print the resolved runtime knobs and exit")
+                 .handler([&]() { printConfig = true; }));
+
+  parser.add(Option("--tpp")
+                 .argName("N")
+                 .help("Threads per particle for the device k-NN "
+                       "(LINKCELL_TPP). 0 is the occupancy picker")
+                 .handler([&](std::string_view value) {
+                   cfg.tpp = parseIntegral<int>(value);
+                 }));
+
+  parser.add(Option("--block")
+                 .argName("N")
+                 .help("CUDA block size (LINKCELL_BLOCK / SEAMS_BLOCK)")
+                 .handler([&](std::string_view value) {
+                   cfg.block = parseIntegral<int>(value);
+                 }));
+
+  parser.add(Option("--resident")
+                 .argName("FRAC")
+                 .help("Fraction of free device memory for a resident batch "
+                       "(SEAMS_RESIDENT, default 0.80)")
+                 .handler([&](std::string_view value) {
+                   cfg.resident = parseFloatingPoint<double>(value);
+                 }));
+
+  parser.add(Option("--cell")
+                 .argName("ANGSTROM")
+                 .help("Link-cell hint so NPT frames share a grid "
+                       "(SEAMS_CELL, default 3)")
+                 .handler([&](std::string_view value) {
+                   cfg.cell = parseFloatingPoint<double>(value);
+                 }));
+
   parser.add(Positional("command")
                  .help("read | chill | chill-plus | cages")
                  .occurs(zeroOrOneTime)
@@ -411,6 +455,20 @@ int main(int argc, char *argv[]) {
     std::cerr << colorizer.warning(parser.formatUsage(progname, colorizer))
               << "\n";
     return 2;
+  }
+
+  cfg.frame = frame;
+  cfg.last = last;
+  cfg.jobs = jobs;
+  cfg.type = typeI;
+  cfg.cutoff = cutoff;
+  cfg.k = k;
+  cfg.graph = graph;
+  seams::cfg::exportEnviron(cfg);
+
+  if (printConfig) {
+    seams::cfg::dump(cfg, std::cout);
+    return 0;
   }
 
   if (cmd.empty() || file.empty()) {

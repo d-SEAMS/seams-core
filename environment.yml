@@ -10,7 +10,6 @@ dependencies:
   - compilers
   - gfortran
   - catch2
-  - yaml-cpp
   - liblapack
   - libblas
   - boost-cpp
