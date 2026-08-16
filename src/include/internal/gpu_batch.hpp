@@ -10,10 +10,12 @@
  *  @brief Run the analysis of a resident frame batch on the device.
  *
  *  Coordinates for every accepted frame are uploaded once. The device
- *  builds a linked cell list, the mutual four-nearest graph, one
- *  \(q_{lm}\) write, CHILL, primitive six-rings (Franzblau SP on
- *  hexagons) and the HC/DDC affiliation predicates. Only labels come
- *  back: CHILL, per-atom ice flags, and the six-ring count.
+ *  builds a linked cell list the way vesin CUDA and LAMMPS NPairKokkos
+ *  do (host bin grid, sort-by-cell, exclusive scan, stencil walk on
+ *  coalesced positions, persistent buffers), then the mutual
+ *  four-nearest graph, one \(q_{lm}\) write, CHILL, primitive
+ *  six-rings and the HC/DDC affiliation predicates. Only labels come
+ *  back.
  */
 
 namespace gpu {
