@@ -6,6 +6,7 @@
 #include <neighbours.hpp>
 #include <rdf.hpp>
 
+#include <array>
 #include <vector>
 
 namespace {
@@ -31,6 +32,46 @@ twoTypeCloud(const std::vector<double> &box,
     cloud.idIndexMap[i + 1] = i;
   }
   return cloud;
+}
+
+molSys::PointCloud<molSys::Point<double>, double>
+typedCloud(const std::vector<double> &box,
+           const std::vector<int> &types,
+           const std::vector<std::array<double, 3>> &coords) {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = box;
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = static_cast<int>(coords.size());
+  cloud.currentFrame = 1;
+  for (int i = 0; i < cloud.nop; ++i) {
+    molSys::Point<double> pt;
+    pt.type = types[static_cast<std::size_t>(i)];
+    pt.atomID = i + 1;
+    pt.molID = i + 1;
+    pt.x = coords[static_cast<std::size_t>(i)][0];
+    pt.y = coords[static_cast<std::size_t>(i)][1];
+    pt.z = coords[static_cast<std::size_t>(i)][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+  return cloud;
+}
+
+double meanTypeIDegree(const std::vector<std::vector<int>> &nList,
+                       const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+                       int typeI) {
+  int nI = 0;
+  int deg = 0;
+  for (int i = 0; i < cloud.nop; ++i) {
+    if (cloud.pts[static_cast<std::size_t>(i)].type != typeI) {
+      continue;
+    }
+    ++nI;
+    if (i < static_cast<int>(nList.size()) && nList[static_cast<std::size_t>(i)].size() > 1) {
+      deg += static_cast<int>(nList[static_cast<std::size_t>(i)].size()) - 1;
+    }
+  }
+  return nI > 0 ? static_cast<double>(deg) / static_cast<double>(nI) : 0.0;
 }
 
 } // namespace
@@ -92,8 +133,31 @@ TEST_CASE("runningCN at rmax is one for a single I-J pair", "[rdf]") {
                Catch::Matchers::WithinAbs(0.0, 1e-12));
 }
 
-TEST_CASE("firstMinimumBin finds the valley after the first peak", "[rdf]") {
+TEST_CASE("neighList degree matches site-site CN past every pair and before none",
+          "[rdf]") {
+  auto cloud = typedCloud(
+      {20.0, 20.0, 20.0}, {1, 1, 2, 2},
+      {{{0.0, 0.0, 0.0}, {10.0, 10.0, 10.0}, {2.0, 0.0, 0.0}, {10.0, 12.0, 10.0}}});
+  const auto gr = rdf::partialRdf(cloud, 1, 2, 10.0, 10);
+  const double rhoJ = static_cast<double>(gr.nJ) / gr.volume;
+
+  const auto past = nneigh::neighList(3.0, cloud, 1, 2);
+  const double degPast = meanTypeIDegree(past, cloud, 1);
+  REQUIRE_THAT(degPast, Catch::Matchers::WithinAbs(1.0, 1e-12));
+  REQUIRE_THAT(rdf::coordinationNumber(gr, 3.0, rhoJ),
+               Catch::Matchers::WithinAbs(degPast, 1e-9));
+
+  const auto none = nneigh::neighList(1.0, cloud, 1, 2);
+  const double degNone = meanTypeIDegree(none, cloud, 1);
+  REQUIRE_THAT(degNone, Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(rdf::coordinationNumber(gr, 1.0, rhoJ),
+               Catch::Matchers::WithinAbs(degNone, 1e-9));
+}
+
+TEST_CASE("firstMinimumBin finds the valley after the first of two peaks",
+          "[rdf]") {
   rdf::PartialRdf h;
+  h.binwidth = 0.5;
   h.g = {0.1, 0.4, 2.0, 1.1, 0.3, 0.5, 1.6, 0.8};
   REQUIRE(rdf::firstMinimumBin(h) == 4);
 

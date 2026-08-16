@@ -195,7 +195,7 @@ TEST_CASE("populateHbondsWithInputClouds accepts acceptor-first angle",
   REQUIRE(net[1].size() == 2);
   REQUIRE(net[0][1] == 2);
   REQUIRE(net[1][1] == 1);
-  const std::vector<std::vector<int>> donorHs = {{0, 1}, {2, 3}};
+  const std::vector<int> donorHs = {0, 1, 2, 3};
   const auto donorNet = bond::populateHbondsFromDonors(oCloud, hCloud, nList,
                                                        donorHs, 2.42, 30.0);
   REQUIRE(donorNet == net);
@@ -241,12 +241,12 @@ TEST_CASE("populateHbondsWithInputClouds accepts a mixed-image dump-H bond",
   REQUIRE(net[1].size() == 2);
   REQUIRE(net[0][1] == 2);
   REQUIRE(net[1][1] == 1);
-  const std::vector<std::vector<int>> donorHs = {{0, 1}, {2, 3}};
+  const std::vector<int> donorHs = {0, 1, 2, 3};
   const auto donorNet = bond::populateHbondsFromDonors(oCloud, hCloud, nList,
                                                        donorHs, 2.42, 30.0);
   REQUIRE(donorNet == net);
-  REQUIRE(
-      bond::donatedHydrogenBond(oCloud, hCloud, 1, 0, donorHs[0], 2.42, 30.0));
+  REQUIRE(bond::donatedHydrogenBond(oCloud, hCloud, 1, 0,
+                                    std::vector<int>{0, 1}, 2.42, 30.0));
   REQUIRE_THAT(gen::periodicDist(oCloud, 0, 1),
                Catch::Matchers::WithinAbs(2.8, 1e-10));
 }
@@ -384,7 +384,81 @@ TEST_CASE("H-bond thresholds are configurable", "[bond]") {
   REQUIRE(countEdges(looseNet) >= countEdges(waterNet));
 }
 
-TEST_CASE("populateHbondsFromDonors two-H rows match water fixture bonds",
+TEST_CASE("three-H imidazolium-like donor set forms a bond that two-H water "
+          "list drops",
+          "[bond]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud.box = {20.0, 20.0, 20.0};
+  yCloud.boxLow = {0.0, 0.0, 0.0};
+  yCloud.currentFrame = 1;
+
+  molSys::Point<double> donor;
+  donor.type = 2;
+  donor.atomID = 1;
+  donor.molID = 1;
+  donor.x = 0.0;
+  donor.y = 0.0;
+  donor.z = 0.0;
+
+  molSys::Point<double> acceptor;
+  acceptor.type = 2;
+  acceptor.atomID = 2;
+  acceptor.molID = 2;
+  acceptor.x = 2.8;
+  acceptor.y = 0.0;
+  acceptor.z = 0.0;
+
+  yCloud.pts.push_back(donor);
+  yCloud.pts.push_back(acceptor);
+  yCloud.nop = 2;
+  yCloud.idIndexMap[1] = 0;
+  yCloud.idIndexMap[2] = 1;
+
+  molSys::PointCloud<molSys::Point<double>, double> hCloud;
+  hCloud.box = yCloud.box;
+  hCloud.boxLow = yCloud.boxLow;
+  hCloud.currentFrame = 1;
+
+  // First two H (hAtomMolList) point away from the acceptor. The third is
+  // the imidazolium-like ring hydrogen that actually donates.
+  const double hxyz[3][3] = {{-0.96, 0.0, 0.0}, {0.0, 0.96, 0.0}, {0.96, 0.0, 0.0}};
+  for (int i = 0; i < 3; i++) {
+    molSys::Point<double> h;
+    h.type = 1;
+    h.atomID = 10 + i;
+    h.molID = 1;
+    h.x = hxyz[i][0];
+    h.y = hxyz[i][1];
+    h.z = hxyz[i][2];
+    hCloud.pts.push_back(h);
+    hCloud.idIndexMap[h.atomID] = i;
+  }
+  hCloud.nop = 3;
+
+  const std::vector<std::vector<int>> nList = {{1, 2}, {2, 1}};
+
+  auto waterNet = bond::populateHbondsWithInputClouds(yCloud, hCloud, nList);
+  REQUIRE(waterNet.size() == 2);
+  REQUIRE(waterNet[0].size() == 1);
+  REQUIRE(waterNet[1].size() == 1);
+
+  const std::vector<int> twoH = {0, 1};
+  auto twoHNet =
+      bond::populateHbondsFromDonors(yCloud, hCloud, nList, twoH);
+  REQUIRE(twoHNet == waterNet);
+
+  const std::vector<int> threeH = {0, 1, 2};
+  auto threeHNet =
+      bond::populateHbondsFromDonors(yCloud, hCloud, nList, threeH);
+  REQUIRE(threeHNet[0].size() == 2);
+  REQUIRE(threeHNet[0][1] == 2);
+  REQUIRE(threeHNet[1].size() == 2);
+  REQUIRE(threeHNet[1][1] == 1);
+  REQUIRE(bond::donatedHydrogenBond(yCloud, hCloud, 1, 0, threeH));
+  REQUIRE_FALSE(bond::donatedHydrogenBond(yCloud, hCloud, 1, 0, twoH));
+}
+
+TEST_CASE("water donorHs from hAtomMolList matches populateHbondsWithInputClouds",
           "[bond]") {
   molSys::PointCloud<molSys::Point<double>, double> oCloud;
   oCloud = sinp::readLammpsTrjO("traj/exampleTraj.lammpstrj", 1, oCloud, 2);
@@ -396,26 +470,18 @@ TEST_CASE("populateHbondsFromDonors two-H rows match water fixture bonds",
 
   auto nList = nneigh::neighListO(3.5, oCloud, 2);
   auto molList = molSys::hAtomMolList(hCloud, oCloud);
-  std::vector<std::vector<int>> donorHs(molList.size());
-  for (size_t i = 0; i < molList.size(); i++) {
-    if (molList[i].size() < 3) {
-      continue;
+  std::vector<int> donorHs;
+  for (const auto &row : molList) {
+    for (size_t k = 1; k < row.size(); k++) {
+      donorHs.push_back(row[k]);
     }
-    donorHs[i] = {molList[i][1], molList[i][2]};
   }
   REQUIRE_FALSE(donorHs.empty());
 
   auto waterNet = bond::populateHbondsWithInputClouds(oCloud, hCloud, nList);
-  auto donorNet = bond::populateHbondsFromDonors(oCloud, hCloud, nList, donorHs,
-                                                 2.42, 30.0);
+  auto donorNet =
+      bond::populateHbondsFromDonors(oCloud, hCloud, nList, donorHs);
   REQUIRE(donorNet == waterNet);
-  int bonded = 0;
-  for (const auto &row : waterNet) {
-    if (row.size() > 1) {
-      bonded++;
-    }
-  }
-  REQUIRE(bonded > 0);
 }
 
 TEST_CASE("populateHbondsFromDonors ignores a far third donor H", "[bond]") {
@@ -442,11 +508,11 @@ TEST_CASE("populateHbondsFromDonors ignores a far third donor H", "[bond]") {
   REQUIRE(waterNet[1].size() == 2);
   REQUIRE(waterNet[0][1] == 2);
   REQUIRE(waterNet[1][1] == 1);
-  const std::vector<std::vector<int>> twoH = {{0, 1}, {2, 3}};
+  const std::vector<int> twoH = {0, 1, 2, 3};
   const auto twoHNet =
       bond::populateHbondsFromDonors(oCloud, hCloud, nList, twoH, 2.42, 30.0);
   REQUIRE(twoHNet == waterNet);
-  const std::vector<std::vector<int>> threeH = {{0, 1, 4}, {2, 3}};
+  const std::vector<int> threeH = {0, 1, 4, 2, 3};
   const auto threeHNet =
       bond::populateHbondsFromDonors(oCloud, hCloud, nList, threeH, 2.42, 30.0);
   REQUIRE(threeHNet == waterNet);

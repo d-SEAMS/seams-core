@@ -114,7 +114,7 @@ TEST_CASE("indicesOf polar is the cationHead anion polar union", "[site]") {
   REQUIRE(site::indicesOf(cloud, table, site::Kind::tail).size() == 2);
 }
 
-TEST_CASE("ionCloud two mols cation 3 atoms plus anion 1", "[site]") {
+TEST_CASE("ionCloud two mols cation heads plus anion 1", "[site]") {
   site::Table table;
   table.typeToKind[1] = site::Kind::cationHead;
   table.typeToKind[2] = site::Kind::anion;
@@ -122,11 +122,13 @@ TEST_CASE("ionCloud two mols cation 3 atoms plus anion 1", "[site]") {
   table.typeToKind[4] = site::Kind::donorH;
 
   auto cloud = makeCloud();
-  // Cation mol: two heads split across the seam, plus a tail that must
-  // not enter the COM. Anion mol: one site.
+  // Cation: two head atoms split across the periodic seam, plus a tail
+  // and a donorH that must not enter the COM.
   addAtom(cloud, 10, 7, 1, 0.5, 1.0, 2.0);
   addAtom(cloud, 11, 7, 1, 9.5, 1.0, 2.0);
   addAtom(cloud, 12, 7, 3, 5.0, 4.0, 5.0);
+  addAtom(cloud, 13, 7, 4, 0.6, 1.1, 2.1);
+  // Monatomic anion.
   addAtom(cloud, 20, 8, 2, 4.0, 5.0, 6.0);
 
   const auto ions = site::ionCloud(cloud, table);
@@ -144,7 +146,7 @@ TEST_CASE("ionCloud two mols cation 3 atoms plus anion 1", "[site]") {
   REQUIRE_THAT(ions.pts[1].z, Catch::Matchers::WithinAbs(6.0, 1e-12));
 
   // First head at 0.5; second unwraps across L=10 to -0.5; COM x = 0.
-  // Tail at 5 is not averaged in.
+  // Tail and donorH are not averaged in.
   REQUIRE_THAT(ions.pts[0].x, Catch::Matchers::WithinAbs(0.0, 1e-12));
   REQUIRE_THAT(ions.pts[0].y, Catch::Matchers::WithinAbs(1.0, 1e-12));
   REQUIRE_THAT(ions.pts[0].z, Catch::Matchers::WithinAbs(2.0, 1e-12));
@@ -216,6 +218,21 @@ TEST_CASE("ionCloud monatomic anion is a copy", "[site]") {
   REQUIRE_THAT(ions.pts[0].z, Catch::Matchers::WithinAbs(6.0, 1e-12));
   REQUIRE(ions.pts[0].inSlice == false);
   REQUIRE(ions.pts[0].iceType == cloud.pts[0].iceType);
+}
+
+TEST_CASE("parseSiteSpec reads type=kind and optional family", "[site]") {
+  const auto table =
+      site::parseSiteSpec("1=cationHead, 2=anion, 3=tail, family=ionicLiquid");
+  REQUIRE(table.family == site::Family::ionicLiquid);
+  REQUIRE(table.ofType(1) == site::Kind::cationHead);
+  REQUIRE(table.ofType(2) == site::Kind::anion);
+  REQUIRE(table.ofType(3) == site::Kind::tail);
+  REQUIRE(table.ofType(4) == site::Kind::unspecified);
+  REQUIRE(site::lammpsTypeOfKind(table, site::Kind::anion) == 2);
+}
+
+TEST_CASE("parseSiteSpec rejects unknown kind names", "[site]") {
+  REQUIRE_THROWS_AS(site::parseSiteSpec("1=oxygen"), std::invalid_argument);
 }
 
 TEST_CASE("lammpsTypeOfKind errors when the kind is not unique", "[site]") {

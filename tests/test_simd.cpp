@@ -133,7 +133,8 @@ TEST_CASE("SIMD handles exact half-box displacements", "[simd]") {
 TEST_CASE("ortho SIMD wrap on dump bound spans misses the a-image", "[simd]") {
   // Sheared pair (0.2, 0.1, 1) and (9.7, 0.1, 1) on dump box
   // {15, 8.66, 10, xy=5}. H-image r^2 is 0.25. Independent wrap
-  // on the bound span 15 yields 5.5^2 = 30.25.
+  // on the bound span 15 yields 5.5^2 = 30.25. The kernel is
+  // ortho-only; callers must not pass dump bound spans.
   constexpr size_t n = 1;
   const double dx[n] = {0.2 - 9.7};
   const double dy[n] = {0.1 - 0.1};

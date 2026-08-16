@@ -237,17 +237,22 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
 int rdf2::normalizeRDF(int nopA, std::vector<double> &rdfValues,
                        std::vector<int> histogram, double binwidth, int nbin,
                        std::vector<double> volumeLengths, int nIter) {
-  //
-  auto height = *std::min_element(
-      volumeLengths.begin(),
-      volumeLengths.end()); // The height or the smallest dimension
-  // double planeArea = rdf2::getPlaneArea(
-  //     volumeLengths);  // The area of the quasi-two-dimensional water
+  // volumeLengths is the particle AABB (box.size()==3) or dump H
+  // {lx, ly, lz} (box.size()>=6). Product of the dump lengths is
+  // nneigh::dumpVolume; Lx*Ly is the restricted-triclinic in-plane
+  // area and Lz is the confined height. A vanishing in-plane product
+  // (AABB of a line or point) keeps the smallest extent as height.
+  const double planeArea = volumeLengths[0] * volumeLengths[1];
+  const double volume =
+      volumeLengths[0] * volumeLengths[1] * volumeLengths[2];
+  const double height =
+      planeArea > 0.0
+          ? volume / planeArea
+          : *std::min_element(volumeLengths.begin(), volumeLengths.end());
   double r;         // Distance for the current bin
   double factor;    // Factor for accounting for the two-dimensional slab
   double binVolume; // Volume of the current bin
-  double volumeDensity =
-      nopA / (volumeLengths[0] * volumeLengths[1] * volumeLengths[2]);
+  double volumeDensity = nopA / volume;
 
   // Loop through every bin
   for (int ibin = 0; ibin < nbin; ibin++) {
@@ -279,14 +284,23 @@ int rdf2::normalizeRDF(int nopA, std::vector<double> &rdfValues,
 
 /**
  * @details Calculates the lengths of the quasi-two-dimensional
- *  system. The smallest length is the 'height'.
+ *  system. A tilt dump (box.size()>=6) returns dump H {lx, ly, lz}.
+ *  A length-3 box returns the particle AABB; the smallest length is
+ *  then the slab height.
  * @param[in] yCloud The molSys::PointCloud struct for the system.
- * @return The length (i.e. the 'height') of the smallest dimension of
- *  quasi-two-dimensional system.
+ * @return {lx, ly, lz} from dumpBoundsToH, or the AABB extents.
  */
 std::vector<double> rdf2::getSystemLengths(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
-  //
+  // Dump tilt: lattice edges from dumpBoundsToH, not the particle
+  // AABB and not the bound-span product.
+  if (yCloud.box.size() >= 6) {
+    double H[3][3];
+    double origin[3];
+    nneigh::dumpBoundsToH(yCloud.box, yCloud.boxLow, H, origin);
+    return {H[0][0], H[1][1], H[2][2]};
+  }
+
   std::vector<double> lengths; // Volume lengths
   std::vector<double>
       rMax; // Max of the coordinates {0 is for x, 1 is for y and 2 is for z}

@@ -4,6 +4,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <argum.h>
+#include <bond.hpp>
 #include <bop.hpp>
 #include <cage_affiliation.hpp>
 #include <franzblau.hpp>
@@ -461,6 +462,24 @@ int cmdRdf(std::ostream &os, Cloud &cloud, double rmax, int bins, int typeI,
   return 0;
 }
 
+int cmdCn(std::ostream &os, Cloud &cloud, double rmax, int bins, int typeI,
+          int typeJ) {
+  if (bins <= 0) {
+    bins = std::max(1, static_cast<int>(std::lround(rmax / 0.1)));
+  }
+  const int typI = typeOf(cloud, typeI);
+  const int typJ = typeJ > 0 ? typeJ : typI;
+  const auto gr = rdf::partialRdf(cloud, typI, typJ, rmax, bins);
+  const double rhoJ =
+      (gr.volume > 0.0) ? static_cast<double>(gr.nJ) / gr.volume : 0.0;
+  const double cn = rdf::coordinationNumber(gr, rmax, rhoJ);
+  os << "# site-site\n";
+  os << "# types " << typI << " " << typJ << " cutoff " << rmax << " cn "
+     << cn << " nI " << gr.nI << " nJ " << gr.nJ << " volume " << gr.volume
+     << "\n";
+  return 0;
+}
+
 int cmdChillPlus(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
   if (cloud.nop == 0) {
     printCounts(os, cloud);
@@ -571,6 +590,40 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
   return 0;
 }
 
+int cmdHbonds(std::ostream &os, Cloud &yCloud, Cloud &hCloud, double cutoff,
+              int typeI, double distCutoff, double angleCutoff,
+              bool allDonors) {
+  if (yCloud.nop == 0) {
+    os << colorizer.heading("nop") << " 0 "
+       << colorizer.longOption("hbonds") << " 0\n";
+    return 0;
+  }
+  const int typ = typeOf(yCloud, typeI);
+  auto nList = nneigh::neighListO(cutoff, yCloud, typ);
+  std::vector<std::vector<int>> net;
+  if (allDonors) {
+    std::vector<int> donorHs;
+    donorHs.reserve(static_cast<std::size_t>(hCloud.nop));
+    for (int i = 0; i < hCloud.nop; ++i) {
+      donorHs.push_back(i);
+    }
+    net = bond::populateHbondsFromDonors(yCloud, hCloud, nList, donorHs,
+                                         distCutoff, angleCutoff);
+  } else {
+    net = bond::populateHbondsWithInputClouds(yCloud, hCloud, nList, distCutoff,
+                                              angleCutoff);
+  }
+  int edges = 0;
+  for (const auto &row : net) {
+    if (row.size() > 1) {
+      edges += static_cast<int>(row.size()) - 1;
+    }
+  }
+  os << colorizer.heading("nop") << " " << yCloud.nop << " "
+     << colorizer.longOption("hbonds") << " " << (edges / 2) << "\n";
+  return 0;
+}
+
 } // namespace
 
 int main(int argc, char *argv[]) {
@@ -588,6 +641,10 @@ int main(int argc, char *argv[]) {
   bool familyFlag = false;
   std::string familyNameFlag;
   bool printConfig = false;
+  int htype = 1;
+  double hdist = 2.42;
+  double hangle = 30.0;
+  bool allDonors = false;
   std::string cmd;
   std::string file;
   std::string typesFlag;
@@ -662,14 +719,14 @@ int main(int argc, char *argv[]) {
 
   parser.add(Option("--cutoff", "-c")
                  .argName("ANGSTROM")
-                 .help("Neighbour cutoff (rdf rmax)")
+                 .help("Neighbour cutoff (rdf/cn rmax; hbonds heavy-atom nList)")
                  .handler([&](std::string_view value) {
                    cutoff = parseFloatingPoint<double>(value);
                  }));
 
   parser.add(Option("--types")
                  .argName("I,J")
-                 .help("Pair types for rdf/cn (default I=J=--type)")
+                 .help("Pair types for site-site rdf/cn (default I=J=--type)")
                  .handler([&](std::string_view value) {
                    typesFlag = std::string(value);
                  }));
@@ -728,6 +785,31 @@ int main(int argc, char *argv[]) {
                  .help("Bond graph for cages: cutoff | knn | knn-union | seeded")
                  .handler([&](std::string_view value) { graph = value; }));
 
+  parser.add(Option("--htype")
+                 .argName("I")
+                 .help("Hydrogen atom type for hbonds")
+                 .handler([&](std::string_view value) {
+                   htype = parseIntegral<int>(value);
+                 }));
+
+  parser.add(Option("--hdist")
+                 .argName("ANGSTROM")
+                 .help("Acceptor-H distance cutoff for hbonds")
+                 .handler([&](std::string_view value) {
+                   hdist = parseFloatingPoint<double>(value);
+                 }));
+
+  parser.add(Option("--hangle")
+                 .argName("DEG")
+                 .help("O-O-H angle cutoff for hbonds (acceptor-centered)")
+                 .handler([&](std::string_view value) {
+                   hangle = parseFloatingPoint<double>(value);
+                 }));
+
+  parser.add(Option("--donors")
+                 .help("Use every hydrogen as a donor candidate")
+                 .handler([&]() { allDonors = true; }));
+
   parser.add(Option("--config")
                  .argName("FILE")
                  .help("Dotenv file of SEAMS_* / LINKCELL_* knobs "
@@ -770,8 +852,8 @@ int main(int argc, char *argv[]) {
                  }));
 
   parser.add(Positional("command")
-                 .help("read | chill | chill-plus | cages | rdf | cn | pairs | "
-                       "density-z | domains")
+                 .help("read | chill | chill-plus | cages | rdf | cn | hbonds | "
+                       "pairs | density-z | domains")
                  .occurs(zeroOrOneTime)
                  .handler([&](std::string_view value) { cmd = value; }));
 
@@ -928,7 +1010,7 @@ int main(int argc, char *argv[]) {
       if (ionsFlag) {
         return cmdCnIons(os, cloud, cutoff, siteTable);
       }
-      return cmdCn(os, cloud, cutoff, rdfTypeI, rdfTypeJ);
+      return cmdCn(os, cloud, cutoff, bins, rdfTypeI, rdfTypeJ);
     }
     if (cmd == "pairs") {
       return cmdPairs(os, cloud, siteTable);
@@ -939,12 +1021,17 @@ int main(int argc, char *argv[]) {
     if (cmd == "domains") {
       return cmdDomains(os, cloud, cutoff, siteTable, domainKind);
     }
+    if (cmd == "hbonds") {
+      Cloud hCloud = load(file, cloud.currentFrame, htype);
+      return cmdHbonds(os, cloud, hCloud, cutoff, typeI, hdist, hangle,
+                       allDonors);
+    }
     os << colorizer.error("unknown command: ") << cmd << "\n";
     return 2;
   };
 
   const bool loadAll =
-      cmd == "pairs" || (cmd == "cn" && ionsFlag) ||
+      cmd == "pairs" || cmd == "hbonds" || (cmd == "cn" && ionsFlag) ||
       ((cmd == "rdf" || cmd == "cn") && typesSet && rdfTypeI != rdfTypeJ) ||
       (cmd == "density-z" && typeI <= 0) || cmd == "domains";
   const int loadType = loadAll ? -1 : typeI;

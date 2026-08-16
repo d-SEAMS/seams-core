@@ -151,8 +151,16 @@ double shellIntegral(double rhoJ, double g, double r0, double r1) {
  *  unordered pair therefore integrates to 1 / nI at rmax.
  */
 std::vector<double> rdf::runningCN(const PartialRdf &h) {
+  return runningCN(h, typeJDensity(h));
+}
+
+/**
+ * @details Discrete running integral 4 pi rho_J int_0^r s^2 g(s) ds.
+ *  Each bin contributes a spherical shell of width binwidth. The
+ *  value at bin i is the CN at the outer edge of that bin.
+ */
+std::vector<double> rdf::runningCN(const PartialRdf &h, double rhoJ) {
   std::vector<double> cn(h.g.size(), 0.0);
-  const double rhoJ = typeJDensity(h);
   if (h.binwidth <= 0.0 || rhoJ == 0.0) {
     return cn;
   }
@@ -199,10 +207,17 @@ int rdf::firstMinimumBin(const PartialRdf &h) {
 /**
  * @details Site-site CN up to rMax. Partial last bins are cut at rMax.
  *  rMax is a caller input; this function does not pick a first
- *  minimum.
+ *  minimum. rho_J = nJ / volume.
  */
 double rdf::coordinationNumber(const PartialRdf &h, double rMax) {
-  const double rhoJ = typeJDensity(h);
+  return coordinationNumber(h, rMax, typeJDensity(h));
+}
+
+/**
+ * @details Site-site CN up to rMax. Partial last bins are cut at rMax.
+ */
+double rdf::coordinationNumber(const PartialRdf &h, double rMax,
+                               double rhoJ) {
   if (rMax <= 0.0 || h.binwidth <= 0.0 || rhoJ == 0.0 || h.g.empty()) {
     return 0.0;
   }

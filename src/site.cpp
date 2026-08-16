@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <stdexcept>
+#include <string>
 #include <unordered_set>
 #include <utility>
 
@@ -18,6 +19,81 @@ namespace site {
 namespace {
 
 using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
+
+std::string trim(std::string_view s) {
+  const auto begin = s.find_first_not_of(" \t\n\r");
+  if (begin == std::string_view::npos) {
+    return {};
+  }
+  const auto end = s.find_last_not_of(" \t\n\r");
+  return std::string(s.substr(begin, end - begin + 1));
+}
+
+Kind kindFromName(std::string_view name) {
+  if (name == "unspecified") {
+    return Kind::unspecified;
+  }
+  if (name == "cationHead") {
+    return Kind::cationHead;
+  }
+  if (name == "anion") {
+    return Kind::anion;
+  }
+  if (name == "tail") {
+    return Kind::tail;
+  }
+  if (name == "donorH") {
+    return Kind::donorH;
+  }
+  if (name == "acceptor") {
+    return Kind::acceptor;
+  }
+  if (name == "polar") {
+    return Kind::polar;
+  }
+  if (name == "apolar") {
+    return Kind::apolar;
+  }
+  if (name == "waterO") {
+    return Kind::waterO;
+  }
+  if (name == "waterH") {
+    return Kind::waterH;
+  }
+  if (name == "solvent") {
+    return Kind::solvent;
+  }
+  throw std::invalid_argument("unknown site kind '" + std::string(name) + "'");
+}
+
+Family familyFromName(std::string_view name) {
+  if (name == "waterIce") {
+    return Family::waterIce;
+  }
+  if (name == "ionicLiquid") {
+    return Family::ionicLiquid;
+  }
+  if (name == "moltenSalt") {
+    return Family::moltenSalt;
+  }
+  if (name == "des") {
+    return Family::des;
+  }
+  if (name == "electrolyte") {
+    return Family::electrolyte;
+  }
+  if (name == "confinedIL") {
+    return Family::confinedIL;
+  }
+  if (name == "confinedWater") {
+    return Family::confinedWater;
+  }
+  if (name == "networkFormer") {
+    return Family::networkFormer;
+  }
+  throw std::invalid_argument("unknown site family '" + std::string(name) +
+                              "'");
+}
 
 bool isIonKind(Kind k) {
   return k == Kind::cationHead || k == Kind::anion;
@@ -164,6 +240,52 @@ Cloud ionCloud(const Cloud &src, const Table &table) {
 
   out.nop = static_cast<int>(out.pts.size());
   return out;
+}
+
+Table parseSiteSpec(std::string_view spec) {
+  Table table;
+  std::size_t start = 0;
+  while (start <= spec.size()) {
+    const std::size_t comma = spec.find(',', start);
+    const auto raw =
+        spec.substr(start, comma == std::string_view::npos
+                               ? std::string_view::npos
+                               : comma - start);
+    start = (comma == std::string_view::npos) ? spec.size() + 1 : comma + 1;
+    const std::string token = trim(raw);
+    if (token.empty()) {
+      continue;
+    }
+    const auto eq = token.find('=');
+    if (eq == std::string::npos) {
+      throw std::invalid_argument("site spec token '" + token +
+                                  "' is not key=value");
+    }
+    const std::string key = trim(token.substr(0, eq));
+    const std::string val = trim(token.substr(eq + 1));
+    if (key.empty() || val.empty()) {
+      throw std::invalid_argument("site spec token '" + token +
+                                  "' is not key=value");
+    }
+    if (key == "family") {
+      table.family = familyFromName(val);
+      continue;
+    }
+    std::size_t consumed = 0;
+    int typeId = 0;
+    try {
+      typeId = std::stoi(key, &consumed);
+    } catch (const std::exception &) {
+      throw std::invalid_argument("site spec type '" + key +
+                                  "' is not an integer");
+    }
+    if (consumed != key.size()) {
+      throw std::invalid_argument("site spec type '" + key +
+                                  "' is not an integer");
+    }
+    table.typeToKind[typeId] = kindFromName(val);
+  }
+  return table;
 }
 
 } // namespace site

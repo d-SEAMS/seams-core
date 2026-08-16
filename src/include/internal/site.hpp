@@ -8,6 +8,7 @@
 
 #include <mol_sys.hpp>
 
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -72,6 +73,8 @@ int lammpsTypeOfKind(const Table &table, Kind kind); // error if not unique
 molSys::PointCloud<molSys::Point<double>, double>
 ionCloud(const molSys::PointCloud<molSys::Point<double>, double> &src,
          const Table &table);
+
+Table parseSiteSpec(std::string_view spec);
 
 } // namespace site
 

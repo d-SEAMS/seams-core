@@ -17,19 +17,19 @@
 #include <generic.hpp>
 
 #include <cmath>
+#include <unordered_map>
 
 namespace {
 
 // Water populateHbonds* keep the two-H-per-molID set from hAtomMolList.
-// Row 0 is molID; rows 1 and 2 are the first two H indices.
-std::vector<std::vector<int>>
-donorHsFromTwoHRows(const std::vector<std::vector<int>> &molIDlist) {
-  std::vector<std::vector<int>> donorHs(molIDlist.size());
-  for (size_t i = 0; i < molIDlist.size(); i++) {
-    if (molIDlist[i].size() < 3) {
+std::vector<int> donorHsFromMolList(const std::vector<std::vector<int>> &molIDlist) {
+  std::vector<int> donorHs;
+  for (const auto &row : molIDlist) {
+    if (row.size() < 3) {
       continue;
     }
-    donorHs[i] = {molIDlist[i][1], molIDlist[i][2]};
+    donorHs.push_back(row[1]);
+    donorHs.push_back(row[2]);
   }
   return donorHs;
 }
@@ -37,29 +37,30 @@ donorHsFromTwoHRows(const std::vector<std::vector<int>> &molIDlist) {
 } // namespace
 
 bool bond::donatedHydrogenBond(
-    const molSys::PointCloud<molSys::Point<double>, double> &heavyCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const molSys::PointCloud<molSys::Point<double>, double> &hCloud,
     int acceptorIndex, int donorIndex, const std::vector<int> &donorHs,
     double distCutoff, double angleCutoff) {
-  if (acceptorIndex < 0 || donorIndex < 0 || acceptorIndex >= heavyCloud.nop ||
-      donorIndex >= heavyCloud.nop) {
+  if (acceptorIndex < 0 || donorIndex < 0 ||
+      acceptorIndex >= yCloud.nop || donorIndex >= yCloud.nop) {
     return false;
   }
-  const auto ooArr = gen::relDist(heavyCloud, acceptorIndex, donorIndex);
-  const std::vector<double> oo = {ooArr[0], ooArr[1], ooArr[2]};
+  const auto oo = gen::relDist(yCloud, acceptorIndex, donorIndex);
+  const std::vector<double> ooVec{oo[0], oo[1], oo[2]};
+  const double dist2 = distCutoff * distCutoff;
   for (int hAtomIndex : donorHs) {
     if (hAtomIndex < 0 || hAtomIndex >= hCloud.nop) {
       continue;
     }
-    if (bond::getHbondDistanceOH(heavyCloud, hCloud, acceptorIndex,
-                                 hAtomIndex) >= distCutoff) {
+    const auto oh = gen::relDistFromPoint(
+        yCloud, acceptorIndex, hCloud.pts[hAtomIndex].x,
+        hCloud.pts[hAtomIndex].y, hCloud.pts[hAtomIndex].z);
+    const double oh2 = oh[0] * oh[0] + oh[1] * oh[1] + oh[2] * oh[2];
+    if (oh2 >= dist2) {
       continue;
     }
-    const auto ohArr = gen::relDistFromPoint(
-        heavyCloud, acceptorIndex, hCloud.pts[hAtomIndex].x,
-        hCloud.pts[hAtomIndex].y, hCloud.pts[hAtomIndex].z);
-    const std::vector<double> oh = {ohArr[0], ohArr[1], ohArr[2]};
-    if (gen::radDeg(gen::eigenVecAngle(oo, oh)) <= angleCutoff) {
+    const std::vector<double> ohVec{oh[0], oh[1], oh[2]};
+    if (gen::radDeg(gen::eigenVecAngle(ooVec, ohVec)) <= angleCutoff) {
       return true;
     }
   }
@@ -253,32 +254,39 @@ std::vector<std::vector<int>> bond::populateHbondsWithInputClouds(
     molSys::PointCloud<molSys::Point<double>, double> &hCloud,
     const std::vector<std::vector<int>> &nList, double distCutoff,
     double angleCutoff) {
-  // Two-H hAtomMolList rows: first column is molID, next two are H indices.
   auto molIDlist = molSys::hAtomMolList(hCloud, yCloud);
   return bond::populateHbondsFromDonors(yCloud, hCloud, nList,
-                                        donorHsFromTwoHRows(molIDlist),
+                                        donorHsFromMolList(molIDlist),
                                         distCutoff, angleCutoff);
 }
 
 std::vector<std::vector<int>> bond::populateHbondsFromDonors(
-    const molSys::PointCloud<molSys::Point<double>, double> &heavyCloud,
-    const molSys::PointCloud<molSys::Point<double>, double> &hCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &hCloud,
     const std::vector<std::vector<int>> &nList,
-    const std::vector<std::vector<int>> &donorHs, double distCutoff,
-    double angleCutoff) {
+    const std::vector<int> &donorHs, double distCutoff, double angleCutoff) {
   std::vector<std::vector<int>> hBondNet;
+  std::unordered_map<int, std::vector<int>> donorHsByMol;
+  for (int hAtomIndex : donorHs) {
+    if (hAtomIndex < 0 || hAtomIndex >= hCloud.nop) {
+      continue;
+    }
+    donorHsByMol[hCloud.pts[hAtomIndex].molID].push_back(hAtomIndex);
+  }
+
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+    hBondNet.push_back(std::vector<int>());
+    hBondNet[iatom].push_back(yCloud.pts[iatom].atomID);
+  }
+
   const std::vector<int> emptyHs;
   auto hsFor = [&](int donorIndex) -> const std::vector<int> & {
-    if (donorIndex < 0 || static_cast<size_t>(donorIndex) >= donorHs.size()) {
+    auto it = donorHsByMol.find(yCloud.pts[donorIndex].molID);
+    if (it == donorHsByMol.end()) {
       return emptyHs;
     }
-    return donorHs[static_cast<size_t>(donorIndex)];
+    return it->second;
   };
-
-  for (int iatom = 0; iatom < heavyCloud.nop; iatom++) {
-    hBondNet.push_back(std::vector<int>());
-    hBondNet[iatom].push_back(heavyCloud.pts[iatom].atomID);
-  }
 
   for (size_t iatom = 0; iatom < nList.size(); iatom++) {
     if (nList[iatom].empty()) {
@@ -292,17 +300,15 @@ std::vector<std::vector<int>> bond::populateHbondsFromDonors(
       if (iatomID >= jatomID) {
         continue;
       }
-      auto gotJ = heavyCloud.idIndexMap.find(jatomID);
-      if (gotJ == heavyCloud.idIndexMap.end()) {
+      auto gotJ = yCloud.idIndexMap.find(jatomID);
+      if (gotJ == yCloud.idIndexMap.end()) {
         continue;
       }
       const int jatomIndex = gotJ->second;
-      // Either heavy atom may donate. The unordered-pair skip above
-      // only prevents writing the edge twice.
-      if (bond::donatedHydrogenBond(heavyCloud, hCloud, iatomIndex, jatomIndex,
+      if (bond::donatedHydrogenBond(yCloud, hCloud, iatomIndex, jatomIndex,
                                     hsFor(jatomIndex), distCutoff,
                                     angleCutoff) ||
-          bond::donatedHydrogenBond(heavyCloud, hCloud, jatomIndex, iatomIndex,
+          bond::donatedHydrogenBond(yCloud, hCloud, jatomIndex, iatomIndex,
                                     hsFor(iatomIndex), distCutoff,
                                     angleCutoff)) {
         hBondNet[iatomIndex].push_back(jatomID);
