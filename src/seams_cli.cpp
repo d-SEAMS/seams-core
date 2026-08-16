@@ -8,11 +8,14 @@
 #include <cage_affiliation.hpp>
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
+#include <generic.hpp>
 #include <neighbours.hpp>
+#include <rdf.hpp>
 #include <seams_config.hpp>
 #include <seams_input.hpp>
 
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <map>
@@ -68,9 +71,13 @@ Cloud load(const std::string &path, int frame, int typeI) {
 #endif
 #ifdef SEAMS_HAS_CHEMFILES
   if (ext == "pdb" || ext == "gro" || ext == "dcd") {
-    return sinp::readChemfiles(path, frame, cloud, typeI > 0 ? typeI : -1);
+    const int filter = typeI < 0 ? -1 : (typeI > 0 ? typeI : -1);
+    return sinp::readChemfiles(path, frame, cloud, filter);
   }
 #endif
+  if (typeI < 0) {
+    return sinp::readLammpsTrj(path, frame, cloud);
+  }
   if (typeI > 0) {
     return sinp::readLammpsTrjO(path, frame, cloud, typeI);
   }
@@ -80,6 +87,37 @@ Cloud load(const std::string &path, int frame, int typeI) {
   }
   Cloud again;
   return sinp::readLammpsTrjO(path, frame, again, 1);
+}
+
+std::string_view trimView(std::string_view s) {
+  const auto first = s.find_first_not_of(" \t");
+  if (first == std::string_view::npos) {
+    return {};
+  }
+  const auto last = s.find_last_not_of(" \t");
+  return s.substr(first, last - first + 1);
+}
+
+bool parseTypePair(std::string_view value, int &typeI, int &typeJ) {
+  const auto comma = value.find(',');
+  if (comma == std::string_view::npos) {
+    return false;
+  }
+  if (value.find(',', comma + 1) != std::string_view::npos) {
+    return false;
+  }
+  const auto left = trimView(value.substr(0, comma));
+  const auto right = trimView(value.substr(comma + 1));
+  if (left.empty() || right.empty()) {
+    return false;
+  }
+  try {
+    typeI = parseIntegral<int>(left);
+    typeJ = parseIntegral<int>(right);
+  } catch (const ParsingException &) {
+    return false;
+  }
+  return true;
 }
 
 int typeOf(const Cloud &cloud, int requested) {
@@ -185,11 +223,27 @@ void printFeatures(std::ostream &os) {
 }
 
 int cmdRead(std::ostream &os, Cloud &cloud) {
-  const auto box = cloud.box;
   os << colorizer.heading("nop") << " " << cloud.nop << " "
      << colorizer.longOption("frame") << " " << cloud.currentFrame << " "
-     << colorizer.shortOption("box") << " " << box[0] << " " << box[1] << " "
-     << box[2] << "\n";
+     << colorizer.shortOption("box") << " " << gen::formatDumpBox(cloud.box)
+     << "\n";
+  return 0;
+}
+
+int cmdRdf(std::ostream &os, Cloud &cloud, double rmax, int bins, int typeI,
+           int typeJ) {
+  if (bins <= 0) {
+    bins = std::max(1, static_cast<int>(std::lround(rmax / 0.1)));
+  }
+  const int typI = typeOf(cloud, typeI);
+  const int typJ = typeJ > 0 ? typeJ : typI;
+  const auto gr = rdf::partialRdf(cloud, typI, typJ, rmax, bins);
+  os << "# r g count\n";
+  os << "# types " << typI << " " << typJ << " rmax " << rmax << " bins "
+     << bins << " volume " << gr.volume << "\n";
+  for (std::size_t i = 0; i < gr.r.size(); ++i) {
+    os << gr.r[i] << " " << gr.g[i] << " " << gr.count[i] << "\n";
+  }
   return 0;
 }
 
@@ -319,6 +373,11 @@ int main(int argc, char *argv[]) {
   bool printConfig = false;
   std::string cmd;
   std::string file;
+  std::string typesFlag;
+  int rdfTypeI = 0;
+  int rdfTypeJ = 0;
+  bool typesSet = false;
+  int bins = 0;
 
   const char *progname = (argc ? argv[0] : "seams");
   Parser parser;
@@ -380,9 +439,23 @@ int main(int argc, char *argv[]) {
 
   parser.add(Option("--cutoff", "-c")
                  .argName("ANGSTROM")
-                 .help("Neighbour cutoff")
+                 .help("Neighbour cutoff (rdf rmax)")
                  .handler([&](std::string_view value) {
                    cutoff = parseFloatingPoint<double>(value);
+                 }));
+
+  parser.add(Option("--types")
+                 .argName("I,J")
+                 .help("Pair types for rdf (default I=J=--type)")
+                 .handler([&](std::string_view value) {
+                   typesFlag = std::string(value);
+                 }));
+
+  parser.add(Option("--bins")
+                 .argName("N")
+                 .help("RDF histogram bins (default rmax/0.1)")
+                 .handler([&](std::string_view value) {
+                   bins = parseIntegral<int>(value);
                  }));
 
   parser.add(Option("-k")
@@ -439,7 +512,7 @@ int main(int argc, char *argv[]) {
                  }));
 
   parser.add(Positional("command")
-                 .help("read | chill | chill-plus | cages")
+                 .help("read | chill | chill-plus | cages | rdf")
                  .occurs(zeroOrOneTime)
                  .handler([&](std::string_view value) { cmd = value; }));
 
@@ -471,6 +544,23 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
+  if (!typesFlag.empty()) {
+    if (!parseTypePair(typesFlag, rdfTypeI, rdfTypeJ)) {
+      std::cerr << colorizer.error("bad --types (want I,J)") << "\n";
+      std::cerr << colorizer.warning(parser.formatUsage(progname, colorizer))
+                << "\n";
+      return 2;
+    }
+    typesSet = true;
+  } else {
+    rdfTypeI = typeI;
+    rdfTypeJ = typeI;
+  }
+  if (bins < 0) {
+    std::cerr << colorizer.error("bad --bins (want N > 0)") << "\n";
+    return 2;
+  }
+
   if (cmd.empty() || file.empty()) {
     std::cerr << colorizer.error(
                      "A command and a trajectory file are required")
@@ -498,23 +588,31 @@ int main(int argc, char *argv[]) {
         return 2;
       }
     }
+    if (cmd == "rdf") {
+      return cmdRdf(os, cloud, cutoff, bins, rdfTypeI, rdfTypeJ);
+    }
     os << colorizer.error("unknown command: ") << cmd << "\n";
     return 2;
   };
 
+  const int loadType =
+      (cmd == "rdf" && (typesSet ? rdfTypeI != rdfTypeJ : false)) ? -1 : typeI;
+
   if (last <= 0 || last == frame) {
-    Cloud cloud = load(file, frame, typeI);
+    Cloud cloud = load(file, frame, loadType);
     return runOne(std::cout, cloud);
   }
 
   std::mutex outMu;
   int rc = 0;
-  const int typeFilter = typeI > 0 ? typeI : 0;
+  const int typeFilter = (cmd == "rdf" && typesSet && rdfTypeI != rdfTypeJ)
+                             ? 0
+                             : (typeI > 0 ? typeI : 0);
   sinp::forEachLammpsFrame(
       file, frame, last, typeFilter,
       [&](int /*fr*/, Cloud &cloud) {
         if (typeFilter <= 0 && cloud.nop == 0) {
-          cloud = load(file, cloud.currentFrame, typeI);
+          cloud = load(file, cloud.currentFrame, loadType);
         }
         std::ostringstream line;
         const int one = runOne(line, cloud);

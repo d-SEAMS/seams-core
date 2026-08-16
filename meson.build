@@ -407,4 +407,32 @@ if get_option('with_cli')
   test('seams_version', seams_exe, args: ['--version'])
   test('seams_features', seams_exe, args: ['--features'])
   test('seams_print_config', seams_exe, args: ['--print-config'])
+
+  python3 = find_program('python3', required: true)
+  test(
+    'seams_help_mentions_rdf',
+    python3,
+    args: [
+      '-c',
+      'import subprocess, sys\n'
+      'p = subprocess.run(sys.argv[1:], capture_output=True, text=True)\n'
+      'out = p.stdout + p.stderr\n'
+      'sys.exit(0 if p.returncode == 0 and "rdf" in out else 1)\n',
+      seams_exe.full_path(),
+      '--help',
+    ],
+    depends: [seams_exe])
+  test(
+    'seams_unknown_command_exit_2',
+    python3,
+    args: [
+      '-c',
+      'import subprocess, sys\n'
+      'p = subprocess.run(sys.argv[1:], capture_output=True, text=True)\n'
+      'sys.exit(0 if p.returncode == 2 else 1)\n',
+      seams_exe.full_path(),
+      'nope',
+      'x',
+    ],
+    depends: [seams_exe])
 endif
