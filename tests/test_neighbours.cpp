@@ -10,6 +10,7 @@
 #include <array>
 #include <stdexcept>
 #include <string>
+#include <tuple>
 #include <vector>
 
 // Helper: build a 4-atom system in a 10x10x10 box
@@ -707,6 +708,95 @@ TEST_CASE("tilt dump cutoff list finds the a-image pair", "[neighbours]") {
   cloud.box[3] = 4.0;
   skin.update(cloud);
   REQUIRE(skin.lastRebuilt());
+}
+
+// Type 1 / type 2 ion vertices (cation, anion). Not a cutoff shell.
+static molSys::PointCloud<molSys::Point<double>, double>
+makeFourIonCloud() {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {20.0, 20.0, 20.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 4;
+  cloud.currentFrame = 1;
+  // 0 --1.0-- 1 --2.0-- 2 --3.0-- 3
+  // type 1    2         1         2
+  // Mutual nearest unlike: (0, 1). Ion 2's nearest unlike is 1,
+  // whose nearest type-1 is 0, so (2, 1) is not mutual.
+  const int types[4] = {1, 2, 1, 2};
+  const double x[4] = {0.0, 1.0, 3.0, 6.0};
+  const int atomIDs[4] = {10, 20, 30, 40};
+  for (int i = 0; i < 4; i++) {
+    molSys::Point<double> pt;
+    pt.type = types[i];
+    pt.atomID = atomIDs[i];
+    pt.molID = atomIDs[i];
+    pt.x = x[i];
+    pt.y = 0.0;
+    pt.z = 0.0;
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[pt.atomID] = i;
+  }
+  return cloud;
+}
+
+TEST_CASE("nearestUnlike on 2+2 ions has one mutual pair",
+          "[neighbours]") {
+  auto cloud = makeFourIonCloud();
+  const auto nearest = nneigh::nearestUnlike(cloud, 1, 2);
+  REQUIRE(nearest.size() == 2);
+  REQUIRE(std::get<0>(nearest[0]) == 0);
+  REQUIRE(std::get<1>(nearest[0]) == 1);
+  REQUIRE_THAT(std::get<2>(nearest[0]),
+               Catch::Matchers::WithinAbs(1.0, 1e-12));
+  REQUIRE(std::get<0>(nearest[1]) == 2);
+  REQUIRE(std::get<1>(nearest[1]) == 1);
+  REQUIRE_THAT(std::get<2>(nearest[1]),
+               Catch::Matchers::WithinAbs(2.0, 1e-12));
+
+  const auto pairs = nneigh::mutualNearestUnlike(cloud, 1, 2);
+  REQUIRE(pairs.size() == 1);
+  REQUIRE(pairs[0].first == 0);
+  REQUIRE(pairs[0].second == 1);
+}
+
+TEST_CASE("nearestUnlike picks the sheared a-image unlike ion",
+          "[neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 3;
+  // Type-1 at the origin side. Type-2 at 9.7 is the a-image partner
+  // (MIC 0.5). The decoy type-2 at 1.0 is closer in the unwrapped
+  // cell (0.8) and must not win.
+  const double coords[3][3] = {
+      {0.2, 0.1, 1.0}, {9.7, 0.1, 1.0}, {1.0, 0.1, 1.0}};
+  const int types[3] = {1, 2, 2};
+  for (int i = 0; i < 3; i++) {
+    molSys::Point<double> pt;
+    pt.type = types[i];
+    pt.atomID = i + 1;
+    pt.molID = i + 1;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+  REQUIRE_THAT(gen::periodicDistSq(cloud, 0, 1),
+               Catch::Matchers::WithinAbs(0.25, 1e-9));
+  REQUIRE(gen::periodicDistSq(cloud, 0, 2) > 0.25);
+
+  const auto nearest = nneigh::nearestUnlike(cloud, 1, 2);
+  REQUIRE(nearest.size() == 1);
+  REQUIRE(std::get<0>(nearest[0]) == 0);
+  REQUIRE(std::get<1>(nearest[0]) == 1);
+  REQUIRE_THAT(std::get<2>(nearest[0]),
+               Catch::Matchers::WithinAbs(0.5, 1e-9));
+
+  const auto pairs = nneigh::mutualNearestUnlike(cloud, 1, 2);
+  REQUIRE(pairs.size() == 1);
+  REQUIRE(pairs[0].first == 0);
+  REQUIRE(pairs[0].second == 1);
 }
 
 #ifdef SEAMS_HAS_LINKCELL
