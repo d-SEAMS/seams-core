@@ -45,6 +45,21 @@ dump carries it.
 ~seams rdf~ is not an ice score. Do not run CHILL or cages on
 the ions.
 
+* Site kinds and ion vertices
+
+LAMMPS ~type~ is not chemistry: type 1 is oxygen in water and a
+cation head in an IL. Hold a ~site::Table~ of type-to-kind (and
+optional atom-ID overrides). ~Table::of~ looks up the override
+first, then the type, else ~unspecified~. ~indicesOf(polar)~ is
+the union of ~cationHead~, ~anion~, and explicit ~polar~;
+~indicesOf(apolar)~ is ~tail~ plus explicit ~apolar~.
+~site::ionCloud~ emits one vertex per ~molID~ that carries a
+cation head or anion: the unweighted COM of those tagged atoms,
+unwrapped with ~gen::relDist~ to the first atom of the group, with
+~Point::type~ 1 (cation) or 2 (anion). A long-chain cation COM
+sits on the polar head, not halfway down the tail. Family is an
+input on the table; it is not inferred from types.
+
 * Read the box
 
 ~seams read FILE~ prints ~box Lx Ly Lz~ and, when the dump is
