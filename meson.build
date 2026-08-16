@@ -428,6 +428,16 @@ if get_option('with_cli')
     ],
     depends: [seams_exe])
   test(
+    'seams_density_z',
+    python3,
+    args: [
+      '-c',
+      'import os,subprocess,sys; env=os.environ.copy(); lib=os.path.join(os.path.dirname(sys.argv[1]),"src"); env["LD_LIBRARY_PATH"]=lib+(":"+env["LD_LIBRARY_PATH"] if env.get("LD_LIBRARY_PATH") else ""); p=subprocess.run([sys.argv[1],"density-z",sys.argv[2],"--bins","4","--type","0"],capture_output=True,text=True,env=env); lines=[ln for ln in p.stdout.splitlines() if ln.strip()]; sys.exit(0 if p.returncode==0 and lines and lines[0]=="# z rho" and len(lines)==5 else 1)',
+      seams_exe.full_path(),
+      meson.project_source_root() / 'input' / 'traj' / 'exampleTraj.lammpstrj',
+    ],
+    depends: [seams_exe])
+  test(
     'seams_unknown_command_exit_2',
     python3,
     args: [
