@@ -241,10 +241,34 @@ inline void ylmAll(int orderL, double theta, double phi, double *out) {
   }
 }
 
-// One particle, first pass: average Y_lm over CSR neighbours.
+// Accumulate one packed displacement into the interleaved qlm row.
+inline void qlmAddBond(int orderL, double dx, double dy, double dz,
+                       double *qlmInterleaved, int row, int nComp,
+                       int &nUsed) {
+  const double r2 = dx * dx + dy * dy + dz * dz;
+  if (r2 == 0.0) {
+    return;
+  }
+  const double r = std::sqrt(r2);
+  const double phi = std::atan2(dx, dy);
+  const double theta = std::acos(dz / r);
+  double ylm[34];
+  ylmAll(orderL, theta, phi, ylm);
+  for (int m = 0; m < nComp; m++) {
+    qlmInterleaved[2 * (row + m)] += ylm[2 * m];
+    qlmInterleaved[2 * (row + m) + 1] += ylm[2 * m + 1];
+  }
+  nUsed++;
+}
+
+// Leftover xyz path. Packs cartesian pair vectors into qlmAddBond
+// and does not wrap. Live flatten uses relDist + qlmOneAtomDr.
 inline void qlmOneAtom(int iatom, int orderL, const double *xyz,
                        const int *offsets, const int *cols, double bx,
                        double by, double bz, double *qlmInterleaved) {
+  (void)bx;
+  (void)by;
+  (void)bz;
   const int nComp = 2 * orderL + 1;
   const int iOff = 3 * iatom;
   const int row = iatom * nComp;
@@ -255,26 +279,12 @@ inline void qlmOneAtom(int iatom, int orderL, const double *xyz,
   const int j0 = offsets[iatom];
   const int j1 = offsets[iatom + 1];
   int nUsed = 0;
-  double ylm[34];
   for (int p = j0; p < j1; p++) {
     const int jatom = cols[p];
-    double dx = xyz[iOff] - xyz[3 * jatom];
-    double dy = xyz[iOff + 1] - xyz[3 * jatom + 1];
-    double dz = xyz[iOff + 2] - xyz[3 * jatom + 2];
-    minImage(dx, dy, dz, bx, by, bz);
-    const double r2 = dx * dx + dy * dy + dz * dz;
-    if (r2 == 0.0) {
-      continue;
-    }
-    const double r = std::sqrt(r2);
-    const double phi = std::atan2(dx, dy);
-    const double theta = std::acos(dz / r);
-    ylmAll(orderL, theta, phi, ylm);
-    for (int m = 0; m < nComp; m++) {
-      qlmInterleaved[2 * (row + m)] += ylm[2 * m];
-      qlmInterleaved[2 * (row + m) + 1] += ylm[2 * m + 1];
-    }
-    nUsed++;
+    const double dx = xyz[iOff] - xyz[3 * jatom];
+    const double dy = xyz[iOff + 1] - xyz[3 * jatom + 1];
+    const double dz = xyz[iOff + 2] - xyz[3 * jatom + 2];
+    qlmAddBond(orderL, dx, dy, dz, qlmInterleaved, row, nComp, nUsed);
   }
   if (nUsed == 0) {
     return;
@@ -300,24 +310,9 @@ inline void qlmOneAtomDr(int iatom, int orderL, const double *dr,
   const int j0 = offsets[iatom];
   const int j1 = offsets[iatom + 1];
   int nUsed = 0;
-  double ylm[34];
   for (int p = j0; p < j1; p++) {
-    const double dx = dr[3 * p];
-    const double dy = dr[3 * p + 1];
-    const double dz = dr[3 * p + 2];
-    const double r2 = dx * dx + dy * dy + dz * dz;
-    if (r2 == 0.0) {
-      continue;
-    }
-    const double r = std::sqrt(r2);
-    const double phi = std::atan2(dx, dy);
-    const double theta = std::acos(dz / r);
-    ylmAll(orderL, theta, phi, ylm);
-    for (int m = 0; m < nComp; m++) {
-      qlmInterleaved[2 * (row + m)] += ylm[2 * m];
-      qlmInterleaved[2 * (row + m) + 1] += ylm[2 * m + 1];
-    }
-    nUsed++;
+    qlmAddBond(orderL, dr[3 * p], dr[3 * p + 1], dr[3 * p + 2],
+               qlmInterleaved, row, nComp, nUsed);
   }
   if (nUsed == 0) {
     return;
