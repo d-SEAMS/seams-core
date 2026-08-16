@@ -17,10 +17,10 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <cmath>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -54,10 +54,15 @@
  *
  * A hydrogen bond between two water molecules exists when:
  *
- * 1. The distance between the donor oxygen atom and the acceptor hydrogen atom
+ * 1. The distance between the acceptor heavy atom and the donor hydrogen atom
  is less than 2.42 Angstrom
  * 2. The angle between the O--O vector and the O-H vector should be less than
  30 degrees
+ *
+ * 30 deg O-O-H is 150 deg O-H...O. Those numbers stay the water defaults on
+ * populateHbonds and populateHbondsWithInputClouds. Ionic-liquid callers pass
+ * (r, theta) from the site-site RDF of that trajectory. This header does not
+ * bake a cutoff for any other chemistry.
  *
  * ### Changelog ###
  *
@@ -82,20 +87,45 @@ populateHbonds(std::string filename,
 //! Create a vector of vectors (similar to the neighbour list conventions)
 //! containing the hydrogen bond connectivity information. Decides the
 //! existence of the hydrogen bond depending on the O--O and O--H vectors from
-//! the neighbour list already constructed, taking a PointCloud for the H atoms as input
+//! the neighbour list already constructed, taking a PointCloud for the H atoms
+//! as input
 // ! The H atom PointCloud should be for the entire system
-std::vector<std::vector<int>>
-populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-               molSys::PointCloud<molSys::Point<double>, double> &hCloud,
-               const std::vector<std::vector<int>> &nList,
-               double distCutoff = 2.42, double angleCutoff = 30.0);
+std::vector<std::vector<int>> populateHbondsWithInputClouds(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &hCloud,
+    const std::vector<std::vector<int>> &nList, double distCutoff = 2.42,
+    double angleCutoff = 30.0);
+
+//! Geometric test for one donor-acceptor assignment. donorHs are hCloud
+//! indices attached to the donor. O-O is gen::relDist(heavyCloud,
+//! acceptor, donor). O-H uses gen::relDistFromPoint /
+//! unWrappedDistFromPoint (dump MIC).
+bool donatedHydrogenBond(
+    const molSys::PointCloud<molSys::Point<double>, double> &heavyCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &hCloud,
+    int acceptorIndex, int donorIndex, const std::vector<int> &donorHs,
+    double distCutoff, double angleCutoff);
+
+//! donorHs[iHeavy] = hCloud indices of donor hydrogens attached to
+//! heavyCloud.pts[iHeavy]. Empty row = this heavy atom does not donate.
+//! nList is the heavy-heavy neighbour list (by atom ID, leading self),
+//! same shape populateHbondsWithInputClouds already consumes. Water
+//! populateHbondsWithInputClouds builds those rows from the two-H
+//! hAtomMolList set. Other chemistries pass (r, theta) from the
+//! site-site RDF of that trajectory; 30 deg O-O-H is 150 deg O-H...O.
+std::vector<std::vector<int>> populateHbondsFromDonors(
+    const molSys::PointCloud<molSys::Point<double>, double> &heavyCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &hCloud,
+    const std::vector<std::vector<int>> &nList,
+    const std::vector<std::vector<int>> &donorHs, double distCutoff,
+    double angleCutoff);
 
 //! Calculates the distance of the hydrogen bond between O and H (of different
 //! atoms), given the respective pointClouds and the indices to each atom
-double
-getHbondDistanceOH(const molSys::PointCloud<molSys::Point<double>, double> &oCloud,
-                   const molSys::PointCloud<molSys::Point<double>, double> &hCloud,
-                   int oAtomIndex, int hAtomIndex);
+double getHbondDistanceOH(
+    const molSys::PointCloud<molSys::Point<double>, double> &oCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &hCloud,
+    int oAtomIndex, int hAtomIndex);
 
 //! Create a vector of vectors containing bond connectivity information. May
 //! contain duplicates! Gets the bond information from the vector of vectors
