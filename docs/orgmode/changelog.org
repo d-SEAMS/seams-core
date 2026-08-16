@@ -5,6 +5,12 @@ The C++ engine is this repository. Python is ~pydseams~
 ([[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]). Lua is
 ~require("dseams")~ ([[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]).
 
+* 2.2.5
+
+~subprojects/linkcell.wrap~ is v0.2.4. A static ~libyodaLib.a~
+no longer passes ~liblinkcell.so~ to ~ar~. Wrap consumers link
+the static archive. Dump doubles parse with ~strtod~ on Apple libc++.
+
 * 2.2.4
 
 Periodic /k/-nearest graphs via [[https://github.com/d-SEAMS/linkcell][d-SEAMS/linkcell]] v0.2.2.
