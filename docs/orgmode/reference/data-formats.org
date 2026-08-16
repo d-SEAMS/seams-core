@@ -86,12 +86,31 @@ columns are ignored.
 Optional columns: ~id~, ~mol~. Missing ~mol~ falls back to ~id~.
 If both are missing, the reader uses column 0 for both.
 
-~PointCloud.box~ is ~hi - lo~ per axis. ~PointCloud.boxLow~ is the
-lower bound. A third number on a box line is a triclinic tilt and is
-appended to ~box~.
+~PointCloud.box~ is ~hi - lo~ per axis (the LAMMPS bound spans, not
+the lattice edge lengths). ~PointCloud.boxLow~ is the lower bound.
+A third number on a box line is a triclinic tilt (~xy~, then ~xz~,
+then ~yz~) and is appended to ~box~. When those three tilts are
+present, ~box.size() >= 6~. Pair distances go through
+~gen::periodicDistSq~ / ~gen::triclinicMinImage~, which recover H
+with the same mapping as ~nneigh::dumpBoundsToH~ /
+~nneigh::lammpsBoxToLcCell~. An independent-axis wrap on the bound
+spans is the wrong image for a sheared cell; see
+[[file:../howto/sheared-cells.org][Sheared cells]].
+~gen::formatDumpBox~ prints the spans and, when present, the tilt.
+Dump writers emit ~ITEM: BOX BOUNDS xy xz yz pp pp pp~ and a third
+field on each bound line when the cloud carries tilt.
+
+~seams read~ prints the three bound spans (~box Lx Ly Lz~). It does
+not print the tilt. The cloud still keeps ~box[3..5]~ when the dump
+had them.
 
 Mixed water dumps in this tree use type 2 for oxygen and type 1 for
-hydrogen. Single-site mW dumps in this tree use type 1.
+hydrogen. Single-site mW dumps in this tree use type 1. A mixed-type
+dump that is not that water convention (ionic liquid, solvent plus
+solute) needs an explicit ~--type I~; the default ~0~ guess is type
+2 then type 1. The C++ filter is ~sinp::readLammpsTrjO~ or
+~gen::getPointCloudOneAtomType~. See
+[[file:../howto/ionic-liquid.org][Pick one type]].
 
 A live dump session caches ~ITEM: TIMESTEP~ offsets. Sequential
 walks do not rescan prior snapshots. ~seams --frame N --last M
