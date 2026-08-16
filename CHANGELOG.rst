@@ -5,8 +5,11 @@ Changelog
 Version 2.2.5 (2026-08-16)
 ===========================
 
-``subprojects/linkcell.wrap`` is v0.2.3. A static ``libyodaLib.a``
-no longer passes ``liblinkcell.so`` to ``ar``.
+``subprojects/linkcell.wrap`` is v0.2.4. A static ``libyodaLib.a``
+no longer passes ``liblinkcell.so`` to ``ar``. Wrap consumers link
+the static archive, so ``pydseams.yoda`` does not need
+``liblinkcell`` at import time. Dump doubles parse with ``strtod``
+on Apple libc++.
 
 Version 2.2.4 (2026-08-16)
 ===========================

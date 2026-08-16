@@ -7,8 +7,9 @@ The C++ engine is this repository. Python is ~pydseams~
 
 * 2.2.5
 
-~subprojects/linkcell.wrap~ is v0.2.3. A static ~libyodaLib.a~
-no longer passes ~liblinkcell.so~ to ~ar~.
+~subprojects/linkcell.wrap~ is v0.2.4. A static ~libyodaLib.a~
+no longer passes ~liblinkcell.so~ to ~ar~. Wrap consumers link
+the static archive. Dump doubles parse with ~strtod~ on Apple libc++.
 
 * 2.2.4
 
