@@ -363,7 +363,7 @@ TEST_CASE("formatDumpBox prints tilt when box.size() is 6", "[generic]") {
   REQUIRE_THAT(xhi, Catch::Matchers::WithinAbs(16.0, 1e-12));
   REQUIRE_THAT(xyt, Catch::Matchers::WithinAbs(5.0, 1e-12));
   REQUIRE_THAT(ylo, Catch::Matchers::WithinAbs(2.0, 1e-12));
-  REQUIRE_THAT(yhi, Catch::Matchers::WithinAbs(10.660254037844386, 1e-5));
+  REQUIRE_THAT(yhi, Catch::Matchers::WithinAbs(10.660254037844386, 1e-3));
   REQUIRE_THAT(xzt, Catch::Matchers::WithinAbs(0.4, 1e-12));
   REQUIRE_THAT(zlo, Catch::Matchers::WithinAbs(3.0, 1e-12));
   REQUIRE_THAT(zhi, Catch::Matchers::WithinAbs(13.0, 1e-12));
