@@ -10,3 +10,5 @@ overhead_sizes: [4096, 16000]
 strong_atoms: 65536
 strong_threads: [1, 2, 4]
 cage_reps: 5
+incremental_frames: 5
+incremental_sites: 3

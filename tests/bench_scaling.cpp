@@ -126,27 +126,17 @@ int main(int argc, char **argv) {
     const double tCorrel = bestMillis(
         [&]() { chill::getCorrelPlus(cloud, nList, false); }, reps);
 
-    // Ring detection grows steeply with system size; cap it so that the
-    // sweep stays interactive, and report a blank entry past the cap
-    double tRings = -1.0;
-    if (nAtoms <= 8000) {
-      tRings = bestMillis(
-          [&]() {
-            volatile auto rings = primitive::ringNetwork(byIndex, 6);
-            (void)rings;
-          },
-          1);
-    }
+    const double tRings = bestMillis(
+        [&]() {
+          volatile auto rings = primitive::ringNetwork(byIndex, 6);
+          (void)rings;
+        },
+        nAtoms <= 8000 ? reps : 1);
 
     std::cout << std::left << std::setw(10) << nAtoms << std::setw(16)
               << std::fixed << std::setprecision(3) << tNeigh << std::setw(16)
-              << tIndex << std::setw(16) << tCorrel;
-    if (tRings >= 0.0) {
-      std::cout << std::setw(16) << tRings;
-    } else {
-      std::cout << std::setw(16) << "skipped";
-    }
-    std::cout << "\n";
+              << tIndex << std::setw(16) << tCorrel << std::setw(16) << tRings
+              << "\n";
   }
 
   return 0;
