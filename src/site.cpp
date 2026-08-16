@@ -1,0 +1,169 @@
+//-----------------------------------------------------------------------------------
+// d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations
+// SPDX-License-Identifier: MIT
+//-----------------------------------------------------------------------------------
+
+#include <site.hpp>
+
+#include <generic.hpp>
+#include <mol_sys.hpp>
+
+#include <algorithm>
+#include <stdexcept>
+#include <unordered_set>
+#include <utility>
+
+namespace site {
+
+namespace {
+
+using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
+
+bool isIonKind(Kind k) {
+  return k == Kind::cationHead || k == Kind::anion;
+}
+
+bool matchesKind(Kind have, Kind want) {
+  if (want == Kind::polar) {
+    return have == Kind::cationHead || have == Kind::anion ||
+           have == Kind::polar;
+  }
+  if (want == Kind::apolar) {
+    return have == Kind::tail || have == Kind::apolar;
+  }
+  return have == want;
+}
+
+int indexOfAtom(const Cloud &src, int atomID) {
+  const auto it = src.idIndexMap.find(atomID);
+  if (it != src.idIndexMap.end()) {
+    return it->second;
+  }
+  const int n = static_cast<int>(src.pts.size());
+  for (int i = 0; i < n; ++i) {
+    if (src.pts[static_cast<std::size_t>(i)].atomID == atomID) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+} // namespace
+
+Kind Table::of(const molSys::Point<double> &p) const {
+  if (const auto it = atomOverride.find(p.atomID); it != atomOverride.end()) {
+    return it->second;
+  }
+  return ofType(p.type);
+}
+
+Kind Table::ofType(int typeId) const {
+  if (const auto it = typeToKind.find(typeId); it != typeToKind.end()) {
+    return it->second;
+  }
+  return Kind::unspecified;
+}
+
+std::vector<int> indicesOf(const Cloud &yCloud, const Table &table,
+                           Kind kind) {
+  std::vector<int> out;
+  const int n = static_cast<int>(yCloud.pts.size());
+  out.reserve(static_cast<std::size_t>(n));
+  for (int i = 0; i < n; ++i) {
+    if (matchesKind(table.of(yCloud.pts[static_cast<std::size_t>(i)]), kind)) {
+      out.push_back(i);
+    }
+  }
+  return out;
+}
+
+int lammpsTypeOfKind(const Table &table, Kind kind) {
+  int found = 0;
+  int typeId = -1;
+  for (const auto &[id, mapped] : table.typeToKind) {
+    if (mapped == kind) {
+      ++found;
+      typeId = id;
+    }
+  }
+  if (found != 1) {
+    throw std::runtime_error("site kind does not map to a unique LAMMPS type");
+  }
+  return typeId;
+}
+
+Cloud ionCloud(const Cloud &src, const Table &table) {
+  Cloud out;
+  out.box = src.box;
+  out.boxLow = src.boxLow;
+  out.currentFrame = src.currentFrame;
+
+  auto &mutableSrc = const_cast<Cloud &>(src);
+  const auto molMap = molSys::createMolIDAtomIDMultiMap(mutableSrc);
+
+  std::vector<int> molOrder;
+  std::unordered_set<int> seenMol;
+  molOrder.reserve(src.pts.size());
+  for (const auto &pt : src.pts) {
+    if (seenMol.insert(pt.molID).second) {
+      molOrder.push_back(pt.molID);
+    }
+  }
+
+  for (const int molID : molOrder) {
+    std::vector<int> ions;
+    const auto range = molMap.equal_range(molID);
+    for (auto it = range.first; it != range.second; ++it) {
+      const int idx = indexOfAtom(src, it->second);
+      if (idx < 0) {
+        continue;
+      }
+      if (isIonKind(table.of(src.pts[static_cast<std::size_t>(idx)]))) {
+        ions.push_back(idx);
+      }
+    }
+    if (ions.empty()) {
+      continue;
+    }
+    std::sort(ions.begin(), ions.end());
+    const Kind ionKind = table.of(src.pts[static_cast<std::size_t>(ions.front())]);
+    ions.erase(std::remove_if(ions.begin(), ions.end(),
+                              [&](int idx) {
+                                return table.of(src.pts[static_cast<std::size_t>(
+                                           idx)]) != ionKind;
+                              }),
+               ions.end());
+    if (ions.empty()) {
+      continue;
+    }
+
+    molSys::Point<double> vertex = src.pts[static_cast<std::size_t>(ions.front())];
+    vertex.type = (ionKind == Kind::cationHead) ? 1 : 2;
+    vertex.molID = molID;
+    if (ions.size() > 1) {
+      const int ref = ions.front();
+      double sx = src.pts[static_cast<std::size_t>(ref)].x;
+      double sy = src.pts[static_cast<std::size_t>(ref)].y;
+      double sz = src.pts[static_cast<std::size_t>(ref)].z;
+      for (std::size_t k = 1; k < ions.size(); ++k) {
+        const auto dr = gen::relDist(src, ions[k], ref);
+        sx += src.pts[static_cast<std::size_t>(ref)].x + dr[0];
+        sy += src.pts[static_cast<std::size_t>(ref)].y + dr[1];
+        sz += src.pts[static_cast<std::size_t>(ref)].z + dr[2];
+      }
+      const double inv = 1.0 / static_cast<double>(ions.size());
+      vertex.x = sx * inv;
+      vertex.y = sy * inv;
+      vertex.z = sz * inv;
+    }
+
+    const int outIdx = static_cast<int>(out.pts.size());
+    out.idIndexMap[vertex.atomID] = outIdx;
+    out.pts.push_back(std::move(vertex));
+  }
+
+  out.nop = static_cast<int>(out.pts.size());
+  return out;
+}
+
+} // namespace site
