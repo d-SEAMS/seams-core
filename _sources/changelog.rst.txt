@@ -7,6 +7,12 @@ The C++ engine is this repository. Python is ``pydseams``
 (`PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_). Lua is
 ``require("dseams")`` (`yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_).
 
+Unreleased
+----------
+
+The C++ API in the book is Doxygen via doxyrest (``api/index``),
+the same path as rgpot. The hand function tables are gone.
+
 2.2.5
 -----
 

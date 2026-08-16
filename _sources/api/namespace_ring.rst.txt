@@ -8,6 +8,7 @@ namespace ring
 	:hidden:
 
 	struct_ring_CageAffiliation.rst
+	struct_ring_RingSearchIndex.rst
 	struct_ring_SeededAtomLabels.rst
 	class_ring_AffiliationUpdater.rst
 
@@ -37,6 +38,26 @@ Topological network criteria functions. :ref:`More...<details-namespacering>`
 
 	:ref:`CageAffiliation<doxid-structring_1_1_cage_affiliation>` :ref:`cageAffiliation<doxid-namespacering_1a6a455f7a0da97df613534671c9377a45>`(const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList);
 	:ref:`SeededAtomLabels<doxid-structring_1_1_seeded_atom_labels>` :ref:`seededCageAffiliation<doxid-namespacering_1a995edc47f2d855d9b3d19b6aedfa640c>`(const std::vector<std::vector<int>>& strictRings, const std::vector<std::vector<int>>& strictNList, const std::vector<std::vector<int>>& permissiveRings, const std::vector<std::vector<int>>& permissiveNList);
+	int :ref:`bulkPolygonRingAnalysis<doxid-namespacering_1a46bc67e817124b0e736c493bc8e4d6ee>`(std::string path, const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int maxDepth, int firstFrame);
+	int :ref:`topoBulkAnalysis<doxid-namespacering_1ada5f6a19834edc41365e7f85d92e4b76>`(std::string path, const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int firstFrame, bool onlyTetrahedral = true);
+	:ref:`RingSearchIndex<doxid-structring_1_1_ring_search_index>` :ref:`buildRingSearchIndex<doxid-namespacering_1a2314146c9c30c45799ab5217b8b69e61>`(const std::vector<std::vector<int>>& rings, int numAtoms);
+	std::vector<int> :ref:`findDDC<doxid-namespacering_1a503bfa2deec404d907645e16ed236c28>`(const std::vector<std::vector<int>>& rings, std::vector<:ref:`strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, const std::vector<int>& listHC, std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList);
+	std::vector<int> :ref:`findDDC<doxid-namespacering_1a13d4db1147bed179fe5c59afe3bb90f7>`(const std::vector<std::vector<int>>& rings, std::vector<:ref:`strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, const std::vector<int>& listHC, std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, const :ref:`RingSearchIndex<doxid-structring_1_1_ring_search_index>`& index);
+	std::vector<int> :ref:`findMixedRings<doxid-namespacering_1a5e65636a113b8a778541f437f00c0f97>`(const std::vector<std::vector<int>>& rings, std::vector<:ref:`strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, std::vector<int>& listDDC, std::vector<int>& listHC);
+	std::vector<int> :ref:`findHC<doxid-namespacering_1af2bab9ed638ed3e3a1ed3392d7e4a576>`(const std::vector<std::vector<int>>& rings, std::vector<:ref:`strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, const std::vector<std::vector<int>>& nList, std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList);
+	std::vector<int> :ref:`findHC<doxid-namespacering_1a1dfa48bf23ffaf39fee585ac7634231a>`(const std::vector<std::vector<int>>& rings, std::vector<:ref:`strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, const std::vector<std::vector<int>>& nList, std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, const :ref:`RingSearchIndex<doxid-structring_1_1_ring_search_index>`& index);
+	bool :ref:`conditionOneDDC<doxid-namespacering_1a7cc755c188267af7b9ff9ae73ca77579>`(const std::vector<std::vector<int>>& rings, std::vector<int>& peripheralRings, int iring);
+	bool :ref:`conditionOneDDC<doxid-namespacering_1a75c45309352d085d18f89f370dd42ab2>`(const std::vector<std::vector<int>>& rings, std::vector<int>& peripheralRings, int iring, const :ref:`RingSearchIndex<doxid-structring_1_1_ring_search_index>`& index);
+	bool :ref:`conditionTwoDDC<doxid-namespacering_1a5bc5928258e125e0d9e52314221974b9>`(const std::vector<std::vector<int>>& rings, std::vector<int>& peripheralRings, int iring);
+	bool :ref:`conditionTwoDDC<doxid-namespacering_1ac90a6cf68afb185f82a5b1d064a1f80f>`(const std::vector<std::vector<int>>& rings, std::vector<int>& peripheralRings, int iring, const :ref:`RingSearchIndex<doxid-structring_1_1_ring_search_index>`& index);
+	bool :ref:`conditionThreeDDC<doxid-namespacering_1abf88eff5d04ebb4bfad69693edaaa432>`(const std::vector<std::vector<int>>& rings, std::vector<int>& peripheralRings);
+	bool :ref:`basalConditions<doxid-namespacering_1a199fe38d3152cc04d18109ddb868ab34>`(const std::vector<std::vector<int>>& nList, const std::vector<int>& basal1, const std::vector<int>& basal2);
+	bool :ref:`basalNeighbours<doxid-namespacering_1a350f1fa3c3d5807fb720444054d6e340>`(const std::vector<std::vector<int>>& nList, std::vector<int>& triplet, int atomOne, int atomTwo);
+	bool :ref:`notNeighboursOfRing<doxid-namespacering_1a5db4898b22ebb13511cc37fae6674e5c>`(const std::vector<std::vector<int>>& nList, std::vector<int>& triplet, const std::vector<int>& ring);
+	int :ref:`findPrismatic<doxid-namespacering_1a56c3c2a30736d27d9eaf3e3759e630e9>`(const std::vector<std::vector<int>>& rings, std::vector<int>& listHC, std::vector<:ref:`strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, int iring, int jring, std::vector<int>& prismaticRings);
+	int :ref:`findPrismatic<doxid-namespacering_1aaf26a6612dd314b36db80820289ab68b>`(const std::vector<std::vector<int>>& rings, std::vector<int>& listHC, std::vector<:ref:`strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, int iring, int jring, std::vector<int>& prismaticRings, const :ref:`RingSearchIndex<doxid-structring_1_1_ring_search_index>`& index);
+	int :ref:`getAtomTypesTopoBulk<doxid-namespacering_1a45c216fc97f12e29f117bbc1f6d3c7f3>`(const std::vector<std::vector<int>>& rings, const std::vector<:ref:`ring::strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, std::vector<:ref:`cage::iceType<doxid-group__cage_1gaaac41828990e32b9d6e7db4426b61529>`>& atomTypes);
+	int :ref:`getStrucNumbers<doxid-namespacering_1aac3a6fdc27f05a7ded468e955983f270>`(const std::vector<:ref:`ring::strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, const std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, int& numHC, int& numDDC, int& mixedRings, int& prismaticRings, int& basalRings);
 
 	} // namespace ring
 .. _details-namespacering:
@@ -128,4 +149,212 @@ Specificity on structureless input is structural rather than statistical: when t
 		- permissiveNList
 
 		- Permissive graph, same conventions.
+
+.. index:: pair: function; bulkPolygonRingAnalysis
+.. _doxid-namespacering_1a46bc67e817124b0e736c493bc8e4d6ee:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int bulkPolygonRingAnalysis(std::string path, const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int maxDepth, int firstFrame)
+
+Find out rings in the bulk, looping through all ring sizes upto the maxDepth The input ringsAllSizes array has rings of every size.
+
+.. index:: pair: function; topoBulkAnalysis
+.. _doxid-namespacering_1ada5f6a19834edc41365e7f85d92e4b76:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int topoBulkAnalysis(std::string path, const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int firstFrame, bool onlyTetrahedral = true)
+
+Find out which rings are DDCs or HCs, which are comprised of 6-membered primitive rings.
+
+Start with a neighbour list (by index) and a vector of vectors of rings (also by index). TODO: try 'square' ice and ice0
+
+.. index:: pair: function; buildRingSearchIndex
+.. _doxid-namespacering_1a2314146c9c30c45799ab5217b8b69e61:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`RingSearchIndex<doxid-structring_1_1_ring_search_index>` buildRingSearchIndex(const std::vector<std::vector<int>>& rings, int numAtoms)
+
+Builds the inverted atom-to-rings index used by the cage searches.
+
+.. index:: pair: function; findDDC
+.. _doxid-namespacering_1a503bfa2deec404d907645e16ed236c28:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> findDDC(const std::vector<std::vector<int>>& rings, std::vector<:ref:`strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, const std::vector<int>& listHC, std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList)
+
+Find out which hexagonal rings are DDC (Double Diamond Cages) rings.
+
+Returns a vector containing all the ring IDs which are DDC rings
+
+.. index:: pair: function; findDDC
+.. _doxid-namespacering_1a13d4db1147bed179fe5c59afe3bb90f7:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> findDDC(const std::vector<std::vector<int>>& rings, std::vector<:ref:`strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, const std::vector<int>& listHC, std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, const :ref:`RingSearchIndex<doxid-structring_1_1_ring_search_index>`& index)
+
+As findDDC, reusing an index the caller has already built.
+
+.. index:: pair: function; findMixedRings
+.. _doxid-namespacering_1a5e65636a113b8a778541f437f00c0f97:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> findMixedRings(const std::vector<std::vector<int>>& rings, std::vector<:ref:`strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, std::vector<int>& listDDC, std::vector<int>& listHC)
+
+Find out which hexagonal rings are both DDCs (Double Diamond Cages) and HCs (Hexagonal Cages).
+
+Returns a vector containing all the ring IDs which are of this type
+
+.. index:: pair: function; findHC
+.. _doxid-namespacering_1af2bab9ed638ed3e3a1ed3392d7e4a576:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> findHC(const std::vector<std::vector<int>>& rings, std::vector<:ref:`strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, const std::vector<std::vector<int>>& nList, std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList)
+
+Find out which hexagonal rings are HC rings.
+
+Returns a vector containing all the ring IDs which are HC rings
+
+.. index:: pair: function; findHC
+.. _doxid-namespacering_1a1dfa48bf23ffaf39fee585ac7634231a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> findHC(const std::vector<std::vector<int>>& rings, std::vector<:ref:`strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, const std::vector<std::vector<int>>& nList, std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, const :ref:`RingSearchIndex<doxid-structring_1_1_ring_search_index>`& index)
+
+As findHC, reusing an index the caller has already built.
+
+.. index:: pair: function; conditionOneDDC
+.. _doxid-namespacering_1a7cc755c188267af7b9ff9ae73ca77579:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool conditionOneDDC(const std::vector<std::vector<int>>& rings, std::vector<int>& peripheralRings, int iring)
+
+First condition for the DDC: There must be at least 3 other rings in which each element of the equatorial ring is present.
+
+.. index:: pair: function; conditionOneDDC
+.. _doxid-namespacering_1a75c45309352d085d18f89f370dd42ab2:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool conditionOneDDC(const std::vector<std::vector<int>>& rings, std::vector<int>& peripheralRings, int iring, const :ref:`RingSearchIndex<doxid-structring_1_1_ring_search_index>`& index)
+
+As conditionOneDDC, reusing an index the caller has already built.
+
+.. index:: pair: function; conditionTwoDDC
+.. _doxid-namespacering_1a5bc5928258e125e0d9e52314221974b9:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool conditionTwoDDC(const std::vector<std::vector<int>>& rings, std::vector<int>& peripheralRings, int iring)
+
+Second condition for the DDC: There must be at least 1 other ring for every triplet in the equatorial ring.
+
+.. index:: pair: function; conditionTwoDDC
+.. _doxid-namespacering_1ac90a6cf68afb185f82a5b1d064a1f80f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool conditionTwoDDC(const std::vector<std::vector<int>>& rings, std::vector<int>& peripheralRings, int iring, const :ref:`RingSearchIndex<doxid-structring_1_1_ring_search_index>`& index)
+
+As conditionTwoDDC, answering each triplet from the inverted index.
+
+.. index:: pair: function; conditionThreeDDC
+.. _doxid-namespacering_1abf88eff5d04ebb4bfad69693edaaa432:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool conditionThreeDDC(const std::vector<std::vector<int>>& rings, std::vector<int>& peripheralRings)
+
+Third condition for the DDC: Even (by vector index) numbered index triplets and odd triplets must have at least one element in common.
+
+.. index:: pair: function; basalConditions
+.. _doxid-namespacering_1a199fe38d3152cc04d18109ddb868ab34:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool basalConditions(const std::vector<std::vector<int>>& nList, const std::vector<int>& basal1, const std::vector<int>& basal2)
+
+Tests whether two rings are basal rings (true) or not (false)
+
+.. index:: pair: function; basalNeighbours
+.. _doxid-namespacering_1a350f1fa3c3d5807fb720444054d6e340:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool basalNeighbours(const std::vector<std::vector<int>>& nList, std::vector<int>& triplet, int atomOne, int atomTwo)
+
+Tests whether the last two elements of a triplet are neighbours of two atom IDs passed in.
+
+.. index:: pair: function; notNeighboursOfRing
+.. _doxid-namespacering_1a5db4898b22ebb13511cc37fae6674e5c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool notNeighboursOfRing(const std::vector<std::vector<int>>& nList, std::vector<int>& triplet, const std::vector<int>& ring)
+
+Tests to check that elements of a triplet are not neighbours of a ring (vector) passed.
+
+.. index:: pair: function; findPrismatic
+.. _doxid-namespacering_1a56c3c2a30736d27d9eaf3e3759e630e9:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int findPrismatic(const std::vector<std::vector<int>>& rings, std::vector<int>& listHC, std::vector<:ref:`strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, int iring, int jring, std::vector<int>& prismaticRings)
+
+Finds the prismatic rings from basal rings iring and jring.
+
+.. index:: pair: function; findPrismatic
+.. _doxid-namespacering_1aaf26a6612dd314b36db80820289ab68b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int findPrismatic(const std::vector<std::vector<int>>& rings, std::vector<int>& listHC, std::vector<:ref:`strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, int iring, int jring, std::vector<int>& prismaticRings, const :ref:`RingSearchIndex<doxid-structring_1_1_ring_search_index>`& index)
+
+As findPrismatic, drawing candidate rings from the inverted index.
+
+.. index:: pair: function; getAtomTypesTopoBulk
+.. _doxid-namespacering_1a45c216fc97f12e29f117bbc1f6d3c7f3:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int getAtomTypesTopoBulk(const std::vector<std::vector<int>>& rings, const std::vector<:ref:`ring::strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, std::vector<:ref:`cage::iceType<doxid-group__cage_1gaaac41828990e32b9d6e7db4426b61529>`>& atomTypes)
+
+Assigns a type of enum class iceType, to every atom, using information from ringType, which has the information of every ring.
+
+.. index:: pair: function; getStrucNumbers
+.. _doxid-namespacering_1aac3a6fdc27f05a7ded468e955983f270:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int getStrucNumbers(const std::vector<:ref:`ring::strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, const std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, int& numHC, int& numDDC, int& mixedRings, int& prismaticRings, int& basalRings)
+
+Determines the number of HCs, DDCs, Mixed rings, prismatic and basal rings.
 

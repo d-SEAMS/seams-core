@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Prism3 - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="namespace prism3" href="namespace_prism3.html" /><link rel="prev" title="Ring" href="group_ring.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Bulk prisms - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="namespace prism3" href="namespace_prism3.html" /><link rel="prev" title="namespace bond" href="namespace_bond.html" />
       <link rel="canonical" href="https://docs.dseams.info/api/group_prism3.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -12,6 +12,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=23824103" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -23,15 +24,15 @@
 </style>
     <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://docs.dseams.info/api/group_prism3.html"/>
-  <meta property="og:title" content="Prism3"/>
+  <meta property="og:title" content="Bulk prisms"/>
     <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
   <div class="sy-head-blur"></div>
   <div class="sy-head-inner sy-container mx-auto">
     <a class="sy-head-brand" href="../index.html">
-      
-      
+      <img class="light-logo" src="../_static/dSeamsLogo.png" alt="d-SEAMS" height="28" loading="lazy" />
+      <img class="dark-logo" src="../_static/dSeamsLogo.png" alt="d-SEAMS" height="28" loading="lazy" />
       <strong>d-SEAMS</strong>
     </a>
     <div class="sy-head-nav" id="head-nav">
@@ -110,8 +111,20 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 current"><a class="reference internal" href="../reference/index.html">Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../reference/api.html">API Reference</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="index.html">C++ headers (doxyrest)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/api.html">API map</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="group_bond.html">Bond</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Bulk prisms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_cage.html">Cage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_chill.html">Chill</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_clump.html">Clump</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_gen.html">Gen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_molSys.html">MolSys</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_nneigh.html">Nneigh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_primitive.html">Primitive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_rdf2.html">Rdf2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_sinp.html">Sinp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="global.html">Global Namespace</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
@@ -121,21 +134,23 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../reference/api.html">API Reference</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">C++ headers (doxyrest)</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="group_bond.html">Bond</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_cage.html">Cage</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_chill.html">Chill</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_clump.html">Clump</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="group_gen.html">Gen</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_molSys.html">MolSys</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_nneigh.html">Nneigh</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_primitive.html">Primitive</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_rdf2.html">Rdf2</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_sinp.html">Sinp</a></li>
-<li class="toctree-l3"><a class="reference internal" href="global.html">Global Namespace</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API map</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="group_bond.html">Bond</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Bulk prisms</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="namespace_prism3.html">namespace prism3</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="group_cage.html">Cage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_chill.html">Chill</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_clump.html">Clump</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_gen.html">Gen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_molSys.html">MolSys</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_nneigh.html">Nneigh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_primitive.html">Primitive</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_rdf2.html">Rdf2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_sinp.html">Sinp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="global.html">Global Namespace</a></li>
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
@@ -197,24 +212,16 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="2" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="../reference/api.html"><span itemprop="name">API Reference</span></a>
+        <a itemprop="item" href="../reference/api.html"><span itemprop="name">API map</span></a>
         <span>/</span>
         <meta itemprop="position" content="3" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="index.html"><span itemprop="name">C++ headers (doxyrest)</span></a>
+        <a itemprop="item" href="index.html"><span itemprop="name">API Reference</span></a>
         <span>/</span>
         <meta itemprop="position" content="4" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="group_gen.html"><span itemprop="name">Gen</span></a>
-        <span>/</span>
+        <strong itemprop="name">Bulk prisms</strong>
         <meta itemprop="position" content="5" />
-      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="group_ring.html"><span itemprop="name">Ring</span></a>
-        <span>/</span>
-        <meta itemprop="position" content="6" />
-      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">Prism3</strong>
-        <meta itemprop="position" content="7" />
       </li></ol>
     <div class="xl:hidden ml-1">
       <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
@@ -261,18 +268,15 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </div><article class="yue dark-code" role="main">
-          <section id="prism3">
-<span id="doxid-group-prism3"></span><span id="index-0"></span><h1>Prism3<a class="headerlink" href="#prism3" title="Link to this heading">¶</a></h1>
+          <section id="bulk-prisms">
+<span id="doxid-group-prism3"></span><span id="index-0"></span><h1>Bulk prisms<a class="headerlink" href="#bulk-prisms" title="Link to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
+<p>Candidate basal rings and prism blocks in bulk ice.</p>
 <div class="doxyrest-overview-code-block highlight">
 <pre><span data-line="1"><span class="c1">// namespaces</span></span>
 <span data-line="2"> </span>
 <span data-line="3"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_prism3.html#doxid-namespaceprism3"><span class="std std-ref">prism3</span></a><span class="p">;</span></span>
-<span data-line="4"> </span>
-<span data-line="5"><span class="c1">// structs</span></span>
-<span data-line="6"> </span>
-<span data-line="7"><span class="k">struct</span> <a class="doxyrest-code-link reference internal" href="struct_ring_RingSearchIndex.html#doxid-structring-1-1-ring-search-index"><span class="std std-ref">ring::RingSearchIndex</span></a><span class="p">;</span></span>
 </pre></div>
 </section>
 
@@ -282,10 +286,10 @@ data-aria-dark="Switch to auto color mode">
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="group_ring.html">
+    <a href="namespace_bond.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">Ring</div></div>
+        <span>Previous</span><div class="title">namespace bond</div></div>
     </a>
   </div><div class="navigation-next">
     <a href="namespace_prism3.html">

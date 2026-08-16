@@ -1,10 +1,11 @@
-C++ headers (doxyrest)
-======================
+API Reference
+=============
 
 .. toctree::
 	:hidden:
 
 	group_bond.rst
+	group_prism3.rst
 	group_cage.rst
 	group_chill.rst
 	group_clump.rst
@@ -18,12 +19,12 @@ C++ headers (doxyrest)
 .. rubric:: Further Reading:
 
 |	:ref:`Bond<doxid-group__bond>`
+|	:ref:`Bulk prisms<doxid-group__prism3>`
 |	:ref:`Cage<doxid-group__cage>`
 |	:ref:`Chill<doxid-group__chill>`
 |	:ref:`Clump<doxid-group__clump>`
 |	:ref:`Gen<doxid-group__gen>`
 |		:ref:`Ring<doxid-group__ring>`
-|			:ref:`Prism3<doxid-group__prism3>`
 |	:ref:`MolSys<doxid-group__mol_sys>`
 |	:ref:`Nneigh<doxid-group__nneigh>`
 |	:ref:`Primitive<doxid-group__primitive>`

@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>template struct molSys::Point - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="template struct molSys::PointCloud" href="struct_molSys_PointCloud.html" /><link rel="prev" title="namespace molSys" href="namespace_molSys.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>template struct molSys::Point - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="template struct molSys::PointCloud" href="struct_molSys_PointCloud.html" /><link rel="prev" title="namespace molSys" href="namespace_molSys.html" />
       <link rel="canonical" href="https://docs.dseams.info/api/struct_molSys_Point.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -12,6 +12,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=23824103" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -30,8 +31,8 @@
   <div class="sy-head-blur"></div>
   <div class="sy-head-inner sy-container mx-auto">
     <a class="sy-head-brand" href="../index.html">
-      
-      
+      <img class="light-logo" src="../_static/dSeamsLogo.png" alt="d-SEAMS" height="28" loading="lazy" />
+      <img class="dark-logo" src="../_static/dSeamsLogo.png" alt="d-SEAMS" height="28" loading="lazy" />
       <strong>d-SEAMS</strong>
     </a>
     <div class="sy-head-nav" id="head-nav">
@@ -110,20 +111,10 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 current"><a class="reference internal" href="../reference/index.html">Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../reference/api.html">API Reference</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="index.html">C++ headers (doxyrest)</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
-</ul>
-</li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../reference/api.html">API Reference</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">C++ headers (doxyrest)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../reference/api.html">API map</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="group_bond.html">Bond</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_prism3.html">Bulk prisms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_cage.html">Cage</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_chill.html">Chill</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_clump.html">Clump</a></li>
@@ -136,6 +127,33 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="global.html">Global Namespace</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API map</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="group_bond.html">Bond</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_prism3.html">Bulk prisms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_cage.html">Cage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_chill.html">Chill</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_clump.html">Clump</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_gen.html">Gen</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="group_molSys.html">MolSys</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="namespace_molSys.html">namespace molSys</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">template struct molSys::Point</a></li>
+<li class="toctree-l3"><a class="reference internal" href="struct_molSys_PointCloud.html">template struct molSys::PointCloud</a></li>
+<li class="toctree-l3"><a class="reference internal" href="struct_molSys_Result.html">struct molSys::Result</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="group_nneigh.html">Nneigh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_primitive.html">Primitive</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_rdf2.html">Rdf2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_sinp.html">Sinp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="global.html">Global Namespace</a></li>
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
@@ -201,11 +219,11 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="2" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="../reference/api.html"><span itemprop="name">API Reference</span></a>
+        <a itemprop="item" href="../reference/api.html"><span itemprop="name">API map</span></a>
         <span>/</span>
         <meta itemprop="position" content="3" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="index.html"><span itemprop="name">C++ headers (doxyrest)</span></a>
+        <a itemprop="item" href="index.html"><span itemprop="name">API Reference</span></a>
         <span>/</span>
         <meta itemprop="position" content="4" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">

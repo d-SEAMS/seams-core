@@ -7,13 +7,9 @@ Ring
 .. toctree::
 	:hidden:
 
-	group_prism3.rst
 	namespace_ring.rst
 	namespace_tum3.rst
 
-
-
-|	:ref:`Prism3<doxid-group__prism3>`
 
 
 

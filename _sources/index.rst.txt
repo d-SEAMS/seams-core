@@ -131,6 +131,7 @@ framework.
    reference/data-formats
    reference/nix
    reference/api
+   api/index
    reference/glossary
    changelog
 

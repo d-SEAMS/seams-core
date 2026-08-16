@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>namespace prism3 - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="struct ring::RingSearchIndex" href="struct_ring_RingSearchIndex.html" /><link rel="prev" title="Prism3" href="group_prism3.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>namespace prism3 - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Cage" href="group_cage.html" /><link rel="prev" title="Bulk prisms" href="group_prism3.html" />
       <link rel="canonical" href="https://docs.dseams.info/api/namespace_prism3.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -12,6 +12,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=23824103" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -30,8 +31,8 @@
   <div class="sy-head-blur"></div>
   <div class="sy-head-inner sy-container mx-auto">
     <a class="sy-head-brand" href="../index.html">
-      
-      
+      <img class="light-logo" src="../_static/dSeamsLogo.png" alt="d-SEAMS" height="28" loading="lazy" />
+      <img class="dark-logo" src="../_static/dSeamsLogo.png" alt="d-SEAMS" height="28" loading="lazy" />
       <strong>d-SEAMS</strong>
     </a>
     <div class="sy-head-nav" id="head-nav">
@@ -110,8 +111,20 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 current"><a class="reference internal" href="../reference/index.html">Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../reference/api.html">API Reference</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="index.html">C++ headers (doxyrest)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/api.html">API map</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="group_bond.html">Bond</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="group_prism3.html">Bulk prisms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_cage.html">Cage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_chill.html">Chill</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_clump.html">Clump</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_gen.html">Gen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_molSys.html">MolSys</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_nneigh.html">Nneigh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_primitive.html">Primitive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_rdf2.html">Rdf2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_sinp.html">Sinp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="global.html">Global Namespace</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
@@ -121,21 +134,23 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../reference/api.html">API Reference</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">C++ headers (doxyrest)</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="group_bond.html">Bond</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_cage.html">Cage</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_chill.html">Chill</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_clump.html">Clump</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="group_gen.html">Gen</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_molSys.html">MolSys</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_nneigh.html">Nneigh</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_primitive.html">Primitive</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_rdf2.html">Rdf2</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_sinp.html">Sinp</a></li>
-<li class="toctree-l3"><a class="reference internal" href="global.html">Global Namespace</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API map</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="group_bond.html">Bond</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="group_prism3.html">Bulk prisms</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">namespace prism3</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="group_cage.html">Cage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_chill.html">Chill</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_clump.html">Clump</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_gen.html">Gen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_molSys.html">MolSys</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_nneigh.html">Nneigh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_primitive.html">Primitive</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_rdf2.html">Rdf2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_sinp.html">Sinp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="global.html">Global Namespace</a></li>
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
@@ -154,7 +169,14 @@ data-aria-dark="Switch to auto color mode">
     <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
       <i class="i-lucide close"></i>
     </button>
-    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#detailed-documentation">Detailed Documentation</a><ul>
+<li><a class="reference internal" href="#global-functions">Global Functions</a></li>
+</ul>
+</li>
+</ul>
+</div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
   data-type="github" data-user="d-SEAMS" data-repo="seams-core">
   <span class="w-8 flex items-center justify-around shrink-0 text-3xl">
     <iconify-icon icon="simple-icons:github"></iconify-icon>
@@ -197,28 +219,20 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="2" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="../reference/api.html"><span itemprop="name">API Reference</span></a>
+        <a itemprop="item" href="../reference/api.html"><span itemprop="name">API map</span></a>
         <span>/</span>
         <meta itemprop="position" content="3" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="index.html"><span itemprop="name">C++ headers (doxyrest)</span></a>
+        <a itemprop="item" href="index.html"><span itemprop="name">API Reference</span></a>
         <span>/</span>
         <meta itemprop="position" content="4" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="group_gen.html"><span itemprop="name">Gen</span></a>
+        <a itemprop="item" href="group_prism3.html"><span itemprop="name">Bulk prisms</span></a>
         <span>/</span>
         <meta itemprop="position" content="5" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="group_ring.html"><span itemprop="name">Ring</span></a>
-        <span>/</span>
-        <meta itemprop="position" content="6" />
-      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="group_prism3.html"><span itemprop="name">Prism3</span></a>
-        <span>/</span>
-        <meta itemprop="position" content="7" />
-      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
         <strong itemprop="name">namespace prism3</strong>
-        <meta itemprop="position" content="8" />
+        <meta itemprop="position" content="6" />
       </li></ol>
     <div class="xl:hidden ml-1">
       <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
@@ -269,6 +283,43 @@ data-aria-dark="Switch to auto color mode">
 <span id="doxid-namespaceprism3"></span><span id="index-0"></span><h1>namespace prism3<a class="headerlink" href="#namespace-prism3" title="Link to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<div class="doxyrest-overview-code-block highlight">
+<pre><span data-line="1"><span class="k">namespace</span> <span class="n">prism3</span> <span class="p">{</span></span>
+<span data-line="2"> </span>
+<span data-line="3"><span class="c1">// global functions</span></span>
+<span data-line="4"> </span>
+<span data-line="5"><span class="kt">int</span> <a class="doxyrest-code-link reference internal" href="#doxid-namespaceprism3-1a1ba0089123227ca022acc1ce38baf7ee"><span class="std std-ref">findBulkPrisms</span></a><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span> <span class="n">rings</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">ring</span><span class="o">::</span><span class="n">strucType</span><span class="o">&gt;&amp;</span> <span class="n">ringType</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span> <span class="n">nList</span><span class="p">,</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">rmsdPerAtom</span><span class="p">,</span> <span class="kt">double</span> <span class="n">heightCutoff</span> <span class="o">=</span> <span class="mi">8</span><span class="p">);</span></span>
+<span data-line="6"><span class="kt">bool</span> <a class="doxyrest-code-link reference internal" href="#doxid-namespaceprism3-1ab03946085dcf2e67583da676ab7f869f"><span class="std std-ref">basalPrismConditions</span></a><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span> <span class="n">nList</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">basal1</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">basal2</span><span class="p">);</span></span>
+<span data-line="7"><span class="kt">bool</span> <a class="doxyrest-code-link reference internal" href="#doxid-namespaceprism3-1abbcd706f2576f374e6037e9073815ee8"><span class="std std-ref">relaxedPrismConditions</span></a><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span> <span class="n">nList</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">basal1</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">basal2</span><span class="p">);</span></span>
+<span data-line="8"><span class="kt">bool</span> <a class="doxyrest-code-link reference internal" href="#doxid-namespaceprism3-1ad85e1c83d20a91d7e8678f5facc7cb7a"><span class="std std-ref">basalRingsSeparation</span></a><span class="p">(</span><a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">basal1</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">basal2</span><span class="p">,</span> <span class="kt">double</span> <span class="n">heightCutoff</span> <span class="o">=</span> <span class="mi">8</span><span class="p">);</span></span>
+<span data-line="9"> </span>
+<span data-line="10"><span class="p">}</span> <span class="c1">// namespace prism3</span></span>
+</pre></div>
+</section>
+<section id="detailed-documentation">
+<span id="details-namespaceprism3"></span><h2>Detailed Documentation<a class="headerlink" href="#detailed-documentation" title="Link to this heading">¶</a></h2>
+<section id="global-functions">
+<h3>Global Functions<a class="headerlink" href="#global-functions" title="Link to this heading">¶</a></h3>
+<div class="doxyrest-title-code-block highlight" id="doxid-namespaceprism3-1a1ba0089123227ca022acc1ce38baf7ee">
+<span id="index-1"></span><pre><span data-line="1"><span class="kt">int</span> <span class="n">findBulkPrisms</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span> <span class="n">rings</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">ring</span><span class="o">::</span><span class="n">strucType</span><span class="o">&gt;&amp;</span> <span class="n">ringType</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span> <span class="n">nList</span><span class="p">,</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">rmsdPerAtom</span><span class="p">,</span> <span class="kt">double</span> <span class="n">heightCutoff</span> <span class="o">=</span> <span class="mi">8</span><span class="p">)</span></span>
+</pre></div>
+<p>Find out which rings are prisms.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-namespaceprism3-1ab03946085dcf2e67583da676ab7f869f">
+<span id="index-2"></span><pre><span data-line="1"><span class="kt">bool</span> <span class="n">basalPrismConditions</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span> <span class="n">nList</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">basal1</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">basal2</span><span class="p">)</span></span>
+</pre></div>
+<p>Tests whether two rings are basal rings (true) or not (false) for a prism (strict criterion)</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-namespaceprism3-1abbcd706f2576f374e6037e9073815ee8">
+<span id="index-3"></span><pre><span data-line="1"><span class="kt">bool</span> <span class="n">relaxedPrismConditions</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span> <span class="n">nList</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">basal1</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">basal2</span><span class="p">)</span></span>
+</pre></div>
+<p>Reduced criterion: Two candidate basal rings of a prism block should have at least one bond between them.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-namespaceprism3-1ad85e1c83d20a91d7e8678f5facc7cb7a">
+<span id="index-4"></span><pre><span data-line="1"><span class="kt">bool</span> <span class="n">basalRingsSeparation</span><span class="p">(</span><a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">basal1</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">basal2</span><span class="p">,</span> <span class="kt">double</span> <span class="n">heightCutoff</span> <span class="o">=</span> <span class="mi">8</span><span class="p">)</span></span>
+</pre></div>
+<p>Check to see that candidate basal prisms are not really far from each other.</p>
+</section>
+</section>
 </section>
 
         </article><button class="back-to-top" type="button">
@@ -280,13 +331,13 @@ data-aria-dark="Switch to auto color mode">
     <a href="group_prism3.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">Prism3</div></div>
+        <span>Previous</span><div class="title">Bulk prisms</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="struct_ring_RingSearchIndex.html">
+    <a href="group_cage.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">struct ring::RingSearchIndex</div>
+        <div class="title">Cage</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

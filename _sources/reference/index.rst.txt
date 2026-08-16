@@ -14,7 +14,9 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
     +------------------------------------+-----------------------------------------------+
     | `data formats <data-formats.rst>`_ | LAMMPS dump, XYZ, chemfiles, ``.con``         |
     +------------------------------------+-----------------------------------------------+
-    | `API <api.rst>`_                   | C++ identifiers and the doxyrest tree         |
+    | `API map <api.rst>`_               | fronts and headers; the tree is ``api/index`` |
+    +------------------------------------+-----------------------------------------------+
+    | `API Reference <../api/index>`_    | Doxygen comments, via doxyrest                |
     +------------------------------------+-----------------------------------------------+
     | `Nix flake <nix.rst>`_             | ``nix build``, ``nix develop``, flake outputs |
     +------------------------------------+-----------------------------------------------+
@@ -27,5 +29,6 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
    cli
    data-formats
    api
+   ../api/index
    nix
    glossary

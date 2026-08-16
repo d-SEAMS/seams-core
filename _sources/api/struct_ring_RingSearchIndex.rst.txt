@@ -12,6 +12,17 @@ Overview
 
 Inverted index from an atom to the rings that contain it. :ref:`More...<details-structring_1_1_ring_search_index>`
 
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <topo_bulk.hpp>
+	
+	struct RingSearchIndex {
+		// fields
+	
+		std::vector<std::vector<int>> :target:`ringsContainingAtom<doxid-structring_1_1_ring_search_index_1a8e4433086bf9bec113ee61bc3c17b8bb>`;
+	};
 .. _details-structring_1_1_ring_search_index:
 
 Detailed Documentation

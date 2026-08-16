@@ -7,5 +7,73 @@ namespace prism3
 .. toctree::
 	:hidden:
 
+Overview
+~~~~~~~~
 
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace prism3 {
+
+	// global functions
+
+	int :ref:`findBulkPrisms<doxid-namespaceprism3_1a1ba0089123227ca022acc1ce38baf7ee>`(const std::vector<std::vector<int>>& rings, std::vector<:ref:`ring::strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, const std::vector<std::vector<int>>& nList, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, std::vector<double>& rmsdPerAtom, double heightCutoff = 8);
+	bool :ref:`basalPrismConditions<doxid-namespaceprism3_1ab03946085dcf2e67583da676ab7f869f>`(const std::vector<std::vector<int>>& nList, std::vector<int>& basal1, std::vector<int>& basal2);
+	bool :ref:`relaxedPrismConditions<doxid-namespaceprism3_1abbcd706f2576f374e6037e9073815ee8>`(const std::vector<std::vector<int>>& nList, std::vector<int>& basal1, std::vector<int>& basal2);
+	bool :ref:`basalRingsSeparation<doxid-namespaceprism3_1ad85e1c83d20a91d7e8678f5facc7cb7a>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& basal1, const std::vector<int>& basal2, double heightCutoff = 8);
+
+	} // namespace prism3
+.. _details-namespaceprism3:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Global Functions
+----------------
+
+.. index:: pair: function; findBulkPrisms
+.. _doxid-namespaceprism3_1a1ba0089123227ca022acc1ce38baf7ee:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int findBulkPrisms(const std::vector<std::vector<int>>& rings, std::vector<:ref:`ring::strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, const std::vector<std::vector<int>>& nList, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, std::vector<double>& rmsdPerAtom, double heightCutoff = 8)
+
+Find out which rings are prisms.
+
+.. index:: pair: function; basalPrismConditions
+.. _doxid-namespaceprism3_1ab03946085dcf2e67583da676ab7f869f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool basalPrismConditions(const std::vector<std::vector<int>>& nList, std::vector<int>& basal1, std::vector<int>& basal2)
+
+Tests whether two rings are basal rings (true) or not (false) for a prism (strict criterion)
+
+.. index:: pair: function; relaxedPrismConditions
+.. _doxid-namespaceprism3_1abbcd706f2576f374e6037e9073815ee8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool relaxedPrismConditions(const std::vector<std::vector<int>>& nList, std::vector<int>& basal1, std::vector<int>& basal2)
+
+Reduced criterion: Two candidate basal rings of a prism block should have at least one bond between them.
+
+.. index:: pair: function; basalRingsSeparation
+.. _doxid-namespaceprism3_1ad85e1c83d20a91d7e8678f5facc7cb7a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool basalRingsSeparation(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& basal1, const std::vector<int>& basal2, double heightCutoff = 8)
+
+Check to see that candidate basal prisms are not really far from each other.
 

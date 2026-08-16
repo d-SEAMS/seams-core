@@ -13,7 +13,6 @@ Gen
 
 
 |	:ref:`Ring<doxid-group__ring>`
-|		:ref:`Prism3<doxid-group__prism3>`
 
 
 
