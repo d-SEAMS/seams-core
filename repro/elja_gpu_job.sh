@@ -14,7 +14,7 @@
 set -euo pipefail
 # cargo builds the linkcell wrap. libcudart/libnvrtc live under the
 # OpenHPC CUDA prefix and are not on the default linker path.
-export PATH=$HOME/.pixi/bin:$HOME/.cargo/bin:$PATH
+export PATH=$HOME/.pixi/bin:$HOME/.cargo/bin:/opt/ohpc/pub/compiler/cuda/12.2/bin:$PATH
 CUDA_LIB=
 for d in \
   /opt/ohpc/pub/compiler/cuda/12.2/targets/x86_64-linux/lib \
@@ -41,6 +41,7 @@ cd "$ROOT"
   echo "jobid: ${SLURM_JOB_ID:-none}"
   echo "partition: ${SLURM_JOB_PARTITION:-none}"
   echo "cuda_lib: $CUDA_LIB"
+  echo "nsys: $(command -v nsys || echo missing)"
   echo "cargo: $(command -v cargo || echo missing)"
   echo "rustc: $(command -v rustc || echo missing)"
   nvidia-smi -L 2>/dev/null || true
@@ -56,10 +57,22 @@ pixi run -- meson test -C "$BUILD" --print-errorlogs | tee "$OUT/gpu-test.log"
 
 cd "$ROOT/input"
 export LD_LIBRARY_PATH=$BUILD/src:$CUDA_LIB${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
-"$BUILD/tests/bench_gpu_batch" traj/mW_cubic.lammpstrj 11 1 \
+NSYS=$(command -v nsys || true)
+if [[ -z $NSYS ]]; then
+  echo "nsys not on PATH" >&2
+  exit 1
+fi
+# One process: cold NVRTC plus warm repeats. nsys owns the timeline.
+$NSYS profile --trace=cuda,nvtx,osrt --sample=none --cpuctxsw=none \
+  --force-overwrite=true --stats=true \
+  -o "$OUT/tip-gpu-nsys" \
+  "$BUILD/tests/bench_gpu_batch" traj/mW_cubic.lammpstrj 11 1 5 \
   | tee "$OUT/tip-gpu-batch.txt"
 if ! grep -q '^resident yes$' "$OUT/tip-gpu-batch.txt"; then
   echo "device batch did not reside" >&2
   exit 1
 fi
+$NSYS stats --report cuda_gpu_kern_sum --report cuda_api_sum \
+  --report cuda_gpu_mem_time_sum \
+  "$OUT/tip-gpu-nsys.nsys-rep" | tee "$OUT/tip-gpu-nsys-stats.txt"
 echo DONE

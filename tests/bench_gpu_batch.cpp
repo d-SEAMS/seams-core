@@ -1,14 +1,16 @@
 /*
-** Probe whether N frames of the analysis working set fit on the GPU,
-** then run the device-resident batch if they do.
-**   bench_gpu_batch TRAJ [nFrames] [atomType]
+** Probe whether N frames of the TUM ice-score working set fit on the
+** GPU, then time a cold launch and the best of N warm repeats.
+**   bench_gpu_batch TRAJ [nFrames] [atomType] [repeats]
 */
 
 #include <gpu_batch.hpp>
 #include <seams_input.hpp>
 
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -16,6 +18,7 @@ int main(int argc, char **argv) {
   const std::string traj = argc > 1 ? argv[1] : "traj/mW_cubic.lammpstrj";
   const int want = argc > 2 ? std::atoi(argv[2]) : 11;
   const int typeI = argc > 3 ? std::atoi(argv[3]) : 1;
+  const int repeats = argc > 4 ? std::max(1, std::atoi(argv[4])) : 5;
 
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   cloud = sinp::readLammpsTrjO(traj, 1, cloud, typeI);
@@ -65,26 +68,44 @@ int main(int argc, char **argv) {
   if (!plan.resident) {
     return 0;
   }
-  const auto r = gpu::analyzeResident(xyz.data(), box.data(), nAtoms, got);
-  if (!r.error.empty()) {
-    std::printf("error %s\n", r.error.c_str());
+  const auto printRun = [](const char *tag, const gpu::BatchResult &r) {
+    std::printf("%s_upload_ms %.3f\n%s_compute_ms %.3f\n%s_download_ms %.3f\n",
+                tag, r.uploadMs, tag, r.computeMs, tag, r.downloadMs);
+  };
+
+  const auto cold = gpu::analyzeResident(xyz.data(), box.data(), nAtoms, got);
+  if (!cold.error.empty()) {
+    std::printf("error %s\n", cold.error.c_str());
     return 1;
   }
-  std::printf("upload_ms %.3f\ncompute_ms %.3f\ndownload_ms %.3f\n",
-              r.uploadMs, r.computeMs, r.downloadMs);
+  printRun("cold", cold);
+
+  gpu::BatchResult best = cold;
+  best.computeMs = std::numeric_limits<double>::max();
+  for (int i = 0; i < repeats; ++i) {
+    const auto r = gpu::analyzeResident(xyz.data(), box.data(), nAtoms, got);
+    if (!r.error.empty()) {
+      std::printf("error %s\n", r.error.c_str());
+      return 1;
+    }
+    if (r.computeMs < best.computeMs) {
+      best = r;
+    }
+  }
+  printRun("warm", best);
   int nHc = 0;
   int nDdc = 0;
   int nSix = 0;
-  for (int v : r.atomHc) {
+  for (int v : best.atomHc) {
     nHc += v;
   }
-  for (int v : r.atomDdc) {
+  for (int v : best.atomDdc) {
     nDdc += v;
   }
-  for (int v : r.nRings) {
+  for (int v : best.nRings) {
     nSix += v;
   }
   std::printf("ice_hc_atoms %d\nice_ddc_atoms %d\n", nHc, nDdc);
-  std::printf("six_rings %d\nrings_dropped %d\n", nSix, r.ringsDropped);
+  std::printf("six_rings %d\nrings_dropped %d\n", nSix, best.ringsDropped);
   return 0;
 }

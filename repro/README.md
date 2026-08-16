@@ -11,7 +11,9 @@ Paper timings run on Elja (`repro/elja_submit.sh`, exclusive
 path calls `linkcell::gpu` for the periodic k-nearest walk, then
 the mutual four-nearest graph, primitive six-rings and HC/DDC
 affiliation (the TUM ice score). CHILL and \(q_{lm}\) stay on the
-host. Only cage labels come back.
+host. Only cage labels come back. The GPU job wraps the bench in
+`nsys profile` and writes `tip-gpu-nsys.nsys-rep` plus
+`tip-gpu-nsys-stats.txt`.
 Terra is not the perf host.
 
 ## On a Slurm cluster
