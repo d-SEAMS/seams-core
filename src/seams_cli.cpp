@@ -496,7 +496,7 @@ int main(int argc, char *argv[]) {
 
   parser.add(Option("--cutoff", "-c")
                  .argName("ANGSTROM")
-                 .help("Neighbour cutoff (rdf/cn rmax)")
+                 .help("Neighbour cutoff (rdf/cn rmax; hbonds heavy-atom nList)")
                  .handler([&](std::string_view value) {
                    cutoff = parseFloatingPoint<double>(value);
                  }));
@@ -543,7 +543,7 @@ int main(int argc, char *argv[]) {
 
   parser.add(Option("--hangle")
                  .argName("DEG")
-                 .help("Acceptor-donor-H angle cutoff for hbonds")
+                 .help("O-O-H angle cutoff for hbonds (acceptor-centered)")
                  .handler([&](std::string_view value) {
                    hangle = parseFloatingPoint<double>(value);
                  }));
