@@ -611,6 +611,7 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
     checkCuda(rt.cudaMemcpy(ws.dxyz.p, xyz, xyzN * sizeof(double),
                             cudaMemcpyHostToDevice),
               "HtoD xyz");
+    checkCuda(rt.cudaDeviceSynchronize(), "upload");
     out.uploadMs = msSince(t0);
 
     auto &factory = KernelFactory::instance(0);
