@@ -12,7 +12,23 @@
 # gpu-2xA100 advertises GRES; gpu-1xA100 does not. Slurm copies the
 # batch script into the spool, so BASH_SOURCE is not the repo path.
 set -euo pipefail
-export PATH=$HOME/.pixi/bin:$PATH
+# cargo builds the linkcell wrap. libcudart/libnvrtc live under the
+# OpenHPC CUDA prefix and are not on the default linker path.
+export PATH=$HOME/.pixi/bin:$HOME/.cargo/bin:$PATH
+CUDA_LIB=
+for d in \
+  /opt/ohpc/pub/compiler/cuda/12.2/targets/x86_64-linux/lib \
+  /opt/ohpc/pub/compiler/cuda/12.2/lib64; do
+  if [[ -e $d/libcudart.so.12 || -e $d/libcudart.so ]]; then
+    CUDA_LIB=$d
+    break
+  fi
+done
+if [[ -z $CUDA_LIB ]]; then
+  echo "no libcudart.so on this node" >&2
+  exit 1
+fi
+export LD_LIBRARY_PATH=$CUDA_LIB${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 ROOT=${SLURM_SUBMIT_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}
 OUT=$ROOT/repro/results
 BUILD=/tmp/seams-gpu-${SLURM_JOB_ID:-manual}
@@ -22,17 +38,24 @@ cd "$ROOT"
   echo "hostname: $(hostname)"
   echo "jobid: ${SLURM_JOB_ID:-none}"
   echo "partition: ${SLURM_JOB_PARTITION:-none}"
+  echo "cuda_lib: $CUDA_LIB"
+  echo "cargo: $(command -v cargo || echo missing)"
+  echo "rustc: $(command -v rustc || echo missing)"
   nvidia-smi -L 2>/dev/null || true
   echo "loadavg_at_start: $(cut -d' ' -f1 /proc/loadavg)"
 } | tee "$OUT/gpu-conditions.txt"
 
-pixi run -- meson setup "$BUILD" --buildtype=release -Dwith_tests=true \
-  -Dwith_gpulite=enabled
-pixi run -- meson compile -C "$BUILD"
+pixi run -- env PATH="$HOME/.cargo/bin:$PATH" meson setup "$BUILD" \
+  --buildtype=release -Dwith_tests=true -Dwith_gpulite=enabled
+pixi run -- env PATH="$HOME/.cargo/bin:$PATH" meson compile -C "$BUILD"
 pixi run -- meson test -C "$BUILD" --print-errorlogs | tee "$OUT/gpu-test.log"
 
 cd "$ROOT/input"
-export LD_LIBRARY_PATH=$BUILD/src:${LD_LIBRARY_PATH:-}
+export LD_LIBRARY_PATH=$BUILD/src:$CUDA_LIB${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 "$BUILD/tests/bench_gpu_batch" traj/mW_cubic.lammpstrj 11 1 \
   | tee "$OUT/tip-gpu-batch.txt"
+if ! grep -q '^resident yes$' "$OUT/tip-gpu-batch.txt"; then
+  echo "device batch did not reside" >&2
+  exit 1
+fi
 echo DONE
