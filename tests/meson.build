@@ -16,6 +16,7 @@ test_sources = {
   'order_parameter': 'test_order_parameter.cpp',
   'rdf': 'test_rdf.cpp',
   'rdf2d': 'test_rdf2d.cpp',
+  'density': 'test_density.cpp',
   'selection': 'test_selection.cpp',
   'shapeMatch': 'test_shapeMatch.cpp',
   'topo_two_dim': 'test_topo_two_dim.cpp',
