@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <stdexcept>
+#include <string>
 
 namespace seams::cfg {
 namespace {
@@ -101,6 +102,97 @@ int firstPositive(int a, int b) {
 
 } // namespace
 
+} // namespace seams::cfg
+
+namespace site {
+
+const char *familyName(Family f) {
+  switch (f) {
+  case Family::waterIce:
+    return "waterIce";
+  case Family::ionicLiquid:
+    return "ionicLiquid";
+  case Family::moltenSalt:
+    return "moltenSalt";
+  case Family::des:
+    return "des";
+  case Family::electrolyte:
+    return "electrolyte";
+  case Family::confinedIL:
+    return "confinedIL";
+  case Family::confinedWater:
+    return "confinedWater";
+  case Family::networkFormer:
+    return "networkFormer";
+  }
+  return "waterIce";
+}
+
+Family parseFamily(std::string_view name) {
+  if (name == "waterIce" || name == "water-ice" || name == "water_ice") {
+    return Family::waterIce;
+  }
+  if (name == "ionicLiquid" || name == "ionic-liquid" ||
+      name == "ionic_liquid" || name == "il") {
+    return Family::ionicLiquid;
+  }
+  if (name == "moltenSalt" || name == "molten-salt" ||
+      name == "molten_salt") {
+    return Family::moltenSalt;
+  }
+  if (name == "des") {
+    return Family::des;
+  }
+  if (name == "electrolyte") {
+    return Family::electrolyte;
+  }
+  if (name == "confinedIL" || name == "confined-il" ||
+      name == "confined_il") {
+    return Family::confinedIL;
+  }
+  if (name == "confinedWater" || name == "confined-water" ||
+      name == "confined_water") {
+    return Family::confinedWater;
+  }
+  if (name == "networkFormer" || name == "network-former" ||
+      name == "network_former" || name == "network") {
+    return Family::networkFormer;
+  }
+  throw std::invalid_argument("unknown family '" + std::string(name) +
+                              "' (want waterIce, ionicLiquid, moltenSalt, "
+                              "des, electrolyte, confinedIL, confinedWater, "
+                              "networkFormer)");
+}
+
+bool iceScoreAllowed(Family f) { return f == Family::waterIce; }
+
+const char *refuseIceScore(Family f) {
+  switch (f) {
+  case Family::waterIce:
+    return "";
+  case Family::ionicLiquid:
+    return "CHILL/TUM refused for family ionicLiquid";
+  case Family::moltenSalt:
+    return "CHILL/TUM refused for family moltenSalt";
+  case Family::des:
+    return "CHILL/TUM refused for family des";
+  case Family::electrolyte:
+    return "CHILL/TUM refused for family electrolyte "
+           "(name a waterIce subset)";
+  case Family::confinedIL:
+    return "CHILL/TUM refused for family confinedIL";
+  case Family::confinedWater:
+    return "CHILL/TUM refused for family confinedWater";
+  case Family::networkFormer:
+    return "CHILL/TUM refused for family networkFormer";
+  }
+  return "CHILL/TUM refused";
+}
+
+} // namespace site
+
+namespace seams::cfg {
+
 std::string pathFromArgv(int argc, char **argv) {
   for (int i = 1; i < argc; ++i) {
     const std::string_view a(argv[i]);
@@ -181,6 +273,9 @@ Runtime load(std::string_view explicitFile) {
   if (const char *g = env("SEAMS_GRAPH")) {
     r.graph = g;
   }
+  if (const char *fam = env("SEAMS_FAMILY")) {
+    r.family = site::parseFamily(fam);
+  }
   r.resident = envDouble("SEAMS_RESIDENT", r.resident);
   r.cell = envDouble("SEAMS_CELL", r.cell);
   r.tpp = firstPositive(envInt("LINKCELL_TPP", 0), envInt("SEAMS_TPP", 0));
@@ -201,6 +296,7 @@ void exportEnviron(const Runtime &cfg) {
   putEnv("SEAMS_CUTOFF", std::to_string(cfg.cutoff), true);
   putEnv("SEAMS_K", std::to_string(cfg.k), true);
   putEnv("SEAMS_GRAPH", cfg.graph, true);
+  putEnv("SEAMS_FAMILY", site::familyName(cfg.family), true);
   putEnv("SEAMS_RESIDENT", std::to_string(cfg.resident), true);
   putEnv("SEAMS_CELL", std::to_string(cfg.cell), true);
   if (cfg.tpp > 0) {
@@ -228,6 +324,7 @@ void dump(const Runtime &cfg, std::ostream &os) {
   os << "SEAMS_CUTOFF=" << cfg.cutoff << "\n";
   os << "SEAMS_K=" << cfg.k << "\n";
   os << "SEAMS_GRAPH=" << cfg.graph << "\n";
+  os << "SEAMS_FAMILY=" << site::familyName(cfg.family) << "\n";
   os << "SEAMS_RESIDENT=" << cfg.resident << "\n";
   os << "SEAMS_CELL=" << cfg.cell << "\n";
   if (cfg.tpp > 0) {
