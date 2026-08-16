@@ -14,6 +14,7 @@ test_sources = {
   'cluster': 'test_cluster.cpp',
   'generic': 'test_generic.cpp',
   'order_parameter': 'test_order_parameter.cpp',
+  'rdf': 'test_rdf.cpp',
   'rdf2d': 'test_rdf2d.cpp',
   'selection': 'test_selection.cpp',
   'shapeMatch': 'test_shapeMatch.cpp',
