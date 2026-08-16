@@ -372,6 +372,57 @@ TEST_CASE("writeLAMMPSdataAllPrisms writes data file", "[seams_output]") {
   std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
 
+TEST_CASE("writeLAMMPSdataAllPrisms emits recovered lx and xy xz yz",
+          "[seams_output]") {
+  auto cloud = makeTestCloud(2);
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  auto nList = nneigh::getNewNeighbourListByIndex(cloud, 20.0);
+  std::vector<int> atomTypes = {1, 1};
+  std::string tmpPath =
+      fs::temp_directory_path().append("dseams_test_data_tilt/").string();
+  REQUIRE(sout::writeLAMMPSdataAllPrisms(cloud, nList, atomTypes, 6,
+                                         tmpPath) == 0);
+  std::ifstream in(tmpPath + "topoINT/dataFiles/system-prisms-1.data");
+  REQUIRE(in.good());
+  std::string line;
+  bool foundXlo = false;
+  double xlo = 0.0, xhi = 0.0, ylo = 0.0, yhi = 0.0, zlo = 0.0, zhi = 0.0;
+  double xy = 0.0, xz = 0.0, yz = 0.0;
+  std::string tok0, tok1, tok2;
+  while (std::getline(in, line)) {
+    if (line.find("xlo xhi") == std::string::npos) {
+      continue;
+    }
+    foundXlo = true;
+    REQUIRE(static_cast<bool>(std::istringstream(line) >> xlo >> xhi));
+    REQUIRE(static_cast<bool>(std::getline(in, line)));
+    REQUIRE(static_cast<bool>(std::istringstream(line) >> ylo >> yhi));
+    REQUIRE(static_cast<bool>(std::getline(in, line)));
+    REQUIRE(static_cast<bool>(std::istringstream(line) >> zlo >> zhi));
+    REQUIRE(static_cast<bool>(std::getline(in, line)));
+    REQUIRE(static_cast<bool>(std::istringstream(line) >> xy >> xz >> yz >>
+                              tok0 >> tok1 >> tok2));
+    break;
+  }
+  REQUIRE(foundXlo);
+  REQUIRE_THAT(xlo, Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(xhi, Catch::Matchers::WithinAbs(10.0, 1e-12));
+  REQUIRE_THAT(ylo, Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(yhi, Catch::Matchers::WithinAbs(8.660254037844386, 1e-5));
+  REQUIRE_THAT(zlo, Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(zhi, Catch::Matchers::WithinAbs(10.0, 1e-12));
+  REQUIRE_THAT(xy, Catch::Matchers::WithinAbs(5.0, 1e-12));
+  REQUIRE_THAT(xz, Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(yz, Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE(tok0 == "xy");
+  REQUIRE(tok1 == "xz");
+  REQUIRE(tok2 == "yz");
+
+  std::error_code _ec_;
+  fs::remove_all(tmpPath, _ec_);
+}
+
 // -- writeLAMMPSdataAllRings tests --
 
 TEST_CASE("writeLAMMPSdataAllRings writes ring data file", "[seams_output]") {
