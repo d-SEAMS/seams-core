@@ -12,6 +12,18 @@ Overview
 
 Clustering functions. This namespace contains functions that are used in the for clustering ice-like particles. :ref:`More...<details-namespaceclump>`
 
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace clump {
+
+	// structs
+
+	struct :ref:`Domain<doxid-structclump_1_1_domain>`;
+
+	} // namespace clump
 .. _details-namespaceclump:
 
 Detailed Documentation

@@ -2,8 +2,8 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Clump - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="namespace clump" href="namespace_clump.html" /><link rel="prev" title="struct chill::YlmAtom" href="struct_chill_YlmAtom.html" />
-      <link rel="canonical" href="https://docs.dseams.info/api/group_clump.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>struct clump::Domain - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Gen" href="group_gen.html" /><link rel="prev" title="namespace clump" href="namespace_clump.html" />
+      <link rel="canonical" href="https://docs.dseams.info/api/struct_clump_Domain.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
@@ -23,8 +23,8 @@
 }
 </style>
     <meta property="og:type" content="website"/>
-  <meta property="og:url" content="https://docs.dseams.info/api/group_clump.html"/>
-  <meta property="og:title" content="Clump"/>
+  <meta property="og:url" content="https://docs.dseams.info/api/struct_clump_Domain.html"/>
+  <meta property="og:title" content="struct clump::Domain"/>
     <meta name="twitter:card" content="summary"/>
   <!-- Antics analytics -->
 <script defer src="https://antics-api.turtletech.us/antics.js"></script>
@@ -124,7 +124,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="group_prism3.html">Bulk prisms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_cage.html">Cage</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_chill.html">Chill</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Clump</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="group_clump.html">Clump</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_gen.html">Gen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_molSys.html">MolSys</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_nneigh.html">Nneigh</a></li>
@@ -148,9 +148,9 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="group_prism3.html">Bulk prisms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="group_cage.html">Cage</a></li>
 <li class="toctree-l2"><a class="reference internal" href="group_chill.html">Chill</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Clump</a><ul>
+<li class="toctree-l2 current"><a class="reference internal" href="group_clump.html">Clump</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="namespace_clump.html">namespace clump</a></li>
-<li class="toctree-l3"><a class="reference internal" href="struct_clump_Domain.html">struct clump::Domain</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">struct clump::Domain</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="group_gen.html">Gen</a></li>
@@ -179,7 +179,11 @@ data-aria-dark="Switch to auto color mode">
     <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
       <i class="i-lucide close"></i>
     </button>
-    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#detailed-documentation">Detailed Documentation</a></li>
+</ul>
+</div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
   data-type="github" data-user="d-SEAMS" data-repo="seams-core">
   <span class="w-8 flex items-center justify-around shrink-0 text-3xl">
     <iconify-icon icon="simple-icons:github"></iconify-icon>
@@ -201,7 +205,7 @@ data-aria-dark="Switch to auto color mode">
     </span>
   </span>
 </a><div class="edit-this-page">
-  <a href="https://github.com/d-SEAMS/seams-core/blob/main/docs/source/api/group_clump.rst">Edit this page</a>
+  <a href="https://github.com/d-SEAMS/seams-core/blob/main/docs/source/api/struct_clump_Domain.rst">Edit this page</a>
 </div></div>
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
@@ -230,8 +234,12 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="4" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">Clump</strong>
+        <a itemprop="item" href="group_clump.html"><span itemprop="name">Clump</span></a>
+        <span>/</span>
         <meta itemprop="position" content="5" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">struct clump::Domain</strong>
+        <meta itemprop="position" content="6" />
       </li></ol>
     <div class="xl:hidden ml-1">
       <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
@@ -247,7 +255,7 @@ data-aria-dark="Switch to auto color mode">
     <button
       type="button"
       class="js-copy px-3 py-1 inline-flex items-center gap-1"
-      data-url="https://docs.dseams.info/_sources/api/group_clump.rst.txt"
+      data-url="https://docs.dseams.info/_sources/api/struct_clump_Domain.rst.txt"
     >
       <i class="i-lucide" data-icon="copy"></i>
       <span>Copy page</span>
@@ -261,36 +269,36 @@ data-aria-dark="Switch to auto color mode">
     <div role="presentation">
       <div class="flex flex-col" role="group">
         <button class="js-copy" type="button" role="menuitem"
-          data-url="https://docs.dseams.info/_sources/api/group_clump.rst.txt">
+          data-url="https://docs.dseams.info/_sources/api/struct_clump_Domain.rst.txt">
           <span class="iconify-icon">
             <i class="i-lucide" data-icon="copy"></i>
           </span>
           <span>Copy page</span>
         </button>
-        <a role="menuitem" href="https://docs.dseams.info/_sources/api/group_clump.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
-            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20https%3A//docs.dseams.info/_sources/api/group_clump.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+        <a role="menuitem" href="https://docs.dseams.info/_sources/api/struct_clump_Domain.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
+            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20https%3A//docs.dseams.info/_sources/api/struct_clump_Domain.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
           <iconify-icon icon="bi:openai"></iconify-icon>
           <span>Open in ChatGPT</span>
-        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20https%3A//docs.dseams.info/_sources/api/group_clump.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20https%3A//docs.dseams.info/_sources/api/struct_clump_Domain.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
           <iconify-icon icon="bi:claude"></iconify-icon>
           <span>Open in Claude</span>
         </a></div>
     </div>
   </div>
 </div><article class="yue dark-code" role="main">
-          <section id="clump">
-<span id="doxid-group-clump"></span><span id="index-0"></span><h1>Clump<a class="headerlink" href="#clump" title="Link to this heading">¶</a></h1>
+          <section id="struct-clump-domain">
+<span id="doxid-structclump-1-1-domain"></span><span id="index-0"></span><h1>struct clump::Domain<a class="headerlink" href="#struct-clump-domain" title="Link to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
-<div class="doxyrest-overview-code-block highlight">
-<pre><span data-line="1"><span class="c1">// namespaces</span></span>
-<span data-line="2"> </span>
-<span data-line="3"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_clump.html#doxid-namespaceclump"><span class="std std-ref">clump</span></a><span class="p">;</span></span>
-<span data-line="4"> </span>
-<span data-line="5"><span class="c1">// structs</span></span>
-<span data-line="6"> </span>
-<span data-line="7"><span class="k">struct</span> <a class="doxyrest-code-link reference internal" href="struct_clump_Domain.html#doxid-structclump-1-1-domain"><span class="std std-ref">clump::Domain</span></a><span class="p">;</span></span>
-</pre></div>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>Largest connected component of a Boolean site mask (Stoddard). <a class="reference internal" href="#details-structclump-1-1-domain"><span class="std std-ref">More…</span></a></p>
+</section>
+<section id="detailed-documentation">
+<span id="details-structclump-1-1-domain"></span><h2>Detailed Documentation<a class="headerlink" href="#detailed-documentation" title="Link to this heading">¶</a></h2>
+<p>Largest connected component of a Boolean site mask (Stoddard).</p>
+<p>percolation is N_largest / N_subset. Does not classify ice.</p>
+</section>
 </section>
 
         </article><button class="back-to-top" type="button">
@@ -299,16 +307,16 @@ data-aria-dark="Switch to auto color mode">
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="struct_chill_YlmAtom.html">
+    <a href="namespace_clump.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">struct chill::YlmAtom</div></div>
+        <span>Previous</span><div class="title">namespace clump</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="namespace_clump.html">
+    <a href="group_gen.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">namespace clump</div>
+        <div class="title">Gen</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

@@ -105,9 +105,9 @@ Core concepts
 
 ``populateHbonds``
     Geometric hydrogen bonds. Needs hydrogens
-    (re-read from a dump, or an explicit H cloud). Water keeps the
+    (re-read from a dump, or an explicit H cloud). Water uses the
     two-hydrogen ``hAtomMolList`` set. ``populateHbondsFromDonors``
-    takes an explicit ``hCloud`` index list.
+    takes an explicit per-heavy donor-H index list.
 
 ``getCorrelPlus`` / ``getIceTypePlus``
     CHILL+. Four-neighbour

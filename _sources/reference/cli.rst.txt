@@ -19,6 +19,9 @@ colorized through Argum's ``environmentColorStatus``.
     seams rdf FILE
     seams cn FILE
     seams hbonds FILE
+    seams pairs FILE
+    seams density-z FILE
+    seams domains FILE
 
 A positional ``command`` and a positional ``file`` are required. Missing
 either, an unknown command, or a parse error exits 2.
@@ -26,28 +29,36 @@ either, an unknown command, or a parse error exits 2.
 Commands
 --------
 
-The ``command`` positional help string is ``read | chill | chill-plus | cages | rdf | cn | hbonds``. ``chill_plus`` is an accepted alias of
-``chill-plus`` (not listed in that help string).
+The ``command`` positional help string is ``read | chill | chill-plus | cages | rdf | cn | hbonds | pairs | density-z | domains``. ``chill_plus``
+is an accepted alias of ``chill-plus`` (not listed in that help string).
 
 .. table::
 
-    +----------------+-------------------------------------+------------------------------------------------------------------------------------------------+
-    | command        | action                              | stdout                                                                                         |
-    +================+=====================================+================================================================================================+
-    | ``read``       | print the loaded cloud              | ``nop N frame F box Lx Ly Lz`` and, when ``box.size() >= 6``, ``xy xz yz``                     |
-    +----------------+-------------------------------------+------------------------------------------------------------------------------------------------+
-    | ``chill``      | CHILL four-neighbour labels         | ``nop N`` then ``name count`` for each ice type present                                        |
-    +----------------+-------------------------------------+------------------------------------------------------------------------------------------------+
-    | ``chill-plus`` | CHILL+ four-neighbour labels        | same as ``chill``                                                                              |
-    +----------------+-------------------------------------+------------------------------------------------------------------------------------------------+
-    | ``cages``      | ice score on six-membered rings     | ``nop N graph KIND hexagonal IH cubic IC water W``                                             |
-    +----------------+-------------------------------------+------------------------------------------------------------------------------------------------+
-    | ``rdf``        | partial site-site :math:`g_{IJ}(r)` | ``# r g count`` then ``# types I J rmax R bins N volume V`` then one ``r g count`` row per bin |
-    +----------------+-------------------------------------+------------------------------------------------------------------------------------------------+
-    | ``cn``         | site-site coordination number       | ``# site-site`` then ``# types I J cutoff R cn X nI N nJ M volume V``                          |
-    +----------------+-------------------------------------+------------------------------------------------------------------------------------------------+
-    | ``hbonds``     | geometric hydrogen-bond count       | ``nop N hbonds E``                                                                             |
-    +----------------+-------------------------------------+------------------------------------------------------------------------------------------------+
+    +-----------------------------+-------------------------------------------+------------------------------------------------------------------------------------------------+
+    | command                     | action                                    | stdout                                                                                         |
+    +=============================+===========================================+================================================================================================+
+    | ``read``                    | print the loaded cloud                    | ``nop N frame F box Lx Ly Lz`` and, when ``box.size() >= 6``, ``xy xz yz``                     |
+    +-----------------------------+-------------------------------------------+------------------------------------------------------------------------------------------------+
+    | ``chill``                   | CHILL four-neighbour labels               | ``nop N`` then ``name count`` for each ice type present                                        |
+    +-----------------------------+-------------------------------------------+------------------------------------------------------------------------------------------------+
+    | ``chill-plus``              | CHILL+ four-neighbour labels              | same as ``chill``                                                                              |
+    +-----------------------------+-------------------------------------------+------------------------------------------------------------------------------------------------+
+    | ``cages``                   | ice score on six-membered rings           | ``nop N graph KIND hexagonal IH cubic IC water W``                                             |
+    +-----------------------------+-------------------------------------------+------------------------------------------------------------------------------------------------+
+    | ``rdf``                     | partial site-site :math:`g_{IJ}(r)`       | ``# r g count`` then ``# types I J rmax R bins N volume V`` then one ``r g count`` row per bin |
+    +-----------------------------+-------------------------------------------+------------------------------------------------------------------------------------------------+
+    | ``cn``                      | site-site coordination number             | ``# site-site`` then ``# types I J cutoff R cn X nI N nJ M volume V``                          |
+    +-----------------------------+-------------------------------------------+------------------------------------------------------------------------------------------------+
+    | ``cn --ions --site``        | cage degree on ``ionCloud``               | ``cage ionCloud types 1 2 cutoff R degree D nCation N nAnion M``                               |
+    +-----------------------------+-------------------------------------------+------------------------------------------------------------------------------------------------+
+    | ``hbonds``                  | geometric hydrogen-bond count             | ``nop N hbonds E``                                                                             |
+    +-----------------------------+-------------------------------------------+------------------------------------------------------------------------------------------------+
+    | ``pairs --site``            | mutual-nearest contact pairs              | ``contact-pair count N nCation C nAnion A``                                                    |
+    +-----------------------------+-------------------------------------------+------------------------------------------------------------------------------------------------+
+    | ``density-z``               | type-resolved :math:`\rho` along one axis | ``# z rho`` then one ``z rho`` row per bin                                                     |
+    +-----------------------------+-------------------------------------------+------------------------------------------------------------------------------------------------+
+    | ``domains --site --subset`` | polar/apolar Stoddard component           | ``subset polar n N largest L P P_inf``                                                         |
+    +-----------------------------+-------------------------------------------+------------------------------------------------------------------------------------------------+
 
 ``chill`` / ``chill-plus`` call ``nneigh::neighListO``, then
 ``chill::getCorrel`` / ``chill::getIceTypeNoPrint`` or
@@ -67,18 +78,45 @@ is optional. The volume is ``nneigh::dumpVolume`` (det of dump ``H``).
 (``rdf::coordinationNumber``). Help text and the ``cn`` header say
 ``site-site``. There is no cage CN and no ``--ions``.
 
+``cn`` calls ``nneigh::neighListPair`` on types from ``--types I,J``
+(default ``I = J = --type``) and prints the mean degree of type ``I``
+(row length minus the leading self). The line contains
+``site-site``. This is not an ice score and is not cage CN.
+
+``cn --ions --site SPEC`` builds ``site::ionCloud`` and prints the mean
+unlike degree of type-1 (cation) vertices from
+``nneigh::neighList(cutoff, ions, 1, 2)``. The line contains ``cage``.
+``pairs --site SPEC`` prints the size of
+``nneigh::mutualNearestUnlike(ions, 1, 2)``. That line contains
+``contact-pair``, not ionicity. Both need ``--site``.
+
+``density-z`` calls ``site::densityZ``. ``--type 0`` (default) keeps
+every atom; ``--type I`` keeps that LAMMPS type. ``--axis`` is ``x``,
+``y``, or ``z`` (default ``z``). ``--bins`` defaults to the bound span
+over :math:`0.1`. Each slab volume is :math:`A_\perp \times dz`, with
+:math:`A_\perp` from dump H (recovered ``lx, ly, lz``, not bound
+spans). This is not an ice score.
+
+``chill``, ``chill-plus``, and ``cages`` call ``site::iceScoreAllowed``.
+When ``--family`` is not ``waterIce`` they print ``site::refuseIceScore``
+(the message names the family) and exit 2. They do not fall through
+to ``atom_state_type::water``. Unflagged ``seams chill`` stays
+``waterIce``. If ``--family`` is absent and the frame has more than two
+LAMMPS types, one stderr line names ``--family`` and the command
+still exits 0.
+
 An empty cloud (``nop 0``) still prints. ``chill`` / ``chill-plus`` print
 ``nop 0``. ``cages`` prints ``nop 0 graph KIND hexagonal 0 cubic 0 water 0``. ``rdf`` / ``cn`` still emit their headers. ``hbonds`` prints
-``nop 0 hbonds 0``.
+``nop 0 hbonds 0``. ``density-z`` prints ``# z rho`` and zero-density bins.
 
 ``hbonds`` loads the heavy-atom cloud with ``--type`` and the hydrogen
 cloud with ``--htype``, then builds a cutoff neighbour list. Without
 ``--donors`` it uses the water two-hydrogen-per-molecule set
 (``hAtomMolList``). ``--donors`` passes every hydrogen index to
-``populateHbondsFromDonors``. ``--hdist`` and ``--hangle`` are the acceptor-H distance and the
-acceptor-centered O-O-H angle cutoffs (angle between OO and OH);
-the C++ defaults stay the water values and are not an ionic-liquid
-criterion.
+``populateHbondsFromDonors``. ``--hdist`` and ``--hangle`` are the acceptor-H
+distance and the acceptor-centered O-O-H angle cutoffs (angle
+between OO and OH); the C++ defaults stay the water values and are
+not an ionic-liquid criterion.
 
 Options
 -------
@@ -104,13 +142,21 @@ initializers (Argum does not write defaults into the help).
     +-------------------------------+-------------------------------------+--------------------------------------------------------------------------+
     | ``-j``, ``--jobs N``          | ``1``                               | ``Parallel frame workers (OpenMP). 1 is serial``                         |
     +-------------------------------+-------------------------------------+--------------------------------------------------------------------------+
-    | ``-t``, ``--type I``          | ``0``                               | ``Atom type (0 guesses oxygen then type 1)``                             |
+    | ``-t``, ``--type I``          | ``0``                               | ``Atom type (0 guesses oxygen then type 1; density-z: 0 is every atom)`` |
     +-------------------------------+-------------------------------------+--------------------------------------------------------------------------+
     | ``--types I,J``               | ``I = J = --type``                  | ``Pair types for site-site rdf/cn (default I=J=--type)``                 |
     +-------------------------------+-------------------------------------+--------------------------------------------------------------------------+
+    | ``--family NAME``             | ``waterIce``                        | Material family. Ice scores refuse every value except ``waterIce``       |
+    +-------------------------------+-------------------------------------+--------------------------------------------------------------------------+
+    | ``--site SPEC``               | \                                   | Type-to-kind map for ``ionCloud`` (``1=cationHead,2=anion``)             |
+    +-------------------------------+-------------------------------------+--------------------------------------------------------------------------+
+    | ``--ions``                    | \                                   | ``cn`` on ``ionCloud`` cage degree (needs ``--site``)                    |
+    +-------------------------------+-------------------------------------+--------------------------------------------------------------------------+
     | ``-c``, ``--cutoff ANGSTROM`` | ``3.5``                             | ``Neighbour cutoff (rdf/cn rmax; hbonds heavy-atom nList)``              |
     +-------------------------------+-------------------------------------+--------------------------------------------------------------------------+
-    | ``--bins N``                  | ``rmax / 0.1``                      | ``RDF histogram bins (default rmax/0.1)``                                |
+    | ``--bins N``                  | ``rmax / 0.1`` or ``L / 0.1``       | ``Histogram bins (rdf: rmax/0.1; density-z: bound span / 0.1)``          |
+    +-------------------------------+-------------------------------------+--------------------------------------------------------------------------+
+    | ``--axis XYZ``                | ``z``                               | ``Histogram axis for density-z (x, y, or z)``                            |
     +-------------------------------+-------------------------------------+--------------------------------------------------------------------------+
     | ``-k N``                      | ``4``                               | ``k for knn / seeded cages``                                             |
     +-------------------------------+-------------------------------------+--------------------------------------------------------------------------+
@@ -164,13 +210,17 @@ only by ``cages``.
 XYZ always stores type 1. Classification still uses ``--type`` after
 the read (type 0 then becomes 1).
 
+A mixed-type dump that is not the water guess needs ``--type I``.
+``density-z`` treats ``0`` as every atom, not the oxygen guess.
+See `Ionic-liquid dumps <../howto/ionic-liquid.rst>`_.
+
 ``--types``
 -----------
 
 Used by ``rdf`` and ``cn``. The Argum form is ``I,J`` (one comma). A bad
 string exits 2 (``bad --types (want I,J)``). Omit the flag to set both
 sides to ``--type``. These are LAMMPS type IDs on the original cloud
-(site-site). There is no ``--ions``.
+(site-site). ``cn --ions`` is a different path (ionCloud cage degree).
 
 .. table::
 
@@ -186,6 +236,16 @@ sides to ``--type``. These are LAMMPS type IDs on the original cloud
 
 ``cmdRdf`` / ``cmdCn`` then call ``rdf::partialRdf`` on those two integers.
 ``typeOf`` still resolves a zero to the first atom (or 1).
+
+``seams read`` and the box
+--------------------------
+
+``seams read`` prints ``gen::formatDumpBox``: the three bound spans,
+then ``xy xz yz`` when ``box.size() >= 6``. There is no separate tilt
+flag. ``seams rdf`` uses the same dump H (``gen::periodicDist`` and
+``nneigh::dumpVolume``). ``seams density-z`` uses recovered ``lx, ly, lz`` for :math:`A_\perp`, not bound spans. The in-plane sampler remains
+``rdf2::sampleRDF_AA``; see
+`Sheared cells <../howto/sheared-cells.rst>`_.
 
 ``--graph``
 -----------
@@ -237,6 +297,8 @@ the table.
     | ``SEAMS_K``                              | ``4``                    |
     +------------------------------------------+--------------------------+
     | ``SEAMS_GRAPH``                          | ``seeded``               |
+    +------------------------------------------+--------------------------+
+    | ``SEAMS_FAMILY``                         | ``waterIce``             |
     +------------------------------------------+--------------------------+
     | ``SEAMS_RESIDENT``                       | ``0.80``                 |
     +------------------------------------------+--------------------------+
@@ -377,13 +439,13 @@ Exit status
 
 .. table::
 
-    +-------+-------------------------------------------------------------------------------------------------------------+
-    | code  | when                                                                                                        |
-    +=======+=============================================================================================================+
-    | ``0`` | success, including ``--help`` / ``--version`` / ``--features`` / ``--print-config``                         |
-    +-------+-------------------------------------------------------------------------------------------------------------+
-    | ``2`` | parse error, missing command or file, unknown command, unknown ``--graph``, bad ``--types``, ``--bins < 0`` |
-    +-------+-------------------------------------------------------------------------------------------------------------+
+    +-------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | code  | when                                                                                                                                                                 |
+    +=======+======================================================================================================================================================================+
+    | ``0`` | success, including ``--help`` / ``--version`` / ``--features`` / ``--print-config``                                                                                  |
+    +-------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | ``2`` | parse error, missing command or file, unknown command, unknown ``--graph``, bad ``--types``, ``--bins < 0``, unknown ``--family``, ice score refused by ``--family`` |
+    +-------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Examples
 --------
@@ -399,8 +461,11 @@ Examples
     seams chill-plus dump.lammpstrj --frame 1 --last 50 --jobs 8
     seams rdf dump.lammpstrj --types 1,2 --cutoff 10 --bins 100
     seams cn dump.lammpstrj --types 1,2 --cutoff 4.5
+    seams cn dump.lammpstrj --ions --site '1=cationHead,2=anion' --cutoff 6.0
+    seams pairs dump.lammpstrj --site '1=cationHead,2=anion'
     seams hbonds dump.lammpstrj --type 2 --htype 1
     seams hbonds dump.lammpstrj --donors
+    seams chill dump.lammpstrj --family ionicLiquid
 
 Lua and Python are not this binary. See
 `yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_

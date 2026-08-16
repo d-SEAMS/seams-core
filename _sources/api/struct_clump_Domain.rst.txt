@@ -1,0 +1,23 @@
+.. index:: pair: struct; clump::Domain
+.. _doxid-structclump_1_1_domain:
+
+struct clump::Domain
+====================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Largest connected component of a Boolean site mask (Stoddard). :ref:`More...<details-structclump_1_1_domain>`
+
+.. _details-structclump_1_1_domain:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Largest connected component of a Boolean site mask (Stoddard).
+
+percolation is N_largest / N_subset. Does not classify ice.
+

@@ -323,9 +323,9 @@ name the front-end repositories.</p>
 graphs. <code class="docutils literal notranslate"><span class="pre">bondGraphFromName</span></code> accepts <code class="docutils literal notranslate"><span class="pre">cutoff</span></code>, <code class="docutils literal notranslate"><span class="pre">knn</span></code>, <code class="docutils literal notranslate"><span class="pre">knn-union</span></code>.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">populateHbonds</span></code></dt><dd><p>Geometric hydrogen bonds. Needs hydrogens
-(re-read from a dump, or an explicit H cloud). Water keeps the
+(re-read from a dump, or an explicit H cloud). Water uses the
 two-hydrogen <code class="docutils literal notranslate"><span class="pre">hAtomMolList</span></code> set. <code class="docutils literal notranslate"><span class="pre">populateHbondsFromDonors</span></code>
-takes an explicit <code class="docutils literal notranslate"><span class="pre">hCloud</span></code> index list.</p>
+takes an explicit per-heavy donor-H index list.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">getCorrelPlus</span></code> / <code class="docutils literal notranslate"><span class="pre">getIceTypePlus</span></code></dt><dd><p>CHILL+. Four-neighbour
 <code class="docutils literal notranslate"><span class="pre">c_ij</span></code>, then cubic / hexagonal / interfacial / clathrate / water.</p>

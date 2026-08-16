@@ -9,7 +9,11 @@ namespace site
 
 	enum_site_Family.rst
 	enum_site_Kind.rst
+	struct_site_DensityZ.rst
 	struct_site_Table.rst
+
+Overview
+~~~~~~~~
 
 
 
@@ -27,13 +31,50 @@ namespace site
 
 	// structs
 
+	struct :ref:`DensityZ<doxid-structsite_1_1_density_z>`;
 	struct :ref:`Table<doxid-structsite_1_1_table>`;
 
 	// global functions
 
+	:ref:`DensityZ<doxid-structsite_1_1_density_z>` :ref:`densityZ<doxid-namespacesite_1a75c8588cd72dda60fecb01240009ca6c>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI, int nbin, int axis);
+	:ref:`DensityZ<doxid-structsite_1_1_density_z>` :ref:`densityZ<doxid-namespacesite_1a0e086c58b6a8de67c895bd1e034f58e6>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const :ref:`Table<doxid-structsite_1_1_table>`& table, :ref:`Kind<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90>` kind, int nbin, int axis);
+	bool :target:`iceScoreAllowed<doxid-namespacesite_1a05342583b5b8258d5347b3f18983d4b2>`(:ref:`Family<doxid-namespacesite_1aa3661d15289b4b8576f48217ed337ca3>` f);
+	const char* :target:`refuseIceScore<doxid-namespacesite_1a3043411870d52f19774d045fa21dfc09>`(:ref:`Family<doxid-namespacesite_1aa3661d15289b4b8576f48217ed337ca3>` f);
+	const char* :target:`familyName<doxid-namespacesite_1a1dacaa43f0631e0bc75cc37531b89ce7>`(:ref:`Family<doxid-namespacesite_1aa3661d15289b4b8576f48217ed337ca3>` f);
+	:ref:`Family<doxid-namespacesite_1aa3661d15289b4b8576f48217ed337ca3>` :target:`parseFamily<doxid-namespacesite_1a44e7fbcc66c892d4e98d896e5041cf4c>`(std::string_view name);
 	std::vector<int> :target:`indicesOf<doxid-namespacesite_1a651f87e7aaca786cffd536a4d2b286c4>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const :ref:`Table<doxid-structsite_1_1_table>`& table, :ref:`Kind<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90>` kind);
 	int :target:`lammpsTypeOfKind<doxid-namespacesite_1a1dd96ee4ccc36bc86f348ec029859b53>`(const :ref:`Table<doxid-structsite_1_1_table>`& table, :ref:`Kind<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90>` kind);
 	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> :target:`ionCloud<doxid-namespacesite_1a55a0dd31fcceddabfa6cda601eeb807c>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& src, const :ref:`Table<doxid-structsite_1_1_table>`& table);
 	:ref:`Table<doxid-structsite_1_1_table>` :target:`parseSiteSpec<doxid-namespacesite_1ab556d24c5f6d7d7be9ba2e4d975259be>`(std::string_view spec);
 
 	} // namespace site
+.. _details-namespacesite:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Global Functions
+----------------
+
+.. index:: pair: function; densityZ
+.. _doxid-namespacesite_1a75c8588cd72dda60fecb01240009ca6c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`DensityZ<doxid-structsite_1_1_density_z>` densityZ(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI, int nbin, int axis)
+
+Histogram Point::{x,y,z} for typeI (0 = every atom). axis is 0, 1, or 2.
+
+.. index:: pair: function; densityZ
+.. _doxid-namespacesite_1a0e086c58b6a8de67c895bd1e034f58e6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`DensityZ<doxid-structsite_1_1_density_z>` densityZ(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const :ref:`Table<doxid-structsite_1_1_table>`& table, :ref:`Kind<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90>` kind, int nbin, int axis)
+
+Same histogram, restricted to atoms whose :ref:`Table <doxid-structsite_1_1_table>` kind matches.
+

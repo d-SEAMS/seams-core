@@ -150,6 +150,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#options">Options</a></li>
 <li><a class="reference internal" href="#type"><code class="docutils literal notranslate"><span class="pre">--type</span></code></a></li>
 <li><a class="reference internal" href="#types"><code class="docutils literal notranslate"><span class="pre">--types</span></code></a></li>
+<li><a class="reference internal" href="#seams-read-and-the-box"><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> and the box</a></li>
 <li><a class="reference internal" href="#graph"><code class="docutils literal notranslate"><span class="pre">--graph</span></code></a></li>
 <li><a class="reference internal" href="#runtime-knobs">Runtime knobs</a></li>
 <li><a class="reference internal" href="#file-suffix">File suffix</a></li>
@@ -265,14 +266,17 @@ colorized through Argum’s <code class="docutils literal notranslate"><span cla
 </span><span data-line="8">seams rdf FILE
 </span><span data-line="9">seams cn FILE
 </span><span data-line="10">seams hbonds FILE
+</span><span data-line="11">seams pairs FILE
+</span><span data-line="12">seams density-z FILE
+</span><span data-line="13">seams domains FILE
 </span></pre></div>
 </div>
 <p>A positional <code class="docutils literal notranslate"><span class="pre">command</span></code> and a positional <code class="docutils literal notranslate"><span class="pre">file</span></code> are required. Missing
 either, an unknown command, or a parse error exits 2.</p>
 <section id="commands">
 <h2>Commands<a class="headerlink" href="#commands" title="Link to this heading">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">command</span></code> positional help string is <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">|</span> <span class="pre">chill</span> <span class="pre">|</span> <span class="pre">chill-plus</span> <span class="pre">|</span> <span class="pre">cages</span> <span class="pre">|</span> <span class="pre">rdf</span> <span class="pre">|</span> <span class="pre">cn</span> <span class="pre">|</span> <span class="pre">hbonds</span></code>. <code class="docutils literal notranslate"><span class="pre">chill_plus</span></code> is an accepted alias of
-<code class="docutils literal notranslate"><span class="pre">chill-plus</span></code> (not listed in that help string).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">command</span></code> positional help string is <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">|</span> <span class="pre">chill</span> <span class="pre">|</span> <span class="pre">chill-plus</span> <span class="pre">|</span> <span class="pre">cages</span> <span class="pre">|</span> <span class="pre">rdf</span> <span class="pre">|</span> <span class="pre">cn</span> <span class="pre">|</span> <span class="pre">hbonds</span> <span class="pre">|</span> <span class="pre">pairs</span> <span class="pre">|</span> <span class="pre">density-z</span> <span class="pre">|</span> <span class="pre">domains</span></code>. <code class="docutils literal notranslate"><span class="pre">chill_plus</span></code>
+is an accepted alias of <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code> (not listed in that help string).</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -306,9 +310,25 @@ either, an unknown command, or a parse error exits 2.</p>
 <td><p>site-site coordination number</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">site-site</span></code> then <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">types</span> <span class="pre">I</span> <span class="pre">J</span> <span class="pre">cutoff</span> <span class="pre">R</span> <span class="pre">cn</span> <span class="pre">X</span> <span class="pre">nI</span> <span class="pre">N</span> <span class="pre">nJ</span> <span class="pre">M</span> <span class="pre">volume</span> <span class="pre">V</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">hbonds</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cn</span> <span class="pre">--ions</span> <span class="pre">--site</span></code></p></td>
+<td><p>cage degree on <code class="docutils literal notranslate"><span class="pre">ionCloud</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cage</span> <span class="pre">ionCloud</span> <span class="pre">types</span> <span class="pre">1</span> <span class="pre">2</span> <span class="pre">cutoff</span> <span class="pre">R</span> <span class="pre">degree</span> <span class="pre">D</span> <span class="pre">nCation</span> <span class="pre">N</span> <span class="pre">nAnion</span> <span class="pre">M</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">hbonds</span></code></p></td>
 <td><p>geometric hydrogen-bond count</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">N</span> <span class="pre">hbonds</span> <span class="pre">E</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pairs</span> <span class="pre">--site</span></code></p></td>
+<td><p>mutual-nearest contact pairs</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">contact-pair</span> <span class="pre">count</span> <span class="pre">N</span> <span class="pre">nCation</span> <span class="pre">C</span> <span class="pre">nAnion</span> <span class="pre">A</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">density-z</span></code></p></td>
+<td><p>type-resolved <span class="math notranslate nohighlight">\(\rho\)</span> along one axis</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">z</span> <span class="pre">rho</span></code> then one <code class="docutils literal notranslate"><span class="pre">z</span> <span class="pre">rho</span></code> row per bin</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">domains</span> <span class="pre">--site</span> <span class="pre">--subset</span></code></p></td>
+<td><p>polar/apolar Stoddard component</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">subset</span> <span class="pre">polar</span> <span class="pre">n</span> <span class="pre">N</span> <span class="pre">largest</span> <span class="pre">L</span> <span class="pre">P</span> <span class="pre">P_inf</span></code></p></td>
 </tr>
 </tbody>
 </table>
@@ -328,17 +348,40 @@ is optional. The volume is <code class="docutils literal notranslate"><span clas
 <code class="docutils literal notranslate"><span class="pre">cn</span></code> integrates the site-site RDF to that cutoff
 (<code class="docutils literal notranslate"><span class="pre">rdf::coordinationNumber</span></code>). Help text and the <code class="docutils literal notranslate"><span class="pre">cn</span></code> header say
 <code class="docutils literal notranslate"><span class="pre">site-site</span></code>. There is no cage CN and no <code class="docutils literal notranslate"><span class="pre">--ions</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">cn</span></code> calls <code class="docutils literal notranslate"><span class="pre">nneigh::neighListPair</span></code> on types from <code class="docutils literal notranslate"><span class="pre">--types</span> <span class="pre">I,J</span></code>
+(default <code class="docutils literal notranslate"><span class="pre">I</span> <span class="pre">=</span> <span class="pre">J</span> <span class="pre">=</span> <span class="pre">--type</span></code>) and prints the mean degree of type <code class="docutils literal notranslate"><span class="pre">I</span></code>
+(row length minus the leading self). The line contains
+<code class="docutils literal notranslate"><span class="pre">site-site</span></code>. This is not an ice score and is not cage CN.</p>
+<p><code class="docutils literal notranslate"><span class="pre">cn</span> <span class="pre">--ions</span> <span class="pre">--site</span> <span class="pre">SPEC</span></code> builds <code class="docutils literal notranslate"><span class="pre">site::ionCloud</span></code> and prints the mean
+unlike degree of type-1 (cation) vertices from
+<code class="docutils literal notranslate"><span class="pre">nneigh::neighList(cutoff,</span> <span class="pre">ions,</span> <span class="pre">1,</span> <span class="pre">2)</span></code>. The line contains <code class="docutils literal notranslate"><span class="pre">cage</span></code>.
+<code class="docutils literal notranslate"><span class="pre">pairs</span> <span class="pre">--site</span> <span class="pre">SPEC</span></code> prints the size of
+<code class="docutils literal notranslate"><span class="pre">nneigh::mutualNearestUnlike(ions,</span> <span class="pre">1,</span> <span class="pre">2)</span></code>. That line contains
+<code class="docutils literal notranslate"><span class="pre">contact-pair</span></code>, not ionicity. Both need <code class="docutils literal notranslate"><span class="pre">--site</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">density-z</span></code> calls <code class="docutils literal notranslate"><span class="pre">site::densityZ</span></code>. <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">0</span></code> (default) keeps
+every atom; <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">I</span></code> keeps that LAMMPS type. <code class="docutils literal notranslate"><span class="pre">--axis</span></code> is <code class="docutils literal notranslate"><span class="pre">x</span></code>,
+<code class="docutils literal notranslate"><span class="pre">y</span></code>, or <code class="docutils literal notranslate"><span class="pre">z</span></code> (default <code class="docutils literal notranslate"><span class="pre">z</span></code>). <code class="docutils literal notranslate"><span class="pre">--bins</span></code> defaults to the bound span
+over <span class="math notranslate nohighlight">\(0.1\)</span>. Each slab volume is <span class="math notranslate nohighlight">\(A_\perp \times dz\)</span>, with
+<span class="math notranslate nohighlight">\(A_\perp\)</span> from dump H (recovered <code class="docutils literal notranslate"><span class="pre">lx,</span> <span class="pre">ly,</span> <span class="pre">lz</span></code>, not bound
+spans). This is not an ice score.</p>
+<p><code class="docutils literal notranslate"><span class="pre">chill</span></code>, <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code>, and <code class="docutils literal notranslate"><span class="pre">cages</span></code> call <code class="docutils literal notranslate"><span class="pre">site::iceScoreAllowed</span></code>.
+When <code class="docutils literal notranslate"><span class="pre">--family</span></code> is not <code class="docutils literal notranslate"><span class="pre">waterIce</span></code> they print <code class="docutils literal notranslate"><span class="pre">site::refuseIceScore</span></code>
+(the message names the family) and exit 2. They do not fall through
+to <code class="docutils literal notranslate"><span class="pre">atom_state_type::water</span></code>. Unflagged <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill</span></code> stays
+<code class="docutils literal notranslate"><span class="pre">waterIce</span></code>. If <code class="docutils literal notranslate"><span class="pre">--family</span></code> is absent and the frame has more than two
+LAMMPS types, one stderr line names <code class="docutils literal notranslate"><span class="pre">--family</span></code> and the command
+still exits 0.</p>
 <p>An empty cloud (<code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span></code>) still prints. <code class="docutils literal notranslate"><span class="pre">chill</span></code> / <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code> print
 <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span></code>. <code class="docutils literal notranslate"><span class="pre">cages</span></code> prints <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span> <span class="pre">graph</span> <span class="pre">KIND</span> <span class="pre">hexagonal</span> <span class="pre">0</span> <span class="pre">cubic</span> <span class="pre">0</span> <span class="pre">water</span> <span class="pre">0</span></code>. <code class="docutils literal notranslate"><span class="pre">rdf</span></code> / <code class="docutils literal notranslate"><span class="pre">cn</span></code> still emit their headers. <code class="docutils literal notranslate"><span class="pre">hbonds</span></code> prints
-<code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span> <span class="pre">hbonds</span> <span class="pre">0</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span> <span class="pre">hbonds</span> <span class="pre">0</span></code>. <code class="docutils literal notranslate"><span class="pre">density-z</span></code> prints <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">z</span> <span class="pre">rho</span></code> and zero-density bins.</p>
 <p><code class="docutils literal notranslate"><span class="pre">hbonds</span></code> loads the heavy-atom cloud with <code class="docutils literal notranslate"><span class="pre">--type</span></code> and the hydrogen
 cloud with <code class="docutils literal notranslate"><span class="pre">--htype</span></code>, then builds a cutoff neighbour list. Without
 <code class="docutils literal notranslate"><span class="pre">--donors</span></code> it uses the water two-hydrogen-per-molecule set
 (<code class="docutils literal notranslate"><span class="pre">hAtomMolList</span></code>). <code class="docutils literal notranslate"><span class="pre">--donors</span></code> passes every hydrogen index to
-<code class="docutils literal notranslate"><span class="pre">populateHbondsFromDonors</span></code>. <code class="docutils literal notranslate"><span class="pre">--hdist</span></code> and <code class="docutils literal notranslate"><span class="pre">--hangle</span></code> are the acceptor-H distance and the
-acceptor-centered O-O-H angle cutoffs (angle between OO and OH);
-the C++ defaults stay the water values and are not an ionic-liquid
-criterion.</p>
+<code class="docutils literal notranslate"><span class="pre">populateHbondsFromDonors</span></code>. <code class="docutils literal notranslate"><span class="pre">--hdist</span></code> and <code class="docutils literal notranslate"><span class="pre">--hangle</span></code> are the acceptor-H
+distance and the acceptor-centered O-O-H angle cutoffs (angle
+between OO and OH); the C++ defaults stay the water values and are
+not an ionic-liquid criterion.</p>
 </section>
 <section id="options">
 <h2>Options<a class="headerlink" href="#options" title="Link to this heading">¶</a></h2>
@@ -378,13 +421,16 @@ only by <code class="docutils literal notranslate"><span class="pre">cages</span
 </div>
 <p>XYZ always stores type 1. Classification still uses <code class="docutils literal notranslate"><span class="pre">--type</span></code> after
 the read (type 0 then becomes 1).</p>
+<p>A mixed-type dump that is not the water guess needs <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">I</span></code>.
+<code class="docutils literal notranslate"><span class="pre">density-z</span></code> treats <code class="docutils literal notranslate"><span class="pre">0</span></code> as every atom, not the oxygen guess.
+See <a class="reference external" href="../howto/ionic-liquid.rst">Ionic-liquid dumps</a>.</p>
 </section>
 <section id="types">
 <h2><code class="docutils literal notranslate"><span class="pre">--types</span></code><a class="headerlink" href="#types" title="Link to this heading">¶</a></h2>
 <p>Used by <code class="docutils literal notranslate"><span class="pre">rdf</span></code> and <code class="docutils literal notranslate"><span class="pre">cn</span></code>. The Argum form is <code class="docutils literal notranslate"><span class="pre">I,J</span></code> (one comma). A bad
 string exits 2 (<code class="docutils literal notranslate"><span class="pre">bad</span> <span class="pre">--types</span> <span class="pre">(want</span> <span class="pre">I,J)</span></code>). Omit the flag to set both
 sides to <code class="docutils literal notranslate"><span class="pre">--type</span></code>. These are LAMMPS type IDs on the original cloud
-(site-site). There is no <code class="docutils literal notranslate"><span class="pre">--ions</span></code>.</p>
+(site-site). <code class="docutils literal notranslate"><span class="pre">cn</span> <span class="pre">--ions</span></code> is a different path (ionCloud cage degree).</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -411,6 +457,15 @@ sides to <code class="docutils literal notranslate"><span class="pre">--type</sp
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">cmdRdf</span></code> / <code class="docutils literal notranslate"><span class="pre">cmdCn</span></code> then call <code class="docutils literal notranslate"><span class="pre">rdf::partialRdf</span></code> on those two integers.
 <code class="docutils literal notranslate"><span class="pre">typeOf</span></code> still resolves a zero to the first atom (or 1).</p>
+</section>
+<section id="seams-read-and-the-box">
+<h2><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> and the box<a class="headerlink" href="#seams-read-and-the-box" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> prints <code class="docutils literal notranslate"><span class="pre">gen::formatDumpBox</span></code>: the three bound spans,
+then <code class="docutils literal notranslate"><span class="pre">xy</span> <span class="pre">xz</span> <span class="pre">yz</span></code> when <code class="docutils literal notranslate"><span class="pre">box.size()</span> <span class="pre">&gt;=</span> <span class="pre">6</span></code>. There is no separate tilt
+flag. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">rdf</span></code> uses the same dump H (<code class="docutils literal notranslate"><span class="pre">gen::periodicDist</span></code> and
+<code class="docutils literal notranslate"><span class="pre">nneigh::dumpVolume</span></code>). <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">density-z</span></code> uses recovered <code class="docutils literal notranslate"><span class="pre">lx,</span> <span class="pre">ly,</span> <span class="pre">lz</span></code> for <span class="math notranslate nohighlight">\(A_\perp\)</span>, not bound spans. The in-plane sampler remains
+<code class="docutils literal notranslate"><span class="pre">rdf2::sampleRDF_AA</span></code>; see
+<a class="reference external" href="../howto/sheared-cells.rst">Sheared cells</a>.</p>
 </section>
 <section id="graph">
 <h2><code class="docutils literal notranslate"><span class="pre">--graph</span></code><a class="headerlink" href="#graph" title="Link to this heading">¶</a></h2>
@@ -476,22 +531,25 @@ the table.</p>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_GRAPH</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seeded</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_RESIDENT</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_FAMILY</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">waterIce</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_RESIDENT</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">0.80</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_CELL</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_CELL</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">3.0</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_TPP</span></code> / <code class="docutils literal notranslate"><span class="pre">LINKCELL_TPP</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_TPP</span></code> / <code class="docutils literal notranslate"><span class="pre">LINKCELL_TPP</span></code></p></td>
 <td><p>occupancy picker (<code class="docutils literal notranslate"><span class="pre">0</span></code>)</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_BLOCK</span></code> / <code class="docutils literal notranslate"><span class="pre">LINKCELL_BLOCK</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_BLOCK</span></code> / <code class="docutils literal notranslate"><span class="pre">LINKCELL_BLOCK</span></code></p></td>
 <td><p>occupancy picker (<code class="docutils literal notranslate"><span class="pre">0</span></code>)</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_OFFLOAD</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_OFFLOAD</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">YODA_FENNEL_PATH</span></code> / <code class="docutils literal notranslate"><span class="pre">YODA_LUA_PATH</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">YODA_FENNEL_PATH</span></code> / <code class="docutils literal notranslate"><span class="pre">YODA_LUA_PATH</span></code></p></td>
 <td><p>empty</p></td>
 </tr>
 </tbody>
@@ -680,7 +738,7 @@ line is <code class="docutils literal notranslate"><span class="pre">NAME:</span
 <td><p>success, including <code class="docutils literal notranslate"><span class="pre">--help</span></code> / <code class="docutils literal notranslate"><span class="pre">--version</span></code> / <code class="docutils literal notranslate"><span class="pre">--features</span></code> / <code class="docutils literal notranslate"><span class="pre">--print-config</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">2</span></code></p></td>
-<td><p>parse error, missing command or file, unknown command, unknown <code class="docutils literal notranslate"><span class="pre">--graph</span></code>, bad <code class="docutils literal notranslate"><span class="pre">--types</span></code>, <code class="docutils literal notranslate"><span class="pre">--bins</span> <span class="pre">&lt;</span> <span class="pre">0</span></code></p></td>
+<td><p>parse error, missing command or file, unknown command, unknown <code class="docutils literal notranslate"><span class="pre">--graph</span></code>, bad <code class="docutils literal notranslate"><span class="pre">--types</span></code>, <code class="docutils literal notranslate"><span class="pre">--bins</span> <span class="pre">&lt;</span> <span class="pre">0</span></code>, unknown <code class="docutils literal notranslate"><span class="pre">--family</span></code>, ice score refused by <code class="docutils literal notranslate"><span class="pre">--family</span></code></p></td>
 </tr>
 </tbody>
 </table>
@@ -697,8 +755,11 @@ line is <code class="docutils literal notranslate"><span class="pre">NAME:</span
 </span><span data-line="7">seams<span class="w"> </span>chill-plus<span class="w"> </span>dump.lammpstrj<span class="w"> </span>--frame<span class="w"> </span><span class="m">1</span><span class="w"> </span>--last<span class="w"> </span><span class="m">50</span><span class="w"> </span>--jobs<span class="w"> </span><span class="m">8</span>
 </span><span data-line="8">seams<span class="w"> </span>rdf<span class="w"> </span>dump.lammpstrj<span class="w"> </span>--types<span class="w"> </span><span class="m">1</span>,2<span class="w"> </span>--cutoff<span class="w"> </span><span class="m">10</span><span class="w"> </span>--bins<span class="w"> </span><span class="m">100</span>
 </span><span data-line="9">seams<span class="w"> </span>cn<span class="w"> </span>dump.lammpstrj<span class="w"> </span>--types<span class="w"> </span><span class="m">1</span>,2<span class="w"> </span>--cutoff<span class="w"> </span><span class="m">4</span>.5
-</span><span data-line="10">seams<span class="w"> </span>hbonds<span class="w"> </span>dump.lammpstrj<span class="w"> </span>--type<span class="w"> </span><span class="m">2</span><span class="w"> </span>--htype<span class="w"> </span><span class="m">1</span>
-</span><span data-line="11">seams<span class="w"> </span>hbonds<span class="w"> </span>dump.lammpstrj<span class="w"> </span>--donors
+</span><span data-line="10">seams<span class="w"> </span>cn<span class="w"> </span>dump.lammpstrj<span class="w"> </span>--ions<span class="w"> </span>--site<span class="w"> </span><span class="s1">&#39;1=cationHead,2=anion&#39;</span><span class="w"> </span>--cutoff<span class="w"> </span><span class="m">6</span>.0
+</span><span data-line="11">seams<span class="w"> </span>pairs<span class="w"> </span>dump.lammpstrj<span class="w"> </span>--site<span class="w"> </span><span class="s1">&#39;1=cationHead,2=anion&#39;</span>
+</span><span data-line="12">seams<span class="w"> </span>hbonds<span class="w"> </span>dump.lammpstrj<span class="w"> </span>--type<span class="w"> </span><span class="m">2</span><span class="w"> </span>--htype<span class="w"> </span><span class="m">1</span>
+</span><span data-line="13">seams<span class="w"> </span>hbonds<span class="w"> </span>dump.lammpstrj<span class="w"> </span>--donors
+</span><span data-line="14">seams<span class="w"> </span>chill<span class="w"> </span>dump.lammpstrj<span class="w"> </span>--family<span class="w"> </span>ionicLiquid
 </span></pre></div>
 </div>
 <p>Lua and Python are not this binary. See

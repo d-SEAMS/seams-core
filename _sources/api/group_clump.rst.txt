@@ -8,6 +8,7 @@ Clump
 	:hidden:
 
 	namespace_clump.rst
+	struct_clump_Domain.rst
 
 
 
@@ -19,4 +20,8 @@ Clump
 	// namespaces
 
 	namespace :ref:`clump<doxid-namespaceclump>`;
+
+	// structs
+
+	struct :ref:`clump::Domain<doxid-structclump_1_1_domain>`;
 

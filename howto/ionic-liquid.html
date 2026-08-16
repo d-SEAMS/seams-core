@@ -141,7 +141,11 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#pick-one-type">Pick one type</a></li>
 <li><a class="reference internal" href="#unlike-type-neighbours">Unlike-type neighbours</a></li>
 <li><a class="reference internal" href="#partial-g-r">Partial g(r)</a></li>
+<li><a class="reference internal" href="#site-kinds-and-ion-vertices">Site kinds and ion vertices</a></li>
+<li><a class="reference internal" href="#polar-and-apolar-domains">Polar and apolar domains</a></li>
+<li><a class="reference internal" href="#confined-layers">Confined layers</a></li>
 <li><a class="reference internal" href="#read-the-box">Read the box</a></li>
+<li><a class="reference internal" href="#family-gate">Family gate</a></li>
 </ul>
 </div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
   data-type="github" data-user="d-SEAMS" data-repo="seams-core">
@@ -238,7 +242,8 @@ data-aria-dark="Switch to auto color mode">
 <h1>Ionic-liquid dumps<a class="headerlink" href="#ionic-liquid-dumps" title="Link to this heading">¶</a></h1>
 <p>A multi-type dump is not an ice frame. Keep CHILL and cages on
 one species with <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">I</span></code>. Use <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">rdf</span></code> for a partial
-g<sub>IJ</sub>(r) under the dump minimum image.</p>
+g<sub>IJ</sub>(r) under the dump minimum image. Use <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">density-z</span></code>
+for a type-resolved <span class="math notranslate nohighlight">\(\rho(z)\)</span> in a slit.</p>
 <section id="pick-one-type">
 <h2>Pick one type<a class="headerlink" href="#pick-one-type" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">--type</span></code> / <code class="docutils literal notranslate"><span class="pre">-t</span></code> is unchanged. <code class="docutils literal notranslate"><span class="pre">0</span></code> guesses type 2 then type 1.
@@ -275,12 +280,89 @@ dump carries it.</p>
 <p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">rdf</span></code> is not an ice score. Do not run CHILL or cages on
 the ions.</p>
 </section>
+<section id="site-kinds-and-ion-vertices">
+<h2>Site kinds and ion vertices<a class="headerlink" href="#site-kinds-and-ion-vertices" title="Link to this heading">¶</a></h2>
+<p>LAMMPS <code class="docutils literal notranslate"><span class="pre">type</span></code> is not chemistry: type 1 is oxygen in water and a
+cation head in an IL. Hold a <code class="docutils literal notranslate"><span class="pre">site::Table</span></code> of type-to-kind (and
+optional atom-ID overrides). <code class="docutils literal notranslate"><span class="pre">Table::of</span></code> looks up the override
+first, then the type, else <code class="docutils literal notranslate"><span class="pre">unspecified</span></code>. <code class="docutils literal notranslate"><span class="pre">indicesOf(polar)</span></code> is
+the union of <code class="docutils literal notranslate"><span class="pre">cationHead</span></code>, <code class="docutils literal notranslate"><span class="pre">anion</span></code>, and explicit <code class="docutils literal notranslate"><span class="pre">polar</span></code>;
+<code class="docutils literal notranslate"><span class="pre">indicesOf(apolar)</span></code> is <code class="docutils literal notranslate"><span class="pre">tail</span></code> plus explicit <code class="docutils literal notranslate"><span class="pre">apolar</span></code>.
+<code class="docutils literal notranslate"><span class="pre">site::ionCloud</span></code> emits one vertex per <code class="docutils literal notranslate"><span class="pre">molID</span></code> that carries a
+cation head or anion: the unweighted COM of those tagged atoms,
+unwrapped with <code class="docutils literal notranslate"><span class="pre">gen::relDist</span></code> to the first atom of the group, with
+<code class="docutils literal notranslate"><span class="pre">Point::type</span></code> 1 (cation) or 2 (anion). A long-chain cation COM
+sits on the polar head, not halfway down the tail. Family is an
+input on the table; it is not inferred from types.</p>
+<p>On that ion cloud, <code class="docutils literal notranslate"><span class="pre">nneigh::nearestUnlike(cloud,</span> <span class="pre">1,</span> <span class="pre">2)</span></code> is each
+ion’s nearest unlike neighbour and the MIC distance.
+<code class="docutils literal notranslate"><span class="pre">nneigh::mutualNearestUnlike</span></code> keeps the mutual edges. Those
+are contact pairs. They are not first-shell membership and
+not a coordination number.</p>
+</section>
+<section id="polar-and-apolar-domains">
+<h2>Polar and apolar domains<a class="headerlink" href="#polar-and-apolar-domains" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span>domains<span class="w"> </span>FILE<span class="w"> </span>--site<span class="w"> </span><span class="s1">&#39;1=cationHead,2=anion,3=tail&#39;</span><span class="w"> </span>--subset<span class="w"> </span>polar
+</span><span data-line="2">seams<span class="w"> </span>domains<span class="w"> </span>FILE<span class="w"> </span>--site<span class="w"> </span><span class="s1">&#39;1=cationHead,2=anion,3=tail&#39;</span><span class="w"> </span>--subset<span class="w"> </span>apolar
+</span></pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">domains</span></code> builds the mask from <code class="docutils literal notranslate"><span class="pre">site::indicesOf</span></code> and walks
+Stoddard’s clusters on that subset. It does not run CHILL or
+<code class="docutils literal notranslate"><span class="pre">q_6</span></code>. Neighbours are the dump-MIC cutoff list (<code class="docutils literal notranslate"><span class="pre">--cutoff</span></code>).
+Stdout is <code class="docutils literal notranslate"><span class="pre">subset</span> <span class="pre">polar</span> <span class="pre">n</span> <span class="pre">N</span> <span class="pre">largest</span> <span class="pre">L</span> <span class="pre">P</span> <span class="pre">P_inf</span></code> with
+<code class="docutils literal notranslate"><span class="pre">P_inf</span> <span class="pre">=</span> <span class="pre">L</span> <span class="pre">/</span> <span class="pre">N</span></code>. Missing <code class="docutils literal notranslate"><span class="pre">--site</span></code> exits 2. <code class="docutils literal notranslate"><span class="pre">--family</span></code> still only
+gates ice scores.</p>
+</section>
+<section id="confined-layers">
+<h2>Confined layers<a class="headerlink" href="#confined-layers" title="Link to this heading">¶</a></h2>
+<p>A slit or slab dump needs type-resolved <span class="math notranslate nohighlight">\(\rho(z)\)</span>, not bulk CHILL.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span>density-z<span class="w"> </span>FILE
+</span><span data-line="2">seams<span class="w"> </span>density-z<span class="w"> </span>FILE<span class="w"> </span>--type<span class="w"> </span><span class="m">1</span><span class="w"> </span>--bins<span class="w"> </span><span class="m">80</span>
+</span><span data-line="3">seams<span class="w"> </span>density-z<span class="w"> </span>FILE<span class="w"> </span>--type<span class="w"> </span><span class="m">2</span><span class="w"> </span>--axis<span class="w"> </span>z
+</span></pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">0</span></code> (default) histograms every atom. <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">I</span></code> keeps one
+LAMMPS type. <code class="docutils literal notranslate"><span class="pre">--axis</span></code> is the Cartesian coordinate (<code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">z</span></code>; default <code class="docutils literal notranslate"><span class="pre">z</span></code>). <code class="docutils literal notranslate"><span class="pre">--bins</span></code> is optional (default the bound span
+over <span class="math notranslate nohighlight">\(0.1\)</span>).</p>
+<p>Stdout is <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">z</span> <span class="pre">rho</span></code> then one row per bin. The slice volume is
+<span class="math notranslate nohighlight">\(A_\perp \times dz\)</span>. <span class="math notranslate nohighlight">\(A_\perp\)</span> comes from dump H (<code class="docutils literal notranslate"><span class="pre">ly*lz</span></code>
+for <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">lx*lz</span></code> for <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">lx*ly</span></code> for <code class="docutils literal notranslate"><span class="pre">z</span></code>) using the recovered
+edge lengths, not bound spans. This is not a 2-periodic MIC.
+The integral of <code class="docutils literal notranslate"><span class="pre">rho</span> <span class="pre">*</span> <span class="pre">A</span> <span class="pre">*</span> <span class="pre">dz</span></code> is the number of selected atoms.</p>
+<p>Confined IL work is this histogram plus the existing in-plane
+<code class="docutils literal notranslate"><span class="pre">rdf2::rdf2Danalysis_AA</span></code> sampler. Do not run CHILL on
+<code class="docutils literal notranslate"><span class="pre">--family</span> <span class="pre">confinedIL</span></code>.</p>
+<p>Molten salt is <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">rdf</span></code> / <code class="docutils literal notranslate"><span class="pre">cn</span></code> plus <code class="docutils literal notranslate"><span class="pre">ionCloud</span></code> when the melt
+is multi-site. DES adds explicit donor H-bonds. Electrolyte is
+ion–O rdf/cn plus water H-bonds. Silica / BeF2 is rdf/cn plus
+Franzblau on the M–X graph and <code class="docutils literal notranslate"><span class="pre">getq6</span></code> on the tetrahedral
+cation (<code class="docutils literal notranslate"><span class="pre">steinhardtQlVoronoi</span></code> otherwise).</p>
+</section>
 <section id="read-the-box">
 <h2>Read the box<a class="headerlink" href="#read-the-box" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span> <span class="pre">FILE</span></code> prints <code class="docutils literal notranslate"><span class="pre">box</span> <span class="pre">Lx</span> <span class="pre">Ly</span> <span class="pre">Lz</span></code> and, when the dump is
 triclinic (<code class="docutils literal notranslate"><span class="pre">box.size()</span> <span class="pre">&gt;=</span> <span class="pre">6</span></code>), the tilt <code class="docutils literal notranslate"><span class="pre">xy</span> <span class="pre">xz</span> <span class="pre">yz</span></code>. Bound spans
 are not edge lengths; see <a class="reference external" href="sheared-cells.rst">Sheared
 cells</a>.</p>
+</section>
+<section id="family-gate">
+<h2>Family gate<a class="headerlink" href="#family-gate" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">--family</span></code> names the material. The default is <code class="docutils literal notranslate"><span class="pre">waterIce</span></code>.
+<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill</span></code>, <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code>, and <code class="docutils literal notranslate"><span class="pre">cages</span></code> refuse (exit 2) when
+<code class="docutils literal notranslate"><span class="pre">--family</span></code> is <code class="docutils literal notranslate"><span class="pre">ionicLiquid</span></code>, <code class="docutils literal notranslate"><span class="pre">moltenSalt</span></code>, <code class="docutils literal notranslate"><span class="pre">des</span></code>, <code class="docutils literal notranslate"><span class="pre">electrolyte</span></code>,
+<code class="docutils literal notranslate"><span class="pre">confinedIL</span></code>, <code class="docutils literal notranslate"><span class="pre">confinedWater</span></code>, or <code class="docutils literal notranslate"><span class="pre">networkFormer</span></code>. The message
+names the family. Unflagged <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill</span></code> stays the historical
+water path and is not an IL classifier.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span>rdf<span class="w"> </span>FILE<span class="w"> </span>--types<span class="w"> </span><span class="m">1</span>,2<span class="w"> </span>--cutoff<span class="w"> </span><span class="m">6</span>.0
+</span><span data-line="2">seams<span class="w"> </span>cn<span class="w"> </span>FILE<span class="w"> </span>--types<span class="w"> </span><span class="m">1</span>,2<span class="w"> </span>--cutoff<span class="w"> </span><span class="m">6</span>.0
+</span><span data-line="3">seams<span class="w"> </span>cn<span class="w"> </span>FILE<span class="w"> </span>--ions<span class="w"> </span>--site<span class="w"> </span><span class="s1">&#39;1=cationHead,2=anion&#39;</span>
+</span><span data-line="4">seams<span class="w"> </span>pairs<span class="w"> </span>FILE<span class="w"> </span>--site<span class="w"> </span><span class="s1">&#39;1=cationHead,2=anion&#39;</span>
+</span><span data-line="5">seams<span class="w"> </span>domains<span class="w"> </span>FILE<span class="w"> </span>--site<span class="w"> </span><span class="s1">&#39;1=cationHead,2=anion,3=tail&#39;</span><span class="w"> </span>--subset<span class="w"> </span>polar
+</span><span data-line="6">seams<span class="w"> </span>density-z<span class="w"> </span>FILE<span class="w"> </span>--type<span class="w"> </span><span class="m">1</span><span class="w"> </span>--bins<span class="w"> </span><span class="m">80</span>
+</span><span data-line="7">seams<span class="w"> </span>chill<span class="w"> </span>FILE<span class="w"> </span>--family<span class="w"> </span>ionicLiquid<span class="w">   </span><span class="c1"># exits 2</span>
+</span></pre></div>
+</div>
 <p>Flags and the rest of the surface live on
 <a class="reference external" href="../reference/cli.rst">seams CLI</a>. Formats live on
 <a class="reference external" href="../reference/data-formats.rst">data formats</a>.</p>
@@ -471,5 +553,6 @@ cells</a>.</p>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/target-highlight.js?v=df7d332b"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
+      <script src="../_static/shibuya.js?v=cac61aee"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script></body>
 </html>

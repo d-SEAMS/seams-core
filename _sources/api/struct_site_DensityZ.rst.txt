@@ -1,0 +1,57 @@
+.. index:: pair: struct; site::DensityZ
+.. _doxid-structsite_1_1_density_z:
+
+struct site::DensityZ
+=====================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <density.hpp>
+	
+	struct DensityZ {
+		// fields
+	
+		std::vector<double> :target:`z<doxid-structsite_1_1_density_z_1a2ee6a65755d2e0f6a2b8444324d2f2bd>`;
+		std::vector<double> :ref:`rho<doxid-structsite_1_1_density_z_1a40c9a9e719c82bec67afecd5de0989dc>`;
+		int :ref:`type<doxid-structsite_1_1_density_z_1a292387f47ba3c8ef2afed2934537ea4f>` {0};
+	};
+.. _details-structsite_1_1_density_z:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; rho
+.. _doxid-structsite_1_1_density_z_1a40c9a9e719c82bec67afecd5de0989dc:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> rho
+
+Bin centres along the chosen axis.
+
+.. index:: pair: variable; type
+.. _doxid-structsite_1_1_density_z_1a292387f47ba3c8ef2afed2934537ea4f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int type {0}
+
+Number density in each slab.
+

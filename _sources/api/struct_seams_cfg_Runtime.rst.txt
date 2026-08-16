@@ -25,6 +25,7 @@ struct seams::cfg::Runtime
 		double :target:`cutoff<doxid-structseams_1_1cfg_1_1_runtime_1a6c22ad1c8eae1acfba7a026c38391863>` = 3.5;
 		int :target:`k<doxid-structseams_1_1cfg_1_1_runtime_1aa9d9b9bfa55fc30cecd034759b5c48c1>` = 4;
 		std::string :target:`graph<doxid-structseams_1_1cfg_1_1_runtime_1a79be330a6b6d208c056daaf5f40682d1>` = "seeded";
+		:ref:`site::Family<doxid-namespacesite_1aa3661d15289b4b8576f48217ed337ca3>` :target:`family<doxid-structseams_1_1cfg_1_1_runtime_1ab7e771317b68e4aafa46cac28b25a526>` = :ref:`site::Family::waterIce<doxid-namespacesite_1aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd>`;
 		double :target:`resident<doxid-structseams_1_1cfg_1_1_runtime_1a80e2b2794741cea5a949eab3b0813990>` = 0.80;
 		double :target:`cell<doxid-structseams_1_1cfg_1_1_runtime_1a435f96bf622cece732267afe1daddc4d>` = 3.0;
 		int :target:`tpp<doxid-structseams_1_1cfg_1_1_runtime_1aba36d153b85a4c2d1f8c34ea40dddd18>` = 0;

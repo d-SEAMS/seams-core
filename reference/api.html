@@ -409,35 +409,39 @@ API; the header table below is only a map onto those pages.</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">rdf2</span></code></p></td>
 <td><p>in-plane radial distribution</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">selection.hpp</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">density.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">site</span></code></p></td>
+<td><p>type- or kind-resolved <span class="math notranslate nohighlight">\(\rho\)</span> along one axis</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">selection.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">gen</span></code>, <code class="docutils literal notranslate"><span class="pre">ring</span></code></p></td>
 <td><p>type and slice selections</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">generic.hpp</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">generic.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">gen</span></code></p></td>
 <td><p>periodic distance, angles, medians</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">structure_desc.hpp</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">structure_desc.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">chill</span></code></p></td>
 <td><p>SOAP, template overlay, linear classifier</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">voronoi_qlm.hpp</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">voronoi_qlm.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">chill</span></code></p></td>
 <td><p>Voronoi-weighted Steinhardt</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ira_sofi.hpp</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ira_sofi.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">ira</span></code></p></td>
 <td><p>IRA match and SOFI point groups</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sphericart_ylm.hpp</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sphericart_ylm.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams::sphericart_ylm</span></code></p></td>
 <td><p>batched Cartesian <code class="docutils literal notranslate"><span class="pre">Y_lm</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">steinhardt_device.hpp</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">steinhardt_device.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams::steinhardt</span></code></p></td>
 <td><p>host / MPI / offload Steinhardt kernel</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">simd_distance.hpp</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">simd_distance.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams</span></code></p></td>
 <td><p>Highway periodic distance</p></td>
 </tr>
@@ -633,5 +637,6 @@ these headers. The generated pages are <code class="docutils literal notranslate
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/target-highlight.js?v=df7d332b"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
+      <script src="../_static/shibuya.js?v=cac61aee"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script></body>
 </html>

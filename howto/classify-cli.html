@@ -257,8 +257,10 @@ numbers for the in-tree mixed frame live in
 <p><code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">0</span></code> (default) guesses type 2 then type 1. Mixed water dumps in
 this tree use type 2 oxygen. Single-site mW dumps use type 1. A
 mixed-type dump that is not that guess needs <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">I</span></code>; see
-<a class="reference external" href="ionic-liquid.rst">Ionic-liquid dumps</a>. A triclinic dump uses the
-stored tilt; see <a class="reference external" href="sheared-cells.rst">Sheared cells</a>.</p>
+<a class="reference external" href="ionic-liquid.rst">Ionic-liquid dumps</a>. <code class="docutils literal notranslate"><span class="pre">--family</span></code> defaults to
+<code class="docutils literal notranslate"><span class="pre">waterIce</span></code>. <code class="docutils literal notranslate"><span class="pre">chill</span></code> / <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code> / <code class="docutils literal notranslate"><span class="pre">cages</span></code> refuse every other family.
+A triclinic dump uses the stored tilt; see
+<a class="reference external" href="sheared-cells.rst">Sheared cells</a>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span>chill-plus<span class="w"> </span>FILE<span class="w"> </span>--type<span class="w"> </span><span class="m">2</span>
 </span><span data-line="2">seams<span class="w"> </span>cages<span class="w"> </span>input/traj/mW_cubic.lammpstrj<span class="w"> </span>--type<span class="w"> </span><span class="m">1</span>
 </span></pre></div>
