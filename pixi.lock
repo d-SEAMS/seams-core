@@ -498,6 +498,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/1e/db/4254e3eabe8020b458f1a747140d32277ec7a271daf1d235b70dc0b4e6e3/requests-2.32.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/27/2c/daca29684cbe9fd4bc711f8246da3c10adca1ccc4d24436b17572eb2590e/roman_numerals_py-4.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/27/83/859ecdd180cacc13b1f7e857abf8582a64552ea7a061057a6c716e790fce/sphinxcontrib_qthelp-2.0.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/2c/bc/d67ef1e11ed6e6343c135bf605aa9d5734ff0cc77eb42a2a41f182abc9d9/breathe-4.36.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/30/cf/45dd359f6ca0c3762ce0490f681da242f0530c49c81050c035c016bfdd3a/sphinx_design-0.7.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/31/53/136e9eca6e0b9dc0e1962e2c908fbea2e5ac000c2a2fbd9a35797958c48b/sphinx-8.2.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/35/7a/987e583882f985fe4d7323774889ec58049171828b58c2217e7f79cdf44e/sphinxcontrib_devhelp-2.0.0-py3-none-any.whl
@@ -8983,6 +8984,24 @@ packages:
   requires_dist:
   - pytest ; extra == 'dev'
   - setuptools ; extra == 'dev'
+  requires_python: '>=3.9'
+- pypi: https://files.pythonhosted.org/packages/2c/bc/d67ef1e11ed6e6343c135bf605aa9d5734ff0cc77eb42a2a41f182abc9d9/breathe-4.36.0-py3-none-any.whl
+  name: breathe
+  version: 4.36.0
+  sha256: af85436f1f09e842bd1fd95617281211c635f8768d245ff830c59b979888d1d5
+  requires_dist:
+  - sphinx>=7.2
+  - furo ; extra == 'docs'
+  - sphinx-copybutton ; extra == 'docs'
+  - sphinxcontrib-spelling ; extra == 'docs'
+  - ruff==0.9.2 ; extra == 'lint'
+  - mypy>=1 ; extra == 'lint'
+  - types-docutils ; extra == 'lint'
+  - types-pygments ; extra == 'lint'
+  - pytest>=8.0 ; extra == 'lint'
+  - sphinxcontrib-phpdomain ; extra == 'lint'
+  - sphinx-csharp ; extra == 'lint'
+  - pytest>=8.0 ; extra == 'test'
   requires_python: '>=3.9'
 - pypi: https://files.pythonhosted.org/packages/30/cf/45dd359f6ca0c3762ce0490f681da242f0530c49c81050c035c016bfdd3a/sphinx_design-0.7.0-py3-none-any.whl
   name: sphinx-design

@@ -2,6 +2,12 @@
 Changelog
 =========
 
+Unreleased
+==========
+
+The C++ API in the book is Doxygen via doxyrest (=api/index=), the
+same path as rgpot. The hand function tables are gone.
+
 Version 2.2.5 (2026-08-16)
 ===========================
 
