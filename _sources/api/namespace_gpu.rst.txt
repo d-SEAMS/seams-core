@@ -33,7 +33,7 @@ Overview
 
 	// global functions
 
-	:ref:`BatchResult<doxid-structgpu_1_1_batch_result>` :ref:`analyzeResident<doxid-namespacegpu_1a248cd4f5d936bc2c0a05bd668737c7b6>`(const double* xyz, const double* box, int nAtoms, int nFrames, double rc = 5.5);
+	:ref:`BatchResult<doxid-structgpu_1_1_batch_result>` :ref:`analyzeResident<doxid-namespacegpu_1a4dbfdd404bf0992c51a3b08d0a9f8c42>`(const double* xyz, const double* box, int nAtoms, int nFrames, double rc = 5.5, const double* boxLow = nullptr, int nBox = 3);
 	:ref:`DeviceInfo<doxid-structgpu_1_1_device_info>` :target:`probeDevice<doxid-namespacegpu_1aa686ad342cce27d1a34ebd5ba5878f79>`();
 	:ref:`Footprint<doxid-structgpu_1_1_footprint>` :target:`estimateFootprint<doxid-namespacegpu_1a5e96b0fb97bcce4c6cca5e5888bea7a6>`(int nAtoms, int nFrames, int kMax = 16, int maxSixRingsPerAtom = 16);
 	int :target:`maxResidentFrames<doxid-namespacegpu_1a423e858b483752f380c8f4939a899e78>`(const :ref:`DeviceInfo<doxid-structgpu_1_1_device_info>`& dev, int nAtoms, int kMax = 16, int maxSixRingsPerAtom = 16, double safety = 0.80);
@@ -51,14 +51,14 @@ Global Functions
 ----------------
 
 .. index:: pair: function; analyzeResident
-.. _doxid-namespacegpu_1a248cd4f5d936bc2c0a05bd668737c7b6:
+.. _doxid-namespacegpu_1a4dbfdd404bf0992c51a3b08d0a9f8c42:
 
 .. ref-code-block:: cpp
 	:class: doxyrest-title-code-block
 
-	:ref:`BatchResult<doxid-structgpu_1_1_batch_result>` analyzeResident(const double* xyz, const double* box, int nAtoms, int nFrames, double rc = 5.5)
+	:ref:`BatchResult<doxid-structgpu_1_1_batch_result>` analyzeResident(const double* xyz, const double* box, int nAtoms, int nFrames, double rc = 5.5, const double* boxLow = nullptr, int nBox = 3)
 
 xyz is frame-major, atom, xyz.
 
-box is frame-major, three lengths. rc is the cell-list cutoff; 5.5 matches the host k-NN candidate shell.
+box is frame-major three lengths when boxLow is null and nBox is 3. When boxLow is set or nBox is at least 6, box is one dump box (3 spans or 6 span+tilt) shared by every frame and the device walk uses lammpsBoxToLinkcell. rc is the cell-list cutoff; 5.5 matches the host k-NN candidate shell.
 
