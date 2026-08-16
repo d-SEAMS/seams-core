@@ -5,6 +5,21 @@ Changelog
 Unreleased
 ==========
 
+Version 2.4.0 (2026-08-16)
+===========================
+
+Partial 3D site-site ``g_IJ(r)`` and coordination numbers under
+the dump MIC, with ``seams rdf`` and ``seams cn``. Site chemistry
+is a ``site::Table`` of LAMMPS types and optional atom-ID
+overrides; ``site::ionCloud`` collapses each ion ``molID`` to one
+unwrapped COM vertex. Hydrogen bonds accept an explicit donor-H
+index set (``populateHbondsFromDonors``). ``seams hbonds --donors``
+uses every hydrogen as a donor candidate; water cutoffs stay on
+that command and are not an ionic-liquid criterion. In-plane RDF
+normalization uses the dump-cell volume ``|det H|`` and the
+restricted-triclinic in-plane area ``lx*ly``, not the particle AABB
+or bound-span product.
+
 Version 2.3.4 (2026-08-16)
 ===========================
 
