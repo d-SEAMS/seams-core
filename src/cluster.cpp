@@ -452,25 +452,15 @@ int clump::recenterClusterCloud(
     currentIndex = i;
     nextElement = linkedList[currentIndex];
     index = i;
-    // Keep looping
     while (nextElement != index) {
-      currentIndex = nextElement;
-      visited[currentIndex] = true;
-      nextElement = linkedList[currentIndex];
-      // -----------------------------------
-      // Get the relative distance between the central atom (iatom)
-      // and the next element
-      // Coordinates
-      // if (nextElement != index) {
-      const auto dr =
-          gen::relDist(iceCloud, currentIndex, nextElement);
+      const auto dr = gen::relDist(iceCloud, currentIndex, nextElement);
       iceCloud.pts[nextElement].x = iceCloud.pts[currentIndex].x - dr[0];
       iceCloud.pts[nextElement].y = iceCloud.pts[currentIndex].y - dr[1];
       iceCloud.pts[nextElement].z = iceCloud.pts[currentIndex].z - dr[2];
-          // -----------------------------------
-      // }  // don't shift the last atom!
-
-    } // End of going through linked atoms
+      visited[nextElement] = true;
+      currentIndex = nextElement;
+      nextElement = linkedList[currentIndex];
+    }
     //
   } // end of loop through atoms
   // --------------------------------------------------------------------------
