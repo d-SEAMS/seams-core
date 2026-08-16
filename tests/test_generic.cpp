@@ -4,6 +4,7 @@
 #include <generic.hpp>
 #include <mol_sys.hpp>
 
+#include <array>
 #include <cmath>
 #include <filesystem>
 #include <string>
@@ -283,12 +284,23 @@ TEST_CASE("relDist mixed image disagrees with span wrap", "[generic]") {
   cloud.idIndexMap[1] = 0;
   cloud.idIndexMap[2] = 1;
   const auto dr = gen::relDist(cloud, 0, 1);
-  REQUIRE_THAT(dr[0], Catch::Matchers::WithinAbs(4.5, 1e-9));
-  REQUIRE_THAT(dr[1], Catch::Matchers::WithinAbs(1.160254037844386, 1e-9));
+  REQUIRE_THAT(dr[0], Catch::Matchers::WithinAbs(4.5, 1e-10));
+  REQUIRE_THAT(dr[1], Catch::Matchers::WithinAbs(1.160254037844386, 1e-10));
   REQUIRE_THAT(dr[2], Catch::Matchers::WithinAbs(0.0, 1e-12));
+  // Independent-axis wrap of i-j uses bound spans, not the (0,-1,0) image.
+  std::array<double, 3> span = {0.5 - 1.0, 0.5 - 8.0, 1.0 - 1.0};
+  for (int k = 0; k < 3; k++) {
+    span[k] -= cloud.box[static_cast<size_t>(k)] *
+               std::round(span[k] / cloud.box[static_cast<size_t>(k)]);
+  }
+  REQUIRE(std::abs(dr[0] - span[0]) > 1.0);
   double x0, y0, z0, x1, y1, z1;
   REQUIRE(gen::unwrappedCoordShift(cloud, 0, 1, &x0, &y0, &z0, &x1, &y1,
                                    &z1) == 0);
-  REQUIRE_THAT(x1, Catch::Matchers::WithinAbs(x0 - dr[0], 1e-12));
-  REQUIRE_THAT(y1, Catch::Matchers::WithinAbs(y0 - dr[1], 1e-12));
+  REQUIRE_THAT(x0, Catch::Matchers::WithinAbs(0.5, 1e-12));
+  REQUIRE_THAT(y0, Catch::Matchers::WithinAbs(0.5, 1e-12));
+  REQUIRE_THAT(z0, Catch::Matchers::WithinAbs(1.0, 1e-12));
+  REQUIRE_THAT(x1, Catch::Matchers::WithinAbs(-4.0, 1e-10));
+  REQUIRE_THAT(y1, Catch::Matchers::WithinAbs(-0.660254037844386, 1e-10));
+  REQUIRE_THAT(z1, Catch::Matchers::WithinAbs(1.0, 1e-12));
 }

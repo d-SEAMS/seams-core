@@ -140,7 +140,7 @@ TEST_CASE("getHbondDistanceOH uses dump H on a mixed image", "[bond]") {
   hCloud.pts.push_back(hPoint);
   const double dist = bond::getHbondDistanceOH(oCloud, hCloud, 0, 0);
   const double expect = std::sqrt(4.5 * 4.5 + 1.160254037844386 * 1.160254037844386);
-  REQUIRE_THAT(dist, Catch::Matchers::WithinAbs(expect, 1e-9));
+  REQUIRE_THAT(dist, Catch::Matchers::WithinAbs(expect, 1e-10));
 }
 
 TEST_CASE("populateBonds with cage iceType filters dummy atoms", "[bond]") {

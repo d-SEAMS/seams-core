@@ -3,10 +3,12 @@
 
 #include <bop.hpp>
 #include <cluster.hpp>
+#include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <seams_input.hpp>
 
+#include <cmath>
 #include <filesystem>
 #include <unordered_map>
 
@@ -123,6 +125,38 @@ TEST_CASE("recenterClusterCloud shifts centroid toward box center",
   REQUIRE_THAT(cx, Catch::Matchers::WithinAbs(50.0, 1e-8));
   REQUIRE_THAT(cy, Catch::Matchers::WithinAbs(50.0, 1e-8));
   REQUIRE_THAT(cz, Catch::Matchers::WithinAbs(50.0, 1e-8));
+}
+
+TEST_CASE("recenterClusterCloud unwraps a mixed image on dump H",
+          "[cluster]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  molSys::Point<double> a;
+  a.x = 0.5;
+  a.y = 0.5;
+  a.z = 1.0;
+  a.atomID = 1;
+  molSys::Point<double> b;
+  b.x = 1.0;
+  b.y = 8.0;
+  b.z = 1.0;
+  b.atomID = 2;
+  cloud.pts.push_back(a);
+  cloud.pts.push_back(b);
+  cloud.idIndexMap[1] = 0;
+  cloud.idIndexMap[2] = 1;
+  const std::vector<std::vector<int>> nList = {{0, 1}, {1, 0}};
+  REQUIRE(clump::recenterClusterCloud(cloud, nList) == 0);
+  const double dx = cloud.pts[0].x - cloud.pts[1].x;
+  const double dy = cloud.pts[0].y - cloud.pts[1].y;
+  const double dz = cloud.pts[0].z - cloud.pts[1].z;
+  const bool dumpH =
+      (std::abs(std::abs(dx) - 4.5) < 1e-10 &&
+       std::abs(std::abs(dy) - 1.160254037844386) < 1e-10 &&
+       std::abs(dz) < 1e-12);
+  REQUIRE(dumpH);
 }
 
 TEST_CASE("largestIceCluster identifies clusters and writes stats",

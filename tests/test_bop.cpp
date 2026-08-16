@@ -1070,19 +1070,26 @@ TEST_CASE("qlmOneAtomDr uses packed relDist not minImage", "[bop]") {
   cloud.pts.push_back(b);
   cloud.idIndexMap[1] = 0;
   cloud.idIndexMap[2] = 1;
-  std::vector<std::vector<int>> nList = {{1, 2}, {2, 1}};
-  const auto ql = chill::steinhardtQl(cloud, nList, 6);
   const auto dr01 = gen::relDist(cloud, 0, 1);
+  REQUIRE_THAT(dr01[0], Catch::Matchers::WithinAbs(4.5, 1e-10));
+  REQUIRE_THAT(dr01[1], Catch::Matchers::WithinAbs(1.160254037844386, 1e-10));
+  REQUIRE_THAT(dr01[2], Catch::Matchers::WithinAbs(0.0, 1e-12));
   const double packed[6] = {dr01[0], dr01[1], dr01[2],
                             -dr01[0], -dr01[1], -dr01[2]};
+  const double xyz[6] = {0.5, 0.5, 1.0, 1.0, 8.0, 1.0};
   const int offsets[3] = {0, 1, 2};
   const int cols[2] = {1, 0};
-  std::vector<double> qlm(2 * 2 * 13, 0.0);
-  seams::steinhardt::qlmOneAtomDr(0, 6, packed, offsets, cols, qlm.data());
-  seams::steinhardt::qlmOneAtomDr(1, 6, packed, offsets, cols, qlm.data());
-  std::vector<double> qlHost(2, 0.0);
-  std::vector<double> qlBar(2, 0.0);
-  seams::steinhardt::qlOneAtom(0, 6, qlm.data(), offsets, cols, qlHost.data(),
-                               qlBar.data());
-  REQUIRE_THAT(ql.ql[0], Catch::Matchers::WithinAbs(qlHost[0], 1e-12));
+  std::vector<double> qlmDr(2 * 2 * 13, 0.0);
+  std::vector<double> qlmSpan(2 * 2 * 13, 0.0);
+  seams::steinhardt::qlmOneAtomDr(0, 6, packed, offsets, cols, qlmDr.data());
+  seams::steinhardt::qlmOneAtom(0, 6, xyz, offsets, cols, cloud.box[0],
+                                cloud.box[1], cloud.box[2], qlmSpan.data());
+  bool qlmDiffers = false;
+  for (size_t i = 0; i < qlmDr.size(); i++) {
+    if (std::abs(qlmDr[i] - qlmSpan[i]) > 1e-8) {
+      qlmDiffers = true;
+      break;
+    }
+  }
+  REQUIRE(qlmDiffers);
 }
