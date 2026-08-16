@@ -71,8 +71,8 @@ Scripting front ends are separate packages:
   `yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_),
   ``require("dseams")``
 
-The header **Ecosystem** menu on every page jumps between the three
-Shibuya sites.
+The header **Ecosystem** menu on every page jumps between the engine,
+the bindings, and linkcell.
 
 Build with a Nix flake (``nix build``, ``nix develop``) or with
 ``pixi run setup && pixi run build && pixi run test``.
@@ -91,7 +91,9 @@ Suite stack
        PY[pydseams Frame]
        LUA["require(\"dseams\")"]
      end
+     LC[linkcell]
      DUMP[LAMMPS / XYZ / chemfiles / con] --> LIB
+     LC --> LIB
      LIB --> CLI
      LIB --> PY
      LIB --> LUA
@@ -166,6 +168,9 @@ Related projects
 
 `dseams (Lua) <https://d-seams.github.io/yodaStruct/>`_
     ``require("dseams")`` and Fennel
+
+`linkcell <https://github.com/d-SEAMS/linkcell>`_
+    periodic linked-cell k-nearest neighbours
 
 `dseams.info <https://dseams.info>`_
     project site

@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Three repositories - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="CHILL+ versus cages" href="chill-plus-vs-cages.html" /><link rel="prev" title="Explanation" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Repositories - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="CHILL+ versus cages" href="chill-plus-vs-cages.html" /><link rel="prev" title="Explanation" href="index.html" />
       <link rel="canonical" href="https://docs.dseams.info/explanation/architecture.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -24,7 +24,7 @@
 </style>
     <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://docs.dseams.info/explanation/architecture.html"/>
-  <meta property="og:title" content="Three repositories"/>
+  <meta property="og:title" content="Repositories"/>
     <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
@@ -50,6 +50,9 @@
               </a></li><li><a href="https://d-seams.github.io/yodaStruct/">
                 <span>dseams (Lua)</span>
                 <small>require("dseams") and Fennel</small>
+              </a></li><li><a href="https://github.com/d-SEAMS/linkcell">
+                <span>linkcell</span>
+                <small>Periodic linked-cell k-nearest neighbours</small>
               </a></li></ul>
       </li></ul></nav>
       <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
@@ -102,7 +105,7 @@ data-aria-dark="Switch to auto color mode">
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Explanation</span></p>
 <ul class="current">
 <li class="toctree-l1 _expand"><a class="reference internal" href="index.html">Explanation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Three repositories</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Repositories</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="citation.html">Citation</a></li>
 </ul>
@@ -178,7 +181,7 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="2" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">Three repositories</strong>
+        <strong itemprop="name">Repositories</strong>
         <meta itemprop="position" content="3" />
       </li></ol>
     <div class="xl:hidden ml-1">
@@ -226,10 +229,11 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </div><article class="yue dark-code" role="main">
-          <section id="three-repositories">
-<h1>Three repositories<a class="headerlink" href="#three-repositories" title="Link to this heading">¶</a></h1>
-<p>d-SEAMS 2 is not a monolith. The classifier is one C++ library. Each
-language ships its own package against that library.</p>
+          <section id="repositories">
+<h1>Repositories<a class="headerlink" href="#repositories" title="Link to this heading">¶</a></h1>
+<p>d-SEAMS 2 is not a monolith. The classifier is one C++ library.
+Neighbour search is linkcell. Each language ships its own package
+against that library.</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -250,6 +254,10 @@ language ships its own package against that library.</p>
 <tr class="row-even"><td><p><a class="reference external" href="https://github.com/d-SEAMS/yodaStruct">yodaStruct</a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">dseams</span></code></p></td>
 <td><p>Lua/Fennel library</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/d-SEAMS/linkcell">linkcell</a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">lc_*</span></code></p></td>
+<td><p>Periodic linked-cell k-nearest neighbours</p></td>
 </tr>
 </tbody>
 </table>
@@ -272,7 +280,9 @@ schedules.</p>
     PY[pydseams Frame]
     LUA[&quot;require(\&quot;dseams\&quot;)&quot;]
   end
+  LC[linkcell]
   DUMP[LAMMPS / XYZ / chemfiles / con] --&gt; LIB
+  LC --&gt; LIB
   LIB --&gt; CLI
   LIB --&gt; PY
   LIB --&gt; LUA

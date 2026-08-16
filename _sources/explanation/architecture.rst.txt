@@ -1,22 +1,25 @@
-==================
-Three repositories
-==================
+============
+Repositories
+============
 
 
-d-SEAMS 2 is not a monolith. The classifier is one C++ library. Each
-language ships its own package against that library.
+d-SEAMS 2 is not a monolith. The classifier is one C++ library.
+Neighbour search is linkcell. Each language ships its own package
+against that library.
 
 .. table::
 
-    +---------------------------------------------------------+---------------------------+----------------------------+
-    | repository                                              | product                   | role                       |
-    +=========================================================+===========================+============================+
-    | `seams-core <https://github.com/d-SEAMS/seams-core>`_   | ``libyodaLib``, ``seams`` | C++ engine and CLI         |
-    +---------------------------------------------------------+---------------------------+----------------------------+
-    | `PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_ | ``pydseams``              | Python helpers on ``yoda`` |
-    +---------------------------------------------------------+---------------------------+----------------------------+
-    | `yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_   | ``dseams``                | Lua/Fennel library         |
-    +---------------------------------------------------------+---------------------------+----------------------------+
+    +---------------------------------------------------------+---------------------------+-------------------------------------------+
+    | repository                                              | product                   | role                                      |
+    +=========================================================+===========================+===========================================+
+    | `seams-core <https://github.com/d-SEAMS/seams-core>`_   | ``libyodaLib``, ``seams`` | C++ engine and CLI                        |
+    +---------------------------------------------------------+---------------------------+-------------------------------------------+
+    | `PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_ | ``pydseams``              | Python helpers on ``yoda``                |
+    +---------------------------------------------------------+---------------------------+-------------------------------------------+
+    | `yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_   | ``dseams``                | Lua/Fennel library                        |
+    +---------------------------------------------------------+---------------------------+-------------------------------------------+
+    | `linkcell <https://github.com/d-SEAMS/linkcell>`_       | ``lc_*``                  | Periodic linked-cell k-nearest neighbours |
+    +---------------------------------------------------------+---------------------------+-------------------------------------------+
 
 The front ends take seams-core as a Meson subproject (static library)
 or as a flake input. They do not vendor a second engine.
@@ -39,7 +42,9 @@ schedules.
        PY[pydseams Frame]
        LUA["require(\"dseams\")"]
      end
+     LC[linkcell]
      DUMP[LAMMPS / XYZ / chemfiles / con] --> LIB
+     LC --> LIB
      LIB --> CLI
      LIB --> PY
      LIB --> LUA
