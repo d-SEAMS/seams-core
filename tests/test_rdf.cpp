@@ -73,3 +73,34 @@ TEST_CASE("partial RDF like-type does not count the unlike neighbour",
   const auto unlike = rdf::partialRdf(cloud, 1, 2, 6.0, 6);
   REQUIRE(unlike.count[5] == 1);
 }
+
+TEST_CASE("runningCN at rmax is one for a single I-J pair", "[rdf]") {
+  const double coords[2][3] = {{1.0, 1.0, 1.0}, {3.0, 1.0, 1.0}};
+  auto cloud = twoTypeCloud({10.0, 10.0, 10.0}, coords);
+  const auto gr = rdf::partialRdf(cloud, 1, 2, 5.0, 10);
+  REQUIRE(gr.nI == 1);
+  REQUIRE(gr.nJ == 1);
+  REQUIRE(gr.binwidth == 0.5);
+  REQUIRE(gr.count[4] == 1);
+  const auto cn = rdf::runningCN(gr);
+  REQUIRE(cn.size() == gr.g.size());
+  REQUIRE_THAT(cn[3], Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(cn.back(), Catch::Matchers::WithinAbs(1.0, 1e-12));
+  REQUIRE_THAT(rdf::coordinationNumber(gr, 5.0),
+               Catch::Matchers::WithinAbs(1.0, 1e-12));
+  REQUIRE_THAT(rdf::coordinationNumber(gr, 1.5),
+               Catch::Matchers::WithinAbs(0.0, 1e-12));
+}
+
+TEST_CASE("firstMinimumBin finds the valley after the first peak", "[rdf]") {
+  rdf::PartialRdf h;
+  h.g = {0.1, 0.4, 2.0, 1.1, 0.3, 0.5, 1.6, 0.8};
+  REQUIRE(rdf::firstMinimumBin(h) == 4);
+
+  rdf::PartialRdf empty;
+  REQUIRE(rdf::firstMinimumBin(empty) == -1);
+
+  rdf::PartialRdf rising;
+  rising.g = {0.1, 0.2, 0.4, 0.8, 1.2};
+  REQUIRE(rdf::firstMinimumBin(rising) == -1);
+}
