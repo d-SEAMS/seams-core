@@ -643,34 +643,11 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
     const std::size_t fSz = static_cast<std::size_t>(nF);
     const linkcell::Cell cell0 =
         linkcell::Cell::ortho(box[0], box[1], box[2]);
-    auto boxClose = [](double a, double b) {
-      return std::fabs(a - b) <= 1.0e-8 * std::max(1.0, std::fabs(a));
-    };
-    bool sameBox = true;
-    for (int f = 1; f < nF; ++f) {
-      if (!boxClose(box[static_cast<std::size_t>(f) * 3 + 0], box[0]) ||
-          !boxClose(box[static_cast<std::size_t>(f) * 3 + 1], box[1]) ||
-          !boxClose(box[static_cast<std::size_t>(f) * 3 + 2], box[2])) {
-        sameBox = false;
-        break;
-      }
-    }
     void *q = knn.queue();
-    if (sameBox) {
-      knn.knearest_into_many(xyzDev, nSz, fSz, cell0, kSz, colsDev,
-                             fSz * nSz * kSz, nullptr, rc, false);
-    } else {
-      for (int f = 0; f < nF; ++f) {
-        const linkcell::Cell cell = linkcell::Cell::ortho(
-            box[static_cast<std::size_t>(f) * 3 + 0],
-            box[static_cast<std::size_t>(f) * 3 + 1],
-            box[static_cast<std::size_t>(f) * 3 + 2]);
-        knn.knearest_into(xyzDev + static_cast<std::size_t>(f) * nSz * 3, nSz,
-                          cell, kSz,
-                          colsDev + static_cast<std::size_t>(f) * nSz * kSz,
-                          nSz * kSz, nullptr, rc);
-      }
-    }
+    // One multi-frame launch on the workspace stream. Per-frame box
+    // walks serialize on the same bin buffers and leave the SMs idle.
+    knn.knearest_into_many(xyzDev, nSz, fSz, cell0, kSz, colsDev,
+                           fSz * nSz * kSz, nullptr, rc, false);
     auto launchArgs = [](void **raw, std::size_t n) {
       return std::vector<void *>(raw, raw + n);
     };
