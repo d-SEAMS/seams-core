@@ -43,10 +43,10 @@ schedules.
        PY[pydseams Frame]
        LUA["require(\"dseams\")"]
      end
-     LC[linkcell k-NN]
-     VE[vesin cutoff]
-     GPU[gpulite TUM batch]
-     DUMP[LAMMPS / XYZ / chemfiles / con] --> LIB
+     LC["linkcell k-NN"]
+     VE["vesin cutoff"]
+     GPU["gpulite TUM batch"]
+     DUMP["LAMMPS / XYZ / chemfiles / con"] --> LIB
      LC --> LIB
      VE --> LIB
      GPU --> LIB
