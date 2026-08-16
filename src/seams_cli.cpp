@@ -13,6 +13,7 @@
 #include <rdf.hpp>
 #include <seams_config.hpp>
 #include <seams_input.hpp>
+#include <site.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -20,6 +21,7 @@
 #include <iostream>
 #include <map>
 #include <mutex>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -230,6 +232,173 @@ int cmdRead(std::ostream &os, Cloud &cloud) {
   return 0;
 }
 
+site::Kind kindFromName(std::string_view name) {
+  if (name == "unspecified") {
+    return site::Kind::unspecified;
+  }
+  if (name == "cationHead") {
+    return site::Kind::cationHead;
+  }
+  if (name == "anion") {
+    return site::Kind::anion;
+  }
+  if (name == "tail") {
+    return site::Kind::tail;
+  }
+  if (name == "donorH") {
+    return site::Kind::donorH;
+  }
+  if (name == "acceptor") {
+    return site::Kind::acceptor;
+  }
+  if (name == "polar") {
+    return site::Kind::polar;
+  }
+  if (name == "apolar") {
+    return site::Kind::apolar;
+  }
+  if (name == "waterO") {
+    return site::Kind::waterO;
+  }
+  if (name == "waterH") {
+    return site::Kind::waterH;
+  }
+  if (name == "solvent") {
+    return site::Kind::solvent;
+  }
+  throw std::invalid_argument("unknown site kind '" + std::string(name) + "'");
+}
+
+site::Table parseSiteSpec(std::string_view spec, site::Family family) {
+  site::Table table;
+  table.family = family;
+  std::size_t start = 0;
+  while (start <= spec.size()) {
+    const std::size_t comma = spec.find(',', start);
+    const auto raw =
+        spec.substr(start, comma == std::string_view::npos
+                               ? std::string_view::npos
+                               : comma - start);
+    start = (comma == std::string_view::npos) ? spec.size() + 1 : comma + 1;
+    const auto token = trimView(raw);
+    if (token.empty()) {
+      continue;
+    }
+    const auto eq = token.find('=');
+    if (eq == std::string_view::npos) {
+      throw std::invalid_argument("site spec token '" + std::string(token) +
+                                  "' is not key=value");
+    }
+    const auto key = trimView(token.substr(0, eq));
+    const auto val = trimView(token.substr(eq + 1));
+    if (key.empty() || val.empty()) {
+      throw std::invalid_argument("site spec token '" + std::string(token) +
+                                  "' is not key=value");
+    }
+    if (key == "family") {
+      table.family = site::parseFamily(val);
+      continue;
+    }
+    int typeId = 0;
+    try {
+      typeId = parseIntegral<int>(key);
+    } catch (const ParsingException &) {
+      throw std::invalid_argument("site spec type '" + std::string(key) +
+                                  "' is not an integer");
+    }
+    table.typeToKind[typeId] = kindFromName(val);
+  }
+  return table;
+}
+
+void countIonTypes(const Cloud &ions, int &nCation, int &nAnion) {
+  nCation = 0;
+  nAnion = 0;
+  for (const auto &pt : ions.pts) {
+    if (pt.type == 1) {
+      ++nCation;
+    } else if (pt.type == 2) {
+      ++nAnion;
+    }
+  }
+}
+
+double meanCageDegree(const Cloud &ions, double cutoff) {
+  if (ions.nop == 0) {
+    return 0.0;
+  }
+  const auto nList = nneigh::neighList(cutoff, ions, 1, 2);
+  double sum = 0.0;
+  int nI = 0;
+  const int nRows = static_cast<int>(nList.size());
+  for (int i = 0; i < ions.nop; ++i) {
+    if (ions.pts[static_cast<std::size_t>(i)].type != 1) {
+      continue;
+    }
+    ++nI;
+    if (i >= nRows || nList[static_cast<std::size_t>(i)].empty()) {
+      continue;
+    }
+    sum += static_cast<double>(nList[static_cast<std::size_t>(i)].size() - 1);
+  }
+  return nI > 0 ? sum / static_cast<double>(nI) : 0.0;
+}
+
+int uniqueTypeCount(const Cloud &cloud) {
+  std::set<int> types;
+  for (const auto &pt : cloud.pts) {
+    types.insert(pt.type);
+  }
+  return static_cast<int>(types.size());
+}
+
+int cmdCn(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
+          int typeJ) {
+  const int typI = typeOf(cloud, typeI);
+  const int typJ = typeJ > 0 ? typeJ : typI;
+  const auto nList = nneigh::neighListPair(cutoff, cloud, typI, typJ);
+  double sum = 0.0;
+  int nI = 0;
+  const int nRows = static_cast<int>(nList.size());
+  for (int i = 0; i < cloud.nop; ++i) {
+    if (cloud.pts[static_cast<std::size_t>(i)].type != typI) {
+      continue;
+    }
+    ++nI;
+    if (i >= nRows || nList[static_cast<std::size_t>(i)].empty()) {
+      continue;
+    }
+    sum += static_cast<double>(nList[static_cast<std::size_t>(i)].size() - 1);
+  }
+  const double degree = nI > 0 ? sum / static_cast<double>(nI) : 0.0;
+  os << "site-site types " << typI << " " << typJ << " cutoff " << cutoff
+     << " degree " << degree << " nI " << nI << "\n";
+  return 0;
+}
+
+int cmdCnIons(std::ostream &os, Cloud &cloud, double cutoff,
+              const site::Table &table) {
+  const auto ions = site::ionCloud(cloud, table);
+  int nCation = 0;
+  int nAnion = 0;
+  countIonTypes(ions, nCation, nAnion);
+  const double degree = meanCageDegree(ions, cutoff);
+  os << "cage ionCloud types 1 2 cutoff " << cutoff << " degree " << degree
+     << " nCation " << nCation << " nAnion " << nAnion << "\n";
+  return 0;
+}
+
+int cmdPairs(std::ostream &os, Cloud &cloud, const site::Table &table) {
+  const auto ions = site::ionCloud(cloud, table);
+  const auto pairs = nneigh::mutualNearestUnlike(ions, 1, 2);
+  int nCation = 0;
+  int nAnion = 0;
+  countIonTypes(ions, nCation, nAnion);
+  os << "contact-pair count " << pairs.size() << " nCation " << nCation
+     << " nAnion " << nAnion << "\n";
+  return 0;
+}
+
 int cmdRdf(std::ostream &os, Cloud &cloud, double rmax, int bins, int typeI,
            int typeJ) {
   if (bins <= 0) {
@@ -370,10 +539,15 @@ int main(int argc, char *argv[]) {
   double cutoff = cfg.cutoff;
   int k = cfg.k;
   std::string graph = cfg.graph;
+  site::Family family = cfg.family;
+  bool familyFlag = false;
+  std::string familyNameFlag;
   bool printConfig = false;
   std::string cmd;
   std::string file;
   std::string typesFlag;
+  std::string siteSpec;
+  bool ionsFlag = false;
   int rdfTypeI = 0;
   int rdfTypeJ = 0;
   bool typesSet = false;
@@ -446,10 +620,31 @@ int main(int argc, char *argv[]) {
 
   parser.add(Option("--types")
                  .argName("I,J")
-                 .help("Pair types for rdf (default I=J=--type)")
+                 .help("Pair types for rdf/cn (default I=J=--type)")
                  .handler([&](std::string_view value) {
                    typesFlag = std::string(value);
                  }));
+
+  parser.add(Option("--family")
+                 .argName("NAME")
+                 .help("Material family (default waterIce): waterIce, "
+                       "ionicLiquid, moltenSalt, des, electrolyte, "
+                       "confinedIL, confinedWater, networkFormer")
+                 .handler([&](std::string_view value) {
+                   familyNameFlag = std::string(value);
+                   familyFlag = true;
+                 }));
+
+  parser.add(Option("--site")
+                 .argName("SPEC")
+                 .help("Type-to-kind map for ionCloud (1=cationHead,2=anion)")
+                 .handler([&](std::string_view value) {
+                   siteSpec = std::string(value);
+                 }));
+
+  parser.add(Option("--ions")
+                 .help("cn on ionCloud cage degree (needs --site)")
+                 .handler([&]() { ionsFlag = true; }));
 
   parser.add(Option("--bins")
                  .argName("N")
@@ -512,7 +707,7 @@ int main(int argc, char *argv[]) {
                  }));
 
   parser.add(Positional("command")
-                 .help("read | chill | chill-plus | cages | rdf")
+                 .help("read | chill | chill-plus | cages | rdf | cn | pairs")
                  .occurs(zeroOrOneTime)
                  .handler([&](std::string_view value) { cmd = value; }));
 
@@ -537,6 +732,17 @@ int main(int argc, char *argv[]) {
   cfg.cutoff = cutoff;
   cfg.k = k;
   cfg.graph = graph;
+  if (familyFlag) {
+    try {
+      family = site::parseFamily(familyNameFlag);
+    } catch (const std::invalid_argument &e) {
+      std::cerr << colorizer.error(e.what()) << "\n";
+      std::cerr << colorizer.warning(parser.formatUsage(progname, colorizer))
+                << "\n";
+      return 2;
+    }
+  }
+  cfg.family = family;
   seams::cfg::exportEnviron(cfg);
 
   if (printConfig) {
@@ -570,7 +776,40 @@ int main(int argc, char *argv[]) {
     return 2;
   }
 
+  const bool iceCmd = cmd == "chill" || cmd == "chill-plus" ||
+                      cmd == "chill_plus" || cmd == "cages";
+  if (iceCmd && !site::iceScoreAllowed(family)) {
+    std::cerr << colorizer.error(site::refuseIceScore(family)) << "\n";
+    return 2;
+  }
+
+  site::Table siteTable;
+  siteTable.family = family;
+  if (!siteSpec.empty()) {
+    try {
+      siteTable = parseSiteSpec(siteSpec, family);
+    } catch (const std::exception &e) {
+      std::cerr << colorizer.error(e.what()) << "\n";
+      return 2;
+    }
+  }
+  if (cmd == "pairs" && siteSpec.empty()) {
+    std::cerr << colorizer.error("pairs needs --site") << "\n";
+    return 2;
+  }
+  if (cmd == "cn" && ionsFlag && siteSpec.empty()) {
+    std::cerr << colorizer.error("cn --ions needs --site") << "\n";
+    return 2;
+  }
+
   auto runOne = [&](std::ostream &os, Cloud &cloud) {
+    if (!familyFlag && family == site::Family::waterIce &&
+        uniqueTypeCount(cloud) > 2) {
+      std::cerr << colorizer.warning(
+                       "hint: more than two LAMMPS types; set --family "
+                       "(default waterIce)")
+                << "\n";
+    }
     if (cmd == "read") {
       return cmdRead(os, cloud);
     }
@@ -591,12 +830,23 @@ int main(int argc, char *argv[]) {
     if (cmd == "rdf") {
       return cmdRdf(os, cloud, cutoff, bins, rdfTypeI, rdfTypeJ);
     }
+    if (cmd == "cn") {
+      if (ionsFlag) {
+        return cmdCnIons(os, cloud, cutoff, siteTable);
+      }
+      return cmdCn(os, cloud, cutoff, rdfTypeI, rdfTypeJ);
+    }
+    if (cmd == "pairs") {
+      return cmdPairs(os, cloud, siteTable);
+    }
     os << colorizer.error("unknown command: ") << cmd << "\n";
     return 2;
   };
 
-  const int loadType =
-      (cmd == "rdf" && (typesSet ? rdfTypeI != rdfTypeJ : false)) ? -1 : typeI;
+  const bool loadAll =
+      cmd == "pairs" || (cmd == "cn" && ionsFlag) ||
+      ((cmd == "rdf" || cmd == "cn") && typesSet && rdfTypeI != rdfTypeJ);
+  const int loadType = loadAll ? -1 : typeI;
 
   if (last <= 0 || last == frame) {
     Cloud cloud = load(file, frame, loadType);
@@ -605,9 +855,7 @@ int main(int argc, char *argv[]) {
 
   std::mutex outMu;
   int rc = 0;
-  const int typeFilter = (cmd == "rdf" && typesSet && rdfTypeI != rdfTypeJ)
-                             ? 0
-                             : (typeI > 0 ? typeI : 0);
+  const int typeFilter = loadAll ? 0 : (typeI > 0 ? typeI : 0);
   sinp::forEachLammpsFrame(
       file, frame, last, typeFilter,
       [&](int /*fr*/, Cloud &cloud) {
