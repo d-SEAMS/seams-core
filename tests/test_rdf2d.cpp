@@ -123,6 +123,30 @@ TEST_CASE("sampleRDF_AA produces histogram with correct bin count", "[rdf2d]") {
   REQUIRE(hist[1] == 0);
 }
 
+TEST_CASE("sampleRDF_AA histograms the tilt a-image pair", "[rdf2d]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  const double coords[2][3] = {{0.2, 0.1, 1.0}, {9.7, 0.1, 1.0}};
+  for (int i = 0; i < 2; i++) {
+    molSys::Point<double> pt;
+    pt.type = 1;
+    pt.atomID = i + 1;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+  const double cutoff = 1.0;
+  const double binwidth = 0.1;
+  const int nbin = 10;
+  auto hist = rdf2::sampleRDF_AA(cloud, cutoff, binwidth, nbin);
+  REQUIRE(hist.size() == static_cast<std::size_t>(nbin));
+  REQUIRE(hist[5] == 2);
+}
+
 // -- normalizeRDF tests --
 
 TEST_CASE("normalizeRDF produces non-negative values", "[rdf2d]") {

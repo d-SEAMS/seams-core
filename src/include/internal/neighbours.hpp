@@ -123,6 +123,29 @@ inline linkcell::Cell lammpsBoxToLinkcell(const std::vector<double> &box,
                                           const std::vector<double> &boxLow) {
   return linkcell::Cell(lammpsBoxToLcCell(box, boxLow));
 }
+
+/// Cell and optional per-frame ortho lengths for analyzeResident.
+/// boxLow set or nBox >= 6: one dump box via lammpsBoxToLinkcell,
+/// frameLens is null. Otherwise Cell::ortho of box[0..2] and
+/// frameLens is box.
+inline void residentFrameCell(const double *box, const double *boxLow,
+                              int nBox, linkcell::Cell &cell,
+                              const double *&frameLens) {
+  cell = linkcell::Cell::ortho(box[0], box[1], box[2]);
+  frameLens = box;
+  if (boxLow != nullptr || nBox >= 6) {
+    std::vector<double> dump(static_cast<std::size_t>(std::max(nBox, 3)));
+    for (int i = 0; i < nBox && i < static_cast<int>(dump.size()); ++i) {
+      dump[static_cast<std::size_t>(i)] = box[i];
+    }
+    std::vector<double> lo;
+    if (boxLow != nullptr) {
+      lo = {boxLow[0], boxLow[1], boxLow[2]};
+    }
+    cell = lammpsBoxToLinkcell(dump, lo);
+    frameLens = nullptr;
+  }
+}
 #endif
 
 //! All these functions use atom IDs and not indices
@@ -254,7 +277,7 @@ private:
   std::vector<double> x0_;
   std::vector<double> y0_;
   std::vector<double> z0_;
-  std::array<double, 3> box0_{};
+  std::vector<double> box0_;
   std::vector<std::pair<int, int>> candidates_;
   std::vector<std::pair<int, int>> bonded_;
   std::vector<std::vector<int>> nList_;
