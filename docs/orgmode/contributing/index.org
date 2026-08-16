@@ -130,3 +130,15 @@ Install the clang-format hook:
 
 Commit subjects follow ~fileName: description of change~. See
 ~CONTRIBUTING.md~ in the repository root.
+
+* Releases
+
+The three-repo cut (~libyodaLib~ / ~seams~, then the PydSEAMSlib
+and yodaStruct wraps) is [[file:release.org][Release process]].
+
+#+begin_export rst
+.. toctree::
+   :maxdepth: 1
+
+   release
+#+end_export
