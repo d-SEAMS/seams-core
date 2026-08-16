@@ -5,13 +5,15 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:2
 #SBATCH --time=01:00:00
 #SBATCH --output=repro/results/elja-gpu-%j.out
 # Device-resident N-frame batch on Elja. Not Terra.
+# gpu-2xA100 advertises GRES; gpu-1xA100 does not. Slurm copies the
+# batch script into the spool, so BASH_SOURCE is not the repo path.
 set -euo pipefail
 export PATH=$HOME/.pixi/bin:$PATH
-ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+ROOT=${SLURM_SUBMIT_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}
 OUT=$ROOT/repro/results
 BUILD=/tmp/seams-gpu-${SLURM_JOB_ID:-manual}
 mkdir -p "$OUT" "$BUILD"
