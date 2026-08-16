@@ -100,17 +100,24 @@ spans is the wrong image for a sheared cell; see
 Dump writers emit ~ITEM: BOX BOUNDS xy xz yz pp pp pp~ and a third
 field on each bound line when the cloud carries tilt.
 
-~seams read~ prints the three bound spans (~box Lx Ly Lz~). It does
-not print the tilt. The cloud still keeps ~box[3..5]~ when the dump
-had them.
+~seams read~ prints the three bound spans (~box Lx Ly Lz~) and,
+when ~box.size() >= 6~, the tilt (~xy xz yz~).
 
 Mixed water dumps in this tree use type 2 for oxygen and type 1 for
-hydrogen. Single-site mW dumps in this tree use type 1. A mixed-type
+hydrogen. Single-site mW dumps in this tree use type 1.
+
+A two-type (or multi-type) dump is the same text format. Each atom
+keeps its ~ITEM: ATOMS~ ~type~ value. ~seams read~ / ~chill~ /
+~cages~ still filter through ~--type~ (~readLammpsTrjO~). ~seams
+rdf --types I,J~ with ~I != J~ loads every atom (~readLammpsTrj~)
+and histograms I-J pairs. The pair list is
+~nneigh::neighListPair~; the histogram is ~rdf::partialRdf~.
+Neither is an ice score. A mixed-type
 dump that is not that water convention (ionic liquid, solvent plus
 solute) needs an explicit ~--type I~; the default ~0~ guess is type
 2 then type 1. The C++ filter is ~sinp::readLammpsTrjO~ or
 ~gen::getPointCloudOneAtomType~. See
-[[file:../howto/ionic-liquid.org][Pick one type]].
+[[file:../howto/ionic-liquid.org][Ionic-liquid dumps]].
 
 A live dump session caches ~ITEM: TIMESTEP~ offsets. Sequential
 walks do not rescan prior snapshots. ~seams --frame N --last M

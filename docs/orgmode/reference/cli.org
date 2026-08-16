@@ -13,6 +13,7 @@ seams read FILE
 seams chill FILE
 seams chill-plus FILE
 seams cages FILE
+seams rdf FILE
 #+end_src
 
 A positional ~command~ and a positional ~file~ are required. Missing
@@ -21,15 +22,16 @@ either, an unknown command, or a parse error exits 2.
 * Commands
 
 The ~command~ positional help string is ~read | chill | chill-plus |
-cages~. ~chill_plus~ is an accepted alias of ~chill-plus~ (not listed
-in that help string).
+cages | rdf~. ~chill_plus~ is an accepted alias of ~chill-plus~
+(not listed in that help string).
 
 | command | action | stdout |
 |---------+--------+--------|
-| ~read~ | print the loaded cloud | ~nop N frame F box Lx Ly Lz~ |
+| ~read~ | print the loaded cloud | ~nop N frame F box Lx Ly Lz~ and, when ~box.size() >= 6~, ~xy xz yz~ |
 | ~chill~ | CHILL four-neighbour labels | ~nop N~ then ~name count~ for each ice type present |
 | ~chill-plus~ | CHILL+ four-neighbour labels | same as ~chill~ |
 | ~cages~ | ice score on six-membered rings | ~nop N graph KIND hexagonal IH cubic IC water W~ |
+| ~rdf~ | partial \(g_{IJ}(r)\) | ~# r g count~ then ~# types I J rmax R bins N volume V~ then one ~r g count~ row per bin |
 
 ~chill~ / ~chill-plus~ call ~nneigh::neighListO~, then
 ~chill::getCorrel~ / ~chill::getIceTypeNoPrint~ or
@@ -42,9 +44,14 @@ are the ~molSys::atom_state_type~ enumerators: ~cubic~, ~hexagonal~,
 (Ih), cubic = DDC (Ic), water = neither. The bond graph is
 ~--graph~.
 
+~rdf~ calls ~rdf::partialRdf~ on types from ~--types I,J~ (default
+~I = J = --type~). ~--cutoff~ is rmax. ~--bins~ is optional. The
+volume is ~nneigh::dumpVolume~ (det of dump ~H~), including shear.
+This is not an ice score.
+
 An empty cloud (~nop 0~) still prints. ~chill~ / ~chill-plus~ print
 ~nop 0~. ~cages~ prints ~nop 0 graph KIND hexagonal 0 cubic 0
-water 0~.
+water 0~. ~rdf~ prints the comment header and zero-count bins.
 
 * Options
 
@@ -61,7 +68,9 @@ initializers (Argum does not write defaults into the help).
 | ~--last N~ | omitted (~0~) | ~Last frame (inclusive). Omit for a single --frame~ |
 | ~-j~, ~--jobs N~ | ~1~ | ~Parallel frame workers (OpenMP). 1 is serial~ |
 | ~-t~, ~--type I~ | ~0~ | ~Atom type (0 guesses oxygen then type 1)~ |
-| ~-c~, ~--cutoff ANGSTROM~ | ~3.5~ | ~Neighbour cutoff~ |
+| ~--types I,J~ | ~I = J = --type~ | ~Pair types for rdf (default I=J=--type)~ |
+| ~-c~, ~--cutoff ANGSTROM~ | ~3.5~ | ~Neighbour cutoff (rdf rmax)~ |
+| ~--bins N~ | ~rmax / 0.1~ | ~RDF histogram bins (default rmax/0.1)~ |
 | ~-k N~ | ~4~ | ~k for knn / seeded cages~ |
 | ~--graph KIND~ | ~seeded~ | ~Bond graph for cages: cutoff \| knn \| knn-union \| seeded~ |
 | ~--config FILE~ | ~SEAMS_CONFIG~ or ~./seams.env~ | Dotenv of ~SEAMS_*~ / ~LINKCELL_*~ knobs. Env wins over the file |
@@ -91,6 +100,33 @@ only by ~cages~.
 
 XYZ always stores type 1. Classification still uses ~--type~ after
 the read (type 0 then becomes 1).
+
+A mixed-type dump that is not the water guess needs ~--type I~.
+See [[file:../howto/ionic-liquid.org][Ionic-liquid dumps]].
+
+* ~--types~
+
+Used by ~rdf~. The Argum form is ~I,J~ (one comma). A bad string
+exits 2 (~bad --types (want I,J)~). Omit the flag to set both
+sides to ~--type~.
+
+| ~--types~ | single-frame load | ~--last~ range |
+|-----------+-------------------+----------------|
+| omitted | same as ~--type~ (one species) | same as ~--type~ |
+| ~I,I~ (like) | keep type ~I~ | keep type ~I~ |
+| ~I,J~ with ~I != J~ | every atom (~readLammpsTrj~ / chemfiles unfiltered) | every atom (~typeFilter 0~) |
+
+~cmdRdf~ then histograms ~rdf::partialRdf~ on those two integers.
+~typeOf~ still resolves a zero to the first atom (or 1).
+
+* ~seams read~ and the box
+
+~seams read~ prints ~gen::formatDumpBox~: the three bound spans,
+then ~xy xz yz~ when ~box.size() >= 6~. There is no separate tilt
+flag. ~seams rdf~ uses the same dump H (~gen::periodicDist~ and
+~nneigh::dumpVolume~). The in-plane sampler remains
+~rdf2::sampleRDF_AA~; see
+[[file:../howto/sheared-cells.org][Sheared cells]].
 
 * ~--graph~
 
@@ -213,7 +249,7 @@ Color roles on this binary:
 | code | when |
 |------+------|
 | ~0~ | success, including ~--help~ / ~--version~ / ~--features~ / ~--print-config~ |
-| ~2~ | parse error, missing command or file, unknown command, unknown ~--graph~ |
+| ~2~ | parse error, missing command or file, unknown command, unknown ~--graph~, bad ~--types~, ~--bins < 0~ |
 
 * Examples
 
@@ -225,6 +261,8 @@ seams cages dump.lammpstrj --graph cutoff
 seams cages dump.lammpstrj --graph knn
 seams cages dump.lammpstrj --graph knn-union
 seams chill-plus dump.lammpstrj --frame 1 --last 50 --jobs 8
+seams rdf dump.lammpstrj --type 1 --cutoff 10
+seams rdf dump.lammpstrj --types 1,2 --cutoff 10 --bins 100
 #+end_src
 
 Lua and Python are not this binary. See

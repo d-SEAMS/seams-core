@@ -7,6 +7,16 @@ The C++ engine is this repository. Python is ~pydseams~
 
 * Unreleased
 
+* 2.3.4
+
+Steinhardt, hydrogen-bond, and cluster wraps use the dump
+minimum image, not an independent-axis wrap on bound spans.
+
+* 2.3.3
+
+Cutoff fallbacks and the skin Verlet refresh use the dump 3x3
+minimum image, not a diagonal of bound spans.
+
 * 2.3.2
 
 Cutoff lists take the LAMMPS dump 3x3, not a diagonal of bound

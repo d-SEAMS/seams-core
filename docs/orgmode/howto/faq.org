@@ -30,7 +30,15 @@ for ~cages~ only.
 * Which ~--type~ do I pass?
 
 Mixed water dumps in this tree: type 2 oxygen. Single-site mW dumps:
-type 1. Default ~0~ guesses type 2 then type 1.
+type 1. Default ~0~ guesses type 2 then type 1. Any other mixed-type
+dump (ionic liquid, solvent plus solute) needs the integer type of
+the species you want; see [[file:ionic-liquid.org][Ionic-liquid dumps]].
+
+* How does a sheared dump box work?
+
+The dump stores bound spans plus optional ~xy, xz, yz~. Those spans
+are not edge lengths. The engine recovers H. See
+[[file:sheared-cells.org][Sheared cells]].
 
 * Why is chemfiles disabled on ~nix build~?
 

@@ -12,6 +12,7 @@ numbers for the in-tree mixed frame live in
 seams read FILE
 seams chill-plus FILE --cutoff 3.5 --type 2
 seams cages FILE --type 2
+seams rdf FILE --type 2 --cutoff 10
 #+end_src
 
 ~chill~ is the original CHILL rule. ~chill-plus~ is CHILL+.
@@ -20,7 +21,10 @@ seams cages FILE --type 2
 * Type
 
 ~--type 0~ (default) guesses type 2 then type 1. Mixed water dumps in
-this tree use type 2 oxygen. Single-site mW dumps use type 1.
+this tree use type 2 oxygen. Single-site mW dumps use type 1. A
+mixed-type dump that is not that guess needs ~--type I~; see
+[[file:ionic-liquid.org][Ionic-liquid dumps]]. A triclinic dump uses the
+stored tilt; see [[file:sheared-cells.org][Sheared cells]].
 
 #+begin_src bash
 seams chill-plus FILE --type 2
