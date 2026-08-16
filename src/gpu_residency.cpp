@@ -75,10 +75,7 @@ Footprint estimateFootprint(int nAtoms, int nFrames, int kMax,
   f.labelBytes = alignUp(nf * n * 3 * sizeof(int));
   const std::size_t flags = alignUp(nf * maxRings * 2 * sizeof(int));
   const std::size_t qlm = alignUp(nf * n * 14 * sizeof(double));
-  const std::size_t cells = alignUp(nf * n * 4 * sizeof(int)) +
-                            alignUp(nf * (n + 1) * sizeof(int)) +
-                            alignUp(nf * n * 3 * sizeof(double)) +
-                            alignUp(nf * n * sizeof(int));
+  const std::size_t cells = alignUp(nf * n * sizeof(int));
   f.totalBytes = f.xyzBytes + boxBytes + f.nlistBytes + f.ringsBytes +
                  f.labelBytes + flags + qlm + cells;
   return f;

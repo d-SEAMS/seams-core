@@ -1,5 +1,9 @@
 #include <gpu_batch.hpp>
 
+#ifdef SEAMS_HAS_LINKCELL
+#include <linkcell_gpu.hpp>
+#endif
+
 #include <chrono>
 #include <cmath>
 #include <stdexcept>
@@ -19,9 +23,9 @@ namespace {
 
 #ifdef SEAMS_HAS_GPULITE
 
-// Resident batch. Cell list follows vesin CUDA + LAMMPS NPairKokkos
-// (host grid, sort-by-cell, scan, stencil on coalesced xyz). Then
-// mutual 4-graph, one q_lm, CHILL, primitive six-rings, HC/DDC.
+// Resident batch. k-nearest comes from linkcell::gpu (fold, bin,
+// Chebyshev shells). Then mutual 4-graph, one q_lm, CHILL, primitive
+// six-rings, HC/DDC.
 const char *kKernels = R"CUDA(
 __device__ inline void minImage(double& dx, double& dy, double& dz,
     double bx, double by, double bz) {
@@ -239,195 +243,34 @@ __device__ inline int ringsThrough(const int* A, int nA, const int* B, int nB,
   return n;
 }
 
-// Grid sizes live on the host (LAMMPS NBin / vesin cpu_box_check). The
-// device only maps atoms. Positions are then sorted by cell so the
-// stencil walk (LAMMPS NPairKokkos, vesin find_neighbors) is coalesced.
-extern "C" __global__ void bin_atoms(const double* __restrict__ xyz,
-    const double* __restrict__ box, const int* __restrict__ ncell,
-    int nAtoms, int nFrames, int* __restrict__ cellOf,
-    int* __restrict__ cellCount) {
-  const int tid = blockIdx.x * blockDim.x + threadIdx.x;
-  if (tid >= nAtoms * nFrames) return;
-  const int f = tid / nAtoms;
-  const int i = tid % nAtoms;
-  const double bx = __ldg(box + f * 3 + 0);
-  const double by = __ldg(box + f * 3 + 1);
-  const double bz = __ldg(box + f * 3 + 2);
-  const int nx = __ldg(ncell + f * 3 + 0);
-  const int ny = __ldg(ncell + f * 3 + 1);
-  const int nz = __ldg(ncell + f * 3 + 2);
-  const int base = f * nAtoms * 3;
-  double fx = xyz[base + i * 3 + 0] / bx;
-  double fy = xyz[base + i * 3 + 1] / by;
-  double fz = xyz[base + i * 3 + 2] / bz;
-  fx -= floor(fx); fy -= floor(fy); fz -= floor(fz);
-  int cx = (int)(fx * nx); if (cx < 0) cx = 0; if (cx >= nx) cx = nx - 1;
-  int cy = (int)(fy * ny); if (cy < 0) cy = 0; if (cy >= ny) cy = ny - 1;
-  int cz = (int)(fz * nz); if (cz < 0) cz = 0; if (cz >= nz) cz = nz - 1;
-  const int cid = (cz * ny + cy) * nx + cx;
-  cellOf[f * nAtoms + i] = cid;
-  atomicAdd(cellCount + f * nAtoms + cid, 1);
-}
-
-// Exclusive scan of cell counts, one block per frame (vesin prefix_sum_cells).
-extern "C" __global__ void prefix_cells(const int* __restrict__ ncell,
-    int* __restrict__ cellCount, int* __restrict__ cellOff,
-    int nAtoms, int nFrames) {
-  extern __shared__ int shared[];
-  const int f = blockIdx.x;
-  if (f >= nFrames) return;
-  const int nx = ncell[f * 3 + 0];
-  const int ny = ncell[f * 3 + 1];
-  const int nz = ncell[f * 3 + 2];
-  const int nC = nx * ny * nz;
-  const int tid = threadIdx.x;
-  const int nthreads = blockDim.x;
-  const int chunk = (nC + nthreads - 1) / nthreads;
-  const int start = tid * chunk;
-  const int end = start + chunk < nC ? start + chunk : nC;
-  int local = 0;
-  for (int c = start; c < end; ++c) {
-    cellOff[f * (nAtoms + 1) + c] = local;
-    local += cellCount[f * nAtoms + c];
-    cellCount[f * nAtoms + c] = 0;
-  }
-  shared[tid] = local;
-  __syncthreads();
-  if (tid == 0) {
-    int acc = 0;
-    for (int t = 0; t < nthreads; ++t) {
-      const int v = shared[t];
-      shared[t] = acc;
-      acc += v;
-    }
-    cellOff[f * (nAtoms + 1) + nC] = acc;
-  }
-  __syncthreads();
-  const int off = shared[tid];
-  for (int c = start; c < end; ++c) {
-    cellOff[f * (nAtoms + 1) + c] += off;
-  }
-}
-
-extern "C" __global__ void scatter_atoms(const double* __restrict__ xyz,
-    const int* __restrict__ cellOf, int* __restrict__ cellCount,
-    const int* __restrict__ cellOff, int* __restrict__ order,
-    double* __restrict__ sorted, int* __restrict__ sortedCell,
-    int nAtoms, int nFrames) {
-  const int tid = blockIdx.x * blockDim.x + threadIdx.x;
-  if (tid >= nAtoms * nFrames) return;
-  const int f = tid / nAtoms;
-  const int i = tid % nAtoms;
-  const int cid = cellOf[f * nAtoms + i];
-  const int slot = atomicAdd(cellCount + f * nAtoms + cid, 1);
-  const int dest = f * nAtoms + cellOff[f * (nAtoms + 1) + cid] + slot;
-  order[dest] = i;
-  sortedCell[dest] = cid;
-  sorted[dest * 3 + 0] = xyz[(f * nAtoms + i) * 3 + 0];
-  sorted[dest * 3 + 1] = xyz[(f * nAtoms + i) * 3 + 1];
-  sorted[dest * 3 + 2] = xyz[(f * nAtoms + i) * 3 + 2];
-}
-
-// One i-atom per thread over the 27-cell stencil (LAMMPS NPairKokkos).
-// Walks the cell-sorted arrays so neighbouring threads share cache lines
-// (vesin find_neighbors_optimized).
-extern "C" __global__ void nlist_cells(const double* __restrict__ sorted,
-    const double* __restrict__ box, const int* __restrict__ ncell,
-    const int* __restrict__ cellOff, const int* __restrict__ order,
-    const int* __restrict__ sortedCell, int nAtoms, int nFrames,
-    double rc2, int kMax, int* __restrict__ deg, int* __restrict__ cols) {
-  const int tid = blockIdx.x * blockDim.x + threadIdx.x;
-  if (tid >= nAtoms * nFrames) return;
-  const int f = tid / nAtoms;
-  const int s = tid % nAtoms;
-  const int i = __ldg(order + f * nAtoms + s);
-  const double bx = __ldg(box + f * 3 + 0);
-  const double by = __ldg(box + f * 3 + 1);
-  const double bz = __ldg(box + f * 3 + 2);
-  const int nx = __ldg(ncell + f * 3 + 0);
-  const int ny = __ldg(ncell + f * 3 + 1);
-  const int nz = __ldg(ncell + f * 3 + 2);
-  const int sbase = (f * nAtoms + s) * 3;
-  const double ix = __ldg(sorted + sbase + 0);
-  const double iy = __ldg(sorted + sbase + 1);
-  const double iz = __ldg(sorted + sbase + 2);
-  const int cid = __ldg(sortedCell + f * nAtoms + s);
-  const int nxy = nx * ny;
-  const int cz = cid / nxy;
-  const int cy = (cid % nxy) / nx;
-  const int cx = cid % nx;
-  int found = 0;
-  const int row = (f * nAtoms + i) * kMax;
-  double bestR2[16];
-  int bestJ[16];
-  for (int dx = -1; dx <= 1; ++dx) {
-    for (int dy = -1; dy <= 1; ++dy) {
-      for (int dz = -1; dz <= 1; ++dz) {
-        int ncx = cx + dx; int ncy = cy + dy; int ncz = cz + dz;
-        ncx = (ncx % nx + nx) % nx;
-        ncy = (ncy % ny + ny) % ny;
-        ncz = (ncz % nz + nz) % nz;
-        const int ncid = (ncz * ny + ncy) * nx + ncx;
-        const int a0 = __ldg(cellOff + f * (nAtoms + 1) + ncid);
-        const int a1 = __ldg(cellOff + f * (nAtoms + 1) + ncid + 1);
-        for (int t = a0; t < a1; ++t) {
-          const int j = __ldg(order + f * nAtoms + t);
-          if (j == i) continue;
-          const int jbase = (f * nAtoms + t) * 3;
-          double rx = __ldg(sorted + jbase + 0) - ix;
-          double ry = __ldg(sorted + jbase + 1) - iy;
-          double rz = __ldg(sorted + jbase + 2) - iz;
-          minImage(rx, ry, rz, bx, by, bz);
-          const double r2 = rx * rx + ry * ry + rz * rz;
-          if (r2 > rc2 || r2 <= 1.0e-12) continue;
-          if (found < kMax) {
-            bestR2[found] = r2;
-            bestJ[found] = j;
-            ++found;
-          } else {
-            int w = 0;
-            for (int u = 1; u < kMax; ++u) {
-              if (bestR2[u] > bestR2[w]) w = u;
-            }
-            if (r2 < bestR2[w]) {
-              bestR2[w] = r2;
-              bestJ[w] = j;
-            }
-          }
-        }
-      }
-    }
-  }
-  for (int a = 1; a < found; ++a) {
-    const double key = bestR2[a];
-    const int id = bestJ[a];
-    int p = a;
-    while (p > 0 && bestR2[p - 1] > key) {
-      bestR2[p] = bestR2[p - 1];
-      bestJ[p] = bestJ[p - 1];
-      --p;
-    }
-    bestR2[p] = key;
-    bestJ[p] = id;
-  }
-  for (int a = 0; a < found; ++a) cols[row + a] = bestJ[a];
-  deg[f * nAtoms + i] = found;
-}
-
-extern "C" __global__ void mutual_knn(const int* deg, const int* cols,
+extern "C" __global__ void mutual_knn(int* deg, const int* cols,
     int nAtoms, int nFrames, int kMax, int* mdeg, int* mcols) {
   const int tid = blockIdx.x * blockDim.x + threadIdx.x;
   if (tid >= nAtoms * nFrames) return;
   const int f = tid / nAtoms;
   const int i = tid % nAtoms;
-  const int di = deg[f * nAtoms + i];
-  const int take = di < 4 ? di : 4;
   const int row = (f * nAtoms + i) * kMax;
+  int found = 0;
+  for (int a = 0; a < kMax; ++a) {
+    if (cols[row + a] < 0) break;
+    ++found;
+  }
+  deg[f * nAtoms + i] = found;
+  const int take = found < 4 ? found : 4;
   const int mrow = (f * nAtoms + i) * 4;
   int kept = 0;
   for (int a = 0; a < take && kept < 4; ++a) {
     const int j = cols[row + a];
-    if (bonded(deg, cols, f, nAtoms, kMax, j, i)) {
+    bool back = false;
+    const int jrow = (f * nAtoms + j) * kMax;
+    for (int t = 0; t < kMax; ++t) {
+      if (cols[jrow + t] < 0) break;
+      if (cols[jrow + t] == i) {
+        back = true;
+        break;
+      }
+    }
+    if (back) {
       mcols[mrow + kept] = j;
       ++kept;
     }
@@ -760,8 +603,7 @@ struct Workspace {
   int capF = 0;
   int capK = 0;
   int capPer = 0;
-  DevPtr dxyz, dbox, dncell, dcellOf, dcellCount, dcellOff, dorder;
-  DevPtr dsorted, dsortedCell;
+  DevPtr dxyz, dbox;
   DevPtr ddeg, dcols, dmdeg, dmcols, dqre, dqim, dchill;
   DevPtr dnRings, dringAtoms, ddropped, dthroughCount, dthrough;
   DevPtr dhc, dddc, datomHc, datomDdc, dsix;
@@ -788,13 +630,6 @@ struct Workspace {
     const std::size_t maxRings = n * static_cast<std::size_t>(capPer);
     growOne(dxyz, nN * 3 * sizeof(double), "xyz");
     growOne(dbox, nf * 3 * sizeof(double), "box");
-    growOne(dncell, nf * 3 * sizeof(int), "ncell");
-    growOne(dcellOf, nN * sizeof(int), "cellOf");
-    growOne(dcellCount, nN * sizeof(int), "cellCount");
-    growOne(dcellOff, nf * (n + 1) * sizeof(int), "cellOff");
-    growOne(dorder, nN * sizeof(int), "order");
-    growOne(dsorted, nN * 3 * sizeof(double), "sorted");
-    growOne(dsortedCell, nN * sizeof(int), "sortedCell");
     growOne(ddeg, nN * sizeof(int), "deg");
     growOne(dcols, nN * static_cast<std::size_t>(capK) * sizeof(int), "cols");
     growOne(dmdeg, nN * sizeof(int), "mdeg");
@@ -821,46 +656,6 @@ Workspace &workspace() {
   return w;
 }
 
-void hostGrid(const double *box, int nFrames, int nAtoms, double rc,
-              std::vector<int> &ncell) {
-  ncell.resize(static_cast<std::size_t>(nFrames) * 3);
-  for (int f = 0; f < nFrames; ++f) {
-    int nx = static_cast<int>(std::floor(box[f * 3 + 0] / rc));
-    int ny = static_cast<int>(std::floor(box[f * 3 + 1] / rc));
-    int nz = static_cast<int>(std::floor(box[f * 3 + 2] / rc));
-    if (nx < 1) {
-      nx = 1;
-    }
-    if (ny < 1) {
-      ny = 1;
-    }
-    if (nz < 1) {
-      nz = 1;
-    }
-    while (nx * ny * nz > nAtoms) {
-      if (nx >= ny && nx >= nz) {
-        --nx;
-      } else if (ny >= nz) {
-        --ny;
-      } else {
-        --nz;
-      }
-      if (nx < 1) {
-        nx = 1;
-      }
-      if (ny < 1) {
-        ny = 1;
-      }
-      if (nz < 1) {
-        nz = 1;
-      }
-    }
-    ncell[static_cast<std::size_t>(f) * 3 + 0] = nx;
-    ncell[static_cast<std::size_t>(f) * 3 + 1] = ny;
-    ncell[static_cast<std::size_t>(f) * 3 + 2] = nz;
-  }
-}
-
 double msSince(std::chrono::steady_clock::time_point t0) {
   return std::chrono::duration<double, std::milli>(
              std::chrono::steady_clock::now() - t0)
@@ -875,16 +670,19 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
                             int nFrames, double rc) {
   BatchResult out;
   out.plan = planBatch(nAtoms, nFrames);
-#ifndef SEAMS_HAS_GPULITE
+#if !defined(SEAMS_HAS_GPULITE)
   out.error = "built without gpulite";
+  return out;
+#elif !defined(SEAMS_HAS_LINKCELL) || !defined(LINKCELL_HAS_GPULITE)
+  out.error = "linkcell device k-nearest not built";
   return out;
 #else
   if (!out.plan.resident) {
     out.error = out.plan.reason;
     return out;
   }
-  if (!NVRTC::loaded()) {
-    out.error = "nvrtc not loaded";
+  if (!NVRTC::loaded() || !linkcell::gpu::available()) {
+    out.error = "nvrtc or linkcell device path not loaded";
     return out;
   }
   try {
@@ -901,10 +699,7 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
 
     auto &ws = workspace();
     ws.ensure(nAtoms, out.plan.frames, kMax, maxPer);
-    std::vector<int> hNcell;
-    hostGrid(box, out.plan.frames, nAtoms, rc, hNcell);
     auto t0 = std::chrono::steady_clock::now();
-    checkCuda(rt.cudaMemset(ws.dcellCount.p, 0, nN * sizeof(int)), "zero cells");
     checkCuda(rt.cudaMemset(ws.dnRings.p, 0, nf * sizeof(int)), "zero nRings");
     checkCuda(rt.cudaMemset(ws.ddropped.p, 0, sizeof(int)), "zero dropped");
     checkCuda(rt.cudaMemset(ws.dthroughCount.p, 0, nN * sizeof(int)), "zero thru");
@@ -919,17 +714,10 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
     checkCuda(rt.cudaMemcpy(ws.dbox.p, box, boxN * sizeof(double),
                             cudaMemcpyHostToDevice),
               "HtoD box");
-    checkCuda(rt.cudaMemcpy(ws.dncell.p, hNcell.data(),
-                            nf * 3 * sizeof(int), cudaMemcpyHostToDevice),
-              "HtoD ncell");
     out.uploadMs = msSince(t0);
 
     auto &factory = KernelFactory::instance(0);
     const std::vector<std::string> opt{"-std=c++17"};
-    auto *kBin = factory.create("bin_atoms", kKernels, "batch.cu", opt);
-    auto *kPref = factory.create("prefix_cells", kKernels, "batch.cu", opt);
-    auto *kScat = factory.create("scatter_atoms", kKernels, "batch.cu", opt);
-    auto *kList = factory.create("nlist_cells", kKernels, "batch.cu", opt);
     auto *kMut = factory.create("mutual_knn", kKernels, "batch.cu", opt);
     auto *kQlm = factory.create("qlm_l3", kKernels, "batch.cu", opt);
     auto *kChill = factory.create("chill_from_qlm", kKernels, "batch.cu", opt);
@@ -945,7 +733,6 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
     const int grid = (nTot + block - 1) / block;
     const int ringTot = out.plan.frames * maxRings;
     const int ringGrid = (ringTot + block - 1) / block;
-    const double rc2 = rc * rc;
     t0 = std::chrono::steady_clock::now();
     int nA = nAtoms;
     int nF = out.plan.frames;
@@ -953,28 +740,20 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
     int mR = maxRings;
     int mP = maxPer;
     {
-      std::vector<void *> a = {&ws.dxyz.p, &ws.dbox.p, &ws.dncell.p, &nA, &nF,
-                               &ws.dcellOf.p, &ws.dcellCount.p};
-      kBin->launch(dim3(grid), dim3(block), 0, nullptr, a, true);
-    }
-    {
-      std::vector<void *> a = {&ws.dncell.p, &ws.dcellCount.p, &ws.dcellOff.p,
-                               &nA, &nF};
-      kPref->launch(dim3(nF < 1 ? 1 : nF), dim3(128),
-                    128 * sizeof(int), nullptr, a, true);
-    }
-    {
-      std::vector<void *> a = {&ws.dxyz.p, &ws.dcellOf.p, &ws.dcellCount.p,
-                               &ws.dcellOff.p, &ws.dorder.p, &ws.dsorted.p,
-                               &ws.dsortedCell.p, &nA, &nF};
-      kScat->launch(dim3(grid), dim3(block), 0, nullptr, a, true);
-    }
-    {
-      std::vector<void *> a = {&ws.dsorted.p, &ws.dbox.p, &ws.dncell.p,
-                               &ws.dcellOff.p, &ws.dorder.p, &ws.dsortedCell.p,
-                               &nA, &nF, (void *)&rc2, &kM, &ws.ddeg.p,
-                               &ws.dcols.p};
-      kList->launch(dim3(grid), dim3(block), 0, nullptr, a, true);
+      static linkcell::gpu::Workspace knn;
+      auto *xyzDev = static_cast<double *>(ws.dxyz.p);
+      auto *colsDev = static_cast<int *>(ws.dcols.p);
+      const std::size_t kSz = static_cast<std::size_t>(kMax);
+      const std::size_t nSz = static_cast<std::size_t>(nAtoms);
+      for (int f = 0; f < nF; ++f) {
+        const linkcell::Cell cell = linkcell::Cell::ortho(
+            box[static_cast<std::size_t>(f) * 3 + 0],
+            box[static_cast<std::size_t>(f) * 3 + 1],
+            box[static_cast<std::size_t>(f) * 3 + 2]);
+        knn.knearest_into(xyzDev + static_cast<std::size_t>(f) * nSz * 3, nSz,
+                          cell, kSz, colsDev + static_cast<std::size_t>(f) * nSz * kSz,
+                          nSz * kSz, nullptr, rc);
+      }
     }
     {
       std::vector<void *> a = {&ws.ddeg.p, &ws.dcols.p, &nA, &nF, &kM,

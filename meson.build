@@ -156,8 +156,13 @@ if vesin_dep.found()
   _args += ['-DSEAMS_HAS_VESIN=1']
 endif
 
+_linkcell_opts = []
+if gpulite_dep.found() and not gpulite_opt.disabled()
+  _linkcell_opts += ['with_gpulite=enabled']
+endif
 linkcell_dep = dependency('linkcell', required: false,
-                          fallback: ['linkcell', 'linkcell_dep'])
+                          fallback: ['linkcell', 'linkcell_dep'],
+                          default_options: _linkcell_opts)
 if linkcell_dep.found()
   _deps += [linkcell_dep]
   _args += ['-DSEAMS_HAS_LINKCELL=1']
