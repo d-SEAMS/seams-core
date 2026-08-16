@@ -1,0 +1,133 @@
+===============
+Release process
+===============
+
+
+This is the maintainer cut. ``.github/workflows/release.yml`` only
+runs ``gh release create`` when a ``v*`` tag is pushed. Versions,
+newsfragments, bindings wraps, and the Zenodo pin are not
+automated.
+
+d-SEAMS is three packages:
+
+.. table::
+
+    +---------------------------------------------------------+------------------------------+
+    | repo                                                    | product                      |
+    +=========================================================+==============================+
+    | `seams-core <https://github.com/d-SEAMS/seams-core>`_   | ``libyodaLib`` and ``seams`` |
+    +---------------------------------------------------------+------------------------------+
+    | `PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_ | ``pydseams``                 |
+    +---------------------------------------------------------+------------------------------+
+    | `yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_   | ``dseams`` Lua/Fennel        |
+    +---------------------------------------------------------+------------------------------+
+
+Bindings do not live in seams-core. ``-Dwith_python=true`` and
+``-Dwith_lua=enabled`` are Meson errors that name those repositories.
+Do not add a language binding here. Do not resurrect
+``yodaStruct -c`` or ``conf.yaml``.
+
+Checklist
+---------
+
+1. Feature work is on ``main``, or on a native GitHub stack that
+   lands on ``main``.
+
+2. CI is green on the merge commit (``CI`` and ``Docs``).
+
+3. Collect newsfragments under ``docs/newsfragments/`` that are
+   **not** already in ``CHANGELOG.rst``. Fragments whose text is
+   already in that file reprint those notes if they stay in the
+   directory.
+   Then:
+
+   .. code:: bash
+
+       towncrier build --version X.Y.Z
+
+   That writes ``CHANGELOG.rst`` and removes the consumed fragments.
+
+4. Bump ``pixi.toml``, ``meson.build``, ``CITATION.cff``, and
+   ``towncrier.toml`` together. Set ``towncrier.toml`` ``version`` to
+   ``X.Y.Z`` so a build without ``--version`` does not write the
+   wrong header. Sync
+   ``docs/orgmode/changelog.org`` with the new ``CHANGELOG.rst``
+   section. ``nix/package.nix`` and
+   ``docs/source/Doxyfile_seams.cfg`` ``PROJECT_NUMBER`` also carry a
+   version string; do not leave them behind the cut.
+
+5. Export org docs with ``pixi run -e docs docbld`` (same command
+   as the contributing page and ``ci_docs.yml``). Org under
+   ``docs/orgmode/`` is the source. RST under ``docs/source/`` is
+   generated and is not committed.
+
+6. Open a ``chore: cut X.Y.Z`` pull request. Merge when CI is
+   green.
+
+7. Tag ``vX.Y.Z`` on ``d-SEAMS/seams-core`` and push the tag.
+   ``release.yml`` mints the GitHub release
+   (``gh release create --generate-notes``).
+
+8. Point PydSEAMSlib and yodaStruct
+   ``subprojects/seams-core.wrap`` ``revision`` at that tag. Bump
+   those package versions to the same ``X.Y.Z`` when the wrap is
+   the only change. Tag those repositories on their own schedule.
+
+9. Zenodo: run ``repro/stage_zenodo.sh`` and pin the software in
+   that record to the release tag, never a commit. Do not mint a
+   new DOI version for prose. See ``repro/zenodo/README.md``.
+
+10. GitHub native stacked PRs are same-repo only. Use
+    ``gh stack link`` to attach PRs and ``gh stack merge`` to land
+    them. Cross-fork stacks are not supported. Merge-top lands
+    the whole stack. Use ``gh stack merge`` (async stack merge),
+    not a lone ``gh pr merge`` of a mid-stack PR, if the stack
+    object is to stay intact.
+
+Version files
+-------------
+
+seams-core cut:
+
+.. table::
+
+    +------------------------------------+------------------------------------+
+    | file                               | field                              |
+    +====================================+====================================+
+    | ``meson.build``                    | ``project(..., version:)``         |
+    +------------------------------------+------------------------------------+
+    | ``pixi.toml``                      | ``[workspace] version``            |
+    +------------------------------------+------------------------------------+
+    | ``CITATION.cff``                   | ``version``                        |
+    +------------------------------------+------------------------------------+
+    | ``towncrier.toml``                 | ``[tool.towncrier] version``       |
+    +------------------------------------+------------------------------------+
+    | ``docs/orgmode/changelog.org``     | new section from ``CHANGELOG.rst`` |
+    +------------------------------------+------------------------------------+
+    | ``nix/package.nix``                | ``version``                        |
+    +------------------------------------+------------------------------------+
+    | ``docs/source/Doxyfile_seams.cfg`` | ``PROJECT_NUMBER``                 |
+    +------------------------------------+------------------------------------+
+
+Front ends, after the engine tag exists:
+
+.. table::
+
+    +-------------------------------------------------------------------+-----------------------+
+    | file                                                              | field                 |
+    +===================================================================+=======================+
+    | ``subprojects/seams-core.wrap``                                   | ``revision = vX.Y.Z`` |
+    +-------------------------------------------------------------------+-----------------------+
+    | PydSEAMSlib ``pyproject.toml``, ``meson.build``, ``CITATION.cff`` | package version       |
+    +-------------------------------------------------------------------+-----------------------+
+    | yodaStruct ``meson.build``, ``CITATION.cff``                      | package version       |
+    +-------------------------------------------------------------------+-----------------------+
+
+Newsfragments
+-------------
+
+One file per user-visible change, under ``docs/newsfragments/``,
+named ``<slug>.<type>`` (``feature``, ``bugfix``, ...). Write the
+fragment in the same pull request as the change. The cut in step
+3 consumes only fragments that are not already reflected in
+``CHANGELOG.rst``.

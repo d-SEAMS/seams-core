@@ -2,8 +2,8 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Contributing - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Release process" href="release.html" /><link rel="prev" title="Changelog" href="../changelog.html" />
-      <link rel="canonical" href="https://docs.dseams.info/contributing/" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Release process - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="prev" title="Contributing" href="index.html" />
+      <link rel="canonical" href="https://docs.dseams.info/contributing/release.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
@@ -23,8 +23,8 @@
 }
 </style>
     <meta property="og:type" content="website"/>
-  <meta property="og:url" content="https://docs.dseams.info/contributing/"/>
-  <meta property="og:title" content="Contributing"/>
+  <meta property="og:url" content="https://docs.dseams.info/contributing/release.html"/>
+  <meta property="og:title" content="Release process"/>
     <meta name="twitter:card" content="summary"/>
   <!-- Antics analytics -->
 <script defer src="https://antics-api.turtletech.us/antics.js"></script>
@@ -126,8 +126,8 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="release.html">Release process</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Contributing</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Release process</a></li>
 </ul>
 </li>
 </ul>
@@ -141,13 +141,9 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
-<li><a class="reference internal" href="#clone-and-build">Clone and build</a></li>
-<li><a class="reference internal" href="#project-structure">Project structure</a></li>
-<li><a class="reference internal" href="#core-concepts">Core concepts</a></li>
-<li><a class="reference internal" href="#tests">Tests</a></li>
-<li><a class="reference internal" href="#style">Style</a></li>
-<li><a class="reference internal" href="#releases">Releases</a></li>
+<li><a class="reference internal" href="#checklist">Checklist</a></li>
+<li><a class="reference internal" href="#version-files">Version files</a></li>
+<li><a class="reference internal" href="#newsfragments">Newsfragments</a></li>
 </ul>
 </div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
   data-type="github" data-user="d-SEAMS" data-repo="seams-core">
@@ -171,7 +167,7 @@ data-aria-dark="Switch to auto color mode">
     </span>
   </span>
 </a><div class="edit-this-page">
-  <a href="https://github.com/d-SEAMS/seams-core/blob/main/docs/source/contributing/index.rst">Edit this page</a>
+  <a href="https://github.com/d-SEAMS/seams-core/blob/main/docs/source/contributing/release.rst">Edit this page</a>
 </div></div>
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
@@ -188,8 +184,12 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">Contributing</strong>
+        <a itemprop="item" href="index.html"><span itemprop="name">Contributing</span></a>
+        <span>/</span>
         <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Release process</strong>
+        <meta itemprop="position" content="3" />
       </li></ol>
     <div class="xl:hidden ml-1">
       <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
@@ -205,7 +205,7 @@ data-aria-dark="Switch to auto color mode">
     <button
       type="button"
       class="js-copy px-3 py-1 inline-flex items-center gap-1"
-      data-url="https://docs.dseams.info/_sources/contributing/index.rst.txt"
+      data-url="https://docs.dseams.info/_sources/contributing/release.rst.txt"
     >
       <i class="i-lucide" data-icon="copy"></i>
       <span>Copy page</span>
@@ -219,153 +219,166 @@ data-aria-dark="Switch to auto color mode">
     <div role="presentation">
       <div class="flex flex-col" role="group">
         <button class="js-copy" type="button" role="menuitem"
-          data-url="https://docs.dseams.info/_sources/contributing/index.rst.txt">
+          data-url="https://docs.dseams.info/_sources/contributing/release.rst.txt">
           <span class="iconify-icon">
             <i class="i-lucide" data-icon="copy"></i>
           </span>
           <span>Copy page</span>
         </button>
-        <a role="menuitem" href="https://docs.dseams.info/_sources/contributing/index.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
-            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20https%3A//docs.dseams.info/_sources/contributing/index.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+        <a role="menuitem" href="https://docs.dseams.info/_sources/contributing/release.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
+            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20https%3A//docs.dseams.info/_sources/contributing/release.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
           <iconify-icon icon="bi:openai"></iconify-icon>
           <span>Open in ChatGPT</span>
-        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20https%3A//docs.dseams.info/_sources/contributing/index.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20https%3A//docs.dseams.info/_sources/contributing/release.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
           <iconify-icon icon="bi:claude"></iconify-icon>
           <span>Open in Claude</span>
         </a></div>
     </div>
   </div>
 </div><article class="yue dark-code" role="main">
-          <section id="contributing">
-<h1>Contributing<a class="headerlink" href="#contributing" title="Link to this heading">¶</a></h1>
-<p>This repository is the C++ engine (<code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code>) and the <code class="docutils literal notranslate"><span class="pre">seams</span></code> CLI.
-Python bindings are <a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib">PydSEAMSlib</a>.
-Lua/Fennel is <a class="reference external" href="https://github.com/d-SEAMS/yodaStruct">yodaStruct</a>.
-Do not add a language binding here.</p>
-<p>Documentation is authored in <code class="docutils literal notranslate"><span class="pre">docs/orgmode/</span></code> and exported with
-<code class="docutils literal notranslate"><span class="pre">docs/export.el</span></code> (ox-rst) before Sphinx. Run <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">-e</span> <span class="pre">docs</span> <span class="pre">docbld</span></code>
-to export, run doxyrest, and build the Shibuya site.</p>
-<section id="prerequisites">
-<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
-<p>Two supported compiler shells:</p>
-<ul class="simple">
-<li><p><a class="reference external" href="https://pixi.sh">pixi</a> (locked conda-forge toolchain)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nix</span> <span class="pre">develop</span></code> (flake inputs: compiler, Eigen, BLAS, Catch2, gdb)</p></li>
-</ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">curl<span class="w"> </span>-fsSL<span class="w"> </span>https://pixi.sh/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>bash
+          <section id="release-process">
+<h1>Release process<a class="headerlink" href="#release-process" title="Link to this heading">¶</a></h1>
+<p>This is the maintainer cut. <code class="docutils literal notranslate"><span class="pre">.github/workflows/release.yml</span></code> only
+runs <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">release</span> <span class="pre">create</span></code> when a <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag is pushed. Versions,
+newsfragments, bindings wraps, and the Zenodo pin are not
+automated.</p>
+<p>d-SEAMS is three packages:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>repo</p></th>
+<th class="head"><p>product</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/d-SEAMS/seams-core">seams-core</a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code> and <code class="docutils literal notranslate"><span class="pre">seams</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib">PydSEAMSlib</a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pydseams</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/d-SEAMS/yodaStruct">yodaStruct</a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">dseams</span></code> Lua/Fennel</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Bindings do not live in seams-core. <code class="docutils literal notranslate"><span class="pre">-Dwith_python=true</span></code> and
+<code class="docutils literal notranslate"><span class="pre">-Dwith_lua=enabled</span></code> are Meson errors that name those repositories.
+Do not add a language binding here. Do not resurrect
+<code class="docutils literal notranslate"><span class="pre">yodaStruct</span> <span class="pre">-c</span></code> or <code class="docutils literal notranslate"><span class="pre">conf.yaml</span></code>.</p>
+<section id="checklist">
+<h2>Checklist<a class="headerlink" href="#checklist" title="Link to this heading">¶</a></h2>
+<ol class="arabic">
+<li><p>Feature work is on <code class="docutils literal notranslate"><span class="pre">main</span></code>, or on a native GitHub stack that
+lands on <code class="docutils literal notranslate"><span class="pre">main</span></code>.</p></li>
+<li><p>CI is green on the merge commit (<code class="docutils literal notranslate"><span class="pre">CI</span></code> and <code class="docutils literal notranslate"><span class="pre">Docs</span></code>).</p></li>
+<li><p>Collect newsfragments under <code class="docutils literal notranslate"><span class="pre">docs/newsfragments/</span></code> that are
+<strong>not</strong> already in <code class="docutils literal notranslate"><span class="pre">CHANGELOG.rst</span></code>. Fragments whose text is
+already in that file reprint those notes if they stay in the
+directory.
+Then:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">towncrier<span class="w"> </span>build<span class="w"> </span>--version<span class="w"> </span>X.Y.Z
 </span></pre></div>
 </div>
-<p>pixi provides a compiler, Eigen, BLAS/LAPACK, Catch2, Meson, Ninja,
-Highway and chemfiles. Optional pixi features add IRA, sphericart,
-nauty, MPI, the docs stack, and the Coq/SymPy proofs.</p>
-<p><code class="docutils literal notranslate"><span class="pre">-Dwith_python=true</span></code> and <code class="docutils literal notranslate"><span class="pre">-Dwith_lua=enabled</span></code> are Meson errors that
-name the front-end repositories.</p>
+<p>That writes <code class="docutils literal notranslate"><span class="pre">CHANGELOG.rst</span></code> and removes the consumed fragments.</p>
+</li>
+<li><p>Bump <code class="docutils literal notranslate"><span class="pre">pixi.toml</span></code>, <code class="docutils literal notranslate"><span class="pre">meson.build</span></code>, <code class="docutils literal notranslate"><span class="pre">CITATION.cff</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">towncrier.toml</span></code> together. Set <code class="docutils literal notranslate"><span class="pre">towncrier.toml</span></code> <code class="docutils literal notranslate"><span class="pre">version</span></code> to
+<code class="docutils literal notranslate"><span class="pre">X.Y.Z</span></code> so a build without <code class="docutils literal notranslate"><span class="pre">--version</span></code> does not write the
+wrong header. Sync
+<code class="docutils literal notranslate"><span class="pre">docs/orgmode/changelog.org</span></code> with the new <code class="docutils literal notranslate"><span class="pre">CHANGELOG.rst</span></code>
+section. <code class="docutils literal notranslate"><span class="pre">nix/package.nix</span></code> and
+<code class="docutils literal notranslate"><span class="pre">docs/source/Doxyfile_seams.cfg</span></code> <code class="docutils literal notranslate"><span class="pre">PROJECT_NUMBER</span></code> also carry a
+version string; do not leave them behind the cut.</p></li>
+<li><p>Export org docs with <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">-e</span> <span class="pre">docs</span> <span class="pre">docbld</span></code> (same command
+as the contributing page and <code class="docutils literal notranslate"><span class="pre">ci_docs.yml</span></code>). Org under
+<code class="docutils literal notranslate"><span class="pre">docs/orgmode/</span></code> is the source. RST under <code class="docutils literal notranslate"><span class="pre">docs/source/</span></code> is
+generated and is not committed.</p></li>
+<li><p>Open a <code class="docutils literal notranslate"><span class="pre">chore:</span> <span class="pre">cut</span> <span class="pre">X.Y.Z</span></code> pull request. Merge when CI is
+green.</p></li>
+<li><p>Tag <code class="docutils literal notranslate"><span class="pre">vX.Y.Z</span></code> on <code class="docutils literal notranslate"><span class="pre">d-SEAMS/seams-core</span></code> and push the tag.
+<code class="docutils literal notranslate"><span class="pre">release.yml</span></code> mints the GitHub release
+(<code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">release</span> <span class="pre">create</span> <span class="pre">--generate-notes</span></code>).</p></li>
+<li><p>Point PydSEAMSlib and yodaStruct
+<code class="docutils literal notranslate"><span class="pre">subprojects/seams-core.wrap</span></code> <code class="docutils literal notranslate"><span class="pre">revision</span></code> at that tag. Bump
+those package versions to the same <code class="docutils literal notranslate"><span class="pre">X.Y.Z</span></code> when the wrap is
+the only change. Tag those repositories on their own schedule.</p></li>
+<li><p>Zenodo: run <code class="docutils literal notranslate"><span class="pre">repro/stage_zenodo.sh</span></code> and pin the software in
+that record to the release tag, never a commit. Do not mint a
+new DOI version for prose. See <code class="docutils literal notranslate"><span class="pre">repro/zenodo/README.md</span></code>.</p></li>
+<li><p>GitHub native stacked PRs are same-repo only. Use
+<code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">stack</span> <span class="pre">link</span></code> to attach PRs and <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">stack</span> <span class="pre">merge</span></code> to land
+them. Cross-fork stacks are not supported. Merge-top lands
+the whole stack. Use <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">stack</span> <span class="pre">merge</span></code> (async stack merge),
+not a lone <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">pr</span> <span class="pre">merge</span></code> of a mid-stack PR, if the stack
+object is to stay intact.</p></li>
+</ol>
 </section>
-<section id="clone-and-build">
-<h2>Clone and build<a class="headerlink" href="#clone-and-build" title="Link to this heading">¶</a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">git<span class="w"> </span>clone<span class="w"> </span>https://github.com/d-SEAMS/seams-core.git
-</span><span data-line="2"><span class="nb">cd</span><span class="w"> </span>seams-core
-</span></pre></div>
+<section id="version-files">
+<h2>Version files<a class="headerlink" href="#version-files" title="Link to this heading">¶</a></h2>
+<p>seams-core cut:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>file</p></th>
+<th class="head"><p>field</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">meson.build</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">project(...,</span> <span class="pre">version:)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pixi.toml</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[workspace]</span> <span class="pre">version</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CITATION.cff</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">version</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">towncrier.toml</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[tool.towncrier]</span> <span class="pre">version</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">docs/orgmode/changelog.org</span></code></p></td>
+<td><p>new section from <code class="docutils literal notranslate"><span class="pre">CHANGELOG.rst</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nix/package.nix</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">version</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">docs/source/Doxyfile_seams.cfg</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">PROJECT_NUMBER</span></code></p></td>
+</tr>
+</tbody>
+</table>
 </div>
-<p>pixi:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">pixi<span class="w"> </span>run<span class="w"> </span>setup
-</span><span data-line="2">pixi<span class="w"> </span>run<span class="w"> </span>build
-</span><span data-line="3">pixi<span class="w"> </span>run<span class="w"> </span><span class="nb">test</span>
-</span></pre></div>
+<p>Front ends, after the engine tag exists:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>file</p></th>
+<th class="head"><p>field</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">subprojects/seams-core.wrap</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">revision</span> <span class="pre">=</span> <span class="pre">vX.Y.Z</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>PydSEAMSlib <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>, <code class="docutils literal notranslate"><span class="pre">meson.build</span></code>, <code class="docutils literal notranslate"><span class="pre">CITATION.cff</span></code></p></td>
+<td><p>package version</p></td>
+</tr>
+<tr class="row-even"><td><p>yodaStruct <code class="docutils literal notranslate"><span class="pre">meson.build</span></code>, <code class="docutils literal notranslate"><span class="pre">CITATION.cff</span></code></p></td>
+<td><p>package version</p></td>
+</tr>
+</tbody>
+</table>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">setup</span></code> configures <code class="docutils literal notranslate"><span class="pre">bbdir/</span></code> with tests and the <code class="docutils literal notranslate"><span class="pre">seams</span></code> CLI
-(<code class="docutils literal notranslate"><span class="pre">-Dwith_tests=true</span> <span class="pre">-Dwith_python=false</span></code>). <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">build</span></code> compiles
-<code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code> and <code class="docutils literal notranslate"><span class="pre">seams</span></code>. <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">test</span></code> runs the Catch2 suite.</p>
-<p>Nix:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">nix<span class="w"> </span>develop
-</span><span data-line="2">meson<span class="w"> </span>setup<span class="w"> </span>bbdir<span class="w"> </span>-Dwith_tests<span class="o">=</span><span class="nb">true</span>
-</span><span data-line="3">meson<span class="w"> </span>compile<span class="w"> </span>-C<span class="w"> </span>bbdir
-</span><span data-line="4">meson<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-C<span class="w"> </span>bbdir
-</span><span data-line="5">./bbdir/seams<span class="w"> </span><span class="nb">read</span><span class="w"> </span>input/traj/exampleTraj.lammpstrj
-</span></pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">nix</span> <span class="pre">build</span></code> is the same package plus the install check.</p>
 </section>
-<section id="project-structure">
-<h2>Project structure<a class="headerlink" href="#project-structure" title="Link to this heading">¶</a></h2>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams-core/
-</span><span data-line="2">  src/                   C++ engine
-</span><span data-line="3">    seams_cli.cpp        seams (Argum)
-</span><span data-line="4">    include/internal/    engine headers
-</span><span data-line="5">    include/external/    vendored headers (argum, backward, ...)
-</span><span data-line="6">    mol_sys.cpp          PointCloud
-</span><span data-line="7">    neighbours.cpp       cutoff / knn / knn-union lists
-</span><span data-line="8">    bond.cpp             hydrogen bonds
-</span><span data-line="9">    bop.cpp              CHILL / CHILL+
-</span><span data-line="10">    ring.cpp             ring classification
-</span><span data-line="11">    franzblau.cpp        Franzblau shortest-path rings
-</span><span data-line="12">    cage_affiliation.cpp HC / DDC ice score
-</span><span data-line="13">    bulkTUM.cpp          topological unit matching
-</span><span data-line="14">    topo_one_dim.cpp     nanotubes
-</span><span data-line="15">    topo_two_dim.cpp     sheets
-</span><span data-line="16">  tests/                 Catch2 binaries
-</span><span data-line="17">  input/traj/            example LAMMPS dumps
-</span><span data-line="18">  input/xyz/             fixtures
-</span><span data-line="19">  input/con/             eOn .con fixture
-</span><span data-line="20">  meson.build            Meson project
-</span><span data-line="21">  meson_options.txt      with_tests, with_cli, optional backends
-</span><span data-line="22">  flake.nix              nix build / nix develop
-</span><span data-line="23">  pixi.toml              pixi workspace
-</span></pre></div>
-</div>
-</section>
-<section id="core-concepts">
-<h2>Core concepts<a class="headerlink" href="#core-concepts" title="Link to this heading">¶</a></h2>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">PointCloud</span></code></dt><dd><p>Atom positions, types, box, and per-atom ice labels.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">neighListO</span></code> / <code class="docutils literal notranslate"><span class="pre">kNearestNeighbourList</span></code></dt><dd><p>Cutoff and k-nearest
-graphs. <code class="docutils literal notranslate"><span class="pre">bondGraphFromName</span></code> accepts <code class="docutils literal notranslate"><span class="pre">cutoff</span></code>, <code class="docutils literal notranslate"><span class="pre">knn</span></code>, <code class="docutils literal notranslate"><span class="pre">knn-union</span></code>.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">populateHbonds</span></code></dt><dd><p>Geometric hydrogen bonds. Needs hydrogens
-(re-read from a dump, or an explicit H cloud). Water keeps the
-two-hydrogen <code class="docutils literal notranslate"><span class="pre">hAtomMolList</span></code> set. <code class="docutils literal notranslate"><span class="pre">populateHbondsFromDonors</span></code>
-takes an explicit <code class="docutils literal notranslate"><span class="pre">hCloud</span></code> index list.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">getCorrelPlus</span></code> / <code class="docutils literal notranslate"><span class="pre">getIceTypePlus</span></code></dt><dd><p>CHILL+. Four-neighbour
-<code class="docutils literal notranslate"><span class="pre">c_ij</span></code>, then cubic / hexagonal / interfacial / clathrate / water.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">cageAffiliation</span></code> / <code class="docutils literal notranslate"><span class="pre">seededCageAffiliation</span></code></dt><dd><p>Ice score on
-six-rings. HC = Ih, DDC = Ic, neither = water. Not the CHILL+ star.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">ringNetwork</span></code></dt><dd><p>Franzblau primitive rings up to a depth.</p>
-</dd>
-</dl>
-</section>
-<section id="tests">
-<h2>Tests<a class="headerlink" href="#tests" title="Link to this heading">¶</a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">pixi<span class="w"> </span>run<span class="w"> </span><span class="nb">test</span>
-</span><span data-line="2">nix<span class="w"> </span>develop<span class="w"> </span>--command<span class="w"> </span>meson<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-C<span class="w"> </span>bbdir
-</span></pre></div>
-</div>
-<p>C++ tests are Catch2. Python tests live in
-<a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib">PydSEAMSlib</a>.</p>
-<p>Optional pixi environments: <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">-e</span> <span class="pre">ira</span> <span class="pre">...</span></code>, <code class="docutils literal notranslate"><span class="pre">sphericart</span></code>,
-<code class="docutils literal notranslate"><span class="pre">nauty</span></code>, <code class="docutils literal notranslate"><span class="pre">mpi</span></code>, <code class="docutils literal notranslate"><span class="pre">docs</span></code>, <code class="docutils literal notranslate"><span class="pre">formalanalysis</span></code>, <code class="docutils literal notranslate"><span class="pre">repro</span></code>.</p>
-</section>
-<section id="style">
-<h2>Style<a class="headerlink" href="#style" title="Link to this heading">¶</a></h2>
-<p>Install the clang-format hook:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">./scripts/git-pre-commit-format<span class="w"> </span>install
-</span></pre></div>
-</div>
-<p>Commit subjects follow <code class="docutils literal notranslate"><span class="pre">fileName:</span> <span class="pre">description</span> <span class="pre">of</span> <span class="pre">change</span></code>. See
-<code class="docutils literal notranslate"><span class="pre">CONTRIBUTING.md</span></code> in the repository root.</p>
-</section>
-<section id="releases">
-<h2>Releases<a class="headerlink" href="#releases" title="Link to this heading">¶</a></h2>
-<p>The three-repo cut (<code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code> / <code class="docutils literal notranslate"><span class="pre">seams</span></code>, then the PydSEAMSlib
-and yodaStruct wraps) is <a class="reference external" href="release.rst">Release process</a>.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="release.html">Release process</a></li>
-</ul>
-</div>
+<section id="newsfragments">
+<h2>Newsfragments<a class="headerlink" href="#newsfragments" title="Link to this heading">¶</a></h2>
+<p>One file per user-visible change, under <code class="docutils literal notranslate"><span class="pre">docs/newsfragments/</span></code>,
+named <code class="docutils literal notranslate"><span class="pre">&lt;slug&gt;.&lt;type&gt;</span></code> (<code class="docutils literal notranslate"><span class="pre">feature</span></code>, <code class="docutils literal notranslate"><span class="pre">bugfix</span></code>, …). Write the
+fragment in the same pull request as the change. The cut in step
+3 consumes only fragments that are not already reflected in
+<code class="docutils literal notranslate"><span class="pre">CHANGELOG.rst</span></code>.</p>
 </section>
 </section>
 
@@ -375,18 +388,10 @@ and yodaStruct wraps) is <a class="reference external" href="release.rst">Releas
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="../changelog.html">
+    <a href="index.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">Changelog</div></div>
-    </a>
-  </div><div class="navigation-next">
-    <a href="release.html">
-      <div class="page-info">
-        <span>Next</span>
-        <div class="title">Release process</div>
-      </div>
-      <i class="i-lucide chevron-right"></i>
+        <span>Previous</span><div class="title">Contributing</div></div>
     </a>
   </div></div></div>
     </div>
