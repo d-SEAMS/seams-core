@@ -16,6 +16,7 @@ seams cages FILE
 seams rdf FILE
 seams cn FILE
 seams pairs FILE
+seams density-z FILE
 #+end_src
 
 A positional ~command~ and a positional ~file~ are required. Missing
@@ -24,8 +25,8 @@ either, an unknown command, or a parse error exits 2.
 * Commands
 
 The ~command~ positional help string is ~read | chill | chill-plus |
-cages | rdf | cn | pairs~. ~chill_plus~ is an accepted alias of ~chill-plus~
-(not listed in that help string).
+cages | rdf | cn | pairs | density-z~. ~chill_plus~ is an accepted
+alias of ~chill-plus~ (not listed in that help string).
 
 | command | action | stdout |
 |---------+--------+--------|
@@ -37,6 +38,7 @@ cages | rdf | cn | pairs~. ~chill_plus~ is an accepted alias of ~chill-plus~
 | ~cn~ | site-site neighbour-list degree | ~site-site types I J cutoff R degree D nI N~ |
 | ~cn --ions --site~ | cage degree on ~ionCloud~ | ~cage ionCloud types 1 2 cutoff R degree D nCation N nAnion M~ |
 | ~pairs --site~ | mutual-nearest contact pairs | ~contact-pair count N nCation C nAnion A~ |
+| ~density-z~ | type-resolved \(\rho\) along one axis | ~# z rho~ then one ~z rho~ row per bin |
 
 ~chill~ / ~chill-plus~ call ~nneigh::neighListO~, then
 ~chill::getCorrel~ / ~chill::getIceTypeNoPrint~ or
@@ -66,6 +68,13 @@ unlike degree of type-1 (cation) vertices from
 ~nneigh::mutualNearestUnlike(ions, 1, 2)~. That line contains
 ~contact-pair~, not ionicity. Both need ~--site~.
 
+~density-z~ calls ~site::densityZ~. ~--type 0~ (default) keeps
+every atom; ~--type I~ keeps that LAMMPS type. ~--axis~ is ~x~,
+~y~, or ~z~ (default ~z~). ~--bins~ defaults to the bound span
+over \(0.1\). Each slab volume is \(A_\perp \times dz\), with
+\(A_\perp\) from dump H (recovered ~lx, ly, lz~, not bound
+spans). This is not an ice score.
+
 ~chill~, ~chill-plus~, and ~cages~ call ~site::iceScoreAllowed~.
 When ~--family~ is not ~waterIce~ they print ~site::refuseIceScore~
 (the message names the family) and exit 2. They do not fall through
@@ -77,6 +86,7 @@ still exits 0.
 An empty cloud (~nop 0~) still prints. ~chill~ / ~chill-plus~ print
 ~nop 0~. ~cages~ prints ~nop 0 graph KIND hexagonal 0 cubic 0
 water 0~. ~rdf~ prints the comment header and zero-count bins.
+~density-z~ prints ~# z rho~ and zero-density bins.
 
 * Options
 
@@ -92,13 +102,14 @@ initializers (Argum does not write defaults into the help).
 | ~-f~, ~--frame N~ | ~1~ | ~First frame (1-based)~ |
 | ~--last N~ | omitted (~0~) | ~Last frame (inclusive). Omit for a single --frame~ |
 | ~-j~, ~--jobs N~ | ~1~ | ~Parallel frame workers (OpenMP). 1 is serial~ |
-| ~-t~, ~--type I~ | ~0~ | ~Atom type (0 guesses oxygen then type 1)~ |
+| ~-t~, ~--type I~ | ~0~ | ~Atom type (0 guesses oxygen then type 1; density-z: 0 is every atom)~ |
 | ~--types I,J~ | ~I = J = --type~ | ~Pair types for rdf/cn (default I=J=--type)~ |
 | ~--family NAME~ | ~waterIce~ | Material family. Ice scores refuse every value except ~waterIce~ |
 | ~--site SPEC~ | | Type-to-kind map for ~ionCloud~ (~1=cationHead,2=anion~) |
 | ~--ions~ | | ~cn~ on ~ionCloud~ cage degree (needs ~--site~) |
 | ~-c~, ~--cutoff ANGSTROM~ | ~3.5~ | ~Neighbour cutoff (rdf rmax)~ |
-| ~--bins N~ | ~rmax / 0.1~ | ~RDF histogram bins (default rmax/0.1)~ |
+| ~--bins N~ | ~rmax / 0.1~ or ~L / 0.1~ | ~Histogram bins (rdf: rmax/0.1; density-z: bound span / 0.1)~ |
+| ~--axis XYZ~ | ~z~ | ~Histogram axis for density-z (x, y, or z)~ |
 | ~-k N~ | ~4~ | ~k for knn / seeded cages~ |
 | ~--graph KIND~ | ~seeded~ | ~Bond graph for cages: cutoff \| knn \| knn-union \| seeded~ |
 | ~--config FILE~ | ~SEAMS_CONFIG~ or ~./seams.env~ | Dotenv of ~SEAMS_*~ / ~LINKCELL_*~ knobs. Env wins over the file |
@@ -130,6 +141,7 @@ XYZ always stores type 1. Classification still uses ~--type~ after
 the read (type 0 then becomes 1).
 
 A mixed-type dump that is not the water guess needs ~--type I~.
+~density-z~ treats ~0~ as every atom, not the oxygen guess.
 See [[file:../howto/ionic-liquid.org][Ionic-liquid dumps]].
 
 * ~--types~
@@ -152,7 +164,8 @@ sides to ~--type~.
 ~seams read~ prints ~gen::formatDumpBox~: the three bound spans,
 then ~xy xz yz~ when ~box.size() >= 6~. There is no separate tilt
 flag. ~seams rdf~ uses the same dump H (~gen::periodicDist~ and
-~nneigh::dumpVolume~). The in-plane sampler remains
+~nneigh::dumpVolume~). ~seams density-z~ uses recovered ~lx, ly,
+lz~ for \(A_\perp\), not bound spans. The in-plane sampler remains
 ~rdf2::sampleRDF_AA~; see
 [[file:../howto/sheared-cells.org][Sheared cells]].
 

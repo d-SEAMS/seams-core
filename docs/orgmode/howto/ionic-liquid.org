@@ -3,7 +3,8 @@
 
 A multi-type dump is not an ice frame. Keep CHILL and cages on
 one species with ~--type I~. Use ~seams rdf~ for a partial
-g_IJ(r) under the dump minimum image.
+g_IJ(r) under the dump minimum image. Use ~seams density-z~
+for a type-resolved \(\rho(z)\) in a slit.
 
 * Pick one type
 
@@ -66,6 +67,47 @@ ion's nearest unlike neighbour and the MIC distance.
 are contact pairs. They are not first-shell membership and
 not a coordination number.
 
+* Polar and apolar domains
+
+~seams domains FILE --site '1=cationHead,2=anion,3=tail' --subset
+polar~ (~apolar~) builds the mask from ~site::indicesOf~ and walks
+Stoddard's clusters on that subset. It does not run CHILL or
+~q_6~. Neighbours are the dump-MIC cutoff list (~--cutoff~).
+Stdout is ~subset polar n N largest L P P_inf~ with
+~P_inf = L / N~. Missing ~--site~ exits 2. ~--family~ still only
+gates ice scores.
+
+* Confined layers
+
+A slit or slab dump needs type-resolved \(\rho(z)\), not bulk CHILL.
+
+#+begin_src bash
+seams density-z FILE
+seams density-z FILE --type 1 --bins 80
+seams density-z FILE --type 2 --axis z
+#+end_src
+
+~--type 0~ (default) histograms every atom. ~--type I~ keeps one
+LAMMPS type. ~--axis~ is the Cartesian coordinate (~x~, ~y~, or
+~z~; default ~z~). ~--bins~ is optional (default the bound span
+over \(0.1\)).
+
+Stdout is ~# z rho~ then one row per bin. The slice volume is
+\(A_\perp \times dz\). \(A_\perp\) comes from dump H (~ly*lz~
+for ~x~, ~lx*lz~ for ~y~, ~lx*ly~ for ~z~) using the recovered
+edge lengths, not bound spans. This is not a 2-periodic MIC.
+The integral of ~rho * A * dz~ is the number of selected atoms.
+
+Confined IL work is this histogram plus the existing in-plane
+~rdf2::rdf2Danalysis_AA~ sampler. Do not run CHILL on
+~--family confinedIL~.
+
+Molten salt is ~seams rdf~ / ~cn~ plus ~ionCloud~ when the melt
+is multi-site. DES adds explicit donor H-bonds. Electrolyte is
+ion--O rdf/cn plus water H-bonds. Silica / BeF2 is rdf/cn plus
+Franzblau on the M--X graph and ~getq6~ on the tetrahedral
+cation (~steinhardtQlVoronoi~ otherwise).
+
 * Read the box
 
 ~seams read FILE~ prints ~box Lx Ly Lz~ and, when the dump is
@@ -87,6 +129,8 @@ seams rdf FILE --types 1,2 --cutoff 6.0
 seams cn FILE --types 1,2 --cutoff 6.0
 seams cn FILE --ions --site '1=cationHead,2=anion'
 seams pairs FILE --site '1=cationHead,2=anion'
+seams domains FILE --site '1=cationHead,2=anion,3=tail' --subset polar
+seams density-z FILE --type 1 --bins 80
 seams chill FILE --family ionicLiquid   # exits 2
 #+end_src
 

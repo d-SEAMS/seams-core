@@ -8,7 +8,7 @@ A how-to solves a goal you already have. It is not a learning path.
 | [[file:install.org][Install the engine]] | Get a ~seams~ binary |
 | [[file:classify-cli.org][Classify a dump]] | Run ~read~ / ~chill-plus~ / ~cages~ on a file you have |
 | [[file:sheared-cells.org][Sheared cells]] | Triclinic dump: bound spans are not edge lengths; recover H |
-| [[file:ionic-liquid.org][Ionic-liquid dumps]] | Keep one species with ~--type~; unlike-pair ~seams rdf --types I,J~ |
+| [[file:ionic-liquid.org][Ionic-liquid dumps]] | Keep one species with ~--type~; unlike-pair ~seams rdf --types I,J~; confined \(\rho(z)\) |
 | [[file:ase-integration.org][ASE]] | Pointer to the pydseams ASE howto |
 | [[file:solvis.org][View a classified frame]] | solvis via pydseams, not OVITO |
 | [[file:confined-ice.org][Confined ice]] | Nanotube and monolayer classification |
