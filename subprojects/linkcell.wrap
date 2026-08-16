@@ -1,6 +1,6 @@
 [wrap-git]
 url = https://github.com/d-SEAMS/linkcell.git
-revision = 24a968ec9c48322063e7dc340dea4d1255e328ac
+revision = 19bb395f2cfcc067a06b498390bc2299509e2284
 depth = 1
 
 [provide]
