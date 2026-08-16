@@ -745,14 +745,32 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
       auto *colsDev = static_cast<int *>(ws.dcols.p);
       const std::size_t kSz = static_cast<std::size_t>(kMax);
       const std::size_t nSz = static_cast<std::size_t>(nAtoms);
-      for (int f = 0; f < nF; ++f) {
-        const linkcell::Cell cell = linkcell::Cell::ortho(
-            box[static_cast<std::size_t>(f) * 3 + 0],
-            box[static_cast<std::size_t>(f) * 3 + 1],
-            box[static_cast<std::size_t>(f) * 3 + 2]);
-        knn.knearest_into(xyzDev + static_cast<std::size_t>(f) * nSz * 3, nSz,
-                          cell, kSz, colsDev + static_cast<std::size_t>(f) * nSz * kSz,
-                          nSz * kSz, nullptr, rc);
+      const std::size_t fSz = static_cast<std::size_t>(nF);
+      const linkcell::Cell cell0 = linkcell::Cell::ortho(
+          box[0], box[1], box[2]);
+      bool sameBox = true;
+      for (int f = 1; f < nF; ++f) {
+        if (box[static_cast<std::size_t>(f) * 3 + 0] != box[0] ||
+            box[static_cast<std::size_t>(f) * 3 + 1] != box[1] ||
+            box[static_cast<std::size_t>(f) * 3 + 2] != box[2]) {
+          sameBox = false;
+          break;
+        }
+      }
+      if (sameBox) {
+        knn.knearest_into_many(xyzDev, nSz, fSz, cell0, kSz, colsDev,
+                               fSz * nSz * kSz, nullptr, rc);
+      } else {
+        for (int f = 0; f < nF; ++f) {
+          const linkcell::Cell cell = linkcell::Cell::ortho(
+              box[static_cast<std::size_t>(f) * 3 + 0],
+              box[static_cast<std::size_t>(f) * 3 + 1],
+              box[static_cast<std::size_t>(f) * 3 + 2]);
+          knn.knearest_into(xyzDev + static_cast<std::size_t>(f) * nSz * 3, nSz,
+                            cell, kSz,
+                            colsDev + static_cast<std::size_t>(f) * nSz * kSz,
+                            nSz * kSz, nullptr, rc);
+        }
       }
     }
     {
