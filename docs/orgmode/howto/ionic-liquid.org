@@ -73,6 +73,23 @@ triclinic (~box.size() >= 6~), the tilt ~xy xz yz~. Bound spans
 are not edge lengths; see [[file:sheared-cells.org][Sheared
 cells]].
 
+* Family gate
+
+~--family~ names the material. The default is ~waterIce~.
+~seams chill~, ~chill-plus~, and ~cages~ refuse (exit 2) when
+~--family~ is ~ionicLiquid~, ~moltenSalt~, ~des~, ~electrolyte~,
+~confinedIL~, ~confinedWater~, or ~networkFormer~. The message
+names the family. Unflagged ~seams chill~ stays the historical
+water path and is not an IL classifier.
+
+#+begin_src bash
+seams rdf FILE --types 1,2 --cutoff 6.0
+seams cn FILE --types 1,2 --cutoff 6.0
+seams cn FILE --ions --site '1=cationHead,2=anion'
+seams pairs FILE --site '1=cationHead,2=anion'
+seams chill FILE --family ionicLiquid   # exits 2
+#+end_src
+
 Flags and the rest of the surface live on
 [[file:../reference/cli.org][seams CLI]]. Formats live on
 [[file:../reference/data-formats.org][data formats]].
