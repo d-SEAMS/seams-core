@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Bulk ice on the mixed TIP4P example - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Quasi-one-dimensional ice" href="nanotube.html" /><link rel="prev" title="Quickstart" href="../quickstart.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Classify ice on the mixed TIP4P example - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="How-to" href="../howto/index.html" /><link rel="prev" title="Tutorials" href="index.html" />
       <link rel="canonical" href="https://docs.dseams.info/tutorials/bulk-ice.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -10,6 +10,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
     <link rel="stylesheet" type="text/css" href="../_static/doxyrest-pygments.css?v=ff3f4257" />
     <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,7 +23,7 @@
 </style>
     <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://docs.dseams.info/tutorials/bulk-ice.html"/>
-  <meta property="og:title" content="Bulk ice on the mixed TIP4P example"/>
+  <meta property="og:title" content="Classify ice on the mixed TIP4P example"/>
     <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
@@ -34,13 +35,22 @@
       <strong>d-SEAMS</strong>
     </a>
     <div class="sy-head-nav" id="head-nav">
-      <nav class="sy-head-links"><ul><li class="link">
-          <a href="https://github.com/d-SEAMS/PydSEAMSlib">
-            <span>pydseams</span><i class="i-lucide external-link"></i></a>
-        </li><li class="link">
-          <a href="https://github.com/d-SEAMS/yodaStruct">
-            <span>dseams (Lua)</span><i class="i-lucide external-link"></i></a>
-        </li></ul></nav>
+      <nav class="sy-head-links"><ul>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-1" aria-controls="nav-children-1">
+            <span>Ecosystem</span>
+            <i class="i-lucide chevron-down"></i>
+          </button>
+        <ul id="nav-children-1" aria-labelledby="nav-trigger-1"><li><a href="https://docs.dseams.info">
+                <span>d-SEAMS engine</span>
+                <small>libyodaLib and the seams CLI</small>
+              </a></li><li><a href="https://d-seams.github.io/PydSEAMSlib/">
+                <span>pydseams</span>
+                <small>Python Frame API on yoda</small>
+              </a></li><li><a href="https://d-seams.github.io/yodaStruct/">
+                <span>dseams (Lua)</span>
+                <small>require("dseams") and Fennel</small>
+              </a></li></ul>
+      </li></ul></nav>
       <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
   <input type="text" name="q" placeholder="Search" />
   <kbd>/</kbd>
@@ -74,28 +84,43 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Bulk ice on the mixed TIP4P example</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="nanotube.html">Quasi-one-dimensional ice</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Classify ice on the mixed TIP4P example</a></li>
 </ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-To Guides</span></p>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Classify ice on the mixed TIP4P example</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">How-to</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ase-integration.html">ASE integration</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/solvis.html">View a classified frame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/confined-ice.html">Confined ice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/faq.html">FAQ</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/troubleshooting.html">Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Explanation</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/index.html">Explanation</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Three repositories</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">Citation</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/index.html">Reference</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API Reference</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
         </div>
       </div>
@@ -107,10 +132,17 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#chill-from-the-cli">CHILL+ from the CLI</a></li>
-<li><a class="reference internal" href="#the-same-path-in-python">The same path in Python</a></li>
-<li><a class="reference internal" href="#cubic-mw">Cubic mW</a></li>
-<li><a class="reference internal" href="#bond-graphs-for-cages">Bond graphs for cages</a></li>
+<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li><a class="reference internal" href="#learning-objectives">Learning Objectives</a></li>
+<li><a class="reference internal" href="#step-1-read-the-frame">Step 1: Read the frame</a></li>
+<li><a class="reference internal" href="#step-2-chill-from-the-cli">Step 2: CHILL+ from the CLI</a></li>
+<li><a class="reference internal" href="#step-3-cages-from-the-cli">Step 3: Cages from the CLI</a></li>
+<li><a class="reference internal" href="#step-4-why-the-two-scores-differ">Step 4: Why the two scores differ</a></li>
+<li><a class="reference internal" href="#step-5-a-cubic-crystal">Step 5: A cubic crystal</a></li>
+<li><a class="reference internal" href="#step-6-the-same-numbers-in-python">Step 6: The same numbers in Python</a></li>
+<li><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+<li><a class="reference internal" href="#next-steps">Next steps</a></li>
+<li><a class="reference internal" href="#summary">Summary</a></li>
 </ul>
 </div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
   data-type="github" data-user="d-SEAMS" data-repo="seams-core">
@@ -151,8 +183,12 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">Bulk ice on the mixed TIP4P example</strong>
+        <a itemprop="item" href="index.html"><span itemprop="name">Tutorials</span></a>
+        <span>/</span>
         <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Classify ice on the mixed TIP4P example</strong>
+        <meta itemprop="position" content="3" />
       </li></ol>
     <div class="xl:hidden ml-1">
       <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
@@ -199,16 +235,86 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </div><article class="yue dark-code" role="main">
-          <section id="bulk-ice-on-the-mixed-tip4p-example">
-<h1>Bulk ice on the mixed TIP4P example<a class="headerlink" href="#bulk-ice-on-the-mixed-tip4p-example" title="Link to this heading">¶</a></h1>
-<p>This walk uses <code class="docutils literal notranslate"><span class="pre">input/traj/exampleTraj.lammpstrj</span></code> from a seams-core
-checkout (250 waters, type 2 is oxygen).</p>
-<section id="chill-from-the-cli">
-<h2>CHILL+ from the CLI<a class="headerlink" href="#chill-from-the-cli" title="Link to this heading">¶</a></h2>
+          <section id="classify-ice-on-the-mixed-tip4p-example">
+<h1>Classify ice on the mixed TIP4P example<a class="headerlink" href="#classify-ice-on-the-mixed-tip4p-example" title="Link to this heading">¶</a></h1>
+<p>You classify one in-tree frame two ways: CHILL+ (a four-neighbour
+staggered/eclipsed star per oxygen) and topological cages (HC/DDC
+membership). The result is a labelled oxygen set and a reason the two
+scores disagree.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>A seams-core checkout. Work from the repository root so
+<code class="docutils literal notranslate"><span class="pre">input/traj/</span></code> is a child.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">seams</span></code> on <code class="docutils literal notranslate"><span class="pre">PATH</span></code> (<code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">build</span></code> produces <code class="docutils literal notranslate"><span class="pre">./bbdir/seams</span></code>;
+<code class="docutils literal notranslate"><span class="pre">nix</span> <span class="pre">build</span></code> produces <code class="docutils literal notranslate"><span class="pre">./result/bin/seams</span></code>).</p></li>
+<li><p>The in-tree dump <code class="docutils literal notranslate"><span class="pre">input/traj/exampleTraj.lammpstrj</span></code> (one frame, 750
+atoms, 250 TIP4P waters; LAMMPS type 2 oxygen, type 1 hydrogen).</p></li>
+</ul>
+<p>Python and Lua are not required. The Frame tutorial lives in
+<a class="reference external" href="https://d-seams.github.io/PydSEAMSlib/">pydseams</a>. Lua is
+<a class="reference external" href="https://d-seams.github.io/yodaStruct/">dseams</a>.</p>
+</section>
+<section id="learning-objectives">
+<h2>Learning Objectives<a class="headerlink" href="#learning-objectives" title="Link to this heading">¶</a></h2>
+<p>By the end of this tutorial you will be able to:</p>
+<ol class="arabic simple">
+<li><p>Read a LAMMPS dump with <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> and name the oxygen type.</p></li>
+<li><p>Run CHILL+ and read the four-neighbour star histogram.</p></li>
+<li><p>Run cages on the same oxygens and read HC / DDC membership.</p></li>
+<li><p>State why the two scores disagree on this mixed frame.</p></li>
+</ol>
+</section>
+<section id="step-1-read-the-frame">
+<h2>Step 1: Read the frame<a class="headerlink" href="#step-1-read-the-frame" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span><span class="nb">read</span><span class="w"> </span>input/traj/exampleTraj.lammpstrj
+</span></pre></div>
+</div>
+<p>Expected output starts <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">250</span> <span class="pre">frame</span> <span class="pre">1</span> <span class="pre">box</span> <span class="pre">...</span></code>. The CLI guesses
+oxygen (type 2, then type 1). Pass <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">2</span></code> on the classifiers so
+the type is explicit.</p>
+</section>
+<section id="step-2-chill-from-the-cli">
+<h2>Step 2: CHILL+ from the CLI<a class="headerlink" href="#step-2-chill-from-the-cli" title="Link to this heading">¶</a></h2>
+<p>CHILL+ looks at each oxygen’s four nearest neighbours inside the
+cutoff. Each of those four bonds is staggered or eclipsed from the
+pair correlation <code class="docutils literal notranslate"><span class="pre">c_ij</span></code>. The star of four labels is the ice type:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>label</p></th>
+<th class="head"><p>four-neighbour star</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>cubic</p></td>
+<td><p>four staggered</p></td>
+</tr>
+<tr class="row-odd"><td><p>hexagonal</p></td>
+<td><p>three staggered and one eclipsed</p></td>
+</tr>
+<tr class="row-even"><td><p>clathrate</p></td>
+<td><p>four eclipsed</p></td>
+</tr>
+<tr class="row-odd"><td><p>interClathrate</p></td>
+<td><p>three eclipsed</p></td>
+</tr>
+<tr class="row-even"><td><p>interfacial</p></td>
+<td><p>ice-like, not one of the above</p></td>
+</tr>
+<tr class="row-odd"><td><p>water</p></td>
+<td><p>fewer than four bonds, or none of the above</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span>chill-plus<span class="w"> </span>input/traj/exampleTraj.lammpstrj<span class="w"> </span>--cutoff<span class="w"> </span><span class="m">3</span>.5<span class="w"> </span>--type<span class="w"> </span><span class="m">2</span>
 </span></pre></div>
 </div>
-<p>Four-neighbour staggered/eclipsed counts on this frame:</p>
+<p>Expected output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">nop</span> <span class="mi">250</span> <span class="n">interClathrate</span> <span class="mi">12</span> <span class="n">water</span> <span class="mi">238</span>
+</span></pre></div>
+</div>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -217,27 +323,66 @@ checkout (250 waters, type 2 is oxygen).</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>cubic</p></td>
-<td><p>42</p></td>
-</tr>
-<tr class="row-odd"><td><p>hexagonal</p></td>
-<td><p>65</p></td>
-</tr>
-<tr class="row-even"><td><p>interfacial</p></td>
-<td><p>58</p></td>
+<tr class="row-even"><td><p>interClathrate</p></td>
+<td><p>12</p></td>
 </tr>
 <tr class="row-odd"><td><p>water</p></td>
-<td><p>85</p></td>
-</tr>
-<tr class="row-even"><td><p>bulk ice</p></td>
-<td><p>107</p></td>
+<td><p>238</p></td>
 </tr>
 </tbody>
 </table>
 </div>
+<p>This dump is confined mixed TIP4P. Twelve oxygens have four
+neighbours and three eclipsed bonds. The rest are water. Original
+CHILL (<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill</span></code>) labels every oxygen water. The four-neighbour
+stars do not close a cubic or hexagonal ice motif.</p>
 </section>
-<section id="the-same-path-in-python">
-<h2>The same path in Python<a class="headerlink" href="#the-same-path-in-python" title="Link to this heading">¶</a></h2>
+<section id="step-3-cages-from-the-cli">
+<h2>Step 3: Cages from the CLI<a class="headerlink" href="#step-3-cages-from-the-cli" title="Link to this heading">¶</a></h2>
+<p>Cages ask a different question: does this oxygen belong to a complete
+hexagonal cage (HC, ice Ih, 12 waters) or a complete double-diamond
+cage (DDC, ice Ic, 14 waters)? The search walks primitive six-rings on
+a bonded graph. The default graph is <code class="docutils literal notranslate"><span class="pre">--graph</span> <span class="pre">seeded</span></code>: mutual
+four-nearest seeds, union completions.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span>cages<span class="w"> </span>input/traj/exampleTraj.lammpstrj<span class="w"> </span>--type<span class="w"> </span><span class="m">2</span>
+</span></pre></div>
+</div>
+<p>Expected output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">nop</span> <span class="mi">250</span> <span class="n">graph</span> <span class="n">seeded</span> <span class="n">hexagonal</span> <span class="mi">0</span> <span class="n">cubic</span> <span class="mi">0</span> <span class="n">water</span> <span class="mi">250</span>
+</span></pre></div>
+</div>
+<p>This mixed frame has no complete HC or DDC.</p>
+</section>
+<section id="step-4-why-the-two-scores-differ">
+<h2>Step 4: Why the two scores differ<a class="headerlink" href="#step-4-why-the-two-scores-differ" title="Link to this heading">¶</a></h2>
+<p>CHILL+ is a four-neighbour star. A molecule is cubic or hexagonal when
+its four bonds look like ice, even if those neighbours do not close a
+cage.</p>
+<p>Cages are topological unit matching (TUM). A molecule is ice Ih only
+as a member of an HC, ice Ic only as a member of a DDC, and water
+otherwise. Partial ice-like order is water on that score.</p>
+<p>On this mixed frame CHILL+ finds twelve interfacial-clathrate
+oxygens and TUM finds no complete HC or DDC. A three-eclipsed star
+is not cage membership.</p>
+<p>The longer argument is
+<a class="reference external" href="../explanation/chill-plus-vs-cages.rst">CHILL+ versus cages</a>.</p>
+</section>
+<section id="step-5-a-cubic-crystal">
+<h2>Step 5: A cubic crystal<a class="headerlink" href="#step-5-a-cubic-crystal" title="Link to this heading">¶</a></h2>
+<p>The 4096-molecule cubic mW dump (<code class="docutils literal notranslate"><span class="pre">input/traj/mW_cubic.lammpstrj</span></code>,
+type 1) is the opposite case: every molecule is in a DDC, and CHILL+
+reports cubic ice.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span>cages<span class="w"> </span>input/traj/mW_cubic.lammpstrj<span class="w"> </span>--type<span class="w"> </span><span class="m">1</span>
+</span><span data-line="2">seams<span class="w"> </span>chill-plus<span class="w"> </span>input/traj/mW_cubic.lammpstrj<span class="w"> </span>--type<span class="w"> </span><span class="m">1</span>
+</span></pre></div>
+</div>
+<p>On a perfect cubic lattice the four cage graphs (<code class="docutils literal notranslate"><span class="pre">cutoff</span></code>, <code class="docutils literal notranslate"><span class="pre">knn</span></code>,
+<code class="docutils literal notranslate"><span class="pre">knn-union</span></code>, <code class="docutils literal notranslate"><span class="pre">seeded</span></code>) coincide. The mixed TIP4P frame is the one that
+separates the two scores.</p>
+</section>
+<section id="step-6-the-same-numbers-in-python">
+<h2>Step 6: The same numbers in Python<a class="headerlink" href="#step-6-the-same-numbers-in-python" title="Link to this heading">¶</a></h2>
+<p>From the same checkout, so the relative path holds:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">pydseams</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ds</span>
 </span><span data-line="2">
 </span><span data-line="3"><span class="n">frame</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;input/traj/exampleTraj.lammpstrj&quot;</span><span class="p">)</span>
@@ -245,49 +390,43 @@ checkout (250 waters, type 2 is oxygen).</p>
 </span><span data-line="5"><span class="nb">print</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">cages</span><span class="p">())</span>
 </span></pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">Frame.chill_plus</span></code> is the four-neighbour classifier.
-<code class="docutils literal notranslate"><span class="pre">Frame.cages</span></code> is topological unit matching on six-rings. On this
-mixed frame TUM finds no complete HC or DDC: cage membership is not
-the CHILL+ star.</p>
-</section>
-<section id="cubic-mw">
-<h2>Cubic mW<a class="headerlink" href="#cubic-mw" title="Link to this heading">¶</a></h2>
-<p>The 4096-molecule cubic mW dump (<code class="docutils literal notranslate"><span class="pre">input/traj/mW_cubic.lammpstrj</span></code>)
-is the opposite case: every molecule is in a double-diamond cage and
-CHILL+ reports cubic ice.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span>cages<span class="w"> </span>input/traj/mW_cubic.lammpstrj<span class="w"> </span>--type<span class="w"> </span><span class="m">1</span>
-</span><span data-line="2">seams<span class="w"> </span>chill-plus<span class="w"> </span>input/traj/mW_cubic.lammpstrj<span class="w"> </span>--type<span class="w"> </span><span class="m">1</span>
+<p>Expected print on this fixture:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">IceCounts</span><span class="p">(</span><span class="n">interClathrate</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">water</span><span class="o">=</span><span class="mi">238</span><span class="p">)</span>
+</span><span data-line="2"><span class="n">CageScore</span><span class="p">(</span><span class="n">n_ih</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_ic</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_water</span><span class="o">=</span><span class="mi">250</span><span class="p">)</span>
 </span></pre></div>
 </div>
+<p>That is a pointer, not a Frame tutorial. The Frame walkthrough is
+<a class="reference external" href="https://d-seams.github.io/PydSEAMSlib/">pydseams</a>. Lua is
+<a class="reference external" href="https://d-seams.github.io/yodaStruct/">require(“dseams”)</a>. This
+repository does not install Python.</p>
 </section>
-<section id="bond-graphs-for-cages">
-<h2>Bond graphs for cages<a class="headerlink" href="#bond-graphs-for-cages" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span> <span class="pre">--graph</span></code> selects the neighbour graph:</p>
-<div class="table-wrapper docutils container">
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>value</p></th>
-<th class="head"><p>graph</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cutoff</span></code></p></td>
-<td><p>distance cutoff (2020 default)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">knn</span></code></p></td>
-<td><p>mutual four-nearest</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">knn-union</span></code></p></td>
-<td><p>union four-nearest</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seeded</span></code></p></td>
-<td><p>mutual seeds, union completions (default)</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>On a perfect cubic crystal the four graphs coincide. On a disordered
-nucleation dump they do not.</p>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span></code> or an empty histogram: wrong <code class="docutils literal notranslate"><span class="pre">--type</span></code>. Mixed TIP4P in this
+tree is type 2. mW is type 1.</p></li>
+<li><p>Unknown command, exit 2: the binary is <code class="docutils literal notranslate"><span class="pre">seams</span></code>, not <code class="docutils literal notranslate"><span class="pre">yodaStruct</span></code>.
+Commands are <code class="docutils literal notranslate"><span class="pre">read</span></code>, <code class="docutils literal notranslate"><span class="pre">chill</span></code>, <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code>, and <code class="docutils literal notranslate"><span class="pre">cages</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ModuleNotFoundError:</span> <span class="pre">pydseams</span></code>: this repo does not install Python.
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pydseams</span></code>.</p></li>
+<li><p>Lua <code class="docutils literal notranslate"><span class="pre">require(&quot;dseams&quot;)</span></code>: that module lives in yodaStruct.</p></li>
+</ul>
+</section>
+<section id="next-steps">
+<h2>Next steps<a class="headerlink" href="#next-steps" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="../howto/classify-cli.rst">Classify a dump you already have</a>
+(frame ranges, <code class="docutils literal notranslate"><span class="pre">--graph</span></code>, <code class="docutils literal notranslate"><span class="pre">--jobs</span></code>)</p></li>
+<li><p><a class="reference external" href="../explanation/chill-plus-vs-cages.rst">CHILL+ versus cages</a></p></li>
+<li><p><a class="reference external" href="https://d-seams.github.io/PydSEAMSlib/">pydseams Frame tutorial</a></p></li>
+<li><p><a class="reference external" href="https://d-seams.github.io/yodaStruct/">Lua read-and-classify</a></p></li>
+</ul>
+</section>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading">¶</a></h2>
+<p>You read one mixed TIP4P frame, printed the CHILL+ star (12
+interfacial clathrate, 238 water), printed the seeded cage score
+(zero HC, zero DDC), and stated why those two answers differ.</p>
 </section>
 </section>
 
@@ -297,16 +436,16 @@ nucleation dump they do not.</p>
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="../quickstart.html">
+    <a href="index.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">Quickstart</div></div>
+        <span>Previous</span><div class="title">Tutorials</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="nanotube.html">
+    <a href="../howto/index.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">Quasi-one-dimensional ice</div>
+        <div class="title">How-to</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>
@@ -338,5 +477,6 @@ nucleation dump they do not.</p>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/target-highlight.js?v=df7d332b"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
       <script src="../_static/shibuya.js?v=cac61aee"></script></body>
 </html>

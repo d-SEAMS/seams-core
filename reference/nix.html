@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Nix flake - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="API Reference" href="api.html" /><link rel="prev" title="seams CLI" href="cli.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Nix flake - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Glossary" href="glossary.html" /><link rel="prev" title="namespace topoparam" href="../api/namespace_topoparam.html" />
       <link rel="canonical" href="https://docs.dseams.info/reference/nix.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -10,6 +10,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
     <link rel="stylesheet" type="text/css" href="../_static/doxyrest-pygments.css?v=ff3f4257" />
     <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,13 +35,22 @@
       <strong>d-SEAMS</strong>
     </a>
     <div class="sy-head-nav" id="head-nav">
-      <nav class="sy-head-links"><ul><li class="link">
-          <a href="https://github.com/d-SEAMS/PydSEAMSlib">
-            <span>pydseams</span><i class="i-lucide external-link"></i></a>
-        </li><li class="link">
-          <a href="https://github.com/d-SEAMS/yodaStruct">
-            <span>dseams (Lua)</span><i class="i-lucide external-link"></i></a>
-        </li></ul></nav>
+      <nav class="sy-head-links"><ul>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-1" aria-controls="nav-children-1">
+            <span>Ecosystem</span>
+            <i class="i-lucide chevron-down"></i>
+          </button>
+        <ul id="nav-children-1" aria-labelledby="nav-trigger-1"><li><a href="https://docs.dseams.info">
+                <span>d-SEAMS engine</span>
+                <small>libyodaLib and the seams CLI</small>
+              </a></li><li><a href="https://d-seams.github.io/PydSEAMSlib/">
+                <span>pydseams</span>
+                <small>Python Frame API on yoda</small>
+              </a></li><li><a href="https://d-seams.github.io/yodaStruct/">
+                <span>dseams (Lua)</span>
+                <small>require("dseams") and Fennel</small>
+              </a></li></ul>
+      </li></ul></nav>
       <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
   <input type="text" name="q" placeholder="Search" />
   <kbd>/</kbd>
@@ -74,28 +84,47 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Bulk ice on the mixed TIP4P example</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/nanotube.html">Quasi-one-dimensional ice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
 </ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-To Guides</span></p>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">How-to</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ase-integration.html">ASE integration</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/solvis.html">View a classified frame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/confined-ice.html">Confined ice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/faq.html">FAQ</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/troubleshooting.html">Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Explanation</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/index.html">Explanation</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Three repositories</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">Citation</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
 <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="cli.html">seams CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-formats.html">Data Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Nix flake</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glossary.html">Glossary</a></li>
+</ul>
+</li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="cli.html">seams CLI</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="data-formats.html">Data Formats</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Nix flake</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="api.html">API Reference</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="data-formats.html">Data Formats</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
         </div>
       </div>
@@ -107,7 +136,9 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#what-the-flake-enables">What the flake enables</a></li>
+<li><a class="reference internal" href="#flake-outputs">Flake outputs</a></li>
+<li><a class="reference internal" href="#what-the-package-enables">What the package enables</a></li>
+<li><a class="reference internal" href="#what-stays-off">What stays off</a></li>
 <li><a class="reference internal" href="#front-end-flakes">Front-end flakes</a></li>
 <li><a class="reference internal" href="#cachix">Cachix</a></li>
 </ul>
@@ -150,8 +181,12 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">Nix flake</strong>
+        <a itemprop="item" href="index.html"><span itemprop="name">Reference</span></a>
+        <span>/</span>
         <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Nix flake</strong>
+        <meta itemprop="position" content="3" />
       </li></ol>
     <div class="xl:hidden ml-1">
       <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
@@ -200,20 +235,117 @@ data-aria-dark="Switch to auto color mode">
 </div><article class="yue dark-code" role="main">
           <section id="nix-flake">
 <h1>Nix flake<a class="headerlink" href="#nix-flake" title="Link to this heading">¶</a></h1>
+<p>The flake builds <code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code> and the <code class="docutils literal notranslate"><span class="pre">seams</span></code> CLI with Meson. It does
+not build Python or Lua. There are no overlays.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">nix<span class="w"> </span>build<span class="w">                  </span><span class="c1"># ./result/bin/seams</span>
 </span><span data-line="2">nix<span class="w"> </span>run<span class="w"> </span>.<span class="w"> </span>--<span class="w"> </span><span class="nb">read</span><span class="w"> </span>input/traj/exampleTraj.lammpstrj
-</span><span data-line="3">nix<span class="w"> </span>develop
-</span><span data-line="4">nix<span class="w"> </span>flake<span class="w"> </span>update<span class="w"> </span>nixpkgs
+</span><span data-line="3">nix<span class="w"> </span>develop<span class="w">                </span><span class="c1"># inputsFrom seams, plus gdb, ccache, clang-tools</span>
+</span><span data-line="4">nix<span class="w"> </span>flake<span class="w"> </span>update<span class="w">           </span><span class="c1"># refresh the nixpkgs pin</span>
 </span><span data-line="5">nix<span class="w"> </span>fmt
 </span></pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">nix</span> <span class="pre">build</span></code> runs the Catch2 suite (Meson install check).</p>
-<section id="what-the-flake-enables">
-<h2>What the flake enables<a class="headerlink" href="#what-the-flake-enables" title="Link to this heading">¶</a></h2>
-<p>Eigen, BLAS/LAPACK, Catch2, Highway when nixpkgs has them. OpenMP when
-the toolchain links it. Optional wrap-git backends (vesin,
-readcon-core) and chemfiles stay off unless a nixpkgs package is
-already in the closure.</p>
+<p><code class="docutils literal notranslate"><span class="pre">nix</span> <span class="pre">build</span></code> runs Meson <code class="docutils literal notranslate"><span class="pre">doCheck</span></code>: the Catch2 suite plus the CLI
+smoke tests <code class="docutils literal notranslate"><span class="pre">seams_read</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_help</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_version</span></code>,
+<code class="docutils literal notranslate"><span class="pre">seams_features</span></code>.</p>
+<section id="flake-outputs">
+<h2>Flake outputs<a class="headerlink" href="#flake-outputs" title="Link to this heading">¶</a></h2>
+<p>From <code class="docutils literal notranslate"><span class="pre">flake.nix</span></code>. Supported systems: <code class="docutils literal notranslate"><span class="pre">x86_64-linux</span></code>,
+<code class="docutils literal notranslate"><span class="pre">aarch64-linux</span></code>, <code class="docutils literal notranslate"><span class="pre">x86_64-darwin</span></code>, <code class="docutils literal notranslate"><span class="pre">aarch64-darwin</span></code>.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>output</p></th>
+<th class="head"><p>value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">packages.&lt;system&gt;.seams</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nix/package.nix</span></code> derivation</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">packages.&lt;system&gt;.default</span></code></p></td>
+<td><p>same as <code class="docutils literal notranslate"><span class="pre">seams</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">apps.&lt;system&gt;.default</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">${packages.default}/bin/seams</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">checks.&lt;system&gt;.seams</span></code></p></td>
+<td><p>the <code class="docutils literal notranslate"><span class="pre">seams</span></code> package</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">checks.&lt;system&gt;.default</span></code></p></td>
+<td><p>same as <code class="docutils literal notranslate"><span class="pre">seams</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">devShells.&lt;system&gt;.default</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">inputsFrom</span></code> the package; extra packages <code class="docutils literal notranslate"><span class="pre">gdb</span></code>, <code class="docutils literal notranslate"><span class="pre">ccache</span></code>, <code class="docutils literal notranslate"><span class="pre">clang-tools</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">formatter.&lt;system&gt;</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nixfmt</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The only flake input is <code class="docutils literal notranslate"><span class="pre">nixpkgs</span></code> (<code class="docutils literal notranslate"><span class="pre">github:NixOS/nixpkgs/nixos-unstable</span></code>).</p>
+</section>
+<section id="what-the-package-enables">
+<h2>What the package enables<a class="headerlink" href="#what-the-package-enables" title="Link to this heading">¶</a></h2>
+<p>From <code class="docutils literal notranslate"><span class="pre">nix/package.nix</span></code> (<code class="docutils literal notranslate"><span class="pre">pname</span> <span class="pre">=</span> <span class="pre">&quot;seams&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">version</span> <span class="pre">=</span> <span class="pre">&quot;2.2.0&quot;</span></code>):</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p>on</p></td>
+<td><p>Eigen, BLAS, LAPACK, Catch2 3, Highway (<code class="docutils literal notranslate"><span class="pre">libhwy</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>OpenMP</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">dependency('openmp')</span></code> probe; Clang also gets <code class="docutils literal notranslate"><span class="pre">llvmPackages.openmp</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Meson flags</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">with_tests=true</span></code>, <code class="docutils literal notranslate"><span class="pre">with_cli=true</span></code>, <code class="docutils literal notranslate"><span class="pre">with_python=false</span></code>, <code class="docutils literal notranslate"><span class="pre">with_lua=false</span></code>, <code class="docutils literal notranslate"><span class="pre">with_mpi=false</span></code>, <code class="docutils literal notranslate"><span class="pre">with_openmp_offload=false</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mesonAutoFeatures</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">disabled</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>wrap mode</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nodownload</span></code> (Meson setup hook)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The fileset is <code class="docutils literal notranslate"><span class="pre">meson.build</span></code>, <code class="docutils literal notranslate"><span class="pre">meson_options.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">src</span></code>, <code class="docutils literal notranslate"><span class="pre">tests</span></code>,
+<code class="docutils literal notranslate"><span class="pre">input</span></code>, <code class="docutils literal notranslate"><span class="pre">templates</span></code>, and the wraps <code class="docutils literal notranslate"><span class="pre">readcon-core.wrap</span></code>,
+<code class="docutils literal notranslate"><span class="pre">vesin.wrap</span></code>, <code class="docutils literal notranslate"><span class="pre">robin-map.wrap</span></code>, <code class="docutils literal notranslate"><span class="pre">subprojects/packagefiles</span></code>.</p>
+</section>
+<section id="what-stays-off">
+<h2>What stays off<a class="headerlink" href="#what-stays-off" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">with_python</span></code></p></td>
+<td><p>Meson error if forced; Python is PydSEAMSlib</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">with_lua</span></code></p></td>
+<td><p>Meson error if forced; Lua is yodaStruct</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">with_mpi</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">with_openmp_offload</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>vesin, readcon-core</p></td>
+<td><p>wrap-git fallbacks are not fetched (<code class="docutils literal notranslate"><span class="pre">nodownload</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>chemfiles</p></td>
+<td><p>not in the flake closure</p></td>
+</tr>
+<tr class="row-odd"><td><p>IRA, sphericart, nauty</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">auto_features=disabled</span></code>, so the <code class="docutils literal notranslate"><span class="pre">auto</span></code> probes stay off</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">--features</span></code> on a flake build therefore reports Highway (and
+OpenMP when it linked) as enabled, and vesin, chemfiles, readcon-core,
+IRA/SOFI, sphericart, nauty, and MPI as disabled. Optional backends
+turn on only if a nixpkgs package is already in the closure.</p>
 </section>
 <section id="front-end-flakes">
 <h2>Front-end flakes<a class="headerlink" href="#front-end-flakes" title="Link to this heading">¶</a></h2>
@@ -224,7 +356,8 @@ the Meson subproject.</p>
 </section>
 <section id="cachix">
 <h2>Cachix<a class="headerlink" href="#cachix" title="Link to this heading">¶</a></h2>
-<p>The <a class="reference external" href="https://dseams.cachix.org/">dseams</a> cache is optional:</p>
+<p>The <a class="reference external" href="https://dseams.cachix.org/">dseams</a> cache is optional (not a
+flake input):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">nix-env<span class="w"> </span>-iA<span class="w"> </span>cachix<span class="w"> </span>-f<span class="w"> </span>https://cachix.org/api/v1/install
 </span><span data-line="2">cachix<span class="w"> </span>use<span class="w"> </span>dseams
 </span></pre></div>
@@ -238,16 +371,16 @@ the Meson subproject.</p>
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="cli.html">
+    <a href="../api/namespace_topoparam.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">seams CLI</div></div>
+        <span>Previous</span><div class="title">namespace topoparam</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="api.html">
+    <a href="glossary.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">API Reference</div>
+        <div class="title">Glossary</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>
@@ -279,5 +412,6 @@ the Meson subproject.</p>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/target-highlight.js?v=df7d332b"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
       <script src="../_static/shibuya.js?v=cac61aee"></script></body>
 </html>

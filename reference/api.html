@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>API Reference - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Data Formats" href="data-formats.html" /><link rel="prev" title="Nix flake" href="nix.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>API Reference - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="C++ headers (doxyrest)" href="../api/index.html" /><link rel="prev" title="Data Formats" href="data-formats.html" />
       <link rel="canonical" href="https://docs.dseams.info/reference/api.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -10,6 +10,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
     <link rel="stylesheet" type="text/css" href="../_static/doxyrest-pygments.css?v=ff3f4257" />
     <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,13 +35,22 @@
       <strong>d-SEAMS</strong>
     </a>
     <div class="sy-head-nav" id="head-nav">
-      <nav class="sy-head-links"><ul><li class="link">
-          <a href="https://github.com/d-SEAMS/PydSEAMSlib">
-            <span>pydseams</span><i class="i-lucide external-link"></i></a>
-        </li><li class="link">
-          <a href="https://github.com/d-SEAMS/yodaStruct">
-            <span>dseams (Lua)</span><i class="i-lucide external-link"></i></a>
-        </li></ul></nav>
+      <nav class="sy-head-links"><ul>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-1" aria-controls="nav-children-1">
+            <span>Ecosystem</span>
+            <i class="i-lucide chevron-down"></i>
+          </button>
+        <ul id="nav-children-1" aria-labelledby="nav-trigger-1"><li><a href="https://docs.dseams.info">
+                <span>d-SEAMS engine</span>
+                <small>libyodaLib and the seams CLI</small>
+              </a></li><li><a href="https://d-seams.github.io/PydSEAMSlib/">
+                <span>pydseams</span>
+                <small>Python Frame API on yoda</small>
+              </a></li><li><a href="https://d-seams.github.io/yodaStruct/">
+                <span>dseams (Lua)</span>
+                <small>require("dseams") and Fennel</small>
+              </a></li></ul>
+      </li></ul></nav>
       <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
   <input type="text" name="q" placeholder="Search" />
   <kbd>/</kbd>
@@ -74,28 +84,53 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Bulk ice on the mixed TIP4P example</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/nanotube.html">Quasi-one-dimensional ice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
 </ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-To Guides</span></p>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">How-to</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ase-integration.html">ASE integration</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/solvis.html">View a classified frame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/confined-ice.html">Confined ice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/faq.html">FAQ</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/troubleshooting.html">Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Explanation</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/index.html">Explanation</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Three repositories</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">Citation</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
 <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="cli.html">seams CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-formats.html">Data Formats</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../api/index.html">C++ headers (doxyrest)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nix.html">Nix flake</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glossary.html">Glossary</a></li>
+</ul>
+</li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="cli.html">seams CLI</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="nix.html">Nix flake</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="data-formats.html">Data Formats</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="nix.html">Nix flake</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/index.html">C++ headers (doxyrest)</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
         </div>
       </div>
@@ -107,57 +142,16 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#data-types">Data types</a><ul>
-<li><a class="reference internal" href="#pointdouble">PointDouble</a></li>
-<li><a class="reference internal" href="#pointclouddouble">PointCloudDouble</a></li>
-<li><a class="reference internal" href="#result">Result</a></li>
-<li><a class="reference internal" href="#enumerations">Enumerations</a><ul>
-<li><a class="reference internal" href="#bondtype">BondType</a></li>
-<li><a class="reference internal" href="#atomstatetype">AtomStateType</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#i-o-functions">I/O functions</a><ul>
-<li><a class="reference internal" href="#readlammpstrjreduced">readLammpsTrjreduced</a></li>
-<li><a class="reference internal" href="#readlammpstrjo">readLammpsTrjO</a></li>
-<li><a class="reference internal" href="#readlammpstrj">readLammpsTrj</a></li>
-<li><a class="reference internal" href="#readxyz">readXYZ</a></li>
-<li><a class="reference internal" href="#readchemfiles-optional-requires-chemfiles">readChemfiles (optional, requires chemfiles)</a></li>
-<li><a class="reference internal" href="#readcon-optional-requires-readcon-core">readCon (optional, requires readcon-core)</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#neighbour-list-functions">Neighbour list functions</a><ul>
-<li><a class="reference internal" href="#neighlisto">neighListO</a></li>
-<li><a class="reference internal" href="#neighbourlistbyindex">neighbourListByIndex</a></li>
-<li><a class="reference internal" href="#getnewneighbourlistbyindex">getNewNeighbourListByIndex</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#bond-functions">Bond functions</a><ul>
-<li><a class="reference internal" href="#populatehbonds">populateHbonds</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#chill-functions">CHILL+ functions</a><ul>
-<li><a class="reference internal" href="#getcorrelplus">getCorrelPlus</a></li>
-<li><a class="reference internal" href="#geticetypeplus">getIceTypePlus</a></li>
-<li><a class="reference internal" href="#getq6">getq6</a></li>
-<li><a class="reference internal" href="#reclassifywater">reclassifyWater</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#ring-analysis-functions">Ring analysis functions</a><ul>
-<li><a class="reference internal" href="#ringnetwork">ringNetwork</a></li>
-<li><a class="reference internal" href="#polygonringanalysis">polygonRingAnalysis</a></li>
-<li><a class="reference internal" href="#bulkpolygonringanalysis">bulkPolygonRingAnalysis</a></li>
-<li><a class="reference internal" href="#prismanalysis">prismAnalysis</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#topological-unit-matching-tum">Topological unit matching (TUM)</a><ul>
-<li><a class="reference internal" href="#topobulkcriteria">topoBulkCriteria</a></li>
-<li><a class="reference internal" href="#topounitmatchingbulk">topoUnitMatchingBulk</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#output-functions">Output functions</a><ul>
-<li><a class="reference internal" href="#writedump">writeDump</a></li>
+<li><a class="reference internal" href="#fronts">Fronts</a></li>
+<li><a class="reference internal" href="#doxyrest-wiring">Doxyrest wiring</a></li>
+<li><a class="reference internal" href="#headers">Headers</a></li>
+<li><a class="reference internal" href="#c-functions-a-caller-uses">C++ functions a caller uses</a><ul>
+<li><a class="reference internal" href="#i-o-sinp-sout">I/O (<code class="docutils literal notranslate"><span class="pre">sinp</span></code>, <code class="docutils literal notranslate"><span class="pre">sout</span></code>)</a></li>
+<li><a class="reference internal" href="#neighbours-nneigh">Neighbours (<code class="docutils literal notranslate"><span class="pre">nneigh</span></code>)</a></li>
+<li><a class="reference internal" href="#chill-chill">CHILL (<code class="docutils literal notranslate"><span class="pre">chill</span></code>)</a></li>
+<li><a class="reference internal" href="#rings-primitive-ring">Rings (<code class="docutils literal notranslate"><span class="pre">primitive</span></code>, <code class="docutils literal notranslate"><span class="pre">ring</span></code>)</a></li>
+<li><a class="reference internal" href="#cages-cage-ring-tum3">Cages (<code class="docutils literal notranslate"><span class="pre">cage</span></code>, <code class="docutils literal notranslate"><span class="pre">ring</span></code>, <code class="docutils literal notranslate"><span class="pre">tum3</span></code>)</a></li>
+<li><a class="reference internal" href="#bonds-orientation-optional-backends">Bonds, orientation, optional backends</a></li>
 </ul>
 </li>
 </ul>
@@ -200,8 +194,12 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">API Reference</strong>
+        <a itemprop="item" href="index.html"><span itemprop="name">Reference</span></a>
+        <span>/</span>
         <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">API Reference</strong>
+        <meta itemprop="position" content="3" />
       </li></ol>
     <div class="xl:hidden ml-1">
       <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
@@ -250,452 +248,552 @@ data-aria-dark="Switch to auto color mode">
 </div><article class="yue dark-code" role="main">
           <section id="api-reference">
 <h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h1>
-<p>This page documents all types and functions exposed by <code class="docutils literal notranslate"><span class="pre">pydseams.yoda</span></code>.</p>
-<section id="data-types">
-<h2>Data types<a class="headerlink" href="#data-types" title="Link to this heading">¶</a></h2>
-<section id="pointdouble">
-<h3>PointDouble<a class="headerlink" href="#pointdouble" title="Link to this heading">¶</a></h3>
-<p>Represents a single atom in the system.</p>
+<p>Lookup for the C++ identifiers in <code class="docutils literal notranslate"><span class="pre">src/include/internal</span></code>. Generated
+pages under <code class="docutils literal notranslate"><span class="pre">api/</span></code> are the Doxygen comments from those headers,
+converted by doxyrest. This is not a dump of <code class="docutils literal notranslate"><span class="pre">pydseamslib._core</span></code> and
+it is not a tutorial.</p>
+<section id="fronts">
+<h2>Fronts<a class="headerlink" href="#fronts" title="Link to this heading">¶</a></h2>
+<p>Four fronts, one engine (<code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code>). Flags live on
+<a class="reference external" href="cli.rst">seams CLI</a>. Formats live on
+<a class="reference external" href="data-formats.rst">data formats</a>.</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Field</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Description</p></th>
+<tr class="row-odd"><th class="head"><p>Front</p></th>
+<th class="head"><p>Package</p></th>
+<th class="head"><p>First call</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">x</span></code></p></td>
-<td><p>float</p></td>
-<td><p>X coordinate (Angstroms)</p></td>
+<tr class="row-even"><td><p>CLI</p></td>
+<td><p>this repo (<code class="docutils literal notranslate"><span class="pre">seams</span></code>)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span> <span class="pre">FILE</span></code>, <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill-plus</span> <span class="pre">FILE</span></code>, <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span> <span class="pre">FILE</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">y</span></code></p></td>
-<td><p>float</p></td>
-<td><p>Y coordinate (Angstroms)</p></td>
+<tr class="row-odd"><td><p>Python Frame</p></td>
+<td><p><a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib">PydSEAMSlib</a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pydseams.Frame</span></code> from <code class="docutils literal notranslate"><span class="pre">pydseams.read(...)</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">z</span></code></p></td>
-<td><p>float</p></td>
-<td><p>Z coordinate (Angstroms)</p></td>
+<tr class="row-even"><td><p>Lua</p></td>
+<td><p><a class="reference external" href="https://github.com/d-SEAMS/yodaStruct">yodaStruct</a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">require(&quot;dseams&quot;)</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">c_type</span></code></p></td>
-<td><p>int</p></td>
-<td><p>LAMMPS atom type</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">molID</span></code></p></td>
-<td><p>int</p></td>
-<td><p>Molecule ID</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">atomID</span></code></p></td>
-<td><p>int</p></td>
-<td><p>Atom ID</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">iceType</span></code></p></td>
-<td><p>AtomStateType</p></td>
-<td><p>Ice classification (set by CHILL+)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">c_ij</span></code></p></td>
-<td><p>list[Result]</p></td>
-<td><p>Bond-order correlations (set by getCorrelPlus)</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">inSlice</span></code></p></td>
-<td><p>bool</p></td>
-<td><p>Whether atom is in the selected slice</p></td>
+<tr class="row-odd"><td><p>Compiled Python</p></td>
+<td><p>PydSEAMSlib</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pydseams.yoda</span></code> (<code class="docutils literal notranslate"><span class="pre">_core</span></code> and <code class="docutils literal notranslate"><span class="pre">cyoda</span></code> are aliases)</p></td>
 </tr>
 </tbody>
 </table>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">pydseams.yoda</span></code> registers the C++ spellings below
+(<code class="docutils literal notranslate"><span class="pre">getCorrelPlus</span></code>, <code class="docutils literal notranslate"><span class="pre">ringNetwork</span></code>, <code class="docutils literal notranslate"><span class="pre">topoBulkCriteria</span></code>, …).</p>
 </section>
-<section id="pointclouddouble">
-<h3>PointCloudDouble<a class="headerlink" href="#pointclouddouble" title="Link to this heading">¶</a></h3>
-<p>Container for a set of atoms and simulation box metadata.</p>
-<div class="table-wrapper docutils container">
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Field</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pts</span></code></p></td>
-<td><p>list[PointDouble]</p></td>
-<td><p>All atoms in the frame</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nop</span></code></p></td>
-<td><p>int</p></td>
-<td><p>Number of particles</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">currentFrame</span></code></p></td>
-<td><p>int</p></td>
-<td><p>Frame index</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">box</span></code></p></td>
-<td><p>list[float]</p></td>
-<td><p>Box dimensions [Lx, Ly, Lz]</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">boxLow</span></code></p></td>
-<td><p>list[float]</p></td>
-<td><p>Box lower bounds [xlo, ylo, zlo]</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">idIndexMap</span></code></p></td>
-<td><p>dict[int, int]</p></td>
-<td><p>Atom ID to index mapping</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
-<section id="result">
-<h3>Result<a class="headerlink" href="#result" title="Link to this heading">¶</a></h3>
-<p>A single bond-order correlation measurement.</p>
-<div class="table-wrapper docutils container">
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Field</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">classifier</span></code></p></td>
-<td><p>BondType</p></td>
-<td><p>Bond classification (staggered, eclipsed, out<sub>of</sub><sub>range</sub>)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">c_value</span></code></p></td>
-<td><p>float</p></td>
-<td><p>Correlation value in [-1, 1]</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
-<section id="enumerations">
-<h3>Enumerations<a class="headerlink" href="#enumerations" title="Link to this heading">¶</a></h3>
-<section id="bondtype">
-<h4>BondType<a class="headerlink" href="#bondtype" title="Link to this heading">¶</a></h4>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">staggered</span></code> – eclipsed bond orientation</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">eclipsed</span></code> – staggered bond orientation</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">out_of_range</span></code> – correlation outside classification thresholds</p></li>
+<section id="doxyrest-wiring">
+<h2>Doxyrest wiring<a class="headerlink" href="#doxyrest-wiring" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">-e</span> <span class="pre">docs</span> <span class="pre">doxybuild</span></code> runs from <code class="docutils literal notranslate"><span class="pre">docs/source</span></code>:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">doxygen</span> <span class="pre">Doxyfile_seams.cfg</span></code> – <code class="docutils literal notranslate"><span class="pre">INPUT</span></code> is
+<code class="docutils literal notranslate"><span class="pre">../../src/include/internal</span></code> (<code class="docutils literal notranslate"><span class="pre">EXTRACT_ALL=YES</span></code>, private members
+off). <code class="docutils literal notranslate"><span class="pre">src/include/external</span></code> and <code class="docutils literal notranslate"><span class="pre">tests/</span></code> are excluded.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">doxyrest</span> <span class="pre">-c</span> <span class="pre">doxyrest-config.lua</span></code> – reads <code class="docutils literal notranslate"><span class="pre">xml/index.xml</span></code>, writes
+=api/index.rst~ with title <code class="docutils literal notranslate"><span class="pre">C++</span> <span class="pre">headers</span> <span class="pre">(doxyrest)</span></code>.</p></li>
+</ol>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">C++ (doxyrest)</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">C++ headers (doxyrest)</a></li>
 </ul>
-</section>
-<section id="atomstatetype">
-<h4>AtomStateType<a class="headerlink" href="#atomstatetype" title="Link to this heading">¶</a></h4>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">cubic</span></code> – cubic ice (Ic)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">hexagonal</span></code> – hexagonal ice (Ih)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">water</span></code> – liquid water</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">interfacial</span></code> – interfacial ice</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">clathrate</span></code> – clathrate hydrate</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">interClathrate</span></code> – inter-clathrate</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">unclassified</span></code> – not yet classified</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">reCubic</span></code> – reclassified cubic</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">reHex</span></code> – reclassified hexagonal</p></li>
-</ul>
-</section>
-</section>
-</section>
-<section id="i-o-functions">
-<h2>I/O functions<a class="headerlink" href="#i-o-functions" title="Link to this heading">¶</a></h2>
-<section id="readlammpstrjreduced">
-<h3>readLammpsTrjreduced<a class="headerlink" href="#readlammpstrjreduced" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">readLammpsTrjreduced</span><span class="p">(</span>
-</span><span data-line="2">    <span class="n">filename</span><span class="p">,</span> <span class="n">targetFrame</span><span class="p">,</span> <span class="n">typeI</span><span class="p">,</span> <span class="n">isSlice</span><span class="p">,</span> <span class="n">coordLow</span><span class="p">,</span> <span class="n">coordHigh</span>
-</span><span data-line="3"><span class="p">)</span>
-</span></pre></div>
 </div>
-<p>Read a LAMMPS trajectory, selecting atoms of a single type. Returns a
-<code class="docutils literal notranslate"><span class="pre">PointCloudDouble</span></code>.</p>
+</section>
+<section id="headers">
+<h2>Headers<a class="headerlink" href="#headers" title="Link to this heading">¶</a></h2>
+<p>Every file under <code class="docutils literal notranslate"><span class="pre">src/include/internal</span></code>.</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Argument</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Description</p></th>
+<tr class="row-odd"><th class="head"><p>Header</p></th>
+<th class="head"><p>Namespace</p></th>
+<th class="head"><p>Role</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">filename</span></code></p></td>
-<td><p>str</p></td>
-<td><p>Path to LAMMPS dump file</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mol_sys.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">molSys</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Point</span></code>, <code class="docutils literal notranslate"><span class="pre">PointCloud</span></code>, bond and ice enums</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">targetFrame</span></code></p></td>
-<td><p>int</p></td>
-<td><p>Frame number to read (1-indexed)</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams_input.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sinp</span></code></p></td>
+<td><p>LAMMPS / XYZ / chemfiles / readcon readers</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">typeI</span></code></p></td>
-<td><p>int</p></td>
-<td><p>LAMMPS atom type to select</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams_output.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sout</span></code></p></td>
+<td><p>dump, cage, ring, and cluster writers</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">isSlice</span></code></p></td>
-<td><p>bool</p></td>
-<td><p>Enable coordinate slice selection</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">neighbours.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nneigh</span></code></p></td>
+<td><p>cutoff, k-nearest, skin neighbour lists</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">coordLow</span></code></p></td>
-<td><p>list[float]</p></td>
-<td><p>Lower slice bounds [x, y, z]</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bop.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">chill</span></code>, <code class="docutils literal notranslate"><span class="pre">sph</span></code></p></td>
+<td><p>CHILL, CHILL+, <code class="docutils literal notranslate"><span class="pre">q6</span></code>, Steinhardt <code class="docutils literal notranslate"><span class="pre">ql</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">coordHigh</span></code></p></td>
-<td><p>list[float]</p></td>
-<td><p>Upper slice bounds [x, y, z]</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">franzblau.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">primitive</span></code></p></td>
+<td><p>Franzblau primitive rings</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ring.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ring</span></code></p></td>
+<td><p>ring helpers and <code class="docutils literal notranslate"><span class="pre">strucType</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">topo_bulk.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ring</span></code>, <code class="docutils literal notranslate"><span class="pre">prism3</span></code></p></td>
+<td><p>HC / DDC search, bulk polygons</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">topo_one_dim.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ring</span></code></p></td>
+<td><p>ice-nanotube prisms</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">topo_two_dim.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ring</span></code></p></td>
+<td><p>monolayer polygons</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cage.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cage</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Cage</span></code>, <code class="docutils literal notranslate"><span class="pre">cageType</span></code>, <code class="docutils literal notranslate"><span class="pre">iceType</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cage_affiliation.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ring</span></code></p></td>
+<td><p>claim-free HC / DDC flags</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cage_canon.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cage</span></code></p></td>
+<td><p>nauty canonical certificates</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bulkTUM.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tum3</span></code></p></td>
+<td><p>topological unit matching</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bond.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bond</span></code></p></td>
+<td><p>geometric hydrogen bonds</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">absOrientation.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">absor</span></code></p></td>
+<td><p>Horn absolute orientation</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pntCorrespondence.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pntToPnt</span></code></p></td>
+<td><p>reference / target point sets</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">shapeMatch.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">match</span></code></p></td>
+<td><p>prism shape-matching</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cluster.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">clump</span></code></p></td>
+<td><p>Stillinger ice clusters</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">order_parameter.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">topoparam</span></code></p></td>
+<td><p>height% and coverage area</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rdf2d.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rdf2</span></code></p></td>
+<td><p>in-plane radial distribution</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">selection.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gen</span></code>, <code class="docutils literal notranslate"><span class="pre">ring</span></code></p></td>
+<td><p>type and slice selections</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">generic.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gen</span></code></p></td>
+<td><p>periodic distance, angles, medians</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">structure_desc.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">chill</span></code></p></td>
+<td><p>SOAP, template overlay, linear classifier</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">voronoi_qlm.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">chill</span></code></p></td>
+<td><p>Voronoi-weighted Steinhardt</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ira_sofi.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ira</span></code></p></td>
+<td><p>IRA match and SOFI point groups</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sphericart_ylm.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams::sphericart_ylm</span></code></p></td>
+<td><p>batched Cartesian <code class="docutils literal notranslate"><span class="pre">Y_lm</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">steinhardt_device.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams::steinhardt</span></code></p></td>
+<td><p>host / MPI / offload Steinhardt kernel</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">simd_distance.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams</span></code></p></td>
+<td><p>Highway periodic distance</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 </section>
-<section id="readlammpstrjo">
-<h3>readLammpsTrjO<a class="headerlink" href="#readlammpstrjo" title="Link to this heading">¶</a></h3>
-<p>Same as <code class="docutils literal notranslate"><span class="pre">readLammpsTrjreduced</span></code> but with argument named <code class="docutils literal notranslate"><span class="pre">typeO</span></code> instead of <code class="docutils literal notranslate"><span class="pre">typeI</span></code>.</p>
-</section>
-<section id="readlammpstrj">
-<h3>readLammpsTrj<a class="headerlink" href="#readlammpstrj" title="Link to this heading">¶</a></h3>
-<p>Read all atoms from a LAMMPS trajectory (no type filtering).</p>
-</section>
-<section id="readxyz">
-<h3>readXYZ<a class="headerlink" href="#readxyz" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">readXYZ</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-</span></pre></div>
-</div>
-<p>Read an XYZ format file. Returns a <code class="docutils literal notranslate"><span class="pre">PointCloudDouble</span></code>.</p>
-</section>
-<section id="readchemfiles-optional-requires-chemfiles">
-<h3>readChemfiles (optional, requires chemfiles)<a class="headerlink" href="#readchemfiles-optional-requires-chemfiles" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">readChemfiles</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">targetFrame</span><span class="p">,</span> <span class="n">typeFilter</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-</span></pre></div>
-</div>
-<p>Read any trajectory format supported by chemfiles (PDB, GRO, DCD, TRR, and
-40+ others). Available when d-SEAMS is built with chemfiles.</p>
+<section id="c-functions-a-caller-uses">
+<h2>C++ functions a caller uses<a class="headerlink" href="#c-functions-a-caller-uses" title="Link to this heading">¶</a></h2>
+<p>Names below are the C++ identifiers. <code class="docutils literal notranslate"><span class="pre">pydseams.yoda</span></code> registers the
+same spellings.</p>
+<section id="i-o-sinp-sout">
+<h3>I/O (<code class="docutils literal notranslate"><span class="pre">sinp</span></code>, <code class="docutils literal notranslate"><span class="pre">sout</span></code>)<a class="headerlink" href="#i-o-sinp-sout" title="Link to this heading">¶</a></h3>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Argument</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Description</p></th>
+<tr class="row-odd"><th class="head"><p>Function</p></th>
+<th class="head"><p>Header</p></th>
+<th class="head"><p>Role</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">filename</span></code></p></td>
-<td><p>str</p></td>
-<td><p>Path to trajectory file (any chemfiles format)</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sinp::readLammpsTrj</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_input.hpp</span></code></p></td>
+<td><p>every atom in one LAMMPS frame (1-based)</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">targetFrame</span></code></p></td>
-<td><p>int</p></td>
-<td><p>Frame number to read (1-indexed)</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sinp::readLammpsTrjO</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_input.hpp</span></code></p></td>
+<td><p>one LAMMPS type (oxygen)</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">typeFilter</span></code></p></td>
-<td><p>int</p></td>
-<td><p>Atomic number to filter (-1 = all atoms)</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sinp::readLammpsTrjreduced</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_input.hpp</span></code></p></td>
+<td><p>one type, optional coordinate slice</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sinp::readXYZ</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_input.hpp</span></code></p></td>
+<td><p>XYZ coordinates</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sinp::nLammpsFrames</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_input.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ITEM:</span> <span class="pre">TIMESTEP</span></code> count</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sinp::forEachLammpsFrame</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_input.hpp</span></code></p></td>
+<td><p>walk <code class="docutils literal notranslate"><span class="pre">[first,</span> <span class="pre">last]</span></code>, optional OpenMP</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sinp::dropLammpsDumpIndex</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_input.hpp</span></code></p></td>
+<td><p>drop a cached dump session</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sinp::readChemfiles</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_input.hpp</span></code></p></td>
+<td><p>PDB / GRO / DCD / … when chemfiles is on</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sinp::readCon</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_input.hpp</span></code></p></td>
+<td><p>eOn <code class="docutils literal notranslate"><span class="pre">.con</span></code> when readcon-core is on</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sinp::readBonds</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_input.hpp</span></code></p></td>
+<td><p>ring / bond ID file</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sinp::atomInSlice</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_input.hpp</span></code></p></td>
+<td><p>closed-interval slice test (<code class="docutils literal notranslate"><span class="pre">lo</span> <span class="pre">==</span> <span class="pre">hi</span></code> ignores that axis)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sout::writeDump</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_output.hpp</span></code></p></td>
+<td><p>LAMMPS dump of a <code class="docutils literal notranslate"><span class="pre">PointCloud</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sout::writeAllCages</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_output.hpp</span></code></p></td>
+<td><p>every HC and DDC into <code class="docutils literal notranslate"><span class="pre">cages/</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sout::writeLAMMPSdataTopoBulk</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_output.hpp</span></code></p></td>
+<td><p>bulk HC / DDC data file</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 </section>
-<section id="readcon-optional-requires-readcon-core">
-<h3>readCon (optional, requires readcon-core)<a class="headerlink" href="#readcon-optional-requires-readcon-core" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">readCon</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">targetFrame</span><span class="p">)</span>
-</span></pre></div>
-</div>
-<p>Read a <code class="docutils literal notranslate"><span class="pre">.con</span></code> format file used by eOn for saddle point searches. Available when
-d-SEAMS is built with readcon-core.</p>
-</section>
-</section>
-<section id="neighbour-list-functions">
-<h2>Neighbour list functions<a class="headerlink" href="#neighbour-list-functions" title="Link to this heading">¶</a></h2>
-<section id="neighlisto">
-<h3>neighListO<a class="headerlink" href="#neighlisto" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">nList</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">neighListO</span><span class="p">(</span><span class="n">rcutoff</span><span class="p">,</span> <span class="n">yCloud</span><span class="p">,</span> <span class="n">typeI</span><span class="p">)</span>
-</span></pre></div>
-</div>
-<p>Build a neighbour list for atoms of a given type within a cutoff distance.
-Uses O(n) cell-list algorithm (vesin) when available, with automatic fallback
-to O(n<sup>2</sup>) brute-force.</p>
+<section id="neighbours-nneigh">
+<h3>Neighbours (<code class="docutils literal notranslate"><span class="pre">nneigh</span></code>)<a class="headerlink" href="#neighbours-nneigh" title="Link to this heading">¶</a></h3>
+<p>Rows are central atom then neighbours. ID-keyed lists carry a
+leading self entry. Index-keyed lists come from
+<code class="docutils literal notranslate"><span class="pre">neighbourListByIndex</span></code>.</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Argument</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Description</p></th>
+<tr class="row-odd"><th class="head"><p>Function</p></th>
+<th class="head"><p>Header</p></th>
+<th class="head"><p>Role</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rcutoff</span></code></p></td>
-<td><p>float</p></td>
-<td><p>Cutoff distance (Angstroms)</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nneigh::neighListO</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">neighbours.hpp</span></code></p></td>
+<td><p>cutoff list, one type</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">yCloud</span></code></p></td>
-<td><p>PointCloudDouble</p></td>
-<td><p>Input point cloud</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nneigh::neighList</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">neighbours.hpp</span></code></p></td>
+<td><p>cutoff list, two types</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">typeI</span></code></p></td>
-<td><p>int</p></td>
-<td><p>Atom type to consider</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nneigh::halfNeighList</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">neighbours.hpp</span></code></p></td>
+<td><p>half cutoff list</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nneigh::neighbourListByIndex</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">neighbours.hpp</span></code></p></td>
+<td><p>convert IDs to cloud indices</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nneigh::kNearestNeighbourList</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">neighbours.hpp</span></code></p></td>
+<td><p>mutual or union k-nearest</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nneigh::bondGraphFromName</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">neighbours.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cutoff</span></code> / <code class="docutils literal notranslate"><span class="pre">knn</span></code> / <code class="docutils literal notranslate"><span class="pre">knn-union</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nneigh::SkinNeighborList</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">neighbours.hpp</span></code></p></td>
+<td><p>LAMMPS-skin persistent list</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nneigh::shellSeparation</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">neighbours.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">{max</span> <span class="pre">d_k,</span> <span class="pre">min</span> <span class="pre">d_{k+1}}</span></code> certificate</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>Returns a list of lists. Each inner list starts with the atom’s own ID followed
-by the IDs of its neighbours.</p>
 </section>
-<section id="neighbourlistbyindex">
-<h3>neighbourListByIndex<a class="headerlink" href="#neighbourlistbyindex" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">nListIdx</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">neighbourListByIndex</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">nList</span><span class="p">)</span>
-</span></pre></div>
-</div>
-<p>Convert an ID-based neighbour list to an index-based neighbour list.</p>
-</section>
-<section id="getnewneighbourlistbyindex">
-<h3>getNewNeighbourListByIndex<a class="headerlink" href="#getnewneighbourlistbyindex" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">nListIdx</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">getNewNeighbourListByIndex</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">)</span>
-</span></pre></div>
-</div>
-<p>Build a neighbour list directly by index (combining neighbour search and index
-conversion in one step).</p>
-</section>
-</section>
-<section id="bond-functions">
-<h2>Bond functions<a class="headerlink" href="#bond-functions" title="Link to this heading">¶</a></h2>
-<section id="populatehbonds">
-<h3>populateHbonds<a class="headerlink" href="#populatehbonds" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">hbonds</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">populateHbonds</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">yCloud</span><span class="p">,</span> <span class="n">nList</span><span class="p">,</span> <span class="n">targetFrame</span><span class="p">,</span> <span class="n">Htype</span><span class="p">)</span>
-</span></pre></div>
-</div>
-<p>Build a hydrogen bond network by reading hydrogen positions from the trajectory
-and applying geometric criteria.</p>
+<section id="chill-chill">
+<h3>CHILL (<code class="docutils literal notranslate"><span class="pre">chill</span></code>)<a class="headerlink" href="#chill-chill" title="Link to this heading">¶</a></h3>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Argument</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Description</p></th>
+<tr class="row-odd"><th class="head"><p>Function</p></th>
+<th class="head"><p>Header</p></th>
+<th class="head"><p>Role</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">filename</span></code></p></td>
-<td><p>str</p></td>
-<td><p>Path to LAMMPS dump file</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">chill::chillRule</span></code> / <code class="docutils literal notranslate"><span class="pre">chill::chillPlusRule</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bop.hpp</span></code></p></td>
+<td><p>published water thresholds</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">yCloud</span></code></p></td>
-<td><p>PointCloudDouble</p></td>
-<td><p>Oxygen point cloud</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">chill::bondClassifier</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bop.hpp</span></code></p></td>
+<td><p>look up a named rule set</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nList</span></code></p></td>
-<td><p>list[list[int]]</p></td>
-<td><p>Oxygen neighbour list</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">chill::registerBondClassifier</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bop.hpp</span></code></p></td>
+<td><p>add or replace a named rule</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">targetFrame</span></code></p></td>
-<td><p>int</p></td>
-<td><p>Frame number (1-indexed)</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">chill::classifyBonds</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bop.hpp</span></code></p></td>
+<td><p>fill <code class="docutils literal notranslate"><span class="pre">Point::c_ij</span></code> under a rule</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Htype</span></code></p></td>
-<td><p>int</p></td>
-<td><p>Hydrogen atom type</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">chill::getCorrel</span></code> / <code class="docutils literal notranslate"><span class="pre">chill::getIceType</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bop.hpp</span></code></p></td>
+<td><p>CHILL bonds and ice labels</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">chill::getIceTypeNoPrint</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bop.hpp</span></code></p></td>
+<td><p>CHILL labels, no file</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">chill::getCorrelPlus</span></code> / <code class="docutils literal notranslate"><span class="pre">chill::getIceTypePlus</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bop.hpp</span></code></p></td>
+<td><p>CHILL+ bonds and ice labels</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">chill::getIceTypePlusNoPrint</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bop.hpp</span></code></p></td>
+<td><p>CHILL+ labels, no file</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">chill::getq6</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bop.hpp</span></code></p></td>
+<td><p>per-atom <code class="docutils literal notranslate"><span class="pre">q6</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">chill::reclassifyWater</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bop.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">q6</span></code> reclassification of liquid</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">chill::steinhardtQl</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bop.hpp</span></code></p></td>
+<td><p>local and Lechner-Dellago <code class="docutils literal notranslate"><span class="pre">ql</span></code> / <code class="docutils literal notranslate"><span class="pre">qlBar</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">chill::steinhardtQlVoronoi</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">voronoi_qlm.hpp</span></code></p></td>
+<td><p>facet-area weighted <code class="docutils literal notranslate"><span class="pre">ql</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">chill::voronoiFacetWeights</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">voronoi_qlm.hpp</span></code></p></td>
+<td><p>Voronoi neighbours and area weights</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">chill::classifyTemplates</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">structure_desc.hpp</span></code></p></td>
+<td><p>FCC / HCP / BCC / SC overlay</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">chill::soapSpectrum</span></code> / <code class="docutils literal notranslate"><span class="pre">chill::soapSpectrumAll</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">structure_desc.hpp</span></code></p></td>
+<td><p>Bartok SOAP</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">chill::voronoiFeature</span></code> / <code class="docutils literal notranslate"><span class="pre">chill::voronoiFeatures</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">structure_desc.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[q4,</span> <span class="pre">q6,</span> <span class="pre">q8]</span></code></p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>Returns a list of lists with the same structure as the neighbour list, but
-containing only hydrogen-bonded pairs.</p>
+<p>Ice labels are <code class="docutils literal notranslate"><span class="pre">molSys::atom_state_type</span></code>: <code class="docutils literal notranslate"><span class="pre">cubic</span></code>, <code class="docutils literal notranslate"><span class="pre">hexagonal</span></code>,
+<code class="docutils literal notranslate"><span class="pre">water</span></code>, <code class="docutils literal notranslate"><span class="pre">interfacial</span></code>, <code class="docutils literal notranslate"><span class="pre">clathrate</span></code>, <code class="docutils literal notranslate"><span class="pre">interClathrate</span></code>,
+<code class="docutils literal notranslate"><span class="pre">unclassified</span></code>, <code class="docutils literal notranslate"><span class="pre">reCubic</span></code>, <code class="docutils literal notranslate"><span class="pre">reHex</span></code>. Bond labels are
+<code class="docutils literal notranslate"><span class="pre">molSys::bond_type</span></code>: <code class="docutils literal notranslate"><span class="pre">staggered</span></code>, <code class="docutils literal notranslate"><span class="pre">eclipsed</span></code>, <code class="docutils literal notranslate"><span class="pre">out_of_range</span></code>.</p>
 </section>
-</section>
-<section id="chill-functions">
-<h2>CHILL+ functions<a class="headerlink" href="#chill-functions" title="Link to this heading">¶</a></h2>
-<section id="getcorrelplus">
-<h3>getCorrelPlus<a class="headerlink" href="#getcorrelplus" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">getCorrelPlus</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">nList</span><span class="p">,</span> <span class="n">isSlice</span><span class="p">)</span>
-</span></pre></div>
-</div>
-<p>Compute CHILL+ bond-order correlations. Populates the <code class="docutils literal notranslate"><span class="pre">c_ij</span></code> field on each atom
-in the returned cloud.</p>
-</section>
-<section id="geticetypeplus">
-<h3>getIceTypePlus<a class="headerlink" href="#geticetypeplus" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">getIceTypePlus</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">nList</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">firstFrame</span><span class="p">,</span> <span class="n">isSlice</span><span class="p">,</span> <span class="n">outputFileName</span><span class="p">)</span>
-</span></pre></div>
-</div>
-<p>Run full CHILL+ classification and write results to a file. Sets the <code class="docutils literal notranslate"><span class="pre">iceType</span></code>
-field on each atom.</p>
-</section>
-<section id="getq6">
-<h3>getq6<a class="headerlink" href="#getq6" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">q6</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">getq6</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">nList</span><span class="p">,</span> <span class="n">isSlice</span><span class="p">)</span>
-</span></pre></div>
-</div>
-<p>Compute the q6 bond order parameter for each atom.</p>
-</section>
-<section id="reclassifywater">
-<h3>reclassifyWater<a class="headerlink" href="#reclassifywater" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">cloud</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">reclassifyWater</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">q6</span><span class="p">)</span>
-</span></pre></div>
-</div>
-<p>Reclassify water molecules using q6 values.</p>
-</section>
-</section>
-<section id="ring-analysis-functions">
-<h2>Ring analysis functions<a class="headerlink" href="#ring-analysis-functions" title="Link to this heading">¶</a></h2>
-<section id="ringnetwork">
-<h3>ringNetwork<a class="headerlink" href="#ringnetwork" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">rings</span> <span class="o">=</span> <span class="n">yoda</span><span class="o">.</span><span class="n">ringNetwork</span><span class="p">(</span><span class="n">nList</span><span class="p">,</span> <span class="n">maxDepth</span><span class="p">)</span>
-</span></pre></div>
-</div>
-<p>Find primitive rings in the network using the Franzblau algorithm.</p>
+<section id="rings-primitive-ring">
+<h3>Rings (<code class="docutils literal notranslate"><span class="pre">primitive</span></code>, <code class="docutils literal notranslate"><span class="pre">ring</span></code>)<a class="headerlink" href="#rings-primitive-ring" title="Link to this heading">¶</a></h3>
+<p>Neighbour lists first (<code class="docutils literal notranslate"><span class="pre">nneigh::neighListO</span></code>, then
+<code class="docutils literal notranslate"><span class="pre">nneigh::neighbourListByIndex</span></code>).</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Argument</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Description</p></th>
+<tr class="row-odd"><th class="head"><p>Function</p></th>
+<th class="head"><p>Header</p></th>
+<th class="head"><p>Role</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nList</span></code></p></td>
-<td><p>list[list[int]]</p></td>
-<td><p>Index-based neighbour list</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">primitive::ringNetwork</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">franzblau.hpp</span></code></p></td>
+<td><p>Franzblau primitive rings, by index</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">maxDepth</span></code></p></td>
-<td><p>int</p></td>
-<td><p>Maximum ring size to search for</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">primitive::RingUpdater</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">franzblau.hpp</span></code></p></td>
+<td><p>same rings, incremental across frames</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ring::getSingleRingSize</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ring.hpp</span></code></p></td>
+<td><p>keep rings of one size</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ring::polygonRingAnalysis</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">topo_two_dim.hpp</span></code></p></td>
+<td><p>monolayer polygon types</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ring::bulkPolygonRingAnalysis</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">topo_bulk.hpp</span></code></p></td>
+<td><p>bulk polygon types</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ring::prismAnalysis</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">topo_one_dim.hpp</span></code></p></td>
+<td><p>ice-nanotube prism blocks</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ring::findPrisms</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">topo_one_dim.hpp</span></code></p></td>
+<td><p>prism ring IDs</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>Returns a list of rings, where each ring is a list of atom indices.</p>
 </section>
-<section id="polygonringanalysis">
-<h3>polygonRingAnalysis<a class="headerlink" href="#polygonringanalysis" title="Link to this heading">¶</a></h3>
-<p>Classify rings by polygon type for 2D systems (sheets).</p>
-</section>
-<section id="bulkpolygonringanalysis">
-<h3>bulkPolygonRingAnalysis<a class="headerlink" href="#bulkpolygonringanalysis" title="Link to this heading">¶</a></h3>
-<p>Classify rings by polygon type for bulk (3D) systems.</p>
-</section>
-<section id="prismanalysis">
-<h3>prismAnalysis<a class="headerlink" href="#prismanalysis" title="Link to this heading">¶</a></h3>
-<p>Find and classify prismatic cages in the ring network.</p>
-</section>
-</section>
-<section id="topological-unit-matching-tum">
-<h2>Topological unit matching (TUM)<a class="headerlink" href="#topological-unit-matching-tum" title="Link to this heading">¶</a></h2>
-<section id="topobulkcriteria">
-<h3>topoBulkCriteria<a class="headerlink" href="#topobulkcriteria" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">yoda</span><span class="o">.</span><span class="n">topoBulkCriteria</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">rings</span><span class="p">,</span> <span class="n">nList</span><span class="p">,</span> <span class="n">yCloud</span><span class="p">,</span> <span class="n">firstFrame</span><span class="p">,</span> <span class="n">numHC</span><span class="p">,</span> <span class="n">numDDC</span><span class="p">,</span> <span class="n">ringType</span><span class="p">)</span>
-</span></pre></div>
+<section id="cages-cage-ring-tum3">
+<h3>Cages (<code class="docutils literal notranslate"><span class="pre">cage</span></code>, <code class="docutils literal notranslate"><span class="pre">ring</span></code>, <code class="docutils literal notranslate"><span class="pre">tum3</span></code>)<a class="headerlink" href="#cages-cage-ring-tum3" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Function</p></th>
+<th class="head"><p>Header</p></th>
+<th class="head"><p>Role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ring::findHC</span></code> / <code class="docutils literal notranslate"><span class="pre">ring::findDDC</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">topo_bulk.hpp</span></code></p></td>
+<td><p>hexagonal and double-diamond cages</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ring::topoBulkAnalysis</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">topo_bulk.hpp</span></code></p></td>
+<td><p>HC / DDC classification of the frame</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ring::cageAffiliation</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cage_affiliation.hpp</span></code></p></td>
+<td><p>claim-free per-ring HC / DDC flags</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ring::AffiliationUpdater</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cage_affiliation.hpp</span></code></p></td>
+<td><p>same flags, incremental</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ring::seededCageAffiliation</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cage_affiliation.hpp</span></code></p></td>
+<td><p>mutual-k seeds, union completions</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">tum3::topoBulkCriteria</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bulkTUM.hpp</span></code></p></td>
+<td><p>cages plus <code class="docutils literal notranslate"><span class="pre">ring::strucType</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">tum3::topoUnitMatchingBulk</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bulkTUM.hpp</span></code></p></td>
+<td><p>TUM with optional cluster XYZ</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cage::canonicalCertificate</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cage_canon.hpp</span></code></p></td>
+<td><p>nauty adjacency certificate</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cage::isHexagonalPrism</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cage_canon.hpp</span></code></p></td>
+<td><p>ring graph isomorphic to HC</p></td>
+</tr>
+</tbody>
+</table>
 </div>
-<p>Apply topological criteria to identify hexagonal cages (HC) and double-diamond
-cages (DDC) in bulk ice.</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">cage::Cage</span></code> holds a <code class="docutils literal notranslate"><span class="pre">cage::cageType</span></code> (<code class="docutils literal notranslate"><span class="pre">HexC</span></code> or <code class="docutils literal notranslate"><span class="pre">DoubleDiaC</span></code>) and
+the ring indices that make it. Per-atom cage labels are
+<code class="docutils literal notranslate"><span class="pre">cage::iceType</span></code> (<code class="docutils literal notranslate"><span class="pre">dummy</span></code>, <code class="docutils literal notranslate"><span class="pre">hc</span></code>, <code class="docutils literal notranslate"><span class="pre">ddc</span></code>, <code class="docutils literal notranslate"><span class="pre">mixed</span></code>, <code class="docutils literal notranslate"><span class="pre">pnc</span></code>, <code class="docutils literal notranslate"><span class="pre">mixed2</span></code>).
+The CLI default <code class="docutils literal notranslate"><span class="pre">--graph</span> <span class="pre">seeded</span></code> is <code class="docutils literal notranslate"><span class="pre">seededCageAffiliation</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ring::strucType</span></code>: <code class="docutils literal notranslate"><span class="pre">unclassified</span></code>, <code class="docutils literal notranslate"><span class="pre">DDC</span></code>, <code class="docutils literal notranslate"><span class="pre">HCbasal</span></code>, <code class="docutils literal notranslate"><span class="pre">HCprismatic</span></code>,
+<code class="docutils literal notranslate"><span class="pre">bothBasal</span></code>, <code class="docutils literal notranslate"><span class="pre">bothPrismatic</span></code>, <code class="docutils literal notranslate"><span class="pre">Prism</span></code>, <code class="docutils literal notranslate"><span class="pre">deformedPrism</span></code>,
+<code class="docutils literal notranslate"><span class="pre">mixedPrismRing</span></code>.</p>
 </section>
-<section id="topounitmatchingbulk">
-<h3>topoUnitMatchingBulk<a class="headerlink" href="#topounitmatchingbulk" title="Link to this heading">¶</a></h3>
-<p>Run full TUM analysis for bulk systems, including optional cluster analysis.</p>
-</section>
-</section>
-<section id="output-functions">
-<h2>Output functions<a class="headerlink" href="#output-functions" title="Link to this heading">¶</a></h2>
-<section id="writedump">
-<h3>writeDump<a class="headerlink" href="#writedump" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">yoda</span><span class="o">.</span><span class="n">writeDump</span><span class="p">(</span><span class="n">yCloud</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">outFile</span><span class="p">)</span>
-</span></pre></div>
+<section id="bonds-orientation-optional-backends">
+<h3>Bonds, orientation, optional backends<a class="headerlink" href="#bonds-orientation-optional-backends" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Function</p></th>
+<th class="head"><p>Header</p></th>
+<th class="head"><p>Role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bond::populateHbonds</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bond.hpp</span></code></p></td>
+<td><p>geometric H-bonds (2.42 A, 30 deg)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bond::populateHbondsWithInputClouds</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bond.hpp</span></code></p></td>
+<td><p>same, with a hydrogen <code class="docutils literal notranslate"><span class="pre">PointCloud</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">absor::hornAbsOrientation</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">absOrientation.hpp</span></code></p></td>
+<td><p>Horn quaternion overlay</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ira::available</span></code> / <code class="docutils literal notranslate"><span class="pre">ira::match</span></code> / <code class="docutils literal notranslate"><span class="pre">ira::pointGroup</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ira_sofi.hpp</span></code></p></td>
+<td><p>IRA overlay, SOFI point group</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ira::orient</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ira_sofi.hpp</span></code></p></td>
+<td><p>Horn-shaped quat + RMSD from IRA</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::sphericart_ylm::ylmCartesian</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sphericart_ylm.hpp</span></code></p></td>
+<td><p>batched Cartesian <code class="docutils literal notranslate"><span class="pre">Y_lm</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">clump::clusterAnalysis</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cluster.hpp</span></code></p></td>
+<td><p>largest ice cluster</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rdf2::rdf2Danalysis_AA</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rdf2d.hpp</span></code></p></td>
+<td><p>in-plane RDF</p></td>
+</tr>
+</tbody>
+</table>
 </div>
-<p>Write the point cloud to a LAMMPS dump file.</p>
 </section>
 </section>
 </section>
@@ -706,16 +804,16 @@ cages (DDC) in bulk ice.</p>
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="nix.html">
+    <a href="data-formats.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">Nix flake</div></div>
+        <span>Previous</span><div class="title">Data Formats</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="data-formats.html">
+    <a href="../api/index.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">Data Formats</div>
+        <div class="title">C++ headers (doxyrest)</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>
@@ -747,5 +845,6 @@ cages (DDC) in bulk ice.</p>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/target-highlight.js?v=df7d332b"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
       <script src="../_static/shibuya.js?v=cac61aee"></script></body>
 </html>

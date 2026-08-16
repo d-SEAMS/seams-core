@@ -3,29 +3,104 @@ Changelog
 =========
 
 
+The C++ engine is this repository. Python is ``pydseams``
+(`PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_). Lua is
+``require("dseams")`` (`yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_).
+
+2.2.5
+-----
+
+``subprojects/linkcell.wrap`` is v0.2.4. A static ``libyodaLib.a``
+no longer passes ``liblinkcell.so`` to ``ar``. Wrap consumers link
+the static archive. Dump doubles parse with ``strtod`` on Apple libc++.
+
+2.2.4
+-----
+
+Periodic *k*-nearest graphs via `d-SEAMS/linkcell <https://github.com/d-SEAMS/linkcell>`_ v0.2.2.
+``kNearestNeighbourList`` / ``kNearestNeighbourPair`` write packed
+``n*k`` nominations. Mutual and union come from one walk. The LAMMPS
+dump box is bound spans plus ``xy, xz, yz``; ``periodicDistSq`` recovers
+H. Empty frames no longer abort the walker.
+
+Docs orgmode covers the ``seams`` CLI, the Nix flake, and the
+three-repo split.
+
+2.2.3
+-----
+
+The ``seams`` CLI uses Argum. Help, errors, ice-type counts, and
+``--features`` are colorized. ``NO_COLOR`` turns the colors off.
+
+2.2.2
+-----
+
+The compiled Python surface is ``pydseams.yoda``. ``_core`` remains an
+alias.
+
+2.2.1
+-----
+
+- Flake package for ``libyodaLib`` and ``seams`` (Meson, not the
+  CMake-era ``yodaStruct`` derivation).
+
+- Live LAMMPS dump session (``nLammpsFrames``,
+  ``forEachLammpsFrame``): ``seams --frame N --last M --jobs J``.
+
+- ``BondGraph`` at runtime: ``cutoff``, ``knn``, ``knn-union``. ``seams cages --graph`` adds ``seeded``.
+
+- LAMMPS readers bind ``xu~/~yu~/~zu`` and ``xs~/~ys~/~zs`` when ``x y z``
+  are absent.
+
+2.2.0
+-----
+
+``seams`` CLI: ``read``, ``chill``, ``chill-plus``, ``cages``. This is the
+engine command line.
+
+2.1.2
+-----
+
+Removed CMake-era Nix entrypoints that still named the product
+``yodaStruct``. Build with pixi or ``nix build``.
+
+2.1.1
+-----
+
+CHILL interfacial walk uses the same four-neighbour star as ``c_ij``.
+Atoms without four recorded bonds go to water. Seeded affiliation
+floods HC and DDC separately.
+
+2.1.0
+-----
+
+The C++ engine is this repository. Front ends are not.
+
+- The ``yodaStruct`` Lua/Fennel CLI moved to
+  `https://github.com/d-SEAMS/yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_ . ``-Dwith_lua=enabled`` is an
+  error that names that repository.
+
+- Python bindings remain in
+  `https://github.com/d-SEAMS/PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_ (moved in 2.0.1).
+
+- C++ ``getCorrel`` / ``getIceType`` family and ``reclassifyWater`` return
+  ``void``.
+
+2.0.1
+-----
+
+Python bindings moved to PydSEAMSlib. This repository is the C++
+engine.
 
 2.0.0
 -----
 
-- Modernized build system: Meson replaces CMake
-
-- Python bindings via nanobind (replacing pybind11)
-
-- New pixi-based development environment
-
-- ASE adapter for converting ASE Atoms to d-SEAMS point clouds
-
-- Comprehensive Python test suite (pytest)
+Meson replaces CMake. License is MIT. Optional vesin neighbour lists,
+Highway SIMD, chemfiles, and readcon-core. Catch2 suite for the
+engine.
 
 1.0.0
 -----
 
-- Initial release with Lua scripting interface
-
-- CHILL and CHILL+ ice classification
-
-- Franzblau ring analysis
-
-- Topological unit matching (TUM) for bulk ice
-
-- LAMMPS trajectory reader
+Initial release. See Goswami et al., J. Chem. Inf. Model. 2020, 60,
+2169-2177.

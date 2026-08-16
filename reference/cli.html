@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>seams CLI - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Nix flake" href="nix.html" /><link rel="prev" title="Three repositories" href="../explanation/architecture.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>seams CLI - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Data Formats" href="data-formats.html" /><link rel="prev" title="Reference" href="index.html" />
       <link rel="canonical" href="https://docs.dseams.info/reference/cli.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -10,6 +10,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
     <link rel="stylesheet" type="text/css" href="../_static/doxyrest-pygments.css?v=ff3f4257" />
     <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,13 +35,22 @@
       <strong>d-SEAMS</strong>
     </a>
     <div class="sy-head-nav" id="head-nav">
-      <nav class="sy-head-links"><ul><li class="link">
-          <a href="https://github.com/d-SEAMS/PydSEAMSlib">
-            <span>pydseams</span><i class="i-lucide external-link"></i></a>
-        </li><li class="link">
-          <a href="https://github.com/d-SEAMS/yodaStruct">
-            <span>dseams (Lua)</span><i class="i-lucide external-link"></i></a>
-        </li></ul></nav>
+      <nav class="sy-head-links"><ul>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-1" aria-controls="nav-children-1">
+            <span>Ecosystem</span>
+            <i class="i-lucide chevron-down"></i>
+          </button>
+        <ul id="nav-children-1" aria-labelledby="nav-trigger-1"><li><a href="https://docs.dseams.info">
+                <span>d-SEAMS engine</span>
+                <small>libyodaLib and the seams CLI</small>
+              </a></li><li><a href="https://d-seams.github.io/PydSEAMSlib/">
+                <span>pydseams</span>
+                <small>Python Frame API on yoda</small>
+              </a></li><li><a href="https://d-seams.github.io/yodaStruct/">
+                <span>dseams (Lua)</span>
+                <small>require("dseams") and Fennel</small>
+              </a></li></ul>
+      </li></ul></nav>
       <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
   <input type="text" name="q" placeholder="Search" />
   <kbd>/</kbd>
@@ -74,28 +84,47 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Bulk ice on the mixed TIP4P example</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/nanotube.html">Quasi-one-dimensional ice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
 </ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-To Guides</span></p>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">How-to</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ase-integration.html">ASE integration</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/solvis.html">View a classified frame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/confined-ice.html">Confined ice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/faq.html">FAQ</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/troubleshooting.html">Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Explanation</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/index.html">Explanation</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Three repositories</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">Citation</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
 <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">seams CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-formats.html">Data Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nix.html">Nix flake</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glossary.html">Glossary</a></li>
+</ul>
+</li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">seams CLI</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="data-formats.html">Data Formats</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="nix.html">Nix flake</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="api.html">API Reference</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="data-formats.html">Data Formats</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
         </div>
       </div>
@@ -107,7 +136,15 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#commands">Commands</a></li>
 <li><a class="reference internal" href="#options">Options</a></li>
+<li><a class="reference internal" href="#type"><code class="docutils literal notranslate"><span class="pre">--type</span></code></a></li>
+<li><a class="reference internal" href="#graph"><code class="docutils literal notranslate"><span class="pre">--graph</span></code></a></li>
+<li><a class="reference internal" href="#file-suffix">File suffix</a></li>
+<li><a class="reference internal" href="#frame-ranges">Frame ranges</a></li>
+<li><a class="reference internal" href="#features"><code class="docutils literal notranslate"><span class="pre">--features</span></code></a></li>
+<li><a class="reference internal" href="#colors">Colors</a></li>
+<li><a class="reference internal" href="#exit-status">Exit status</a></li>
 <li><a class="reference internal" href="#examples">Examples</a></li>
 </ul>
 </div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
@@ -149,8 +186,12 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">seams CLI</strong>
+        <a itemprop="item" href="index.html"><span itemprop="name">Reference</span></a>
+        <span>/</span>
         <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">seams CLI</strong>
+        <meta itemprop="position" content="3" />
       </li></ol>
     <div class="xl:hidden ml-1">
       <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
@@ -199,9 +240,9 @@ data-aria-dark="Switch to auto color mode">
 </div><article class="yue dark-code" role="main">
           <section id="seams-cli">
 <h1>seams CLI<a class="headerlink" href="#seams-cli" title="Link to this heading">¶</a></h1>
-<p>The engine command is <code class="docutils literal notranslate"><span class="pre">seams</span></code>. It uses Argum (the same parser as
-eonclient). Help, errors and ice-type counts are colorized.
-<code class="docutils literal notranslate"><span class="pre">NO_COLOR</span></code> / <code class="docutils literal notranslate"><span class="pre">FORCE_COLOR</span></code> apply.</p>
+<p>The engine command is <code class="docutils literal notranslate"><span class="pre">seams</span></code>. The parser is Argum (the same parser as
+eonclient). Help, errors, ice-type counts, and <code class="docutils literal notranslate"><span class="pre">--features</span></code> are
+colorized through Argum’s <code class="docutils literal notranslate"><span class="pre">environmentColorStatus</span></code>.</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams --help
 </span><span data-line="2">seams --version
 </span><span data-line="3">seams --features
@@ -211,36 +252,299 @@ eonclient). Help, errors and ice-type counts are colorized.
 </span><span data-line="7">seams cages FILE
 </span></pre></div>
 </div>
-<section id="options">
-<h2>Options<a class="headerlink" href="#options" title="Link to this heading">¶</a></h2>
+<p>A positional <code class="docutils literal notranslate"><span class="pre">command</span></code> and a positional <code class="docutils literal notranslate"><span class="pre">file</span></code> are required. Missing
+either, an unknown command, or a parse error exits 2.</p>
+<section id="commands">
+<h2>Commands<a class="headerlink" href="#commands" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">command</span></code> positional help string is <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">|</span> <span class="pre">chill</span> <span class="pre">|</span> <span class="pre">chill-plus</span> <span class="pre">|</span> <span class="pre">cages</span></code>. <code class="docutils literal notranslate"><span class="pre">chill_plus</span></code> is an accepted alias of <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code> (not listed
+in that help string).</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>flag</p></th>
-<th class="head"><p>meaning</p></th>
+<tr class="row-odd"><th class="head"><p>command</p></th>
+<th class="head"><p>action</p></th>
+<th class="head"><p>stdout</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-f</span></code>, <code class="docutils literal notranslate"><span class="pre">--frame</span> <span class="pre">N</span></code></p></td>
-<td><p>first frame, 1-based</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">read</span></code></p></td>
+<td><p>print the loaded cloud</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">N</span> <span class="pre">frame</span> <span class="pre">F</span> <span class="pre">box</span> <span class="pre">Lx</span> <span class="pre">Ly</span> <span class="pre">Lz</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--last</span> <span class="pre">N</span></code></p></td>
-<td><p>last frame inclusive; omit for one frame</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">chill</span></code></p></td>
+<td><p>CHILL four-neighbour labels</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">N</span></code> then <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">count</span></code> for each ice type present</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-j</span></code>, <code class="docutils literal notranslate"><span class="pre">--jobs</span> <span class="pre">N</span></code></p></td>
-<td><p>OpenMP workers over a frame range</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">chill-plus</span></code></p></td>
+<td><p>CHILL+ four-neighbour labels</p></td>
+<td><p>same as <code class="docutils literal notranslate"><span class="pre">chill</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-t</span></code>, <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">I</span></code></p></td>
-<td><p>atom type; <code class="docutils literal notranslate"><span class="pre">0</span></code> guesses oxygen then type 1</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cages</span></code></p></td>
+<td><p>ice score on six-membered rings</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">N</span> <span class="pre">graph</span> <span class="pre">KIND</span> <span class="pre">hexagonal</span> <span class="pre">IH</span> <span class="pre">cubic</span> <span class="pre">IC</span> <span class="pre">water</span> <span class="pre">W</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-c</span></code>, <code class="docutils literal notranslate"><span class="pre">--cutoff</span> <span class="pre">A</span></code></p></td>
-<td><p>neighbour cutoff (Å)</p></td>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">chill</span></code> / <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code> call <code class="docutils literal notranslate"><span class="pre">nneigh::neighListO</span></code>, then
+<code class="docutils literal notranslate"><span class="pre">chill::getCorrel</span></code> / <code class="docutils literal notranslate"><span class="pre">chill::getIceTypeNoPrint</span></code> or
+<code class="docutils literal notranslate"><span class="pre">chill::getCorrelPlus</span></code> / <code class="docutils literal notranslate"><span class="pre">chill::getIceTypePlusNoPrint</span></code>. Ice names
+are the <code class="docutils literal notranslate"><span class="pre">molSys::atom_state_type</span></code> enumerators: <code class="docutils literal notranslate"><span class="pre">cubic</span></code>, <code class="docutils literal notranslate"><span class="pre">hexagonal</span></code>,
+<code class="docutils literal notranslate"><span class="pre">water</span></code>, <code class="docutils literal notranslate"><span class="pre">interfacial</span></code>, <code class="docutils literal notranslate"><span class="pre">clathrate</span></code>, <code class="docutils literal notranslate"><span class="pre">interClathrate</span></code>, <code class="docutils literal notranslate"><span class="pre">reCubic</span></code>,
+<code class="docutils literal notranslate"><span class="pre">reHex</span></code>, <code class="docutils literal notranslate"><span class="pre">unclassified</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">cages</span></code> reports cage membership, not CHILL labels: hexagonal = HC
+(Ih), cubic = DDC (Ic), water = neither. The bond graph is
+<code class="docutils literal notranslate"><span class="pre">--graph</span></code>.</p>
+<p>An empty cloud (<code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span></code>) still prints. <code class="docutils literal notranslate"><span class="pre">chill</span></code> / <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code> print
+<code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span></code>. <code class="docutils literal notranslate"><span class="pre">cages</span></code> prints <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span> <span class="pre">graph</span> <span class="pre">KIND</span> <span class="pre">hexagonal</span> <span class="pre">0</span> <span class="pre">cubic</span> <span class="pre">0</span> <span class="pre">water</span> <span class="pre">0</span></code>.</p>
+</section>
+<section id="options">
+<h2>Options<a class="headerlink" href="#options" title="Link to this heading">¶</a></h2>
+<p>Names and help text are the Argum <code class="docutils literal notranslate"><span class="pre">Option</span></code> / <code class="docutils literal notranslate"><span class="pre">Positional</span></code>
+definitions in <code class="docutils literal notranslate"><span class="pre">src/seams_cli.cpp</span></code>. Defaults are the C++
+initializers (Argum does not write defaults into the help).</p>
+<p><code class="docutils literal notranslate"><span class="pre">--help</span></code>, <code class="docutils literal notranslate"><span class="pre">--version</span></code>, and <code class="docutils literal notranslate"><span class="pre">--features</span></code> print and exit 0 before any
+file is opened.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--cutoff</span></code> is in Angstrom. <code class="docutils literal notranslate"><span class="pre">-k</span></code> also applies to <code class="docutils literal notranslate"><span class="pre">knn-union</span></code> (the
+same <code class="docutils literal notranslate"><span class="pre">k</span></code> feeds <code class="docutils literal notranslate"><span class="pre">nneigh::kNearestNeighbourList</span></code>). <code class="docutils literal notranslate"><span class="pre">--graph</span></code> is used
+only by <code class="docutils literal notranslate"><span class="pre">cages</span></code>.</p>
+</section>
+<section id="type">
+<h2><code class="docutils literal notranslate"><span class="pre">--type</span></code><a class="headerlink" href="#type" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>value</p></th>
+<th class="head"><p>single frame (<code class="docutils literal notranslate"><span class="pre">load</span></code>)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">--last</span></code> range (<code class="docutils literal notranslate"><span class="pre">forEachLammpsFrame</span></code>)</p></th>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-k</span> <span class="pre">N</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">k</span></code> for knn / seeded cages</p></td>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>LAMMPS: type 2, then type 1 if that cloud is empty. chemfiles: keep every atom. XYZ: every atom is type 1</p></td>
+<td><p>LAMMPS: every atom (<code class="docutils literal notranslate"><span class="pre">sinp::readLammpsTrj</span></code>). Classification uses <code class="docutils literal notranslate"><span class="pre">cloud.pts[0].type</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--graph</span> <span class="pre">KIND</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">cutoff</span></code> / <code class="docutils literal notranslate"><span class="pre">knn</span></code> / <code class="docutils literal notranslate"><span class="pre">knn-union</span></code> / <code class="docutils literal notranslate"><span class="pre">seeded</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">I</span> <span class="pre">&gt;</span> <span class="pre">0</span></code></p></td>
+<td><p>LAMMPS <code class="docutils literal notranslate"><span class="pre">readLammpsTrjO</span></code> / chemfiles filter <code class="docutils literal notranslate"><span class="pre">I</span></code></p></td>
+<td><p>LAMMPS <code class="docutils literal notranslate"><span class="pre">readLammpsTrjO</span></code> with that type</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>XYZ always stores type 1. Classification still uses <code class="docutils literal notranslate"><span class="pre">--type</span></code> after
+the read (type 0 then becomes 1).</p>
+</section>
+<section id="graph">
+<h2><code class="docutils literal notranslate"><span class="pre">--graph</span></code><a class="headerlink" href="#graph" title="Link to this heading">¶</a></h2>
+<p>Used only by <code class="docutils literal notranslate"><span class="pre">cages</span></code>.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>value</p></th>
+<th class="head"><p>graph</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seeded</span></code></p></td>
+<td><p>mutual <code class="docutils literal notranslate"><span class="pre">k</span></code>-nearest seeds, union completions (<code class="docutils literal notranslate"><span class="pre">ring::seededCageAffiliation</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cutoff</span></code></p></td>
+<td><p>pairs inside <code class="docutils literal notranslate"><span class="pre">--cutoff</span></code> (<code class="docutils literal notranslate"><span class="pre">nneigh::neighListO</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">knn</span></code></p></td>
+<td><p>mutual k-nearest (<code class="docutils literal notranslate"><span class="pre">nneigh::BondGraph::KnnMutual</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">knn-union</span></code></p></td>
+<td><p>union k-nearest (<code class="docutils literal notranslate"><span class="pre">nneigh::BondGraph::KnnUnion</span></code>)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">nneigh::bondGraphFromName</span></code> also accepts <code class="docutils literal notranslate"><span class="pre">knn-mutual</span></code> and <code class="docutils literal notranslate"><span class="pre">mutual</span></code>
+as <code class="docutils literal notranslate"><span class="pre">knn</span></code>, and <code class="docutils literal notranslate"><span class="pre">union</span></code> as <code class="docutils literal notranslate"><span class="pre">knn-union</span></code>. <code class="docutils literal notranslate"><span class="pre">seeded</span></code> is handled in the CLI
+and is not a <code class="docutils literal notranslate"><span class="pre">BondGraph</span></code> enumerator. Any other name throws
+<code class="docutils literal notranslate"><span class="pre">std::invalid_argument</span></code> (<code class="docutils literal notranslate"><span class="pre">unknown</span> <span class="pre">bond</span> <span class="pre">graph</span> <span class="pre">'NAME'</span> <span class="pre">(use</span> <span class="pre">cutoff,</span> <span class="pre">knn,</span> <span class="pre">knn-union)</span></code>) and <code class="docutils literal notranslate"><span class="pre">cages</span></code> exits 2.</p>
+<p>Candidate cutoff for the knn graphs is <code class="docutils literal notranslate"><span class="pre">--cutoff</span> <span class="pre">+</span> <span class="pre">1.5</span></code>.</p>
+</section>
+<section id="file-suffix">
+<h2>File suffix<a class="headerlink" href="#file-suffix" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">seams</span></code> picks a reader from the path suffix
+(<code class="docutils literal notranslate"><span class="pre">path.find_last_of('.')</span></code>):</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>suffix</p></th>
+<th class="head"><p>reader</p></th>
+<th class="head"><p>compile-time gate</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">xyz</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sinp::readXYZ</span></code></p></td>
+<td><p>always</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">con</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sinp::readCon</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_READCON</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pdb</span></code>, <code class="docutils literal notranslate"><span class="pre">gro</span></code>, <code class="docutils literal notranslate"><span class="pre">dcd</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sinp::readChemfiles</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_CHEMFILES</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>anything else</p></td>
+<td><p>LAMMPS dump (<code class="docutils literal notranslate"><span class="pre">readLammpsTrjO</span></code> / <code class="docutils literal notranslate"><span class="pre">readLammpsTrj</span></code>)</p></td>
+<td><p>always</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>A build without chemfiles or readcon-core treats <code class="docutils literal notranslate"><span class="pre">.pdb</span></code> / <code class="docutils literal notranslate"><span class="pre">.gro</span></code> /
+<code class="docutils literal notranslate"><span class="pre">.dcd</span></code> / <code class="docutils literal notranslate"><span class="pre">.con</span></code> as LAMMPS dumps. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">--features</span></code> reports those
+gates.</p>
+</section>
+<section id="frame-ranges">
+<h2>Frame ranges<a class="headerlink" href="#frame-ranges" title="Link to this heading">¶</a></h2>
+<p>Omit <code class="docutils literal notranslate"><span class="pre">--last</span></code>, or set it equal to <code class="docutils literal notranslate"><span class="pre">--frame</span></code>, for one frame. That
+path calls <code class="docutils literal notranslate"><span class="pre">load</span></code> and works for every linked suffix.</p>
+<p>A range (<code class="docutils literal notranslate"><span class="pre">--last</span></code> &gt; <code class="docutils literal notranslate"><span class="pre">--frame</span></code>) always walks a LAMMPS dump through
+<code class="docutils literal notranslate"><span class="pre">sinp::forEachLammpsFrame</span></code>. Each OpenMP worker opens its own handle
+and seeks the shared <code class="docutils literal notranslate"><span class="pre">ITEM:</span> <span class="pre">TIMESTEP</span></code> offset table. <code class="docutils literal notranslate"><span class="pre">--jobs</span> <span class="pre">1</span></code> is
+serial. Non-LAMMPS suffixes are not walked this way.</p>
+</section>
+<section id="features">
+<h2><code class="docutils literal notranslate"><span class="pre">--features</span></code><a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>
+<p>Heading <code class="docutils literal notranslate"><span class="pre">Compile-time</span> <span class="pre">features:</span></code> then one line per backend. Each
+line is <code class="docutils literal notranslate"><span class="pre">NAME:</span> <span class="pre">enabled</span></code> or <code class="docutils literal notranslate"><span class="pre">NAME:</span> <span class="pre">disabled</span></code>.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>printed name</p></th>
+<th class="head"><p>macro</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">OpenMP</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_OPENMP</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MPI</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_MPI</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Highway</span> <span class="pre">SIMD</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_HWY</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">vesin</span> <span class="pre">neighbours</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_VESIN</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">chemfiles</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_CHEMFILES</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">readcon-core</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_READCON</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">IRA/SOFI</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_IRA</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sphericart</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_SPHERICART</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nauty</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_NAUTY</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="colors">
+<h2>Colors<a class="headerlink" href="#colors" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">colorizerForFile(environmentColorStatus(),</span> <span class="pre">stdout)</span></code>. Argum’s
+<code class="docutils literal notranslate"><span class="pre">environmentColorStatus</span></code> (first match wins):</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>condition</p></th>
+<th class="head"><p>result</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">NO_COLOR</span></code> set and non-empty</p></td>
+<td><p>off</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">FORCE_COLOR</span></code> set and non-empty</p></td>
+<td><p>on</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CLICOLOR_FORCE</span></code> set, non-empty, not <code class="docutils literal notranslate"><span class="pre">0</span></code> / <code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+<td><p>on</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">CLICOLOR_FORCE</span></code> is <code class="docutils literal notranslate"><span class="pre">0</span></code> or <code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+<td><p>off</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CLICOLOR</span></code> is <code class="docutils literal notranslate"><span class="pre">0</span></code> or <code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+<td><p>off</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">CLICOLOR</span></code> set and non-empty</p></td>
+<td><p>allowed (TTY decides)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">COLORTERM</span></code> set and non-empty</p></td>
+<td><p>allowed</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TERM=dumb</span></code></p></td>
+<td><p>off</p></td>
+</tr>
+<tr class="row-even"><td><p>otherwise</p></td>
+<td><p>TTY / <code class="docutils literal notranslate"><span class="pre">TERM</span></code> heuristics</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Color roles on this binary:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>role</p></th>
+<th class="head"><p>used for</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">heading</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">d-SEAMS</span></code> banner, <code class="docutils literal notranslate"><span class="pre">nop</span></code>, <code class="docutils literal notranslate"><span class="pre">Compile-time</span> <span class="pre">features:</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">progName</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams</span></code> in <code class="docutils literal notranslate"><span class="pre">--version</span></code>; <code class="docutils literal notranslate"><span class="pre">clathrate</span></code>, <code class="docutils literal notranslate"><span class="pre">interClathrate</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">longOption</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">frame</span></code>, <code class="docutils literal notranslate"><span class="pre">graph</span></code>; <code class="docutils literal notranslate"><span class="pre">cubic</span></code>, <code class="docutils literal notranslate"><span class="pre">reCubic</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">shortOption</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">box</span></code>; <code class="docutils literal notranslate"><span class="pre">hexagonal</span></code>, <code class="docutils literal notranslate"><span class="pre">reHex</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">warning</span></code></p></td>
+<td><p>usage line; <code class="docutils literal notranslate"><span class="pre">interfacial</span></code>; <code class="docutils literal notranslate"><span class="pre">enabled</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">error</span></code></p></td>
+<td><p>parse / missing-args / unknown-command; <code class="docutils literal notranslate"><span class="pre">unclassified</span></code>; <code class="docutils literal notranslate"><span class="pre">disabled</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>uncolored</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">water</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="exit-status">
+<h2>Exit status<a class="headerlink" href="#exit-status" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>code</p></th>
+<th class="head"><p>when</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>success, including <code class="docutils literal notranslate"><span class="pre">--help</span></code> / <code class="docutils literal notranslate"><span class="pre">--version</span></code> / <code class="docutils literal notranslate"><span class="pre">--features</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">2</span></code></p></td>
+<td><p>parse error, missing command or file, unknown command, unknown <code class="docutils literal notranslate"><span class="pre">--graph</span></code></p></td>
 </tr>
 </tbody>
 </table>
@@ -251,12 +555,17 @@ eonclient). Help, errors and ice-type counts are colorized.
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span><span class="nb">read</span><span class="w"> </span>input/traj/exampleTraj.lammpstrj
 </span><span data-line="2">seams<span class="w"> </span>chill-plus<span class="w"> </span>input/traj/exampleTraj.lammpstrj<span class="w"> </span>--cutoff<span class="w"> </span><span class="m">3</span>.5<span class="w"> </span>--type<span class="w"> </span><span class="m">2</span>
 </span><span data-line="3">seams<span class="w"> </span>cages<span class="w"> </span>input/traj/mW_cubic.lammpstrj<span class="w"> </span>--type<span class="w"> </span><span class="m">1</span><span class="w"> </span>--graph<span class="w"> </span>seeded
-</span><span data-line="4">seams<span class="w"> </span>chill-plus<span class="w"> </span>dump.lammpstrj<span class="w"> </span>--frame<span class="w"> </span><span class="m">1</span><span class="w"> </span>--last<span class="w"> </span><span class="m">50</span><span class="w"> </span>--jobs<span class="w"> </span><span class="m">8</span>
+</span><span data-line="4">seams<span class="w"> </span>cages<span class="w"> </span>dump.lammpstrj<span class="w"> </span>--graph<span class="w"> </span>cutoff
+</span><span data-line="5">seams<span class="w"> </span>cages<span class="w"> </span>dump.lammpstrj<span class="w"> </span>--graph<span class="w"> </span>knn
+</span><span data-line="6">seams<span class="w"> </span>cages<span class="w"> </span>dump.lammpstrj<span class="w"> </span>--graph<span class="w"> </span>knn-union
+</span><span data-line="7">seams<span class="w"> </span>chill-plus<span class="w"> </span>dump.lammpstrj<span class="w"> </span>--frame<span class="w"> </span><span class="m">1</span><span class="w"> </span>--last<span class="w"> </span><span class="m">50</span><span class="w"> </span>--jobs<span class="w"> </span><span class="m">8</span>
 </span></pre></div>
 </div>
 <p>Lua and Python are not this binary. See
-<a class="reference external" href="https://github.com/d-SEAMS/yodaStruct">yodaStruct</a> and
-<a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib">PydSEAMSlib</a>.</p>
+<a class="reference external" href="https://github.com/d-SEAMS/yodaStruct">yodaStruct</a>
+(<code class="docutils literal notranslate"><span class="pre">require(&quot;dseams&quot;)</span></code>) and
+<a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib">PydSEAMSlib</a>
+(<code class="docutils literal notranslate"><span class="pre">pydseams</span></code>).</p>
 </section>
 </section>
 
@@ -266,16 +575,16 @@ eonclient). Help, errors and ice-type counts are colorized.
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="../explanation/architecture.html">
+    <a href="index.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">Three repositories</div></div>
+        <span>Previous</span><div class="title">Reference</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="nix.html">
+    <a href="data-formats.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">Nix flake</div>
+        <div class="title">Data Formats</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>
@@ -307,5 +616,6 @@ eonclient). Help, errors and ice-type counts are colorized.
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/target-highlight.js?v=df7d332b"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
       <script src="../_static/shibuya.js?v=cac61aee"></script></body>
 </html>

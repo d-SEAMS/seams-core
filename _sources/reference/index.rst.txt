@@ -1,0 +1,31 @@
+=========
+Reference
+=========
+
+
+Lookup pages for the engine. Tutorials and how-tos live elsewhere.
+
+.. table::
+
+    +------------------------------------+-----------------------------------------------+
+    | page                               | what it names                                 |
+    +====================================+===============================================+
+    | `seams CLI <cli.rst>`_             | ``seams`` subcommands, flags, colors          |
+    +------------------------------------+-----------------------------------------------+
+    | `data formats <data-formats.rst>`_ | LAMMPS dump, XYZ, chemfiles, ``.con``         |
+    +------------------------------------+-----------------------------------------------+
+    | `API <api.rst>`_                   | C++ identifiers and the doxyrest tree         |
+    +------------------------------------+-----------------------------------------------+
+    | `Nix flake <nix.rst>`_             | ``nix build``, ``nix develop``, flake outputs |
+    +------------------------------------+-----------------------------------------------+
+    | `glossary <glossary.rst>`_         | Engine terms                                  |
+    +------------------------------------+-----------------------------------------------+
+
+.. toctree::
+   :maxdepth: 1
+
+   cli
+   data-formats
+   api
+   nix
+   glossary

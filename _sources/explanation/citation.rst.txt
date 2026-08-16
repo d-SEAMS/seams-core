@@ -1,0 +1,33 @@
+========
+Citation
+========
+
+
+If you use this software, cite the methods paper.
+
+Goswami, R.; Goswami, A.; Singh, J. K. d-SEAMS: Deferred Structural
+Elucidation Analysis for Molecular Simulations. *J. Chem. Inf. Model.*
+2020, 60, 2169--2177.
+`10.1021/acs.jcim.0c00031 <https://doi.org/10.1021/acs.jcim.0c00031>`_
+(arXiv:1909.09830).
+
+.. code:: bibtex
+
+    @Article{Goswami2020,
+      author  = {Goswami, Rohit and Goswami, Amrita and Singh, Jayant Kumar},
+      title   = {{d-SEAMS}: Deferred Structural Elucidation Analysis for Molecular Simulations},
+      journal = {Journal of Chemical Information and Modeling},
+      year    = {2020},
+      volume  = {60},
+      number  = {4},
+      pages   = {2169--2177},
+      doi     = {10.1021/acs.jcim.0c00031},
+    }
+
+The v2 engine paper targets Computer Physics Communications. Cite
+JCIM 2020 until that article has a DOI; then cite both (JCIM for the
+methods, CPC for the v2 engine).
+
+Related method papers, only when the page uses that method: Nguyen
+and Molinero 2015 (CHILL+), Moore et al. 2010 (CHILL), ten Wolde
+et al. 1996 (local bond order).

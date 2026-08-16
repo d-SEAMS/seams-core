@@ -1,0 +1,50 @@
+==================
+Install the engine
+==================
+
+
+Get a ``seams`` binary and ``libyodaLib``. This repository does not
+install Python or Lua.
+
+pixi
+----
+
+.. code:: bash
+
+    pixi run setup
+    pixi run build
+    ./bbdir/seams --help
+    ./bbdir/seams --features
+
+The default pixi lock includes Highway and chemfiles. Optional pixi
+environments: ``ira``, ``sphericart``, ``nauty``, ``mpi``, ``docs``.
+
+Nix flake
+---------
+
+.. code:: bash
+
+    nix build
+    ./result/bin/seams --help
+    nix develop
+    nix run . -- read input/traj/exampleTraj.lammpstrj
+
+The flake turns Eigen, BLAS/LAPACK, Catch2, and Highway on when
+nixpkgs provides them. Optional wrap-git backends (vesin, chemfiles,
+readcon-core, IRA, sphericart, nauty, MPI) stay off unless the package
+is already in the closure. Binary cache: ``cachix use dseams``.
+
+The flake on/off table lives on `Nix <../reference/nix.rst>`_.
+
+Verify
+------
+
+.. code:: bash
+
+    seams --help
+    seams --version
+    seams --features
+
+``-Dwith_python=true`` and ``-Dwith_lua=enabled`` are Meson errors that
+name `PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_ and
+`yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_.

@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>class primitive::RingUpdater - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>class primitive::RingUpdater - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Rdf2" href="group_rdf2.html" /><link rel="prev" title="struct primitive::Vertex" href="struct_primitive_Vertex.html" />
       <link rel="canonical" href="https://docs.dseams.info/api/class_primitive_RingUpdater.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -10,6 +10,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
     <link rel="stylesheet" type="text/css" href="../_static/doxyrest-pygments.css?v=ff3f4257" />
     <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,13 +35,22 @@
       <strong>d-SEAMS</strong>
     </a>
     <div class="sy-head-nav" id="head-nav">
-      <nav class="sy-head-links"><ul><li class="link">
-          <a href="https://github.com/d-SEAMS/PydSEAMSlib">
-            <span>pydseams</span><i class="i-lucide external-link"></i></a>
-        </li><li class="link">
-          <a href="https://github.com/d-SEAMS/yodaStruct">
-            <span>dseams (Lua)</span><i class="i-lucide external-link"></i></a>
-        </li></ul></nav>
+      <nav class="sy-head-links"><ul>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-1" aria-controls="nav-children-1">
+            <span>Ecosystem</span>
+            <i class="i-lucide chevron-down"></i>
+          </button>
+        <ul id="nav-children-1" aria-labelledby="nav-trigger-1"><li><a href="https://docs.dseams.info">
+                <span>d-SEAMS engine</span>
+                <small>libyodaLib and the seams CLI</small>
+              </a></li><li><a href="https://d-seams.github.io/PydSEAMSlib/">
+                <span>pydseams</span>
+                <small>Python Frame API on yoda</small>
+              </a></li><li><a href="https://d-seams.github.io/yodaStruct/">
+                <span>dseams (Lua)</span>
+                <small>require("dseams") and Fennel</small>
+              </a></li></ul>
+      </li></ul></nav>
       <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
   <input type="text" name="q" placeholder="Search" />
   <kbd>/</kbd>
@@ -74,28 +84,66 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Bulk ice on the mixed TIP4P example</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/nanotube.html">Quasi-one-dimensional ice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
 </ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-To Guides</span></p>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">How-to</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ase-integration.html">ASE integration</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/solvis.html">View a classified frame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/confined-ice.html">Confined ice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/faq.html">FAQ</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/troubleshooting.html">Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Explanation</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/index.html">Explanation</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Three repositories</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">Citation</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
-<ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../reference/index.html">Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../reference/api.html">API Reference</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">C++ headers (doxyrest)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
+</ul>
+</li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API Reference</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../reference/api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">C++ headers (doxyrest)</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="group_bond.html">Bond</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_cage.html">Cage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_chill.html">Chill</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_clump.html">Clump</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_gen.html">Gen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_molSys.html">MolSys</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_nneigh.html">Nneigh</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="group_primitive.html">Primitive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_rdf2.html">Rdf2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_sinp.html">Sinp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="global.html">Global Namespace</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
         </div>
       </div>
@@ -149,8 +197,24 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">class primitive::RingUpdater</strong>
+        <a itemprop="item" href="../reference/index.html"><span itemprop="name">Reference</span></a>
+        <span>/</span>
         <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../reference/api.html"><span itemprop="name">API Reference</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="3" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">C++ headers (doxyrest)</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="4" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="group_primitive.html"><span itemprop="name">Primitive</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="5" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">class primitive::RingUpdater</strong>
+        <meta itemprop="position" content="6" />
       </li></ol>
     <div class="xl:hidden ml-1">
       <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
@@ -217,7 +281,21 @@ data-aria-dark="Switch to auto color mode">
     <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
   </svg>
   <span>Back to top</span>
-</button><div class="navigation flex print:hidden"></div></div>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="struct_primitive_Vertex.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">struct primitive::Vertex</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="group_rdf2.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Rdf2</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
     </div>
   </main>
 </div>
@@ -245,5 +323,6 @@ data-aria-dark="Switch to auto color mode">
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/target-highlight.js?v=df7d332b"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
       <script src="../_static/shibuya.js?v=cac61aee"></script></body>
 </html>

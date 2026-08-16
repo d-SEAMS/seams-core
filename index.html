@@ -10,6 +10,7 @@
     <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=44020203" />
     <link rel="stylesheet" type="text/css" href="_static/doxyrest-pygments.css?v=ff3f4257" />
     <link rel="stylesheet" type="text/css" href="_static/doxyrest-shibuya.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,13 +35,22 @@
       <strong>d-SEAMS</strong>
     </a>
     <div class="sy-head-nav" id="head-nav">
-      <nav class="sy-head-links"><ul><li class="link">
-          <a href="https://github.com/d-SEAMS/PydSEAMSlib">
-            <span>pydseams</span><i class="i-lucide external-link"></i></a>
-        </li><li class="link">
-          <a href="https://github.com/d-SEAMS/yodaStruct">
-            <span>dseams (Lua)</span><i class="i-lucide external-link"></i></a>
-        </li></ul></nav>
+      <nav class="sy-head-links"><ul>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-1" aria-controls="nav-children-1">
+            <span>Ecosystem</span>
+            <i class="i-lucide chevron-down"></i>
+          </button>
+        <ul id="nav-children-1" aria-labelledby="nav-trigger-1"><li><a href="https://docs.dseams.info">
+                <span>d-SEAMS engine</span>
+                <small>libyodaLib and the seams CLI</small>
+              </a></li><li><a href="https://d-seams.github.io/PydSEAMSlib/">
+                <span>pydseams</span>
+                <small>Python Frame API on yoda</small>
+              </a></li><li><a href="https://d-seams.github.io/yodaStruct/">
+                <span>dseams (Lua)</span>
+                <small>require("dseams") and Fennel</small>
+              </a></li></ul>
+      </li></ul></nav>
       <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="search.html" method="get">
   <input type="text" name="q" placeholder="Search" />
   <kbd>/</kbd>
@@ -74,28 +84,40 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="tutorials/bulk-ice.html">Bulk ice on the mixed TIP4P example</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="tutorials/nanotube.html">Quasi-one-dimensional ice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
 </ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-To Guides</span></p>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="howto/index.html">How-to</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="howto/install.html">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="howto/classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="howto/ase-integration.html">ASE integration</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="howto/solvis.html">View a classified frame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="howto/confined-ice.html">Confined ice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="howto/faq.html">FAQ</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="howto/troubleshooting.html">Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Explanation</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="explanation/index.html">Explanation</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="explanation/architecture.html">Three repositories</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="explanation/citation.html">Citation</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="reference/index.html">Reference</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="reference/cli.html">seams CLI</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="reference/data-formats.html">Data Formats</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="reference/nix.html">Nix flake</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="reference/api.html">API Reference</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="reference/data-formats.html">Data Formats</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="reference/glossary.html">Glossary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="contributing/index.html">Contributing</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
         </div>
       </div>
@@ -108,12 +130,12 @@ data-aria-dark="Switch to auto color mode">
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#overview">Overview</a></li>
-<li><a class="reference internal" href="#getting-started">Getting Started</a></li>
-<li><a class="reference internal" href="#tutorials">Tutorials</a></li>
-<li><a class="reference internal" href="#how-to-guides">How-To Guides</a></li>
-<li><a class="reference internal" href="#explanation">Explanation</a></li>
-<li><a class="reference internal" href="#reference">Reference</a></li>
-<li><a class="reference internal" href="#development">Development</a></li>
+<li><a class="reference internal" href="#suite-stack">Suite stack</a></li>
+<li><a class="reference internal" href="#documentation-structure">Documentation structure</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#related-projects">Related projects</a></li>
+<li><a class="reference internal" href="#license">License</a></li>
 </ul>
 </div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
   data-type="github" data-user="d-SEAMS" data-repo="seams-core">
@@ -209,13 +231,42 @@ data-aria-dark="Switch to auto color mode">
 <dd class="field-odd"><p><a class="reference external" href="https://dseams.info">d-SEAMS core team</a></p>
 </dd>
 </dl>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 sd-pt-1 sd-pb-1 sd-pl-0 sd-pr-0 sd-text-center docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-2 sd-row-cols-md-3 sd-row-cols-lg-3 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-2 sd-g-lg-2 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Read</div>
+<p class="sd-card-text">Load a LAMMPS frame and print nop, frame, and box.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="quickstart.html"><span class="doc">Quickstart</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Classify</div>
+<p class="sd-card-text">CHILL+ four-neighbour star: cubic, hexagonal, interfacial, water.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="tutorials/bulk-ice.html"><span class="doc">Classify ice on the mixed TIP4P example</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Score</div>
+<p class="sd-card-text">Cage membership: HC is ice Ih, DDC is ice Ic, else water.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="explanation/chill-plus-vs-cages.html"><span class="doc">CHILL+ versus cages</span></a></div>
+</div>
+</div>
+</div>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
 <p>d-SEAMS (Deferred Structural Elucidation Analysis for Molecular
-Simulations) classifies ice in molecular-dynamics trajectories: CHILL
-and CHILL+, Franzblau / Yuan–Cormack primitive rings, and hexagonal /
-double-diamond cage membership.</p>
-<p>This repository is the C++ engine (<code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code>) and the <code class="docutils literal notranslate"><span class="pre">seams</span></code> CLI.</p>
+Simulations) classifies ice in molecular-dynamics trajectories. This
+repository is the C++ engine (<code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code>) and the <code class="docutils literal notranslate"><span class="pre">seams</span></code> CLI.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span><span class="nb">read</span><span class="w"> </span>water.lammpstrj
 </span><span data-line="2">seams<span class="w"> </span>chill-plus<span class="w"> </span>water.lammpstrj<span class="w"> </span>--cutoff<span class="w"> </span><span class="m">3</span>.5
 </span><span data-line="3">seams<span class="w"> </span>cages<span class="w"> </span>water.lammpstrj
@@ -223,82 +274,121 @@ double-diamond cage membership.</p>
 </div>
 <p>Scripting front ends are separate packages:</p>
 <ul class="simple">
-<li><p>Python: <code class="docutils literal notranslate"><span class="pre">pydseams</span></code> (<a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib">PydSEAMSlib</a>), compiled module <code class="docutils literal notranslate"><span class="pre">yoda</span></code></p></li>
-<li><p>Lua/Fennel: <code class="docutils literal notranslate"><span class="pre">dseams</span></code> (<a class="reference external" href="https://github.com/d-SEAMS/yodaStruct">yodaStruct</a>), <code class="docutils literal notranslate"><span class="pre">require(&quot;dseams&quot;)</span></code></p></li>
+<li><p>Python: <code class="docutils literal notranslate"><span class="pre">pydseams</span></code> (<a class="reference external" href="https://d-seams.github.io/PydSEAMSlib/">docs</a>,
+<a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib">PydSEAMSlib</a>), compiled
+module <code class="docutils literal notranslate"><span class="pre">yoda</span></code></p></li>
+<li><p>Lua/Fennel: <code class="docutils literal notranslate"><span class="pre">dseams</span></code> (<a class="reference external" href="https://d-seams.github.io/yodaStruct/">docs</a>,
+<a class="reference external" href="https://github.com/d-SEAMS/yodaStruct">yodaStruct</a>),
+<code class="docutils literal notranslate"><span class="pre">require(&quot;dseams&quot;)</span></code></p></li>
 </ul>
+<p>The header <strong>Ecosystem</strong> menu on every page jumps between the three
+Shibuya sites.</p>
 <p>Build with a Nix flake (<code class="docutils literal notranslate"><span class="pre">nix</span> <span class="pre">build</span></code>, <code class="docutils literal notranslate"><span class="pre">nix</span> <span class="pre">develop</span></code>) or with
 <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">setup</span> <span class="pre">&amp;&amp;</span> <span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">build</span> <span class="pre">&amp;&amp;</span> <span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">test</span></code>.</p>
 </section>
-<section id="getting-started">
-<h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading">¶</a></h2>
-<blockquote>
-<div><div class="toctree-wrapper compound">
+<section id="suite-stack">
+<h2>Suite stack<a class="headerlink" href="#suite-stack" title="Link to this heading">¶</a></h2>
+<pre  class="mermaid">
+        flowchart TB
+  subgraph engine[&quot;seams-core&quot;]
+    LIB[libyodaLib]
+    CLI[seams CLI]
+  end
+  subgraph fronts[&quot;Front ends&quot;]
+    PY[pydseams Frame]
+    LUA[&quot;require(\&quot;dseams\&quot;)&quot;]
+  end
+  DUMP[LAMMPS / XYZ / chemfiles / con] --&gt; LIB
+  LIB --&gt; CLI
+  LIB --&gt; PY
+  LIB --&gt; LUA
+  CLI --&gt; OUT[stdout counts]
+  PY --&gt; ASE[ASE / solvis extras]
+    </pre></section>
+<section id="documentation-structure">
+<h2>Documentation structure<a class="headerlink" href="#documentation-structure" title="Link to this heading">¶</a></h2>
+<p>This documentation follows the <a class="reference external" href="https://diataxis.fr/">Diataxis</a>
+framework.</p>
+<div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 </ul>
 </div>
-</div></blockquote>
-</section>
-<section id="tutorials">
-<h2>Tutorials<a class="headerlink" href="#tutorials" title="Link to this heading">¶</a></h2>
-<blockquote>
-<div><div class="toctree-wrapper compound">
+<div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="tutorials/bulk-ice.html">Bulk ice on the mixed TIP4P example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials/nanotube.html">Quasi-one-dimensional ice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
 </ul>
 </div>
-</div></blockquote>
-</section>
-<section id="how-to-guides">
-<h2>How-To Guides<a class="headerlink" href="#how-to-guides" title="Link to this heading">¶</a></h2>
-<blockquote>
-<div><div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">How-To Guides</span></p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="howto/index.html">How-to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto/install.html">Install the engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto/classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howto/ase-integration.html">ASE integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto/solvis.html">View a classified frame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto/confined-ice.html">Confined ice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto/faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto/troubleshooting.html">Troubleshooting</a></li>
 </ul>
 </div>
-</div></blockquote>
-</section>
-<section id="explanation">
-<h2>Explanation<a class="headerlink" href="#explanation" title="Link to this heading">¶</a></h2>
-<blockquote>
-<div><div class="toctree-wrapper compound">
+<div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="explanation/index.html">Explanation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="explanation/architecture.html">Three repositories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="explanation/citation.html">Citation</a></li>
 </ul>
 </div>
-</div></blockquote>
-</section>
-<section id="reference">
-<h2>Reference<a class="headerlink" href="#reference" title="Link to this heading">¶</a></h2>
-<blockquote>
-<div><div class="toctree-wrapper compound">
+<div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="reference/cli.html">seams CLI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference/nix.html">Nix flake</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference/api.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference/data-formats.html">Data Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/index.html">Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reference/cli.html">seams CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/data-formats.html">Data Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/api.html">API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/nix.html">Nix flake</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/glossary.html">Glossary</a></li>
 </ul>
-</div>
-</div></blockquote>
-</section>
-<section id="development">
-<h2>Development<a class="headerlink" href="#development" title="Link to this heading">¶</a></h2>
-<blockquote>
-<div><div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Development</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="contributing/index.html">Contributing</a></li>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference/cli.html">seams CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/data-formats.html">Data Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/nix.html">Nix flake</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/index.html">C++ headers (doxyrest)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference/glossary.html">Glossary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 </div>
-</div></blockquote>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing/index.html">Contributing</a></li>
+</ul>
+</div>
+</section>
+<section id="related-projects">
+<h2>Related projects<a class="headerlink" href="#related-projects" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt><a class="reference external" href="https://d-seams.github.io/PydSEAMSlib/">pydseams</a></dt><dd><p>Python Frame API on <code class="docutils literal notranslate"><span class="pre">yoda</span></code></p>
+</dd>
+<dt><a class="reference external" href="https://d-seams.github.io/yodaStruct/">dseams (Lua)</a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">require(&quot;dseams&quot;)</span></code> and Fennel</p>
+</dd>
+<dt><a class="reference external" href="https://dseams.info">dseams.info</a></dt><dd><p>project site</p>
+</dd>
+</dl>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Link to this heading">¶</a></h2>
+<p>MIT. Cite the 2020 JCIM paper (DOI
+<a class="reference external" href="https://doi.org/10.1021/acs.jcim.0c00031">10.1021/acs.jcim.0c00031</a>).
+See <a class="reference external" href="explanation/citation.rst">Citation</a>.</p>
 </section>
 </section>
 
@@ -343,5 +433,371 @@ double-diamond cage membership.</p>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/target-highlight.js?v=df7d332b"></script>
-      <script src="_static/shibuya.js?v=cac61aee"></script></body>
+      <script src="_static/design-tabs.js?v=f930bc37"></script>
+      <script src="_static/shibuya.js?v=cac61aee"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.4.0/dist/mermaid.esm.min.mjs"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.2.0/dist/mermaid-layout-elk.esm.min.mjs"></script>
+      <script type="module">mermaid.initialize({startOnLoad:true, theme:'neutral'});</script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.4.0/dist/mermaid.esm.min.mjs";
+
+const defaultStyle = document.createElement('style');
+defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
+    width: 100%;
+}
+
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+`;
+document.head.appendChild(defaultStyle);
+
+const fullscreenStyle = document.createElement('style');
+fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.mermaid-fullscreen-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    color: #333;
+}
+
+.mermaid-fullscreen-btn:hover {
+    opacity: 100% !important;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-btn.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-btn.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 95vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 9999;
+    padding: 20px;
+    overflow: auto;
+}
+
+.mermaid-fullscreen-modal.dark-theme {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.mermaid-fullscreen-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen {
+    position: relative;
+    width: 95vw;
+    height: 90vh;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen.dark-theme {
+    background: #1a1a1a;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mermaid-container-fullscreen pre.mermaid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
+    cursor: grab;
+}
+
+.mermaid-fullscreen-close {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    font-size: 24px;
+    line-height: 1;
+    color: #333;
+}
+
+.mermaid-fullscreen-close:hover {
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-close.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-close.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
+    display: none !important;
+}`;
+document.head.appendChild(fullscreenStyle);
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        return brightness < 128;
+    }
+    return false;
+};
+
+const load = async () => {
+    await mermaid.run();
+
+    const all_mermaids = document.querySelectorAll(".mermaid");
+    const mermaids_processed = document.querySelectorAll(".mermaid[data-processed='true']");
+
+    if ("False" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? all_mermaids.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("");
+            if(all_mermaids.length !== mermaids_processed.length) {
+                setTimeout(load, 200);
+                return;
+            } else if(svgs.size() !== mermaids_to_add_zoom) {
+                setTimeout(load, 200);
+                return;
+            } else {
+                svgs.each(function() {
+                    var svg = d3.select(this);
+                    svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+                    var inner = svg.select("g");
+                    var zoom = d3.zoom().on("zoom", function(event) {
+                        inner.attr("transform", event.transform);
+                    });
+                    svg.call(zoom);
+                });
+            }
+        }
+    } else if(all_mermaids.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(load, 200);
+        return;
+    }
+
+    const darkTheme = isDarkTheme();
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
+
+    const modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    const modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    let previousScrollOffset = [window.scrollX, window.scrollY];
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    const allButtons = [];
+
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.sdisplay = 'block';
+
+                if ("False" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        container.appendChild(fullscreenBtn);
+        allButtons.push(fullscreenBtn);
+    });
+
+    // Update theme classes when theme changes
+    const updateTheme = () => {
+        const dark = isDarkTheme();
+        allButtons.forEach(btn => {
+            if (dark) {
+                btn.classList.add('dark-theme');
+            } else {
+                btn.classList.remove('dark-theme');
+            }
+        });
+        if (dark) {
+            modal.classList.add('dark-theme');
+            modalContent.classList.add('dark-theme');
+            closeBtn.classList.add('dark-theme');
+        } else {
+            modal.classList.remove('dark-theme');
+            modalContent.classList.remove('dark-theme');
+            closeBtn.classList.remove('dark-theme');
+        }
+    };
+
+    // Watch for theme changes
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    observer.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style']
+    });
+};
+
+window.addEventListener("load", load);
+</script></body>
 </html>

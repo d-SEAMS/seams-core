@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Contributing - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Changelog" href="../changelog.html" /><link rel="prev" title="Data Formats" href="../reference/data-formats.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Contributing - d-SEAMS documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="prev" title="Changelog" href="../changelog.html" />
       <link rel="canonical" href="https://docs.dseams.info/contributing/" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -10,6 +10,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
     <link rel="stylesheet" type="text/css" href="../_static/doxyrest-pygments.css?v=ff3f4257" />
     <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,13 +35,22 @@
       <strong>d-SEAMS</strong>
     </a>
     <div class="sy-head-nav" id="head-nav">
-      <nav class="sy-head-links"><ul><li class="link">
-          <a href="https://github.com/d-SEAMS/PydSEAMSlib">
-            <span>pydseams</span><i class="i-lucide external-link"></i></a>
-        </li><li class="link">
-          <a href="https://github.com/d-SEAMS/yodaStruct">
-            <span>dseams (Lua)</span><i class="i-lucide external-link"></i></a>
-        </li></ul></nav>
+      <nav class="sy-head-links"><ul>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-1" aria-controls="nav-children-1">
+            <span>Ecosystem</span>
+            <i class="i-lucide chevron-down"></i>
+          </button>
+        <ul id="nav-children-1" aria-labelledby="nav-trigger-1"><li><a href="https://docs.dseams.info">
+                <span>d-SEAMS engine</span>
+                <small>libyodaLib and the seams CLI</small>
+              </a></li><li><a href="https://d-seams.github.io/PydSEAMSlib/">
+                <span>pydseams</span>
+                <small>Python Frame API on yoda</small>
+              </a></li><li><a href="https://d-seams.github.io/yodaStruct/">
+                <span>dseams (Lua)</span>
+                <small>require("dseams") and Fennel</small>
+              </a></li></ul>
+      </li></ul></nav>
       <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
   <input type="text" name="q" placeholder="Search" />
   <kbd>/</kbd>
@@ -74,28 +84,40 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Bulk ice on the mixed TIP4P example</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/nanotube.html">Quasi-one-dimensional ice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
 </ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-To Guides</span></p>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">How-to</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ase-integration.html">ASE integration</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/solvis.html">View a classified frame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/confined-ice.html">Confined ice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/faq.html">FAQ</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/troubleshooting.html">Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Explanation</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/index.html">Explanation</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Three repositories</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">Citation</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
 <ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/index.html">Reference</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API Reference</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
         </div>
       </div>
@@ -109,10 +131,10 @@ data-aria-dark="Switch to auto color mode">
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
 <li><a class="reference internal" href="#clone-and-build">Clone and build</a></li>
-<li><a class="reference internal" href="#running-tests">Running tests</a></li>
 <li><a class="reference internal" href="#project-structure">Project structure</a></li>
 <li><a class="reference internal" href="#core-concepts">Core concepts</a></li>
-<li><a class="reference internal" href="#commit-style">Commit style</a></li>
+<li><a class="reference internal" href="#tests">Tests</a></li>
+<li><a class="reference internal" href="#style">Style</a></li>
 </ul>
 </div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
   data-type="github" data-user="d-SEAMS" data-repo="seams-core">
@@ -203,16 +225,28 @@ data-aria-dark="Switch to auto color mode">
 </div><article class="yue dark-code" role="main">
           <section id="contributing">
 <h1>Contributing<a class="headerlink" href="#contributing" title="Link to this heading">¶</a></h1>
+<p>This repository is the C++ engine (<code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code>) and the <code class="docutils literal notranslate"><span class="pre">seams</span></code> CLI.
+Python bindings are <a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib">PydSEAMSlib</a>.
+Lua/Fennel is <a class="reference external" href="https://github.com/d-SEAMS/yodaStruct">yodaStruct</a>.
+Do not add a language binding here.</p>
+<p>Documentation is authored in <code class="docutils literal notranslate"><span class="pre">docs/orgmode/</span></code> and exported with
+<code class="docutils literal notranslate"><span class="pre">docs/export.el</span></code> (ox-rst) before Sphinx. Run <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">-e</span> <span class="pre">docs</span> <span class="pre">docbld</span></code>
+to export, run doxyrest, and build the Shibuya site.</p>
 <section id="prerequisites">
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
-<p>d-SEAMS uses <a class="reference external" href="https://pixi.sh">pixi</a> for environment and task management. Install pixi first:</p>
+<p>Two supported compiler shells:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://pixi.sh">pixi</a> (locked conda-forge toolchain)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nix</span> <span class="pre">develop</span></code> (flake inputs: compiler, Eigen, BLAS, Catch2, gdb)</p></li>
+</ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">curl<span class="w"> </span>-fsSL<span class="w"> </span>https://pixi.sh/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>bash
 </span></pre></div>
 </div>
-<p>The pixi environment provides the C++ toolchain: a compiler, Eigen,
-BLAS/LAPACK, Catch2, Meson and Ninja. Python bindings are
-<a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib">PydSEAMSlib</a>, not this
-tree. <code class="docutils literal notranslate"><span class="pre">nix</span> <span class="pre">develop</span></code> is the other supported compiler shell.</p>
+<p>pixi provides a compiler, Eigen, BLAS/LAPACK, Catch2, Meson, Ninja,
+Highway and chemfiles. Optional pixi features add IRA, sphericart,
+nauty, MPI, the docs stack, and the Coq/SymPy proofs.</p>
+<p><code class="docutils literal notranslate"><span class="pre">-Dwith_python=true</span></code> and <code class="docutils literal notranslate"><span class="pre">-Dwith_lua=enabled</span></code> are Meson errors that
+name the front-end repositories.</p>
 </section>
 <section id="clone-and-build">
 <h2>Clone and build<a class="headerlink" href="#clone-and-build" title="Link to this heading">¶</a></h2>
@@ -220,78 +254,93 @@ tree. <code class="docutils literal notranslate"><span class="pre">nix</span> <s
 </span><span data-line="2"><span class="nb">cd</span><span class="w"> </span>seams-core
 </span></pre></div>
 </div>
-<p>Set up the Meson build directory and compile:</p>
+<p>pixi:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">pixi<span class="w"> </span>run<span class="w"> </span>setup
 </span><span data-line="2">pixi<span class="w"> </span>run<span class="w"> </span>build
+</span><span data-line="3">pixi<span class="w"> </span>run<span class="w"> </span><span class="nb">test</span>
 </span></pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">setup</span></code> configures a Meson build directory at <code class="docutils literal notranslate"><span class="pre">bbdir/</span></code> with
-tests and the <code class="docutils literal notranslate"><span class="pre">seams</span></code> CLI. <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">build</span></code> compiles <code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code> and
-<code class="docutils literal notranslate"><span class="pre">seams</span></code>.</p>
-</section>
-<section id="running-tests">
-<h2>Running tests<a class="headerlink" href="#running-tests" title="Link to this heading">¶</a></h2>
-<p>C++ tests (Catch2):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">pixi<span class="w"> </span>run<span class="w"> </span><span class="nb">test</span>
+<p><code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">setup</span></code> configures <code class="docutils literal notranslate"><span class="pre">bbdir/</span></code> with tests and the <code class="docutils literal notranslate"><span class="pre">seams</span></code> CLI
+(<code class="docutils literal notranslate"><span class="pre">-Dwith_tests=true</span> <span class="pre">-Dwith_python=false</span></code>). <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">build</span></code> compiles
+<code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code> and <code class="docutils literal notranslate"><span class="pre">seams</span></code>. <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">test</span></code> runs the Catch2 suite.</p>
+<p>Nix:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">nix<span class="w"> </span>develop
+</span><span data-line="2">meson<span class="w"> </span>setup<span class="w"> </span>bbdir<span class="w"> </span>-Dwith_tests<span class="o">=</span><span class="nb">true</span>
+</span><span data-line="3">meson<span class="w"> </span>compile<span class="w"> </span>-C<span class="w"> </span>bbdir
+</span><span data-line="4">meson<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-C<span class="w"> </span>bbdir
+</span><span data-line="5">./bbdir/seams<span class="w"> </span><span class="nb">read</span><span class="w"> </span>input/traj/exampleTraj.lammpstrj
 </span></pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">test</span></code> runs the Catch2 suite. Python tests live in
-<a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib">PydSEAMSlib</a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">nix</span> <span class="pre">build</span></code> is the same package plus the install check.</p>
 </section>
 <section id="project-structure">
 <h2>Project structure<a class="headerlink" href="#project-structure" title="Link to this heading">¶</a></h2>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams-core/
-</span><span data-line="2">  src/                   C++ source files
-</span><span data-line="3">    include/
-</span><span data-line="4">      internal/          Internal headers (mol_sys, neighbours, bond, ...)
-</span><span data-line="5">      external/          Vendored headers (backward, argum, cxxopts, rang, ...)
-</span><span data-line="6">    mol_sys.cpp          Molecular system data structures
-</span><span data-line="7">    neighbours.cpp       Neighbour list construction
-</span><span data-line="8">    bond.cpp             Hydrogen bond detection
-</span><span data-line="9">    bop.cpp              Bond order parameters (CHILL/CHILL+)
-</span><span data-line="10">    ring.cpp             Ring analysis and classification
-</span><span data-line="11">    franzblau.cpp        Franzblau shortest-path ring finder
-</span><span data-line="12">    bulkTUM.cpp          Topological unit matching for bulk ice
-</span><span data-line="13">    topo_one_dim.cpp     1D topology (nanotubes)
-</span><span data-line="14">    topo_two_dim.cpp     2D topology (sheets)
-</span><span data-line="15">    ...
-</span><span data-line="16">  tests/
-</span><span data-line="17">    *.cpp                C++ test files (Catch2)
-</span><span data-line="18">  input/
-</span><span data-line="19">    traj/                Example LAMMPS trajectories
-</span><span data-line="20">  meson.build            Top-level Meson build definition
-</span><span data-line="21">  pixi.toml              pixi workspace configuration
+</span><span data-line="2">  src/                   C++ engine
+</span><span data-line="3">    seams_cli.cpp        seams (Argum)
+</span><span data-line="4">    include/internal/    engine headers
+</span><span data-line="5">    include/external/    vendored headers (argum, backward, ...)
+</span><span data-line="6">    mol_sys.cpp          PointCloud
+</span><span data-line="7">    neighbours.cpp       cutoff / knn / knn-union lists
+</span><span data-line="8">    bond.cpp             hydrogen bonds
+</span><span data-line="9">    bop.cpp              CHILL / CHILL+
+</span><span data-line="10">    ring.cpp             ring classification
+</span><span data-line="11">    franzblau.cpp        Franzblau shortest-path rings
+</span><span data-line="12">    cage_affiliation.cpp HC / DDC ice score
+</span><span data-line="13">    bulkTUM.cpp          topological unit matching
+</span><span data-line="14">    topo_one_dim.cpp     nanotubes
+</span><span data-line="15">    topo_two_dim.cpp     sheets
+</span><span data-line="16">  tests/                 Catch2 binaries
+</span><span data-line="17">  input/traj/            example LAMMPS dumps
+</span><span data-line="18">  input/xyz/             fixtures
+</span><span data-line="19">  input/con/             eOn .con fixture
+</span><span data-line="20">  meson.build            Meson project
+</span><span data-line="21">  meson_options.txt      with_tests, with_cli, optional backends
+</span><span data-line="22">  flake.nix              nix build / nix develop
+</span><span data-line="23">  pixi.toml              pixi workspace
 </span></pre></div>
 </div>
-<p>Python bindings: <a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib">d-SEAMS/PydSEAMSlib</a>.
-#+end<sub>src</sub></p>
 </section>
 <section id="core-concepts">
 <h2>Core concepts<a class="headerlink" href="#core-concepts" title="Link to this heading">¶</a></h2>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">PointCloud</span></code></dt><dd><p>The central data structure. Holds atom positions, types, box
-dimensions, and per-atom properties (ice type, bond-order correlations).</p>
+<dt><code class="docutils literal notranslate"><span class="pre">PointCloud</span></code></dt><dd><p>Atom positions, types, box, and per-atom ice labels.</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">neighListO</span></code></dt><dd><p>Builds distance-based neighbour lists for oxygen atoms. Returns
-a vector of vectors where each inner vector starts with the atom’s own ID
-followed by its neighbours.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">neighListO</span></code> / <code class="docutils literal notranslate"><span class="pre">kNearestNeighbourList</span></code></dt><dd><p>Cutoff and k-nearest
+graphs. <code class="docutils literal notranslate"><span class="pre">bondGraphFromName</span></code> accepts <code class="docutils literal notranslate"><span class="pre">cutoff</span></code>, <code class="docutils literal notranslate"><span class="pre">knn</span></code>, <code class="docutils literal notranslate"><span class="pre">knn-union</span></code>.</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">populateHbonds</span></code></dt><dd><p>Re-reads the trajectory to find hydrogen positions, then
-applies geometric criteria to determine hydrogen bonds between oxygen pairs.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">populateHbonds</span></code></dt><dd><p>Geometric hydrogen bonds. Needs hydrogens
+(re-read from a dump, or an explicit H cloud).</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">getCorrelPlus</span></code> / <code class="docutils literal notranslate"><span class="pre">getIceTypePlus</span></code></dt><dd><p>The CHILL+ algorithm. First computes
-bond-order correlations (<code class="docutils literal notranslate"><span class="pre">c_ij</span></code>) between neighbours, then classifies each atom
-as cubic ice, hexagonal ice, interfacial, clathrate, or liquid water.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">getCorrelPlus</span></code> / <code class="docutils literal notranslate"><span class="pre">getIceTypePlus</span></code></dt><dd><p>CHILL+. Four-neighbour
+<code class="docutils literal notranslate"><span class="pre">c_ij</span></code>, then cubic / hexagonal / interfacial / clathrate / water.</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">ringNetwork</span></code></dt><dd><p>Franzblau shortest-path ring analysis. Finds primitive rings
-in the hydrogen bond or neighbour network up to a specified depth.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">cageAffiliation</span></code> / <code class="docutils literal notranslate"><span class="pre">seededCageAffiliation</span></code></dt><dd><p>Ice score on
+six-rings. HC = Ih, DDC = Ic, neither = water. Not the CHILL+ star.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">ringNetwork</span></code></dt><dd><p>Franzblau primitive rings up to a depth.</p>
 </dd>
 </dl>
 </section>
-<section id="commit-style">
-<h2>Commit style<a class="headerlink" href="#commit-style" title="Link to this heading">¶</a></h2>
-<p>Follow the pattern <code class="docutils literal notranslate"><span class="pre">fileName:</span> <span class="pre">description</span> <span class="pre">of</span> <span class="pre">change</span></code>. See <code class="docutils literal notranslate"><span class="pre">CONTRIBUTING.md</span></code> in the
-repository root for full details.</p>
+<section id="tests">
+<h2>Tests<a class="headerlink" href="#tests" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">pixi<span class="w"> </span>run<span class="w"> </span><span class="nb">test</span>
+</span><span data-line="2">nix<span class="w"> </span>develop<span class="w"> </span>--command<span class="w"> </span>meson<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-C<span class="w"> </span>bbdir
+</span></pre></div>
+</div>
+<p>C++ tests are Catch2. Python tests live in
+<a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib">PydSEAMSlib</a>.</p>
+<p>Optional pixi environments: <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">-e</span> <span class="pre">ira</span> <span class="pre">...</span></code>, <code class="docutils literal notranslate"><span class="pre">sphericart</span></code>,
+<code class="docutils literal notranslate"><span class="pre">nauty</span></code>, <code class="docutils literal notranslate"><span class="pre">mpi</span></code>, <code class="docutils literal notranslate"><span class="pre">docs</span></code>, <code class="docutils literal notranslate"><span class="pre">formalanalysis</span></code>, <code class="docutils literal notranslate"><span class="pre">repro</span></code>.</p>
+</section>
+<section id="style">
+<h2>Style<a class="headerlink" href="#style" title="Link to this heading">¶</a></h2>
+<p>Install the clang-format hook:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">./scripts/git-pre-commit-format<span class="w"> </span>install
+</span></pre></div>
+</div>
+<p>Commit subjects follow <code class="docutils literal notranslate"><span class="pre">fileName:</span> <span class="pre">description</span> <span class="pre">of</span> <span class="pre">change</span></code>. See
+<code class="docutils literal notranslate"><span class="pre">CONTRIBUTING.md</span></code> in the repository root.</p>
 </section>
 </section>
 
@@ -301,18 +350,10 @@ repository root for full details.</p>
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="../reference/data-formats.html">
+    <a href="../changelog.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">Data Formats</div></div>
-    </a>
-  </div><div class="navigation-next">
-    <a href="../changelog.html">
-      <div class="page-info">
-        <span>Next</span>
-        <div class="title">Changelog</div>
-      </div>
-      <i class="i-lucide chevron-right"></i>
+        <span>Previous</span><div class="title">Changelog</div></div>
     </a>
   </div></div></div>
     </div>
@@ -342,5 +383,6 @@ repository root for full details.</p>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/target-highlight.js?v=df7d332b"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
       <script src="../_static/shibuya.js?v=cac61aee"></script></body>
 </html>

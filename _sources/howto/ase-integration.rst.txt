@@ -3,18 +3,13 @@ ASE integration
 ===============
 
 
-Pass an ASE ``Atoms`` to ``pydseams.from_ase``. Oxygen is selected by
-default. Hydrogen bonds are used when the ``Atoms`` also contain H.
-
-Prerequisites
--------------
+Turn an ASE ``Atoms`` into labels. The engine repository does not
+install Python. The full howto is
+`pydseams ASE <https://d-seams.github.io/PydSEAMSlib/>`_.
 
 .. code:: bash
 
     pip install 'pydseams[ase]'
-
-Classify ice from ASE
----------------------
 
 .. code:: python
 
@@ -22,27 +17,12 @@ Classify ice from ASE
     import pydseams as ds
 
     atoms = ase.io.read("input/traj/exampleTraj.lammpstrj", format="lammps-dump-text")
-    # LAMMPS dumps often have numeric types; give them symbols first
-    for atom in atoms:
-        atom.symbol = {1: "H", 2: "O"}.get(atom.number, atom.symbol)
-
-    frame = ds.from_ase(atoms)          # oxygen, H-bonds if H is present
+    frame = ds.from_ase(atoms)
     print(frame.chill_plus())
-    print(frame.cages())
+    labelled = frame.to_ase()
 
-    labelled = frame.to_ase()           # arrays['ice_type'] after CHILL
-
-Single-site models (mW)
------------------------
-
-.. code:: python
-
-    frame = ds.from_ase(atoms, select="O", bonded="cutoff")
-
-``select`` is a chemical symbol, an atomic number, or ``None`` (every atom).
-
-Notes
------
-
-The engine repository does not install Python. Build or install
-`PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_.
+``from_ase`` needs an orthorhombic cell. The analysed species is oxygen
+by default (``select="O"``). ``bonded`` is ``auto``, ``hbond``, or ``cutoff``.
+``to_ase`` writes ``arrays['ice_type']`` after CHILL, and ``hc`` / ``ddc``
+after ``cages()``. Optional extra ``pydseams[solvis]`` builds a solvis
+``System`` (``frame.to_solvis()``).

@@ -1,0 +1,25 @@
+===========
+Explanation
+===========
+
+
+These pages are for understanding. They are not recipes.
+
+.. table::
+
+    +--------------------------------------------------+----------------------------------------------------+
+    | page                                             | question                                           |
+    +==================================================+====================================================+
+    | `Three repositories <architecture.rst>`_         | Why the engine, Python, and Lua are three packages |
+    +--------------------------------------------------+----------------------------------------------------+
+    | `CHILL+ versus cages <chill-plus-vs-cages.rst>`_ | Why the two scores disagree                        |
+    +--------------------------------------------------+----------------------------------------------------+
+    | `Citation <citation.rst>`_                       | What to cite                                       |
+    +--------------------------------------------------+----------------------------------------------------+
+
+.. toctree::
+   :maxdepth: 1
+
+   architecture
+   chill-plus-vs-cages
+   citation

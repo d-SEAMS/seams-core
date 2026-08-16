@@ -1,0 +1,27 @@
+=======================
+View a classified frame
+=======================
+
+
+View ice labels on a dump. The engine writes LAMMPS text. The
+viewer for this release is solvis (PyVista) through
+`pydseams <https://d-seams.github.io/PydSEAMSlib/>`_, not OVITO.
+
+.. code:: bash
+
+    pip install 'pydseams[solvis]'
+
+.. code:: python
+
+    import pydseams as ds
+
+    frame = ds.read("input/traj/exampleTraj.lammpstrj")
+    frame.chill_plus()
+    frame.cages()
+    system = frame.to_solvis()
+
+``system`` is a ``solvis.System`` on the same ``Atoms`` ``to_ase``
+returns, including ``ice_type`` / ``hc`` / ``ddc`` arrays after those
+calls. Interactive plots follow the
+`solvis examples <https://github.com/amritagos/solvis>`_. The full
+howto is `pydseams solvis <https://d-seams.github.io/PydSEAMSlib/>`_.

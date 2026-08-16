@@ -1,0 +1,27 @@
+============
+Confined ice
+============
+
+
+Classify ice in a nanotube or a monolayer.
+
+The engine functions are ``ring::prismAnalysis`` (one-dimensional
+prisms) and ``ring::polygonRingAnalysis`` (two-dimensional sheets).
+Those names live on `API <../reference/api.rst>`_. The ``seams``
+CLI does not expose them.
+
+Use a scripting front end:
+
+- Lua examples under ``example_lua/iceNanotube/`` in
+  `yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_
+
+- ``Frame.find_prisms`` and ``Frame.find_polygons`` in
+  `pydseams <https://d-seams.github.io/PydSEAMSlib/>`_
+
+External dumps (figshare project 73545):
+``Quasi-1D_Nanotube_LAMMPS_Trajectory`` and
+``Monolayer_LAMMPS_Trajectory``. This repository does not ship those
+files and does not pin prism counts.
+
+For the in-tree mixed TIP4P dump, start with
+`the mixed TIP4P tutorial <../tutorials/bulk-ice.rst>`_.
