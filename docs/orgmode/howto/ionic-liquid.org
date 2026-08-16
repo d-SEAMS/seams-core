@@ -60,6 +60,12 @@ unwrapped with ~gen::relDist~ to the first atom of the group, with
 sits on the polar head, not halfway down the tail. Family is an
 input on the table; it is not inferred from types.
 
+On that ion cloud, ~nneigh::nearestUnlike(cloud, 1, 2)~ is each
+ion's nearest unlike neighbour and the MIC distance.
+~nneigh::mutualNearestUnlike~ keeps the mutual edges. Those
+are contact pairs. They are not first-shell membership and
+not a coordination number.
+
 * Read the box
 
 ~seams read FILE~ prints ~box Lx Ly Lz~ and, when the dump is
