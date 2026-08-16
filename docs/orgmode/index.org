@@ -9,6 +9,23 @@
 
 :Author: `d-SEAMS core team <https://dseams.info>`_
 
+.. raw:: html
+
+   <p class="dseams-hero">
+     <img class="dseams-hero-logo dseams-hero-logo--light"
+          src="_static/dSeamsLogo.png"
+          alt="d-SEAMS"
+          width="320"
+          height="334"
+          loading="eager" />
+     <img class="dseams-hero-logo dseams-hero-logo--dark"
+          src="_static/dSeamsLogo.png"
+          alt="d-SEAMS"
+          width="320"
+          height="334"
+          loading="eager" />
+   </p>
+
 .. grid:: 1 2 3 3
    :gutter: 2
    :padding: 1 1 0 0
@@ -57,8 +74,8 @@ Scripting front ends are separate packages:
   [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]),
   ~require("dseams")~
 
-The header *Ecosystem* menu on every page jumps between the three
-Shibuya sites.
+The header *Ecosystem* menu on every page jumps between the engine,
+the bindings, and linkcell.
 
 Build with a Nix flake (~nix build~, ~nix develop~) or with
 ~pixi run setup && pixi run build && pixi run test~.
@@ -77,7 +94,9 @@ Build with a Nix flake (~nix build~, ~nix develop~) or with
        PY[pydseams Frame]
        LUA["require(\"dseams\")"]
      end
+     LC[linkcell]
      DUMP[LAMMPS / XYZ / chemfiles / con] --> LIB
+     LC --> LIB
      LIB --> CLI
      LIB --> PY
      LIB --> LUA
@@ -150,6 +169,7 @@ framework.
 
 - [[https://d-seams.github.io/PydSEAMSlib/][pydseams]] :: Python Frame API on ~yoda~
 - [[https://d-seams.github.io/yodaStruct/][dseams (Lua)]] :: ~require("dseams")~ and Fennel
+- [[https://github.com/d-SEAMS/linkcell][linkcell]] :: periodic linked-cell k-nearest neighbours
 - [[https://dseams.info][dseams.info]] :: project site
 
 * License

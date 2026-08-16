@@ -31,6 +31,9 @@ Scripting front ends are separate packages:
 - Python: `pydseams` ([PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib))
 - Lua/Fennel: `dseams` ([yodaStruct](https://github.com/d-SEAMS/yodaStruct))
 
+Periodic k-nearest neighbour search is
+[linkcell](https://github.com/d-SEAMS/linkcell).
+
 Build with `pixi run setup && pixi run build && pixi run test`, or with
 the Nix flake: `nix build` and `nix develop`.
 
