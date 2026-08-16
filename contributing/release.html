@@ -303,7 +303,10 @@ green.</p></li>
 <li><p>Point PydSEAMSlib and yodaStruct
 <code class="docutils literal notranslate"><span class="pre">subprojects/seams-core.wrap</span></code> <code class="docutils literal notranslate"><span class="pre">revision</span></code> at that tag. Bump
 those package versions to the same <code class="docutils literal notranslate"><span class="pre">X.Y.Z</span></code> when the wrap is
-the only change. Tag those repositories on their own schedule.</p></li>
+the only change. When the wrap stays and a front end binds new
+engine surfaces, cut a frontend-only minor: keep the wrap tag,
+bump the package version, and tag that repository. Tag those
+repositories on their own schedule.</p></li>
 <li><p>Zenodo: run <code class="docutils literal notranslate"><span class="pre">repro/stage_zenodo.sh</span></code> and pin the software in
 that record to the release tag, never a commit. Do not mint a
 new DOI version for prose. See <code class="docutils literal notranslate"><span class="pre">repro/zenodo/README.md</span></code>.</p></li>
@@ -365,8 +368,14 @@ object is to stay intact.</p></li>
 <tr class="row-odd"><td><p>PydSEAMSlib <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>, <code class="docutils literal notranslate"><span class="pre">meson.build</span></code>, <code class="docutils literal notranslate"><span class="pre">CITATION.cff</span></code></p></td>
 <td><p>package version</p></td>
 </tr>
-<tr class="row-even"><td><p>yodaStruct <code class="docutils literal notranslate"><span class="pre">meson.build</span></code>, <code class="docutils literal notranslate"><span class="pre">CITATION.cff</span></code></p></td>
+<tr class="row-even"><td><p>PydSEAMSlib <code class="docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">release</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>yodaStruct <code class="docutils literal notranslate"><span class="pre">meson.build</span></code>, <code class="docutils literal notranslate"><span class="pre">CITATION.cff</span></code></p></td>
 <td><p>package version</p></td>
+</tr>
+<tr class="row-even"><td><p>yodaStruct <code class="docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">release</span></code></p></td>
 </tr>
 </tbody>
 </table>
