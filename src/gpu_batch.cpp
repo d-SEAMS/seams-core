@@ -1,4 +1,5 @@
 #include <gpu_batch.hpp>
+#include <seams_config.hpp>
 
 #ifdef SEAMS_HAS_LINKCELL
 #include <linkcell_gpu.hpp>
@@ -569,7 +570,8 @@ double msSince(std::chrono::steady_clock::time_point t0) {
 BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
                             int nFrames, double rc) {
   BatchResult out;
-  out.plan = planBatch(nAtoms, nFrames);
+  const auto cfg = seams::cfg::load();
+  out.plan = planBatch(nAtoms, nFrames, 16, 16, cfg.resident);
 #if !defined(SEAMS_HAS_GPULITE)
   out.error = "built without gpulite";
   return out;
@@ -626,7 +628,7 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
     auto *kAtom = factory.create("atom_ice", kKernels, "batch.cu", opt);
 
     const int nTot = nAtoms * out.plan.frames;
-    const int block = 128;
+    const int block = cfg.block > 0 ? cfg.block : 128;
     const int grid = (nTot + block - 1) / block;
     const int ringTot = out.plan.frames * maxRings;
     const int ringGrid = (ringTot + block - 1) / block;
@@ -648,7 +650,7 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
     // One multi-frame launch on the workspace stream. Per-frame box
     // walks serialize on the same bin buffers and leave the SMs idle.
     knn.knearest_into_many(xyzDev, nSz, fSz, cell0, kSz, colsDev,
-                           fSz * nSz * kSz, nullptr, 3.0, false, box);
+                           fSz * nSz * kSz, nullptr, cfg.cell, false, box);
     auto launchArgs = [](void **raw, std::size_t n) {
       return std::vector<void *>(raw, raw + n);
     };

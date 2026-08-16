@@ -406,4 +406,5 @@ if get_option('with_cli')
   test('seams_help', seams_exe, args: ['--help'])
   test('seams_version', seams_exe, args: ['--version'])
   test('seams_features', seams_exe, args: ['--features'])
+  test('seams_print_config', seams_exe, args: ['--print-config'])
 endif

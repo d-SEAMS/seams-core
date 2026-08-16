@@ -30,6 +30,7 @@ test_sources = {
   'structure_desc': 'test_structure_desc.cpp',
   'cage_affiliation': 'test_cage_affiliation.cpp',
   'gpu_residency': 'test_gpu_residency.cpp',
+  'config': 'test_config.cpp',
 }
 
 if readcon_dep.found()

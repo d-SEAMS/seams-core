@@ -21,6 +21,7 @@ ydslib_sources = files(
   'pntCorrespondence.cpp',
   'rdf2d.cpp',
   'ring.cpp',
+  'seams_config.cpp',
   'seams_input.cpp',
   'seams_output.cpp',
   'selection.cpp',
