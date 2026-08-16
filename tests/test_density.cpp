@@ -76,7 +76,8 @@ TEST_CASE("tilted box uses det H face area not bound spans", "[density]") {
   const auto d = site::densityZ(cloud, 0, nbin, 2);
   const double dz = 10.0 / static_cast<double>(nbin);
   REQUIRE_THAT(integrateRho(d, area, dz), Catch::Matchers::WithinAbs(10.0, 1e-9));
-  REQUIRE(integrateRho(d, boundArea, dz) < 9.0);
+  REQUIRE_THAT(integrateRho(d, boundArea, dz),
+               Catch::Matchers::WithinAbs(10.0 * boundArea / area, 1e-9));
 }
 
 TEST_CASE("type 0 is every atom and type I filters", "[density]") {
