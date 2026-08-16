@@ -15,9 +15,9 @@ namespace {
 const char *kKeys[] = {
     "SEAMS_CONFIG",  "SEAMS_FRAME",    "SEAMS_LAST",     "SEAMS_JOBS",
     "SEAMS_TYPE",    "SEAMS_CUTOFF",   "SEAMS_K",        "SEAMS_GRAPH",
-    "SEAMS_RESIDENT", "SEAMS_CELL",    "SEAMS_TPP",      "SEAMS_BLOCK",
-    "SEAMS_OFFLOAD", "LINKCELL_TPP",   "LINKCELL_BLOCK", "YODA_FENNEL_PATH",
-    "YODA_LUA_PATH"};
+    "SEAMS_FAMILY",  "SEAMS_RESIDENT", "SEAMS_CELL",    "SEAMS_TPP",
+    "SEAMS_BLOCK",   "SEAMS_OFFLOAD", "LINKCELL_TPP",   "LINKCELL_BLOCK",
+    "YODA_FENNEL_PATH", "YODA_LUA_PATH"};
 
 struct EnvGuard {
   std::vector<std::pair<std::string, std::string>> saved;
@@ -62,6 +62,7 @@ TEST_CASE("defaults when the environment is empty") {
   REQUIRE(cfg.cutoff == 3.5);
   REQUIRE(cfg.k == 4);
   REQUIRE(cfg.graph == "seeded");
+  REQUIRE(cfg.family == site::Family::waterIce);
   REQUIRE(cfg.resident == 0.80);
   REQUIRE(cfg.cell == 3.0);
   REQUIRE(cfg.tpp == 0);
@@ -121,6 +122,49 @@ TEST_CASE("dump lists resolved keys") {
   const auto text = os.str();
   REQUIRE(text.find("SEAMS_JOBS=4") != std::string::npos);
   REQUIRE(text.find("SEAMS_GRAPH=seeded") != std::string::npos);
+}
+
+TEST_CASE("SEAMS_FAMILY fills the runtime table") {
+  EnvGuard g;
+  setenv("SEAMS_FAMILY", "ionicLiquid", 1);
+  const auto cfg = seams::cfg::load();
+  REQUIRE(cfg.family == site::Family::ionicLiquid);
+  REQUIRE_FALSE(site::iceScoreAllowed(cfg.family));
+}
+
+TEST_CASE("parseFamily accepts camelCase and kebab aliases") {
+  REQUIRE(site::parseFamily("waterIce") == site::Family::waterIce);
+  REQUIRE(site::parseFamily("water-ice") == site::Family::waterIce);
+  REQUIRE(site::parseFamily("ionicLiquid") == site::Family::ionicLiquid);
+  REQUIRE(site::parseFamily("il") == site::Family::ionicLiquid);
+  REQUIRE(site::parseFamily("moltenSalt") == site::Family::moltenSalt);
+  REQUIRE(site::parseFamily("des") == site::Family::des);
+  REQUIRE(site::parseFamily("electrolyte") == site::Family::electrolyte);
+  REQUIRE(site::parseFamily("confinedIL") == site::Family::confinedIL);
+  REQUIRE(site::parseFamily("confinedWater") == site::Family::confinedWater);
+  REQUIRE(site::parseFamily("networkFormer") == site::Family::networkFormer);
+  REQUIRE_THROWS_AS(site::parseFamily("not-a-family"), std::invalid_argument);
+}
+
+TEST_CASE("iceScoreAllowed is true only for waterIce") {
+  REQUIRE(site::iceScoreAllowed(site::Family::waterIce));
+  REQUIRE_FALSE(site::iceScoreAllowed(site::Family::ionicLiquid));
+  REQUIRE_FALSE(site::iceScoreAllowed(site::Family::moltenSalt));
+  REQUIRE_FALSE(site::iceScoreAllowed(site::Family::des));
+  REQUIRE_FALSE(site::iceScoreAllowed(site::Family::electrolyte));
+  REQUIRE_FALSE(site::iceScoreAllowed(site::Family::confinedIL));
+  REQUIRE_FALSE(site::iceScoreAllowed(site::Family::confinedWater));
+  REQUIRE_FALSE(site::iceScoreAllowed(site::Family::networkFormer));
+}
+
+TEST_CASE("refuseIceScore names the family") {
+  const std::string il = site::refuseIceScore(site::Family::ionicLiquid);
+  REQUIRE(il.find("ionicLiquid") != std::string::npos);
+  const std::string salt = site::refuseIceScore(site::Family::moltenSalt);
+  REQUIRE(salt.find("moltenSalt") != std::string::npos);
+  const std::string el = site::refuseIceScore(site::Family::electrolyte);
+  REQUIRE(el.find("electrolyte") != std::string::npos);
+  REQUIRE(std::string(site::familyName(site::Family::waterIce)) == "waterIce");
 }
 
 TEST_CASE("pathFromArgv reads --config") {

@@ -115,6 +115,24 @@ TEST_CASE("partial RDF like-type does not count the unlike neighbour",
   REQUIRE(unlike.count[5] == 1);
 }
 
+TEST_CASE("runningCN at rmax is one for a single I-J pair", "[rdf]") {
+  const double coords[2][3] = {{1.0, 1.0, 1.0}, {3.0, 1.0, 1.0}};
+  auto cloud = twoTypeCloud({10.0, 10.0, 10.0}, coords);
+  const auto gr = rdf::partialRdf(cloud, 1, 2, 5.0, 10);
+  REQUIRE(gr.nI == 1);
+  REQUIRE(gr.nJ == 1);
+  REQUIRE(gr.binwidth == 0.5);
+  REQUIRE(gr.count[4] == 1);
+  const auto cn = rdf::runningCN(gr);
+  REQUIRE(cn.size() == gr.g.size());
+  REQUIRE_THAT(cn[3], Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(cn.back(), Catch::Matchers::WithinAbs(1.0, 1e-12));
+  REQUIRE_THAT(rdf::coordinationNumber(gr, 5.0),
+               Catch::Matchers::WithinAbs(1.0, 1e-12));
+  REQUIRE_THAT(rdf::coordinationNumber(gr, 1.5),
+               Catch::Matchers::WithinAbs(0.0, 1e-12));
+}
+
 TEST_CASE("neighList degree matches site-site CN past every pair and before none",
           "[rdf]") {
   auto cloud = typedCloud(

@@ -19,6 +19,7 @@ ydslib_sources = files(
   'neighbours.cpp',
   'order_parameter.cpp',
   'pntCorrespondence.cpp',
+  'density.cpp',
   'rdf.cpp',
   'rdf2d.cpp',
   'ring.cpp',

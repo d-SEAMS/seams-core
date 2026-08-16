@@ -73,9 +73,9 @@ bool bond::donatedHydrogenBond(
  * (which contains atom INDICES). Moreover, the first element corresponds to the
  * atom whose neighbours have been found.
  */
-std::vector<std::vector<int>>
-bond::populateBonds(const std::vector<std::vector<int>> &nList,
-                    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+std::vector<std::vector<int>> bond::populateBonds(
+    const std::vector<std::vector<int>> &nList,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   //
   std::vector<std::vector<int>> bonds; // Output vector of vectors
   std::vector<int> currentBond;        // Vector for the current bond
@@ -140,10 +140,10 @@ bond::populateBonds(const std::vector<std::vector<int>> &nList,
  *  @param[in] yCloud The input molSys::PointCloud
  *  @param[in] atomTypes Contains an atom type for each particle in yCloud
  */
-std::vector<std::vector<int>>
-bond::populateBonds(const std::vector<std::vector<int>> &nList,
-                    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-                    const std::vector<cage::iceType> &atomTypes) {
+std::vector<std::vector<int>> bond::populateBonds(
+    const std::vector<std::vector<int>> &nList,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<cage::iceType> &atomTypes) {
   //
   std::vector<std::vector<int>> bonds; // Output vector of vectors
   std::vector<int> currentBond;        // Vector for the current bond
@@ -224,8 +224,9 @@ bond::populateBonds(const std::vector<std::vector<int>> &nList,
 std::vector<std::vector<int>>
 bond::populateHbonds(std::string filename,
                      molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-                     const std::vector<std::vector<int>> &nList, int targetFrame,
-                     int Htype, double distCutoff, double angleCutoff) {
+                     const std::vector<std::vector<int>> &nList,
+                     int targetFrame, int Htype, double distCutoff,
+                     double angleCutoff) {
   // Read hydrogen atoms from the trajectory file
   molSys::PointCloud<molSys::Point<double>, double> hCloud;
   hCloud = sinp::readLammpsTrjreduced(filename, targetFrame, hCloud, Htype);
@@ -240,18 +241,19 @@ bond::populateHbonds(std::string filename,
  the particle for which the neighbours are enumerated (the central atom),
  followed by the central atom's neighbour's IDs (not indices). Decides the
  existence of the hydrogen bond depending on the O--O and O--H vectors from the
- neighbour list (by ID) already constructed. The only difference between this function and the
- similar populateHbonds function is that this takes in the H atom PointCloud as input
+ neighbour list (by ID) already constructed. The only difference between this
+ function and the similar populateHbonds function is that this takes in the H
+ atom PointCloud as input
  *  @param[in] yCloud The input molSys::PointCloud for the hydrogen atoms only,
  for the entire system (regardless of whether there is a slice or not)
  *  @param[in] hCloud The input molSys::PointCloud for the oxygen atoms only
  *  @param[in] nList Row-ordered neighbour list by atom ID
  ***********************************************/
-std::vector<std::vector<int>>
-bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-                     molSys::PointCloud<molSys::Point<double>, double> &hCloud,
-                     const std::vector<std::vector<int>> &nList,
-                     double distCutoff, double angleCutoff) {
+std::vector<std::vector<int>> bond::populateHbondsWithInputClouds(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &hCloud,
+    const std::vector<std::vector<int>> &nList, double distCutoff,
+    double angleCutoff) {
   auto molIDlist = molSys::hAtomMolList(hCloud, yCloud);
   return bond::populateHbondsFromDonors(yCloud, hCloud, nList,
                                         donorHsFromMolList(molIDlist),
@@ -329,8 +331,8 @@ to each atom.
 */
 double bond::getHbondDistanceOH(
     const molSys::PointCloud<molSys::Point<double>, double> &oCloud,
-    const molSys::PointCloud<molSys::Point<double>, double> &hCloud, int oAtomIndex,
-    int hAtomIndex) {
+    const molSys::PointCloud<molSys::Point<double>, double> &hCloud,
+    int oAtomIndex, int hAtomIndex) {
   const std::vector<double> hpt = {hCloud.pts[hAtomIndex].x,
                                    hCloud.pts[hAtomIndex].y,
                                    hCloud.pts[hAtomIndex].z};
@@ -403,7 +405,7 @@ bond::createBondsFromCages(const std::vector<std::vector<int>> &rings,
       std::sort(currentBond.begin(), currentBond.end());
       bonds.push_back(currentBond);
     } // end of loop through a particular ring
-  }   // end of loop through cages
+  } // end of loop through cages
 
   // This may have duplicates, so the duplicates should be removed
   std::sort(bonds.begin(), bonds.end());

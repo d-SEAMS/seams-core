@@ -5,6 +5,8 @@
 #include <string>
 #include <string_view>
 
+#include <site.hpp>
+
 /** @file seams_config.hpp
  *  @brief Twelve-factor runtime knobs for the engine and the fronts.
  *
@@ -14,6 +16,13 @@
  *  over the file. CLI flags win over the environment. Compile-time
  *  meson options stay out of this table.
  */
+
+namespace site {
+bool iceScoreAllowed(Family f);
+const char *refuseIceScore(Family f);
+const char *familyName(Family f);
+Family parseFamily(std::string_view name);
+} // namespace site
 
 namespace seams::cfg {
 
@@ -25,6 +34,7 @@ struct Runtime {
   double cutoff = 3.5;
   int k = 4;
   std::string graph = "seeded";
+  site::Family family = site::Family::waterIce;
   double resident = 0.80;
   double cell = 3.0;
   int tpp = 0;

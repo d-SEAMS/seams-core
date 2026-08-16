@@ -17,10 +17,10 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <cmath>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -87,13 +87,14 @@ populateHbonds(std::string filename,
 //! Create a vector of vectors (similar to the neighbour list conventions)
 //! containing the hydrogen bond connectivity information. Decides the
 //! existence of the hydrogen bond depending on the O--O and O--H vectors from
-//! the neighbour list already constructed, taking a PointCloud for the H atoms as input
+//! the neighbour list already constructed, taking a PointCloud for the H atoms
+//! as input
 // ! The H atom PointCloud should be for the entire system
-std::vector<std::vector<int>>
-populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-               molSys::PointCloud<molSys::Point<double>, double> &hCloud,
-               const std::vector<std::vector<int>> &nList,
-               double distCutoff = 2.42, double angleCutoff = 30.0);
+std::vector<std::vector<int>> populateHbondsWithInputClouds(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &hCloud,
+    const std::vector<std::vector<int>> &nList, double distCutoff = 2.42,
+    double angleCutoff = 30.0);
 
 //! Geometric test for one donor-acceptor assignment. donorHs are hCloud
 //! indices on the donor. O-O is gen::relDist(yCloud, acceptor, donor).
@@ -116,10 +117,10 @@ std::vector<std::vector<int>> populateHbondsFromDonors(
 
 //! Calculates the distance of the hydrogen bond between O and H (of different
 //! atoms), given the respective pointClouds and the indices to each atom
-double
-getHbondDistanceOH(const molSys::PointCloud<molSys::Point<double>, double> &oCloud,
-                   const molSys::PointCloud<molSys::Point<double>, double> &hCloud,
-                   int oAtomIndex, int hAtomIndex);
+double getHbondDistanceOH(
+    const molSys::PointCloud<molSys::Point<double>, double> &oCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &hCloud,
+    int oAtomIndex, int hAtomIndex);
 
 //! Create a vector of vectors containing bond connectivity information. May
 //! contain duplicates! Gets the bond information from the vector of vectors

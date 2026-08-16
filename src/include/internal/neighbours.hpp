@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <array>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -295,6 +296,23 @@ kNearestNeighbourPair(
 std::pair<double, double> shellSeparation(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     int typeI);
+
+/** Nearest unlike image of each typeI particle among typeJ particles.
+ *  Returns cloud-index pairs (i, j) and the MIC distance
+ *  (sqrt of gen::periodicDistSq). On an ion cloud, typeI = 1
+ *  (cation vertex) and typeJ = 2 (anion vertex). This is the
+ *  nearest unlike neighbour, not a coordination number.
+ */
+std::vector<std::tuple<int, int, double>> nearestUnlike(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeI,
+    int typeJ);
+
+/** Subset of nearestUnlike where j's nearest typeI is i (mutual).
+ *  A contact pair is this mutual edge, not first-shell membership.
+ */
+std::vector<std::pair<int, int>> mutualNearestUnlike(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeI,
+    int typeJ);
 
 //! Erases memory for a vector of vectors for the neighbour list
 [[nodiscard]] int clearNeighbourList(std::vector<std::vector<int>> &nList);

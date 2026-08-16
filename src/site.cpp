@@ -117,7 +117,7 @@ int indexOfAtom(const Cloud &src, int atomID) {
   }
   const int n = static_cast<int>(src.pts.size());
   for (int i = 0; i < n; ++i) {
-    if (src.pts[i].atomID == atomID) {
+    if (src.pts[static_cast<std::size_t>(i)].atomID == atomID) {
       return i;
     }
   }
@@ -144,9 +144,9 @@ std::vector<int> indicesOf(const Cloud &yCloud, const Table &table,
                            Kind kind) {
   std::vector<int> out;
   const int n = static_cast<int>(yCloud.pts.size());
-  out.reserve(static_cast<size_t>(n));
+  out.reserve(static_cast<std::size_t>(n));
   for (int i = 0; i < n; ++i) {
-    if (matchesKind(table.of(yCloud.pts[i]), kind)) {
+    if (matchesKind(table.of(yCloud.pts[static_cast<std::size_t>(i)]), kind)) {
       out.push_back(i);
     }
   }
@@ -194,7 +194,7 @@ Cloud ionCloud(const Cloud &src, const Table &table) {
       if (idx < 0) {
         continue;
       }
-      if (isIonKind(table.of(src.pts[idx]))) {
+      if (isIonKind(table.of(src.pts[static_cast<std::size_t>(idx)]))) {
         ions.push_back(idx);
       }
     }
@@ -202,29 +202,30 @@ Cloud ionCloud(const Cloud &src, const Table &table) {
       continue;
     }
     std::sort(ions.begin(), ions.end());
-    const Kind ionKind = table.of(src.pts[ions.front()]);
+    const Kind ionKind = table.of(src.pts[static_cast<std::size_t>(ions.front())]);
     ions.erase(std::remove_if(ions.begin(), ions.end(),
                               [&](int idx) {
-                                return table.of(src.pts[idx]) != ionKind;
+                                return table.of(src.pts[static_cast<std::size_t>(
+                                           idx)]) != ionKind;
                               }),
                ions.end());
     if (ions.empty()) {
       continue;
     }
 
-    molSys::Point<double> vertex = src.pts[ions.front()];
+    molSys::Point<double> vertex = src.pts[static_cast<std::size_t>(ions.front())];
     vertex.type = (ionKind == Kind::cationHead) ? 1 : 2;
     vertex.molID = molID;
     if (ions.size() > 1) {
       const int ref = ions.front();
-      double sx = src.pts[ref].x;
-      double sy = src.pts[ref].y;
-      double sz = src.pts[ref].z;
-      for (size_t k = 1; k < ions.size(); ++k) {
+      double sx = src.pts[static_cast<std::size_t>(ref)].x;
+      double sy = src.pts[static_cast<std::size_t>(ref)].y;
+      double sz = src.pts[static_cast<std::size_t>(ref)].z;
+      for (std::size_t k = 1; k < ions.size(); ++k) {
         const auto dr = gen::relDist(src, ions[k], ref);
-        sx += src.pts[ref].x + dr[0];
-        sy += src.pts[ref].y + dr[1];
-        sz += src.pts[ref].z + dr[2];
+        sx += src.pts[static_cast<std::size_t>(ref)].x + dr[0];
+        sy += src.pts[static_cast<std::size_t>(ref)].y + dr[1];
+        sz += src.pts[static_cast<std::size_t>(ref)].z + dr[2];
       }
       const double inv = 1.0 / static_cast<double>(ions.size());
       vertex.x = sx * inv;
@@ -243,12 +244,13 @@ Cloud ionCloud(const Cloud &src, const Table &table) {
 
 Table parseSiteSpec(std::string_view spec) {
   Table table;
-  size_t start = 0;
+  std::size_t start = 0;
   while (start <= spec.size()) {
-    const size_t comma = spec.find(',', start);
+    const std::size_t comma = spec.find(',', start);
     const auto raw =
-        spec.substr(start, comma == std::string_view::npos ? std::string_view::npos
-                                                           : comma - start);
+        spec.substr(start, comma == std::string_view::npos
+                               ? std::string_view::npos
+                               : comma - start);
     start = (comma == std::string_view::npos) ? spec.size() + 1 : comma + 1;
     const std::string token = trim(raw);
     if (token.empty()) {
@@ -269,7 +271,7 @@ Table parseSiteSpec(std::string_view spec) {
       table.family = familyFromName(val);
       continue;
     }
-    size_t consumed = 0;
+    std::size_t consumed = 0;
     int typeId = 0;
     try {
       typeId = std::stoi(key, &consumed);

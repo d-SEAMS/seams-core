@@ -63,7 +63,8 @@ TEST_CASE("trimBonds on empty input returns empty", "[bond]") {
 
 TEST_CASE("populateBonds generates bonds from neighbour list", "[bond]") {
   auto cloud = makeSquareCloud();
-  // Build a neighbour list by index (not ID, since populateBonds expects index-based)
+  // Build a neighbour list by index (not ID, since populateBonds expects
+  // index-based)
   auto nList = nneigh::getNewNeighbourListByIndex(cloud, 1.5);
 
   auto bonds = bond::populateBonds(nList, cloud);
@@ -143,12 +144,13 @@ TEST_CASE("getHbondDistanceOH uses dump H on a mixed image", "[bond]") {
   hPoint.z = 1.0;
   hCloud.pts.push_back(hPoint);
   const double dist = bond::getHbondDistanceOH(oCloud, hCloud, 0, 0);
-  const double expect = std::sqrt(4.5 * 4.5 + 1.160254037844386 * 1.160254037844386);
+  const double expect =
+      std::sqrt(4.5 * 4.5 + 1.160254037844386 * 1.160254037844386);
   REQUIRE_THAT(dist, Catch::Matchers::WithinAbs(expect, 1e-10));
 }
 
-static molSys::Point<double> makeAtom(int atomID, int molID, double x,
-                                      double y, double z) {
+static molSys::Point<double> makeAtom(int atomID, int molID, double x, double y,
+                                      double z) {
   molSys::Point<double> p;
   p.atomID = atomID;
   p.molID = molID;
@@ -193,6 +195,10 @@ TEST_CASE("populateHbondsWithInputClouds accepts acceptor-first angle",
   REQUIRE(net[1].size() == 2);
   REQUIRE(net[0][1] == 2);
   REQUIRE(net[1][1] == 1);
+  const std::vector<int> donorHs = {0, 1, 2, 3};
+  const auto donorNet = bond::populateHbondsFromDonors(oCloud, hCloud, nList,
+                                                       donorHs, 2.42, 30.0);
+  REQUIRE(donorNet == net);
 }
 
 TEST_CASE("populateHbondsWithInputClouds accepts a mixed-image dump-H bond",
@@ -235,6 +241,14 @@ TEST_CASE("populateHbondsWithInputClouds accepts a mixed-image dump-H bond",
   REQUIRE(net[1].size() == 2);
   REQUIRE(net[0][1] == 2);
   REQUIRE(net[1][1] == 1);
+  const std::vector<int> donorHs = {0, 1, 2, 3};
+  const auto donorNet = bond::populateHbondsFromDonors(oCloud, hCloud, nList,
+                                                       donorHs, 2.42, 30.0);
+  REQUIRE(donorNet == net);
+  REQUIRE(bond::donatedHydrogenBond(oCloud, hCloud, 1, 0,
+                                    std::vector<int>{0, 1}, 2.42, 30.0));
+  REQUIRE_THAT(gen::periodicDist(oCloud, 0, 1),
+               Catch::Matchers::WithinAbs(2.8, 1e-10));
 }
 
 TEST_CASE("populateBonds with cage iceType filters dummy atoms", "[bond]") {
@@ -245,8 +259,8 @@ TEST_CASE("populateBonds with cage iceType filters dummy atoms", "[bond]") {
   std::vector<cage::iceType> atomTypes(4, cage::iceType::dummy);
   auto bonds = bond::populateBonds(nList, cloud, atomTypes);
 
-  // With bondsBetweenDummy=false (default), bonds between dummy atoms are excluded
-  // So no bonds should be created
+  // With bondsBetweenDummy=false (default), bonds between dummy atoms are
+  // excluded So no bonds should be created
   REQUIRE(bonds.empty());
 }
 
@@ -267,7 +281,7 @@ TEST_CASE("populateBonds with non-dummy iceType creates bonds", "[bond]") {
 TEST_CASE("createBondsFromCages extracts bonds from cage rings", "[bond]") {
   // Minimal cage setup: a single HC cage has rings
   std::vector<std::vector<int>> rings = {{1, 2, 3, 4, 5, 6},
-                                          {7, 8, 9, 10, 11, 12}};
+                                         {7, 8, 9, 10, 11, 12}};
   cage::Cage cage1;
   cage1.type = cage::cageType::HexC;
   cage1.rings = {0, 1}; // Indices into rings
@@ -275,8 +289,8 @@ TEST_CASE("createBondsFromCages extracts bonds from cage rings", "[bond]") {
   std::vector<cage::Cage> cageList = {cage1};
   int nRings = 0;
 
-  auto bonds = bond::createBondsFromCages(rings, cageList,
-                                           cage::cageType::HexC, nRings);
+  auto bonds =
+      bond::createBondsFromCages(rings, cageList, cage::cageType::HexC, nRings);
 
   REQUIRE(nRings == 2);
   REQUIRE(bonds.size() > 0);
@@ -290,8 +304,8 @@ TEST_CASE("populateHbonds detects hydrogen bonds from trajectory", "[bond]") {
 
   auto nList = nneigh::neighListO(3.5, yCloud, 2);
 
-  auto hBonds = bond::populateHbonds("traj/exampleTraj.lammpstrj", yCloud,
-                                      nList, 1, 1);
+  auto hBonds =
+      bond::populateHbonds("traj/exampleTraj.lammpstrj", yCloud, nList, 1, 1);
 
   REQUIRE(hBonds.size() == static_cast<size_t>(yCloud.nop));
   int bonded = 0;
@@ -470,6 +484,42 @@ TEST_CASE("water donorHs from hAtomMolList matches populateHbondsWithInputClouds
   REQUIRE(donorNet == waterNet);
 }
 
+TEST_CASE("populateHbondsFromDonors ignores a far third donor H", "[bond]") {
+  molSys::PointCloud<molSys::Point<double>, double> oCloud, hCloud;
+  oCloud.box = {10.0, 10.0, 10.0};
+  oCloud.boxLow = {0.0, 0.0, 0.0};
+  hCloud.box = oCloud.box;
+  hCloud.boxLow = oCloud.boxLow;
+  oCloud.pts.push_back(makeAtom(1, 1, 0.0, 0.0, 0.0));
+  oCloud.pts.push_back(makeAtom(2, 2, 2.8, 0.0, 0.0));
+  oCloud.nop = 2;
+  oCloud.idIndexMap[1] = 0;
+  oCloud.idIndexMap[2] = 1;
+  hCloud.pts.push_back(makeAtom(11, 1, 1.0, 0.0, 0.0));
+  hCloud.pts.push_back(makeAtom(12, 1, -0.96, 0.76, 0.0));
+  hCloud.pts.push_back(makeAtom(21, 2, 3.8, 0.0, 0.0));
+  hCloud.pts.push_back(makeAtom(22, 2, 2.8, 0.96, 0.0));
+  hCloud.pts.push_back(makeAtom(13, 1, 8.0, 8.0, 8.0));
+  hCloud.nop = 5;
+  const std::vector<std::vector<int>> nList = {{1, 2}, {2, 1}};
+  const auto waterNet =
+      bond::populateHbondsWithInputClouds(oCloud, hCloud, nList, 2.42, 30.0);
+  REQUIRE(waterNet[0].size() == 2);
+  REQUIRE(waterNet[1].size() == 2);
+  REQUIRE(waterNet[0][1] == 2);
+  REQUIRE(waterNet[1][1] == 1);
+  const std::vector<int> twoH = {0, 1, 2, 3};
+  const auto twoHNet =
+      bond::populateHbondsFromDonors(oCloud, hCloud, nList, twoH, 2.42, 30.0);
+  REQUIRE(twoHNet == waterNet);
+  const std::vector<int> threeH = {0, 1, 4, 2, 3};
+  const auto threeHNet =
+      bond::populateHbondsFromDonors(oCloud, hCloud, nList, threeH, 2.42, 30.0);
+  REQUIRE(threeHNet == waterNet);
+  REQUIRE_FALSE(bond::donatedHydrogenBond(oCloud, hCloud, 1, 0,
+                                          std::vector<int>{4}, 2.42, 30.0));
+}
+
 TEST_CASE("createBondsFromCages with no matching cage type returns empty",
           "[bond]") {
   std::vector<std::vector<int>> rings = {{1, 2, 3, 4, 5, 6}};
@@ -480,8 +530,8 @@ TEST_CASE("createBondsFromCages with no matching cage type returns empty",
   std::vector<cage::Cage> cageList = {cage1};
   int nRings = 0;
 
-  auto bonds = bond::createBondsFromCages(rings, cageList,
-                                           cage::cageType::HexC, nRings);
+  auto bonds =
+      bond::createBondsFromCages(rings, cageList, cage::cageType::HexC, nRings);
 
   REQUIRE(nRings == 0);
 }

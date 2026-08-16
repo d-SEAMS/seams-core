@@ -419,6 +419,25 @@ if get_option('with_cli')
     ],
     depends: [seams_exe])
   test(
+    'seams_help_mentions_density_z',
+    python3,
+    args: [
+      '-c',
+      'import subprocess,sys; p=subprocess.run([sys.argv[1],"--help"],capture_output=True,text=True); text=p.stdout+p.stderr; sys.exit(0 if p.returncode==0 and "density-z" in text and "--axis" in text else 1)',
+      seams_exe.full_path(),
+    ],
+    depends: [seams_exe])
+  test(
+    'seams_density_z',
+    python3,
+    args: [
+      '-c',
+      'import os,subprocess,sys; env=os.environ.copy(); lib=os.path.join(os.path.dirname(sys.argv[1]),"src"); env["LD_LIBRARY_PATH"]=lib+(":"+env["LD_LIBRARY_PATH"] if env.get("LD_LIBRARY_PATH") else ""); p=subprocess.run([sys.argv[1],"density-z",sys.argv[2],"--bins","4","--type","0"],capture_output=True,text=True,env=env); lines=[ln for ln in p.stdout.splitlines() if ln.strip()]; sys.exit(0 if p.returncode==0 and lines and lines[0]=="# z rho" and len(lines)==5 else 1)',
+      seams_exe.full_path(),
+      meson.project_source_root() / 'input' / 'traj' / 'exampleTraj.lammpstrj',
+    ],
+    depends: [seams_exe])
+  test(
     'seams_unknown_command_exit_2',
     python3,
     args: [
@@ -427,4 +446,91 @@ if get_option('with_cli')
       seams_exe.full_path(),
     ],
     depends: [seams_exe])
+  test(
+    'seams_chill_family_ionicLiquid_exit_2',
+    python3,
+    args: [
+      '-c',
+      'import subprocess,sys; p=subprocess.run([sys.argv[1],"chill",sys.argv[2],"--family","ionicLiquid"],capture_output=True,text=True); text=p.stderr+p.stdout; sys.exit(0 if p.returncode==2 and "ionicLiquid" in text else 1)',
+      seams_exe.full_path(),
+      meson.project_source_root() / 'input' / 'traj' / 'exampleTraj.lammpstrj',
+    ],
+    depends: [seams_exe])
+  test(
+    'seams_cages_family_des_exit_2',
+    python3,
+    args: [
+      '-c',
+      'import subprocess,sys; p=subprocess.run([sys.argv[1],"cages",sys.argv[2],"--family","des"],capture_output=True,text=True); text=p.stderr+p.stdout; sys.exit(0 if p.returncode==2 and "des" in text else 1)',
+      seams_exe.full_path(),
+      meson.project_source_root() / 'input' / 'traj' / 'exampleTraj.lammpstrj',
+    ],
+    depends: [seams_exe])
+  test(
+    'seams_chill_exampleTraj',
+    seams_exe,
+    args: ['chill', 'input/traj/exampleTraj.lammpstrj'],
+    workdir: meson.project_source_root(),
+    timeout: 120)
+  test(
+    'seams_help_mentions_domains',
+    python3,
+    args: [
+      '-c',
+      'import subprocess,sys; p=subprocess.run([sys.argv[1],"--help"],capture_output=True,text=True); text=p.stdout+p.stderr; sys.exit(0 if p.returncode==0 and "domains" in text and "--subset" in text else 1)',
+      seams_exe.full_path(),
+    ],
+    depends: [seams_exe])
+  test(
+    'seams_domains_needs_site',
+    python3,
+    args: [
+      '-c',
+      'import subprocess,sys; p=subprocess.run([sys.argv[1],"domains",sys.argv[2]],capture_output=True,text=True); sys.exit(0 if p.returncode==2 else 1)',
+      seams_exe.full_path(),
+      meson.project_source_root() / 'input' / 'traj' / 'exampleTraj.lammpstrj',
+    ],
+    depends: [seams_exe])
+  test(
+    'seams_help_mentions_family',
+    python3,
+    args: [
+      '-c',
+      'import subprocess,sys; p=subprocess.run([sys.argv[1],"--help"],capture_output=True,text=True); text=p.stdout+p.stderr; sys.exit(0 if p.returncode==0 and "--family" in text and "waterIce" in text else 1)',
+      seams_exe.full_path(),
+    ],
+    depends: [seams_exe])
+  test(
+    'seams_cn_site_site',
+    python3,
+    args: [
+      '-c',
+      'import subprocess,sys; p=subprocess.run([sys.argv[1],"cn",sys.argv[2],"--types","2,2","--cutoff","3.5"],capture_output=True,text=True); text=p.stdout+p.stderr; sys.exit(0 if p.returncode==0 and "site-site" in text else 1)',
+      seams_exe.full_path(),
+      meson.project_source_root() / 'input' / 'traj' / 'exampleTraj.lammpstrj',
+    ],
+    depends: [seams_exe],
+    timeout: 60)
+  test(
+    'seams_cn_ions_cage',
+    python3,
+    args: [
+      '-c',
+      'import subprocess,sys; p=subprocess.run([sys.argv[1],"cn",sys.argv[2],"--ions","--site","1=cationHead,2=anion","--cutoff","3.5"],capture_output=True,text=True); text=p.stdout+p.stderr; sys.exit(0 if p.returncode==0 and "cage" in text else 1)',
+      seams_exe.full_path(),
+      meson.project_source_root() / 'input' / 'traj' / 'exampleTraj.lammpstrj',
+    ],
+    depends: [seams_exe],
+    timeout: 60)
+  test(
+    'seams_pairs_contact',
+    python3,
+    args: [
+      '-c',
+      'import subprocess,sys; p=subprocess.run([sys.argv[1],"pairs",sys.argv[2],"--site","1=cationHead,2=anion"],capture_output=True,text=True); text=p.stdout+p.stderr; sys.exit(0 if p.returncode==0 and "contact-pair" in text else 1)',
+      seams_exe.full_path(),
+      meson.project_source_root() / 'input' / 'traj' / 'exampleTraj.lammpstrj',
+    ],
+    depends: [seams_exe],
+    timeout: 60)
 endif

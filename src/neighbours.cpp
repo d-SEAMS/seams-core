@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <numeric>
 #include <queue>
 #include <span>
@@ -971,6 +972,84 @@ nneigh::kNearestNeighbourPair(
   std::vector<std::vector<int>> uni;
   fillBothGraphsFromNom(yCloud, nom, k, mutual, uni);
   return {std::move(mutual), std::move(uni)};
+}
+
+/**
+ * @details Nearest unlike neighbour of every typeI index among typeJ
+ *  indices. Each typeI walks every typeJ with gen::periodicDistSq
+ *  (the dump MIC). Ties keep the lowest typeJ index. Particles with
+ *  no unlike partner are omitted. Results are cloud indices and the
+ *  MIC distance, not a coordination number.
+ */
+std::vector<std::tuple<int, int, double>> nneigh::nearestUnlike(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeI,
+    int typeJ) {
+  std::vector<std::tuple<int, int, double>> out;
+  if (yCloud.box.size() < 3 || yCloud.nop <= 0) {
+    return out;
+  }
+
+  std::vector<int> jIdx;
+  jIdx.reserve(static_cast<std::size_t>(yCloud.nop));
+  for (int j = 0; j < yCloud.nop; j++) {
+    if (yCloud.pts[static_cast<std::size_t>(j)].type == typeJ) {
+      jIdx.push_back(j);
+    }
+  }
+  if (jIdx.empty()) {
+    return out;
+  }
+
+  for (int i = 0; i < yCloud.nop; i++) {
+    if (yCloud.pts[static_cast<std::size_t>(i)].type != typeI) {
+      continue;
+    }
+    int bestJ = -1;
+    double bestD2 = std::numeric_limits<double>::infinity();
+    for (const int j : jIdx) {
+      if (j == i) {
+        continue;
+      }
+      const double d2 = gen::periodicDistSq(yCloud, i, j);
+      if (d2 < bestD2) {
+        bestD2 = d2;
+        bestJ = j;
+      }
+    }
+    if (bestJ >= 0) {
+      out.emplace_back(i, bestJ, std::sqrt(bestD2));
+    }
+  }
+  return out;
+}
+
+/**
+ * @details Contact pairs: those nearestUnlike edges whose typeJ
+ *  partner also lists the typeI index as its nearest unlike
+ *  neighbour. Not first-shell membership.
+ */
+std::vector<std::pair<int, int>> nneigh::mutualNearestUnlike(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeI,
+    int typeJ) {
+  const auto forward = nearestUnlike(yCloud, typeI, typeJ);
+  const auto reverse = nearestUnlike(yCloud, typeJ, typeI);
+  std::vector<int> partnerOfJ(static_cast<std::size_t>(yCloud.nop), -1);
+  for (const auto &row : reverse) {
+    const int j = std::get<0>(row);
+    if (j >= 0 && j < yCloud.nop) {
+      partnerOfJ[static_cast<std::size_t>(j)] = std::get<1>(row);
+    }
+  }
+  std::vector<std::pair<int, int>> out;
+  for (const auto &row : forward) {
+    const int i = std::get<0>(row);
+    const int j = std::get<1>(row);
+    if (j >= 0 && j < yCloud.nop &&
+        partnerOfJ[static_cast<std::size_t>(j)] == i) {
+      out.emplace_back(i, j);
+    }
+  }
+  return out;
 }
 
 /**

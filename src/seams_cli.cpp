@@ -11,9 +11,12 @@
 #include <mol_sys.hpp>
 #include <generic.hpp>
 #include <neighbours.hpp>
+#include <cluster.hpp>
+#include <density.hpp>
 #include <rdf.hpp>
 #include <seams_config.hpp>
 #include <seams_input.hpp>
+#include <site.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -21,6 +24,7 @@
 #include <iostream>
 #include <map>
 #include <mutex>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -231,6 +235,216 @@ int cmdRead(std::ostream &os, Cloud &cloud) {
   return 0;
 }
 
+site::Kind kindFromName(std::string_view name) {
+  if (name == "unspecified") {
+    return site::Kind::unspecified;
+  }
+  if (name == "cationHead") {
+    return site::Kind::cationHead;
+  }
+  if (name == "anion") {
+    return site::Kind::anion;
+  }
+  if (name == "tail") {
+    return site::Kind::tail;
+  }
+  if (name == "donorH") {
+    return site::Kind::donorH;
+  }
+  if (name == "acceptor") {
+    return site::Kind::acceptor;
+  }
+  if (name == "polar") {
+    return site::Kind::polar;
+  }
+  if (name == "apolar") {
+    return site::Kind::apolar;
+  }
+  if (name == "waterO") {
+    return site::Kind::waterO;
+  }
+  if (name == "waterH") {
+    return site::Kind::waterH;
+  }
+  if (name == "solvent") {
+    return site::Kind::solvent;
+  }
+  throw std::invalid_argument("unknown site kind '" + std::string(name) + "'");
+}
+
+site::Table parseSiteSpec(std::string_view spec, site::Family family) {
+  site::Table table;
+  table.family = family;
+  std::size_t start = 0;
+  while (start <= spec.size()) {
+    const std::size_t comma = spec.find(',', start);
+    const auto raw =
+        spec.substr(start, comma == std::string_view::npos
+                               ? std::string_view::npos
+                               : comma - start);
+    start = (comma == std::string_view::npos) ? spec.size() + 1 : comma + 1;
+    const auto token = trimView(raw);
+    if (token.empty()) {
+      continue;
+    }
+    const auto eq = token.find('=');
+    if (eq == std::string_view::npos) {
+      throw std::invalid_argument("site spec token '" + std::string(token) +
+                                  "' is not key=value");
+    }
+    const auto key = trimView(token.substr(0, eq));
+    const auto val = trimView(token.substr(eq + 1));
+    if (key.empty() || val.empty()) {
+      throw std::invalid_argument("site spec token '" + std::string(token) +
+                                  "' is not key=value");
+    }
+    if (key == "family") {
+      table.family = site::parseFamily(val);
+      continue;
+    }
+    int typeId = 0;
+    try {
+      typeId = parseIntegral<int>(key);
+    } catch (const ParsingException &) {
+      throw std::invalid_argument("site spec type '" + std::string(key) +
+                                  "' is not an integer");
+    }
+    table.typeToKind[typeId] = kindFromName(val);
+  }
+  return table;
+}
+
+void countIonTypes(const Cloud &ions, int &nCation, int &nAnion) {
+  nCation = 0;
+  nAnion = 0;
+  for (const auto &pt : ions.pts) {
+    if (pt.type == 1) {
+      ++nCation;
+    } else if (pt.type == 2) {
+      ++nAnion;
+    }
+  }
+}
+
+double meanCageDegree(const Cloud &ions, double cutoff) {
+  if (ions.nop == 0) {
+    return 0.0;
+  }
+  const auto nList = nneigh::neighList(cutoff, ions, 1, 2);
+  double sum = 0.0;
+  int nI = 0;
+  const int nRows = static_cast<int>(nList.size());
+  for (int i = 0; i < ions.nop; ++i) {
+    if (ions.pts[static_cast<std::size_t>(i)].type != 1) {
+      continue;
+    }
+    ++nI;
+    if (i >= nRows || nList[static_cast<std::size_t>(i)].empty()) {
+      continue;
+    }
+    sum += static_cast<double>(nList[static_cast<std::size_t>(i)].size() - 1);
+  }
+  return nI > 0 ? sum / static_cast<double>(nI) : 0.0;
+}
+
+int uniqueTypeCount(const Cloud &cloud) {
+  std::set<int> types;
+  for (const auto &pt : cloud.pts) {
+    types.insert(pt.type);
+  }
+  return static_cast<int>(types.size());
+}
+
+int cmdCn(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
+          int typeJ) {
+  const int typI = typeOf(cloud, typeI);
+  const int typJ = typeJ > 0 ? typeJ : typI;
+  const auto nList = nneigh::neighListPair(cutoff, cloud, typI, typJ);
+  double sum = 0.0;
+  int nI = 0;
+  const int nRows = static_cast<int>(nList.size());
+  for (int i = 0; i < cloud.nop; ++i) {
+    if (cloud.pts[static_cast<std::size_t>(i)].type != typI) {
+      continue;
+    }
+    ++nI;
+    if (i >= nRows || nList[static_cast<std::size_t>(i)].empty()) {
+      continue;
+    }
+    sum += static_cast<double>(nList[static_cast<std::size_t>(i)].size() - 1);
+  }
+  const double degree = nI > 0 ? sum / static_cast<double>(nI) : 0.0;
+  os << "site-site types " << typI << " " << typJ << " cutoff " << cutoff
+     << " degree " << degree << " nI " << nI << "\n";
+  return 0;
+}
+
+int cmdCnIons(std::ostream &os, Cloud &cloud, double cutoff,
+              const site::Table &table) {
+  const auto ions = site::ionCloud(cloud, table);
+  int nCation = 0;
+  int nAnion = 0;
+  countIonTypes(ions, nCation, nAnion);
+  const double degree = meanCageDegree(ions, cutoff);
+  os << "cage ionCloud types 1 2 cutoff " << cutoff << " degree " << degree
+     << " nCation " << nCation << " nAnion " << nAnion << "\n";
+  return 0;
+}
+
+int cmdPairs(std::ostream &os, Cloud &cloud, const site::Table &table) {
+  const auto ions = site::ionCloud(cloud, table);
+  const auto pairs = nneigh::mutualNearestUnlike(ions, 1, 2);
+  int nCation = 0;
+  int nAnion = 0;
+  countIonTypes(ions, nCation, nAnion);
+  os << "contact-pair count " << pairs.size() << " nCation " << nCation
+     << " nAnion " << nAnion << "\n";
+  return 0;
+}
+
+int cmdDomains(std::ostream &os, Cloud &cloud, double cutoff,
+               const site::Table &table, site::Kind subset) {
+  std::vector<bool> mask(static_cast<std::size_t>(cloud.nop), false);
+  for (const int i : site::indicesOf(cloud, table, subset)) {
+    if (i >= 0 && i < cloud.nop) {
+      mask[static_cast<std::size_t>(i)] = true;
+    }
+  }
+  const auto idxList = nneigh::getNewNeighbourListByIndex(cloud, cutoff);
+  std::vector<std::vector<int>> idList(idxList.size());
+  for (std::size_t i = 0; i < idxList.size(); ++i) {
+    idList[i].reserve(idxList[i].size());
+    for (const int idx : idxList[i]) {
+      if (idx >= 0 && idx < cloud.nop) {
+        idList[i].push_back(cloud.pts[static_cast<std::size_t>(idx)].atomID);
+      }
+    }
+  }
+  const auto d = clump::largestDomain(cloud, idList, mask);
+  const char *name =
+      subset == site::Kind::apolar ? "apolar" : "polar";
+  os << "subset " << name << " n " << d.subset << " largest " << d.largest
+     << " P " << d.percolation << "\n";
+  return 0;
+}
+
+int cmdDensityZ(std::ostream &os, Cloud &cloud, int typeI, int bins, int axis) {
+  if (bins <= 0) {
+    const int a = (axis >= 0 && axis <= 2) ? axis : 2;
+    const double span =
+        (static_cast<int>(cloud.box.size()) > a)
+            ? cloud.box[static_cast<std::size_t>(a)]
+            : 0.0;
+    bins = std::max(1, static_cast<int>(std::lround(span / 0.1)));
+  }
+  const auto d = site::densityZ(cloud, typeI, bins, axis);
+  os << "# z rho\n";
+  for (std::size_t i = 0; i < d.z.size(); ++i) {
+    os << d.z[i] << " " << d.rho[i] << "\n";
+  }
+  return 0;
+}
+
 int cmdRdf(std::ostream &os, Cloud &cloud, double rmax, int bins, int typeI,
            int typeJ) {
   if (bins <= 0) {
@@ -423,6 +637,9 @@ int main(int argc, char *argv[]) {
   double cutoff = cfg.cutoff;
   int k = cfg.k;
   std::string graph = cfg.graph;
+  site::Family family = cfg.family;
+  bool familyFlag = false;
+  std::string familyNameFlag;
   bool printConfig = false;
   int htype = 1;
   double hdist = 2.42;
@@ -431,10 +648,15 @@ int main(int argc, char *argv[]) {
   std::string cmd;
   std::string file;
   std::string typesFlag;
+  std::string siteSpec;
+  bool ionsFlag = false;
+  std::string subsetFlag;
   int rdfTypeI = 0;
   int rdfTypeJ = 0;
   bool typesSet = false;
   int bins = 0;
+  int densAxis = 2;
+  std::string axisFlag;
 
   const char *progname = (argc ? argv[0] : "seams");
   Parser parser;
@@ -489,7 +711,8 @@ int main(int argc, char *argv[]) {
 
   parser.add(Option("--type", "-t")
                  .argName("I")
-                 .help("Atom type (0 guesses oxygen then type 1)")
+                 .help("Atom type (0 guesses oxygen then type 1; "
+                       "density-z: 0 is every atom)")
                  .handler([&](std::string_view value) {
                    typeI = parseIntegral<int>(value);
                  }));
@@ -508,11 +731,46 @@ int main(int argc, char *argv[]) {
                    typesFlag = std::string(value);
                  }));
 
+  parser.add(Option("--family")
+                 .argName("NAME")
+                 .help("Material family (default waterIce): waterIce, "
+                       "ionicLiquid, moltenSalt, des, electrolyte, "
+                       "confinedIL, confinedWater, networkFormer")
+                 .handler([&](std::string_view value) {
+                   familyNameFlag = std::string(value);
+                   familyFlag = true;
+                 }));
+
+  parser.add(Option("--site")
+                 .argName("SPEC")
+                 .help("Type-to-kind map for ionCloud (1=cationHead,2=anion)")
+                 .handler([&](std::string_view value) {
+                   siteSpec = std::string(value);
+                 }));
+
+  parser.add(Option("--ions")
+                 .help("cn on ionCloud cage degree (needs --site)")
+                 .handler([&]() { ionsFlag = true; }));
+
+  parser.add(Option("--subset")
+                 .argName("KIND")
+                 .help("domains subset: polar | apolar")
+                 .handler([&](std::string_view value) {
+                   subsetFlag = std::string(value);
+                 }));
+
   parser.add(Option("--bins")
                  .argName("N")
-                 .help("RDF histogram bins (default rmax/0.1)")
+                 .help("Histogram bins (rdf: rmax/0.1; density-z: L/0.1)")
                  .handler([&](std::string_view value) {
                    bins = parseIntegral<int>(value);
+                 }));
+
+  parser.add(Option("--axis")
+                 .argName("XYZ")
+                 .help("Histogram axis for density-z (x|y|z, default z)")
+                 .handler([&](std::string_view value) {
+                   axisFlag = std::string(value);
                  }));
 
   parser.add(Option("-k")
@@ -594,7 +852,8 @@ int main(int argc, char *argv[]) {
                  }));
 
   parser.add(Positional("command")
-                 .help("read | chill | chill-plus | cages | rdf | cn | hbonds")
+                 .help("read | chill | chill-plus | cages | rdf | cn | hbonds | "
+                       "pairs | density-z | domains")
                  .occurs(zeroOrOneTime)
                  .handler([&](std::string_view value) { cmd = value; }));
 
@@ -619,6 +878,17 @@ int main(int argc, char *argv[]) {
   cfg.cutoff = cutoff;
   cfg.k = k;
   cfg.graph = graph;
+  if (familyFlag) {
+    try {
+      family = site::parseFamily(familyNameFlag);
+    } catch (const std::invalid_argument &e) {
+      std::cerr << colorizer.error(e.what()) << "\n";
+      std::cerr << colorizer.warning(parser.formatUsage(progname, colorizer))
+                << "\n";
+      return 2;
+    }
+  }
+  cfg.family = family;
   seams::cfg::exportEnviron(cfg);
 
   if (printConfig) {
@@ -642,6 +912,21 @@ int main(int argc, char *argv[]) {
     std::cerr << colorizer.error("bad --bins (want N > 0)") << "\n";
     return 2;
   }
+  if (!axisFlag.empty()) {
+    const auto axisView = trimView(axisFlag);
+    if (axisView == "x" || axisView == "X" || axisView == "0") {
+      densAxis = 0;
+    } else if (axisView == "y" || axisView == "Y" || axisView == "1") {
+      densAxis = 1;
+    } else if (axisView == "z" || axisView == "Z" || axisView == "2") {
+      densAxis = 2;
+    } else {
+      std::cerr << colorizer.error("bad --axis (want x|y|z)") << "\n";
+      std::cerr << colorizer.warning(parser.formatUsage(progname, colorizer))
+                << "\n";
+      return 2;
+    }
+  }
 
   if (cmd.empty() || file.empty()) {
     std::cerr << colorizer.error(
@@ -652,7 +937,55 @@ int main(int argc, char *argv[]) {
     return 2;
   }
 
+  const bool iceCmd = cmd == "chill" || cmd == "chill-plus" ||
+                      cmd == "chill_plus" || cmd == "cages";
+  if (iceCmd && !site::iceScoreAllowed(family)) {
+    std::cerr << colorizer.error(site::refuseIceScore(family)) << "\n";
+    return 2;
+  }
+
+  site::Table siteTable;
+  siteTable.family = family;
+  if (!siteSpec.empty()) {
+    try {
+      siteTable = parseSiteSpec(siteSpec, family);
+    } catch (const std::exception &e) {
+      std::cerr << colorizer.error(e.what()) << "\n";
+      return 2;
+    }
+  }
+  if (cmd == "pairs" && siteSpec.empty()) {
+    std::cerr << colorizer.error("pairs needs --site") << "\n";
+    return 2;
+  }
+  if (cmd == "cn" && ionsFlag && siteSpec.empty()) {
+    std::cerr << colorizer.error("cn --ions needs --site") << "\n";
+    return 2;
+  }
+  if (cmd == "domains" && siteSpec.empty()) {
+    std::cerr << colorizer.error("domains needs --site") << "\n";
+    return 2;
+  }
+  site::Kind domainKind = site::Kind::polar;
+  if (cmd == "domains") {
+    if (subsetFlag == "apolar" || subsetFlag == "tail") {
+      domainKind = site::Kind::apolar;
+    } else if (subsetFlag.empty() || subsetFlag == "polar") {
+      domainKind = site::Kind::polar;
+    } else {
+      std::cerr << colorizer.error("bad --subset (want polar|apolar)") << "\n";
+      return 2;
+    }
+  }
+
   auto runOne = [&](std::ostream &os, Cloud &cloud) {
+    if (!familyFlag && family == site::Family::waterIce &&
+        uniqueTypeCount(cloud) > 2) {
+      std::cerr << colorizer.warning(
+                       "hint: more than two LAMMPS types; set --family "
+                       "(default waterIce)")
+                << "\n";
+    }
     if (cmd == "read") {
       return cmdRead(os, cloud);
     }
@@ -674,7 +1007,19 @@ int main(int argc, char *argv[]) {
       return cmdRdf(os, cloud, cutoff, bins, rdfTypeI, rdfTypeJ);
     }
     if (cmd == "cn") {
+      if (ionsFlag) {
+        return cmdCnIons(os, cloud, cutoff, siteTable);
+      }
       return cmdCn(os, cloud, cutoff, bins, rdfTypeI, rdfTypeJ);
+    }
+    if (cmd == "pairs") {
+      return cmdPairs(os, cloud, siteTable);
+    }
+    if (cmd == "density-z") {
+      return cmdDensityZ(os, cloud, typeI, bins, densAxis);
+    }
+    if (cmd == "domains") {
+      return cmdDomains(os, cloud, cutoff, siteTable, domainKind);
     }
     if (cmd == "hbonds") {
       Cloud hCloud = load(file, cloud.currentFrame, htype);
@@ -685,9 +1030,11 @@ int main(int argc, char *argv[]) {
     return 2;
   };
 
-  const bool pairCmd = (cmd == "rdf" || cmd == "cn");
-  const int loadType =
-      (pairCmd && (typesSet ? rdfTypeI != rdfTypeJ : false)) ? -1 : typeI;
+  const bool loadAll =
+      cmd == "pairs" || cmd == "hbonds" || (cmd == "cn" && ionsFlag) ||
+      ((cmd == "rdf" || cmd == "cn") && typesSet && rdfTypeI != rdfTypeJ) ||
+      (cmd == "density-z" && typeI <= 0) || cmd == "domains";
+  const int loadType = loadAll ? -1 : typeI;
 
   if (last <= 0 || last == frame) {
     Cloud cloud = load(file, frame, loadType);
@@ -696,9 +1043,7 @@ int main(int argc, char *argv[]) {
 
   std::mutex outMu;
   int rc = 0;
-  const int typeFilter = (pairCmd && typesSet && rdfTypeI != rdfTypeJ)
-                             ? 0
-                             : (typeI > 0 ? typeI : 0);
+  const int typeFilter = loadAll ? 0 : (typeI > 0 ? typeI : 0);
   sinp::forEachLammpsFrame(
       file, frame, last, typeFilter,
       [&](int /*fr*/, Cloud &cloud) {

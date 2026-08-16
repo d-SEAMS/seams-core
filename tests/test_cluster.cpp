@@ -7,6 +7,7 @@
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <seams_input.hpp>
+#include <site.hpp>
 
 #include <cmath>
 #include <filesystem>
@@ -293,4 +294,112 @@ TEST_CASE("clusterAnalysis with Q6 on mW cubic trajectory", "[cluster]") {
   REQUIRE(iceCloud.nop > 0);
 
   std::error_code _ec_; std::filesystem::remove_all(tmpPath, _ec_);
+}
+
+namespace {
+
+using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
+
+void addAtom(Cloud &cloud, int atomID, int molID, int type, double x, double y,
+             double z) {
+  molSys::Point<double> pt;
+  pt.atomID = atomID;
+  pt.molID = molID;
+  pt.type = type;
+  pt.x = x;
+  pt.y = y;
+  pt.z = z;
+  cloud.idIndexMap[atomID] = static_cast<int>(cloud.pts.size());
+  cloud.pts.push_back(pt);
+  cloud.nop = static_cast<int>(cloud.pts.size());
+}
+
+std::vector<bool> maskOf(const Cloud &cloud, const site::Table &table,
+                         site::Kind kind) {
+  std::vector<bool> mask(static_cast<std::size_t>(cloud.nop), false);
+  for (const int i : site::indicesOf(cloud, table, kind)) {
+    if (i >= 0 && i < cloud.nop) {
+      mask[static_cast<std::size_t>(i)] = true;
+    }
+  }
+  return mask;
+}
+
+} // namespace
+
+TEST_CASE("largestDomain polar star plus isolated polar", "[cluster]") {
+  site::Table table;
+  table.typeToKind[1] = site::Kind::cationHead;
+  table.typeToKind[2] = site::Kind::anion;
+  table.typeToKind[3] = site::Kind::tail;
+
+  Cloud cloud;
+  cloud.box = {100.0, 100.0, 100.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  addAtom(cloud, 1, 1, 1, 0.0, 0.0, 0.0);
+  addAtom(cloud, 2, 2, 1, 1.0, 0.0, 0.0);
+  addAtom(cloud, 3, 3, 2, 0.0, 1.0, 0.0);
+  addAtom(cloud, 4, 4, 2, 0.0, 0.0, 1.0);
+  addAtom(cloud, 5, 5, 1, 50.0, 50.0, 50.0);
+  addAtom(cloud, 6, 6, 3, 0.5, 0.5, 0.5);
+
+  const auto nList = nneigh::getNewNeighbourListByIndex(cloud, 1.5);
+  std::vector<std::vector<int>> idList(nList.size());
+  for (std::size_t i = 0; i < nList.size(); ++i) {
+    idList[i].reserve(nList[i].size());
+    for (const int idx : nList[i]) {
+      idList[i].push_back(cloud.pts[static_cast<std::size_t>(idx)].atomID);
+    }
+  }
+
+  const auto polar = clump::largestDomain(cloud, idList,
+                                          maskOf(cloud, table, site::Kind::polar));
+  REQUIRE(polar.subset == 5);
+  REQUIRE(polar.largest == 4);
+  REQUIRE_THAT(polar.percolation,
+               Catch::Matchers::WithinAbs(4.0 / 5.0, 1e-12));
+
+  const auto apolar = clump::largestDomain(
+      cloud, idList, maskOf(cloud, table, site::Kind::apolar));
+  REQUIRE(apolar.subset == 1);
+  REQUIRE(apolar.largest == 1);
+  REQUIRE_THAT(apolar.percolation, Catch::Matchers::WithinAbs(1.0, 1e-12));
+}
+
+TEST_CASE("largestDomain sheared MIC polar star", "[cluster]") {
+  site::Table table;
+  table.typeToKind[1] = site::Kind::cationHead;
+  table.typeToKind[2] = site::Kind::anion;
+  table.typeToKind[3] = site::Kind::tail;
+
+  Cloud cloud;
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  addAtom(cloud, 1, 1, 1, 0.2, 0.1, 1.0);
+  addAtom(cloud, 2, 2, 1, 9.7, 0.1, 1.0);
+  addAtom(cloud, 3, 3, 2, 0.2, 1.1, 1.0);
+  addAtom(cloud, 4, 4, 2, 0.2, 0.1, 2.0);
+  addAtom(cloud, 5, 5, 1, 5.0, 4.0, 5.0);
+  addAtom(cloud, 6, 6, 3, 7.0, 3.0, 4.0);
+
+  REQUIRE_THAT(gen::periodicDistSq(cloud, 0, 1),
+               Catch::Matchers::WithinAbs(0.25, 1e-9));
+
+  const auto nList = nneigh::getNewNeighbourListByIndex(cloud, 1.2);
+  std::vector<std::vector<int>> idList(nList.size());
+  for (std::size_t i = 0; i < nList.size(); ++i) {
+    idList[i].reserve(nList[i].size());
+    for (const int idx : nList[i]) {
+      idList[i].push_back(cloud.pts[static_cast<std::size_t>(idx)].atomID);
+    }
+  }
+
+  const auto polar = clump::largestDomain(
+      cloud, idList, maskOf(cloud, table, site::Kind::polar));
+  REQUIRE(polar.subset == 5);
+  REQUIRE(polar.largest == 4);
+  REQUIRE_THAT(polar.percolation,
+               Catch::Matchers::WithinAbs(4.0 / 5.0, 1e-12));
 }

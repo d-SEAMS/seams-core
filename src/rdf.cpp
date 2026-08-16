@@ -128,6 +128,32 @@ rdf::PartialRdf rdf::partialRdf(
   return out;
 }
 
+namespace {
+
+double typeJDensity(const rdf::PartialRdf &h) {
+  if (h.volume <= 0.0) {
+    return 0.0;
+  }
+  return static_cast<double>(h.nJ) / h.volume;
+}
+
+double shellIntegral(double rhoJ, double g, double r0, double r1) {
+  return 4.0 * gen::pi * rhoJ * g * (r1 * r1 * r1 - r0 * r0 * r0) / 3.0;
+}
+
+} // namespace
+
+/**
+ * @details Discrete running integral 4 pi rho_J int_0^r s^2 g(s) ds
+ *  with rho_J = nJ / volume. Each bin is a spherical shell of width
+ *  binwidth, the same shell used to normalize g. The value at bin i
+ *  is the CN at the outer edge of that bin. Unlike I-J with one
+ *  unordered pair therefore integrates to 1 / nI at rmax.
+ */
+std::vector<double> rdf::runningCN(const PartialRdf &h) {
+  return runningCN(h, typeJDensity(h));
+}
+
 /**
  * @details Discrete running integral 4 pi rho_J int_0^r s^2 g(s) ds.
  *  Each bin contributes a spherical shell of width binwidth. The
@@ -142,8 +168,7 @@ std::vector<double> rdf::runningCN(const PartialRdf &h, double rhoJ) {
   for (std::size_t i = 0; i < h.g.size(); ++i) {
     const double r0 = h.binwidth * static_cast<double>(i);
     const double r1 = h.binwidth * static_cast<double>(i + 1);
-    acc += 4.0 * gen::pi * rhoJ * h.g[i] * (r1 * r1 * r1 - r0 * r0 * r0) /
-           3.0;
+    acc += shellIntegral(rhoJ, h.g[i], r0, r1);
     cn[i] = acc;
   }
   return cn;
@@ -152,7 +177,7 @@ std::vector<double> rdf::runningCN(const PartialRdf &h, double rhoJ) {
 /**
  * @details First local maximum of g, then the first local minimum after
  *  that peak. A confirmed minimum needs a descent and a later rise.
- *  Monotonic or empty histograms return -1.
+ *  Monotonic or empty histograms return -1. No default radius.
  */
 int rdf::firstMinimumBin(const PartialRdf &h) {
   const int n = static_cast<int>(h.g.size());
@@ -181,6 +206,15 @@ int rdf::firstMinimumBin(const PartialRdf &h) {
 
 /**
  * @details Site-site CN up to rMax. Partial last bins are cut at rMax.
+ *  rMax is a caller input; this function does not pick a first
+ *  minimum. rho_J = nJ / volume.
+ */
+double rdf::coordinationNumber(const PartialRdf &h, double rMax) {
+  return coordinationNumber(h, rMax, typeJDensity(h));
+}
+
+/**
+ * @details Site-site CN up to rMax. Partial last bins are cut at rMax.
  */
 double rdf::coordinationNumber(const PartialRdf &h, double rMax,
                                double rhoJ) {
@@ -197,7 +231,7 @@ double rdf::coordinationNumber(const PartialRdf &h, double rMax,
     if (r1 > rMax) {
       r1 = rMax;
     }
-    cn += 4.0 * gen::pi * rhoJ * h.g[i] * (r1 * r1 * r1 - r0 * r0 * r0) / 3.0;
+    cn += shellIntegral(rhoJ, h.g[i], r0, r1);
   }
   return cn;
 }
