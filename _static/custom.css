@@ -1,45 +1,50 @@
-/* Homepage hero: full logo with wordmark; swap light/dark variants via Shibuya
-   color-mode classes (html.light / html.dark). Fallback: prefers-color-scheme. */
+/* Homepage hero: full cage mark; swap light/dark via Shibuya color-mode
+   classes (html.light / html.dark). Fallback: prefers-color-scheme. */
 
-.rgpot-hero {
+.dseams-hero {
   text-align: center;
   margin: 0.5rem 0 1.25rem;
 }
 
-.rgpot-hero-logo {
+.dseams-hero-logo {
   display: none;
   margin: 0 auto;
   max-width: min(320px, 70vw);
   height: auto;
 }
 
-/* Default / light: dark wordmark on light page */
-html.light .rgpot-hero-logo--light,
-html:not(.dark) .rgpot-hero-logo--light {
+html.light .dseams-hero-logo--light,
+html:not(.dark) .dseams-hero-logo--light {
   display: block;
 }
 
-html.dark .rgpot-hero-logo--light {
+html.dark .dseams-hero-logo--light {
   display: none;
 }
 
-html.dark .rgpot-hero-logo--dark {
+html.dark .dseams-hero-logo--dark {
   display: block;
 }
 
-html.light .rgpot-hero-logo--dark,
-html:not(.dark) .rgpot-hero-logo--dark {
+html.light .dseams-hero-logo--dark,
+html:not(.dark) .dseams-hero-logo--dark {
   display: none;
 }
 
-/* Before Shibuya applies .light/.dark, honour system preference */
 @media (prefers-color-scheme: dark) {
-  html:not(.light):not(.dark) .rgpot-hero-logo--light {
+  html:not(.light):not(.dark) .dseams-hero-logo--light {
     display: none;
   }
-  html:not(.light):not(.dark) .rgpot-hero-logo--dark {
+  html:not(.light):not(.dark) .dseams-hero-logo--dark {
     display: block;
   }
+}
+
+/* Navbar cage is a 3D mark; 28px from the theme is a smudge. */
+.sy-head-brand img.light-logo,
+.sy-head-brand img.dark-logo {
+  height: 40px;
+  width: auto;
 }
 
 /*
