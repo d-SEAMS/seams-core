@@ -9,8 +9,9 @@ Paper timings run on Elja (`repro/elja_submit.sh`, exclusive
 `64cpu_256mem`, account `chem-ui`). The device-resident N-frame batch is `repro/elja_gpu_job.sh` on
 `gpu-2xA100`. A gpulite probe sizes the working set; the device
 path calls `linkcell::gpu` for the periodic k-nearest walk, then
-the mutual four-nearest graph, one \(q_{lm}\) write, CHILL,
-primitive six-rings and HC/DDC affiliation. Only labels come back.
+the mutual four-nearest graph, primitive six-rings and HC/DDC
+affiliation (the TUM ice score). CHILL and \(q_{lm}\) stay on the
+host. Only cage labels come back.
 Terra is not the perf host.
 
 ## On a Slurm cluster

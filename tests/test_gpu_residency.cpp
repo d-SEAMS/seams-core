@@ -28,5 +28,5 @@ TEST_CASE("an A100-sized budget holds the cubic trajectory") {
 TEST_CASE("affiliation working set is counted in the footprint") {
   const auto foot = gpu::estimateFootprint(4096, 11, 16, 16);
   REQUIRE(foot.ringsBytes > foot.xyzBytes);
-  REQUIRE(foot.labelBytes >= 11ull * 4096ull * 3ull * sizeof(int));
+  REQUIRE(foot.labelBytes >= 11ull * 4096ull * 2ull * sizeof(int));
 }

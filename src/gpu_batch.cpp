@@ -5,14 +5,12 @@
 #endif
 
 #include <chrono>
-#include <cmath>
 #include <stdexcept>
 #include <vector>
 
 #ifdef SEAMS_HAS_GPULITE
 #include <gpulite/gpulite.hpp>
 using gpulite::CUDART;
-using gpulite::CUDADriver;
 using gpulite::KernelFactory;
 using gpulite::NVRTC;
 using gpulite::dim3;
@@ -23,54 +21,9 @@ namespace {
 
 #ifdef SEAMS_HAS_GPULITE
 
-// Resident batch. k-nearest comes from linkcell::gpu (fold, bin,
-// Chebyshev shells). Then mutual 4-graph, one q_lm, CHILL, primitive
-// six-rings, HC/DDC.
+// TUM ice score only: linkcell k-NN, mutual 4-graph, primitive
+// six-rings, HC/DDC affiliation. No CHILL, no q_lm.
 const char *kKernels = R"CUDA(
-__device__ inline void minImage(double& dx, double& dy, double& dz,
-    double bx, double by, double bz) {
-  dx -= bx * nearbyint(dx / bx);
-  dy -= by * nearbyint(dy / by);
-  dz -= bz * nearbyint(dz / bz);
-}
-
-// l=3 Y_lm, m = -3..3, matching seams::steinhardt::ylmAll (phi = atan2(dx, dy)).
-__device__ inline void ylm3(double dx, double dy, double dz,
-    double* re, double* im) {
-  const double r = sqrt(dx * dx + dy * dy + dz * dz);
-  if (r < 1.0e-12) return;
-  const double z = dz / r;
-  const double phi = atan2(dx, dy);
-  const double sinT = sqrt(fmax(0.0, 1.0 - z * z));
-  const double cosT = z;
-  const double cphi = cos(phi);
-  const double sphi = sin(phi);
-  double s[4], c[4], pr[4], pi[4];
-  s[0] = 1.0; c[0] = 1.0; pr[0] = 1.0; pi[0] = 0.0;
-  for (int k = 1; k <= 3; ++k) {
-    s[k] = s[k - 1] * sinT;
-    c[k] = c[k - 1] * cosT;
-    const double nr = pr[k - 1] * cphi - pi[k - 1] * sphi;
-    const double ni = pr[k - 1] * sphi + pi[k - 1] * cphi;
-    pr[k] = nr;
-    pi[k] = ni;
-  }
-  const double piC = 3.14159265358979323846;
-  const double amp[4] = {
-      0.25 * sqrt(7.0 / piC) * (5.0 * c[3] - 3.0 * c[1]),
-      0.125 * sqrt(21.0 / piC) * s[1] * (5.0 * c[2] - 1.0),
-      0.25 * sqrt(105.0 / (2.0 * piC)) * s[2] * c[1],
-      0.125 * sqrt(35.0 / piC) * s[3]};
-  for (int absM = 0; absM <= 3; ++absM) {
-    const double a = amp[absM];
-    re[3 - absM] += a * pr[absM];
-    im[3 - absM] += -a * pi[absM];
-    const double sign = (absM % 2 == 0) ? 1.0 : -1.0;
-    re[3 + absM] += sign * a * pr[absM];
-    im[3 + absM] += sign * a * pi[absM];
-  }
-}
-
 __device__ inline bool bonded(const int* deg, const int* cols,
     int f, int nAtoms, int kMax, int a, int b) {
   if (a < 0 || b < 0) return false;
@@ -243,7 +196,7 @@ __device__ inline int ringsThrough(const int* A, int nA, const int* B, int nB,
   return n;
 }
 
-extern "C" __global__ void mutual_knn(int* deg, const int* cols,
+extern "C" __global__ void mutual_knn(const int* cols,
     int nAtoms, int nFrames, int kMax, int* mdeg, int* mcols) {
   const int tid = blockIdx.x * blockDim.x + threadIdx.x;
   if (tid >= nAtoms * nFrames) return;
@@ -255,7 +208,6 @@ extern "C" __global__ void mutual_knn(int* deg, const int* cols,
     if (cols[row + a] < 0) break;
     ++found;
   }
-  deg[f * nAtoms + i] = found;
   const int take = found < 4 ? found : 4;
   const int mrow = (f * nAtoms + i) * 4;
   int kept = 0;
@@ -276,81 +228,6 @@ extern "C" __global__ void mutual_knn(int* deg, const int* cols,
     }
   }
   mdeg[f * nAtoms + i] = kept;
-}
-
-extern "C" __global__ void qlm_l3(const double* xyz, const double* box,
-    const int* deg, const int* cols, int nAtoms, int nFrames, int kMax,
-    double* qre, double* qim) {
-  const int tid = blockIdx.x * blockDim.x + threadIdx.x;
-  if (tid >= nAtoms * nFrames) return;
-  const int f = tid / nAtoms;
-  const int i = tid % nAtoms;
-  const int take0 = deg[f * nAtoms + i];
-  const int take = take0 < 4 ? take0 : 4;
-  const int row = (f * nAtoms + i) * kMax;
-  const int base = f * nAtoms * 3;
-  const double bx = box[f * 3 + 0];
-  const double by = box[f * 3 + 1];
-  const double bz = box[f * 3 + 2];
-  const double ix = xyz[base + i * 3 + 0];
-  const double iy = xyz[base + i * 3 + 1];
-  const double iz = xyz[base + i * 3 + 2];
-  double re[7] = {0, 0, 0, 0, 0, 0, 0};
-  double im[7] = {0, 0, 0, 0, 0, 0, 0};
-  for (int a = 0; a < take; ++a) {
-    const int j = cols[row + a];
-    double dx = xyz[base + j * 3 + 0] - ix;
-    double dy = xyz[base + j * 3 + 1] - iy;
-    double dz = xyz[base + j * 3 + 2] - iz;
-    minImage(dx, dy, dz, bx, by, bz);
-    ylm3(dx, dy, dz, re, im);
-  }
-  if (take > 0) {
-    const double inv = 1.0 / (double)take;
-    for (int m = 0; m < 7; ++m) {
-      re[m] *= inv;
-      im[m] *= inv;
-    }
-  }
-  const int qrow = (f * nAtoms + i) * 7;
-  for (int m = 0; m < 7; ++m) {
-    qre[qrow + m] = re[m];
-    qim[qrow + m] = im[m];
-  }
-}
-
-extern "C" __global__ void chill_from_qlm(const int* deg, const int* cols,
-    const double* qre, const double* qim, int nAtoms, int nFrames, int kMax,
-    int* chill) {
-  const int tid = blockIdx.x * blockDim.x + threadIdx.x;
-  if (tid >= nAtoms * nFrames) return;
-  const int f = tid / nAtoms;
-  const int i = tid % nAtoms;
-  const int take0 = deg[f * nAtoms + i];
-  const int take = take0 < 4 ? take0 : 4;
-  const int row = (f * nAtoms + i) * kMax;
-  const int qi = (f * nAtoms + i) * 7;
-  int S = 0;
-  int E = 0;
-  for (int a = 0; a < take; ++a) {
-    const int j = cols[row + a];
-    const int qj = (f * nAtoms + j) * 7;
-    double num = 0.0, ni = 0.0, nj = 0.0;
-    for (int m = 0; m < 7; ++m) {
-      num += qre[qi + m] * qre[qj + m] + qim[qi + m] * qim[qj + m];
-      ni += qre[qi + m] * qre[qi + m] + qim[qi + m] * qim[qi + m];
-      nj += qre[qj + m] * qre[qj + m] + qim[qj + m] * qim[qj + m];
-    }
-    const double den = sqrt(ni * nj);
-    const double cij = den > 1.0e-12 ? num / den : 0.0;
-    if (cij <= -0.8) ++S;
-    else if (cij >= -0.35 && cij <= 0.25) ++E;
-  }
-  int lab = 0;
-  if (S == 4 && E == 0) lab = 1;
-  else if (S == 3 && E == 1) lab = 2;
-  else if (take == 4) lab = 3;
-  chill[f * nAtoms + i] = lab;
 }
 
 extern "C" __global__ void enum_six(const int* mdeg, const int* mcols,
@@ -626,8 +503,8 @@ struct Workspace {
   int capF = 0;
   int capK = 0;
   int capPer = 0;
-  DevPtr dxyz, dbox;
-  DevPtr ddeg, dcols, dmdeg, dmcols, dqre, dqim, dchill;
+  DevPtr dxyz;
+  DevPtr dcols, dmdeg, dmcols;
   DevPtr dnRings, dringAtoms, ddropped, dthroughCount, dthrough;
   DevPtr dhc, dddc, datomHc, datomDdc, dsix, dnPairs, dpairs;
 
@@ -652,14 +529,9 @@ struct Workspace {
     const std::size_t nN = nf * n;
     const std::size_t maxRings = n * static_cast<std::size_t>(capPer);
     growOne(dxyz, nN * 3 * sizeof(double), "xyz");
-    growOne(dbox, nf * 3 * sizeof(double), "box");
-    growOne(ddeg, nN * sizeof(int), "deg");
     growOne(dcols, nN * static_cast<std::size_t>(capK) * sizeof(int), "cols");
     growOne(dmdeg, nN * sizeof(int), "mdeg");
     growOne(dmcols, nN * 4 * sizeof(int), "mcols");
-    growOne(dqre, nN * 7 * sizeof(double), "qre");
-    growOne(dqim, nN * 7 * sizeof(double), "qim");
-    growOne(dchill, nN * sizeof(int), "chill");
     growOne(dnRings, nf * sizeof(int), "nRings");
     growOne(dringAtoms, nf * maxRings * 6 * sizeof(int), "rings");
     growOne(ddropped, sizeof(int), "dropped");
@@ -719,7 +591,6 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
     const std::size_t n = static_cast<std::size_t>(nAtoms);
     const std::size_t nf = static_cast<std::size_t>(out.plan.frames);
     const std::size_t xyzN = nf * n * 3;
-    const std::size_t boxN = nf * 3;
     const std::size_t nN = nf * n;
     const std::size_t ringN = nf * static_cast<std::size_t>(maxRings);
 
@@ -738,16 +609,11 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
     checkCuda(rt.cudaMemcpy(ws.dxyz.p, xyz, xyzN * sizeof(double),
                             cudaMemcpyHostToDevice),
               "HtoD xyz");
-    checkCuda(rt.cudaMemcpy(ws.dbox.p, box, boxN * sizeof(double),
-                            cudaMemcpyHostToDevice),
-              "HtoD box");
     out.uploadMs = msSince(t0);
 
     auto &factory = KernelFactory::instance(0);
     const std::vector<std::string> opt{"-std=c++17"};
     auto *kMut = factory.create("mutual_knn", kKernels, "batch.cu", opt);
-    auto *kQlm = factory.create("qlm_l3", kKernels, "batch.cu", opt);
-    auto *kChill = factory.create("chill_from_qlm", kKernels, "batch.cu", opt);
     auto *kSix = factory.create("enum_six", kKernels, "batch.cu", opt);
     auto *kInv = factory.create("invert_rings", kKernels, "batch.cu", opt);
     auto *kSort = factory.create("sort_through", kKernels, "batch.cu", opt);
@@ -802,19 +668,9 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
       }
     }
     {
-      std::vector<void *> a = {&ws.ddeg.p, &ws.dcols.p, &nA, &nF, &kM,
-                               &ws.dmdeg.p, &ws.dmcols.p};
+      std::vector<void *> a = {&ws.dcols.p, &nA, &nF, &kM, &ws.dmdeg.p,
+                               &ws.dmcols.p};
       kMut->launch(dim3(grid), dim3(block), 0, nullptr, a, true);
-    }
-    {
-      std::vector<void *> a = {&ws.dxyz.p, &ws.dbox.p, &ws.ddeg.p, &ws.dcols.p,
-                               &nA, &nF, &kM, &ws.dqre.p, &ws.dqim.p};
-      kQlm->launch(dim3(grid), dim3(block), 0, nullptr, a, true);
-    }
-    {
-      std::vector<void *> a = {&ws.ddeg.p, &ws.dcols.p, &ws.dqre.p, &ws.dqim.p,
-                               &nA, &nF, &kM, &ws.dchill.p};
-      kChill->launch(dim3(grid), dim3(block), 0, nullptr, a, true);
     }
     {
       std::vector<void *> a = {&ws.dmdeg.p, &ws.dmcols.p, &nA, &nF, &mR,
@@ -858,15 +714,11 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
     }
     out.computeMs = msSince(t0);
 
-    out.chill.assign(nN, 0);
     out.sixCount.assign(nN, 0);
     out.atomHc.assign(nN, 0);
     out.atomDdc.assign(nN, 0);
     out.nRings.assign(nf, 0);
     t0 = std::chrono::steady_clock::now();
-    checkCuda(rt.cudaMemcpy(out.chill.data(), ws.dchill.p, nN * sizeof(int),
-                            cudaMemcpyDeviceToHost),
-              "DtoH chill");
     checkCuda(rt.cudaMemcpy(out.sixCount.data(), ws.dsix.p, nN * sizeof(int),
                             cudaMemcpyDeviceToHost),
               "DtoH six");

@@ -9,19 +9,17 @@
 /** @file gpu_batch.hpp
  *  @brief Run the analysis of a resident frame batch on the device.
  *
- *  Coordinates for every accepted frame are uploaded once. k-nearest
- *  neighbours come from `linkcell::gpu` (the same fold / bin /
- *  Chebyshev-shell walk as the host library). This file then builds
- *  the mutual four-nearest graph, one \(q_{lm}\) write, CHILL,
- *  primitive six-rings and the HC/DDC affiliation predicates. Only
- *  labels come back.
+ *  Coordinates for every accepted frame are uploaded once. The device
+ *  path is the TUM ice score: linkcell \(k\)-nearest, the mutual
+ *  four-nearest graph, primitive six-rings, and the HC/DDC affiliation
+ *  predicates. CHILL and \(q_{lm}\) stay on the host. Only cage labels
+ *  come back.
  */
 
 namespace gpu {
 
 struct BatchResult {
   Plan plan;
-  std::vector<int> chill;   // nFrames * nAtoms
   std::vector<int> sixCount;
   std::vector<int> atomHc;  // 1 if the atom sits on an HC-affiliated ring
   std::vector<int> atomDdc; // 1 if the atom sits on a DDC-affiliated ring

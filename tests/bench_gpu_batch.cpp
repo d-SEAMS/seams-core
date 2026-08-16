@@ -72,15 +72,9 @@ int main(int argc, char **argv) {
   }
   std::printf("upload_ms %.3f\ncompute_ms %.3f\ndownload_ms %.3f\n",
               r.uploadMs, r.computeMs, r.downloadMs);
-  int nIc = 0;
-  int nIh = 0;
   int nHc = 0;
   int nDdc = 0;
   int nSix = 0;
-  for (int lab : r.chill) {
-    nIc += lab == 1 ? 1 : 0;
-    nIh += lab == 2 ? 1 : 0;
-  }
   for (int v : r.atomHc) {
     nHc += v;
   }
@@ -90,7 +84,6 @@ int main(int argc, char **argv) {
   for (int v : r.nRings) {
     nSix += v;
   }
-  std::printf("chill_ic %d\nchill_ih %d\n", nIc, nIh);
   std::printf("ice_hc_atoms %d\nice_ddc_atoms %d\n", nHc, nDdc);
   std::printf("six_rings %d\nrings_dropped %d\n", nSix, r.ringsDropped);
   return 0;

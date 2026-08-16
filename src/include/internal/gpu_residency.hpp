@@ -7,12 +7,11 @@
 /** @file gpu_residency.hpp
  *  @brief Decide whether N frames of the analysis working set fit on the GPU.
  *
- *  The offload unit is a batch of frames, not a kernel. A gpulite-style
- *  runtime probe (CUDA driver + cudart, no SDK at build) reports total and
- *  free device memory. The footprint is positions, the neighbour CSR, the
- *  six-ring CSR, affiliation flags and ice labels for every frame that
- *  stays resident. If that working set fits under a safety margin the
- *  batch stays on the device and only labels come back.
+ *  The offload unit is a batch of frames of the TUM ice-score path.
+ *  A gpulite-style runtime probe reports free device memory. The
+ *  footprint is positions, the mutual-graph CSR, the six-ring CSR,
+ *  affiliation flags and per-atom HC/DDC labels. CHILL and \(q_{lm}\)
+ *  are not in this working set.
  */
 
 namespace gpu {
