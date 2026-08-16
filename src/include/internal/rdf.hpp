@@ -55,6 +55,15 @@ PartialRdf partialRdf(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeI,
     int typeJ, double rmax, int nbins);
 
+//! Running CN: 4 pi rho_J int_0^r s^2 g_IJ(s) ds. rho_J = nJ / volume.
+std::vector<double> runningCN(const PartialRdf &h);
+
+//! First minimum of g after the first maximum. Returns the bin index, or -1.
+int firstMinimumBin(const PartialRdf &h);
+
+//! Site-site CN integrated to rMax. Same kernel as runningCN; no default rMax.
+double coordinationNumber(const PartialRdf &h, double rMax);
+
 } // namespace rdf
 
 #endif // SEAMS_RDF_H_
