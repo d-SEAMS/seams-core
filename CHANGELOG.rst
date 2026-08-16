@@ -5,8 +5,19 @@ Changelog
 Unreleased
 ==========
 
-The C++ API in the book is Doxygen via doxyrest (=api/index=), the
-same path as rgpot. The hand function tables are gone.
+Version 2.3.0 (2026-08-16)
+===========================
+
+The TUM ice score (mutual four-nearest graph, primitive hexagons,
+HC/DDC) runs as a device-resident frame batch when gpulite and
+``linkcell`` 0.3.0 are present. CHILL and :math:`q_{lm}` stay on the
+host. Runtime knobs are twelve-factor: ``SEAMS_CONFIG`` or
+``./seams.env``, then the environment, then CLI flags.
+``seams --print-config`` dumps the table. Examples and the README
+use ``seams`` / ``pydseams`` / ``require("dseams")``; the 2020
+``yodaStruct -c`` / ``conf.yaml`` surface is gone.
+
+The C++ API in the book is Doxygen via doxyrest (``api/index``).
 
 Version 2.2.5 (2026-08-16)
 ===========================
