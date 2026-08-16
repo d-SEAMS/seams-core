@@ -13,8 +13,7 @@ seams read FILE
 seams chill FILE
 seams chill-plus FILE
 seams cages FILE
-seams rdf FILE
-seams cn FILE
+seams hbonds FILE
 #+end_src
 
 A positional ~command~ and a positional ~file~ are required. Missing
@@ -23,7 +22,7 @@ either, an unknown command, or a parse error exits 2.
 * Commands
 
 The ~command~ positional help string is ~read | chill | chill-plus |
-cages | rdf | cn~. ~chill_plus~ is an accepted alias of ~chill-plus~
+cages | hbonds~. ~chill_plus~ is an accepted alias of ~chill-plus~
 (not listed in that help string).
 
 | command | action | stdout |
@@ -32,8 +31,7 @@ cages | rdf | cn~. ~chill_plus~ is an accepted alias of ~chill-plus~
 | ~chill~ | CHILL four-neighbour labels | ~nop N~ then ~name count~ for each ice type present |
 | ~chill-plus~ | CHILL+ four-neighbour labels | same as ~chill~ |
 | ~cages~ | ice score on six-membered rings | ~nop N graph KIND hexagonal IH cubic IC water W~ |
-| ~rdf~ | partial site-site \(g_{IJ}(r)\) | ~# r g count~ then ~# types I J rmax R bins N volume V~ then one ~r g count~ row per bin |
-| ~cn~ | site-site coordination number | ~# site-site~ then ~# types I J cutoff R cn X nI N nJ M volume V~ |
+| ~hbonds~ | geometric hydrogen-bond count | ~nop N hbonds E~ |
 
 ~chill~ / ~chill-plus~ call ~nneigh::neighListO~, then
 ~chill::getCorrel~ / ~chill::getIceTypeNoPrint~ or
@@ -55,8 +53,16 @@ is optional. The volume is ~nneigh::dumpVolume~ (det of dump ~H~).
 
 An empty cloud (~nop 0~) still prints. ~chill~ / ~chill-plus~ print
 ~nop 0~. ~cages~ prints ~nop 0 graph KIND hexagonal 0 cubic 0
-water 0~. ~rdf~ prints the comment header and zero-count bins.
-~cn~ prints ~# site-site~ and ~cn 0~.
+water 0~. ~hbonds~ prints ~nop 0 hbonds 0~.
+
+~hbonds~ loads the heavy-atom cloud with ~--type~ and the hydrogen
+cloud with ~--htype~, then builds a cutoff neighbour list. Without
+~--donors~ it uses the water two-hydrogen-per-molecule set
+(~hAtomMolList~). ~--donors~ passes every hydrogen index to
+~populateHbondsFromDonors~. ~--hdist~ and ~--hangle~ are the
+acceptor-H distance and acceptor-donor-H angle cutoffs; the C++
+defaults stay the water values and are not an ionic-liquid
+criterion.
 
 * Options
 
@@ -78,6 +84,10 @@ initializers (Argum does not write defaults into the help).
 | ~--bins N~ | ~rmax / 0.1~ | ~RDF histogram bins (default rmax/0.1)~ |
 | ~-k N~ | ~4~ | ~k for knn / seeded cages~ |
 | ~--graph KIND~ | ~seeded~ | ~Bond graph for cages: cutoff \| knn \| knn-union \| seeded~ |
+| ~--htype I~ | ~1~ | ~Hydrogen atom type for hbonds~ |
+| ~--hdist ANGSTROM~ | water C++ default | ~Acceptor-H distance cutoff for hbonds~ |
+| ~--hangle DEG~ | water C++ default | ~Acceptor-donor-H angle cutoff for hbonds~ |
+| ~--donors~ | off | ~Use every hydrogen as a donor candidate~ |
 | ~--config FILE~ | ~SEAMS_CONFIG~ or ~./seams.env~ | Dotenv of ~SEAMS_*~ / ~LINKCELL_*~ knobs. Env wins over the file |
 | ~--print-config~ | | Print the resolved runtime knobs and exit |
 | ~--tpp N~ | ~0~ (occupancy picker) | Threads per particle for the device k-NN (~LINKCELL_TPP~) |

@@ -17,51 +17,55 @@
 #include <generic.hpp>
 
 #include <cmath>
+#include <unordered_map>
 
 namespace {
 
-// Geometric test (O-H cutoff + OO/OH angle) for one donor-acceptor
-// assignment. The H-bond network is undirected, so each unordered pair
-// of oxygens is tried both ways.
-bool donatedHydrogenBond(
-    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-    const molSys::PointCloud<molSys::Point<double>, double> &hCloud,
-    const std::vector<std::vector<int>> &molIDlist,
-    const std::unordered_map<int, int> &idMolIDmap, int acceptorIndex,
-    int donorID, double distCutoff, double angleCutoff) {
-  auto molIt = idMolIDmap.find(donorID);
-  if (molIt == idMolIDmap.end()) {
-    return false;
-  }
-  auto donorIt = yCloud.idIndexMap.find(donorID);
-  if (donorIt == yCloud.idIndexMap.end()) {
-    return false;
-  }
-  const int listIndex = molSys::searchMolList(molIDlist, molIt->second);
-  if (listIndex == -1 || molIDlist[listIndex].size() < 3) {
-    return false;
-  }
-  const int donorIndex = donorIt->second;
-  for (int k = 1; k <= 2; k++) {
-    const int hAtomIndex = molIDlist[listIndex][k];
-    if (bond::getHbondDistanceOH(yCloud, hCloud, acceptorIndex, hAtomIndex) >=
-        distCutoff) {
+// Water populateHbonds* keep the two-H-per-molID set from hAtomMolList.
+std::vector<int> donorHsFromMolList(const std::vector<std::vector<int>> &molIDlist) {
+  std::vector<int> donorHs;
+  for (const auto &row : molIDlist) {
+    if (row.size() < 3) {
       continue;
     }
-    const auto ooArr = gen::relDist(yCloud, acceptorIndex, donorIndex);
-    std::vector<double> oo = {ooArr[0], ooArr[1], ooArr[2]};
-    const auto ohArr = gen::relDistFromPoint(
+    donorHs.push_back(row[1]);
+    donorHs.push_back(row[2]);
+  }
+  return donorHs;
+}
+
+} // namespace
+
+bool bond::donatedHydrogenBond(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &hCloud,
+    int acceptorIndex, int donorIndex, const std::vector<int> &donorHs,
+    double distCutoff, double angleCutoff) {
+  if (acceptorIndex < 0 || donorIndex < 0 ||
+      acceptorIndex >= yCloud.nop || donorIndex >= yCloud.nop) {
+    return false;
+  }
+  const auto oo = gen::relDist(yCloud, acceptorIndex, donorIndex);
+  const std::vector<double> ooVec{oo[0], oo[1], oo[2]};
+  const double dist2 = distCutoff * distCutoff;
+  for (int hAtomIndex : donorHs) {
+    if (hAtomIndex < 0 || hAtomIndex >= hCloud.nop) {
+      continue;
+    }
+    const auto oh = gen::relDistFromPoint(
         yCloud, acceptorIndex, hCloud.pts[hAtomIndex].x,
         hCloud.pts[hAtomIndex].y, hCloud.pts[hAtomIndex].z);
-    std::vector<double> oh = {ohArr[0], ohArr[1], ohArr[2]};
-    if (gen::radDeg(gen::eigenVecAngle(oo, oh)) <= angleCutoff) {
+    const double oh2 = oh[0] * oh[0] + oh[1] * oh[1] + oh[2] * oh[2];
+    if (oh2 >= dist2) {
+      continue;
+    }
+    const std::vector<double> ohVec{oh[0], oh[1], oh[2]};
+    if (gen::radDeg(gen::eigenVecAngle(ooVec, ohVec)) <= angleCutoff) {
       return true;
     }
   }
   return false;
 }
-
-} // namespace
 
 /**
  * @details Create a vector of vectors containing bond information (outputs
@@ -248,72 +252,68 @@ bond::populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, do
                      molSys::PointCloud<molSys::Point<double>, double> &hCloud,
                      const std::vector<std::vector<int>> &nList,
                      double distCutoff, double angleCutoff) {
-  //
-  std::vector<std::vector<int>>
-      hBondNet; // Output vector of vectors containing the HBN
-  std::vector<std::vector<int>>
-      molIDlist; // Vector of vectors; first element is the molID, and the next
-                 // two elements are the hydrogen atom indices
-  std::unordered_map<int, int>
-      idMolIDmap; // Unordered map with atom IDs of oxygens as the keys and the
-                  // molecular IDs as the values
-  int nnumNeighbours;
-  int iatomID, jatomID;
-  int iatomIndex, jatomIndex;
+  auto molIDlist = molSys::hAtomMolList(hCloud, yCloud);
+  return bond::populateHbondsFromDonors(yCloud, hCloud, nList,
+                                        donorHsFromMolList(molIDlist),
+                                        distCutoff, angleCutoff);
+}
 
-  // --------------------
-  // Get the unordered map of the oxygen atom IDs (keys) and the molecular IDs
-  // (values)
-  idMolIDmap = molSys::createIDMolIDmap(yCloud);
+std::vector<std::vector<int>> bond::populateHbondsFromDonors(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &hCloud,
+    const std::vector<std::vector<int>> &nList,
+    const std::vector<int> &donorHs, double distCutoff, double angleCutoff) {
+  std::vector<std::vector<int>> hBondNet;
+  std::unordered_map<int, std::vector<int>> donorHsByMol;
+  for (int hAtomIndex : donorHs) {
+    if (hAtomIndex < 0 || hAtomIndex >= hCloud.nop) {
+      continue;
+    }
+    donorHsByMol[hCloud.pts[hAtomIndex].molID].push_back(hAtomIndex);
+  }
 
-  // Get a vector of vectors with the molID in the first column, and the
-  // hydrogen atom indices (not ID) in each row
-  molIDlist = molSys::hAtomMolList(hCloud, yCloud);
-
-  // Initialize the vector of vectors hBondNet
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-    hBondNet.push_back(std::vector<int>()); // Empty vector for the index iatom
-    // Fill the first element with the atom ID of iatom itself
+    hBondNet.push_back(std::vector<int>());
     hBondNet[iatom].push_back(yCloud.pts[iatom].atomID);
-  } // end of init of hBondNet
+  }
 
-  // Loop through the neighbour list
+  const std::vector<int> emptyHs;
+  auto hsFor = [&](int donorIndex) -> const std::vector<int> & {
+    auto it = donorHsByMol.find(yCloud.pts[donorIndex].molID);
+    if (it == donorHsByMol.end()) {
+      return emptyHs;
+    }
+    return it->second;
+  };
+
   for (size_t iatom = 0; iatom < nList.size(); iatom++) {
     if (nList[iatom].empty()) {
       continue;
     }
-    iatomID = nList[iatom][0];
-    nnumNeighbours = static_cast<int>(nList[iatom].size()) - 1;
-    iatomIndex = static_cast<int>(iatom);
-    //
-    // Loop through the nearest neighbours
-    // Only process pairs where iatomID < jatomID to avoid adding each
-    // H-bond twice (both directions are added when a bond is found)
+    const int iatomID = nList[iatom][0];
+    const int nnumNeighbours = static_cast<int>(nList[iatom].size()) - 1;
+    const int iatomIndex = static_cast<int>(iatom);
     for (int j = 1; j <= nnumNeighbours; j++) {
-      jatomID = nList[iatom][j]; // Atom ID of the nearest neighbour
+      const int jatomID = nList[iatom][j];
       if (iatomID >= jatomID) {
         continue;
-      } // skip to avoid duplicate H-bond entries
+      }
       auto gotJ = yCloud.idIndexMap.find(jatomID);
       if (gotJ == yCloud.idIndexMap.end()) {
         continue;
       }
-      jatomIndex = gotJ->second;
-      // Either oxygen may donate. The unordered-pair skip above only
-      // prevents writing the edge twice.
-      if (donatedHydrogenBond(yCloud, hCloud, molIDlist, idMolIDmap,
-                              iatomIndex, jatomID, distCutoff, angleCutoff) ||
-          donatedHydrogenBond(yCloud, hCloud, molIDlist, idMolIDmap,
-                              jatomIndex, iatomID, distCutoff, angleCutoff)) {
+      const int jatomIndex = gotJ->second;
+      if (bond::donatedHydrogenBond(yCloud, hCloud, iatomIndex, jatomIndex,
+                                    hsFor(jatomIndex), distCutoff,
+                                    angleCutoff) ||
+          bond::donatedHydrogenBond(yCloud, hCloud, jatomIndex, iatomIndex,
+                                    hsFor(iatomIndex), distCutoff,
+                                    angleCutoff)) {
         hBondNet[iatomIndex].push_back(jatomID);
         hBondNet[jatomIndex].push_back(iatomID);
       }
-
-    } // end of loop through the nearest neighbours
-
-  } // end of loop through the neighbour list
-
-  // --------------------
+    }
+  }
 
   return hBondNet;
 }
