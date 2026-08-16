@@ -1,28 +1,45 @@
-# Bulk Ice Classification Using the CHILL+ Criterion
+# CHILL+ on a cubic lattice
 
-The Lua scripts live in [yodaStruct](https://github.com/d-SEAMS/yodaStruct)
-(`example_lua/chillPlus`). This repository is the C++ engine.
+The Lua scripts live in [yodaStruct](https://github.com/d-SEAMS/yodaStruct).
+This repository is the C++ engine.
 
-The trajectory file for this example is [here on figshare](https://figshare.com/articles/CHILL_LAMMPS_Trajectory/11448720). The trajectory file details a portion of a long run of 4096 molecules of a perfect Ic (cubic ice) lattice. In this example, the all 4096 molecules are identified as Ic, according to the CHILL+ algorithm [1]. On running the example, an output top-level directory named _runOne_ is created.
+Figshare:
+[CHILL LAMMPS Trajectory](https://figshare.com/articles/CHILL_LAMMPS_Trajectory/11448720)
+(`nucleation.lammpstrj`, 4096 molecules of ice Ic). CHILL+ labels
+every oxygen cubic on that lattice.
 
-## Steps to Run the Example
+The 1.x driver (`yodaStruct -c`, `conf.yaml`, `lua_inputs/`) is gone.
+Use `seams`, `pydseams`, or `require("dseams")`.
 
-In order to run this example, without making any changes to the example files, please follow the steps below.
+## CLI
 
-- Download the LAMMPS trajectory file from [here on figshare](https://figshare.com/articles/CHILL_LAMMPS_Trajectory/11448720). Copy the downloaded trajectory file, entitled _nucleation.lammpstrj_, into the _traj_ folder inside the top-level directory _input_. Alternatively, you could change the path to the trajectory file in the _conf.yaml_ file:
-
-```{.lua}
-trajectory: "path/to/trajectory/file"
+```bash
+seams chill-plus nucleation.lammpstrj --cutoff 3.5 --type 2
 ```
 
-- You can obtain the other input files required from _example_lua/chillPlus_ folder. Copy the contents of the _chillPlus_ into the top-level _lua_inputs_ directory.
-- You can change the frames to be analyzed by updating the options in the _vars.lua_ file. The starting and ending frames are inclusive, starting from 1 onwards, irrespective of the timestep number.
-- A custom volume slice can also be defined in the _vars.lua_ file.
-- The _functions.lua_ file actually contains the Lua functions which interface with the C++ backend.
+Counts print to stdout (cubic, hexagonal, interfacial, clathrate,
+water).
 
-## Analyzing the Output
+## Python
 
-Inside the output directory, a file called _clusterStats.dat_ contains the cluster statistics for each frame. Each frame is also written out to a LAMMPS trajectory file called _waterChillP.lammpstrj_, containing the classified atoms, and the _largestIce.lammpstrj_, which has the particles in the largest ice cluster. These trajectory files are LAMMPS text. View classified frames with [solvis](https://github.com/amritagos/solvis) through `pydseams[solvis]` (`frame.to_solvis()`). Inside the _bop_ directory, _chillPlus.txt_ contains the number of particles identified as cubic ice (Ic), hexagonal ice (Ih), interfacial ice (Interfacial), clathrates (Clath), interfacial clathrates (InterClath), water and the total number of molecules (Total).
+```python
+import pydseams as ds
+
+frame = ds.read("nucleation.lammpstrj")
+print(frame.chill_plus())
+```
+
+## Lua
+
+```lua
+local dseams = require("dseams")
+local cloud = dseams.read("nucleation.lammpstrj", {type = 2})
+print(dseams.chill_plus(cloud, {cutoff = 3.5}))
+```
+
+Books: [seams CLI](https://docs.dseams.info),
+[pydseams](https://d-seams.github.io/PydSEAMSlib/),
+[dseams](https://d-seams.github.io/yodaStruct/).
 
 ## References
 

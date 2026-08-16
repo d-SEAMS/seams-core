@@ -98,93 +98,19 @@ The corresponding `bibtex` entry is:
 
 # Compilation
 
-We use a deterministic build system to generate both bug reports and uniform
-usage statistics. The Lua and Fennel CLI is
-[yodaStruct](https://github.com/d-SEAMS/yodaStruct); the functions it
-registers are documented
-[there](https://github.com/d-SEAMS/yodaStruct/blob/main/docs/luaFunctions.md).
-
-We also provide a `conda` environment as a fallback, which is also recommended for MacOS users.
-
-## Build
-
-### Conda
-
-For MacOS systems without Nix, the following instructions may be more
-suitable. We will assume the presence of [micromamba](https://mamba.readthedocs.io/en/latest/installation.html):
+The live builds are `pixi` + meson, or the Nix flake. This repository
+builds `libyodaLib` and the `seams` CLI. Lua is
+[yodaStruct](https://github.com/d-SEAMS/yodaStruct)
+(`require("dseams")`). Python is
+[PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib).
 
 ```bash
-cd ~/seams-core
-micromamba create -f environment.yml
-micromamba activate dseams
-luarocks install luafilesystem
+pixi run setup && pixi run build && pixi run test
+./bbdir/src/seams read input/traj/exampleTraj.lammpstrj
 ```
 
-Now the installation can proceed. The commands below that invoke
-`yodaStruct` belong in a
-[yodaStruct](https://github.com/d-SEAMS/yodaStruct) checkout. This
-repository builds `libyodaLib`.
-
-\note we do not install `lua-luafilesystem` within the `conda` environment because it is outdated on `osx`
-
-```bash
-mkdir build
-cd build
-export EIGEN3_INCLUDE_DIR=$CONDA_PREFIX/include/eigen3
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -DCMAKE_INSTALL_PREFIX:PATH=$CONDA_PREFIX ../
-make -j$(nproc)
-make install
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib $CONDA_PREFIX/bin/yodaStruct -c lua_inputs/config.yml
-```
-
-We have opted to install into the `conda` environment, if this is not the
-intended behavior, use `/usr/local` instead.
-
-### Spack (not working at the moment)
-
-Manually this can be done in a painful way as follows:
-
-```bash
-spack install eigen@3.3.9 lua@5.2
-spack install catch2 fmt yaml-cpp openblas boost cmake ninja meson
-spack load catch2 fmt yaml-cpp openblas boost cmake ninja meson eigen@3.3.9 lua@5.2
-luarocks install luafilesystem
-```
-
-Or better:
-
-```bash
-spack env activate $(pwd)
-# After loading the packages
-luarocks install luafilesystem
-```
-
-Now we can build and install as usual.
-
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo \
- -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -GNinja \
- -DCMAKE_INSTALL_PREFIX=$HOME/.local \
- -DCMAKE_CXX_FLAGS="-pg -fsanitize=address " \
- -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg \
- -DBUILD_TESTING=NO
-cmake --build build
-```
-
-Or more reasonably:
-
-```bash
-export INST_DIR=$HOME/.local
-cd src
-meson setup bbdir --prefix $INST_DIR
-meson compile -C bbdir
-meson install -C bbdir
-# if not done
-export PATH=$PATH:$INST_DIR/bin
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INST_DIR/lib
-cd ../
-yodaStruct -c lua_inputs/config.yml
-```
+`environment.yml` is a micromamba fallback (meson, Eigen, BLAS,
+Catch2). It does not install Lua or yaml-cpp.
 
 ### Nix
 
@@ -283,10 +209,12 @@ and
 [LeakSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer))
 and the following:
 
-```{bash}
+```bash
 # From the developer shell
-export CXX=/usr/bin/clang++ && export CC=/usr/bin/clang
-cmake .. -DCMAKE_CXX_FLAGS="-pg -fsanitize=address " -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg
+export CXX=clang++ CC=clang
+meson setup bbdir -Dwith_tests=true -Db_sanitize=address
+meson compile -C bbdir
+meson test -C bbdir
 ```
 
 # Overview
@@ -350,7 +278,7 @@ b seams_input.cpp:408
 
 The following tools are used in this project:
 
-- [CMake](https://cmake.org/) for compilation ([cmake-init](https://github.com/cginternals/cmake-init) was used as a reference)
+- [Meson](https://mesonbuild.com/) for compilation
 - [Clang](https://clang.llvm.org/) because it is more descriptive with better tools
 - [Doxygen](https://www.doxygen.org) for the developer API
 - [clang-format](https://clang.llvm.org/docs/ClangFormat.html) for code formatting
