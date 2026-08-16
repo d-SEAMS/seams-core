@@ -126,5 +126,5 @@ Install the clang-format hook:
 ./scripts/git-pre-commit-format install
 #+end_src
 
-Commit subjects follow Conventional Commits (~feat~, ~fix~, ~docs~,
-~chore~). Do not use the 2020 ~fileName: ...~ sandwich sample.
+Commit subjects follow ~fileName: description of change~. See
+~CONTRIBUTING.md~ in the repository root.
