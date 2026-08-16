@@ -16,7 +16,7 @@
 #include <cmath>
 #include <iostream>
 #include <numeric>
-#include <set>
+#include <queue>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -27,6 +27,9 @@
 
 #ifdef SEAMS_HAS_VESIN
 #include <vesin.h>
+#endif
+#ifdef SEAMS_HAS_LINKCELL
+#include <linkcell.hpp>
 #endif
 
 namespace {
@@ -87,6 +90,10 @@ bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yClo
                    const std::vector<int> &subset, double rcutoff,
                    std::vector<std::pair<int, int>> &pairs) {
   const size_t nSubset = subset.size();
+  if (nSubset == 0) {
+    pairs.clear();
+    return true;
+  }
   std::vector<std::array<double, 3>> positions(nSubset);
   for (size_t i = 0; i < nSubset; i++) {
     const int idx = subset[i];
@@ -550,99 +557,318 @@ int nneigh::clearNeighbourList(std::vector<std::vector<int>> &nList) {
  * @return Row-ordered full neighbour list by atom ID, one row per atom with
  *  the leading self entry, like neighListO.
  */
+namespace {
+
+#ifdef SEAMS_HAS_LINKCELL
+// Writes n*k cloud indices, nearest first, unused slots -1.
+bool nominateByLinkcell(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    int typeI, double cellHint, std::vector<int> &nom) {
+  const int n = yCloud.nop;
+  if (n <= 0 || k <= 0 || yCloud.box.size() < 3) {
+    return true;
+  }
+  const double bx = yCloud.box[0];
+  const double by = yCloud.box[1];
+  const double bz = yCloud.box[2];
+  if (!(bx > 0.0 && by > 0.0 && bz > 0.0)) {
+    return true;
+  }
+  std::vector<double> xyz(static_cast<std::size_t>(n) * 3);
+  std::vector<int> mask(static_cast<std::size_t>(n), 0);
+  int nSrc = 0;
+  for (int i = 0; i < n; i++) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+    xyz[static_cast<std::size_t>(i) * 3 + 0] = p.x;
+    xyz[static_cast<std::size_t>(i) * 3 + 1] = p.y;
+    xyz[static_cast<std::size_t>(i) * 3 + 2] = p.z;
+    if (p.type == typeI) {
+      mask[static_cast<std::size_t>(i)] = 1;
+      ++nSrc;
+    }
+  }
+  if (nSrc == 0) {
+    return true;
+  }
+  const linkcell::Cell cell =
+      nneigh::lammpsBoxToLinkcell(yCloud.box, yCloud.boxLow);
+  try {
+    linkcell::knearest_into(xyz.data(), static_cast<std::size_t>(n), cell,
+                            static_cast<std::size_t>(k), nom.data(),
+                            nom.size(), mask.data(), cellHint);
+  } catch (const linkcell::Error &e) {
+    std::cerr << "linkcell failed: " << e.what()
+              << "; falling back to the in-tree cell list.\n";
+    return false;
+  }
+  return true;
+}
+#endif
+
+// Packed n*k nominations, nearest first, unused slots -1.
+std::vector<int> nominatePacked(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    int typeI, double cellHint) {
+  const int n = yCloud.nop;
+  std::vector<int> nom(static_cast<std::size_t>(n) * static_cast<std::size_t>(k),
+                       -1);
+  if (n <= 0 || k <= 0 || yCloud.box.size() < 3) {
+    return nom;
+  }
+#ifdef SEAMS_HAS_LINKCELL
+  if (nominateByLinkcell(yCloud, k, typeI, cellHint, nom)) {
+    return nom;
+  }
+#endif
+  const double bx = yCloud.box[0];
+  const double by = yCloud.box[1];
+  const double bz = yCloud.box[2];
+  if (!(bx > 0.0 && by > 0.0 && bz > 0.0)) {
+    return nom;
+  }
+  const double xlo = yCloud.boxLow.size() >= 3 ? yCloud.boxLow[0] : 0.0;
+  const double ylo = yCloud.boxLow.size() >= 3 ? yCloud.boxLow[1] : 0.0;
+  const double zlo = yCloud.boxLow.size() >= 3 ? yCloud.boxLow[2] : 0.0;
+  double edge = cellHint > 0.0 ? cellHint : 3.0;
+  edge = std::min({edge, bx, by, bz});
+  int nx = std::max(1, static_cast<int>(std::floor(bx / edge)));
+  int ny = std::max(1, static_cast<int>(std::floor(by / edge)));
+  int nz = std::max(1, static_cast<int>(std::floor(bz / edge)));
+  const int ncell = nx * ny * nz;
+  const double invx = static_cast<double>(nx) / bx;
+  const double invy = static_cast<double>(ny) / by;
+  const double invz = static_cast<double>(nz) / bz;
+  const double cellMin = std::min({bx / nx, by / ny, bz / nz});
+
+  std::vector<int> head(static_cast<std::size_t>(ncell), -1);
+  std::vector<int> next(static_cast<std::size_t>(yCloud.nop), -1);
+  std::vector<int> owners;
+  owners.reserve(static_cast<std::size_t>(yCloud.nop));
+
+  auto wrap = [](double x, double L) {
+    double t = x / L;
+    t -= std::floor(t);
+    return t * L;
+  };
+  auto cellOf = [&](int iatom, int &ix, int &iy, int &iz) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(iatom)];
+    const double x = wrap(p.x - xlo, bx);
+    const double y = wrap(p.y - ylo, by);
+    const double z = wrap(p.z - zlo, bz);
+    ix = std::min(nx - 1, std::max(0, static_cast<int>(x * invx)));
+    iy = std::min(ny - 1, std::max(0, static_cast<int>(y * invy)));
+    iz = std::min(nz - 1, std::max(0, static_cast<int>(z * invz)));
+  };
+  auto cellIndex = [&](int ix, int iy, int iz) {
+    ix %= nx;
+    if (ix < 0) {
+      ix += nx;
+    }
+    iy %= ny;
+    if (iy < 0) {
+      iy += ny;
+    }
+    iz %= nz;
+    if (iz < 0) {
+      iz += nz;
+    }
+    return (iz * ny + iy) * nx + ix;
+  };
+
+  for (int i = 0; i < yCloud.nop; i++) {
+    if (yCloud.pts[static_cast<std::size_t>(i)].type != typeI) {
+      continue;
+    }
+    int ix = 0;
+    int iy = 0;
+    int iz = 0;
+    cellOf(i, ix, iy, iz);
+    const int c = cellIndex(ix, iy, iz);
+    next[static_cast<std::size_t>(i)] = head[static_cast<std::size_t>(c)];
+    head[static_cast<std::size_t>(c)] = i;
+    owners.push_back(i);
+  }
+
+  const int maxReach = std::max({nx, ny, nz}) / 2 + 1;
+  std::vector<unsigned> seen(static_cast<std::size_t>(ncell), 0);
+  unsigned stamp = 1;
+  for (const int i : owners) {
+    std::priority_queue<std::pair<double, int>> heap;
+    int ix = 0;
+    int iy = 0;
+    int iz = 0;
+    cellOf(i, ix, iy, iz);
+    ++stamp;
+    if (stamp == 0) {
+      std::fill(seen.begin(), seen.end(), 0);
+      stamp = 1;
+    }
+    int reach = 1;
+    while (reach <= maxReach) {
+      for (int dx = -reach; dx <= reach; dx++) {
+        for (int dy = -reach; dy <= reach; dy++) {
+          for (int dz = -reach; dz <= reach; dz++) {
+            const bool shell = (reach == 1) || (std::abs(dx) == reach ||
+                                                std::abs(dy) == reach ||
+                                                std::abs(dz) == reach);
+            if (!shell && reach > 1) {
+              continue;
+            }
+            const int c = cellIndex(ix + dx, iy + dy, iz + dz);
+            if (seen[static_cast<std::size_t>(c)] == stamp) {
+              continue;
+            }
+            seen[static_cast<std::size_t>(c)] = stamp;
+            int j = head[static_cast<std::size_t>(c)];
+            while (j >= 0) {
+              if (j != i) {
+                const double d2 = gen::periodicDistSq(yCloud, i, j);
+                if (static_cast<int>(heap.size()) < k) {
+                  heap.push({d2, j});
+                } else if (d2 < heap.top().first) {
+                  heap.pop();
+                  heap.push({d2, j});
+                }
+              }
+              j = next[static_cast<std::size_t>(j)];
+            }
+          }
+        }
+      }
+      if (static_cast<int>(heap.size()) >= k) {
+        const double bound = static_cast<double>(reach) * cellMin;
+        if (heap.top().first <= bound * bound) {
+          break;
+        }
+      }
+      ++reach;
+    }
+    const int take = std::min(k, static_cast<int>(heap.size()));
+    for (int t = take - 1; t >= 0; t--) {
+      nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+          static_cast<std::size_t>(t)] = heap.top().second;
+      heap.pop();
+    }
+  }
+  return nom;
+}
+
+bool listsPacked(const std::vector<int> &nom, int n, int k, int i, int j) {
+  if (i < 0 || i >= n) {
+    return false;
+  }
+  const std::size_t base =
+      static_cast<std::size_t>(i) * static_cast<std::size_t>(k);
+  for (int t = 0; t < k; t++) {
+    if (nom[base + static_cast<std::size_t>(t)] == j) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void addUndirectedIDs(
+    std::vector<std::vector<int>> &out,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int i,
+    int j) {
+  out[static_cast<std::size_t>(i)].push_back(
+      yCloud.pts[static_cast<std::size_t>(j)].atomID);
+  out[static_cast<std::size_t>(j)].push_back(
+      yCloud.pts[static_cast<std::size_t>(i)].atomID);
+}
+
+void fillGraphFromNom(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &nom, int k, bool mutual,
+    std::vector<std::vector<int>> &out) {
+  const int n = yCloud.nop;
+  std::vector<int> deg(static_cast<std::size_t>(n), 0);
+  for (int i = 0; i < n; i++) {
+    for (int t = 0; t < k; t++) {
+      const int j =
+          nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+              static_cast<std::size_t>(t)];
+      if (j < 0 || j >= n || j == i) {
+        continue;
+      }
+      const bool listed = listsPacked(nom, n, k, j, i);
+      if (mutual) {
+        if (i < j && listed) {
+          deg[static_cast<std::size_t>(i)]++;
+          deg[static_cast<std::size_t>(j)]++;
+        }
+      } else if (i < j || !listed) {
+        deg[static_cast<std::size_t>(i)]++;
+        deg[static_cast<std::size_t>(j)]++;
+      }
+    }
+  }
+  out.assign(static_cast<std::size_t>(n), {});
+  for (int i = 0; i < n; i++) {
+    out[static_cast<std::size_t>(i)].reserve(
+        static_cast<std::size_t>(1 + deg[static_cast<std::size_t>(i)]));
+    out[static_cast<std::size_t>(i)].push_back(
+        yCloud.pts[static_cast<std::size_t>(i)].atomID);
+  }
+  for (int i = 0; i < n; i++) {
+    for (int t = 0; t < k; t++) {
+      const int j =
+          nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+              static_cast<std::size_t>(t)];
+      if (j < 0 || j >= n || j == i) {
+        continue;
+      }
+      const bool listed = listsPacked(nom, n, k, j, i);
+      if (mutual) {
+        if (i < j && listed) {
+          addUndirectedIDs(out, yCloud, i, j);
+        }
+      } else if (i < j) {
+        addUndirectedIDs(out, yCloud, i, j);
+      } else if (!listed) {
+        addUndirectedIDs(out, yCloud, i, j);
+      }
+    }
+  }
+}
+
+void fillBothGraphsFromNom(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &nom, int k, std::vector<std::vector<int>> &mutual,
+    std::vector<std::vector<int>> &uni) {
+  fillGraphFromNom(yCloud, nom, k, true, mutual);
+  fillGraphFromNom(yCloud, nom, k, false, uni);
+}
+
+} // namespace
+
 std::vector<std::vector<int>>
 nneigh::kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     double candidateCutoff, int typeI, bool mutual) {
-  std::vector<std::vector<int>> candidateRows =
-      nneigh::neighListO(candidateCutoff, yCloud, typeI);
-  if (candidateRows.empty() || k <= 0) {
-    return candidateRows;
+  if (yCloud.nop <= 0 || k <= 0) {
+    return {};
   }
-
-  // Directed nominations: each atom's k nearest among the candidates
-  std::vector<std::vector<int>> nominated(yCloud.nop);
-  std::vector<std::pair<double, int>> byDist; // (distance^2, neighbour index)
-  for (int i = 0; i < yCloud.nop; i++) {
-    const auto &row = candidateRows[i];
-    if (row.size() <= 1) {
-      continue;
-    }
-    byDist.clear();
-    for (size_t m = 1; m < row.size(); m++) {
-      const auto it = yCloud.idIndexMap.find(row[m]);
-      if (it == yCloud.idIndexMap.end()) {
-        continue;
-      }
-      byDist.emplace_back(gen::periodicDistSq(yCloud, i, it->second),
-                          it->second);
-    }
-    const size_t keep = std::min(static_cast<size_t>(k), byDist.size());
-    std::partial_sort(byDist.begin(), byDist.begin() + keep, byDist.end());
-    nominated[i].reserve(keep);
-    for (size_t m = 0; m < keep; m++) {
-      nominated[i].push_back(byDist[m].second);
-    }
-  }
-
-  // Exactness fallback: an atom whose k-th neighbour lies beyond the
-  // candidate cutoff got a truncated nomination; recompute those few by a
-  // brute-force scan so the k nearest are exact regardless of the cutoff
-  for (int i = 0; i < yCloud.nop; i++) {
-    if (yCloud.pts[i].type != typeI ||
-        static_cast<int>(nominated[i].size()) >= k) {
-      continue;
-    }
-    byDist.clear();
-    for (int j = 0; j < yCloud.nop; j++) {
-      if (j == i || yCloud.pts[j].type != typeI) {
-        continue;
-      }
-      byDist.emplace_back(gen::periodicDistSq(yCloud, i, j), j);
-    }
-    const size_t keep = std::min(static_cast<size_t>(k), byDist.size());
-    std::partial_sort(byDist.begin(), byDist.begin() + keep, byDist.end());
-    nominated[i].clear();
-    for (size_t m = 0; m < keep; m++) {
-      nominated[i].push_back(byDist[m].second);
-    }
-  }
-
-  // Union symmetrization into ID rows with the leading self entry
-  std::vector<std::vector<int>> out(yCloud.nop);
-  for (int i = 0; i < yCloud.nop; i++) {
-    out[i].push_back(candidateRows[i].empty() ? yCloud.pts[i].atomID
-                                              : candidateRows[i][0]);
-  }
-  std::set<std::pair<int, int>> bonds;
-  if (mutual) {
-    // Intersection symmetrization: a bond requires both nominations. In a
-    // crystal the first shell is mutual, so this equals the union graph
-    // there; on disordered packings one-sided nominations vanish, which is
-    // what starves the accidental ring complexes
-    std::set<std::pair<int, int>> directed;
-    for (int i = 0; i < yCloud.nop; i++) {
-      for (const int j : nominated[i]) {
-        directed.emplace(i, j);
-      }
-    }
-    for (const auto &[i, j] : directed) {
-      if (directed.count({j, i})) {
-        bonds.emplace(std::min(i, j), std::max(i, j));
-      }
-    }
-  } else {
-    for (int i = 0; i < yCloud.nop; i++) {
-      for (const int j : nominated[i]) {
-        bonds.emplace(std::min(i, j), std::max(i, j));
-      }
-    }
-  }
-  for (const auto &[i, j] : bonds) {
-    out[i].push_back(yCloud.pts[j].atomID);
-    out[j].push_back(yCloud.pts[i].atomID);
-  }
+  const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
+  const auto nom = nominatePacked(yCloud, k, typeI, hint);
+  std::vector<std::vector<int>> out;
+  fillGraphFromNom(yCloud, nom, k, mutual, out);
   return out;
+}
+
+std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
+nneigh::kNearestNeighbourPair(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, int typeI) {
+  if (yCloud.nop <= 0 || k <= 0) {
+    return {{}, {}};
+  }
+  const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
+  const auto nom = nominatePacked(yCloud, k, typeI, hint);
+  std::vector<std::vector<int>> mutual;
+  std::vector<std::vector<int>> uni;
+  fillBothGraphsFromNom(yCloud, nom, k, mutual, uni);
+  return {std::move(mutual), std::move(uni)};
 }
 
 /**
@@ -800,26 +1026,50 @@ void nneigh::SkinNeighborList::rebuildCandidates(
 
 void nneigh::SkinNeighborList::refreshBonds(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
-  std::set<std::pair<int, int>> next;
+  std::vector<std::pair<int, int>> next;
+  next.reserve(candidates_.size());
+  const std::size_t m = candidates_.size();
+  std::vector<double> dx(m), dy(m), dz(m), r2(m);
+  for (std::size_t t = 0; t < m; t++) {
+    const int i = candidates_[t].first;
+    const int j = candidates_[t].second;
+    if (i < 0 || j < 0 || i >= yCloud.nop || j >= yCloud.nop) {
+      dx[t] = dy[t] = dz[t] = 0.0;
+      continue;
+    }
+    dx[t] = yCloud.pts[static_cast<std::size_t>(j)].x -
+            yCloud.pts[static_cast<std::size_t>(i)].x;
+    dy[t] = yCloud.pts[static_cast<std::size_t>(j)].y -
+            yCloud.pts[static_cast<std::size_t>(i)].y;
+    dz[t] = yCloud.pts[static_cast<std::size_t>(j)].z -
+            yCloud.pts[static_cast<std::size_t>(i)].z;
+  }
+  if (yCloud.box.size() >= 3 && m > 0) {
+    seams::BatchPeriodicDistSq(dx.data(), dy.data(), dz.data(), yCloud.box[0],
+                               yCloud.box[1], yCloud.box[2], r2.data(), m);
+  }
   if (k_ <= 0) {
-    for (const auto &[i, j] : candidates_) {
+    for (std::size_t t = 0; t < m; t++) {
+      const int i = candidates_[t].first;
+      const int j = candidates_[t].second;
       if (i < 0 || j < 0 || i >= yCloud.nop || j >= yCloud.nop) {
         continue;
       }
-      if (gen::periodicDistSq(yCloud, i, j) <= cutoffSq_) {
-        next.emplace(i, j);
+      if (r2[t] <= cutoffSq_) {
+        next.emplace_back(i, j);
       }
     }
   } else {
     std::vector<std::vector<std::pair<double, int>>> byDist(
         static_cast<std::size_t>(yCloud.nop));
-    for (const auto &[i, j] : candidates_) {
+    for (std::size_t t = 0; t < m; t++) {
+      const int i = candidates_[t].first;
+      const int j = candidates_[t].second;
       if (i < 0 || j < 0 || i >= yCloud.nop || j >= yCloud.nop) {
         continue;
       }
-      const double r2 = gen::periodicDistSq(yCloud, i, j);
-      byDist[static_cast<std::size_t>(i)].emplace_back(r2, j);
-      byDist[static_cast<std::size_t>(j)].emplace_back(r2, i);
+      byDist[static_cast<std::size_t>(i)].emplace_back(r2[t], j);
+      byDist[static_cast<std::size_t>(j)].emplace_back(r2[t], i);
     }
     std::vector<std::vector<int>> nominated(static_cast<std::size_t>(yCloud.nop));
     for (int i = 0; i < yCloud.nop; i++) {
@@ -844,22 +1094,34 @@ void nneigh::SkinNeighborList::refreshBonds(
             continue;
           }
         }
-        next.emplace(a, b);
+        next.emplace_back(a, b);
       }
     }
+    std::sort(next.begin(), next.end());
+    next.erase(std::unique(next.begin(), next.end()), next.end());
   }
-  std::set<int> touched;
-  for (const auto &p : bonded_) {
-    if (next.count(p) == 0) {
-      touched.insert(p.first);
-      touched.insert(p.second);
+  std::sort(next.begin(), next.end());
+  next.erase(std::unique(next.begin(), next.end()), next.end());
+  std::vector<int> touched;
+  {
+    std::size_t a = 0;
+    std::size_t b = 0;
+    while (a < bonded_.size() || b < next.size()) {
+      if (b == next.size() || (a < bonded_.size() && bonded_[a] < next[b])) {
+        touched.push_back(bonded_[a].first);
+        touched.push_back(bonded_[a].second);
+        ++a;
+      } else if (a == bonded_.size() || next[b] < bonded_[a]) {
+        touched.push_back(next[b].first);
+        touched.push_back(next[b].second);
+        ++b;
+      } else {
+        ++a;
+        ++b;
+      }
     }
-  }
-  for (const auto &p : next) {
-    if (bonded_.count(p) == 0) {
-      touched.insert(p.first);
-      touched.insert(p.second);
-    }
+    std::sort(touched.begin(), touched.end());
+    touched.erase(std::unique(touched.begin(), touched.end()), touched.end());
   }
   changedAtoms_ = static_cast<int>(touched.size());
   bonded_.swap(next);

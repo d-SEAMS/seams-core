@@ -149,6 +149,22 @@ executable('bench_lammps_walk', 'bench_lammps_walk.cpp',
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
 
+executable('bench_stages', 'bench_stages.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+if linkcell_dep.found()
+  executable('profile_knn', 'profile_knn.cpp',
+    dependencies: [yds_dep],
+    cpp_args: _args,
+    link_args: _test_link_args,
+    include_directories: _incdirs,
+    build_rpath: '$ORIGIN/../src')
+endif
+
 executable('report_ice_graphs', 'report_ice_graphs.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
@@ -157,6 +173,13 @@ executable('report_ice_graphs', 'report_ice_graphs.cpp',
   build_rpath: '$ORIGIN/../src')
 
 executable('walk_seeded', 'walk_seeded.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('walk_graphs', 'walk_graphs.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
   link_args: _test_link_args,

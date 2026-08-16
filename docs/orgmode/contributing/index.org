@@ -1,18 +1,32 @@
 #+TITLE: Contributing
 #+OPTIONS: toc:nil num:nil
 
+This repository is the C++ engine (~libyodaLib~) and the ~seams~ CLI.
+Python bindings are [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
+Lua/Fennel is [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]].
+Do not add a language binding here.
+
+Documentation is authored in ~docs/orgmode/~ and exported with
+~docs/export.el~ (ox-rst) before Sphinx. Run ~pixi run -e docs docbld~
+to export, run doxyrest, and build the Shibuya site.
+
 * Prerequisites
 
-d-SEAMS uses [[https://pixi.sh][pixi]] for environment and task management. Install pixi first:
+Two supported compiler shells:
+
+- [[https://pixi.sh][pixi]] (locked conda-forge toolchain)
+- ~nix develop~ (flake inputs: compiler, Eigen, BLAS, Catch2, gdb)
 
 #+begin_src bash
 curl -fsSL https://pixi.sh/install.sh | bash
 #+end_src
 
-The pixi environment provides the C++ toolchain: a compiler, Eigen,
-BLAS/LAPACK, Catch2, Meson and Ninja. Python bindings are
-[[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]], not this
-tree. ~nix develop~ is the other supported compiler shell.
+pixi provides a compiler, Eigen, BLAS/LAPACK, Catch2, Meson, Ninja,
+Highway and chemfiles. Optional pixi features add IRA, sphericart,
+nauty, MPI, the docs stack, and the Coq/SymPy proofs.
+
+~-Dwith_python=true~ and ~-Dwith_lua=enabled~ are Meson errors that
+name the front-end repositories.
 
 * Clone and build
 
@@ -21,77 +35,96 @@ git clone https://github.com/d-SEAMS/seams-core.git
 cd seams-core
 #+end_src
 
-Set up the Meson build directory and compile:
+pixi:
 
 #+begin_src bash
 pixi run setup
 pixi run build
-#+end_src
-
-~pixi run setup~ configures a Meson build directory at ~bbdir/~ with
-tests and the ~seams~ CLI. ~pixi run build~ compiles ~libyodaLib~ and
-~seams~.
-
-* Running tests
-
-C++ tests (Catch2):
-
-#+begin_src bash
 pixi run test
 #+end_src
 
-~pixi run test~ runs the Catch2 suite. Python tests live in
-[[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
+~pixi run setup~ configures ~bbdir/~ with tests and the ~seams~ CLI
+(~-Dwith_tests=true -Dwith_python=false~). ~pixi run build~ compiles
+~libyodaLib~ and ~seams~. ~pixi run test~ runs the Catch2 suite.
+
+Nix:
+
+#+begin_src bash
+nix develop
+meson setup bbdir -Dwith_tests=true
+meson compile -C bbdir
+meson test -C bbdir
+./bbdir/seams read input/traj/exampleTraj.lammpstrj
+#+end_src
+
+~nix build~ is the same package plus the install check.
 
 * Project structure
 
 #+begin_src text
 seams-core/
-  src/                   C++ source files
-    include/
-      internal/          Internal headers (mol_sys, neighbours, bond, ...)
-      external/          Vendored headers (backward, argum, cxxopts, rang, ...)
-    mol_sys.cpp          Molecular system data structures
-    neighbours.cpp       Neighbour list construction
-    bond.cpp             Hydrogen bond detection
-    bop.cpp              Bond order parameters (CHILL/CHILL+)
-    ring.cpp             Ring analysis and classification
-    franzblau.cpp        Franzblau shortest-path ring finder
-    bulkTUM.cpp          Topological unit matching for bulk ice
-    topo_one_dim.cpp     1D topology (nanotubes)
-    topo_two_dim.cpp     2D topology (sheets)
-    ...
-  tests/
-    *.cpp                C++ test files (Catch2)
-  input/
-    traj/                Example LAMMPS trajectories
-  meson.build            Top-level Meson build definition
-  pixi.toml              pixi workspace configuration
-#+end_src
-
-Python bindings: [[https://github.com/d-SEAMS/PydSEAMSlib][d-SEAMS/PydSEAMSlib]].
+  src/                   C++ engine
+    seams_cli.cpp        seams (Argum)
+    include/internal/    engine headers
+    include/external/    vendored headers (argum, backward, ...)
+    mol_sys.cpp          PointCloud
+    neighbours.cpp       cutoff / knn / knn-union lists
+    bond.cpp             hydrogen bonds
+    bop.cpp              CHILL / CHILL+
+    ring.cpp             ring classification
+    franzblau.cpp        Franzblau shortest-path rings
+    cage_affiliation.cpp HC / DDC ice score
+    bulkTUM.cpp          topological unit matching
+    topo_one_dim.cpp     nanotubes
+    topo_two_dim.cpp     sheets
+  tests/                 Catch2 binaries
+  input/traj/            example LAMMPS dumps
+  input/xyz/             fixtures
+  input/con/             eOn .con fixture
+  meson.build            Meson project
+  meson_options.txt      with_tests, with_cli, optional backends
+  flake.nix              nix build / nix develop
+  pixi.toml              pixi workspace
 #+end_src
 
 * Core concepts
 
-- ~PointCloud~ :: The central data structure. Holds atom positions, types, box
-  dimensions, and per-atom properties (ice type, bond-order correlations).
+- ~PointCloud~ :: Atom positions, types, box, and per-atom ice labels.
 
-- ~neighListO~ :: Builds distance-based neighbour lists for oxygen atoms. Returns
-  a vector of vectors where each inner vector starts with the atom's own ID
-  followed by its neighbours.
+- ~neighListO~ / ~kNearestNeighbourList~ :: Cutoff and k-nearest
+  graphs. ~bondGraphFromName~ accepts ~cutoff~, ~knn~, ~knn-union~.
 
-- ~populateHbonds~ :: Re-reads the trajectory to find hydrogen positions, then
-  applies geometric criteria to determine hydrogen bonds between oxygen pairs.
+- ~populateHbonds~ :: Geometric hydrogen bonds. Needs hydrogens
+  (re-read from a dump, or an explicit H cloud).
 
-- ~getCorrelPlus~ / ~getIceTypePlus~ :: The CHILL+ algorithm. First computes
-  bond-order correlations (~c_ij~) between neighbours, then classifies each atom
-  as cubic ice, hexagonal ice, interfacial, clathrate, or liquid water.
+- ~getCorrelPlus~ / ~getIceTypePlus~ :: CHILL+. Four-neighbour
+  ~c_ij~, then cubic / hexagonal / interfacial / clathrate / water.
 
-- ~ringNetwork~ :: Franzblau shortest-path ring analysis. Finds primitive rings
-  in the hydrogen bond or neighbour network up to a specified depth.
+- ~cageAffiliation~ / ~seededCageAffiliation~ :: Ice score on
+  six-rings. HC = Ih, DDC = Ic, neither = water. Not the CHILL+ star.
 
-* Commit style
+- ~ringNetwork~ :: Franzblau primitive rings up to a depth.
 
-Follow the pattern ~fileName: description of change~. See ~CONTRIBUTING.md~ in the
-repository root for full details.
+* Tests
+
+#+begin_src bash
+pixi run test
+nix develop --command meson test -C bbdir
+#+end_src
+
+C++ tests are Catch2. Python tests live in
+[[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
+
+Optional pixi environments: ~pixi run -e ira ...~, ~sphericart~,
+~nauty~, ~mpi~, ~docs~, ~formalanalysis~, ~repro~.
+
+* Style
+
+Install the clang-format hook:
+
+#+begin_src bash
+./scripts/git-pre-commit-format install
+#+end_src
+
+Commit subjects follow ~fileName: description of change~. See
+~CONTRIBUTING.md~ in the repository root.

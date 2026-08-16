@@ -1,7 +1,8 @@
 #+TITLE: Three repositories
 #+OPTIONS: toc:nil num:nil
 
-d-SEAMS 2 is not a monolith.
+d-SEAMS 2 is not a monolith. The classifier is one C++ library. Each
+language ships its own package against that library.
 
 | repository | product | role |
 |------------+---------+------|
@@ -12,12 +13,39 @@ d-SEAMS 2 is not a monolith.
 The front ends take seams-core as a Meson subproject (static library)
 or as a flake input. They do not vendor a second engine.
 
+A language binding that lived in the engine tree would force every
+C++ user to take that language's toolchain, and every wheel or rock
+to rebuild the same library. Splitting the repos keeps the Catch2
+suite, the ~seams~ CLI, and the optional backends on one Meson
+project, while Python and Lua version and release on their own
+schedules.
+
+#+begin_export rst
+.. mermaid::
+
+   flowchart TB
+     subgraph engine["seams-core"]
+       LIB[libyodaLib]
+       CLI[seams CLI]
+     end
+     subgraph fronts["Front ends"]
+       PY[pydseams Frame]
+       LUA["require(\"dseams\")"]
+     end
+     DUMP[LAMMPS / XYZ / chemfiles / con] --> LIB
+     LIB --> CLI
+     LIB --> PY
+     LIB --> LUA
+#+end_export
+
 * Why ~yoda~
 
-The 2020 executable was ~yodaStruct~. The compiled Python module is
-~pydseams.yoda~ so that name stays on the C++ surface.
-~_core~ and ~cyoda~ are aliases of ~yoda~. Lua helpers are
+The 2020 product was a single executable named ~yodaStruct~. That
+binary is gone. The compiled C++ surface kept the name so existing
+registrations stay findable: the Python module is ~pydseams.yoda~
+(~_core~ and ~cyoda~ are aliases of ~yoda~). Lua helpers are
 ~require("dseams")~; ~require("yoda")~ still resolves to that table.
+There is no ~yodaStruct~ executable in any of the three repositories.
 
 * Builds
 
@@ -27,9 +55,16 @@ The 2020 executable was ~yodaStruct~. The compiled Python module is
 - *Wheels*: cibuildwheel on PydSEAMSlib, CPython 3.12 limited ABI.
 
 The 2020 CMake Nix derivation of ~yodaStruct~ is gone.
+~-Dwith_python=true~ and ~-Dwith_lua=enabled~ are Meson errors that
+name PydSEAMSlib and yodaStruct.
 
-* Ice score
+* Ice score and the CHILL+ star
 
-A molecule in an HC is ice Ih. A molecule in a DDC is ice Ic. A
-molecule in neither is water. That is cage membership, not the
-four-neighbour CHILL+ star. Both live in ~libyodaLib~.
+Two classifiers live in ~libyodaLib~. They answer different questions
+and they do not imply each other. The argument is
+[[file:chill-plus-vs-cages.org][CHILL+ versus cages]].
+
+~seams cages --graph~ chooses the bond graph the six-rings are found
+on: ~cutoff~, ~knn~, ~knn-union~, or ~seeded~ (CLI default). On a
+perfect cubic crystal the four graphs coincide. On a mixed nucleation
+dump they do not.

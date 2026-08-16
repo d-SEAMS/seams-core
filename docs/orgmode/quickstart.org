@@ -1,8 +1,10 @@
 #+TITLE: Quickstart
 #+OPTIONS: toc:nil num:nil
 
-Classify ice on the in-tree mixed TIP4P example
-(~input/traj/exampleTraj.lammpstrj~, 250 waters).
+Build the engine, read a frame, and print what this binary linked.
+
+The in-tree mixed TIP4P dump is ~input/traj/exampleTraj.lammpstrj~
+(750 atoms, 250 waters; type 2 is oxygen).
 
 * Install the engine
 
@@ -19,8 +21,11 @@ pixi:
 #+begin_src bash
 pixi run setup
 pixi run build
-./bbdir/src/seams --help
+./bbdir/seams --help
 #+end_src
+
+Either path produces ~libyodaLib~ and the ~seams~ CLI. This repository
+does not install Python or Lua.
 
 * Read a frame
 
@@ -28,47 +33,8 @@ pixi run build
 seams read input/traj/exampleTraj.lammpstrj
 #+end_src
 
-Expected shape of the line: ~nop 250 frame 1 box ...~.
-
-* CHILL+
-
-#+begin_src bash
-seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
-#+end_src
-
-On this fixture the four-neighbour labels are 42 cubic, 65 hexagonal,
-58 interfacial and 85 water.
-
-* Cages
-
-#+begin_src bash
-seams cages input/traj/exampleTraj.lammpstrj --type 2
-#+end_src
-
-The default bond graph is ~--graph seeded~ (mutual four-nearest seeds,
-union completions). This mixed frame has no complete HC or DDC.
-
-* Python and Lua
-
-The engine CLI is not a scripting host.
-
-#+begin_src python
-import pydseams as ds
-
-frame = ds.read("input/traj/exampleTraj.lammpstrj")
-print(frame.chill_plus())
-print(frame.cages())
-#+end_src
-
-#+begin_src lua
-local dseams = require("dseams")
-local cloud = dseams.read("input/traj/exampleTraj.lammpstrj")
-print(dseams.chill_plus(cloud, {cutoff = 3.5}))
-#+end_src
-
-Install those from
-[[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] and
-[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]].
+The line is ~nop 250 frame 1 box ...~ after the oxygen guess (type 2,
+then type 1). Pass ~--type 2~ to skip the guess.
 
 * Features of this build
 
@@ -76,7 +42,37 @@ Install those from
 seams --features
 #+end_src
 
-Optional backends (vesin, chemfiles, readcon-core, IRA, sphericart,
-nauty, MPI) stay off unless the Meson probe finds them. The Nix flake
-enables Eigen, BLAS/LAPACK, Catch2 and Highway when nixpkgs provides
-them.
+Each line is a compile-time backend: OpenMP, MPI, Highway SIMD, vesin,
+chemfiles, readcon-core, IRA/SOFI, sphericart, nauty. The Nix flake
+turns Eigen, BLAS/LAPACK, Catch2 and Highway on when nixpkgs provides
+them. Optional wrap-git backends stay off unless a package is already
+in the closure. ~pixi~ enables what conda-forge put in the environment
+(Highway and chemfiles are in the default pixi lock).
+
+* CHILL+ and cages
+
+#+begin_src bash
+seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
+seams cages input/traj/exampleTraj.lammpstrj --type 2
+#+end_src
+
+On this fixture the four-neighbour labels are 12 interfacial
+clathrate and 238 water. The default bond graph is ~--graph seeded~
+(mutual four-nearest seeds, union completions). This mixed frame has
+no complete HC or DDC: cage membership is not the CHILL+ star.
+
+* Python and Lua
+
+The engine CLI is not a scripting host. Install
+[[https://github.com/d-SEAMS/PydSEAMSlib][pydseams]] (~pip install
+pydseams~, compiled module ~yoda~) or
+[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
+(~require("dseams")~). ~import pydseamslib~ is an alias of ~pydseams~.
+
+The Frame tutorial is
+[[https://d-seams.github.io/PydSEAMSlib/][pydseams docs]].
+Lua is [[https://d-seams.github.io/yodaStruct/][dseams docs]].
+
+The full install matrix is [[file:howto/install.org][Install]].
+The mixed-frame walkthrough is
+[[file:tutorials/bulk-ice.org][Classify ice on the mixed TIP4P example]].

@@ -1014,7 +1014,8 @@ std::vector<int> ring::findHC(const std::vector<std::vector<int>> &rings,
  *  for being the basal rings of an HC.
  */
 bool ring::basalConditions(const std::vector<std::vector<int>> &nList,
-                           std::vector<int> &basal1, std::vector<int> &basal2) {
+                           const std::vector<int> &basal1,
+                           const std::vector<int> &basal2) {
   int l1 = basal1[0]; // first element of basal1 ring
   int l2 = basal1[1]; // second element of basal1 ring
   int ringSize = 6;      // Size of the ring; each ring contains 6 elements
@@ -1210,7 +1211,7 @@ bool ring::basalNeighbours(const std::vector<std::vector<int>> &nList,
  */
 bool ring::notNeighboursOfRing(const std::vector<std::vector<int>> &nList,
                                std::vector<int> &triplet,
-                               std::vector<int> &ring) {
+                               const std::vector<int> &ring) {
   int iatom; // AtomID of the atom to be searched for inside the neighbour
              // lists
   int jatom; // AtomID of in whose neighbour list iatom will be searched for

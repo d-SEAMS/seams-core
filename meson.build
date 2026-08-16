@@ -145,6 +145,13 @@ if vesin_dep.found()
   _args += ['-DSEAMS_HAS_VESIN=1']
 endif
 
+linkcell_dep = dependency('linkcell', required: false,
+                          fallback: ['linkcell', 'linkcell_dep'])
+if linkcell_dep.found()
+  _deps += [linkcell_dep]
+  _args += ['-DSEAMS_HAS_LINKCELL=1']
+endif
+
 chemfiles_dep = dependency('chemfiles', required: false)
 if chemfiles_dep.found()
   _deps += [chemfiles_dep]
@@ -309,15 +316,18 @@ if not nauty_opt.disabled()
 endif
 
 # Report which optional backends this build actually got. Each of these
-# degrades silently: without vesin the neighbour search falls back to the
-# brute-force path, and without a reader the corresponding formats are simply
-# absent from the library, with nothing at run time to say so.
+# degrades silently: without vesin the cutoff neighbour search falls
+# back to the brute-force path, without linkcell the k-nearest walk
+# uses the in-tree cell list, and without a reader the corresponding
+# formats are simply absent from the library, with nothing at run time
+# to say so.
 summary({
   'SIMD distance kernel (hwy)': hwy_dep.found(),
   'Shared-memory parallelism (OpenMP)': openmp_found,
   'MPI atom split (Steinhardt)': mpi_found,
   'OpenMP target offload': offload_enabled,
   'Cell-list neighbours (vesin)': vesin_dep.found(),
+  'Periodic k-nearest (linkcell)': linkcell_dep.found(),
   'PDB/GRO/DCD readers (chemfiles)': chemfiles_dep.found(),
   '.con reader (readcon-core)': readcon_dep.found(),
   'IRA/SOFI shape matching (libira)': ira_found,

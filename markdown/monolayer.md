@@ -37,8 +37,8 @@ Inside the output directory, a directory called _topoMonolayer_ is created. Insi
 _topoMonolayer_ directory, files called _coverageAreaXY.dat_, _coverageAreaXZ.dat_, and _coverageAreaYZ.dat_ contain the number of rings and and the corresponding coverage area% [1], for each frame. Here, the confining sheet is in the XY plane, so the _coverageAreaXY.dat_ contains the coverage area% and quantities of interest. Inside
 _runOne/topoMonolayer/dataFiles_, LAMMPS data files which are numbered according to
 the frame number are created. These data files can be visualized in
-[OVITO](https://www.ovito.org/) or [VMD](http://www.ks.uiuc.edu/Research/vmd/),
-although OVITO is recommended for optimal type visualization.
+[solvis](https://github.com/amritagos/solvis) through `pydseams[solvis]`
+(`frame.to_solvis()`). The files are LAMMPS text.
 
 ## References
 

@@ -1,10 +1,64 @@
 #+TITLE: Data Formats
 #+OPTIONS: toc:nil num:nil
 
-* LAMMPS trajectory format
+~seams~ and the C++ readers share one suffix table. Coordinates are
+Cartesian Angstroms. Frames are 1-based (the file's timestep value is
+not the frame index).
 
-d-SEAMS reads LAMMPS dump files in the standard text format. Each frame in the
-trajectory has the following structure:
+| suffix | reader | always compiled? |
+|--------+--------+------------------|
+| ~.lammpstrj~, ~.dump~, ~.lammps~, anything else | LAMMPS dump text | yes |
+| ~.xyz~ | ~sinp::readXYZ~ | yes |
+| ~.pdb~, ~.gro~, ~.dcd~ | ~sinp::readChemfiles~ | only with ~SEAMS_HAS_CHEMFILES~ |
+| ~.con~ | ~sinp::readCon~ | only with ~SEAMS_HAS_READCON~ |
+
+The CLI matches the substring after the last ~.~ (~xyz~, ~con~,
+~pdb~, ~gro~, ~dcd~). Everything else, including a path with no
+dot, is a LAMMPS dump. ~seams --features~ reports chemfiles and
+readcon-core. Python ~pydseams.read~ and Lua ~dseams.read~ use the
+same suffixes.
+
+* Type columns
+
+| reader | ~Point::type~ | ~--type 0~ | ~--type I~ (~I > 0~) |
+|--------+---------------+------------+----------------------|
+| LAMMPS | ~ITEM: ATOMS~ ~type~ column | single-frame: keep type 2, then type 1 if empty | keep type ~I~ |
+| XYZ | hard-coded ~1~ | ignored on the read | ignored on the read |
+| chemfiles | numeric ~type~ string, else numeric ~name~, else atomic number (or ~1~) | keep every atom (~typeFilter = -1~) | keep type ~I~ |
+| readcon | atomic number from the file | keep every atom | keep every atom (~--type~ is not applied) |
+
+~Point::atomID~ is the file id when the format has one, else
+1-based file order. ~Point::molID~ is ~mol~ when present, else
+~atomID~ (chemfiles: residue id when the format has residues).
+
+* Empty frames
+
+A reader that cannot fill atoms returns a cloud with ~nop == 0~
+(~pts~ empty). ~currentFrame~ is still the requested 1-based index
+when the reader knows it.
+
+| situation | result |
+|-----------+--------|
+| LAMMPS path missing or unreadable | empty cloud, ~currentFrame = targetFrame~ |
+| LAMMPS frame does not exist | empty cloud, ~currentFrame = targetFrame~ |
+| LAMMPS type filter matches nothing | ~nop == 0~ |
+| XYZ path missing | ~std::runtime_error("Wrong filepath")~ |
+| chemfiles frame out of range | cloud left as passed in (usually empty) |
+| chemfiles throws | empty cloud |
+| readcon path unreadable or frame missing | empty cloud |
+
+~seams chill~ / ~seams chill-plus~ on an empty cloud print ~nop 0~
+and return 0. ~seams cages~ prints ~nop 0 graph KIND hexagonal 0
+cubic 0 water 0~.
+
+~sinp::nLammpsFrames~ is ~0~ when the file cannot be read.
+~sinp::forEachLammpsFrame~ is a no-op when that count is ~0~, or
+when ~first > last~.
+
+* LAMMPS dump
+
+Default reader. Text dump, frames concatenated, each starting with
+~ITEM: TIMESTEP~.
 
 #+begin_src text
 ITEM: TIMESTEP
@@ -18,49 +72,87 @@ ITEM: BOX BOUNDS pp pp pp
 ITEM: ATOMS id mol type x y z c_peratom
 1 1 2 1.62441 -0.745636 131.621 -28.449
 2 1 1 2.11159 -0.763153 132.444 9.60885
-3 1 1 0.727051 -0.969064 131.868 9.36579
 #+end_src
 
-** Header fields
+That block is the first snapshot of
+~input/traj/exampleTraj.lammpstrj~ (750 atoms, 250 waters).
 
-- ~ITEM: TIMESTEP~ :: The simulation timestep for this frame.
-- ~ITEM: NUMBER OF ATOMS~ :: Total number of atoms in the frame.
-- ~ITEM: BOX BOUNDS~ :: Three lines giving lo/hi bounds for x, y, z. The boundary
-  flags (~pp~ = periodic-periodic) follow on the header line.
-- ~ITEM: ATOMS~ :: Column names for atom data. The required columns are ~id~,
-  ~mol~, ~type~, ~x~, ~y~, ~z~. Additional columns (like ~c_peratom~) are
-  accepted but not used by d-SEAMS.
+Required ~ITEM: ATOMS~ columns: ~type~, and one coordinate triple.
+The coordinate names follow LAMMPS ~ReaderNative~: ~x~ / ~y~ / ~z~
+if present, otherwise the first of ~xu~ / ~xs~ / ~xsu~ (and the ~y~
+and ~z~ analogues ~yu~ / ~ys~ / ~ysu~, ~zu~ / ~zs~ / ~zsu~). Extra
+columns are ignored.
 
-** Atom type conventions
+Optional columns: ~id~, ~mol~. Missing ~mol~ falls back to ~id~.
+If both are missing, the reader uses column 0 for both.
 
-For water simulations analyzed with CHILL+ or hydrogen bond detection:
+~PointCloud.box~ is ~hi - lo~ per axis. ~PointCloud.boxLow~ is the
+lower bound. A third number on a box line is a triclinic tilt and is
+appended to ~box~.
 
-| Type ID | Atom | Notes                            |
-|---------+------+----------------------------------|
-|       1 | H    | Hydrogen, used by ~populateHbonds~ |
-|       2 | O    | Oxygen, used by ~readLammpsTrjreduced~ and ~neighListO~ |
+Mixed water dumps in this tree use type 2 for oxygen and type 1 for
+hydrogen. Single-site mW dumps in this tree use type 1.
 
-These type IDs are passed as the ~typeI~ and ~Htype~ arguments to the reader and
-bond functions. Adjust them to match your LAMMPS data file.
+A live dump session caches ~ITEM: TIMESTEP~ offsets. Sequential
+walks do not rescan prior snapshots. ~seams --frame N --last M
+--jobs J~ walks that table with one handle per OpenMP worker.
+~sinp::dropLammpsDumpIndex~ drops a cached session (tests that
+rewrite a path in place).
 
-** Multiple frames
+The C++ readers also accept a coordinate slice (~isSlice~,
+~coordLow~, ~coordHigh~). An atom is kept when each component lies in
+the closed interval, or when that axis has ~lo == hi~ (ignored). The
+CLI does not expose the slice.
 
-A trajectory file can contain multiple frames concatenated back to back. Each
-frame starts with ~ITEM: TIMESTEP~. The ~targetFrame~ argument to the reader
-functions selects which frame to read (1-indexed).
+* XYZ
 
-** Coordinate conventions
+Always compiled. Standard XYZ:
 
-d-SEAMS uses Cartesian coordinates in Angstroms. The box dimensions stored in
-~PointCloud.box~ are computed as ~hi - lo~ for each dimension. The lower bounds
-are stored in ~PointCloud.boxLow~.
+#+begin_src text
+12
+comment
+O 8.995 10.3859997 15.0939999
+O 6.7459998 14.2810001 15.0939999
+#+end_src
 
-* Slice selection
+~templates/hc.xyz~ is this shape (hexagonal-cage template). The first
+line is the atom count, the second line is skipped, each data line is
+~symbol x y z~. Every atom is stored as type 1. The box is the axis-
+aligned bounding box of the coordinates (~boxLow~ is the minimum);
+the comment line is not parsed for a lattice. ~seams~ routes ~.xyz~
+here and ignores ~--type~ on the read (classification still uses
+~--type~, which then sees type 1).
 
-When ~isSlice=True~ is passed to a reader function, only atoms within the
-coordinate range ~[coordLow, coordHigh]~ are included. The comparison is
-per-component: an atom is included when ~coordLow[i] <= pos[i] <= coordHigh[i]~
-for all three dimensions.
+XYZ files in this tree do not carry a periodic cell. Analyses that
+need the true box should use a LAMMPS dump.
 
-When ~isSlice=False~, the ~coordLow~ and ~coordHigh~ arguments are ignored.
-Convention is to pass ~[0, 0, 0]~ for both.
+* chemfiles (PDB, GRO, DCD)
+
+Compiled when Meson finds chemfiles (~SEAMS_HAS_CHEMFILES~). The CLI
+opens ~.pdb~, ~.gro~, and ~.dcd~ only. The C++ entry
+~sinp::readChemfiles~ accepts any path chemfiles can open.
+
+Frame ~N~ is ~read_step(N-1)~. ~--type I~ with ~I > 0~ keeps that
+numeric type; otherwise every atom is kept. Type is the chemfiles
+type or name string when it is all digits, otherwise the atomic
+number (~value_or(1)~). ~box~ is the cell lengths; ~boxLow~ is the
+origin. ~atomID~ is the 1-based file order. ~molID~ is the residue
+id when the format has residues, else ~atomID~.
+
+A flake build leaves chemfiles off. The default pixi environment
+ships chemfiles, so ~pixi run build~ reports ~chemfiles: enabled~.
+
+* eOn ~.con~
+
+Compiled when Meson finds readcon-core (~SEAMS_HAS_READCON~).
+~input/con/tiny_multi_cuh2.con~ is a two-frame fixture (Cu + H,
+~con_spec_version~ 2).
+
+~type~ is the atomic number from the file. ~atomID~ is the file atom
+id. ~molID~ is set to ~atomID~. ~box~ is ~frame->cell[0..2]~;
+~boxLow~ is the origin. Frame ~N~ is the Nth record from the
+iterator. The CLI does not type-filter ~.con~.
+
+A flake build leaves readcon-core off (the wrap is not downloaded).
+Enable it in a Meson build that can see the wrap or a system package,
+then ~seams --features~ reports ~readcon-core: enabled~.

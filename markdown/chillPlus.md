@@ -22,7 +22,7 @@ trajectory: "path/to/trajectory/file"
 
 ## Analyzing the Output
 
-Inside the output directory, a file called _clusterStats.dat_ contains the cluster statistics for each frame. Each frame is also written out to a LAMMPS trajectory file called _waterChillP.lammpstrj_, containing the classified atoms, and the _largestIce.lammpstrj_, which has the particles in the largest ice cluster. These trajectory files can be visualized in [OVITO](https://www.ovito.org/) or [VMD](http://www.ks.uiuc.edu/Research/vmd/). Inside the _bop_ directory, _chillPlus.txt_ contains the number of particles identified as cubic ice (Ic), hexagonal ice (Ih), interfacial ice (Interfacial), clathrates (Clath), interfacial clathrates (InterClath), water and the total number of molecules (Total).
+Inside the output directory, a file called _clusterStats.dat_ contains the cluster statistics for each frame. Each frame is also written out to a LAMMPS trajectory file called _waterChillP.lammpstrj_, containing the classified atoms, and the _largestIce.lammpstrj_, which has the particles in the largest ice cluster. These trajectory files are LAMMPS text. View classified frames with [solvis](https://github.com/amritagos/solvis) through `pydseams[solvis]` (`frame.to_solvis()`). Inside the _bop_ directory, _chillPlus.txt_ contains the number of particles identified as cubic ice (Ic), hexagonal ice (Ih), interfacial ice (Interfacial), clathrates (Clath), interfacial clathrates (InterClath), water and the total number of molecules (Total).
 
 ## References
 

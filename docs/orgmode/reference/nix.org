@@ -1,22 +1,66 @@
 #+TITLE: Nix flake
 #+OPTIONS: toc:nil num:nil
 
+The flake builds ~libyodaLib~ and the ~seams~ CLI with Meson. It does
+not build Python or Lua. There are no overlays.
+
 #+begin_src bash
 nix build                  # ./result/bin/seams
 nix run . -- read input/traj/exampleTraj.lammpstrj
-nix develop
-nix flake update nixpkgs
+nix develop                # inputsFrom seams, plus gdb, ccache, clang-tools
+nix flake update           # refresh the nixpkgs pin
 nix fmt
 #+end_src
 
-~nix build~ runs the Catch2 suite (Meson install check).
+~nix build~ runs Meson ~doCheck~: the Catch2 suite plus the CLI
+smoke tests ~seams_read~, ~seams_help~, ~seams_version~,
+~seams_features~.
 
-* What the flake enables
+* Flake outputs
 
-Eigen, BLAS/LAPACK, Catch2, Highway when nixpkgs has them. OpenMP when
-the toolchain links it. Optional wrap-git backends (vesin,
-readcon-core) and chemfiles stay off unless a nixpkgs package is
-already in the closure.
+From =flake.nix=. Supported systems: ~x86_64-linux~,
+~aarch64-linux~, ~x86_64-darwin~, ~aarch64-darwin~.
+
+| output | value |
+|--------+-------|
+| ~packages.<system>.seams~ | =nix/package.nix= derivation |
+| ~packages.<system>.default~ | same as ~seams~ |
+| ~apps.<system>.default~ | ~${packages.default}/bin/seams~ |
+| ~checks.<system>.seams~ | the ~seams~ package |
+| ~checks.<system>.default~ | same as ~seams~ |
+| ~devShells.<system>.default~ | ~inputsFrom~ the package; extra packages ~gdb~, ~ccache~, ~clang-tools~ |
+| ~formatter.<system>~ | ~nixfmt~ |
+
+The only flake input is ~nixpkgs~ (~github:NixOS/nixpkgs/nixos-unstable~).
+
+* What the package enables
+
+From =nix/package.nix= (~pname = "seams"~, ~version = "2.2.0"~):
+
+| on | Eigen, BLAS, LAPACK, Catch2 3, Highway (~libhwy~) |
+| OpenMP | ~dependency('openmp')~ probe; Clang also gets ~llvmPackages.openmp~ |
+| Meson flags | ~with_tests=true~, ~with_cli=true~, ~with_python=false~, ~with_lua=false~, ~with_mpi=false~, ~with_openmp_offload=false~ |
+| ~mesonAutoFeatures~ | ~disabled~ |
+| wrap mode | ~nodownload~ (Meson setup hook) |
+
+The fileset is =meson.build=, =meson_options.txt=, =src=, =tests=,
+=input=, =templates=, and the wraps =readcon-core.wrap=,
+=vesin.wrap=, =robin-map.wrap=, =subprojects/packagefiles=.
+
+* What stays off
+
+| ~with_python~ | Meson error if forced; Python is PydSEAMSlib |
+| ~with_lua~ | Meson error if forced; Lua is yodaStruct |
+| ~with_mpi~ | ~false~ |
+| ~with_openmp_offload~ | ~false~ |
+| vesin, readcon-core | wrap-git fallbacks are not fetched (~nodownload~) |
+| chemfiles | not in the flake closure |
+| IRA, sphericart, nauty | ~auto_features=disabled~, so the ~auto~ probes stay off |
+
+~seams --features~ on a flake build therefore reports Highway (and
+OpenMP when it linked) as enabled, and vesin, chemfiles, readcon-core,
+IRA/SOFI, sphericart, nauty, and MPI as disabled. Optional backends
+turn on only if a nixpkgs package is already in the closure.
 
 * Front-end flakes
 
@@ -27,7 +71,8 @@ the Meson subproject.
 
 * Cachix
 
-The [[https://dseams.cachix.org/][dseams]] cache is optional:
+The [[https://dseams.cachix.org/][dseams]] cache is optional (not a
+flake input):
 
 #+begin_src bash
 nix-env -iA cachix -f https://cachix.org/api/v1/install

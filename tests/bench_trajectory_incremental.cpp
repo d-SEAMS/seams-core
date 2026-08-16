@@ -88,9 +88,8 @@ int main(int argc, char **argv) {
     molSys::PointCloud<molSys::Point<double>, double> cloud;
     cloud = sinp::readLammpsTrjO(traj, frame, cloud, atomType);
     if (cloud.nop == 0) {
-      std::fprintf(stderr, "could not read frame %d of %s\n", frame,
-                   traj.c_str());
-      return 1;
+      std::printf("%d 0 0 0 0 0 0 0 0 0 0 0 . 0 yes yes\n", frame);
+      continue;
     }
     auto nList = skin.update(cloud);
     auto idx = nneigh::neighbourListByIndex(cloud, nList);

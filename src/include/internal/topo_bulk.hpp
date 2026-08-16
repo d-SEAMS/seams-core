@@ -143,7 +143,8 @@ bool conditionThreeDDC(const std::vector<std::vector<int>> &rings,
 
 //! Tests whether two rings are basal rings (true) or not (false)
 bool basalConditions(const std::vector<std::vector<int>> &nList,
-                     std::vector<int> &basal1, std::vector<int> &basal2);
+                     const std::vector<int> &basal1,
+                     const std::vector<int> &basal2);
 
 //! Tests whether the last two elements of a triplet are neighbours of two atom
 //! IDs passed in
@@ -153,7 +154,8 @@ bool basalNeighbours(const std::vector<std::vector<int>> &nList,
 //! Tests to check that elements of a triplet are not neighbours of a ring
 //! (vector) passed
 bool notNeighboursOfRing(const std::vector<std::vector<int>> &nList,
-                         std::vector<int> &triplet, std::vector<int> &ring);
+                         std::vector<int> &triplet,
+                         const std::vector<int> &ring);
 
 //! Finds the prismatic rings from basal rings iring and jring
 [[nodiscard]] int findPrismatic(const std::vector<std::vector<int>> &rings, std::vector<int> &listHC,

@@ -1,33 +1,7 @@
 #+TITLE: Quasi-one-dimensional ice
 #+OPTIONS: toc:nil num:nil
 
-Ice nanotubes and confined prisms are the 2020 quasi-one-dimensional
-path: primitive rings, then prism identification on that ring set.
-
-* Where the code lives
-
-C++: ~topo_one_dim.cpp~ / ~prismAnalysis~. The Catch2 binary
-~topo_one_dim~ exercises the path.
-
-Lua: ~example_lua/iceNanotube/~ in
-[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] still runs the
-registered prism helpers (~prismAnalysis~, ~ringAnalysis~) through
-~require("dseams")~.
-
-* From Python
-
-There is no separate ~seams nanotube~ subcommand. Load a frame and
-call the compiled registrations on ~pydseams.yoda~ (or the Lua
-helpers) after you have a bonded graph and a ring set. The high-level
-~Frame~ API is CHILL+ and cages; prism analysis stays on ~yoda~.
-
-#+begin_src python
-from pydseams import yoda
-# yoda.prismAnalysis(...) after rings and a neighbour list
-#+end_src
-
-* Trajectories
-
-The 2020 INT dumps live on the
-[[https://figshare.com/projects/d-SEAMS_Datasets/73545][figshare project]].
-Keep paths relative to the directory you invoke ~dseams~ from.
+The ~seams~ CLI has no prism command. Confined ice (nanotube and
+monolayer) is [[file:../howto/confined-ice.org][the confined-ice howto]].
+Bulk CHILL+ and cages on the in-tree dump are
+[[file:bulk-ice.org][the mixed TIP4P tutorial]].

@@ -151,6 +151,11 @@ void printFeatures(std::ostream &os) {
 #else
   line("vesin neighbours", false);
 #endif
+#ifdef SEAMS_HAS_LINKCELL
+  line("linkcell k-nearest", true);
+#else
+  line("linkcell k-nearest", false);
+#endif
 #ifdef SEAMS_HAS_CHEMFILES
   line("chemfiles", true);
 #else
@@ -188,6 +193,10 @@ int cmdRead(std::ostream &os, Cloud &cloud) {
 }
 
 int cmdChillPlus(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
+  if (cloud.nop == 0) {
+    printCounts(os, cloud);
+    return 0;
+  }
   const int typ = typeOf(cloud, typeI);
   auto nList = nneigh::neighListO(cutoff, cloud, typ);
   chill::getCorrelPlus(cloud, nList, false);
@@ -197,6 +206,10 @@ int cmdChillPlus(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
 }
 
 int cmdChill(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
+  if (cloud.nop == 0) {
+    printCounts(os, cloud);
+    return 0;
+  }
   const int typ = typeOf(cloud, typeI);
   auto nList = nneigh::neighListO(cutoff, cloud, typ);
   chill::getCorrel(cloud, nList, false);
@@ -207,6 +220,13 @@ int cmdChill(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
 
 int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
              const std::string &graphName) {
+  if (cloud.nop == 0) {
+    os << colorizer.heading("nop") << " 0 "
+       << colorizer.longOption("graph") << " " << graphName << " "
+       << iceColor("hexagonal") << " 0 " << iceColor("cubic") << " 0 "
+       << iceColor("water") << " 0\n";
+    return 0;
+  }
   const int typ = typeOf(cloud, typeI);
   const double cand = cutoff + 1.5;
 
@@ -239,8 +259,9 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
   };
 
   if (graphName == "seeded") {
-    auto mutual = nneigh::kNearestNeighbourList(cloud, k, cand, typ, true);
-    auto uni = nneigh::kNearestNeighbourList(cloud, k, cand, typ, false);
+    auto graphs = nneigh::kNearestNeighbourPair(cloud, k, cand, typ);
+    const auto &mutual = graphs.first;
+    const auto &uni = graphs.second;
     auto idxS = nneigh::neighbourListByIndex(cloud, mutual);
     auto idxU = nneigh::neighbourListByIndex(cloud, uni);
     auto sixS = sixOf(primitive::ringNetwork(idxS, 6));

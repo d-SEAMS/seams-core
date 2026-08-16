@@ -1,0 +1,55 @@
+#+TITLE: Classify a dump
+#+OPTIONS: toc:nil num:nil
+
+You have a LAMMPS water dump and want counts. Flags and the full
+surface live on [[file:../reference/cli.org][seams CLI]]. Measured
+numbers for the in-tree mixed frame live in
+[[file:../tutorials/bulk-ice.org][the mixed TIP4P tutorial]].
+
+* One frame
+
+#+begin_src bash
+seams read FILE
+seams chill-plus FILE --cutoff 3.5 --type 2
+seams cages FILE --type 2
+#+end_src
+
+~chill~ is the original CHILL rule. ~chill-plus~ is CHILL+.
+~chill_plus~ is a CLI alias of ~chill-plus~.
+
+* Type
+
+~--type 0~ (default) guesses type 2 then type 1. Mixed water dumps in
+this tree use type 2 oxygen. Single-site mW dumps use type 1.
+
+#+begin_src bash
+seams chill-plus FILE --type 2
+seams cages input/traj/mW_cubic.lammpstrj --type 1
+#+end_src
+
+* Frame range
+
+Frames are 1-based. ~--last~ is inclusive. ~--jobs~ walks the range
+via ~forEachLammpsFrame~ (~--jobs 1~ is serial).
+
+#+begin_src bash
+seams chill-plus FILE --frame 1 --last 10 --jobs 4
+#+end_src
+
+* Bond graph for cages
+
+#+begin_src bash
+seams cages FILE --graph seeded
+seams cages FILE --graph cutoff --cutoff 3.5
+seams cages FILE --graph knn -k 4
+seams cages FILE --graph knn-union -k 4
+#+end_src
+
+~seeded~ is the CLI default: mutual four-nearest seeds, union
+completions. On a perfect cubic crystal the four graphs coincide.
+
+* Features of this binary
+
+#+begin_src bash
+seams --features
+#+end_src

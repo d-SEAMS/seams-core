@@ -15,13 +15,18 @@
 #ifndef SEAMS_NEIGHBOURS_H_
 #define SEAMS_NEIGHBOURS_H_
 
+#include <algorithm>
 #include <array>
-#include <set>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <generic.hpp>
 #include <mol_sys.hpp>
+
+#ifdef SEAMS_HAS_LINKCELL
+#include <linkcell.hpp>
+#endif
 
 /** @file neighbours.hpp
  *  @brief Header file for neighbour list generation.
@@ -55,6 +60,49 @@
  */
 
 namespace nneigh {
+
+#ifdef SEAMS_HAS_LINKCELL
+/// Map a LAMMPS dump box onto lc_cell.
+///
+/// `box[0..3]` are bound spans (`xhi_bound - xlo_bound`, ...) as
+/// `seams_input` stores them. `boxLow` is the bound lo. Optional
+/// `box[3..6]` are the dump tilt factors `xy, xz, yz`.
+///
+/// The conversion is the LAMMPS dump convention:
+/// `xlo = xlo_bound - min(0, xy, xz, xy+xz)` and
+/// `lx = xhi_bound - xlo_bound - max(...) + min(...)`, then
+/// `a = (lx, 0, 0)`, `b = (xy, ly, 0)`, `c = (xz, yz, lz)`.
+inline lc_cell lammpsBoxToLcCell(const std::vector<double> &box,
+                                 const std::vector<double> &boxLow) {
+  const double xspan = box.size() > 0 ? box[0] : 0.0;
+  const double yspan = box.size() > 1 ? box[1] : 0.0;
+  const double zspan = box.size() > 2 ? box[2] : 0.0;
+  const double xlo_b = boxLow.size() > 0 ? boxLow[0] : 0.0;
+  const double ylo_b = boxLow.size() > 1 ? boxLow[1] : 0.0;
+  const double zlo_b = boxLow.size() > 2 ? boxLow[2] : 0.0;
+  const double xy = box.size() >= 6 ? box[3] : 0.0;
+  const double xz = box.size() >= 6 ? box[4] : 0.0;
+  const double yz = box.size() >= 6 ? box[5] : 0.0;
+  const double xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));
+  const double xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));
+  const double ymin = std::min(0.0, yz);
+  const double ymax = std::max(0.0, yz);
+  lc_cell c = lc_cell_ortho(xspan - xmax + xmin, yspan - ymax + ymin, zspan);
+  c.bx = xy;
+  c.cx = xz;
+  c.cy = yz;
+  c.ox = xlo_b - xmin;
+  c.oy = ylo_b - ymin;
+  c.oz = zlo_b;
+  return c;
+}
+
+inline linkcell::Cell lammpsBoxToLinkcell(const std::vector<double> &box,
+                                          const std::vector<double> &boxLow) {
+  return linkcell::Cell(lammpsBoxToLcCell(box, boxLow));
+}
+#endif
+
 //! All these functions use atom IDs and not indices
 
 //! Inefficient @f$O(n^2)@f$ implementation of neighbour lists when there are
@@ -97,17 +145,25 @@ std::vector<std::vector<int>> getNewNeighbourListByIndex(
  *  shell is mutual and the two coincide; on disordered packings the mutual
  *  graph is sparser, which starves accidental ring structure -- measured on
  *  the dense null, mutual scores zero false crystal where union reaches
- *  2.5%. Candidates come from the cell list at
- *  candidateCutoff, which must comfortably exceed the k-th neighbour
- *  distance. On an undistorted tetrahedral lattice with k = 4 this graph
- *  equals the first-shell cutoff graph; under thermal distortion it keeps
- *  the neighbour identities a hard cutoff loses, which is what the cage
- *  predicates need. Rows are by atom ID with the leading self entry, like
- *  neighListO.
+ *  2.5%. Nominations are a periodic linked-cell k-nearest search via
+ *  linkcell (Allen and Tildesley): vesin is cutoff-only and KD-trees
+ *  have no minimum-image convention. candidateCutoff is only a
+ *  cell-size hint.
+ *  On an undistorted tetrahedral lattice with k = 4 this graph equals
+ *  the first-shell cutoff graph. Rows are by atom ID with the leading
+ *  self entry, like neighListO.
  */
 std::vector<std::vector<int>> kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     double candidateCutoff, int typeI, bool mutual = true);
+
+/** Mutual and union k-nearest graphs from one candidate search. Seeded
+ *  affiliation needs both; building them separately repeats the cell list.
+ */
+std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
+kNearestNeighbourPair(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, int typeI);
 
 /** The shell-separation certificate for the exact reduction of the k-nearest
  *  graph to the cutoff graph: returns {max_i d_k(i), min_i d_{k+1}(i)} over
@@ -178,7 +234,7 @@ private:
   std::vector<double> z0_;
   std::array<double, 3> box0_{};
   std::vector<std::pair<int, int>> candidates_;
-  std::set<std::pair<int, int>> bonded_;
+  std::vector<std::pair<int, int>> bonded_;
   std::vector<std::vector<int>> nList_;
 
   bool mustRebuild(

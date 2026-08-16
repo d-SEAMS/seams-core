@@ -162,7 +162,8 @@ yodaStruct -c lua_inputs/config.yml
 ### Nix
 
 The flake builds `libyodaLib` and the `seams` CLI with meson. Optional
-backends that meson would otherwise wrap-git (vesin, readcon-core) or
+backends that meson would otherwise wrap-git (vesin, readcon-core,
+linkcell) or
 that nixpkgs does not ship (chemfiles) stay off unless a package is
 already in the closure.
 

@@ -8,16 +8,39 @@
 =========
 
 :Author: `d-SEAMS core team <https://dseams.info>`_
+
+.. grid:: 1 2 3 3
+   :gutter: 2
+   :padding: 1 1 0 0
+   :class-container: sd-text-center
+
+   .. grid-item-card:: Read
+      :link: quickstart
+      :link-type: doc
+      :class-card: sd-shadow-sm
+
+      Load a LAMMPS frame and print nop, frame, and box.
+
+   .. grid-item-card:: Classify
+      :link: tutorials/bulk-ice
+      :link-type: doc
+      :class-card: sd-shadow-sm
+
+      CHILL+ four-neighbour star: cubic, hexagonal, interfacial, water.
+
+   .. grid-item-card:: Score
+      :link: explanation/chill-plus-vs-cages
+      :link-type: doc
+      :class-card: sd-shadow-sm
+
+      Cage membership: HC is ice Ih, DDC is ice Ic, else water.
 #+end_export
 
 * Overview
 
 d-SEAMS (Deferred Structural Elucidation Analysis for Molecular
-Simulations) classifies ice in molecular-dynamics trajectories: CHILL
-and CHILL+, Franzblau / Yuan--Cormack primitive rings, and hexagonal /
-double-diamond cage membership.
-
-This repository is the C++ engine (~libyodaLib~) and the ~seams~ CLI.
+Simulations) classifies ice in molecular-dynamics trajectories. This
+repository is the C++ engine (~libyodaLib~) and the ~seams~ CLI.
 
 #+begin_src bash
 seams read water.lammpstrj
@@ -27,67 +50,109 @@ seams cages water.lammpstrj
 
 Scripting front ends are separate packages:
 
-- Python: ~pydseams~ ([[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]), compiled module ~yoda~
-- Lua/Fennel: ~dseams~ ([[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]), ~require("dseams")~
+- Python: ~pydseams~ ([[https://d-seams.github.io/PydSEAMSlib/][docs]],
+  [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]), compiled
+  module ~yoda~
+- Lua/Fennel: ~dseams~ ([[https://d-seams.github.io/yodaStruct/][docs]],
+  [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]),
+  ~require("dseams")~
+
+The header *Ecosystem* menu on every page jumps between the three
+Shibuya sites.
 
 Build with a Nix flake (~nix build~, ~nix develop~) or with
 ~pixi run setup && pixi run build && pixi run test~.
 
-* Getting Started
-#+begin_export rst
-  .. toctree::
-     :maxdepth: 1
-     :caption: Getting Started
+* Suite stack
 
-     quickstart
+#+begin_export rst
+.. mermaid::
+
+   flowchart TB
+     subgraph engine["seams-core"]
+       LIB[libyodaLib]
+       CLI[seams CLI]
+     end
+     subgraph fronts["Front ends"]
+       PY[pydseams Frame]
+       LUA["require(\"dseams\")"]
+     end
+     DUMP[LAMMPS / XYZ / chemfiles / con] --> LIB
+     LIB --> CLI
+     LIB --> PY
+     LIB --> LUA
+     CLI --> OUT[stdout counts]
+     PY --> ASE[ASE / solvis extras]
 #+end_export
 
-* Tutorials
-#+begin_export rst
-  .. toctree::
-     :maxdepth: 1
-     :caption: Tutorials
+* Documentation structure
 
-     tutorials/bulk-ice
-     tutorials/nanotube
+This documentation follows the [[https://diataxis.fr/][Diataxis]]
+framework.
+
+#+begin_export rst
+.. toctree::
+   :maxdepth: 1
+   :caption: Getting Started
+
+   quickstart
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Tutorials
+
+   tutorials/index
+   tutorials/bulk-ice
+
+.. toctree::
+   :maxdepth: 1
+   :caption: How-to
+
+   howto/index
+   howto/install
+   howto/classify-cli
+   howto/ase-integration
+   howto/solvis
+   howto/confined-ice
+   howto/faq
+   howto/troubleshooting
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Explanation
+
+   explanation/index
+   explanation/architecture
+   explanation/chill-plus-vs-cages
+   explanation/citation
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Reference
+
+   reference/index
+   reference/cli
+   reference/data-formats
+   reference/nix
+   reference/api
+   reference/glossary
+   changelog
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Development
+
+   contributing/index
 #+end_export
 
-* How-To Guides
-#+begin_export rst
-  .. toctree::
-     :maxdepth: 1
-     :caption: How-To Guides
+* Related projects
 
-     howto/ase-integration
-#+end_export
+- [[https://d-seams.github.io/PydSEAMSlib/][pydseams]] :: Python Frame API on ~yoda~
+- [[https://d-seams.github.io/yodaStruct/][dseams (Lua)]] :: ~require("dseams")~ and Fennel
+- [[https://dseams.info][dseams.info]] :: project site
 
-* Explanation
-#+begin_export rst
-  .. toctree::
-     :maxdepth: 1
-     :caption: Explanation
+* License
 
-     explanation/architecture
-#+end_export
-
-* Reference
-#+begin_export rst
-  .. toctree::
-     :maxdepth: 2
-     :caption: Reference
-
-     reference/cli
-     reference/nix
-     reference/api
-     reference/data-formats
-#+end_export
-
-* Development
-#+begin_export rst
-  .. toctree::
-     :maxdepth: 2
-     :caption: Development
-
-     contributing/index
-     changelog
-#+end_export
+MIT. Cite the 2020 JCIM paper (DOI
+[[https://doi.org/10.1021/acs.jcim.0c00031][10.1021/acs.jcim.0c00031]]).
+See [[file:explanation/citation.org][Citation]].

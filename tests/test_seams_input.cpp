@@ -183,6 +183,23 @@ std::string writeUnwrappedDump() {
   f << "7 2 11.5 12.25 -3.0\n";
   return path.string();
 }
+
+std::string writeEmptyMiddleDump() {
+  auto path =
+      fs::temp_directory_path() / "dseams_test_lammps_empty_frame.lammpstrj";
+  std::ofstream f(path);
+  const int counts[3] = {2, 0, 2};
+  for (int frame = 0; frame < 3; ++frame) {
+    f << "ITEM: TIMESTEP\n" << frame << "\n";
+    f << "ITEM: NUMBER OF ATOMS\n" << counts[frame] << "\n";
+    f << "ITEM: BOX BOUNDS pp pp pp\n0 10\n0 10\n0 10\n";
+    f << "ITEM: ATOMS id type x y z\n";
+    for (int i = 0; i < counts[frame]; ++i) {
+      f << (i + 1) << " 1 " << (i + 0.25) << " 0 0\n";
+    }
+  }
+  return path.string();
+}
 } // namespace
 
 TEST_CASE("nLammpsFrames counts ITEM: TIMESTEP markers", "[seams_input]") {
@@ -268,6 +285,42 @@ TEST_CASE("forEachLammpsFrame matches sequential reads", "[seams_input]") {
   sinp::dropLammpsDumpIndex(tiny);
 }
 
+TEST_CASE("empty NUMBER OF ATOMS frames are valid snapshots",
+          "[seams_input]") {
+  const auto dump = writeEmptyMiddleDump();
+  sinp::dropLammpsDumpIndex(dump);
+  REQUIRE(sinp::nLammpsFrames(dump) == 3);
+
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  auto first = sinp::readLammpsTrjO(dump, 1, yCloud, 1);
+  REQUIRE(first.nop == 2);
+  REQUIRE(first.box.size() >= 3);
+
+  auto empty = sinp::readLammpsTrjO(dump, 2, yCloud, 1);
+  REQUIRE(empty.nop == 0);
+  REQUIRE(empty.pts.empty());
+  REQUIRE(empty.currentFrame == 2);
+  REQUIRE(empty.box.size() >= 3);
+
+  auto last = sinp::readLammpsTrjO(dump, 3, yCloud, 1);
+  REQUIRE(last.nop == 2);
+  REQUIRE(last.currentFrame == 3);
+
+  std::vector<int> nops(3, -1);
+  sinp::forEachLammpsFrame(
+      dump, 1, 3, 1,
+      [&](int frame, molSys::PointCloud<molSys::Point<double>, double> &cloud) {
+        nops[static_cast<std::size_t>(frame - 1)] = cloud.nop;
+      },
+      1);
+  REQUIRE(nops[0] == 2);
+  REQUIRE(nops[1] == 0);
+  REQUIRE(nops[2] == 2);
+
+  fs::remove(dump);
+  sinp::dropLammpsDumpIndex(dump);
+}
+
 TEST_CASE("readLammpsTrj binds xu yu zu when x y z are absent",
           "[seams_input]") {
   const auto path = writeUnwrappedDump();
@@ -282,6 +335,31 @@ TEST_CASE("readLammpsTrj binds xu yu zu when x y z are absent",
   REQUIRE_THAT(cloud.pts[0].z, Catch::Matchers::WithinAbs(-3.0, 1e-10));
   fs::remove(path);
   sinp::dropLammpsDumpIndex(path);
+}
+
+TEST_CASE("readLammpsTrjO parses scientific-notation dump coordinates",
+          "[seams_input]") {
+  auto path = fs::temp_directory_path() / "dseams_test_lammps_sci.lammpstrj";
+  {
+    std::ofstream f(path);
+    f << "ITEM: TIMESTEP\n0\nITEM: NUMBER OF ATOMS\n2\n";
+    f << "ITEM: BOX BOUNDS pp pp pp\n0 1.0e1\n0 1e1\n0 10\n";
+    f << "ITEM: ATOMS id type x y z\n";
+    f << "1 1 1.25e0 2.5E-1 -3.0e0\n";
+    f << "2 1 4.2e1 0 1.5e-1\n";
+  }
+  sinp::dropLammpsDumpIndex(path.string());
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  auto cloud = sinp::readLammpsTrjO(path.string(), 1, yCloud, 1);
+  REQUIRE(cloud.nop == 2);
+  REQUIRE_THAT(cloud.box[0], Catch::Matchers::WithinAbs(10.0, 1e-10));
+  REQUIRE_THAT(cloud.pts[0].x, Catch::Matchers::WithinAbs(1.25, 1e-10));
+  REQUIRE_THAT(cloud.pts[0].y, Catch::Matchers::WithinAbs(0.25, 1e-10));
+  REQUIRE_THAT(cloud.pts[0].z, Catch::Matchers::WithinAbs(-3.0, 1e-10));
+  REQUIRE_THAT(cloud.pts[1].x, Catch::Matchers::WithinAbs(42.0, 1e-10));
+  REQUIRE_THAT(cloud.pts[1].z, Catch::Matchers::WithinAbs(0.15, 1e-10));
+  fs::remove(path);
+  sinp::dropLammpsDumpIndex(path.string());
 }
 
 // -- readBonds tests --

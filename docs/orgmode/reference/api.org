@@ -1,276 +1,195 @@
 #+TITLE: API Reference
 #+OPTIONS: toc:nil num:nil
 
-This page documents all types and functions exposed by ~pydseams.yoda~.
-
-* Data types
-
-** PointDouble
-
-Represents a single atom in the system.
-
-| Field     | Type            | Description                                   |
-|-----------+-----------------+-----------------------------------------------|
-| ~x~       | float           | X coordinate (Angstroms)                      |
-| ~y~       | float           | Y coordinate (Angstroms)                      |
-| ~z~       | float           | Z coordinate (Angstroms)                      |
-| ~c_type~  | int             | LAMMPS atom type                              |
-| ~molID~   | int             | Molecule ID                                   |
-| ~atomID~  | int             | Atom ID                                       |
-| ~iceType~ | AtomStateType   | Ice classification (set by CHILL+)            |
-| ~c_ij~    | list[Result]    | Bond-order correlations (set by getCorrelPlus) |
-| ~inSlice~ | bool            | Whether atom is in the selected slice          |
-
-** PointCloudDouble
-
-Container for a set of atoms and simulation box metadata.
-
-| Field          | Type                   | Description                    |
-|----------------+------------------------+--------------------------------|
-| ~pts~          | list[PointDouble]      | All atoms in the frame         |
-| ~nop~          | int                    | Number of particles            |
-| ~currentFrame~ | int                    | Frame index                    |
-| ~box~          | list[float]            | Box dimensions [Lx, Ly, Lz]   |
-| ~boxLow~       | list[float]            | Box lower bounds [xlo, ylo, zlo] |
-| ~idIndexMap~   | dict[int, int]         | Atom ID to index mapping       |
-
-** Result
-
-A single bond-order correlation measurement.
-
-| Field        | Type      | Description                          |
-|--------------+-----------+--------------------------------------|
-| ~classifier~ | BondType  | Bond classification (staggered, eclipsed, out_of_range) |
-| ~c_value~    | float     | Correlation value in [-1, 1]         |
-
-** Enumerations
-
-*** BondType
-
-- ~staggered~ -- eclipsed bond orientation
-- ~eclipsed~ -- staggered bond orientation
-- ~out_of_range~ -- correlation outside classification thresholds
-
-*** AtomStateType
-
-- ~cubic~ -- cubic ice (Ic)
-- ~hexagonal~ -- hexagonal ice (Ih)
-- ~water~ -- liquid water
-- ~interfacial~ -- interfacial ice
-- ~clathrate~ -- clathrate hydrate
-- ~interClathrate~ -- inter-clathrate
-- ~unclassified~ -- not yet classified
-- ~reCubic~ -- reclassified cubic
-- ~reHex~ -- reclassified hexagonal
-
-* I/O functions
-
-** readLammpsTrjreduced
-
-#+begin_src python
-cloud = yoda.readLammpsTrjreduced(
-    filename, targetFrame, typeI, isSlice, coordLow, coordHigh
-)
-#+end_src
-
-Read a LAMMPS trajectory, selecting atoms of a single type. Returns a
-~PointCloudDouble~.
-
-| Argument      | Type        | Description                           |
-|---------------+-------------+---------------------------------------|
-| ~filename~    | str         | Path to LAMMPS dump file              |
-| ~targetFrame~ | int         | Frame number to read (1-indexed)      |
-| ~typeI~       | int         | LAMMPS atom type to select            |
-| ~isSlice~     | bool        | Enable coordinate slice selection     |
-| ~coordLow~    | list[float] | Lower slice bounds [x, y, z]          |
-| ~coordHigh~   | list[float] | Upper slice bounds [x, y, z]          |
-
-** readLammpsTrjO
-
-Same as ~readLammpsTrjreduced~ but with argument named ~typeO~ instead of ~typeI~.
-
-** readLammpsTrj
-
-Read all atoms from a LAMMPS trajectory (no type filtering).
-
-** readXYZ
-
-#+begin_src python
-cloud = yoda.readXYZ(filename)
-#+end_src
-
-Read an XYZ format file. Returns a ~PointCloudDouble~.
-
-** readChemfiles (optional, requires chemfiles)
-
-#+begin_src python
-cloud = yoda.readChemfiles(filename, targetFrame, typeFilter=-1)
-#+end_src
-
-Read any trajectory format supported by chemfiles (PDB, GRO, DCD, TRR, and
-40+ others). Available when d-SEAMS is built with chemfiles.
-
-| Argument      | Type | Description                                    |
-|---------------+------+------------------------------------------------|
-| ~filename~    | str  | Path to trajectory file (any chemfiles format) |
-| ~targetFrame~ | int  | Frame number to read (1-indexed)               |
-| ~typeFilter~  | int  | Atomic number to filter (-1 = all atoms)       |
-
-** readCon (optional, requires readcon-core)
-
-#+begin_src python
-cloud = yoda.readCon(filename, targetFrame)
-#+end_src
-
-Read a =.con= format file used by eOn for saddle point searches. Available when
-d-SEAMS is built with readcon-core.
-
-* Neighbour list functions
-
-** neighListO
-
-#+begin_src python
-nList = yoda.neighListO(rcutoff, yCloud, typeI)
-#+end_src
-
-Build a neighbour list for atoms of a given type within a cutoff distance.
-Uses O(n) cell-list algorithm (vesin) when available, with automatic fallback
-to O(n^2) brute-force.
-
-| Argument   | Type             | Description                     |
-|------------+------------------+---------------------------------|
-| ~rcutoff~  | float            | Cutoff distance (Angstroms)     |
-| ~yCloud~   | PointCloudDouble | Input point cloud               |
-| ~typeI~    | int              | Atom type to consider           |
-
-Returns a list of lists. Each inner list starts with the atom's own ID followed
-by the IDs of its neighbours.
-
-** neighbourListByIndex
-
-#+begin_src python
-nListIdx = yoda.neighbourListByIndex(yCloud, nList)
-#+end_src
-
-Convert an ID-based neighbour list to an index-based neighbour list.
-
-** getNewNeighbourListByIndex
-
-#+begin_src python
-nListIdx = yoda.getNewNeighbourListByIndex(yCloud, cutoff)
-#+end_src
-
-Build a neighbour list directly by index (combining neighbour search and index
-conversion in one step).
-
-* Bond functions
-
-** populateHbonds
-
-#+begin_src python
-hbonds = yoda.populateHbonds(filename, yCloud, nList, targetFrame, Htype)
-#+end_src
-
-Build a hydrogen bond network by reading hydrogen positions from the trajectory
-and applying geometric criteria.
-
-| Argument      | Type             | Description                     |
-|---------------+------------------+---------------------------------|
-| ~filename~    | str              | Path to LAMMPS dump file        |
-| ~yCloud~      | PointCloudDouble | Oxygen point cloud              |
-| ~nList~       | list[list[int]]  | Oxygen neighbour list           |
-| ~targetFrame~ | int              | Frame number (1-indexed)        |
-| ~Htype~       | int              | Hydrogen atom type              |
-
-Returns a list of lists with the same structure as the neighbour list, but
-containing only hydrogen-bonded pairs.
-
-* CHILL+ functions
-
-** getCorrelPlus
-
-#+begin_src python
-cloud = yoda.getCorrelPlus(yCloud, nList, isSlice)
-#+end_src
-
-Compute CHILL+ bond-order correlations. Populates the ~c_ij~ field on each atom
-in the returned cloud.
-
-** getIceTypePlus
-
-#+begin_src python
-cloud = yoda.getIceTypePlus(yCloud, nList, path, firstFrame, isSlice, outputFileName)
-#+end_src
-
-Run full CHILL+ classification and write results to a file. Sets the ~iceType~
-field on each atom.
-
-** getq6
-
-#+begin_src python
-q6 = yoda.getq6(yCloud, nList, isSlice)
-#+end_src
-
-Compute the q6 bond order parameter for each atom.
-
-** reclassifyWater
-
-#+begin_src python
-cloud = yoda.reclassifyWater(yCloud, q6)
-#+end_src
-
-Reclassify water molecules using q6 values.
-
-* Ring analysis functions
-
-** ringNetwork
-
-#+begin_src python
-rings = yoda.ringNetwork(nList, maxDepth)
-#+end_src
-
-Find primitive rings in the network using the Franzblau algorithm.
-
-| Argument   | Type            | Description                      |
-|------------+-----------------+----------------------------------|
-| ~nList~    | list[list[int]] | Index-based neighbour list       |
-| ~maxDepth~ | int             | Maximum ring size to search for  |
-
-Returns a list of rings, where each ring is a list of atom indices.
-
-** polygonRingAnalysis
-
-Classify rings by polygon type for 2D systems (sheets).
-
-** bulkPolygonRingAnalysis
-
-Classify rings by polygon type for bulk (3D) systems.
-
-** prismAnalysis
-
-Find and classify prismatic cages in the ring network.
-
-* Topological unit matching (TUM)
-
-** topoBulkCriteria
-
-#+begin_src python
-yoda.topoBulkCriteria(path, rings, nList, yCloud, firstFrame, numHC, numDDC, ringType)
-#+end_src
-
-Apply topological criteria to identify hexagonal cages (HC) and double-diamond
-cages (DDC) in bulk ice.
-
-** topoUnitMatchingBulk
-
-Run full TUM analysis for bulk systems, including optional cluster analysis.
-
-* Output functions
-
-** writeDump
-
-#+begin_src python
-yoda.writeDump(yCloud, path, outFile)
-#+end_src
-
-Write the point cloud to a LAMMPS dump file.
+Lookup for the C++ identifiers in =src/include/internal=. Generated
+pages under =api/= are the Doxygen comments from those headers,
+converted by doxyrest. This is not a dump of ~pydseamslib._core~ and
+it is not a tutorial.
+
+* Fronts
+
+Four fronts, one engine (~libyodaLib~). Flags live on
+[[file:cli.org][seams CLI]]. Formats live on
+[[file:data-formats.org][data formats]].
+
+| Front | Package | First call |
+|-------+---------+------------|
+| CLI | this repo (~seams~) | ~seams read FILE~, ~seams chill-plus FILE~, ~seams cages FILE~ |
+| Python Frame | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseams.Frame~ from ~pydseams.read(...)~ |
+| Lua | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | ~require("dseams")~ |
+| Compiled Python | PydSEAMSlib | ~pydseams.yoda~ (~_core~ and ~cyoda~ are aliases) |
+
+~pydseams.yoda~ registers the C++ spellings below
+(~getCorrelPlus~, ~ringNetwork~, ~topoBulkCriteria~, ...).
+
+* Doxyrest wiring
+
+~pixi run -e docs doxybuild~ runs from =docs/source=:
+
+1. ~doxygen Doxyfile_seams.cfg~ -- ~INPUT~ is
+   =../../src/include/internal= (~EXTRACT_ALL=YES~, private members
+   off). =src/include/external= and =tests/= are excluded.
+2. ~doxyrest -c doxyrest-config.lua~ -- reads =xml/index.xml=, writes
+   =api/index.rst~ with title ~C++ headers (doxyrest)~.
+
+#+begin_export rst
+.. toctree::
+   :maxdepth: 1
+   :caption: C++ (doxyrest)
+
+   ../api/index
+#+end_export
+
+* Headers
+
+Every file under =src/include/internal=.
+
+| Header | Namespace | Role |
+|--------+-----------+------|
+| =mol_sys.hpp= | ~molSys~ | ~Point~, ~PointCloud~, bond and ice enums |
+| =seams_input.hpp= | ~sinp~ | LAMMPS / XYZ / chemfiles / readcon readers |
+| =seams_output.hpp= | ~sout~ | dump, cage, ring, and cluster writers |
+| =neighbours.hpp= | ~nneigh~ | cutoff, k-nearest, skin neighbour lists |
+| =bop.hpp= | ~chill~, ~sph~ | CHILL, CHILL+, ~q6~, Steinhardt ~ql~ |
+| =franzblau.hpp= | ~primitive~ | Franzblau primitive rings |
+| =ring.hpp= | ~ring~ | ring helpers and ~strucType~ |
+| =topo_bulk.hpp= | ~ring~, ~prism3~ | HC / DDC search, bulk polygons |
+| =topo_one_dim.hpp= | ~ring~ | ice-nanotube prisms |
+| =topo_two_dim.hpp= | ~ring~ | monolayer polygons |
+| =cage.hpp= | ~cage~ | ~Cage~, ~cageType~, ~iceType~ |
+| =cage_affiliation.hpp= | ~ring~ | claim-free HC / DDC flags |
+| =cage_canon.hpp= | ~cage~ | nauty canonical certificates |
+| =bulkTUM.hpp= | ~tum3~ | topological unit matching |
+| =bond.hpp= | ~bond~ | geometric hydrogen bonds |
+| =absOrientation.hpp= | ~absor~ | Horn absolute orientation |
+| =pntCorrespondence.hpp= | ~pntToPnt~ | reference / target point sets |
+| =shapeMatch.hpp= | ~match~ | prism shape-matching |
+| =cluster.hpp= | ~clump~ | Stillinger ice clusters |
+| =order_parameter.hpp= | ~topoparam~ | height% and coverage area |
+| =rdf2d.hpp= | ~rdf2~ | in-plane radial distribution |
+| =selection.hpp= | ~gen~, ~ring~ | type and slice selections |
+| =generic.hpp= | ~gen~ | periodic distance, angles, medians |
+| =structure_desc.hpp= | ~chill~ | SOAP, template overlay, linear classifier |
+| =voronoi_qlm.hpp= | ~chill~ | Voronoi-weighted Steinhardt |
+| =ira_sofi.hpp= | ~ira~ | IRA match and SOFI point groups |
+| =sphericart_ylm.hpp= | ~seams::sphericart_ylm~ | batched Cartesian ~Y_lm~ |
+| =steinhardt_device.hpp= | ~seams::steinhardt~ | host / MPI / offload Steinhardt kernel |
+| =simd_distance.hpp= | ~seams~ | Highway periodic distance |
+
+* C++ functions a caller uses
+
+Names below are the C++ identifiers. ~pydseams.yoda~ registers the
+same spellings.
+
+** I/O (~sinp~, ~sout~)
+
+| Function | Header | Role |
+|----------+--------+------|
+| ~sinp::readLammpsTrj~ | =seams_input.hpp= | every atom in one LAMMPS frame (1-based) |
+| ~sinp::readLammpsTrjO~ | =seams_input.hpp= | one LAMMPS type (oxygen) |
+| ~sinp::readLammpsTrjreduced~ | =seams_input.hpp= | one type, optional coordinate slice |
+| ~sinp::readXYZ~ | =seams_input.hpp= | XYZ coordinates |
+| ~sinp::nLammpsFrames~ | =seams_input.hpp= | ~ITEM: TIMESTEP~ count |
+| ~sinp::forEachLammpsFrame~ | =seams_input.hpp= | walk ~[first, last]~, optional OpenMP |
+| ~sinp::dropLammpsDumpIndex~ | =seams_input.hpp= | drop a cached dump session |
+| ~sinp::readChemfiles~ | =seams_input.hpp= | PDB / GRO / DCD / ... when chemfiles is on |
+| ~sinp::readCon~ | =seams_input.hpp= | eOn =.con= when readcon-core is on |
+| ~sinp::readBonds~ | =seams_input.hpp= | ring / bond ID file |
+| ~sinp::atomInSlice~ | =seams_input.hpp= | closed-interval slice test (~lo == hi~ ignores that axis) |
+| ~sout::writeDump~ | =seams_output.hpp= | LAMMPS dump of a ~PointCloud~ |
+| ~sout::writeAllCages~ | =seams_output.hpp= | every HC and DDC into =cages/= |
+| ~sout::writeLAMMPSdataTopoBulk~ | =seams_output.hpp= | bulk HC / DDC data file |
+
+** Neighbours (~nneigh~)
+
+Rows are central atom then neighbours. ID-keyed lists carry a
+leading self entry. Index-keyed lists come from
+~neighbourListByIndex~.
+
+| Function | Header | Role |
+|----------+--------+------|
+| ~nneigh::neighListO~ | =neighbours.hpp= | cutoff list, one type |
+| ~nneigh::neighList~ | =neighbours.hpp= | cutoff list, two types |
+| ~nneigh::halfNeighList~ | =neighbours.hpp= | half cutoff list |
+| ~nneigh::neighbourListByIndex~ | =neighbours.hpp= | convert IDs to cloud indices |
+| ~nneigh::kNearestNeighbourList~ | =neighbours.hpp= | mutual or union k-nearest |
+| ~nneigh::bondGraphFromName~ | =neighbours.hpp= | ~cutoff~ / ~knn~ / ~knn-union~ |
+| ~nneigh::SkinNeighborList~ | =neighbours.hpp= | LAMMPS-skin persistent list |
+| ~nneigh::shellSeparation~ | =neighbours.hpp= | ~{max d_k, min d_{k+1}}~ certificate |
+
+** CHILL (~chill~)
+
+| Function | Header | Role |
+|----------+--------+------|
+| ~chill::chillRule~ / ~chill::chillPlusRule~ | =bop.hpp= | published water thresholds |
+| ~chill::bondClassifier~ | =bop.hpp= | look up a named rule set |
+| ~chill::registerBondClassifier~ | =bop.hpp= | add or replace a named rule |
+| ~chill::classifyBonds~ | =bop.hpp= | fill ~Point::c_ij~ under a rule |
+| ~chill::getCorrel~ / ~chill::getIceType~ | =bop.hpp= | CHILL bonds and ice labels |
+| ~chill::getIceTypeNoPrint~ | =bop.hpp= | CHILL labels, no file |
+| ~chill::getCorrelPlus~ / ~chill::getIceTypePlus~ | =bop.hpp= | CHILL+ bonds and ice labels |
+| ~chill::getIceTypePlusNoPrint~ | =bop.hpp= | CHILL+ labels, no file |
+| ~chill::getq6~ | =bop.hpp= | per-atom ~q6~ |
+| ~chill::reclassifyWater~ | =bop.hpp= | ~q6~ reclassification of liquid |
+| ~chill::steinhardtQl~ | =bop.hpp= | local and Lechner-Dellago ~ql~ / ~qlBar~ |
+| ~chill::steinhardtQlVoronoi~ | =voronoi_qlm.hpp= | facet-area weighted ~ql~ |
+| ~chill::voronoiFacetWeights~ | =voronoi_qlm.hpp= | Voronoi neighbours and area weights |
+| ~chill::classifyTemplates~ | =structure_desc.hpp= | FCC / HCP / BCC / SC overlay |
+| ~chill::soapSpectrum~ / ~chill::soapSpectrumAll~ | =structure_desc.hpp= | Bartok SOAP |
+| ~chill::voronoiFeature~ / ~chill::voronoiFeatures~ | =structure_desc.hpp= | ~[q4, q6, q8]~ |
+
+Ice labels are ~molSys::atom_state_type~: ~cubic~, ~hexagonal~,
+~water~, ~interfacial~, ~clathrate~, ~interClathrate~,
+~unclassified~, ~reCubic~, ~reHex~. Bond labels are
+~molSys::bond_type~: ~staggered~, ~eclipsed~, ~out_of_range~.
+
+** Rings (~primitive~, ~ring~)
+
+Neighbour lists first (~nneigh::neighListO~, then
+~nneigh::neighbourListByIndex~).
+
+| Function | Header | Role |
+|----------+--------+------|
+| ~primitive::ringNetwork~ | =franzblau.hpp= | Franzblau primitive rings, by index |
+| ~primitive::RingUpdater~ | =franzblau.hpp= | same rings, incremental across frames |
+| ~ring::getSingleRingSize~ | =ring.hpp= | keep rings of one size |
+| ~ring::polygonRingAnalysis~ | =topo_two_dim.hpp= | monolayer polygon types |
+| ~ring::bulkPolygonRingAnalysis~ | =topo_bulk.hpp= | bulk polygon types |
+| ~ring::prismAnalysis~ | =topo_one_dim.hpp= | ice-nanotube prism blocks |
+| ~ring::findPrisms~ | =topo_one_dim.hpp= | prism ring IDs |
+
+** Cages (~cage~, ~ring~, ~tum3~)
+
+| Function | Header | Role |
+|----------+--------+------|
+| ~ring::findHC~ / ~ring::findDDC~ | =topo_bulk.hpp= | hexagonal and double-diamond cages |
+| ~ring::topoBulkAnalysis~ | =topo_bulk.hpp= | HC / DDC classification of the frame |
+| ~ring::cageAffiliation~ | =cage_affiliation.hpp= | claim-free per-ring HC / DDC flags |
+| ~ring::AffiliationUpdater~ | =cage_affiliation.hpp= | same flags, incremental |
+| ~ring::seededCageAffiliation~ | =cage_affiliation.hpp= | mutual-k seeds, union completions |
+| ~tum3::topoBulkCriteria~ | =bulkTUM.hpp= | cages plus ~ring::strucType~ |
+| ~tum3::topoUnitMatchingBulk~ | =bulkTUM.hpp= | TUM with optional cluster XYZ |
+| ~cage::canonicalCertificate~ | =cage_canon.hpp= | nauty adjacency certificate |
+| ~cage::isHexagonalPrism~ | =cage_canon.hpp= | ring graph isomorphic to HC |
+
+A ~cage::Cage~ holds a ~cage::cageType~ (~HexC~ or ~DoubleDiaC~) and
+the ring indices that make it. Per-atom cage labels are
+~cage::iceType~ (~dummy~, ~hc~, ~ddc~, ~mixed~, ~pnc~, ~mixed2~).
+The CLI default ~--graph seeded~ is ~seededCageAffiliation~.
+
+~ring::strucType~: ~unclassified~, ~DDC~, ~HCbasal~, ~HCprismatic~,
+~bothBasal~, ~bothPrismatic~, ~Prism~, ~deformedPrism~,
+~mixedPrismRing~.
+
+** Bonds, orientation, optional backends
+
+| Function | Header | Role |
+|----------+--------+------|
+| ~bond::populateHbonds~ | =bond.hpp= | geometric H-bonds (2.42 A, 30 deg) |
+| ~bond::populateHbondsWithInputClouds~ | =bond.hpp= | same, with a hydrogen ~PointCloud~ |
+| ~absor::hornAbsOrientation~ | =absOrientation.hpp= | Horn quaternion overlay |
+| ~ira::available~ / ~ira::match~ / ~ira::pointGroup~ | =ira_sofi.hpp= | IRA overlay, SOFI point group |
+| ~ira::orient~ | =ira_sofi.hpp= | Horn-shaped quat + RMSD from IRA |
+| ~seams::sphericart_ylm::ylmCartesian~ | =sphericart_ylm.hpp= | batched Cartesian ~Y_lm~ |
+| ~clump::clusterAnalysis~ | =cluster.hpp= | largest ice cluster |
+| ~rdf2::rdf2Danalysis_AA~ | =rdf2d.hpp= | in-plane RDF |

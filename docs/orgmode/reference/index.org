@@ -1,0 +1,23 @@
+#+TITLE: Reference
+#+OPTIONS: toc:nil num:nil
+
+Lookup pages for the engine. Tutorials and how-tos live elsewhere.
+
+| page | what it names |
+|------+---------------|
+| [[file:cli.org][seams CLI]] | ~seams~ subcommands, flags, colors |
+| [[file:data-formats.org][data formats]] | LAMMPS dump, XYZ, chemfiles, ~.con~ |
+| [[file:api.org][API]] | C++ identifiers and the doxyrest tree |
+| [[file:nix.org][Nix flake]] | ~nix build~, ~nix develop~, flake outputs |
+| [[file:glossary.org][glossary]] | Engine terms |
+
+#+begin_export rst
+.. toctree::
+   :maxdepth: 1
+
+   cli
+   data-formats
+   api
+   nix
+   glossary
+#+end_export

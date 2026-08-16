@@ -1,9 +1,9 @@
 #+TITLE: seams CLI
 #+OPTIONS: toc:nil num:nil
 
-The engine command is ~seams~. It uses Argum (the same parser as
-eonclient). Help, errors and ice-type counts are colorized.
-~NO_COLOR~ / ~FORCE_COLOR~ apply.
+The engine command is ~seams~. The parser is Argum (the same parser as
+eonclient). Help, errors, ice-type counts, and ~--features~ are
+colorized through Argum's ~environmentColorStatus~.
 
 #+begin_src text
 seams --help
@@ -15,17 +15,170 @@ seams chill-plus FILE
 seams cages FILE
 #+end_src
 
+A positional ~command~ and a positional ~file~ are required. Missing
+either, an unknown command, or a parse error exits 2.
+
+* Commands
+
+The ~command~ positional help string is ~read | chill | chill-plus |
+cages~. ~chill_plus~ is an accepted alias of ~chill-plus~ (not listed
+in that help string).
+
+| command | action | stdout |
+|---------+--------+--------|
+| ~read~ | print the loaded cloud | ~nop N frame F box Lx Ly Lz~ |
+| ~chill~ | CHILL four-neighbour labels | ~nop N~ then ~name count~ for each ice type present |
+| ~chill-plus~ | CHILL+ four-neighbour labels | same as ~chill~ |
+| ~cages~ | ice score on six-membered rings | ~nop N graph KIND hexagonal IH cubic IC water W~ |
+
+~chill~ / ~chill-plus~ call ~nneigh::neighListO~, then
+~chill::getCorrel~ / ~chill::getIceTypeNoPrint~ or
+~chill::getCorrelPlus~ / ~chill::getIceTypePlusNoPrint~. Ice names
+are the ~molSys::atom_state_type~ enumerators: ~cubic~, ~hexagonal~,
+~water~, ~interfacial~, ~clathrate~, ~interClathrate~, ~reCubic~,
+~reHex~, ~unclassified~.
+
+~cages~ reports cage membership, not CHILL labels: hexagonal = HC
+(Ih), cubic = DDC (Ic), water = neither. The bond graph is
+~--graph~.
+
+An empty cloud (~nop 0~) still prints. ~chill~ / ~chill-plus~ print
+~nop 0~. ~cages~ prints ~nop 0 graph KIND hexagonal 0 cubic 0
+water 0~.
+
 * Options
 
-| flag | meaning |
-|------+---------|
-| ~-f~, ~--frame N~ | first frame, 1-based |
-| ~--last N~ | last frame inclusive; omit for one frame |
-| ~-j~, ~--jobs N~ | OpenMP workers over a frame range |
-| ~-t~, ~--type I~ | atom type; ~0~ guesses oxygen then type 1 |
-| ~-c~, ~--cutoff A~ | neighbour cutoff (Å) |
-| ~-k N~ | ~k~ for knn / seeded cages |
-| ~--graph KIND~ | ~cutoff~ / ~knn~ / ~knn-union~ / ~seeded~ |
+Names and help text are the Argum ~Option~ / ~Positional~
+definitions in =src/seams_cli.cpp=. Defaults are the C++
+initializers (Argum does not write defaults into the help).
+
+| flag | default | Argum help |
+|------+---------+------------|
+| ~-h~, ~--help~ | | ~show this help message and exit~ |
+| ~-v~, ~--version~ | | ~Print version information~ |
+| ~--features~ | | ~Print compile-time backends~ |
+| ~-f~, ~--frame N~ | ~1~ | ~First frame (1-based)~ |
+| ~--last N~ | omitted (~0~) | ~Last frame (inclusive). Omit for a single --frame~ |
+| ~-j~, ~--jobs N~ | ~1~ | ~Parallel frame workers (OpenMP). 1 is serial~ |
+| ~-t~, ~--type I~ | ~0~ | ~Atom type (0 guesses oxygen then type 1)~ |
+| ~-c~, ~--cutoff ANGSTROM~ | ~3.5~ | ~Neighbour cutoff~ |
+| ~-k N~ | ~4~ | ~k for knn / seeded cages~ |
+| ~--graph KIND~ | ~seeded~ | ~Bond graph for cages: cutoff \| knn \| knn-union \| seeded~ |
+
+~--help~, ~--version~, and ~--features~ print and exit 0 before any
+file is opened.
+
+~--cutoff~ is in Angstrom. ~-k~ also applies to ~knn-union~ (the
+same ~k~ feeds ~nneigh::kNearestNeighbourList~). ~--graph~ is used
+only by ~cages~.
+
+* ~--type~
+
+| value | single frame (~load~) | ~--last~ range (~forEachLammpsFrame~) |
+|-------+------------------------+---------------------------------------|
+| ~0~ | LAMMPS: type 2, then type 1 if that cloud is empty. chemfiles: keep every atom. XYZ: every atom is type 1 | LAMMPS: every atom (~sinp::readLammpsTrj~). Classification uses ~cloud.pts[0].type~ |
+| ~I > 0~ | LAMMPS ~readLammpsTrjO~ / chemfiles filter ~I~ | LAMMPS ~readLammpsTrjO~ with that type |
+
+XYZ always stores type 1. Classification still uses ~--type~ after
+the read (type 0 then becomes 1).
+
+* ~--graph~
+
+Used only by ~cages~.
+
+| value | graph |
+|-------+-------|
+| ~seeded~ | mutual ~k~-nearest seeds, union completions (~ring::seededCageAffiliation~) |
+| ~cutoff~ | pairs inside ~--cutoff~ (~nneigh::neighListO~) |
+| ~knn~ | mutual k-nearest (~nneigh::BondGraph::KnnMutual~) |
+| ~knn-union~ | union k-nearest (~nneigh::BondGraph::KnnUnion~) |
+
+~nneigh::bondGraphFromName~ also accepts ~knn-mutual~ and ~mutual~
+as ~knn~, and ~union~ as ~knn-union~. ~seeded~ is handled in the CLI
+and is not a ~BondGraph~ enumerator. Any other name throws
+~std::invalid_argument~ (~unknown bond graph 'NAME' (use cutoff,
+knn, knn-union)~) and ~cages~ exits 2.
+
+Candidate cutoff for the knn graphs is ~--cutoff + 1.5~.
+
+* File suffix
+
+~seams~ picks a reader from the path suffix
+(~path.find_last_of('.')~):
+
+| suffix | reader | compile-time gate |
+|--------+--------+-------------------|
+| ~xyz~ | ~sinp::readXYZ~ | always |
+| ~con~ | ~sinp::readCon~ | ~SEAMS_HAS_READCON~ |
+| ~pdb~, ~gro~, ~dcd~ | ~sinp::readChemfiles~ | ~SEAMS_HAS_CHEMFILES~ |
+| anything else | LAMMPS dump (~readLammpsTrjO~ / ~readLammpsTrj~) | always |
+
+A build without chemfiles or readcon-core treats ~.pdb~ / ~.gro~ /
+~.dcd~ / ~.con~ as LAMMPS dumps. ~seams --features~ reports those
+gates.
+
+* Frame ranges
+
+Omit ~--last~, or set it equal to ~--frame~, for one frame. That
+path calls ~load~ and works for every linked suffix.
+
+A range (~--last~ > ~--frame~) always walks a LAMMPS dump through
+~sinp::forEachLammpsFrame~. Each OpenMP worker opens its own handle
+and seeks the shared ~ITEM: TIMESTEP~ offset table. ~--jobs 1~ is
+serial. Non-LAMMPS suffixes are not walked this way.
+
+* ~--features~
+
+Heading ~Compile-time features:~ then one line per backend. Each
+line is ~NAME: enabled~ or ~NAME: disabled~.
+
+| printed name | macro |
+|--------------+-------|
+| ~OpenMP~ | ~SEAMS_HAS_OPENMP~ |
+| ~MPI~ | ~SEAMS_HAS_MPI~ |
+| ~Highway SIMD~ | ~SEAMS_HAS_HWY~ |
+| ~vesin neighbours~ | ~SEAMS_HAS_VESIN~ |
+| ~chemfiles~ | ~SEAMS_HAS_CHEMFILES~ |
+| ~readcon-core~ | ~SEAMS_HAS_READCON~ |
+| ~IRA/SOFI~ | ~SEAMS_HAS_IRA~ |
+| ~sphericart~ | ~SEAMS_HAS_SPHERICART~ |
+| ~nauty~ | ~SEAMS_HAS_NAUTY~ |
+
+* Colors
+
+~colorizerForFile(environmentColorStatus(), stdout)~. Argum's
+~environmentColorStatus~ (first match wins):
+
+| condition | result |
+|-----------+--------|
+| ~NO_COLOR~ set and non-empty | off |
+| ~FORCE_COLOR~ set and non-empty | on |
+| ~CLICOLOR_FORCE~ set, non-empty, not ~0~ / ~false~ | on |
+| ~CLICOLOR_FORCE~ is ~0~ or ~false~ | off |
+| ~CLICOLOR~ is ~0~ or ~false~ | off |
+| ~CLICOLOR~ set and non-empty | allowed (TTY decides) |
+| ~COLORTERM~ set and non-empty | allowed |
+| ~TERM=dumb~ | off |
+| otherwise | TTY / ~TERM~ heuristics |
+
+Color roles on this binary:
+
+| role | used for |
+|------+----------|
+| ~heading~ | ~d-SEAMS~ banner, ~nop~, ~Compile-time features:~ |
+| ~progName~ | ~seams~ in ~--version~; ~clathrate~, ~interClathrate~ |
+| ~longOption~ | ~frame~, ~graph~; ~cubic~, ~reCubic~ |
+| ~shortOption~ | ~box~; ~hexagonal~, ~reHex~ |
+| ~warning~ | usage line; ~interfacial~; ~enabled~ |
+| ~error~ | parse / missing-args / unknown-command; ~unclassified~; ~disabled~ |
+| uncolored | ~water~ |
+
+* Exit status
+
+| code | when |
+|------+------|
+| ~0~ | success, including ~--help~ / ~--version~ / ~--features~ |
+| ~2~ | parse error, missing command or file, unknown command, unknown ~--graph~ |
 
 * Examples
 
@@ -33,9 +186,14 @@ seams cages FILE
 seams read input/traj/exampleTraj.lammpstrj
 seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
 seams cages input/traj/mW_cubic.lammpstrj --type 1 --graph seeded
+seams cages dump.lammpstrj --graph cutoff
+seams cages dump.lammpstrj --graph knn
+seams cages dump.lammpstrj --graph knn-union
 seams chill-plus dump.lammpstrj --frame 1 --last 50 --jobs 8
 #+end_src
 
 Lua and Python are not this binary. See
-[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] and
-[[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
+[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
+(~require("dseams")~) and
+[[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]
+(~pydseams~).

@@ -42,14 +42,16 @@ std::vector<int> canonicalKey(const std::vector<int> &ringAtoms) {
 }
 
 //! Shared per-frame machinery: the inverted index, sorted ring copies for
-//! fast overlap tests, and mutable ring copies for the condition helpers
-//! (which take non-const references without mutating).
+//! overlap tests, and cached basal/adjacency lists (one sort per ring).
 struct FrameContext {
   const std::vector<std::vector<int>> &rings;
   const std::vector<std::vector<int>> &nList;
   ring::RingSearchIndex index;
   std::vector<std::vector<int>> sortedRings;
-  std::vector<std::vector<int>> ringsMut;
+  mutable std::vector<std::vector<int>> basalCand;
+  mutable std::vector<char> basalReady;
+  mutable std::vector<std::vector<int>> adjRings;
+  mutable std::vector<char> adjReady;
   // Scratch for findPrismatic, which appends to a list and stamps a type
   // vector neither of which affiliation reads
   std::vector<int> scratchListHC;
@@ -65,13 +67,20 @@ struct FrameContext {
       }
     }
     index = ring::buildRingSearchIndex(rings, maxAtom + 1);
-    sortedRings.resize(rings.size());
-    for (size_t i = 0; i < rings.size(); i++) {
-      sortedRings[i] = rings[i];
-      std::sort(sortedRings[i].begin(), sortedRings[i].end());
+    const int nR = static_cast<int>(rings.size());
+    sortedRings.resize(static_cast<std::size_t>(nR));
+    for (int i = 0; i < nR; i++) {
+      sortedRings[static_cast<std::size_t>(i)] =
+          rings[static_cast<std::size_t>(i)];
+      std::sort(sortedRings[static_cast<std::size_t>(i)].begin(),
+                sortedRings[static_cast<std::size_t>(i)].end());
     }
-    ringsMut = rings;
-    scratchType.assign(rings.size(), ring::strucType::unclassified);
+    scratchType.assign(static_cast<std::size_t>(nR),
+                       ring::strucType::unclassified);
+    basalCand.resize(static_cast<std::size_t>(nR));
+    adjRings.resize(static_cast<std::size_t>(nR));
+    adjReady.assign(static_cast<std::size_t>(nR), 0);
+    basalReady.assign(static_cast<std::size_t>(nR), 0);
   }
 
   [[nodiscard]] bool shareAtoms(int i, int j) const {
@@ -96,9 +105,7 @@ struct FrameContext {
     return index.ringsContainingAtom[atom];
   }
 
-  //! The adjacency neighbourhood A(r): rings containing an atom within one
-  //! bond-hop of an atom of r, excluding r itself; sorted unique
-  [[nodiscard]] std::vector<int> adjacentRings(int r) const {
+  [[nodiscard]] std::vector<int> collectAdjacentRings(int r) const {
     std::vector<int> out;
     for (const int atom : rings[r]) {
       for (const int s : ringsThroughAtom(atom)) {
@@ -126,12 +133,24 @@ struct FrameContext {
     if (i == j || shareAtoms(i, j)) {
       return false;
     }
-    return ring::basalConditions(nList, ringsMut[i], ringsMut[j]);
+    return ring::basalConditions(nList, rings[i], rings[j]);
+  }
+
+  [[nodiscard]] const std::vector<int> &adjacentRings(int r) const {
+    static const std::vector<int> empty;
+    if (r < 0 || r >= static_cast<int>(adjRings.size())) {
+      return empty;
+    }
+    if (!adjReady[static_cast<std::size_t>(r)]) {
+      adjRings[static_cast<std::size_t>(r)] = collectAdjacentRings(r);
+      adjReady[static_cast<std::size_t>(r)] = 1;
+    }
+    return adjRings[static_cast<std::size_t>(r)];
   }
 
   //! Candidate second-basal rings for i in the findHC gathering order:
   //! rings holding a bond-neighbour of i's first or second atom
-  [[nodiscard]] std::vector<int> basalCandidates(int i) const {
+  [[nodiscard]] std::vector<int> collectBasalCandidates(int i) const {
     std::vector<int> out;
     for (int slot = 0; slot < 2 &&
                        slot < static_cast<int>(rings[i].size());
@@ -151,6 +170,18 @@ struct FrameContext {
     std::sort(out.begin(), out.end());
     out.erase(std::unique(out.begin(), out.end()), out.end());
     return out;
+  }
+
+  [[nodiscard]] const std::vector<int> &basalCandidates(int i) const {
+    static const std::vector<int> empty;
+    if (i < 0 || i >= static_cast<int>(basalCand.size())) {
+      return empty;
+    }
+    if (!basalReady[static_cast<std::size_t>(i)]) {
+      basalCand[static_cast<std::size_t>(i)] = collectBasalCandidates(i);
+      basalReady[static_cast<std::size_t>(i)] = 1;
+    }
+    return basalCand[static_cast<std::size_t>(i)];
   }
 
   //! Prismatic rings of the ordered passing pair (i, j)
@@ -201,7 +232,7 @@ bool hcAffiliatedOf(FrameContext &ctx, int r,
     if (i == r) {
       continue;
     }
-    const std::vector<int> candidates = ctx.basalCandidates(i);
+    const std::vector<int> &candidates = ctx.basalCandidates(i);
     for (const int j : candidates) {
       if (j == r) {
         continue;
@@ -241,7 +272,7 @@ ring::cageAffiliation(const std::vector<std::vector<int>> &rings,
   // marks its basal rings and its prismatic rings. Sweeping every i covers
   // both directions of every pair once.
   for (size_t i = 0; i < nRings; i++) {
-    const std::vector<int> candidates = ctx.basalCandidates(static_cast<int>(i));
+    const std::vector<int> &candidates = ctx.basalCandidates(static_cast<int>(i));
     for (const int j : candidates) {
       if (!ctx.basalPair(static_cast<int>(i), j)) {
         continue;

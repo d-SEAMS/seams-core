@@ -72,7 +72,7 @@ struct BoundedBalls {
     const int nVertices = static_cast<int>(adjacency.size());
     ball.assign(nVertices, {});
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel if (nVertices >= 256)
+#pragma omp parallel if (nVertices >= 256 && !omp_in_parallel())
 #endif
     {
       std::vector<int> dist(nVertices, -1);
@@ -163,24 +163,34 @@ void levelsFrom(const std::vector<std::vector<int>> &adjacency, int src,
   }
 }
 
-//! All shortest paths src -> target under the level field, excluding src
-void allShortestPaths(const std::vector<std::vector<int>> &adjacency,
-                      const std::vector<int> &lvl, int src, int target,
-                      std::vector<int> cur,
-                      std::vector<std::vector<int>> &out) {
+//! All shortest paths src -> target under the level field, excluding src.
+//! The path is grown in @a cur by push/pop so each hop does not copy.
+void allShortestPathsRec(const std::vector<std::vector<int>> &adjacency,
+                         const std::vector<int> &lvl, int src, int target,
+                         std::vector<int> &cur,
+                         std::vector<std::vector<int>> &out) {
   if (target == src) {
-    std::reverse(cur.begin(), cur.end());
-    out.push_back(std::move(cur));
+    std::vector<int> path = cur;
+    std::reverse(path.begin(), path.end());
+    out.push_back(std::move(path));
     return;
   }
   for (const int w : adjacency[target]) {
     if (w >= 0 && w < static_cast<int>(lvl.size()) && lvl[w] >= 0 &&
         lvl[w] == lvl[target] - 1) {
-      std::vector<int> nxt = cur;
-      nxt.push_back(target);
-      allShortestPaths(adjacency, lvl, src, w, std::move(nxt), out);
+      cur.push_back(target);
+      allShortestPathsRec(adjacency, lvl, src, w, cur, out);
+      cur.pop_back();
     }
   }
+}
+
+void allShortestPaths(const std::vector<std::vector<int>> &adjacency,
+                      const std::vector<int> &lvl, int src, int target,
+                      std::vector<std::vector<int>> &out) {
+  std::vector<int> cur;
+  cur.reserve(8);
+  allShortestPathsRec(adjacency, lvl, src, target, cur, out);
 }
 
 //! Shortest-path criterion over every pair of members, by ball lookup
@@ -251,7 +261,7 @@ void enumerateFromSource(const std::vector<std::vector<int>> &adjacency,
       continue;
     }
     scr.paths.clear();
-    allShortestPaths(adjacency, scr.lvl, src, p, {}, scr.paths);
+    allShortestPaths(adjacency, scr.lvl, src, p, scr.paths);
     // Even rings: two vertex-disjoint shortest paths to an antipodal vertex
     if (2 * scr.lvl[p] >= 3 && 2 * scr.lvl[p] <= maxDepth) {
       for (size_t a = 0; a < scr.paths.size(); a++) {
@@ -278,7 +288,7 @@ void enumerateFromSource(const std::vector<std::vector<int>> &adjacency,
           continue;
         }
         scr.pathsQ.clear();
-        allShortestPaths(adjacency, scr.lvl, src, q, {}, scr.pathsQ);
+        allShortestPaths(adjacency, scr.lvl, src, q, scr.pathsQ);
         for (const auto &pa : scr.paths) {
           for (const auto &pb : scr.pathsQ) {
             std::vector<int> ring{src};
@@ -342,8 +352,8 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth)
   const int nVertices = static_cast<int>(nList.size());
   std::vector<std::vector<int>> adjacency(nVertices);
   for (int i = 0; i < nVertices; i++) {
-    for (size_t j = 1; j < nList[i].size(); j++) {
-      adjacency[i].push_back(nList[i][j]);
+    if (nList[i].size() > 1) {
+      adjacency[i].assign(nList[i].begin() + 1, nList[i].end());
     }
   }
 
@@ -353,7 +363,7 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth)
   balls.fillAll(adjacency, radius);
 
 #ifdef SEAMS_HAS_OPENMP
-  if (nVertices >= 256) {
+  if (nVertices >= 256 && !omp_in_parallel()) {
     // Sources are independent given the shared read-only balls; per-source
     // collection keeps the output identical to the serial ascending-source
     // order

@@ -15,10 +15,11 @@
 #ifndef SEAMS_GENERIC_H_
 #define SEAMS_GENERIC_H_
 
+#include <algorithm>
 #include <array>
+#include <cmath>
 #include <filesystem>
 #include <iostream>
-#include <cmath>
 #include <mol_sys.hpp>
 
 // C++20
@@ -94,6 +95,53 @@ inline double calcMedian(std::vector<double> *input) {
   return median;
 }
 
+// Recover H (columns a, b, c) and origin from a LAMMPS dump box with the
+// same mapping as nneigh::lammpsBoxToLcCell: box[0..3] are bound spans,
+// box[3..6] are tilt factors xy, xz, yz, boxLow is the bound lo.
+// Convert each cartesian point to fractional coordinates relative to
+// origin, wrap the fractional difference, and map back through H.
+inline std::array<double, 3> triclinicMinImage(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double xi,
+    double yi, double zi, double xj, double yj, double zj) {
+  const auto &box = yCloud.box;
+  const auto &boxLow = yCloud.boxLow;
+  const double xspan = box[0];
+  const double yspan = box[1];
+  const double zspan = box[2];
+  const double xlo_b = boxLow.size() > 0 ? boxLow[0] : 0.0;
+  const double ylo_b = boxLow.size() > 1 ? boxLow[1] : 0.0;
+  const double zlo_b = boxLow.size() > 2 ? boxLow[2] : 0.0;
+  const double xy = box[3];
+  const double xz = box[4];
+  const double yz = box[5];
+  const double xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));
+  const double xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));
+  const double ymin = std::min(0.0, yz);
+  const double ymax = std::max(0.0, yz);
+  const double lx = xspan - xmax + xmin;
+  const double ly = yspan - ymax + ymin;
+  const double lz = zspan;
+  const double ox = xlo_b - xmin;
+  const double oy = ylo_b - ymin;
+  const double oz = zlo_b;
+
+  auto toFrac = [&](double x, double y, double z) {
+    const double sz = (z - oz) / lz;
+    const double sy = (y - oy - yz * sz) / ly;
+    const double sx = (x - ox - xy * sy - xz * sz) / lx;
+    return std::array<double, 3>{sx, sy, sz};
+  };
+  const auto si = toFrac(xi, yi, zi);
+  const auto sj = toFrac(xj, yj, zj);
+  double dsx = si[0] - sj[0];
+  double dsy = si[1] - sj[1];
+  double dsz = si[2] - sj[2];
+  dsx -= std::round(dsx);
+  dsy -= std::round(dsy);
+  dsz -= std::round(dsz);
+  return {lx * dsx + xy * dsy + xz * dsz, ly * dsy + yz * dsz, lz * dsz};
+}
+
 // Generic function for getting the unwrapped distance
 /**
  *  @brief Inline generic function for obtaining the unwrapped periodic distance
@@ -107,6 +155,13 @@ inline double calcMedian(std::vector<double> *input) {
 inline double
 periodicDistSq(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                int iatom, int jatom) {
+  if (yCloud.box.size() >= 6) {
+    const auto dr = triclinicMinImage(
+        yCloud, yCloud.pts[iatom].x, yCloud.pts[iatom].y, yCloud.pts[iatom].z,
+        yCloud.pts[jatom].x, yCloud.pts[jatom].y, yCloud.pts[jatom].z);
+    return dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+  }
+
   std::array<double, 3> dr;
   double r2 = 0.0; // Squared absolute distance
 
@@ -115,9 +170,8 @@ periodicDistSq(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
   dr[1] = std::fabs(yCloud.pts[iatom].y - yCloud.pts[jatom].y);
   dr[2] = std::fabs(yCloud.pts[iatom].z - yCloud.pts[jatom].z);
 
-  // Get the squared absolute distance
+  // Three-axis wrap for an orthorhombic length-3 box
   for (int k = 0; k < 3; k++) {
-    // Correct for periodicity
     dr[k] -= yCloud.box[k] * std::round(dr[k] / yCloud.box[k]);
     r2 += dr[k] * dr[k];
   }
@@ -153,6 +207,14 @@ periodicDist(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 inline double unWrappedDistFromPoint(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
     std::vector<double> singlePoint) {
+  if (yCloud.box.size() >= 6) {
+    const auto dr = triclinicMinImage(yCloud, yCloud.pts[iatom].x,
+                                      yCloud.pts[iatom].y, yCloud.pts[iatom].z,
+                                      singlePoint[0], singlePoint[1],
+                                      singlePoint[2]);
+    return std::sqrt(dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2]);
+  }
+
   std::array<double, 3> dr;
   double r2 = 0.0; // Squared absolute distance
 
@@ -161,9 +223,8 @@ inline double unWrappedDistFromPoint(
   dr[1] = fabs(yCloud.pts[iatom].y - singlePoint[1]);
   dr[2] = fabs(yCloud.pts[iatom].z - singlePoint[2]);
 
-  // Get the squared absolute distance
+  // Three-axis wrap for an orthorhombic length-3 box
   for (int k = 0; k < 3; k++) {
-    // Correct for periodicity
     dr[k] -= yCloud.box[k] * round(dr[k] / yCloud.box[k]);
     r2 += pow(dr[k], 2.0);
   }
@@ -214,6 +275,12 @@ distance(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int ia
 inline std::array<double, 3>
 relDist(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
         int jatom) {
+  if (yCloud.box.size() >= 6) {
+    return triclinicMinImage(
+        yCloud, yCloud.pts[iatom].x, yCloud.pts[iatom].y, yCloud.pts[iatom].z,
+        yCloud.pts[jatom].x, yCloud.pts[jatom].y, yCloud.pts[jatom].z);
+  }
+
   std::array<double, 3> dr;
   std::array<double, 3> box = {yCloud.box[0], yCloud.box[1], yCloud.box[2]};
 
@@ -222,9 +289,8 @@ relDist(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iat
   dr[1] = yCloud.pts[iatom].y - yCloud.pts[jatom].y;
   dr[2] = yCloud.pts[iatom].z - yCloud.pts[jatom].z;
 
-  // Get the relative distance
+  // Three-axis wrap for an orthorhombic length-3 box
   for (int k = 0; k < 3; k++) {
-    //
     if (dr[k] < -box[k] * 0.5) {
       dr[k] = dr[k] + box[k];
     }
