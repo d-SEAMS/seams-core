@@ -7,6 +7,9 @@ The C++ engine is this repository. Python is ~pydseams~
 
 * Unreleased
 
+Partial 3D \(g_{IJ}(r)\) and unlike-type neighbour lists for
+multi-type dumps, via ~seams rdf~.
+
 * 2.3.4
 
 Steinhardt, hydrogen-bond, and cluster wraps use the dump
