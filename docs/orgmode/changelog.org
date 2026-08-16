@@ -7,8 +7,19 @@ The C++ engine is this repository. Python is ~pydseams~
 
 * Unreleased
 
-Partial 3D \(g_{IJ}(r)\) and unlike-type neighbour lists for
-multi-type dumps, via ~seams rdf~.
+* 2.4.0
+
+Partial 3D site-site \(g_{IJ}(r)\) and coordination numbers under
+the dump MIC, via ~seams rdf~ and ~seams cn~. Site chemistry is a
+~site::Table~ of LAMMPS types and optional atom-ID overrides;
+~site::ionCloud~ collapses each ion ~molID~ to one unwrapped COM
+vertex. Hydrogen bonds accept an explicit donor-H index set
+(~populateHbondsFromDonors~). ~seams hbonds --donors~ uses every
+hydrogen as a donor candidate; water cutoffs stay on that command
+and are not an ionic-liquid criterion. In-plane RDF normalization
+uses the dump-cell volume \(|\det H|\) and the restricted-triclinic
+in-plane area \(lx \times ly\), not the particle AABB or bound-span
+product.
 
 * 2.3.4
 

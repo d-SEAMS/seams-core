@@ -1,3 +1,0 @@
-In-plane RDF normalization uses the dump-cell volume |det H|
-and the restricted-triclinic in-plane area lx*ly, not the
-product of the particle AABB or of the bound spans.
