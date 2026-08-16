@@ -1,0 +1,27 @@
+.. index:: pair: enum; Kind
+.. _doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90:
+
+enum site::Kind
+===============
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <site.hpp>
+
+	enum Kind {
+	    :target:`unspecified<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90ad415f0e30c471dfdd9bc4f827329ef48>`,
+	    :target:`cationHead<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90a0b8e52e34535b887af98225a7587dd63>`,
+	    :target:`anion<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90a507e935a0f2208b571dfc60bf56d38a6>`,
+	    :target:`tail<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90a7aea2552dfe7eb84b9443b6fc9ba6e01>`,
+	    :target:`donorH<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90a484dd7cb8c261bbc7e46da795767797e>`,
+	    :target:`acceptor<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90a2ac2f053dd34646d6bb6b76e1170630d>`,
+	    :target:`polar<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90afa5caf54a500bad246188a8769cb9947>`,
+	    :target:`apolar<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90ae5e437761e40c78a4c0929be07a3ab04>`,
+	    :target:`waterO<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90a12d4612b078096f98216afac0e984ce8>`,
+	    :target:`waterH<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90a26dca521e814fabf8fe99711c652d2ab>`,
+	    :target:`solvent<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90acb536c8fd095555b861ed4eb1d313e7f>`,
+	};
+

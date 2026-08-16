@@ -98,6 +98,8 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">How-to</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/sheared-cells.html">Sheared cells</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ionic-liquid.html">Ionic-liquid dumps</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ase-integration.html">ASE integration</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/solvis.html">View a classified frame</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/confined-ice.html">Confined ice</a></li>
@@ -388,11 +390,34 @@ and <code class="docutils literal notranslate"><span class="pre">z</span></code>
 columns are ignored.</p>
 <p>Optional columns: <code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">mol</span></code>. Missing <code class="docutils literal notranslate"><span class="pre">mol</span></code> falls back to <code class="docutils literal notranslate"><span class="pre">id</span></code>.
 If both are missing, the reader uses column 0 for both.</p>
-<p><code class="docutils literal notranslate"><span class="pre">PointCloud.box</span></code> is <code class="docutils literal notranslate"><span class="pre">hi</span> <span class="pre">-</span> <span class="pre">lo</span></code> per axis. <code class="docutils literal notranslate"><span class="pre">PointCloud.boxLow</span></code> is the
-lower bound. A third number on a box line is a triclinic tilt and is
-appended to <code class="docutils literal notranslate"><span class="pre">box</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">PointCloud.box</span></code> is <code class="docutils literal notranslate"><span class="pre">hi</span> <span class="pre">-</span> <span class="pre">lo</span></code> per axis (the LAMMPS bound spans, not
+the lattice edge lengths). <code class="docutils literal notranslate"><span class="pre">PointCloud.boxLow</span></code> is the lower bound.
+A third number on a box line is a triclinic tilt (<code class="docutils literal notranslate"><span class="pre">xy</span></code>, then <code class="docutils literal notranslate"><span class="pre">xz</span></code>,
+then <code class="docutils literal notranslate"><span class="pre">yz</span></code>) and is appended to <code class="docutils literal notranslate"><span class="pre">box</span></code>. When those three tilts are
+present, <code class="docutils literal notranslate"><span class="pre">box.size()</span> <span class="pre">&gt;=</span> <span class="pre">6</span></code>. Pair distances go through
+<code class="docutils literal notranslate"><span class="pre">gen::periodicDistSq</span></code> / <code class="docutils literal notranslate"><span class="pre">gen::triclinicMinImage</span></code>, which recover H
+with the same mapping as <code class="docutils literal notranslate"><span class="pre">nneigh::dumpBoundsToH</span></code> /
+<code class="docutils literal notranslate"><span class="pre">nneigh::lammpsBoxToLcCell</span></code>. An independent-axis wrap on the bound
+spans is the wrong image for a sheared cell; see
+<a class="reference external" href="../howto/sheared-cells.rst">Sheared cells</a>.
+<code class="docutils literal notranslate"><span class="pre">gen::formatDumpBox</span></code> prints the spans and, when present, the tilt.
+Dump writers emit <code class="docutils literal notranslate"><span class="pre">ITEM:</span> <span class="pre">BOX</span> <span class="pre">BOUNDS</span> <span class="pre">xy</span> <span class="pre">xz</span> <span class="pre">yz</span> <span class="pre">pp</span> <span class="pre">pp</span> <span class="pre">pp</span></code> and a third
+field on each bound line when the cloud carries tilt.</p>
+<p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> prints the three bound spans (<code class="docutils literal notranslate"><span class="pre">box</span> <span class="pre">Lx</span> <span class="pre">Ly</span> <span class="pre">Lz</span></code>) and,
+when <code class="docutils literal notranslate"><span class="pre">box.size()</span> <span class="pre">&gt;=</span> <span class="pre">6</span></code>, the tilt (<code class="docutils literal notranslate"><span class="pre">xy</span> <span class="pre">xz</span> <span class="pre">yz</span></code>).</p>
 <p>Mixed water dumps in this tree use type 2 for oxygen and type 1 for
 hydrogen. Single-site mW dumps in this tree use type 1.</p>
+<p>A two-type (or multi-type) dump is the same text format. Each atom
+keeps its <code class="docutils literal notranslate"><span class="pre">ITEM:</span> <span class="pre">ATOMS</span></code> <code class="docutils literal notranslate"><span class="pre">type</span></code> value. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> / <code class="docutils literal notranslate"><span class="pre">chill</span></code> /
+<code class="docutils literal notranslate"><span class="pre">cages</span></code> still filter through <code class="docutils literal notranslate"><span class="pre">--type</span></code> (<code class="docutils literal notranslate"><span class="pre">readLammpsTrjO</span></code>). <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">rdf</span> <span class="pre">--types</span> <span class="pre">I,J</span></code> with <code class="docutils literal notranslate"><span class="pre">I</span> <span class="pre">!=</span> <span class="pre">J</span></code> loads every atom (<code class="docutils literal notranslate"><span class="pre">readLammpsTrj</span></code>)
+and histograms I-J pairs. The pair list is
+<code class="docutils literal notranslate"><span class="pre">nneigh::neighListPair</span></code>; the histogram is <code class="docutils literal notranslate"><span class="pre">rdf::partialRdf</span></code>.
+Neither is an ice score. A mixed-type
+dump that is not that water convention (ionic liquid, solvent plus
+solute) needs an explicit <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">I</span></code>; the default <code class="docutils literal notranslate"><span class="pre">0</span></code> guess is type
+2 then type 1. The C++ filter is <code class="docutils literal notranslate"><span class="pre">sinp::readLammpsTrjO</span></code> or
+<code class="docutils literal notranslate"><span class="pre">gen::getPointCloudOneAtomType</span></code>. See
+<a class="reference external" href="../howto/ionic-liquid.rst">Ionic-liquid dumps</a>.</p>
 <p>A live dump session caches <code class="docutils literal notranslate"><span class="pre">ITEM:</span> <span class="pre">TIMESTEP</span></code> offsets. Sequential
 walks do not rescan prior snapshots. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">--frame</span> <span class="pre">N</span> <span class="pre">--last</span> <span class="pre">M</span> <span class="pre">--jobs</span> <span class="pre">J</span></code> walks that table with one handle per OpenMP worker.
 <code class="docutils literal notranslate"><span class="pre">sinp::dropLammpsDumpIndex</span></code> drops a cached session (tests that

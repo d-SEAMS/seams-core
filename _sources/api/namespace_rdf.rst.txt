@@ -1,0 +1,35 @@
+.. index:: pair: namespace; rdf
+.. _doxid-namespacerdf:
+
+namespace rdf
+=============
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Three-dimensional partial RDF g_IJ(r). :ref:`More...<details-namespacerdf>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace rdf {
+
+	// structs
+
+	struct :ref:`PartialRdf<doxid-structrdf_1_1_partial_rdf>`;
+
+	} // namespace rdf
+.. _details-namespacerdf:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Three-dimensional partial RDF g_IJ(r).
+
+Pair distances use :ref:`gen::periodicDist <doxid-group__gen_1ga4038dadde6016e7a738c2cb015344ee3>`, so a sheared dump cell uses the same minimum image as the neighbour lists. The ideal-gas denominator uses the triclinic volume from :ref:`nneigh::dumpVolume <doxid-group__nneigh_1gad17e972366865905372aa796e946a351>` (det H), not the product of bound spans.
+

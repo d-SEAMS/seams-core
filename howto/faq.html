@@ -98,6 +98,8 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="index.html">How-to</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="install.html">Install the engine</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="classify-cli.html">Classify a dump</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="sheared-cells.html">Sheared cells</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="ionic-liquid.html">Ionic-liquid dumps</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="ase-integration.html">ASE integration</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="solvis.html">View a classified frame</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="confined-ice.html">Confined ice</a></li>
@@ -142,6 +144,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#why-do-chill-and-cages-disagree">Why do CHILL+ and cages disagree?</a></li>
 <li><a class="reference internal" href="#what-does-graph-seeded-mean">What does <code class="docutils literal notranslate"><span class="pre">--graph</span> <span class="pre">seeded</span></code> mean?</a></li>
 <li><a class="reference internal" href="#which-type-do-i-pass">Which <code class="docutils literal notranslate"><span class="pre">--type</span></code> do I pass?</a></li>
+<li><a class="reference internal" href="#how-does-a-sheared-dump-box-work">How does a sheared dump box work?</a></li>
 <li><a class="reference internal" href="#why-is-chemfiles-disabled-on-nix-build">Why is chemfiles disabled on <code class="docutils literal notranslate"><span class="pre">nix</span> <span class="pre">build</span></code>?</a></li>
 <li><a class="reference internal" href="#how-do-i-turn-colors-off">How do I turn colors off?</a></li>
 <li><a class="reference internal" href="#does-seams-walk-a-trajectory">Does <code class="docutils literal notranslate"><span class="pre">seams</span></code> walk a trajectory?</a></li>
@@ -270,7 +273,15 @@ for <code class="docutils literal notranslate"><span class="pre">cages</span></c
 <section id="which-type-do-i-pass">
 <h2>Which <code class="docutils literal notranslate"><span class="pre">--type</span></code> do I pass?<a class="headerlink" href="#which-type-do-i-pass" title="Link to this heading">¶</a></h2>
 <p>Mixed water dumps in this tree: type 2 oxygen. Single-site mW dumps:
-type 1. Default <code class="docutils literal notranslate"><span class="pre">0</span></code> guesses type 2 then type 1.</p>
+type 1. Default <code class="docutils literal notranslate"><span class="pre">0</span></code> guesses type 2 then type 1. Any other mixed-type
+dump (ionic liquid, solvent plus solute) needs the integer type of
+the species you want; see <a class="reference external" href="ionic-liquid.rst">Ionic-liquid dumps</a>.</p>
+</section>
+<section id="how-does-a-sheared-dump-box-work">
+<h2>How does a sheared dump box work?<a class="headerlink" href="#how-does-a-sheared-dump-box-work" title="Link to this heading">¶</a></h2>
+<p>The dump stores bound spans plus optional <code class="docutils literal notranslate"><span class="pre">xy,</span> <span class="pre">xz,</span> <span class="pre">yz</span></code>. Those spans
+are not edge lengths. The engine recovers H. See
+<a class="reference external" href="sheared-cells.rst">Sheared cells</a>.</p>
 </section>
 <section id="why-is-chemfiles-disabled-on-nix-build">
 <h2>Why is chemfiles disabled on <code class="docutils literal notranslate"><span class="pre">nix</span> <span class="pre">build</span></code>?<a class="headerlink" href="#why-is-chemfiles-disabled-on-nix-build" title="Link to this heading">¶</a></h2>

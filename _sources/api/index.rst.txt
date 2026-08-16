@@ -13,6 +13,7 @@ API Reference
 	group_molSys.rst
 	group_nneigh.rst
 	group_primitive.rst
+	group_rdf.rst
 	group_rdf2.rst
 	group_sinp.rst
 
@@ -28,6 +29,7 @@ API Reference
 |	:ref:`MolSys<doxid-group__mol_sys>`
 |	:ref:`Nneigh<doxid-group__nneigh>`
 |	:ref:`Primitive<doxid-group__primitive>`
+|	:ref:`Rdf<doxid-group__rdf>`
 |	:ref:`Rdf2<doxid-group__rdf2>`
 |	:ref:`Sinp<doxid-group__sinp>`
 

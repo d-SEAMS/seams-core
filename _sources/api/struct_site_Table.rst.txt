@@ -1,0 +1,29 @@
+.. index:: pair: struct; site::Table
+.. _doxid-structsite_1_1_table:
+
+struct site::Table
+==================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <site.hpp>
+	
+	struct Table {
+		// fields
+	
+		:ref:`Family<doxid-namespacesite_1aa3661d15289b4b8576f48217ed337ca3>` :target:`family<doxid-structsite_1_1_table_1a38cfa99bc45bda42c6e76b2f48eb39dc>` = :ref:`Family::waterIce<doxid-namespacesite_1aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd>`;
+		std::unordered_map<int, :ref:`Kind<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90>`> :target:`typeToKind<doxid-structsite_1_1_table_1a84b073b27fb7b70b8891b4ca12007ab5>`;
+		std::unordered_map<int, :ref:`Kind<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90>`> :target:`atomOverride<doxid-structsite_1_1_table_1ae4fef91b396372693e47e15c4aaf149c>`;
+
+		// methods
+	
+		:ref:`Kind<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90>` :target:`of<doxid-structsite_1_1_table_1adc5635e77a366b0e9e27dcfa0d80288e>`(const :ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>& p) const;
+		:ref:`Kind<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90>` :target:`ofType<doxid-structsite_1_1_table_1ada6cb01db577cf6d01e8703bdbfe8bbb>`(int typeId) const;
+	};

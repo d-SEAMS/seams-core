@@ -1,0 +1,11 @@
+.. index:: pair: struct; rdf::PartialRdf
+.. _doxid-structrdf_1_1_partial_rdf:
+
+struct rdf::PartialRdf
+======================
+
+.. toctree::
+	:hidden:
+
+
+

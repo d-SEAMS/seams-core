@@ -1,0 +1,27 @@
+.. index:: pair: group; Rdf
+.. _doxid-group__rdf:
+
+Rdf
+===
+
+.. toctree::
+	:hidden:
+
+	namespace_rdf.rst
+	struct_rdf_PartialRdf.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// namespaces
+
+	namespace :ref:`rdf<doxid-namespacerdf>`;
+
+	// structs
+
+	struct :ref:`rdf::PartialRdf<doxid-structrdf_1_1_partial_rdf>`;
+

@@ -98,6 +98,8 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="index.html">How-to</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="install.html">Install the engine</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="classify-cli.html">Classify a dump</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="sheared-cells.html">Sheared cells</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="ionic-liquid.html">Ionic-liquid dumps</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="ase-integration.html">ASE integration</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="solvis.html">View a classified frame</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="confined-ice.html">Confined ice</a></li>
@@ -242,12 +244,20 @@ data-aria-dark="Switch to auto color mode">
 <td><p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span> <span class="pre">FILE</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">unknown</span> <span class="pre">command</span></code> / exit 2</p></td>
-<td><p>Not <code class="docutils literal notranslate"><span class="pre">read</span></code> / <code class="docutils literal notranslate"><span class="pre">chill</span></code> / <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code> / <code class="docutils literal notranslate"><span class="pre">cages</span></code></p></td>
+<td><p>Not <code class="docutils literal notranslate"><span class="pre">read</span></code> / <code class="docutils literal notranslate"><span class="pre">chill</span></code> / <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code> / <code class="docutils literal notranslate"><span class="pre">cages</span></code> / <code class="docutils literal notranslate"><span class="pre">rdf</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">chill_plus</span></code> is an alias of <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bad</span> <span class="pre">--types</span></code> / exit 2</p></td>
+<td><p>Not <code class="docutils literal notranslate"><span class="pre">I,J</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">rdf</span> <span class="pre">FILE</span> <span class="pre">--types</span> <span class="pre">1,2</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span></code></p></td>
 <td><p>Wrong type or empty file</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">2</span></code> on TIP4P, <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">1</span></code> on mW</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">2</span></code> on TIP4P, <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">1</span></code> on mW; other mixed dumps need the species integer (<a class="reference external" href="ionic-liquid.rst">Ionic-liquid dumps</a>)</p></td>
+</tr>
+<tr class="row-even"><td><p>Neighbours miss a pair across a sheared face</p></td>
+<td><p>Bound spans treated as <code class="docutils literal notranslate"><span class="pre">lx,</span> <span class="pre">ly,</span> <span class="pre">lz</span></code></p></td>
+<td><p>The dump tilt is enough; the engine recovers H (<a class="reference external" href="sheared-cells.rst">Sheared cells</a>)</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">chemfiles:</span> <span class="pre">disabled</span></code> and <code class="docutils literal notranslate"><span class="pre">.pdb</span></code> fails</p></td>
 <td><p>Flake / no chemfiles</p></td>

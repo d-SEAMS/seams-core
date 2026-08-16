@@ -27,9 +27,11 @@ Hydrogen bonds are determined using a strict geometric criterion.
 
 A hydrogen bond between two water molecules exists when:
 
-#. The distance between the donor oxygen atom and the acceptor hydrogen atom is less than 2.42 Angstrom
+#. The distance between the acceptor oxygen atom and the donor hydrogen atom is less than 2.42 Angstrom
 
-#. The angle between the O O vector and the O-H vector should be less than 30 degrees
+#. The angle between the O-O vector and the O-H vector should be less than 30 degrees
+
+Those numbers are the water defaults on populateHbonds and populateHbondsWithInputClouds. populateHbondsFromDonors takes the same defaults so a water donor-H set stays comparable; other chemistries pass their own cutoffs. They are not an ionic-liquid default.
 
 
 

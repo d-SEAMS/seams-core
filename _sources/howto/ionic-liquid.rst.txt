@@ -1,0 +1,63 @@
+==================
+Ionic-liquid dumps
+==================
+
+
+A multi-type dump is not an ice frame. Keep CHILL and cages on
+one species with ``--type I``. Use ``seams rdf`` for a partial
+g\ :sub:`IJ`\(r) under the dump minimum image.
+
+Pick one type
+-------------
+
+``--type`` / ``-t`` is unchanged. ``0`` guesses type 2 then type 1.
+Classification still filters the cloud to that type. A dump
+whose interesting species is not that guess needs the integer
+type of the species you want.
+
+.. code:: bash
+
+    seams read FILE
+    seams chill-plus FILE --type 2
+    seams cages FILE --type 2
+
+Unlike-type neighbours
+----------------------
+
+``nneigh::neighListPair(rcut, cloud, typeI, typeJ)`` builds I-J
+pairs. ``I == J`` is the like-type list (``neighListO``). Distances
+use ``gen::periodicDistSq``, so a sheared dump box uses the same
+MIC as the ice neighbour lists.
+
+Partial g(r)
+------------
+
+.. code:: bash
+
+    seams rdf FILE --types 1,2 --cutoff 6.0
+    seams rdf FILE --types 1,2 --cutoff 6.0 --bins 60
+    seams rdf FILE --type 2 --cutoff 6.0
+
+``--types I,J`` selects the pair. The default is ``I = J = --type``
+(a like-type g(r) of the guessed or requested species).
+``--cutoff`` is rmax. ``--bins`` is optional (default ``rmax / 0.1``).
+
+Stdout is a comment header then ``r g count`` rows. The
+normalization volume is ``det(H)`` from the dump box, not the
+product of bound spans. Tilt ``xy xz yz`` is included when the
+dump carries it.
+
+``seams rdf`` is not an ice score. Do not run CHILL or cages on
+the ions.
+
+Read the box
+------------
+
+``seams read FILE`` prints ``box Lx Ly Lz`` and, when the dump is
+triclinic (``box.size() >= 6``), the tilt ``xy xz yz``. Bound spans
+are not edge lengths; see `Sheared
+cells <sheared-cells.rst>`_.
+
+Flags and the rest of the surface live on
+`seams CLI <../reference/cli.rst>`_. Formats live on
+`data formats <../reference/data-formats.rst>`_.

@@ -22,7 +22,9 @@ namespace seams::steinhardt
 	double :target:`normLM<doxid-namespaceseams_1_1steinhardt_1aef637bd4e52ad99c21c04c2530d464f9>`(int orderL, int absM);
 	double :target:`legendreAmp<doxid-namespaceseams_1_1steinhardt_1a4266009e733515c8d90dcd7990d696fa>`(int orderL, int absM, const double* s, const double* c);
 	void :target:`ylmAll<doxid-namespaceseams_1_1steinhardt_1adf41cecc177768d88e4c00b88bef06d6>`(int orderL, double theta, double phi, double* out);
+	void :target:`qlmAddBond<doxid-namespaceseams_1_1steinhardt_1af9c20d33b335cba28f07391b0bf2a7ec>`(int orderL, double dx, double dy, double dz, double* qlmInterleaved, int row, int nComp, int& nUsed);
 	void :target:`qlmOneAtom<doxid-namespaceseams_1_1steinhardt_1a37d2da128add52c3ffd5aa4d682755f7>`(int iatom, int orderL, const double* xyz, const int* offsets, const int* cols, double bx, double by, double bz, double* qlmInterleaved);
+	void :target:`qlmOneAtomDr<doxid-namespaceseams_1_1steinhardt_1a55aa32c67dd82d3268c94b0c553b8a5e>`(int iatom, int orderL, const double* dr, const int* offsets, const int* cols, double* qlmInterleaved);
 	void :target:`qlOneAtom<doxid-namespaceseams_1_1steinhardt_1ad7a4bc8342952acfea0b25760b426796>`(int iatom, int orderL, const double* qlmInterleaved, const int* offsets, const int* cols, double* ql, double* qlBar);
 
 	} // namespace steinhardt

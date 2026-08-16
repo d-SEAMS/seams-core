@@ -1,0 +1,92 @@
+=============
+Sheared cells
+=============
+
+
+You have a triclinic LAMMPS dump and want the engine to use the
+real cell, not a diagonal of bound spans.
+
+A dump ``ITEM: BOX BOUNDS`` line is ``lo hi [tilt]``. The reader stores
+``hi - lo`` per axis in ``PointCloud.box[0..2]`` and, when a third
+number is present, appends ``xy, xz, yz`` so ``box.size() >= 6``.
+Those first three numbers are bound spans. They are not the
+lattice edge lengths.
+
+The engine recovers the restricted-triclinic matrix H (rows
+:math:`\mathbf{a}`, :math:`\mathbf{b}`, :math:`\mathbf{c}`) and the origin from
+the spans, the tilt, and ``boxLow``. Neighbour lists and every
+minimum-image distance use that H. Wrapping each Cartesian axis
+by ``box[0]``, ``box[1]``, ``box[2]`` is the wrong image on a sheared
+cell.
+
+The ``seams`` CLI has no tilt flag. A sheared dump is enough.
+``seams read`` prints the three bound spans and, when
+``box.size() >= 6``, ``xy xz yz``. ``seams rdf`` histograms
+``rdf::partialRdf`` with the same dump MIC; the ideal-gas volume is
+``nneigh::dumpVolume`` (|det H|, not the product of bound spans).
+Type selection on a mixed dump is ``--type I``; unlike-pair RDF is
+``--types I,J``. See `Ionic-liquid dumps <ionic-liquid.rst>`_.
+The dump layout is on `data
+formats <../reference/data-formats.rst>`_.
+
+Recover H
+---------
+
+``nneigh::dumpBoundsToH`` (and ``lammpsBoxToLcCell`` /
+``lammpsBoxToLinkcell``) invert the LAMMPS bound mapping:
+
+- ``lx = xspan - max(0, xy, xz, xy+xz) + min(0, xy, xz, xy+xz)``
+
+- ``ly = yspan - max(0, yz) + min(0, yz)``
+
+- ``lz = zspan``
+
+- origin is ``boxLow`` minus the same lower clip
+
+``gen::periodicDistSq`` / ``gen::relDist`` call
+``gen::triclinicMinImage`` when ``box.size() >= 6``: fractional
+coordinates relative to that origin, wrap the fractional
+difference, map back through H. A length-3 ``box`` stays an
+independent-axis wrap of the three spans.
+
+Catch2: ``LAMMPS dump bounds convert to lattice H``, ``relDist mixed image disagrees with span wrap``, ``relDistFromPoint uses dump H on a mixed image``, ``formatDumpBox prints tilt when box.size() is 6``.
+
+Neighbour lists
+---------------
+
+Cutoff lists (``nneigh::neighListO``, ``neighList``, ``halfNeighList``,
+``getNewNeighbourListByIndex``, the vesin cell list, the brute
+fallback, and ``SkinNeighborList``) pass the dump 3x3 into the
+minimum image. k-nearest lists (``kNearestNeighbourList``) build
+the same H through ``lammpsBoxToLinkcell``. Device ice-score
+batches use ``residentFrameCell``: ``nBox >= 6`` or a supplied
+``boxLow`` becomes one dump cell; three lengths stay ortho.
+
+A pair that is only close across the ``a`` image of a sheared cell
+is a neighbour at cutoff 1.0. Treating the bound span 15 as ``lx``
+misses that pair.
+
+Catch2: ``tilt dump cutoff list finds the a-image pair``, ``sheared box k-nearest uses the periodic image``, ``residentFrameCell uses dump H when nBox is 6``, ``residentFrameCell stays ortho for three lengths``.
+
+Other MIC users
+---------------
+
+The same dump H feeds Steinhardt flattening, hydrogen-bond
+distances, cluster unwrap, and the in-plane RDF sampler.
+
+Catch2: ``steinhardtQl flatten uses dump H not span minImage``,
+``getHbondDistanceOH uses dump H on a mixed image``,
+``populateHbondsWithInputClouds accepts a mixed-image dump-H bond``, ``recenterClusterCloud unwraps a mixed image on dump H``,
+``recenterClusterCloud unwraps a three-atom mixed-image chain``,
+``sampleRDF_AA histograms the tilt a-image pair``.
+
+``seams rdf FILE --cutoff RMAX`` is the 3D partial :math:`g_{IJ}(r)`.
+Catch2: ``dumpVolume uses det H not bound spans``, ``partial RDF first bin sees the sheared a-image pair``, ``partial RDF like-type does not count the unlike neighbour``. The in-plane sampler
+remains ``rdf2::sampleRDF_AA`` on a ``PointCloud``.
+
+Empty or ortho clouds
+---------------------
+
+``box.size() < 3`` yields an empty neighbour list. A length-3 box
+is treated as ortho. XYZ files in this tree do not carry a
+periodic cell; use a LAMMPS dump when the true H matters.

@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>namespace seams::steinhardt - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="namespace sout" href="namespace_sout.html" /><link rel="prev" title="namespace seams::sphericart_ylm" href="namespace_seams_sphericart_ylm.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>namespace seams::steinhardt - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="namespace site" href="namespace_site.html" /><link rel="prev" title="namespace seams::sphericart_ylm" href="namespace_seams_sphericart_ylm.html" />
       <link rel="canonical" href="https://docs.dseams.info/api/namespace_seams_steinhardt.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -98,6 +98,8 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">How-to</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/sheared-cells.html">Sheared cells</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ionic-liquid.html">Ionic-liquid dumps</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ase-integration.html">ASE integration</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/solvis.html">View a classified frame</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/confined-ice.html">Confined ice</a></li>
@@ -127,6 +129,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="group_molSys.html">MolSys</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_nneigh.html">Nneigh</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_primitive.html">Primitive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="group_rdf.html">Rdf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_rdf2.html">Rdf2</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_sinp.html">Sinp</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="global.html">Global Namespace</a></li>
@@ -150,6 +153,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="group_molSys.html">MolSys</a></li>
 <li class="toctree-l2"><a class="reference internal" href="group_nneigh.html">Nneigh</a></li>
 <li class="toctree-l2"><a class="reference internal" href="group_primitive.html">Primitive</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group_rdf.html">Rdf</a></li>
 <li class="toctree-l2"><a class="reference internal" href="group_rdf2.html">Rdf2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="group_sinp.html">Sinp</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="global.html">Global Namespace</a><ul class="current">
@@ -159,6 +163,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="namespace_match.html">namespace match</a></li>
 <li class="toctree-l3"><a class="reference internal" href="namespace_pntToPnt.html">namespace pntToPnt</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="namespace_seams.html">namespace seams</a></li>
+<li class="toctree-l3"><a class="reference internal" href="namespace_site.html">namespace site</a></li>
 <li class="toctree-l3"><a class="reference internal" href="namespace_sout.html">namespace sout</a></li>
 <li class="toctree-l3"><a class="reference internal" href="namespace_std.html">namespace std</a></li>
 <li class="toctree-l3"><a class="reference internal" href="namespace_topoparam.html">namespace topoparam</a></li>
@@ -302,10 +307,12 @@ data-aria-dark="Switch to auto color mode">
 <span data-line="6"><span class="kt">double</span> <span class="doxyrest-code-target target" id="doxid-namespaceseams_1_1steinhardt_1aef637bd4e52ad99c21c04c2530d464f9"></span><span class="n">normLM</span><span class="p">(</span><span class="kt">int</span> <span class="n">orderL</span><span class="p">,</span> <span class="kt">int</span> <span class="n">absM</span><span class="p">);</span></span>
 <span data-line="7"><span class="kt">double</span> <span class="doxyrest-code-target target" id="doxid-namespaceseams_1_1steinhardt_1a4266009e733515c8d90dcd7990d696fa"></span><span class="n">legendreAmp</span><span class="p">(</span><span class="kt">int</span> <span class="n">orderL</span><span class="p">,</span> <span class="kt">int</span> <span class="n">absM</span><span class="p">,</span> <span class="k">const</span> <span class="kt">double</span><span class="o">*</span> <span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="kt">double</span><span class="o">*</span> <span class="n">c</span><span class="p">);</span></span>
 <span data-line="8"><span class="kt">void</span> <span class="doxyrest-code-target target" id="doxid-namespaceseams_1_1steinhardt_1adf41cecc177768d88e4c00b88bef06d6"></span><span class="n">ylmAll</span><span class="p">(</span><span class="kt">int</span> <span class="n">orderL</span><span class="p">,</span> <span class="kt">double</span> <span class="n">theta</span><span class="p">,</span> <span class="kt">double</span> <span class="n">phi</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">out</span><span class="p">);</span></span>
-<span data-line="9"><span class="kt">void</span> <span class="doxyrest-code-target target" id="doxid-namespaceseams_1_1steinhardt_1a37d2da128add52c3ffd5aa4d682755f7"></span><span class="n">qlmOneAtom</span><span class="p">(</span><span class="kt">int</span> <span class="n">iatom</span><span class="p">,</span> <span class="kt">int</span> <span class="n">orderL</span><span class="p">,</span> <span class="k">const</span> <span class="kt">double</span><span class="o">*</span> <span class="n">xyz</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span><span class="o">*</span> <span class="n">offsets</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span><span class="o">*</span> <span class="n">cols</span><span class="p">,</span> <span class="kt">double</span> <span class="n">bx</span><span class="p">,</span> <span class="kt">double</span> <span class="n">by</span><span class="p">,</span> <span class="kt">double</span> <span class="n">bz</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">qlmInterleaved</span><span class="p">);</span></span>
-<span data-line="10"><span class="kt">void</span> <span class="doxyrest-code-target target" id="doxid-namespaceseams_1_1steinhardt_1ad7a4bc8342952acfea0b25760b426796"></span><span class="n">qlOneAtom</span><span class="p">(</span><span class="kt">int</span> <span class="n">iatom</span><span class="p">,</span> <span class="kt">int</span> <span class="n">orderL</span><span class="p">,</span> <span class="k">const</span> <span class="kt">double</span><span class="o">*</span> <span class="n">qlmInterleaved</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span><span class="o">*</span> <span class="n">offsets</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span><span class="o">*</span> <span class="n">cols</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">ql</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">qlBar</span><span class="p">);</span></span>
-<span data-line="11"> </span>
-<span data-line="12"><span class="p">}</span> <span class="c1">// namespace steinhardt</span></span>
+<span data-line="9"><span class="kt">void</span> <span class="doxyrest-code-target target" id="doxid-namespaceseams_1_1steinhardt_1af9c20d33b335cba28f07391b0bf2a7ec"></span><span class="n">qlmAddBond</span><span class="p">(</span><span class="kt">int</span> <span class="n">orderL</span><span class="p">,</span> <span class="kt">double</span> <span class="n">dx</span><span class="p">,</span> <span class="kt">double</span> <span class="n">dy</span><span class="p">,</span> <span class="kt">double</span> <span class="n">dz</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">qlmInterleaved</span><span class="p">,</span> <span class="kt">int</span> <span class="n">row</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nComp</span><span class="p">,</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">nUsed</span><span class="p">);</span></span>
+<span data-line="10"><span class="kt">void</span> <span class="doxyrest-code-target target" id="doxid-namespaceseams_1_1steinhardt_1a37d2da128add52c3ffd5aa4d682755f7"></span><span class="n">qlmOneAtom</span><span class="p">(</span><span class="kt">int</span> <span class="n">iatom</span><span class="p">,</span> <span class="kt">int</span> <span class="n">orderL</span><span class="p">,</span> <span class="k">const</span> <span class="kt">double</span><span class="o">*</span> <span class="n">xyz</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span><span class="o">*</span> <span class="n">offsets</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span><span class="o">*</span> <span class="n">cols</span><span class="p">,</span> <span class="kt">double</span> <span class="n">bx</span><span class="p">,</span> <span class="kt">double</span> <span class="n">by</span><span class="p">,</span> <span class="kt">double</span> <span class="n">bz</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">qlmInterleaved</span><span class="p">);</span></span>
+<span data-line="11"><span class="kt">void</span> <span class="doxyrest-code-target target" id="doxid-namespaceseams_1_1steinhardt_1a55aa32c67dd82d3268c94b0c553b8a5e"></span><span class="n">qlmOneAtomDr</span><span class="p">(</span><span class="kt">int</span> <span class="n">iatom</span><span class="p">,</span> <span class="kt">int</span> <span class="n">orderL</span><span class="p">,</span> <span class="k">const</span> <span class="kt">double</span><span class="o">*</span> <span class="n">dr</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span><span class="o">*</span> <span class="n">offsets</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span><span class="o">*</span> <span class="n">cols</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">qlmInterleaved</span><span class="p">);</span></span>
+<span data-line="12"><span class="kt">void</span> <span class="doxyrest-code-target target" id="doxid-namespaceseams_1_1steinhardt_1ad7a4bc8342952acfea0b25760b426796"></span><span class="n">qlOneAtom</span><span class="p">(</span><span class="kt">int</span> <span class="n">iatom</span><span class="p">,</span> <span class="kt">int</span> <span class="n">orderL</span><span class="p">,</span> <span class="k">const</span> <span class="kt">double</span><span class="o">*</span> <span class="n">qlmInterleaved</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span><span class="o">*</span> <span class="n">offsets</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span><span class="o">*</span> <span class="n">cols</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">ql</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">qlBar</span><span class="p">);</span></span>
+<span data-line="13"> </span>
+<span data-line="14"><span class="p">}</span> <span class="c1">// namespace steinhardt</span></span>
 </pre></div>
 </section>
 
@@ -321,10 +328,10 @@ data-aria-dark="Switch to auto color mode">
         <span>Previous</span><div class="title">namespace seams::sphericart_ylm</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="namespace_sout.html">
+    <a href="namespace_site.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">namespace sout</div>
+        <div class="title">namespace site</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

@@ -1,0 +1,39 @@
+.. index:: pair: namespace; site
+.. _doxid-namespacesite:
+
+namespace site
+==============
+
+.. toctree::
+	:hidden:
+
+	enum_site_Family.rst
+	enum_site_Kind.rst
+	struct_site_Table.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace site {
+
+	// enums
+
+	enum :ref:`Family<doxid-namespacesite_1aa3661d15289b4b8576f48217ed337ca3>`;
+	enum :ref:`Kind<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90>`;
+
+	// structs
+
+	struct :ref:`Table<doxid-structsite_1_1_table>`;
+
+	// global functions
+
+	std::vector<int> :target:`indicesOf<doxid-namespacesite_1a651f87e7aaca786cffd536a4d2b286c4>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const :ref:`Table<doxid-structsite_1_1_table>`& table, :ref:`Kind<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90>` kind);
+	int :target:`lammpsTypeOfKind<doxid-namespacesite_1a1dd96ee4ccc36bc86f348ec029859b53>`(const :ref:`Table<doxid-structsite_1_1_table>`& table, :ref:`Kind<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90>` kind);
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> :target:`ionCloud<doxid-namespacesite_1a55a0dd31fcceddabfa6cda601eeb807c>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& src, const :ref:`Table<doxid-structsite_1_1_table>`& table);
+	:ref:`Table<doxid-structsite_1_1_table>` :target:`parseSiteSpec<doxid-namespacesite_1ab556d24c5f6d7d7be9ba2e4d975259be>`(std::string_view spec);
+
+	} // namespace site

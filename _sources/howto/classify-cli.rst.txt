@@ -16,6 +16,7 @@ One frame
     seams read FILE
     seams chill-plus FILE --cutoff 3.5 --type 2
     seams cages FILE --type 2
+    seams rdf FILE --type 2 --cutoff 10
 
 ``chill`` is the original CHILL rule. ``chill-plus`` is CHILL+.
 ``chill_plus`` is a CLI alias of ``chill-plus``.
@@ -24,7 +25,10 @@ Type
 ----
 
 ``--type 0`` (default) guesses type 2 then type 1. Mixed water dumps in
-this tree use type 2 oxygen. Single-site mW dumps use type 1.
+this tree use type 2 oxygen. Single-site mW dumps use type 1. A
+mixed-type dump that is not that guess needs ``--type I``; see
+`Ionic-liquid dumps <ionic-liquid.rst>`_. A triclinic dump uses the
+stored tilt; see `Sheared cells <sheared-cells.rst>`_.
 
 .. code:: bash
 

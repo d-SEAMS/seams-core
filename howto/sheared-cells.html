@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="teal" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Sheared cells - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Ionic-liquid dumps" href="ionic-liquid.html" /><link rel="prev" title="Classify a dump" href="classify-cli.html" />
+      <link rel="canonical" href="https://docs.dseams.info/howto/sheared-cells.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-pygments.css?v=ff3f4257" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=9d7eab11" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://docs.dseams.info/howto/sheared-cells.html"/>
+  <meta property="og:title" content="Sheared cells"/>
+    <meta name="twitter:card" content="summary"/>
+  <!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script></head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      <img class="light-logo" src="../_static/dSeamsLogo.png" alt="d-SEAMS" height="28" loading="lazy" />
+      <img class="dark-logo" src="../_static/dSeamsLogo.png" alt="d-SEAMS" height="28" loading="lazy" />
+      <strong>d-SEAMS</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-1" aria-controls="nav-children-1">
+            <span>Ecosystem</span>
+            <i class="i-lucide chevron-down"></i>
+          </button>
+        <ul id="nav-children-1" aria-labelledby="nav-trigger-1"><li><a href="https://docs.dseams.info">
+                <span>d-SEAMS engine</span>
+                <small>libyodaLib and the seams CLI</small>
+              </a></li><li><a href="https://d-seams.github.io/PydSEAMSlib/">
+                <span>pydseams</span>
+                <small>Python Frame API on yoda</small>
+              </a></li><li><a href="https://d-seams.github.io/yodaStruct/">
+                <span>dseams (Lua)</span>
+                <small>require("dseams") and Fennel</small>
+              </a></li><li><a href="https://github.com/d-SEAMS/linkcell">
+                <span>linkcell</span>
+                <small>Periodic linked-cell k-nearest neighbours</small>
+              </a></li></ul>
+      </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+  <a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
+<ul class="current">
+<li class="toctree-l1 _expand"><a class="reference internal" href="index.html">How-to</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="install.html">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="classify-cli.html">Classify a dump</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Sheared cells</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="ionic-liquid.html">Ionic-liquid dumps</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="ase-integration.html">ASE integration</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="solvis.html">View a classified frame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="confined-ice.html">Confined ice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/index.html">Explanation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Repositories</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">Citation</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/index.html">Reference</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API map</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/index.html">API Reference</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+</ul>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#recover-h">Recover H</a></li>
+<li><a class="reference internal" href="#neighbour-lists">Neighbour lists</a></li>
+<li><a class="reference internal" href="#other-mic-users">Other MIC users</a></li>
+<li><a class="reference internal" href="#empty-or-ortho-clouds">Empty or ortho clouds</a></li>
+</ul>
+</div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
+  data-type="github" data-user="d-SEAMS" data-repo="seams-core">
+  <span class="w-8 flex items-center justify-around shrink-0 text-3xl">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </span>
+  <span class="flex-grow px-2 break-all">
+    
+    
+      <span>seams-core</span>
+    
+    <span class="flex text-sm repo-stats-count">
+      <span class="flex items-center pr-3">
+        <iconify-icon icon="lucide:star"></iconify-icon>
+        <strong class="js-repo-stars ml-1">0</strong>
+      </span>
+      <span class="flex items-center">
+        <iconify-icon icon="lucide:git-fork"></iconify-icon>
+        <strong class="js-repo-forks ml-1">0</strong>
+      </span>
+    </span>
+  </span>
+</a><div class="edit-this-page">
+  <a href="https://github.com/d-SEAMS/seams-core/blob/main/docs/source/howto/sheared-cells.rst">Edit this page</a>
+</div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">d-SEAMS</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">How-to</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Sheared cells</strong>
+        <meta itemprop="position" content="3" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <div class="copy-page-wrapper relative pb-4 lg:absolute lg:top-8 lg:right-6 xl:right-12">
+  <div id="copy-page-trigger">
+    <button
+      type="button"
+      class="js-copy px-3 py-1 inline-flex items-center gap-1"
+      data-url="https://docs.dseams.info/_sources/howto/sheared-cells.rst.txt"
+    >
+      <i class="i-lucide" data-icon="copy"></i>
+      <span>Copy page</span>
+    </button>
+    <button class="js-menu px-2 py-1" type="button" aria-label="More actions"
+      aria-haspopup="menu" aria-expanded="false" aria-controls="copy-page-content">
+      <i class="i-lucide chevron-down"></i>
+    </button>
+  </div>
+  <div id="copy-page-content" role="menu" aria-orientation="vertical" aria-hidden="true">
+    <div role="presentation">
+      <div class="flex flex-col" role="group">
+        <button class="js-copy" type="button" role="menuitem"
+          data-url="https://docs.dseams.info/_sources/howto/sheared-cells.rst.txt">
+          <span class="iconify-icon">
+            <i class="i-lucide" data-icon="copy"></i>
+          </span>
+          <span>Copy page</span>
+        </button>
+        <a role="menuitem" href="https://docs.dseams.info/_sources/howto/sheared-cells.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
+            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20https%3A//docs.dseams.info/_sources/howto/sheared-cells.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+          <iconify-icon icon="bi:openai"></iconify-icon>
+          <span>Open in ChatGPT</span>
+        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20https%3A//docs.dseams.info/_sources/howto/sheared-cells.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+          <iconify-icon icon="bi:claude"></iconify-icon>
+          <span>Open in Claude</span>
+        </a></div>
+    </div>
+  </div>
+</div><article class="yue dark-code" role="main">
+          <section id="sheared-cells">
+<h1>Sheared cells<a class="headerlink" href="#sheared-cells" title="Link to this heading">¶</a></h1>
+<p>You have a triclinic LAMMPS dump and want the engine to use the
+real cell, not a diagonal of bound spans.</p>
+<p>A dump <code class="docutils literal notranslate"><span class="pre">ITEM:</span> <span class="pre">BOX</span> <span class="pre">BOUNDS</span></code> line is <code class="docutils literal notranslate"><span class="pre">lo</span> <span class="pre">hi</span> <span class="pre">[tilt]</span></code>. The reader stores
+<code class="docutils literal notranslate"><span class="pre">hi</span> <span class="pre">-</span> <span class="pre">lo</span></code> per axis in <code class="docutils literal notranslate"><span class="pre">PointCloud.box[0..2]</span></code> and, when a third
+number is present, appends <code class="docutils literal notranslate"><span class="pre">xy,</span> <span class="pre">xz,</span> <span class="pre">yz</span></code> so <code class="docutils literal notranslate"><span class="pre">box.size()</span> <span class="pre">&gt;=</span> <span class="pre">6</span></code>.
+Those first three numbers are bound spans. They are not the
+lattice edge lengths.</p>
+<p>The engine recovers the restricted-triclinic matrix H (rows
+<span class="math notranslate nohighlight">\(\mathbf{a}\)</span>, <span class="math notranslate nohighlight">\(\mathbf{b}\)</span>, <span class="math notranslate nohighlight">\(\mathbf{c}\)</span>) and the origin from
+the spans, the tilt, and <code class="docutils literal notranslate"><span class="pre">boxLow</span></code>. Neighbour lists and every
+minimum-image distance use that H. Wrapping each Cartesian axis
+by <code class="docutils literal notranslate"><span class="pre">box[0]</span></code>, <code class="docutils literal notranslate"><span class="pre">box[1]</span></code>, <code class="docutils literal notranslate"><span class="pre">box[2]</span></code> is the wrong image on a sheared
+cell.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">seams</span></code> CLI has no tilt flag. A sheared dump is enough.
+<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> prints the three bound spans and, when
+<code class="docutils literal notranslate"><span class="pre">box.size()</span> <span class="pre">&gt;=</span> <span class="pre">6</span></code>, <code class="docutils literal notranslate"><span class="pre">xy</span> <span class="pre">xz</span> <span class="pre">yz</span></code>. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">rdf</span></code> histograms
+<code class="docutils literal notranslate"><span class="pre">rdf::partialRdf</span></code> with the same dump MIC; the ideal-gas volume is
+<code class="docutils literal notranslate"><span class="pre">nneigh::dumpVolume</span></code> (<a href="#id1"><span class="problematic" id="id2">|det H|</span></a>, not the product of bound spans).
+Type selection on a mixed dump is <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">I</span></code>; unlike-pair RDF is
+<code class="docutils literal notranslate"><span class="pre">--types</span> <span class="pre">I,J</span></code>. See <a class="reference external" href="ionic-liquid.rst">Ionic-liquid dumps</a>.
+The dump layout is on <a class="reference external" href="../reference/data-formats.rst">data
+formats</a>.</p>
+<section id="recover-h">
+<h2>Recover H<a class="headerlink" href="#recover-h" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">nneigh::dumpBoundsToH</span></code> (and <code class="docutils literal notranslate"><span class="pre">lammpsBoxToLcCell</span></code> /
+<code class="docutils literal notranslate"><span class="pre">lammpsBoxToLinkcell</span></code>) invert the LAMMPS bound mapping:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">lx</span> <span class="pre">=</span> <span class="pre">xspan</span> <span class="pre">-</span> <span class="pre">max(0,</span> <span class="pre">xy,</span> <span class="pre">xz,</span> <span class="pre">xy+xz)</span> <span class="pre">+</span> <span class="pre">min(0,</span> <span class="pre">xy,</span> <span class="pre">xz,</span> <span class="pre">xy+xz)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ly</span> <span class="pre">=</span> <span class="pre">yspan</span> <span class="pre">-</span> <span class="pre">max(0,</span> <span class="pre">yz)</span> <span class="pre">+</span> <span class="pre">min(0,</span> <span class="pre">yz)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lz</span> <span class="pre">=</span> <span class="pre">zspan</span></code></p></li>
+<li><p>origin is <code class="docutils literal notranslate"><span class="pre">boxLow</span></code> minus the same lower clip</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">gen::periodicDistSq</span></code> / <code class="docutils literal notranslate"><span class="pre">gen::relDist</span></code> call
+<code class="docutils literal notranslate"><span class="pre">gen::triclinicMinImage</span></code> when <code class="docutils literal notranslate"><span class="pre">box.size()</span> <span class="pre">&gt;=</span> <span class="pre">6</span></code>: fractional
+coordinates relative to that origin, wrap the fractional
+difference, map back through H. A length-3 <code class="docutils literal notranslate"><span class="pre">box</span></code> stays an
+independent-axis wrap of the three spans.</p>
+<p>Catch2: <code class="docutils literal notranslate"><span class="pre">LAMMPS</span> <span class="pre">dump</span> <span class="pre">bounds</span> <span class="pre">convert</span> <span class="pre">to</span> <span class="pre">lattice</span> <span class="pre">H</span></code>, <code class="docutils literal notranslate"><span class="pre">relDist</span> <span class="pre">mixed</span> <span class="pre">image</span> <span class="pre">disagrees</span> <span class="pre">with</span> <span class="pre">span</span> <span class="pre">wrap</span></code>, <code class="docutils literal notranslate"><span class="pre">relDistFromPoint</span> <span class="pre">uses</span> <span class="pre">dump</span> <span class="pre">H</span> <span class="pre">on</span> <span class="pre">a</span> <span class="pre">mixed</span> <span class="pre">image</span></code>, <code class="docutils literal notranslate"><span class="pre">formatDumpBox</span> <span class="pre">prints</span> <span class="pre">tilt</span> <span class="pre">when</span> <span class="pre">box.size()</span> <span class="pre">is</span> <span class="pre">6</span></code>.</p>
+</section>
+<section id="neighbour-lists">
+<h2>Neighbour lists<a class="headerlink" href="#neighbour-lists" title="Link to this heading">¶</a></h2>
+<p>Cutoff lists (<code class="docutils literal notranslate"><span class="pre">nneigh::neighListO</span></code>, <code class="docutils literal notranslate"><span class="pre">neighList</span></code>, <code class="docutils literal notranslate"><span class="pre">halfNeighList</span></code>,
+<code class="docutils literal notranslate"><span class="pre">getNewNeighbourListByIndex</span></code>, the vesin cell list, the brute
+fallback, and <code class="docutils literal notranslate"><span class="pre">SkinNeighborList</span></code>) pass the dump 3x3 into the
+minimum image. k-nearest lists (<code class="docutils literal notranslate"><span class="pre">kNearestNeighbourList</span></code>) build
+the same H through <code class="docutils literal notranslate"><span class="pre">lammpsBoxToLinkcell</span></code>. Device ice-score
+batches use <code class="docutils literal notranslate"><span class="pre">residentFrameCell</span></code>: <code class="docutils literal notranslate"><span class="pre">nBox</span> <span class="pre">&gt;=</span> <span class="pre">6</span></code> or a supplied
+<code class="docutils literal notranslate"><span class="pre">boxLow</span></code> becomes one dump cell; three lengths stay ortho.</p>
+<p>A pair that is only close across the <code class="docutils literal notranslate"><span class="pre">a</span></code> image of a sheared cell
+is a neighbour at cutoff 1.0. Treating the bound span 15 as <code class="docutils literal notranslate"><span class="pre">lx</span></code>
+misses that pair.</p>
+<p>Catch2: <code class="docutils literal notranslate"><span class="pre">tilt</span> <span class="pre">dump</span> <span class="pre">cutoff</span> <span class="pre">list</span> <span class="pre">finds</span> <span class="pre">the</span> <span class="pre">a-image</span> <span class="pre">pair</span></code>, <code class="docutils literal notranslate"><span class="pre">sheared</span> <span class="pre">box</span> <span class="pre">k-nearest</span> <span class="pre">uses</span> <span class="pre">the</span> <span class="pre">periodic</span> <span class="pre">image</span></code>, <code class="docutils literal notranslate"><span class="pre">residentFrameCell</span> <span class="pre">uses</span> <span class="pre">dump</span> <span class="pre">H</span> <span class="pre">when</span> <span class="pre">nBox</span> <span class="pre">is</span> <span class="pre">6</span></code>, <code class="docutils literal notranslate"><span class="pre">residentFrameCell</span> <span class="pre">stays</span> <span class="pre">ortho</span> <span class="pre">for</span> <span class="pre">three</span> <span class="pre">lengths</span></code>.</p>
+</section>
+<section id="other-mic-users">
+<h2>Other MIC users<a class="headerlink" href="#other-mic-users" title="Link to this heading">¶</a></h2>
+<p>The same dump H feeds Steinhardt flattening, hydrogen-bond
+distances, cluster unwrap, and the in-plane RDF sampler.</p>
+<p>Catch2: <code class="docutils literal notranslate"><span class="pre">steinhardtQl</span> <span class="pre">flatten</span> <span class="pre">uses</span> <span class="pre">dump</span> <span class="pre">H</span> <span class="pre">not</span> <span class="pre">span</span> <span class="pre">minImage</span></code>,
+<code class="docutils literal notranslate"><span class="pre">getHbondDistanceOH</span> <span class="pre">uses</span> <span class="pre">dump</span> <span class="pre">H</span> <span class="pre">on</span> <span class="pre">a</span> <span class="pre">mixed</span> <span class="pre">image</span></code>,
+<code class="docutils literal notranslate"><span class="pre">populateHbondsWithInputClouds</span> <span class="pre">accepts</span> <span class="pre">a</span> <span class="pre">mixed-image</span> <span class="pre">dump-H</span> <span class="pre">bond</span></code>, <code class="docutils literal notranslate"><span class="pre">recenterClusterCloud</span> <span class="pre">unwraps</span> <span class="pre">a</span> <span class="pre">mixed</span> <span class="pre">image</span> <span class="pre">on</span> <span class="pre">dump</span> <span class="pre">H</span></code>,
+<code class="docutils literal notranslate"><span class="pre">recenterClusterCloud</span> <span class="pre">unwraps</span> <span class="pre">a</span> <span class="pre">three-atom</span> <span class="pre">mixed-image</span> <span class="pre">chain</span></code>,
+<code class="docutils literal notranslate"><span class="pre">sampleRDF_AA</span> <span class="pre">histograms</span> <span class="pre">the</span> <span class="pre">tilt</span> <span class="pre">a-image</span> <span class="pre">pair</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">rdf</span> <span class="pre">FILE</span> <span class="pre">--cutoff</span> <span class="pre">RMAX</span></code> is the 3D partial <span class="math notranslate nohighlight">\(g_{IJ}(r)\)</span>.
+Catch2: <code class="docutils literal notranslate"><span class="pre">dumpVolume</span> <span class="pre">uses</span> <span class="pre">det</span> <span class="pre">H</span> <span class="pre">not</span> <span class="pre">bound</span> <span class="pre">spans</span></code>, <code class="docutils literal notranslate"><span class="pre">partial</span> <span class="pre">RDF</span> <span class="pre">first</span> <span class="pre">bin</span> <span class="pre">sees</span> <span class="pre">the</span> <span class="pre">sheared</span> <span class="pre">a-image</span> <span class="pre">pair</span></code>, <code class="docutils literal notranslate"><span class="pre">partial</span> <span class="pre">RDF</span> <span class="pre">like-type</span> <span class="pre">does</span> <span class="pre">not</span> <span class="pre">count</span> <span class="pre">the</span> <span class="pre">unlike</span> <span class="pre">neighbour</span></code>. The in-plane sampler
+remains <code class="docutils literal notranslate"><span class="pre">rdf2::sampleRDF_AA</span></code> on a <code class="docutils literal notranslate"><span class="pre">PointCloud</span></code>.</p>
+</section>
+<section id="empty-or-ortho-clouds">
+<h2>Empty or ortho clouds<a class="headerlink" href="#empty-or-ortho-clouds" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">box.size()</span> <span class="pre">&lt;</span> <span class="pre">3</span></code> yields an empty neighbour list. A length-3 box
+is treated as ortho. XYZ files in this tree do not carry a
+periodic cell; use a LAMMPS dump when the true H matters.</p>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="classify-cli.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Classify a dump</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="ionic-liquid.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Ionic-liquid dumps</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--sy-c-text-weak);
+        font-size: 0.9em;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 1rem;
+          align-items: center;
+        "
+      >
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
+            height="1em"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z" />
+          </svg>
+          <span
+            >Analytics by
+            <a
+              href="https://antics.turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >Antics</a
+            ></span
+          >
+        </span>
+
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <span>provided by</span>
+          <span style="display: inline-flex; align-items: center; gap: 0.3em">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1.2em"
+              height="1.2em"
+              viewBox="0 0 64 64"
+              aria-hidden="true"
+            >
+              <g fill-rule="evenodd">
+                <ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9" />
+                <path
+                  fill="#80D25B"
+                  d="M20.302104,46 C20.302104,46 17.1330329,55.8812548 20.6828149,59.7817355 C24.232597,63.6822162 26.8008673,63.215359 26.8008673,53.7414927 C26.8008673,44.2676263 20.302104,46 20.302104,46 Z"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M38.302104,46 C38.302104,46 35.1330329,55.8812548 38.6828149,59.7817355 C42.232597,63.6822162 44.8008673,63.215359 44.8008673,53.7414927 C44.8008673,44.2676263 38.302104,46 38.302104,46 Z"
+                  transform="matrix(-1 0 0 1 81.8 0)"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M20.6227767,21.2218684 C20.6227767,21.2218684 13.956214,15.3844007 10.091955,16.0534044 C6.22769598,16.722408 6,22.2124633 6,23.9992899 C6,25.7861165 7.78917398,37.3159836 9.78726488,36.4967476 C11.7853558,35.6775115 13.7411938,27.959322 13.7411938,27.959322 15.6510232,30.2287702 18.609193,30.4630388"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M57.6227767,21.2218684 C57.6227767,21.2218684 50.956214,15.3844007 47.091955,16.0534044 C43.227696,16.722408 43,22.2124633 43,23.9992899 C43,25.7861165 44.789174,37.3159836 46.7872649,36.4967476 C48.7853558,35.6775115 50.7411938,27.959322 50.7411938,27.959322 52.6510232,30.2287702 55.609193,30.4630388"
+                  transform="matrix(-1 0 0 1 100.623 0)"
+                />
+                <path
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32,53 C40.836556,53 48,44.4934102 48,34 C48,23.5065898 46.6814044,17 32,17 C17.3185956,17 16,23.5065898 16,34 C16,44.4934102 23.163444,53 32,53 Z"
+                />
+                <polygon
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  points="32 22 38.928 26 38.928 34 32 38 25.072 34 25.072 26"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M30,8 C28.8954305,8 28,8.8954305 28,10"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M36,8 C34.8954305,8 34,8.8954305 34,10"
+                  transform="matrix(-1 0 0 1 70 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32.1194396 38.1881507L32.1194396 52.4125899M32.0164956 21.7467197L32.0164956 17M25.2141026 26.0041506L17.737148 23.0721126M25.1254173 34.1534318L16.7659494 38.8876521"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M46.2141026,26.0041506 L38.737148,23.0721126"
+                  transform="matrix(-1 0 0 1 84.951 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M47.1254173,34.1534318 L38.7659494,38.8876521"
+                  transform="matrix(-1 0 0 1 85.891 0)"
+                />
+              </g>
+            </svg>
+            <a
+              href="https://turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >TurtleTech ehf</a
+            >
+          </span>
+        </span>
+      </div>
+    </div>
+
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2019-2026, d-SEAMS core team</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div> <div class="sy-foot-socials">
+<a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+  <iconify-icon icon="simple-icons:github"></iconify-icon>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/target-highlight.js?v=df7d332b"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=cac61aee"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script></body>
+</html>

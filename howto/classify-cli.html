@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Classify a dump - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="ASE integration" href="ase-integration.html" /><link rel="prev" title="Install the engine" href="install.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Classify a dump - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Sheared cells" href="sheared-cells.html" /><link rel="prev" title="Install the engine" href="install.html" />
       <link rel="canonical" href="https://docs.dseams.info/howto/classify-cli.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -98,6 +98,8 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="index.html">How-to</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="install.html">Install the engine</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Classify a dump</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="sheared-cells.html">Sheared cells</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="ionic-liquid.html">Ionic-liquid dumps</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="ase-integration.html">ASE integration</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="solvis.html">View a classified frame</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="confined-ice.html">Confined ice</a></li>
@@ -244,6 +246,7 @@ numbers for the in-tree mixed frame live in
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span><span class="nb">read</span><span class="w"> </span>FILE
 </span><span data-line="2">seams<span class="w"> </span>chill-plus<span class="w"> </span>FILE<span class="w"> </span>--cutoff<span class="w"> </span><span class="m">3</span>.5<span class="w"> </span>--type<span class="w"> </span><span class="m">2</span>
 </span><span data-line="3">seams<span class="w"> </span>cages<span class="w"> </span>FILE<span class="w"> </span>--type<span class="w"> </span><span class="m">2</span>
+</span><span data-line="4">seams<span class="w"> </span>rdf<span class="w"> </span>FILE<span class="w"> </span>--type<span class="w"> </span><span class="m">2</span><span class="w"> </span>--cutoff<span class="w"> </span><span class="m">10</span>
 </span></pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">chill</span></code> is the original CHILL rule. <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code> is CHILL+.
@@ -252,7 +255,10 @@ numbers for the in-tree mixed frame live in
 <section id="type">
 <h2>Type<a class="headerlink" href="#type" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">0</span></code> (default) guesses type 2 then type 1. Mixed water dumps in
-this tree use type 2 oxygen. Single-site mW dumps use type 1.</p>
+this tree use type 2 oxygen. Single-site mW dumps use type 1. A
+mixed-type dump that is not that guess needs <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">I</span></code>; see
+<a class="reference external" href="ionic-liquid.rst">Ionic-liquid dumps</a>. A triclinic dump uses the
+stored tilt; see <a class="reference external" href="sheared-cells.rst">Sheared cells</a>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span>chill-plus<span class="w"> </span>FILE<span class="w"> </span>--type<span class="w"> </span><span class="m">2</span>
 </span><span data-line="2">seams<span class="w"> </span>cages<span class="w"> </span>input/traj/mW_cubic.lammpstrj<span class="w"> </span>--type<span class="w"> </span><span class="m">1</span>
 </span></pre></div>
@@ -297,10 +303,10 @@ completions. On a perfect cubic crystal the four graphs coincide.</p>
         <span>Previous</span><div class="title">Install the engine</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="ase-integration.html">
+    <a href="sheared-cells.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">ASE integration</div>
+        <div class="title">Sheared cells</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

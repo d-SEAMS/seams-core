@@ -13,6 +13,7 @@ Global Namespace
 	namespace_match.rst
 	namespace_pntToPnt.rst
 	namespace_seams.rst
+	namespace_site.rst
 	namespace_sout.rst
 	namespace_std.rst
 	namespace_topoparam.rst
@@ -40,6 +41,7 @@ Global Namespace
 	namespace :ref:`pntToPnt<doxid-namespacepnt_to_pnt>`;
 	namespace :ref:`primitive<doxid-namespaceprimitive>`;
 	namespace :ref:`prism3<doxid-namespaceprism3>`;
+	namespace :ref:`rdf<doxid-namespacerdf>`;
 	namespace :ref:`rdf2<doxid-namespacerdf2>`;
 	namespace :ref:`ring<doxid-namespacering>`;
 	namespace :ref:`seams<doxid-namespaceseams>`;
@@ -47,6 +49,7 @@ Global Namespace
 		namespace :ref:`seams::sphericart_ylm<doxid-namespaceseams_1_1sphericart__ylm>`;
 		namespace :ref:`seams::steinhardt<doxid-namespaceseams_1_1steinhardt>`;
 	namespace :ref:`sinp<doxid-namespacesinp>`;
+	namespace :ref:`site<doxid-namespacesite>`;
 	namespace :ref:`sout<doxid-namespacesout>`;
 	namespace :ref:`sph<doxid-namespacesph>`;
 	namespace :ref:`std<doxid-namespacestd>`;
