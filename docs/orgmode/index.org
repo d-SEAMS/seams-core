@@ -9,6 +9,23 @@
 
 :Author: `d-SEAMS core team <https://dseams.info>`_
 
+.. raw:: html
+
+   <p class="dseams-hero">
+     <img class="dseams-hero-logo dseams-hero-logo--light"
+          src="_static/dSeamsLogo.png"
+          alt="d-SEAMS"
+          width="320"
+          height="334"
+          loading="eager" />
+     <img class="dseams-hero-logo dseams-hero-logo--dark"
+          src="_static/dSeamsLogo.png"
+          alt="d-SEAMS"
+          width="320"
+          height="334"
+          loading="eager" />
+   </p>
+
 .. grid:: 1 2 3 3
    :gutter: 2
    :padding: 1 1 0 0
