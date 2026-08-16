@@ -409,20 +409,18 @@ int clump::recenterClusterCloud(
     molSys::PointCloud<molSys::Point<double>, double> &iceCloud,
     const std::vector<std::vector<int>> &nList) {
   //
-  int dim = 3; // Dimensions
-  std::vector<double> box = iceCloud.box;
-  std::vector<double> boxLow = iceCloud.boxLow;
-  std::vector<double> boxHigh;
   double xBoxCenter, yBoxCenter, zBoxCenter; // Centroid of the simulation box
   double x_centroid, y_centroid, z_centroid; // Centroid of the cluster
   // Variables for the linked list
   std::vector<int> linkedList; // Contains the linked list for the cluster
   std::vector<bool> visited; // Records whether an item has been visited or not
 
-  // To avoid long confusing lines, fill boxHigh
-  for (int k = 0; k < dim; k++) {
-    boxHigh.push_back(boxLow[k] + box[k]);
-  } // end of filling up boxHigh
+  double H[3][3];
+  double origin[3];
+  nneigh::dumpBoundsToH(iceCloud.box, iceCloud.boxLow, H, origin);
+  xBoxCenter = origin[0] + 0.5 * (H[0][0] + H[1][0] + H[2][0]);
+  yBoxCenter = origin[1] + 0.5 * (H[0][1] + H[1][1] + H[2][1]);
+  zBoxCenter = origin[2] + 0.5 * (H[0][2] + H[1][2] + H[2][2]);
 
   // --------------------------------------------------------------------------
   // Get the linked list of the cluster
@@ -433,12 +431,9 @@ int clump::recenterClusterCloud(
   visited.resize(iceCloud.nop);
 
   // The starting value is the first atom
-  int iatom = 0;    // Atom index of the 'starting value'
   int currentIndex; // Current atom
   int nextElement;  // Next linked atom
   int index;        // Keeps track of the first element in the linked list
-  double x_ij, y_ij, z_ij; // Relative distance between the two atoms
-  double xPBC, yPBC, zPBC; // Actual distance
 
   // Loop through the entire linked list
   for (int i = 0; i < iceCloud.nop; i++) {
@@ -455,66 +450,17 @@ int clump::recenterClusterCloud(
     currentIndex = i;
     nextElement = linkedList[currentIndex];
     index = i;
-    // Keep looping
     while (nextElement != index) {
+      const auto dr = gen::relDist(iceCloud, currentIndex, nextElement);
+      iceCloud.pts[nextElement].x = iceCloud.pts[currentIndex].x - dr[0];
+      iceCloud.pts[nextElement].y = iceCloud.pts[currentIndex].y - dr[1];
+      iceCloud.pts[nextElement].z = iceCloud.pts[currentIndex].z - dr[2];
+      visited[nextElement] = true;
       currentIndex = nextElement;
-      visited[currentIndex] = true;
       nextElement = linkedList[currentIndex];
-      // -----------------------------------
-      // Get the relative distance between the central atom (iatom)
-      // and the next element
-      // Coordinates
-      // if (nextElement != index) {
-      x_ij = iceCloud.pts[currentIndex].x - iceCloud.pts[nextElement].x;
-      y_ij = iceCloud.pts[currentIndex].y - iceCloud.pts[nextElement].y;
-      z_ij = iceCloud.pts[currentIndex].z - iceCloud.pts[nextElement].z;
-      // Shift the nextElement if it's on the other side of the box
-      // Shift x
-      if (std::abs(x_ij) > 0.5 * box[0]) {
-        // Get the actual distance
-        xPBC = box[0] - std::abs(x_ij);
-        if (x_ij < 0) {
-          iceCloud.pts[nextElement].x = iceCloud.pts[currentIndex].x - xPBC;
-        } // To the -x side of currentIndex
-        else {
-          iceCloud.pts[nextElement].x = iceCloud.pts[currentIndex].x + xPBC;
-        } // Add to the + side
-      }   // Shift nextElement
-      //
-      // Shift y
-      if (std::abs(y_ij) > 0.5 * box[1]) {
-        // Get the actual distance
-        yPBC = box[1] - std::abs(y_ij);
-        if (y_ij < 0) {
-          iceCloud.pts[nextElement].y = iceCloud.pts[currentIndex].y - yPBC;
-        } // To the -y side of currentIndex
-        else {
-          iceCloud.pts[nextElement].y = iceCloud.pts[currentIndex].y + yPBC;
-        } // Add to the + side
-      }   // Shift nextElement
-      //
-      // Shift z
-      if (std::abs(z_ij) > 0.5 * box[2]) {
-        // Get the actual distance
-        zPBC = box[2] - std::abs(z_ij);
-        if (z_ij < 0) {
-          iceCloud.pts[nextElement].z = iceCloud.pts[currentIndex].z - zPBC;
-        } // To the -z side of currentIndex
-        else {
-          iceCloud.pts[nextElement].z = iceCloud.pts[currentIndex].z + zPBC;
-        } // Add to the + side
-      }   // Shift nextElement
-          // -----------------------------------
-      // }  // don't shift the last atom!
-
-    } // End of going through linked atoms
+    }
     //
   } // end of loop through atoms
-  // --------------------------------------------------------------------------
-  // Center of the simulation box
-  xBoxCenter = 0.5 * (boxLow[0] + boxHigh[0]);
-  yBoxCenter = 0.5 * (boxLow[1] + boxHigh[1]);
-  zBoxCenter = 0.5 * (boxLow[2] + boxHigh[2]);
   // --------------------------------------------------------------------------
   // Get the centroid of the ice cluster.
   x_centroid = 0.0;

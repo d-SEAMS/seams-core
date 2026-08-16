@@ -14,6 +14,7 @@
 
 #include <seams_input.hpp>
 #include <seams_output.hpp>
+#include <neighbours.hpp>
 
 #include <algorithm>
 #include <array>
@@ -38,34 +39,34 @@ void writeDumpHeader(
   outputFile << yCloud.currentFrame << "\n";
   outputFile << "ITEM: NUMBER OF ATOMS\n";
   outputFile << nAtoms << "\n";
-  outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
-  for (int k = 0; k < 3; k++) {
-    const double lo = (static_cast<size_t>(k) < yCloud.boxLow.size())
-                          ? yCloud.boxLow[k]
-                          : 0.0;
-    const double len =
-        (static_cast<size_t>(k) < yCloud.box.size()) ? yCloud.box[k] : 0.0;
-    outputFile << lo << " " << lo + len << "\n";
-  }
+  gen::writeDumpBoxBounds(outputFile, yCloud);
   outputFile << "ITEM: ATOMS " << columns << "\n";
 }
 
+struct DataBoxBounds {
+  std::array<double, 3> lo{};
+  std::array<double, 3> hi{};
+  bool tilt = false;
+  double xy = 0.0;
+  double xz = 0.0;
+  double yz = 0.0;
+};
+
 /**
  * @details Writes the fixed part of a LAMMPS data file: the comment line, the
- *  section counts, the type counts and the orthogonal box bounds. Every data
- *  writer shares this skeleton; only the counts and the box origin differ.
+ *  section counts, the type counts and the box bounds. A tilt line is emitted
+ *  when the recovered cell is triclinic. Every data writer shares this
+ *  skeleton; only the counts and the box origin differ.
  * @param[in,out] outputFile The open output stream.
  * @param[in] nAtoms Number of atoms the Atoms section will contain.
  * @param[in] nBonds Number of bonds the Bonds section will contain.
  * @param[in] numAtomTypes Number of atom types declared in the header.
  * @param[in] bondTypes Number of bond types declared in the header.
- * @param[in] boxLo Lower box bound per dimension.
- * @param[in] boxHi Upper box bound per dimension.
+ * @param[in] box Recovered xlo/xhi, ylo/yhi, zlo/zhi and optional tilt.
  */
 void writeDataHeader(std::ofstream &outputFile, size_t nAtoms, size_t nBonds,
                      int numAtomTypes, int bondTypes,
-                     const std::array<double, 3> &boxLo,
-                     const std::array<double, 3> &boxHi) {
+                     const DataBoxBounds &box) {
   outputFile << "Written out by D-SEAMS\n";
   outputFile << nAtoms << " atoms\n";
   outputFile << nBonds << " bonds\n";
@@ -74,28 +75,41 @@ void writeDataHeader(std::ofstream &outputFile, size_t nAtoms, size_t nBonds,
   outputFile
       << bondTypes
       << " bond types\n0 angle types\n0 dihedral types\n0 improper types\n";
-  outputFile << boxLo[0] << " " << boxHi[0] << " xlo xhi\n";
-  outputFile << boxLo[1] << " " << boxHi[1] << " ylo yhi\n";
-  outputFile << boxLo[2] << " " << boxHi[2] << " zlo zhi\n";
-}
-
-//! Box bounds for a data file anchored at the cloud's lower box coordinate
-std::array<std::array<double, 3>, 2> dataBoxBounds(
-    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
-  std::array<double, 3> lo{0.0, 0.0, 0.0};
-  std::array<double, 3> hi{0.0, 0.0, 0.0};
-  for (int k = 0; k < 3; k++) {
-    lo[k] = yCloud.boxLow[k];
-    hi[k] = yCloud.boxLow[k] + yCloud.box[k];
+  outputFile << box.lo[0] << " " << box.hi[0] << " xlo xhi\n";
+  outputFile << box.lo[1] << " " << box.hi[1] << " ylo yhi\n";
+  outputFile << box.lo[2] << " " << box.hi[2] << " zlo zhi\n";
+  if (box.tilt) {
+    outputFile << box.xy << " " << box.xz << " " << box.yz << " xy xz yz\n";
   }
-  return {lo, hi};
 }
 
-//! Box bounds for a data file anchored at the origin
-std::array<std::array<double, 3>, 2> dataBoxBoundsZero(
+//! Box bounds for a data file from dump H: origin and recovered lx, ly, lz.
+DataBoxBounds dataBoxBounds(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
-  return {std::array<double, 3>{0.0, 0.0, 0.0},
-          std::array<double, 3>{yCloud.box[0], yCloud.box[1], yCloud.box[2]}};
+  double H[3][3];
+  double origin[3];
+  nneigh::dumpBoundsToH(yCloud.box, yCloud.boxLow, H, origin);
+  DataBoxBounds box;
+  box.lo = {origin[0], origin[1], origin[2]};
+  box.hi = {origin[0] + H[0][0], origin[1] + H[1][1], origin[2] + H[2][2]};
+  if (yCloud.box.size() >= 6) {
+    box.tilt = true;
+    box.xy = H[1][0];
+    box.xz = H[2][0];
+    box.yz = H[2][1];
+  }
+  return box;
+}
+
+//! Box bounds for a data file anchored at the origin, recovered lx, ly, lz.
+DataBoxBounds dataBoxBoundsZero(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  DataBoxBounds box = dataBoxBounds(yCloud);
+  box.hi[0] -= box.lo[0];
+  box.hi[1] -= box.lo[1];
+  box.hi[2] -= box.lo[2];
+  box.lo = {0.0, 0.0, 0.0};
+  return box;
 }
 
 //! Sorts atom IDs and drops duplicates, for writers that collect the IDs by
@@ -213,7 +227,7 @@ int sout::writeLAMMPSdata(
   outputFile.open("../output/" + filename);
   const auto box = dataBoxBoundsZero(yCloud);
   writeDataHeader(outputFile, atoms[atoms.size() - 1], bonds.size(),
-                  padAtoms ? 2 : 1, 1, box[0], box[1]);
+                  padAtoms ? 2 : 1, 1, box);
   // Masses
   outputFile << "\nMasses\n\n";
   outputFile << "1 15.999400 # O\n";
@@ -1559,7 +1573,7 @@ int sout::writeLAMMPSdataAllPrisms(
   const auto box = dataBoxBounds(yCloud);
   writeDataHeader(outputFile, yCloud.pts.size(), bonds.size(),
                   doShapeMatching ? 2 * maxDepth - 2 : maxDepth, bondTypes,
-                  box[0], box[1]);
+                  box);
   // Masses
   outputFile << "\nMasses\n\n";
   outputFile << "1 15.999400 # dummy\n";
@@ -1632,7 +1646,7 @@ int sout::writeLAMMPSdataAllRings(
   // There are maxDepth-2 total types of rings + dummy
   const auto box = dataBoxBounds(yCloud);
   writeDataHeader(outputFile, yCloud.pts.size(), bonds.size(), maxDepth,
-                  bondTypes, box[0], box[1]);
+                  bondTypes, box);
   // Masses
   outputFile << "\nMasses\n\n";
   outputFile << "1 15.999400 # dummy\n";
@@ -1709,7 +1723,7 @@ int sout::writeLAMMPSdataPrisms(
   outputFile.open("../output/" + filename);
   const auto box = dataBoxBoundsZero(yCloud);
   writeDataHeader(outputFile, yCloud.pts.size(), bonds.size(),
-                  padAtoms ? 2 : 1, bondTypes, box[0], box[1]);
+                  padAtoms ? 2 : 1, bondTypes, box);
   // Masses
   outputFile << "\nMasses\n\n";
   outputFile << "1 15.999400 # O\n";
@@ -1836,7 +1850,7 @@ int sout::writeLAMMPSdataCages(
   outputFile.open("../output/" + filename);
   const auto box = dataBoxBoundsZero(yCloud);
   writeDataHeader(outputFile, yCloud.pts.size(), bonds.size(),
-                  padAtoms ? 2 : 1, bondTypes, box[0], box[1]);
+                  padAtoms ? 2 : 1, bondTypes, box);
   // Masses
   outputFile << "\nMasses\n\n";
   // For DDCs and HCs
@@ -1896,18 +1910,7 @@ int sout::writeDump(const molSys::PointCloud<molSys::Point<double>, double> &yCl
   outputFile << yCloud.currentFrame << "\n";
   outputFile << "ITEM: NUMBER OF ATOMS\n";
   outputFile << yCloud.nop << "\n";
-  outputFile << "ITEM: BOX BOUNDS pp pp pp\n";
-  for (int k = 0; k < yCloud.boxLow.size(); k++) {
-    outputFile << yCloud.boxLow[k] << " "
-               << yCloud.boxLow[k] + yCloud.box[k]; // print xlo xhi etc
-    // print out the tilt factors too if it is a triclinic box
-    if (yCloud.box.size() == 2 * yCloud.boxLow.size()) {
-      outputFile << " "
-                 << yCloud.box[k + yCloud.boxLow.size()]; // this would be +2
-                                                            // for a 2D box
-    }
-    outputFile << "\n"; // print end of line
-  }                     // end of printing box lengths
+  gen::writeDumpBoxBounds(outputFile, yCloud);
   outputFile << "ITEM: ATOMS id mol type x y z\n";
   // -----------------------
   // Atom lines
@@ -2064,7 +2067,7 @@ int sout::writeLAMMPSdataTopoBulk(
   outputFile.open(path + "bulkTopo/dataFiles/" + filename);
   const auto box = dataBoxBounds(yCloud);
   writeDataHeader(outputFile, yCloud.pts.size(), bonds.size(), numAtomTypes,
-                  bondTypes, box[0], box[1]);
+                  bondTypes, box);
   // Masses
   outputFile << "\nMasses\n\n";
   outputFile << "1 15.999400 # dummy\n";

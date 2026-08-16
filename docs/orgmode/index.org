@@ -130,6 +130,8 @@ framework.
    howto/index
    howto/install
    howto/classify-cli
+   howto/sheared-cells
+   howto/ionic-liquid
    howto/ase-integration
    howto/solvis
    howto/confined-ice

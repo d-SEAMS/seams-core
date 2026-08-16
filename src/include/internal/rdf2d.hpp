@@ -99,7 +99,9 @@ sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                  std::vector<int> histogram, double binwidth, int nbin,
                  std::vector<double> volumeLengths, int nIter);
 
-//! Gets the lengths of the volume slice of the quasi-two-dimensional system
+//! Gets the lengths of the volume slice of the quasi-two-dimensional system.
+//! box.size()>=6 returns dump H {lx, ly, lz}; a length-3 box stays the
+//! particle AABB so slab tests keep the occupied extents.
 std::vector<double>
 getSystemLengths(const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 

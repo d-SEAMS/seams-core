@@ -1048,3 +1048,136 @@ TEST_CASE("steinhardtQl accepts l=8 and averages correctly on FCC", "[bop]") {
     REQUIRE_THAT(q8.qlBar[i], Catch::Matchers::WithinAbs(q8.ql[i], 1e-9));
   }
 }
+
+TEST_CASE("qlmOneAtomDr uses packed relDist not minImage", "[bop]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  molSys::Point<double> a;
+  a.x = 0.5;
+  a.y = 0.5;
+  a.z = 1.0;
+  a.atomID = 1;
+  a.type = 1;
+  molSys::Point<double> b;
+  b.x = 1.0;
+  b.y = 8.0;
+  b.z = 1.0;
+  b.atomID = 2;
+  b.type = 1;
+  cloud.pts.push_back(a);
+  cloud.pts.push_back(b);
+  cloud.idIndexMap[1] = 0;
+  cloud.idIndexMap[2] = 1;
+  const auto dr01 = gen::relDist(cloud, 0, 1);
+  REQUIRE_THAT(dr01[0], Catch::Matchers::WithinAbs(4.5, 1e-10));
+  REQUIRE_THAT(dr01[1], Catch::Matchers::WithinAbs(1.160254037844386, 1e-10));
+  REQUIRE_THAT(dr01[2], Catch::Matchers::WithinAbs(0.0, 1e-12));
+  const double packed[6] = {dr01[0], dr01[1], dr01[2],
+                            -dr01[0], -dr01[1], -dr01[2]};
+  const double xyz[6] = {0.5, 0.5, 1.0, 1.0, 8.0, 1.0};
+  const int offsets[3] = {0, 1, 2};
+  const int cols[2] = {1, 0};
+  std::vector<double> qlmDr(2 * 2 * 13, 0.0);
+  std::vector<double> qlmSpan(2 * 2 * 13, 0.0);
+  seams::steinhardt::qlmOneAtomDr(0, 6, packed, offsets, cols, qlmDr.data());
+  seams::steinhardt::qlmOneAtom(0, 6, xyz, offsets, cols, cloud.box[0],
+                                cloud.box[1], cloud.box[2], qlmSpan.data());
+  bool qlmDiffers = false;
+  for (size_t i = 0; i < qlmDr.size(); i++) {
+    if (std::abs(qlmDr[i] - qlmSpan[i]) > 1e-8) {
+      qlmDiffers = true;
+      break;
+    }
+  }
+  REQUIRE(qlmDiffers);
+}
+
+TEST_CASE("steinhardtQl flatten uses dump H not span minImage", "[bop]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 3;
+  molSys::Point<double> a;
+  a.x = 0.5;
+  a.y = 0.5;
+  a.z = 1.0;
+  a.atomID = 1;
+  a.type = 1;
+  molSys::Point<double> b;
+  b.x = 1.0;
+  b.y = 8.0;
+  b.z = 1.0;
+  b.atomID = 2;
+  b.type = 1;
+  molSys::Point<double> c;
+  c.x = 2.5;
+  c.y = 0.5;
+  c.z = 1.0;
+  c.atomID = 3;
+  c.type = 1;
+  cloud.pts.push_back(a);
+  cloud.pts.push_back(b);
+  cloud.pts.push_back(c);
+  cloud.idIndexMap[1] = 0;
+  cloud.idIndexMap[2] = 1;
+  cloud.idIndexMap[3] = 2;
+  const std::vector<std::vector<int>> nList = {{1, 2, 3}, {2, 1}, {3, 1}};
+  const auto ql = chill::steinhardtQl(cloud, nList, 6);
+  const auto dr01 = gen::relDist(cloud, 0, 1);
+  const auto dr02 = gen::relDist(cloud, 0, 2);
+  const double packed[6] = {dr01[0], dr01[1], dr01[2],
+                            dr02[0], dr02[1], dr02[2]};
+  const double xyz[9] = {0.5, 0.5, 1.0, 1.0, 8.0, 1.0, 2.5, 0.5, 1.0};
+  const int offsets[2] = {0, 2};
+  const int cols[2] = {1, 2};
+  std::vector<double> qlmDr(1 * 13 * 2, 0.0);
+  std::vector<double> qlmSpan(1 * 13 * 2, 0.0);
+  seams::steinhardt::qlmOneAtomDr(0, 6, packed, offsets, cols, qlmDr.data());
+  seams::steinhardt::qlmOneAtom(0, 6, xyz, offsets, cols, cloud.box[0],
+                                cloud.box[1], cloud.box[2], qlmSpan.data());
+  std::vector<double> qlDr(1, 0.0);
+  std::vector<double> qlBarDr(1, 0.0);
+  std::vector<double> qlSpan(1, 0.0);
+  std::vector<double> qlBarSpan(1, 0.0);
+  seams::steinhardt::qlOneAtom(0, 6, qlmDr.data(), offsets, cols, qlDr.data(),
+                               qlBarDr.data());
+  seams::steinhardt::qlOneAtom(0, 6, qlmSpan.data(), offsets, cols,
+                               qlSpan.data(), qlBarSpan.data());
+  REQUIRE(std::abs(qlDr[0] - qlSpan[0]) > 1e-4);
+  REQUIRE_THAT(ql.ql[0], Catch::Matchers::WithinAbs(qlDr[0], 1e-5));
+}
+
+TEST_CASE("qlmOneAtom matches qlmOneAtomDr on an ortho pair", "[bop]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {10.0, 10.0, 10.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  molSys::Point<double> a;
+  a.x = 0.0;
+  a.y = 0.0;
+  a.z = 0.0;
+  a.atomID = 1;
+  molSys::Point<double> b;
+  b.x = 1.0;
+  b.y = 0.0;
+  b.z = 0.0;
+  b.atomID = 2;
+  cloud.pts.push_back(a);
+  cloud.pts.push_back(b);
+  const auto dr01 = gen::relDist(cloud, 0, 1);
+  const double packed[6] = {dr01[0], dr01[1], dr01[2],
+                            -dr01[0], -dr01[1], -dr01[2]};
+  const double xyz[6] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0};
+  const int offsets[3] = {0, 1, 2};
+  const int cols[2] = {1, 0};
+  std::vector<double> qlmDr(2 * 2 * 13, 0.0);
+  std::vector<double> qlmXyz(2 * 2 * 13, 0.0);
+  seams::steinhardt::qlmOneAtomDr(0, 6, packed, offsets, cols, qlmDr.data());
+  seams::steinhardt::qlmOneAtom(0, 6, xyz, offsets, cols, 10.0, 10.0, 10.0,
+                                qlmXyz.data());
+  for (size_t i = 0; i < qlmDr.size(); i++) {
+    REQUIRE_THAT(qlmDr[i], Catch::Matchers::WithinAbs(qlmXyz[i], 1e-12));
+  }
+}

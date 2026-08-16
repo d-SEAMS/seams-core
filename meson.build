@@ -7,7 +7,7 @@
 #-----------------------------------------------------------------------------------
 
 project('seams-core', ['cpp', 'c'],
-  version: '2.3.3',
+  version: '2.3.4',
   default_options: ['warning_level=2', 'cpp_std=c++20'],
   meson_version: '>=1.3.0')
 
@@ -407,4 +407,24 @@ if get_option('with_cli')
   test('seams_version', seams_exe, args: ['--version'])
   test('seams_features', seams_exe, args: ['--features'])
   test('seams_print_config', seams_exe, args: ['--print-config'])
+
+  python3 = find_program('python3', required: true)
+  test(
+    'seams_help_mentions_rdf',
+    python3,
+    args: [
+      '-c',
+      'import subprocess,sys; p=subprocess.run([sys.argv[1],"--help"],capture_output=True,text=True); sys.exit(0 if p.returncode==0 and "rdf" in p.stdout+p.stderr else 1)',
+      seams_exe.full_path(),
+    ],
+    depends: [seams_exe])
+  test(
+    'seams_unknown_command_exit_2',
+    python3,
+    args: [
+      '-c',
+      'import subprocess,sys; p=subprocess.run([sys.argv[1],"nope","x"],capture_output=True,text=True); sys.exit(0 if p.returncode==2 else 1)',
+      seams_exe.full_path(),
+    ],
+    depends: [seams_exe])
 endif

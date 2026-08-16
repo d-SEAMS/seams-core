@@ -4,15 +4,19 @@
 //-----------------------------------------------------------------------------------
 
 #include <argum.h>
+#include <bond.hpp>
 #include <bop.hpp>
 #include <cage_affiliation.hpp>
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
+#include <generic.hpp>
 #include <neighbours.hpp>
+#include <rdf.hpp>
 #include <seams_config.hpp>
 #include <seams_input.hpp>
 
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <map>
@@ -68,9 +72,13 @@ Cloud load(const std::string &path, int frame, int typeI) {
 #endif
 #ifdef SEAMS_HAS_CHEMFILES
   if (ext == "pdb" || ext == "gro" || ext == "dcd") {
-    return sinp::readChemfiles(path, frame, cloud, typeI > 0 ? typeI : -1);
+    const int filter = typeI < 0 ? -1 : (typeI > 0 ? typeI : -1);
+    return sinp::readChemfiles(path, frame, cloud, filter);
   }
 #endif
+  if (typeI < 0) {
+    return sinp::readLammpsTrj(path, frame, cloud);
+  }
   if (typeI > 0) {
     return sinp::readLammpsTrjO(path, frame, cloud, typeI);
   }
@@ -80,6 +88,37 @@ Cloud load(const std::string &path, int frame, int typeI) {
   }
   Cloud again;
   return sinp::readLammpsTrjO(path, frame, again, 1);
+}
+
+std::string_view trimView(std::string_view s) {
+  const auto first = s.find_first_not_of(" \t");
+  if (first == std::string_view::npos) {
+    return {};
+  }
+  const auto last = s.find_last_not_of(" \t");
+  return s.substr(first, last - first + 1);
+}
+
+bool parseTypePair(std::string_view value, int &typeI, int &typeJ) {
+  const auto comma = value.find(',');
+  if (comma == std::string_view::npos) {
+    return false;
+  }
+  if (value.find(',', comma + 1) != std::string_view::npos) {
+    return false;
+  }
+  const auto left = trimView(value.substr(0, comma));
+  const auto right = trimView(value.substr(comma + 1));
+  if (left.empty() || right.empty()) {
+    return false;
+  }
+  try {
+    typeI = parseIntegral<int>(left);
+    typeJ = parseIntegral<int>(right);
+  } catch (const ParsingException &) {
+    return false;
+  }
+  return true;
 }
 
 int typeOf(const Cloud &cloud, int requested) {
@@ -185,11 +224,45 @@ void printFeatures(std::ostream &os) {
 }
 
 int cmdRead(std::ostream &os, Cloud &cloud) {
-  const auto box = cloud.box;
   os << colorizer.heading("nop") << " " << cloud.nop << " "
      << colorizer.longOption("frame") << " " << cloud.currentFrame << " "
-     << colorizer.shortOption("box") << " " << box[0] << " " << box[1] << " "
-     << box[2] << "\n";
+     << colorizer.shortOption("box") << " " << gen::formatDumpBox(cloud.box)
+     << "\n";
+  return 0;
+}
+
+int cmdRdf(std::ostream &os, Cloud &cloud, double rmax, int bins, int typeI,
+           int typeJ) {
+  if (bins <= 0) {
+    bins = std::max(1, static_cast<int>(std::lround(rmax / 0.1)));
+  }
+  const int typI = typeOf(cloud, typeI);
+  const int typJ = typeJ > 0 ? typeJ : typI;
+  const auto gr = rdf::partialRdf(cloud, typI, typJ, rmax, bins);
+  os << "# r g count\n";
+  os << "# types " << typI << " " << typJ << " rmax " << rmax << " bins "
+     << bins << " volume " << gr.volume << "\n";
+  for (std::size_t i = 0; i < gr.r.size(); ++i) {
+    os << gr.r[i] << " " << gr.g[i] << " " << gr.count[i] << "\n";
+  }
+  return 0;
+}
+
+int cmdCn(std::ostream &os, Cloud &cloud, double rmax, int bins, int typeI,
+          int typeJ) {
+  if (bins <= 0) {
+    bins = std::max(1, static_cast<int>(std::lround(rmax / 0.1)));
+  }
+  const int typI = typeOf(cloud, typeI);
+  const int typJ = typeJ > 0 ? typeJ : typI;
+  const auto gr = rdf::partialRdf(cloud, typI, typJ, rmax, bins);
+  const double rhoJ =
+      (gr.volume > 0.0) ? static_cast<double>(gr.nJ) / gr.volume : 0.0;
+  const double cn = rdf::coordinationNumber(gr, rmax, rhoJ);
+  os << "# site-site\n";
+  os << "# types " << typI << " " << typJ << " cutoff " << rmax << " cn "
+     << cn << " nI " << gr.nI << " nJ " << gr.nJ << " volume " << gr.volume
+     << "\n";
   return 0;
 }
 
@@ -303,6 +376,40 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
   return 0;
 }
 
+int cmdHbonds(std::ostream &os, Cloud &yCloud, Cloud &hCloud, double cutoff,
+              int typeI, double distCutoff, double angleCutoff,
+              bool allDonors) {
+  if (yCloud.nop == 0) {
+    os << colorizer.heading("nop") << " 0 "
+       << colorizer.longOption("hbonds") << " 0\n";
+    return 0;
+  }
+  const int typ = typeOf(yCloud, typeI);
+  auto nList = nneigh::neighListO(cutoff, yCloud, typ);
+  std::vector<std::vector<int>> net;
+  if (allDonors) {
+    std::vector<int> donorHs;
+    donorHs.reserve(static_cast<std::size_t>(hCloud.nop));
+    for (int i = 0; i < hCloud.nop; ++i) {
+      donorHs.push_back(i);
+    }
+    net = bond::populateHbondsFromDonors(yCloud, hCloud, nList, donorHs,
+                                         distCutoff, angleCutoff);
+  } else {
+    net = bond::populateHbondsWithInputClouds(yCloud, hCloud, nList, distCutoff,
+                                              angleCutoff);
+  }
+  int edges = 0;
+  for (const auto &row : net) {
+    if (row.size() > 1) {
+      edges += static_cast<int>(row.size()) - 1;
+    }
+  }
+  os << colorizer.heading("nop") << " " << yCloud.nop << " "
+     << colorizer.longOption("hbonds") << " " << (edges / 2) << "\n";
+  return 0;
+}
+
 } // namespace
 
 int main(int argc, char *argv[]) {
@@ -317,8 +424,17 @@ int main(int argc, char *argv[]) {
   int k = cfg.k;
   std::string graph = cfg.graph;
   bool printConfig = false;
+  int htype = 1;
+  double hdist = 2.42;
+  double hangle = 30.0;
+  bool allDonors = false;
   std::string cmd;
   std::string file;
+  std::string typesFlag;
+  int rdfTypeI = 0;
+  int rdfTypeJ = 0;
+  bool typesSet = false;
+  int bins = 0;
 
   const char *progname = (argc ? argv[0] : "seams");
   Parser parser;
@@ -380,9 +496,23 @@ int main(int argc, char *argv[]) {
 
   parser.add(Option("--cutoff", "-c")
                  .argName("ANGSTROM")
-                 .help("Neighbour cutoff")
+                 .help("Neighbour cutoff (rdf/cn rmax; hbonds heavy-atom nList)")
                  .handler([&](std::string_view value) {
                    cutoff = parseFloatingPoint<double>(value);
+                 }));
+
+  parser.add(Option("--types")
+                 .argName("I,J")
+                 .help("Pair types for site-site rdf/cn (default I=J=--type)")
+                 .handler([&](std::string_view value) {
+                   typesFlag = std::string(value);
+                 }));
+
+  parser.add(Option("--bins")
+                 .argName("N")
+                 .help("RDF histogram bins (default rmax/0.1)")
+                 .handler([&](std::string_view value) {
+                   bins = parseIntegral<int>(value);
                  }));
 
   parser.add(Option("-k")
@@ -396,6 +526,31 @@ int main(int argc, char *argv[]) {
                  .argName("KIND")
                  .help("Bond graph for cages: cutoff | knn | knn-union | seeded")
                  .handler([&](std::string_view value) { graph = value; }));
+
+  parser.add(Option("--htype")
+                 .argName("I")
+                 .help("Hydrogen atom type for hbonds")
+                 .handler([&](std::string_view value) {
+                   htype = parseIntegral<int>(value);
+                 }));
+
+  parser.add(Option("--hdist")
+                 .argName("ANGSTROM")
+                 .help("Acceptor-H distance cutoff for hbonds")
+                 .handler([&](std::string_view value) {
+                   hdist = parseFloatingPoint<double>(value);
+                 }));
+
+  parser.add(Option("--hangle")
+                 .argName("DEG")
+                 .help("O-O-H angle cutoff for hbonds (acceptor-centered)")
+                 .handler([&](std::string_view value) {
+                   hangle = parseFloatingPoint<double>(value);
+                 }));
+
+  parser.add(Option("--donors")
+                 .help("Use every hydrogen as a donor candidate")
+                 .handler([&]() { allDonors = true; }));
 
   parser.add(Option("--config")
                  .argName("FILE")
@@ -439,7 +594,7 @@ int main(int argc, char *argv[]) {
                  }));
 
   parser.add(Positional("command")
-                 .help("read | chill | chill-plus | cages")
+                 .help("read | chill | chill-plus | cages | rdf | cn | hbonds")
                  .occurs(zeroOrOneTime)
                  .handler([&](std::string_view value) { cmd = value; }));
 
@@ -471,6 +626,23 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
+  if (!typesFlag.empty()) {
+    if (!parseTypePair(typesFlag, rdfTypeI, rdfTypeJ)) {
+      std::cerr << colorizer.error("bad --types (want I,J)") << "\n";
+      std::cerr << colorizer.warning(parser.formatUsage(progname, colorizer))
+                << "\n";
+      return 2;
+    }
+    typesSet = true;
+  } else {
+    rdfTypeI = typeI;
+    rdfTypeJ = typeI;
+  }
+  if (bins < 0) {
+    std::cerr << colorizer.error("bad --bins (want N > 0)") << "\n";
+    return 2;
+  }
+
   if (cmd.empty() || file.empty()) {
     std::cerr << colorizer.error(
                      "A command and a trajectory file are required")
@@ -498,23 +670,40 @@ int main(int argc, char *argv[]) {
         return 2;
       }
     }
+    if (cmd == "rdf") {
+      return cmdRdf(os, cloud, cutoff, bins, rdfTypeI, rdfTypeJ);
+    }
+    if (cmd == "cn") {
+      return cmdCn(os, cloud, cutoff, bins, rdfTypeI, rdfTypeJ);
+    }
+    if (cmd == "hbonds") {
+      Cloud hCloud = load(file, cloud.currentFrame, htype);
+      return cmdHbonds(os, cloud, hCloud, cutoff, typeI, hdist, hangle,
+                       allDonors);
+    }
     os << colorizer.error("unknown command: ") << cmd << "\n";
     return 2;
   };
 
+  const bool pairCmd = (cmd == "rdf" || cmd == "cn");
+  const int loadType =
+      (pairCmd && (typesSet ? rdfTypeI != rdfTypeJ : false)) ? -1 : typeI;
+
   if (last <= 0 || last == frame) {
-    Cloud cloud = load(file, frame, typeI);
+    Cloud cloud = load(file, frame, loadType);
     return runOne(std::cout, cloud);
   }
 
   std::mutex outMu;
   int rc = 0;
-  const int typeFilter = typeI > 0 ? typeI : 0;
+  const int typeFilter = (pairCmd && typesSet && rdfTypeI != rdfTypeJ)
+                             ? 0
+                             : (typeI > 0 ? typeI : 0);
   sinp::forEachLammpsFrame(
       file, frame, last, typeFilter,
       [&](int /*fr*/, Cloud &cloud) {
         if (typeFilter <= 0 && cloud.nop == 0) {
-          cloud = load(file, cloud.currentFrame, typeI);
+          cloud = load(file, cloud.currentFrame, loadType);
         }
         std::ostringstream line;
         const int one = runOne(line, cloud);

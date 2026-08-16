@@ -81,9 +81,7 @@ void fillPairDistSq(
     const int *jatom, std::size_t n, double *dx, double *dy, double *dz,
     double *distSq) {
   if (yCloud.box.size() >= 6) {
-    for (std::size_t k = 0; k < n; k++) {
-      distSq[k] = gen::periodicDistSq(yCloud, iatom, jatom[k]);
-    }
+    gen::batchPeriodicDistSq(yCloud, iatom, jatom, n, distSq);
     return;
   }
   const double xi = yCloud.pts[static_cast<std::size_t>(iatom)].x;
@@ -236,64 +234,7 @@ std::vector<std::vector<int>>
 nneigh::neighList(double rcutoff,
                   const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                   int typeI, int typeJ) {
-  if (!hasPeriodicBox(yCloud)) {
-    return {};
-  }
-
-  const std::vector<int> indexToID = indexToIDTable(yCloud);
-  std::vector<std::vector<int>> nList = seedWithSelfIDs(indexToID, yCloud.nop);
-
-#ifdef SEAMS_HAS_VESIN
-  {
-    std::vector<int> subset;
-    subset.reserve(static_cast<size_t>(yCloud.nop));
-    for (int i = 0; i < yCloud.nop; i++) {
-      const int t = yCloud.pts[i].type;
-      if (t == typeI || t == typeJ) {
-        subset.push_back(i);
-      }
-    }
-    std::vector<std::pair<int, int>> pairs;
-    if (cellListPairs(yCloud, subset, rcutoff, pairs)) {
-      for (const auto &[iatom, jatom] : pairs) {
-        const int ti = yCloud.pts[iatom].type;
-        const int tj = yCloud.pts[jatom].type;
-        const bool mixed = (ti == typeI && tj == typeJ) ||
-                           (ti == typeJ && tj == typeI);
-        if (!mixed) {
-          continue;
-        }
-        appendNeighbourID(nList, indexToID, iatom, jatom);
-      }
-      return nList;
-    }
-  }
-#endif
-
-  // Compare squared distances so that the per-pair square root is avoided
-  const double rcutoffSq = rcutoff * rcutoff;
-
-  // Pairs of type I and type J. When the types coincide the full i x j
-  // product would write each unordered pair twice and accept iatom == jatom
-  // (distance 0). Walk j > i in that case, matching halfNeighList.
-  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-    if (yCloud.pts[iatom].type != typeI) {
-      continue;
-    }
-    const int jStart = (typeI == typeJ) ? iatom + 1 : 0;
-    for (int jatom = jStart; jatom < yCloud.nop; jatom++) {
-      if (yCloud.pts[jatom].type != typeJ) {
-        continue;
-      }
-      if (gen::periodicDistSq(yCloud, iatom, jatom) > rcutoffSq) {
-        continue;
-      }
-      appendNeighbourID(nList, indexToID, iatom, jatom);
-      appendNeighbourID(nList, indexToID, jatom, iatom);
-    }
-  }
-
-  return nList;
+  return neighListPair(rcutoff, yCloud, typeI, typeJ);
 }
 
 /**
@@ -382,6 +323,97 @@ nneigh::neighListO(double rcutoff,
       appendNeighbourID(nList, indexToID, jatom, iatom);
     }
   }   // End of loop for iatom
+
+  return nList;
+}
+
+/**
+ * @details I-J neighbour list. Like-type (I==J) reuses neighListO,
+ *  including its dump MIC. Unlike-type pairs use the same vesin /
+ *  fillPairDistSq path, then keep only mixed I-J contacts.
+ * @param[in] rcutoff Distance cutoff, within which two atoms are neighbours.
+ * @param[in] yCloud The input molSys::PointCloud
+ * @param[in] typeI Type ID of particles of type I.
+ * @param[in] typeJ Type ID of particles of type J.
+ * @return Row-ordered full neighbour list, by atom ID.
+ */
+std::vector<std::vector<int>>
+nneigh::neighListPair(
+    double rcutoff,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeI,
+    int typeJ) {
+  if (typeI == typeJ) {
+    return neighListO(rcutoff, yCloud, typeI);
+  }
+  if (!hasPeriodicBox(yCloud)) {
+    return {};
+  }
+
+  const std::vector<int> indexToID = indexToIDTable(yCloud);
+  std::vector<std::vector<int>> nList = seedWithSelfIDs(indexToID, yCloud.nop);
+
+#ifdef SEAMS_HAS_VESIN
+  {
+    std::vector<int> subset;
+    subset.reserve(static_cast<size_t>(yCloud.nop));
+    for (int i = 0; i < yCloud.nop; i++) {
+      const int t = yCloud.pts[i].type;
+      if (t == typeI || t == typeJ) {
+        subset.push_back(i);
+      }
+    }
+    std::vector<std::pair<int, int>> pairs;
+    if (cellListPairs(yCloud, subset, rcutoff, pairs)) {
+      for (const auto &[iatom, jatom] : pairs) {
+        const int ti = yCloud.pts[iatom].type;
+        const int tj = yCloud.pts[jatom].type;
+        const bool mixed = (ti == typeI && tj == typeJ) ||
+                           (ti == typeJ && tj == typeI);
+        if (!mixed) {
+          continue;
+        }
+        appendNeighbourID(nList, indexToID, iatom, jatom);
+      }
+      return nList;
+    }
+  }
+#endif
+
+  const double rcutoffSq = rcutoff * rcutoff;
+  std::vector<int> iIdx;
+  std::vector<int> jIdx;
+  iIdx.reserve(static_cast<size_t>(yCloud.nop));
+  jIdx.reserve(static_cast<size_t>(yCloud.nop));
+  for (int i = 0; i < yCloud.nop; i++) {
+    const int t = yCloud.pts[i].type;
+    if (t == typeI) {
+      iIdx.push_back(i);
+    }
+    if (t == typeJ) {
+      jIdx.push_back(i);
+    }
+  }
+
+  std::vector<double> dx(jIdx.size()), dy(jIdx.size()), dz(jIdx.size());
+  std::vector<double> distSq(jIdx.size());
+  for (const int iatom : iIdx) {
+    if (jIdx.empty()) {
+      break;
+    }
+    fillPairDistSq(yCloud, iatom, jIdx.data(), jIdx.size(), dx.data(),
+                   dy.data(), dz.data(), distSq.data());
+    for (size_t jj = 0; jj < jIdx.size(); jj++) {
+      if (distSq[jj] > rcutoffSq) {
+        continue;
+      }
+      const int jatom = jIdx[jj];
+      if (iatom == jatom) {
+        continue;
+      }
+      appendNeighbourID(nList, indexToID, iatom, jatom);
+      appendNeighbourID(nList, indexToID, jatom, iatom);
+    }
+  }
 
   return nList;
 }

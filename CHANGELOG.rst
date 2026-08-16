@@ -5,6 +5,12 @@ Changelog
 Unreleased
 ==========
 
+Version 2.3.4 (2026-08-16)
+===========================
+
+Steinhardt, hydrogen-bond, and cluster wraps use the dump
+minimum image, not an independent-axis wrap on bound spans.
+
 Version 2.3.3 (2026-08-16)
 ===========================
 

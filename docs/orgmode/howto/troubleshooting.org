@@ -4,8 +4,10 @@
 | symptom | cause | fix |
 |---------+-------+-----|
 | ~A command and a trajectory file are required~ / exit 2 | Missing positional | ~seams read FILE~ |
-| ~unknown command~ / exit 2 | Not ~read~ / ~chill~ / ~chill-plus~ / ~cages~ | ~chill_plus~ is an alias of ~chill-plus~ |
-| ~nop 0~ | Wrong type or empty file | ~--type 2~ on TIP4P, ~--type 1~ on mW |
+| ~unknown command~ / exit 2 | Not ~read~ / ~chill~ / ~chill-plus~ / ~cages~ / ~rdf~ | ~chill_plus~ is an alias of ~chill-plus~ |
+| ~bad --types~ / exit 2 | Not ~I,J~ | ~seams rdf FILE --types 1,2~ |
+| ~nop 0~ | Wrong type or empty file | ~--type 2~ on TIP4P, ~--type 1~ on mW; other mixed dumps need the species integer ([[file:ionic-liquid.org][Ionic-liquid dumps]]) |
+| Neighbours miss a pair across a sheared face | Bound spans treated as ~lx, ly, lz~ | The dump tilt is enough; the engine recovers H ([[file:sheared-cells.org][Sheared cells]]) |
 | ~chemfiles: disabled~ and ~.pdb~ fails | Flake / no chemfiles | Default pixi lock, or a Meson build that finds chemfiles |
 | ~.con~ fails | readcon-core off | Enable in a Meson build that can see it; the flake does not fetch the wrap |
 | ~--jobs~ does nothing useful | OpenMP off | ~seams --features~ |

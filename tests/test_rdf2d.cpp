@@ -1,7 +1,9 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <generic.hpp>
 #include <mol_sys.hpp>
+#include <neighbours.hpp>
 #include <rdf2d.hpp>
 
 #include <cmath>
@@ -73,6 +75,38 @@ TEST_CASE("getSystemLengths with spread atoms", "[rdf2d]") {
   REQUIRE_THAT(lengths[2], Catch::Matchers::WithinAbs(6.0, 1e-10)); // z: 7-1
 }
 
+TEST_CASE("getSystemLengths hex-prism uses dump H not bound spans",
+          "[rdf2d]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  const double coords[2][3] = {{0.2, 0.1, 1.0}, {9.7, 0.1, 1.0}};
+  for (int i = 0; i < 2; i++) {
+    molSys::Point<double> pt;
+    pt.type = 1;
+    pt.atomID = i + 1;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+  auto lengths = rdf2::getSystemLengths(cloud);
+  REQUIRE(lengths.size() == 3);
+  REQUIRE_THAT(lengths[0], Catch::Matchers::WithinAbs(10.0, 1e-9));
+  REQUIRE_THAT(lengths[1], Catch::Matchers::WithinAbs(8.660254037844386, 1e-9));
+  REQUIRE_THAT(lengths[2], Catch::Matchers::WithinAbs(10.0, 1e-9));
+  const double vol = lengths[0] * lengths[1] * lengths[2];
+  const double dumpVol = nneigh::dumpVolume(cloud);
+  const double planeArea = lengths[0] * lengths[1];
+  const double bound = 15.0 * 8.660254037844386 * 10.0;
+  REQUIRE_THAT(vol, Catch::Matchers::WithinAbs(dumpVol, 1e-9));
+  REQUIRE_THAT(planeArea,
+               Catch::Matchers::WithinAbs(10.0 * 8.660254037844386, 1e-9));
+  REQUIRE(vol < bound - 1.0);
+}
+
 // -- getPlaneArea tests --
 
 TEST_CASE("getPlaneArea returns product of two largest dimensions", "[rdf2d]") {
@@ -139,6 +173,8 @@ TEST_CASE("sampleRDF_AA histograms the tilt a-image pair", "[rdf2d]") {
     cloud.pts.push_back(pt);
     cloud.idIndexMap[i + 1] = i;
   }
+  REQUIRE_THAT(gen::periodicDistSq(cloud, 0, 1),
+               Catch::Matchers::WithinAbs(0.25, 1e-9));
   const double cutoff = 1.0;
   const double binwidth = 0.1;
   const int nbin = 10;
@@ -166,6 +202,46 @@ TEST_CASE("normalizeRDF produces non-negative values", "[rdf2d]") {
   for (int i = 0; i < nbin; i++) {
     REQUIRE(rdfValues[i] >= 0.0);
   }
+}
+
+TEST_CASE("normalizeRDF hex-prism density is dumpVolume not span product",
+          "[rdf2d]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  const double coords[2][3] = {{0.2, 0.1, 1.0}, {9.7, 0.1, 1.0}};
+  for (int i = 0; i < 2; i++) {
+    molSys::Point<double> pt;
+    pt.type = 1;
+    pt.atomID = i + 1;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+  auto lengths = rdf2::getSystemLengths(cloud);
+  const double dumpVol = nneigh::dumpVolume(cloud);
+  REQUIRE_THAT(lengths[0] * lengths[1] * lengths[2],
+               Catch::Matchers::WithinAbs(dumpVol, 1e-9));
+  REQUIRE_THAT(lengths[0] * lengths[1],
+               Catch::Matchers::WithinAbs(10.0 * 8.660254037844386, 1e-9));
+
+  const int nopA = 2;
+  const int nbin = 5;
+  const double binwidth = 1.0;
+  const int nIter = 1;
+  std::vector<int> histogram = {2, 0, 0, 0, 0};
+  std::vector<double> rdfDump(static_cast<std::size_t>(nbin), 0.0);
+  std::vector<double> rdfSpan(static_cast<std::size_t>(nbin), 0.0);
+  REQUIRE(rdf2::normalizeRDF(nopA, rdfDump, histogram, binwidth, nbin, lengths,
+                             nIter) == 0);
+  REQUIRE(rdf2::normalizeRDF(nopA, rdfSpan, histogram, binwidth, nbin,
+                             {15.0, 8.660254037844386, 10.0}, nIter) == 0);
+  REQUIRE(rdfDump[0] > 0.0);
+  REQUIRE(rdfSpan[0] > 0.0);
+  REQUIRE(rdfDump[0] < rdfSpan[0]);
 }
 
 // -- rdf2Danalysis_AA integration test --

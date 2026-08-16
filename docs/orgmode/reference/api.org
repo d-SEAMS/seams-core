@@ -67,6 +67,7 @@ Every file under =src/include/internal=.
 | =shapeMatch.hpp= | ~match~ | prism shape-matching |
 | =cluster.hpp= | ~clump~ | Stillinger ice clusters |
 | =order_parameter.hpp= | ~topoparam~ | height% and coverage area |
+| =rdf.hpp= | ~rdf~ | partial 3D ~g_IJ(r)~ and site-site CN |
 | =rdf2d.hpp= | ~rdf2~ | in-plane radial distribution |
 | =selection.hpp= | ~gen~, ~ring~ | type and slice selections |
 | =generic.hpp= | ~gen~ | periodic distance, angles, medians |

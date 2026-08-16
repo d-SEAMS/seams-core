@@ -15,6 +15,10 @@ namespace seams {
 namespace hn = hwy::HWY_NAMESPACE;
 
 // Compute squared periodic distances for a batch of atom pairs.
+// Orthorhombic lengths only: one independent wrap per axis.
+// A LAMMPS dump with tilt (PointCloud.box.size() >= 6) stores bound
+// spans in box[0..2], not lx, ly, lz. Call gen::periodicDistSq or
+// gen::batchPeriodicDistSq for those clouds.
 // dx, dy, dz: coordinate differences (length n)
 // bx, by, bz: periodic box dimensions
 // out: output squared distances (length n)

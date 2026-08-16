@@ -18,8 +18,12 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstddef>
 #include <filesystem>
 #include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 #include <mol_sys.hpp>
 
 // C++20
@@ -194,6 +198,53 @@ periodicDist(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
   return std::sqrt(periodicDistSq(yCloud, iatom, jatom));
 }
 
+// Scalar pair batch. Highway BatchPeriodicDistSq is ortho-only; a
+// tilt dump (box.size() >= 6) must go through periodicDistSq.
+inline void batchPeriodicDistSq(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
+    const int *jatom, std::size_t n, double *distSq) {
+  for (std::size_t k = 0; k < n; k++) {
+    distSq[k] = periodicDistSq(yCloud, iatom, jatom[k]);
+  }
+}
+
+// Bound spans, then tilt when box.size() >= 6.
+inline std::string formatDumpBox(const std::vector<double> &box) {
+  std::ostringstream oss;
+  if (box.size() >= 3) {
+    oss << box[0] << ' ' << box[1] << ' ' << box[2];
+  }
+  if (box.size() >= 6) {
+    oss << " xy " << box[3] << " xz " << box[4] << " yz " << box[5];
+  }
+  return oss.str();
+}
+
+// ITEM line plus three bound lines. Tilt is a third field per line.
+inline void writeDumpBoxBounds(
+    std::ostream &os,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  const bool tilt = yCloud.box.size() >= 6;
+  if (tilt) {
+    os << "ITEM: BOX BOUNDS xy xz yz pp pp pp\n";
+  } else {
+    os << "ITEM: BOX BOUNDS pp pp pp\n";
+  }
+  for (int k = 0; k < 3; k++) {
+    const double lo = (static_cast<std::size_t>(k) < yCloud.boxLow.size())
+                          ? yCloud.boxLow[k]
+                          : 0.0;
+    const double len = (static_cast<std::size_t>(k) < yCloud.box.size())
+                           ? yCloud.box[k]
+                           : 0.0;
+    os << lo << ' ' << lo + len;
+    if (tilt) {
+      os << ' ' << yCloud.box[static_cast<std::size_t>(k + 3)];
+    }
+    os << '\n';
+  }
+}
+
 /**
  *  Inline generic function for obtaining
  *  the unwrapped periodic distance between one particle and another point,
@@ -204,32 +255,34 @@ periodicDist(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
  *  @param[in] singlePoint Vector containing coordinate values
  *  \return The unwrapped periodic distance.
  */
+inline std::array<double, 3> relDistFromPoint(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
+    double xj, double yj, double zj) {
+  if (yCloud.box.size() >= 6) {
+    return triclinicMinImage(yCloud, yCloud.pts[iatom].x, yCloud.pts[iatom].y,
+                             yCloud.pts[iatom].z, xj, yj, zj);
+  }
+
+  std::array<double, 3> dr = {yCloud.pts[iatom].x - xj, yCloud.pts[iatom].y - yj,
+                              yCloud.pts[iatom].z - zj};
+  for (int k = 0; k < 3; k++) {
+    if (dr[k] < -yCloud.box[k] * 0.5) {
+      dr[k] += yCloud.box[k];
+    }
+    if (dr[k] >= yCloud.box[k] * 0.5) {
+      dr[k] -= yCloud.box[k];
+    }
+  }
+  return dr;
+}
+
 inline double unWrappedDistFromPoint(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
-    std::vector<double> singlePoint) {
-  if (yCloud.box.size() >= 6) {
-    const auto dr = triclinicMinImage(yCloud, yCloud.pts[iatom].x,
-                                      yCloud.pts[iatom].y, yCloud.pts[iatom].z,
-                                      singlePoint[0], singlePoint[1],
-                                      singlePoint[2]);
-    return std::sqrt(dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2]);
-  }
-
-  std::array<double, 3> dr;
-  double r2 = 0.0; // Squared absolute distance
-
-  // Get x1-x2 etc
-  dr[0] = fabs(yCloud.pts[iatom].x - singlePoint[0]);
-  dr[1] = fabs(yCloud.pts[iatom].y - singlePoint[1]);
-  dr[2] = fabs(yCloud.pts[iatom].z - singlePoint[2]);
-
-  // Three-axis wrap for an orthorhombic length-3 box
-  for (int k = 0; k < 3; k++) {
-    dr[k] -= yCloud.box[k] * round(dr[k] / yCloud.box[k]);
-    r2 += pow(dr[k], 2.0);
-  }
-
-  return sqrt(r2);
+    const std::vector<double> &singlePoint) {
+  const auto dr =
+      relDistFromPoint(yCloud, iatom, singlePoint[0], singlePoint[1],
+                       singlePoint[2]);
+  return std::sqrt(dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2]);
 }
 
 // Generic function for getting the distance (no PBCs applied)
@@ -275,31 +328,8 @@ distance(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int ia
 inline std::array<double, 3>
 relDist(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
         int jatom) {
-  if (yCloud.box.size() >= 6) {
-    return triclinicMinImage(
-        yCloud, yCloud.pts[iatom].x, yCloud.pts[iatom].y, yCloud.pts[iatom].z,
-        yCloud.pts[jatom].x, yCloud.pts[jatom].y, yCloud.pts[jatom].z);
-  }
-
-  std::array<double, 3> dr;
-  std::array<double, 3> box = {yCloud.box[0], yCloud.box[1], yCloud.box[2]};
-
-  // Get x1-x2 etc
-  dr[0] = yCloud.pts[iatom].x - yCloud.pts[jatom].x;
-  dr[1] = yCloud.pts[iatom].y - yCloud.pts[jatom].y;
-  dr[2] = yCloud.pts[iatom].z - yCloud.pts[jatom].z;
-
-  // Three-axis wrap for an orthorhombic length-3 box
-  for (int k = 0; k < 3; k++) {
-    if (dr[k] < -box[k] * 0.5) {
-      dr[k] = dr[k] + box[k];
-    }
-    if (dr[k] >= box[k] * 0.5) {
-      dr[k] = dr[k] - box[k];
-    }
-  }
-
-  return dr;
+  return relDistFromPoint(yCloud, iatom, yCloud.pts[jatom].x,
+                          yCloud.pts[jatom].y, yCloud.pts[jatom].z);
 }
 
 // Function for sorting according to atom ID

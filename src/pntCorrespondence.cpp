@@ -13,6 +13,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <pntCorrespondence.hpp>
+#include <neighbours.hpp>
 
 /**
  * @details Fills up an eigen matrix point set a reference ring, which is a
@@ -72,8 +73,7 @@ Eigen::MatrixXd pntToPnt::createPrismBlock(
   // 0 -> x dim
   // 1 -> y dim
   // 2 -> z dim
-  axialDim = std::max_element(yCloud.box.begin(), yCloud.box.end()) -
-             yCloud.box.begin();
+  axialDim = nneigh::dumpAxialDim(yCloud);
   // --------------------------------------
   // Get the average radius
   avgRadius = pntToPnt::getRadiusFromRings(yCloud, basal1, basal2);

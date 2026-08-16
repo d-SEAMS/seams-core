@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <rang.hpp>
 
 namespace fs = std::filesystem;
@@ -222,4 +223,34 @@ TEST_CASE("assignPrismType assigns atom types for known prism list",
     if (atomTypes[i] != 1) hasNonDummy = true;
   }
   REQUIRE(hasNonDummy);
+}
+
+TEST_CASE("rmAxialTranslations wraps through dump H not bound span",
+          "[topo_one_dim]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {25.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  molSys::Point<double> a;
+  a.x = 1.0;
+  a.y = 0.5;
+  a.z = 1.0;
+  a.atomID = 1;
+  molSys::Point<double> b;
+  b.x = 0.2;
+  b.y = 0.5;
+  b.z = 1.0;
+  b.atomID = 2;
+  cloud.pts.push_back(a);
+  cloud.pts.push_back(b);
+  cloud.idIndexMap[1] = 0;
+  cloud.idIndexMap[2] = 1;
+  int atomID = 0;
+  REQUIRE(ring::rmAxialTranslations(cloud, atomID, 1, 1) == 0);
+  REQUIRE(atomID == 1);
+  REQUIRE_THAT(cloud.pts[0].x, Catch::Matchers::WithinAbs(0.2886751345948129, 1e-10));
+  REQUIRE_THAT(cloud.pts[0].y, Catch::Matchers::WithinAbs(0.5, 1e-12));
+  REQUIRE_THAT(cloud.pts[1].x, Catch::Matchers::WithinAbs(19.488675134594813, 1e-10));
+  REQUIRE_THAT(cloud.pts[1].y, Catch::Matchers::WithinAbs(0.5, 1e-12));
+  REQUIRE_THAT(cloud.pts[1].z, Catch::Matchers::WithinAbs(1.0, 1e-12));
 }

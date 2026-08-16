@@ -136,6 +136,20 @@ TEST_CASE("createPrismBlock creates reference prism from basal rings",
   REQUIRE(prismBlock.cols() == 3);
 }
 
+TEST_CASE("createPrismBlock uses recovered lz not tilt as axial",
+          "[pntCorrespondence]") {
+  auto cloud = makePrismCloud();
+  cloud.box = {61.0, 12.0, 50.0, 60.0, 0.0, 0.0};
+  std::vector<int> basal1 = {0, 1, 2, 3};
+  std::vector<int> basal2 = {4, 5, 6, 7};
+  auto refPts = pntToPnt::getPointSetRefRing(4, 2);
+  auto prismBlock =
+      pntToPnt::createPrismBlock(cloud, refPts, 4, basal1, basal2);
+  REQUIRE(prismBlock.rows() == 8);
+  REQUIRE_THAT(prismBlock(0, 2), Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(prismBlock(4, 2), Catch::Matchers::WithinAbs(2.75, 0.1));
+}
+
 // -- relOrderPrismBlock tests --
 
 TEST_CASE("relOrderPrismBlock with nList from trajectory", "[pntCorrespondence]") {

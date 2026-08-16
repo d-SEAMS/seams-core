@@ -54,10 +54,15 @@
  *
  * A hydrogen bond between two water molecules exists when:
  *
- * 1. The distance between the donor oxygen atom and the acceptor hydrogen atom
+ * 1. The distance between the acceptor oxygen atom and the donor hydrogen atom
  is less than 2.42 Angstrom
- * 2. The angle between the O--O vector and the O-H vector should be less than
+ * 2. The angle between the O-O vector and the O-H vector should be less than
  30 degrees
+ *
+ * Those numbers are the water defaults on populateHbonds and
+ * populateHbondsWithInputClouds. populateHbondsFromDonors takes the same
+ * defaults so a water donor-H set stays comparable; other chemistries pass
+ * their own cutoffs. They are not an ionic-liquid default.
  *
  * ### Changelog ###
  *
@@ -89,6 +94,25 @@ populateHbondsWithInputClouds(molSys::PointCloud<molSys::Point<double>, double> 
                molSys::PointCloud<molSys::Point<double>, double> &hCloud,
                const std::vector<std::vector<int>> &nList,
                double distCutoff = 2.42, double angleCutoff = 30.0);
+
+//! Geometric test for one donor-acceptor assignment. donorHs are hCloud
+//! indices on the donor. O-O is gen::relDist(yCloud, acceptor, donor).
+//! O-H uses gen::relDistFromPoint (dump MIC).
+bool donatedHydrogenBond(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const molSys::PointCloud<molSys::Point<double>, double> &hCloud,
+    int acceptorIndex, int donorIndex, const std::vector<int> &donorHs,
+    double distCutoff = 2.42, double angleCutoff = 30.0);
+
+//! Hydrogen-bond network from an explicit donor-H set. donorHs are hCloud
+//! indices; each is paired with the heavy atom that shares its molID.
+//! Water callers build donorHs from hAtomMolList (two H per molecule).
+std::vector<std::vector<int>> populateHbondsFromDonors(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    molSys::PointCloud<molSys::Point<double>, double> &hCloud,
+    const std::vector<std::vector<int>> &nList,
+    const std::vector<int> &donorHs, double distCutoff = 2.42,
+    double angleCutoff = 30.0);
 
 //! Calculates the distance of the hydrogen bond between O and H (of different
 //! atoms), given the respective pointClouds and the indices to each atom

@@ -4,8 +4,10 @@
 #include <generic.hpp>
 #include <mol_sys.hpp>
 
+#include <array>
 #include <cmath>
 #include <filesystem>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -261,4 +263,151 @@ TEST_CASE("eigenVecAngle does not produce NaN for antiparallel vectors",
   double angle = gen::eigenVecAngle(a, b);
   REQUIRE_FALSE(std::isnan(angle));
   REQUIRE_THAT(angle, Catch::Matchers::WithinAbs(gen::pi, 1e-10));
+}
+
+TEST_CASE("relDist mixed image disagrees with span wrap", "[generic]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  molSys::Point<double> a;
+  a.x = 0.5;
+  a.y = 0.5;
+  a.z = 1.0;
+  a.atomID = 1;
+  molSys::Point<double> b;
+  b.x = 1.0;
+  b.y = 8.0;
+  b.z = 1.0;
+  b.atomID = 2;
+  cloud.pts.push_back(a);
+  cloud.pts.push_back(b);
+  cloud.idIndexMap[1] = 0;
+  cloud.idIndexMap[2] = 1;
+  const auto dr = gen::relDist(cloud, 0, 1);
+  REQUIRE_THAT(dr[0], Catch::Matchers::WithinAbs(4.5, 1e-10));
+  REQUIRE_THAT(dr[1], Catch::Matchers::WithinAbs(1.160254037844386, 1e-10));
+  REQUIRE_THAT(dr[2], Catch::Matchers::WithinAbs(0.0, 1e-12));
+  // Independent-axis wrap of i-j uses bound spans, not the (0,-1,0) image.
+  std::array<double, 3> span = {0.5 - 1.0, 0.5 - 8.0, 1.0 - 1.0};
+  for (int k = 0; k < 3; k++) {
+    span[k] -= cloud.box[static_cast<size_t>(k)] *
+               std::round(span[k] / cloud.box[static_cast<size_t>(k)]);
+  }
+  REQUIRE(std::abs(dr[0] - span[0]) > 1.0);
+  double x0, y0, z0, x1, y1, z1;
+  REQUIRE(gen::unwrappedCoordShift(cloud, 0, 1, &x0, &y0, &z0, &x1, &y1,
+                                   &z1) == 0);
+  REQUIRE_THAT(x0, Catch::Matchers::WithinAbs(0.5, 1e-12));
+  REQUIRE_THAT(y0, Catch::Matchers::WithinAbs(0.5, 1e-12));
+  REQUIRE_THAT(z0, Catch::Matchers::WithinAbs(1.0, 1e-12));
+  REQUIRE_THAT(x1, Catch::Matchers::WithinAbs(-4.0, 1e-10));
+  REQUIRE_THAT(y1, Catch::Matchers::WithinAbs(-0.660254037844386, 1e-10));
+  REQUIRE_THAT(z1, Catch::Matchers::WithinAbs(1.0, 1e-12));
+}
+
+TEST_CASE("relDistFromPoint matches relDist and keeps -L/2", "[generic]") {
+  auto cloud = makeTwoAtomCloud(0.0, 0.0, 0.0, 5.0, 0.0, 0.0, 10.0);
+  const auto drPair = gen::relDist(cloud, 0, 1);
+  const auto drPt =
+      gen::relDistFromPoint(cloud, 0, cloud.pts[1].x, cloud.pts[1].y,
+                            cloud.pts[1].z);
+  REQUIRE_THAT(drPair[0], Catch::Matchers::WithinAbs(-5.0, 1e-12));
+  REQUIRE_THAT(drPt[0], Catch::Matchers::WithinAbs(-5.0, 1e-12));
+  REQUIRE_THAT(drPt[1], Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(drPt[2], Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(gen::unWrappedDistFromPoint(cloud, 0, {5.0, 0.0, 0.0}),
+               Catch::Matchers::WithinAbs(5.0, 1e-12));
+}
+
+TEST_CASE("formatDumpBox prints tilt when box.size() is 6", "[generic]") {
+  REQUIRE(gen::formatDumpBox({10.0, 11.0, 12.0}) == "10 11 12");
+  const auto tilted =
+      gen::formatDumpBox({15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0});
+  std::istringstream ts(tilted);
+  double x = 0.0, y = 0.0, z = 0.0, xy = 0.0, xz = 0.0, yz = 0.0;
+  std::string xyl, xzl, yzl;
+  REQUIRE(static_cast<bool>(ts >> x >> y >> z >> xyl >> xy >> xzl >> xz >> yzl >>
+                            yz));
+  REQUIRE(xyl == "xy");
+  REQUIRE(xzl == "xz");
+  REQUIRE(yzl == "yz");
+  REQUIRE_THAT(x, Catch::Matchers::WithinAbs(15.0, 1e-12));
+  REQUIRE_THAT(y, Catch::Matchers::WithinAbs(8.660254037844386, 1e-5));
+  REQUIRE_THAT(z, Catch::Matchers::WithinAbs(10.0, 1e-12));
+  REQUIRE_THAT(xy, Catch::Matchers::WithinAbs(5.0, 1e-12));
+  REQUIRE_THAT(xz, Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(yz, Catch::Matchers::WithinAbs(0.0, 1e-12));
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.4, -0.2};
+  cloud.boxLow = {1.0, 2.0, 3.0};
+  std::ostringstream os;
+  gen::writeDumpBoxBounds(os, cloud);
+  std::istringstream hs(os.str());
+  std::string item, boxw, bounds, a, b, c, p1, p2, p3;
+  REQUIRE(static_cast<bool>(hs >> item >> boxw >> bounds >> a >> b >> c >> p1 >>
+                            p2 >> p3));
+  REQUIRE(item == "ITEM:");
+  REQUIRE(boxw == "BOX");
+  REQUIRE(bounds == "BOUNDS");
+  REQUIRE(a == "xy");
+  REQUIRE(b == "xz");
+  REQUIRE(c == "yz");
+  REQUIRE(p1 == "pp");
+  double xlo = 0.0, xhi = 0.0, xyt = 0.0;
+  double ylo = 0.0, yhi = 0.0, xzt = 0.0;
+  double zlo = 0.0, zhi = 0.0, yzt = 0.0;
+  REQUIRE(static_cast<bool>(hs >> xlo >> xhi >> xyt >> ylo >> yhi >> xzt >> zlo >>
+                            zhi >> yzt));
+  REQUIRE_THAT(xlo, Catch::Matchers::WithinAbs(1.0, 1e-12));
+  REQUIRE_THAT(xhi, Catch::Matchers::WithinAbs(16.0, 1e-12));
+  REQUIRE_THAT(xyt, Catch::Matchers::WithinAbs(5.0, 1e-12));
+  REQUIRE_THAT(ylo, Catch::Matchers::WithinAbs(2.0, 1e-12));
+  REQUIRE_THAT(yhi, Catch::Matchers::WithinAbs(10.660254037844386, 1e-3));
+  REQUIRE_THAT(xzt, Catch::Matchers::WithinAbs(0.4, 1e-12));
+  REQUIRE_THAT(zlo, Catch::Matchers::WithinAbs(3.0, 1e-12));
+  REQUIRE_THAT(zhi, Catch::Matchers::WithinAbs(13.0, 1e-12));
+  REQUIRE_THAT(yzt, Catch::Matchers::WithinAbs(-0.2, 1e-12));
+}
+
+TEST_CASE("sheared a-image pair has periodicDistSq 0.25", "[generic]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  const double coords[2][3] = {{0.2, 0.1, 1.0}, {9.7, 0.1, 1.0}};
+  for (int i = 0; i < 2; i++) {
+    molSys::Point<double> pt;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+  }
+  const int jatom[1] = {1};
+  double distSq[1] = {-1.0};
+  gen::batchPeriodicDistSq(cloud, 0, jatom, 1, distSq);
+  REQUIRE_THAT(gen::periodicDistSq(cloud, 0, 1),
+               Catch::Matchers::WithinAbs(0.25, 1e-9));
+  REQUIRE_THAT(distSq[0], Catch::Matchers::WithinAbs(0.25, 1e-9));
+}
+
+TEST_CASE("relDistFromPoint uses dump H on a mixed image", "[generic]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 1;
+  molSys::Point<double> a;
+  a.x = 0.5;
+  a.y = 0.5;
+  a.z = 1.0;
+  cloud.pts.push_back(a);
+  const auto dr =
+      gen::relDistFromPoint(cloud, 0, 1.0, 8.0, 1.0);
+  REQUIRE_THAT(dr[0], Catch::Matchers::WithinAbs(4.5, 1e-10));
+  REQUIRE_THAT(dr[1], Catch::Matchers::WithinAbs(1.160254037844386, 1e-10));
+  REQUIRE_THAT(dr[2], Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(gen::unWrappedDistFromPoint(cloud, 0, {1.0, 8.0, 1.0}),
+               Catch::Matchers::WithinAbs(
+                   std::sqrt(4.5 * 4.5 + 1.160254037844386 * 1.160254037844386),
+                   1e-10));
 }

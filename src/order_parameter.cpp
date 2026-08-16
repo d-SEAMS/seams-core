@@ -13,6 +13,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <order_parameter.hpp>
+#include <neighbours.hpp>
 
 /**
  * @details The average height of prism blocks remains relatively constant. We
@@ -39,8 +40,10 @@ double topoparam::normHeightPercent(
 
   // ---------------------------------------
   // Calculate the height of the SWCT
-  // This is the longest dimension of the simulation box
-  nanoTubeHeight = *max_element(yCloud.box.begin(), yCloud.box.end());
+  // This is the longest recovered cell length
+  double lengths[3];
+  nneigh::dumpCellLengths(yCloud.box, yCloud.boxLow, lengths);
+  nanoTubeHeight = std::max(lengths[0], std::max(lengths[1], lengths[2]));
   // ---------------------------------------
   // Calculate the maximum possible height, given the average prism height
   // and the height of the nanotube
