@@ -62,19 +62,14 @@
 
 namespace nneigh {
 
-#ifdef SEAMS_HAS_LINKCELL
-/// Map a LAMMPS dump box onto lc_cell.
+/// LAMMPS dump bound spans to restricted triclinic H (rows a, b, c).
 ///
-/// `box[0..3]` are bound spans (`xhi_bound - xlo_bound`, ...) as
-/// `seams_input` stores them. `boxLow` is the bound lo. Optional
-/// `box[3..6]` are the dump tilt factors `xy, xz, yz`.
-///
-/// The conversion is the LAMMPS dump convention:
-/// `xlo = xlo_bound - min(0, xy, xz, xy+xz)` and
-/// `lx = xhi_bound - xlo_bound - max(...) + min(...)`, then
-/// `a = (lx, 0, 0)`, `b = (xy, ly, 0)`, `c = (xz, yz, lz)`.
-inline lc_cell lammpsBoxToLcCell(const std::vector<double> &box,
-                                 const std::vector<double> &boxLow) {
+/// `box[0..2]` are `xhi_bound - xlo_bound` etc. Optional `box[3..5]`
+/// are tilt `xy, xz, yz`. `boxLow` is the bound lo. Inverse of
+/// `xlo_bound = xlo + min(0, xy, xz, xy+xz)`.
+inline void dumpBoundsToH(const std::vector<double> &box,
+                          const std::vector<double> &boxLow, double H[3][3],
+                          double origin[3]) {
   const double xspan = box.size() > 0 ? box[0] : 0.0;
   const double yspan = box.size() > 1 ? box[1] : 0.0;
   const double zspan = box.size() > 2 ? box[2] : 0.0;
@@ -88,13 +83,39 @@ inline lc_cell lammpsBoxToLcCell(const std::vector<double> &box,
   const double xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));
   const double ymin = std::min(0.0, yz);
   const double ymax = std::max(0.0, yz);
-  lc_cell c = lc_cell_ortho(xspan - xmax + xmin, yspan - ymax + ymin, zspan);
-  c.bx = xy;
-  c.cx = xz;
-  c.cy = yz;
-  c.ox = xlo_b - xmin;
-  c.oy = ylo_b - ymin;
-  c.oz = zlo_b;
+  H[0][0] = xspan - xmax + xmin;
+  H[0][1] = 0.0;
+  H[0][2] = 0.0;
+  H[1][0] = xy;
+  H[1][1] = yspan - ymax + ymin;
+  H[1][2] = 0.0;
+  H[2][0] = xz;
+  H[2][1] = yz;
+  H[2][2] = zspan;
+  origin[0] = xlo_b - xmin;
+  origin[1] = ylo_b - ymin;
+  origin[2] = zlo_b;
+}
+
+#ifdef SEAMS_HAS_LINKCELL
+/// Map a LAMMPS dump box onto lc_cell.
+inline lc_cell lammpsBoxToLcCell(const std::vector<double> &box,
+                                 const std::vector<double> &boxLow) {
+  double H[3][3], o[3];
+  dumpBoundsToH(box, boxLow, H, o);
+  lc_cell c = lc_cell_ortho(H[0][0], H[1][1], H[2][2]);
+  c.ax = H[0][0];
+  c.ay = H[0][1];
+  c.az = H[0][2];
+  c.bx = H[1][0];
+  c.by = H[1][1];
+  c.bz = H[1][2];
+  c.cx = H[2][0];
+  c.cy = H[2][1];
+  c.cz = H[2][2];
+  c.ox = o[0];
+  c.oy = o[1];
+  c.oz = o[2];
   return c;
 }
 

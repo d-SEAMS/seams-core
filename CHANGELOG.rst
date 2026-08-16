@@ -5,6 +5,13 @@ Changelog
 Unreleased
 ==========
 
+Version 2.3.2 (2026-08-16)
+===========================
+
+Cutoff lists take the LAMMPS dump 3x3, not a diagonal of bound
+spans. Device ice-score batches pass ``lammpsBoxToLinkcell`` when
+the dump tilt is present. ``linkcell`` wrap pin is v0.3.1.
+
 Version 2.3.1 (2026-08-16)
 ===========================
 

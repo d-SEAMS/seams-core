@@ -12,6 +12,7 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
+#include <neighbours.hpp>
 #include <rdf2d.hpp>
 
 #ifdef SEAMS_HAS_VESIN
@@ -139,9 +140,9 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
       positions[static_cast<size_t>(i)] = {
           yCloud.pts[i].x, yCloud.pts[i].y, yCloud.pts[i].z};
     }
-    double box[3][3] = {{yCloud.box[0], 0.0, 0.0},
-                        {0.0, yCloud.box[1], 0.0},
-                        {0.0, 0.0, yCloud.box[2]}};
+    double box[3][3];
+    double origin[3];
+    nneigh::dumpBoundsToH(yCloud.box, yCloud.boxLow, box, origin);
     bool periodic[3] = {true, true, true};
     VesinOptions options{};
     options.cutoff = cutoff;
