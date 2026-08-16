@@ -138,6 +138,9 @@ data-aria-dark="Switch to auto color mode">
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#why-yoda">Why <code class="docutils literal notranslate"><span class="pre">yoda</span></code></a></li>
 <li><a class="reference internal" href="#builds">Builds</a></li>
+<li><a class="reference internal" href="#neighbour-backends">Neighbour backends</a></li>
+<li><a class="reference internal" href="#device-paths">Device paths</a></li>
+<li><a class="reference internal" href="#runtime-knobs">Runtime knobs</a></li>
 <li><a class="reference internal" href="#ice-score-and-the-chill-star">Ice score and the CHILL+ star</a></li>
 </ul>
 </div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
@@ -234,8 +237,9 @@ data-aria-dark="Switch to auto color mode">
           <section id="repositories">
 <h1>Repositories<a class="headerlink" href="#repositories" title="Link to this heading">¶</a></h1>
 <p>d-SEAMS 2 is not a monolith. The classifier is one C++ library.
-Neighbour search is linkcell. Each language ships its own package
-against that library.</p>
+Cutoff neighbour lists are optional vesin (brute-force fallback).
+Periodic k-nearest graphs are optional linkcell. Each language
+ships its own package against that library.</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -264,7 +268,7 @@ against that library.</p>
 </tbody>
 </table>
 </div>
-<p>The front ends take seams-core as a Meson subproject (static library)
+<p>The front ends take seams-core as a Meson subproject (<code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code>)
 or as a flake input. They do not vendor a second engine.</p>
 <p>A language binding that lived in the engine tree would force every
 C++ user to take that language’s toolchain, and every wheel or rock
@@ -282,9 +286,13 @@ schedules.</p>
     PY[pydseams Frame]
     LUA[&quot;require(\&quot;dseams\&quot;)&quot;]
   end
-  LC[linkcell]
+  LC[linkcell k-NN]
+  VE[vesin cutoff]
+  GPU[gpulite TUM batch]
   DUMP[LAMMPS / XYZ / chemfiles / con] --&gt; LIB
   LC --&gt; LIB
+  VE --&gt; LIB
+  GPU --&gt; LIB
   LIB --&gt; CLI
   LIB --&gt; PY
   LIB --&gt; LUA
@@ -308,6 +316,36 @@ wrap-git backends stay off unless nixpkgs already provides them.</p></li>
 <p>The 2020 CMake Nix derivation of <code class="docutils literal notranslate"><span class="pre">yodaStruct</span></code> is gone.
 <code class="docutils literal notranslate"><span class="pre">-Dwith_python=true</span></code> and <code class="docutils literal notranslate"><span class="pre">-Dwith_lua=enabled</span></code> are Meson errors that
 name PydSEAMSlib and yodaStruct.</p>
+</section>
+<section id="neighbour-backends">
+<h2>Neighbour backends<a class="headerlink" href="#neighbour-backends" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>vesin</strong> (optional, <code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_VESIN</span></code>): cutoff pair lists
+(<code class="docutils literal notranslate"><span class="pre">neighList</span></code>, <code class="docutils literal notranslate"><span class="pre">neighListO</span></code>). Brute force if the wrap is off.</p></li>
+<li><p><strong>linkcell</strong> (optional, <code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_LINKCELL</span></code>): periodic k-NN for
+<code class="docutils literal notranslate"><span class="pre">knn</span></code> / <code class="docutils literal notranslate"><span class="pre">knn-union</span></code> / <code class="docutils literal notranslate"><span class="pre">seeded</span></code> graphs and the device TUM walk.
+Not a drop-in for vesin cutoff lists.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">--features</span></code> prints both.</p>
+</section>
+<section id="device-paths">
+<h2>Device paths<a class="headerlink" href="#device-paths" title="Link to this heading">¶</a></h2>
+<p>Optional CUDA via gpulite (<code class="docutils literal notranslate"><span class="pre">-Dwith_gpulite</span></code>) runs the TUM ice score
+only: linkcell k-NN, mutual four-nearest graph, primitive six-rings,
+HC/DDC. CHILL and <span class="math notranslate nohighlight">\(q_{lm}\)</span> stay on the host.</p>
+<p>OpenMP target offload is a second GPU path, Steinhardt-only, meson
+off by default (<code class="docutils literal notranslate"><span class="pre">-Dwith_openmp_offload</span></code>, <code class="docutils literal notranslate"><span class="pre">SEAMS_OFFLOAD</span></code>). It is
+not gpulite.</p>
+</section>
+<section id="runtime-knobs">
+<h2>Runtime knobs<a class="headerlink" href="#runtime-knobs" title="Link to this heading">¶</a></h2>
+<p>Defaults live in the binary. An optional dotenv (<code class="docutils literal notranslate"><span class="pre">SEAMS_CONFIG</span></code> or
+<code class="docutils literal notranslate"><span class="pre">./seams.env</span></code>) fills unset keys. The process environment wins the
+file; CLI flags win the environment. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">--print-config</span></code> dumps
+the table. Keys: <code class="docutils literal notranslate"><span class="pre">SEAMS_FRAME</span></code> / <code class="docutils literal notranslate"><span class="pre">LAST</span></code> / <code class="docutils literal notranslate"><span class="pre">JOBS</span></code> / <code class="docutils literal notranslate"><span class="pre">TYPE</span></code> /
+<code class="docutils literal notranslate"><span class="pre">CUTOFF</span></code> / <code class="docutils literal notranslate"><span class="pre">K</span></code> / <code class="docutils literal notranslate"><span class="pre">GRAPH</span></code> / <code class="docutils literal notranslate"><span class="pre">RESIDENT</span></code> / <code class="docutils literal notranslate"><span class="pre">CELL</span></code> / <code class="docutils literal notranslate"><span class="pre">OFFLOAD</span></code>,
+<code class="docutils literal notranslate"><span class="pre">LINKCELL_TPP</span></code> / <code class="docutils literal notranslate"><span class="pre">BLOCK</span></code>, <code class="docutils literal notranslate"><span class="pre">YODA_FENNEL_PATH</span></code> / <code class="docutils literal notranslate"><span class="pre">YODA_LUA_PATH</span></code>.
+Analysis choice is not this table.</p>
 </section>
 <section id="ice-score-and-the-chill-star">
 <h2>Ice score and the CHILL+ star<a class="headerlink" href="#ice-score-and-the-chill-star" title="Link to this heading">¶</a></h2>
@@ -506,6 +544,7 @@ dump they do not.</p>
       <script src="../_static/target-highlight.js?v=df7d332b"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
       <script src="../_static/shibuya.js?v=cac61aee"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.4.0/dist/mermaid.esm.min.mjs"></script>
       <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.2.0/dist/mermaid-layout-elk.esm.min.mjs"></script>
       <script type="module">mermaid.initialize({startOnLoad:true, theme:'neutral'});</script>

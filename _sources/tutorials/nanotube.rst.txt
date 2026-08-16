@@ -4,6 +4,8 @@ Quasi-one-dimensional ice
 
 
 The ``seams`` CLI has no prism command. Confined ice (nanotube and
-monolayer) is `the confined-ice howto <../howto/confined-ice.rst>`_.
+monolayer) is `the confined-ice howto <../howto/confined-ice.rst>`_:
+``pydseams.Frame.find_prisms`` / ``monolayer_rings``, or the yodaStruct
+Lua examples under ``example_lua/iceNanotube/``.
 Bulk CHILL+ and cages on the in-tree dump are
 `the mixed TIP4P tutorial <bulk-ice.rst>`_.

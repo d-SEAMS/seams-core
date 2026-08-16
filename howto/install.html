@@ -244,7 +244,8 @@ install Python or Lua.</p>
 </span></pre></div>
 </div>
 <p>The default pixi lock includes Highway and chemfiles. Optional pixi
-environments: <code class="docutils literal notranslate"><span class="pre">ira</span></code>, <code class="docutils literal notranslate"><span class="pre">sphericart</span></code>, <code class="docutils literal notranslate"><span class="pre">nauty</span></code>, <code class="docutils literal notranslate"><span class="pre">mpi</span></code>, <code class="docutils literal notranslate"><span class="pre">docs</span></code>.</p>
+environments: <code class="docutils literal notranslate"><span class="pre">ira</span></code>, <code class="docutils literal notranslate"><span class="pre">sphericart</span></code>, <code class="docutils literal notranslate"><span class="pre">nauty</span></code>, <code class="docutils literal notranslate"><span class="pre">mpi</span></code>, <code class="docutils literal notranslate"><span class="pre">docs</span></code>,
+<code class="docutils literal notranslate"><span class="pre">formalanalysis</span></code>, <code class="docutils literal notranslate"><span class="pre">repro</span></code>.</p>
 </section>
 <section id="nix-flake">
 <h2>Nix flake<a class="headerlink" href="#nix-flake" title="Link to this heading">¶</a></h2>
@@ -254,10 +255,11 @@ environments: <code class="docutils literal notranslate"><span class="pre">ira</
 </span><span data-line="4">nix<span class="w"> </span>run<span class="w"> </span>.<span class="w"> </span>--<span class="w"> </span><span class="nb">read</span><span class="w"> </span>input/traj/exampleTraj.lammpstrj
 </span></pre></div>
 </div>
-<p>The flake turns Eigen, BLAS/LAPACK, Catch2, and Highway on when
-nixpkgs provides them. Optional wrap-git backends (vesin, chemfiles,
-readcon-core, IRA, sphericart, nauty, MPI) stay off unless the package
-is already in the closure. Binary cache: <code class="docutils literal notranslate"><span class="pre">cachix</span> <span class="pre">use</span> <span class="pre">dseams</span></code>.</p>
+<p>The flake links Eigen, BLAS/LAPACK, Catch2, and Highway from nixpkgs.
+Wrap-git backends (vesin, readcon-core, linkcell) and chemfiles stay
+off unless the package is already in the closure. IRA, sphericart,
+nauty, and MPI stay off. vesin is cutoff; linkcell is k-NN. Binary
+cache: <code class="docutils literal notranslate"><span class="pre">cachix</span> <span class="pre">use</span> <span class="pre">dseams</span></code>.</p>
 <p>The flake on/off table lives on <a class="reference external" href="../reference/nix.rst">Nix</a>.</p>
 </section>
 <section id="verify">

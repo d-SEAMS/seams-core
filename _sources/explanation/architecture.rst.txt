@@ -4,8 +4,9 @@ Repositories
 
 
 d-SEAMS 2 is not a monolith. The classifier is one C++ library.
-Neighbour search is linkcell. Each language ships its own package
-against that library.
+Cutoff neighbour lists are optional vesin (brute-force fallback).
+Periodic k-nearest graphs are optional linkcell. Each language
+ships its own package against that library.
 
 .. table::
 
@@ -21,7 +22,7 @@ against that library.
     | `linkcell <https://github.com/d-SEAMS/linkcell>`_       | ``lc_*``                  | Periodic linked-cell k-nearest neighbours |
     +---------------------------------------------------------+---------------------------+-------------------------------------------+
 
-The front ends take seams-core as a Meson subproject (static library)
+The front ends take seams-core as a Meson subproject (``libyodaLib``)
 or as a flake input. They do not vendor a second engine.
 
 A language binding that lived in the engine tree would force every
@@ -42,9 +43,13 @@ schedules.
        PY[pydseams Frame]
        LUA["require(\"dseams\")"]
      end
-     LC[linkcell]
+     LC[linkcell k-NN]
+     VE[vesin cutoff]
+     GPU[gpulite TUM batch]
      DUMP[LAMMPS / XYZ / chemfiles / con] --> LIB
      LC --> LIB
+     VE --> LIB
+     GPU --> LIB
      LIB --> CLI
      LIB --> PY
      LIB --> LUA
@@ -72,6 +77,40 @@ Builds
 The 2020 CMake Nix derivation of ``yodaStruct`` is gone.
 ``-Dwith_python=true`` and ``-Dwith_lua=enabled`` are Meson errors that
 name PydSEAMSlib and yodaStruct.
+
+Neighbour backends
+------------------
+
+- **vesin** (optional, ``SEAMS_HAS_VESIN``): cutoff pair lists
+  (``neighList``, ``neighListO``). Brute force if the wrap is off.
+
+- **linkcell** (optional, ``SEAMS_HAS_LINKCELL``): periodic k-NN for
+  ``knn`` / ``knn-union`` / ``seeded`` graphs and the device TUM walk.
+  Not a drop-in for vesin cutoff lists.
+
+``seams --features`` prints both.
+
+Device paths
+------------
+
+Optional CUDA via gpulite (``-Dwith_gpulite``) runs the TUM ice score
+only: linkcell k-NN, mutual four-nearest graph, primitive six-rings,
+HC/DDC. CHILL and :math:`q_{lm}` stay on the host.
+
+OpenMP target offload is a second GPU path, Steinhardt-only, meson
+off by default (``-Dwith_openmp_offload``, ``SEAMS_OFFLOAD``). It is
+not gpulite.
+
+Runtime knobs
+-------------
+
+Defaults live in the binary. An optional dotenv (``SEAMS_CONFIG`` or
+``./seams.env``) fills unset keys. The process environment wins the
+file; CLI flags win the environment. ``seams --print-config`` dumps
+the table. Keys: ``SEAMS_FRAME`` / ``LAST`` / ``JOBS`` / ``TYPE`` /
+``CUTOFF`` / ``K`` / ``GRAPH`` / ``RESIDENT`` / ``CELL`` / ``OFFLOAD``,
+``LINKCELL_TPP`` / ``BLOCK``, ``YODA_FENNEL_PATH`` / ``YODA_LUA_PATH``.
+Analysis choice is not this table.
 
 Ice score and the CHILL+ star
 -----------------------------

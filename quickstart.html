@@ -139,6 +139,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#install-the-engine">Install the engine</a></li>
 <li><a class="reference internal" href="#read-a-frame">Read a frame</a></li>
 <li><a class="reference internal" href="#features-of-this-build">Features of this build</a></li>
+<li><a class="reference internal" href="#runtime-knobs">Runtime knobs</a></li>
 <li><a class="reference internal" href="#chill-and-cages">CHILL+ and cages</a></li>
 <li><a class="reference internal" href="#python-and-lua">Python and Lua</a></li>
 </ul>
@@ -270,6 +271,27 @@ turns Eigen, BLAS/LAPACK, Catch2 and Highway on when nixpkgs provides
 them. Optional wrap-git backends stay off unless a package is already
 in the closure. <code class="docutils literal notranslate"><span class="pre">pixi</span></code> enables what conda-forge put in the environment
 (Highway and chemfiles are in the default pixi lock).</p>
+</section>
+<section id="runtime-knobs">
+<h2>Runtime knobs<a class="headerlink" href="#runtime-knobs" title="Link to this heading">¶</a></h2>
+<p>Knobs that change between machines and jobs are twelve-factor. They
+are not compiled in and they are not <code class="docutils literal notranslate"><span class="pre">conf.yaml</span></code>. Defaults live in
+the binary. An optional dotenv file (<code class="docutils literal notranslate"><span class="pre">SEAMS_CONFIG</span></code> or
+<code class="docutils literal notranslate"><span class="pre">./seams.env</span></code>) fills unset variables. The process environment wins
+over the file. CLI flags win over the environment.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">cp<span class="w"> </span>seams.env.example<span class="w"> </span>seams.env
+</span><span data-line="2">seams<span class="w"> </span>--print-config
+</span><span data-line="3">seams<span class="w"> </span>--frame<span class="w"> </span><span class="m">1</span><span class="w"> </span>--last<span class="w"> </span><span class="m">100</span><span class="w"> </span>--jobs<span class="w"> </span><span class="m">8</span><span class="w"> </span>--type<span class="w"> </span><span class="m">2</span><span class="w"> </span>--graph<span class="w"> </span>seeded<span class="w"> </span><span class="se">\</span>
+</span><span data-line="4"><span class="w">  </span>cages<span class="w"> </span>input/traj/exampleTraj.lammpstrj
+</span></pre></div>
+</div>
+<p>The same values can be <code class="docutils literal notranslate"><span class="pre">SEAMS_FRAME</span></code>, <code class="docutils literal notranslate"><span class="pre">SEAMS_LAST</span></code>, <code class="docutils literal notranslate"><span class="pre">SEAMS_JOBS</span></code>,
+<code class="docutils literal notranslate"><span class="pre">SEAMS_TYPE</span></code>, <code class="docutils literal notranslate"><span class="pre">SEAMS_CUTOFF</span></code>, <code class="docutils literal notranslate"><span class="pre">SEAMS_K</span></code>, <code class="docutils literal notranslate"><span class="pre">SEAMS_GRAPH</span></code>, plus
+<code class="docutils literal notranslate"><span class="pre">SEAMS_RESIDENT</span></code>, <code class="docutils literal notranslate"><span class="pre">SEAMS_CELL</span></code>, <code class="docutils literal notranslate"><span class="pre">SEAMS_OFFLOAD</span></code>, <code class="docutils literal notranslate"><span class="pre">LINKCELL_TPP</span></code>,
+<code class="docutils literal notranslate"><span class="pre">LINKCELL_BLOCK</span></code>. <code class="docutils literal notranslate"><span class="pre">OMP_NUM_THREADS</span></code> and <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code> keep
+their usual meaning. Analysis choice (which <code class="docutils literal notranslate"><span class="pre">seams</span></code> command, which
+<code class="docutils literal notranslate"><span class="pre">pydseams</span></code> call, which <code class="docutils literal notranslate"><span class="pre">require(&quot;dseams&quot;)</span></code> script) is not this
+table.</p>
 </section>
 <section id="chill-and-cages">
 <h2>CHILL+ and cages<a class="headerlink" href="#chill-and-cages" title="Link to this heading">¶</a></h2>

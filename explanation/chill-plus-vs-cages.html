@@ -238,12 +238,13 @@ data-aria-dark="Switch to auto color mode">
 and they do not imply each other.</p>
 <section id="four-neighbour-star">
 <h2>Four-neighbour star<a class="headerlink" href="#four-neighbour-star" title="Link to this heading">¶</a></h2>
-<p>CHILL and CHILL+ (<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill</span></code> / <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill-plus</span></code>,
-<code class="docutils literal notranslate"><span class="pre">chill::getCorrelPlus</span></code> / <code class="docutils literal notranslate"><span class="pre">getIceTypePlus</span></code>) look at the four-neighbour
-star. They compute bond-order correlations <code class="docutils literal notranslate"><span class="pre">c_ij</span></code> on the four nearest
-neighbours of each oxygen (or each mW site) and label the atom cubic,
-hexagonal, interfacial, clathrate, or water from the staggered and
-eclipsed pattern of that star.</p>
+<p>CHILL (<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill</span></code>, <code class="docutils literal notranslate"><span class="pre">chill::getCorrel</span></code> / <code class="docutils literal notranslate"><span class="pre">getIceTypeNoPrint</span></code>) and
+CHILL+ (<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill-plus</span></code>, <code class="docutils literal notranslate"><span class="pre">chill::getCorrelPlus</span></code> /
+<code class="docutils literal notranslate"><span class="pre">getIceTypePlusNoPrint</span></code>) look at the four-neighbour star. Both stay
+on the host. They compute bond-order correlations <code class="docutils literal notranslate"><span class="pre">c_ij</span></code> on the four
+nearest neighbours of each oxygen (or each mW site) and label the
+atom cubic, hexagonal, interfacial, clathrate, or water from the
+staggered and eclipsed pattern of that star.</p>
 <p>A molecule is cubic or hexagonal when its four bonds look like ice,
 even if those neighbours do not close a cage.</p>
 <p>CHILL+: Nguyen and Molinero, <strong>J. Phys. Chem. B</strong> 2015
@@ -260,6 +261,10 @@ six-membered primitive rings on a chosen bond graph, not from the
 four-neighbour star.</p>
 <p>This is topological unit matching (TUM). The methods paper is the
 2020 JCIM article (see <a class="reference external" href="citation.rst">Citation</a>).</p>
+<p>The GPU path (<code class="docutils literal notranslate"><span class="pre">gpu::analyzeResident</span></code>) is that TUM ice score only:
+<code class="docutils literal notranslate"><span class="pre">linkcell::gpu</span></code> k-nearest, the mutual four-nearest graph, primitive
+six-rings, and HC/DDC affiliation. CHILL, CHILL+, and <span class="math notranslate nohighlight">\(q_{lm}\)</span>
+stay on the host. Only cage labels come back.</p>
 </section>
 <section id="why-they-disagree">
 <h2>Why they disagree<a class="headerlink" href="#why-they-disagree" title="Link to this heading">¶</a></h2>
@@ -491,5 +496,6 @@ nucleation dump they do not have to.</p>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/target-highlight.js?v=df7d332b"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
+      <script src="../_static/shibuya.js?v=cac61aee"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script></body>
 </html>

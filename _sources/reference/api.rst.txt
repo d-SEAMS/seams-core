@@ -42,64 +42,14 @@ Doxyrest wiring
    =api/index.rst~ with title ``API Reference``.
 
 The book includes that tree as ``api/index`` (Reference toctree), not
-as a second hand list of functions.
+as a second hand list of functions. The generated pages are the
+API; the header table below is only a map onto those pages.
 
 .. toctree::
    :maxdepth: 2
    :caption: C++ (doxygen)
 
    ../api/index
-
-The groups below are Breathe of the same XML. That is the interned
-API, not a hand table.
-
-.. doxygengroup:: nneigh
-   :members:
-   :content-only:
-
-.. doxygengroup:: chill
-   :members:
-   :content-only:
-
-.. doxygengroup:: primitive
-   :members:
-   :content-only:
-
-.. doxygengroup:: ring
-   :members:
-   :content-only:
-
-.. doxygengroup:: prism3
-   :members:
-   :content-only:
-
-.. doxygengroup:: cage
-   :members:
-   :content-only:
-
-.. doxygengroup:: bond
-   :members:
-   :content-only:
-
-.. doxygengroup:: sinp
-   :members:
-   :content-only:
-
-.. doxygengroup:: clump
-   :members:
-   :content-only:
-
-.. doxygengroup:: gen
-   :members:
-   :content-only:
-
-.. doxygengroup:: rdf2
-   :members:
-   :content-only:
-
-.. doxygengroup:: molSys
-   :members:
-   :content-only:
 
 Headers
 -------

@@ -269,6 +269,18 @@ data-aria-dark="Switch to auto color mode">
 <td><p>2020 executable</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams</span></code> here; Lua library in yodaStruct</p></td>
 </tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams:</span> <span class="pre">command</span> <span class="pre">not</span> <span class="pre">found</span></code></p></td>
+<td><p>Binary not on <code class="docutils literal notranslate"><span class="pre">PATH</span></code></p></td>
+<td><p>After <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">build</span></code> / <code class="docutils literal notranslate"><span class="pre">meson</span> <span class="pre">compile</span> <span class="pre">-C</span> <span class="pre">bbdir</span></code> the binary is <code class="docutils literal notranslate"><span class="pre">./bbdir/seams</span></code>. Install with <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">install</span></code> or <code class="docutils literal notranslate"><span class="pre">meson</span> <span class="pre">install</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Meson rejects <code class="docutils literal notranslate"><span class="pre">-Dwith_python=true</span></code> or <code class="docutils literal notranslate"><span class="pre">-Dwith_lua=enabled</span></code></p></td>
+<td><p>Bindings are other repos</p></td>
+<td><p>Build PydSEAMSlib or yodaStruct; engine Meson is <code class="docutils literal notranslate"><span class="pre">-Dwith_python=false</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Wrap pin / <code class="docutils literal notranslate"><span class="pre">nodownload</span></code> miss</p></td>
+<td><p>Flake does not fetch wrap-git</p></td>
+<td><p>Pins live in <code class="docutils literal notranslate"><span class="pre">subprojects/</span></code> (<code class="docutils literal notranslate"><span class="pre">linkcell</span></code> v0.3.1, <code class="docutils literal notranslate"><span class="pre">vesin</span></code> v0.5.7, <code class="docutils literal notranslate"><span class="pre">readcon-core</span></code> v0.14.0, <code class="docutils literal notranslate"><span class="pre">gpulite</span></code>). The flake uses <code class="docutils literal notranslate"><span class="pre">mesonAutoFeatures=disabled</span></code> and wrap <code class="docutils literal notranslate"><span class="pre">nodownload</span></code></p></td>
+</tr>
 </tbody>
 </table>
 </div>

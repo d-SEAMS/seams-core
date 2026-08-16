@@ -54,6 +54,30 @@ them. Optional wrap-git backends stay off unless a package is already
 in the closure. ``pixi`` enables what conda-forge put in the environment
 (Highway and chemfiles are in the default pixi lock).
 
+Runtime knobs
+-------------
+
+Knobs that change between machines and jobs are twelve-factor. They
+are not compiled in and they are not ``conf.yaml``. Defaults live in
+the binary. An optional dotenv file (``SEAMS_CONFIG`` or
+``./seams.env``) fills unset variables. The process environment wins
+over the file. CLI flags win over the environment.
+
+.. code:: bash
+
+    cp seams.env.example seams.env
+    seams --print-config
+    seams --frame 1 --last 100 --jobs 8 --type 2 --graph seeded \
+      cages input/traj/exampleTraj.lammpstrj
+
+The same values can be ``SEAMS_FRAME``, ``SEAMS_LAST``, ``SEAMS_JOBS``,
+``SEAMS_TYPE``, ``SEAMS_CUTOFF``, ``SEAMS_K``, ``SEAMS_GRAPH``, plus
+``SEAMS_RESIDENT``, ``SEAMS_CELL``, ``SEAMS_OFFLOAD``, ``LINKCELL_TPP``,
+``LINKCELL_BLOCK``. ``OMP_NUM_THREADS`` and ``CUDA_VISIBLE_DEVICES`` keep
+their usual meaning. Analysis choice (which ``seams`` command, which
+``pydseams`` call, which ``require("dseams")`` script) is not this
+table.
+
 CHILL+ and cages
 ----------------
 
