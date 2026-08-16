@@ -30,11 +30,9 @@ namespace {
 constexpr int kParallelThreshold = 50000;
 
 struct NeighbourCSR {
-  std::vector<double> xyz;
   std::vector<double> dr;
   std::vector<int> offsets;
   std::vector<int> cols;
-  double box[3];
   int nop = 0;
 };
 
@@ -42,17 +40,7 @@ NeighbourCSR flatten(const molSys::PointCloud<molSys::Point<double>, double> &yC
                      const std::vector<std::vector<int>> &nList) {
   NeighbourCSR g;
   g.nop = yCloud.nop;
-  g.box[0] = yCloud.box.size() > 0 ? yCloud.box[0] : 0.0;
-  g.box[1] = yCloud.box.size() > 1 ? yCloud.box[1] : 0.0;
-  g.box[2] = yCloud.box.size() > 2 ? yCloud.box[2] : 0.0;
-  g.xyz.resize(static_cast<size_t>(g.nop) * 3);
   g.offsets.resize(static_cast<size_t>(g.nop) + 1, 0);
-
-  for (int i = 0; i < g.nop; i++) {
-    g.xyz[static_cast<size_t>(3 * i)] = yCloud.pts[i].x;
-    g.xyz[static_cast<size_t>(3 * i + 1)] = yCloud.pts[i].y;
-    g.xyz[static_cast<size_t>(3 * i + 2)] = yCloud.pts[i].z;
-  }
 
   int nnz = 0;
   for (int i = 0; i < g.nop; i++) {
@@ -187,6 +175,14 @@ void runPass2(const NeighbourCSR &g, int orderL, int begin, int end,
 }
 
 #ifdef SEAMS_HAS_OFFLOAD
+bool wantOffload() {
+  const char *env = std::getenv("SEAMS_OFFLOAD");
+  if (env != nullptr && env[0] == '0') {
+    return false;
+  }
+  return omp_get_num_devices() > 0;
+}
+
 void runOffload(const NeighbourCSR &g, int orderL, std::vector<double> &qlm,
                 std::vector<double> &ql, std::vector<double> &qlBar) {
   const int n = g.nop;
@@ -217,18 +213,6 @@ void runOffload(const NeighbourCSR &g, int orderL, std::vector<double> &qlm,
   }
 }
 #endif
-
-bool wantOffload() {
-#ifdef SEAMS_HAS_OFFLOAD
-  const char *env = std::getenv("SEAMS_OFFLOAD");
-  if (env != nullptr && env[0] == '0') {
-    return false;
-  }
-  return omp_get_num_devices() > 0;
-#else
-  return false;
-#endif
-}
 
 #ifdef SEAMS_HAS_MPI
 void allgathervDoubles(std::vector<double> &buf, int nAtoms, int perAtom,
