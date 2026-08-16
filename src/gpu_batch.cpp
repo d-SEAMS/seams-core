@@ -587,7 +587,7 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
   }
   try {
     auto &rt = CUDART::instance();
-    const int kMax = 4;
+    const int kMax = out.plan.foot.kMax;
     const int maxPer = out.plan.foot.maxSixRingsPerAtom;
     const int maxRings = nAtoms * maxPer;
     const std::size_t n = static_cast<std::size_t>(nAtoms);
