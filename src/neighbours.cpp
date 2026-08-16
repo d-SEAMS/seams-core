@@ -237,14 +237,6 @@ nneigh::neighList(double rcutoff,
   return neighListPair(rcutoff, yCloud, typeI, typeJ);
 }
 
-std::vector<std::vector<int>>
-nneigh::neighListPair(
-    double rcutoff,
-    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeI,
-    int typeJ) {
-  return neighList(rcutoff, yCloud, typeI, typeJ);
-}
-
 /**
  * @details Function for building neighbour lists for each
  *  particle of only one type. Inefficient brute-force \f$ O(n^2) \f$

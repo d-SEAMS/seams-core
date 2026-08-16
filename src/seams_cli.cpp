@@ -130,37 +130,6 @@ int typeOf(const Cloud &cloud, int requested) {
   return cloud.pts[0].type;
 }
 
-std::string_view trimView(std::string_view s) {
-  const auto first = s.find_first_not_of(" \t");
-  if (first == std::string_view::npos) {
-    return {};
-  }
-  const auto last = s.find_last_not_of(" \t");
-  return s.substr(first, last - first + 1);
-}
-
-bool parseTypePair(std::string_view value, int &typeI, int &typeJ) {
-  const auto comma = value.find(',');
-  if (comma == std::string_view::npos) {
-    return false;
-  }
-  if (value.find(',', comma + 1) != std::string_view::npos) {
-    return false;
-  }
-  const auto left = trimView(value.substr(0, comma));
-  const auto right = trimView(value.substr(comma + 1));
-  if (left.empty() || right.empty()) {
-    return false;
-  }
-  try {
-    typeI = parseIntegral<int>(left);
-    typeJ = parseIntegral<int>(right);
-  } catch (const ParsingException &) {
-    return false;
-  }
-  return true;
-}
-
 std::string iceColor(std::string_view name) {
   if (name == "cubic" || name == "reCubic") {
     return colorizer.longOption(name);
