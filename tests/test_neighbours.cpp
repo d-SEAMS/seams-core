@@ -573,3 +573,39 @@ TEST_CASE("sheared box k-nearest uses the periodic image",
                Catch::Matchers::WithinAbs(0.25, 1e-9));
 }
 #endif
+
+TEST_CASE("tilt dump cutoff list finds the a-image pair", "[neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  const double coords[2][3] = {{0.2, 0.1, 1.0}, {9.7, 0.1, 1.0}};
+  for (int i = 0; i < 2; i++) {
+    molSys::Point<double> pt;
+    pt.type = 1;
+    pt.atomID = i + 1;
+    pt.molID = i + 1;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+  auto nList = nneigh::neighListO(1.0, cloud, 1);
+  REQUIRE(nList.size() == 2);
+  REQUIRE(nList[0][0] == 1);
+  REQUIRE(nList[1][0] == 2);
+  const bool zeroHasOne =
+      std::find(nList[0].begin() + 1, nList[0].end(), 2) != nList[0].end();
+  const bool oneHasZero =
+      std::find(nList[1].begin() + 1, nList[1].end(), 1) != nList[1].end();
+  REQUIRE(zeroHasOne);
+  REQUIRE(oneHasZero);
+
+  auto byIndex = nneigh::getNewNeighbourListByIndex(cloud, 1.0);
+  REQUIRE(byIndex[0][0] == 0);
+  const bool idx01 =
+      std::find(byIndex[0].begin() + 1, byIndex[0].end(), 1) !=
+      byIndex[0].end();
+  REQUIRE(idx01);
+}

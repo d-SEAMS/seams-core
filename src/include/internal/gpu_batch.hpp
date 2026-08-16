@@ -31,10 +31,14 @@ struct BatchResult {
   std::string error;
 };
 
-/** xyz is frame-major, atom, xyz. box is frame-major, three lengths.
+/** xyz is frame-major, atom, xyz.
+ *  box is frame-major three lengths when boxLow is null.
+ *  When boxLow is set, box is one dump box (3 spans or 6 span+tilt)
+ *  shared by every frame.
  *  rc is the cell-list cutoff; 5.5 matches the host k-NN candidate shell. */
 BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
-                            int nFrames, double rc = 5.5);
+                            int nFrames, double rc = 5.5,
+                            const double *boxLow = nullptr, int nBox = 3);
 
 } // namespace gpu
 

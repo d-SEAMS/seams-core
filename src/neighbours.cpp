@@ -100,10 +100,9 @@ bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yClo
     positions[i] = {yCloud.pts[idx].x, yCloud.pts[idx].y, yCloud.pts[idx].z};
   }
 
-  // Box matrix (row-major, diagonal for orthorhombic)
-  double box[3][3] = {{yCloud.box[0], 0.0, 0.0},
-                      {0.0, yCloud.box[1], 0.0},
-                      {0.0, 0.0, yCloud.box[2]}};
+  double box[3][3];
+  double origin[3];
+  nneigh::dumpBoundsToH(yCloud.box, yCloud.boxLow, box, origin);
   bool periodic[3] = {true, true, true};
 
   VesinOptions options;
