@@ -29,7 +29,7 @@
 #include <vesin.h>
 #endif
 #ifdef SEAMS_HAS_LINKCELL
-#include <linkcell.h>
+#include <linkcell.hpp>
 #endif
 
 namespace {
@@ -590,12 +590,14 @@ bool nominateByLinkcell(
   if (nSrc == 0) {
     return true;
   }
-  const lc_cell box = nneigh::lammpsBoxToLcCell(yCloud.box, yCloud.boxLow);
-  if (lc_knearest(xyz.data(), static_cast<std::size_t>(n), &box,
-                  static_cast<std::size_t>(k), mask.data(), cellHint,
-                  nom.data()) != 0) {
-    const char *msg = lc_last_error();
-    std::cerr << "linkcell failed: " << (msg ? msg : "unknown")
+  const linkcell::Cell cell =
+      nneigh::lammpsBoxToLinkcell(yCloud.box, yCloud.boxLow);
+  try {
+    linkcell::knearest_into(xyz.data(), static_cast<std::size_t>(n), cell,
+                            static_cast<std::size_t>(k), nom.data(),
+                            nom.size(), mask.data(), cellHint);
+  } catch (const linkcell::Error &e) {
+    std::cerr << "linkcell failed: " << e.what()
               << "; falling back to the in-tree cell list.\n";
     return false;
   }

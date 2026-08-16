@@ -25,7 +25,7 @@
 #include <mol_sys.hpp>
 
 #ifdef SEAMS_HAS_LINKCELL
-#include <linkcell.h>
+#include <linkcell.hpp>
 #endif
 
 /** @file neighbours.hpp
@@ -95,6 +95,11 @@ inline lc_cell lammpsBoxToLcCell(const std::vector<double> &box,
   c.oy = ylo_b - ymin;
   c.oz = zlo_b;
   return c;
+}
+
+inline linkcell::Cell lammpsBoxToLinkcell(const std::vector<double> &box,
+                                          const std::vector<double> &boxLow) {
+  return linkcell::Cell(lammpsBoxToLcCell(box, boxLow));
 }
 #endif
 
