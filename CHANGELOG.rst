@@ -5,6 +5,13 @@ Changelog
 Unreleased
 ==========
 
+Version 2.3.1 (2026-08-16)
+===========================
+
+``neighList``, ``halfNeighList``, and the in-plane RDF sampler use
+the vesin cell list (same helper as ``neighListO``). Brute force
+remains the fallback. The GPU ice-score workspace is unchanged.
+
 Version 2.3.0 (2026-08-16)
 ===========================
 
