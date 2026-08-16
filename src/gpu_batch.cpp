@@ -648,7 +648,7 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
     // One multi-frame launch on the workspace stream. Per-frame box
     // walks serialize on the same bin buffers and leave the SMs idle.
     knn.knearest_into_many(xyzDev, nSz, fSz, cell0, kSz, colsDev,
-                           fSz * nSz * kSz, nullptr, rc, false);
+                           fSz * nSz * kSz, nullptr, rc, false, box);
     auto launchArgs = [](void **raw, std::size_t n) {
       return std::vector<void *>(raw, raw + n);
     };
