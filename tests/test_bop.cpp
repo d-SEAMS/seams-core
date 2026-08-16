@@ -1112,9 +1112,9 @@ TEST_CASE("steinhardtQl flatten uses dump H not span minImage", "[bop]") {
   b.atomID = 2;
   b.type = 1;
   molSys::Point<double> c;
-  c.x = 0.5;
+  c.x = 2.5;
   c.y = 0.5;
-  c.z = 2.0;
+  c.z = 1.0;
   c.atomID = 3;
   c.type = 1;
   cloud.pts.push_back(a);
@@ -1129,7 +1129,7 @@ TEST_CASE("steinhardtQl flatten uses dump H not span minImage", "[bop]") {
   const auto dr02 = gen::relDist(cloud, 0, 2);
   const double packed[6] = {dr01[0], dr01[1], dr01[2],
                             dr02[0], dr02[1], dr02[2]};
-  const double xyz[9] = {0.5, 0.5, 1.0, 1.0, 8.0, 1.0, 0.5, 0.5, 2.0};
+  const double xyz[9] = {0.5, 0.5, 1.0, 1.0, 8.0, 1.0, 2.5, 0.5, 1.0};
   const int offsets[2] = {0, 2};
   const int cols[2] = {1, 2};
   std::vector<double> qlmDr(1 * 13 * 2, 0.0);
