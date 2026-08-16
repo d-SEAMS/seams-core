@@ -127,3 +127,77 @@ rdf::PartialRdf rdf::partialRdf(
   }
   return out;
 }
+
+/**
+ * @details Discrete running integral 4 pi rho_J int_0^r s^2 g(s) ds.
+ *  Each bin contributes a spherical shell of width binwidth. The
+ *  value at bin i is the CN at the outer edge of that bin.
+ */
+std::vector<double> rdf::runningCN(const PartialRdf &h, double rhoJ) {
+  std::vector<double> cn(h.g.size(), 0.0);
+  if (h.binwidth <= 0.0 || rhoJ == 0.0) {
+    return cn;
+  }
+  double acc = 0.0;
+  for (std::size_t i = 0; i < h.g.size(); ++i) {
+    const double r0 = h.binwidth * static_cast<double>(i);
+    const double r1 = h.binwidth * static_cast<double>(i + 1);
+    acc += 4.0 * gen::pi * rhoJ * h.g[i] * (r1 * r1 * r1 - r0 * r0 * r0) /
+           3.0;
+    cn[i] = acc;
+  }
+  return cn;
+}
+
+/**
+ * @details First local maximum of g, then the first local minimum after
+ *  that peak. A confirmed minimum needs a descent and a later rise.
+ *  Monotonic or empty histograms return -1.
+ */
+int rdf::firstMinimumBin(const PartialRdf &h) {
+  const int n = static_cast<int>(h.g.size());
+  if (n < 3) {
+    return -1;
+  }
+  int i = 0;
+  while (i + 1 < n && h.g[static_cast<std::size_t>(i + 1)] >=
+                           h.g[static_cast<std::size_t>(i)]) {
+    ++i;
+  }
+  const int imax = i;
+  if (imax >= n - 1) {
+    return -1;
+  }
+  i = imax;
+  while (i + 1 < n && h.g[static_cast<std::size_t>(i + 1)] <=
+                           h.g[static_cast<std::size_t>(i)]) {
+    ++i;
+  }
+  if (i == imax || i + 1 >= n) {
+    return -1;
+  }
+  return i;
+}
+
+/**
+ * @details Site-site CN up to rMax. Partial last bins are cut at rMax.
+ */
+double rdf::coordinationNumber(const PartialRdf &h, double rMax,
+                               double rhoJ) {
+  if (rMax <= 0.0 || h.binwidth <= 0.0 || rhoJ == 0.0 || h.g.empty()) {
+    return 0.0;
+  }
+  double cn = 0.0;
+  for (std::size_t i = 0; i < h.g.size(); ++i) {
+    const double r0 = h.binwidth * static_cast<double>(i);
+    if (r0 >= rMax) {
+      break;
+    }
+    double r1 = h.binwidth * static_cast<double>(i + 1);
+    if (r1 > rMax) {
+      r1 = rMax;
+    }
+    cn += 4.0 * gen::pi * rhoJ * h.g[i] * (r1 * r1 * r1 - r0 * r0 * r0) / 3.0;
+  }
+  return cn;
+}

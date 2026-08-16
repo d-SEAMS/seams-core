@@ -130,6 +130,37 @@ int typeOf(const Cloud &cloud, int requested) {
   return cloud.pts[0].type;
 }
 
+std::string_view trimView(std::string_view s) {
+  const auto first = s.find_first_not_of(" \t");
+  if (first == std::string_view::npos) {
+    return {};
+  }
+  const auto last = s.find_last_not_of(" \t");
+  return s.substr(first, last - first + 1);
+}
+
+bool parseTypePair(std::string_view value, int &typeI, int &typeJ) {
+  const auto comma = value.find(',');
+  if (comma == std::string_view::npos) {
+    return false;
+  }
+  if (value.find(',', comma + 1) != std::string_view::npos) {
+    return false;
+  }
+  const auto left = trimView(value.substr(0, comma));
+  const auto right = trimView(value.substr(comma + 1));
+  if (left.empty() || right.empty()) {
+    return false;
+  }
+  try {
+    typeI = parseIntegral<int>(left);
+    typeJ = parseIntegral<int>(right);
+  } catch (const ParsingException &) {
+    return false;
+  }
+  return true;
+}
+
 std::string iceColor(std::string_view name) {
   if (name == "cubic" || name == "reCubic") {
     return colorizer.longOption(name);
@@ -244,6 +275,24 @@ int cmdRdf(std::ostream &os, Cloud &cloud, double rmax, int bins, int typeI,
   for (std::size_t i = 0; i < gr.r.size(); ++i) {
     os << gr.r[i] << " " << gr.g[i] << " " << gr.count[i] << "\n";
   }
+  return 0;
+}
+
+int cmdCn(std::ostream &os, Cloud &cloud, double rmax, int bins, int typeI,
+          int typeJ) {
+  if (bins <= 0) {
+    bins = std::max(1, static_cast<int>(std::lround(rmax / 0.1)));
+  }
+  const int typI = typeOf(cloud, typeI);
+  const int typJ = typeJ > 0 ? typeJ : typI;
+  const auto gr = rdf::partialRdf(cloud, typI, typJ, rmax, bins);
+  const double rhoJ =
+      (gr.volume > 0.0) ? static_cast<double>(gr.nJ) / gr.volume : 0.0;
+  const double cn = rdf::coordinationNumber(gr, rmax, rhoJ);
+  os << "# site-site\n";
+  os << "# types " << typI << " " << typJ << " cutoff " << rmax << " cn "
+     << cn << " nI " << gr.nI << " nJ " << gr.nJ << " volume " << gr.volume
+     << "\n";
   return 0;
 }
 
@@ -439,14 +488,14 @@ int main(int argc, char *argv[]) {
 
   parser.add(Option("--cutoff", "-c")
                  .argName("ANGSTROM")
-                 .help("Neighbour cutoff (rdf rmax)")
+                 .help("Neighbour cutoff (rdf/cn rmax)")
                  .handler([&](std::string_view value) {
                    cutoff = parseFloatingPoint<double>(value);
                  }));
 
   parser.add(Option("--types")
                  .argName("I,J")
-                 .help("Pair types for rdf (default I=J=--type)")
+                 .help("Pair types for site-site rdf/cn (default I=J=--type)")
                  .handler([&](std::string_view value) {
                    typesFlag = std::string(value);
                  }));
@@ -512,7 +561,7 @@ int main(int argc, char *argv[]) {
                  }));
 
   parser.add(Positional("command")
-                 .help("read | chill | chill-plus | cages | rdf")
+                 .help("read | chill | chill-plus | cages | rdf | cn")
                  .occurs(zeroOrOneTime)
                  .handler([&](std::string_view value) { cmd = value; }));
 
@@ -591,12 +640,16 @@ int main(int argc, char *argv[]) {
     if (cmd == "rdf") {
       return cmdRdf(os, cloud, cutoff, bins, rdfTypeI, rdfTypeJ);
     }
+    if (cmd == "cn") {
+      return cmdCn(os, cloud, cutoff, bins, rdfTypeI, rdfTypeJ);
+    }
     os << colorizer.error("unknown command: ") << cmd << "\n";
     return 2;
   };
 
+  const bool pairCmd = (cmd == "rdf" || cmd == "cn");
   const int loadType =
-      (cmd == "rdf" && (typesSet ? rdfTypeI != rdfTypeJ : false)) ? -1 : typeI;
+      (pairCmd && (typesSet ? rdfTypeI != rdfTypeJ : false)) ? -1 : typeI;
 
   if (last <= 0 || last == frame) {
     Cloud cloud = load(file, frame, loadType);
@@ -605,7 +658,7 @@ int main(int argc, char *argv[]) {
 
   std::mutex outMu;
   int rc = 0;
-  const int typeFilter = (cmd == "rdf" && typesSet && rdfTypeI != rdfTypeJ)
+  const int typeFilter = (pairCmd && typesSet && rdfTypeI != rdfTypeJ)
                              ? 0
                              : (typeI > 0 ? typeI : 0);
   sinp::forEachLammpsFrame(
