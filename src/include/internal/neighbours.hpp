@@ -97,6 +97,60 @@ inline void dumpBoundsToH(const std::vector<double> &box,
   origin[2] = zlo_b;
 }
 
+/// Recovered restricted-triclinic lengths lx, ly, lz (H diagonal).
+inline void dumpCellLengths(const std::vector<double> &box,
+                            const std::vector<double> &boxLow,
+                            double lengths[3]) {
+  double H[3][3];
+  double origin[3];
+  dumpBoundsToH(box, boxLow, H, origin);
+  lengths[0] = H[0][0];
+  lengths[1] = H[1][1];
+  lengths[2] = H[2][2];
+}
+
+/// Longest recovered length: 0 = x, 1 = y, 2 = z.
+inline int dumpAxialDim(const std::vector<double> &box,
+                        const std::vector<double> &boxLow) {
+  double lengths[3];
+  dumpCellLengths(box, boxLow, lengths);
+  int axial = 0;
+  if (lengths[1] > lengths[axial]) {
+    axial = 1;
+  }
+  if (lengths[2] > lengths[axial]) {
+    axial = 2;
+  }
+  return axial;
+}
+
+inline int dumpAxialDim(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  return dumpAxialDim(yCloud.box, yCloud.boxLow);
+}
+
+/// Cartesian to fractional coordinates via dump H.
+inline void dumpToFrac(const double H[3][3], const double origin[3], double x,
+                       double y, double z, double s[3]) {
+  const double lx = H[0][0];
+  const double ly = H[1][1];
+  const double lz = H[2][2];
+  const double xy = H[1][0];
+  const double xz = H[2][0];
+  const double yz = H[2][1];
+  s[2] = (z - origin[2]) / lz;
+  s[1] = (y - origin[1] - yz * s[2]) / ly;
+  s[0] = (x - origin[0] - xy * s[1] - xz * s[2]) / lx;
+}
+
+/// Fractional to cartesian coordinates via dump H.
+inline void dumpFromFrac(const double H[3][3], const double origin[3],
+                         const double s[3], double r[3]) {
+  r[0] = origin[0] + H[0][0] * s[0] + H[1][0] * s[1] + H[2][0] * s[2];
+  r[1] = origin[1] + H[1][1] * s[1] + H[2][1] * s[2];
+  r[2] = origin[2] + H[2][2] * s[2];
+}
+
 /// Triclinic dump-cell volume |det(H)| from dumpBoundsToH.
 /// Bound spans Lx*Ly*Lz are not the cell volume when tilt is present.
 inline double dumpVolume(const std::vector<double> &box,
