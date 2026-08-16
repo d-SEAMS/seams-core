@@ -414,12 +414,8 @@ if get_option('with_cli')
     python3,
     args: [
       '-c',
-      'import subprocess, sys\n'
-      'p = subprocess.run(sys.argv[1:], capture_output=True, text=True)\n'
-      'out = p.stdout + p.stderr\n'
-      'sys.exit(0 if p.returncode == 0 and "rdf" in out else 1)\n',
+      'import subprocess,sys; p=subprocess.run([sys.argv[1],"--help"],capture_output=True,text=True); sys.exit(0 if p.returncode==0 and "rdf" in p.stdout+p.stderr else 1)',
       seams_exe.full_path(),
-      '--help',
     ],
     depends: [seams_exe])
   test(
@@ -427,12 +423,8 @@ if get_option('with_cli')
     python3,
     args: [
       '-c',
-      'import subprocess, sys\n'
-      'p = subprocess.run(sys.argv[1:], capture_output=True, text=True)\n'
-      'sys.exit(0 if p.returncode == 2 else 1)\n',
+      'import subprocess,sys; p=subprocess.run([sys.argv[1],"nope","x"],capture_output=True,text=True); sys.exit(0 if p.returncode==2 else 1)',
       seams_exe.full_path(),
-      'nope',
-      'x',
     ],
     depends: [seams_exe])
 endif
