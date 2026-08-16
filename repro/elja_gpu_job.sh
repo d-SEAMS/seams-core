@@ -33,6 +33,8 @@ ROOT=${SLURM_SUBMIT_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}
 OUT=$ROOT/repro/results
 BUILD=/tmp/seams-gpu-${SLURM_JOB_ID:-manual}
 mkdir -p "$OUT" "$BUILD"
+: > "$OUT/tip-gpu-batch.txt"
+: > "$OUT/gpu-test.log"
 cd "$ROOT"
 {
   echo "hostname: $(hostname)"
@@ -45,9 +47,11 @@ cd "$ROOT"
   echo "loadavg_at_start: $(cut -d' ' -f1 /proc/loadavg)"
 } | tee "$OUT/gpu-conditions.txt"
 
-pixi run -- env PATH="$HOME/.cargo/bin:$PATH" meson setup "$BUILD" \
-  --buildtype=release -Dwith_tests=true -Dwith_gpulite=enabled
-pixi run -- env PATH="$HOME/.cargo/bin:$PATH" meson compile -C "$BUILD"
+# cargo is already on PATH. Do not wrap pixi run in `env PATH=...`:
+# that expansion is the pre-pixi PATH and drops meson.
+pixi run -- meson setup "$BUILD" --buildtype=release -Dwith_tests=true \
+  -Dwith_gpulite=enabled
+pixi run -- meson compile -C "$BUILD"
 pixi run -- meson test -C "$BUILD" --print-errorlogs | tee "$OUT/gpu-test.log"
 
 cd "$ROOT/input"
