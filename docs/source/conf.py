@@ -88,6 +88,12 @@ html_theme_options = {
                     "summary": "require(\"dseams\") and Fennel",
                     "external": True,
                 },
+                {
+                    "title": "linkcell",
+                    "url": "https://github.com/d-SEAMS/linkcell",
+                    "summary": "Periodic linked-cell k-nearest neighbours",
+                    "external": True,
+                },
             ],
         },
     ],
