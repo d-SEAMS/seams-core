@@ -583,6 +583,18 @@ TEST_CASE("SkinNeighborList default is the mutual four-nearest graph",
   }
 }
 
+TEST_CASE("dumpAxialDim uses recovered lx ly lz not tilt", "[neighbours]") {
+  double lengths[3];
+  nneigh::dumpCellLengths({61.0, 12.0, 50.0, 60.0, 0.0, 0.0}, {0.0, 0.0, 0.0},
+                          lengths);
+  REQUIRE_THAT(lengths[0], Catch::Matchers::WithinAbs(1.0, 1e-12));
+  REQUIRE_THAT(lengths[1], Catch::Matchers::WithinAbs(12.0, 1e-12));
+  REQUIRE_THAT(lengths[2], Catch::Matchers::WithinAbs(50.0, 1e-12));
+  REQUIRE(nneigh::dumpAxialDim({61.0, 12.0, 50.0, 60.0, 0.0, 0.0},
+                               {0.0, 0.0, 0.0}) == 2);
+  REQUIRE(nneigh::dumpAxialDim({10.0, 10.0, 50.0}, {0.0, 0.0, 0.0}) == 2);
+}
+
 TEST_CASE("empty cloud k-nearest does not throw", "[neighbours]") {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   cloud.box = {10.0, 10.0, 10.0};

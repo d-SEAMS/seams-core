@@ -409,20 +409,18 @@ int clump::recenterClusterCloud(
     molSys::PointCloud<molSys::Point<double>, double> &iceCloud,
     const std::vector<std::vector<int>> &nList) {
   //
-  int dim = 3; // Dimensions
-  std::vector<double> box = iceCloud.box;
-  std::vector<double> boxLow = iceCloud.boxLow;
-  std::vector<double> boxHigh;
   double xBoxCenter, yBoxCenter, zBoxCenter; // Centroid of the simulation box
   double x_centroid, y_centroid, z_centroid; // Centroid of the cluster
   // Variables for the linked list
   std::vector<int> linkedList; // Contains the linked list for the cluster
   std::vector<bool> visited; // Records whether an item has been visited or not
 
-  // To avoid long confusing lines, fill boxHigh
-  for (int k = 0; k < dim; k++) {
-    boxHigh.push_back(boxLow[k] + box[k]);
-  } // end of filling up boxHigh
+  double H[3][3];
+  double origin[3];
+  nneigh::dumpBoundsToH(iceCloud.box, iceCloud.boxLow, H, origin);
+  xBoxCenter = origin[0] + 0.5 * (H[0][0] + H[1][0] + H[2][0]);
+  yBoxCenter = origin[1] + 0.5 * (H[0][1] + H[1][1] + H[2][1]);
+  zBoxCenter = origin[2] + 0.5 * (H[0][2] + H[1][2] + H[2][2]);
 
   // --------------------------------------------------------------------------
   // Get the linked list of the cluster
@@ -463,11 +461,6 @@ int clump::recenterClusterCloud(
     }
     //
   } // end of loop through atoms
-  // --------------------------------------------------------------------------
-  // Center of the simulation box
-  xBoxCenter = 0.5 * (boxLow[0] + boxHigh[0]);
-  yBoxCenter = 0.5 * (boxLow[1] + boxHigh[1]);
-  zBoxCenter = 0.5 * (boxLow[2] + boxHigh[2]);
   // --------------------------------------------------------------------------
   // Get the centroid of the ice cluster.
   x_centroid = 0.0;

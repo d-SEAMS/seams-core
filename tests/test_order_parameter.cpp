@@ -71,3 +71,12 @@ TEST_CASE("projAreaSingleRing XY plane rectangle", "[order_parameter]") {
   REQUIRE_THAT(areas[1], Catch::Matchers::WithinAbs(0.0, 1e-10));
   REQUIRE_THAT(areas[2], Catch::Matchers::WithinAbs(0.0, 1e-10));
 }
+
+TEST_CASE("normHeightPercent uses recovered lz not tilt",
+          "[order_parameter]") {
+  auto cloud = makeCloud({{0.0, 0.0, 0.0}});
+  cloud.box = {61.0, 12.0, 50.0, 60.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  const double h = topoparam::normHeightPercent(cloud, 10, 2.5);
+  REQUIRE_THAT(h, Catch::Matchers::WithinAbs(50.0, 1e-10));
+}

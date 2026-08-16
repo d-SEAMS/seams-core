@@ -160,6 +160,18 @@ TEST_CASE("recenterClusterCloud unwraps a mixed image on dump H",
   REQUIRE_THAT(dz, Catch::Matchers::WithinAbs(z0 - z1, 1e-12));
   REQUIRE_THAT(dx, Catch::Matchers::WithinAbs(4.5, 1e-10));
   REQUIRE_THAT(dy, Catch::Matchers::WithinAbs(1.160254037844386, 1e-10));
+  double cx = 0.0, cy = 0.0, cz = 0.0;
+  for (int i = 0; i < cloud.nop; i++) {
+    cx += cloud.pts[i].x;
+    cy += cloud.pts[i].y;
+    cz += cloud.pts[i].z;
+  }
+  cx /= cloud.nop;
+  cy /= cloud.nop;
+  cz /= cloud.nop;
+  REQUIRE_THAT(cx, Catch::Matchers::WithinAbs(7.5, 1e-10));
+  REQUIRE_THAT(cy, Catch::Matchers::WithinAbs(4.330127018922193, 1e-10));
+  REQUIRE_THAT(cz, Catch::Matchers::WithinAbs(5.0, 1e-12));
 }
 
 TEST_CASE("recenterClusterCloud unwraps a three-atom mixed-image chain",
