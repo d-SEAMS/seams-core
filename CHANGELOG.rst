@@ -2,6 +2,12 @@
 Changelog
 =========
 
+Version 2.2.5 (2026-08-16)
+===========================
+
+``subprojects/linkcell.wrap`` is v0.2.3. A static ``libyodaLib.a``
+no longer passes ``liblinkcell.so`` to ``ar``.
+
 Version 2.2.4 (2026-08-16)
 ===========================
 
