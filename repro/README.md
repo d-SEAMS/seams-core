@@ -7,7 +7,7 @@ exclusive allocation.
 
 Paper timings run on Elja (`repro/elja_submit.sh`, exclusive
 `64cpu_256mem`, account `chem-ui`). The device-resident N-frame batch is `repro/elja_gpu_job.sh` on
-`gpu-1xA100`. A gpulite probe sizes the working set; the device
+`gpu-2xA100`. A gpulite probe sizes the working set; the device
 path is a cell list, one \(q_{lm}\) pass and CHILL, not a host
 round-trip per kernel. Terra is not the perf host.
 

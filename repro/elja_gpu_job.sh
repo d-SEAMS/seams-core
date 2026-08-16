@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #SBATCH --job-name=seams-gpu
-#SBATCH --partition=gpu-1xA100
+#SBATCH --partition=gpu-2xA100
 #SBATCH --account=chem-ui
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
