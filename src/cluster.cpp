@@ -433,12 +433,9 @@ int clump::recenterClusterCloud(
   visited.resize(iceCloud.nop);
 
   // The starting value is the first atom
-  int iatom = 0;    // Atom index of the 'starting value'
   int currentIndex; // Current atom
   int nextElement;  // Next linked atom
   int index;        // Keeps track of the first element in the linked list
-  double x_ij, y_ij, z_ij; // Relative distance between the two atoms
-  double xPBC, yPBC, zPBC; // Actual distance
 
   // Loop through the entire linked list
   for (int i = 0; i < iceCloud.nop; i++) {
@@ -465,45 +462,11 @@ int clump::recenterClusterCloud(
       // and the next element
       // Coordinates
       // if (nextElement != index) {
-      x_ij = iceCloud.pts[currentIndex].x - iceCloud.pts[nextElement].x;
-      y_ij = iceCloud.pts[currentIndex].y - iceCloud.pts[nextElement].y;
-      z_ij = iceCloud.pts[currentIndex].z - iceCloud.pts[nextElement].z;
-      // Shift the nextElement if it's on the other side of the box
-      // Shift x
-      if (std::abs(x_ij) > 0.5 * box[0]) {
-        // Get the actual distance
-        xPBC = box[0] - std::abs(x_ij);
-        if (x_ij < 0) {
-          iceCloud.pts[nextElement].x = iceCloud.pts[currentIndex].x - xPBC;
-        } // To the -x side of currentIndex
-        else {
-          iceCloud.pts[nextElement].x = iceCloud.pts[currentIndex].x + xPBC;
-        } // Add to the + side
-      }   // Shift nextElement
-      //
-      // Shift y
-      if (std::abs(y_ij) > 0.5 * box[1]) {
-        // Get the actual distance
-        yPBC = box[1] - std::abs(y_ij);
-        if (y_ij < 0) {
-          iceCloud.pts[nextElement].y = iceCloud.pts[currentIndex].y - yPBC;
-        } // To the -y side of currentIndex
-        else {
-          iceCloud.pts[nextElement].y = iceCloud.pts[currentIndex].y + yPBC;
-        } // Add to the + side
-      }   // Shift nextElement
-      //
-      // Shift z
-      if (std::abs(z_ij) > 0.5 * box[2]) {
-        // Get the actual distance
-        zPBC = box[2] - std::abs(z_ij);
-        if (z_ij < 0) {
-          iceCloud.pts[nextElement].z = iceCloud.pts[currentIndex].z - zPBC;
-        } // To the -z side of currentIndex
-        else {
-          iceCloud.pts[nextElement].z = iceCloud.pts[currentIndex].z + zPBC;
-        } // Add to the + side
-      }   // Shift nextElement
+      const auto dr =
+          gen::relDist(iceCloud, currentIndex, nextElement);
+      iceCloud.pts[nextElement].x = iceCloud.pts[currentIndex].x - dr[0];
+      iceCloud.pts[nextElement].y = iceCloud.pts[currentIndex].y - dr[1];
+      iceCloud.pts[nextElement].z = iceCloud.pts[currentIndex].z - dr[2];
           // -----------------------------------
       // }  // don't shift the last atom!
 

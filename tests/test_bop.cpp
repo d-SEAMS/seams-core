@@ -1048,3 +1048,41 @@ TEST_CASE("steinhardtQl accepts l=8 and averages correctly on FCC", "[bop]") {
     REQUIRE_THAT(q8.qlBar[i], Catch::Matchers::WithinAbs(q8.ql[i], 1e-9));
   }
 }
+
+TEST_CASE("qlmOneAtomDr uses packed relDist not minImage", "[bop]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  molSys::Point<double> a;
+  a.x = 0.5;
+  a.y = 0.5;
+  a.z = 1.0;
+  a.atomID = 1;
+  a.type = 1;
+  molSys::Point<double> b;
+  b.x = 1.0;
+  b.y = 8.0;
+  b.z = 1.0;
+  b.atomID = 2;
+  b.type = 1;
+  cloud.pts.push_back(a);
+  cloud.pts.push_back(b);
+  cloud.idIndexMap[1] = 0;
+  cloud.idIndexMap[2] = 1;
+  std::vector<std::vector<int>> nList = {{1, 2}, {2, 1}};
+  const auto ql = chill::steinhardtQl(cloud, nList, 6);
+  const auto dr01 = gen::relDist(cloud, 0, 1);
+  const double packed[6] = {dr01[0], dr01[1], dr01[2],
+                            -dr01[0], -dr01[1], -dr01[2]};
+  const int offsets[3] = {0, 1, 2};
+  const int cols[2] = {1, 0};
+  std::vector<double> qlm(2 * 2 * 13, 0.0);
+  seams::steinhardt::qlmOneAtomDr(0, 6, packed, offsets, cols, qlm.data());
+  seams::steinhardt::qlmOneAtomDr(1, 6, packed, offsets, cols, qlm.data());
+  std::vector<double> qlHost(2, 0.0);
+  std::vector<double> qlBar(2, 0.0);
+  seams::steinhardt::qlOneAtom(0, 6, qlm.data(), offsets, cols, qlHost.data(),
+                               qlBar.data());
+  REQUIRE_THAT(ql.ql[0], Catch::Matchers::WithinAbs(qlHost[0], 1e-12));
+}

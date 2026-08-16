@@ -48,22 +48,23 @@ bool donatedHydrogenBond(
         distCutoff) {
       continue;
     }
-    std::vector<double> oo = {yCloud.pts[acceptorIndex].x -
-                                  yCloud.pts[donorIndex].x,
-                              yCloud.pts[acceptorIndex].y -
-                                  yCloud.pts[donorIndex].y,
-                              yCloud.pts[acceptorIndex].z -
-                                  yCloud.pts[donorIndex].z};
-    std::vector<double> oh = {yCloud.pts[acceptorIndex].x -
-                                  hCloud.pts[hAtomIndex].x,
-                              yCloud.pts[acceptorIndex].y -
-                                  hCloud.pts[hAtomIndex].y,
-                              yCloud.pts[acceptorIndex].z -
-                                  hCloud.pts[hAtomIndex].z};
-    for (int l = 0; l < 3; l++) {
-      oo[l] -= yCloud.box[l] * std::round(oo[l] / yCloud.box[l]);
-      oh[l] -= yCloud.box[l] * std::round(oh[l] / yCloud.box[l]);
+    const auto ooArr = gen::relDist(yCloud, acceptorIndex, donorIndex);
+    std::vector<double> oo = {ooArr[0], ooArr[1], ooArr[2]};
+    std::array<double, 3> ohArr;
+    if (yCloud.box.size() >= 6) {
+      ohArr = gen::triclinicMinImage(
+          yCloud, yCloud.pts[acceptorIndex].x, yCloud.pts[acceptorIndex].y,
+          yCloud.pts[acceptorIndex].z, hCloud.pts[hAtomIndex].x,
+          hCloud.pts[hAtomIndex].y, hCloud.pts[hAtomIndex].z);
+    } else {
+      ohArr = {yCloud.pts[acceptorIndex].x - hCloud.pts[hAtomIndex].x,
+               yCloud.pts[acceptorIndex].y - hCloud.pts[hAtomIndex].y,
+               yCloud.pts[acceptorIndex].z - hCloud.pts[hAtomIndex].z};
+      for (int l = 0; l < 3; l++) {
+        ohArr[l] -= yCloud.box[l] * std::round(ohArr[l] / yCloud.box[l]);
+      }
     }
+    std::vector<double> oh = {ohArr[0], ohArr[1], ohArr[2]};
     if (gen::radDeg(gen::eigenVecAngle(oo, oh)) <= angleCutoff) {
       return true;
     }
@@ -341,19 +342,10 @@ double bond::getHbondDistanceOH(
     const molSys::PointCloud<molSys::Point<double>, double> &oCloud,
     const molSys::PointCloud<molSys::Point<double>, double> &hCloud, int oAtomIndex,
     int hAtomIndex) {
-  std::array<double, 3> dr; // relative distance in the X, Y, Z dimensions
-  double r2 = 0.0;          // Bond length
-
-  dr[0] = oCloud.pts[oAtomIndex].x - hCloud.pts[hAtomIndex].x;
-  dr[1] = oCloud.pts[oAtomIndex].y - hCloud.pts[hAtomIndex].y;
-  dr[2] = oCloud.pts[oAtomIndex].z - hCloud.pts[hAtomIndex].z;
-
-  // Apply the PBCs and get the squared area
-  for (int k = 0; k < 3; k++) {
-    dr[k] -= oCloud.box[k] * round(dr[k] / oCloud.box[k]);
-    r2 += pow(dr[k], 2.0);
-  } // end of applying the PBCs and getting the squared area
-  return sqrt(r2);
+  const std::vector<double> hpt = {hCloud.pts[hAtomIndex].x,
+                                   hCloud.pts[hAtomIndex].y,
+                                   hCloud.pts[hAtomIndex].z};
+  return gen::unWrappedDistFromPoint(oCloud, oAtomIndex, hpt);
 }
 
 /**

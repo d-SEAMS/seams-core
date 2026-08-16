@@ -286,6 +286,49 @@ inline void qlmOneAtom(int iatom, int orderL, const double *xyz,
   }
 }
 
+// First pass from packed MIC vectors (3 * nnz, aligned with cols).
+// Does not call minImage.
+inline void qlmOneAtomDr(int iatom, int orderL, const double *dr,
+                         const int *offsets, const int *cols,
+                         double *qlmInterleaved) {
+  const int nComp = 2 * orderL + 1;
+  const int row = iatom * nComp;
+  for (int m = 0; m < nComp; m++) {
+    qlmInterleaved[2 * (row + m)] = 0.0;
+    qlmInterleaved[2 * (row + m) + 1] = 0.0;
+  }
+  const int j0 = offsets[iatom];
+  const int j1 = offsets[iatom + 1];
+  int nUsed = 0;
+  double ylm[34];
+  for (int p = j0; p < j1; p++) {
+    const double dx = dr[3 * p];
+    const double dy = dr[3 * p + 1];
+    const double dz = dr[3 * p + 2];
+    const double r2 = dx * dx + dy * dy + dz * dz;
+    if (r2 == 0.0) {
+      continue;
+    }
+    const double r = std::sqrt(r2);
+    const double phi = std::atan2(dx, dy);
+    const double theta = std::acos(dz / r);
+    ylmAll(orderL, theta, phi, ylm);
+    for (int m = 0; m < nComp; m++) {
+      qlmInterleaved[2 * (row + m)] += ylm[2 * m];
+      qlmInterleaved[2 * (row + m) + 1] += ylm[2 * m + 1];
+    }
+    nUsed++;
+  }
+  if (nUsed == 0) {
+    return;
+  }
+  const double inv = 1.0 / static_cast<double>(nUsed);
+  for (int m = 0; m < nComp; m++) {
+    qlmInterleaved[2 * (row + m)] *= inv;
+    qlmInterleaved[2 * (row + m) + 1] *= inv;
+  }
+}
+
 inline void qlOneAtom(int iatom, int orderL, const double *qlmInterleaved,
                       const int *offsets, const int *cols, double *ql,
                       double *qlBar) {

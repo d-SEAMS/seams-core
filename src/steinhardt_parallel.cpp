@@ -9,6 +9,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <bop.hpp>
+#include <generic.hpp>
 #include <sphericart_ylm.hpp>
 #include <steinhardt_device.hpp>
 
@@ -30,6 +31,7 @@ constexpr int kParallelThreshold = 50000;
 
 struct NeighbourCSR {
   std::vector<double> xyz;
+  std::vector<double> dr;
   std::vector<int> offsets;
   std::vector<int> cols;
   double box[3];
@@ -67,6 +69,10 @@ NeighbourCSR flatten(const molSys::PointCloud<molSys::Point<double>, double> &yC
         continue;
       }
       g.cols.push_back(it->second);
+      const auto d = gen::relDist(yCloud, i, it->second);
+      g.dr.push_back(d[0]);
+      g.dr.push_back(d[1]);
+      g.dr.push_back(d[2]);
       nnz++;
     }
     g.offsets[static_cast<size_t>(i) + 1] = nnz;
@@ -94,16 +100,11 @@ void runPass1Sphericart(const NeighbourCSR &g, int orderL, int begin, int end,
   owner.reserve(static_cast<size_t>(std::max(nBonds, 0)));
   int b = 0;
   for (int i = begin; i < end; i++) {
-    const int iOff = 3 * i;
     for (int p = g.offsets[static_cast<size_t>(i)];
          p < g.offsets[static_cast<size_t>(i) + 1]; p++) {
-      const int j = g.cols[static_cast<size_t>(p)];
-      double dx = g.xyz[static_cast<size_t>(iOff)] - g.xyz[static_cast<size_t>(3 * j)];
-      double dy = g.xyz[static_cast<size_t>(iOff + 1)] -
-                  g.xyz[static_cast<size_t>(3 * j + 1)];
-      double dz = g.xyz[static_cast<size_t>(iOff + 2)] -
-                  g.xyz[static_cast<size_t>(3 * j + 2)];
-      seams::steinhardt::minImage(dx, dy, dz, g.box[0], g.box[1], g.box[2]);
+      const double dx = g.dr[static_cast<size_t>(3 * p)];
+      const double dy = g.dr[static_cast<size_t>(3 * p + 1)];
+      const double dz = g.dr[static_cast<size_t>(3 * p + 2)];
       const double r2 = dx * dx + dy * dy + dz * dz;
       if (r2 == 0.0) {
         continue;
@@ -120,9 +121,8 @@ void runPass1Sphericart(const NeighbourCSR &g, int orderL, int begin, int end,
   if (seams::sphericart_ylm::ylmCartesian(orderL, cart.data(), b, ylm.data()) !=
       0) {
     for (int i = begin; i < end; i++) {
-      seams::steinhardt::qlmOneAtom(i, orderL, g.xyz.data(), g.offsets.data(),
-                                    g.cols.data(), g.box[0], g.box[1], g.box[2],
-                                    qlm.data());
+      seams::steinhardt::qlmOneAtomDr(i, orderL, g.dr.data(), g.offsets.data(),
+                                      g.cols.data(), qlm.data());
     }
     return;
   }
@@ -168,9 +168,8 @@ void runPass1(const NeighbourCSR &g, int orderL, int begin, int end,
 #pragma omp parallel for schedule(static) if (useThreads)
 #endif
   for (int i = begin; i < end; i++) {
-    seams::steinhardt::qlmOneAtom(i, orderL, g.xyz.data(), g.offsets.data(),
-                                  g.cols.data(), g.box[0], g.box[1], g.box[2],
-                                  qlm.data());
+    seams::steinhardt::qlmOneAtomDr(i, orderL, g.dr.data(), g.offsets.data(),
+                                    g.cols.data(), qlm.data());
   }
 }
 
@@ -192,27 +191,23 @@ void runOffload(const NeighbourCSR &g, int orderL, std::vector<double> &qlm,
                 std::vector<double> &ql, std::vector<double> &qlBar) {
   const int n = g.nop;
   const int nnz = static_cast<int>(g.cols.size());
-  const double bx = g.box[0];
-  const double by = g.box[1];
-  const double bz = g.box[2];
-  const double *xyz = g.xyz.data();
+  const double *dr = g.dr.data();
   const int *offsets = g.offsets.data();
   const int *cols = g.cols.data();
   double *qlmP = qlm.data();
   double *qlP = ql.data();
   double *qlBarP = qlBar.data();
-  const int xyzN = 3 * n;
+  const int drN = 3 * nnz;
   const int offN = n + 1;
   const int qlmN = static_cast<int>(qlm.size());
 
-#pragma omp target data map(to : xyz[0 : xyzN], offsets[0 : offN],                    \
-                                cols[0 : nnz], bx, by, bz, orderL)                    \
+#pragma omp target data map(to : dr[0 : drN], offsets[0 : offN],                      \
+                                cols[0 : nnz], orderL)                                \
     map(alloc : qlmP[0 : qlmN]) map(from : qlP[0 : n], qlBarP[0 : n])
   {
 #pragma omp target teams distribute parallel for
     for (int i = 0; i < n; i++) {
-      seams::steinhardt::qlmOneAtom(i, orderL, xyz, offsets, cols, bx, by, bz,
-                                    qlmP);
+      seams::steinhardt::qlmOneAtomDr(i, orderL, dr, offsets, cols, qlmP);
     }
 #pragma omp target teams distribute parallel for
     for (int i = 0; i < n; i++) {

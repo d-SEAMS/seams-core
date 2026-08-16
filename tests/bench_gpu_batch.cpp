@@ -29,7 +29,17 @@ int main(int argc, char **argv) {
   const int nAtoms = cloud.nop;
   std::vector<double> xyz(static_cast<std::size_t>(want) *
                           static_cast<std::size_t>(nAtoms) * 3);
-  std::vector<double> box(static_cast<std::size_t>(want) * 3);
+  const bool tiltDump = cloud.box.size() >= 6;
+  std::vector<double> box;
+  std::vector<double> boxLow;
+  int nBox = 3;
+  if (tiltDump) {
+    nBox = static_cast<int>(cloud.box.size());
+    box = cloud.box;
+    boxLow = cloud.boxLow;
+  } else {
+    box.assign(static_cast<std::size_t>(want) * 3, 0.0);
+  }
   int got = 0;
   for (int f = 1; f <= want; ++f) {
     cloud = sinp::readLammpsTrjO(traj, f, cloud, typeI);
@@ -43,9 +53,11 @@ int main(int argc, char **argv) {
       xyz[base + static_cast<std::size_t>(i) * 3 + 1] = cloud.pts[i].y;
       xyz[base + static_cast<std::size_t>(i) * 3 + 2] = cloud.pts[i].z;
     }
-    box[static_cast<std::size_t>(got) * 3 + 0] = cloud.box[0];
-    box[static_cast<std::size_t>(got) * 3 + 1] = cloud.box[1];
-    box[static_cast<std::size_t>(got) * 3 + 2] = cloud.box[2];
+    if (!tiltDump) {
+      box[static_cast<std::size_t>(got) * 3 + 0] = cloud.box[0];
+      box[static_cast<std::size_t>(got) * 3 + 1] = cloud.box[1];
+      box[static_cast<std::size_t>(got) * 3 + 2] = cloud.box[2];
+    }
     ++got;
   }
 
@@ -73,7 +85,11 @@ int main(int argc, char **argv) {
                 tag, r.uploadMs, tag, r.computeMs, tag, r.downloadMs);
   };
 
-  const auto cold = gpu::analyzeResident(xyz.data(), box.data(), nAtoms, got);
+  const auto cold = tiltDump
+                         ? gpu::analyzeResident(xyz.data(), box.data(), nAtoms,
+                                                got, 5.5, boxLow.data(), nBox)
+                         : gpu::analyzeResident(xyz.data(), box.data(), nAtoms,
+                                                got);
   if (!cold.error.empty()) {
     std::printf("error %s\n", cold.error.c_str());
     return 1;
@@ -83,7 +99,10 @@ int main(int argc, char **argv) {
   gpu::BatchResult best = cold;
   best.computeMs = std::numeric_limits<double>::max();
   for (int i = 0; i < repeats; ++i) {
-    const auto r = gpu::analyzeResident(xyz.data(), box.data(), nAtoms, got);
+    const auto r =
+        tiltDump ? gpu::analyzeResident(xyz.data(), box.data(), nAtoms, got,
+                                        5.5, boxLow.data(), nBox)
+                 : gpu::analyzeResident(xyz.data(), box.data(), nAtoms, got);
     if (!r.error.empty()) {
       std::printf("error %s\n", r.error.c_str());
       return 1;

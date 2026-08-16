@@ -122,6 +122,27 @@ TEST_CASE("getHbondDistanceOH respects periodic boundaries", "[bond]") {
   REQUIRE_THAT(dist, Catch::Matchers::WithinAbs(1.0, 1e-10));
 }
 
+TEST_CASE("getHbondDistanceOH uses dump H on a mixed image", "[bond]") {
+  molSys::PointCloud<molSys::Point<double>, double> oCloud, hCloud;
+  oCloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  oCloud.boxLow = {0.0, 0.0, 0.0};
+  hCloud.box = oCloud.box;
+  hCloud.boxLow = oCloud.boxLow;
+  molSys::Point<double> oPoint;
+  oPoint.x = 0.5;
+  oPoint.y = 0.5;
+  oPoint.z = 1.0;
+  oCloud.pts.push_back(oPoint);
+  molSys::Point<double> hPoint;
+  hPoint.x = 1.0;
+  hPoint.y = 8.0;
+  hPoint.z = 1.0;
+  hCloud.pts.push_back(hPoint);
+  const double dist = bond::getHbondDistanceOH(oCloud, hCloud, 0, 0);
+  const double expect = std::sqrt(4.5 * 4.5 + 1.160254037844386 * 1.160254037844386);
+  REQUIRE_THAT(dist, Catch::Matchers::WithinAbs(expect, 1e-9));
+}
+
 TEST_CASE("populateBonds with cage iceType filters dummy atoms", "[bond]") {
   auto cloud = makeSquareCloud();
   auto nList = nneigh::getNewNeighbourListByIndex(cloud, 1.5);
