@@ -74,15 +74,21 @@ distances, cluster unwrap, and the in-plane RDF sampler.
 Catch2: ~steinhardtQl flatten uses dump H not span minImage~,
 ~getHbondDistanceOH uses dump H on a mixed image~,
 ~populateHbondsWithInputClouds accepts a mixed-image dump-H
-bond~, ~recenterClusterCloud unwraps a mixed image on dump H~,
+bond~, ~populateHbondsFromDonors~ on that same sheared OH,
+~recenterClusterCloud unwraps a mixed image on dump H~,
 ~recenterClusterCloud unwraps a three-atom mixed-image chain~,
 ~sampleRDF_AA histograms the tilt a-image pair~.
 
 ~seams rdf FILE --cutoff RMAX~ is the 3D partial \(g_{IJ}(r)\).
 Catch2: ~dumpVolume uses det H not bound spans~, ~partial RDF
 first bin sees the sheared a-image pair~, ~partial RDF like-type
-does not count the unlike neighbour~. The in-plane sampler
-remains ~rdf2::sampleRDF_AA~ on a ~PointCloud~.
+does not count the unlike neighbour~, ~runningCN at rmax is one
+for a single I-J pair~, ~firstMinimumBin finds the valley after
+the first peak~. The in-plane sampler remains
+~rdf2::sampleRDF_AA~ on a ~PointCloud~. ~rdf::runningCN~ and
+~rdf::coordinationNumber~ integrate ~4 pi rho_J s^2 g ds~ with
+~rho_J = nJ / volume~; the cutoff is a caller input, not a
+hard-wired first minimum.
 
 * Empty or ortho clouds
 
