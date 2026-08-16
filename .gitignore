@@ -360,3 +360,6 @@ proofs/CoqMakefile
 proofs/CoqMakefile.conf
 .hypothesis/
 repro/figshare/
+repro/results/
+repro/zenodo/payload/
+.tip_sha

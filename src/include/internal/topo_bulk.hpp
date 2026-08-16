@@ -181,9 +181,10 @@ bool notNeighboursOfRing(const std::vector<std::vector<int>> &nList,
                     int &mixedRings, int &prismaticRings, int &basalRings);
 
 } // namespace ring
+/** @} */
 
-/**
- *  @addtogroup prism3
+/** @defgroup prism3 Bulk prisms
+ *  Candidate basal rings and prism blocks in bulk ice.
  *  @{
  */
 
@@ -211,5 +212,6 @@ bool basalRingsSeparation(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &basal1, const std::vector<int> &basal2, double heightCutoff = 8);
 } // namespace prism3
+/** @} */
 
 #endif // SEAMS_TOPO_BULK_H_

@@ -1,10 +1,10 @@
-#+TITLE: API Reference
+#+TITLE: API map
 #+OPTIONS: toc:nil num:nil
 
 Lookup for the C++ identifiers in =src/include/internal=. Generated
 pages under =api/= are the Doxygen comments from those headers,
-converted by doxyrest. This is not a dump of ~pydseamslib._core~ and
-it is not a tutorial.
+converted by doxyrest, the same path as rgpot. This is not a dump
+of ~pydseams.yoda~ and it is not a tutorial.
 
 * Fronts
 
@@ -19,9 +19,6 @@ Four fronts, one engine (~libyodaLib~). Flags live on
 | Lua | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | ~require("dseams")~ |
 | Compiled Python | PydSEAMSlib | ~pydseams.yoda~ (~_core~ and ~cyoda~ are aliases) |
 
-~pydseams.yoda~ registers the C++ spellings below
-(~getCorrelPlus~, ~ringNetwork~, ~topoBulkCriteria~, ...).
-
 * Doxyrest wiring
 
 ~pixi run -e docs doxybuild~ runs from =docs/source=:
@@ -30,14 +27,70 @@ Four fronts, one engine (~libyodaLib~). Flags live on
    =../../src/include/internal= (~EXTRACT_ALL=YES~, private members
    off). =src/include/external= and =tests/= are excluded.
 2. ~doxyrest -c doxyrest-config.lua~ -- reads =xml/index.xml=, writes
-   =api/index.rst~ with title ~C++ headers (doxyrest)~.
+   =api/index.rst~ with title ~API Reference~.
+
+The book includes that tree as =api/index= (Reference toctree), not
+as a second hand list of functions.
 
 #+begin_export rst
 .. toctree::
-   :maxdepth: 1
-   :caption: C++ (doxyrest)
+   :maxdepth: 2
+   :caption: C++ (doxygen)
 
    ../api/index
+#+end_export
+
+The groups below are Breathe of the same XML. That is the interned
+API, not a hand table.
+
+#+begin_export rst
+.. doxygengroup:: nneigh
+   :members:
+   :content-only:
+
+.. doxygengroup:: chill
+   :members:
+   :content-only:
+
+.. doxygengroup:: primitive
+   :members:
+   :content-only:
+
+.. doxygengroup:: ring
+   :members:
+   :content-only:
+
+.. doxygengroup:: prism3
+   :members:
+   :content-only:
+
+.. doxygengroup:: cage
+   :members:
+   :content-only:
+
+.. doxygengroup:: bond
+   :members:
+   :content-only:
+
+.. doxygengroup:: sinp
+   :members:
+   :content-only:
+
+.. doxygengroup:: clump
+   :members:
+   :content-only:
+
+.. doxygengroup:: gen
+   :members:
+   :content-only:
+
+.. doxygengroup:: rdf2
+   :members:
+   :content-only:
+
+.. doxygengroup:: molSys
+   :members:
+   :content-only:
 #+end_export
 
 * Headers
@@ -76,120 +129,5 @@ Every file under =src/include/internal=.
 | =steinhardt_device.hpp= | ~seams::steinhardt~ | host / MPI / offload Steinhardt kernel |
 | =simd_distance.hpp= | ~seams~ | Highway periodic distance |
 
-* C++ functions a caller uses
-
-Names below are the C++ identifiers. ~pydseams.yoda~ registers the
-same spellings.
-
-** I/O (~sinp~, ~sout~)
-
-| Function | Header | Role |
-|----------+--------+------|
-| ~sinp::readLammpsTrj~ | =seams_input.hpp= | every atom in one LAMMPS frame (1-based) |
-| ~sinp::readLammpsTrjO~ | =seams_input.hpp= | one LAMMPS type (oxygen) |
-| ~sinp::readLammpsTrjreduced~ | =seams_input.hpp= | one type, optional coordinate slice |
-| ~sinp::readXYZ~ | =seams_input.hpp= | XYZ coordinates |
-| ~sinp::nLammpsFrames~ | =seams_input.hpp= | ~ITEM: TIMESTEP~ count |
-| ~sinp::forEachLammpsFrame~ | =seams_input.hpp= | walk ~[first, last]~, optional OpenMP |
-| ~sinp::dropLammpsDumpIndex~ | =seams_input.hpp= | drop a cached dump session |
-| ~sinp::readChemfiles~ | =seams_input.hpp= | PDB / GRO / DCD / ... when chemfiles is on |
-| ~sinp::readCon~ | =seams_input.hpp= | eOn =.con= when readcon-core is on |
-| ~sinp::readBonds~ | =seams_input.hpp= | ring / bond ID file |
-| ~sinp::atomInSlice~ | =seams_input.hpp= | closed-interval slice test (~lo == hi~ ignores that axis) |
-| ~sout::writeDump~ | =seams_output.hpp= | LAMMPS dump of a ~PointCloud~ |
-| ~sout::writeAllCages~ | =seams_output.hpp= | every HC and DDC into =cages/= |
-| ~sout::writeLAMMPSdataTopoBulk~ | =seams_output.hpp= | bulk HC / DDC data file |
-
-** Neighbours (~nneigh~)
-
-Rows are central atom then neighbours. ID-keyed lists carry a
-leading self entry. Index-keyed lists come from
-~neighbourListByIndex~.
-
-| Function | Header | Role |
-|----------+--------+------|
-| ~nneigh::neighListO~ | =neighbours.hpp= | cutoff list, one type |
-| ~nneigh::neighList~ | =neighbours.hpp= | cutoff list, two types |
-| ~nneigh::halfNeighList~ | =neighbours.hpp= | half cutoff list |
-| ~nneigh::neighbourListByIndex~ | =neighbours.hpp= | convert IDs to cloud indices |
-| ~nneigh::kNearestNeighbourList~ | =neighbours.hpp= | mutual or union k-nearest |
-| ~nneigh::bondGraphFromName~ | =neighbours.hpp= | ~cutoff~ / ~knn~ / ~knn-union~ |
-| ~nneigh::SkinNeighborList~ | =neighbours.hpp= | LAMMPS-skin persistent list |
-| ~nneigh::shellSeparation~ | =neighbours.hpp= | ~{max d_k, min d_{k+1}}~ certificate |
-
-** CHILL (~chill~)
-
-| Function | Header | Role |
-|----------+--------+------|
-| ~chill::chillRule~ / ~chill::chillPlusRule~ | =bop.hpp= | published water thresholds |
-| ~chill::bondClassifier~ | =bop.hpp= | look up a named rule set |
-| ~chill::registerBondClassifier~ | =bop.hpp= | add or replace a named rule |
-| ~chill::classifyBonds~ | =bop.hpp= | fill ~Point::c_ij~ under a rule |
-| ~chill::getCorrel~ / ~chill::getIceType~ | =bop.hpp= | CHILL bonds and ice labels |
-| ~chill::getIceTypeNoPrint~ | =bop.hpp= | CHILL labels, no file |
-| ~chill::getCorrelPlus~ / ~chill::getIceTypePlus~ | =bop.hpp= | CHILL+ bonds and ice labels |
-| ~chill::getIceTypePlusNoPrint~ | =bop.hpp= | CHILL+ labels, no file |
-| ~chill::getq6~ | =bop.hpp= | per-atom ~q6~ |
-| ~chill::reclassifyWater~ | =bop.hpp= | ~q6~ reclassification of liquid |
-| ~chill::steinhardtQl~ | =bop.hpp= | local and Lechner-Dellago ~ql~ / ~qlBar~ |
-| ~chill::steinhardtQlVoronoi~ | =voronoi_qlm.hpp= | facet-area weighted ~ql~ |
-| ~chill::voronoiFacetWeights~ | =voronoi_qlm.hpp= | Voronoi neighbours and area weights |
-| ~chill::classifyTemplates~ | =structure_desc.hpp= | FCC / HCP / BCC / SC overlay |
-| ~chill::soapSpectrum~ / ~chill::soapSpectrumAll~ | =structure_desc.hpp= | Bartok SOAP |
-| ~chill::voronoiFeature~ / ~chill::voronoiFeatures~ | =structure_desc.hpp= | ~[q4, q6, q8]~ |
-
-Ice labels are ~molSys::atom_state_type~: ~cubic~, ~hexagonal~,
-~water~, ~interfacial~, ~clathrate~, ~interClathrate~,
-~unclassified~, ~reCubic~, ~reHex~. Bond labels are
-~molSys::bond_type~: ~staggered~, ~eclipsed~, ~out_of_range~.
-
-** Rings (~primitive~, ~ring~)
-
-Neighbour lists first (~nneigh::neighListO~, then
-~nneigh::neighbourListByIndex~).
-
-| Function | Header | Role |
-|----------+--------+------|
-| ~primitive::ringNetwork~ | =franzblau.hpp= | Franzblau primitive rings, by index |
-| ~primitive::RingUpdater~ | =franzblau.hpp= | same rings, incremental across frames |
-| ~ring::getSingleRingSize~ | =ring.hpp= | keep rings of one size |
-| ~ring::polygonRingAnalysis~ | =topo_two_dim.hpp= | monolayer polygon types |
-| ~ring::bulkPolygonRingAnalysis~ | =topo_bulk.hpp= | bulk polygon types |
-| ~ring::prismAnalysis~ | =topo_one_dim.hpp= | ice-nanotube prism blocks |
-| ~ring::findPrisms~ | =topo_one_dim.hpp= | prism ring IDs |
-
-** Cages (~cage~, ~ring~, ~tum3~)
-
-| Function | Header | Role |
-|----------+--------+------|
-| ~ring::findHC~ / ~ring::findDDC~ | =topo_bulk.hpp= | hexagonal and double-diamond cages |
-| ~ring::topoBulkAnalysis~ | =topo_bulk.hpp= | HC / DDC classification of the frame |
-| ~ring::cageAffiliation~ | =cage_affiliation.hpp= | claim-free per-ring HC / DDC flags |
-| ~ring::AffiliationUpdater~ | =cage_affiliation.hpp= | same flags, incremental |
-| ~ring::seededCageAffiliation~ | =cage_affiliation.hpp= | mutual-k seeds, union completions |
-| ~tum3::topoBulkCriteria~ | =bulkTUM.hpp= | cages plus ~ring::strucType~ |
-| ~tum3::topoUnitMatchingBulk~ | =bulkTUM.hpp= | TUM with optional cluster XYZ |
-| ~cage::canonicalCertificate~ | =cage_canon.hpp= | nauty adjacency certificate |
-| ~cage::isHexagonalPrism~ | =cage_canon.hpp= | ring graph isomorphic to HC |
-
-A ~cage::Cage~ holds a ~cage::cageType~ (~HexC~ or ~DoubleDiaC~) and
-the ring indices that make it. Per-atom cage labels are
-~cage::iceType~ (~dummy~, ~hc~, ~ddc~, ~mixed~, ~pnc~, ~mixed2~).
-The CLI default ~--graph seeded~ is ~seededCageAffiliation~.
-
-~ring::strucType~: ~unclassified~, ~DDC~, ~HCbasal~, ~HCprismatic~,
-~bothBasal~, ~bothPrismatic~, ~Prism~, ~deformedPrism~,
-~mixedPrismRing~.
-
-** Bonds, orientation, optional backends
-
-| Function | Header | Role |
-|----------+--------+------|
-| ~bond::populateHbonds~ | =bond.hpp= | geometric H-bonds (2.42 A, 30 deg) |
-| ~bond::populateHbondsWithInputClouds~ | =bond.hpp= | same, with a hydrogen ~PointCloud~ |
-| ~absor::hornAbsOrientation~ | =absOrientation.hpp= | Horn quaternion overlay |
-| ~ira::available~ / ~ira::match~ / ~ira::pointGroup~ | =ira_sofi.hpp= | IRA overlay, SOFI point group |
-| ~ira::orient~ | =ira_sofi.hpp= | Horn-shaped quat + RMSD from IRA |
-| ~seams::sphericart_ylm::ylmCartesian~ | =sphericart_ylm.hpp= | batched Cartesian ~Y_lm~ |
-| ~clump::clusterAnalysis~ | =cluster.hpp= | largest ice cluster |
-| ~rdf2::rdf2Danalysis_AA~ | =rdf2d.hpp= | in-plane RDF |
+~pydseams.yoda~ and ~dseams.core~ register the C++ spellings from
+these headers. The generated pages are =api/index=.

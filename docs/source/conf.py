@@ -15,12 +15,16 @@ author = "Rohit Goswami, Amrita Goswami, Ruhila S"
 extensions = [
     "doxyrest",
     "cpplexer",
+    "breathe",
     "myst_parser",
     "sphinx.ext.intersphinx",
     "sphinx_sitemap",
     "sphinx_design",
     "sphinxcontrib.mermaid",
 ]
+
+breathe_projects = {"seams": "xml"}
+breathe_default_project = "seams"
 
 templates_path = ["_templates"]
 exclude_patterns = []
@@ -36,8 +40,9 @@ intersphinx_mapping = {
 # -- Options for HTML output -------------------------------------------------
 html_theme = "shibuya"
 html_static_path = ["_static"]
-html_css_files = []  # sphinx-design ships its own CSS
+html_css_files = ["custom.css"]
 html_js_files = []
+html_favicon = "_static/dSeamsLogo.ico"
 
 # Mermaid: default CDN; diagrams via ``.. mermaid::`` from Org RST export.
 mermaid_version = "11.4.0"
@@ -55,6 +60,8 @@ html_theme_options = {
     "github_url": "https://github.com/d-SEAMS/seams-core",
     "accent_color": "teal",
     "dark_code": True,
+    "light_logo": "_static/dSeamsLogo.png",
+    "dark_logo": "_static/dSeamsLogo.png",
     "globaltoc_expand_depth": 1,
     "toctree_collapse": True,
     "toctree_maxdepth": 3,

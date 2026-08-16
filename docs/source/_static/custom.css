@@ -1,0 +1,290 @@
+/* Homepage hero: full logo with wordmark; swap light/dark variants via Shibuya
+   color-mode classes (html.light / html.dark). Fallback: prefers-color-scheme. */
+
+.rgpot-hero {
+  text-align: center;
+  margin: 0.5rem 0 1.25rem;
+}
+
+.rgpot-hero-logo {
+  display: none;
+  margin: 0 auto;
+  max-width: min(320px, 70vw);
+  height: auto;
+}
+
+/* Default / light: dark wordmark on light page */
+html.light .rgpot-hero-logo--light,
+html:not(.dark) .rgpot-hero-logo--light {
+  display: block;
+}
+
+html.dark .rgpot-hero-logo--light {
+  display: none;
+}
+
+html.dark .rgpot-hero-logo--dark {
+  display: block;
+}
+
+html.light .rgpot-hero-logo--dark,
+html:not(.dark) .rgpot-hero-logo--dark {
+  display: none;
+}
+
+/* Before Shibuya applies .light/.dark, honour system preference */
+@media (prefers-color-scheme: dark) {
+  html:not(.light):not(.dark) .rgpot-hero-logo--light {
+    display: none;
+  }
+  html:not(.light):not(.dark) .rgpot-hero-logo--dark {
+    display: block;
+  }
+}
+
+/*
+ * API / doxyrest *code blocks only* (e.g. group_rgpot_cpp.html pre/highlight)
+ * ---------------------------------------------------------------------------
+ * Shibuya `dark_code: True` puts class `dark-code` on the whole `article.yue`,
+ * not on each <pre>. Prose must keep normal theme text colours; only fenced /
+ * doxyrest code containers get the light-on-dark palette.
+ *
+ * 1) doxyrest-pygments.css forces light-theme #000/#902000 with !important.
+ * 2) Shibuya only remaps --syntax-* on `html.light .dark-code` / `html.dark`;
+ *    if <html> has neither class yet, vars stay light-theme (dark ink) on a
+ *    dark code block background.
+ * 3) Most identifiers are NOT pygments .n/.nc — they are links inside code:
+ *      <a class="doxyrest-code-link"><span class="std std-ref">rgpot::CalcResult</span></a>
+ *
+ * NEVER set `color:` on bare `.yue.dark-code` — that paints all body copy
+ * light-gray on white in light mode (homepage / guides / API prose).
+ */
+
+/* Shared: syntax vars + light text only on actual code containers */
+.yue.dark-code .highlight,
+.yue.dark-code .highlight pre,
+.yue.dark-code pre.literal-block,
+.yue.dark-code div[class*="highlight-"],
+.yue.dark-code .doxyrest-overview-code-block,
+.yue.dark-code .doxyrest-title-code-block,
+html.dark .highlight,
+html.dark .highlight pre,
+html.dark pre.literal-block,
+html.dark .doxyrest-overview-code-block,
+html.dark .doxyrest-title-code-block {
+  --syntax-text: #e6edf3;
+  --syntax-comment: #8b949e;
+  --syntax-keyword: #ff7b72;
+  --syntax-keyword-type: #ff7b72;
+  --syntax-literal: #a5d6ff;
+  --syntax-literal-string: #a5d6ff;
+  --syntax-literal-number: #79c0ff;
+  --syntax-operator: #ff7b72;
+  --syntax-name-function: #d2a8ff;
+  --syntax-name-class: #f0883e;
+  color: #e6edf3;
+}
+
+/* Beat doxyrest !important on tokens — scoped to code containers only */
+.yue.dark-code .highlight .k,
+.yue.dark-code .highlight .kc,
+.yue.dark-code .highlight .kd,
+.yue.dark-code .highlight .kn,
+.yue.dark-code .highlight .kp,
+.yue.dark-code .highlight .kr,
+.yue.dark-code .highlight .kt,
+.yue.dark-code .highlight .nb,
+html.dark .highlight .k,
+html.dark .highlight .kc,
+html.dark .highlight .kd,
+html.dark .highlight .kn,
+html.dark .highlight .kp,
+html.dark .highlight .kr,
+html.dark .highlight .kt,
+html.dark .highlight .nb {
+  color: #ff7b72 !important;
+  font-weight: bold !important;
+}
+
+.yue.dark-code .highlight .n,
+.yue.dark-code .highlight .na,
+.yue.dark-code .highlight .nc,
+.yue.dark-code .highlight .no,
+.yue.dark-code .highlight .nd,
+.yue.dark-code .highlight .ni,
+.yue.dark-code .highlight .ne,
+.yue.dark-code .highlight .nf,
+.yue.dark-code .highlight .nl,
+.yue.dark-code .highlight .nn,
+.yue.dark-code .highlight .nt,
+.yue.dark-code .highlight .nv,
+.yue.dark-code .highlight .nx,
+.yue.dark-code .highlight .py,
+.yue.dark-code .highlight .bp,
+.yue.dark-code .highlight .vc,
+.yue.dark-code .highlight .vg,
+.yue.dark-code .highlight .vi,
+.yue.dark-code .highlight .vm,
+html.dark .highlight .n,
+html.dark .highlight .na,
+html.dark .highlight .nc,
+html.dark .highlight .no,
+html.dark .highlight .nd,
+html.dark .highlight .ni,
+html.dark .highlight .ne,
+html.dark .highlight .nf,
+html.dark .highlight .nl,
+html.dark .highlight .nn,
+html.dark .highlight .nt,
+html.dark .highlight .nv,
+html.dark .highlight .nx,
+html.dark .highlight .py,
+html.dark .highlight .bp,
+html.dark .highlight .vc,
+html.dark .highlight .vg,
+html.dark .highlight .vi,
+html.dark .highlight .vm {
+  color: #e6edf3 !important;
+  font-weight: normal !important;
+}
+
+.yue.dark-code .highlight .c,
+.yue.dark-code .highlight .ch,
+.yue.dark-code .highlight .cm,
+.yue.dark-code .highlight .cp,
+.yue.dark-code .highlight .cpf,
+.yue.dark-code .highlight .c1,
+.yue.dark-code .highlight .cs,
+html.dark .highlight .c,
+html.dark .highlight .ch,
+html.dark .highlight .cm,
+html.dark .highlight .cp,
+html.dark .highlight .cpf,
+html.dark .highlight .c1,
+html.dark .highlight .cs {
+  color: #8b949e !important;
+  font-style: italic;
+}
+
+.yue.dark-code .highlight .o,
+.yue.dark-code .highlight .ow,
+.yue.dark-code .highlight .p,
+html.dark .highlight .o,
+html.dark .highlight .ow,
+html.dark .highlight .p {
+  color: #e6edf3 !important;
+}
+
+.yue.dark-code .highlight .s,
+.yue.dark-code .highlight .sa,
+.yue.dark-code .highlight .sb,
+.yue.dark-code .highlight .sc,
+.yue.dark-code .highlight .dl,
+.yue.dark-code .highlight .sd,
+.yue.dark-code .highlight .s2,
+.yue.dark-code .highlight .se,
+.yue.dark-code .highlight .sh,
+.yue.dark-code .highlight .si,
+.yue.dark-code .highlight .sx,
+.yue.dark-code .highlight .sr,
+.yue.dark-code .highlight .s1,
+.yue.dark-code .highlight .ss,
+html.dark .highlight .s,
+html.dark .highlight .sa,
+html.dark .highlight .sb,
+html.dark .highlight .sc,
+html.dark .highlight .dl,
+html.dark .highlight .sd,
+html.dark .highlight .s2,
+html.dark .highlight .se,
+html.dark .highlight .sh,
+html.dark .highlight .si,
+html.dark .highlight .sx,
+html.dark .highlight .sr,
+html.dark .highlight .s1,
+html.dark .highlight .ss {
+  color: #a5d6ff !important;
+}
+
+.yue.dark-code .highlight .m,
+.yue.dark-code .highlight .mb,
+.yue.dark-code .highlight .mf,
+.yue.dark-code .highlight .mh,
+.yue.dark-code .highlight .mi,
+.yue.dark-code .highlight .mo,
+.yue.dark-code .highlight .il,
+html.dark .highlight .m,
+html.dark .highlight .mb,
+html.dark .highlight .mf,
+html.dark .highlight .mh,
+html.dark .highlight .mi,
+html.dark .highlight .mo,
+html.dark .highlight .il {
+  color: #79c0ff !important;
+}
+
+/*
+ * Doxyrest cross-refs *inside code containers only* (rgpot::CalcResult case).
+ * Do not target .yue.dark-code .doxyrest-code-link alone — that can sit in
+ * non-pre contexts; always require a code ancestor.
+ */
+.yue.dark-code .highlight a,
+.yue.dark-code .highlight a:visited,
+.yue.dark-code .highlight a:hover,
+.yue.dark-code .highlight .doxyrest-code-link,
+.yue.dark-code .highlight .doxyrest-code-link:visited,
+.yue.dark-code .highlight .doxyrest-code-link:hover,
+.yue.dark-code .highlight .doxyrest-code-link .std-ref,
+.yue.dark-code .highlight .doxyrest-code-link .std.std-ref,
+.yue.dark-code .highlight .std-ref,
+.yue.dark-code .highlight .std.std-ref,
+.yue.dark-code .doxyrest-overview-code-block a,
+.yue.dark-code .doxyrest-overview-code-block .doxyrest-code-link,
+.yue.dark-code .doxyrest-overview-code-block .doxyrest-code-link .std-ref,
+.yue.dark-code .doxyrest-title-code-block a,
+.yue.dark-code .doxyrest-title-code-block .doxyrest-code-link,
+.yue.dark-code .doxyrest-title-code-block .doxyrest-code-link .std-ref,
+html.dark .highlight a,
+html.dark .highlight a:visited,
+html.dark .highlight .doxyrest-code-link,
+html.dark .highlight .doxyrest-code-link .std-ref,
+html.dark .highlight .std-ref,
+html.dark .doxyrest-overview-code-block a,
+html.dark .doxyrest-overview-code-block .doxyrest-code-link,
+html.dark .doxyrest-overview-code-block .doxyrest-code-link .std-ref {
+  color: #79c0ff !important;
+  text-decoration: none;
+  border-bottom: none;
+}
+
+.yue.dark-code .highlight a:hover,
+.yue.dark-code .highlight .doxyrest-code-link:hover .std-ref,
+.yue.dark-code .doxyrest-overview-code-block a:hover,
+html.dark .highlight a:hover,
+html.dark .highlight .doxyrest-code-link:hover .std-ref,
+html.dark .doxyrest-overview-code-block a:hover {
+  color: #a5d6ff !important;
+  text-decoration: underline;
+}
+
+/* Inline `code` / tt in prose: normal theme colours (article is .yue.dark-code) */
+.yue.dark-code code.literal,
+.yue.dark-code tt.literal,
+.yue.dark-code span.pre,
+.yue.dark-code p code,
+.yue.dark-code li code,
+.yue.dark-code td code {
+  color: inherit;
+}
+
+/* Doxyrest links in normal prose (outside pre/highlight): normal page links */
+html.light:not(.dark) .yue.dark-code p .doxyrest-code-link,
+html.light:not(.dark) .yue.dark-code p .doxyrest-code-link .std-ref,
+html.light:not(.dark) .yue.dark-code li .doxyrest-code-link,
+html.light:not(.dark) .yue.dark-code li .doxyrest-code-link .std-ref,
+html.light:not(.dark) .yue.dark-code .toctree-wrapper .doxyrest-code-link,
+html.light:not(.dark) .yue.dark-code .toctree-wrapper .doxyrest-code-link .std-ref,
+html.light:not(.dark) .yue:not(.dark-code) .doxyrest-code-link,
+html.light:not(.dark) .yue:not(.dark-code) .doxyrest-code-link .std-ref {
+  color: var(--sy-c-link, var(--accent-11));
+}

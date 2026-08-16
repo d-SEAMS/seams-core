@@ -7,7 +7,8 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 |------+---------------|
 | [[file:cli.org][seams CLI]] | ~seams~ subcommands, flags, colors |
 | [[file:data-formats.org][data formats]] | LAMMPS dump, XYZ, chemfiles, ~.con~ |
-| [[file:api.org][API]] | C++ identifiers and the doxyrest tree |
+| [[file:api.org][API map]] | fronts and headers; the tree is =api/index= |
+| [[file:../api/index][API Reference]] | Doxygen comments, via doxyrest |
 | [[file:nix.org][Nix flake]] | ~nix build~, ~nix develop~, flake outputs |
 | [[file:glossary.org][glossary]] | Engine terms |
 
@@ -18,6 +19,7 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
    cli
    data-formats
    api
+   ../api/index
    nix
    glossary
 #+end_export

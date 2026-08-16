@@ -48,6 +48,43 @@ def parse_kv(text):
     return out
 
 
+def parse_pipeline(text):
+    rows = {}
+    for line in text.splitlines():
+        m = re.match(
+            r"\s*(\d+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)",
+            line,
+        )
+        if m:
+            rows[int(m.group(1))] = {
+                "neigh_ms": float(m.group(2)),
+                "knn_ms": float(m.group(3)),
+                "knn_pair_ms": float(m.group(4)),
+                "rings_ms": float(m.group(5)),
+                "affil_ms": float(m.group(6)),
+            }
+    return rows
+
+
+def parse_incremental_file(text):
+    out = {}
+    for line in text.splitlines():
+        m = re.match(r"(\S+)\s+(.*)$", line.strip())
+        if not m:
+            continue
+        key, val = m.group(1), m.group(2)
+        if key in ("nAtoms", "frames", "sites", "recomp", "balls"):
+            out[key] = val
+        elif key == "identical":
+            out[key] = val
+        else:
+            try:
+                out[key] = float(val)
+            except ValueError:
+                out[key] = val
+    return out
+
+
 def parse_overhead(text):
     rows = {}
     for line in text.splitlines():
@@ -188,6 +225,15 @@ def main():
         "base": {
             "scaling": parse_scaling(read(out_dir / "base-scaling.txt")),
             "cages": parse_kv(read(out_dir / "base-cages.txt")),
+        },
+        "pipeline": parse_pipeline(read(out_dir / "tip-pipeline.txt")),
+        "incremental": {
+            int(p.stem.split("-")[-1]): parse_incremental_file(read(p))
+            for p in sorted(out_dir.glob("tip-incremental-*.txt"))
+        },
+        "stages": {
+            "cubic": parse_kv(read(out_dir / "tip-stages-cubic.txt")),
+            "nucleation": parse_kv(read(out_dir / "tip-stages-nucleation.txt")),
         },
         "trajectory_incremental": parse_trajectory(
             read(out_dir / "trajectory-incremental.txt")

@@ -238,6 +238,68 @@ rule tip_strong:
         "{params.tbuild}/tests/bench_strong {params.atoms} > ../{output}'"
 
 
+rule tip_pipeline:
+    input:
+        R + "/tip-test.log",
+    output:
+        R + "/tip-pipeline.txt",
+    params:
+        hq=lambda wc: hq(1),
+        tbuild=TIP_BUILD,
+        sizes=" ".join(str(s) for s in config["scaling_sizes"]),
+    shell:
+        "{params.hq} bash -c 'cd input && OMP_NUM_THREADS=1 "
+        "{params.tbuild}/tests/bench_pipeline {params.sizes} > ../{output}'"
+
+
+rule tip_incremental:
+    input:
+        R + "/tip-test.log",
+    output:
+        R + "/tip-incremental-{n}.txt",
+    params:
+        hq=lambda wc: hq(1),
+        tbuild=TIP_BUILD,
+        frames=config["incremental_frames"],
+        sites=config["incremental_sites"],
+    shell:
+        "{params.hq} bash -c 'cd input && OMP_NUM_THREADS=1 "
+        "{params.tbuild}/tests/bench_rings_incremental {wildcards.n} "
+        "{params.frames} {params.sites} > ../{output}'"
+
+
+rule tip_stages_cubic:
+    input:
+        R + "/tip-test.log",
+    output:
+        R + "/tip-stages-cubic.txt",
+    params:
+        hq=lambda wc: hq(1),
+        tbuild=TIP_BUILD,
+        traj=config["trajectory"],
+        reps=config["cage_reps"],
+    shell:
+        "{params.hq} bash -c 'cd input && OMP_NUM_THREADS=1 "
+        "{params.tbuild}/tests/bench_stages {params.traj} 1 1 {params.reps} "
+        "> ../{output}'"
+
+
+rule tip_stages_nucleation:
+    input:
+        gate=R + "/tip-test.log",
+        traj=FIGSHARE_DIR + "/nucleation.lammpstrj",
+    output:
+        R + "/tip-stages-nucleation.txt",
+    params:
+        hq=lambda wc: hq(1),
+        tbuild=TIP_BUILD,
+        reps=config["cage_reps"],
+    shell:
+        "{params.hq} bash -c 'OMP_NUM_THREADS=1 "
+        "{params.tbuild}/tests/bench_stages {input.traj} 1 1 {params.reps} "
+        "> {output}'"
+
+
 rule trajectory_incremental:
     # Exactness referee and steady-state timings for the incremental rings
     # and the incremental cage affiliation; nonzero exit on any inequality
@@ -371,6 +433,12 @@ rule aggregate:
             R + "/notebooks/{nb}.ipynb", nb=NOTEBOOKS
         ),
         figshare_incremental=R + "/figshare-incremental.json",
+        pipeline=R + "/tip-pipeline.txt",
+        incremental=expand(
+            R + "/tip-incremental-{n}.txt", n=config["scaling_sizes"]
+        ),
+        stages_cubic=R + "/tip-stages-cubic.txt",
+        stages_nucleation=R + "/tip-stages-nucleation.txt",
     output:
         R + "/paper_manifest.json",
     params:

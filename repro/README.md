@@ -60,6 +60,9 @@ first use into `repro/figshare/`.
 
 | Output | Feeds |
 |---|---|
+| `tip-pipeline.txt` | rings, k-NN and affiliation vs system size |
+| `tip-incremental-*.txt` | hop-bound updater vs full rebuild at each size |
+| `tip-stages-cubic.txt`, `tip-stages-nucleation.txt` | per-stage times on the cubic frame and the figshare nucleation deposit |
 | `tip-scaling.txt`, `base-scaling.txt` | the neighbour/CHILL+ scaling table |
 | `tip-cages.txt`, `base-cages.txt` | the ring-and-cage pipeline paragraph |
 | `tip-overhead.txt` | the vesin-overhead note |
