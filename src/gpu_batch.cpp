@@ -5,6 +5,7 @@
 #endif
 
 #include <chrono>
+#include <cstddef>
 #include <stdexcept>
 #include <vector>
 
@@ -667,49 +668,61 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
         }
       }
     }
+    auto launchArgs = [](void **raw, std::size_t n) {
+      return std::vector<void *>(raw, raw + n);
+    };
     {
-      std::vector<void *> a = {&ws.dcols.p, &nA, &nF, &kM, &ws.dmdeg.p,
-                               &ws.dmcols.p};
+      void *raw[] = {&ws.dcols.p, &nA, &nF, &kM, &ws.dmdeg.p, &ws.dmcols.p};
+      auto a = launchArgs(raw, sizeof(raw) / sizeof(raw[0]));
       kMut->launch(dim3(grid), dim3(block), 0, nullptr, a, true);
     }
     {
-      std::vector<void *> a = {&ws.dmdeg.p, &ws.dmcols.p, &nA, &nF, &mR,
-                               &ws.dnRings.p, &ws.dringAtoms.p, &ws.ddropped.p};
+      void *raw[] = {&ws.dmdeg.p, &ws.dmcols.p, &nA, &nF, &mR, &ws.dnRings.p,
+                     &ws.dringAtoms.p, &ws.ddropped.p};
+      auto a = launchArgs(raw, sizeof(raw) / sizeof(raw[0]));
       kSix->launch(dim3(grid), dim3(block), 0, nullptr, a, true);
     }
     {
-      std::vector<void *> a = {&ws.dnRings.p, &ws.dringAtoms.p, &nA, &nF, &mR,
-                               &mP, &ws.dthroughCount.p, &ws.dthrough.p};
+      void *raw[] = {&ws.dnRings.p, &ws.dringAtoms.p, &nA, &nF, &mR, &mP,
+                     &ws.dthroughCount.p, &ws.dthrough.p};
+      auto a = launchArgs(raw, sizeof(raw) / sizeof(raw[0]));
       kInv->launch(dim3(ringGrid), dim3(block), 0, nullptr, a, true);
     }
     {
-      std::vector<void *> a = {&ws.dthroughCount.p, &ws.dthrough.p, &nA, &nF,
-                               &mP};
+      void *raw[] = {&ws.dthroughCount.p, &ws.dthrough.p, &nA, &nF, &mP};
+      auto a = launchArgs(raw, sizeof(raw) / sizeof(raw[0]));
       kSort->launch(dim3(grid), dim3(block), 0, nullptr, a, true);
     }
     {
       int maxPairs = maxRings * 8;
       const int pairGrid = (nF * maxPairs + block - 1) / block;
-      std::vector<void *> a = {&ws.dnRings.p, &ws.dringAtoms.p, &ws.dmdeg.p,
-                               &ws.dmcols.p, &ws.dthroughCount.p, &ws.dthrough.p,
-                               &nA, &nF, &mR, &mP, &maxPairs, &ws.dnPairs.p,
-                               &ws.dpairs.p};
+      void *emitRaw[] = {&ws.dnRings.p,        &ws.dringAtoms.p, &ws.dmdeg.p,
+                         &ws.dmcols.p,         &ws.dthroughCount.p,
+                         &ws.dthrough.p,       &nA,              &nF,
+                         &mR,                  &mP,              &maxPairs,
+                         &ws.dnPairs.p,        &ws.dpairs.p};
+      auto a = launchArgs(emitRaw, sizeof(emitRaw) / sizeof(emitRaw[0]));
       kEmit->launch(dim3(ringGrid), dim3(block), 0, nullptr, a, true);
-      std::vector<void *> b = {&ws.dnPairs.p, &ws.dpairs.p, &ws.dringAtoms.p,
-                               &ws.dthroughCount.p, &ws.dthrough.p, &nA, &nF,
-                               &mR, &mP, &maxPairs, &ws.dhc.p};
+      void *hcRaw[] = {&ws.dnPairs.p,  &ws.dpairs.p,        &ws.dringAtoms.p,
+                       &ws.dthroughCount.p, &ws.dthrough.p, &nA,
+                       &nF,            &mR,                 &mP,
+                       &maxPairs,      &ws.dhc.p};
+      auto b = launchArgs(hcRaw, sizeof(hcRaw) / sizeof(hcRaw[0]));
       kHc->launch(dim3(pairGrid), dim3(block), 0, nullptr, b, true);
     }
     {
-      std::vector<void *> a = {&ws.dnRings.p, &ws.dringAtoms.p,
-                               &ws.dthroughCount.p, &ws.dthrough.p, &ws.dhc.p,
-                               &nA, &nF, &mR, &mP, &ws.dddc.p};
+      void *raw[] = {&ws.dnRings.p,        &ws.dringAtoms.p, &ws.dthroughCount.p,
+                     &ws.dthrough.p,       &ws.dhc.p,        &nA,
+                     &nF,                  &mR,              &mP,
+                     &ws.dddc.p};
+      auto a = launchArgs(raw, sizeof(raw) / sizeof(raw[0]));
       kDdc->launch(dim3(ringGrid), dim3(block), 0, nullptr, a, true);
     }
     {
-      std::vector<void *> a = {&ws.dnRings.p, &ws.dringAtoms.p, &ws.dhc.p,
-                               &ws.dddc.p, &nA, &nF, &mR, &ws.datomHc.p,
-                               &ws.datomDdc.p, &ws.dsix.p};
+      void *raw[] = {&ws.dnRings.p,  &ws.dringAtoms.p, &ws.dhc.p,    &ws.dddc.p,
+                     &nA,            &nF,              &mR,          &ws.datomHc.p,
+                     &ws.datomDdc.p, &ws.dsix.p};
+      auto a = launchArgs(raw, sizeof(raw) / sizeof(raw[0]));
       kAtom->launch(dim3(ringGrid), dim3(block), 0, nullptr, a, true);
     }
     out.computeMs = msSince(t0);
