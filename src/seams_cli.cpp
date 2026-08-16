@@ -4,6 +4,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <argum.h>
+#include <bond.hpp>
 #include <bop.hpp>
 #include <cage_affiliation.hpp>
 #include <franzblau.hpp>
@@ -375,6 +376,40 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
   return 0;
 }
 
+int cmdHbonds(std::ostream &os, Cloud &yCloud, Cloud &hCloud, double cutoff,
+              int typeI, double distCutoff, double angleCutoff,
+              bool allDonors) {
+  if (yCloud.nop == 0) {
+    os << colorizer.heading("nop") << " 0 "
+       << colorizer.longOption("hbonds") << " 0\n";
+    return 0;
+  }
+  const int typ = typeOf(yCloud, typeI);
+  auto nList = nneigh::neighListO(cutoff, yCloud, typ);
+  std::vector<std::vector<int>> net;
+  if (allDonors) {
+    std::vector<int> donorHs;
+    donorHs.reserve(static_cast<std::size_t>(hCloud.nop));
+    for (int i = 0; i < hCloud.nop; ++i) {
+      donorHs.push_back(i);
+    }
+    net = bond::populateHbondsFromDonors(yCloud, hCloud, nList, donorHs,
+                                         distCutoff, angleCutoff);
+  } else {
+    net = bond::populateHbondsWithInputClouds(yCloud, hCloud, nList, distCutoff,
+                                              angleCutoff);
+  }
+  int edges = 0;
+  for (const auto &row : net) {
+    if (row.size() > 1) {
+      edges += static_cast<int>(row.size()) - 1;
+    }
+  }
+  os << colorizer.heading("nop") << " " << yCloud.nop << " "
+     << colorizer.longOption("hbonds") << " " << (edges / 2) << "\n";
+  return 0;
+}
+
 } // namespace
 
 int main(int argc, char *argv[]) {
@@ -389,6 +424,10 @@ int main(int argc, char *argv[]) {
   int k = cfg.k;
   std::string graph = cfg.graph;
   bool printConfig = false;
+  int htype = 1;
+  double hdist = 2.42;
+  double hangle = 30.0;
+  bool allDonors = false;
   std::string cmd;
   std::string file;
   std::string typesFlag;
@@ -488,6 +527,31 @@ int main(int argc, char *argv[]) {
                  .help("Bond graph for cages: cutoff | knn | knn-union | seeded")
                  .handler([&](std::string_view value) { graph = value; }));
 
+  parser.add(Option("--htype")
+                 .argName("I")
+                 .help("Hydrogen atom type for hbonds")
+                 .handler([&](std::string_view value) {
+                   htype = parseIntegral<int>(value);
+                 }));
+
+  parser.add(Option("--hdist")
+                 .argName("ANGSTROM")
+                 .help("Acceptor-H distance cutoff for hbonds")
+                 .handler([&](std::string_view value) {
+                   hdist = parseFloatingPoint<double>(value);
+                 }));
+
+  parser.add(Option("--hangle")
+                 .argName("DEG")
+                 .help("Acceptor-donor-H angle cutoff for hbonds")
+                 .handler([&](std::string_view value) {
+                   hangle = parseFloatingPoint<double>(value);
+                 }));
+
+  parser.add(Option("--donors")
+                 .help("Use every hydrogen as a donor candidate")
+                 .handler([&]() { allDonors = true; }));
+
   parser.add(Option("--config")
                  .argName("FILE")
                  .help("Dotenv file of SEAMS_* / LINKCELL_* knobs "
@@ -530,7 +594,7 @@ int main(int argc, char *argv[]) {
                  }));
 
   parser.add(Positional("command")
-                 .help("read | chill | chill-plus | cages | rdf | cn")
+                 .help("read | chill | chill-plus | cages | rdf | cn | hbonds")
                  .occurs(zeroOrOneTime)
                  .handler([&](std::string_view value) { cmd = value; }));
 
@@ -611,6 +675,11 @@ int main(int argc, char *argv[]) {
     }
     if (cmd == "cn") {
       return cmdCn(os, cloud, cutoff, bins, rdfTypeI, rdfTypeJ);
+    }
+    if (cmd == "hbonds") {
+      Cloud hCloud = load(file, cloud.currentFrame, htype);
+      return cmdHbonds(os, cloud, hCloud, cutoff, typeI, hdist, hangle,
+                       allDonors);
     }
     os << colorizer.error("unknown command: ") << cmd << "\n";
     return 2;
