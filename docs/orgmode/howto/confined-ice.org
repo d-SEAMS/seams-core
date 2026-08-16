@@ -12,7 +12,7 @@ Use a scripting front end:
 
 - Lua examples under ~example_lua/iceNanotube/~ in
   [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
-- ~Frame.find_prisms~ and ~Frame.find_polygons~ in
+- ~Frame.find_prisms~ and ~Frame.monolayer_rings~ in
   [[https://d-seams.github.io/PydSEAMSlib/][pydseams]]
 
 External dumps (figshare project 73545):

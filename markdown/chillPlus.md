@@ -5,8 +5,9 @@ This repository is the C++ engine.
 
 Figshare:
 [CHILL LAMMPS Trajectory](https://figshare.com/articles/CHILL_LAMMPS_Trajectory/11448720)
-(`nucleation.lammpstrj`, 4096 molecules of ice Ic). CHILL+ labels
-every oxygen cubic on that lattice.
+(`mW_cubic.lammpstrj`, 4096 type-1 mW sites of ice Ic). CHILL+
+labels every site cubic on that lattice. `nucleation.lammpstrj` is
+a different figshare deposit.
 
 The 1.x driver (`yodaStruct -c`, `conf.yaml`, `lua_inputs/`) is gone.
 Use `seams`, `pydseams`, or `require("dseams")`.
@@ -14,18 +15,19 @@ Use `seams`, `pydseams`, or `require("dseams")`.
 ## CLI
 
 ```bash
-seams chill-plus nucleation.lammpstrj --cutoff 3.5 --type 2
+seams chill-plus mW_cubic.lammpstrj --cutoff 3.5 --type 1
 ```
 
-Counts print to stdout (cubic, hexagonal, interfacial, clathrate,
-water).
+Counts print to stdout (`cubic`, `hexagonal`, `water`,
+`interfacial`, `clathrate`, `interClathrate`, `reCubic`, `reHex`,
+`unclassified`).
 
 ## Python
 
 ```python
 import pydseams as ds
 
-frame = ds.read("nucleation.lammpstrj")
+frame = ds.read("mW_cubic.lammpstrj")
 print(frame.chill_plus())
 ```
 
@@ -33,7 +35,7 @@ print(frame.chill_plus())
 
 ```lua
 local dseams = require("dseams")
-local cloud = dseams.read("nucleation.lammpstrj", {type = 2})
+local cloud = dseams.read("mW_cubic.lammpstrj", {type = 1})
 print(dseams.chill_plus(cloud, {cutoff = 3.5}))
 ```
 

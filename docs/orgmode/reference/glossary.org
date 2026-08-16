@@ -16,3 +16,5 @@
 | ~nop~ | Number of particles in the analysed cloud |
 | TUM | Topological unit matching |
 | ~PointCloud~ | Positions, types, box, and per-atom labels |
+| vesin | Optional cutoff cell list (~neighList~ / ~neighListO~); brute force if not built |
+| linkcell | Optional periodic k-NN (~nominateByLinkcell~); ~knn~ / ~seeded~ graphs and device TUM, not a drop-in for vesin |

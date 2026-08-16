@@ -64,9 +64,19 @@ initializers (Argum does not write defaults into the help).
 | ~-c~, ~--cutoff ANGSTROM~ | ~3.5~ | ~Neighbour cutoff~ |
 | ~-k N~ | ~4~ | ~k for knn / seeded cages~ |
 | ~--graph KIND~ | ~seeded~ | ~Bond graph for cages: cutoff \| knn \| knn-union \| seeded~ |
+| ~--config FILE~ | ~SEAMS_CONFIG~ or ~./seams.env~ | Dotenv of ~SEAMS_*~ / ~LINKCELL_*~ knobs. Env wins over the file |
+| ~--print-config~ | | Print the resolved runtime knobs and exit |
+| ~--tpp N~ | ~0~ (occupancy picker) | Threads per particle for the device k-NN (~LINKCELL_TPP~) |
+| ~--block N~ | ~0~ (occupancy picker) | CUDA block size (~LINKCELL_BLOCK~ / ~SEAMS_BLOCK~) |
+| ~--resident FRAC~ | ~0.80~ | Fraction of free device memory for a resident batch (~SEAMS_RESIDENT~) |
+| ~--cell ANGSTROM~ | ~3~ | Link-cell hint so NPT frames share a grid (~SEAMS_CELL~) |
 
-~--help~, ~--version~, and ~--features~ print and exit 0 before any
-file is opened.
+~--help~, ~--version~, ~--features~, and ~--print-config~ print and
+exit 0 before any file is opened.
+
+~--tpp~, ~--block~, ~--resident~, and ~--cell~ apply to the device
+TUM ice score (~seams cages~) only. CHILL and \(q_{lm}\) stay on
+the host.
 
 ~--cutoff~ is in Angstrom. ~-k~ also applies to ~knn-union~ (the
 same ~k~ feeds ~nneigh::kNearestNeighbourList~). ~--graph~ is used
@@ -100,6 +110,30 @@ and is not a ~BondGraph~ enumerator. Any other name throws
 knn, knn-union)~) and ~cages~ exits 2.
 
 Candidate cutoff for the knn graphs is ~--cutoff + 1.5~.
+
+* Runtime knobs
+
+Defaults live in the binary. An optional dotenv (~SEAMS_CONFIG~ or
+~./seams.env~) fills unset keys. The process environment wins the
+file; CLI flags win the environment. ~seams --print-config~ dumps
+the table.
+
+| variable | default |
+|----------+---------|
+| ~SEAMS_FRAME~ / ~SEAMS_LAST~ | ~1~ / ~0~ |
+| ~SEAMS_JOBS~ | ~1~ |
+| ~SEAMS_TYPE~ | ~0~ |
+| ~SEAMS_CUTOFF~ | ~3.5~ |
+| ~SEAMS_K~ | ~4~ |
+| ~SEAMS_GRAPH~ | ~seeded~ |
+| ~SEAMS_RESIDENT~ | ~0.80~ |
+| ~SEAMS_CELL~ | ~3.0~ |
+| ~SEAMS_TPP~ / ~LINKCELL_TPP~ | occupancy picker (~0~) |
+| ~SEAMS_BLOCK~ / ~LINKCELL_BLOCK~ | occupancy picker (~0~) |
+| ~SEAMS_OFFLOAD~ | ~false~ |
+| ~YODA_FENNEL_PATH~ / ~YODA_LUA_PATH~ | empty |
+
+Analysis choice (which command) is not this table.
 
 * File suffix
 
@@ -138,6 +172,7 @@ line is ~NAME: enabled~ or ~NAME: disabled~.
 | ~MPI~ | ~SEAMS_HAS_MPI~ |
 | ~Highway SIMD~ | ~SEAMS_HAS_HWY~ |
 | ~vesin neighbours~ | ~SEAMS_HAS_VESIN~ |
+| ~linkcell k-nearest~ | ~SEAMS_HAS_LINKCELL~ |
 | ~chemfiles~ | ~SEAMS_HAS_CHEMFILES~ |
 | ~readcon-core~ | ~SEAMS_HAS_READCON~ |
 | ~IRA/SOFI~ | ~SEAMS_HAS_IRA~ |
@@ -177,7 +212,7 @@ Color roles on this binary:
 
 | code | when |
 |------+------|
-| ~0~ | success, including ~--help~ / ~--version~ / ~--features~ |
+| ~0~ | success, including ~--help~ / ~--version~ / ~--features~ / ~--print-config~ |
 | ~2~ | parse error, missing command or file, unknown command, unknown ~--graph~ |
 
 * Examples
