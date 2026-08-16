@@ -2,10 +2,16 @@
 Changelog
 =========
 
-Version 2.2.4 (2026-08-15)
+Version 2.2.4 (2026-08-16)
 ===========================
 
-Docs orgmode covers the ~seams~ CLI, the Nix flake, and the
+Periodic *k*-nearest graphs via ``d-SEAMS/linkcell`` v0.2.2.
+``kNearestNeighbourList`` / ``kNearestNeighbourPair`` write packed
+``n*k`` nominations. Mutual and union come from one walk. The LAMMPS
+dump box is bound spans plus ``xy, xz, yz``; ``periodicDistSq``
+recovers H. Empty frames no longer abort the walker.
+
+Docs orgmode covers the ``seams`` CLI, the Nix flake, and the
 three-repo split. Tutorials use the live APIs.
 
 Version 2.2.3 (2026-08-15)

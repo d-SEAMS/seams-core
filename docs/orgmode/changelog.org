@@ -7,6 +7,12 @@ The C++ engine is this repository. Python is ~pydseams~
 
 * 2.2.4
 
+Periodic /k/-nearest graphs via [[https://github.com/d-SEAMS/linkcell][d-SEAMS/linkcell]] v0.2.2.
+~kNearestNeighbourList~ / ~kNearestNeighbourPair~ write packed
+~n*k~ nominations. Mutual and union come from one walk. The LAMMPS
+dump box is bound spans plus ~xy, xz, yz~; ~periodicDistSq~ recovers
+H. Empty frames no longer abort the walker.
+
 Docs orgmode covers the ~seams~ CLI, the Nix flake, and the
 three-repo split.
 
