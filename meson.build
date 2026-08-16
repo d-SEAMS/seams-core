@@ -473,6 +473,25 @@ if get_option('with_cli')
     workdir: meson.project_source_root(),
     timeout: 120)
   test(
+    'seams_help_mentions_domains',
+    python3,
+    args: [
+      '-c',
+      'import subprocess,sys; p=subprocess.run([sys.argv[1],"--help"],capture_output=True,text=True); text=p.stdout+p.stderr; sys.exit(0 if p.returncode==0 and "domains" in text and "--subset" in text else 1)',
+      seams_exe.full_path(),
+    ],
+    depends: [seams_exe])
+  test(
+    'seams_domains_needs_site',
+    python3,
+    args: [
+      '-c',
+      'import subprocess,sys; p=subprocess.run([sys.argv[1],"domains",sys.argv[2]],capture_output=True,text=True); sys.exit(0 if p.returncode==2 else 1)',
+      seams_exe.full_path(),
+      meson.project_source_root() / 'input' / 'traj' / 'exampleTraj.lammpstrj',
+    ],
+    depends: [seams_exe])
+  test(
     'seams_help_mentions_family',
     python3,
     args: [
