@@ -10,6 +10,7 @@
 #include <mol_sys.hpp>
 #include <generic.hpp>
 #include <neighbours.hpp>
+#include <cluster.hpp>
 #include <density.hpp>
 #include <rdf.hpp>
 #include <seams_config.hpp>
@@ -400,6 +401,32 @@ int cmdPairs(std::ostream &os, Cloud &cloud, const site::Table &table) {
   return 0;
 }
 
+int cmdDomains(std::ostream &os, Cloud &cloud, double cutoff,
+               const site::Table &table, site::Kind subset) {
+  std::vector<bool> mask(static_cast<std::size_t>(cloud.nop), false);
+  for (const int i : site::indicesOf(cloud, table, subset)) {
+    if (i >= 0 && i < cloud.nop) {
+      mask[static_cast<std::size_t>(i)] = true;
+    }
+  }
+  const auto idxList = nneigh::getNewNeighbourListByIndex(cloud, cutoff);
+  std::vector<std::vector<int>> idList(idxList.size());
+  for (std::size_t i = 0; i < idxList.size(); ++i) {
+    idList[i].reserve(idxList[i].size());
+    for (const int idx : idxList[i]) {
+      if (idx >= 0 && idx < cloud.nop) {
+        idList[i].push_back(cloud.pts[static_cast<std::size_t>(idx)].atomID);
+      }
+    }
+  }
+  const auto d = clump::largestDomain(cloud, idList, mask);
+  const char *name =
+      subset == site::Kind::apolar ? "apolar" : "polar";
+  os << "subset " << name << " n " << d.subset << " largest " << d.largest
+     << " P " << d.percolation << "\n";
+  return 0;
+}
+
 int cmdDensityZ(std::ostream &os, Cloud &cloud, int typeI, int bins, int axis) {
   if (bins <= 0) {
     const int a = (axis >= 0 && axis <= 2) ? axis : 2;
@@ -566,6 +593,7 @@ int main(int argc, char *argv[]) {
   std::string typesFlag;
   std::string siteSpec;
   bool ionsFlag = false;
+  std::string subsetFlag;
   int rdfTypeI = 0;
   int rdfTypeJ = 0;
   bool typesSet = false;
@@ -667,6 +695,13 @@ int main(int argc, char *argv[]) {
                  .help("cn on ionCloud cage degree (needs --site)")
                  .handler([&]() { ionsFlag = true; }));
 
+  parser.add(Option("--subset")
+                 .argName("KIND")
+                 .help("domains subset: polar | apolar")
+                 .handler([&](std::string_view value) {
+                   subsetFlag = std::string(value);
+                 }));
+
   parser.add(Option("--bins")
                  .argName("N")
                  .help("Histogram bins (rdf: rmax/0.1; density-z: L/0.1)")
@@ -736,7 +771,7 @@ int main(int argc, char *argv[]) {
 
   parser.add(Positional("command")
                  .help("read | chill | chill-plus | cages | rdf | cn | pairs | "
-                       "density-z")
+                       "density-z | domains")
                  .occurs(zeroOrOneTime)
                  .handler([&](std::string_view value) { cmd = value; }));
 
@@ -845,6 +880,21 @@ int main(int argc, char *argv[]) {
     std::cerr << colorizer.error("cn --ions needs --site") << "\n";
     return 2;
   }
+  if (cmd == "domains" && siteSpec.empty()) {
+    std::cerr << colorizer.error("domains needs --site") << "\n";
+    return 2;
+  }
+  site::Kind domainKind = site::Kind::polar;
+  if (cmd == "domains") {
+    if (subsetFlag == "apolar" || subsetFlag == "tail") {
+      domainKind = site::Kind::apolar;
+    } else if (subsetFlag.empty() || subsetFlag == "polar") {
+      domainKind = site::Kind::polar;
+    } else {
+      std::cerr << colorizer.error("bad --subset (want polar|apolar)") << "\n";
+      return 2;
+    }
+  }
 
   auto runOne = [&](std::ostream &os, Cloud &cloud) {
     if (!familyFlag && family == site::Family::waterIce &&
@@ -886,6 +936,9 @@ int main(int argc, char *argv[]) {
     if (cmd == "density-z") {
       return cmdDensityZ(os, cloud, typeI, bins, densAxis);
     }
+    if (cmd == "domains") {
+      return cmdDomains(os, cloud, cutoff, siteTable, domainKind);
+    }
     os << colorizer.error("unknown command: ") << cmd << "\n";
     return 2;
   };
@@ -893,7 +946,7 @@ int main(int argc, char *argv[]) {
   const bool loadAll =
       cmd == "pairs" || (cmd == "cn" && ionsFlag) ||
       ((cmd == "rdf" || cmd == "cn") && typesSet && rdfTypeI != rdfTypeJ) ||
-      (cmd == "density-z" && typeI <= 0);
+      (cmd == "density-z" && typeI <= 0) || cmd == "domains";
   const int loadType = loadAll ? -1 : typeI;
 
   if (last <= 0 || last == frame) {

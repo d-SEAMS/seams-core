@@ -59,6 +59,19 @@
 
 namespace clump {
 
+//! Largest connected component of a Boolean site mask (Stoddard).
+//! percolation is N_largest / N_subset. Does not classify ice.
+struct Domain {
+  int largest = 0;
+  int subset = 0;
+  double percolation = 0.0; // largest/subset
+};
+
+[[nodiscard]] Domain
+largestDomain(const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+              const std::vector<std::vector<int>> &nList,
+              const std::vector<bool> &mask);
+
 //! Finds the largest ice cluster
 [[nodiscard]] int largestIceCluster(
     std::string path, molSys::PointCloud<molSys::Point<double>, double> &yCloud,

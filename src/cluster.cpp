@@ -17,6 +17,111 @@
 #include <iostream>
 #include <seams_output.hpp>
 
+namespace {
+
+using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
+
+void buildStoddardList(const Cloud &yCloud,
+                       const std::vector<std::vector<int>> &nList,
+                       const std::vector<bool> &mask,
+                       std::vector<int> &linkedList) {
+  linkedList.assign(yCloud.nop, -1);
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+    if (iatom >= static_cast<int>(mask.size()) ||
+        !mask[static_cast<std::size_t>(iatom)] ||
+        !yCloud.pts[static_cast<std::size_t>(iatom)].inSlice) {
+      continue;
+    }
+    linkedList[static_cast<std::size_t>(iatom)] = iatom;
+  }
+  for (int i = 0; i < yCloud.nop - 1; i++) {
+    if (linkedList[static_cast<std::size_t>(i)] == -1) {
+      continue;
+    }
+    if (linkedList[static_cast<std::size_t>(i)] != i) {
+      continue;
+    }
+    int j = i;
+    do {
+      for (int k = i + 1; k < yCloud.nop; k++) {
+        if (k >= static_cast<int>(mask.size()) ||
+            !mask[static_cast<std::size_t>(k)]) {
+          continue;
+        }
+        if (linkedList[static_cast<std::size_t>(k)] != k) {
+          continue;
+        }
+        const int kAtomID = yCloud.pts[static_cast<std::size_t>(k)].atomID;
+        if (j < 0 || j >= static_cast<int>(nList.size()) ||
+            nList[static_cast<std::size_t>(j)].size() < 2) {
+          continue;
+        }
+        auto it = std::find(nList[static_cast<std::size_t>(j)].begin() + 1,
+                            nList[static_cast<std::size_t>(j)].end(), kAtomID);
+        if (it != nList[static_cast<std::size_t>(j)].end()) {
+          const int temp = linkedList[static_cast<std::size_t>(j)];
+          linkedList[static_cast<std::size_t>(j)] =
+              linkedList[static_cast<std::size_t>(k)];
+          linkedList[static_cast<std::size_t>(k)] = temp;
+        }
+      }
+      j = linkedList[static_cast<std::size_t>(j)];
+    } while (j != i);
+  }
+}
+
+void measureStoddardClusters(const std::vector<int> &linkedList, int nop,
+                             std::vector<int> &startingIndex,
+                             std::vector<int> &nClusters,
+                             bool countSingletons) {
+  std::vector<bool> visited(static_cast<std::size_t>(nop));
+  startingIndex.clear();
+  nClusters.clear();
+  for (int i = 0; i < nop; i++) {
+    if (visited[static_cast<std::size_t>(i)]) {
+      continue;
+    }
+    visited[static_cast<std::size_t>(i)] = true;
+    if (linkedList[static_cast<std::size_t>(i)] == -1) {
+      continue;
+    }
+    if (linkedList[static_cast<std::size_t>(i)] == i) {
+      if (countSingletons) {
+        startingIndex.push_back(i);
+        nClusters.push_back(1);
+      }
+      continue;
+    }
+    int currentIndex = i;
+    int nextElement = linkedList[static_cast<std::size_t>(currentIndex)];
+    int iClusterNumber = 1;
+    const int index = i;
+    while (nextElement != index) {
+      iClusterNumber++;
+      currentIndex = nextElement;
+      visited[static_cast<std::size_t>(currentIndex)] = true;
+      nextElement = linkedList[static_cast<std::size_t>(currentIndex)];
+    }
+    startingIndex.push_back(index);
+    nClusters.push_back(iClusterNumber);
+  }
+}
+
+int subsetCount(const Cloud &cloud, const std::vector<bool> &mask) {
+  int n = 0;
+  const int nop = cloud.nop;
+  for (int i = 0; i < nop; i++) {
+    if (i < static_cast<int>(mask.size()) &&
+        mask[static_cast<std::size_t>(i)] &&
+        cloud.pts[static_cast<std::size_t>(i)].inSlice) {
+      ++n;
+    }
+  }
+  return n;
+}
+
+} // namespace
+
 /**
  * @details Finds the number of particles in the largest ice cluster, for a
  * given frame, using Stoddard's clustering algorithm (Stoddard J. Comp. Phys.,
@@ -43,117 +148,22 @@ int clump::largestIceCluster(
     const std::vector<std::vector<int>> &nList, std::vector<bool> &isIce,
     std::vector<int> &list, std::vector<int> &nClusters,
     std::unordered_map<int, int> &indexNumber, int firstFrame) {
-  //
-  int kAtomID;                    // Atom ID of the nearest neighbour
-  int iClusterNumber;             // Number in the current cluster
   int nLargestCluster;            // Number in the largest cluster
   std::vector<int> linkedList;    // Linked list
-  int j;                          // Index
-  std::vector<int> startingIndex; // Contains the vector index in list
-                                  // corresponding to a particular cluster
-  int temp;                       // For swapping
-  std::vector<bool>
-      visited; // To make sure you don't go through the same atoms again.
-  molSys::Point<double> iPoint; // Current point
-  int currentIndex;             // Current index
+  std::vector<int> startingIndex; // Vector index in list of each cluster
+  molSys::Point<double> iPoint;   // Current point
+  int currentIndex;               // Current index
+
+  (void)list;
+  (void)indexNumber;
 
   iceCloud = molSys::clearPointCloud(iceCloud);
   nClusters.clear();
-  // -----------------------------------------------------------
-  // INITIALIZATION
-  linkedList.assign(yCloud.nop, -1);
-  // Initial values of the list. -1 is a dummy value if the molecule is
-  // water or not in the slice
-  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-    // Skip if the molecule is water or if it is not in the slice
-    if (!isIce[iatom] || !yCloud.pts[iatom].inSlice) {
-      continue;
-    } // skip for water or not in slice
-    // Otherwise, assign the index as the ID
-    linkedList[iatom] = iatom;
-  } // init of cluster IDs
-  // -----------------------------------------------------------
-  // Get the linked list
-  for (int i = 0; i < yCloud.nop - 1; i++) {
-    //
-    // Skip if the molecule is water or if it is not in the slice
-    if (linkedList[i] == -1) {
-      continue;
-    } // skip for water or not in slice
-    //
-    // If iatom is already in a cluster, skip it
-    if (linkedList[i] != i) {
-      continue;
-    } // Already part of a cluster
-    //
-    j = i; // Init of j
-    // Execute the next part of the loop while j is not equal to i
-    do {
-      //
-      // Go through the rest of the atoms (KLOOP)
-      for (int k = i + 1; k < yCloud.nop; k++) {
-        // Skip if not ice
-        if (!isIce[k]) {
-          continue;
-        } // not ice
-        // Skip if already part of a cluster
-        if (linkedList[k] != k) {
-          continue;
-        } // Already part of a cluster
-        //
-        // Check to see if k is a nearest neighbour of j
-        kAtomID = yCloud.pts[k].atomID; // Atom ID
-        auto it = std::find(nList[j].begin() + 1, nList[j].end(), kAtomID);
-        if (it != nList[j].end()) {
-          // Swap!
-          temp = linkedList[j];
-          linkedList[j] = linkedList[k];
-          linkedList[k] = temp;
-        } // j and k are nearest neighbours
-      }   // end of loop through k (KLOOP)
-      //
-      j = linkedList[j];
-    } while (j != i); // end of control for j!=i
-    //
-
-  } // end of looping through every i
-
-  // -----------------------------------------------------------
-  // Get the starting index (which is the vector index in list) corresponding to
-  // clusters with more than one molecule in them
+  buildStoddardList(yCloud, nList, isIce, linkedList);
+  measureStoddardClusters(linkedList, yCloud.nop, startingIndex, nClusters,
+                          false);
   int nextElement; // value in list
   int index;       // starting index value
-  // init
-  visited.resize(yCloud.nop);
-
-  for (int i = 0; i < yCloud.nop; i++) {
-    //
-    if (visited[i]) {
-      continue;
-    }                  // Already counted
-    visited[i] = true; // Visited
-    if (linkedList[i] == -1) {
-      continue;
-    } // not ice
-    if (linkedList[i] == i) {
-      continue;
-    } // only one element
-    //
-    currentIndex = i;
-    nextElement = linkedList[currentIndex];
-    index = i;
-    iClusterNumber = 1; // at least one value
-    while (nextElement != index) {
-      iClusterNumber++;
-      currentIndex = nextElement;
-      visited[currentIndex] = true;
-      nextElement = linkedList[currentIndex];
-    } // get number
-    // Update startingIndex with index
-    startingIndex.push_back(index);
-    // Update the number of molecules in the cluster
-    nClusters.push_back(iClusterNumber);
-  } // end of loop through
   // -----------------------------------------------------------
   if (nClusters.empty()) {
     iceCloud.currentFrame = yCloud.currentFrame;
@@ -233,6 +243,26 @@ int clump::largestIceCluster(
 
   // -----------------------------------------------------------
   return 0;
+}
+
+clump::Domain
+clump::largestDomain(const Cloud &cloud,
+                     const std::vector<std::vector<int>> &nList,
+                     const std::vector<bool> &mask) {
+  Domain out;
+  out.subset = subsetCount(cloud, mask);
+  std::vector<int> linkedList;
+  std::vector<int> startingIndex;
+  std::vector<int> nClusters;
+  buildStoddardList(cloud, nList, mask, linkedList);
+  measureStoddardClusters(linkedList, cloud.nop, startingIndex, nClusters,
+                          true);
+  if (!nClusters.empty()) {
+    out.largest = *std::max_element(nClusters.begin(), nClusters.end());
+  }
+  out.percolation =
+      out.subset > 0 ? static_cast<double>(out.largest) / out.subset : 0.0;
+  return out;
 }
 
 /**

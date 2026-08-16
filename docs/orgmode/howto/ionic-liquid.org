@@ -69,8 +69,12 @@ not a coordination number.
 
 * Polar and apolar domains
 
-~seams domains FILE --site '1=cationHead,2=anion,3=tail' --subset
-polar~ (~apolar~) builds the mask from ~site::indicesOf~ and walks
+#+begin_src bash
+seams domains FILE --site '1=cationHead,2=anion,3=tail' --subset polar
+seams domains FILE --site '1=cationHead,2=anion,3=tail' --subset apolar
+#+end_src
+
+~seams domains~ builds the mask from ~site::indicesOf~ and walks
 Stoddard's clusters on that subset. It does not run CHILL or
 ~q_6~. Neighbours are the dump-MIC cutoff list (~--cutoff~).
 Stdout is ~subset polar n N largest L P P_inf~ with
