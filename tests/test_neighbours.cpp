@@ -165,6 +165,11 @@ TEST_CASE("neighList produces neighbour list for two atom types",
       std::find(nList[0].begin() + 1, nList[0].end(), 1) != nList[0].end();
   REQUIRE(found1);
 
+  // Same-type pair 0-2 is inside the cutoff but must not appear on an I-J list
+  bool foundSameType =
+      std::find(nList[0].begin() + 1, nList[0].end(), 2) != nList[0].end();
+  REQUIRE_FALSE(foundSameType);
+
   // Atom 3 (type 2, far away) should have no type-1 neighbours within cutoff
   REQUIRE(nList[3].size() == 1); // only self
 }

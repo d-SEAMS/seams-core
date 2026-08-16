@@ -38,9 +38,10 @@
  */
 
 /** @brief Functions for building neighbour lists.
- * This namespace contains functions that build neighbour lists (using
- * brute-force), saving either the atom IDs or atom indices (according to a
- * PointCloud) in a row-ordered vector of vectors.
+ * This namespace contains functions that build neighbour lists (vesin
+ * cell list, with a brute-force fallback), saving either the atom IDs
+ * or atom indices (according to a PointCloud) in a row-ordered vector
+ * of vectors.
  * Whether the atom IDs or atom indices (i.e. the indices of the elements in the
  * vector pts inside the PointCloud) are saved, the neighbour lists are
  * constructed such that the first element is the 'central atom', whose
@@ -105,20 +106,20 @@ inline linkcell::Cell lammpsBoxToLinkcell(const std::vector<double> &box,
 
 //! All these functions use atom IDs and not indices
 
-//! Inefficient @f$O(n^2)@f$ implementation of neighbour lists when there are
-//! two different types of atoms The neighbour list does not differentiate
+//! Full neighbour list for pairs of type I and type J (vesin cell list,
+//! brute-force fallback). The neighbour list does not differentiate
 //! between the types of atoms
 std::vector<std::vector<int>> neighList(
     double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     int typeI, int typeJ);
 
-//! Inefficient @f$O(n^2)@f$ implementation of neighbour lists
+//! Full neighbour list for one type (vesin cell list, brute-force fallback)
 //! You can only use this for neighbour lists with one type
 std::vector<std::vector<int>> neighListO(
     double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     int typeI);
 
-//! Inefficient @f$O(n^2)@f$ implementation of neighbour lists
+//! Half neighbour list for one type (vesin cell list, brute-force fallback)
 //! You can only use this for neighbour lists with one type
 std::vector<std::vector<int>> halfNeighList(
     double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,

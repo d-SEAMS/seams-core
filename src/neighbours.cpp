@@ -199,8 +199,8 @@ void appendNeighbourID(std::vector<std::vector<int>> &nList,
 
 /**
  * @details Function for building neighbour lists for each
- *  particle. Inefficient brute-force \f$ O(n^2) \f$ implementation.
- *  This generates the full neighbour list, by ID.
+ *  particle. Vesin cell list when built with SEAMS_HAS_VESIN, else
+ *  brute-force \f$ O(n^2) \f$. This generates the full neighbour list, by ID.
  * @param[in] rcutoff Distance cutoff, within which two atoms are neighbours.
  * @param[in] yCloud The input molSys::PointCloud
  * @param[in] typeI Type ID of particles of type I.
@@ -217,6 +217,33 @@ nneigh::neighList(double rcutoff,
 
   const std::vector<int> indexToID = indexToIDTable(yCloud);
   std::vector<std::vector<int>> nList = seedWithSelfIDs(indexToID, yCloud.nop);
+
+#ifdef SEAMS_HAS_VESIN
+  {
+    std::vector<int> subset;
+    subset.reserve(static_cast<size_t>(yCloud.nop));
+    for (int i = 0; i < yCloud.nop; i++) {
+      const int t = yCloud.pts[i].type;
+      if (t == typeI || t == typeJ) {
+        subset.push_back(i);
+      }
+    }
+    std::vector<std::pair<int, int>> pairs;
+    if (cellListPairs(yCloud, subset, rcutoff, pairs)) {
+      for (const auto &[iatom, jatom] : pairs) {
+        const int ti = yCloud.pts[iatom].type;
+        const int tj = yCloud.pts[jatom].type;
+        const bool mixed = (ti == typeI && tj == typeJ) ||
+                           (ti == typeJ && tj == typeI);
+        if (!mixed) {
+          continue;
+        }
+        appendNeighbourID(nList, indexToID, iatom, jatom);
+      }
+      return nList;
+    }
+  }
+#endif
 
   // Compare squared distances so that the per-pair square root is avoided
   const double rcutoffSq = rcutoff * rcutoff;
@@ -352,9 +379,10 @@ nneigh::neighListO(double rcutoff,
 
 /**
  * @details Function for building neighbour lists for each
- *  particle of only one type. Inefficient brute-force \f$ O(n^2) \f$
- *  implementation. This generates the half neighbour list, by ID. This function
- *  will only work for building a neighbour list between one type of particles.
+ *  particle of only one type. Vesin cell list when built with
+ *  SEAMS_HAS_VESIN, else brute-force \f$ O(n^2) \f$. This generates the
+ *  half neighbour list, by ID. This function will only work for building a
+ *  neighbour list between one type of particles.
  * @param[in] rcutoff Distance cutoff, within which two atoms are neighbours.
  * @param[in] yCloud The input molSys::PointCloud
  * @param[in] typeI Type ID of the \f$ i^{th} \f$ particle type.
@@ -370,6 +398,28 @@ nneigh::halfNeighList(double rcutoff,
 
   const std::vector<int> indexToID = indexToIDTable(yCloud);
   std::vector<std::vector<int>> nList = seedWithSelfIDs(indexToID, yCloud.nop);
+
+#ifdef SEAMS_HAS_VESIN
+  {
+    std::vector<int> typeIIndices;
+    for (int i = 0; i < yCloud.nop; i++) {
+      if (yCloud.pts[i].type == typeI) {
+        typeIIndices.push_back(i);
+      }
+    }
+    std::vector<std::pair<int, int>> pairs;
+    if (cellListPairs(yCloud, typeIIndices, rcutoff, pairs)) {
+      // Half list: keep the lower cloud index as the owner, matching the
+      // brute walk that only writes j into i when i < j.
+      for (const auto &[iatom, jatom] : pairs) {
+        if (iatom < jatom) {
+          appendNeighbourID(nList, indexToID, iatom, jatom);
+        }
+      }
+      return nList;
+    }
+  }
+#endif
 
   // Compare squared distances so that the per-pair square root is avoided
   const double rcutoffSq = rcutoff * rcutoff;

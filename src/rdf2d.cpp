@@ -14,6 +14,10 @@
 
 #include <rdf2d.hpp>
 
+#ifdef SEAMS_HAS_VESIN
+#include <vesin.h>
+#endif
+
 // -----------------------------------------------------------------------------------------------------
 // IN-PLANE RDF
 // -----------------------------------------------------------------------------------------------------
@@ -126,6 +130,65 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
 
   // Init the histogram to 0
   histogram.resize(nbin);
+
+#ifdef SEAMS_HAS_VESIN
+  if (yCloud.nop > 0 && yCloud.box.size() >= 3) {
+    std::vector<std::array<double, 3>> positions(
+        static_cast<size_t>(yCloud.nop));
+    for (int i = 0; i < yCloud.nop; i++) {
+      positions[static_cast<size_t>(i)] = {
+          yCloud.pts[i].x, yCloud.pts[i].y, yCloud.pts[i].z};
+    }
+    double box[3][3] = {{yCloud.box[0], 0.0, 0.0},
+                        {0.0, yCloud.box[1], 0.0},
+                        {0.0, 0.0, yCloud.box[2]}};
+    bool periodic[3] = {true, true, true};
+    VesinOptions options{};
+    options.cutoff = cutoff;
+    options.full = true;
+    options.sorted = false;
+    options.algorithm = VesinAutoAlgorithm;
+    options.return_shifts = false;
+    options.return_distances = true;
+    options.return_vectors = false;
+    VesinNeighborList neighbors;
+    const char *error_message = nullptr;
+    VesinDevice device = {VesinCPU, 0};
+    const int status = vesin_neighbors(
+        reinterpret_cast<const double (*)[3]>(positions.data()),
+        static_cast<size_t>(yCloud.nop), box, periodic, device, options,
+        &neighbors, &error_message);
+    if (status == 0 && neighbors.distances != nullptr) {
+      for (size_t k = 0; k < neighbors.length; k++) {
+        const int iatom = static_cast<int>(neighbors.pairs[k][0]);
+        const int jatom = static_cast<int>(neighbors.pairs[k][1]);
+        if (iatom >= jatom) {
+          continue;
+        }
+        const double r_ij = neighbors.distances[k];
+        if (r_ij > cutoff) {
+          continue;
+        }
+        int ibin = static_cast<int>(r_ij / binwidth);
+        if (ibin < 0) {
+          continue;
+        }
+        if (ibin >= nbin) {
+          ibin = nbin - 1;
+        }
+        histogram[static_cast<size_t>(ibin)] += 2;
+      }
+      vesin_free(&neighbors);
+      return histogram;
+    }
+    if (status != 0) {
+      std::cerr << "Vesin failed: "
+                << (error_message ? error_message : "unknown")
+                << "; falling back to brute force.\n";
+    }
+    vesin_free(&neighbors);
+  }
+#endif
 
   // Loop through pairs of atoms
   for (int iatom = 0; iatom < yCloud.nop - 1; iatom++) {
