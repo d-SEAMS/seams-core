@@ -19,8 +19,9 @@ namespace {
 
 #ifdef SEAMS_HAS_GPULITE
 
-// Cell-list neighbours, one q_lm pass, then CHILL + 4-NN six-cycles.
-// All frames stay in the same device buffers.
+// Resident batch: cell list -> k-NN -> mutual 4-graph -> one q_lm ->
+// CHILL, then primitive six-rings and the claim-free HC/DDC predicates.
+// Frames stay in device buffers; only labels are copied back.
 const char *kKernels = R"CUDA(
 __device__ inline void minImage(double& dx, double& dy, double& dz,
     double bx, double by, double bz) {
@@ -29,23 +30,213 @@ __device__ inline void minImage(double& dx, double& dy, double& dz,
   dz -= bz * nearbyint(dz / bz);
 }
 
-__device__ inline void y3(double dx, double dy, double dz,
-    double* qre, double* qim) {
+// l=3 Y_lm, m = -3..3, matching seams::steinhardt::ylmAll (phi = atan2(dx, dy)).
+__device__ inline void ylm3(double dx, double dy, double dz,
+    double* re, double* im) {
   const double r = sqrt(dx * dx + dy * dy + dz * dz);
   if (r < 1.0e-12) return;
   const double z = dz / r;
-  const double sphi = sqrt(fmax(0.0, 1.0 - z * z));
-  const double cphi = (sphi > 1.0e-12) ? dx / (r * sphi) : 1.0;
-  const double spsi = (sphi > 1.0e-12) ? dy / (r * sphi) : 0.0;
-  qre[0] += 0.5 * (5.0 * z * z * z - 3.0 * z);
-  qre[1] += -0.75 * sphi * (5.0 * z * z - 1.0) * cphi;
-  qim[1] += -0.75 * sphi * (5.0 * z * z - 1.0) * spsi;
-  qre[2] += 7.5 * sphi * sphi * z * (cphi * cphi - spsi * spsi);
-  qim[2] += 7.5 * sphi * sphi * z * (2.0 * cphi * spsi);
-  qre[3] += -7.5 * sphi * sphi * sphi *
-            (cphi * cphi * cphi - 3.0 * cphi * spsi * spsi);
-  qim[3] += -7.5 * sphi * sphi * sphi *
-            (3.0 * cphi * cphi * spsi - spsi * spsi * spsi);
+  const double phi = atan2(dx, dy);
+  const double sinT = sqrt(fmax(0.0, 1.0 - z * z));
+  const double cosT = z;
+  const double cphi = cos(phi);
+  const double sphi = sin(phi);
+  double s[4], c[4], pr[4], pi[4];
+  s[0] = 1.0; c[0] = 1.0; pr[0] = 1.0; pi[0] = 0.0;
+  for (int k = 1; k <= 3; ++k) {
+    s[k] = s[k - 1] * sinT;
+    c[k] = c[k - 1] * cosT;
+    const double nr = pr[k - 1] * cphi - pi[k - 1] * sphi;
+    const double ni = pr[k - 1] * sphi + pi[k - 1] * cphi;
+    pr[k] = nr;
+    pi[k] = ni;
+  }
+  const double piC = 3.14159265358979323846;
+  const double amp[4] = {
+      0.25 * sqrt(7.0 / piC) * (5.0 * c[3] - 3.0 * c[1]),
+      0.125 * sqrt(21.0 / piC) * s[1] * (5.0 * c[2] - 1.0),
+      0.25 * sqrt(105.0 / (2.0 * piC)) * s[2] * c[1],
+      0.125 * sqrt(35.0 / piC) * s[3]};
+  for (int absM = 0; absM <= 3; ++absM) {
+    const double a = amp[absM];
+    re[3 - absM] += a * pr[absM];
+    im[3 - absM] += -a * pi[absM];
+    const double sign = (absM % 2 == 0) ? 1.0 : -1.0;
+    re[3 + absM] += sign * a * pr[absM];
+    im[3 + absM] += sign * a * pi[absM];
+  }
+}
+
+__device__ inline bool bonded(const int* deg, const int* cols,
+    int f, int nAtoms, int kMax, int a, int b) {
+  if (a < 0 || b < 0) return false;
+  const int d = deg[f * nAtoms + a];
+  const int row = (f * nAtoms + a) * kMax;
+  for (int t = 0; t < d; ++t) {
+    if (cols[row + t] == b) return true;
+  }
+  return false;
+}
+
+__device__ inline bool inSix(const int* r, int atom) {
+  for (int t = 0; t < 6; ++t) {
+    if (r[t] == atom) return true;
+  }
+  return false;
+}
+
+__device__ inline bool shareAtoms(const int* a, const int* b) {
+  for (int i = 0; i < 6; ++i) {
+    if (inSix(b, a[i])) return true;
+  }
+  return false;
+}
+
+__device__ inline int commonCount(const int* a, const int* b) {
+  int n = 0;
+  for (int i = 0; i < 6; ++i) {
+    if (inSix(b, a[i])) ++n;
+  }
+  return n;
+}
+
+__device__ inline bool commonInThree(const int* a, const int* b, const int* c) {
+  for (int i = 0; i < 6; ++i) {
+    if (inSix(b, a[i]) && inSix(c, a[i])) return true;
+  }
+  return false;
+}
+
+__device__ inline bool shareNeigh(const int* deg, const int* cols,
+    int f, int nAtoms, int kMax, int a, int b) {
+  const int da = deg[f * nAtoms + a];
+  const int ra = (f * nAtoms + a) * kMax;
+  for (int t = 0; t < da; ++t) {
+    if (bonded(deg, cols, f, nAtoms, kMax, b, cols[ra + t])) return true;
+  }
+  return false;
+}
+
+// Franzblau SP on a 6-cycle of the mutual graph: no chords, opposite
+// vertices at graph distance 3 (no common neighbour).
+__device__ inline bool primitiveSix(const int* r, const int* deg,
+    const int* cols, int f, int nAtoms, int kMax) {
+  const int d2[6][2] = {{0, 2}, {1, 3}, {2, 4}, {3, 5}, {4, 0}, {5, 1}};
+  for (int t = 0; t < 6; ++t) {
+    if (bonded(deg, cols, f, nAtoms, kMax, r[d2[t][0]], r[d2[t][1]])) {
+      return false;
+    }
+  }
+  const int opp[3][2] = {{0, 3}, {1, 4}, {2, 5}};
+  for (int t = 0; t < 3; ++t) {
+    const int u = r[opp[t][0]];
+    const int v = r[opp[t][1]];
+    if (bonded(deg, cols, f, nAtoms, kMax, u, v)) return false;
+    if (shareNeigh(deg, cols, f, nAtoms, kMax, u, v)) return false;
+  }
+  return true;
+}
+
+__device__ inline bool basalNeighbours(const int* deg, const int* cols,
+    int f, int nAtoms, int kMax, int n1, int n2, int atomOne, int atomTwo) {
+  const bool n1one = bonded(deg, cols, f, nAtoms, kMax, atomOne, n1);
+  const bool n1two = bonded(deg, cols, f, nAtoms, kMax, atomTwo, n1);
+  if (!n1one && !n1two) return false;
+  if (n1one) {
+    return bonded(deg, cols, f, nAtoms, kMax, atomTwo, n2);
+  }
+  return bonded(deg, cols, f, nAtoms, kMax, atomOne, n2);
+}
+
+__device__ inline bool notNeighboursOfRing(const int* deg, const int* cols,
+    int f, int nAtoms, int kMax, const int* trip, const int* ring) {
+  for (int i = 0; i < 3; ++i) {
+    for (int j = 0; j < 6; ++j) {
+      if (bonded(deg, cols, f, nAtoms, kMax, ring[j], trip[i])) return false;
+    }
+  }
+  return true;
+}
+
+__device__ inline bool basalConditions(const int* deg, const int* cols,
+    int f, int nAtoms, int kMax, const int* b1, const int* b2) {
+  int kIndex = -1;
+  int compare1 = 0, compare2 = 0;
+  bool l1n = false, l2n = false;
+  const int l1 = b1[0];
+  const int l2 = b1[1];
+  for (int k = 0; k < 6; ++k) {
+    const int mk = b2[k];
+    if (bonded(deg, cols, f, nAtoms, kMax, l1, mk)) {
+      compare1 = b1[2];
+      compare2 = b1[4];
+      kIndex = k;
+      l1n = true;
+      break;
+    }
+    if (bonded(deg, cols, f, nAtoms, kMax, l2, mk)) {
+      compare1 = b1[3];
+      compare2 = b1[5];
+      kIndex = k;
+      l2n = true;
+      break;
+    }
+  }
+  if (!l1n && !l2n) return false;
+  int evenT[3];
+  int oddT[3];
+  int ie = 0, io = 0;
+  for (int k = 0; k <= 5; ++k) {
+    int ck = kIndex + k;
+    if (ck >= 6) ck -= 6;
+    if (k % 2 == 0) evenT[ie++] = b2[ck];
+    else oddT[io++] = b2[ck];
+  }
+  if (!basalNeighbours(deg, cols, f, nAtoms, kMax, evenT[1], evenT[2],
+                       compare1, compare2)) {
+    return false;
+  }
+  return notNeighboursOfRing(deg, cols, f, nAtoms, kMax, oddT, b1);
+}
+
+__device__ inline int firstRingThrough(const int* A, int nA, const int* B,
+    int nB, const int* C, int nC, int skipA, int skipB) {
+  int i = 0, j = 0, k = 0;
+  while (i < nA && j < nB && k < nC) {
+    const int x = A[i], y = B[j], z = C[k];
+    if (x == y && y == z) {
+      if (x != skipA && x != skipB) return x;
+      ++i; ++j; ++k;
+      continue;
+    }
+    int lo = x;
+    if (y < lo) lo = y;
+    if (z < lo) lo = z;
+    if (x == lo) ++i;
+    if (y == lo) ++j;
+    if (z == lo) ++k;
+  }
+  return -1;
+}
+
+__device__ inline int ringsThrough(const int* A, int nA, const int* B, int nB,
+    const int* C, int nC, int skipA, int skipB, int* out, int cap) {
+  int i = 0, j = 0, k = 0, n = 0;
+  while (i < nA && j < nB && k < nC) {
+    const int x = A[i], y = B[j], z = C[k];
+    if (x == y && y == z) {
+      if (x != skipA && x != skipB && n < cap) out[n++] = x;
+      ++i; ++j; ++k;
+      continue;
+    }
+    int lo = x;
+    if (y < lo) lo = y;
+    if (z < lo) lo = z;
+    if (x == lo) ++i;
+    if (y == lo) ++j;
+    if (z == lo) ++k;
+  }
+  return n;
 }
 
 extern "C" __global__ void bin_atoms(const double* xyz, const double* box,
@@ -178,8 +369,41 @@ extern "C" __global__ void nlist_cells(const double* xyz, const double* box,
       }
     }
   }
+  for (int a = 1; a < found; ++a) {
+    const double key = bestR2[a];
+    const int id = bestJ[a];
+    int p = a;
+    while (p > 0 && bestR2[p - 1] > key) {
+      bestR2[p] = bestR2[p - 1];
+      bestJ[p] = bestJ[p - 1];
+      --p;
+    }
+    bestR2[p] = key;
+    bestJ[p] = id;
+  }
   for (int a = 0; a < found; ++a) cols[row + a] = bestJ[a];
   deg[f * nAtoms + i] = found;
+}
+
+extern "C" __global__ void mutual_knn(const int* deg, const int* cols,
+    int nAtoms, int nFrames, int kMax, int* mdeg, int* mcols) {
+  const int tid = blockIdx.x * blockDim.x + threadIdx.x;
+  if (tid >= nAtoms * nFrames) return;
+  const int f = tid / nAtoms;
+  const int i = tid % nAtoms;
+  const int di = deg[f * nAtoms + i];
+  const int take = di < 4 ? di : 4;
+  const int row = (f * nAtoms + i) * kMax;
+  const int mrow = (f * nAtoms + i) * 4;
+  int kept = 0;
+  for (int a = 0; a < take && kept < 4; ++a) {
+    const int j = cols[row + a];
+    if (bonded(deg, cols, f, nAtoms, kMax, j, i)) {
+      mcols[mrow + kept] = j;
+      ++kept;
+    }
+  }
+  mdeg[f * nAtoms + i] = kept;
 }
 
 extern "C" __global__ void qlm_l3(const double* xyz, const double* box,
@@ -199,25 +423,25 @@ extern "C" __global__ void qlm_l3(const double* xyz, const double* box,
   const double ix = xyz[base + i * 3 + 0];
   const double iy = xyz[base + i * 3 + 1];
   const double iz = xyz[base + i * 3 + 2];
-  double re[4] = {0, 0, 0, 0};
-  double im[4] = {0, 0, 0, 0};
+  double re[7] = {0, 0, 0, 0, 0, 0, 0};
+  double im[7] = {0, 0, 0, 0, 0, 0, 0};
   for (int a = 0; a < take; ++a) {
     const int j = cols[row + a];
     double dx = xyz[base + j * 3 + 0] - ix;
     double dy = xyz[base + j * 3 + 1] - iy;
     double dz = xyz[base + j * 3 + 2] - iz;
     minImage(dx, dy, dz, bx, by, bz);
-    y3(dx, dy, dz, re, im);
+    ylm3(dx, dy, dz, re, im);
   }
   if (take > 0) {
     const double inv = 1.0 / (double)take;
-    for (int m = 0; m < 4; ++m) {
+    for (int m = 0; m < 7; ++m) {
       re[m] *= inv;
       im[m] *= inv;
     }
   }
-  const int qrow = (f * nAtoms + i) * 4;
-  for (int m = 0; m < 4; ++m) {
+  const int qrow = (f * nAtoms + i) * 7;
+  for (int m = 0; m < 7; ++m) {
     qre[qrow + m] = re[m];
     qim[qrow + m] = im[m];
   }
@@ -225,7 +449,7 @@ extern "C" __global__ void qlm_l3(const double* xyz, const double* box,
 
 extern "C" __global__ void chill_from_qlm(const int* deg, const int* cols,
     const double* qre, const double* qim, int nAtoms, int nFrames, int kMax,
-    int* chill, int* sixCount) {
+    int* chill) {
   const int tid = blockIdx.x * blockDim.x + threadIdx.x;
   if (tid >= nAtoms * nFrames) return;
   const int f = tid / nAtoms;
@@ -233,17 +457,14 @@ extern "C" __global__ void chill_from_qlm(const int* deg, const int* cols,
   const int take0 = deg[f * nAtoms + i];
   const int take = take0 < 4 ? take0 : 4;
   const int row = (f * nAtoms + i) * kMax;
-  const int qi = (f * nAtoms + i) * 4;
+  const int qi = (f * nAtoms + i) * 7;
   int S = 0;
   int E = 0;
-  int nn[8];
   for (int a = 0; a < take; ++a) {
-    nn[a] = cols[row + a];
-    const int qj = (f * nAtoms + nn[a]) * 4;
-    double num = qre[qi] * qre[qj];
-    double ni = qre[qi] * qre[qi];
-    double nj = qre[qj] * qre[qj];
-    for (int m = 1; m < 4; ++m) {
+    const int j = cols[row + a];
+    const int qj = (f * nAtoms + j) * 7;
+    double num = 0.0, ni = 0.0, nj = 0.0;
+    for (int m = 0; m < 7; ++m) {
       num += qre[qi + m] * qre[qj + m] + qim[qi + m] * qim[qj + m];
       ni += qre[qi + m] * qre[qi + m] + qim[qi + m] * qim[qi + m];
       nj += qre[qj + m] * qre[qj + m] + qim[qj + m] * qim[qj + m];
@@ -258,28 +479,227 @@ extern "C" __global__ void chill_from_qlm(const int* deg, const int* cols,
   else if (S == 3 && E == 1) lab = 2;
   else if (take == 4) lab = 3;
   chill[f * nAtoms + i] = lab;
+}
 
-  int cycles = 0;
-  if (take >= 2) {
-    for (int a = 0; a < take; ++a) {
-      for (int b = a + 1; b < take; ++b) {
-        const int u = nn[a];
-        const int v = nn[b];
-        const int udeg = deg[f * nAtoms + u] < 4 ? deg[f * nAtoms + u] : 4;
-        const int vdeg = deg[f * nAtoms + v] < 4 ? deg[f * nAtoms + v] : 4;
-        const int urow = (f * nAtoms + u) * kMax;
-        const int vrow = (f * nAtoms + v) * kMax;
-        for (int p = 0; p < udeg; ++p) {
-          const int x = cols[urow + p];
-          if (x == i || x == v) continue;
-          for (int q = 0; q < vdeg; ++q) {
-            if (cols[vrow + q] == x) ++cycles;
+extern "C" __global__ void enum_six(const int* mdeg, const int* mcols,
+    int nAtoms, int nFrames, int maxRings, int* nRings, int* ringAtoms,
+    int* dropped) {
+  const int tid = blockIdx.x * blockDim.x + threadIdx.x;
+  if (tid >= nAtoms * nFrames) return;
+  const int f = tid / nAtoms;
+  const int i = tid % nAtoms;
+  const int di = mdeg[f * nAtoms + i];
+  const int irow = (f * nAtoms + i) * 4;
+  for (int ia = 0; ia < di; ++ia) {
+    const int a = mcols[irow + ia];
+    for (int ib = ia + 1; ib < di; ++ib) {
+      const int b = mcols[irow + ib];
+      const int da = mdeg[f * nAtoms + a];
+      const int db = mdeg[f * nAtoms + b];
+      const int arow = (f * nAtoms + a) * 4;
+      const int brow = (f * nAtoms + b) * 4;
+      for (int ix = 0; ix < da; ++ix) {
+        const int x = mcols[arow + ix];
+        if (x == i || x == b) continue;
+        for (int iy = 0; iy < db; ++iy) {
+          const int y = mcols[brow + iy];
+          if (y == i || y == a || y == x) continue;
+          const int dx = mdeg[f * nAtoms + x];
+          const int xrow = (f * nAtoms + x) * 4;
+          for (int iz = 0; iz < dx; ++iz) {
+            const int z = mcols[xrow + iz];
+            if (z == i || z == a || z == b || z == y) continue;
+            if (!bonded(mdeg, mcols, f, nAtoms, 4, z, y)) continue;
+            const int cyc[6] = {i, a, x, z, y, b};
+            int mn = i;
+            for (int t = 1; t < 6; ++t) {
+              if (cyc[t] < mn) mn = cyc[t];
+            }
+            if (mn != i) continue;
+            if (!primitiveSix(cyc, mdeg, mcols, f, nAtoms, 4)) continue;
+            const int slot = atomicAdd(nRings + f, 1);
+            if (slot >= maxRings) {
+              atomicAdd(dropped, 1);
+              continue;
+            }
+            const int dest = (f * maxRings + slot) * 6;
+            for (int t = 0; t < 6; ++t) ringAtoms[dest + t] = cyc[t];
           }
         }
       }
     }
   }
-  sixCount[f * nAtoms + i] = cycles;
+}
+
+extern "C" __global__ void invert_rings(const int* nRings, const int* ringAtoms,
+    int nAtoms, int nFrames, int maxRings, int maxPer, int* throughCount,
+    int* through) {
+  const int tid = blockIdx.x * blockDim.x + threadIdx.x;
+  const int cap = nFrames * maxRings;
+  if (tid >= cap) return;
+  const int f = tid / maxRings;
+  const int r = tid % maxRings;
+  if (r >= nRings[f]) return;
+  const int* ring = ringAtoms + (f * maxRings + r) * 6;
+  for (int t = 0; t < 6; ++t) {
+    const int atom = ring[t];
+    if (atom < 0 || atom >= nAtoms) continue;
+    const int slot = atomicAdd(throughCount + f * nAtoms + atom, 1);
+    if (slot < maxPer) {
+      through[(f * nAtoms + atom) * maxPer + slot] = r;
+    }
+  }
+}
+
+extern "C" __global__ void sort_through(int* throughCount, int* through,
+    int nAtoms, int nFrames, int maxPer) {
+  const int tid = blockIdx.x * blockDim.x + threadIdx.x;
+  if (tid >= nAtoms * nFrames) return;
+  int n = throughCount[tid];
+  if (n > maxPer) n = maxPer;
+  throughCount[tid] = n;
+  int* row = through + tid * maxPer;
+  for (int a = 1; a < n; ++a) {
+    const int key = row[a];
+    int p = a;
+    while (p > 0 && row[p - 1] > key) {
+      row[p] = row[p - 1];
+      --p;
+    }
+    row[p] = key;
+  }
+}
+
+extern "C" __global__ void hc_affil(const int* nRings, const int* ringAtoms,
+    const int* mdeg, const int* mcols, const int* throughCount,
+    const int* through, int nAtoms, int nFrames, int maxRings, int maxPer,
+    int* hc) {
+  const int tid = blockIdx.x * blockDim.x + threadIdx.x;
+  const int cap = nFrames * maxRings;
+  if (tid >= cap) return;
+  const int f = tid / maxRings;
+  const int i = tid % maxRings;
+  if (i >= nRings[f]) return;
+  const int* bi = ringAtoms + (f * maxRings + i) * 6;
+  for (int slot = 0; slot < 2; ++slot) {
+    const int anchor = bi[slot];
+    const int da = mdeg[f * nAtoms + anchor];
+    const int arow = (f * nAtoms + anchor) * 4;
+    for (int n = 0; n < da; ++n) {
+      const int nb = mcols[arow + n];
+      const int nr = throughCount[f * nAtoms + nb];
+      const int* row = through + (f * nAtoms + nb) * maxPer;
+      for (int t = 0; t < nr; ++t) {
+        const int j = row[t];
+        if (j == i) continue;
+        const int* bj = ringAtoms + (f * maxRings + j) * 6;
+        if (shareAtoms(bi, bj)) continue;
+        if (!basalConditions(mdeg, mcols, f, nAtoms, 4, bi, bj)) continue;
+        hc[f * maxRings + i] = 1;
+        hc[f * maxRings + j] = 1;
+        for (int p = 0; p < 6; ++p) {
+          int trip[3];
+          for (int m = 0; m < 3; ++m) trip[m] = bi[(p + m) % 6];
+          const int nA = throughCount[f * nAtoms + trip[0]];
+          const int nB = throughCount[f * nAtoms + trip[1]];
+          const int nC = throughCount[f * nAtoms + trip[2]];
+          const int* A = through + (f * nAtoms + trip[0]) * maxPer;
+          const int* B = through + (f * nAtoms + trip[1]) * maxPer;
+          const int* C = through + (f * nAtoms + trip[2]) * maxPer;
+          int cand[16];
+          const int nc = ringsThrough(A, nA, B, nB, C, nC, i, j, cand, 16);
+          for (int c = 0; c < nc; ++c) {
+            const int k = cand[c];
+            const int* bk = ringAtoms + (f * maxRings + k) * 6;
+            int rest[3];
+            int nrst = 0;
+            for (int u = 0; u < 6; ++u) {
+              if (!inSix(trip, bk[u]) && nrst < 3) rest[nrst++] = bk[u];
+            }
+            if (nrst == 3 && commonCount(rest, bj) == 3) {
+              hc[f * maxRings + k] = 1;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+extern "C" __global__ void ddc_affil(const int* nRings, const int* ringAtoms,
+    const int* throughCount, const int* through, const int* hc,
+    int nAtoms, int nFrames, int maxRings, int maxPer, int* ddc) {
+  const int tid = blockIdx.x * blockDim.x + threadIdx.x;
+  const int cap = nFrames * maxRings;
+  if (tid >= cap) return;
+  const int f = tid / maxRings;
+  const int i = tid % maxRings;
+  if (i >= nRings[f]) return;
+  if (hc[f * maxRings + i]) return;
+  const int* bi = ringAtoms + (f * maxRings + i) * 6;
+  int peri[32];
+  int nPeri = 0;
+  for (int m = 0; m < 6; ++m) {
+    const int atom = bi[m];
+    const int nr = throughCount[f * nAtoms + atom];
+    const int* row = through + (f * nAtoms + atom) * maxPer;
+    int common = 0;
+    for (int t = 0; t < nr; ++t) {
+      if (row[t] == i) continue;
+      ++common;
+      if (nPeri < 32) peri[nPeri++] = row[t];
+    }
+    if (common < 3) return;
+  }
+  int newP[6];
+  for (int k = 0; k < 6; ++k) {
+    int trip[3];
+    for (int t = 0; t < 3; ++t) trip[t] = bi[(k + t) % 6];
+    const int nA = throughCount[f * nAtoms + trip[0]];
+    const int nB = throughCount[f * nAtoms + trip[1]];
+    const int nC = throughCount[f * nAtoms + trip[2]];
+    const int* A = through + (f * nAtoms + trip[0]) * maxPer;
+    const int* B = through + (f * nAtoms + trip[1]) * maxPer;
+    const int* C = through + (f * nAtoms + trip[2]) * maxPer;
+    const int j = firstRingThrough(A, nA, B, nB, C, nC, i, -1);
+    if (j < 0) return;
+    newP[k] = j;
+  }
+  const int* p0 = ringAtoms + (f * maxRings + newP[0]) * 6;
+  const int* p1 = ringAtoms + (f * maxRings + newP[1]) * 6;
+  const int* p2 = ringAtoms + (f * maxRings + newP[2]) * 6;
+  const int* p3 = ringAtoms + (f * maxRings + newP[3]) * 6;
+  const int* p4 = ringAtoms + (f * maxRings + newP[4]) * 6;
+  const int* p5 = ringAtoms + (f * maxRings + newP[5]) * 6;
+  if (!commonInThree(p0, p2, p4)) return;
+  if (!commonInThree(p1, p3, p5)) return;
+  const int* pairs[4][2] = {{p0, p2}, {p1, p3}, {p2, p4}, {p3, p5}};
+  for (int t = 0; t < 4; ++t) {
+    if (commonCount(pairs[t][0], pairs[t][1]) < 3) return;
+  }
+  ddc[f * maxRings + i] = 1;
+  for (int t = 0; t < 6; ++t) ddc[f * maxRings + newP[t]] = 1;
+}
+
+extern "C" __global__ void atom_ice(const int* nRings, const int* ringAtoms,
+    const int* hc, const int* ddc, int nAtoms, int nFrames, int maxRings,
+    int* atomHc, int* atomDdc, int* sixCount) {
+  const int tid = blockIdx.x * blockDim.x + threadIdx.x;
+  const int cap = nFrames * maxRings;
+  if (tid >= cap) return;
+  const int f = tid / maxRings;
+  const int r = tid % maxRings;
+  if (r >= nRings[f]) return;
+  const int* ring = ringAtoms + (f * maxRings + r) * 6;
+  const int isHc = hc[f * maxRings + r];
+  const int isDdc = ddc[f * maxRings + r];
+  for (int t = 0; t < 6; ++t) {
+    const int a = ring[t];
+    if (a < 0 || a >= nAtoms) continue;
+    atomicAdd(sixCount + f * nAtoms + a, 1);
+    if (isHc) atomHc[f * nAtoms + a] = 1;
+    if (isDdc) atomDdc[f * nAtoms + a] = 1;
+  }
 }
 )CUDA";
 
@@ -305,8 +725,6 @@ double msSince(std::chrono::steady_clock::time_point t0) {
       .count();
 }
 
-void *argp(void *p) { return p; }
-
 #endif
 
 } // namespace
@@ -330,17 +748,25 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
   try {
     auto &rt = CUDART::instance();
     const int kMax = out.plan.foot.kMax;
+    const int maxPer = out.plan.foot.maxSixRingsPerAtom;
+    const int maxRings = nAtoms * maxPer;
     const std::size_t n = static_cast<std::size_t>(nAtoms);
     const std::size_t nf = static_cast<std::size_t>(out.plan.frames);
     const std::size_t xyzN = nf * n * 3;
     const std::size_t boxN = nf * 3;
     const std::size_t nN = nf * n;
     const std::size_t colN = nN * static_cast<std::size_t>(kMax);
-    const std::size_t qN = nN * 4;
+    const std::size_t mcolN = nN * 4;
+    const std::size_t qN = nN * 7;
     const std::size_t offN = nf * (n + 1);
+    const std::size_t ringN = nf * static_cast<std::size_t>(maxRings);
+    const std::size_t ringAtomN = ringN * 6;
+    const std::size_t throughN = nN * static_cast<std::size_t>(maxPer);
 
     DevPtr dxyz, dbox, dncell, dcellOf, dcellCount, dcellOff, dorder;
-    DevPtr ddeg, dcols, dqre, dqim, dchill, dsix;
+    DevPtr ddeg, dcols, dmdeg, dmcols, dqre, dqim, dchill;
+    DevPtr dnRings, dringAtoms, ddropped, dthroughCount, dthrough;
+    DevPtr dhc, dddc, datomHc, datomDdc, dsix;
     auto t0 = std::chrono::steady_clock::now();
     checkCuda(rt.cudaMalloc(&dxyz.p, xyzN * sizeof(double)), "xyz");
     checkCuda(rt.cudaMalloc(&dbox.p, boxN * sizeof(double)), "box");
@@ -351,11 +777,30 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
     checkCuda(rt.cudaMalloc(&dorder.p, nN * sizeof(int)), "order");
     checkCuda(rt.cudaMalloc(&ddeg.p, nN * sizeof(int)), "deg");
     checkCuda(rt.cudaMalloc(&dcols.p, colN * sizeof(int)), "cols");
+    checkCuda(rt.cudaMalloc(&dmdeg.p, nN * sizeof(int)), "mdeg");
+    checkCuda(rt.cudaMalloc(&dmcols.p, mcolN * sizeof(int)), "mcols");
     checkCuda(rt.cudaMalloc(&dqre.p, qN * sizeof(double)), "qre");
     checkCuda(rt.cudaMalloc(&dqim.p, qN * sizeof(double)), "qim");
     checkCuda(rt.cudaMalloc(&dchill.p, nN * sizeof(int)), "chill");
+    checkCuda(rt.cudaMalloc(&dnRings.p, nf * sizeof(int)), "nRings");
+    checkCuda(rt.cudaMalloc(&dringAtoms.p, ringAtomN * sizeof(int)), "rings");
+    checkCuda(rt.cudaMalloc(&ddropped.p, sizeof(int)), "dropped");
+    checkCuda(rt.cudaMalloc(&dthroughCount.p, nN * sizeof(int)), "tcount");
+    checkCuda(rt.cudaMalloc(&dthrough.p, throughN * sizeof(int)), "through");
+    checkCuda(rt.cudaMalloc(&dhc.p, ringN * sizeof(int)), "hc");
+    checkCuda(rt.cudaMalloc(&dddc.p, ringN * sizeof(int)), "ddc");
+    checkCuda(rt.cudaMalloc(&datomHc.p, nN * sizeof(int)), "atomHc");
+    checkCuda(rt.cudaMalloc(&datomDdc.p, nN * sizeof(int)), "atomDdc");
     checkCuda(rt.cudaMalloc(&dsix.p, nN * sizeof(int)), "six");
     checkCuda(rt.cudaMemset(dcellCount.p, 0, nN * sizeof(int)), "zero cells");
+    checkCuda(rt.cudaMemset(dnRings.p, 0, nf * sizeof(int)), "zero nRings");
+    checkCuda(rt.cudaMemset(ddropped.p, 0, sizeof(int)), "zero dropped");
+    checkCuda(rt.cudaMemset(dthroughCount.p, 0, nN * sizeof(int)), "zero thru");
+    checkCuda(rt.cudaMemset(dhc.p, 0, ringN * sizeof(int)), "zero hc");
+    checkCuda(rt.cudaMemset(dddc.p, 0, ringN * sizeof(int)), "zero ddc");
+    checkCuda(rt.cudaMemset(datomHc.p, 0, nN * sizeof(int)), "zero atomHc");
+    checkCuda(rt.cudaMemset(datomDdc.p, 0, nN * sizeof(int)), "zero atomDdc");
+    checkCuda(rt.cudaMemset(dsix.p, 0, nN * sizeof(int)), "zero six");
     checkCuda(rt.cudaMemcpy(dxyz.p, xyz, xyzN * sizeof(double),
                             cudaMemcpyHostToDevice),
               "HtoD xyz");
@@ -370,17 +815,28 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
     auto *kPref = factory.create("prefix_cells", kKernels, "batch.cu", opt);
     auto *kScat = factory.create("scatter_atoms", kKernels, "batch.cu", opt);
     auto *kList = factory.create("nlist_cells", kKernels, "batch.cu", opt);
+    auto *kMut = factory.create("mutual_knn", kKernels, "batch.cu", opt);
     auto *kQlm = factory.create("qlm_l3", kKernels, "batch.cu", opt);
     auto *kChill = factory.create("chill_from_qlm", kKernels, "batch.cu", opt);
+    auto *kSix = factory.create("enum_six", kKernels, "batch.cu", opt);
+    auto *kInv = factory.create("invert_rings", kKernels, "batch.cu", opt);
+    auto *kSort = factory.create("sort_through", kKernels, "batch.cu", opt);
+    auto *kHc = factory.create("hc_affil", kKernels, "batch.cu", opt);
+    auto *kDdc = factory.create("ddc_affil", kKernels, "batch.cu", opt);
+    auto *kAtom = factory.create("atom_ice", kKernels, "batch.cu", opt);
 
     const int nTot = nAtoms * out.plan.frames;
     const int block = 128;
     const int grid = (nTot + block - 1) / block;
+    const int ringTot = out.plan.frames * maxRings;
+    const int ringGrid = (ringTot + block - 1) / block;
     const double rc2 = rc * rc;
     t0 = std::chrono::steady_clock::now();
     int nA = nAtoms;
     int nF = out.plan.frames;
     int kM = kMax;
+    int mR = maxRings;
+    int mP = maxPer;
     {
       std::vector<void *> a = {&dxyz.p, &dbox.p, &nA, &nF, (void *)&rc,
                                &dncell.p, &dcellOf.p, &dcellCount.p};
@@ -404,19 +860,58 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
       kList->launch(dim3(grid), dim3(block), 0, nullptr, a, true);
     }
     {
+      std::vector<void *> a = {&ddeg.p, &dcols.p, &nA, &nF, &kM, &dmdeg.p,
+                               &dmcols.p};
+      kMut->launch(dim3(grid), dim3(block), 0, nullptr, a, true);
+    }
+    {
       std::vector<void *> a = {&dxyz.p, &dbox.p, &ddeg.p, &dcols.p, &nA, &nF,
                                &kM, &dqre.p, &dqim.p};
       kQlm->launch(dim3(grid), dim3(block), 0, nullptr, a, true);
     }
     {
       std::vector<void *> a = {&ddeg.p, &dcols.p, &dqre.p, &dqim.p, &nA, &nF,
-                               &kM, &dchill.p, &dsix.p};
+                               &kM, &dchill.p};
       kChill->launch(dim3(grid), dim3(block), 0, nullptr, a, true);
+    }
+    {
+      std::vector<void *> a = {&dmdeg.p, &dmcols.p, &nA, &nF, &mR, &dnRings.p,
+                               &dringAtoms.p, &ddropped.p};
+      kSix->launch(dim3(grid), dim3(block), 0, nullptr, a, true);
+    }
+    {
+      std::vector<void *> a = {&dnRings.p, &dringAtoms.p, &nA, &nF, &mR, &mP,
+                               &dthroughCount.p, &dthrough.p};
+      kInv->launch(dim3(ringGrid), dim3(block), 0, nullptr, a, true);
+    }
+    {
+      std::vector<void *> a = {&dthroughCount.p, &dthrough.p, &nA, &nF, &mP};
+      kSort->launch(dim3(grid), dim3(block), 0, nullptr, a, true);
+    }
+    {
+      std::vector<void *> a = {&dnRings.p, &dringAtoms.p, &dmdeg.p, &dmcols.p,
+                               &dthroughCount.p, &dthrough.p, &nA, &nF, &mR,
+                               &mP, &dhc.p};
+      kHc->launch(dim3(ringGrid), dim3(block), 0, nullptr, a, true);
+    }
+    {
+      std::vector<void *> a = {&dnRings.p, &dringAtoms.p, &dthroughCount.p,
+                               &dthrough.p, &dhc.p, &nA, &nF, &mR, &mP,
+                               &dddc.p};
+      kDdc->launch(dim3(ringGrid), dim3(block), 0, nullptr, a, true);
+    }
+    {
+      std::vector<void *> a = {&dnRings.p, &dringAtoms.p, &dhc.p, &dddc.p, &nA,
+                               &nF, &mR, &datomHc.p, &datomDdc.p, &dsix.p};
+      kAtom->launch(dim3(ringGrid), dim3(block), 0, nullptr, a, true);
     }
     out.computeMs = msSince(t0);
 
     out.chill.assign(nN, 0);
     out.sixCount.assign(nN, 0);
+    out.atomHc.assign(nN, 0);
+    out.atomDdc.assign(nN, 0);
+    out.nRings.assign(nf, 0);
     t0 = std::chrono::steady_clock::now();
     checkCuda(rt.cudaMemcpy(out.chill.data(), dchill.p, nN * sizeof(int),
                             cudaMemcpyDeviceToHost),
@@ -424,6 +919,23 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
     checkCuda(rt.cudaMemcpy(out.sixCount.data(), dsix.p, nN * sizeof(int),
                             cudaMemcpyDeviceToHost),
               "DtoH six");
+    checkCuda(rt.cudaMemcpy(out.atomHc.data(), datomHc.p, nN * sizeof(int),
+                            cudaMemcpyDeviceToHost),
+              "DtoH hc");
+    checkCuda(rt.cudaMemcpy(out.atomDdc.data(), datomDdc.p, nN * sizeof(int),
+                            cudaMemcpyDeviceToHost),
+              "DtoH ddc");
+    checkCuda(rt.cudaMemcpy(out.nRings.data(), dnRings.p, nf * sizeof(int),
+                            cudaMemcpyDeviceToHost),
+              "DtoH nRings");
+    checkCuda(rt.cudaMemcpy(&out.ringsDropped, ddropped.p, sizeof(int),
+                            cudaMemcpyDeviceToHost),
+              "DtoH dropped");
+    for (int &v : out.nRings) {
+      if (v > maxRings) {
+        v = maxRings;
+      }
+    }
     out.downloadMs = msSince(t0);
   } catch (const std::exception &ex) {
     out.error = ex.what();

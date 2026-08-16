@@ -64,13 +64,17 @@ Footprint estimateFootprint(int nAtoms, int nFrames, int kMax,
   const std::size_t r = static_cast<std::size_t>(maxSixRingsPerAtom);
   f.xyzBytes = alignUp(nf * n * 3 * sizeof(double));
   const std::size_t boxBytes = alignUp(nf * 3 * sizeof(double));
-  f.nlistBytes = alignUp(nf * (n + 1) * sizeof(int)) +
-                 alignUp(nf * n * k * sizeof(int));
-  f.ringsBytes = alignUp(nf * (n + 1) * sizeof(int)) +
-                 alignUp(nf * n * r * 6 * sizeof(int));
-  f.labelBytes = alignUp(nf * n * sizeof(int));
-  const std::size_t flags = alignUp(nf * n * 2 * sizeof(int));
-  const std::size_t qlm = alignUp(nf * n * 8 * sizeof(double));
+  f.nlistBytes = alignUp(nf * n * sizeof(int)) * 2 +
+                 alignUp(nf * n * k * sizeof(int)) +
+                 alignUp(nf * n * 4 * sizeof(int));
+  const std::size_t maxRings = n * r;
+  f.ringsBytes = alignUp(nf * maxRings * 6 * sizeof(int)) +
+                 alignUp(nf * sizeof(int)) +
+                 alignUp(nf * n * r * sizeof(int)) +
+                 alignUp(nf * n * sizeof(int));
+  f.labelBytes = alignUp(nf * n * 3 * sizeof(int));
+  const std::size_t flags = alignUp(nf * maxRings * 2 * sizeof(int));
+  const std::size_t qlm = alignUp(nf * n * 14 * sizeof(double));
   const std::size_t cells = alignUp(nf * n * 4 * sizeof(int)) +
                             alignUp(nf * (n + 1) * sizeof(int));
   f.totalBytes = f.xyzBytes + boxBytes + f.nlistBytes + f.ringsBytes +

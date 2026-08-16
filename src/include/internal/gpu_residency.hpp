@@ -31,7 +31,7 @@ struct Footprint {
   int nAtoms = 0;
   int nFrames = 0;
   int kMax = 16;
-  int maxSixRingsPerAtom = 8;
+  int maxSixRingsPerAtom = 16;
   std::size_t xyzBytes = 0;
   std::size_t nlistBytes = 0;
   std::size_t ringsBytes = 0;
@@ -50,13 +50,13 @@ struct Plan {
 DeviceInfo probeDevice();
 
 Footprint estimateFootprint(int nAtoms, int nFrames, int kMax = 16,
-                            int maxSixRingsPerAtom = 8);
+                            int maxSixRingsPerAtom = 16);
 
 int maxResidentFrames(const DeviceInfo &dev, int nAtoms, int kMax = 16,
-                      int maxSixRingsPerAtom = 8, double safety = 0.80);
+                      int maxSixRingsPerAtom = 16, double safety = 0.80);
 
 Plan planBatch(int nAtoms, int requestedFrames, int kMax = 16,
-               int maxSixRingsPerAtom = 8, double safety = 0.80);
+               int maxSixRingsPerAtom = 16, double safety = 0.80);
 
 } // namespace gpu
 
