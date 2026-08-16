@@ -361,6 +361,7 @@ extern "C" __global__ void enum_six(const int* mdeg, const int* mcols,
   const int f = tid / nAtoms;
   const int i = tid % nAtoms;
   const int di = mdeg[f * nAtoms + i];
+  if (di < 2) return;
   const int irow = (f * nAtoms + i) * 4;
   for (int ia = 0; ia < di; ++ia) {
     const int a = mcols[irow + ia];
@@ -442,10 +443,11 @@ extern "C" __global__ void sort_through(int* throughCount, int* through,
   }
 }
 
-extern "C" __global__ void hc_affil(const int* nRings, const int* ringAtoms,
+// Host cageAffiliation: one ordered basal pair, then its prismatics.
+extern "C" __global__ void emit_basal(const int* nRings, const int* ringAtoms,
     const int* mdeg, const int* mcols, const int* throughCount,
     const int* through, int nAtoms, int nFrames, int maxRings, int maxPer,
-    int* hc) {
+    int maxPairs, int* nPairs, int* pairs) {
   const int tid = blockIdx.x * blockDim.x + threadIdx.x;
   const int cap = nFrames * maxRings;
   if (tid >= cap) return;
@@ -467,32 +469,53 @@ extern "C" __global__ void hc_affil(const int* nRings, const int* ringAtoms,
         const int* bj = ringAtoms + (f * maxRings + j) * 6;
         if (shareAtoms(bi, bj)) continue;
         if (!basalConditions(mdeg, mcols, f, nAtoms, 4, bi, bj)) continue;
-        hc[f * maxRings + i] = 1;
-        hc[f * maxRings + j] = 1;
-        for (int p = 0; p < 6; ++p) {
-          int trip[3];
-          for (int m = 0; m < 3; ++m) trip[m] = bi[(p + m) % 6];
-          const int nA = throughCount[f * nAtoms + trip[0]];
-          const int nB = throughCount[f * nAtoms + trip[1]];
-          const int nC = throughCount[f * nAtoms + trip[2]];
-          const int* A = through + (f * nAtoms + trip[0]) * maxPer;
-          const int* B = through + (f * nAtoms + trip[1]) * maxPer;
-          const int* C = through + (f * nAtoms + trip[2]) * maxPer;
-          int cand[16];
-          const int nc = ringsThrough(A, nA, B, nB, C, nC, i, j, cand, 16);
-          for (int c = 0; c < nc; ++c) {
-            const int k = cand[c];
-            const int* bk = ringAtoms + (f * maxRings + k) * 6;
-            int rest[3];
-            int nrst = 0;
-            for (int u = 0; u < 6; ++u) {
-              if (!inSix(trip, bk[u]) && nrst < 3) rest[nrst++] = bk[u];
-            }
-            if (nrst == 3 && commonCount(rest, bj) == 3) {
-              hc[f * maxRings + k] = 1;
-            }
-          }
+        const int slotp = atomicAdd(nPairs + f, 1);
+        if (slotp < maxPairs) {
+          const int p = (f * maxPairs + slotp) * 2;
+          pairs[p] = i;
+          pairs[p + 1] = j;
         }
+      }
+    }
+  }
+}
+
+extern "C" __global__ void apply_hc(const int* nPairs, const int* pairs,
+    const int* ringAtoms, const int* throughCount, const int* through,
+    int nAtoms, int nFrames, int maxRings, int maxPer, int maxPairs, int* hc) {
+  const int tid = blockIdx.x * blockDim.x + threadIdx.x;
+  const int cap = nFrames * maxPairs;
+  if (tid >= cap) return;
+  const int f = tid / maxPairs;
+  const int p = tid % maxPairs;
+  if (p >= nPairs[f]) return;
+  const int i = pairs[(f * maxPairs + p) * 2];
+  const int j = pairs[(f * maxPairs + p) * 2 + 1];
+  hc[f * maxRings + i] = 1;
+  hc[f * maxRings + j] = 1;
+  const int* bi = ringAtoms + (f * maxRings + i) * 6;
+  const int* bj = ringAtoms + (f * maxRings + j) * 6;
+  for (int q = 0; q < 6; ++q) {
+    int trip[3];
+    for (int m = 0; m < 3; ++m) trip[m] = bi[(q + m) % 6];
+    const int nA = throughCount[f * nAtoms + trip[0]];
+    const int nB = throughCount[f * nAtoms + trip[1]];
+    const int nC = throughCount[f * nAtoms + trip[2]];
+    const int* A = through + (f * nAtoms + trip[0]) * maxPer;
+    const int* B = through + (f * nAtoms + trip[1]) * maxPer;
+    const int* C = through + (f * nAtoms + trip[2]) * maxPer;
+    int cand[16];
+    const int nc = ringsThrough(A, nA, B, nB, C, nC, i, j, cand, 16);
+    for (int c = 0; c < nc; ++c) {
+      const int kr = cand[c];
+      const int* bk = ringAtoms + (f * maxRings + kr) * 6;
+      int rest[3];
+      int nrst = 0;
+      for (int u = 0; u < 6; ++u) {
+        if (!inSix(trip, bk[u]) && nrst < 3) rest[nrst++] = bk[u];
+      }
+      if (nrst == 3 && commonCount(rest, bj) == 3) {
+        hc[f * maxRings + kr] = 1;
       }
     }
   }
@@ -606,7 +629,7 @@ struct Workspace {
   DevPtr dxyz, dbox;
   DevPtr ddeg, dcols, dmdeg, dmcols, dqre, dqim, dchill;
   DevPtr dnRings, dringAtoms, ddropped, dthroughCount, dthrough;
-  DevPtr dhc, dddc, datomHc, datomDdc, dsix;
+  DevPtr dhc, dddc, datomHc, datomDdc, dsix, dnPairs, dpairs;
 
   void growOne(DevPtr &d, std::size_t bytes, const char *what) {
     d.reset();
@@ -645,6 +668,9 @@ struct Workspace {
             "through");
     growOne(dhc, nf * maxRings * sizeof(int), "hc");
     growOne(dddc, nf * maxRings * sizeof(int), "ddc");
+    const std::size_t maxPairs = maxRings * 8;
+    growOne(dnPairs, nf * sizeof(int), "nPairs");
+    growOne(dpairs, nf * maxPairs * 2 * sizeof(int), "pairs");
     growOne(datomHc, nN * sizeof(int), "atomHc");
     growOne(datomDdc, nN * sizeof(int), "atomDdc");
     growOne(dsix, nN * sizeof(int), "six");
@@ -704,6 +730,7 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
     checkCuda(rt.cudaMemset(ws.ddropped.p, 0, sizeof(int)), "zero dropped");
     checkCuda(rt.cudaMemset(ws.dthroughCount.p, 0, nN * sizeof(int)), "zero thru");
     checkCuda(rt.cudaMemset(ws.dhc.p, 0, ringN * sizeof(int)), "zero hc");
+    checkCuda(rt.cudaMemset(ws.dnPairs.p, 0, nf * sizeof(int)), "zero nPairs");
     checkCuda(rt.cudaMemset(ws.dddc.p, 0, ringN * sizeof(int)), "zero ddc");
     checkCuda(rt.cudaMemset(ws.datomHc.p, 0, nN * sizeof(int)), "zero atomHc");
     checkCuda(rt.cudaMemset(ws.datomDdc.p, 0, nN * sizeof(int)), "zero atomDdc");
@@ -724,7 +751,8 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
     auto *kSix = factory.create("enum_six", kKernels, "batch.cu", opt);
     auto *kInv = factory.create("invert_rings", kKernels, "batch.cu", opt);
     auto *kSort = factory.create("sort_through", kKernels, "batch.cu", opt);
-    auto *kHc = factory.create("hc_affil", kKernels, "batch.cu", opt);
+    auto *kEmit = factory.create("emit_basal", kKernels, "batch.cu", opt);
+    auto *kHc = factory.create("apply_hc", kKernels, "batch.cu", opt);
     auto *kDdc = factory.create("ddc_affil", kKernels, "batch.cu", opt);
     auto *kAtom = factory.create("atom_ice", kKernels, "batch.cu", opt);
 
@@ -804,10 +832,17 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
       kSort->launch(dim3(grid), dim3(block), 0, nullptr, a, true);
     }
     {
+      int maxPairs = maxRings * 8;
+      const int pairGrid = (nF * maxPairs + block - 1) / block;
       std::vector<void *> a = {&ws.dnRings.p, &ws.dringAtoms.p, &ws.dmdeg.p,
                                &ws.dmcols.p, &ws.dthroughCount.p, &ws.dthrough.p,
-                               &nA, &nF, &mR, &mP, &ws.dhc.p};
-      kHc->launch(dim3(ringGrid), dim3(block), 0, nullptr, a, true);
+                               &nA, &nF, &mR, &mP, &maxPairs, &ws.dnPairs.p,
+                               &ws.dpairs.p};
+      kEmit->launch(dim3(ringGrid), dim3(block), 0, nullptr, a, true);
+      std::vector<void *> b = {&ws.dnPairs.p, &ws.dpairs.p, &ws.dringAtoms.p,
+                               &ws.dthroughCount.p, &ws.dthrough.p, &nA, &nF,
+                               &mR, &mP, &maxPairs, &ws.dhc.p};
+      kHc->launch(dim3(pairGrid), dim3(block), 0, nullptr, b, true);
     }
     {
       std::vector<void *> a = {&ws.dnRings.p, &ws.dringAtoms.p,
