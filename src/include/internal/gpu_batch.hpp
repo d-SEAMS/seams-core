@@ -9,9 +9,9 @@
 /** @file gpu_batch.hpp
  *  @brief Run the analysis of a resident frame batch on the device.
  *
- *  Coordinates for every accepted frame are uploaded once. Neighbour
- *  lists, six-ring incidence and CHILL labels are produced on the
- *  device. Only the labels (and a six-ring count per atom) come back.
+ *  Coordinates for every accepted frame are uploaded once. A linked
+ *  cell list, one \(q_{lm}\) pass and CHILL + 4-NN six-cycles run on
+ *  the device. Only the labels come back.
  */
 
 namespace gpu {
