@@ -50,20 +50,9 @@ bool donatedHydrogenBond(
     }
     const auto ooArr = gen::relDist(yCloud, acceptorIndex, donorIndex);
     std::vector<double> oo = {ooArr[0], ooArr[1], ooArr[2]};
-    std::array<double, 3> ohArr;
-    if (yCloud.box.size() >= 6) {
-      ohArr = gen::triclinicMinImage(
-          yCloud, yCloud.pts[acceptorIndex].x, yCloud.pts[acceptorIndex].y,
-          yCloud.pts[acceptorIndex].z, hCloud.pts[hAtomIndex].x,
-          hCloud.pts[hAtomIndex].y, hCloud.pts[hAtomIndex].z);
-    } else {
-      ohArr = {yCloud.pts[acceptorIndex].x - hCloud.pts[hAtomIndex].x,
-               yCloud.pts[acceptorIndex].y - hCloud.pts[hAtomIndex].y,
-               yCloud.pts[acceptorIndex].z - hCloud.pts[hAtomIndex].z};
-      for (int l = 0; l < 3; l++) {
-        ohArr[l] -= yCloud.box[l] * std::round(ohArr[l] / yCloud.box[l]);
-      }
-    }
+    const auto ohArr = gen::relDistFromPoint(
+        yCloud, acceptorIndex, hCloud.pts[hAtomIndex].x,
+        hCloud.pts[hAtomIndex].y, hCloud.pts[hAtomIndex].z);
     std::vector<double> oh = {ohArr[0], ohArr[1], ohArr[2]};
     if (gen::radDeg(gen::eigenVecAngle(oo, oh)) <= angleCutoff) {
       return true;

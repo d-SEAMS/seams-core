@@ -54,16 +54,7 @@ int main(int argc, char **argv) {
       xyz[static_cast<std::size_t>(i) * 3 + 2] = p.z;
       mask[static_cast<std::size_t>(i)] = p.type == typeI ? 1 : 0;
     }
-#ifdef SEAMS_HAS_LINKCELL
     lc_cell box = nneigh::lammpsBoxToLcCell(cloud.box, cloud.boxLow);
-#else
-    lc_cell box = lc_cell_ortho(cloud.box[0], cloud.box[1], cloud.box[2]);
-    if (cloud.boxLow.size() >= 3) {
-      box.ox = cloud.boxLow[0];
-      box.oy = cloud.boxLow[1];
-      box.oz = cloud.boxLow[2];
-    }
-#endif
     std::vector<int> out(static_cast<std::size_t>(n) * static_cast<std::size_t>(k),
                          -1);
     auto a1 = Clock::now();

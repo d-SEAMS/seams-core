@@ -304,3 +304,38 @@ TEST_CASE("relDist mixed image disagrees with span wrap", "[generic]") {
   REQUIRE_THAT(y1, Catch::Matchers::WithinAbs(-0.660254037844386, 1e-10));
   REQUIRE_THAT(z1, Catch::Matchers::WithinAbs(1.0, 1e-12));
 }
+
+TEST_CASE("relDistFromPoint matches relDist and keeps -L/2", "[generic]") {
+  auto cloud = makeTwoAtomCloud(0.0, 0.0, 0.0, 5.0, 0.0, 0.0, 10.0);
+  const auto drPair = gen::relDist(cloud, 0, 1);
+  const auto drPt =
+      gen::relDistFromPoint(cloud, 0, cloud.pts[1].x, cloud.pts[1].y,
+                            cloud.pts[1].z);
+  REQUIRE_THAT(drPair[0], Catch::Matchers::WithinAbs(-5.0, 1e-12));
+  REQUIRE_THAT(drPt[0], Catch::Matchers::WithinAbs(-5.0, 1e-12));
+  REQUIRE_THAT(drPt[1], Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(drPt[2], Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(gen::unWrappedDistFromPoint(cloud, 0, {5.0, 0.0, 0.0}),
+               Catch::Matchers::WithinAbs(5.0, 1e-12));
+}
+
+TEST_CASE("relDistFromPoint uses dump H on a mixed image", "[generic]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 1;
+  molSys::Point<double> a;
+  a.x = 0.5;
+  a.y = 0.5;
+  a.z = 1.0;
+  cloud.pts.push_back(a);
+  const auto dr =
+      gen::relDistFromPoint(cloud, 0, 1.0, 8.0, 1.0);
+  REQUIRE_THAT(dr[0], Catch::Matchers::WithinAbs(4.5, 1e-10));
+  REQUIRE_THAT(dr[1], Catch::Matchers::WithinAbs(1.160254037844386, 1e-10));
+  REQUIRE_THAT(dr[2], Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(gen::unWrappedDistFromPoint(cloud, 0, {1.0, 8.0, 1.0}),
+               Catch::Matchers::WithinAbs(
+                   std::sqrt(4.5 * 4.5 + 1.160254037844386 * 1.160254037844386),
+                   1e-10));
+}
