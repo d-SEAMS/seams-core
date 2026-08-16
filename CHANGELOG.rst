@@ -5,6 +5,19 @@ Changelog
 Unreleased
 ==========
 
+Version 2.5.0 (2026-08-16)
+===========================
+
+``--family`` (default ``waterIce``) is an input. Ice scores refuse
+non-water families and name the family. ``seams cn --ions`` is cage
+degree on ``site::ionCloud``; ``seams pairs`` is the mutual-nearest
+contact-pair count, not ionicity. ``seams domains`` is the largest
+polar or apolar Stoddard component. ``seams density-z`` is type-resolved
+``rho(z)`` with slab volume from dump H. Running CN and the first
+minimum of ``g_IJ`` come from ``rdf::runningCN`` /
+``firstMinimumBin``. Dump writers emit ``xy, xz, yz`` when the cloud
+carries tilt.
+
 Version 2.4.0 (2026-08-16)
 ===========================
 
