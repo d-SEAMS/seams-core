@@ -25,6 +25,10 @@ BASE_TREE = config["base_tree"]
 BUILD = os.path.abspath(os.environ.get("SEAMS_BUILD_ROOT", "."))
 TIP_BUILD = os.path.join(BUILD, "build-repro")
 BASE_BUILD = os.path.join(BUILD, "build-base")
+YODA_ROOT = os.path.abspath(
+    os.environ.get("YODASTRUCT_ROOT", os.path.join("..", "yodaStruct"))
+)
+YODA_BUILD = os.path.join(BUILD, "build-yoda")
 
 
 def hq(cpus):
@@ -113,7 +117,7 @@ rule install_python:
     output:
         touch(R + "/py-install.done"),
     shell:
-        "python -c 'import pydseams as ds; print(ds.__version__)'"
+        "python -c 'import pydseams as ds; assert ds.__version__ == \"2.6.0\", ds.__version__'"
 
 
 rule build_base:
@@ -353,21 +357,49 @@ rule figshare_fetch:
         "python repro/scripts/figshare_demos.py fetch " + FIGSHARE_DIR
 
 
-rule figshare_demos:
-    # The five example workflows of the 1.0 paper on the exact figshare
-    # deposits they were published with; nonzero exit on any failed demo
+rule build_yoda:
+    # yodaStruct is require("dseams"), not an in-tree seams-core binary.
+    # Point its seams-core wrap at this tip so the Lua module links the
+    # same engine the benches just gated.
     input:
-        gate=R + "/tip-test.log",
+        R + "/tip-test.log",
+    output:
+        touch(R + "/yoda-build.done"),
+    params:
+        hq=lambda wc: hq(8),
+        yoda=YODA_ROOT,
+        bdir=YODA_BUILD,
+        tip=os.path.abspath("."),
+    shell:
+        r"""
+        test -d {params.yoda}/lua || {{ echo "YODASTRUCT_ROOT missing: {params.yoda}" >&2; exit 1; }}
+        mkdir -p {params.yoda}/subprojects
+        if [ -e {params.yoda}/subprojects/seams-core ] && [ ! -L {params.yoda}/subprojects/seams-core ]; then
+          rm -rf {params.yoda}/subprojects/seams-core
+        fi
+        ln -sfn {params.tip} {params.yoda}/subprojects/seams-core
+        meson setup {params.bdir} {params.yoda} --buildtype=release --wrap-mode=nodownload \
+          > repro/results/yoda-setup.log 2>&1
+        {params.hq} meson compile -C {params.bdir}
+        """
+
+
+rule figshare_demos:
+    # The five 1.0 figshare deposits through require("dseams"); nonzero
+    # exit on any failed demo
+    input:
+        yoda=R + "/yoda-build.done",
         traj=expand(FIGSHARE_DIR + "/{f}", f=FIGSHARE_FILES),
     output:
         R + "/figshare-demos/figshare-demos.json",
     params:
         hq=lambda wc: hq(4),
-        tbuild=TIP_BUILD,
+        yoda=YODA_ROOT,
+        bdir=YODA_BUILD,
     shell:
         "{params.hq} bash -c 'OMP_NUM_THREADS=4 "
         "python repro/scripts/figshare_demos.py demos "
-        "{params.tbuild}/yodaStruct " + FIGSHARE_DIR + " "
+        "{params.yoda} {params.bdir} " + FIGSHARE_DIR + " "
         + R + "/figshare-demos'"
 
 
