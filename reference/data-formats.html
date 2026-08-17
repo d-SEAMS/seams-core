@@ -422,10 +422,32 @@ solute) needs an explicit <code class="docutils literal notranslate"><span class
 walks do not rescan prior snapshots. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">--frame</span> <span class="pre">N</span> <span class="pre">--last</span> <span class="pre">M</span> <span class="pre">--jobs</span> <span class="pre">J</span></code> walks that table with one handle per OpenMP worker.
 <code class="docutils literal notranslate"><span class="pre">sinp::dropLammpsDumpIndex</span></code> drops a cached session (tests that
 rewrite a path in place).</p>
-<p>The C++ readers also accept a coordinate slice (<code class="docutils literal notranslate"><span class="pre">isSlice</span></code>,
-<code class="docutils literal notranslate"><span class="pre">coordLow</span></code>, <code class="docutils literal notranslate"><span class="pre">coordHigh</span></code>). An atom is kept when each component lies in
-the closed interval, or when that axis has <code class="docutils literal notranslate"><span class="pre">lo</span> <span class="pre">==</span> <span class="pre">hi</span></code> (ignored). The
-CLI does not expose the slice.</p>
+<p>The two type-filtered C++ readers take the same slice arguments
+(<code class="docutils literal notranslate"><span class="pre">isSlice</span></code>, <code class="docutils literal notranslate"><span class="pre">coordLow</span></code>, <code class="docutils literal notranslate"><span class="pre">coordHigh</span></code>) and do not keep the same atoms.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>reader</p></th>
+<th class="head"><p>keep</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">readLammpsTrjO</span></code></p></td>
+<td><p>Every atom of the requested type. <code class="docutils literal notranslate"><span class="pre">isSlice</span></code> sets <code class="docutils literal notranslate"><span class="pre">inSlice</span></code> on each point and does not drop. <code class="docutils literal notranslate"><span class="pre">nop</span></code> is the type-filtered count. The <code class="docutils literal notranslate"><span class="pre">O</span></code> in the name is historical; the type argument is any LAMMPS type.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">readLammpsTrjreduced</span></code></p></td>
+<td><p>Atoms of the requested type that pass the slice, or every atom of that type when <code class="docutils literal notranslate"><span class="pre">isSlice</span></code> is false. <code class="docutils literal notranslate"><span class="pre">nop</span></code> is the kept count.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>An axis is inside the box when the coordinate lies in the closed
+interval, or when that axis has <code class="docutils literal notranslate"><span class="pre">lo</span> <span class="pre">==</span> <span class="pre">hi</span></code> (unconstrained).
+<code class="docutils literal notranslate"><span class="pre">([0,0,0],</span> <span class="pre">[50,0,0])</span></code> is <code class="docutils literal notranslate"><span class="pre">x</span></code> in <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">50]</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">z</span></code> open.</p>
+<p>The CLI does not expose the slice. Python
+<code class="docutils literal notranslate"><span class="pre">Frame(...,</span> <span class="pre">region=(lo,</span> <span class="pre">hi))</span></code> calls <code class="docutils literal notranslate"><span class="pre">readLammpsTrjreduced</span></code>. Lua
+<code class="docutils literal notranslate"><span class="pre">dseams.read</span></code> calls <code class="docutils literal notranslate"><span class="pre">readLammpsTrjO</span></code> and has no region; a shrinking
+read is <code class="docutils literal notranslate"><span class="pre">dseams.core.readLammpsTrjreduced</span></code>.</p>
 </section>
 <section id="xyz">
 <h2>XYZ<a class="headerlink" href="#xyz" title="Link to this heading">¶</a></h2>

@@ -151,10 +151,27 @@ walks do not rescan prior snapshots. ``seams --frame N --last M --jobs J`` walks
 ``sinp::dropLammpsDumpIndex`` drops a cached session (tests that
 rewrite a path in place).
 
-The C++ readers also accept a coordinate slice (``isSlice``,
-``coordLow``, ``coordHigh``). An atom is kept when each component lies in
-the closed interval, or when that axis has ``lo == hi`` (ignored). The
-CLI does not expose the slice.
+The two type-filtered C++ readers take the same slice arguments
+(``isSlice``, ``coordLow``, ``coordHigh``) and do not keep the same atoms.
+
+.. table::
+
+    +--------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | reader                   | keep                                                                                                                                                                                                           |
+    +==========================+================================================================================================================================================================================================================+
+    | ``readLammpsTrjO``       | Every atom of the requested type. ``isSlice`` sets ``inSlice`` on each point and does not drop. ``nop`` is the type-filtered count. The ``O`` in the name is historical; the type argument is any LAMMPS type. |
+    +--------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | ``readLammpsTrjreduced`` | Atoms of the requested type that pass the slice, or every atom of that type when ``isSlice`` is false. ``nop`` is the kept count.                                                                              |
+    +--------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+An axis is inside the box when the coordinate lies in the closed
+interval, or when that axis has ``lo == hi`` (unconstrained).
+``([0,0,0], [50,0,0])`` is ``x`` in ``[0, 50]``, ``y`` and ``z`` open.
+
+The CLI does not expose the slice. Python
+``Frame(..., region=(lo, hi))`` calls ``readLammpsTrjreduced``. Lua
+``dseams.read`` calls ``readLammpsTrjO`` and has no region; a shrinking
+read is ``dseams.core.readLammpsTrjreduced``.
 
 XYZ
 ---

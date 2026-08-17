@@ -204,7 +204,7 @@ only by ``cages``.
     +===========+===========================================================================================================+=========================================================================================+
     | ``0``     | LAMMPS: type 2, then type 1 if that cloud is empty. chemfiles: keep every atom. XYZ: every atom is type 1 | LAMMPS: every atom (``sinp::readLammpsTrj``). Classification uses ``cloud.pts[0].type`` |
     +-----------+-----------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+
-    | ``I > 0`` | LAMMPS ``readLammpsTrjO`` / chemfiles filter ``I``                                                        | LAMMPS ``readLammpsTrjO`` with that type                                                |
+    | ``I > 0`` | LAMMPS ``readLammpsTrjO`` / chemfiles filter ``I``                                                        | LAMMPS ``readLammpsTrjO`` with that type. The CLI does not pass a coordinate slice.     |
     +-----------+-----------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+
 
 XYZ always stores type 1. Classification still uses ``--type`` after
