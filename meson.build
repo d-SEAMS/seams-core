@@ -49,9 +49,22 @@ _deps += m_dep
 eigen_dep = dependency('eigen3', version: '>=3.4.0', required: true)
 _deps += [eigen_dep]
 
-blas_dep = cppc.find_library('blas', required: true)
-lapack_dep = cppc.find_library('lapack', required: true)
-_deps += [blas_dep, lapack_dep]
+# Prefer FlexiBLAS (one wrapper for BLAS and LAPACK). The conda-forge
+# ABI packages still provide libblas/liblapack; those are the fallback
+# when pkg-config does not find FlexiBLAS.
+flexiblas_dep = dependency('flexiblas', required: false)
+if not flexiblas_dep.found()
+  flexiblas_dep = cppc.find_library('flexiblas', required: false)
+endif
+if flexiblas_dep.found()
+  _deps += flexiblas_dep
+  blas_backend = 'flexiblas'
+else
+  blas_dep = cppc.find_library('blas', required: true)
+  lapack_dep = cppc.find_library('lapack', required: true)
+  _deps += [blas_dep, lapack_dep]
+  blas_backend = 'blas+lapack'
+endif
 
 # Shared-memory parallelism. libstdc++ routes std::execution::par through TBB,
 # which conda-forge does not put in this environment, so a build relying on it
@@ -338,6 +351,7 @@ endif
 # formats are simply absent from the library, with nothing at run time
 # to say so.
 summary({
+  'BLAS/LAPACK': blas_backend,
   'SIMD distance kernel (hwy)': hwy_dep.found(),
   'Shared-memory parallelism (OpenMP)': openmp_found,
   'MPI atom split (Steinhardt)': mpi_found,

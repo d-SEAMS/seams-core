@@ -12,6 +12,8 @@ dependencies:
   - catch2
   - liblapack
   - libblas
+  # Meson prefers FlexiBLAS when pkg-config finds it. These two are
+  # the conda-forge ABI packages (no FlexiBLAS build on that channel).
   - boost-cpp
   - cmake
   - meson
