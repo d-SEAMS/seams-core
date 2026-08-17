@@ -771,17 +771,17 @@ sinp::readLammpsTrj(std::string filename, int targetFrame,
 }
 
 /**
- * @details Function for reading in a lammps file; and saves only the Oxygen
- * atoms. This is an overloaded function. The Oxygen atom ID must be specified.
+ * @details One LAMMPS dump frame, one atom type. The type argument is
+ *  any LAMMPS type (the O in the name is historical). isSlice sets
+ *  inSlice and does not drop atoms. nop is the type-filtered count.
  * @param[in] filename The name of the lammps trajectory file to be read in
  * @param[in] targetFrame The frame number whose information will be read in
  * @param[out] yCloud The outputted PointCloud
- * @param[in] typeO The type ID of the Oxygen atoms
- * @param[in] isSlice This decides whether a slice will be created or not
- * @param[in] coordLow Contains the lower limits of the slice, if a slice is to
- *  be created
- * @param[in] coordHigh Contains the upper limits of the slice, if a slice is
- *  to be created
+ * @param[in] typeO The LAMMPS type ID to keep
+ * @param[in] isSlice If true, set inSlice from the box; do not drop
+ * @param[in] coordLow Lower limits of the slice. An axis with lo == hi
+ *  is unconstrained.
+ * @param[in] coordHigh Upper limits of the slice
  */
 molSys::PointCloud<molSys::Point<double>, double>
 sinp::readLammpsTrjO(std::string filename, int targetFrame,
@@ -794,19 +794,16 @@ sinp::readLammpsTrjO(std::string filename, int targetFrame,
 }
 
 /**
- * @details Function for reading in a lammps file; and saves only the atoms of
- * the desired type. Atoms which are not inside the slice or not of type I are
- * not saved at all This is an overloaded function. The type atom ID must be
- *  specified.
+ * @details One LAMMPS dump frame, one atom type, dropping atoms
+ *  outside the slice when isSlice is true. nop is the kept count.
  * @param[in] filename The name of the lammps trajectory file to be read in
  * @param[in] targetFrame The frame number whose information will be read in
  * @param[out] yCloud The outputted PointCloud
- * @param[in] typeI The type ID of the desired type of atoms
- * @param[in] isSlice This decides whether a slice will be created or not
- * @param[in] coordLow Contains the lower limits of the slice, if a slice is to
- *  be created
- *  @param[in] coordHigh Contains the upper limits of the slice, if a slice is
- *  to be created
+ * @param[in] typeI The LAMMPS type ID to keep
+ * @param[in] isSlice If true, drop atoms outside the box
+ * @param[in] coordLow Lower limits of the slice. An axis with lo == hi
+ *  is unconstrained.
+ * @param[in] coordHigh Upper limits of the slice
  */
 molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
     std::string filename, int targetFrame,
