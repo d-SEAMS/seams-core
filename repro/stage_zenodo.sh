@@ -22,5 +22,13 @@ if [ -d "$SRC/figshare-demos" ]; then
   mkdir -p "$DST/figshare-demos"
   cp -a "$SRC/figshare-demos/"*.json "$DST/figshare-demos/" 2>/dev/null || true
 fi
-find "$DST" -type f | sort > "$DST/MANIFEST"
+# Exclusive-node identity for GPU and v1 bars the paper cites
+for f in \
+  "$ROOT/repro/reference/gpu-conditions-elja-1787449.txt" \
+  "$ROOT/repro/reference/tip-gpu-batch-elja-1787449.txt" \
+  "$ROOT/repro/reference/conditions-elja-1785712.txt"
+do
+  [ -f "$f" ] && cp -a "$f" "$DST/"
+done
+(cd "$DST" && find . -type f ! -name MANIFEST | sed 's|^\./||' | sort > MANIFEST)
 echo "staged $DST ($(wc -l < "$DST/MANIFEST") files)"
