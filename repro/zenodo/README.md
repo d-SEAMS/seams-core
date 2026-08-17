@@ -16,9 +16,12 @@ payload. Pin the software to a release tag, not a commit.
 | `tip-stages-*.txt` | per-stage times on cubic and nucleation frames |
 | `config.yaml` | sizes, reps, baseline SHA |
 | `Snakefile` | the DAG that produced the files |
+| `figshare-demos/` | the five v1 deposits through `require("dseams")` |
+| `figshare-incremental.json` | per-frame incremental rings and seeded labels |
 
-Fill `payload/` from `repro/results/` after `repro/terra_submit.sh run`
-exits 0. The driver is `repro/stage_zenodo.sh`.
+Fill `payload/` from `repro/results/` after `repro/elja_submit.sh run`
+exits 0. The driver is `repro/stage_zenodo.sh`. Pin the software
+in the record to a release tag (`v2.6.0`), not a commit.
 
 ## What this is not
 
