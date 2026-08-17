@@ -5,6 +5,16 @@ Changelog
 Unreleased
 ==========
 
+Version 2.6.0 (2026-08-17)
+===========================
+
+Meson links FlexiBLAS when pkg-config or libflexiblas is present,
+and falls back to the conda-forge libblas/liblapack ABI packages.
+The reproducibility campaign no longer configures in-tree Python;
+bindings come from pydseamslib on PyPI. The nucleation notebook
+reads CageScore fields. Figshare Lua demos resolve example_lua
+from yodaStruct.
+
 Version 2.5.0 (2026-08-16)
 ===========================
 

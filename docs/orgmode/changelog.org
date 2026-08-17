@@ -7,6 +7,15 @@ The C++ engine is this repository. Python is ~pydseams~
 
 * Unreleased
 
+* 2.6.0
+
+Meson links FlexiBLAS when pkg-config or ~libflexiblas~ is present,
+and falls back to the conda-forge ~libblas~ / ~liblapack~ ABI
+packages. The reproducibility campaign no longer configures in-tree
+Python; bindings come from ~pydseamslib~ on PyPI. The nucleation
+notebook reads ~CageScore~ fields. Figshare Lua demos resolve
+~example_lua~ from yodaStruct.
+
 * 2.5.0
 
 ~--family~ (default ~waterIce~) is an input. Ice scores refuse
