@@ -167,6 +167,7 @@ jupytext = ">=1.16"
 ipykernel = ">=6.0"
 papermill = ">=2.4"
 matplotlib-base = ">=3.8"
+lua = ">=5.4,<5.5"
 
 [feature.repro.pypi-dependencies]
 snakemake = ">=8.0"

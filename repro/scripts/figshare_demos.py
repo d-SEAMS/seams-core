@@ -5,13 +5,14 @@ The d-SEAMS 1.0 paper (10.1021/acs.jcim.0c00031) demonstrated on five
 LAMMPS trajectories archived in the figshare project "d-SEAMS Datasets"
 (https://figshare.com/projects/d-SEAMS_Datasets/73545). This script
 fetches those exact deposits (MD5-verified against figshare's records)
-and runs each corresponding published example workflow, unmodified,
-with the current yoda binary.
+and runs each corresponding analysis through require("dseams") in
+yodaStruct.
 
 Subcommands (all paths relative to the repository root):
 
   fetch <trajdir>                       download + verify the deposits
-  demos <yoda> <trajdir> <outdir>       run the five example workflows (Lua CLI)
+  demos <yoda_src> <yoda_build> <trajdir> <outdir>
+                                        run the five deposits via require("dseams")
 
 The Python-bindings demonstrations live as percent-format notebooks
 under repro/notebooks/; jupytext converts them and papermill executes
@@ -21,7 +22,7 @@ import hashlib
 import json
 import os
 import pathlib
-import re
+import shutil
 import subprocess
 import sys
 import time
@@ -84,48 +85,26 @@ def example_lua_root():
     )
 
 
-# Each demo pairs a figshare trajectory with the example workflow that
-# consumed it in the 1.0 paper. The example_lua trees live in
-# https://github.com/d-SEAMS/yodaStruct . frame="last" retargets the
-# workflow at the final frame of the deposit (the crystallized end of
-# the nucleation run); frame=None keeps the example's own frame settings.
+# Each demo pairs a figshare trajectory with the 2.x Lua library
+# (require("dseams")). frame="last" is the crystallized end of the
+# nucleation run.
 DEMOS = [
-    {
-        "key": "chillPlus",
-        "config": "example_lua/chillPlus/config.yml",
-        "vars": "example_lua/chillPlus/iceType/vars.lua",
-        "traj": "chillplus",
-        "frame": None,
-    },
-    {
-        "key": "bulkTopologicalCriterion",
-        "config": "example_lua/bulkTopologicalCriterion/config.yml",
-        "vars": "example_lua/bulkTopologicalCriterion/iceType/vars.lua",
-        "traj": "nucleation",
-        "frame": "last",
-    },
-    {
-        "key": "iceNanotube",
-        "config": "example_lua/iceNanotube/strictCriterion/config.yml",
-        "vars": "example_lua/iceNanotube/strictCriterion/iceType/vars.lua",
-        "traj": "nanotube",
-        "frame": None,
-    },
-    {
-        "key": "monolayer",
-        "config": "example_lua/monolayer/config.yml",
-        "vars": "example_lua/monolayer/iceType/vars.lua",
-        "traj": "monolayer",
-        "frame": None,
-    },
-    {
-        "key": "rdf2D",
-        "config": "example_lua/rdf2D-example/config.yml",
-        "vars": "example_lua/rdf2D-example/iceType/vars.lua",
-        "traj": "rdf2d",
-        "frame": None,
-    },
+    {"key": "chillPlus", "traj": "chillplus", "frame": 1},
+    {"key": "bulkTopologicalCriterion", "traj": "nucleation", "frame": "last"},
+    {"key": "iceNanotube", "traj": "nanotube", "frame": 1},
+    {"key": "monolayer", "traj": "monolayer", "frame": 1},
+    {"key": "rdf2D", "traj": "rdf2d", "frame": 1},
 ]
+
+SCRIPT = pathlib.Path(__file__).resolve().parent.parent / "lua" / "figshare_demo.lua"
+
+
+def find_lua():
+    for name in ("lua5.4", "lua-5.4", "lua5.3", "lua"):
+        path = shutil.which(name)
+        if path:
+            return path
+    raise FileNotFoundError("lua 5.3/5.4 not on PATH; add lua to the repro env")
 
 def md5sum(path):
     h = hashlib.md5()
@@ -168,48 +147,12 @@ def count_frames(path):
     return n
 
 
-def patch_demo(demo, trajdir, rundir):
-    """Write the patched vars.lua and config.yml for one demo; return the
-    config path and the frame count of its trajectory."""
-    traj = (pathlib.Path(trajdir) / FILES[demo["traj"]]["name"]).resolve()
-    frames = count_frames(traj)
-    outrun = rundir / "run"
-    outrun.mkdir(parents=True, exist_ok=True)
-
-    lua_root = example_lua_root()
-    vtext = (lua_root / demo["vars"]).read_text()
-    vtext = re.sub(
-        r"^outDir\s*=.*$",
-        f'outDir="{outrun}/";',
-        vtext,
-        flags=re.M,
-    )
-    if demo["frame"] == "last":
-        vtext = re.sub(
-            r"^targetFrame\s*=.*$", f"targetFrame={frames};", vtext, flags=re.M
-        )
-        vtext = re.sub(
-            r"^finalFrame\s*=.*$", f"finalFrame={frames};", vtext, flags=re.M
-        )
-    vpath = rundir / "vars.lua"
-    vpath.write_text(vtext)
-
-    ctext = (lua_root / demo["config"]).read_text()
-    ctext = re.sub(
-        r'^trajectory:.*$', f'trajectory: "{traj}"', ctext, flags=re.M
-    )
-    ctext = re.sub(
-        r'^variables:.*$', f'variables: "{vpath}"', ctext, flags=re.M
-    )
-    cpath = rundir / "config.yml"
-    cpath.write_text(ctext)
-    return cpath, frames
-
-
 def summarize_run(outrun):
     """Inventory the files a demo produced; keep the last line of small
     text outputs so the manifest carries the headline numbers."""
     out = {}
+    if not outrun.is_dir():
+        return out
     for p in sorted(outrun.rglob("*")):
         if not p.is_file():
             continue
@@ -224,18 +167,37 @@ def summarize_run(outrun):
     return out
 
 
-def demos(yoda, trajdir, outdir):
+def demos(yoda_src, yoda_build, trajdir, outdir):
     outdir = pathlib.Path(outdir)
+    yoda_src = pathlib.Path(yoda_src).resolve()
+    yoda_build = pathlib.Path(yoda_build).resolve()
+    so = yoda_build / "dseams_core.so"
+    if not so.is_file():
+        sys.exit(f"missing {so}; build yodaStruct first")
+    if not SCRIPT.is_file():
+        sys.exit(f"missing {SCRIPT}")
+    lua = find_lua()
+    env = os.environ.copy()
+    env["LUA_PATH"] = str(yoda_src / "lua" / "?.lua") + ";;"
+    env["LUA_CPATH"] = str(yoda_build / "?.so") + ";;"
     results = {}
     for demo in DEMOS:
         key = demo["key"]
         rundir = outdir / key
-        cpath, frames = patch_demo(demo, trajdir, rundir)
+        rundir.mkdir(parents=True, exist_ok=True)
+        traj = (pathlib.Path(trajdir) / FILES[demo["traj"]]["name"]).resolve()
+        frames = count_frames(traj)
+        frame = frames if demo["frame"] == "last" else int(demo["frame"])
+        env["FIGSHARE_TRAJ"] = str(traj)
+        env["FIGSHARE_OUTDIR"] = str(rundir)
+        env["FIGSHARE_FRAME"] = str(frame)
         t0 = time.perf_counter()
         proc = subprocess.run(
-            [yoda, "-c", str(cpath)],
+            [lua, str(SCRIPT), key],
             capture_output=True,
             text=True,
+            env=env,
+            cwd=str(yoda_src),
         )
         secs = time.perf_counter() - t0
         (rundir / "stdout.log").write_text(proc.stdout)
@@ -244,12 +206,16 @@ def demos(yoda, trajdir, outdir):
             "trajectory": FILES[demo["traj"]]["name"],
             "doi": FILES[demo["traj"]]["doi"],
             "frames_in_deposit": frames,
+            "frame": frame,
             "returncode": proc.returncode,
             "seconds": round(secs, 2),
-            "outputs": summarize_run(rundir / "run"),
+            "stdout": proc.stdout.strip(),
+            "outputs": summarize_run(rundir),
         }
         status = "ok" if proc.returncode == 0 else f"rc={proc.returncode}"
         print(f"{key}: {status} in {secs:.1f}s", flush=True)
+        if proc.returncode != 0:
+            print(proc.stderr, file=sys.stderr)
     (outdir / "figshare-demos.json").write_text(
         json.dumps(results, indent=2, sort_keys=True) + "\n"
     )
@@ -262,8 +228,8 @@ def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
     if cmd == "fetch" and len(sys.argv) == 3:
         fetch(sys.argv[2])
-    elif cmd == "demos" and len(sys.argv) == 5:
-        demos(sys.argv[2], sys.argv[3], sys.argv[4])
+    elif cmd == "demos" and len(sys.argv) == 6:
+        demos(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
     else:
         sys.exit(__doc__)
 

@@ -49,10 +49,11 @@ Datasets](https://figshare.com/projects/d-SEAMS_Datasets/73545). The DAG
 fetches those exact deposits (MD5-verified against figshare's records,
 `repro/scripts/figshare_demos.py`) and demonstrates on them twice over:
 
-- The published Lua workflows run unmodified with the current binary
-  (CHILL+ on the Ic lattice, the bulk topological criterion on the
-  crystallized end of the nucleation run, the quasi-one-dimensional
-  nanotube, the monolayer, and the in-plane 2D RDF).
+- The same five deposits run through `require("dseams")` in yodaStruct
+  (CHILL+ on the Ic lattice, cage affiliation on the crystallized end
+  of the nucleation run, prism analysis on the nanotube, ring analysis
+  on the monolayer, and the O--O RDF on the confined sheet). The 2020
+  `yodaStruct -c` driver is not in this tree.
 - The percent-format notebooks under `repro/notebooks/` rerun the same
   analyses through the `pydseamslib` Python bindings. Jupytext converts
   each source to ipynb and papermill executes it; execution is the
