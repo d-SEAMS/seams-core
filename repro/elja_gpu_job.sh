@@ -72,7 +72,7 @@ if ! grep -q '^resident yes$' "$OUT/tip-gpu-batch.txt"; then
   echo "device batch did not reside" >&2
   exit 1
 fi
-$NSYS stats --report cuda_gpu_kern_sum --report cuda_api_sum \
+$NSYS stats --force-export=true --report cuda_gpu_kern_sum --report cuda_api_sum \
   --report cuda_gpu_mem_time_sum \
   "$OUT/tip-gpu-nsys.nsys-rep" | tee "$OUT/tip-gpu-nsys-stats.txt"
 echo DONE

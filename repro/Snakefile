@@ -230,7 +230,7 @@ rule tip_strong:
     output:
         R + "/tip-strong-t{threads}.txt",
     params:
-        hq=lambda wc: hq(4),
+        hq=lambda wc: hq(int(wc.threads)),
         tbuild=TIP_BUILD,
         atoms=config["strong_atoms"],
     shell:

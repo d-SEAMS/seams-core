@@ -99,9 +99,17 @@ def parse_overhead(text):
 
 def parse_strong(text):
     for line in text.splitlines():
-        m = re.match(r"\s*(\d+)\s+\d+\s+\d+\s+\d+\s+([\d.]+)\s+([\d.]+)", line)
+        m = re.match(
+            r"\s*(\d+)\s+\d+\s+\d+\s+\d+\s+([\d.]+)\s+([\d.]+)"
+            r"(?:\s+([\d.]+)\s+([\d.]+))?",
+            line,
+        )
         if m:
-            return {"neigh_ms": float(m.group(2)), "ql_ms": float(m.group(3))}
+            row = {"neigh_ms": float(m.group(2)), "ql_ms": float(m.group(3))}
+            if m.group(4) is not None:
+                row["index_ms"] = float(m.group(4))
+                row["rings_ms"] = float(m.group(5))
+            return row
     return None
 
 

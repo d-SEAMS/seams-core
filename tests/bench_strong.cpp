@@ -3,9 +3,10 @@
 **
 ** SPDX-License-Identifier: MIT
 **
-** Strong scaling of the Steinhardt kernel at fixed N. Neighbour-list
-** construction is timed separately and is still replicated on every rank;
-** do not read a drop in t_neigh as an MPI or GPU win.
+** Strong scaling of the Steinhardt kernel and of primitive rings at
+** fixed N. Neighbour-list construction is timed separately and is
+** still replicated on every rank; do not read a drop in t_neigh as an
+** MPI or GPU win.
 **
 **   bench_strong [nAtoms] [reps]
 **
@@ -14,6 +15,7 @@
 */
 
 #include <bop.hpp>
+#include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 
@@ -118,16 +120,29 @@ int main(int argc, char **argv) {
       },
       reps);
 
+  std::vector<std::vector<int>> byIndex;
+  const double tIndex = bestMillis(
+      [&]() { byIndex = nneigh::getNewNeighbourListByIndex(cloud, 3.5); },
+      reps);
+  const double tRings = bestMillis(
+      [&]() {
+        volatile auto rings = primitive::ringNetwork(byIndex, 6);
+        (void)rings;
+      },
+      reps);
+
   if (rank == 0) {
     std::cout << std::left << std::setw(10) << "nAtoms" << std::setw(8)
               << "ranks" << std::setw(8) << "thr" << std::setw(8) << "devs"
               << std::setw(16) << "neigh/ms" << std::setw(16) << "ql/ms"
+              << std::setw(16) << "index/ms" << std::setw(16) << "rings/ms"
               << "\n";
     std::cout << std::left << std::setw(10) << nAtoms << std::setw(8) << nranks
               << std::setw(8) << nThreads << std::setw(8) << nDevices
               << std::setw(16) << std::fixed << std::setprecision(3) << tNeigh
-              << std::setw(16) << tQl << "\n";
-    std::cout << "# neigh is replicated on every rank; only ql is split\n";
+              << std::setw(16) << tQl << std::setw(16) << tIndex
+              << std::setw(16) << tRings << "\n";
+    std::cout << "# neigh and index are replicated; ql and rings are threaded\n";
   }
 
 #ifdef SEAMS_HAS_MPI
