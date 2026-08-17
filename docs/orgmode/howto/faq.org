@@ -8,8 +8,8 @@
 * Where is Python?
 
 [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
-~pip install pydseams~. ~import pydseamslib~ is an alias of
-~pydseams~. The compiled module is ~yoda~.
+~pip install pydseamslib~. ~import pydseams~. ~import pydseamslib~
+is an alias. The compiled module is ~yoda~.
 
 * Where is Lua / Fennel?
 
