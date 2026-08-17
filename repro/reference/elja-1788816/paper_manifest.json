@@ -1,0 +1,438 @@
+{
+  "base": {
+    "cages": {
+      "atoms": 4096.0,
+      "findDDC/ms": 3753.89,
+      "findHC/ms": 3472.99,
+      "nCages": 1955.0,
+      "nDDCrings": 8192.0,
+      "nHCrings": 0.0,
+      "ringNetwork/ms": 128.963,
+      "rings": 8192.0,
+      "six-rings": 8192.0
+    },
+    "scaling": {
+      "1000": {
+        "byIndex_ms": 8.505,
+        "getCorrelPlus_ms": 4.369,
+        "neighListO_ms": 3.574,
+        "ringNetwork_ms": 147.586
+      },
+      "2000": {
+        "byIndex_ms": 27.927,
+        "getCorrelPlus_ms": 9.201,
+        "neighListO_ms": 7.178,
+        "ringNetwork_ms": 394.11
+      },
+      "4000": {
+        "byIndex_ms": 95.603,
+        "getCorrelPlus_ms": 13.939,
+        "neighListO_ms": 17.18,
+        "ringNetwork_ms": 574.599
+      },
+      "8000": {
+        "byIndex_ms": 382.121,
+        "getCorrelPlus_ms": 27.541,
+        "neighListO_ms": 62.076,
+        "ringNetwork_ms": 939.79
+      },
+      "16000": {
+        "byIndex_ms": 1463.501,
+        "getCorrelPlus_ms": 57.391,
+        "neighListO_ms": 219.518,
+        "ringNetwork_ms": 3514.453
+      },
+      "32000": {
+        "byIndex_ms": 5781.608,
+        "getCorrelPlus_ms": 107.495,
+        "neighListO_ms": 838.21,
+        "ringNetwork_ms": 4359.508
+      }
+    }
+  },
+  "conditions": {
+    "Core(s) per socket": "32",
+    "Model name": "Intel(R) Xeon(R) Platinum 8358 CPU @ 2.60GHz",
+    "Socket(s)": "2",
+    "Thread(s) per core": "2",
+    "base_sha": "1c8efa382c4ae88ebc68e40a991260c4d57edbd5",
+    "hostname": "compute-41",
+    "hq": "hyperqueue v0.19.0",
+    "jobid": "1787775",
+    "loadavg_at_start": "8.29",
+    "partition": "64cpu_256mem",
+    "tip_sha": "unknown"
+  },
+  "figshare": {
+    "demos": {
+      "bulkTopologicalCriterion": {
+        "doi": "10.6084/m9.figshare.11448702.v1",
+        "frame": 148,
+        "frames_in_deposit": 148,
+        "returncode": 0,
+        "seconds": 0.27,
+        "stdout": "demo=bulkTopologicalCriterion frame=148 n_ddc=712 n_hc=632 nop=4096",
+        "trajectory": "nucleation.lammpstrj"
+      },
+      "chillPlus": {
+        "doi": "10.6084/m9.figshare.11448720.v1",
+        "frame": 1,
+        "frames_in_deposit": 11,
+        "returncode": 0,
+        "seconds": 0.32,
+        "stdout": "demo=chillPlus cubic=4096 n_ddc=4096 n_hc=0 nop=4096",
+        "trajectory": "mW_cubic.lammpstrj"
+      },
+      "iceNanotube": {
+        "doi": "10.6084/m9.figshare.11448768.v1",
+        "frame": 1,
+        "frames_in_deposit": 251,
+        "returncode": 0,
+        "seconds": 0.03,
+        "stdout": "demo=iceNanotube n_rings=427 nop=250",
+        "trajectory": "dump-240-square.lammpstrj"
+      },
+      "monolayer": {
+        "doi": "10.6084/m9.figshare.11448741.v1",
+        "frame": 1,
+        "frames_in_deposit": 1001,
+        "returncode": 0,
+        "seconds": 0.05,
+        "stdout": "demo=monolayer n_rings=119 nop=314",
+        "trajectory": "dump-6-320-310.lammpstrj"
+      },
+      "rdf2D": {
+        "doi": "10.6084/m9.figshare.11448711.v1",
+        "frame": 1,
+        "frames_in_deposit": 101,
+        "returncode": 0,
+        "seconds": 0.04,
+        "stdout": "demo=rdf2D gmax=37.3731 nop=314 rpeak=2.7750",
+        "trajectory": "dump-320.lammpstrj"
+      }
+    },
+    "incremental": {
+      "batch_ring_seconds": 4.295,
+      "doi": "10.6084/m9.figshare.11448702.v1",
+      "first_frame": {
+        "affiliation_reclassified": 3409,
+        "ddc_rings": 122,
+        "frame": 1,
+        "hc_rings": 115,
+        "natoms": 4096,
+        "ring_sources_recomputed": 4096,
+        "seeded_ddc_atoms": 139,
+        "seeded_hc_atoms": 182,
+        "six_rings": 3409
+      },
+      "frames": 148,
+      "incremental_ring_seconds": 5.628,
+      "last_frame": {
+        "affiliation_reclassified": 3916,
+        "ddc_rings": 704,
+        "frame": 148,
+        "hc_rings": 480,
+        "natoms": 4096,
+        "ring_sources_recomputed": 4094,
+        "seeded_ddc_atoms": 712,
+        "seeded_hc_atoms": 632,
+        "six_rings": 3916
+      },
+      "peak_seeded_ddc_atoms": 772,
+      "trajectory": "nucleation.lammpstrj"
+    }
+  },
+  "identity_gate": true,
+  "incremental": {
+    "1000": {
+      "balls": "154 / 1000",
+      "frames": "5",
+      "full/ms": 10.116,
+      "identical": "yes",
+      "incr/ms": 7.261,
+      "nAtoms": "1000",
+      "ratio": 1.39,
+      "recomp": "702 / 1000",
+      "sites": "3"
+    },
+    "2000": {
+      "balls": "135 / 2000",
+      "frames": "5",
+      "full/ms": 19.233,
+      "identical": "yes",
+      "incr/ms": 6.08,
+      "nAtoms": "2000",
+      "ratio": 3.16,
+      "recomp": "829 / 2000",
+      "sites": "3"
+    },
+    "4000": {
+      "balls": "135 / 4000",
+      "frames": "5",
+      "full/ms": 35.817,
+      "identical": "yes",
+      "incr/ms": 9.157,
+      "nAtoms": "4000",
+      "ratio": 3.91,
+      "recomp": "814 / 4000",
+      "sites": "3"
+    },
+    "8000": {
+      "balls": "126 / 8000",
+      "frames": "5",
+      "full/ms": 99.623,
+      "identical": "yes",
+      "incr/ms": 11.216,
+      "nAtoms": "8000",
+      "ratio": 8.88,
+      "recomp": "794 / 8000",
+      "sites": "3"
+    },
+    "16000": {
+      "balls": "106 / 16000",
+      "frames": "5",
+      "full/ms": 226.778,
+      "identical": "yes",
+      "incr/ms": 20.46,
+      "nAtoms": "16000",
+      "ratio": 11.08,
+      "recomp": "745 / 16000",
+      "sites": "3"
+    },
+    "32000": {
+      "balls": "128 / 32000",
+      "frames": "5",
+      "full/ms": 523.934,
+      "identical": "yes",
+      "incr/ms": 27.257,
+      "nAtoms": "32000",
+      "ratio": 19.22,
+      "recomp": "913 / 32000",
+      "sites": "3"
+    }
+  },
+  "pipeline": {
+    "1000": {
+      "affil_ms": 21.008,
+      "knn_ms": 2.996,
+      "knn_pair_ms": 2.634,
+      "neigh_ms": 3.231,
+      "rings_ms": 7.897
+    },
+    "2000": {
+      "affil_ms": 61.62,
+      "knn_ms": 4.527,
+      "knn_pair_ms": 4.866,
+      "neigh_ms": 2.686,
+      "rings_ms": 19.24
+    },
+    "4000": {
+      "affil_ms": 99.291,
+      "knn_ms": 9.493,
+      "knn_pair_ms": 10.559,
+      "neigh_ms": 5.173,
+      "rings_ms": 36.202
+    },
+    "8000": {
+      "affil_ms": 173.775,
+      "knn_ms": 15.909,
+      "knn_pair_ms": 16.988,
+      "neigh_ms": 10.787,
+      "rings_ms": 77.447
+    },
+    "16000": {
+      "affil_ms": 551.579,
+      "knn_ms": 35.28,
+      "knn_pair_ms": 38.459,
+      "neigh_ms": 22.273,
+      "rings_ms": 220.888
+    },
+    "32000": {
+      "affil_ms": 779.313,
+      "knn_ms": 73.467,
+      "knn_pair_ms": 79.796,
+      "neigh_ms": 43.926,
+      "rings_ms": 514.517
+    }
+  },
+  "ql_compare": {
+    "dscribe": {
+      "bcc": {},
+      "fcc": {}
+    },
+    "dseams": {
+      "bcc": {
+        "ql4": 0.509175,
+        "ql6": 0.628539,
+        "ql8": 0.212762,
+        "vor_q4": 0.224025,
+        "vor_q6": 0.56694,
+        "vor_q8": 0.325955
+      },
+      "fcc": {
+        "ql4": 0.190941,
+        "ql6": 0.574524,
+        "ql8": 0.403915,
+        "vor_q4": 0.190941,
+        "vor_q6": 0.574524,
+        "vor_q8": 0.403915
+      }
+    },
+    "freud": {
+      "bcc": {
+        "ql4": 0.509175,
+        "ql6": 0.628539,
+        "ql8": 0.212762
+      },
+      "fcc": {
+        "ql4": 0.190941,
+        "ql6": 0.574524,
+        "ql8": 0.403915
+      }
+    },
+    "ptm": {
+      "bcc": {},
+      "fcc": {}
+    },
+    "pyscal3": {
+      "bcc": {
+        "ql4": 0.509175,
+        "ql6": 0.628539,
+        "ql8": 0.212762
+      },
+      "fcc": {
+        "ql4": 0.190941,
+        "ql6": 0.574524,
+        "ql8": 0.403915
+      }
+    }
+  },
+  "stages": {
+    "cubic": {
+      "affil_ms": 60.145,
+      "io_ms": 4.136,
+      "knn_ms": 7.992,
+      "knn_pair_ms": 8.465,
+      "neigh_ms": 5.014,
+      "rings_ms": 11.998,
+      "seeded_ms": 189.778
+    },
+    "nucleation": {
+      "affil_ms": 18.097,
+      "io_ms": 4.162,
+      "knn_ms": 9.656,
+      "knn_pair_ms": 10.43,
+      "neigh_ms": 6.056,
+      "rings_ms": 27.944,
+      "seeded_ms": 65.552
+    }
+  },
+  "tip": {
+    "cages": {
+      "atoms": 4096.0,
+      "findHC+findDDC/ms": 61.584,
+      "findHC/ms": 56.803,
+      "ringNetwork/ms": 15.73,
+      "rings": 8192.0,
+      "shapeMatchDDC/ms": 41.158,
+      "shapeMatchHC/ms": 0.001,
+      "six-rings": 8192.0
+    },
+    "overhead": {
+      "4096": {
+        "neighListO_ms": 5.387,
+        "vesin_ms": 3.736
+      },
+      "16000": {
+        "neighListO_ms": 21.722,
+        "vesin_ms": 14.132
+      }
+    },
+    "scaling": {
+      "1000": {
+        "byIndex_ms": 1.841,
+        "getCorrelPlus_ms": 1.784,
+        "neighListO_ms": 2.804,
+        "ringNetwork_ms": 10.195
+      },
+      "2000": {
+        "byIndex_ms": 3.488,
+        "getCorrelPlus_ms": 3.615,
+        "neighListO_ms": 3.488,
+        "ringNetwork_ms": 24.989
+      },
+      "4000": {
+        "byIndex_ms": 6.692,
+        "getCorrelPlus_ms": 7.153,
+        "neighListO_ms": 6.721,
+        "ringNetwork_ms": 47.349
+      },
+      "8000": {
+        "byIndex_ms": 13.72,
+        "getCorrelPlus_ms": 14.493,
+        "neighListO_ms": 13.933,
+        "ringNetwork_ms": 99.776
+      },
+      "16000": {
+        "byIndex_ms": 28.235,
+        "getCorrelPlus_ms": 29.605,
+        "neighListO_ms": 28.677,
+        "ringNetwork_ms": 279.603
+      },
+      "32000": {
+        "byIndex_ms": 43.643,
+        "getCorrelPlus_ms": 46.527,
+        "neighListO_ms": 43.488,
+        "ringNetwork_ms": 543.7
+      }
+    },
+    "strong": {
+      "1": {
+        "index_ms": 91.865,
+        "neigh_ms": 94.119,
+        "ql_ms": 54.083,
+        "rings_ms": 1691.286
+      },
+      "2": {
+        "index_ms": 122.345,
+        "neigh_ms": 122.984,
+        "ql_ms": 41.431,
+        "rings_ms": 1105.334
+      },
+      "4": {
+        "index_ms": 122.201,
+        "neigh_ms": 123.616,
+        "ql_ms": 27.878,
+        "rings_ms": 571.473
+      },
+      "8": {
+        "index_ms": 122.098,
+        "neigh_ms": 122.396,
+        "ql_ms": 21.411,
+        "rings_ms": 298.3
+      },
+      "16": {
+        "index_ms": 95.629,
+        "neigh_ms": 95.567,
+        "ql_ms": 16.623,
+        "rings_ms": 147.783
+      },
+      "32": {
+        "index_ms": 91.669,
+        "neigh_ms": 93.564,
+        "ql_ms": 14.648,
+        "rings_ms": 86.175
+      }
+    }
+  },
+  "trajectory_incremental": {
+    "frames": [],
+    "steady": {
+      "affilBatch_ms": 77.454,
+      "affilInc_ms": 10.789,
+      "allEqual": true,
+      "ringFull_ms": 15.311,
+      "ringInc_ms": 0.73
+    }
+  }
+}

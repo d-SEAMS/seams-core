@@ -1,0 +1,93 @@
+{
+  "bulkTopologicalCriterion": {
+    "doi": "10.6084/m9.figshare.11448702.v1",
+    "frame": 148,
+    "frames_in_deposit": 148,
+    "outputs": {
+      "stderr.log": {
+        "bytes": 0
+      },
+      "stdout.log": {
+        "bytes": 68
+      }
+    },
+    "returncode": 0,
+    "seconds": 0.27,
+    "stdout": "demo=bulkTopologicalCriterion frame=148 n_ddc=712 n_hc=632 nop=4096",
+    "trajectory": "nucleation.lammpstrj"
+  },
+  "chillPlus": {
+    "doi": "10.6084/m9.figshare.11448720.v1",
+    "frame": 1,
+    "frames_in_deposit": 11,
+    "outputs": {
+      "config.yml": {
+        "bytes": 287
+      },
+      "stderr.log": {
+        "bytes": 0
+      },
+      "stdout.log": {
+        "bytes": 53
+      },
+      "vars.lua": {
+        "bytes": 1609
+      }
+    },
+    "returncode": 0,
+    "seconds": 0.32,
+    "stdout": "demo=chillPlus cubic=4096 n_ddc=4096 n_hc=0 nop=4096",
+    "trajectory": "mW_cubic.lammpstrj"
+  },
+  "iceNanotube": {
+    "doi": "10.6084/m9.figshare.11448768.v1",
+    "frame": 1,
+    "frames_in_deposit": 251,
+    "outputs": {
+      "stderr.log": {
+        "bytes": 0
+      },
+      "stdout.log": {
+        "bytes": 37
+      }
+    },
+    "returncode": 0,
+    "seconds": 0.03,
+    "stdout": "demo=iceNanotube n_rings=427 nop=250",
+    "trajectory": "dump-240-square.lammpstrj"
+  },
+  "monolayer": {
+    "doi": "10.6084/m9.figshare.11448741.v1",
+    "frame": 1,
+    "frames_in_deposit": 1001,
+    "outputs": {
+      "stderr.log": {
+        "bytes": 0
+      },
+      "stdout.log": {
+        "bytes": 35
+      }
+    },
+    "returncode": 0,
+    "seconds": 0.05,
+    "stdout": "demo=monolayer n_rings=119 nop=314",
+    "trajectory": "dump-6-320-310.lammpstrj"
+  },
+  "rdf2D": {
+    "doi": "10.6084/m9.figshare.11448711.v1",
+    "frame": 1,
+    "frames_in_deposit": 101,
+    "outputs": {
+      "stderr.log": {
+        "bytes": 0
+      },
+      "stdout.log": {
+        "bytes": 45
+      }
+    },
+    "returncode": 0,
+    "seconds": 0.04,
+    "stdout": "demo=rdf2D gmax=37.3731 nop=314 rpeak=2.7750",
+    "trajectory": "dump-320.lammpstrj"
+  }
+}

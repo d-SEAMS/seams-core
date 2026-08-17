@@ -419,20 +419,28 @@ NOTEBOOKS = [
     "05_rdf2d",
 ]
 
+NOTEBOOK_INPUTS = dict(
+    py=R + "/py-install.done",
+    runner="repro/scripts/execute_notebook.sh",
+    traj=expand(FIGSHARE_DIR + "/{f}", f=FIGSHARE_FILES),
+)
+
 
 rule figshare_notebook:
     # Percent-format sources under repro/notebooks/; jupytext converts
     # and papermill executes. Execution is the test (each notebook
     # asserts its own headline numbers) and the executed .ipynb is the
-    # artifact. The nucleation notebook also writes
-    # figshare-incremental.json.
+    # artifact. 02_nucleation_cages is a separate rule because it also
+    # writes figshare-incremental.json (Snakemake deletes declared
+    # outputs before the job, so a later test -s stamp cannot see a
+    # side-effect file).
     input:
-        py=R + "/py-install.done",
         nb="repro/notebooks/{nb}.py",
-        runner="repro/scripts/execute_notebook.sh",
-        traj=expand(FIGSHARE_DIR + "/{f}", f=FIGSHARE_FILES),
+        **NOTEBOOK_INPUTS,
     output:
         R + "/notebooks/{nb}.ipynb",
+    wildcard_constraints:
+        nb="(?!02_nucleation_cages).+",
     params:
         hq=lambda wc: hq(2),
     shell:
@@ -441,16 +449,19 @@ rule figshare_notebook:
         "OMP_NUM_THREADS=2 repro/scripts/execute_notebook.sh {input.nb} {output}'"
 
 
-rule figshare_incremental:
-    # Produced by the nucleation notebook: per-frame incremental rings
-    # (refereed against batch every frame), incremental affiliation, and
-    # seeded classification across the whole deposit
+rule figshare_nucleation_notebook:
     input:
-        R + "/notebooks/02_nucleation_cages.ipynb",
+        nb="repro/notebooks/02_nucleation_cages.py",
+        **NOTEBOOK_INPUTS,
     output:
-        R + "/figshare-incremental.json",
+        ipynb=R + "/notebooks/02_nucleation_cages.ipynb",
+        incremental=R + "/figshare-incremental.json",
+    params:
+        hq=lambda wc: hq(2),
     shell:
-        "test -s {output}"
+        "{params.hq} bash -c "
+        "'LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH "
+        "OMP_NUM_THREADS=2 repro/scripts/execute_notebook.sh {input.nb} {output.ipynb}'"
 
 
 rule aggregate:
