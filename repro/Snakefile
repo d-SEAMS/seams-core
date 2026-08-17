@@ -78,7 +78,7 @@ rule setup_tip:
         bdir=TIP_BUILD,
     shell:
         "meson setup {params.bdir} --prefix=$CONDA_PREFIX --buildtype=release "
-        "-Dwith_python=true -Dwith_tests=true > {params.log} 2>&1"
+        "-Dwith_python=false -Dwith_tests=true > {params.log} 2>&1"
 
 
 rule build_tip:
@@ -107,13 +107,13 @@ rule identity_gate:
 
 
 rule install_python:
-    # The descriptor comparison imports the built bindings from the prefix
+    # Bindings are pydseamslib on PyPI, not this tree.
     input:
         R + "/tip-test.log",
     output:
         touch(R + "/py-install.done"),
     shell:
-        "meson install -C " + TIP_BUILD + " > /dev/null 2>&1"
+        "python -c 'import pydseams as ds; print(ds.__version__)'"
 
 
 rule build_base:

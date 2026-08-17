@@ -23,6 +23,7 @@ case "${1:-}" in
 prep)
   cd "$ROOT"
   pixi install -e repro
+  pixi run -e repro -- python -m pip install --no-deps pydseamslib==2.5.1
   pixi run -e repro -- meson subprojects download || true
   git rev-parse HEAD > .tip_sha
   if [ ! -d "$BASE_TREE" ]; then
