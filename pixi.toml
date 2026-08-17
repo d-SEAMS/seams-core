@@ -8,6 +8,7 @@ authors = ["Rohit Goswami <rgoswami@ieee.org>"]
 [dependencies]
 compilers = ">=1.9.0,<2"
 eigen = "3.4.0.*"
+# conda-forge BLAS/LAPACK ABI. Meson prefers FlexiBLAS when present.
 libblas = ">=3.11.0,<4"
 liblapack = ">=3.11.0,<4"
 catch2 = ">=3.6.0,<4"
