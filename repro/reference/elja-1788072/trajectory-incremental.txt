@@ -1,0 +1,14 @@
+# graph knn skin 2.00
+# frame nAtoms nRings nSix nHC nDDC ringFull_ms ringInc_ms ringRecomp affilBatch_ms affilInc_ms affilReclass skinRebuild bondChurn ringsEqual affilEqual
+1 4096 8192 8192 0 8192 12.034 12.392 4096 63.559 65.145 8192 R 4096 yes yes
+2 4096 8192 8192 0 8192 12.177 0.603 0 62.774 8.819 0 R 0 yes yes
+3 4096 8192 8192 0 8192 12.020 0.560 0 62.315 8.873 0 R 0 yes yes
+4 4096 8192 8192 0 8192 12.083 0.601 0 62.238 8.877 0 R 0 yes yes
+5 4096 8192 8192 0 8192 12.007 0.594 0 61.818 8.911 0 R 0 yes yes
+6 4096 8192 8192 0 8192 12.067 0.583 0 61.996 8.869 0 R 0 yes yes
+7 4096 8192 8192 0 8192 12.063 0.584 0 63.056 8.876 0 R 0 yes yes
+8 4096 8192 8192 0 8192 12.023 0.582 0 62.434 8.836 0 R 0 yes yes
+9 4096 8192 8192 0 8192 12.028 0.582 0 62.125 8.836 0 R 0 yes yes
+10 4096 8192 8192 0 8192 12.060 0.565 0 61.792 8.817 0 R 0 yes yes
+11 4096 8192 8192 0 8192 12.043 0.580 0 62.421 8.952 0 R 0 yes yes
+# steady ringFull_ms 12.057 ringInc_ms 0.583 affilBatch_ms 62.297 affilInc_ms 8.867 allEqual yes

@@ -19,6 +19,7 @@ them via the figshare_notebook Snakemake rule.
 """
 import hashlib
 import json
+import os
 import pathlib
 import re
 import subprocess
@@ -58,6 +59,30 @@ FILES = {
         "doi": "10.6084/m9.figshare.11448711.v1",
     },
 }
+
+def example_lua_root():
+    """Directory that contains example_lua/ (yodaStruct, not this tree)."""
+    marker = pathlib.Path("example_lua/chillPlus/iceType/vars.lua")
+    here = pathlib.Path.cwd()
+    env = os.environ.get("YODASTRUCT_ROOT")
+    candidates = []
+    if env:
+        candidates.append(pathlib.Path(env))
+    candidates.extend(
+        [
+            here,
+            here.parent / "yodaStruct",
+            here.parent / "seams-base-repro",
+        ]
+    )
+    for root in candidates:
+        if (root / marker).is_file():
+            return root
+    raise FileNotFoundError(
+        "example_lua not found; set YODASTRUCT_ROOT or clone "
+        "https://github.com/d-SEAMS/yodaStruct next to this tree"
+    )
+
 
 # Each demo pairs a figshare trajectory with the example workflow that
 # consumed it in the 1.0 paper. The example_lua trees live in
@@ -151,7 +176,8 @@ def patch_demo(demo, trajdir, rundir):
     outrun = rundir / "run"
     outrun.mkdir(parents=True, exist_ok=True)
 
-    vtext = pathlib.Path(demo["vars"]).read_text()
+    lua_root = example_lua_root()
+    vtext = (lua_root / demo["vars"]).read_text()
     vtext = re.sub(
         r"^outDir\s*=.*$",
         f'outDir="{outrun}/";',
@@ -168,7 +194,7 @@ def patch_demo(demo, trajdir, rundir):
     vpath = rundir / "vars.lua"
     vpath.write_text(vtext)
 
-    ctext = pathlib.Path(demo["config"]).read_text()
+    ctext = (lua_root / demo["config"]).read_text()
     ctext = re.sub(
         r'^trajectory:.*$', f'trajectory: "{traj}"', ctext, flags=re.M
     )

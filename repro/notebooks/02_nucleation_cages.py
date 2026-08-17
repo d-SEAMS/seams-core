@@ -79,8 +79,8 @@ for f in range(1, n_frames + 1):
             "affiliation_reclassified": affil["reclassified"],
             "hc_rings": sum(affil["hc"]),
             "ddc_rings": sum(affil["ddc"]),
-            "seeded_hc_atoms": sum(seeded["hc"]),
-            "seeded_ddc_atoms": sum(seeded["ddc"]),
+            "seeded_hc_atoms": seeded.n_ih,
+            "seeded_ddc_atoms": seeded.n_ic,
         }
     )
 rows[0], rows[-1]

@@ -34,6 +34,12 @@ prep)
      meson subprojects download || true)
   # Compute nodes are offline; the figshare deposits download here
   pixi run -e repro -- python repro/scripts/figshare_demos.py fetch repro/figshare
+  # Lua examples live in yodaStruct; the tip tree no longer ships them
+  YODA=${YODASTRUCT_ROOT:-$ROOT/../yodaStruct}
+  if [ ! -d "$YODA/example_lua" ]; then
+    git clone --depth 1 https://github.com/d-SEAMS/yodaStruct.git "$YODA"
+  fi
+  export YODASTRUCT_ROOT=$YODA
   # HyperQueue is a single static binary
   if ! command -v hq > /dev/null; then
     mkdir -p repro/bin
@@ -53,6 +59,11 @@ submit)
 run)
   cd "$ROOT"
   mkdir -p repro/results
+  if [ -d "$ROOT/../yodaStruct/example_lua" ]; then
+    export YODASTRUCT_ROOT=$ROOT/../yodaStruct
+  elif [ -d "$ROOT/../seams-base-repro/example_lua" ]; then
+    export YODASTRUCT_ROOT=$ROOT/../seams-base-repro
+  fi
   # One HyperQueue server and one worker own the allocation; Snakemake
   # submits every heavy rule through it
   export HQ_SERVER_DIR=$ROOT/repro/results/hq-server
