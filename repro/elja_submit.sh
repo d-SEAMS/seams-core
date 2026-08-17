@@ -45,7 +45,7 @@ submit)
   : "${ELJA_ACCOUNT:=chem-ui}"
   cd "$ROOT"
   sbatch --partition="${ELJA_PARTITION:-64cpu_256mem}" --exclusive \
-    --ntasks=1 --cpus-per-task=8 --hint=nomultithread --time=04:00:00 \
+    --ntasks=1 --cpus-per-task=32 --hint=nomultithread --time=04:00:00 \
     --mem=32G --account="$ELJA_ACCOUNT" --job-name=seams-repro \
     --output=repro-%j.out --wrap "repro/elja_submit.sh run"
   ;;
@@ -61,7 +61,7 @@ run)
   sleep 3
   # Tasks inherit the worker environment, so the worker starts inside the
   # repro pixi environment; meson, ninja and python resolve there
-  pixi run -e repro -- hq worker start --cpus "${SLURM_CPUS_PER_TASK:-8}" \
+  pixi run -e repro -- hq worker start --cpus "${SLURM_CPUS_PER_TASK:-32}" \
     > repro/results/hq-worker.log 2>&1 &
   HQ_WORKER_PID=$!
   sleep 2
