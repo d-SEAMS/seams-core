@@ -34,10 +34,14 @@ prep)
      meson subprojects download || true)
   # Compute nodes are offline; the figshare deposits download here
   pixi run -e repro -- python repro/scripts/figshare_demos.py fetch repro/figshare
-  # Lua module lives in yodaStruct; the tip tree no longer ships it
+  # Lua module lives in yodaStruct 2.x. A sibling named yodaStruct may
+  # be a symlink to the v1 baseline tree (example_lua only).
   YODA=${YODASTRUCT_ROOT:-$ROOT/../yodaStruct}
   if [ ! -d "$YODA/lua" ]; then
-    git clone --depth 1 --branch v2.6.0 https://github.com/d-SEAMS/yodaStruct.git "$YODA"
+    YODA=$ROOT/../yodaStruct-2.6
+    if [ ! -d "$YODA/lua" ]; then
+      git clone --depth 1 --branch v2.6.0 https://github.com/d-SEAMS/yodaStruct.git "$YODA"
+    fi
   fi
   mkdir -p "$YODA/subprojects"
   if [ -e "$YODA/subprojects/seams-core" ] && [ ! -L "$YODA/subprojects/seams-core" ]; then
@@ -64,10 +68,10 @@ submit)
 run)
   cd "$ROOT"
   mkdir -p repro/results
-  if [ -d "$ROOT/../yodaStruct/example_lua" ]; then
+  if [ -d "$ROOT/../yodaStruct/lua" ]; then
     export YODASTRUCT_ROOT=$ROOT/../yodaStruct
-  elif [ -d "$ROOT/../seams-base-repro/example_lua" ]; then
-    export YODASTRUCT_ROOT=$ROOT/../seams-base-repro
+  elif [ -d "$ROOT/../yodaStruct-2.6/lua" ]; then
+    export YODASTRUCT_ROOT=$ROOT/../yodaStruct-2.6
   fi
   # One HyperQueue server and one worker own the allocation; Snakemake
   # submits every heavy rule through it

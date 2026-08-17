@@ -25,9 +25,17 @@ BASE_TREE = config["base_tree"]
 BUILD = os.path.abspath(os.environ.get("SEAMS_BUILD_ROOT", "."))
 TIP_BUILD = os.path.join(BUILD, "build-repro")
 BASE_BUILD = os.path.join(BUILD, "build-base")
-YODA_ROOT = os.path.abspath(
-    os.environ.get("YODASTRUCT_ROOT", os.path.join("..", "yodaStruct"))
-)
+def _yoda_root():
+    env = os.environ.get("YODASTRUCT_ROOT")
+    if env:
+        return os.path.abspath(env)
+    for cand in (os.path.join("..", "yodaStruct"), os.path.join("..", "yodaStruct-2.6")):
+        if os.path.isdir(os.path.join(cand, "lua")):
+            return os.path.abspath(cand)
+    return os.path.abspath(os.path.join("..", "yodaStruct"))
+
+
+YODA_ROOT = _yoda_root()
 YODA_BUILD = os.path.join(BUILD, "build-yoda")
 
 
