@@ -1,0 +1,105 @@
+device NVIDIA A100-PCIE-40GB
+reason batch fits under safety margin
+sm 8.0
+total_bytes 42298834944
+free_bytes 41842769920
+nAtoms 4096
+requested_frames 11
+bytes_per_frame 2867712
+max_resident_frames 11672
+plan_frames 11
+resident yes
+cold_upload_ms 0.222
+cold_compute_ms 6393.994
+cold_download_ms 0.255
+warm_upload_ms 0.120
+warm_compute_ms 21.986
+warm_download_ms 0.176
+ice_hc_atoms 0
+ice_ddc_atoms 45056
+six_rings 90112
+rings_dropped 0
+Generating '/tmp/nsys-report-cfdb.qdstrm'
+[1/8] [0%                          ] tip-gpu-nsys.nsys-rep[1/8] [0%                          ] tip-gpu-nsys.nsys-rep[1/8] [==21%                       ] tip-gpu-nsys.nsys-rep[1/8] [========42%                 ] tip-gpu-nsys.nsys-rep[1/8] [=========43%                ] tip-gpu-nsys.nsys-rep[1/8] [=========44%                ] tip-gpu-nsys.nsys-rep[1/8] [=========45%                ] tip-gpu-nsys.nsys-rep[1/8] [=========46%                ] tip-gpu-nsys.nsys-rep[1/8] [==========47%               ] tip-gpu-nsys.nsys-rep[1/8] [==========48%               ] tip-gpu-nsys.nsys-rep[1/8] [==========49%               ] tip-gpu-nsys.nsys-rep[1/8] [======================92%   ] tip-gpu-nsys.nsys-rep[1/8] [=======================93%  ] tip-gpu-nsys.nsys-rep[1/8] [========================100%] tip-gpu-nsys.nsys-rep[1/8] [========================100%] tip-gpu-nsys.nsys-rep
+[2/8] [0%                          ] tip-gpu-nsys.sqlite[2/8] [1%                          ] tip-gpu-nsys.sqlite[2/8] [2%                          ] tip-gpu-nsys.sqlite[2/8] [3%                          ] tip-gpu-nsys.sqlite[2/8] [4%                          ] tip-gpu-nsys.sqlite[2/8] [5%                          ] tip-gpu-nsys.sqlite[2/8] [6%                          ] tip-gpu-nsys.sqlite[2/8] [7%                          ] tip-gpu-nsys.sqlite[2/8] [8%                          ] tip-gpu-nsys.sqlite[2/8] [9%                          ] tip-gpu-nsys.sqlite[2/8] [10%                         ] tip-gpu-nsys.sqlite[2/8] [11%                         ] tip-gpu-nsys.sqlite[2/8] [12%                         ] tip-gpu-nsys.sqlite[2/8] [13%                         ] tip-gpu-nsys.sqlite[2/8] [14%                         ] tip-gpu-nsys.sqlite[2/8] [=15%                        ] tip-gpu-nsys.sqlite[2/8] [=16%                        ] tip-gpu-nsys.sqlite[2/8] [=17%                        ] tip-gpu-nsys.sqlite[2/8] [==18%                       ] tip-gpu-nsys.sqlite[2/8] [==19%                       ] tip-gpu-nsys.sqlite[2/8] [==20%                       ] tip-gpu-nsys.sqlite[2/8] [==21%                       ] tip-gpu-nsys.sqlite[2/8] [===22%                      ] tip-gpu-nsys.sqlite[2/8] [===23%                      ] tip-gpu-nsys.sqlite[2/8] [===24%                      ] tip-gpu-nsys.sqlite[2/8] [====25%                     ] tip-gpu-nsys.sqlite[2/8] [====26%                     ] tip-gpu-nsys.sqlite[2/8] [====27%                     ] tip-gpu-nsys.sqlite[2/8] [====28%                     ] tip-gpu-nsys.sqlite[2/8] [=====29%                    ] tip-gpu-nsys.sqlite[2/8] [=====30%                    ] tip-gpu-nsys.sqlite[2/8] [=====31%                    ] tip-gpu-nsys.sqlite[2/8] [=====32%                    ] tip-gpu-nsys.sqlite[2/8] [======33%                   ] tip-gpu-nsys.sqlite[2/8] [======34%                   ] tip-gpu-nsys.sqlite[2/8] [======35%                   ] tip-gpu-nsys.sqlite[2/8] [=======36%                  ] tip-gpu-nsys.sqlite[2/8] [=======37%                  ] tip-gpu-nsys.sqlite[2/8] [=======38%                  ] tip-gpu-nsys.sqlite[2/8] [=======39%                  ] tip-gpu-nsys.sqlite[2/8] [========40%                 ] tip-gpu-nsys.sqlite[2/8] [========41%                 ] tip-gpu-nsys.sqlite[2/8] [========42%                 ] tip-gpu-nsys.sqlite[2/8] [=========43%                ] tip-gpu-nsys.sqlite[2/8] [=========44%                ] tip-gpu-nsys.sqlite[2/8] [=========45%                ] tip-gpu-nsys.sqlite[2/8] [=========46%                ] tip-gpu-nsys.sqlite[2/8] [==========47%               ] tip-gpu-nsys.sqlite[2/8] [==========48%               ] tip-gpu-nsys.sqlite[2/8] [==========49%               ] tip-gpu-nsys.sqlite[2/8] [===========50%              ] tip-gpu-nsys.sqlite[2/8] [===========51%              ] tip-gpu-nsys.sqlite[2/8] [===========52%              ] tip-gpu-nsys.sqlite[2/8] [===========53%              ] tip-gpu-nsys.sqlite[2/8] [============54%             ] tip-gpu-nsys.sqlite[2/8] [============55%             ] tip-gpu-nsys.sqlite[2/8] [============56%             ] tip-gpu-nsys.sqlite[2/8] [============57%             ] tip-gpu-nsys.sqlite[2/8] [=============58%            ] tip-gpu-nsys.sqlite[2/8] [=============59%            ] tip-gpu-nsys.sqlite[2/8] [=============60%            ] tip-gpu-nsys.sqlite[2/8] [==============61%           ] tip-gpu-nsys.sqlite[2/8] [==============62%           ] tip-gpu-nsys.sqlite[2/8] [==============63%           ] tip-gpu-nsys.sqlite[2/8] [==============64%           ] tip-gpu-nsys.sqlite[2/8] [===============65%          ] tip-gpu-nsys.sqlite[2/8] [===============66%          ] tip-gpu-nsys.sqlite[2/8] [===============67%          ] tip-gpu-nsys.sqlite[2/8] [================68%         ] tip-gpu-nsys.sqlite[2/8] [================69%         ] tip-gpu-nsys.sqlite[2/8] [================70%         ] tip-gpu-nsys.sqlite[2/8] [================71%         ] tip-gpu-nsys.sqlite[2/8] [=================72%        ] tip-gpu-nsys.sqlite[2/8] [=================73%        ] tip-gpu-nsys.sqlite[2/8] [=================74%        ] tip-gpu-nsys.sqlite[2/8] [==================75%       ] tip-gpu-nsys.sqlite[2/8] [==================76%       ] tip-gpu-nsys.sqlite[2/8] [==================77%       ] tip-gpu-nsys.sqlite[2/8] [==================78%       ] tip-gpu-nsys.sqlite[2/8] [===================79%      ] tip-gpu-nsys.sqlite[2/8] [===================80%      ] tip-gpu-nsys.sqlite[2/8] [===================81%      ] tip-gpu-nsys.sqlite[2/8] [===================82%      ] tip-gpu-nsys.sqlite[2/8] [====================83%     ] tip-gpu-nsys.sqlite[2/8] [====================84%     ] tip-gpu-nsys.sqlite[2/8] [====================85%     ] tip-gpu-nsys.sqlite[2/8] [=====================86%    ] tip-gpu-nsys.sqlite[2/8] [=====================87%    ] tip-gpu-nsys.sqlite[2/8] [=====================88%    ] tip-gpu-nsys.sqlite[2/8] [=====================89%    ] tip-gpu-nsys.sqlite[2/8] [======================90%   ] tip-gpu-nsys.sqlite[2/8] [======================91%   ] tip-gpu-nsys.sqlite[2/8] [======================92%   ] tip-gpu-nsys.sqlite[2/8] [=======================93%  ] tip-gpu-nsys.sqlite[2/8] [=======================94%  ] tip-gpu-nsys.sqlite[2/8] [=======================95%  ] tip-gpu-nsys.sqlite[2/8] [=======================96%  ] tip-gpu-nsys.sqlite[2/8] [========================97% ] tip-gpu-nsys.sqlite[2/8] [========================98% ] tip-gpu-nsys.sqlite[2/8] [========================99% ] tip-gpu-nsys.sqlite[2/8] [========================100%] tip-gpu-nsys.sqlite[2/8] [========================100%] tip-gpu-nsys.sqlite
+[3/8] Executing 'nvtx_sum' stats report
+[4/8] Executing 'osrt_sum' stats report
+
+ Time (%)  Total Time (ns)  Num Calls   Avg (ns)    Med (ns)    Min (ns)  Max (ns)   StdDev (ns)          Name         
+ --------  ---------------  ---------  ----------  -----------  --------  ---------  -----------  ---------------------
+     95.1       6707693816         78  85996074.6  100102940.0      1385  100116644   32301834.5  poll                 
+      4.7        328159986        725    452634.5      15009.0       323   19617999    1213072.7  ioctl                
+      0.2         12173456         35    347813.0       2912.0      1374   12036479    2033858.0  fopen                
+      0.1          5837260         57    102408.1       5421.0      1916     895801     251418.9  open64               
+      0.0          1313417         32     41044.3       4704.0      2782     908029     158795.7  mmap64               
+      0.0           609218         10     60921.8      13571.5     12268     481887     147925.0  sem_timedwait        
+      0.0           388130          4     97032.5      32973.0     29776     292408     130267.4  pthread_create       
+      0.0           315747        204      1547.8       1440.0       253       4300        641.2  read                 
+      0.0            80968         17      4762.8       2107.0       686      35588       8249.8  mmap                 
+      0.0            38190         29      1316.9       1125.0       586       5699        912.3  fclose               
+      0.0            34075         47       725.0         49.0        45      31550       4594.0  fgets                
+      0.0            26414          9      2934.9       2760.0      1514       5060       1063.7  munmap               
+      0.0            21048          7      3006.9       3313.0      1018       4229       1220.4  open                 
+      0.0            19855         64       310.2        303.0       149        769        105.3  fcntl                
+      0.0            13976         11      1270.5       1300.0       737       2011        384.6  write                
+      0.0            10886          2      5443.0       5443.0      5377       5509         93.3  fread                
+      0.0             9305          2      4652.5       4652.5      2944       6361       2416.2  socket               
+      0.0             8558          1      8558.0       8558.0      8558       8558          0.0  connect              
+      0.0             6024          1      6024.0       6024.0      6024       6024          0.0  pipe2                
+      0.0             4817         76        63.4         24.0        23        938        146.3  pthread_mutex_trylock
+      0.0             4392          7       627.4        287.0       206       2439        812.6  signal               
+      0.0             2135          8       266.9        304.0       162        335         71.7  dup                  
+      0.0             1223          1      1223.0       1223.0      1223       1223          0.0  bind                 
+      0.0              648          1       648.0        648.0       648        648          0.0  listen               
+      0.0              421         10        42.1         32.5        31        125         29.2  fflush               
+
+[5/8] Executing 'cuda_api_sum' stats report
+
+ Time (%)  Total Time (ns)  Num Calls   Avg (ns)   Med (ns)  Min (ns)  Max (ns)   StdDev (ns)           Name         
+ --------  ---------------  ---------  ----------  --------  --------  ---------  -----------  ----------------------
+     63.6        252485303          7  36069329.0   11669.0      6374  252402865   95394123.0  cudaMemGetInfo        
+     34.2        135914099        312    435622.1   19644.0      9964    4039376     778193.8  cuCtxSynchronize      
+      0.9          3602616         12    300218.0  311591.0    252437     389362      39009.6  cuModuleLoadDataEx    
+      0.5          2091375         40     52284.4   48327.0      8109     350106      58880.9  cudaMemcpy            
+      0.3          1209489        312      3876.6    2992.5      2438      23705       3609.4  cuLaunchKernel        
+      0.1           580595         27     21503.5    3441.0      1843     149576      33428.2  cudaFree              
+      0.1           536320         27     19863.7    3251.0      1814      94041      27948.0  cudaMalloc            
+      0.1           461139        120      3842.8    2771.0      2105      40597       3876.5  cudaMemset            
+      0.0              979          1       979.0     979.0       979        979          0.0  cuModuleGetLoadingMode
+
+[6/8] Executing 'cuda_gpu_kern_sum' stats report
+
+ Time (%)  Total Time (ns)  Instances  Avg (ns)   Med (ns)   Min (ns)  Max (ns)  StdDev (ns)       Name      
+ --------  ---------------  ---------  ---------  ---------  --------  --------  -----------  ---------------
+     69.9         93679804         66  1419391.0  1412884.5   1333156   1616358      63509.5  knearest_shells
+     17.9         23934514          6  3989085.7  4032094.0   3876684   4033102      69159.3  enum_six       
+      7.2          9668704          6  1611450.7  1602101.0   1582726   1652133      27117.5  emit_basal     
+      2.3          3119082          6   519847.0   511169.5    471778    595266      45954.3  ddc_affil      
+      0.7           912995         66    13833.3    14304.0      9888     14337       1155.0  prefix_cells   
+      0.4           568353          6    94725.5    96416.5     89696     97632       3592.5  sort_through   
+      0.3           416644          6    69440.7    69600.5     61376     79169       6448.5  atom_ice       
+      0.3           403079         66     6107.3     6144.0      5760      6528        168.3  scatter_atoms  
+      0.3           392226          6    65371.0    66288.5     59009     70976       4701.9  invert_rings   
+      0.3           373025          6    62170.8    63696.5     59072     63744       2388.1  apply_hc       
+      0.3           354341         66     5368.8     5376.5      5024      5760        148.6  bin_atoms      
+      0.1           122400          6    20400.0    20512.0     19424     20864        516.7  mutual_knn     
+
+[7/8] Executing 'cuda_gpu_mem_time_sum' stats report
+
+ Time (%)  Total Time (ns)  Count  Avg (ns)  Med (ns)  Min (ns)  Max (ns)  StdDev (ns)      Operation     
+ --------  ---------------  -----  --------  --------  --------  --------  -----------  ------------------
+     38.2           379587     10   37958.7   60464.0      1952     62497      30719.9  [CUDA memcpy HtoD]
+     34.3           340226    120    2835.2    2384.0      1728      5792       1083.7  [CUDA memset]     
+     27.5           272669     30    9089.0   12512.0      2112     16672       5710.5  [CUDA memcpy DtoH]
+
+[8/8] Executing 'cuda_gpu_mem_size_sum' stats report
+
+ Total (MB)  Count  Avg (MB)  Med (MB)  Min (MB)  Max (MB)  StdDev (MB)      Operation     
+ ----------  -----  --------  --------  --------  --------  -----------  ------------------
+     39.116    120     0.326     0.003     0.000     2.884        0.859  [CUDA memset]     
+      6.504     10     0.650     1.081     0.000     1.081        0.556  [CUDA memcpy HtoD]
+      3.244     30     0.108     0.180     0.000     0.180        0.090  [CUDA memcpy DtoH]
+
+Generated:
+    /users/home/rog32/Git/Github/Cpp/seams-core/repro/results/tip-gpu-nsys.nsys-rep
+    /users/home/rog32/Git/Github/Cpp/seams-core/repro/results/tip-gpu-nsys.sqlite
