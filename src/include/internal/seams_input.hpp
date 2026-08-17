@@ -82,8 +82,10 @@ readLammpsTrj(std::string filename, int targetFrame,
               std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
               std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
 
-//! Function for reading in a specified frame (frame number and not timestep
-//! value) / This only reads in oxygen atoms
+//! One LAMMPS dump frame, one atom type. The type argument is any
+//! LAMMPS type (the O in the name is historical). If isSlice is true,
+//! each kept point gets inSlice set; atoms outside the box stay in
+//! the cloud. nop is the type-filtered count.
 molSys::PointCloud<molSys::Point<double>, double> readLammpsTrjO(
     std::string filename, int targetFrame,
     molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeO,
@@ -91,8 +93,9 @@ molSys::PointCloud<molSys::Point<double>, double> readLammpsTrjO(
     std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0},
     std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
 
-//! Function that reads in only atoms pf the desired type and ignores all atoms
-//! which are not in the slice as well
+//! One LAMMPS dump frame, one atom type, dropping atoms outside the
+//! slice when isSlice is true. nop is the kept count. An axis with
+//! lo == hi is unconstrained.
 molSys::PointCloud<molSys::Point<double>, double> readLammpsTrjreduced(
     std::string filename, int targetFrame,
     molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeI,
@@ -121,6 +124,8 @@ readCon(std::string filename, int targetFrame,
         molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 #endif
 
+//! True when each component lies in [lo, hi], or that axis has lo == hi
+//! (unconstrained). ([0,0,0], [50,0,0]) is x in [0, 50], y and z open.
 inline bool atomInSlice(double x, double y, double z,
                         std::array<double, 3> coordLow,
                         std::array<double, 3> coordHigh) {

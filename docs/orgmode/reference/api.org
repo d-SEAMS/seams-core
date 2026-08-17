@@ -48,7 +48,7 @@ Every file under =src/include/internal=.
 | Header | Namespace | Role |
 |--------+-----------+------|
 | =mol_sys.hpp= | ~molSys~ | ~Point~, ~PointCloud~, bond and ice enums |
-| =seams_input.hpp= | ~sinp~ | LAMMPS / XYZ / chemfiles / readcon readers |
+| =seams_input.hpp= | ~sinp~ | LAMMPS / XYZ / chemfiles / readcon readers. ~readLammpsTrjO~ keeps every atom of one type and flags ~inSlice~; ~readLammpsTrjreduced~ drops atoms outside the slice. Same slice arguments, different keep. |
 | =seams_output.hpp= | ~sout~ | dump, cage, ring, and cluster writers |
 | =neighbours.hpp= | ~nneigh~ | cutoff, k-nearest, skin neighbour lists |
 | =bop.hpp= | ~chill~, ~sph~ | CHILL, CHILL+, ~q6~, Steinhardt ~ql~ |

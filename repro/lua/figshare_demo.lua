@@ -102,7 +102,7 @@ elseif key == "monolayer" then
   core.ringAnalysis(outdir .. "/", rings, hbn, cloud, 4, 50.0 * 50.0, frame)
   emit({nop = cloud.nop, n_rings = #rings})
 elseif key == "rdf2D" then
-  local cloud = core.readLammpsTrjO(
+  local cloud = core.readLammpsTrjreduced(
     traj, frame, 2, true, {0.0, 0.0, 0.0}, {50.0, 0.0, 0.0}
   )
   assert(cloud.nop > 0, "empty cloud")
