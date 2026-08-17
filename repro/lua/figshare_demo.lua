@@ -85,9 +85,10 @@ elseif key == "iceNanotube" then
   core.prismAnalysis(outdir .. "/", rings, hbn, cloud, 6, 1, frame, frame, false)
   emit({nop = cloud.nop, n_rings = #rings})
 elseif key == "monolayer" then
-  -- x in [0, 50]; equal y/z bounds leave those axes unconstrained
-  -- (same region as the Python monolayer notebook).
-  local cloud = core.readLammpsTrjO(
+  -- TypeInSlice, same region as the Python monolayer notebook:
+  -- x in [0, 50], equal y/z bounds leave those axes unconstrained.
+  -- readLammpsTrjO only flags inSlice and keeps every oxygen.
+  local cloud = core.readLammpsTrjreduced(
     traj, frame, 2, true, {0.0, 0.0, 0.0}, {50.0, 0.0, 0.0}
   )
   assert(
