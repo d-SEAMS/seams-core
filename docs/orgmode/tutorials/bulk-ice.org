@@ -156,7 +156,7 @@ repository does not install Python.
 - Unknown command, exit 2: the binary is ~seams~, not ~yodaStruct~.
   Commands are ~read~, ~chill~, ~chill-plus~, and ~cages~.
 - ~ModuleNotFoundError: pydseams~: this repo does not install Python.
-  ~pip install pydseams~.
+  ~pip install pydseamslib~.
 - Lua ~require("dseams")~: that module lives in yodaStruct.
 
 * Next steps
