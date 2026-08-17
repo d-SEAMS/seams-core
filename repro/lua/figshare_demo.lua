@@ -85,10 +85,16 @@ elseif key == "iceNanotube" then
   core.prismAnalysis(outdir .. "/", rings, hbn, cloud, 6, 1, frame, frame, false)
   emit({nop = cloud.nop, n_rings = #rings})
 elseif key == "monolayer" then
-  local cloud = core.readLammpsTrjO(
-    traj, frame, 2, true, {0.0, 0.0, 0.0}, {50.0, 1000.0, 1000.0}
+  -- TypeInSlice, same region as the Python monolayer notebook:
+  -- x in [0, 50], equal y/z bounds leave those axes unconstrained.
+  -- readLammpsTrjO only flags inSlice and keeps every oxygen.
+  local cloud = core.readLammpsTrjreduced(
+    traj, frame, 2, true, {0.0, 0.0, 0.0}, {50.0, 0.0, 0.0}
   )
-  assert(cloud.nop > 250 and cloud.nop < 400, "slice did not select the sheet")
+  assert(
+    cloud.nop > 250 and cloud.nop < 400,
+    string.format("slice did not select the sheet (nop=%d)", cloud.nop)
+  )
   local nList = dseams.neighbors(cloud, {cutoff = 3.5, type = 2})
   local hbn = core.getHbondNetwork(traj, cloud, nList, frame, 1)
   hbn = core.bondNetworkByIndex(cloud, hbn)
@@ -97,7 +103,7 @@ elseif key == "monolayer" then
   emit({nop = cloud.nop, n_rings = #rings})
 elseif key == "rdf2D" then
   local cloud = core.readLammpsTrjO(
-    traj, frame, 2, true, {0.0, 0.0, 0.0}, {50.0, 1000.0, 1000.0}
+    traj, frame, 2, true, {0.0, 0.0, 0.0}, {50.0, 0.0, 0.0}
   )
   assert(cloud.nop > 0, "empty cloud")
   local rdf = core.calcRDF3D(cloud, 2, 2, 12.0, 80)
