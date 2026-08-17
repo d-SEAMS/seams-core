@@ -169,4 +169,3 @@ matplotlib-base = ">=3.8"
 
 [feature.repro.pypi-dependencies]
 snakemake = ">=8.0"
-pydseamslib = "==2.5.1"
