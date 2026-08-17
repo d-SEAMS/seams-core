@@ -188,7 +188,7 @@ Troubleshooting
   Commands are ``read``, ``chill``, ``chill-plus``, and ``cages``.
 
 - ``ModuleNotFoundError: pydseams``: this repo does not install Python.
-  ``pip install pydseams``.
+  ``pip install pydseamslib``.
 
 - Lua ``require("dseams")``: that module lives in yodaStruct.
 
