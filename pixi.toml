@@ -99,7 +99,7 @@ platforms = ["linux-64"]
 python = "3.12.*"
 emacs = ">=30"
 graphviz = ">=12"
-doxygen = ">=1.17"
+doxygen = ">=1.13"
 doxyrest = ">=2.1"
 
 [feature.docs.pypi-dependencies]
