@@ -68,6 +68,11 @@ html_theme_options = {
     "toctree_titles_only": True,
     "nav_links": [
         {
+            "title": "C++ API",
+            "url": "/api-cpp/index.html",
+            "resource": True,
+        },
+        {
             "title": "Ecosystem",
             "children": [
                 {
