@@ -1,0 +1,464 @@
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="generator" content="Doxygen 1.17.0"/>
+<title>seams-core: /home/runner/work/seams-core/seams-core/src/include/internal/topo_bulk.hpp Source File</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default';
+mermaid.initialize({ startOnLoad: true, theme: theme });
+</script>
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.hostname!==location.hostname)antics.event("Outbound Link",{url:a.href});});</script>
+<!-- doxyYoda owns presentation; stock doxygen.css is not linked (theme SCSS covers Doxygen classes). -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+/* doxyYoda theme boot: apply stored or OS preference before first paint */
+(function () {
+  try {
+    var stored = localStorage.getItem("doxyYoda-theme");
+    var root = document.documentElement;
+    if (stored === "dark") {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    } else if (stored === "light") {
+      root.classList.add("light");
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    }
+  } catch (e) { /* private mode */ }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area" aria-label="Project">
+<div class="title_area__start"></div>
+<div class="title_area__center">
+<span class="project_info">seams-core v2.6.0</span>
+<span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
+</div>
+<div class="title_area__end">
+<button type="button" class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false">&#9790;</button>
+</div>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+/* doxyYoda interactive: foldable fragments, copy buttons, dark-mode toggle */
+document.addEventListener("DOMContentLoaded", function () {
+  function prefersDark() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function isDarkMode() {
+    var root = document.documentElement;
+    if (root.classList.contains("dark") || root.classList.contains("dark-mode")) return true;
+    if (root.classList.contains("light")) return false;
+    return prefersDark();
+  }
+  // Optional folding: wrap .fragment in open <details class="code-details">.
+  // Skip fragments already inside details and native Doxygen .foldopen listings.
+  document.querySelectorAll(".fragment").forEach(function (frag) {
+    if (frag.closest("details.code-details")) return;
+    if (frag.querySelector(".foldopen")) return;
+    var details = document.createElement("details");
+    details.className = "code-details";
+    details.open = true;
+    var summary = document.createElement("summary");
+    summary.textContent = "Code";
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard on div.fragment (themed .copy-btn only)
+  document.querySelectorAll("div.fragment").forEach(function (frag) {
+    if (frag.querySelector(".copy-btn")) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-btn";
+    btn.textContent = "Copy";
+    btn.setAttribute("aria-label", "Copy code");
+    btn.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      var clone = frag.cloneNode(true);
+      var extra = clone.querySelector(".copy-btn");
+      if (extra) extra.remove();
+      var lines = clone.querySelectorAll(".line");
+      var text = lines.length
+        ? Array.prototype.map.call(lines, function (l) { return l.textContent; }).join("\n")
+        : clone.textContent;
+      var done = function () {
+        btn.textContent = "Copied!";
+        setTimeout(function () { btn.textContent = "Copy"; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {
+          /* ignore */
+        });
+      }
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById("darkModeToggle");
+  if (toggle) {
+    function updateIcon() {
+      var dark = isDarkMode();
+      toggle.innerHTML = dark ? "&#9788;" : "&#9790;";
+      toggle.setAttribute("aria-pressed", dark ? "true" : "false");
+    }
+    updateIcon();
+    toggle.addEventListener("click", function () {
+      var root = document.documentElement;
+      var nextDark = !isDarkMode();
+      root.classList.toggle("dark", nextDark);
+      root.classList.toggle("dark-mode", nextDark);
+      root.classList.toggle("light", !nextDark);
+      try {
+        localStorage.setItem("doxyYoda-theme", nextDark ? "dark" : "light");
+      } catch (e) { /* private mode */ }
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.17.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', () => {
+  initMenu('',true);
+  init_search();
+});
+</script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1" style="position:absolute;right:8px;top:8px;height:36px;"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2" style="float:right">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon" onmouseover="return searchBox.OnSearchSelectShow()" onmouseout="return searchBox.OnSearchSelectHide()"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('topo__bulk_8hpp_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">topo_bulk.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="topo__bulk_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">// d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment">//</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">// Copyright (c) 2018--present d-SEAMS core team</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">//</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">// This program is free software: you can redistribute it and/or modify</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">// it under the terms of the MIT License as published by</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">// the Open Source Initiative.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">//</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">// A copy of the MIT License is included in the LICENSE file of this repository.</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// You should have received a copy of the MIT License along with this program.</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// If not, see &lt;https://opensource.org/licenses/MIT&gt;.</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#ifndef SEAMS_TOPO_BULK_H_</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#define SEAMS_TOPO_BULK_H_</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;algorithm&gt;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;array&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;fstream&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;iterator&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;cmath&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;sstream&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;<a class="code" href="cage_8hpp.html">cage.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;<a class="code" href="mol__sys_8hpp.html">mol_sys.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;<a class="code" href="order__parameter_8hpp.html">order_parameter.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &lt;<a class="code" href="ring_8hpp.html">ring.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &lt;<a class="code" href="seams__input_8hpp.html">seams_input.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &lt;<a class="code" href="seams__output_8hpp.html">seams_output.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &lt;<a class="code" href="shapeMatch_8hpp.html">shapeMatch.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacering.html">ring</a> {</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="namespacering.html#a46bc67e817124b0e736c493bc8e4d6ee">   51</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="namespacering.html#a46bc67e817124b0e736c493bc8e4d6ee">bulkPolygonRingAnalysis</a>(</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    std::string path, <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">int</span> maxDepth,</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keywordtype">int</span> firstFrame);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="comment">// DDC HC Ring functions</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="namespacering.html#ada5f6a19834edc41365e7f85d92e4b76">   62</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="namespacering.html#ada5f6a19834edc41365e7f85d92e4b76">topoBulkAnalysis</a>(std::string path, <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>                     <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>                     <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>                     <span class="keywordtype">int</span> firstFrame, <span class="keywordtype">bool</span> onlyTetrahedral = <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span></div>
+<div class="foldopen" id="foldopen00075" data-start="{" data-end="};">
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="structring_1_1RingSearchIndex.html">   75</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> {</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="structring_1_1RingSearchIndex.html#a8e4433086bf9bec113ee61bc3c17b8bb">   76</a></span>  std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_variable" href="structring_1_1RingSearchIndex.html#a8e4433086bf9bec113ee61bc3c17b8bb">ringsContainingAtom</a>;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>};</div>
+</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>[[nodiscard]] <a class="code hl_struct" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="namespacering.html#a2314146c9c30c45799ab5217b8b69e61">   81</a></span><a class="code hl_function" href="namespacering.html#a2314146c9c30c45799ab5217b8b69e61">buildRingSearchIndex</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings, <span class="keywordtype">int</span> numAtoms);</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno"><a class="line" href="namespacering.html#a503bfa2deec404d907645e16ed236c28">   85</a></span>std::vector&lt;int&gt; <a class="code hl_function" href="namespacering.html#a503bfa2deec404d907645e16ed236c28">findDDC</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>                         std::vector&lt;strucType&gt; &amp;ringType,</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>                         <span class="keyword">const</span> std::vector&lt;int&gt; &amp;listHC,</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>                         std::vector&lt;cage::Cage&gt; &amp;cageList);</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="namespacering.html#a13d4db1147bed179fe5c59afe3bb90f7">   91</a></span>std::vector&lt;int&gt; <a class="code hl_function" href="namespacering.html#a503bfa2deec404d907645e16ed236c28">findDDC</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>                         std::vector&lt;strucType&gt; &amp;ringType,</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>                         <span class="keyword">const</span> std::vector&lt;int&gt; &amp;listHC,</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>                         std::vector&lt;cage::Cage&gt; &amp;cageList,</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>                         <span class="keyword">const</span> <a class="code hl_struct" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index);</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="namespacering.html#a5e65636a113b8a778541f437f00c0f97">  100</a></span>std::vector&lt;int&gt; <a class="code hl_function" href="namespacering.html#a5e65636a113b8a778541f437f00c0f97">findMixedRings</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>                                std::vector&lt;strucType&gt; &amp;ringType,</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>                                std::vector&lt;int&gt; &amp;listDDC,</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>                                std::vector&lt;int&gt; &amp;listHC);</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="namespacering.html#af2bab9ed638ed3e3a1ed3392d7e4a576">  107</a></span>std::vector&lt;int&gt; <a class="code hl_function" href="namespacering.html#af2bab9ed638ed3e3a1ed3392d7e4a576">findHC</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>                        std::vector&lt;strucType&gt; &amp;ringType,</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>                        <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>                        std::vector&lt;cage::Cage&gt; &amp;cageList);</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno"><a class="line" href="namespacering.html#a1dfa48bf23ffaf39fee585ac7634231a">  113</a></span>std::vector&lt;int&gt; <a class="code hl_function" href="namespacering.html#af2bab9ed638ed3e3a1ed3392d7e4a576">findHC</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>                        std::vector&lt;strucType&gt; &amp;ringType,</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>                        <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>                        std::vector&lt;cage::Cage&gt; &amp;cageList,</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>                        <span class="keyword">const</span> <a class="code hl_struct" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index);</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span></div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno"><a class="line" href="namespacering.html#a7cc755c188267af7b9ff9ae73ca77579">  121</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacering.html#a7cc755c188267af7b9ff9ae73ca77579">conditionOneDDC</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>                     std::vector&lt;int&gt; &amp;peripheralRings, <span class="keywordtype">int</span> iring);</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span></div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno"><a class="line" href="namespacering.html#a75c45309352d085d18f89f370dd42ab2">  125</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacering.html#a7cc755c188267af7b9ff9ae73ca77579">conditionOneDDC</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>                     std::vector&lt;int&gt; &amp;peripheralRings, <span class="keywordtype">int</span> iring,</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>                     <span class="keyword">const</span> <a class="code hl_struct" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index);</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno"><a class="line" href="namespacering.html#a5bc5928258e125e0d9e52314221974b9">  131</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacering.html#a5bc5928258e125e0d9e52314221974b9">conditionTwoDDC</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>                     std::vector&lt;int&gt; &amp;peripheralRings, <span class="keywordtype">int</span> iring);</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span></div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno"><a class="line" href="namespacering.html#ac90a6cf68afb185f82a5b1d064a1f80f">  135</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacering.html#a5bc5928258e125e0d9e52314221974b9">conditionTwoDDC</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>                     std::vector&lt;int&gt; &amp;peripheralRings, <span class="keywordtype">int</span> iring,</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>                     <span class="keyword">const</span> <a class="code hl_struct" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index);</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span></div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno"><a class="line" href="namespacering.html#abf88eff5d04ebb4bfad69693edaaa432">  141</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacering.html#abf88eff5d04ebb4bfad69693edaaa432">conditionThreeDDC</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>                       std::vector&lt;int&gt; &amp;peripheralRings);</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span></div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno"><a class="line" href="namespacering.html#a199fe38d3152cc04d18109ddb868ab34">  145</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacering.html#a199fe38d3152cc04d18109ddb868ab34">basalConditions</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>                     <span class="keyword">const</span> std::vector&lt;int&gt; &amp;basal1,</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>                     <span class="keyword">const</span> std::vector&lt;int&gt; &amp;basal2);</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span></div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno"><a class="line" href="namespacering.html#a350f1fa3c3d5807fb720444054d6e340">  151</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacering.html#a350f1fa3c3d5807fb720444054d6e340">basalNeighbours</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>                     std::vector&lt;int&gt; &amp;triplet, <span class="keywordtype">int</span> atomOne, <span class="keywordtype">int</span> atomTwo);</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span></div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno"><a class="line" href="namespacering.html#a5db4898b22ebb13511cc37fae6674e5c">  156</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacering.html#a5db4898b22ebb13511cc37fae6674e5c">notNeighboursOfRing</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>                         std::vector&lt;int&gt; &amp;triplet,</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>                         <span class="keyword">const</span> std::vector&lt;int&gt; &amp;<a class="code hl_namespace" href="namespacering.html">ring</a>);</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span></div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno"><a class="line" href="namespacering.html#a56c3c2a30736d27d9eaf3e3759e630e9">  161</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="namespacering.html#a56c3c2a30736d27d9eaf3e3759e630e9">findPrismatic</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings, std::vector&lt;int&gt; &amp;listHC,</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>                  std::vector&lt;strucType&gt; &amp;ringType, <span class="keywordtype">int</span> iring, <span class="keywordtype">int</span> jring,</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>                  std::vector&lt;int&gt; &amp;prismaticRings);</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span></div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno"><a class="line" href="namespacering.html#aaf26a6612dd314b36db80820289ab68b">  166</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="namespacering.html#a56c3c2a30736d27d9eaf3e3759e630e9">findPrismatic</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>                                std::vector&lt;int&gt; &amp;listHC,</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>                                std::vector&lt;strucType&gt; &amp;ringType, <span class="keywordtype">int</span> iring,</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>                                <span class="keywordtype">int</span> jring, std::vector&lt;int&gt; &amp;prismaticRings,</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>                                <span class="keyword">const</span> <a class="code hl_struct" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index);</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span></div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno"><a class="line" href="namespacering.html#a45c216fc97f12e29f117bbc1f6d3c7f3">  174</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="namespacering.html#a45c216fc97f12e29f117bbc1f6d3c7f3">getAtomTypesTopoBulk</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>                         <span class="keyword">const</span> std::vector&lt;ring::strucType&gt; &amp;ringType,</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>                         std::vector&lt;cage::iceType&gt; &amp;atomTypes);</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span></div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno"><a class="line" href="namespacering.html#aac3a6fdc27f05a7ded468e955983f270">  179</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="namespacering.html#aac3a6fdc27f05a7ded468e955983f270">getStrucNumbers</a>(<span class="keyword">const</span> std::vector&lt;ring::strucType&gt; &amp;ringType,</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>                    <span class="keyword">const</span> std::vector&lt;cage::Cage&gt; &amp;cageList, <span class="keywordtype">int</span> &amp;numHC, <span class="keywordtype">int</span> &amp;numDDC,</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>                    <span class="keywordtype">int</span> &amp;mixedRings, <span class="keywordtype">int</span> &amp;prismaticRings, <span class="keywordtype">int</span> &amp;basalRings);</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span> </div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>} <span class="comment">// namespace ring</span></div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span></div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span> </div>
+<div class="foldopen" id="foldopen00191" data-start="{" data-end="}">
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno"><a class="line" href="namespaceprism3.html">  191</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceprism3.html">prism3</a> {</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span></div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno"><a class="line" href="namespaceprism3.html#a1ba0089123227ca022acc1ce38baf7ee">  194</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="namespaceprism3.html#a1ba0089123227ca022acc1ce38baf7ee">findBulkPrisms</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>                   std::vector&lt;ring::strucType&gt; &amp;ringType,</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>                   <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>                   <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>                   std::vector&lt;double&gt; &amp;rmsdPerAtom, <span class="keywordtype">double</span> heightCutoff = 8);</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span></div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno"><a class="line" href="namespaceprism3.html#ab03946085dcf2e67583da676ab7f869f">  202</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespaceprism3.html#ab03946085dcf2e67583da676ab7f869f">basalPrismConditions</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>                          std::vector&lt;int&gt; &amp;basal1, std::vector&lt;int&gt; &amp;basal2);</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span></div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno"><a class="line" href="namespaceprism3.html#abbcd706f2576f374e6037e9073815ee8">  207</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespaceprism3.html#abbcd706f2576f374e6037e9073815ee8">relaxedPrismConditions</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>                            std::vector&lt;int&gt; &amp;basal1, std::vector&lt;int&gt; &amp;basal2);</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span></div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno"><a class="line" href="namespaceprism3.html#ad85e1c83d20a91d7e8678f5facc7cb7a">  211</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespaceprism3.html#ad85e1c83d20a91d7e8678f5facc7cb7a">basalRingsSeparation</a>(</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>    <span class="keyword">const</span> std::vector&lt;int&gt; &amp;basal1, <span class="keyword">const</span> std::vector&lt;int&gt; &amp;basal2, <span class="keywordtype">double</span> heightCutoff = 8);</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>} <span class="comment">// namespace prism3</span></div>
+</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span></div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span> </div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span><span class="preprocessor">#endif </span><span class="comment">// SEAMS_TOPO_BULK_H_</span></div>
+<div class="ttc" id="acage_8hpp_html"><div class="ttname"><a href="cage_8hpp.html">cage.hpp</a></div><div class="ttdoc">File for cage types for topological network criteria.</div></div>
+<div class="ttc" id="amol__sys_8hpp_html"><div class="ttname"><a href="mol__sys_8hpp.html">mol_sys.hpp</a></div><div class="ttdoc">The main molecular system handler.</div></div>
+<div class="ttc" id="anamespaceprism3_html"><div class="ttname"><a href="namespaceprism3.html">prism3</a></div><div class="ttdef"><b>Definition</b> <a href="#l00191">topo_bulk.hpp:191</a></div></div>
+<div class="ttc" id="anamespaceprism3_html_a1ba0089123227ca022acc1ce38baf7ee"><div class="ttname"><a href="namespaceprism3.html#a1ba0089123227ca022acc1ce38baf7ee">prism3::findBulkPrisms</a></div><div class="ttdeci">int findBulkPrisms(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; ring::strucType &gt; &amp;ringType, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, std::vector&lt; double &gt; &amp;rmsdPerAtom, double heightCutoff=8)</div><div class="ttdoc">Find out which rings are prisms.</div></div>
+<div class="ttc" id="anamespaceprism3_html_ab03946085dcf2e67583da676ab7f869f"><div class="ttname"><a href="namespaceprism3.html#ab03946085dcf2e67583da676ab7f869f">prism3::basalPrismConditions</a></div><div class="ttdeci">bool basalPrismConditions(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; int &gt; &amp;basal1, std::vector&lt; int &gt; &amp;basal2)</div></div>
+<div class="ttc" id="anamespaceprism3_html_abbcd706f2576f374e6037e9073815ee8"><div class="ttname"><a href="namespaceprism3.html#abbcd706f2576f374e6037e9073815ee8">prism3::relaxedPrismConditions</a></div><div class="ttdeci">bool relaxedPrismConditions(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; int &gt; &amp;basal1, std::vector&lt; int &gt; &amp;basal2)</div></div>
+<div class="ttc" id="anamespaceprism3_html_ad85e1c83d20a91d7e8678f5facc7cb7a"><div class="ttname"><a href="namespaceprism3.html#ad85e1c83d20a91d7e8678f5facc7cb7a">prism3::basalRingsSeparation</a></div><div class="ttdeci">bool basalRingsSeparation(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;basal1, const std::vector&lt; int &gt; &amp;basal2, double heightCutoff=8)</div><div class="ttdoc">Check to see that candidate basal prisms are not really far from each other.</div></div>
+<div class="ttc" id="anamespacering_html"><div class="ttname"><a href="namespacering.html">ring</a></div><div class="ttdoc">Topological network criteria functions.</div><div class="ttdef"><b>Definition</b> <a href="cage__affiliation_8hpp_source.html#l00055">cage_affiliation.hpp:55</a></div></div>
+<div class="ttc" id="anamespacering_html_a199fe38d3152cc04d18109ddb868ab34"><div class="ttname"><a href="namespacering.html#a199fe38d3152cc04d18109ddb868ab34">ring::basalConditions</a></div><div class="ttdeci">bool basalConditions(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; int &gt; &amp;basal1, const std::vector&lt; int &gt; &amp;basal2)</div><div class="ttdoc">Tests whether two rings are basal rings (true) or not (false).</div></div>
+<div class="ttc" id="anamespacering_html_a2314146c9c30c45799ab5217b8b69e61"><div class="ttname"><a href="namespacering.html#a2314146c9c30c45799ab5217b8b69e61">ring::buildRingSearchIndex</a></div><div class="ttdeci">RingSearchIndex buildRingSearchIndex(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, int numAtoms)</div><div class="ttdoc">Builds the inverted atom-to-rings index used by the cage searches.</div></div>
+<div class="ttc" id="anamespacering_html_a350f1fa3c3d5807fb720444054d6e340"><div class="ttname"><a href="namespacering.html#a350f1fa3c3d5807fb720444054d6e340">ring::basalNeighbours</a></div><div class="ttdeci">bool basalNeighbours(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; int &gt; &amp;triplet, int atomOne, int atomTwo)</div></div>
+<div class="ttc" id="anamespacering_html_a45c216fc97f12e29f117bbc1f6d3c7f3"><div class="ttname"><a href="namespacering.html#a45c216fc97f12e29f117bbc1f6d3c7f3">ring::getAtomTypesTopoBulk</a></div><div class="ttdeci">int getAtomTypesTopoBulk(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; ring::strucType &gt; &amp;ringType, std::vector&lt; cage::iceType &gt; &amp;atomTypes)</div></div>
+<div class="ttc" id="anamespacering_html_a46bc67e817124b0e736c493bc8e4d6ee"><div class="ttname"><a href="namespacering.html#a46bc67e817124b0e736c493bc8e4d6ee">ring::bulkPolygonRingAnalysis</a></div><div class="ttdeci">int bulkPolygonRingAnalysis(std::string path, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int maxDepth, int firstFrame)</div></div>
+<div class="ttc" id="anamespacering_html_a503bfa2deec404d907645e16ed236c28"><div class="ttname"><a href="namespacering.html#a503bfa2deec404d907645e16ed236c28">ring::findDDC</a></div><div class="ttdeci">std::vector&lt; int &gt; findDDC(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; strucType &gt; &amp;ringType, const std::vector&lt; int &gt; &amp;listHC, std::vector&lt; cage::Cage &gt; &amp;cageList)</div></div>
+<div class="ttc" id="anamespacering_html_a56c3c2a30736d27d9eaf3e3759e630e9"><div class="ttname"><a href="namespacering.html#a56c3c2a30736d27d9eaf3e3759e630e9">ring::findPrismatic</a></div><div class="ttdeci">int findPrismatic(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;listHC, std::vector&lt; strucType &gt; &amp;ringType, int iring, int jring, std::vector&lt; int &gt; &amp;prismaticRings)</div><div class="ttdoc">Finds the prismatic rings from basal rings iring and jring.</div></div>
+<div class="ttc" id="anamespacering_html_a5bc5928258e125e0d9e52314221974b9"><div class="ttname"><a href="namespacering.html#a5bc5928258e125e0d9e52314221974b9">ring::conditionTwoDDC</a></div><div class="ttdeci">bool conditionTwoDDC(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;peripheralRings, int iring)</div></div>
+<div class="ttc" id="anamespacering_html_a5db4898b22ebb13511cc37fae6674e5c"><div class="ttname"><a href="namespacering.html#a5db4898b22ebb13511cc37fae6674e5c">ring::notNeighboursOfRing</a></div><div class="ttdeci">bool notNeighboursOfRing(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; int &gt; &amp;triplet, const std::vector&lt; int &gt; &amp;ring)</div></div>
+<div class="ttc" id="anamespacering_html_a5e65636a113b8a778541f437f00c0f97"><div class="ttname"><a href="namespacering.html#a5e65636a113b8a778541f437f00c0f97">ring::findMixedRings</a></div><div class="ttdeci">std::vector&lt; int &gt; findMixedRings(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; strucType &gt; &amp;ringType, std::vector&lt; int &gt; &amp;listDDC, std::vector&lt; int &gt; &amp;listHC)</div></div>
+<div class="ttc" id="anamespacering_html_a7cc755c188267af7b9ff9ae73ca77579"><div class="ttname"><a href="namespacering.html#a7cc755c188267af7b9ff9ae73ca77579">ring::conditionOneDDC</a></div><div class="ttdeci">bool conditionOneDDC(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;peripheralRings, int iring)</div></div>
+<div class="ttc" id="anamespacering_html_aac3a6fdc27f05a7ded468e955983f270"><div class="ttname"><a href="namespacering.html#aac3a6fdc27f05a7ded468e955983f270">ring::getStrucNumbers</a></div><div class="ttdeci">int getStrucNumbers(const std::vector&lt; ring::strucType &gt; &amp;ringType, const std::vector&lt; cage::Cage &gt; &amp;cageList, int &amp;numHC, int &amp;numDDC, int &amp;mixedRings, int &amp;prismaticRings, int &amp;basalRings)</div><div class="ttdoc">Determines the number of HCs, DDCs, Mixed rings, prismatic and basal rings.</div></div>
+<div class="ttc" id="anamespacering_html_abf88eff5d04ebb4bfad69693edaaa432"><div class="ttname"><a href="namespacering.html#abf88eff5d04ebb4bfad69693edaaa432">ring::conditionThreeDDC</a></div><div class="ttdeci">bool conditionThreeDDC(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;peripheralRings)</div></div>
+<div class="ttc" id="anamespacering_html_ada5f6a19834edc41365e7f85d92e4b76"><div class="ttname"><a href="namespacering.html#ada5f6a19834edc41365e7f85d92e4b76">ring::topoBulkAnalysis</a></div><div class="ttdeci">int topoBulkAnalysis(std::string path, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int firstFrame, bool onlyTetrahedral=true)</div></div>
+<div class="ttc" id="anamespacering_html_af2bab9ed638ed3e3a1ed3392d7e4a576"><div class="ttname"><a href="namespacering.html#af2bab9ed638ed3e3a1ed3392d7e4a576">ring::findHC</a></div><div class="ttdeci">std::vector&lt; int &gt; findHC(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; strucType &gt; &amp;ringType, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; cage::Cage &gt; &amp;cageList)</div></div>
+<div class="ttc" id="aorder__parameter_8hpp_html"><div class="ttname"><a href="order__parameter_8hpp.html">order_parameter.hpp</a></div></div>
+<div class="ttc" id="aring_8hpp_html"><div class="ttname"><a href="ring_8hpp.html">ring.hpp</a></div><div class="ttdoc">File containing common functions used by bulk and confined topological network critera.</div></div>
+<div class="ttc" id="aseams__input_8hpp_html"><div class="ttname"><a href="seams__input_8hpp.html">seams_input.hpp</a></div><div class="ttdoc">File for functions that read in files).</div></div>
+<div class="ttc" id="aseams__output_8hpp_html"><div class="ttname"><a href="seams__output_8hpp.html">seams_output.hpp</a></div></div>
+<div class="ttc" id="ashapeMatch_8hpp_html"><div class="ttname"><a href="shapeMatch_8hpp.html">shapeMatch.hpp</a></div></div>
+<div class="ttc" id="astructmolSys_1_1PointCloud_html"><div class="ttname"><a href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a></div><div class="ttdoc">This contains a collection of points; contains information for a particular frame.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00173">mol_sys.hpp:173</a></div></div>
+<div class="ttc" id="astructmolSys_1_1Point_html"><div class="ttname"><a href="structmolSys_1_1Point.html">molSys::Point</a></div><div class="ttdoc">This contains per-particle information.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00152">mol_sys.hpp:152</a></div></div>
+<div class="ttc" id="astructring_1_1RingSearchIndex_html"><div class="ttname"><a href="structring_1_1RingSearchIndex.html">ring::RingSearchIndex</a></div><div class="ttdoc">Inverted index from an atom to the rings that contain it.</div><div class="ttdef"><b>Definition</b> <a href="#l00075">topo_bulk.hpp:75</a></div></div>
+<div class="ttc" id="astructring_1_1RingSearchIndex_html_a8e4433086bf9bec113ee61bc3c17b8bb"><div class="ttname"><a href="structring_1_1RingSearchIndex.html#a8e4433086bf9bec113ee61bc3c17b8bb">ring::RingSearchIndex::ringsContainingAtom</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; ringsContainingAtom</div><div class="ttdef"><b>Definition</b> <a href="#l00076">topo_bulk.hpp:76</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!-- Doxygen already closed #doc-content and #container before this template. -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="topo__bulk_8hpp.html">topo_bulk.hpp</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.17.0 </li>
+  </ul>
+</div>
+<div class="doxyyoda-attrib" role="contentinfo">
+  <span class="doxyyoda-attrib__item">
+    <span>Generated by <a href="https://www.doxygen.org/index.html">Doxygen 1.17.0</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z"/></svg>
+    <span>Analytics by <a href="https://antics.turtletech.us/" target="_blank" rel="noopener noreferrer">Antics</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <span>provided by</span>
+    <span class="doxyyoda-attrib__brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1.4em" height="1.4em" viewBox="0 0 64 64" aria-hidden="true"><g fill-rule="evenodd"><ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9"/><path fill="#80D25B" d="M20.3,46c0,0-3.2,9.9.3,13.8c3.5,3.9 6.1,3.4 6.1-6C26.8,44.3 20.3,46 20.3,46Z"/><path fill="#80D25B" d="M38.3,46c0,0-3.2,9.9.4,13.8c3.5,3.9 6.1,3.4 6.1-6C44.8,44.3 38.3,46 38.3,46Z" transform="matrix(-1 0 0 1 81.8 0)"/><path fill="#80D25B" d="M20.6,21.2c0,0-6.7-5.8-10.5-5.2C6.2,16.7 6,22.2 6,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L20.6,21.2Z"/><path fill="#80D25B" d="M57.6,21.2c0,0-6.6-5.8-10.5-5.2C43.2,16.7 43,22.2 43,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L57.6,21.2Z" transform="matrix(-1 0 0 1 100.623 0)"/><path fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32,53C40.8,53 48,44.5 48,34C48,23.5 46.7,17 32,17C17.3,17 16,23.5 16,34C16,44.5 23.2,53 32,53Z"/><polygon fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" points="32 22 38.9 26 38.9 34 32 38 25.1 34 25.1 26"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M30,8C28.9,8 28,8.9 28,10"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M36,8C34.9,8 34,8.9 34,10" transform="matrix(-1 0 0 1 70 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32.1,38.2L32.1,52.4M32,21.7L32,17M25.2,26L17.7,23.1M25.1,34.2L16.8,38.9"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M46.2,26L38.7,23.1" transform="matrix(-1 0 0 1 84.951 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M47.1,34.2L38.8,38.9" transform="matrix(-1 0 0 1 85.891 0)"/></g></svg>
+      <a href="https://turtletech.us/" target="_blank" rel="noopener noreferrer">TurtleTech ehf</a>
+    </span>
+  </span>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

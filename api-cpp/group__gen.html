@@ -1,0 +1,1490 @@
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="generator" content="Doxygen 1.17.0"/>
+<title>seams-core: Gen</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default';
+mermaid.initialize({ startOnLoad: true, theme: theme });
+</script>
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.hostname!==location.hostname)antics.event("Outbound Link",{url:a.href});});</script>
+<!-- doxyYoda owns presentation; stock doxygen.css is not linked (theme SCSS covers Doxygen classes). -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+/* doxyYoda theme boot: apply stored or OS preference before first paint */
+(function () {
+  try {
+    var stored = localStorage.getItem("doxyYoda-theme");
+    var root = document.documentElement;
+    if (stored === "dark") {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    } else if (stored === "light") {
+      root.classList.add("light");
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    }
+  } catch (e) { /* private mode */ }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area" aria-label="Project">
+<div class="title_area__start"></div>
+<div class="title_area__center">
+<span class="project_info">seams-core v2.6.0</span>
+<span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
+</div>
+<div class="title_area__end">
+<button type="button" class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false">&#9790;</button>
+</div>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+/* doxyYoda interactive: foldable fragments, copy buttons, dark-mode toggle */
+document.addEventListener("DOMContentLoaded", function () {
+  function prefersDark() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function isDarkMode() {
+    var root = document.documentElement;
+    if (root.classList.contains("dark") || root.classList.contains("dark-mode")) return true;
+    if (root.classList.contains("light")) return false;
+    return prefersDark();
+  }
+  // Optional folding: wrap .fragment in open <details class="code-details">.
+  // Skip fragments already inside details and native Doxygen .foldopen listings.
+  document.querySelectorAll(".fragment").forEach(function (frag) {
+    if (frag.closest("details.code-details")) return;
+    if (frag.querySelector(".foldopen")) return;
+    var details = document.createElement("details");
+    details.className = "code-details";
+    details.open = true;
+    var summary = document.createElement("summary");
+    summary.textContent = "Code";
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard on div.fragment (themed .copy-btn only)
+  document.querySelectorAll("div.fragment").forEach(function (frag) {
+    if (frag.querySelector(".copy-btn")) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-btn";
+    btn.textContent = "Copy";
+    btn.setAttribute("aria-label", "Copy code");
+    btn.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      var clone = frag.cloneNode(true);
+      var extra = clone.querySelector(".copy-btn");
+      if (extra) extra.remove();
+      var lines = clone.querySelectorAll(".line");
+      var text = lines.length
+        ? Array.prototype.map.call(lines, function (l) { return l.textContent; }).join("\n")
+        : clone.textContent;
+      var done = function () {
+        btn.textContent = "Copied!";
+        setTimeout(function () { btn.textContent = "Copy"; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {
+          /* ignore */
+        });
+      }
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById("darkModeToggle");
+  if (toggle) {
+    function updateIcon() {
+      var dark = isDarkMode();
+      toggle.innerHTML = dark ? "&#9788;" : "&#9790;";
+      toggle.setAttribute("aria-pressed", dark ? "true" : "false");
+    }
+    updateIcon();
+    toggle.addEventListener("click", function () {
+      var root = document.documentElement;
+      var nextDark = !isDarkMode();
+      root.classList.toggle("dark", nextDark);
+      root.classList.toggle("dark-mode", nextDark);
+      root.classList.toggle("light", !nextDark);
+      try {
+        localStorage.setItem("doxyYoda-theme", nextDark ? "dark" : "light");
+      } catch (e) { /* private mode */ }
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.17.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', () => {
+  initMenu('',true);
+  init_search();
+});
+</script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1" style="position:absolute;right:8px;top:8px;height:36px;"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2" style="float:right">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon" onmouseover="return searchBox.OnSearchSelectShow()" onmouseout="return searchBox.OnSearchSelectHide()"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('group__gen.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">Gen </div></div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-groups" class="groupheader"><a id="groups" name="groups"></a>
+Topics</h2></td></tr>
+<tr class="memitem:ring" id="r_ring"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="group__ring.html">Ring</a></td></tr>
+<tr class="memdesc:group__ring"><td class="mdescLeft">&#160;</td><td class="mdescRight"><br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:gen" id="r_gen"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespacegen.html">gen</a></td></tr>
+<tr class="memdesc:namespacegen"><td class="mdescLeft">&#160;</td><td class="mdescRight">Small generic functions that are shared by all namespaces. <br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:gaeadb5e8ff98078b0007d0def0eaad39d" id="r_gaeadb5e8ff98078b0007d0def0eaad39d"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#gaeadb5e8ff98078b0007d0def0eaad39d">gen::radDeg</a> (double angle)</td></tr>
+<tr class="memdesc:gaeadb5e8ff98078b0007d0def0eaad39d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inline function for converting radians-&gt;degrees.  <br /></td></tr>
+<tr class="memitem:ga48d1277f242712a0948bb029883328e4" id="r_ga48d1277f242712a0948bb029883328e4"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga48d1277f242712a0948bb029883328e4">gen::eigenVecAngle</a> (std::vector&lt; double &gt; OO, std::vector&lt; double &gt; OH)</td></tr>
+<tr class="memdesc:ga48d1277f242712a0948bb029883328e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Eigen function for getting the angle (in radians) between the O&ndash;O and O-H vectors.  <br /></td></tr>
+<tr class="memitem:gaf3593d4e71600e8d85fbd873fcd95558" id="r_gaf3593d4e71600e8d85fbd873fcd95558"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#gaf3593d4e71600e8d85fbd873fcd95558">gen::getAverageWithoutOutliers</a> (std::vector&lt; double &gt; inpVec)</td></tr>
+<tr class="memdesc:gaf3593d4e71600e8d85fbd873fcd95558"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the average, after excluding the outliers, using quartiles.  <br /></td></tr>
+<tr class="memitem:ga6046c3c9db73fbf420ad07834047942e" id="r_ga6046c3c9db73fbf420ad07834047942e"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga6046c3c9db73fbf420ad07834047942e">gen::calcMedian</a> (std::vector&lt; double &gt; *input)</td></tr>
+<tr class="memdesc:ga6046c3c9db73fbf420ad07834047942e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inline generic function for calculating the median given a vector of the values.  <br /></td></tr>
+<tr class="memitem:ga74b57e7951bcff4f7c31fdc4ec5e79bf" id="r_ga74b57e7951bcff4f7c31fdc4ec5e79bf"><td class="memItemLeft">std::array&lt; double, 3 &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga74b57e7951bcff4f7c31fdc4ec5e79bf">gen::triclinicMinImage</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double xi, double yi, double zi, double xj, double yj, double zj)</td></tr>
+<tr class="memitem:gafdafa646c7cceaa4eeb8d92b14e0a192" id="r_gafdafa646c7cceaa4eeb8d92b14e0a192"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#gafdafa646c7cceaa4eeb8d92b14e0a192">gen::periodicDistSq</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int iatom, int jatom)</td></tr>
+<tr class="memdesc:gafdafa646c7cceaa4eeb8d92b14e0a192"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inline generic function for obtaining the unwrapped periodic distance between two particles, whose indices (not IDs) have been given.  <br /></td></tr>
+<tr class="memitem:ga4038dadde6016e7a738c2cb015344ee3" id="r_ga4038dadde6016e7a738c2cb015344ee3"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga4038dadde6016e7a738c2cb015344ee3">gen::periodicDist</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int iatom, int jatom)</td></tr>
+<tr class="memdesc:ga4038dadde6016e7a738c2cb015344ee3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inline generic function for obtaining the unwrapped periodic distance between two particles, whose indices (not IDs) have been given.  <br /></td></tr>
+<tr class="memitem:gacdbacffd9c9867dc307efc89686e5634" id="r_gacdbacffd9c9867dc307efc89686e5634"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#gacdbacffd9c9867dc307efc89686e5634">gen::batchPeriodicDistSq</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int iatom, const int *jatom, std::size_t n, double *distSq)</td></tr>
+<tr class="memitem:ga92412c34a5480e96297c968633b07652" id="r_ga92412c34a5480e96297c968633b07652"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#ga92412c34a5480e96297c968633b07652">gen::formatDumpBox</a> (const std::vector&lt; double &gt; &amp;box)</td></tr>
+<tr class="memitem:ga2cc6ef1ffc20f6eebc857d8aafd47f97" id="r_ga2cc6ef1ffc20f6eebc857d8aafd47f97"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ga2cc6ef1ffc20f6eebc857d8aafd47f97">gen::writeDumpBoxBounds</a> (std::ostream &amp;os, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:gacd27073a9df4d812fa5a6d24a8b6efae" id="r_gacd27073a9df4d812fa5a6d24a8b6efae"><td class="memItemLeft">std::array&lt; double, 3 &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gacd27073a9df4d812fa5a6d24a8b6efae">gen::relDistFromPoint</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int iatom, double xj, double yj, double zj)</td></tr>
+<tr class="memdesc:gacd27073a9df4d812fa5a6d24a8b6efae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inline generic function for obtaining the unwrapped periodic distance between one particle and another point, whose index has been given.  <br /></td></tr>
+<tr class="memitem:gafd586580b7217567d600fd49249bd87f" id="r_gafd586580b7217567d600fd49249bd87f"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#gafd586580b7217567d600fd49249bd87f">gen::unWrappedDistFromPoint</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int iatom, const std::vector&lt; double &gt; &amp;singlePoint)</td></tr>
+<tr class="memitem:ga13dd7fd24f050c7a639a1811d22c8d5b" id="r_ga13dd7fd24f050c7a639a1811d22c8d5b"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga13dd7fd24f050c7a639a1811d22c8d5b">gen::distance</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int iatom, int jatom)</td></tr>
+<tr class="memdesc:ga13dd7fd24f050c7a639a1811d22c8d5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inline generic function for obtaining the wrapped distance between two particles WITHOUT applying PBCs, whose indices (not IDs) have been given.  <br /></td></tr>
+<tr class="memitem:ga3c02ecf6adbdc30d78e8c0aeb95914bf" id="r_ga3c02ecf6adbdc30d78e8c0aeb95914bf"><td class="memItemLeft">std::array&lt; double, 3 &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga3c02ecf6adbdc30d78e8c0aeb95914bf">gen::relDist</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int iatom, int jatom)</td></tr>
+<tr class="memdesc:ga3c02ecf6adbdc30d78e8c0aeb95914bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inline generic function for getting the relative unwrapped distance between two particles for each dimension.  <br /></td></tr>
+<tr class="memitem:gaed4f2e37c89f319a852355a2b7199147" id="r_gaed4f2e37c89f319a852355a2b7199147"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#gaed4f2e37c89f319a852355a2b7199147">gen::compareByAtomID</a> (const <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt; &amp;a, const <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt; &amp;b)</td></tr>
+<tr class="memdesc:gaed4f2e37c89f319a852355a2b7199147"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inline generic function for sorting or comparing two particles, according to the atom ID when the entire Point objects have been passed.  <br /></td></tr>
+<tr class="memitem:gaaf97563c332410a372be92dcb8f81b3f" id="r_gaaf97563c332410a372be92dcb8f81b3f"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#gaaf97563c332410a372be92dcb8f81b3f">gen::prettyPrintYoda</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::string outFile)</td></tr>
+<tr class="memdesc:gaaf97563c332410a372be92dcb8f81b3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic function for printing all the struct information.  <br /></td></tr>
+<tr class="memitem:gad4b2c207d9bddf2fe75aca626f14ffe3" id="r_gad4b2c207d9bddf2fe75aca626f14ffe3"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#gad4b2c207d9bddf2fe75aca626f14ffe3">gen::unwrappedCoordShift</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int iatomIndex, int jatomIndex, double *x_i, double *y_i, double *z_i, double *x_j, double *y_j, double *z_j)</td></tr>
+<tr class="memdesc:gad4b2c207d9bddf2fe75aca626f14ffe3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shift particles (unwrapped coordinates).  <br /></td></tr>
+<tr class="memitem:gac7f742de2fac11d3b249c63bf4f4e126" id="r_gac7f742de2fac11d3b249c63bf4f4e126"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#gac7f742de2fac11d3b249c63bf4f4e126">gen::angDistDegQuaternions</a> (std::vector&lt; double &gt; quat1, std::vector&lt; double &gt; quat2)</td></tr>
+<tr class="memitem:gaabdeca1aa6b867687a3540e97447544a" id="r_gaabdeca1aa6b867687a3540e97447544a"><td class="memItemLeft">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gaabdeca1aa6b867687a3540e97447544a">gen::tokenizer</a> (std::string line)</td></tr>
+<tr class="memdesc:gaabdeca1aa6b867687a3540e97447544a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for tokenizing line strings into words (strings) delimited by whitespace.  <br /></td></tr>
+<tr class="memitem:ga98b7a158dd7a61350fdd6ca43a432e4f" id="r_ga98b7a158dd7a61350fdd6ca43a432e4f"><td class="memItemLeft">std::vector&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga98b7a158dd7a61350fdd6ca43a432e4f">gen::tokenizerDouble</a> (std::string line)</td></tr>
+<tr class="memdesc:ga98b7a158dd7a61350fdd6ca43a432e4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for tokenizing line strings into a vector of doubles.  <br /></td></tr>
+<tr class="memitem:gae4ee1568b5329d93d76418227a024ac1" id="r_gae4ee1568b5329d93d76418227a024ac1"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gae4ee1568b5329d93d76418227a024ac1">gen::tokenizerInt</a> (std::string line)</td></tr>
+<tr class="memdesc:gae4ee1568b5329d93d76418227a024ac1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for tokenizing line strings into a vector of ints.  <br /></td></tr>
+<tr class="memitem:gaa49625658169d33851df990c1d62f097" id="r_gaa49625658169d33851df990c1d62f097"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#gaa49625658169d33851df990c1d62f097">gen::file_exists</a> (const std::string &amp;name)</td></tr>
+<tr class="memdesc:gaa49625658169d33851df990c1d62f097"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for checking if a file exists or not.  <br /></td></tr>
+<tr class="memitem:ga17d4f5636c0469c19d7efa59344396b2" id="r_ga17d4f5636c0469c19d7efa59344396b2"><td class="memItemLeft">std::vector&lt; std::complex&lt; double &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga17d4f5636c0469c19d7efa59344396b2">gen::avgVector</a> (std::vector&lt; std::complex&lt; double &gt; &gt; v, int l, int neigh)</td></tr>
+<tr class="memdesc:ga17d4f5636c0469c19d7efa59344396b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the complex vector, normalized by the number of nearest neighbours, of length \(2l+1\).  <br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:ga9aee9bc09915c8d7a816b9ab38cff0f3" id="r_ga9aee9bc09915c8d7a816b9ab38cff0f3"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">gen::pi</a> = std::numbers::pi</td></tr>
+<tr class="memdesc:ga9aee9bc09915c8d7a816b9ab38cff0f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uses Boost to get the value of pi.  <br /></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"></div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="gac7f742de2fac11d3b249c63bf4f4e126" name="gac7f742de2fac11d3b249c63bf4f4e126"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac7f742de2fac11d3b249c63bf4f4e126">&#9670;&#160;</a></span>angDistDegQuaternions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::angDistDegQuaternions </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; double &gt;</td>          <td class="paramname"><span class="paramname"><em>quat1</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt;</td>          <td class="paramname"><span class="paramname"><em>quat2</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Function for getting the angular distance between two quaternions. Returns the result in degrees </p>
+
+</div>
+</div>
+<a id="ga17d4f5636c0469c19d7efa59344396b2" name="ga17d4f5636c0469c19d7efa59344396b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga17d4f5636c0469c19d7efa59344396b2">&#9670;&#160;</a></span>avgVector()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::complex&lt; double &gt; &gt; gen::avgVector </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; std::complex&lt; double &gt; &gt;</td>          <td class="paramname"><span class="paramname"><em>v</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>l</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>neigh</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Calculates the complex vector, normalized by the number of nearest neighbours, of length \(2l+1\). </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">v</td><td>The complex vector to be normalized, of length \(2l+1\) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">l</td><td>A free integer parameter </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">neigh</td><td>The number of nearest neighbours </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>length \(2l+1\), normalized by the number of nearest neighbours </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00421">421</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  421</span>                                                             {</div>
+<div class="line"><span class="lineno">  422</span>  <span class="keywordflow">if</span> (neigh == 0) {</div>
+<div class="line"><span class="lineno">  423</span>    <span class="keywordflow">return</span> v;</div>
+<div class="line"><span class="lineno">  424</span>  }</div>
+<div class="line"><span class="lineno">  425</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; 2 * l + 1; m++) {</div>
+<div class="line"><span class="lineno">  426</span>    v[m] = (1.0 / <span class="keyword">static_cast&lt;</span><span class="keywordtype">double</span><span class="keyword">&gt;</span>(neigh)) * v[m];</div>
+<div class="line"><span class="lineno">  427</span>  }</div>
+<div class="line"><span class="lineno">  428</span> </div>
+<div class="line"><span class="lineno">  429</span>  <span class="keywordflow">return</span> v;</div>
+<div class="line"><span class="lineno">  430</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gacdbacffd9c9867dc307efc89686e5634" name="gacdbacffd9c9867dc307efc89686e5634"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gacdbacffd9c9867dc307efc89686e5634">&#9670;&#160;</a></span>batchPeriodicDistSq()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void gen::batchPeriodicDistSq </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>iatom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>jatom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>distSq</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00203">203</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  205</span>                                                   {</div>
+<div class="line"><span class="lineno">  206</span>  <span class="keywordflow">for</span> (std::size_t k = 0; k &lt; n; k++) {</div>
+<div class="line"><span class="lineno">  207</span>    distSq[k] = <a class="code hl_function" href="#gafdafa646c7cceaa4eeb8d92b14e0a192">periodicDistSq</a>(yCloud, iatom, jatom[k]);</div>
+<div class="line"><span class="lineno">  208</span>  }</div>
+<div class="line"><span class="lineno">  209</span>}</div>
+<div class="ttc" id="agroup__gen_html_gafdafa646c7cceaa4eeb8d92b14e0a192"><div class="ttname"><a href="#gafdafa646c7cceaa4eeb8d92b14e0a192">gen::periodicDistSq</a></div><div class="ttdeci">double periodicDistSq(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int iatom, int jatom)</div><div class="ttdoc">Inline generic function for obtaining the unwrapped periodic distance between two particles,...</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00160">generic.hpp:160</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga6046c3c9db73fbf420ad07834047942e" name="ga6046c3c9db73fbf420ad07834047942e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6046c3c9db73fbf420ad07834047942e">&#9670;&#160;</a></span>calcMedian()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::calcMedian </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; double &gt; *</td>          <td class="paramname"><span class="paramname"><em>input</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Inline generic function for calculating the median given a vector of the values. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">yCloud</td><td>The input PointCloud, which contains the particle coordinates, simulation box lengths etc. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input vector with the values </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The median value </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00083">83</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   83</span>                                                   {</div>
+<div class="line"><span class="lineno">   84</span>  <span class="keywordtype">int</span> n = (*input).size(); <span class="comment">// Number of elements</span></div>
+<div class="line"><span class="lineno">   85</span>  <span class="keywordtype">double</span> median;           <span class="comment">// Output median value</span></div>
+<div class="line"><span class="lineno">   86</span> </div>
+<div class="line"><span class="lineno">   87</span>  <span class="comment">// Sort a copy (avoid mutating input)</span></div>
+<div class="line"><span class="lineno">   88</span>  std::vector&lt;double&gt; sorted = *input;</div>
+<div class="line"><span class="lineno">   89</span>  std::sort(sorted.begin(), sorted.end());</div>
+<div class="line"><span class="lineno">   90</span> </div>
+<div class="line"><span class="lineno">   91</span>  <span class="comment">// Calculate the median</span></div>
+<div class="line"><span class="lineno">   92</span>  <span class="comment">// For even values, the median is the average of the two middle values</span></div>
+<div class="line"><span class="lineno">   93</span>  <span class="keywordflow">if</span> (n % 2 == 0) {</div>
+<div class="line"><span class="lineno">   94</span>    median = 0.5 * (sorted[n / 2] + sorted[n / 2 - 1]);</div>
+<div class="line"><span class="lineno">   95</span>  } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">   96</span>    median = sorted[(n + 1) / 2 - 1];</div>
+<div class="line"><span class="lineno">   97</span>  }</div>
+<div class="line"><span class="lineno">   98</span> </div>
+<div class="line"><span class="lineno">   99</span>  <span class="keywordflow">return</span> median;</div>
+<div class="line"><span class="lineno">  100</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gaed4f2e37c89f319a852355a2b7199147" name="gaed4f2e37c89f319a852355a2b7199147"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaed4f2e37c89f319a852355a2b7199147">&#9670;&#160;</a></span>compareByAtomID()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gen::compareByAtomID </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>b</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Inline generic function for sorting or comparing two particles, according to the atom ID when the entire Point objects have been passed. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>The input Point for A. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>The input Point for B. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if the atom ID of A is less than the atom ID of B </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00344">344</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  345</span>                                                          {</div>
+<div class="line"><span class="lineno">  346</span>  <span class="keywordflow">return</span> a.<a class="code hl_variable" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a> &lt; b.<a class="code hl_variable" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a>;</div>
+<div class="line"><span class="lineno">  347</span>}</div>
+<div class="ttc" id="agroup__molSys_html_gafbcfc945f41267043cddfd9bae8c10a2"><div class="ttname"><a href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">molSys::Point::atomID</a></div><div class="ttdeci">int atomID</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00153">mol_sys.hpp:153</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga13dd7fd24f050c7a639a1811d22c8d5b" name="ga13dd7fd24f050c7a639a1811d22c8d5b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga13dd7fd24f050c7a639a1811d22c8d5b">&#9670;&#160;</a></span>distance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::distance </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>iatom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>jatom</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Inline generic function for obtaining the wrapped distance between two particles WITHOUT applying PBCs, whose indices (not IDs) have been given. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">yCloud</td><td>The input PointCloud, which contains the particle coordinates, simulation box lengths etc. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">iatom</td><td>The index of the \( i^{th} \) atom. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">jatom</td><td>The index of the \( j^{th} \) atom. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The wrapped distance. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00299">299</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  300</span>                    {</div>
+<div class="line"><span class="lineno">  301</span>  std::array&lt;double, 3&gt; dr;</div>
+<div class="line"><span class="lineno">  302</span>  <span class="keywordtype">double</span> r2 = 0.0; <span class="comment">// Squared absolute distance</span></div>
+<div class="line"><span class="lineno">  303</span> </div>
+<div class="line"><span class="lineno">  304</span>  <span class="comment">// Get x1-x2 etc</span></div>
+<div class="line"><span class="lineno">  305</span>  dr[0] = fabs(yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x - yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x);</div>
+<div class="line"><span class="lineno">  306</span>  dr[1] = fabs(yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y - yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y);</div>
+<div class="line"><span class="lineno">  307</span>  dr[2] = fabs(yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z - yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z);</div>
+<div class="line"><span class="lineno">  308</span> </div>
+<div class="line"><span class="lineno">  309</span>  <span class="comment">// Get the squared absolute distance</span></div>
+<div class="line"><span class="lineno">  310</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
+<div class="line"><span class="lineno">  311</span>    r2 += pow(dr[k], 2.0);</div>
+<div class="line"><span class="lineno">  312</span>  }</div>
+<div class="line"><span class="lineno">  313</span> </div>
+<div class="line"><span class="lineno">  314</span>  <span class="keywordflow">return</span> sqrt(r2);</div>
+<div class="line"><span class="lineno">  315</span>}</div>
+<div class="ttc" id="agroup__molSys_html_ga67ab89369cd26572878a91afd521ef81"><div class="ttname"><a href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">molSys::PointCloud::pts</a></div><div class="ttdeci">std::vector&lt; S &gt; pts</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00174">mol_sys.hpp:174</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga48d1277f242712a0948bb029883328e4" name="ga48d1277f242712a0948bb029883328e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga48d1277f242712a0948bb029883328e4">&#9670;&#160;</a></span>eigenVecAngle()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::eigenVecAngle </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; double &gt;</td>          <td class="paramname"><span class="paramname"><em>OO</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt;</td>          <td class="paramname"><span class="paramname"><em>OH</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Eigen function for getting the angle (in radians) between the O&ndash;O and O-H vectors. </p>
+
+</div>
+</div>
+<a id="gaa49625658169d33851df990c1d62f097" name="gaa49625658169d33851df990c1d62f097"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa49625658169d33851df990c1d62f097">&#9670;&#160;</a></span>file_exists()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gen::file_exists </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>name</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Function for checking if a file exists or not. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>The name of the file </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00408">408</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  408</span>                                               {</div>
+<div class="line"><span class="lineno">  409</span>  <span class="keywordflow">return</span> std::filesystem::exists(name);</div>
+<div class="line"><span class="lineno">  410</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga92412c34a5480e96297c968633b07652" name="ga92412c34a5480e96297c968633b07652"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga92412c34a5480e96297c968633b07652">&#9670;&#160;</a></span>formatDumpBox()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string gen::formatDumpBox </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>box</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00212">212</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  212</span>                                                             {</div>
+<div class="line"><span class="lineno">  213</span>  std::ostringstream oss;</div>
+<div class="line"><span class="lineno">  214</span>  <span class="keywordflow">if</span> (box.size() &gt;= 3) {</div>
+<div class="line"><span class="lineno">  215</span>    oss &lt;&lt; box[0] &lt;&lt; <span class="charliteral">&#39; &#39;</span> &lt;&lt; box[1] &lt;&lt; <span class="charliteral">&#39; &#39;</span> &lt;&lt; box[2];</div>
+<div class="line"><span class="lineno">  216</span>  }</div>
+<div class="line"><span class="lineno">  217</span>  <span class="keywordflow">if</span> (box.size() &gt;= 6) {</div>
+<div class="line"><span class="lineno">  218</span>    oss &lt;&lt; <span class="stringliteral">&quot; xy &quot;</span> &lt;&lt; box[3] &lt;&lt; <span class="stringliteral">&quot; xz &quot;</span> &lt;&lt; box[4] &lt;&lt; <span class="stringliteral">&quot; yz &quot;</span> &lt;&lt; box[5];</div>
+<div class="line"><span class="lineno">  219</span>  }</div>
+<div class="line"><span class="lineno">  220</span>  <span class="keywordflow">return</span> oss.str();</div>
+<div class="line"><span class="lineno">  221</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gaf3593d4e71600e8d85fbd873fcd95558" name="gaf3593d4e71600e8d85fbd873fcd95558"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaf3593d4e71600e8d85fbd873fcd95558">&#9670;&#160;</a></span>getAverageWithoutOutliers()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::getAverageWithoutOutliers </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; double &gt;</td>          <td class="paramname"><span class="paramname"><em>inpVec</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the average, after excluding the outliers, using quartiles. </p>
+
+</div>
+</div>
+<a id="ga4038dadde6016e7a738c2cb015344ee3" name="ga4038dadde6016e7a738c2cb015344ee3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4038dadde6016e7a738c2cb015344ee3">&#9670;&#160;</a></span>periodicDist()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::periodicDist </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>iatom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>jatom</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Inline generic function for obtaining the unwrapped periodic distance between two particles, whose indices (not IDs) have been given. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">yCloud</td><td>The input PointCloud, which contains the particle coordinates, simulation box lengths etc. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">iatom</td><td>The index of the \( i^{th} \) atom. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">jatom</td><td>The index of the \( j^{th} \) atom. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The unwrapped periodic distance. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00196">196</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  197</span>                                   {</div>
+<div class="line"><span class="lineno">  198</span>  <span class="keywordflow">return</span> std::sqrt(<a class="code hl_function" href="#gafdafa646c7cceaa4eeb8d92b14e0a192">periodicDistSq</a>(yCloud, iatom, jatom));</div>
+<div class="line"><span class="lineno">  199</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gafdafa646c7cceaa4eeb8d92b14e0a192" name="gafdafa646c7cceaa4eeb8d92b14e0a192"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafdafa646c7cceaa4eeb8d92b14e0a192">&#9670;&#160;</a></span>periodicDistSq()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::periodicDistSq </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>iatom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>jatom</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Inline generic function for obtaining the unwrapped periodic distance between two particles, whose indices (not IDs) have been given. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">yCloud</td><td>The input PointCloud, which contains the particle coordinates, simulation box lengths etc. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">iatom</td><td>The index of the \( i^{th} \) atom. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">jatom</td><td>The index of the \( j^{th} \) atom. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The unwrapped periodic distance. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00160">160</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  161</span>                                     {</div>
+<div class="line"><span class="lineno">  162</span>  <span class="keywordflow">if</span> (yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.size() &gt;= 6) {</div>
+<div class="line"><span class="lineno">  163</span>    <span class="keyword">const</span> <span class="keyword">auto</span> dr = <a class="code hl_function" href="#ga74b57e7951bcff4f7c31fdc4ec5e79bf">triclinicMinImage</a>(</div>
+<div class="line"><span class="lineno">  164</span>        yCloud, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z,</div>
+<div class="line"><span class="lineno">  165</span>        yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z);</div>
+<div class="line"><span class="lineno">  166</span>    <span class="keywordflow">return</span> dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];</div>
+<div class="line"><span class="lineno">  167</span>  }</div>
+<div class="line"><span class="lineno">  168</span> </div>
+<div class="line"><span class="lineno">  169</span>  std::array&lt;double, 3&gt; dr;</div>
+<div class="line"><span class="lineno">  170</span>  <span class="keywordtype">double</span> r2 = 0.0; <span class="comment">// Squared absolute distance</span></div>
+<div class="line"><span class="lineno">  171</span> </div>
+<div class="line"><span class="lineno">  172</span>  <span class="comment">// Get x1-x2 etc</span></div>
+<div class="line"><span class="lineno">  173</span>  dr[0] = std::fabs(yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x - yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x);</div>
+<div class="line"><span class="lineno">  174</span>  dr[1] = std::fabs(yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y - yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y);</div>
+<div class="line"><span class="lineno">  175</span>  dr[2] = std::fabs(yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z - yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z);</div>
+<div class="line"><span class="lineno">  176</span> </div>
+<div class="line"><span class="lineno">  177</span>  <span class="comment">// Three-axis wrap for an orthorhombic length-3 box</span></div>
+<div class="line"><span class="lineno">  178</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
+<div class="line"><span class="lineno">  179</span>    dr[k] -= yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k] * std::round(dr[k] / yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k]);</div>
+<div class="line"><span class="lineno">  180</span>    r2 += dr[k] * dr[k];</div>
+<div class="line"><span class="lineno">  181</span>  }</div>
+<div class="line"><span class="lineno">  182</span> </div>
+<div class="line"><span class="lineno">  183</span>  <span class="keywordflow">return</span> r2;</div>
+<div class="line"><span class="lineno">  184</span>}</div>
+<div class="ttc" id="agroup__gen_html_ga74b57e7951bcff4f7c31fdc4ec5e79bf"><div class="ttname"><a href="#ga74b57e7951bcff4f7c31fdc4ec5e79bf">gen::triclinicMinImage</a></div><div class="ttdeci">std::array&lt; double, 3 &gt; triclinicMinImage(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, double xi, double yi, double zi, double xj, double yj, double zj)</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00107">generic.hpp:107</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gaa7d9b8543780baf4a495c7acdb1f87d8"><div class="ttname"><a href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">molSys::PointCloud::box</a></div><div class="ttdeci">std::vector&lt; T &gt; box</div><div class="ttdoc">Number of atoms.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00177">mol_sys.hpp:177</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gaaf97563c332410a372be92dcb8f81b3f" name="gaaf97563c332410a372be92dcb8f81b3f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaaf97563c332410a372be92dcb8f81b3f">&#9670;&#160;</a></span>prettyPrintYoda()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int gen::prettyPrintYoda </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>outFile</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Generic function for printing all the struct information. </p>
+
+</div>
+</div>
+<a id="gaeadb5e8ff98078b0007d0def0eaad39d" name="gaeadb5e8ff98078b0007d0def0eaad39d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaeadb5e8ff98078b0007d0def0eaad39d">&#9670;&#160;</a></span>radDeg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::radDeg </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>angle</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Inline function for converting radians-&gt;degrees. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">angle</td><td>The input angle, in radians </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The input angle, in degrees </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00067">67</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   67</span>{ <span class="keywordflow">return</span> (angle * 180) / <a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">gen::pi</a>; }</div>
+<div class="ttc" id="agroup__gen_html_ga9aee9bc09915c8d7a816b9ab38cff0f3"><div class="ttname"><a href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">gen::pi</a></div><div class="ttdeci">constexpr double pi</div><div class="ttdoc">Uses Boost to get the value of pi.</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00060">generic.hpp:60</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga3c02ecf6adbdc30d78e8c0aeb95914bf" name="ga3c02ecf6adbdc30d78e8c0aeb95914bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3c02ecf6adbdc30d78e8c0aeb95914bf">&#9670;&#160;</a></span>relDist()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::array&lt; double, 3 &gt; gen::relDist </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>iatom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>jatom</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Inline generic function for getting the relative unwrapped distance between two particles for each dimension. </p>
+<p>The indices (not IDs) of the particles have been given. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">yCloud</td><td>The input PointCloud, which contains the particle coordinates, simulation box lengths etc. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">iatom</td><td>The index of the \( i^{th} \) atom. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">jatom</td><td>The index of the \( j^{th} \) atom. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The unwrapped relative distances for each dimension. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00329">329</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  330</span>                   {</div>
+<div class="line"><span class="lineno">  331</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#gacd27073a9df4d812fa5a6d24a8b6efae">relDistFromPoint</a>(yCloud, iatom, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x,</div>
+<div class="line"><span class="lineno">  332</span>                          yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z);</div>
+<div class="line"><span class="lineno">  333</span>}</div>
+<div class="ttc" id="agroup__gen_html_gacd27073a9df4d812fa5a6d24a8b6efae"><div class="ttname"><a href="#gacd27073a9df4d812fa5a6d24a8b6efae">gen::relDistFromPoint</a></div><div class="ttdeci">std::array&lt; double, 3 &gt; relDistFromPoint(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int iatom, double xj, double yj, double zj)</div><div class="ttdoc">Inline generic function for obtaining the unwrapped periodic distance between one particle and anothe...</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00258">generic.hpp:258</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gacd27073a9df4d812fa5a6d24a8b6efae" name="gacd27073a9df4d812fa5a6d24a8b6efae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gacd27073a9df4d812fa5a6d24a8b6efae">&#9670;&#160;</a></span>relDistFromPoint()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::array&lt; double, 3 &gt; gen::relDistFromPoint </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>iatom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>xj</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>yj</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>zj</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Inline generic function for obtaining the unwrapped periodic distance between one particle and another point, whose index has been given. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">yCloud</td><td>The input PointCloud, which contains the particle coordinates, simulation box lengths etc. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">iatom</td><td>The index of the \( i^{th} \) atom. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">singlePoint</td><td>Vector containing coordinate values </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The unwrapped periodic distance. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00258">258</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  260</span>                                     {</div>
+<div class="line"><span class="lineno">  261</span>  <span class="keywordflow">if</span> (yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.size() &gt;= 6) {</div>
+<div class="line"><span class="lineno">  262</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="#ga74b57e7951bcff4f7c31fdc4ec5e79bf">triclinicMinImage</a>(yCloud, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y,</div>
+<div class="line"><span class="lineno">  263</span>                             yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z, xj, yj, zj);</div>
+<div class="line"><span class="lineno">  264</span>  }</div>
+<div class="line"><span class="lineno">  265</span> </div>
+<div class="line"><span class="lineno">  266</span>  std::array&lt;double, 3&gt; dr = {yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x - xj, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y - yj,</div>
+<div class="line"><span class="lineno">  267</span>                              yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z - zj};</div>
+<div class="line"><span class="lineno">  268</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
+<div class="line"><span class="lineno">  269</span>    <span class="keywordflow">if</span> (dr[k] &lt; -yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k] * 0.5) {</div>
+<div class="line"><span class="lineno">  270</span>      dr[k] += yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k];</div>
+<div class="line"><span class="lineno">  271</span>    }</div>
+<div class="line"><span class="lineno">  272</span>    <span class="keywordflow">if</span> (dr[k] &gt;= yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k] * 0.5) {</div>
+<div class="line"><span class="lineno">  273</span>      dr[k] -= yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k];</div>
+<div class="line"><span class="lineno">  274</span>    }</div>
+<div class="line"><span class="lineno">  275</span>  }</div>
+<div class="line"><span class="lineno">  276</span>  <span class="keywordflow">return</span> dr;</div>
+<div class="line"><span class="lineno">  277</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gaabdeca1aa6b867687a3540e97447544a" name="gaabdeca1aa6b867687a3540e97447544a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaabdeca1aa6b867687a3540e97447544a">&#9670;&#160;</a></span>tokenizer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::string &gt; gen::tokenizer </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>line</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Function for tokenizing line strings into words (strings) delimited by whitespace. </p>
+<p>This returns a vector with the words in it. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">line</td><td>The string containing the line to be tokenized </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00369">369</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  369</span>                                                      {</div>
+<div class="line"><span class="lineno">  370</span>  std::istringstream iss(line);</div>
+<div class="line"><span class="lineno">  371</span>  std::vector&lt;std::string&gt; tokens{std::istream_iterator&lt;std::string&gt;{iss},</div>
+<div class="line"><span class="lineno">  372</span>                                  std::istream_iterator&lt;std::string&gt;{}};</div>
+<div class="line"><span class="lineno">  373</span>  <span class="keywordflow">return</span> tokens;</div>
+<div class="line"><span class="lineno">  374</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga98b7a158dd7a61350fdd6ca43a432e4f" name="ga98b7a158dd7a61350fdd6ca43a432e4f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga98b7a158dd7a61350fdd6ca43a432e4f">&#9670;&#160;</a></span>tokenizerDouble()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; double &gt; gen::tokenizerDouble </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>line</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Function for tokenizing line strings into a vector of doubles. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">line</td><td>The string containing the line to be tokenized </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00380">380</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  380</span>                                                         {</div>
+<div class="line"><span class="lineno">  381</span>  std::istringstream iss(line);</div>
+<div class="line"><span class="lineno">  382</span>  std::vector&lt;double&gt; tokens;</div>
+<div class="line"><span class="lineno">  383</span>  <span class="keywordtype">double</span> number; <span class="comment">// Each number being read in from the line</span></div>
+<div class="line"><span class="lineno">  384</span>  <span class="keywordflow">while</span> (iss &gt;&gt; number) {</div>
+<div class="line"><span class="lineno">  385</span>    tokens.push_back(number);</div>
+<div class="line"><span class="lineno">  386</span>  }</div>
+<div class="line"><span class="lineno">  387</span>  <span class="keywordflow">return</span> tokens;</div>
+<div class="line"><span class="lineno">  388</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gae4ee1568b5329d93d76418227a024ac1" name="gae4ee1568b5329d93d76418227a024ac1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae4ee1568b5329d93d76418227a024ac1">&#9670;&#160;</a></span>tokenizerInt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; int &gt; gen::tokenizerInt </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>line</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Function for tokenizing line strings into a vector of ints. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">line</td><td>The string containing the line to be tokenized </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00394">394</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  394</span>                                                   {</div>
+<div class="line"><span class="lineno">  395</span>  std::istringstream iss(line);</div>
+<div class="line"><span class="lineno">  396</span>  std::vector&lt;int&gt; tokens;</div>
+<div class="line"><span class="lineno">  397</span>  <span class="keywordtype">int</span> number; <span class="comment">// Each number being read in from the line</span></div>
+<div class="line"><span class="lineno">  398</span>  <span class="keywordflow">while</span> (iss &gt;&gt; number) {</div>
+<div class="line"><span class="lineno">  399</span>    tokens.push_back(number);</div>
+<div class="line"><span class="lineno">  400</span>  }</div>
+<div class="line"><span class="lineno">  401</span>  <span class="keywordflow">return</span> tokens;</div>
+<div class="line"><span class="lineno">  402</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga74b57e7951bcff4f7c31fdc4ec5e79bf" name="ga74b57e7951bcff4f7c31fdc4ec5e79bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga74b57e7951bcff4f7c31fdc4ec5e79bf">&#9670;&#160;</a></span>triclinicMinImage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::array&lt; double, 3 &gt; gen::triclinicMinImage </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>xi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>yi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>zi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>xj</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>yj</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>zj</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00107">107</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  109</span>                                                           {</div>
+<div class="line"><span class="lineno">  110</span>  <span class="keyword">const</span> <span class="keyword">auto</span> &amp;box = yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>;</div>
+<div class="line"><span class="lineno">  111</span>  <span class="keyword">const</span> <span class="keyword">auto</span> &amp;boxLow = yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>;</div>
+<div class="line"><span class="lineno">  112</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xspan = box[0];</div>
+<div class="line"><span class="lineno">  113</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yspan = box[1];</div>
+<div class="line"><span class="lineno">  114</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zspan = box[2];</div>
+<div class="line"><span class="lineno">  115</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xlo_b = boxLow.size() &gt; 0 ? boxLow[0] : 0.0;</div>
+<div class="line"><span class="lineno">  116</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ylo_b = boxLow.size() &gt; 1 ? boxLow[1] : 0.0;</div>
+<div class="line"><span class="lineno">  117</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zlo_b = boxLow.size() &gt; 2 ? boxLow[2] : 0.0;</div>
+<div class="line"><span class="lineno">  118</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xy = box[3];</div>
+<div class="line"><span class="lineno">  119</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xz = box[4];</div>
+<div class="line"><span class="lineno">  120</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yz = box[5];</div>
+<div class="line"><span class="lineno">  121</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));</div>
+<div class="line"><span class="lineno">  122</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));</div>
+<div class="line"><span class="lineno">  123</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymin = std::min(0.0, yz);</div>
+<div class="line"><span class="lineno">  124</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymax = std::max(0.0, yz);</div>
+<div class="line"><span class="lineno">  125</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lx = xspan - xmax + xmin;</div>
+<div class="line"><span class="lineno">  126</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ly = yspan - ymax + ymin;</div>
+<div class="line"><span class="lineno">  127</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lz = zspan;</div>
+<div class="line"><span class="lineno">  128</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ox = xlo_b - xmin;</div>
+<div class="line"><span class="lineno">  129</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> oy = ylo_b - ymin;</div>
+<div class="line"><span class="lineno">  130</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> oz = zlo_b;</div>
+<div class="line"><span class="lineno">  131</span> </div>
+<div class="line"><span class="lineno">  132</span>  <span class="keyword">auto</span> toFrac = [&amp;](<span class="keywordtype">double</span> x, <span class="keywordtype">double</span> y, <span class="keywordtype">double</span> z) {</div>
+<div class="line"><span class="lineno">  133</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> sz = (z - oz) / lz;</div>
+<div class="line"><span class="lineno">  134</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> sy = (y - oy - yz * sz) / ly;</div>
+<div class="line"><span class="lineno">  135</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> sx = (x - ox - xy * sy - xz * sz) / lx;</div>
+<div class="line"><span class="lineno">  136</span>    <span class="keywordflow">return</span> std::array&lt;double, 3&gt;{sx, sy, sz};</div>
+<div class="line"><span class="lineno">  137</span>  };</div>
+<div class="line"><span class="lineno">  138</span>  <span class="keyword">const</span> <span class="keyword">auto</span> si = toFrac(xi, yi, zi);</div>
+<div class="line"><span class="lineno">  139</span>  <span class="keyword">const</span> <span class="keyword">auto</span> sj = toFrac(xj, yj, zj);</div>
+<div class="line"><span class="lineno">  140</span>  <span class="keywordtype">double</span> dsx = si[0] - sj[0];</div>
+<div class="line"><span class="lineno">  141</span>  <span class="keywordtype">double</span> dsy = si[1] - sj[1];</div>
+<div class="line"><span class="lineno">  142</span>  <span class="keywordtype">double</span> dsz = si[2] - sj[2];</div>
+<div class="line"><span class="lineno">  143</span>  dsx -= std::round(dsx);</div>
+<div class="line"><span class="lineno">  144</span>  dsy -= std::round(dsy);</div>
+<div class="line"><span class="lineno">  145</span>  dsz -= std::round(dsz);</div>
+<div class="line"><span class="lineno">  146</span>  <span class="keywordflow">return</span> {lx * dsx + xy * dsy + xz * dsz, ly * dsy + yz * dsz, lz * dsz};</div>
+<div class="line"><span class="lineno">  147</span>}</div>
+<div class="ttc" id="agroup__molSys_html_gac861daaeb2b1e75a6ac9eb3390bc6105"><div class="ttname"><a href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">molSys::PointCloud::boxLow</a></div><div class="ttdeci">std::vector&lt; T &gt; boxLow</div><div class="ttdoc">Periodic box lengths.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00178">mol_sys.hpp:178</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gad4b2c207d9bddf2fe75aca626f14ffe3" name="gad4b2c207d9bddf2fe75aca626f14ffe3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad4b2c207d9bddf2fe75aca626f14ffe3">&#9670;&#160;</a></span>unwrappedCoordShift()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int gen::unwrappedCoordShift </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>iatomIndex</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>jatomIndex</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>x_i</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>y_i</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>z_i</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>x_j</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>y_j</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>z_j</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Shift particles (unwrapped coordinates). </p>
+
+</div>
+</div>
+<a id="gafd586580b7217567d600fd49249bd87f" name="gafd586580b7217567d600fd49249bd87f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafd586580b7217567d600fd49249bd87f">&#9670;&#160;</a></span>unWrappedDistFromPoint()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::unWrappedDistFromPoint </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>iatom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>singlePoint</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00279">279</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  281</span>                                          {</div>
+<div class="line"><span class="lineno">  282</span>  <span class="keyword">const</span> <span class="keyword">auto</span> dr =</div>
+<div class="line"><span class="lineno">  283</span>      <a class="code hl_function" href="#gacd27073a9df4d812fa5a6d24a8b6efae">relDistFromPoint</a>(yCloud, iatom, singlePoint[0], singlePoint[1],</div>
+<div class="line"><span class="lineno">  284</span>                       singlePoint[2]);</div>
+<div class="line"><span class="lineno">  285</span>  <span class="keywordflow">return</span> std::sqrt(dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2]);</div>
+<div class="line"><span class="lineno">  286</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga2cc6ef1ffc20f6eebc857d8aafd47f97" name="ga2cc6ef1ffc20f6eebc857d8aafd47f97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga2cc6ef1ffc20f6eebc857d8aafd47f97">&#9670;&#160;</a></span>writeDumpBoxBounds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void gen::writeDumpBoxBounds </td>
+          <td>(</td>
+          <td class="paramtype">std::ostream &amp;</td>          <td class="paramname"><span class="paramname"><em>os</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00224">224</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  226</span>                                                                 {</div>
+<div class="line"><span class="lineno">  227</span>  <span class="keyword">const</span> <span class="keywordtype">bool</span> tilt = yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.size() &gt;= 6;</div>
+<div class="line"><span class="lineno">  228</span>  <span class="keywordflow">if</span> (tilt) {</div>
+<div class="line"><span class="lineno">  229</span>    os &lt;&lt; <span class="stringliteral">&quot;ITEM: BOX BOUNDS xy xz yz pp pp pp\n&quot;</span>;</div>
+<div class="line"><span class="lineno">  230</span>  } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  231</span>    os &lt;&lt; <span class="stringliteral">&quot;ITEM: BOX BOUNDS pp pp pp\n&quot;</span>;</div>
+<div class="line"><span class="lineno">  232</span>  }</div>
+<div class="line"><span class="lineno">  233</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
+<div class="line"><span class="lineno">  234</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> lo = (<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k) &lt; yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>.size())</div>
+<div class="line"><span class="lineno">  235</span>                          ? yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>[k]</div>
+<div class="line"><span class="lineno">  236</span>                          : 0.0;</div>
+<div class="line"><span class="lineno">  237</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> len = (<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k) &lt; yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.size())</div>
+<div class="line"><span class="lineno">  238</span>                           ? yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k]</div>
+<div class="line"><span class="lineno">  239</span>                           : 0.0;</div>
+<div class="line"><span class="lineno">  240</span>    os &lt;&lt; lo &lt;&lt; <span class="charliteral">&#39; &#39;</span> &lt;&lt; lo + len;</div>
+<div class="line"><span class="lineno">  241</span>    <span class="keywordflow">if</span> (tilt) {</div>
+<div class="line"><span class="lineno">  242</span>      os &lt;&lt; <span class="charliteral">&#39; &#39;</span> &lt;&lt; yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k + 3)];</div>
+<div class="line"><span class="lineno">  243</span>    }</div>
+<div class="line"><span class="lineno">  244</span>    os &lt;&lt; <span class="charliteral">&#39;\n&#39;</span>;</div>
+<div class="line"><span class="lineno">  245</span>  }</div>
+<div class="line"><span class="lineno">  246</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="ga9aee9bc09915c8d7a816b9ab38cff0f3" name="ga9aee9bc09915c8d7a816b9ab38cff0f3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">&#9670;&#160;</a></span>pi</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::pi = std::numbers::pi</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Uses Boost to get the value of pi. </p>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00060">60</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!-- Doxygen already closed #doc-content and #container before this template. -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.17.0 </li>
+  </ul>
+</div>
+<div class="doxyyoda-attrib" role="contentinfo">
+  <span class="doxyyoda-attrib__item">
+    <span>Generated by <a href="https://www.doxygen.org/index.html">Doxygen 1.17.0</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z"/></svg>
+    <span>Analytics by <a href="https://antics.turtletech.us/" target="_blank" rel="noopener noreferrer">Antics</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <span>provided by</span>
+    <span class="doxyyoda-attrib__brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1.4em" height="1.4em" viewBox="0 0 64 64" aria-hidden="true"><g fill-rule="evenodd"><ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9"/><path fill="#80D25B" d="M20.3,46c0,0-3.2,9.9.3,13.8c3.5,3.9 6.1,3.4 6.1-6C26.8,44.3 20.3,46 20.3,46Z"/><path fill="#80D25B" d="M38.3,46c0,0-3.2,9.9.4,13.8c3.5,3.9 6.1,3.4 6.1-6C44.8,44.3 38.3,46 38.3,46Z" transform="matrix(-1 0 0 1 81.8 0)"/><path fill="#80D25B" d="M20.6,21.2c0,0-6.7-5.8-10.5-5.2C6.2,16.7 6,22.2 6,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L20.6,21.2Z"/><path fill="#80D25B" d="M57.6,21.2c0,0-6.6-5.8-10.5-5.2C43.2,16.7 43,22.2 43,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L57.6,21.2Z" transform="matrix(-1 0 0 1 100.623 0)"/><path fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32,53C40.8,53 48,44.5 48,34C48,23.5 46.7,17 32,17C17.3,17 16,23.5 16,34C16,44.5 23.2,53 32,53Z"/><polygon fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" points="32 22 38.9 26 38.9 34 32 38 25.1 34 25.1 26"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M30,8C28.9,8 28,8.9 28,10"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M36,8C34.9,8 34,8.9 34,10" transform="matrix(-1 0 0 1 70 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32.1,38.2L32.1,52.4M32,21.7L32,17M25.2,26L17.7,23.1M25.1,34.2L16.8,38.9"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M46.2,26L38.7,23.1" transform="matrix(-1 0 0 1 84.951 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M47.1,34.2L38.8,38.9" transform="matrix(-1 0 0 1 85.891 0)"/></g></svg>
+      <a href="https://turtletech.us/" target="_blank" rel="noopener noreferrer">TurtleTech ehf</a>
+    </span>
+  </span>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

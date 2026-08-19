@@ -1,0 +1,350 @@
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="generator" content="Doxygen 1.17.0"/>
+<title>seams-core: /home/runner/work/seams-core/seams-core/src/include/internal Directory Reference</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default';
+mermaid.initialize({ startOnLoad: true, theme: theme });
+</script>
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.hostname!==location.hostname)antics.event("Outbound Link",{url:a.href});});</script>
+<!-- doxyYoda owns presentation; stock doxygen.css is not linked (theme SCSS covers Doxygen classes). -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+/* doxyYoda theme boot: apply stored or OS preference before first paint */
+(function () {
+  try {
+    var stored = localStorage.getItem("doxyYoda-theme");
+    var root = document.documentElement;
+    if (stored === "dark") {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    } else if (stored === "light") {
+      root.classList.add("light");
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    }
+  } catch (e) { /* private mode */ }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area" aria-label="Project">
+<div class="title_area__start"></div>
+<div class="title_area__center">
+<span class="project_info">seams-core v2.6.0</span>
+<span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
+</div>
+<div class="title_area__end">
+<button type="button" class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false">&#9790;</button>
+</div>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+/* doxyYoda interactive: foldable fragments, copy buttons, dark-mode toggle */
+document.addEventListener("DOMContentLoaded", function () {
+  function prefersDark() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function isDarkMode() {
+    var root = document.documentElement;
+    if (root.classList.contains("dark") || root.classList.contains("dark-mode")) return true;
+    if (root.classList.contains("light")) return false;
+    return prefersDark();
+  }
+  // Optional folding: wrap .fragment in open <details class="code-details">.
+  // Skip fragments already inside details and native Doxygen .foldopen listings.
+  document.querySelectorAll(".fragment").forEach(function (frag) {
+    if (frag.closest("details.code-details")) return;
+    if (frag.querySelector(".foldopen")) return;
+    var details = document.createElement("details");
+    details.className = "code-details";
+    details.open = true;
+    var summary = document.createElement("summary");
+    summary.textContent = "Code";
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard on div.fragment (themed .copy-btn only)
+  document.querySelectorAll("div.fragment").forEach(function (frag) {
+    if (frag.querySelector(".copy-btn")) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-btn";
+    btn.textContent = "Copy";
+    btn.setAttribute("aria-label", "Copy code");
+    btn.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      var clone = frag.cloneNode(true);
+      var extra = clone.querySelector(".copy-btn");
+      if (extra) extra.remove();
+      var lines = clone.querySelectorAll(".line");
+      var text = lines.length
+        ? Array.prototype.map.call(lines, function (l) { return l.textContent; }).join("\n")
+        : clone.textContent;
+      var done = function () {
+        btn.textContent = "Copied!";
+        setTimeout(function () { btn.textContent = "Copy"; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {
+          /* ignore */
+        });
+      }
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById("darkModeToggle");
+  if (toggle) {
+    function updateIcon() {
+      var dark = isDarkMode();
+      toggle.innerHTML = dark ? "&#9788;" : "&#9790;";
+      toggle.setAttribute("aria-pressed", dark ? "true" : "false");
+    }
+    updateIcon();
+    toggle.addEventListener("click", function () {
+      var root = document.documentElement;
+      var nextDark = !isDarkMode();
+      root.classList.toggle("dark", nextDark);
+      root.classList.toggle("dark-mode", nextDark);
+      root.classList.toggle("light", !nextDark);
+      try {
+        localStorage.setItem("doxyYoda-theme", nextDark ? "dark" : "light");
+      } catch (e) { /* private mode */ }
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.17.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', () => {
+  initMenu('',true);
+  init_search();
+});
+</script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1" style="position:absolute;right:8px;top:8px;height:36px;"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2" style="float:right">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon" onmouseover="return searchBox.OnSearchSelectShow()" onmouseout="return searchBox.OnSearchSelectHide()"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('dir_37a9b835d5ced2a8f90c237a2ad84fdf.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">internal Directory Reference</div></div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-files" class="groupheader"><a id="files" name="files"></a>
+Files</h2></td></tr>
+<tr class="memitem:absOrientation_2Ehpp" id="r_absOrientation_2Ehpp"><td class="memItemLeft"><a href="absOrientation_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="absOrientation_8hpp.html">absOrientation.hpp</a></td></tr>
+<tr class="memitem:bond_2Ehpp" id="r_bond_2Ehpp"><td class="memItemLeft"><a href="bond_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="bond_8hpp.html">bond.hpp</a></td></tr>
+<tr class="memdesc:bond_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">File for bond-related analyses (hydrogen bonds, bonded atoms for data file write-outs etc.). <br /></td></tr>
+<tr class="memitem:bop_2Ehpp" id="r_bop_2Ehpp"><td class="memItemLeft"><a href="bop_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="bop_8hpp.html">bop.hpp</a></td></tr>
+<tr class="memdesc:bop_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">File for the bond order parameter analysis. <br /></td></tr>
+<tr class="memitem:bulkTUM_2Ehpp" id="r_bulkTUM_2Ehpp"><td class="memItemLeft"><a href="bulkTUM_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="bulkTUM_8hpp.html">bulkTUM.hpp</a></td></tr>
+<tr class="memdesc:bulkTUM_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">File containing functions used specific to bulk topological unit matching (TUM) criterion. <br /></td></tr>
+<tr class="memitem:cage_2Ehpp" id="r_cage_2Ehpp"><td class="memItemLeft"><a href="cage_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="cage_8hpp.html">cage.hpp</a></td></tr>
+<tr class="memdesc:cage_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">File for cage types for topological network criteria. <br /></td></tr>
+<tr class="memitem:cage_5Faffiliation_2Ehpp" id="r_cage_5Faffiliation_2Ehpp"><td class="memItemLeft"><a href="cage__affiliation_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="cage__affiliation_8hpp.html">cage_affiliation.hpp</a></td></tr>
+<tr class="memdesc:cage__affiliation_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Order-free per-ring cage classification with an exact incremental update. <br /></td></tr>
+<tr class="memitem:cage_5Fcanon_2Ehpp" id="r_cage_5Fcanon_2Ehpp"><td class="memItemLeft"><a href="cage__canon_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="cage__canon_8hpp.html">cage_canon.hpp</a></td></tr>
+<tr class="memitem:cluster_2Ehpp" id="r_cluster_2Ehpp"><td class="memItemLeft"><a href="cluster_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="cluster_8hpp.html">cluster.hpp</a></td></tr>
+<tr class="memdesc:cluster_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">File for the bond order parameter analysis. <br /></td></tr>
+<tr class="memitem:density_2Ehpp" id="r_density_2Ehpp"><td class="memItemLeft"><a href="density_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="density_8hpp.html">density.hpp</a></td></tr>
+<tr class="memdesc:density_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Type- or kind-resolved Cartesian number-density histogram. <br /></td></tr>
+<tr class="memitem:franzblau_2Ehpp" id="r_franzblau_2Ehpp"><td class="memItemLeft"><a href="franzblau_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="franzblau_8hpp.html">franzblau.hpp</a></td></tr>
+<tr class="memdesc:franzblau_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">File for generating shortest-path rings according to the Franzblau algorithm. <br /></td></tr>
+<tr class="memitem:generic_2Ehpp" id="r_generic_2Ehpp"><td class="memItemLeft"><a href="generic_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="generic_8hpp.html">generic.hpp</a></td></tr>
+<tr class="memdesc:generic_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">File for containing generic or common functions. <br /></td></tr>
+<tr class="memitem:gpu_5Fbatch_2Ehpp" id="r_gpu_5Fbatch_2Ehpp"><td class="memItemLeft"><a href="gpu__batch_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="gpu__batch_8hpp.html">gpu_batch.hpp</a></td></tr>
+<tr class="memdesc:gpu__batch_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the analysis of a resident frame batch on the device. <br /></td></tr>
+<tr class="memitem:gpu_5Fresidency_2Ehpp" id="r_gpu_5Fresidency_2Ehpp"><td class="memItemLeft"><a href="gpu__residency_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="gpu__residency_8hpp.html">gpu_residency.hpp</a></td></tr>
+<tr class="memdesc:gpu__residency_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decide whether N frames of the analysis working set fit on the GPU. <br /></td></tr>
+<tr class="memitem:ira_5Fsofi_2Ehpp" id="r_ira_5Fsofi_2Ehpp"><td class="memItemLeft"><a href="ira__sofi_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="ira__sofi_8hpp.html">ira_sofi.hpp</a></td></tr>
+<tr class="memitem:mol_5Fsys_2Ehpp" id="r_mol_5Fsys_2Ehpp"><td class="memItemLeft"><a href="mol__sys_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="mol__sys_8hpp.html">mol_sys.hpp</a></td></tr>
+<tr class="memdesc:mol__sys_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">The main molecular system handler. <br /></td></tr>
+<tr class="memitem:neighbours_2Ehpp" id="r_neighbours_2Ehpp"><td class="memItemLeft"><a href="neighbours_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="neighbours_8hpp.html">neighbours.hpp</a></td></tr>
+<tr class="memdesc:neighbours_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Header file for neighbour list generation. <br /></td></tr>
+<tr class="memitem:order_5Fparameter_2Ehpp" id="r_order_5Fparameter_2Ehpp"><td class="memItemLeft"><a href="order__parameter_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="order__parameter_8hpp.html">order_parameter.hpp</a></td></tr>
+<tr class="memitem:pntCorrespondence_2Ehpp" id="r_pntCorrespondence_2Ehpp"><td class="memItemLeft"><a href="pntCorrespondence_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="pntCorrespondence_8hpp.html">pntCorrespondence.hpp</a></td></tr>
+<tr class="memitem:rdf_2Ehpp" id="r_rdf_2Ehpp"><td class="memItemLeft"><a href="rdf_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="rdf_8hpp.html">rdf.hpp</a></td></tr>
+<tr class="memdesc:rdf_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Partial 3D radial distribution functions under the dump MIC. <br /></td></tr>
+<tr class="memitem:rdf2d_2Ehpp" id="r_rdf2d_2Ehpp"><td class="memItemLeft"><a href="rdf2d_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="rdf2d_8hpp.html">rdf2d.hpp</a></td></tr>
+<tr class="memdesc:rdf2d_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">File containing functions used to calculate the in-plane radial distribution functions. <br /></td></tr>
+<tr class="memitem:ring_2Ehpp" id="r_ring_2Ehpp"><td class="memItemLeft"><a href="ring_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="ring_8hpp.html">ring.hpp</a></td></tr>
+<tr class="memdesc:ring_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">File containing common functions used by bulk and confined topological network critera. <br /></td></tr>
+<tr class="memitem:seams_5Fconfig_2Ehpp" id="r_seams_5Fconfig_2Ehpp"><td class="memItemLeft"><a href="seams__config_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="seams__config_8hpp.html">seams_config.hpp</a></td></tr>
+<tr class="memdesc:seams__config_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Twelve-factor runtime knobs for the engine and the fronts. <br /></td></tr>
+<tr class="memitem:seams_5Finput_2Ehpp" id="r_seams_5Finput_2Ehpp"><td class="memItemLeft"><a href="seams__input_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="seams__input_8hpp.html">seams_input.hpp</a></td></tr>
+<tr class="memdesc:seams__input_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">File for functions that read in files). <br /></td></tr>
+<tr class="memitem:seams_5Foutput_2Ehpp" id="r_seams_5Foutput_2Ehpp"><td class="memItemLeft"><a href="seams__output_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="seams__output_8hpp.html">seams_output.hpp</a></td></tr>
+<tr class="memitem:selection_2Ehpp" id="r_selection_2Ehpp"><td class="memItemLeft"><a href="selection_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="selection_8hpp.html">selection.hpp</a></td></tr>
+<tr class="memdesc:selection_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">File containing functions used to define 'selections' in a given range, using ring information. <br /></td></tr>
+<tr class="memitem:shapeMatch_2Ehpp" id="r_shapeMatch_2Ehpp"><td class="memItemLeft"><a href="shapeMatch_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="shapeMatch_8hpp.html">shapeMatch.hpp</a></td></tr>
+<tr class="memitem:simd_5Fdistance_2Ehpp" id="r_simd_5Fdistance_2Ehpp"><td class="memItemLeft"><a href="simd__distance_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="simd__distance_8hpp.html">simd_distance.hpp</a></td></tr>
+<tr class="memitem:site_2Ehpp" id="r_site_2Ehpp"><td class="memItemLeft"><a href="site_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="site_8hpp.html">site.hpp</a></td></tr>
+<tr class="memdesc:site_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-atom site chemistry, separate from CHILL ice labels. <br /></td></tr>
+<tr class="memitem:sphericart_5Fylm_2Ehpp" id="r_sphericart_5Fylm_2Ehpp"><td class="memItemLeft"><a href="sphericart__ylm_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="sphericart__ylm_8hpp.html">sphericart_ylm.hpp</a></td></tr>
+<tr class="memitem:steinhardt_5Fdevice_2Ehpp" id="r_steinhardt_5Fdevice_2Ehpp"><td class="memItemLeft"><a href="steinhardt__device_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="steinhardt__device_8hpp.html">steinhardt_device.hpp</a></td></tr>
+<tr class="memitem:structure_5Fdesc_2Ehpp" id="r_structure_5Fdesc_2Ehpp"><td class="memItemLeft"><a href="structure__desc_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="structure__desc_8hpp.html">structure_desc.hpp</a></td></tr>
+<tr class="memdesc:structure__desc_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Voronoi-weighted order, IRA template overlay, SOAP, and a linear prototype classifier. <br /></td></tr>
+<tr class="memitem:topo_5Fbulk_2Ehpp" id="r_topo_5Fbulk_2Ehpp"><td class="memItemLeft"><a href="topo__bulk_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="topo__bulk_8hpp.html">topo_bulk.hpp</a></td></tr>
+<tr class="memdesc:topo__bulk_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">File containing functions used specific to bulk topological network critera. <br /></td></tr>
+<tr class="memitem:topo_5Fone_5Fdim_2Ehpp" id="r_topo_5Fone_5Fdim_2Ehpp"><td class="memItemLeft"><a href="topo__one__dim_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="topo__one__dim_8hpp.html">topo_one_dim.hpp</a></td></tr>
+<tr class="memdesc:topo__one__dim_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">File containing functions used specific to quasi-one-dimensional topological network critera (the prism identification scheme). <br /></td></tr>
+<tr class="memitem:topo_5Ftwo_5Fdim_2Ehpp" id="r_topo_5Ftwo_5Fdim_2Ehpp"><td class="memItemLeft"><a href="topo__two__dim_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="topo__two__dim_8hpp.html">topo_two_dim.hpp</a></td></tr>
+<tr class="memitem:voronoi_5Fqlm_2Ehpp" id="r_voronoi_5Fqlm_2Ehpp"><td class="memItemLeft"><a href="voronoi__qlm_8hpp_source.html"><span class="icondoc"><div class="doc-icon"></div></span></a>&#160;</td><td class="memItemRight"><a class="el" href="voronoi__qlm_8hpp.html">voronoi_qlm.hpp</a></td></tr>
+<tr class="memdesc:voronoi__qlm_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Voronoi facet-area weighted bond order parameters. <br /></td></tr>
+</table>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!-- Doxygen already closed #doc-content and #container before this template. -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.17.0 </li>
+  </ul>
+</div>
+<div class="doxyyoda-attrib" role="contentinfo">
+  <span class="doxyyoda-attrib__item">
+    <span>Generated by <a href="https://www.doxygen.org/index.html">Doxygen 1.17.0</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z"/></svg>
+    <span>Analytics by <a href="https://antics.turtletech.us/" target="_blank" rel="noopener noreferrer">Antics</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <span>provided by</span>
+    <span class="doxyyoda-attrib__brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1.4em" height="1.4em" viewBox="0 0 64 64" aria-hidden="true"><g fill-rule="evenodd"><ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9"/><path fill="#80D25B" d="M20.3,46c0,0-3.2,9.9.3,13.8c3.5,3.9 6.1,3.4 6.1-6C26.8,44.3 20.3,46 20.3,46Z"/><path fill="#80D25B" d="M38.3,46c0,0-3.2,9.9.4,13.8c3.5,3.9 6.1,3.4 6.1-6C44.8,44.3 38.3,46 38.3,46Z" transform="matrix(-1 0 0 1 81.8 0)"/><path fill="#80D25B" d="M20.6,21.2c0,0-6.7-5.8-10.5-5.2C6.2,16.7 6,22.2 6,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L20.6,21.2Z"/><path fill="#80D25B" d="M57.6,21.2c0,0-6.6-5.8-10.5-5.2C43.2,16.7 43,22.2 43,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L57.6,21.2Z" transform="matrix(-1 0 0 1 100.623 0)"/><path fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32,53C40.8,53 48,44.5 48,34C48,23.5 46.7,17 32,17C17.3,17 16,23.5 16,34C16,44.5 23.2,53 32,53Z"/><polygon fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" points="32 22 38.9 26 38.9 34 32 38 25.1 34 25.1 26"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M30,8C28.9,8 28,8.9 28,10"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M36,8C34.9,8 34,8.9 34,10" transform="matrix(-1 0 0 1 70 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32.1,38.2L32.1,52.4M32,21.7L32,17M25.2,26L17.7,23.1M25.1,34.2L16.8,38.9"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M46.2,26L38.7,23.1" transform="matrix(-1 0 0 1 84.951 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M47.1,34.2L38.8,38.9" transform="matrix(-1 0 0 1 85.891 0)"/></g></svg>
+      <a href="https://turtletech.us/" target="_blank" rel="noopener noreferrer">TurtleTech ehf</a>
+    </span>
+  </span>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

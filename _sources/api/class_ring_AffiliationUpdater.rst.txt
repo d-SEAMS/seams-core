@@ -29,8 +29,8 @@ Exact incremental affiliation across frames. :ref:`More...<details-classring_1_1
 
 		// methods
 	
-		AffiliationUpdater& :target:`operator=<doxid-classring_1_1_affiliation_updater_1a98bb2d078981e70d618bff065d9da032>`(AffiliationUpdater&&);
-		AffiliationUpdater& :target:`operator=<doxid-classring_1_1_affiliation_updater_1ac47012ce53ab8f6c62f8c869b3a0ac62>`(const AffiliationUpdater&);
+		:ref:`AffiliationUpdater<doxid-classring_1_1_affiliation_updater_1a63d046f94a4fd81428dd7d0f163bcd28>`& :target:`operator=<doxid-classring_1_1_affiliation_updater_1a98bb2d078981e70d618bff065d9da032>`(:ref:`AffiliationUpdater<doxid-classring_1_1_affiliation_updater_1a63d046f94a4fd81428dd7d0f163bcd28>`&&);
+		:ref:`AffiliationUpdater<doxid-classring_1_1_affiliation_updater_1a63d046f94a4fd81428dd7d0f163bcd28>`& :target:`operator=<doxid-classring_1_1_affiliation_updater_1ac47012ce53ab8f6c62f8c869b3a0ac62>`(const :ref:`AffiliationUpdater<doxid-classring_1_1_affiliation_updater_1a63d046f94a4fd81428dd7d0f163bcd28>`&);
 		const :ref:`CageAffiliation<doxid-structring_1_1_cage_affiliation>`& :ref:`update<doxid-classring_1_1_affiliation_updater_1a36779e1a3a2a86b85d51e8f7c6e2939c>`(const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList);
 		int :ref:`lastReclassified<doxid-classring_1_1_affiliation_updater_1a41f180d179f3702cb423c6d87a110ddd>`() const;
 	};
@@ -54,9 +54,7 @@ Methods
 
 	const :ref:`CageAffiliation<doxid-structring_1_1_cage_affiliation>`& update(const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList)
 
-Classify the frame, reusing the previous frame's answers outside the locality closure of what changed.
-
-The reference stays valid until the next update call.
+Classify the frame, reusing the previous frame's answers outside the locality closure of what changed. The reference stays valid until the next update call.
 
 .. index:: pair: function; lastReclassified
 .. _doxid-classring_1_1_affiliation_updater_1a41f180d179f3702cb423c6d87a110ddd:

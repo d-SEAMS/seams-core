@@ -48,7 +48,7 @@ Global Functions
 
 	int hornAbsOrientation(const Eigen::MatrixXd& refPoints, const Eigen::MatrixXd& targetPoints, std::vector<double>& quat, double& rmsd, std::vector<double>& rmsdList, double& scale)
 
-Get the absolute orientation using Horn's algorithm (with quaternions)
+Get the absolute orientation using Horn's algorithm (with quaternions).
 
 .. index:: pair: function; calcMatrixS
 .. _doxid-namespaceabsor_1a16e1d855167323dabd3dbfcd8f1290af:
@@ -58,7 +58,7 @@ Get the absolute orientation using Horn's algorithm (with quaternions)
 
 	Eigen::MatrixXd calcMatrixS(const Eigen::MatrixXd& centeredRefPnts, const Eigen::MatrixXd& centeredTargetPnts, int nop, int dim)
 
-Compute the matrix S, or M, whose elements are the sums of products of coordinates measured in the left and right systems.
+Compute the matrix S, or M, whose elements are the sums of products of coordinates measured in the left and right systems
 
 .. index:: pair: function; calcMatrixN
 .. _doxid-namespaceabsor_1af2d549df95a889e345c6ce1c86155c12:

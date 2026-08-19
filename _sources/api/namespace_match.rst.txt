@@ -46,9 +46,7 @@ Global Functions
 
 	bool matchPrism(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const Eigen::MatrixXd& refPoints, std::vector<int>& basal1, std::vector<int>& basal2, std::vector<double>& rmsdPerAtom, bool isPerfect = true)
 
-Shape-matching for a pair of polygon basal rings.
-
-Returns true if the pair of basal rings form a prism block.
+Shape-matching for a pair of polygon basal rings. Returns true if the pair of basal rings form a prism block.
 
 .. index:: pair: function; matchUntetheredPrism
 .. _doxid-namespacematch_1a0cbe20cb5b3bebd6d5275f69498057d5:
@@ -58,9 +56,7 @@ Returns true if the pair of basal rings form a prism block.
 
 	bool matchUntetheredPrism(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const Eigen::MatrixXd& refPoints, std::vector<int>& basal1, std::vector<int>& basal2, std::vector<double>& rmsdPerAtom)
 
-Shape-matching for a pair of polygon basal rings.
-
-Returns true if the pair of basal rings form a prism block.
+Shape-matching for a pair of polygon basal rings. Returns true if the pair of basal rings form a prism block.
 
 .. index:: pair: function; matchPrismBlock
 .. _doxid-namespacematch_1a61062b67c8fd77b122c581135548a29c:
@@ -70,9 +66,7 @@ Returns true if the pair of basal rings form a prism block.
 
 	bool matchPrismBlock(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const Eigen::MatrixXd& refPoints, std::vector<int>& basal1, std::vector<int>& basal2, int& beginIndex)
 
-Shape-matching for a pair of polygon basal rings, comparing with a complete prism block.
-
-Returns true if the pair of basal rings form a prism block.
+Shape-matching for a pair of polygon basal rings, comparing with a complete prism block. Returns true if the pair of basal rings form a prism block.
 
 .. index:: pair: function; updatePerAtomRMSDRing
 .. _doxid-namespacematch_1a9ecab3363a62bb95c0199fe240c1b2a2:

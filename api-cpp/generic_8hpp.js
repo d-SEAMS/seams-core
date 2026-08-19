@@ -1,0 +1,27 @@
+var generic_8hpp =
+[
+    [ "gen::angDistDegQuaternions", "group__gen.html#gac7f742de2fac11d3b249c63bf4f4e126", null ],
+    [ "gen::avgVector", "group__gen.html#ga17d4f5636c0469c19d7efa59344396b2", null ],
+    [ "gen::batchPeriodicDistSq", "group__gen.html#gacdbacffd9c9867dc307efc89686e5634", null ],
+    [ "gen::calcMedian", "group__gen.html#ga6046c3c9db73fbf420ad07834047942e", null ],
+    [ "gen::compareByAtomID", "group__gen.html#gaed4f2e37c89f319a852355a2b7199147", null ],
+    [ "gen::distance", "group__gen.html#ga13dd7fd24f050c7a639a1811d22c8d5b", null ],
+    [ "gen::eigenVecAngle", "group__gen.html#ga48d1277f242712a0948bb029883328e4", null ],
+    [ "gen::file_exists", "group__gen.html#gaa49625658169d33851df990c1d62f097", null ],
+    [ "gen::formatDumpBox", "group__gen.html#ga92412c34a5480e96297c968633b07652", null ],
+    [ "gen::getAverageWithoutOutliers", "group__gen.html#gaf3593d4e71600e8d85fbd873fcd95558", null ],
+    [ "gen::periodicDist", "group__gen.html#ga4038dadde6016e7a738c2cb015344ee3", null ],
+    [ "gen::periodicDistSq", "group__gen.html#gafdafa646c7cceaa4eeb8d92b14e0a192", null ],
+    [ "gen::prettyPrintYoda", "group__gen.html#gaaf97563c332410a372be92dcb8f81b3f", null ],
+    [ "gen::radDeg", "group__gen.html#gaeadb5e8ff98078b0007d0def0eaad39d", null ],
+    [ "gen::relDist", "group__gen.html#ga3c02ecf6adbdc30d78e8c0aeb95914bf", null ],
+    [ "gen::relDistFromPoint", "group__gen.html#gacd27073a9df4d812fa5a6d24a8b6efae", null ],
+    [ "gen::tokenizer", "group__gen.html#gaabdeca1aa6b867687a3540e97447544a", null ],
+    [ "gen::tokenizerDouble", "group__gen.html#ga98b7a158dd7a61350fdd6ca43a432e4f", null ],
+    [ "gen::tokenizerInt", "group__gen.html#gae4ee1568b5329d93d76418227a024ac1", null ],
+    [ "gen::triclinicMinImage", "group__gen.html#ga74b57e7951bcff4f7c31fdc4ec5e79bf", null ],
+    [ "gen::unwrappedCoordShift", "group__gen.html#gad4b2c207d9bddf2fe75aca626f14ffe3", null ],
+    [ "gen::unWrappedDistFromPoint", "group__gen.html#gafd586580b7217567d600fd49249bd87f", null ],
+    [ "gen::writeDumpBoxBounds", "group__gen.html#ga2cc6ef1ffc20f6eebc857d8aafd47f97", null ],
+    [ "gen::pi", "group__gen.html#ga9aee9bc09915c8d7a816b9ab38cff0f3", null ]
+];

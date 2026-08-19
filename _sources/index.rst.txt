@@ -162,6 +162,11 @@ framework.
 
    contributing/index
 
+The in-book C++ pages under ``api/`` are Doxygen via doxyrest. A sibling
+doxyYoda HTML tree (inline source, treeview) is at
+`*api-cpp* <https://docs.dseams.info/api-cpp/>`_ after
+``pixi run -e docs docbld``.
+
 Related projects
 ----------------
 

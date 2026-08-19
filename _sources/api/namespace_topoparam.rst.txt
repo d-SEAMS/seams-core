@@ -44,9 +44,7 @@ Global Functions
 
 	double normHeightPercent(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int nPrisms, double avgPrismHeight)
 
-Calculates the height%, an average measure of filled volume.
-
-The average height of a prism can be taken to be 2.75-2.85 Angstrom. (Koga et. al., 2001)
+Calculates the height%, an average measure of filled volume. The average height of a prism can be taken to be 2.75-2.85 Angstrom. (Koga et. al., 2001)
 
 .. index:: pair: function; calcCoverageArea
 .. _doxid-namespacetopoparam_1a9c3eb2dbcb32ec7523ed28f8ad4d6b19:

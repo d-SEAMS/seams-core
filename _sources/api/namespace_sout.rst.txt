@@ -109,9 +109,7 @@ Function for printing out ring info, when there is no volume slice.
 
 	int writePrismNum(std::string path, const std::vector<int>& nPrisms, const std::vector<int>& nDefPrisms, const std::vector<double>& heightPercent, int maxDepth, int currentFrame, int firstFrame)
 
-Function for printing out the number of prism blocks, with or without slices.
-
-Be careful when using slices!
+Function for printing out the number of prism blocks, with or without slices. Be careful when using slices!
 
 .. index:: pair: function; writeRingNum
 .. _doxid-namespacesout_1a565b4993e658b431acc2fb314dbde015:
@@ -121,7 +119,7 @@ Be careful when using slices!
 
 	int writeRingNum(std::string path, int currentFrame, const std::vector<int>& nRings, const std::vector<double>& coverageAreaXY, const std::vector<double>& coverageAreaXZ, const std::vector<double>& coverageAreaYZ, int maxDepth, int firstFrame)
 
-Function for printing out the coverage area and the number of rings of each type.
+Function for printing out the coverage area and the number of rings of each type
 
 .. index:: pair: function; writeRingNumBulk
 .. _doxid-namespacesout_1a971cb6b5c97b5b9ba3d552f0a6c47055:
@@ -131,7 +129,7 @@ Function for printing out the coverage area and the number of rings of each type
 
 	int writeRingNumBulk(std::string path, int currentFrame, const std::vector<int>& nRings, int maxDepth, int firstFrame)
 
-Function for printing out the number of rings of each type in a bulk system.
+Function for printing out the number of rings of each type in a bulk system
 
 .. index:: pair: function; printRDF
 .. _doxid-namespacesout_1a77cc523102fc57d203495a657703dab5:
@@ -151,7 +149,7 @@ Function for printing out the RDF, given the filename.
 
 	int writeTopoBulkData(std::string path, int currentFrame, int numHC, int numDDC, int mixedRings, int basalRings, int prismaticRings, int firstFrame)
 
-Function for printing out the number of DDCs, HCs, mixed rings, basal and prismatic rings.
+Function for printing out the number of DDCs, HCs, mixed rings, basal and prismatic rings
 
 .. index:: pair: function; writePrisms
 .. _doxid-namespacesout_1a5bf62f6266ab17b7e0aaab15dddb0267:
@@ -181,7 +179,7 @@ Function for writing out cluster statistics.
 
 	int writeMoleculeIDsInSlice(std::string path, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud)
 
-Function for printing out the molecule IDs present in the slice (compatible with the LAMMPS group command.
+Function for printing out the molecule IDs present in the slice (compatible with the LAMMPS group command
 
 .. index:: pair: function; writeMoleculeIDsExpressionSelectOVITO
 .. _doxid-namespacesout_1af556b48a2b7f51da88108dfc7ecf9623:
@@ -191,7 +189,7 @@ Function for printing out the molecule IDs present in the slice (compatible with
 
 	int writeMoleculeIDsExpressionSelectOVITO(std::string path, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud)
 
-Function for printing out the molecule IDs present in the slice (compatible with the OVITO Expression Select command.
+Function for printing out the molecule IDs present in the slice (compatible with the OVITO Expression Select command
 
 .. index:: pair: function; writeLAMMPSdata
 .. _doxid-namespacesout_1a5b26e7213f27b9506c4eea7e8998edc9:
@@ -221,7 +219,7 @@ Write out a LAMMPS dump file containing the RMSD per atom.
 
 	int writeLAMMPSdumpSlice(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, std::string path)
 
-Write out a LAMMPS dump file containing the inSlice value for each atom for a user-defined slice.
+Write out a LAMMPS dump file containing the inSlice value for each atom for a user-defined slice
 
 .. index:: pair: function; writeLAMMPSdumpCages
 .. _doxid-namespacesout_1a1f96c3a3ef2e7d902c4f183320bd6151:
@@ -281,7 +279,7 @@ Write a data file for prisms of a single type.
 
 	int writeLAMMPSdataCages(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, :ref:`cage::cageType<doxid-group__cage_1ga5787314f51b5927c213db48b81c21d95>` type, int numCages, std::string filename = "system-cages.data")
 
-Write out a lammps data file for DDCs or HCs, assuming that there is no slice.
+Write out a lammps data file for DDCs or HCs, assuming that there is no slice
 
 .. index:: pair: function; writeAllCages
 .. _doxid-namespacesout_1aa6dec898d176414e84433fb08318db4f:
@@ -291,7 +289,7 @@ Write out a lammps data file for DDCs or HCs, assuming that there is no slice.
 
 	int writeAllCages(std::string path, std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int currentFrame)
 
-Write out all cages of all types into a folder called cages inside the output directory.
+Write out all cages of all types into a folder called cages inside the output directory
 
 .. index:: pair: function; writeEachCage
 .. _doxid-namespacesout_1aa4a162332246b965cde05f838e068f2c:
@@ -341,7 +339,7 @@ Generic function for writing out to a dump file.
 
 	int writeHisto(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const std::vector<double>& avgQ6)
 
-Function for printing out Q6, Cij and averaged Q3 values as single columns to text files The file names are cij, q6, q3.
+Function for printing out Q6, Cij and averaged Q3 values as single columns to text files The file names are cij, q6, q3
 
 .. index:: pair: function; writeCluster
 .. _doxid-namespacesout_1abf5ebc975df1bd370e73d7390cd30f68:

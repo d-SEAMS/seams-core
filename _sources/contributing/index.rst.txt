@@ -10,7 +10,8 @@ Do not add a language binding here.
 
 Documentation is authored in ``docs/orgmode/`` and exported with
 ``docs/export.el`` (ox-rst) before Sphinx. Run ``pixi run -e docs docbld``
-to export, run doxyrest, and build the Shibuya site.
+to export, run doxyrest, build the Shibuya site, and write the sibling
+doxyYoda C++ tree to ``docs/build/api-cpp/``.
 
 Prerequisites
 -------------

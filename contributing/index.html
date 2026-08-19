@@ -38,12 +38,12 @@
       <strong>d-SEAMS</strong>
     </a>
     <div class="sy-head-nav" id="head-nav">
-      <nav class="sy-head-links"><ul>
-      <li class="link"><button class="js-menu" type="button" id="nav-trigger-1" aria-controls="nav-children-1">
+      <nav class="sy-head-links"><ul><li class="link"><a href="/api-cpp/index.html">C++ API</a></li>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-2" aria-controls="nav-children-2">
             <span>Ecosystem</span>
             <i class="i-lucide chevron-down"></i>
           </button>
-        <ul id="nav-children-1" aria-labelledby="nav-trigger-1"><li><a href="https://docs.dseams.info">
+        <ul id="nav-children-2" aria-labelledby="nav-trigger-2"><li><a href="https://docs.dseams.info">
                 <span>d-SEAMS engine</span>
                 <small>libyodaLib and the seams CLI</small>
               </a></li><li><a href="https://d-seams.github.io/PydSEAMSlib/">
@@ -244,7 +244,8 @@ Lua/Fennel is <a class="reference external" href="https://github.com/d-SEAMS/yod
 Do not add a language binding here.</p>
 <p>Documentation is authored in <code class="docutils literal notranslate"><span class="pre">docs/orgmode/</span></code> and exported with
 <code class="docutils literal notranslate"><span class="pre">docs/export.el</span></code> (ox-rst) before Sphinx. Run <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">-e</span> <span class="pre">docs</span> <span class="pre">docbld</span></code>
-to export, run doxyrest, and build the Shibuya site.</p>
+to export, run doxyrest, build the Shibuya site, and write the sibling
+doxyYoda C++ tree to <code class="docutils literal notranslate"><span class="pre">docs/build/api-cpp/</span></code>.</p>
 <section id="prerequisites">
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
 <p>Two supported compiler shells:</p>

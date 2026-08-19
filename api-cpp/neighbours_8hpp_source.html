@@ -1,0 +1,604 @@
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="generator" content="Doxygen 1.17.0"/>
+<title>seams-core: /home/runner/work/seams-core/seams-core/src/include/internal/neighbours.hpp Source File</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default';
+mermaid.initialize({ startOnLoad: true, theme: theme });
+</script>
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.hostname!==location.hostname)antics.event("Outbound Link",{url:a.href});});</script>
+<!-- doxyYoda owns presentation; stock doxygen.css is not linked (theme SCSS covers Doxygen classes). -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+/* doxyYoda theme boot: apply stored or OS preference before first paint */
+(function () {
+  try {
+    var stored = localStorage.getItem("doxyYoda-theme");
+    var root = document.documentElement;
+    if (stored === "dark") {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    } else if (stored === "light") {
+      root.classList.add("light");
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    }
+  } catch (e) { /* private mode */ }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area" aria-label="Project">
+<div class="title_area__start"></div>
+<div class="title_area__center">
+<span class="project_info">seams-core v2.6.0</span>
+<span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
+</div>
+<div class="title_area__end">
+<button type="button" class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false">&#9790;</button>
+</div>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+/* doxyYoda interactive: foldable fragments, copy buttons, dark-mode toggle */
+document.addEventListener("DOMContentLoaded", function () {
+  function prefersDark() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function isDarkMode() {
+    var root = document.documentElement;
+    if (root.classList.contains("dark") || root.classList.contains("dark-mode")) return true;
+    if (root.classList.contains("light")) return false;
+    return prefersDark();
+  }
+  // Optional folding: wrap .fragment in open <details class="code-details">.
+  // Skip fragments already inside details and native Doxygen .foldopen listings.
+  document.querySelectorAll(".fragment").forEach(function (frag) {
+    if (frag.closest("details.code-details")) return;
+    if (frag.querySelector(".foldopen")) return;
+    var details = document.createElement("details");
+    details.className = "code-details";
+    details.open = true;
+    var summary = document.createElement("summary");
+    summary.textContent = "Code";
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard on div.fragment (themed .copy-btn only)
+  document.querySelectorAll("div.fragment").forEach(function (frag) {
+    if (frag.querySelector(".copy-btn")) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-btn";
+    btn.textContent = "Copy";
+    btn.setAttribute("aria-label", "Copy code");
+    btn.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      var clone = frag.cloneNode(true);
+      var extra = clone.querySelector(".copy-btn");
+      if (extra) extra.remove();
+      var lines = clone.querySelectorAll(".line");
+      var text = lines.length
+        ? Array.prototype.map.call(lines, function (l) { return l.textContent; }).join("\n")
+        : clone.textContent;
+      var done = function () {
+        btn.textContent = "Copied!";
+        setTimeout(function () { btn.textContent = "Copy"; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {
+          /* ignore */
+        });
+      }
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById("darkModeToggle");
+  if (toggle) {
+    function updateIcon() {
+      var dark = isDarkMode();
+      toggle.innerHTML = dark ? "&#9788;" : "&#9790;";
+      toggle.setAttribute("aria-pressed", dark ? "true" : "false");
+    }
+    updateIcon();
+    toggle.addEventListener("click", function () {
+      var root = document.documentElement;
+      var nextDark = !isDarkMode();
+      root.classList.toggle("dark", nextDark);
+      root.classList.toggle("dark-mode", nextDark);
+      root.classList.toggle("light", !nextDark);
+      try {
+        localStorage.setItem("doxyYoda-theme", nextDark ? "dark" : "light");
+      } catch (e) { /* private mode */ }
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.17.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', () => {
+  initMenu('',true);
+  init_search();
+});
+</script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1" style="position:absolute;right:8px;top:8px;height:36px;"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2" style="float:right">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon" onmouseover="return searchBox.OnSearchSelectShow()" onmouseout="return searchBox.OnSearchSelectHide()"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('neighbours_8hpp_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">neighbours.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="neighbours_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">// d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment">//</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">// Copyright (c) 2018--present d-SEAMS core team</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">//</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">// This program is free software: you can redistribute it and/or modify</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">// it under the terms of the MIT License as published by</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">// the Open Source Initiative.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">//</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">// A copy of the MIT License is included in the LICENSE file of this repository.</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// You should have received a copy of the MIT License along with this program.</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// If not, see &lt;https://opensource.org/licenses/MIT&gt;.</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#ifndef SEAMS_NEIGHBOURS_H_</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#define SEAMS_NEIGHBOURS_H_</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;algorithm&gt;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;array&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;tuple&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;utility&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;<a class="code" href="generic_8hpp.html">generic.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;<a class="code" href="mol__sys_8hpp.html">mol_sys.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#ifdef SEAMS_HAS_LINKCELL</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;linkcell.hpp&gt;</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="foldopen" id="foldopen00064" data-start="{" data-end="}">
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="namespacenneigh.html">   64</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacenneigh.html">nneigh</a> {</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span></div>
+<div class="foldopen" id="foldopen00071" data-start="{" data-end="}">
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="group__nneigh.html#ga342ae6a7675f0a32caf8087f43d679d8">   71</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="group__nneigh.html#ga342ae6a7675f0a32caf8087f43d679d8">dumpBoundsToH</a>(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;box,</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>                          <span class="keyword">const</span> std::vector&lt;double&gt; &amp;boxLow, <span class="keywordtype">double</span> H[3][3],</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>                          <span class="keywordtype">double</span> origin[3]) {</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xspan = box.size() &gt; 0 ? box[0] : 0.0;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yspan = box.size() &gt; 1 ? box[1] : 0.0;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zspan = box.size() &gt; 2 ? box[2] : 0.0;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xlo_b = boxLow.size() &gt; 0 ? boxLow[0] : 0.0;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ylo_b = boxLow.size() &gt; 1 ? boxLow[1] : 0.0;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zlo_b = boxLow.size() &gt; 2 ? boxLow[2] : 0.0;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xy = box.size() &gt;= 6 ? box[3] : 0.0;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xz = box.size() &gt;= 6 ? box[4] : 0.0;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yz = box.size() &gt;= 6 ? box[5] : 0.0;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymin = std::min(0.0, yz);</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymax = std::max(0.0, yz);</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  H[0][0] = xspan - xmax + xmin;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  H[0][1] = 0.0;</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  H[0][2] = 0.0;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  H[1][0] = xy;</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  H[1][1] = yspan - ymax + ymin;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  H[1][2] = 0.0;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  H[2][0] = xz;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  H[2][1] = yz;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  H[2][2] = zspan;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  origin[0] = xlo_b - xmin;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>  origin[1] = ylo_b - ymin;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  origin[2] = zlo_b;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>}</div>
+</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span></div>
+<div class="foldopen" id="foldopen00102" data-start="{" data-end="}">
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno"><a class="line" href="group__nneigh.html#ga4b7e08068d9fba7d981793100b62de6c">  102</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="group__nneigh.html#ga4b7e08068d9fba7d981793100b62de6c">dumpCellLengths</a>(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;box,</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>                            <span class="keyword">const</span> std::vector&lt;double&gt; &amp;boxLow,</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>                            <span class="keywordtype">double</span> lengths[3]) {</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>  <span class="keywordtype">double</span> H[3][3];</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  <span class="keywordtype">double</span> origin[3];</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>  <a class="code hl_function" href="group__nneigh.html#ga342ae6a7675f0a32caf8087f43d679d8">dumpBoundsToH</a>(box, boxLow, H, origin);</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  lengths[0] = H[0][0];</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  lengths[1] = H[1][1];</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  lengths[2] = H[2][2];</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>}</div>
+</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span></div>
+<div class="foldopen" id="foldopen00114" data-start="{" data-end="}">
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="group__nneigh.html#ga87d0da315b8e67fc843f91099dceb349">  114</a></span><span class="keyword">inline</span> <span class="keywordtype">int</span> <a class="code hl_function" href="group__nneigh.html#ga87d0da315b8e67fc843f91099dceb349">dumpAxialDim</a>(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;box,</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>                        <span class="keyword">const</span> std::vector&lt;double&gt; &amp;boxLow) {</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>  <span class="keywordtype">double</span> lengths[3];</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>  <a class="code hl_function" href="group__nneigh.html#ga4b7e08068d9fba7d981793100b62de6c">dumpCellLengths</a>(box, boxLow, lengths);</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>  <span class="keywordtype">int</span> axial = 0;</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>  <span class="keywordflow">if</span> (lengths[1] &gt; lengths[axial]) {</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    axial = 1;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>  }</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>  <span class="keywordflow">if</span> (lengths[2] &gt; lengths[axial]) {</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    axial = 2;</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>  }</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>  <span class="keywordflow">return</span> axial;</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>}</div>
+</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
+<div class="foldopen" id="foldopen00128" data-start="{" data-end="}">
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno"><a class="line" href="group__nneigh.html#gaf4937ef59938a2569258cdf136fd33ec">  128</a></span><span class="keyword">inline</span> <span class="keywordtype">int</span> <a class="code hl_function" href="group__nneigh.html#ga87d0da315b8e67fc843f91099dceb349">dumpAxialDim</a>(</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud) {</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="group__nneigh.html#ga87d0da315b8e67fc843f91099dceb349">dumpAxialDim</a>(yCloud.box, yCloud.boxLow);</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>}</div>
+</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span></div>
+<div class="foldopen" id="foldopen00134" data-start="{" data-end="}">
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno"><a class="line" href="group__nneigh.html#ga7819f2f15dde85f94bf6a4f6632780b8">  134</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="group__nneigh.html#ga7819f2f15dde85f94bf6a4f6632780b8">dumpToFrac</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> H[3][3], <span class="keyword">const</span> <span class="keywordtype">double</span> origin[3], <span class="keywordtype">double</span> x,</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>                       <span class="keywordtype">double</span> y, <span class="keywordtype">double</span> z, <span class="keywordtype">double</span> s[3]) {</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lx = H[0][0];</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ly = H[1][1];</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lz = H[2][2];</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xy = H[1][0];</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xz = H[2][0];</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yz = H[2][1];</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>  s[2] = (z - origin[2]) / lz;</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>  s[1] = (y - origin[1] - yz * s[2]) / ly;</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>  s[0] = (x - origin[0] - xy * s[1] - xz * s[2]) / lx;</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>}</div>
+</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span></div>
+<div class="foldopen" id="foldopen00148" data-start="{" data-end="}">
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno"><a class="line" href="group__nneigh.html#ga60335297e92e0bd73fba7bfdaca28a26">  148</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="group__nneigh.html#ga60335297e92e0bd73fba7bfdaca28a26">dumpFromFrac</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> H[3][3], <span class="keyword">const</span> <span class="keywordtype">double</span> origin[3],</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>                         <span class="keyword">const</span> <span class="keywordtype">double</span> s[3], <span class="keywordtype">double</span> r[3]) {</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>  r[0] = origin[0] + H[0][0] * s[0] + H[1][0] * s[1] + H[2][0] * s[2];</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>  r[1] = origin[1] + H[1][1] * s[1] + H[2][1] * s[2];</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>  r[2] = origin[2] + H[2][2] * s[2];</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>}</div>
+</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span></div>
+<div class="foldopen" id="foldopen00157" data-start="{" data-end="}">
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno"><a class="line" href="group__nneigh.html#gad17e972366865905372aa796e946a351">  157</a></span><span class="keyword">inline</span> <span class="keywordtype">double</span> <a class="code hl_function" href="group__nneigh.html#gad17e972366865905372aa796e946a351">dumpVolume</a>(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;box,</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>                         <span class="keyword">const</span> std::vector&lt;double&gt; &amp;boxLow) {</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>  <span class="keywordtype">double</span> H[3][3];</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>  <span class="keywordtype">double</span> origin[3];</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>  <a class="code hl_function" href="group__nneigh.html#ga342ae6a7675f0a32caf8087f43d679d8">dumpBoundsToH</a>(box, boxLow, H, origin);</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> vol = H[0][0] * H[1][1] * H[2][2];</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>  <span class="keywordflow">return</span> vol &lt; 0.0 ? -vol : vol;</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>}</div>
+</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
+<div class="foldopen" id="foldopen00166" data-start="{" data-end="}">
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno"><a class="line" href="group__nneigh.html#ga786c8abbd20d2751403eb4f2c603cd95">  166</a></span><span class="keyword">inline</span> <span class="keywordtype">double</span> <a class="code hl_function" href="group__nneigh.html#gad17e972366865905372aa796e946a351">dumpVolume</a>(</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud) {</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="group__nneigh.html#gad17e972366865905372aa796e946a351">dumpVolume</a>(yCloud.box, yCloud.boxLow);</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>}</div>
+</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span> </div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span><span class="preprocessor">#ifdef SEAMS_HAS_LINKCELL</span></div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span><span class="keyword">inline</span> lc_cell lammpsBoxToLcCell(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;box,</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>                                 <span class="keyword">const</span> std::vector&lt;double&gt; &amp;boxLow) {</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>  <span class="keywordtype">double</span> H[3][3], o[3];</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>  <a class="code hl_function" href="group__nneigh.html#ga342ae6a7675f0a32caf8087f43d679d8">dumpBoundsToH</a>(box, boxLow, H, o);</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>  lc_cell c = lc_cell_ortho(H[0][0], H[1][1], H[2][2]);</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>  c.ax = H[0][0];</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>  c.ay = H[0][1];</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>  c.az = H[0][2];</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>  c.bx = H[1][0];</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>  c.by = H[1][1];</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>  c.bz = H[1][2];</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>  c.cx = H[2][0];</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>  c.cy = H[2][1];</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>  c.cz = H[2][2];</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>  c.ox = o[0];</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>  c.oy = o[1];</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>  c.oz = o[2];</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>  <span class="keywordflow">return</span> c;</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>}</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span> </div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span><span class="keyword">inline</span> linkcell::Cell lammpsBoxToLinkcell(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;box,</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>                                          <span class="keyword">const</span> std::vector&lt;double&gt; &amp;boxLow) {</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>  <span class="keywordflow">return</span> linkcell::Cell(lammpsBoxToLcCell(box, boxLow));</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>}</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span></div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span><span class="keyword">inline</span> <span class="keywordtype">void</span> residentFrameCell(<span class="keyword">const</span> <span class="keywordtype">double</span> *box, <span class="keyword">const</span> <span class="keywordtype">double</span> *boxLow,</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>                              <span class="keywordtype">int</span> nBox, linkcell::Cell &amp;cell,</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>                              <span class="keyword">const</span> <span class="keywordtype">double</span> *&amp;frameLens) {</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>  cell = linkcell::Cell::ortho(box[0], box[1], box[2]);</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>  frameLens = box;</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>  <span class="keywordflow">if</span> (boxLow != <span class="keyword">nullptr</span> || nBox &gt;= 6) {</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>    std::vector&lt;double&gt; <a class="code hl_function" href="namespaceseams_1_1cfg.html#a713ce305c8665518546545ced0b638f5">dump</a>(<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(std::max(nBox, 3)));</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; nBox &amp;&amp; i &lt; static_cast&lt;int&gt;(<a class="code hl_function" href="namespaceseams_1_1cfg.html#a713ce305c8665518546545ced0b638f5">dump</a>.size()); ++i) {</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>      <a class="code hl_function" href="namespaceseams_1_1cfg.html#a713ce305c8665518546545ced0b638f5">dump</a>[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(i)] = box[i];</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>    }</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    std::vector&lt;double&gt; lo;</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>    <span class="keywordflow">if</span> (boxLow != <span class="keyword">nullptr</span>) {</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>      lo = {boxLow[0], boxLow[1], boxLow[2]};</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>    }</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>    cell = lammpsBoxToLinkcell(dump, lo);</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>    frameLens = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>  }</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>}</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span></div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span></div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno"><a class="line" href="group__nneigh.html#ga9566a384474993ea7356e7abc414e40e">  227</a></span>std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="group__nneigh.html#ga9566a384474993ea7356e7abc414e40e">neighList</a>(</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    <span class="keywordtype">double</span> rcutoff, <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>    <span class="keywordtype">int</span> typeI, <span class="keywordtype">int</span> typeJ);</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span></div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno"><a class="line" href="group__nneigh.html#gadd6ed18f0c7e2e5fbd10d7cdbf6af429">  233</a></span>std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="group__nneigh.html#gadd6ed18f0c7e2e5fbd10d7cdbf6af429">neighListPair</a>(</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    <span class="keywordtype">double</span> rcutoff, <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>    <span class="keywordtype">int</span> typeI, <span class="keywordtype">int</span> typeJ);</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span></div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno"><a class="line" href="group__nneigh.html#gafaf0f0ff09cef581076f99a68018b023">  239</a></span>std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="group__nneigh.html#gafaf0f0ff09cef581076f99a68018b023">neighListO</a>(</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    <span class="keywordtype">double</span> rcutoff, <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    <span class="keywordtype">int</span> typeI);</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span></div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno"><a class="line" href="group__nneigh.html#ga651839704a066d725b22212c13c74327">  245</a></span>std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="group__nneigh.html#ga651839704a066d725b22212c13c74327">halfNeighList</a>(</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>    <span class="keywordtype">double</span> rcutoff, <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>    <span class="keywordtype">int</span> typeI = 1);</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span></div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span></div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno"><a class="line" href="group__nneigh.html#gacf46d8c4b42f15e634ff0076ac83c012">  254</a></span>std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="group__nneigh.html#gacf46d8c4b42f15e634ff0076ac83c012">neighbourListByIndex</a>(</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>    <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList);</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span></div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno"><a class="line" href="group__nneigh.html#ga97ad6e2c7bfaa504c7e021a527effe73">  260</a></span>std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="group__nneigh.html#ga97ad6e2c7bfaa504c7e021a527effe73">getNewNeighbourListByIndex</a>(</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">double</span> cutoff);</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span></div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno"><a class="line" href="group__nneigh.html#ga18cda509d1fc5e680abf22e36348fc61">  278</a></span>std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="group__nneigh.html#ga18cda509d1fc5e680abf22e36348fc61">kNearestNeighbourList</a>(</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">int</span> k,</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>    <span class="keywordtype">double</span> candidateCutoff, <span class="keywordtype">int</span> typeI, <span class="keywordtype">bool</span> mutual = <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span></div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>std::pair&lt;std::vector&lt;std::vector&lt;int&gt;&gt;, std::vector&lt;std::vector&lt;int&gt;&gt;&gt;</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno"><a class="line" href="group__nneigh.html#ga553a0b3d4dddd477c0dcb06d93361eae">  286</a></span><a class="code hl_function" href="group__nneigh.html#ga553a0b3d4dddd477c0dcb06d93361eae">kNearestNeighbourPair</a>(</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">int</span> k,</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>    <span class="keywordtype">double</span> candidateCutoff, <span class="keywordtype">int</span> typeI);</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span></div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno"><a class="line" href="group__nneigh.html#ga139165088e10b53a5efa6034434c9423">  296</a></span>std::pair&lt;double, double&gt; <a class="code hl_function" href="group__nneigh.html#ga139165088e10b53a5efa6034434c9423">shellSeparation</a>(</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">int</span> k,</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>    <span class="keywordtype">int</span> typeI);</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span></div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno"><a class="line" href="group__nneigh.html#ga57e7804488c926a85c21131b895b6491">  306</a></span>std::vector&lt;std::tuple&lt;int, int, double&gt;&gt; <a class="code hl_function" href="group__nneigh.html#ga57e7804488c926a85c21131b895b6491">nearestUnlike</a>(</div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">int</span> typeI,</div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>    <span class="keywordtype">int</span> typeJ);</div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span></div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno"><a class="line" href="group__nneigh.html#ga68ba6195c59b7a1b7c8bb17ec31314a3">  313</a></span>std::vector&lt;std::pair&lt;int, int&gt;&gt; <a class="code hl_function" href="group__nneigh.html#ga68ba6195c59b7a1b7c8bb17ec31314a3">mutualNearestUnlike</a>(</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">int</span> typeI,</div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>    <span class="keywordtype">int</span> typeJ);</div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span></div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno"><a class="line" href="group__nneigh.html#ga752d3e4cbd98fa454a6dc36a4307b75a">  318</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="group__nneigh.html#ga752d3e4cbd98fa454a6dc36a4307b75a">clearNeighbourList</a>(std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList);</div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span></div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno"><a class="line" href="group__nneigh.html#gae70187f6d039fe332d7f59be0112ff26">  326</a></span><span class="keyword">enum class</span> <a class="code hl_enumeration" href="group__nneigh.html#gae70187f6d039fe332d7f59be0112ff26">BondGraph</a> { <a class="code hl_enumvalue" href="group__nneigh.html#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">Cutoff</a>, <a class="code hl_enumvalue" href="group__nneigh.html#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">KnnMutual</a>, <a class="code hl_enumvalue" href="group__nneigh.html#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">KnnUnion</a> };</div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span> </div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno"><a class="line" href="group__nneigh.html#gad285ff1c2c0bd1ca8495f3972faebb8c">  328</a></span><a class="code hl_enumeration" href="group__nneigh.html#gae70187f6d039fe332d7f59be0112ff26">BondGraph</a> <a class="code hl_function" href="group__nneigh.html#gad285ff1c2c0bd1ca8495f3972faebb8c">bondGraphFromName</a>(<span class="keyword">const</span> std::string &amp;name);</div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno"><a class="line" href="group__nneigh.html#ga1c78a7396b0353d674abb0290e85d0ec">  329</a></span><span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_function" href="group__nneigh.html#ga1c78a7396b0353d674abb0290e85d0ec">bondGraphName</a>(<a class="code hl_enumeration" href="group__nneigh.html#gae70187f6d039fe332d7f59be0112ff26">BondGraph</a> graph);</div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span></div>
+<div class="foldopen" id="foldopen00339" data-start="{" data-end="};">
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno"><a class="line" href="classnneigh_1_1SkinNeighborList.html">  339</a></span><span class="keyword">class </span><a class="code hl_function" href="group__nneigh.html#ga80f555acadad22b5edcc4af8285006ed">SkinNeighborList</a> {</div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno"><a class="line" href="group__nneigh.html#ga80f555acadad22b5edcc4af8285006ed">  343</a></span>  <a class="code hl_function" href="group__nneigh.html#ga80f555acadad22b5edcc4af8285006ed">SkinNeighborList</a>(<span class="keywordtype">double</span> cutoff, <span class="keywordtype">double</span> skin, <span class="keywordtype">int</span> typeI,</div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>                   <a class="code hl_enumeration" href="group__nneigh.html#gae70187f6d039fe332d7f59be0112ff26">BondGraph</a> <a class="code hl_function" href="group__nneigh.html#ga97e81664c1e98dd63263c6724f5c8514">graph</a> = <a class="code hl_enumvalue" href="group__nneigh.html#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">BondGraph::KnnMutual</a>, <span class="keywordtype">int</span> k = 4);</div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span> </div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno"><a class="line" href="group__nneigh.html#ga97e81664c1e98dd63263c6724f5c8514">  346</a></span>  [[nodiscard]] <a class="code hl_enumeration" href="group__nneigh.html#gae70187f6d039fe332d7f59be0112ff26">BondGraph</a> <a class="code hl_function" href="group__nneigh.html#ga97e81664c1e98dd63263c6724f5c8514">graph</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> graph_; }</div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span></div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>  <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;</div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno"><a class="line" href="group__nneigh.html#ga81af9074f6b9311b1cba1321b64f21d7">  351</a></span>  <a class="code hl_function" href="group__nneigh.html#ga81af9074f6b9311b1cba1321b64f21d7">update</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud);</div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span> </div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno"><a class="line" href="group__nneigh.html#gaaca057f10435740a240ca275e619e16e">  353</a></span>  [[nodiscard]] <span class="keywordtype">bool</span> <a class="code hl_function" href="group__nneigh.html#gaaca057f10435740a240ca275e619e16e">lastRebuilt</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> rebuilt_; }</div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno"><a class="line" href="group__nneigh.html#gaadc8965e902b0b2a599c75ac338d15af">  355</a></span>  [[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="group__nneigh.html#gaadc8965e902b0b2a599c75ac338d15af">lastChangedAtoms</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> changedAtoms_; }</div>
+<div class="foldopen" id="foldopen00356" data-start="{" data-end="}">
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno"><a class="line" href="group__nneigh.html#gab621667477b3b610de9af803a925f574">  356</a></span>  [[nodiscard]] <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;<a class="code hl_function" href="group__nneigh.html#gab621667477b3b610de9af803a925f574">bonds</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>    <span class="keywordflow">return</span> nList_;</div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>  }</div>
+</div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span> </div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>  <span class="keywordtype">double</span> cutoff_;</div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>  <span class="keywordtype">double</span> skin_;</div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>  <span class="keywordtype">double</span> cutoffSq_;</div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>  <span class="keywordtype">double</span> triggerSq_;</div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>  <span class="keywordtype">int</span> typeI_;</div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>  <span class="keywordtype">int</span> k_;</div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>  <a class="code hl_enumeration" href="group__nneigh.html#gae70187f6d039fe332d7f59be0112ff26">BondGraph</a> graph_{<a class="code hl_enumvalue" href="group__nneigh.html#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">BondGraph::KnnMutual</a>};</div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>  <span class="keywordtype">bool</span> mutual_{<span class="keyword">true</span>};</div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>  <span class="keywordtype">bool</span> rebuilt_{<span class="keyword">true</span>};</div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>  <span class="keywordtype">int</span> changedAtoms_{0};</div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>  std::vector&lt;double&gt; x0_;</div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>  std::vector&lt;double&gt; y0_;</div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>  std::vector&lt;double&gt; z0_;</div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>  std::vector&lt;double&gt; box0_;</div>
+<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span>  std::vector&lt;std::pair&lt;int, int&gt;&gt; candidates_;</div>
+<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span>  std::vector&lt;std::pair&lt;int, int&gt;&gt; bonded_;</div>
+<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>  std::vector&lt;std::vector&lt;int&gt;&gt; nList_;</div>
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span> </div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span>  <span class="keywordtype">bool</span> mustRebuild(</div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>      <span class="keyword">const</span> molSys::PointCloud&lt;molSys::Point&lt;double&gt;, <span class="keywordtype">double</span>&gt; &amp;yCloud) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>  <span class="keywordtype">void</span> rebuildCandidates(</div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>      <span class="keyword">const</span> molSys::PointCloud&lt;molSys::Point&lt;double&gt;, <span class="keywordtype">double</span>&gt; &amp;yCloud);</div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>  <span class="keywordtype">void</span> refreshBonds(</div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>      <span class="keyword">const</span> molSys::PointCloud&lt;molSys::Point&lt;double&gt;, <span class="keywordtype">double</span>&gt; &amp;yCloud);</div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>};</div>
+</div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span> </div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>}  <span class="comment">// namespace nneigh</span></div>
+</div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span> </div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span><span class="preprocessor">#endif  </span><span class="comment">// SEAMS_NEIGHBOURS_H_</span></div>
+<div class="ttc" id="ageneric_8hpp_html"><div class="ttname"><a href="generic_8hpp.html">generic.hpp</a></div><div class="ttdoc">File for containing generic or common functions.</div></div>
+<div class="ttc" id="agroup__nneigh_html_ga139165088e10b53a5efa6034434c9423"><div class="ttname"><a href="group__nneigh.html#ga139165088e10b53a5efa6034434c9423">nneigh::shellSeparation</a></div><div class="ttdeci">std::pair&lt; double, double &gt; shellSeparation(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int k, int typeI)</div><div class="ttdoc">The shell-separation certificate for the exact reduction of the k-nearest graph to the cutoff graph: ...</div></div>
+<div class="ttc" id="agroup__nneigh_html_ga18cda509d1fc5e680abf22e36348fc61"><div class="ttname"><a href="group__nneigh.html#ga18cda509d1fc5e680abf22e36348fc61">nneigh::kNearestNeighbourList</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; kNearestNeighbourList(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int k, double candidateCutoff, int typeI, bool mutual=true)</div><div class="ttdoc">Bonded graph from the k nearest neighbours of each particle rather than a distance cutoff.</div></div>
+<div class="ttc" id="agroup__nneigh_html_ga1c78a7396b0353d674abb0290e85d0ec"><div class="ttname"><a href="group__nneigh.html#ga1c78a7396b0353d674abb0290e85d0ec">nneigh::bondGraphName</a></div><div class="ttdeci">const char * bondGraphName(BondGraph graph)</div></div>
+<div class="ttc" id="agroup__nneigh_html_ga342ae6a7675f0a32caf8087f43d679d8"><div class="ttname"><a href="group__nneigh.html#ga342ae6a7675f0a32caf8087f43d679d8">nneigh::dumpBoundsToH</a></div><div class="ttdeci">void dumpBoundsToH(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow, double H[3][3], double origin[3])</div><div class="ttdoc">LAMMPS dump bound spans to restricted triclinic H (rows a, b, c).</div><div class="ttdef"><b>Definition</b> <a href="#l00071">neighbours.hpp:71</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ga4b7e08068d9fba7d981793100b62de6c"><div class="ttname"><a href="group__nneigh.html#ga4b7e08068d9fba7d981793100b62de6c">nneigh::dumpCellLengths</a></div><div class="ttdeci">void dumpCellLengths(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow, double lengths[3])</div><div class="ttdoc">Recovered restricted-triclinic lengths lx, ly, lz (H diagonal).</div><div class="ttdef"><b>Definition</b> <a href="#l00102">neighbours.hpp:102</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ga553a0b3d4dddd477c0dcb06d93361eae"><div class="ttname"><a href="group__nneigh.html#ga553a0b3d4dddd477c0dcb06d93361eae">nneigh::kNearestNeighbourPair</a></div><div class="ttdeci">std::pair&lt; std::vector&lt; std::vector&lt; int &gt; &gt;, std::vector&lt; std::vector&lt; int &gt; &gt; &gt; kNearestNeighbourPair(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int k, double candidateCutoff, int typeI)</div><div class="ttdoc">Mutual and union k-nearest graphs from one candidate search.</div></div>
+<div class="ttc" id="agroup__nneigh_html_ga57e7804488c926a85c21131b895b6491"><div class="ttname"><a href="group__nneigh.html#ga57e7804488c926a85c21131b895b6491">nneigh::nearestUnlike</a></div><div class="ttdeci">std::vector&lt; std::tuple&lt; int, int, double &gt; &gt; nearestUnlike(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</div><div class="ttdoc">Nearest unlike image of each typeI particle among typeJ particles.</div></div>
+<div class="ttc" id="agroup__nneigh_html_ga60335297e92e0bd73fba7bfdaca28a26"><div class="ttname"><a href="group__nneigh.html#ga60335297e92e0bd73fba7bfdaca28a26">nneigh::dumpFromFrac</a></div><div class="ttdeci">void dumpFromFrac(const double H[3][3], const double origin[3], const double s[3], double r[3])</div><div class="ttdoc">Fractional to cartesian coordinates via dump H.</div><div class="ttdef"><b>Definition</b> <a href="#l00148">neighbours.hpp:148</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ga651839704a066d725b22212c13c74327"><div class="ttname"><a href="group__nneigh.html#ga651839704a066d725b22212c13c74327">nneigh::halfNeighList</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; halfNeighList(double rcutoff, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int typeI=1)</div></div>
+<div class="ttc" id="agroup__nneigh_html_ga68ba6195c59b7a1b7c8bb17ec31314a3"><div class="ttname"><a href="group__nneigh.html#ga68ba6195c59b7a1b7c8bb17ec31314a3">nneigh::mutualNearestUnlike</a></div><div class="ttdeci">std::vector&lt; std::pair&lt; int, int &gt; &gt; mutualNearestUnlike(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</div><div class="ttdoc">Subset of nearestUnlike where j&#39;s nearest typeI is i (mutual).</div></div>
+<div class="ttc" id="agroup__nneigh_html_ga752d3e4cbd98fa454a6dc36a4307b75a"><div class="ttname"><a href="group__nneigh.html#ga752d3e4cbd98fa454a6dc36a4307b75a">nneigh::clearNeighbourList</a></div><div class="ttdeci">int clearNeighbourList(std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</div><div class="ttdoc">Erases memory for a vector of vectors for the neighbour list.</div></div>
+<div class="ttc" id="agroup__nneigh_html_ga7819f2f15dde85f94bf6a4f6632780b8"><div class="ttname"><a href="group__nneigh.html#ga7819f2f15dde85f94bf6a4f6632780b8">nneigh::dumpToFrac</a></div><div class="ttdeci">void dumpToFrac(const double H[3][3], const double origin[3], double x, double y, double z, double s[3])</div><div class="ttdoc">Cartesian to fractional coordinates via dump H.</div><div class="ttdef"><b>Definition</b> <a href="#l00134">neighbours.hpp:134</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ga80f555acadad22b5edcc4af8285006ed"><div class="ttname"><a href="group__nneigh.html#ga80f555acadad22b5edcc4af8285006ed">nneigh::SkinNeighborList::SkinNeighborList</a></div><div class="ttdeci">SkinNeighborList(double cutoff, double skin, int typeI, BondGraph graph=BondGraph::KnnMutual, int k=4)</div></div>
+<div class="ttc" id="agroup__nneigh_html_ga81af9074f6b9311b1cba1321b64f21d7"><div class="ttname"><a href="group__nneigh.html#ga81af9074f6b9311b1cba1321b64f21d7">nneigh::SkinNeighborList::update</a></div><div class="ttdeci">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp; update(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud)</div></div>
+<div class="ttc" id="agroup__nneigh_html_ga87d0da315b8e67fc843f91099dceb349"><div class="ttname"><a href="group__nneigh.html#ga87d0da315b8e67fc843f91099dceb349">nneigh::dumpAxialDim</a></div><div class="ttdeci">int dumpAxialDim(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</div><div class="ttdoc">Longest recovered length: 0 = x, 1 = y, 2 = z.</div><div class="ttdef"><b>Definition</b> <a href="#l00114">neighbours.hpp:114</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ga9566a384474993ea7356e7abc414e40e"><div class="ttname"><a href="group__nneigh.html#ga9566a384474993ea7356e7abc414e40e">nneigh::neighList</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; neighList(double rcutoff, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</div><div class="ttdoc">All these functions use atom IDs and not indices.</div></div>
+<div class="ttc" id="agroup__nneigh_html_ga97ad6e2c7bfaa504c7e021a527effe73"><div class="ttname"><a href="group__nneigh.html#ga97ad6e2c7bfaa504c7e021a527effe73">nneigh::getNewNeighbourListByIndex</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; getNewNeighbourListByIndex(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, double cutoff)</div></div>
+<div class="ttc" id="agroup__nneigh_html_ga97e81664c1e98dd63263c6724f5c8514"><div class="ttname"><a href="group__nneigh.html#ga97e81664c1e98dd63263c6724f5c8514">nneigh::SkinNeighborList::graph</a></div><div class="ttdeci">BondGraph graph() const</div><div class="ttdef"><b>Definition</b> <a href="#l00346">neighbours.hpp:346</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_gaaca057f10435740a240ca275e619e16e"><div class="ttname"><a href="group__nneigh.html#gaaca057f10435740a240ca275e619e16e">nneigh::SkinNeighborList::lastRebuilt</a></div><div class="ttdeci">bool lastRebuilt() const</div><div class="ttdef"><b>Definition</b> <a href="#l00353">neighbours.hpp:353</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_gaadc8965e902b0b2a599c75ac338d15af"><div class="ttname"><a href="group__nneigh.html#gaadc8965e902b0b2a599c75ac338d15af">nneigh::SkinNeighborList::lastChangedAtoms</a></div><div class="ttdeci">int lastChangedAtoms() const</div><div class="ttdoc">Atoms whose cutoff bond set changed on the last update.</div><div class="ttdef"><b>Definition</b> <a href="#l00355">neighbours.hpp:355</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_gab621667477b3b610de9af803a925f574"><div class="ttname"><a href="group__nneigh.html#gab621667477b3b610de9af803a925f574">nneigh::SkinNeighborList::bonds</a></div><div class="ttdeci">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp; bonds() const</div><div class="ttdef"><b>Definition</b> <a href="#l00356">neighbours.hpp:356</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_gacf46d8c4b42f15e634ff0076ac83c012"><div class="ttname"><a href="group__nneigh.html#gacf46d8c4b42f15e634ff0076ac83c012">nneigh::neighbourListByIndex</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; neighbourListByIndex(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</div></div>
+<div class="ttc" id="agroup__nneigh_html_gad17e972366865905372aa796e946a351"><div class="ttname"><a href="group__nneigh.html#gad17e972366865905372aa796e946a351">nneigh::dumpVolume</a></div><div class="ttdeci">double dumpVolume(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</div><div class="ttdoc">Triclinic dump-cell volume |det(H)| from dumpBoundsToH.</div><div class="ttdef"><b>Definition</b> <a href="#l00157">neighbours.hpp:157</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_gad285ff1c2c0bd1ca8495f3972faebb8c"><div class="ttname"><a href="group__nneigh.html#gad285ff1c2c0bd1ca8495f3972faebb8c">nneigh::bondGraphFromName</a></div><div class="ttdeci">BondGraph bondGraphFromName(const std::string &amp;name)</div></div>
+<div class="ttc" id="agroup__nneigh_html_gadd6ed18f0c7e2e5fbd10d7cdbf6af429"><div class="ttname"><a href="group__nneigh.html#gadd6ed18f0c7e2e5fbd10d7cdbf6af429">nneigh::neighListPair</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; neighListPair(double rcutoff, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</div></div>
+<div class="ttc" id="agroup__nneigh_html_gae70187f6d039fe332d7f59be0112ff26"><div class="ttname"><a href="group__nneigh.html#gae70187f6d039fe332d7f59be0112ff26">nneigh::BondGraph</a></div><div class="ttdeci">BondGraph</div><div class="ttdoc">Bond graph for TUM.</div><div class="ttdef"><b>Definition</b> <a href="#l00326">neighbours.hpp:326</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_gafaf0f0ff09cef581076f99a68018b023"><div class="ttname"><a href="group__nneigh.html#gafaf0f0ff09cef581076f99a68018b023">nneigh::neighListO</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; neighListO(double rcutoff, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int typeI)</div></div>
+<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706"><div class="ttname"><a href="group__nneigh.html#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">nneigh::BondGraph::KnnUnion</a></div><div class="ttdeci">@ KnnUnion</div><div class="ttdef"><b>Definition</b> <a href="#l00326">neighbours.hpp:326</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604"><div class="ttname"><a href="group__nneigh.html#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">nneigh::BondGraph::KnnMutual</a></div><div class="ttdeci">@ KnnMutual</div><div class="ttdef"><b>Definition</b> <a href="#l00326">neighbours.hpp:326</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084"><div class="ttname"><a href="group__nneigh.html#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">nneigh::BondGraph::Cutoff</a></div><div class="ttdeci">@ Cutoff</div><div class="ttdef"><b>Definition</b> <a href="#l00326">neighbours.hpp:326</a></div></div>
+<div class="ttc" id="amol__sys_8hpp_html"><div class="ttname"><a href="mol__sys_8hpp.html">mol_sys.hpp</a></div><div class="ttdoc">The main molecular system handler.</div></div>
+<div class="ttc" id="anamespacenneigh_html"><div class="ttname"><a href="namespacenneigh.html">nneigh</a></div><div class="ttdoc">Functions for building neighbour lists.</div><div class="ttdef"><b>Definition</b> <a href="#l00064">neighbours.hpp:64</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1cfg_html_a713ce305c8665518546545ced0b638f5"><div class="ttname"><a href="namespaceseams_1_1cfg.html#a713ce305c8665518546545ced0b638f5">seams::cfg::dump</a></div><div class="ttdeci">void dump(const Runtime &amp;cfg, std::ostream &amp;os)</div></div>
+<div class="ttc" id="astructmolSys_1_1PointCloud_html"><div class="ttname"><a href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a></div><div class="ttdoc">This contains a collection of points; contains information for a particular frame.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00173">mol_sys.hpp:173</a></div></div>
+<div class="ttc" id="astructmolSys_1_1Point_html"><div class="ttname"><a href="structmolSys_1_1Point.html">molSys::Point</a></div><div class="ttdoc">This contains per-particle information.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00152">mol_sys.hpp:152</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!-- Doxygen already closed #doc-content and #container before this template. -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="neighbours_8hpp.html">neighbours.hpp</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.17.0 </li>
+  </ul>
+</div>
+<div class="doxyyoda-attrib" role="contentinfo">
+  <span class="doxyyoda-attrib__item">
+    <span>Generated by <a href="https://www.doxygen.org/index.html">Doxygen 1.17.0</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z"/></svg>
+    <span>Analytics by <a href="https://antics.turtletech.us/" target="_blank" rel="noopener noreferrer">Antics</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <span>provided by</span>
+    <span class="doxyyoda-attrib__brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1.4em" height="1.4em" viewBox="0 0 64 64" aria-hidden="true"><g fill-rule="evenodd"><ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9"/><path fill="#80D25B" d="M20.3,46c0,0-3.2,9.9.3,13.8c3.5,3.9 6.1,3.4 6.1-6C26.8,44.3 20.3,46 20.3,46Z"/><path fill="#80D25B" d="M38.3,46c0,0-3.2,9.9.4,13.8c3.5,3.9 6.1,3.4 6.1-6C44.8,44.3 38.3,46 38.3,46Z" transform="matrix(-1 0 0 1 81.8 0)"/><path fill="#80D25B" d="M20.6,21.2c0,0-6.7-5.8-10.5-5.2C6.2,16.7 6,22.2 6,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L20.6,21.2Z"/><path fill="#80D25B" d="M57.6,21.2c0,0-6.6-5.8-10.5-5.2C43.2,16.7 43,22.2 43,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L57.6,21.2Z" transform="matrix(-1 0 0 1 100.623 0)"/><path fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32,53C40.8,53 48,44.5 48,34C48,23.5 46.7,17 32,17C17.3,17 16,23.5 16,34C16,44.5 23.2,53 32,53Z"/><polygon fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" points="32 22 38.9 26 38.9 34 32 38 25.1 34 25.1 26"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M30,8C28.9,8 28,8.9 28,10"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M36,8C34.9,8 34,8.9 34,10" transform="matrix(-1 0 0 1 70 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32.1,38.2L32.1,52.4M32,21.7L32,17M25.2,26L17.7,23.1M25.1,34.2L16.8,38.9"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M46.2,26L38.7,23.1" transform="matrix(-1 0 0 1 84.951 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M47.1,34.2L38.8,38.9" transform="matrix(-1 0 0 1 85.891 0)"/></g></svg>
+      <a href="https://turtletech.us/" target="_blank" rel="noopener noreferrer">TurtleTech ehf</a>
+    </span>
+  </span>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

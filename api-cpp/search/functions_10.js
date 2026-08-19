@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['raddeg_0',['radDeg',['../group__gen.html#gaeadb5e8ff98078b0007d0def0eaad39d',1,'gen']]],
+  ['radialcoord_1',['radialCoord',['../group__chill.html#ga514fadfbfeabee5d144ef4102fb3004d',1,'sph']]],
+  ['rdf2danalysis_5faa_2',['rdf2Danalysis_AA',['../group__rdf2.html#gaa861f048b84783c91eb1fb21f5c827cd',1,'rdf2']]],
+  ['readbonds_3',['readBonds',['../group__sinp.html#gada34d9d30df182a408a6b69ba7310509',1,'sinp']]],
+  ['readlammpstrj_4',['readLammpsTrj',['../group__sinp.html#ga27548bfe885e92777ee50738245e38d4',1,'sinp']]],
+  ['readlammpstrjo_5',['readLammpsTrjO',['../group__sinp.html#gac788ef30628b292dec2a1b903dbdfe5e',1,'sinp']]],
+  ['readlammpstrjreduced_6',['readLammpsTrjreduced',['../group__sinp.html#gaaf3e97603a0f784f271d01efd5aa9060',1,'sinp']]],
+  ['readxyz_7',['readXYZ',['../group__sinp.html#ga9aeec41b2c3fea17e5e54fd266b71f0a',1,'sinp']]],
+  ['recenterclustercloud_8',['recenterClusterCloud',['../group__clump.html#gadc20f0c734d4fc6b1bc1b39990b7e78f',1,'clump']]],
+  ['reclassifywater_9',['reclassifyWater',['../group__chill.html#gaaad5ad6884511e350e8b2cda1baeaea2',1,'chill']]],
+  ['refuseicescore_10',['refuseIceScore',['../namespacesite.html#a3043411870d52f19774d045fa21dfc09',1,'site']]],
+  ['registerbondclassifier_11',['registerBondClassifier',['../group__chill.html#gafdbd8e7d77ca3e23619b0073b02a2e05',1,'chill']]],
+  ['relaxedprismconditions_12',['relaxedPrismConditions',['../namespaceprism3.html#abbcd706f2576f374e6037e9073815ee8',1,'prism3::relaxedPrismConditions()'],['../group__ring.html#ga55b285a12dd4d3b71906d50714f15e8b',1,'ring::relaxedPrismConditions()']]],
+  ['reldist_13',['relDist',['../group__gen.html#ga3c02ecf6adbdc30d78e8c0aeb95914bf',1,'gen']]],
+  ['reldistfrompoint_14',['relDistFromPoint',['../group__gen.html#gacd27073a9df4d812fa5a6d24a8b6efae',1,'gen']]],
+  ['relorderddc_15',['relOrderDDC',['../namespacepntToPnt.html#afa4d01264e49ab06b2828332e961c8f4',1,'pntToPnt::relOrderDDC(int index, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; cage::Cage &gt; &amp;cageList)'],['../namespacepntToPnt.html#a104a9978a1cec40aeb76f2dbb5afa277',1,'pntToPnt::relOrderDDC(const std::vector&lt; int &gt; &amp;equatorial, int index, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; cage::Cage &gt; &amp;cageList)']]],
+  ['relorderhc_16',['relOrderHC',['../namespacepntToPnt.html#ae91f374f024840f0e75795a5b6c5f2ee',1,'pntToPnt']]],
+  ['relorderprismblock_17',['relOrderPrismBlock',['../namespacepntToPnt.html#aaa5adb93aab9c04dae3b0dd82255113b',1,'pntToPnt::relOrderPrismBlock(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;basal1, const std::vector&lt; int &gt; &amp;basal2, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; int &gt; &amp;outBasal1, std::vector&lt; int &gt; &amp;outBasal2)'],['../namespacepntToPnt.html#ad35ccbeea04f34625242accc1af6d6f8',1,'pntToPnt::relOrderPrismBlock(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;basal1, const std::vector&lt; int &gt; &amp;basal2, std::vector&lt; int &gt; &amp;outBasal1, std::vector&lt; int &gt; &amp;outBasal2)']]],
+  ['removenonsprings_18',['removeNonSPrings',['../group__primitive.html#ga592086d3afae4fab5aa5ff6aa5c1d215',1,'primitive']]],
+  ['restoreedgesfromindices_19',['restoreEdgesFromIndices',['../group__primitive.html#ga30435e6338c201e8908991462d0fb228',1,'primitive']]],
+  ['ringnetwork_20',['ringNetwork',['../group__primitive.html#ga69f1b870183f33e58426c88ee93f0635',1,'primitive']]],
+  ['ringupdater_21',['RingUpdater',['../group__primitive.html#ga61b88624c282b4573177cba65781a2f1',1,'primitive::RingUpdater::RingUpdater(int maxDepth)'],['../group__primitive.html#ga5d186144c78bff338a8c6d3bc88b5d47',1,'primitive::RingUpdater::RingUpdater(RingUpdater &amp;&amp;) noexcept'],['../group__primitive.html#ga8cc0a54ed956da02142a250c4c7bf8c2',1,'primitive::RingUpdater::RingUpdater(const RingUpdater &amp;)=delete']]],
+  ['rmaxialtranslations_22',['rmAxialTranslations',['../group__ring.html#ga5f5496ef80d800cb0e9b4d87b6cca4bf',1,'ring']]],
+  ['runningcn_23',['runningCN',['../group__rdf.html#ga2a54eea649f6c234be50494cec2cee82',1,'rdf::runningCN(const PartialRdf &amp;h)'],['../group__rdf.html#ga86d11871fc6dcad3daa99cddf7fc11dc',1,'rdf::runningCN(const PartialRdf &amp;h, double rhoJ)']]]
+];

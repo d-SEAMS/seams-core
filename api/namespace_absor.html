@@ -38,12 +38,12 @@
       <strong>d-SEAMS</strong>
     </a>
     <div class="sy-head-nav" id="head-nav">
-      <nav class="sy-head-links"><ul>
-      <li class="link"><button class="js-menu" type="button" id="nav-trigger-1" aria-controls="nav-children-1">
+      <nav class="sy-head-links"><ul><li class="link"><a href="/api-cpp/index.html">C++ API</a></li>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-2" aria-controls="nav-children-2">
             <span>Ecosystem</span>
             <i class="i-lucide chevron-down"></i>
           </button>
-        <ul id="nav-children-1" aria-labelledby="nav-trigger-1"><li><a href="https://docs.dseams.info">
+        <ul id="nav-children-2" aria-labelledby="nav-trigger-2"><li><a href="https://docs.dseams.info">
                 <span>d-SEAMS engine</span>
                 <small>libyodaLib and the seams CLI</small>
               </a></li><li><a href="https://d-seams.github.io/PydSEAMSlib/">
@@ -326,11 +326,11 @@ data-aria-dark="Switch to auto color mode">
 <div class="doxyrest-title-code-block highlight" id="doxid-namespaceabsor-1a09d62115f686492810352905250fb0ef">
 <span id="index-1"></span><pre><span data-line="1"><span class="kt">int</span> <span class="n">hornAbsOrientation</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">&amp;</span> <span class="n">refPoints</span><span class="p">,</span> <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">&amp;</span> <span class="n">targetPoints</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">quat</span><span class="p">,</span> <span class="kt">double</span><span class="o">&amp;</span> <span class="n">rmsd</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">rmsdList</span><span class="p">,</span> <span class="kt">double</span><span class="o">&amp;</span> <span class="n">scale</span><span class="p">)</span></span>
 </pre></div>
-<p>Get the absolute orientation using Horn’s algorithm (with quaternions)</p>
+<p>Get the absolute orientation using Horn’s algorithm (with quaternions).</p>
 <div class="doxyrest-title-code-block highlight" id="doxid-namespaceabsor-1a16e1d855167323dabd3dbfcd8f1290af">
 <span id="index-2"></span><pre><span data-line="1"><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">calcMatrixS</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">&amp;</span> <span class="n">centeredRefPnts</span><span class="p">,</span> <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">&amp;</span> <span class="n">centeredTargetPnts</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nop</span><span class="p">,</span> <span class="kt">int</span> <span class="n">dim</span><span class="p">)</span></span>
 </pre></div>
-<p>Compute the matrix S, or M, whose elements are the sums of products of coordinates measured in the left and right systems.</p>
+<p>Compute the matrix S, or M, whose elements are the sums of products of coordinates measured in the left and right systems</p>
 <div class="doxyrest-title-code-block highlight" id="doxid-namespaceabsor-1af2d549df95a889e345c6ce1c86155c12">
 <span id="index-3"></span><pre><span data-line="1"><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">calcMatrixN</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">&amp;</span> <span class="n">S</span><span class="p">)</span></span>
 </pre></div>

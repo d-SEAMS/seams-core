@@ -65,7 +65,7 @@ Tests whether two rings are basal rings (true) or not (false) for a prism (stric
 
 	bool relaxedPrismConditions(const std::vector<std::vector<int>>& nList, std::vector<int>& basal1, std::vector<int>& basal2)
 
-Reduced criterion: Two candidate basal rings of a prism block should have at least one bond between them.
+Reduced criterion: Two candidate basal rings of a prism block should have at least one bond between them
 
 .. index:: pair: function; basalRingsSeparation
 .. _doxid-namespaceprism3_1ad85e1c83d20a91d7e8678f5facc7cb7a:

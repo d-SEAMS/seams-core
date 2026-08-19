@@ -1,0 +1,1327 @@
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="generator" content="Doxygen 1.17.0"/>
+<title>seams-core: Nneigh</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default';
+mermaid.initialize({ startOnLoad: true, theme: theme });
+</script>
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.hostname!==location.hostname)antics.event("Outbound Link",{url:a.href});});</script>
+<!-- doxyYoda owns presentation; stock doxygen.css is not linked (theme SCSS covers Doxygen classes). -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+/* doxyYoda theme boot: apply stored or OS preference before first paint */
+(function () {
+  try {
+    var stored = localStorage.getItem("doxyYoda-theme");
+    var root = document.documentElement;
+    if (stored === "dark") {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    } else if (stored === "light") {
+      root.classList.add("light");
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    }
+  } catch (e) { /* private mode */ }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area" aria-label="Project">
+<div class="title_area__start"></div>
+<div class="title_area__center">
+<span class="project_info">seams-core v2.6.0</span>
+<span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
+</div>
+<div class="title_area__end">
+<button type="button" class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false">&#9790;</button>
+</div>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+/* doxyYoda interactive: foldable fragments, copy buttons, dark-mode toggle */
+document.addEventListener("DOMContentLoaded", function () {
+  function prefersDark() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function isDarkMode() {
+    var root = document.documentElement;
+    if (root.classList.contains("dark") || root.classList.contains("dark-mode")) return true;
+    if (root.classList.contains("light")) return false;
+    return prefersDark();
+  }
+  // Optional folding: wrap .fragment in open <details class="code-details">.
+  // Skip fragments already inside details and native Doxygen .foldopen listings.
+  document.querySelectorAll(".fragment").forEach(function (frag) {
+    if (frag.closest("details.code-details")) return;
+    if (frag.querySelector(".foldopen")) return;
+    var details = document.createElement("details");
+    details.className = "code-details";
+    details.open = true;
+    var summary = document.createElement("summary");
+    summary.textContent = "Code";
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard on div.fragment (themed .copy-btn only)
+  document.querySelectorAll("div.fragment").forEach(function (frag) {
+    if (frag.querySelector(".copy-btn")) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-btn";
+    btn.textContent = "Copy";
+    btn.setAttribute("aria-label", "Copy code");
+    btn.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      var clone = frag.cloneNode(true);
+      var extra = clone.querySelector(".copy-btn");
+      if (extra) extra.remove();
+      var lines = clone.querySelectorAll(".line");
+      var text = lines.length
+        ? Array.prototype.map.call(lines, function (l) { return l.textContent; }).join("\n")
+        : clone.textContent;
+      var done = function () {
+        btn.textContent = "Copied!";
+        setTimeout(function () { btn.textContent = "Copy"; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {
+          /* ignore */
+        });
+      }
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById("darkModeToggle");
+  if (toggle) {
+    function updateIcon() {
+      var dark = isDarkMode();
+      toggle.innerHTML = dark ? "&#9788;" : "&#9790;";
+      toggle.setAttribute("aria-pressed", dark ? "true" : "false");
+    }
+    updateIcon();
+    toggle.addEventListener("click", function () {
+      var root = document.documentElement;
+      var nextDark = !isDarkMode();
+      root.classList.toggle("dark", nextDark);
+      root.classList.toggle("dark-mode", nextDark);
+      root.classList.toggle("light", !nextDark);
+      try {
+        localStorage.setItem("doxyYoda-theme", nextDark ? "dark" : "light");
+      } catch (e) { /* private mode */ }
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.17.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', () => {
+  initMenu('',true);
+  init_search();
+});
+</script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1" style="position:absolute;right:8px;top:8px;height:36px;"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2" style="float:right">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon" onmouseover="return searchBox.OnSearchSelectShow()" onmouseout="return searchBox.OnSearchSelectHide()"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('group__nneigh.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">Nneigh </div></div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:nneigh" id="r_nneigh"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespacenneigh.html">nneigh</a></td></tr>
+<tr class="memdesc:namespacenneigh"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functions for building neighbour lists. <br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:nneigh_3A_3ASkinNeighborList" id="r_nneigh_3A_3ASkinNeighborList"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classnneigh_1_1SkinNeighborList.html">nneigh::SkinNeighborList</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Persistent neighbour list with a LAMMPS skin.  <a href="classnneigh_1_1SkinNeighborList.html#details">More...</a><br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:gae70187f6d039fe332d7f59be0112ff26" id="r_gae70187f6d039fe332d7f59be0112ff26"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#gae70187f6d039fe332d7f59be0112ff26">nneigh::BondGraph</a> { <a class="el" href="#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">nneigh::BondGraph::Cutoff</a>
+, <a class="el" href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">nneigh::BondGraph::KnnMutual</a>
+, <a class="el" href="#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">nneigh::BondGraph::KnnUnion</a>
+ }</td></tr>
+<tr class="memdesc:gae70187f6d039fe332d7f59be0112ff26"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bond graph for TUM.  <a href="#gae70187f6d039fe332d7f59be0112ff26">More...</a><br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ga342ae6a7675f0a32caf8087f43d679d8" id="r_ga342ae6a7675f0a32caf8087f43d679d8"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ga342ae6a7675f0a32caf8087f43d679d8">nneigh::dumpBoundsToH</a> (const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow, double H[3][3], double origin[3])</td></tr>
+<tr class="memdesc:ga342ae6a7675f0a32caf8087f43d679d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">LAMMPS dump bound spans to restricted triclinic H (rows a, b, c).  <br /></td></tr>
+<tr class="memitem:ga4b7e08068d9fba7d981793100b62de6c" id="r_ga4b7e08068d9fba7d981793100b62de6c"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ga4b7e08068d9fba7d981793100b62de6c">nneigh::dumpCellLengths</a> (const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow, double lengths[3])</td></tr>
+<tr class="memdesc:ga4b7e08068d9fba7d981793100b62de6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Recovered restricted-triclinic lengths lx, ly, lz (H diagonal).  <br /></td></tr>
+<tr class="memitem:ga87d0da315b8e67fc843f91099dceb349" id="r_ga87d0da315b8e67fc843f91099dceb349"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ga87d0da315b8e67fc843f91099dceb349">nneigh::dumpAxialDim</a> (const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</td></tr>
+<tr class="memdesc:ga87d0da315b8e67fc843f91099dceb349"><td class="mdescLeft">&#160;</td><td class="mdescRight">Longest recovered length: 0 = x, 1 = y, 2 = z.  <br /></td></tr>
+<tr class="memitem:gaf4937ef59938a2569258cdf136fd33ec" id="r_gaf4937ef59938a2569258cdf136fd33ec"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#gaf4937ef59938a2569258cdf136fd33ec">nneigh::dumpAxialDim</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:ga7819f2f15dde85f94bf6a4f6632780b8" id="r_ga7819f2f15dde85f94bf6a4f6632780b8"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ga7819f2f15dde85f94bf6a4f6632780b8">nneigh::dumpToFrac</a> (const double H[3][3], const double origin[3], double x, double y, double z, double s[3])</td></tr>
+<tr class="memdesc:ga7819f2f15dde85f94bf6a4f6632780b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cartesian to fractional coordinates via dump H.  <br /></td></tr>
+<tr class="memitem:ga60335297e92e0bd73fba7bfdaca28a26" id="r_ga60335297e92e0bd73fba7bfdaca28a26"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ga60335297e92e0bd73fba7bfdaca28a26">nneigh::dumpFromFrac</a> (const double H[3][3], const double origin[3], const double s[3], double r[3])</td></tr>
+<tr class="memdesc:ga60335297e92e0bd73fba7bfdaca28a26"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fractional to cartesian coordinates via dump H.  <br /></td></tr>
+<tr class="memitem:gad17e972366865905372aa796e946a351" id="r_gad17e972366865905372aa796e946a351"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#gad17e972366865905372aa796e946a351">nneigh::dumpVolume</a> (const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</td></tr>
+<tr class="memdesc:gad17e972366865905372aa796e946a351"><td class="mdescLeft">&#160;</td><td class="mdescRight">Triclinic dump-cell volume |det(H)| from dumpBoundsToH.  <br /></td></tr>
+<tr class="memitem:ga786c8abbd20d2751403eb4f2c603cd95" id="r_ga786c8abbd20d2751403eb4f2c603cd95"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga786c8abbd20d2751403eb4f2c603cd95">nneigh::dumpVolume</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:ga9566a384474993ea7356e7abc414e40e" id="r_ga9566a384474993ea7356e7abc414e40e"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga9566a384474993ea7356e7abc414e40e">nneigh::neighList</a> (double rcutoff, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</td></tr>
+<tr class="memdesc:ga9566a384474993ea7356e7abc414e40e"><td class="mdescLeft">&#160;</td><td class="mdescRight">All these functions use atom IDs and not indices.  <br /></td></tr>
+<tr class="memitem:gadd6ed18f0c7e2e5fbd10d7cdbf6af429" id="r_gadd6ed18f0c7e2e5fbd10d7cdbf6af429"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gadd6ed18f0c7e2e5fbd10d7cdbf6af429">nneigh::neighListPair</a> (double rcutoff, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</td></tr>
+<tr class="memitem:gafaf0f0ff09cef581076f99a68018b023" id="r_gafaf0f0ff09cef581076f99a68018b023"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gafaf0f0ff09cef581076f99a68018b023">nneigh::neighListO</a> (double rcutoff, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI)</td></tr>
+<tr class="memitem:ga651839704a066d725b22212c13c74327" id="r_ga651839704a066d725b22212c13c74327"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga651839704a066d725b22212c13c74327">nneigh::halfNeighList</a> (double rcutoff, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI=1)</td></tr>
+<tr class="memitem:gacf46d8c4b42f15e634ff0076ac83c012" id="r_gacf46d8c4b42f15e634ff0076ac83c012"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gacf46d8c4b42f15e634ff0076ac83c012">nneigh::neighbourListByIndex</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</td></tr>
+<tr class="memitem:ga97ad6e2c7bfaa504c7e021a527effe73" id="r_ga97ad6e2c7bfaa504c7e021a527effe73"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga97ad6e2c7bfaa504c7e021a527effe73">nneigh::getNewNeighbourListByIndex</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double cutoff)</td></tr>
+<tr class="memitem:ga18cda509d1fc5e680abf22e36348fc61" id="r_ga18cda509d1fc5e680abf22e36348fc61"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga18cda509d1fc5e680abf22e36348fc61">nneigh::kNearestNeighbourList</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int k, double candidateCutoff, int typeI, bool mutual=true)</td></tr>
+<tr class="memdesc:ga18cda509d1fc5e680abf22e36348fc61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bonded graph from the k nearest neighbours of each particle rather than a distance cutoff.  <br /></td></tr>
+<tr class="memitem:ga553a0b3d4dddd477c0dcb06d93361eae" id="r_ga553a0b3d4dddd477c0dcb06d93361eae"><td class="memItemLeft">std::pair&lt; std::vector&lt; std::vector&lt; int &gt; &gt;, std::vector&lt; std::vector&lt; int &gt; &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga553a0b3d4dddd477c0dcb06d93361eae">nneigh::kNearestNeighbourPair</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int k, double candidateCutoff, int typeI)</td></tr>
+<tr class="memdesc:ga553a0b3d4dddd477c0dcb06d93361eae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mutual and union k-nearest graphs from one candidate search.  <br /></td></tr>
+<tr class="memitem:ga139165088e10b53a5efa6034434c9423" id="r_ga139165088e10b53a5efa6034434c9423"><td class="memItemLeft">std::pair&lt; double, double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga139165088e10b53a5efa6034434c9423">nneigh::shellSeparation</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int k, int typeI)</td></tr>
+<tr class="memdesc:ga139165088e10b53a5efa6034434c9423"><td class="mdescLeft">&#160;</td><td class="mdescRight">The shell-separation certificate for the exact reduction of the k-nearest graph to the cutoff graph: returns {max_i d_k(i), min_i d_{k+1}(i)} over particles of the type.  <br /></td></tr>
+<tr class="memitem:ga57e7804488c926a85c21131b895b6491" id="r_ga57e7804488c926a85c21131b895b6491"><td class="memItemLeft">std::vector&lt; std::tuple&lt; int, int, double &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga57e7804488c926a85c21131b895b6491">nneigh::nearestUnlike</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</td></tr>
+<tr class="memdesc:ga57e7804488c926a85c21131b895b6491"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nearest unlike image of each typeI particle among typeJ particles.  <br /></td></tr>
+<tr class="memitem:ga68ba6195c59b7a1b7c8bb17ec31314a3" id="r_ga68ba6195c59b7a1b7c8bb17ec31314a3"><td class="memItemLeft">std::vector&lt; std::pair&lt; int, int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga68ba6195c59b7a1b7c8bb17ec31314a3">nneigh::mutualNearestUnlike</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</td></tr>
+<tr class="memdesc:ga68ba6195c59b7a1b7c8bb17ec31314a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subset of nearestUnlike where j's nearest typeI is i (mutual).  <br /></td></tr>
+<tr class="memitem:ga752d3e4cbd98fa454a6dc36a4307b75a" id="r_ga752d3e4cbd98fa454a6dc36a4307b75a"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ga752d3e4cbd98fa454a6dc36a4307b75a">nneigh::clearNeighbourList</a> (std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</td></tr>
+<tr class="memdesc:ga752d3e4cbd98fa454a6dc36a4307b75a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Erases memory for a vector of vectors for the neighbour list.  <br /></td></tr>
+<tr class="memitem:gad285ff1c2c0bd1ca8495f3972faebb8c" id="r_gad285ff1c2c0bd1ca8495f3972faebb8c"><td class="memItemLeft"><a class="el" href="#gae70187f6d039fe332d7f59be0112ff26">BondGraph</a>&#160;</td><td class="memItemRight"><a class="el" href="#gad285ff1c2c0bd1ca8495f3972faebb8c">nneigh::bondGraphFromName</a> (const std::string &amp;name)</td></tr>
+<tr class="memitem:ga1c78a7396b0353d674abb0290e85d0ec" id="r_ga1c78a7396b0353d674abb0290e85d0ec"><td class="memItemLeft">const char *&#160;</td><td class="memItemRight"><a class="el" href="#ga1c78a7396b0353d674abb0290e85d0ec">nneigh::bondGraphName</a> (<a class="el" href="#gae70187f6d039fe332d7f59be0112ff26">BondGraph</a> graph)</td></tr>
+<tr class="memitem:ga80f555acadad22b5edcc4af8285006ed" id="r_ga80f555acadad22b5edcc4af8285006ed"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#ga80f555acadad22b5edcc4af8285006ed">nneigh::SkinNeighborList::SkinNeighborList</a> (double cutoff, double skin, int typeI, <a class="el" href="#gae70187f6d039fe332d7f59be0112ff26">BondGraph</a> graph=<a class="el" href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">BondGraph::KnnMutual</a>, int k=4)</td></tr>
+<tr class="memitem:ga97e81664c1e98dd63263c6724f5c8514" id="r_ga97e81664c1e98dd63263c6724f5c8514"><td class="memItemLeft"><a class="el" href="#gae70187f6d039fe332d7f59be0112ff26">BondGraph</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga97e81664c1e98dd63263c6724f5c8514">nneigh::SkinNeighborList::graph</a> () const</td></tr>
+<tr class="memitem:ga81af9074f6b9311b1cba1321b64f21d7" id="r_ga81af9074f6b9311b1cba1321b64f21d7"><td class="memItemLeft">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;&#160;</td><td class="memItemRight"><a class="el" href="#ga81af9074f6b9311b1cba1321b64f21d7">nneigh::SkinNeighborList::update</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:gaaca057f10435740a240ca275e619e16e" id="r_gaaca057f10435740a240ca275e619e16e"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#gaaca057f10435740a240ca275e619e16e">nneigh::SkinNeighborList::lastRebuilt</a> () const</td></tr>
+<tr class="memitem:gaadc8965e902b0b2a599c75ac338d15af" id="r_gaadc8965e902b0b2a599c75ac338d15af"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#gaadc8965e902b0b2a599c75ac338d15af">nneigh::SkinNeighborList::lastChangedAtoms</a> () const</td></tr>
+<tr class="memdesc:gaadc8965e902b0b2a599c75ac338d15af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Atoms whose cutoff bond set changed on the last update.  <br /></td></tr>
+<tr class="memitem:gab621667477b3b610de9af803a925f574" id="r_gab621667477b3b610de9af803a925f574"><td class="memItemLeft">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;&#160;</td><td class="memItemRight"><a class="el" href="#gab621667477b3b610de9af803a925f574">nneigh::SkinNeighborList::bonds</a> () const</td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"></div><a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
+<a id="gae70187f6d039fe332d7f59be0112ff26" name="gae70187f6d039fe332d7f59be0112ff26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae70187f6d039fe332d7f59be0112ff26">&#9670;&#160;</a></span>BondGraph</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#gae70187f6d039fe332d7f59be0112ff26">nneigh::BondGraph</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Bond graph for TUM. </p>
+<p>Chosen at runtime so the three published assignments can be compared on the same frames. cutoff: pairs inside the distance cutoff (2020 graph). knn: mutual k-nearest (TUM v2 without hysteresis). knn-union: union k-nearest (the completion graph of the seeded rule). </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084" name="ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084"></a>Cutoff&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604" name="ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604"></a>KnnMutual&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706" name="ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706"></a>KnnUnion&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00326">326</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  326</span>{ <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">Cutoff</a>, <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">KnnMutual</a>, <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">KnnUnion</a> };</div>
+<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">nneigh::BondGraph::KnnUnion</a></div><div class="ttdeci">@ KnnUnion</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00326">neighbours.hpp:326</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">nneigh::BondGraph::KnnMutual</a></div><div class="ttdeci">@ KnnMutual</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00326">neighbours.hpp:326</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">nneigh::BondGraph::Cutoff</a></div><div class="ttdeci">@ Cutoff</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00326">neighbours.hpp:326</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="gad285ff1c2c0bd1ca8495f3972faebb8c" name="gad285ff1c2c0bd1ca8495f3972faebb8c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad285ff1c2c0bd1ca8495f3972faebb8c">&#9670;&#160;</a></span>bondGraphFromName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="#gae70187f6d039fe332d7f59be0112ff26">BondGraph</a> nneigh::bondGraphFromName </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>name</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ga1c78a7396b0353d674abb0290e85d0ec" name="ga1c78a7396b0353d674abb0290e85d0ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga1c78a7396b0353d674abb0290e85d0ec">&#9670;&#160;</a></span>bondGraphName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char * nneigh::bondGraphName </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#gae70187f6d039fe332d7f59be0112ff26">BondGraph</a></td>          <td class="paramname"><span class="paramname"><em>graph</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="gab621667477b3b610de9af803a925f574" name="gab621667477b3b610de9af803a925f574"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gab621667477b3b610de9af803a925f574">&#9670;&#160;</a></span>bonds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp; nneigh::SkinNeighborList::bonds </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00356">356</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  356</span>                                                               {</div>
+<div class="line"><span class="lineno">  357</span>    <span class="keywordflow">return</span> nList_;</div>
+<div class="line"><span class="lineno">  358</span>  }</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga752d3e4cbd98fa454a6dc36a4307b75a" name="ga752d3e4cbd98fa454a6dc36a4307b75a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga752d3e4cbd98fa454a6dc36a4307b75a">&#9670;&#160;</a></span>clearNeighbourList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nneigh::clearNeighbourList </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Erases memory for a vector of vectors for the neighbour list. </p>
+
+</div>
+</div>
+<a id="gaf4937ef59938a2569258cdf136fd33ec" name="gaf4937ef59938a2569258cdf136fd33ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaf4937ef59938a2569258cdf136fd33ec">&#9670;&#160;</a></span>dumpAxialDim() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nneigh::dumpAxialDim </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00128">128</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  129</span>                                                                 {</div>
+<div class="line"><span class="lineno">  130</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#ga87d0da315b8e67fc843f91099dceb349">dumpAxialDim</a>(yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>, yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>);</div>
+<div class="line"><span class="lineno">  131</span>}</div>
+<div class="ttc" id="agroup__molSys_html_gaa7d9b8543780baf4a495c7acdb1f87d8"><div class="ttname"><a href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">molSys::PointCloud::box</a></div><div class="ttdeci">std::vector&lt; T &gt; box</div><div class="ttdoc">Number of atoms.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00177">mol_sys.hpp:177</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gac861daaeb2b1e75a6ac9eb3390bc6105"><div class="ttname"><a href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">molSys::PointCloud::boxLow</a></div><div class="ttdeci">std::vector&lt; T &gt; boxLow</div><div class="ttdoc">Periodic box lengths.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00178">mol_sys.hpp:178</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ga87d0da315b8e67fc843f91099dceb349"><div class="ttname"><a href="#ga87d0da315b8e67fc843f91099dceb349">nneigh::dumpAxialDim</a></div><div class="ttdeci">int dumpAxialDim(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</div><div class="ttdoc">Longest recovered length: 0 = x, 1 = y, 2 = z.</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00114">neighbours.hpp:114</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga87d0da315b8e67fc843f91099dceb349" name="ga87d0da315b8e67fc843f91099dceb349"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga87d0da315b8e67fc843f91099dceb349">&#9670;&#160;</a></span>dumpAxialDim() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nneigh::dumpAxialDim </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>box</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>boxLow</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Longest recovered length: 0 = x, 1 = y, 2 = z. </p>
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00114">114</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  115</span>                                                         {</div>
+<div class="line"><span class="lineno">  116</span>  <span class="keywordtype">double</span> lengths[3];</div>
+<div class="line"><span class="lineno">  117</span>  <a class="code hl_function" href="#ga4b7e08068d9fba7d981793100b62de6c">dumpCellLengths</a>(box, boxLow, lengths);</div>
+<div class="line"><span class="lineno">  118</span>  <span class="keywordtype">int</span> axial = 0;</div>
+<div class="line"><span class="lineno">  119</span>  <span class="keywordflow">if</span> (lengths[1] &gt; lengths[axial]) {</div>
+<div class="line"><span class="lineno">  120</span>    axial = 1;</div>
+<div class="line"><span class="lineno">  121</span>  }</div>
+<div class="line"><span class="lineno">  122</span>  <span class="keywordflow">if</span> (lengths[2] &gt; lengths[axial]) {</div>
+<div class="line"><span class="lineno">  123</span>    axial = 2;</div>
+<div class="line"><span class="lineno">  124</span>  }</div>
+<div class="line"><span class="lineno">  125</span>  <span class="keywordflow">return</span> axial;</div>
+<div class="line"><span class="lineno">  126</span>}</div>
+<div class="ttc" id="agroup__nneigh_html_ga4b7e08068d9fba7d981793100b62de6c"><div class="ttname"><a href="#ga4b7e08068d9fba7d981793100b62de6c">nneigh::dumpCellLengths</a></div><div class="ttdeci">void dumpCellLengths(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow, double lengths[3])</div><div class="ttdoc">Recovered restricted-triclinic lengths lx, ly, lz (H diagonal).</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00102">neighbours.hpp:102</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga342ae6a7675f0a32caf8087f43d679d8" name="ga342ae6a7675f0a32caf8087f43d679d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga342ae6a7675f0a32caf8087f43d679d8">&#9670;&#160;</a></span>dumpBoundsToH()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nneigh::dumpBoundsToH </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>box</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>boxLow</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>H</em></span>[3][3], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>origin</em></span>[3]&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>LAMMPS dump bound spans to restricted triclinic H (rows a, b, c). </p>
+<p><span class="tt">box[0..2]</span> are <span class="tt">xhi_bound - xlo_bound</span> etc. Optional <span class="tt">box[3..5]</span> are tilt <span class="tt">xy, xz, yz</span>. <span class="tt">boxLow</span> is the bound lo. Inverse of <span class="tt">xlo_bound = xlo + min(0, xy, xz, xy+xz)</span>. </p>
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00071">71</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   73</span>                                            {</div>
+<div class="line"><span class="lineno">   74</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xspan = box.size() &gt; 0 ? box[0] : 0.0;</div>
+<div class="line"><span class="lineno">   75</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yspan = box.size() &gt; 1 ? box[1] : 0.0;</div>
+<div class="line"><span class="lineno">   76</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zspan = box.size() &gt; 2 ? box[2] : 0.0;</div>
+<div class="line"><span class="lineno">   77</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xlo_b = boxLow.size() &gt; 0 ? boxLow[0] : 0.0;</div>
+<div class="line"><span class="lineno">   78</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ylo_b = boxLow.size() &gt; 1 ? boxLow[1] : 0.0;</div>
+<div class="line"><span class="lineno">   79</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zlo_b = boxLow.size() &gt; 2 ? boxLow[2] : 0.0;</div>
+<div class="line"><span class="lineno">   80</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xy = box.size() &gt;= 6 ? box[3] : 0.0;</div>
+<div class="line"><span class="lineno">   81</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xz = box.size() &gt;= 6 ? box[4] : 0.0;</div>
+<div class="line"><span class="lineno">   82</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yz = box.size() &gt;= 6 ? box[5] : 0.0;</div>
+<div class="line"><span class="lineno">   83</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));</div>
+<div class="line"><span class="lineno">   84</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));</div>
+<div class="line"><span class="lineno">   85</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymin = std::min(0.0, yz);</div>
+<div class="line"><span class="lineno">   86</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymax = std::max(0.0, yz);</div>
+<div class="line"><span class="lineno">   87</span>  H[0][0] = xspan - xmax + xmin;</div>
+<div class="line"><span class="lineno">   88</span>  H[0][1] = 0.0;</div>
+<div class="line"><span class="lineno">   89</span>  H[0][2] = 0.0;</div>
+<div class="line"><span class="lineno">   90</span>  H[1][0] = xy;</div>
+<div class="line"><span class="lineno">   91</span>  H[1][1] = yspan - ymax + ymin;</div>
+<div class="line"><span class="lineno">   92</span>  H[1][2] = 0.0;</div>
+<div class="line"><span class="lineno">   93</span>  H[2][0] = xz;</div>
+<div class="line"><span class="lineno">   94</span>  H[2][1] = yz;</div>
+<div class="line"><span class="lineno">   95</span>  H[2][2] = zspan;</div>
+<div class="line"><span class="lineno">   96</span>  origin[0] = xlo_b - xmin;</div>
+<div class="line"><span class="lineno">   97</span>  origin[1] = ylo_b - ymin;</div>
+<div class="line"><span class="lineno">   98</span>  origin[2] = zlo_b;</div>
+<div class="line"><span class="lineno">   99</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga4b7e08068d9fba7d981793100b62de6c" name="ga4b7e08068d9fba7d981793100b62de6c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4b7e08068d9fba7d981793100b62de6c">&#9670;&#160;</a></span>dumpCellLengths()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nneigh::dumpCellLengths </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>box</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>boxLow</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>lengths</em></span>[3]&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Recovered restricted-triclinic lengths lx, ly, lz (H diagonal). </p>
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00102">102</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  104</span>                                               {</div>
+<div class="line"><span class="lineno">  105</span>  <span class="keywordtype">double</span> H[3][3];</div>
+<div class="line"><span class="lineno">  106</span>  <span class="keywordtype">double</span> origin[3];</div>
+<div class="line"><span class="lineno">  107</span>  <a class="code hl_function" href="#ga342ae6a7675f0a32caf8087f43d679d8">dumpBoundsToH</a>(box, boxLow, H, origin);</div>
+<div class="line"><span class="lineno">  108</span>  lengths[0] = H[0][0];</div>
+<div class="line"><span class="lineno">  109</span>  lengths[1] = H[1][1];</div>
+<div class="line"><span class="lineno">  110</span>  lengths[2] = H[2][2];</div>
+<div class="line"><span class="lineno">  111</span>}</div>
+<div class="ttc" id="agroup__nneigh_html_ga342ae6a7675f0a32caf8087f43d679d8"><div class="ttname"><a href="#ga342ae6a7675f0a32caf8087f43d679d8">nneigh::dumpBoundsToH</a></div><div class="ttdeci">void dumpBoundsToH(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow, double H[3][3], double origin[3])</div><div class="ttdoc">LAMMPS dump bound spans to restricted triclinic H (rows a, b, c).</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00071">neighbours.hpp:71</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga60335297e92e0bd73fba7bfdaca28a26" name="ga60335297e92e0bd73fba7bfdaca28a26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga60335297e92e0bd73fba7bfdaca28a26">&#9670;&#160;</a></span>dumpFromFrac()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nneigh::dumpFromFrac </td>
+          <td>(</td>
+          <td class="paramtype">const double</td>          <td class="paramname"><span class="paramname"><em>H</em></span>[3][3], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double</td>          <td class="paramname"><span class="paramname"><em>origin</em></span>[3], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double</td>          <td class="paramname"><span class="paramname"><em>s</em></span>[3], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>r</em></span>[3]&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Fractional to cartesian coordinates via dump H. </p>
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00148">148</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  149</span>                                                         {</div>
+<div class="line"><span class="lineno">  150</span>  r[0] = origin[0] + H[0][0] * s[0] + H[1][0] * s[1] + H[2][0] * s[2];</div>
+<div class="line"><span class="lineno">  151</span>  r[1] = origin[1] + H[1][1] * s[1] + H[2][1] * s[2];</div>
+<div class="line"><span class="lineno">  152</span>  r[2] = origin[2] + H[2][2] * s[2];</div>
+<div class="line"><span class="lineno">  153</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga7819f2f15dde85f94bf6a4f6632780b8" name="ga7819f2f15dde85f94bf6a4f6632780b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga7819f2f15dde85f94bf6a4f6632780b8">&#9670;&#160;</a></span>dumpToFrac()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nneigh::dumpToFrac </td>
+          <td>(</td>
+          <td class="paramtype">const double</td>          <td class="paramname"><span class="paramname"><em>H</em></span>[3][3], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double</td>          <td class="paramname"><span class="paramname"><em>origin</em></span>[3], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>x</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>y</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>z</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>s</em></span>[3]&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cartesian to fractional coordinates via dump H. </p>
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00134">134</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  135</span>                                                        {</div>
+<div class="line"><span class="lineno">  136</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lx = H[0][0];</div>
+<div class="line"><span class="lineno">  137</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ly = H[1][1];</div>
+<div class="line"><span class="lineno">  138</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lz = H[2][2];</div>
+<div class="line"><span class="lineno">  139</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xy = H[1][0];</div>
+<div class="line"><span class="lineno">  140</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xz = H[2][0];</div>
+<div class="line"><span class="lineno">  141</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yz = H[2][1];</div>
+<div class="line"><span class="lineno">  142</span>  s[2] = (z - origin[2]) / lz;</div>
+<div class="line"><span class="lineno">  143</span>  s[1] = (y - origin[1] - yz * s[2]) / ly;</div>
+<div class="line"><span class="lineno">  144</span>  s[0] = (x - origin[0] - xy * s[1] - xz * s[2]) / lx;</div>
+<div class="line"><span class="lineno">  145</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga786c8abbd20d2751403eb4f2c603cd95" name="ga786c8abbd20d2751403eb4f2c603cd95"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga786c8abbd20d2751403eb4f2c603cd95">&#9670;&#160;</a></span>dumpVolume() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double nneigh::dumpVolume </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00166">166</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  167</span>                                                                 {</div>
+<div class="line"><span class="lineno">  168</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#gad17e972366865905372aa796e946a351">dumpVolume</a>(yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>, yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>);</div>
+<div class="line"><span class="lineno">  169</span>}</div>
+<div class="ttc" id="agroup__nneigh_html_gad17e972366865905372aa796e946a351"><div class="ttname"><a href="#gad17e972366865905372aa796e946a351">nneigh::dumpVolume</a></div><div class="ttdeci">double dumpVolume(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</div><div class="ttdoc">Triclinic dump-cell volume |det(H)| from dumpBoundsToH.</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00157">neighbours.hpp:157</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gad17e972366865905372aa796e946a351" name="gad17e972366865905372aa796e946a351"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad17e972366865905372aa796e946a351">&#9670;&#160;</a></span>dumpVolume() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double nneigh::dumpVolume </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>box</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>boxLow</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Triclinic dump-cell volume |det(H)| from dumpBoundsToH. </p>
+<p>Bound spans Lx*Ly*Lz are not the cell volume when tilt is present. </p>
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00157">157</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  158</span>                                                          {</div>
+<div class="line"><span class="lineno">  159</span>  <span class="keywordtype">double</span> H[3][3];</div>
+<div class="line"><span class="lineno">  160</span>  <span class="keywordtype">double</span> origin[3];</div>
+<div class="line"><span class="lineno">  161</span>  <a class="code hl_function" href="#ga342ae6a7675f0a32caf8087f43d679d8">dumpBoundsToH</a>(box, boxLow, H, origin);</div>
+<div class="line"><span class="lineno">  162</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> vol = H[0][0] * H[1][1] * H[2][2];</div>
+<div class="line"><span class="lineno">  163</span>  <span class="keywordflow">return</span> vol &lt; 0.0 ? -vol : vol;</div>
+<div class="line"><span class="lineno">  164</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga97ad6e2c7bfaa504c7e021a527effe73" name="ga97ad6e2c7bfaa504c7e021a527effe73"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga97ad6e2c7bfaa504c7e021a527effe73">&#9670;&#160;</a></span>getNewNeighbourListByIndex()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; nneigh::getNewNeighbourListByIndex </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Gets a neighbour list by index, according to a pointCloud given as the input. Assume no slices or other skullduggery </p>
+
+</div>
+</div>
+<a id="ga97e81664c1e98dd63263c6724f5c8514" name="ga97e81664c1e98dd63263c6724f5c8514"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga97e81664c1e98dd63263c6724f5c8514">&#9670;&#160;</a></span>graph()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="#gae70187f6d039fe332d7f59be0112ff26">BondGraph</a> nneigh::SkinNeighborList::graph </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00346">346</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  346</span>{ <span class="keywordflow">return</span> graph_; }</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga651839704a066d725b22212c13c74327" name="ga651839704a066d725b22212c13c74327"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga651839704a066d725b22212c13c74327">&#9670;&#160;</a></span>halfNeighList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; nneigh::halfNeighList </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>rcutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span><span class="paramdefsep"> = </span><span class="paramdefval">1</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Half neighbour list for one type (vesin cell list, brute-force fallback) You can only use this for neighbour lists with one type </p>
+
+</div>
+</div>
+<a id="ga18cda509d1fc5e680abf22e36348fc61" name="ga18cda509d1fc5e680abf22e36348fc61"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga18cda509d1fc5e680abf22e36348fc61">&#9670;&#160;</a></span>kNearestNeighbourList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; nneigh::kNearestNeighbourList </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>k</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>candidateCutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>mutual</em></span><span class="paramdefsep"> = </span><span class="paramdefval">true</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Bonded graph from the k nearest neighbours of each particle rather than a distance cutoff. </p>
+<p>The default intersection symmetrization (mutual = true) bonds i and j only when each lists the other among its k nearest; the union alternative bonds on either nomination. In a crystal the first shell is mutual and the two coincide; on disordered packings the mutual graph is sparser, which starves accidental ring structure &ndash; measured on the dense null, mutual scores zero false crystal where union reaches 2.5%. Nominations are a periodic linked-cell k-nearest search via linkcell (Allen and Tildesley): vesin is cutoff-only and KD-trees have no minimum-image convention. candidateCutoff is only a cell-size hint. On an undistorted tetrahedral lattice with k = 4 this graph equals the first-shell cutoff graph. Rows are by atom ID with the leading self entry, like neighListO. </p>
+
+</div>
+</div>
+<a id="ga553a0b3d4dddd477c0dcb06d93361eae" name="ga553a0b3d4dddd477c0dcb06d93361eae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga553a0b3d4dddd477c0dcb06d93361eae">&#9670;&#160;</a></span>kNearestNeighbourPair()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::pair&lt; std::vector&lt; std::vector&lt; int &gt; &gt;, std::vector&lt; std::vector&lt; int &gt; &gt; &gt; nneigh::kNearestNeighbourPair </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>k</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>candidateCutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Mutual and union k-nearest graphs from one candidate search. </p>
+<p>Seeded affiliation needs both; building them separately repeats the cell list. </p>
+
+</div>
+</div>
+<a id="gaadc8965e902b0b2a599c75ac338d15af" name="gaadc8965e902b0b2a599c75ac338d15af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaadc8965e902b0b2a599c75ac338d15af">&#9670;&#160;</a></span>lastChangedAtoms()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nneigh::SkinNeighborList::lastChangedAtoms </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Atoms whose cutoff bond set changed on the last update. </p>
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00355">355</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  355</span>{ <span class="keywordflow">return</span> changedAtoms_; }</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gaaca057f10435740a240ca275e619e16e" name="gaaca057f10435740a240ca275e619e16e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaaca057f10435740a240ca275e619e16e">&#9670;&#160;</a></span>lastRebuilt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool nneigh::SkinNeighborList::lastRebuilt </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00353">353</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  353</span>{ <span class="keywordflow">return</span> rebuilt_; }</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga68ba6195c59b7a1b7c8bb17ec31314a3" name="ga68ba6195c59b7a1b7c8bb17ec31314a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga68ba6195c59b7a1b7c8bb17ec31314a3">&#9670;&#160;</a></span>mutualNearestUnlike()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::pair&lt; int, int &gt; &gt; nneigh::mutualNearestUnlike </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeJ</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Subset of nearestUnlike where j's nearest typeI is i (mutual). </p>
+<p>A contact pair is this mutual edge, not first-shell membership. </p>
+
+</div>
+</div>
+<a id="ga57e7804488c926a85c21131b895b6491" name="ga57e7804488c926a85c21131b895b6491"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga57e7804488c926a85c21131b895b6491">&#9670;&#160;</a></span>nearestUnlike()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::tuple&lt; int, int, double &gt; &gt; nneigh::nearestUnlike </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeJ</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Nearest unlike image of each typeI particle among typeJ particles. </p>
+<p>Returns cloud-index pairs (i, j) and the MIC distance (sqrt of <a class="el" href="group__gen.html#gafdafa646c7cceaa4eeb8d92b14e0a192" title="Inline generic function for obtaining the unwrapped periodic distance between two particles,...">gen::periodicDistSq</a>). On an ion cloud, typeI = 1 (cation vertex) and typeJ = 2 (anion vertex). This is the nearest unlike neighbour, not a coordination number. </p>
+
+</div>
+</div>
+<a id="gacf46d8c4b42f15e634ff0076ac83c012" name="gacf46d8c4b42f15e634ff0076ac83c012"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gacf46d8c4b42f15e634ff0076ac83c012">&#9670;&#160;</a></span>neighbourListByIndex()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; nneigh::neighbourListByIndex </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The following function outputs a neighbour list using indices and NOT atom IDs</p>
+<p>Converts the neighbour list build with atom IDs into a neighbour list of atom indices, according to the pointCloud </p>
+
+</div>
+</div>
+<a id="ga9566a384474993ea7356e7abc414e40e" name="ga9566a384474993ea7356e7abc414e40e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga9566a384474993ea7356e7abc414e40e">&#9670;&#160;</a></span>neighList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; nneigh::neighList </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>rcutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeJ</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>All these functions use atom IDs and not indices. </p>
+<p>Full neighbour list for pairs of type I and type J (vesin cell list, brute-force fallback). The neighbour list does not differentiate between the types of atoms </p>
+
+</div>
+</div>
+<a id="gafaf0f0ff09cef581076f99a68018b023" name="gafaf0f0ff09cef581076f99a68018b023"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafaf0f0ff09cef581076f99a68018b023">&#9670;&#160;</a></span>neighListO()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; nneigh::neighListO </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>rcutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Full neighbour list for one type (vesin cell list, brute-force fallback) You can only use this for neighbour lists with one type </p>
+
+</div>
+</div>
+<a id="gadd6ed18f0c7e2e5fbd10d7cdbf6af429" name="gadd6ed18f0c7e2e5fbd10d7cdbf6af429"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gadd6ed18f0c7e2e5fbd10d7cdbf6af429">&#9670;&#160;</a></span>neighListPair()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; nneigh::neighListPair </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>rcutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeJ</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>I-J neighbour list (I==J is like-type and reuses neighListO). Unlike-type pairs use the same dump MIC as neighListO. </p>
+
+</div>
+</div>
+<a id="ga139165088e10b53a5efa6034434c9423" name="ga139165088e10b53a5efa6034434c9423"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga139165088e10b53a5efa6034434c9423">&#9670;&#160;</a></span>shellSeparation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::pair&lt; double, double &gt; nneigh::shellSeparation </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>k</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The shell-separation certificate for the exact reduction of the k-nearest graph to the cutoff graph: returns {max_i d_k(i), min_i d_{k+1}(i)} over particles of the type. </p>
+<p>When max_i d_k(i) &lt;= rcutoff &lt;= min_i d_{k+1}(i), the two graphs coincide edge for edge and every downstream graph predicate is identical. Brute force, intended for validation. </p>
+
+</div>
+</div>
+<a id="ga80f555acadad22b5edcc4af8285006ed" name="ga80f555acadad22b5edcc4af8285006ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga80f555acadad22b5edcc4af8285006ed">&#9670;&#160;</a></span>SkinNeighborList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">nneigh::SkinNeighborList::SkinNeighborList </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>skin</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="#gae70187f6d039fe332d7f59be0112ff26">BondGraph</a></td>          <td class="paramname"><span class="paramname"><em>graph</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">BondGraph::KnnMutual</a></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>k</em></span><span class="paramdefsep"> = </span><span class="paramdefval">4</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>graph selects cutoff vs k-nearest (mutual or union). k is the neighbour count for the knn graphs (default 4). </p>
+
+</div>
+</div>
+<a id="ga81af9074f6b9311b1cba1321b64f21d7" name="ga81af9074f6b9311b1cba1321b64f21d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga81af9074f6b9311b1cba1321b64f21d7">&#9670;&#160;</a></span>update()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp; nneigh::SkinNeighborList::update </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Refresh from a new frame. The returned list is ID-keyed with a leading self entry, the same shape as neighListO. </p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!-- Doxygen already closed #doc-content and #container before this template. -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.17.0 </li>
+  </ul>
+</div>
+<div class="doxyyoda-attrib" role="contentinfo">
+  <span class="doxyyoda-attrib__item">
+    <span>Generated by <a href="https://www.doxygen.org/index.html">Doxygen 1.17.0</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z"/></svg>
+    <span>Analytics by <a href="https://antics.turtletech.us/" target="_blank" rel="noopener noreferrer">Antics</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <span>provided by</span>
+    <span class="doxyyoda-attrib__brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1.4em" height="1.4em" viewBox="0 0 64 64" aria-hidden="true"><g fill-rule="evenodd"><ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9"/><path fill="#80D25B" d="M20.3,46c0,0-3.2,9.9.3,13.8c3.5,3.9 6.1,3.4 6.1-6C26.8,44.3 20.3,46 20.3,46Z"/><path fill="#80D25B" d="M38.3,46c0,0-3.2,9.9.4,13.8c3.5,3.9 6.1,3.4 6.1-6C44.8,44.3 38.3,46 38.3,46Z" transform="matrix(-1 0 0 1 81.8 0)"/><path fill="#80D25B" d="M20.6,21.2c0,0-6.7-5.8-10.5-5.2C6.2,16.7 6,22.2 6,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L20.6,21.2Z"/><path fill="#80D25B" d="M57.6,21.2c0,0-6.6-5.8-10.5-5.2C43.2,16.7 43,22.2 43,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L57.6,21.2Z" transform="matrix(-1 0 0 1 100.623 0)"/><path fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32,53C40.8,53 48,44.5 48,34C48,23.5 46.7,17 32,17C17.3,17 16,23.5 16,34C16,44.5 23.2,53 32,53Z"/><polygon fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" points="32 22 38.9 26 38.9 34 32 38 25.1 34 25.1 26"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M30,8C28.9,8 28,8.9 28,10"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M36,8C34.9,8 34,8.9 34,10" transform="matrix(-1 0 0 1 70 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32.1,38.2L32.1,52.4M32,21.7L32,17M25.2,26L17.7,23.1M25.1,34.2L16.8,38.9"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M46.2,26L38.7,23.1" transform="matrix(-1 0 0 1 84.951 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M47.1,34.2L38.8,38.9" transform="matrix(-1 0 0 1 85.891 0)"/></g></svg>
+      <a href="https://turtletech.us/" target="_blank" rel="noopener noreferrer">TurtleTech ehf</a>
+    </span>
+  </span>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

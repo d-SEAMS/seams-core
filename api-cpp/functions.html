@@ -1,0 +1,511 @@
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="generator" content="Doxygen 1.17.0"/>
+<title>seams-core: Class Members</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default';
+mermaid.initialize({ startOnLoad: true, theme: theme });
+</script>
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.hostname!==location.hostname)antics.event("Outbound Link",{url:a.href});});</script>
+<!-- doxyYoda owns presentation; stock doxygen.css is not linked (theme SCSS covers Doxygen classes). -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+/* doxyYoda theme boot: apply stored or OS preference before first paint */
+(function () {
+  try {
+    var stored = localStorage.getItem("doxyYoda-theme");
+    var root = document.documentElement;
+    if (stored === "dark") {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    } else if (stored === "light") {
+      root.classList.add("light");
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    }
+  } catch (e) { /* private mode */ }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area" aria-label="Project">
+<div class="title_area__start"></div>
+<div class="title_area__center">
+<span class="project_info">seams-core v2.6.0</span>
+<span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
+</div>
+<div class="title_area__end">
+<button type="button" class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false">&#9790;</button>
+</div>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+/* doxyYoda interactive: foldable fragments, copy buttons, dark-mode toggle */
+document.addEventListener("DOMContentLoaded", function () {
+  function prefersDark() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function isDarkMode() {
+    var root = document.documentElement;
+    if (root.classList.contains("dark") || root.classList.contains("dark-mode")) return true;
+    if (root.classList.contains("light")) return false;
+    return prefersDark();
+  }
+  // Optional folding: wrap .fragment in open <details class="code-details">.
+  // Skip fragments already inside details and native Doxygen .foldopen listings.
+  document.querySelectorAll(".fragment").forEach(function (frag) {
+    if (frag.closest("details.code-details")) return;
+    if (frag.querySelector(".foldopen")) return;
+    var details = document.createElement("details");
+    details.className = "code-details";
+    details.open = true;
+    var summary = document.createElement("summary");
+    summary.textContent = "Code";
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard on div.fragment (themed .copy-btn only)
+  document.querySelectorAll("div.fragment").forEach(function (frag) {
+    if (frag.querySelector(".copy-btn")) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-btn";
+    btn.textContent = "Copy";
+    btn.setAttribute("aria-label", "Copy code");
+    btn.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      var clone = frag.cloneNode(true);
+      var extra = clone.querySelector(".copy-btn");
+      if (extra) extra.remove();
+      var lines = clone.querySelectorAll(".line");
+      var text = lines.length
+        ? Array.prototype.map.call(lines, function (l) { return l.textContent; }).join("\n")
+        : clone.textContent;
+      var done = function () {
+        btn.textContent = "Copied!";
+        setTimeout(function () { btn.textContent = "Copy"; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {
+          /* ignore */
+        });
+      }
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById("darkModeToggle");
+  if (toggle) {
+    function updateIcon() {
+      var dark = isDarkMode();
+      toggle.innerHTML = dark ? "&#9788;" : "&#9790;";
+      toggle.setAttribute("aria-pressed", dark ? "true" : "false");
+    }
+    updateIcon();
+    toggle.addEventListener("click", function () {
+      var root = document.documentElement;
+      var nextDark = !isDarkMode();
+      root.classList.toggle("dark", nextDark);
+      root.classList.toggle("dark-mode", nextDark);
+      root.classList.toggle("light", !nextDark);
+      try {
+        localStorage.setItem("doxyYoda-theme", nextDark ? "dark" : "light");
+      } catch (e) { /* private mode */ }
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.17.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', () => {
+  initMenu('',true);
+  init_search();
+});
+</script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1" style="position:absolute;right:8px;top:8px;height:36px;"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2" style="float:right">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon" onmouseover="return searchBox.OnSearchSelectShow()" onmouseout="return searchBox.OnSearchSelectHide()"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('functions.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="contents">
+<div class="textblock">Here is a list of all class members with links to the classes they belong to:</div><br/>
+<div class="qindex"><a class="qindex" href="#index_a">A</a><div class="alphasepar"></div><a class="qindex" href="#index_b">B</a><div class="alphasepar"></div><a class="qindex" href="#index_c">C</a><div class="alphasepar"></div><a class="qindex" href="#index_d">D</a><div class="alphasepar"></div><a class="qindex" href="#index_e">E</a><div class="alphasepar"></div><a class="qindex" href="#index_f">F</a><div class="alphasepar"></div><a class="qindex" href="#index_g">G</a><div class="alphasepar"></div><a class="qindex" href="#index_h">H</a><div class="alphasepar"></div><a class="qindex" href="#index_i">I</a><div class="alphasepar"></div><a class="qindex" href="#index_j">J</a><div class="alphasepar"></div><a class="qindex" href="#index_k">K</a><div class="alphasepar"></div><a class="qindex" href="#index_l">L</a><div class="alphasepar"></div><a class="qindex" href="#index_m">M</a><div class="alphasepar"></div><a class="qindex" href="#index_n">N</a><div class="alphasepar"></div><a class="qindex" href="#index_o">O</a><div class="alphasepar"></div><a class="qindex" href="#index_p">P</a><div class="alphasepar"></div><a class="qindex" href="#index_q">Q</a><div class="alphasepar"></div><a class="qindex" href="#index_r">R</a><div class="alphasepar"></div><a class="qindex" href="#index_s">S</a><div class="alphasepar"></div><a class="qindex" href="#index_t">T</a><div class="alphasepar"></div><a class="qindex" href="#index_u">U</a><div class="alphasepar"></div><a class="qindex" href="#index_v">V</a><div class="alphasepar"></div><a class="qindex" href="#index_w">W</a><div class="alphasepar"></div><a class="qindex" href="#index_x">X</a><div class="alphasepar"></div><a class="qindex" href="#index_y">Y</a><div class="alphasepar"></div><a class="qindex" href="#index_z">Z</a><div class="alphasepar"></div><a class="qindex" href="#index_~">~</a></div>
+
+
+<h3 class="doxsection"><a id="index_a" name="index_a"></a>- a -</h3><ul>
+<li>AffiliationUpdater()&#160;:&#160;<a class="el" href="classring_1_1AffiliationUpdater.html#a63d046f94a4fd81428dd7d0f163bcd28">ring::AffiliationUpdater</a></li>
+<li>assignment&#160;:&#160;<a class="el" href="structira_1_1Match.html#a8edc4272c13e68aa6b723015410efb6c">ira::Match</a></li>
+<li>atomDdc&#160;:&#160;<a class="el" href="structgpu_1_1BatchResult.html#af9aeedd1d67929018064906cb44cfb4c">gpu::BatchResult</a></li>
+<li>atomHc&#160;:&#160;<a class="el" href="structgpu_1_1BatchResult.html#af4536b2e33674151f4082c28f6fa752e">gpu::BatchResult</a></li>
+<li>atomID&#160;:&#160;<a class="el" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">molSys::Point&lt; T &gt;</a></li>
+<li>atomIndex&#160;:&#160;<a class="el" href="group__primitive.html#gaead86b6d47e9f9a77949fef59b8de27f">primitive::Vertex</a></li>
+<li>atomOverride&#160;:&#160;<a class="el" href="structsite_1_1Table.html#ae4fef91b396372693e47e15c4aaf149c">site::Table</a></li>
+<li>available&#160;:&#160;<a class="el" href="structgpu_1_1DeviceInfo.html#aa906d2f24ad5737eb03a4766f5866f24">gpu::DeviceInfo</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_b" name="index_b"></a>- b -</h3><ul>
+<li>binwidth&#160;:&#160;<a class="el" href="group__rdf.html#gab024931b1238e545b2eacaa3c0ca7579">rdf::PartialRdf</a></li>
+<li>block&#160;:&#160;<a class="el" href="structseams_1_1cfg_1_1Runtime.html#ad58d311025cf510daab7bf4f45e94bcf">seams::cfg::Runtime</a></li>
+<li>bonds()&#160;:&#160;<a class="el" href="group__nneigh.html#gab621667477b3b610de9af803a925f574">nneigh::SkinNeighborList</a></li>
+<li>box&#160;:&#160;<a class="el" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">molSys::PointCloud&lt; S, T &gt;</a></li>
+<li>boxLow&#160;:&#160;<a class="el" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">molSys::PointCloud&lt; S, T &gt;</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_c" name="index_c"></a>- c -</h3><ul>
+<li>c_ij&#160;:&#160;<a class="el" href="group__molSys.html#gaa15249b70d3c7504f751092e3454b4c6">molSys::Point&lt; T &gt;</a></li>
+<li>c_value&#160;:&#160;<a class="el" href="group__molSys.html#ga8e5d024f6bc765d00dc47d65f9d3b6e8">molSys::Result</a></li>
+<li>cell&#160;:&#160;<a class="el" href="structseams_1_1cfg_1_1Runtime.html#a435f96bf622cece732267afe1daddc4d">seams::cfg::Runtime</a></li>
+<li>certified&#160;:&#160;<a class="el" href="structchill_1_1VoronoiWeights.html#ac5c078e14d5da5156f96f416933bb6a7">chill::VoronoiWeights</a></li>
+<li>classifier&#160;:&#160;<a class="el" href="group__molSys.html#ga6e96e75b4bca61e9e5fbb5f99263cf3e">molSys::Result</a></li>
+<li>computeMajor&#160;:&#160;<a class="el" href="structgpu_1_1DeviceInfo.html#ab85fa71864d523b0c41d735a053fb064">gpu::DeviceInfo</a></li>
+<li>computeMinor&#160;:&#160;<a class="el" href="structgpu_1_1DeviceInfo.html#ad07d8780126008d9aad09d8b9da844b1">gpu::DeviceInfo</a></li>
+<li>computeMs&#160;:&#160;<a class="el" href="structgpu_1_1BatchResult.html#a7db619777f01296286cb224c04ff6ba7">gpu::BatchResult</a></li>
+<li>coordinationNumber&#160;:&#160;<a class="el" href="group__chill.html#ga85100f5928056281b3c93e4dca7a1d5b">chill::BondClassifier</a></li>
+<li>count&#160;:&#160;<a class="el" href="group__rdf.html#ga6a7fe8ab4c2603482500fc57a2b132b1">rdf::PartialRdf</a></li>
+<li>currentFrame&#160;:&#160;<a class="el" href="group__molSys.html#gafccb5a0daab40c3ccc83e4494f4176d7">molSys::PointCloud&lt; S, T &gt;</a></li>
+<li>cutoff&#160;:&#160;<a class="el" href="structseams_1_1cfg_1_1Runtime.html#a6c22ad1c8eae1acfba7a026c38391863">seams::cfg::Runtime</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_d" name="index_d"></a>- d -</h3><ul>
+<li>ddc&#160;:&#160;<a class="el" href="structring_1_1CageAffiliation.html#a62e4f552cead2f3be6c2de3cc23e4952">ring::CageAffiliation</a>, <a class="el" href="structring_1_1SeededAtomLabels.html#a850d14e4cf97556a4d09c6260a626b40">ring::SeededAtomLabels</a></li>
+<li>device&#160;:&#160;<a class="el" href="structgpu_1_1Plan.html#a51255a1bbc92f0f62657f764bd44fe29">gpu::Plan</a></li>
+<li>downloadMs&#160;:&#160;<a class="el" href="structgpu_1_1BatchResult.html#ad4ba81e3f6d6bb265a5e689aee0de4fc">gpu::BatchResult</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_e" name="index_e"></a>- e -</h3><ul>
+<li>eclipsedMax&#160;:&#160;<a class="el" href="group__chill.html#gaa9f8b29d2f9ab31e7cda7a399f2b4466">chill::BondClassifier</a></li>
+<li>eclipsedMin&#160;:&#160;<a class="el" href="group__chill.html#ga02940fdda8b90a912eda29b5d48a4bc3">chill::BondClassifier</a></li>
+<li>error&#160;:&#160;<a class="el" href="structgpu_1_1BatchResult.html#a9b8289baca55bd98812d4e30239ac4c9">gpu::BatchResult</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_f" name="index_f"></a>- f -</h3><ul>
+<li>family&#160;:&#160;<a class="el" href="structseams_1_1cfg_1_1Runtime.html#ab7e771317b68e4aafa46cac28b25a526">seams::cfg::Runtime</a>, <a class="el" href="structsite_1_1Table.html#a38cfa99bc45bda42c6e76b2f48eb39dc">site::Table</a></li>
+<li>fennel&#160;:&#160;<a class="el" href="structseams_1_1cfg_1_1Runtime.html#ad8b5f283520f2569e2b88a6425217e03">seams::cfg::Runtime</a></li>
+<li>fit()&#160;:&#160;<a class="el" href="structchill_1_1LinearClassifier.html#a71891e00818b87d370748614fc3e84ff">chill::LinearClassifier</a></li>
+<li>foot&#160;:&#160;<a class="el" href="structgpu_1_1Plan.html#a1086b17671aa3043e3228c29c0c783af">gpu::Plan</a></li>
+<li>frame&#160;:&#160;<a class="el" href="structseams_1_1cfg_1_1Runtime.html#a7cfcb2f861268d8aa7b218f97f2b83fe">seams::cfg::Runtime</a></li>
+<li>frames&#160;:&#160;<a class="el" href="structgpu_1_1Plan.html#ad96d06fdc72c18378dd452832a70ea83">gpu::Plan</a></li>
+<li>freeBytes&#160;:&#160;<a class="el" href="structgpu_1_1DeviceInfo.html#ac316ae8f9bd37bee8327159b7d06e1be">gpu::DeviceInfo</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_g" name="index_g"></a>- g -</h3><ul>
+<li>g&#160;:&#160;<a class="el" href="group__rdf.html#gab1536dc69bcf2e6823250188f98150aa">rdf::PartialRdf</a></li>
+<li>graph()&#160;:&#160;<a class="el" href="group__nneigh.html#ga97e81664c1e98dd63263c6724f5c8514">nneigh::SkinNeighborList</a>, <a class="el" href="structseams_1_1cfg_1_1Runtime.html#a79be330a6b6d208c056daaf5f40682d1">seams::cfg::Runtime</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_h" name="index_h"></a>- h -</h3><ul>
+<li>hausdorff&#160;:&#160;<a class="el" href="structira_1_1Match.html#ace1f42824c354ae15ac5f7abf006931c">ira::Match</a></li>
+<li>hc&#160;:&#160;<a class="el" href="structring_1_1CageAffiliation.html#ad64ca4fb8e7b4b56bec72ac899e5b084">ring::CageAffiliation</a>, <a class="el" href="structring_1_1SeededAtomLabels.html#a86b70944057c6a0478cc33617e95d819">ring::SeededAtomLabels</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_i" name="index_i"></a>- i -</h3><ul>
+<li>iceType&#160;:&#160;<a class="el" href="group__molSys.html#ga3b139c528b716173634931897dd13f73">molSys::Point&lt; T &gt;</a></li>
+<li>idIndexMap&#160;:&#160;<a class="el" href="group__molSys.html#ga8e48a0ae066c2585e7320cdaa0cbc8db">molSys::PointCloud&lt; S, T &gt;</a></li>
+<li>inGraph&#160;:&#160;<a class="el" href="group__primitive.html#ga932b6ae4efc838d407deed5ee11b8afe">primitive::Vertex</a></li>
+<li>inSlice&#160;:&#160;<a class="el" href="group__molSys.html#ga825e22e4d171aea51998d585c925c897">molSys::Point&lt; T &gt;</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_j" name="index_j"></a>- j -</h3><ul>
+<li>jobs&#160;:&#160;<a class="el" href="structseams_1_1cfg_1_1Runtime.html#ac1465acdd497f03a97764f2febe033a2">seams::cfg::Runtime</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_k" name="index_k"></a>- k -</h3><ul>
+<li>k&#160;:&#160;<a class="el" href="structseams_1_1cfg_1_1Runtime.html#aa9d9b9bfa55fc30cecd034759b5c48c1">seams::cfg::Runtime</a></li>
+<li>kind&#160;:&#160;<a class="el" href="structchill_1_1TemplateHit.html#ae13a09b6ba70e05e96b251cb0c326212">chill::TemplateHit</a></li>
+<li>kMax&#160;:&#160;<a class="el" href="structgpu_1_1Footprint.html#aaad6c2ec782a264df743ce61cef37ba8">gpu::Footprint</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_l" name="index_l"></a>- l -</h3><ul>
+<li>labelBytes&#160;:&#160;<a class="el" href="structgpu_1_1Footprint.html#a7575de4c305fb2b5c0cb88d4aa06e9ae">gpu::Footprint</a></li>
+<li>labels&#160;:&#160;<a class="el" href="structchill_1_1LinearClassifier.html#ac5d08fd477153fe168f77101330ac400">chill::LinearClassifier</a></li>
+<li>largest&#160;:&#160;<a class="el" href="group__clump.html#ga81b32e2237269a4ac983c5c894aee8bd">clump::Domain</a></li>
+<li>last&#160;:&#160;<a class="el" href="structseams_1_1cfg_1_1Runtime.html#a5e24a5ee983e627deb1b33d54558d694">seams::cfg::Runtime</a></li>
+<li>lastBallsRefreshed()&#160;:&#160;<a class="el" href="group__primitive.html#gadb46ee075b664d8ec659250008d13c94">primitive::RingUpdater</a></li>
+<li>lastChangedAtoms()&#160;:&#160;<a class="el" href="group__nneigh.html#gaadc8965e902b0b2a599c75ac338d15af">nneigh::SkinNeighborList</a></li>
+<li>lastRebuilt()&#160;:&#160;<a class="el" href="group__nneigh.html#gaaca057f10435740a240ca275e619e16e">nneigh::SkinNeighborList</a></li>
+<li>lastReclassified()&#160;:&#160;<a class="el" href="classring_1_1AffiliationUpdater.html#a41f180d179f3702cb423c6d87a110ddd">ring::AffiliationUpdater</a></li>
+<li>lastRecomputedSources()&#160;:&#160;<a class="el" href="group__primitive.html#ga084d21f04e9aa5ef91faf6e536fb2412">primitive::RingUpdater</a></li>
+<li>luaPath&#160;:&#160;<a class="el" href="structseams_1_1cfg_1_1Runtime.html#af6e3d385e1bb24dd9e50157d792a0b03">seams::cfg::Runtime</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_m" name="index_m"></a>- m -</h3><ul>
+<li>maxSixRingsPerAtom&#160;:&#160;<a class="el" href="structgpu_1_1Footprint.html#ab16986c20c49edf9ff98cb97867fc38a">gpu::Footprint</a></li>
+<li>molID&#160;:&#160;<a class="el" href="group__molSys.html#gaeed1df09b79527444ceb1bc0836f4f1a">molSys::Point&lt; T &gt;</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_n" name="index_n"></a>- n -</h3><ul>
+<li>name&#160;:&#160;<a class="el" href="structchill_1_1TemplateHit.html#a69c28bf3fc7a3a7831b3b7ab3b113a73">chill::TemplateHit</a>, <a class="el" href="structgpu_1_1DeviceInfo.html#a65c0117d3c9104a8e938319372ac666b">gpu::DeviceInfo</a></li>
+<li>nAtoms&#160;:&#160;<a class="el" href="structgpu_1_1Footprint.html#a9465d5bc892337f8c15b80c98b71e216">gpu::Footprint</a></li>
+<li>nClasses&#160;:&#160;<a class="el" href="structchill_1_1LinearClassifier.html#adbc7eb691580d4c569d3ae8f3b46d675">chill::LinearClassifier</a></li>
+<li>neighbours&#160;:&#160;<a class="el" href="structchill_1_1VoronoiWeights.html#a011165cd6360e0c275311af270aa68dc">chill::VoronoiWeights</a></li>
+<li>neighListIndex&#160;:&#160;<a class="el" href="group__primitive.html#gabbf40e41b84205035d4053be2180f6b2">primitive::Vertex</a></li>
+<li>nFeat&#160;:&#160;<a class="el" href="structchill_1_1LinearClassifier.html#a80420505e41f4d6462815d62e7b13671">chill::LinearClassifier</a></li>
+<li>nFrames&#160;:&#160;<a class="el" href="structgpu_1_1Footprint.html#a0e4fc0f777fae3d42f0b19b2326b42f0">gpu::Footprint</a></li>
+<li>nI&#160;:&#160;<a class="el" href="group__rdf.html#ga71a5ed9266ea41b597649fba59a6c699">rdf::PartialRdf</a></li>
+<li>nJ&#160;:&#160;<a class="el" href="group__rdf.html#gad206f2047add393eb6e1c3a95b0da7b5">rdf::PartialRdf</a></li>
+<li>nlistBytes&#160;:&#160;<a class="el" href="structgpu_1_1Footprint.html#ab473038da5c197da756b2f3812d3258f">gpu::Footprint</a></li>
+<li>nop&#160;:&#160;<a class="el" href="group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1">molSys::PointCloud&lt; S, T &gt;</a></li>
+<li>nOperations&#160;:&#160;<a class="el" href="structira_1_1PointGroup.html#a1e65b4956b4fa7c746d8153cae52cda9">ira::PointGroup</a></li>
+<li>nRings&#160;:&#160;<a class="el" href="structgpu_1_1BatchResult.html#ab851d787241b52d9210cd08b9dc3c361">gpu::BatchResult</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_o" name="index_o"></a>- o -</h3><ul>
+<li>of()&#160;:&#160;<a class="el" href="structsite_1_1Table.html#adc5635e77a366b0e9e27dcfa0d80288e">site::Table</a></li>
+<li>offload&#160;:&#160;<a class="el" href="structseams_1_1cfg_1_1Runtime.html#a0cab36848dbe3e0803a0c44d9a6ea14b">seams::cfg::Runtime</a></li>
+<li>ofType()&#160;:&#160;<a class="el" href="structsite_1_1Table.html#ada6cb01db577cf6d01e8703bdbfe8bbb">site::Table</a></li>
+<li>operations&#160;:&#160;<a class="el" href="structira_1_1PointGroup.html#a61c9804e0f5ea9c584b4b1e5885cc93f">ira::PointGroup</a></li>
+<li>operator=()&#160;:&#160;<a class="el" href="group__primitive.html#ga04ae3941d0bac6c89d5b44ea525a52c6">primitive::RingUpdater</a>, <a class="el" href="classring_1_1AffiliationUpdater.html#a98bb2d078981e70d618bff065d9da032">ring::AffiliationUpdater</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_p" name="index_p"></a>- p -</h3><ul>
+<li>percolation&#160;:&#160;<a class="el" href="group__clump.html#gacfa4b2b1ec2f872af09f9edc6c201b11">clump::Domain</a></li>
+<li>plan&#160;:&#160;<a class="el" href="structgpu_1_1BatchResult.html#a904866eb6e3bc39730f2e2626530a129">gpu::BatchResult</a></li>
+<li>predict()&#160;:&#160;<a class="el" href="structchill_1_1LinearClassifier.html#aa2e6670a82d536991b8efb24874c4886">chill::LinearClassifier</a></li>
+<li>ptq&#160;:&#160;<a class="el" href="group__chill.html#ga4449b8cb7345b6dec04dcb5aa155e676">chill::QlmAtom</a></li>
+<li>pts&#160;:&#160;<a class="el" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">molSys::PointCloud&lt; S, T &gt;</a>, <a class="el" href="group__primitive.html#gaf6aaf0f3cc1ab4d32e6095ff38398df9">primitive::Graph</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_q" name="index_q"></a>- q -</h3><ul>
+<li>ql&#160;:&#160;<a class="el" href="group__chill.html#ga2b88da7a601aa10ff56f494544a1e9f4">chill::SteinhardtQl</a></li>
+<li>qlBar&#160;:&#160;<a class="el" href="group__chill.html#gad4ef3b18e16844653f52f4c1a4052f26">chill::SteinhardtQl</a></li>
+<li>quat&#160;:&#160;<a class="el" href="structira_1_1Match.html#a485640ca625cb1553db753a1491cf8e4">ira::Match</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_r" name="index_r"></a>- r -</h3><ul>
+<li>r&#160;:&#160;<a class="el" href="group__rdf.html#gaec5a7e75ae025bde9974dd620ada435f">rdf::PartialRdf</a></li>
+<li>reason&#160;:&#160;<a class="el" href="structgpu_1_1DeviceInfo.html#a858e8921bb84be9d553e8a358630d588">gpu::DeviceInfo</a>, <a class="el" href="structgpu_1_1Plan.html#a3e9b7b27194f7d4dc9ee50d024aa628a">gpu::Plan</a></li>
+<li>resident&#160;:&#160;<a class="el" href="structgpu_1_1Plan.html#ab1c938c085ac443d1be9df17c54dc15c">gpu::Plan</a>, <a class="el" href="structseams_1_1cfg_1_1Runtime.html#a80e2b2794741cea5a949eab3b0813990">seams::cfg::Runtime</a></li>
+<li>rho&#160;:&#160;<a class="el" href="structsite_1_1DensityZ.html#a40c9a9e719c82bec67afecd5de0989dc">site::DensityZ</a></li>
+<li>ridge&#160;:&#160;<a class="el" href="structchill_1_1LinearClassifier.html#a5aabcb34def301a6c7146134c20f6483">chill::LinearClassifier</a></li>
+<li>rings&#160;:&#160;<a class="el" href="group__cage.html#ga5b4c006e8de944ce67f924190123f178">cage::Cage</a>, <a class="el" href="group__primitive.html#gac591e6693cef9a022fdbc24b8596bfd3">primitive::Graph</a></li>
+<li>ringsBytes&#160;:&#160;<a class="el" href="structgpu_1_1Footprint.html#a0c4b0995a0210b0def820bd933d79d9b">gpu::Footprint</a></li>
+<li>ringsContainingAtom&#160;:&#160;<a class="el" href="structring_1_1RingSearchIndex.html#a8e4433086bf9bec113ee61bc3c17b8bb">ring::RingSearchIndex</a></li>
+<li>ringsDropped&#160;:&#160;<a class="el" href="structgpu_1_1BatchResult.html#aa2bf91a0e7f7a2dccfc3c4139e54f6fa">gpu::BatchResult</a></li>
+<li>RingUpdater()&#160;:&#160;<a class="el" href="group__primitive.html#ga61b88624c282b4573177cba65781a2f1">primitive::RingUpdater</a></li>
+<li>rmax&#160;:&#160;<a class="el" href="group__rdf.html#gaf633cbb773b23a72ae1e070d691c76ec">rdf::PartialRdf</a></li>
+<li>rmsd&#160;:&#160;<a class="el" href="structchill_1_1TemplateHit.html#ab9b9bdbf34e6272e29ab3bdcf2c9e1c2">chill::TemplateHit</a>, <a class="el" href="structira_1_1Match.html#ab14b20ac985fe3c9fb6359973da2b5c9">ira::Match</a></li>
+<li>rotation&#160;:&#160;<a class="el" href="structira_1_1Match.html#a4a98f0d5bfd17ab0b1aa668dbf72c415">ira::Match</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_s" name="index_s"></a>- s -</h3><ul>
+<li>sixCount&#160;:&#160;<a class="el" href="structgpu_1_1BatchResult.html#a7ad83b1890c8860121d34b52669ece96">gpu::BatchResult</a></li>
+<li>SkinNeighborList()&#160;:&#160;<a class="el" href="group__nneigh.html#ga80f555acadad22b5edcc4af8285006ed">nneigh::SkinNeighborList</a></li>
+<li>source&#160;:&#160;<a class="el" href="structseams_1_1cfg_1_1Runtime.html#a05a989351227a5a0ab8dacb165e6d894">seams::cfg::Runtime</a></li>
+<li>staggeredMax&#160;:&#160;<a class="el" href="group__chill.html#ga146b6b87ef413723796680f70c8ecca5">chill::BondClassifier</a></li>
+<li>subset&#160;:&#160;<a class="el" href="group__clump.html#ga51cef87b47075b4c44641511e66247b0">clump::Domain</a></li>
+<li>symbol&#160;:&#160;<a class="el" href="structira_1_1PointGroup.html#adae4a9fa2ea71c4b628ac94bfe79a4f7">ira::PointGroup</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_t" name="index_t"></a>- t -</h3><ul>
+<li>totalBytes&#160;:&#160;<a class="el" href="structgpu_1_1DeviceInfo.html#a2740e6fd1b274ef8fdba12b2dd1eec48">gpu::DeviceInfo</a>, <a class="el" href="structgpu_1_1Footprint.html#a453d9e67f3164e9cac5670675e5e0554">gpu::Footprint</a></li>
+<li>tpp&#160;:&#160;<a class="el" href="structseams_1_1cfg_1_1Runtime.html#aba36d153b85a4c2d1f8c34ea40dddd18">seams::cfg::Runtime</a></li>
+<li>translation&#160;:&#160;<a class="el" href="structira_1_1Match.html#aa87a041a36fe2ccc088034f85d01f074">ira::Match</a></li>
+<li>type&#160;:&#160;<a class="el" href="group__cage.html#gabcbd2f167fb2ff545280b6180cf25692">cage::Cage</a>, <a class="el" href="group__molSys.html#ga4ffe5d88981575daa2adcd36cab0ce9f">molSys::Point&lt; T &gt;</a>, <a class="el" href="structseams_1_1cfg_1_1Runtime.html#ade67224f3460b14be18195bbd8499527">seams::cfg::Runtime</a>, <a class="el" href="structsite_1_1DensityZ.html#a292387f47ba3c8ef2afed2934537ea4f">site::DensityZ</a></li>
+<li>typeI&#160;:&#160;<a class="el" href="group__rdf.html#ga268d127ca25d1b47d9e4a56a1ab5c000">rdf::PartialRdf</a></li>
+<li>typeJ&#160;:&#160;<a class="el" href="group__rdf.html#gaefba3c29678218e93d84ce4252b469f7">rdf::PartialRdf</a></li>
+<li>typeToKind&#160;:&#160;<a class="el" href="structsite_1_1Table.html#a84b073b27fb7b70b8891b4ca12007ab5">site::Table</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_u" name="index_u"></a>- u -</h3><ul>
+<li>update()&#160;:&#160;<a class="el" href="group__nneigh.html#ga81af9074f6b9311b1cba1321b64f21d7">nneigh::SkinNeighborList</a>, <a class="el" href="group__primitive.html#ga7684b53e6a0fe8a5ca2e327536c67536">primitive::RingUpdater</a>, <a class="el" href="classring_1_1AffiliationUpdater.html#a36779e1a3a2a86b85d51e8f7c6e2939c">ring::AffiliationUpdater</a></li>
+<li>uploadMs&#160;:&#160;<a class="el" href="structgpu_1_1BatchResult.html#a32c3a277a79bbc9a6c0fa6901117cac2">gpu::BatchResult</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_v" name="index_v"></a>- v -</h3><ul>
+<li>volume&#160;:&#160;<a class="el" href="group__rdf.html#ga6846695e7bf8c92b5ee1c994d337853c">rdf::PartialRdf</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_w" name="index_w"></a>- w -</h3><ul>
+<li>weights&#160;:&#160;<a class="el" href="structchill_1_1LinearClassifier.html#a4088b2d0b62d217535574e6e9ef2a2ae">chill::LinearClassifier</a>, <a class="el" href="structchill_1_1VoronoiWeights.html#af0c66ea83a6956cbfd5ed7d1e03d8a81">chill::VoronoiWeights</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_x" name="index_x"></a>- x -</h3><ul>
+<li>x&#160;:&#160;<a class="el" href="group__molSys.html#ga25dff2dc0e4cd802b9057d90b3c08d76">molSys::Point&lt; T &gt;</a></li>
+<li>xyzBytes&#160;:&#160;<a class="el" href="structgpu_1_1Footprint.html#a44eccf2be130cc06d484a426683557e3">gpu::Footprint</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_y" name="index_y"></a>- y -</h3><ul>
+<li>y&#160;:&#160;<a class="el" href="group__molSys.html#ga364150fed66ad63fd2d3995909d43fe0">molSys::Point&lt; T &gt;</a></li>
+<li>ylm&#160;:&#160;<a class="el" href="group__chill.html#ga3eb7d9180c409702925c3ac48c79bb7a">chill::YlmAtom</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_z" name="index_z"></a>- z -</h3><ul>
+<li>z&#160;:&#160;<a class="el" href="group__molSys.html#ga47e132eb01596124477945fbe4345d73">molSys::Point&lt; T &gt;</a>, <a class="el" href="structsite_1_1DensityZ.html#a2ee6a65755d2e0f6a2b8444324d2f2bd">site::DensityZ</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index__7E" name="index__7E"></a>- ~ -</h3><ul>
+<li>~AffiliationUpdater()&#160;:&#160;<a class="el" href="classring_1_1AffiliationUpdater.html#ac317156058b74bd411d74ba94dbbe3fb">ring::AffiliationUpdater</a></li>
+<li>~RingUpdater()&#160;:&#160;<a class="el" href="group__primitive.html#ga59677a1b2d3083f426396eeb218012f1">primitive::RingUpdater</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!-- Doxygen already closed #doc-content and #container before this template. -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.17.0 </li>
+  </ul>
+</div>
+<div class="doxyyoda-attrib" role="contentinfo">
+  <span class="doxyyoda-attrib__item">
+    <span>Generated by <a href="https://www.doxygen.org/index.html">Doxygen 1.17.0</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z"/></svg>
+    <span>Analytics by <a href="https://antics.turtletech.us/" target="_blank" rel="noopener noreferrer">Antics</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <span>provided by</span>
+    <span class="doxyyoda-attrib__brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1.4em" height="1.4em" viewBox="0 0 64 64" aria-hidden="true"><g fill-rule="evenodd"><ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9"/><path fill="#80D25B" d="M20.3,46c0,0-3.2,9.9.3,13.8c3.5,3.9 6.1,3.4 6.1-6C26.8,44.3 20.3,46 20.3,46Z"/><path fill="#80D25B" d="M38.3,46c0,0-3.2,9.9.4,13.8c3.5,3.9 6.1,3.4 6.1-6C44.8,44.3 38.3,46 38.3,46Z" transform="matrix(-1 0 0 1 81.8 0)"/><path fill="#80D25B" d="M20.6,21.2c0,0-6.7-5.8-10.5-5.2C6.2,16.7 6,22.2 6,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L20.6,21.2Z"/><path fill="#80D25B" d="M57.6,21.2c0,0-6.6-5.8-10.5-5.2C43.2,16.7 43,22.2 43,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L57.6,21.2Z" transform="matrix(-1 0 0 1 100.623 0)"/><path fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32,53C40.8,53 48,44.5 48,34C48,23.5 46.7,17 32,17C17.3,17 16,23.5 16,34C16,44.5 23.2,53 32,53Z"/><polygon fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" points="32 22 38.9 26 38.9 34 32 38 25.1 34 25.1 26"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M30,8C28.9,8 28,8.9 28,10"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M36,8C34.9,8 34,8.9 34,10" transform="matrix(-1 0 0 1 70 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32.1,38.2L32.1,52.4M32,21.7L32,17M25.2,26L17.7,23.1M25.1,34.2L16.8,38.9"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M46.2,26L38.7,23.1" transform="matrix(-1 0 0 1 84.951 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M47.1,34.2L38.8,38.9" transform="matrix(-1 0 0 1 85.891 0)"/></g></svg>
+      <a href="https://turtletech.us/" target="_blank" rel="noopener noreferrer">TurtleTech ehf</a>
+    </span>
+  </span>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

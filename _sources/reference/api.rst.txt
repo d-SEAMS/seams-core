@@ -45,6 +45,9 @@ The book includes that tree as ``api/index`` (Reference toctree), not
 as a second hand list of functions. The generated pages are the
 API; the header table below is only a map onto those pages.
 
+A sibling doxyYoda HTML tree of the same headers is at ``/api-cpp/``
+(``pixi run -e docs doxyhtml``). That landing page points back here.
+
 .. toctree::
    :maxdepth: 2
    :caption: C++ (doxygen)

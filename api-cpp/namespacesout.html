@@ -1,0 +1,1594 @@
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="generator" content="Doxygen 1.17.0"/>
+<title>seams-core: sout Namespace Reference</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default';
+mermaid.initialize({ startOnLoad: true, theme: theme });
+</script>
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.hostname!==location.hostname)antics.event("Outbound Link",{url:a.href});});</script>
+<!-- doxyYoda owns presentation; stock doxygen.css is not linked (theme SCSS covers Doxygen classes). -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+/* doxyYoda theme boot: apply stored or OS preference before first paint */
+(function () {
+  try {
+    var stored = localStorage.getItem("doxyYoda-theme");
+    var root = document.documentElement;
+    if (stored === "dark") {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    } else if (stored === "light") {
+      root.classList.add("light");
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    }
+  } catch (e) { /* private mode */ }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area" aria-label="Project">
+<div class="title_area__start"></div>
+<div class="title_area__center">
+<span class="project_info">seams-core v2.6.0</span>
+<span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
+</div>
+<div class="title_area__end">
+<button type="button" class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false">&#9790;</button>
+</div>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+/* doxyYoda interactive: foldable fragments, copy buttons, dark-mode toggle */
+document.addEventListener("DOMContentLoaded", function () {
+  function prefersDark() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function isDarkMode() {
+    var root = document.documentElement;
+    if (root.classList.contains("dark") || root.classList.contains("dark-mode")) return true;
+    if (root.classList.contains("light")) return false;
+    return prefersDark();
+  }
+  // Optional folding: wrap .fragment in open <details class="code-details">.
+  // Skip fragments already inside details and native Doxygen .foldopen listings.
+  document.querySelectorAll(".fragment").forEach(function (frag) {
+    if (frag.closest("details.code-details")) return;
+    if (frag.querySelector(".foldopen")) return;
+    var details = document.createElement("details");
+    details.className = "code-details";
+    details.open = true;
+    var summary = document.createElement("summary");
+    summary.textContent = "Code";
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard on div.fragment (themed .copy-btn only)
+  document.querySelectorAll("div.fragment").forEach(function (frag) {
+    if (frag.querySelector(".copy-btn")) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-btn";
+    btn.textContent = "Copy";
+    btn.setAttribute("aria-label", "Copy code");
+    btn.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      var clone = frag.cloneNode(true);
+      var extra = clone.querySelector(".copy-btn");
+      if (extra) extra.remove();
+      var lines = clone.querySelectorAll(".line");
+      var text = lines.length
+        ? Array.prototype.map.call(lines, function (l) { return l.textContent; }).join("\n")
+        : clone.textContent;
+      var done = function () {
+        btn.textContent = "Copied!";
+        setTimeout(function () { btn.textContent = "Copy"; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {
+          /* ignore */
+        });
+      }
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById("darkModeToggle");
+  if (toggle) {
+    function updateIcon() {
+      var dark = isDarkMode();
+      toggle.innerHTML = dark ? "&#9788;" : "&#9790;";
+      toggle.setAttribute("aria-pressed", dark ? "true" : "false");
+    }
+    updateIcon();
+    toggle.addEventListener("click", function () {
+      var root = document.documentElement;
+      var nextDark = !isDarkMode();
+      root.classList.toggle("dark", nextDark);
+      root.classList.toggle("dark-mode", nextDark);
+      root.classList.toggle("light", !nextDark);
+      try {
+        localStorage.setItem("doxyYoda-theme", nextDark ? "dark" : "light");
+      } catch (e) { /* private mode */ }
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.17.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', () => {
+  initMenu('',true);
+  init_search();
+});
+</script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1" style="position:absolute;right:8px;top:8px;height:36px;"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2" style="float:right">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon" onmouseover="return searchBox.OnSearchSelectShow()" onmouseout="return searchBox.OnSearchSelectHide()"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacesout.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">sout Namespace Reference</div></div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a3985775f30d7920fbf13f12386abefc1" id="r_a3985775f30d7920fbf13f12386abefc1"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a3985775f30d7920fbf13f12386abefc1">makePath</a> (const std::string &amp;path)</td></tr>
+<tr class="memdesc:a3985775f30d7920fbf13f12386abefc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inline function for creating the desired directory (and parents).  <br /></td></tr>
+<tr class="memitem:aa5a5fe7be0281da3e75c9c45c7bc005d" id="r_aa5a5fe7be0281da3e75c9c45c7bc005d"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aa5a5fe7be0281da3e75c9c45c7bc005d">writeRings</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::string filename=&quot;rings.dat&quot;)</td></tr>
+<tr class="memdesc:aa5a5fe7be0281da3e75c9c45c7bc005d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for printing out ring info, when there is no volume slice.  <br /></td></tr>
+<tr class="memitem:a74916a9878dd9f8234f493d8d67e0588" id="r_a74916a9878dd9f8234f493d8d67e0588"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a74916a9878dd9f8234f493d8d67e0588">writePrismNum</a> (std::string path, const std::vector&lt; int &gt; &amp;nPrisms, const std::vector&lt; int &gt; &amp;nDefPrisms, const std::vector&lt; double &gt; &amp;heightPercent, int maxDepth, int currentFrame, int firstFrame)</td></tr>
+<tr class="memitem:a565b4993e658b431acc2fb314dbde015" id="r_a565b4993e658b431acc2fb314dbde015"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a565b4993e658b431acc2fb314dbde015">writeRingNum</a> (std::string path, int currentFrame, const std::vector&lt; int &gt; &amp;nRings, const std::vector&lt; double &gt; &amp;coverageAreaXY, const std::vector&lt; double &gt; &amp;coverageAreaXZ, const std::vector&lt; double &gt; &amp;coverageAreaYZ, int maxDepth, int firstFrame)</td></tr>
+<tr class="memitem:a971cb6b5c97b5b9ba3d552f0a6c47055" id="r_a971cb6b5c97b5b9ba3d552f0a6c47055"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a971cb6b5c97b5b9ba3d552f0a6c47055">writeRingNumBulk</a> (std::string path, int currentFrame, const std::vector&lt; int &gt; &amp;nRings, int maxDepth, int firstFrame)</td></tr>
+<tr class="memitem:a77cc523102fc57d203495a657703dab5" id="r_a77cc523102fc57d203495a657703dab5"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a77cc523102fc57d203495a657703dab5">printRDF</a> (std::string fileName, std::vector&lt; double &gt; &amp;rdfValues, double binwidth, int nbin)</td></tr>
+<tr class="memdesc:a77cc523102fc57d203495a657703dab5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for printing out the RDF, given the filename.  <br /></td></tr>
+<tr class="memitem:a5ca5eeff9edc702cdcf1b26e8501dc0c" id="r_a5ca5eeff9edc702cdcf1b26e8501dc0c"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a5ca5eeff9edc702cdcf1b26e8501dc0c">writeTopoBulkData</a> (std::string path, int currentFrame, int numHC, int numDDC, int mixedRings, int basalRings, int prismaticRings, int firstFrame)</td></tr>
+<tr class="memitem:a5bf62f6266ab17b7e0aaab15dddb0267" id="r_a5bf62f6266ab17b7e0aaab15dddb0267"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a5bf62f6266ab17b7e0aaab15dddb0267">writePrisms</a> (std::vector&lt; int &gt; &amp;basal1, std::vector&lt; int &gt; &amp;basal2, int prismNum, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memdesc:a5bf62f6266ab17b7e0aaab15dddb0267"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for writing out each prism.  <br /></td></tr>
+<tr class="memitem:aee17b8438205b4b88aad8a481c533ba5" id="r_aee17b8438205b4b88aad8a481c533ba5"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aee17b8438205b4b88aad8a481c533ba5">writeClusterStats</a> (std::string path, int currentFrame, int largestCluster, int numOfClusters, int smallestCluster, double avgClusterSize, int firstFrame)</td></tr>
+<tr class="memdesc:aee17b8438205b4b88aad8a481c533ba5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for writing out cluster statistics.  <br /></td></tr>
+<tr class="memitem:a5d8a2d2b1746ed2e1deba049593ded7b" id="r_a5d8a2d2b1746ed2e1deba049593ded7b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a5d8a2d2b1746ed2e1deba049593ded7b">writeMoleculeIDsInSlice</a> (std::string path, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:af556b48a2b7f51da88108dfc7ecf9623" id="r_af556b48a2b7f51da88108dfc7ecf9623"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#af556b48a2b7f51da88108dfc7ecf9623">writeMoleculeIDsExpressionSelectOVITO</a> (std::string path, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:a5b26e7213f27b9506c4eea7e8998edc9" id="r_a5b26e7213f27b9506c4eea7e8998edc9"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a5b26e7213f27b9506c4eea7e8998edc9">writeLAMMPSdata</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::vector&lt; std::vector&lt; int &gt; &gt; rings, std::vector&lt; std::vector&lt; int &gt; &gt; bonds, std::string filename=&quot;system-rings.data&quot;)</td></tr>
+<tr class="memdesc:a5b26e7213f27b9506c4eea7e8998edc9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a data file for rings.  <br /></td></tr>
+<tr class="memitem:a3b1cccfe3d5fc641d200b9ef3c31f041" id="r_a3b1cccfe3d5fc641d200b9ef3c31f041"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a3b1cccfe3d5fc641d200b9ef3c31f041">writeLAMMPSdumpINT</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; double &gt; &amp;rmsdPerAtom, const std::vector&lt; int &gt; &amp;atomTypes, int maxDepth, std::string path)</td></tr>
+<tr class="memdesc:a3b1cccfe3d5fc641d200b9ef3c31f041"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write out a LAMMPS dump file containing the RMSD per atom.  <br /></td></tr>
+<tr class="memitem:a46251e11ffd9fab32a85c6e80e98ca0c" id="r_a46251e11ffd9fab32a85c6e80e98ca0c"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a46251e11ffd9fab32a85c6e80e98ca0c">writeLAMMPSdumpSlice</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::string path)</td></tr>
+<tr class="memitem:a1f96c3a3ef2e7d902c4f183320bd6151" id="r_a1f96c3a3ef2e7d902c4f183320bd6151"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a1f96c3a3ef2e7d902c4f183320bd6151">writeLAMMPSdumpCages</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; double &gt; &amp;rmsdPerAtom, const std::vector&lt; int &gt; &amp;atomTypes, std::string path, int firstFrame)</td></tr>
+<tr class="memdesc:a1f96c3a3ef2e7d902c4f183320bd6151"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write out a LAMMPS dump file containing the RMSD per atom for bulk ice.  <br /></td></tr>
+<tr class="memitem:a4bc27d1a493f6ac1baea341587486142" id="r_a4bc27d1a493f6ac1baea341587486142"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a4bc27d1a493f6ac1baea341587486142">writeLAMMPSdataAllPrisms</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; int &gt; &amp;atomTypes, int maxDepth, std::string path, bool doShapeMatching=false)</td></tr>
+<tr class="memdesc:a4bc27d1a493f6ac1baea341587486142"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a data file for prisms of every type.  <br /></td></tr>
+<tr class="memitem:abddd6a343317271ce30245c88e4ed66c" id="r_abddd6a343317271ce30245c88e4ed66c"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#abddd6a343317271ce30245c88e4ed66c">writeLAMMPSdataAllRings</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; int &gt; &amp;atomTypes, int maxDepth, std::string path, bool isMonolayer=true)</td></tr>
+<tr class="memdesc:abddd6a343317271ce30245c88e4ed66c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a data file for rings of every type for a monolayer.  <br /></td></tr>
+<tr class="memitem:a0955d323d41c351af8a878c29acb0248" id="r_a0955d323d41c351af8a878c29acb0248"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a0955d323d41c351af8a878c29acb0248">writeLAMMPSdataTopoBulk</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; <a class="el" href="group__cage.html#gaaac41828990e32b9d6e7db4426b61529">cage::iceType</a> &gt; &amp;atomTypes, std::string path, bool bondsBetweenDummy=false)</td></tr>
+<tr class="memitem:af0da7bd8c480ab8e9fb74cd634fb8877" id="r_af0da7bd8c480ab8e9fb74cd634fb8877"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#af0da7bd8c480ab8e9fb74cd634fb8877">writeLAMMPSdataPrisms</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, bool useBondFile, std::string bondFile, const std::vector&lt; int &gt; &amp;listPrism, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::string filename=&quot;system-prisms.data&quot;)</td></tr>
+<tr class="memdesc:af0da7bd8c480ab8e9fb74cd634fb8877"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a data file for prisms of a single type.  <br /></td></tr>
+<tr class="memitem:afad3207fe70a1e45c079465f1ac44104" id="r_afad3207fe70a1e45c079465f1ac44104"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#afad3207fe70a1e45c079465f1ac44104">writeLAMMPSdataCages</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList, <a class="el" href="group__cage.html#ga5787314f51b5927c213db48b81c21d95">cage::cageType</a> type, int numCages, std::string filename=&quot;system-cages.data&quot;)</td></tr>
+<tr class="memitem:aa6dec898d176414e84433fb08318db4f" id="r_aa6dec898d176414e84433fb08318db4f"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aa6dec898d176414e84433fb08318db4f">writeAllCages</a> (std::string path, std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int currentFrame)</td></tr>
+<tr class="memitem:aa4a162332246b965cde05f838e068f2c" id="r_aa4a162332246b965cde05f838e068f2c"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aa4a162332246b965cde05f838e068f2c">writeEachCage</a> (const std::vector&lt; int &gt; &amp;currentCage, int cageNum, <a class="el" href="group__cage.html#ga5787314f51b5927c213db48b81c21d95">cage::cageType</a> type, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memdesc:aa4a162332246b965cde05f838e068f2c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write out a particular cage to a file.  <br /></td></tr>
+<tr class="memitem:a37163ab84cced80535282af04a7b6238" id="r_a37163ab84cced80535282af04a7b6238"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a37163ab84cced80535282af04a7b6238">writeBasalRingsHex</a> (const std::vector&lt; int &gt; &amp;currentCage, int cageNum, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings)</td></tr>
+<tr class="memdesc:a37163ab84cced80535282af04a7b6238"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write out the basal rings of a particular Hexagonal cage.  <br /></td></tr>
+<tr class="memitem:aae3f9c739ed902feed13bf1572dbf619" id="r_aae3f9c739ed902feed13bf1572dbf619"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aae3f9c739ed902feed13bf1572dbf619">writeBasalRingsPrism</a> (std::vector&lt; int &gt; &amp;basal1, std::vector&lt; int &gt; &amp;basal2, int prismNum, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, bool isDeformed)</td></tr>
+<tr class="memdesc:aae3f9c739ed902feed13bf1572dbf619"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write out the basal rings for a particular prism.  <br /></td></tr>
+<tr class="memitem:a6cc62aedecc8a19b34725616fbb8bdab" id="r_a6cc62aedecc8a19b34725616fbb8bdab"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a6cc62aedecc8a19b34725616fbb8bdab">writeDump</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::string path, std::string outFile)</td></tr>
+<tr class="memdesc:a6cc62aedecc8a19b34725616fbb8bdab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic function for writing out to a dump file.  <br /></td></tr>
+<tr class="memitem:a27fa17268ba7c153cb879ff53022eee7" id="r_a27fa17268ba7c153cb879ff53022eee7"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a27fa17268ba7c153cb879ff53022eee7">writeHisto</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; double &gt; &amp;avgQ6)</td></tr>
+<tr class="memitem:abf5ebc975df1bd370e73d7390cd30f68" id="r_abf5ebc975df1bd370e73d7390cd30f68"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#abf5ebc975df1bd370e73d7390cd30f68">writeCluster</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::string fileName=&quot;cluster.txt&quot;, bool isSlice=false, int largestIceCluster=0)</td></tr>
+<tr class="memdesc:abf5ebc975df1bd370e73d7390cd30f68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for printing the largest ice cluster.  <br /></td></tr>
+<tr class="memitem:a2b208dcfe7724d9af7b158dfd15c808d" id="r_a2b208dcfe7724d9af7b158dfd15c808d"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a2b208dcfe7724d9af7b158dfd15c808d">writeXYZcluster</a> (std::string path, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;atoms, int clusterID, <a class="el" href="group__cage.html#ga5787314f51b5927c213db48b81c21d95">cage::cageType</a> type)</td></tr>
+<tr class="memdesc:a2b208dcfe7724d9af7b158dfd15c808d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for writing out the XYZ files for each cluster.  <br /></td></tr>
+</table>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a3985775f30d7920fbf13f12386abefc1" name="a3985775f30d7920fbf13f12386abefc1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3985775f30d7920fbf13f12386abefc1">&#9670;&#160;</a></span>makePath()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::makePath </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>path</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Inline function for creating the desired directory (and parents). </p>
+<p>Uses std::filesystem for portability. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>The path of the directory </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>0 on success, 1 on failure </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="seams__output_8hpp_source.html#l00036">36</a> of file <a class="el" href="seams__output_8hpp_source.html">seams_output.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   36</span>                                                         {</div>
+<div class="line"><span class="lineno">   37</span>  std::error_code ec;</div>
+<div class="line"><span class="lineno">   38</span>  <span class="keywordflow">if</span> (fs::is_directory(path)) {</div>
+<div class="line"><span class="lineno">   39</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">   40</span>  }</div>
+<div class="line"><span class="lineno">   41</span>  <span class="keywordflow">if</span> (fs::create_directories(path, ec)) {</div>
+<div class="line"><span class="lineno">   42</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">   43</span>  }</div>
+<div class="line"><span class="lineno">   44</span>  <span class="keywordflow">return</span> ec ? 1 : 0;</div>
+<div class="line"><span class="lineno">   45</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a77cc523102fc57d203495a657703dab5" name="a77cc523102fc57d203495a657703dab5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77cc523102fc57d203495a657703dab5">&#9670;&#160;</a></span>printRDF()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::printRDF </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>fileName</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rdfValues</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>binwidth</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nbin</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Function for printing out the RDF, given the filename. </p>
+
+</div>
+</div>
+<a id="aa6dec898d176414e84433fb08318db4f" name="aa6dec898d176414e84433fb08318db4f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6dec898d176414e84433fb08318db4f">&#9670;&#160;</a></span>writeAllCages()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeAllCages </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cageList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>currentFrame</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Write out all cages of all types into a folder called cages inside the output directory </p>
+
+</div>
+</div>
+<a id="a37163ab84cced80535282af04a7b6238" name="a37163ab84cced80535282af04a7b6238"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a37163ab84cced80535282af04a7b6238">&#9670;&#160;</a></span>writeBasalRingsHex()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeBasalRingsHex </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>currentCage</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>cageNum</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write out the basal rings of a particular Hexagonal cage. </p>
+
+</div>
+</div>
+<a id="aae3f9c739ed902feed13bf1572dbf619" name="aae3f9c739ed902feed13bf1572dbf619"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae3f9c739ed902feed13bf1572dbf619">&#9670;&#160;</a></span>writeBasalRingsPrism()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeBasalRingsPrism </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>basal1</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>basal2</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>prismNum</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isDeformed</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write out the basal rings for a particular prism. </p>
+
+</div>
+</div>
+<a id="abf5ebc975df1bd370e73d7390cd30f68" name="abf5ebc975df1bd370e73d7390cd30f68"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf5ebc975df1bd370e73d7390cd30f68">&#9670;&#160;</a></span>writeCluster()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeCluster </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>fileName</em></span><span class="paramdefsep"> = </span><span class="paramdefval">&quot;cluster.txt&quot;</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>largestIceCluster</em></span><span class="paramdefsep"> = </span><span class="paramdefval">0</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Function for printing the largest ice cluster. </p>
+
+</div>
+</div>
+<a id="aee17b8438205b4b88aad8a481c533ba5" name="aee17b8438205b4b88aad8a481c533ba5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee17b8438205b4b88aad8a481c533ba5">&#9670;&#160;</a></span>writeClusterStats()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeClusterStats </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>currentFrame</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>largestCluster</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>numOfClusters</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>smallestCluster</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>avgClusterSize</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>firstFrame</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Function for writing out cluster statistics. </p>
+
+</div>
+</div>
+<a id="a6cc62aedecc8a19b34725616fbb8bdab" name="a6cc62aedecc8a19b34725616fbb8bdab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6cc62aedecc8a19b34725616fbb8bdab">&#9670;&#160;</a></span>writeDump()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeDump </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>outFile</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Generic function for writing out to a dump file. </p>
+
+</div>
+</div>
+<a id="aa4a162332246b965cde05f838e068f2c" name="aa4a162332246b965cde05f838e068f2c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa4a162332246b965cde05f838e068f2c">&#9670;&#160;</a></span>writeEachCage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeEachCage </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>currentCage</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>cageNum</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__cage.html#ga5787314f51b5927c213db48b81c21d95">cage::cageType</a></td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write out a particular cage to a file. </p>
+
+</div>
+</div>
+<a id="a27fa17268ba7c153cb879ff53022eee7" name="a27fa17268ba7c153cb879ff53022eee7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27fa17268ba7c153cb879ff53022eee7">&#9670;&#160;</a></span>writeHisto()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeHisto </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>avgQ6</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Function for printing out Q6, Cij and averaged Q3 values as single columns to text files The file names are cij, q6, q3 </p>
+
+</div>
+</div>
+<a id="a5b26e7213f27b9506c4eea7e8998edc9" name="a5b26e7213f27b9506c4eea7e8998edc9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b26e7213f27b9506c4eea7e8998edc9">&#9670;&#160;</a></span>writeLAMMPSdata()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeLAMMPSdata </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::vector&lt; int &gt; &gt;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::vector&lt; int &gt; &gt;</td>          <td class="paramname"><span class="paramname"><em>bonds</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>filename</em></span><span class="paramdefsep"> = </span><span class="paramdefval">&quot;system-rings.data&quot;</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write a data file for rings. </p>
+
+</div>
+</div>
+<a id="a4bc27d1a493f6ac1baea341587486142" name="a4bc27d1a493f6ac1baea341587486142"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4bc27d1a493f6ac1baea341587486142">&#9670;&#160;</a></span>writeLAMMPSdataAllPrisms()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeLAMMPSdataAllPrisms </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>atomTypes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxDepth</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>doShapeMatching</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write a data file for prisms of every type. </p>
+
+</div>
+</div>
+<a id="abddd6a343317271ce30245c88e4ed66c" name="abddd6a343317271ce30245c88e4ed66c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abddd6a343317271ce30245c88e4ed66c">&#9670;&#160;</a></span>writeLAMMPSdataAllRings()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeLAMMPSdataAllRings </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>atomTypes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxDepth</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isMonolayer</em></span><span class="paramdefsep"> = </span><span class="paramdefval">true</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write a data file for rings of every type for a monolayer. </p>
+
+</div>
+</div>
+<a id="afad3207fe70a1e45c079465f1ac44104" name="afad3207fe70a1e45c079465f1ac44104"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afad3207fe70a1e45c079465f1ac44104">&#9670;&#160;</a></span>writeLAMMPSdataCages()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeLAMMPSdataCages </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cageList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__cage.html#ga5787314f51b5927c213db48b81c21d95">cage::cageType</a></td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>numCages</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>filename</em></span><span class="paramdefsep"> = </span><span class="paramdefval">&quot;system-cages.data&quot;</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Write out a lammps data file for DDCs or HCs, assuming that there is no slice </p>
+
+</div>
+</div>
+<a id="af0da7bd8c480ab8e9fb74cd634fb8877" name="af0da7bd8c480ab8e9fb74cd634fb8877"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af0da7bd8c480ab8e9fb74cd634fb8877">&#9670;&#160;</a></span>writeLAMMPSdataPrisms()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeLAMMPSdataPrisms </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>useBondFile</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>bondFile</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>listPrism</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>filename</em></span><span class="paramdefsep"> = </span><span class="paramdefval">&quot;system-prisms.data&quot;</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write a data file for prisms of a single type. </p>
+
+</div>
+</div>
+<a id="a0955d323d41c351af8a878c29acb0248" name="a0955d323d41c351af8a878c29acb0248"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0955d323d41c351af8a878c29acb0248">&#9670;&#160;</a></span>writeLAMMPSdataTopoBulk()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeLAMMPSdataTopoBulk </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="group__cage.html#gaaac41828990e32b9d6e7db4426b61529">cage::iceType</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>atomTypes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>bondsBetweenDummy</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Write a data file for a particular frame, writing out topological bulk ice structures (DDCs/HCs) </p>
+
+</div>
+</div>
+<a id="a1f96c3a3ef2e7d902c4f183320bd6151" name="a1f96c3a3ef2e7d902c4f183320bd6151"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f96c3a3ef2e7d902c4f183320bd6151">&#9670;&#160;</a></span>writeLAMMPSdumpCages()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeLAMMPSdumpCages </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rmsdPerAtom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>atomTypes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>firstFrame</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write out a LAMMPS dump file containing the RMSD per atom for bulk ice. </p>
+
+</div>
+</div>
+<a id="a3b1cccfe3d5fc641d200b9ef3c31f041" name="a3b1cccfe3d5fc641d200b9ef3c31f041"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b1cccfe3d5fc641d200b9ef3c31f041">&#9670;&#160;</a></span>writeLAMMPSdumpINT()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeLAMMPSdumpINT </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rmsdPerAtom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>atomTypes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxDepth</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write out a LAMMPS dump file containing the RMSD per atom. </p>
+
+</div>
+</div>
+<a id="a46251e11ffd9fab32a85c6e80e98ca0c" name="a46251e11ffd9fab32a85c6e80e98ca0c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a46251e11ffd9fab32a85c6e80e98ca0c">&#9670;&#160;</a></span>writeLAMMPSdumpSlice()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeLAMMPSdumpSlice </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Write out a LAMMPS dump file containing the inSlice value for each atom for a user-defined slice </p>
+
+</div>
+</div>
+<a id="af556b48a2b7f51da88108dfc7ecf9623" name="af556b48a2b7f51da88108dfc7ecf9623"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af556b48a2b7f51da88108dfc7ecf9623">&#9670;&#160;</a></span>writeMoleculeIDsExpressionSelectOVITO()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeMoleculeIDsExpressionSelectOVITO </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Function for printing out the molecule IDs present in the slice (compatible with the OVITO Expression Select command </p>
+
+</div>
+</div>
+<a id="a5d8a2d2b1746ed2e1deba049593ded7b" name="a5d8a2d2b1746ed2e1deba049593ded7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5d8a2d2b1746ed2e1deba049593ded7b">&#9670;&#160;</a></span>writeMoleculeIDsInSlice()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeMoleculeIDsInSlice </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Function for printing out the molecule IDs present in the slice (compatible with the LAMMPS group command </p>
+
+</div>
+</div>
+<a id="a74916a9878dd9f8234f493d8d67e0588" name="a74916a9878dd9f8234f493d8d67e0588"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74916a9878dd9f8234f493d8d67e0588">&#9670;&#160;</a></span>writePrismNum()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writePrismNum </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nPrisms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nDefPrisms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>heightPercent</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxDepth</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>currentFrame</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>firstFrame</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Function for printing out the number of prism blocks, with or without slices. Be careful when using slices! </p>
+
+</div>
+</div>
+<a id="a5bf62f6266ab17b7e0aaab15dddb0267" name="a5bf62f6266ab17b7e0aaab15dddb0267"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5bf62f6266ab17b7e0aaab15dddb0267">&#9670;&#160;</a></span>writePrisms()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writePrisms </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>basal1</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>basal2</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>prismNum</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Function for writing out each prism. </p>
+
+</div>
+</div>
+<a id="a565b4993e658b431acc2fb314dbde015" name="a565b4993e658b431acc2fb314dbde015"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a565b4993e658b431acc2fb314dbde015">&#9670;&#160;</a></span>writeRingNum()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeRingNum </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>currentFrame</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nRings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>coverageAreaXY</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>coverageAreaXZ</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>coverageAreaYZ</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxDepth</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>firstFrame</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Function for printing out the coverage area and the number of rings of each type </p>
+
+</div>
+</div>
+<a id="a971cb6b5c97b5b9ba3d552f0a6c47055" name="a971cb6b5c97b5b9ba3d552f0a6c47055"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a971cb6b5c97b5b9ba3d552f0a6c47055">&#9670;&#160;</a></span>writeRingNumBulk()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeRingNumBulk </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>currentFrame</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nRings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxDepth</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>firstFrame</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Function for printing out the number of rings of each type in a bulk system </p>
+
+</div>
+</div>
+<a id="aa5a5fe7be0281da3e75c9c45c7bc005d" name="aa5a5fe7be0281da3e75c9c45c7bc005d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5a5fe7be0281da3e75c9c45c7bc005d">&#9670;&#160;</a></span>writeRings()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeRings </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>filename</em></span><span class="paramdefsep"> = </span><span class="paramdefval">&quot;rings.dat&quot;</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Function for printing out ring info, when there is no volume slice. </p>
+
+</div>
+</div>
+<a id="a5ca5eeff9edc702cdcf1b26e8501dc0c" name="a5ca5eeff9edc702cdcf1b26e8501dc0c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ca5eeff9edc702cdcf1b26e8501dc0c">&#9670;&#160;</a></span>writeTopoBulkData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeTopoBulkData </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>currentFrame</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>numHC</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>numDDC</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>mixedRings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>basalRings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>prismaticRings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>firstFrame</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Function for printing out the number of DDCs, HCs, mixed rings, basal and prismatic rings </p>
+
+</div>
+</div>
+<a id="a2b208dcfe7724d9af7b158dfd15c808d" name="a2b208dcfe7724d9af7b158dfd15c808d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b208dcfe7724d9af7b158dfd15c808d">&#9670;&#160;</a></span>writeXYZcluster()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sout::writeXYZcluster </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>atoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>clusterID</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__cage.html#ga5787314f51b5927c213db48b81c21d95">cage::cageType</a></td>          <td class="paramname"><span class="paramname"><em>type</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Function for writing out the XYZ files for each cluster. </p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!-- Doxygen already closed #doc-content and #container before this template. -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespacesout.html">sout</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.17.0 </li>
+  </ul>
+</div>
+<div class="doxyyoda-attrib" role="contentinfo">
+  <span class="doxyyoda-attrib__item">
+    <span>Generated by <a href="https://www.doxygen.org/index.html">Doxygen 1.17.0</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z"/></svg>
+    <span>Analytics by <a href="https://antics.turtletech.us/" target="_blank" rel="noopener noreferrer">Antics</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <span>provided by</span>
+    <span class="doxyyoda-attrib__brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1.4em" height="1.4em" viewBox="0 0 64 64" aria-hidden="true"><g fill-rule="evenodd"><ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9"/><path fill="#80D25B" d="M20.3,46c0,0-3.2,9.9.3,13.8c3.5,3.9 6.1,3.4 6.1-6C26.8,44.3 20.3,46 20.3,46Z"/><path fill="#80D25B" d="M38.3,46c0,0-3.2,9.9.4,13.8c3.5,3.9 6.1,3.4 6.1-6C44.8,44.3 38.3,46 38.3,46Z" transform="matrix(-1 0 0 1 81.8 0)"/><path fill="#80D25B" d="M20.6,21.2c0,0-6.7-5.8-10.5-5.2C6.2,16.7 6,22.2 6,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L20.6,21.2Z"/><path fill="#80D25B" d="M57.6,21.2c0,0-6.6-5.8-10.5-5.2C43.2,16.7 43,22.2 43,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L57.6,21.2Z" transform="matrix(-1 0 0 1 100.623 0)"/><path fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32,53C40.8,53 48,44.5 48,34C48,23.5 46.7,17 32,17C17.3,17 16,23.5 16,34C16,44.5 23.2,53 32,53Z"/><polygon fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" points="32 22 38.9 26 38.9 34 32 38 25.1 34 25.1 26"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M30,8C28.9,8 28,8.9 28,10"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M36,8C34.9,8 34,8.9 34,10" transform="matrix(-1 0 0 1 70 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32.1,38.2L32.1,52.4M32,21.7L32,17M25.2,26L17.7,23.1M25.1,34.2L16.8,38.9"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M46.2,26L38.7,23.1" transform="matrix(-1 0 0 1 84.951 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M47.1,34.2L38.8,38.9" transform="matrix(-1 0 0 1 85.891 0)"/></g></svg>
+      <a href="https://turtletech.us/" target="_blank" rel="noopener noreferrer">TurtleTech ehf</a>
+    </span>
+  </span>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

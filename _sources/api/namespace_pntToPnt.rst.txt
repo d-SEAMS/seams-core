@@ -55,7 +55,7 @@ Global Functions
 
 	Eigen::MatrixXd getPointSetRefRing(int n, int axialDim)
 
-Fills up an eigen matrix point set a reference ring, which is a regular n-gonal polygon; where n is the number of nodes in the ring.
+Fills up an eigen matrix point set a reference ring, which is a regular n-gonal polygon; where n is the number of nodes in the ring
 
 .. index:: pair: function; createPrismBlock
 .. _doxid-namespacepnt_to_pnt_1ab2aaa39d1afd5e2b9a2f23d26323d339:
@@ -65,7 +65,7 @@ Fills up an eigen matrix point set a reference ring, which is a regular n-gonal 
 
 	Eigen::MatrixXd createPrismBlock(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const Eigen::MatrixXd& refPoints, int ringSize, const std::vector<int>& basal1, const std::vector<int>& basal2)
 
-Creates an eigen matrix for the points of a prism block, constructed from the points of a perfect polygon of radius 1, given the basal rings and axial dimension.
+Creates an eigen matrix for the points of a prism block, constructed from the points of a perfect polygon of radius 1, given the basal rings and axial dimension
 
 .. index:: pair: function; getRadiusFromRings
 .. _doxid-namespacepnt_to_pnt_1a318a49881fa85f0f239778cd6c7a33f9:
@@ -75,7 +75,7 @@ Creates an eigen matrix for the points of a prism block, constructed from the po
 
 	double getRadiusFromRings(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& basal1, const std::vector<int>& basal2)
 
-Calculate the average radial distance for the basal rings, calculated from the centroid of each basal ring.
+Calculate the average radial distance for the basal rings, calculated from the centroid of each basal ring
 
 .. index:: pair: function; getAvgHeightPrismBlock
 .. _doxid-namespacepnt_to_pnt_1af0adb2c86725daa33e7553c7456b1260:
@@ -85,7 +85,7 @@ Calculate the average radial distance for the basal rings, calculated from the c
 
 	double getAvgHeightPrismBlock(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& basal1, const std::vector<int>& basal2)
 
-Calculate the average height of the prism block, calculated using the basal rings of the prism and the axial dimension.
+Calculate the average height of the prism block, calculated using the basal rings of the prism and the axial dimension
 
 .. index:: pair: function; relOrderPrismBlock
 .. _doxid-namespacepnt_to_pnt_1aaa5adb93aab9c04dae3b0dd82255113b:
@@ -95,9 +95,7 @@ Calculate the average height of the prism block, calculated using the basal ring
 
 	int relOrderPrismBlock(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& basal1, const std::vector<int>& basal2, const std::vector<std::vector<int>>& nList, std::vector<int>& outBasal1, std::vector<int>& outBasal2)
 
-Get the relative ordering of a pair of basal rings for a deformed prism/perfect prism.
-
-Outputs a vector of vectors of indices, such that the first vector is for the first basal ring, and the second vector is for the second basal ring. The input neighbour list is with respect to indices, not IDs
+Get the relative ordering of a pair of basal rings for a deformed prism/perfect prism. Outputs a vector of vectors of indices, such that the first vector is for the first basal ring, and the second vector is for the second basal ring. The input neighbour list is with respect to indices, not IDs
 
 .. index:: pair: function; relOrderPrismBlock
 .. _doxid-namespacepnt_to_pnt_1ad35ccbeea04f34625242accc1af6d6f8:
@@ -107,9 +105,7 @@ Outputs a vector of vectors of indices, such that the first vector is for the fi
 
 	int relOrderPrismBlock(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& basal1, const std::vector<int>& basal2, std::vector<int>& outBasal1, std::vector<int>& outBasal2)
 
-Get the relative ordering of a pair of basal rings for a deformed prism/perfect prism.
-
-Outputs a vector of vectors of indices, such that the first vector is for the first basal ring, and the second vector is for the second basal ring.
+Get the relative ordering of a pair of basal rings for a deformed prism/perfect prism. Outputs a vector of vectors of indices, such that the first vector is for the first basal ring, and the second vector is for the second basal ring.
 
 .. index:: pair: function; fillPointSetPrismRing
 .. _doxid-namespacepnt_to_pnt_1add7f31e0a4e17beae5c3ded8752e9259:
@@ -119,7 +115,7 @@ Outputs a vector of vectors of indices, such that the first vector is for the fi
 
 	Eigen::MatrixXd fillPointSetPrismRing(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& basalRing, int startingIndex)
 
-Fill up an Eigen Matrix of a prism basal ring from an input vector of atom indices.
+Fill up an Eigen Matrix of a prism basal ring from an input vector of atom indices
 
 .. index:: pair: function; fillPointSetPrismBlock
 .. _doxid-namespacepnt_to_pnt_1ad9d450912979a4c05acb3e1f7829a55f:
@@ -129,7 +125,7 @@ Fill up an Eigen Matrix of a prism basal ring from an input vector of atom indic
 
 	Eigen::MatrixXd fillPointSetPrismBlock(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& basal1, const std::vector<int>& basal2, int startingIndex)
 
-Fill up an Eigen matrix of a prism block (two basal rings) from input vectors for the basal rings.
+Fill up an Eigen matrix of a prism block (two basal rings) from input vectors for the basal rings
 
 .. index:: pair: function; getPointSetCage
 .. _doxid-namespacepnt_to_pnt_1a332141ec965df89d231a1def4dc3f5d7:
@@ -139,7 +135,7 @@ Fill up an Eigen matrix of a prism block (two basal rings) from input vectors fo
 
 	Eigen::MatrixXd getPointSetCage(:ref:`ring::strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>` type)
 
-Fills up an eigen matrix point set a reference ring, which is a regular n-gonal polygon, constructed with radius 1 by default; where n is the number of nodes in the ring.
+Fills up an eigen matrix point set a reference ring, which is a regular n-gonal polygon, constructed with radius 1 by default; where n is the number of nodes in the ring
 
 .. index:: pair: function; relOrderHC
 .. _doxid-namespacepnt_to_pnt_1ae91f374f024840f0e75795a5b6c5f2ee:
@@ -169,7 +165,7 @@ Matches the order of the basal rings of an DDC or a potential HC.
 
 	std::vector<int> relOrderDDC(const std::vector<int>& equatorial, int index, const std::vector<std::vector<int>>& rings, const std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList)
 
-As relOrderDDC, but deriving the connectivity from an explicit equatorial traversal instead of the stored ring row; passing the reversed traversal yields the mirror correspondence for the shape-matching search.
+As relOrderDDC, but deriving the connectivity from an explicit equatorial traversal instead of the stored ring row; passing the reversed traversal yields the mirror correspondence for the shape-matching search
 
 .. index:: pair: function; changeHexCageOrder
 .. _doxid-namespacepnt_to_pnt_1a640219c17f532aa11fe3269cd5d3a4e8:

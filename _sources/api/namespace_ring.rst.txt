@@ -107,9 +107,7 @@ Global Functions
 
 	:ref:`CageAffiliation<doxid-structring_1_1_cage_affiliation>` cageAffiliation(const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList)
 
-Batch computation of the affiliation predicates for six-membered rings.
-
-nList is by index with the leading self entry, as neighbourListByIndex produces.
+Batch computation of the affiliation predicates for six-membered rings. nList is by index with the leading self entry, as neighbourListByIndex produces.
 
 .. index:: pair: function; seededCageAffiliation
 .. _doxid-namespacering_1a995edc47f2d855d9b3d19b6aedfa640c:
@@ -168,9 +166,7 @@ Find out rings in the bulk, looping through all ring sizes upto the maxDepth The
 
 	int topoBulkAnalysis(std::string path, const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int firstFrame, bool onlyTetrahedral = true)
 
-Find out which rings are DDCs or HCs, which are comprised of 6-membered primitive rings.
-
-Start with a neighbour list (by index) and a vector of vectors of rings (also by index). TODO: try 'square' ice and ice0
+Find out which rings are DDCs or HCs, which are comprised of 6-membered primitive rings. Start with a neighbour list (by index) and a vector of vectors of rings (also by index). TODO: try 'square' ice and ice0
 
 .. index:: pair: function; buildRingSearchIndex
 .. _doxid-namespacering_1a2314146c9c30c45799ab5217b8b69e61:
@@ -190,9 +186,7 @@ Builds the inverted atom-to-rings index used by the cage searches.
 
 	std::vector<int> findDDC(const std::vector<std::vector<int>>& rings, std::vector<:ref:`strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, const std::vector<int>& listHC, std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList)
 
-Find out which hexagonal rings are DDC (Double Diamond Cages) rings.
-
-Returns a vector containing all the ring IDs which are DDC rings
+Find out which hexagonal rings are DDC (Double Diamond Cages) rings. Returns a vector containing all the ring IDs which are DDC rings
 
 .. index:: pair: function; findDDC
 .. _doxid-namespacering_1a13d4db1147bed179fe5c59afe3bb90f7:
@@ -212,9 +206,7 @@ As findDDC, reusing an index the caller has already built.
 
 	std::vector<int> findMixedRings(const std::vector<std::vector<int>>& rings, std::vector<:ref:`strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, std::vector<int>& listDDC, std::vector<int>& listHC)
 
-Find out which hexagonal rings are both DDCs (Double Diamond Cages) and HCs (Hexagonal Cages).
-
-Returns a vector containing all the ring IDs which are of this type
+Find out which hexagonal rings are both DDCs (Double Diamond Cages) and HCs (Hexagonal Cages). Returns a vector containing all the ring IDs which are of this type
 
 .. index:: pair: function; findHC
 .. _doxid-namespacering_1af2bab9ed638ed3e3a1ed3392d7e4a576:
@@ -224,9 +216,7 @@ Returns a vector containing all the ring IDs which are of this type
 
 	std::vector<int> findHC(const std::vector<std::vector<int>>& rings, std::vector<:ref:`strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, const std::vector<std::vector<int>>& nList, std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList)
 
-Find out which hexagonal rings are HC rings.
-
-Returns a vector containing all the ring IDs which are HC rings
+Find out which hexagonal rings are HC rings. Returns a vector containing all the ring IDs which are HC rings
 
 .. index:: pair: function; findHC
 .. _doxid-namespacering_1a1dfa48bf23ffaf39fee585ac7634231a:
@@ -246,7 +236,7 @@ As findHC, reusing an index the caller has already built.
 
 	bool conditionOneDDC(const std::vector<std::vector<int>>& rings, std::vector<int>& peripheralRings, int iring)
 
-First condition for the DDC: There must be at least 3 other rings in which each element of the equatorial ring is present.
+First condition for the DDC: There must be at least 3 other rings in which each element of the equatorial ring is present
 
 .. index:: pair: function; conditionOneDDC
 .. _doxid-namespacering_1a75c45309352d085d18f89f370dd42ab2:
@@ -266,7 +256,7 @@ As conditionOneDDC, reusing an index the caller has already built.
 
 	bool conditionTwoDDC(const std::vector<std::vector<int>>& rings, std::vector<int>& peripheralRings, int iring)
 
-Second condition for the DDC: There must be at least 1 other ring for every triplet in the equatorial ring.
+Second condition for the DDC: There must be at least 1 other ring for every triplet in the equatorial ring
 
 .. index:: pair: function; conditionTwoDDC
 .. _doxid-namespacering_1ac90a6cf68afb185f82a5b1d064a1f80f:
@@ -286,7 +276,7 @@ As conditionTwoDDC, answering each triplet from the inverted index.
 
 	bool conditionThreeDDC(const std::vector<std::vector<int>>& rings, std::vector<int>& peripheralRings)
 
-Third condition for the DDC: Even (by vector index) numbered index triplets and odd triplets must have at least one element in common.
+Third condition for the DDC: Even (by vector index) numbered index triplets and odd triplets must have at least one element in common
 
 .. index:: pair: function; basalConditions
 .. _doxid-namespacering_1a199fe38d3152cc04d18109ddb868ab34:
@@ -296,7 +286,7 @@ Third condition for the DDC: Even (by vector index) numbered index triplets and 
 
 	bool basalConditions(const std::vector<std::vector<int>>& nList, const std::vector<int>& basal1, const std::vector<int>& basal2)
 
-Tests whether two rings are basal rings (true) or not (false)
+Tests whether two rings are basal rings (true) or not (false).
 
 .. index:: pair: function; basalNeighbours
 .. _doxid-namespacering_1a350f1fa3c3d5807fb720444054d6e340:
@@ -306,7 +296,7 @@ Tests whether two rings are basal rings (true) or not (false)
 
 	bool basalNeighbours(const std::vector<std::vector<int>>& nList, std::vector<int>& triplet, int atomOne, int atomTwo)
 
-Tests whether the last two elements of a triplet are neighbours of two atom IDs passed in.
+Tests whether the last two elements of a triplet are neighbours of two atom IDs passed in
 
 .. index:: pair: function; notNeighboursOfRing
 .. _doxid-namespacering_1a5db4898b22ebb13511cc37fae6674e5c:
@@ -316,7 +306,7 @@ Tests whether the last two elements of a triplet are neighbours of two atom IDs 
 
 	bool notNeighboursOfRing(const std::vector<std::vector<int>>& nList, std::vector<int>& triplet, const std::vector<int>& ring)
 
-Tests to check that elements of a triplet are not neighbours of a ring (vector) passed.
+Tests to check that elements of a triplet are not neighbours of a ring (vector) passed
 
 .. index:: pair: function; findPrismatic
 .. _doxid-namespacering_1a56c3c2a30736d27d9eaf3e3759e630e9:
@@ -346,7 +336,7 @@ As findPrismatic, drawing candidate rings from the inverted index.
 
 	int getAtomTypesTopoBulk(const std::vector<std::vector<int>>& rings, const std::vector<:ref:`ring::strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, std::vector<:ref:`cage::iceType<doxid-group__cage_1gaaac41828990e32b9d6e7db4426b61529>`>& atomTypes)
 
-Assigns a type of enum class iceType, to every atom, using information from ringType, which has the information of every ring.
+Assigns a type of enum class iceType, to every atom, using information from ringType, which has the information of every ring
 
 .. index:: pair: function; getStrucNumbers
 .. _doxid-namespacering_1aac3a6fdc27f05a7ded468e955983f270:
