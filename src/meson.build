@@ -51,3 +51,49 @@ yds_dep = declare_dependency(
   include_directories: _incdirs,
   compile_args: _args,
   dependencies: _deps)
+
+# Installed interface.
+#
+# Building the library is not the same as shipping something another
+# project can build against: without headers and a pkg-config file an
+# installed copy can only be linked blind, which is why consumers vendor
+# this repository as a subproject instead of depending on a packaged one.
+#
+# The feature defines have to travel with the headers. seams_input.hpp,
+# neighbours.hpp and steinhardt_device.hpp change shape under
+# SEAMS_HAS_CHEMFILES, SEAMS_HAS_READCON, SEAMS_HAS_LINKCELL and
+# SEAMS_HAS_OFFLOAD, so a consumer that compiles without the set this
+# library was built with sees a different declaration than the one the
+# library exports. yds_dep hands them to in-tree consumers through
+# compile_args; extra_cflags is the same promise to an installed one.
+# The warning suppressions in _args stay behind: they are this project's
+# taste, not part of its interface.
+install_subdir(
+  'include/internal',
+  install_dir: get_option('includedir') / 'seams',
+  strip_directory: true)
+
+_public_defines = []
+foreach _arg : _args
+  if _arg.startswith('-DSEAMS_HAS') or _arg.startswith('-D_LIBCPP_DISABLE_AVAILABILITY')
+    _public_defines += _arg
+  endif
+endforeach
+
+# Naming the library object here would make meson walk the dependency
+# graph into Libs.private, and that graph holds absolute paths: the
+# build directory of any static subproject, and whichever environment
+# supplied chemfiles and highway on the build machine. Those paths do
+# not survive the install, let alone reach another machine. yodaLib is
+# shared and carries its own dependencies, so the consumer needs the
+# link line and nothing more.
+pkgconfig = import('pkgconfig')
+pkgconfig.generate(
+  name: 'seams-core',
+  filebase: 'seams-core',
+  description: 'd-SEAMS structural elucidation engine',
+  version: meson.project_version(),
+  subdirs: ['seams'],
+  requires: ['eigen3 >= 3.4.0'],
+  libraries: ['-L${libdir}', '-lyodaLib'],
+  extra_cflags: _public_defines)
