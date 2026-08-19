@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
-# Fetch the doxyYoda HTML theme next to Doxyfile-prj.cfg.
+# Fetch the doxyYoda HTML theme into docs/doxyYoda/.
 set -euo pipefail
 ver=0.2.2
 root=$(git rev-parse --show-toplevel)
-cd "$root"
-if [ -d doxyYoda/html ]; then
+dest="$root/docs/doxyYoda"
+if [ -f "$dest/html/header.html" ]; then
   echo "doxyYoda already present"
   exit 0
 fi
-curl -fSL "https://github.com/HaoZeke/doxyYoda/releases/download/v${ver}/doxyYoda_${ver}.tar.gz" -o doxyYoda.tar.gz
-tar xf doxyYoda.tar.gz
-rm -f doxyYoda.tar.gz
-echo "extracted doxyYoda ${ver}"
+tmp=$(mktemp)
+trap 'rm -f "$tmp"' EXIT
+curl -fSL "https://github.com/HaoZeke/doxyYoda/releases/download/v${ver}/doxyYoda_${ver}.tar.gz" -o "$tmp"
+mkdir -p "$root/docs"
+tar -xf "$tmp" -C "$root/docs"
+echo "extracted doxyYoda ${ver} -> docs/doxyYoda"

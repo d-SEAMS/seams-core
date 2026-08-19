@@ -1,0 +1,9 @@
+/*! \mainpage seams-core C++ API
+
+The install, tutorials, and CLI live in the
+<a href="https://docs.dseams.info/">d-SEAMS book</a>.
+This tree is the public headers under <code>src/include/internal</code>.
+
+The in-book pages under <code>/api/</code> are the same comments via doxyrest.
+
+*/

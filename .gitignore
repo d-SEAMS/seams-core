@@ -68,6 +68,7 @@ build/
 # docs/source/*.rst is generated from orgmode, but track orgmode + conf.py
 docs/build/
 docs/doctrees/
+docs/doxygen-html/
 docs/source/*.rst
 docs/source/xml/
 docs/source/api/

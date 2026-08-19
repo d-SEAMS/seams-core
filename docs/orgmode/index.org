@@ -167,6 +167,11 @@ framework.
    contributing/index
 #+end_export
 
+The in-book C++ pages under =api/= are Doxygen via doxyrest. A sibling
+doxyYoda HTML tree (inline source, treeview) is at
+[[https://docs.dseams.info/api-cpp/][/api-cpp/]] after
+~pixi run -e docs docbld~.
+
 * Related projects
 
 - [[https://d-seams.github.io/PydSEAMSlib/][pydseams]] :: Python Frame API on ~yoda~

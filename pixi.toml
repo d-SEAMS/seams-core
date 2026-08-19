@@ -99,7 +99,7 @@ platforms = ["linux-64"]
 python = "3.12.*"
 emacs = ">=30"
 graphviz = ">=12"
-doxygen = ">=1.13"
+doxygen = ">=1.17,<2"
 doxyrest = ">=2.1"
 
 [feature.docs.pypi-dependencies]
@@ -137,8 +137,23 @@ cmd = "doxygen Doxyfile_seams.cfg && doxyrest -c doxyrest-config.lua"
 depends-on = ["mkrst", "doxybuild"]
 cmd = "sphinx-build -d docs/doctrees docs/source/ docs/build"
 
+[feature.docs.tasks.fetch-doxyyoda]
+description = "Download the doxyYoda 0.2.2 HTML theme"
+cmd = "bash scripts/get_doxyyoda.sh"
+
+[feature.docs.tasks.doxyhtml]
+description = "Standalone doxyYoda C++ API HTML"
+cwd = "docs/source"
+depends-on = ["fetch-doxyyoda"]
+cmd = "doxygen Doxyfile_doxyyoda.cfg"
+
+[feature.docs.tasks.install-doxyhtml]
+description = "Copy doxyYoda HTML into the Sphinx publish tree"
+depends-on = ["sphinxbld", "doxyhtml"]
+cmd = "rm -rf docs/build/api-cpp && cp -R docs/doxygen-html/html docs/build/api-cpp"
+
 [feature.docs.tasks.docbld]
-depends-on = ["sphinxbld"]
+depends-on = ["sphinxbld", "install-doxyhtml"]
 
 [feature.docs.tasks.docdel]
 cwd = "docs"
@@ -146,6 +161,7 @@ cwd = "docs"
 cmd = """
 rm -rf build
 rm -rf doctrees
+rm -rf doxygen-html
 rm -rf source/xml
 rm -rf source/api
 rm -rf source/contributing
