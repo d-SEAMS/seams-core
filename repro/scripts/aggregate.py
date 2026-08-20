@@ -7,6 +7,7 @@ Reads the text outputs the Snakemake DAG produced and emits the manifest
 JSON on stdout. Missing files become nulls rather than errors so a partial
 run still yields an inspectable object; the DAG itself decides completeness.
 """
+
 import json
 import pathlib
 import re
@@ -159,9 +160,7 @@ def parse_ql(text):
     for line in text.splitlines():
         m = re.match(r"tool=(\w+) lattice=(\w+)", line)
         if m:
-            current = tools.setdefault(m.group(1), {}).setdefault(
-                m.group(2), {}
-            )
+            current = tools.setdefault(m.group(1), {}).setdefault(m.group(2), {})
             continue
         if current is None:
             continue
@@ -224,8 +223,7 @@ def main():
         "conditions": conditions,
         "source_manifest": load_json(out_dir / "source-manifest.json"),
         "workflow_parity": load_json(out_dir / "workflow-parity.json"),
-        "identity_gate": "Fail:              0"
-        in read(out_dir / "tip-test.log"),
+        "identity_gate": "Fail:              0" in read(out_dir / "tip-test.log"),
         "tip": {
             "scaling": parse_scaling(read(out_dir / "tip-scaling.txt")),
             "cages": parse_kv(read(out_dir / "tip-cages.txt")),
@@ -251,9 +249,7 @@ def main():
         "ql_compare": ql,
         "figshare": {
             "demos": digest_figshare_demos(
-                load_json(
-                    out_dir / "figshare-demos" / "figshare-demos.json"
-                )
+                load_json(out_dir / "figshare-demos" / "figshare-demos.json")
             ),
             "incremental": digest_figshare_incremental(
                 load_json(out_dir / "figshare-incremental.json")
