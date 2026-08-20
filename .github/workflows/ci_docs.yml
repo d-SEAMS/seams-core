@@ -14,6 +14,7 @@ jobs:
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           environments: docs
+          cache-key: pixi-docs-
       - run: pixi run -e docs docbld
 
       - name: Deploy to GitHub Pages
