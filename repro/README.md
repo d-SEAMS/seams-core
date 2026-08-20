@@ -91,3 +91,12 @@ The baseline commit, sizes, trajectory, and repetition counts live in
 `repro/config.yaml`. Timings on a shared or loaded machine are not
 comparable to the paper's exclusive-node numbers; the conditions file
 records the load so a reviewer can tell.
+
+## Validation contract
+
+The CLI regression suite covers deterministic ordering for parallel LAMMPS
+ranges, bounded ranges for the single-frame XYZ reader, strict rejection of
+empty input, and the versioned `dseams.cli/v1` JSONL envelope. The density
+suite checks that profiles integrate to the selected atom count on an
+orthorhombic cell and on a sheared cell along x, y, and z. These checks run
+with the normal Meson test suite before the reproducibility DAG proceeds.
