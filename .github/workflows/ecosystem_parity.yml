@@ -79,7 +79,7 @@ jobs:
         run: |
           PYTHONPATH="$RUNNER_TEMP/dseams-python" pixi run -e repro -- \
             python repro/scripts/workflow_parity.py \
-            --seams build-parity/src/seams \
+            --seams build-parity/seams \
             --lua "$GITHUB_WORKSPACE/.pixi/envs/repro/bin/lua" \
             --lua-source "$RUNNER_TEMP/dseams-sources/yodaStruct" \
             --lua-build "$RUNNER_TEMP/build-yoda" \
