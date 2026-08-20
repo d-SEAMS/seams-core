@@ -192,7 +192,7 @@ def collect_cli(binary: Path, water: Path, ice: Path, ions: Path) -> dict[str, A
             "3.5",
             "--graph",
             "seeded",
-            "--k",
+            "-k",
             "4",
         )
     )
