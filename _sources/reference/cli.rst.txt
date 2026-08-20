@@ -85,11 +85,6 @@ is optional. The volume is ``nneigh::dumpVolume`` (det of dump ``H``).
 (``rdf::coordinationNumber``). Help text and the ``cn`` header say
 ``site-site``. There is no cage CN and no ``--ions``.
 
-``cn`` calls ``nneigh::neighListPair`` on types from ``--types I,J``
-(default ``I = J = --type``) and prints the mean degree of type ``I``
-(row length minus the leading self). The line contains
-``site-site``. This is not an ice score and is not cage CN.
-
 ``cn --ions --site SPEC`` builds ``site::ionCloud`` and prints the mean
 unlike degree of type-1 (cation) vertices from
 ``nneigh::neighList(cutoff, ions, 1, 2)``. The line contains ``cage``.

@@ -354,10 +354,6 @@ is optional. The volume is <code class="docutils literal notranslate"><span clas
 <code class="docutils literal notranslate"><span class="pre">cn</span></code> integrates the site-site RDF to that cutoff
 (<code class="docutils literal notranslate"><span class="pre">rdf::coordinationNumber</span></code>). Help text and the <code class="docutils literal notranslate"><span class="pre">cn</span></code> header say
 <code class="docutils literal notranslate"><span class="pre">site-site</span></code>. There is no cage CN and no <code class="docutils literal notranslate"><span class="pre">--ions</span></code>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">cn</span></code> calls <code class="docutils literal notranslate"><span class="pre">nneigh::neighListPair</span></code> on types from <code class="docutils literal notranslate"><span class="pre">--types</span> <span class="pre">I,J</span></code>
-(default <code class="docutils literal notranslate"><span class="pre">I</span> <span class="pre">=</span> <span class="pre">J</span> <span class="pre">=</span> <span class="pre">--type</span></code>) and prints the mean degree of type <code class="docutils literal notranslate"><span class="pre">I</span></code>
-(row length minus the leading self). The line contains
-<code class="docutils literal notranslate"><span class="pre">site-site</span></code>. This is not an ice score and is not cage CN.</p>
 <p><code class="docutils literal notranslate"><span class="pre">cn</span> <span class="pre">--ions</span> <span class="pre">--site</span> <span class="pre">SPEC</span></code> builds <code class="docutils literal notranslate"><span class="pre">site::ionCloud</span></code> and prints the mean
 unlike degree of type-1 (cation) vertices from
 <code class="docutils literal notranslate"><span class="pre">nneigh::neighList(cutoff,</span> <span class="pre">ions,</span> <span class="pre">1,</span> <span class="pre">2)</span></code>. The line contains <code class="docutils literal notranslate"><span class="pre">cage</span></code>.

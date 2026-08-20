@@ -95,7 +95,7 @@ Python and Lua
 --------------
 
 The engine CLI is not a scripting host. Install
-`pydseams <https://github.com/d-SEAMS/PydSEAMSlib>`_ (``pip install pydseams``, compiled module ``yoda``) or
+`pydseams <https://github.com/d-SEAMS/PydSEAMSlib>`_ (``pip install pydseamslib``, compiled module ``yoda``) or
 `yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_
 (``require("dseams")``). ``import pydseamslib`` is an alias of ``pydseams``.
 
