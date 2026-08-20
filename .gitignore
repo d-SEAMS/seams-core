@@ -8,6 +8,7 @@ doxyYoda_*
 run*
 bbdir/
 bbdir-cov/
+/.snakemake/
 # Manual updates ONLY
 spack.yml
 /.spack-env/
