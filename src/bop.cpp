@@ -500,6 +500,9 @@ void chill::classifyBonds(
       yl; // temp q_lm for each pair of iatom and jatom
 
   QlmTotal.ptq.resize(yCloud.nop);
+  for (auto &point : yCloud.pts) {
+    point.c_ij.clear();
+  }
 
   // Loop through the neighbour list
   for (int iatom = 0; iatom < nList.size(); iatom++) {
@@ -1223,4 +1226,3 @@ int chill::numStaggered(
 
   return num_staggrd;
 }
-

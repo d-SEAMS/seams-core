@@ -1140,7 +1140,7 @@ int main(int argc, char *argv[]) {
   };
 
   const bool loadAll =
-      cmd == "pairs" || cmd == "hbonds" || (cmd == "cn" && ionsFlag) ||
+      cmd == "pairs" || (cmd == "cn" && ionsFlag) ||
       ((cmd == "rdf" || cmd == "cn") && typesSet && rdfTypeI != rdfTypeJ) ||
       (cmd == "density-z" && typeI <= 0) || cmd == "domains";
   const int loadType = loadAll ? -1 : typeI;
