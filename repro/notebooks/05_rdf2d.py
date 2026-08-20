@@ -24,7 +24,11 @@
 import tempfile
 from pathlib import Path
 
+import matplotlib.pyplot as plt
+
 from pydseamslib import Trajectory
+
+plt.switch_backend("Agg")
 
 ROOT = next(
     p
@@ -63,11 +67,6 @@ first_peak_g, first_peak_r = max(
 round(first_peak_r, 3), round(first_peak_g, 3)
 
 # %%
-import matplotlib
-
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-
 fig, ax = plt.subplots(figsize=(5.5, 3.4), constrained_layout=True)
 ax.plot(r, g)
 ax.set_xlabel(r"r (Å)")

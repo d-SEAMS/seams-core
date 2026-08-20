@@ -31,7 +31,11 @@ import json
 import time
 from pathlib import Path
 
+import matplotlib.pyplot as plt
+
 from pydseams import Trajectory, yoda
+
+plt.switch_backend("Agg")
 
 ROOT = next(
     p
@@ -94,11 +98,6 @@ rows[0], rows[-1]
 # refereed equality above is the point being demonstrated on real data.
 
 # %%
-import matplotlib
-
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-
 fig, ax = plt.subplots(1, 2, figsize=(10, 3.6), constrained_layout=True)
 frames = [r["frame"] for r in rows]
 ax[0].plot(frames, [r["ddc_rings"] for r in rows], label="DDC rings")
