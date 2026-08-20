@@ -1042,11 +1042,13 @@ int main(int argc, char *argv[]) {
   }
 
   std::mutex outMu;
-  int rc = 0;
+  const int outputCount = std::max(0, last - frame + 1);
+  std::vector<std::string> outputLines(static_cast<std::size_t>(outputCount));
+  std::vector<int> outputStatus(static_cast<std::size_t>(outputCount), 0);
   const int typeFilter = loadAll ? 0 : (typeI > 0 ? typeI : 0);
   sinp::forEachLammpsFrame(
       file, frame, last, typeFilter,
-      [&](int /*fr*/, Cloud &cloud) {
+      [&](int fr, Cloud &cloud) {
         if (typeFilter <= 0 && cloud.nop == 0) {
           cloud = load(file, cloud.currentFrame, loadType);
         }
@@ -1054,12 +1056,20 @@ int main(int argc, char *argv[]) {
         const int one = runOne(line, cloud);
         {
           std::lock_guard<std::mutex> lock(outMu);
-          std::cout << line.str();
-          if (one != 0) {
-            rc = one;
+          const int index = fr - frame;
+          if (index >= 0 && index < outputCount) {
+            outputLines[static_cast<std::size_t>(index)] = line.str();
+            outputStatus[static_cast<std::size_t>(index)] = one;
           }
         }
       },
       jobs);
+  int rc = 0;
+  for (std::size_t i = 0; i < outputLines.size(); ++i) {
+    std::cout << outputLines[i];
+    if (rc == 0 && outputStatus[i] != 0) {
+      rc = outputStatus[i];
+    }
+  }
   return rc;
 }

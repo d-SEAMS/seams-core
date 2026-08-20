@@ -424,6 +424,17 @@ if get_option('with_cli')
 
   python3 = find_program('python3', required: true)
   test(
+    'seams_frame_range_preserves_order',
+    python3,
+    args: [
+      '-c',
+      'import re,subprocess,sys; p=subprocess.run([sys.argv[1],"--frame","1","--last","3","--jobs","4","read",sys.argv[2]],capture_output=True,text=True); frames=[int(m.group(1)) for m in re.finditer(r"frame (\\d+)",p.stdout)]; sys.exit(0 if p.returncode==0 and frames==[1,2,3] else 1)',
+      seams_exe.full_path(),
+      meson.project_source_root() / 'input' / 'traj' / 'mW_cubic.lammpstrj',
+    ],
+    depends: [seams_exe],
+    timeout: 60)
+  test(
     'seams_help_mentions_rdf',
     python3,
     args: [
