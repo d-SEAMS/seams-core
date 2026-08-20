@@ -69,18 +69,18 @@ def lonsdaleite(reps_x: int, reps_y: int, reps_z: int):
     ]
     X, Y = a, a * np.sqrt(3.0)
     ortho = []
-    for (hx, hy, hz) in hexagonal:
+    for hx, hy, hz in hexagonal:
         # Hexagonal lattice vectors a1 = (a, 0), a2 = (-a/2, a*sqrt(3)/2)
         x = (hx - 0.5 * hy) * a
         y = hy * (np.sqrt(3.0) / 2.0) * a
-        for (sx, sy) in ((0.0, 0.0), (X / 2.0, Y / 2.0)):
+        for sx, sy in ((0.0, 0.0), (X / 2.0, Y / 2.0)):
             ortho.append(((x + sx) % X, (y + sy) % Y, hz * c))
     box = np.array([reps_x * X, reps_y * Y, reps_z * c])
     pos = []
     for i in range(reps_x):
         for j in range(reps_y):
             for k in range(reps_z):
-                for (ox, oy, oz) in ortho:
+                for ox, oy, oz in ortho:
                     pos.append((i * X + ox, j * Y + oy, k * c + oz))
     return np.asarray(pos) % box, box
 
@@ -193,9 +193,7 @@ def dseams_topo_seeded(pos, box, permissive_k=4, permissive_mutual=False):
     )
     perm_rows = yoda.neighbourListByIndex(
         cloud,
-        yoda.kNearestNeighbourList(
-            cloud, permissive_k, 5.0, 1, permissive_mutual
-        ),
+        yoda.kNearestNeighbourList(cloud, permissive_k, 5.0, 1, permissive_mutual),
     )
     six_s = [r for r in yoda.ringNetwork(strict, 7) if len(r) == 6]
     six_p = [r for r in yoda.ringNetwork(perm_rows, 7) if len(r) == 6]
@@ -297,12 +295,8 @@ def ovito_ptm(pos, box):
     particles.create_property("Position", data=pos)
     pipeline = Pipeline(source=StaticSource(data=data))
     mod = PolyhedralTemplateMatchingModifier(rmsd_cutoff=0.15)
-    mod.structures[
-        PolyhedralTemplateMatchingModifier.Type.CUBIC_DIAMOND
-    ].enabled = True
-    mod.structures[
-        PolyhedralTemplateMatchingModifier.Type.HEX_DIAMOND
-    ].enabled = True
+    mod.structures[PolyhedralTemplateMatchingModifier.Type.CUBIC_DIAMOND].enabled = True
+    mod.structures[PolyhedralTemplateMatchingModifier.Type.HEX_DIAMOND].enabled = True
     pipeline.modifiers.append(mod)
     out = pipeline.compute()
     types = np.asarray(out.particles["Structure Type"])
@@ -359,9 +353,7 @@ def score(labels, truth):
         "acc": float((labels == truth).sum() / n),
         "cubic": float((labels == "cubic").sum() / n),
         "hex": float((labels == "hexagonal").sum() / n),
-        "crystal": float(
-            ((labels == "cubic") | (labels == "hexagonal")).sum() / n
-        ),
+        "crystal": float(((labels == "cubic") | (labels == "hexagonal")).sum() / n),
     }
 
 
@@ -439,7 +431,9 @@ def main():
     systems = [("ic", ic_pos, ic_box, "cubic"), ("ih", ih_pos, ih_box, "hexagonal")]
     for name, pos0, box, truth in systems:
         for sigma in SIGMAS:
-            pos = jitter(pos0, box, sigma, np.random.default_rng(SEED + int(sigma * 1000)))
+            pos = jitter(
+                pos0, box, sigma, np.random.default_rng(SEED + int(sigma * 1000))
+            )
 
             for method, run in (
                 ("dseams-topo", lambda: dseams_topo(pos, box)),
@@ -459,13 +453,11 @@ def main():
                     f"method={method} system={name} sigma={sigma:.2f} "
                     f"acc={s['acc']:.3f} cubic={s['cubic']:.3f} "
                     f"hex={s['hex']:.3f} crystal={s['crystal']:.3f} "
-                    f"ms={dt*1e3:.1f}"
+                    f"ms={dt * 1e3:.1f}"
                 )
 
             feats = freud_features(pos, box)
-            ld = ld_classify(
-                np.column_stack([feats[(4, True)], feats[(6, True)]])
-            )
+            ld = ld_classify(np.column_stack([feats[(4, True)], feats[(6, True)]]))
             s = score(ld, truth)
             print(
                 f"method=freud-ld system={name} sigma={sigma:.2f} "
@@ -477,7 +469,7 @@ def main():
             print(
                 f"method=freud-q6 system={name} sigma={sigma:.2f} "
                 f"acc=nan cubic=nan hex=nan "
-                f"crystal={float(ice.sum())/len(q6):.3f} ms=-1 "
+                f"crystal={float(ice.sum()) / len(q6):.3f} ms=-1 "
                 f"note=ice-vs-not-only"
             )
 
@@ -530,7 +522,7 @@ def main():
     q6 = feats[(6, False)]
     print(
         f"method=freud-q6 system=null sigma=0.00 acc=nan "
-        f"false_crystal={float((q6 > q6_ice_threshold).sum())/len(q6):.3f}"
+        f"false_crystal={float((q6 > q6_ice_threshold).sum()) / len(q6):.3f}"
     )
     if ptm_ok:
         labels = ovito_ptm(null_pos, ic_box)
@@ -547,8 +539,10 @@ def main():
             f"false_crystal={s['crystal']:.3f}"
         )
 
-    print("# availability deepice=no-public-code icecoder=no-public-code "
-          "zeron2024=no-public-code (searched GitHub and package indexes)")
+    print(
+        "# availability deepice=no-public-code icecoder=no-public-code "
+        "zeron2024=no-public-code (searched GitHub and package indexes)"
+    )
     return 0
 
 
