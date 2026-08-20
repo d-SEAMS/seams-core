@@ -233,7 +233,7 @@ data-aria-dark="Switch to auto color mode">
 <p>Turn an ASE <code class="docutils literal notranslate"><span class="pre">Atoms</span></code> into labels. The engine repository does not
 install Python. The full howto is
 <a class="reference external" href="https://d-seams.github.io/PydSEAMSlib/">pydseams ASE</a>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">pip<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;pydseams[ase]&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">pip<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;pydseamslib[ase]&#39;</span>
 </span></pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">ase.io</span>
@@ -248,7 +248,7 @@ install Python. The full howto is
 <p><code class="docutils literal notranslate"><span class="pre">from_ase</span></code> needs an orthorhombic cell. The analysed species is oxygen
 by default (<code class="docutils literal notranslate"><span class="pre">select=&quot;O&quot;</span></code>). <code class="docutils literal notranslate"><span class="pre">bonded</span></code> is <code class="docutils literal notranslate"><span class="pre">auto</span></code>, <code class="docutils literal notranslate"><span class="pre">hbond</span></code>, or <code class="docutils literal notranslate"><span class="pre">cutoff</span></code>.
 <code class="docutils literal notranslate"><span class="pre">to_ase</span></code> writes <code class="docutils literal notranslate"><span class="pre">arrays['ice_type']</span></code> after CHILL, and <code class="docutils literal notranslate"><span class="pre">hc</span></code> / <code class="docutils literal notranslate"><span class="pre">ddc</span></code>
-after <code class="docutils literal notranslate"><span class="pre">cages()</span></code>. Optional extra <code class="docutils literal notranslate"><span class="pre">pydseams[solvis]</span></code> builds a solvis
+after <code class="docutils literal notranslate"><span class="pre">cages()</span></code>. Optional extra <code class="docutils literal notranslate"><span class="pre">pydseamslib[solvis]</span></code> builds a solvis
 <code class="docutils literal notranslate"><span class="pre">System</span></code> (<code class="docutils literal notranslate"><span class="pre">frame.to_solvis()</span></code>).</p>
 </section>
 

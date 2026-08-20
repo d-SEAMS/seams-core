@@ -9,7 +9,7 @@ viewer for this release is solvis (PyVista) through
 
 .. code:: bash
 
-    pip install 'pydseams[solvis]'
+    pip install 'pydseamslib[solvis]'
 
 .. code:: python
 
