@@ -222,6 +222,8 @@ def main():
 
     manifest = {
         "conditions": conditions,
+        "source_manifest": load_json(out_dir / "source-manifest.json"),
+        "workflow_parity": load_json(out_dir / "workflow-parity.json"),
         "identity_gate": "Fail:              0"
         in read(out_dir / "tip-test.log"),
         "tip": {
