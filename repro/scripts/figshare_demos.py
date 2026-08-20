@@ -61,30 +61,6 @@ FILES = {
     },
 }
 
-def example_lua_root():
-    """Directory that contains example_lua/ (yodaStruct, not this tree)."""
-    marker = pathlib.Path("example_lua/chillPlus/iceType/vars.lua")
-    here = pathlib.Path.cwd()
-    env = os.environ.get("YODASTRUCT_ROOT")
-    candidates = []
-    if env:
-        candidates.append(pathlib.Path(env))
-    candidates.extend(
-        [
-            here,
-            here.parent / "yodaStruct",
-            here.parent / "seams-base-repro",
-        ]
-    )
-    for root in candidates:
-        if (root / marker).is_file():
-            return root
-    raise FileNotFoundError(
-        "example_lua not found; set YODASTRUCT_ROOT or clone "
-        "https://github.com/d-SEAMS/yodaStruct next to this tree"
-    )
-
-
 # Each demo pairs a figshare trajectory with the 2.x Lua library
 # (require("dseams")). frame="last" is the crystallized end of the
 # nucleation run.
