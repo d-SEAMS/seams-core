@@ -38,6 +38,23 @@ Cloud uniformZCloud(const std::vector<double> &box, int n, int type) {
   return cloud;
 }
 
+Cloud uniformAxisCloud(const std::vector<double> &box, int n, int axis,
+                       int type) {
+  Cloud cloud;
+  cloud.box = box;
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  const double span = box[static_cast<std::size_t>(axis)];
+  for (int i = 0; i < n; ++i) {
+    const double coordinate =
+        (static_cast<double>(i) + 0.5) * span / static_cast<double>(n);
+    double xyz[3] = {1.0, 1.0, 1.0};
+    xyz[axis] = coordinate;
+    addAtom(cloud, i + 1, type, xyz[0], xyz[1], xyz[2]);
+  }
+  return cloud;
+}
+
 double integrateRho(const site::DensityZ &d, double area, double dz) {
   double acc = 0.0;
   for (double rho : d.rho) {
@@ -78,6 +95,22 @@ TEST_CASE("tilted box uses det H face area not bound spans", "[density]") {
   REQUIRE_THAT(integrateRho(d, area, dz), Catch::Matchers::WithinAbs(10.0, 1e-9));
   REQUIRE_THAT(integrateRho(d, boundArea, dz),
                Catch::Matchers::WithinAbs(10.0 * boundArea / area, 1e-9));
+}
+
+TEST_CASE("tilted box profiles integrate on every Cartesian axis", "[density]") {
+  const std::vector<double> box = {15.0, 8.660254037844386, 10.0,
+                                   5.0, 0.0, 0.0};
+  const double volume = nneigh::dumpVolume(uniformZCloud(box, 1, 1));
+  for (int axis = 0; axis < 3; ++axis) {
+    auto cloud = uniformAxisCloud(box, 12, axis, 1);
+    double lengths[3] = {0.0, 0.0, 0.0};
+    nneigh::dumpCellLengths(cloud.box, cloud.boxLow, lengths);
+    const double area = volume / lengths[axis];
+    const double dz = box[static_cast<std::size_t>(axis)] / 24.0;
+    const auto density = site::densityZ(cloud, 0, 24, axis);
+    REQUIRE_THAT(integrateRho(density, area, dz),
+                 Catch::Matchers::WithinAbs(12.0, 1e-9));
+  }
 }
 
 TEST_CASE("type 0 is every atom and type I filters", "[density]") {
