@@ -41,10 +41,7 @@ for f in \
 do
   [ -f "$f" ] && cp -a "$f" "$DST/"
 done
-(
-  cd "$DST"
-  find . -type f ! -name MANIFEST ! -name MANIFEST.tmp |
-    sed 's|^\./||' | sort > MANIFEST.tmp
-  mv MANIFEST.tmp MANIFEST
-)
+MANIFEST_TMP=$(mktemp /tmp/dseams-manifest.XXXXXX)
+(cd "$DST" && find . -type f ! -name MANIFEST | sed 's|^\./||' | sort) > "$MANIFEST_TMP"
+mv "$MANIFEST_TMP" "$DST/MANIFEST"
 echo "staged $DST ($(wc -l < "$DST/MANIFEST") files)"
