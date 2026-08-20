@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 import unittest
+from unittest import mock
 
 
 SCRIPT = Path(__file__).with_name("workflow_parity.py")
@@ -16,6 +17,25 @@ SPEC.loader.exec_module(workflow_parity)
 
 
 class CliParserTests(unittest.TestCase):
+    def test_cage_collection_uses_short_k_option(self) -> None:
+        def fake_command(_binary, command, _path, *_options):
+            if command == "read":
+                return {"read.nop": 1}
+            return {}
+
+        with mock.patch.object(
+            workflow_parity, "_cli_command", side_effect=fake_command
+        ) as command:
+            workflow_parity.collect_cli(
+                Path("seams"), Path("water"), Path("ice"), Path("ions")
+            )
+
+        cage_args = next(
+            call.args for call in command.call_args_list if call.args[1] == "cages"
+        )
+        self.assertIn("-k", cage_args)
+        self.assertNotIn("--k", cage_args)
+
     def test_scalar_commands(self) -> None:
         cases = {
             "read": ("nop 250 frame 1 box 40 40 180.203", {"read.nop": 250}),
