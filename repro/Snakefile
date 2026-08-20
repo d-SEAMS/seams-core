@@ -12,12 +12,14 @@
 # `repro/elja_submit.sh prep`, since compute nodes carry neither git nor
 # network access.
 
+import json
 import os
 import shutil
 
 configfile: "repro/config.yaml"
 
 R = "repro/results"
+LOCK = "repro/ecosystem-lock.json"
 BASE_TREE = config["base_tree"]
 # Build directories default to the working tree but move to node-local
 # storage (SEAMS_BUILD_ROOT) on clusters whose NFS clocks skew against
@@ -25,18 +27,20 @@ BASE_TREE = config["base_tree"]
 BUILD = os.path.abspath(os.environ.get("SEAMS_BUILD_ROOT", "."))
 TIP_BUILD = os.path.join(BUILD, "build-repro")
 BASE_BUILD = os.path.join(BUILD, "build-base")
-def _yoda_root():
-    env = os.environ.get("YODASTRUCT_ROOT")
-    if env:
-        return os.path.abspath(env)
-    for cand in (os.path.join("..", "yodaStruct"), os.path.join("..", "yodaStruct-2.6")):
-        if os.path.isdir(os.path.join(cand, "lua")):
-            return os.path.abspath(cand)
-    return os.path.abspath(os.path.join("..", "yodaStruct"))
-
-
-YODA_ROOT = _yoda_root()
+SOURCE_ROOT = os.path.abspath(
+    os.environ.get("DSEAMS_SOURCE_ROOT", os.path.join("..", "dseams-repro-sources"))
+)
+with open(LOCK, encoding="utf-8") as lock_file:
+    SOURCE_LOCK = json.load(lock_file)
+PYTHON_ROOT = os.path.join(
+    SOURCE_ROOT, SOURCE_LOCK["components"]["pydseamslib"]["directory"]
+)
+YODA_ROOT = os.path.join(
+    SOURCE_ROOT, SOURCE_LOCK["components"]["yodastruct"]["directory"]
+)
+PYTHON_SITE = os.path.join(BUILD, "python-site")
 YODA_BUILD = os.path.join(BUILD, "build-yoda")
+LUA_EXE = shutil.which("lua") or "lua"
 
 
 def hq(cpus):
@@ -82,7 +86,22 @@ rule conditions:
         """
 
 
+rule source_manifest:
+    input:
+        lock=LOCK,
+    output:
+        R + "/source-manifest.json",
+    params:
+        root=SOURCE_ROOT,
+        core=os.path.abspath("."),
+    shell:
+        "python repro/scripts/ecosystem_sources.py --lock {input.lock} manifest "
+        "--root {params.root} --core {params.core} --output {output}"
+
+
 rule setup_tip:
+    input:
+        R + "/source-manifest.json",
     output:
         touch(R + "/tip-setup.done"),
     params:
@@ -119,13 +138,19 @@ rule identity_gate:
 
 
 rule install_python:
-    # Bindings are pydseamslib on PyPI, not this tree.
     input:
-        R + "/tip-test.log",
+        gate=R + "/tip-test.log",
+        source=R + "/source-manifest.json",
     output:
         touch(R + "/py-install.done"),
+    params:
+        source=PYTHON_ROOT,
+        site=PYTHON_SITE,
     shell:
-        "python -c 'import pydseams as ds; assert ds.__version__ == \"2.6.0\", ds.__version__'"
+        "python -m pip install --no-build-isolation --no-deps --upgrade "
+        "--target {params.site} {params.source} && "
+        "PYTHONPATH={params.site}:${{PYTHONPATH:-}} "
+        "python -c 'import pydseams; print(pydseams.__file__)'"
 
 
 rule build_base:
@@ -350,9 +375,11 @@ rule ql_compare_python:
         R + "/ql-python.txt",
     params:
         hq=lambda wc: hq(1),
+        site=PYTHON_SITE,
     shell:
         "{params.hq} bash -c "
         "'LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH "
+        "PYTHONPATH={params.site}:${{PYTHONPATH:-}} "
         "python scripts/compare_ql_literature.py > {output}'"
 
 
@@ -367,36 +394,69 @@ rule figshare_fetch:
 
 rule build_yoda:
     # yodaStruct is require("dseams"), not an in-tree seams-core binary.
-    # Point its seams-core wrap at this tip so the Lua module links the
-    # same engine the benches just gated.
+    # The source manifest verifies that its wrap points at this engine.
     input:
-        R + "/tip-test.log",
+        gate=R + "/tip-test.log",
+        source=R + "/source-manifest.json",
     output:
         touch(R + "/yoda-build.done"),
     params:
         hq=lambda wc: hq(8),
         yoda=YODA_ROOT,
         bdir=YODA_BUILD,
-        tip=os.path.abspath("."),
     shell:
         r"""
-        test -d {params.yoda}/lua || {{ echo "YODASTRUCT_ROOT missing: {params.yoda}" >&2; exit 1; }}
-        mkdir -p {params.yoda}/subprojects
-        if [ -e {params.yoda}/subprojects/seams-core ] && [ ! -L {params.yoda}/subprojects/seams-core ]; then
-          rm -rf {params.yoda}/subprojects/seams-core
-        fi
-        ln -sfn {params.tip} {params.yoda}/subprojects/seams-core
+        test -d {params.yoda}/lua || {{ echo "locked yodaStruct source missing: {params.yoda}" >&2; exit 1; }}
         meson setup {params.bdir} {params.yoda} --buildtype=release --wrap-mode=nodownload \
           > repro/results/yoda-setup.log 2>&1
         {params.hq} meson compile -C {params.bdir}
         """
 
 
+rule yoda_identity_gate:
+    input:
+        R + "/yoda-build.done",
+    output:
+        R + "/yoda-test.log",
+    params:
+        hq=lambda wc: hq(8),
+        bdir=YODA_BUILD,
+    shell:
+        "{params.hq} bash -c 'meson test -C {params.bdir} "
+        "--print-errorlogs > {output} 2>&1'"
+
+
+rule workflow_parity:
+    input:
+        gate=R + "/tip-test.log",
+        python=R + "/py-install.done",
+        yoda=R + "/yoda-test.log",
+        source=R + "/source-manifest.json",
+        water="input/traj/exampleTraj.lammpstrj",
+        ice="input/traj/mW_cubic.lammpstrj",
+        ions="repro/fixtures/tiny-ions.lammpstrj",
+    output:
+        R + "/workflow-parity.json",
+    params:
+        cli=os.path.join(TIP_BUILD, "seams"),
+        lua=LUA_EXE,
+        yoda=YODA_ROOT,
+        yoda_build=YODA_BUILD,
+        site=PYTHON_SITE,
+    shell:
+        "PYTHONPATH={params.site}:${{PYTHONPATH:-}} "
+        "python repro/scripts/workflow_parity.py "
+        "--seams {params.cli} --lua {params.lua} "
+        "--lua-source {params.yoda} --lua-build {params.yoda_build} "
+        "--water {input.water} --ice {input.ice} --ions {input.ions} "
+        "--output {output}"
+
+
 rule figshare_demos:
     # The five 1.0 figshare deposits through require("dseams"); nonzero
     # exit on any failed demo
     input:
-        yoda=R + "/yoda-build.done",
+        yoda=R + "/yoda-test.log",
         traj=expand(FIGSHARE_DIR + "/{f}", f=FIGSHARE_FILES),
     output:
         R + "/figshare-demos/figshare-demos.json",
@@ -443,10 +503,12 @@ rule figshare_notebook:
         nb="(?!02_nucleation_cages).+",
     params:
         hq=lambda wc: hq(2),
+        site=PYTHON_SITE,
     shell:
         "{params.hq} bash -c "
         "'LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH "
-        "OMP_NUM_THREADS=2 repro/scripts/execute_notebook.sh {input.nb} {output}'"
+        "PYTHONPATH={params.site}:${{PYTHONPATH:-}} OMP_NUM_THREADS=2 "
+        "repro/scripts/execute_notebook.sh {input.nb} {output}'"
 
 
 rule figshare_nucleation_notebook:
@@ -458,15 +520,19 @@ rule figshare_nucleation_notebook:
         incremental=R + "/figshare-incremental.json",
     params:
         hq=lambda wc: hq(2),
+        site=PYTHON_SITE,
     shell:
         "{params.hq} bash -c "
         "'LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH "
-        "OMP_NUM_THREADS=2 repro/scripts/execute_notebook.sh {input.nb} {output.ipynb}'"
+        "PYTHONPATH={params.site}:${{PYTHONPATH:-}} OMP_NUM_THREADS=2 "
+        "repro/scripts/execute_notebook.sh {input.nb} {output.ipynb}'"
 
 
 rule aggregate:
     input:
         conditions=R + "/conditions.txt",
+        source=R + "/source-manifest.json",
+        parity=R + "/workflow-parity.json",
         gate=R + "/tip-test.log",
         tip_scaling=R + "/tip-scaling.txt",
         base_scaling=R + "/base-scaling.txt",
