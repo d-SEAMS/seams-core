@@ -435,6 +435,17 @@ if get_option('with_cli')
     depends: [seams_exe],
     timeout: 60)
   test(
+    'seams_single_frame_format_range_is_bounded',
+    python3,
+    args: [
+      '-c',
+      'import re,subprocess,sys; p=subprocess.run([sys.argv[1],"--frame","1","--last","2","read",sys.argv[2]],capture_output=True,text=True); frames=[int(m.group(1)) for m in re.finditer(r"frame (\\d+)",p.stdout)]; sys.exit(0 if p.returncode==0 and frames==[1] else 1)',
+      seams_exe.full_path(),
+      meson.project_source_root() / 'input' / 'xyz' / 'configuration.xyz',
+    ],
+    depends: [seams_exe],
+    timeout: 60)
+  test(
     'seams_json_output_is_versioned',
     python3,
     args: [

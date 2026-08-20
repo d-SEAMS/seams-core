@@ -492,11 +492,16 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
         continue;
       }
 
+      const std::size_t coordinateOffset = tokens.size() >= 4 ? 1 : 0;
+      if (tokens.size() < coordinateOffset + 3) {
+        continue;
+      }
+
       // Put logic for checking atom type here later
       iPoint.type = 1; // Oxygen type; hard-coded!
-      iPoint.x = std::stod(tokens[1]);
-      iPoint.y = std::stod(tokens[2]);
-      iPoint.z = std::stod(tokens[3]);
+      iPoint.x = std::stod(tokens[coordinateOffset]);
+      iPoint.y = std::stod(tokens[coordinateOffset + 1]);
+      iPoint.z = std::stod(tokens[coordinateOffset + 2]);
       if (yCloud.pts.empty()) {
         xLo = xHi = iPoint.x;
         yLo = yHi = iPoint.y;
@@ -528,6 +533,7 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
 
   yCloud.box = {xHi - xLo, yHi - yLo, zHi - zLo};
   yCloud.boxLow = {xLo, yLo, zLo};
+  yCloud.currentFrame = 1;
 
   if (yCloud.pts.size() != yCloud.nop) {
     std::cout << "Atoms didn't get filled in properly.\n";

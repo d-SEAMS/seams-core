@@ -29,6 +29,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 using namespace Argum;
@@ -101,6 +102,45 @@ std::string_view trimView(std::string_view s) {
   }
   const auto last = s.find_last_not_of(" \t");
   return s.substr(first, last - first + 1);
+}
+
+template <typename Fn>
+bool forEachInputFrame(const std::string &path, int first, int last,
+                       int typeFilter, int nThreads, Fn &&fn) {
+  const auto dot = path.find_last_of('.');
+  const std::string ext = dot == std::string::npos ? "" : path.substr(dot + 1);
+  if (ext == "lammpstrj" || ext == "dump" || ext == "trj") {
+    sinp::forEachLammpsFrame(path, first, last, typeFilter,
+                             std::forward<Fn>(fn), nThreads);
+    return true;
+  }
+
+  if (ext == "xyz") {
+    if (first <= 1 && (last <= 0 || last >= 1)) {
+      Cloud cloud = load(path, 1, typeFilter);
+      fn(1, cloud);
+    }
+    return true;
+  }
+
+  if (ext == "con" || ext == "pdb" || ext == "gro" || ext == "dcd") {
+    const int stop = last <= 0 ? first : last;
+    for (int frame = std::max(1, first); frame <= stop; ++frame) {
+      Cloud cloud = load(path, frame, typeFilter);
+      if (cloud.nop == 0 && frame != std::max(1, first)) {
+        break;
+      }
+      fn(frame, cloud);
+      if (cloud.nop == 0) {
+        break;
+      }
+    }
+    return true;
+  }
+
+  sinp::forEachLammpsFrame(path, first, last, typeFilter,
+                           std::forward<Fn>(fn), nThreads);
+  return true;
 }
 
 std::string jsonEscape(std::string_view value) {
@@ -1120,9 +1160,7 @@ int main(int argc, char *argv[]) {
   std::vector<int> outputStatus(static_cast<std::size_t>(outputCount), 0);
   std::vector<bool> outputSeen(static_cast<std::size_t>(outputCount), false);
   const int typeFilter = loadAll ? 0 : (typeI > 0 ? typeI : 0);
-  sinp::forEachLammpsFrame(
-      file, frame, last, typeFilter,
-      [&](int fr, Cloud &cloud) {
+  auto processFrame = [&](int fr, Cloud &cloud) {
         if (typeFilter <= 0 && cloud.nop == 0) {
           cloud = load(file, cloud.currentFrame, loadType);
         }
@@ -1137,8 +1175,12 @@ int main(int argc, char *argv[]) {
             outputSeen[static_cast<std::size_t>(index)] = true;
           }
         }
-      },
-      jobs);
+      };
+  if (!forEachInputFrame(file, frame, last, typeFilter, jobs, processFrame)) {
+    std::cerr << colorizer.error("frame ranges are unsupported for this input format")
+              << "\n";
+    return 2;
+  }
   int rc = 0;
   for (std::size_t i = 0; i < outputLines.size(); ++i) {
     if (!outputSeen[i]) {
