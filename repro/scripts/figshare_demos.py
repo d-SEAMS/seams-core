@@ -18,6 +18,7 @@ The Python-bindings demonstrations live as percent-format notebooks
 under repro/notebooks/; jupytext converts them and papermill executes
 them via the figshare_notebook Snakemake rule.
 """
+
 import hashlib
 import json
 import os
@@ -81,6 +82,7 @@ def find_lua():
         if path:
             return path
     raise FileNotFoundError("lua 5.3/5.4 not on PATH; add lua to the repro env")
+
 
 def md5sum(path):
     h = hashlib.md5()
