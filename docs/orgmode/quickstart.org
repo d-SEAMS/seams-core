@@ -88,7 +88,7 @@ no complete HC or DDC: cage membership is not the CHILL+ star.
 
 The engine CLI is not a scripting host. Install
 [[https://github.com/d-SEAMS/PydSEAMSlib][pydseams]] (~pip install
-pydseams~, compiled module ~yoda~) or
+pydseamslib~, compiled module ~yoda~) or
 [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
 (~require("dseams")~). ~import pydseamslib~ is an alias of ~pydseams~.
 
