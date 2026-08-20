@@ -1,0 +1,102 @@
+name: Ecosystem parity
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/ecosystem_parity.yml"
+      - "meson.build"
+      - "meson_options.txt"
+      - "pixi.lock"
+      - "pixi.toml"
+      - "repro/**"
+      - "src/**"
+      - "subprojects/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/ecosystem_parity.yml"
+      - "meson.build"
+      - "meson_options.txt"
+      - "pixi.lock"
+      - "pixi.toml"
+      - "repro/**"
+      - "src/**"
+      - "subprojects/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: prefix-dev/setup-pixi@19eac09b398e3d0c747adc7921926a6d802df4da # v0.8.8
+        with:
+          environments: repro
+
+      - name: Check parity tooling
+        run: |
+          pixi run -e repro -- python repro/scripts/test_ecosystem_sources.py
+          pixi run -e repro -- python repro/scripts/test_workflow_parity.py
+
+      - name: Materialize one source graph
+        run: |
+          pixi run -e repro -- python repro/scripts/ecosystem_sources.py fetch \
+            --root "$RUNNER_TEMP/dseams-sources"
+          pixi run -e repro -- python repro/scripts/ecosystem_sources.py wire \
+            --root "$RUNNER_TEMP/dseams-sources" --core "$GITHUB_WORKSPACE"
+          pixi run -e repro -- meson subprojects download
+
+      - name: Build and test the engine
+        run: |
+          pixi run -e repro -- meson setup build-parity --buildtype=release \
+            -Dwith_python=false -Dwith_tests=true --wrap-mode=nodownload
+          pixi run -e repro -- meson compile -C build-parity
+          pixi run -e repro -- meson test -C build-parity --print-errorlogs
+
+      - name: Build the Python binding from source
+        run: |
+          pixi run -e repro -- python -m pip install --no-build-isolation \
+            --no-deps --target "$RUNNER_TEMP/dseams-python" \
+            "$RUNNER_TEMP/dseams-sources/PydSEAMSlib"
+          PYTHONPATH="$RUNNER_TEMP/dseams-python" pixi run -e repro -- \
+            python -c 'import pydseams; print(pydseams.__version__)'
+
+      - name: Build and test the Lua binding from source
+        run: |
+          pixi run -e repro -- meson setup "$RUNNER_TEMP/build-yoda" \
+            "$RUNNER_TEMP/dseams-sources/yodaStruct" --buildtype=release \
+            --wrap-mode=nodownload
+          pixi run -e repro -- meson compile -C "$RUNNER_TEMP/build-yoda"
+          pixi run -e repro -- meson test -C "$RUNNER_TEMP/build-yoda" \
+            --print-errorlogs
+
+      - name: Compare stable workflows
+        run: |
+          PYTHONPATH="$RUNNER_TEMP/dseams-python" pixi run -e repro -- \
+            python repro/scripts/workflow_parity.py \
+            --seams build-parity/src/seams \
+            --lua "$GITHUB_WORKSPACE/.pixi/envs/repro/bin/lua" \
+            --lua-source "$RUNNER_TEMP/dseams-sources/yodaStruct" \
+            --lua-build "$RUNNER_TEMP/build-yoda" \
+            --water input/traj/exampleTraj.lammpstrj \
+            --ice input/traj/mW_cubic.lammpstrj \
+            --ions repro/fixtures/tiny-ions.lammpstrj \
+            --output repro/results/workflow-parity.json
+          pixi run -e repro -- python repro/scripts/ecosystem_sources.py manifest \
+            --root "$RUNNER_TEMP/dseams-sources" --core "$GITHUB_WORKSPACE" \
+            --output repro/results/source-manifest.json
+
+      - name: Upload parity manifests
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ecosystem-parity
+          path: |
+            repro/results/workflow-parity.json
+            repro/results/source-manifest.json
+          if-no-files-found: warn
