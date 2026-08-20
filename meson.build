@@ -457,6 +457,17 @@ if get_option('with_cli')
     depends: [seams_exe],
     timeout: 60)
   test(
+    'seams_hbonds_reports_selected_atoms',
+    python3,
+    args: [
+      '-c',
+      'import json,subprocess,sys; p=subprocess.run([sys.argv[1],"--format","json","hbonds",sys.argv[2],"--type","2","--htype","1"],capture_output=True,text=True); r=json.loads(p.stdout); sys.exit(0 if p.returncode==0 and r["text"].startswith("nop 250 hbonds ") else 1)',
+      seams_exe.full_path(),
+      meson.project_source_root() / 'input' / 'traj' / 'exampleTraj.lammpstrj',
+    ],
+    depends: [seams_exe],
+    timeout: 60)
+  test(
     'seams_json_range_is_ordered',
     python3,
     args: [

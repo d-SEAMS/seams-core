@@ -306,6 +306,23 @@ TEST_CASE("getCorrelPlus uses CHILL+ algorithm", "[bop]") {
   }
 }
 
+TEST_CASE("bond classification replaces the active rule state", "[bop]") {
+  auto cloud = makeTetraCloud();
+  auto nList = nneigh::neighListO(3.0, cloud, 1);
+
+  chill::getCorrel(cloud, nList, false);
+  std::vector<std::size_t> chillSizes;
+  chillSizes.reserve(cloud.pts.size());
+  for (const auto &point : cloud.pts) {
+    chillSizes.push_back(point.c_ij.size());
+  }
+
+  chill::getCorrelPlus(cloud, nList, false);
+  for (std::size_t i = 0; i < cloud.pts.size(); ++i) {
+    REQUIRE(cloud.pts[i].c_ij.size() == chillSizes[i]);
+  }
+}
+
 TEST_CASE("printIceType writes super chill classification", "[bop]") {
   auto cloud = makeTetraCloud();
   auto nList = nneigh::neighListO(3.0, cloud, 1);
