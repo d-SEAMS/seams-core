@@ -40,8 +40,10 @@ jobs:
 
       - name: Check parity tooling
         run: |
+          pixi run -e repro -- python repro/scripts/test_aggregate.py
           pixi run -e repro -- python repro/scripts/test_ecosystem_sources.py
           pixi run -e repro -- python repro/scripts/test_workflow_parity.py
+          pixi run -e repro -- snakemake -s repro/Snakefile --dry-run --cores 1
 
       - name: Materialize one source graph
         run: |
