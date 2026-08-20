@@ -9,7 +9,7 @@
     "pydseamslib": {
       "directory": "PydSEAMSlib",
       "repository": "https://github.com/d-SEAMS/PydSEAMSlib.git",
-      "revision": "d0c4026d2234433c4ba5154e5581ff197ff18f7b"
+      "revision": "b9f8738701ba9ada3e8d9bb47910d3816c22c543"
     },
     "yodastruct": {
       "directory": "yodaStruct",
