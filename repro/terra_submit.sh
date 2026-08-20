@@ -12,29 +12,35 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 ROOT=$(dirname "$SCRIPT_DIR")
 BASE_SHA=${BASE_SHA:-$(grep '^base_sha' "$SCRIPT_DIR/config.yaml" | sed 's/.*"\(.*\)".*/\1/')}
 BASE_TREE=$ROOT/../seams-base-repro
+SOURCE_ROOT=${DSEAMS_SOURCE_ROOT:-$ROOT/../dseams-repro-sources}
 HQ_VERSION=${HQ_VERSION:-v0.19.0}
 export PATH=$HOME/.pixi/bin:$ROOT/repro/bin:$PATH
 export SLURM_CONF=${SLURM_CONF:-/etc/slurm-llnl/slurm.conf}
+export DSEAMS_SOURCE_ROOT=$SOURCE_ROOT
 
 case "${1:-}" in
 prep)
   cd "$ROOT"
   pixi install -e repro
-  pixi run -e repro -- meson subprojects download || true
+  pixi run -e repro -- python repro/scripts/ecosystem_sources.py fetch \
+    --root "$SOURCE_ROOT"
+  pixi run -e repro -- python repro/scripts/ecosystem_sources.py wire \
+    --root "$SOURCE_ROOT" --core "$ROOT"
+  pixi run -e repro -- meson subprojects download
   git rev-parse HEAD > .tip_sha
   if [ ! -d "$BASE_TREE" ]; then
     git worktree add --detach "$BASE_TREE" "$BASE_SHA"
   fi
   (cd "$BASE_TREE" &&
    pixi run -e repro --manifest-path "$ROOT/pixi.toml" -- \
-     meson subprojects download || true)
+     meson subprojects download)
   pixi run -e repro -- python repro/scripts/figshare_demos.py fetch repro/figshare
   if ! command -v hq > /dev/null; then
     mkdir -p repro/bin
     curl -sL "https://github.com/It4innovations/hyperqueue/releases/download/${HQ_VERSION}/hq-${HQ_VERSION}-linux-x64.tar.gz" |
       tar -xz -C repro/bin
   fi
-  echo "prep done: tip $(cat .tip_sha), base tree $BASE_TREE, hq $(hq --version)"
+  echo "prep done: tip $(cat .tip_sha), sources $SOURCE_ROOT, base tree $BASE_TREE, hq $(hq --version)"
   ;;
 submit)
   cd "$ROOT"

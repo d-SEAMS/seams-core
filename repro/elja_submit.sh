@@ -16,46 +16,36 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 ROOT=$(dirname "$SCRIPT_DIR")
 BASE_SHA=${BASE_SHA:-$(grep '^base_sha' "$SCRIPT_DIR/config.yaml" | sed 's/.*"\(.*\)".*/\1/')}
 BASE_TREE=$ROOT/../seams-base-repro
+SOURCE_ROOT=${DSEAMS_SOURCE_ROOT:-$ROOT/../dseams-repro-sources}
 HQ_VERSION=${HQ_VERSION:-v0.19.0}
 export PATH=$HOME/.pixi/bin:$ROOT/repro/bin:$PATH
+export DSEAMS_SOURCE_ROOT=$SOURCE_ROOT
 
 case "${1:-}" in
 prep)
   cd "$ROOT"
   pixi install -e repro
-  pixi run -e repro -- python -m pip install --no-deps pydseamslib==2.6.0
-  pixi run -e repro -- meson subprojects download || true
+  pixi run -e repro -- python repro/scripts/ecosystem_sources.py fetch \
+    --root "$SOURCE_ROOT"
+  pixi run -e repro -- python repro/scripts/ecosystem_sources.py wire \
+    --root "$SOURCE_ROOT" --core "$ROOT"
+  pixi run -e repro -- meson subprojects download
   git rev-parse HEAD > .tip_sha
   if [ ! -d "$BASE_TREE" ]; then
     git worktree add --detach "$BASE_TREE" "$BASE_SHA"
   fi
   (cd "$BASE_TREE" &&
    pixi run -e repro --manifest-path "$ROOT/pixi.toml" -- \
-     meson subprojects download || true)
+     meson subprojects download)
   # Compute nodes are offline; the figshare deposits download here
   pixi run -e repro -- python repro/scripts/figshare_demos.py fetch repro/figshare
-  # Lua module lives in yodaStruct 2.x. A sibling named yodaStruct may
-  # be a symlink to the v1 baseline tree (example_lua only).
-  YODA=${YODASTRUCT_ROOT:-$ROOT/../yodaStruct}
-  if [ ! -d "$YODA/lua" ]; then
-    YODA=$ROOT/../yodaStruct-2.6
-    if [ ! -d "$YODA/lua" ]; then
-      git clone --depth 1 --branch v2.6.0 https://github.com/d-SEAMS/yodaStruct.git "$YODA"
-    fi
-  fi
-  mkdir -p "$YODA/subprojects"
-  if [ -e "$YODA/subprojects/seams-core" ] && [ ! -L "$YODA/subprojects/seams-core" ]; then
-    rm -rf "$YODA/subprojects/seams-core"
-  fi
-  ln -sfn "$ROOT" "$YODA/subprojects/seams-core"
-  export YODASTRUCT_ROOT=$YODA
   # HyperQueue is a single static binary
   if ! command -v hq > /dev/null; then
     mkdir -p repro/bin
     curl -sL "https://github.com/It4innovations/hyperqueue/releases/download/${HQ_VERSION}/hq-${HQ_VERSION}-linux-x64.tar.gz" |
       tar -xz -C repro/bin
   fi
-  echo "prep done: tip $(cat .tip_sha), base tree $BASE_TREE, hq $(hq --version)"
+  echo "prep done: tip $(cat .tip_sha), sources $SOURCE_ROOT, base tree $BASE_TREE, hq $(hq --version)"
   ;;
 submit)
   : "${ELJA_ACCOUNT:=chem-ui}"
@@ -68,11 +58,6 @@ submit)
 run)
   cd "$ROOT"
   mkdir -p repro/results
-  if [ -d "$ROOT/../yodaStruct/lua" ]; then
-    export YODASTRUCT_ROOT=$ROOT/../yodaStruct
-  elif [ -d "$ROOT/../yodaStruct-2.6/lua" ]; then
-    export YODASTRUCT_ROOT=$ROOT/../yodaStruct-2.6
-  fi
   # One HyperQueue server and one worker own the allocation; Snakemake
   # submits every heavy rule through it
   export HQ_SERVER_DIR=$ROOT/repro/results/hq-server
