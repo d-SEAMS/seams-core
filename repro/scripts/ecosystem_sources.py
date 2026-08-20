@@ -71,8 +71,11 @@ def _component_path(lock: dict[str, Any], root: Path, name: str) -> Path:
     return root / lock["components"][name]["directory"]
 
 
-def _assert_clean_repository(path: Path) -> None:
-    status = _git("status", "--porcelain", cwd=path)
+def _assert_clean_repository(path: Path, *, include_untracked: bool = True) -> None:
+    args = ["status", "--porcelain"]
+    if not include_untracked:
+        args.append("--untracked-files=no")
+    status = _git(*args, cwd=path)
     if status:
         raise RuntimeError(f"locked source has local changes: {path}")
 
@@ -150,7 +153,7 @@ def source_manifest(lock: dict[str, Any], root: Path, core: Path) -> dict[str, A
     components: dict[str, dict[str, str]] = {}
     for name, locked in sorted(lock["components"].items()):
         source = _component_path(lock, root, name)
-        _assert_clean_repository(source)
+        _assert_clean_repository(source, include_untracked=False)
         actual = _git("rev-parse", "HEAD", cwd=source)
         if actual != locked["revision"]:
             raise RuntimeError(
