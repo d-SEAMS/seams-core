@@ -56,7 +56,7 @@ Yes: ~--frame N --last M --jobs J~ via ~forEachLammpsFrame~.
 
 * How do I view a classified dump?
 
-solvis, through ~pydseams[solvis]~ (~frame.to_solvis()~). That is
+solvis, through ~pydseamslib[solvis]~ (~frame.to_solvis()~). That is
 the viewer for this release. See
 [[file:solvis.org][View a classified frame]]. OVITO still opens the
 LAMMPS text the engine writes; it is not the documented path.

@@ -6,7 +6,7 @@ viewer for this release is solvis (PyVista) through
 [[https://d-seams.github.io/PydSEAMSlib/][pydseams]], not OVITO.
 
 #+begin_src bash
-pip install 'pydseams[solvis]'
+pip install 'pydseamslib[solvis]'
 #+end_src
 
 #+begin_src python

@@ -6,7 +6,7 @@ install Python. The full howto is
 [[https://d-seams.github.io/PydSEAMSlib/][pydseams ASE]].
 
 #+begin_src bash
-pip install 'pydseams[ase]'
+pip install 'pydseamslib[ase]'
 #+end_src
 
 #+begin_src python
@@ -22,5 +22,5 @@ labelled = frame.to_ase()
 ~from_ase~ needs an orthorhombic cell. The analysed species is oxygen
 by default (~select="O"~). ~bonded~ is ~auto~, ~hbond~, or ~cutoff~.
 ~to_ase~ writes ~arrays['ice_type']~ after CHILL, and ~hc~ / ~ddc~
-after ~cages()~. Optional extra ~pydseams[solvis]~ builds a solvis
+after ~cages()~. Optional extra ~pydseamslib[solvis]~ builds a solvis
 ~System~ (~frame.to_solvis()~).
