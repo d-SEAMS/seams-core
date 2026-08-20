@@ -103,6 +103,53 @@ std::string_view trimView(std::string_view s) {
   return s.substr(first, last - first + 1);
 }
 
+std::string jsonEscape(std::string_view value) {
+  std::string escaped;
+  escaped.reserve(value.size());
+  for (const unsigned char ch : value) {
+    switch (ch) {
+    case '\\':
+      escaped += "\\\\";
+      break;
+    case '"':
+      escaped += "\\\"";
+      break;
+    case '\n':
+      escaped += "\\n";
+      break;
+    case '\r':
+      escaped += "\\r";
+      break;
+    case '\t':
+      escaped += "\\t";
+      break;
+    default:
+      if (ch < 0x20) {
+        constexpr char hex[] = "0123456789abcdef";
+        escaped += "\\u00";
+        escaped += hex[(ch >> 4) & 0xf];
+        escaped += hex[ch & 0xf];
+      } else {
+        escaped.push_back(static_cast<char>(ch));
+      }
+    }
+  }
+  return escaped;
+}
+
+void emitResult(std::ostream &os, std::string_view format,
+                std::string_view command, int frame, int status,
+                std::string_view text) {
+  if (format != "json") {
+    os << text;
+    return;
+  }
+  os << "{\"schema\":\"dseams.cli/v1\",\"command\":\""
+     << jsonEscape(command) << "\",\"frame\":" << frame
+     << ",\"status\":" << status << ",\"text\":\""
+     << jsonEscape(text) << "\"}\n";
+}
+
 bool parseTypePair(std::string_view value, int &typeI, int &typeJ) {
   const auto comma = value.find(',');
   if (comma == std::string_view::npos) {
@@ -641,6 +688,7 @@ int main(int argc, char *argv[]) {
   bool familyFlag = false;
   std::string familyNameFlag;
   bool printConfig = false;
+  bool strictInput = false;
   int htype = 1;
   double hdist = 2.42;
   double hangle = 30.0;
@@ -657,6 +705,7 @@ int main(int argc, char *argv[]) {
   int bins = 0;
   int densAxis = 2;
   std::string axisFlag;
+  std::string outputFormat = "text";
 
   const char *progname = (argc ? argv[0] : "seams");
   Parser parser;
@@ -687,6 +736,17 @@ int main(int argc, char *argv[]) {
                    printFeatures(std::cout);
                    std::exit(EXIT_SUCCESS);
                  }));
+
+  parser.add(Option("--format")
+                 .argName("KIND")
+                 .help("Output format: text (default) or json")
+                 .handler([&](std::string_view value) {
+                   outputFormat = std::string(value);
+                 }));
+
+  parser.add(Option("--strict-input")
+                 .help("Fail when a requested frame produces no atoms")
+                 .handler([&]() { strictInput = true; }));
 
   parser.add(Option("--frame", "-f")
                  .argName("N")
@@ -871,6 +931,11 @@ int main(int argc, char *argv[]) {
     return 2;
   }
 
+  if (outputFormat != "text" && outputFormat != "json") {
+    std::cerr << colorizer.error("bad --format (want text|json)") << "\n";
+    return 2;
+  }
+
   cfg.frame = frame;
   cfg.last = last;
   cfg.jobs = jobs;
@@ -979,6 +1044,10 @@ int main(int argc, char *argv[]) {
   }
 
   auto runOne = [&](std::ostream &os, Cloud &cloud) {
+    if (strictInput && cloud.nop == 0) {
+      os << "input frame " << cloud.currentFrame << " contains no atoms\n";
+      return 2;
+    }
     if (!familyFlag && family == site::Family::waterIce &&
         uniqueTypeCount(cloud) > 2) {
       std::cerr << colorizer.warning(
@@ -1038,13 +1107,18 @@ int main(int argc, char *argv[]) {
 
   if (last <= 0 || last == frame) {
     Cloud cloud = load(file, frame, loadType);
-    return runOne(std::cout, cloud);
+    std::ostringstream line;
+    const int rc = runOne(line, cloud);
+    emitResult(std::cout, outputFormat, cmd, cloud.currentFrame, rc,
+               line.str());
+    return rc;
   }
 
   std::mutex outMu;
   const int outputCount = std::max(0, last - frame + 1);
   std::vector<std::string> outputLines(static_cast<std::size_t>(outputCount));
   std::vector<int> outputStatus(static_cast<std::size_t>(outputCount), 0);
+  std::vector<bool> outputSeen(static_cast<std::size_t>(outputCount), false);
   const int typeFilter = loadAll ? 0 : (typeI > 0 ? typeI : 0);
   sinp::forEachLammpsFrame(
       file, frame, last, typeFilter,
@@ -1060,13 +1134,19 @@ int main(int argc, char *argv[]) {
           if (index >= 0 && index < outputCount) {
             outputLines[static_cast<std::size_t>(index)] = line.str();
             outputStatus[static_cast<std::size_t>(index)] = one;
+            outputSeen[static_cast<std::size_t>(index)] = true;
           }
         }
       },
       jobs);
   int rc = 0;
   for (std::size_t i = 0; i < outputLines.size(); ++i) {
-    std::cout << outputLines[i];
+    if (!outputSeen[i]) {
+      continue;
+    }
+    const int frameNumber = frame + static_cast<int>(i);
+    emitResult(std::cout, outputFormat, cmd, frameNumber, outputStatus[i],
+               outputLines[i]);
     if (rc == 0 && outputStatus[i] != 0) {
       rc = outputStatus[i];
     }

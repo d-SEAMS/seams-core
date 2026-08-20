@@ -435,6 +435,27 @@ if get_option('with_cli')
     depends: [seams_exe],
     timeout: 60)
   test(
+    'seams_json_output_is_versioned',
+    python3,
+    args: [
+      '-c',
+      'import json,subprocess,sys; p=subprocess.run([sys.argv[1],"--format","json","read",sys.argv[2]],capture_output=True,text=True); r=json.loads(p.stdout); sys.exit(0 if p.returncode==0 and r["schema"]=="dseams.cli/v1" and r["command"]=="read" and r["frame"]==1 and r["status"]==0 and r["text"].startswith("nop ") else 1)',
+      seams_exe.full_path(),
+      meson.project_source_root() / 'input' / 'traj' / 'exampleTraj.lammpstrj',
+    ],
+    depends: [seams_exe],
+    timeout: 60)
+  test(
+    'seams_strict_input_rejects_missing_file',
+    python3,
+    args: [
+      '-c',
+      'import subprocess,sys; p=subprocess.run([sys.argv[1],"--strict-input","read","/definitely/missing/seams-input.lammpstrj"],capture_output=True,text=True); sys.exit(0 if p.returncode==2 and "contains no atoms" in p.stdout else 1)',
+      seams_exe.full_path(),
+    ],
+    depends: [seams_exe],
+    timeout: 60)
+  test(
     'seams_help_mentions_rdf',
     python3,
     args: [
