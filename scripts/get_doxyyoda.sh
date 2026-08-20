@@ -2,7 +2,8 @@
 # Fetch the doxyYoda HTML theme into docs/doxyYoda/.
 set -euo pipefail
 ver=0.2.2
-root=$(git rev-parse --show-toplevel)
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+root=$(cd -- "$script_dir/.." && pwd)
 dest="$root/docs/doxyYoda"
 if [ -f "$dest/html/header.html" ]; then
   echo "doxyYoda already present"

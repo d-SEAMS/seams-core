@@ -139,6 +139,7 @@ cmd = "sphinx-build -d docs/doctrees docs/source/ docs/build"
 
 [feature.docs.tasks.fetch-doxyyoda]
 description = "Download the doxyYoda 0.2.2 HTML theme"
+cwd = "."
 cmd = "bash scripts/get_doxyyoda.sh"
 
 [feature.docs.tasks.doxyhtml]
