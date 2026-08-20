@@ -80,7 +80,9 @@ and return 0. ``seams cages`` prints ``nop 0 graph KIND hexagonal 0 cubic 0 wate
 
 ``sinp::nLammpsFrames`` is ``0`` when the file cannot be read.
 ``sinp::forEachLammpsFrame`` is a no-op when that count is ``0``, or
-when ``first > last``.
+when ``first > last``. The CLI's range dispatcher treats XYZ as one frame
+and reads chemfiles/readcon frames serially; it preserves requested frame
+order for every supported suffix.
 
 LAMMPS dump
 -----------

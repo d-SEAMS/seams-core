@@ -273,6 +273,12 @@ colorized through Argum’s <code class="docutils literal notranslate"><span cla
 </div>
 <p>A positional <code class="docutils literal notranslate"><span class="pre">command</span></code> and a positional <code class="docutils literal notranslate"><span class="pre">file</span></code> are required. Missing
 either, an unknown command, or a parse error exits 2.</p>
+<p>Every command accepts <code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">text|json</span></code>. Text is the human-readable
+format documented below. JSON emits one JSON object per output frame on
+stdout, with the fields <code class="docutils literal notranslate"><span class="pre">schema</span></code> (<code class="docutils literal notranslate"><span class="pre">dseams.cli/v1</span></code>), <code class="docutils literal notranslate"><span class="pre">command</span></code>, <code class="docutils literal notranslate"><span class="pre">frame</span></code>,
+<code class="docutils literal notranslate"><span class="pre">status</span></code>, and <code class="docutils literal notranslate"><span class="pre">text</span></code>. The <code class="docutils literal notranslate"><span class="pre">text</span></code> field contains the command’s text output
+without changing its contents. <code class="docutils literal notranslate"><span class="pre">--strict-input</span></code> returns 2 when a requested
+frame has no atoms; without it, empty input retains the legacy text output.</p>
 <section id="commands">
 <h2>Commands<a class="headerlink" href="#commands" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">command</span></code> positional help string is <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">|</span> <span class="pre">chill</span> <span class="pre">|</span> <span class="pre">chill-plus</span> <span class="pre">|</span> <span class="pre">cages</span> <span class="pre">|</span> <span class="pre">rdf</span> <span class="pre">|</span> <span class="pre">cn</span> <span class="pre">|</span> <span class="pre">hbonds</span> <span class="pre">|</span> <span class="pre">pairs</span> <span class="pre">|</span> <span class="pre">density-z</span> <span class="pre">|</span> <span class="pre">domains</span></code>. <code class="docutils literal notranslate"><span class="pre">chill_plus</span></code>
@@ -597,10 +603,12 @@ gates.</p>
 <h2>Frame ranges<a class="headerlink" href="#frame-ranges" title="Link to this heading">¶</a></h2>
 <p>Omit <code class="docutils literal notranslate"><span class="pre">--last</span></code>, or set it equal to <code class="docutils literal notranslate"><span class="pre">--frame</span></code>, for one frame. That
 path calls <code class="docutils literal notranslate"><span class="pre">load</span></code> and works for every linked suffix.</p>
-<p>A range (<code class="docutils literal notranslate"><span class="pre">--last</span></code> &gt; <code class="docutils literal notranslate"><span class="pre">--frame</span></code>) always walks a LAMMPS dump through
-<code class="docutils literal notranslate"><span class="pre">sinp::forEachLammpsFrame</span></code>. Each OpenMP worker opens its own handle
-and seeks the shared <code class="docutils literal notranslate"><span class="pre">ITEM:</span> <span class="pre">TIMESTEP</span></code> offset table. <code class="docutils literal notranslate"><span class="pre">--jobs</span> <span class="pre">1</span></code> is
-serial. Non-LAMMPS suffixes are not walked this way.</p>
+<p>A range (<code class="docutils literal notranslate"><span class="pre">--last</span></code> &gt; <code class="docutils literal notranslate"><span class="pre">--frame</span></code>) dispatches by suffix. LAMMPS dumps use
+<code class="docutils literal notranslate"><span class="pre">sinp::forEachLammpsFrame</span></code>, with one handle per OpenMP worker and
+deterministic output order. XYZ is a single-frame input and emits frame 1
+at most. Chemfiles and readcon inputs are read serially until the requested
+range or the first missing frame. <code class="docutils literal notranslate"><span class="pre">--jobs</span> <span class="pre">1</span></code> is serial; non-LAMMPS readers
+do not use OpenMP workers.</p>
 </section>
 <section id="features">
 <h2><code class="docutils literal notranslate"><span class="pre">--features</span></code><a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>

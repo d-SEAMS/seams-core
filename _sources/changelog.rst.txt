@@ -10,6 +10,13 @@ The C++ engine is this repository. Python is ``pydseams``
 Unreleased
 ----------
 
+The CLI preserves frame order for parallel LAMMPS ranges, dispatches ranges
+for XYZ, chemfiles, and readcon inputs, and offers versioned JSONL output
+through ``--format json``. ``--strict-input`` makes empty-frame handling an
+explicit error. XYZ input accepts coordinate-only rows and records its
+single frame as frame 1. Density regression coverage includes all Cartesian
+axes of a sheared cell.
+
 2.6.0
 -----
 

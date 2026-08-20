@@ -362,7 +362,9 @@ when the reader knows it.</p>
 and return 0. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span></code> prints <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span> <span class="pre">graph</span> <span class="pre">KIND</span> <span class="pre">hexagonal</span> <span class="pre">0</span> <span class="pre">cubic</span> <span class="pre">0</span> <span class="pre">water</span> <span class="pre">0</span></code>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">sinp::nLammpsFrames</span></code> is <code class="docutils literal notranslate"><span class="pre">0</span></code> when the file cannot be read.
 <code class="docutils literal notranslate"><span class="pre">sinp::forEachLammpsFrame</span></code> is a no-op when that count is <code class="docutils literal notranslate"><span class="pre">0</span></code>, or
-when <code class="docutils literal notranslate"><span class="pre">first</span> <span class="pre">&gt;</span> <span class="pre">last</span></code>.</p>
+when <code class="docutils literal notranslate"><span class="pre">first</span> <span class="pre">&gt;</span> <span class="pre">last</span></code>. The CLI’s range dispatcher treats XYZ as one frame
+and reads chemfiles/readcon frames serially; it preserves requested frame
+order for every supported suffix.</p>
 </section>
 <section id="lammps-dump">
 <h2>LAMMPS dump<a class="headerlink" href="#lammps-dump" title="Link to this heading">¶</a></h2>

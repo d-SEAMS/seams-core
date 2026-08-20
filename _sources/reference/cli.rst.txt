@@ -26,6 +26,13 @@ colorized through Argum's ``environmentColorStatus``.
 A positional ``command`` and a positional ``file`` are required. Missing
 either, an unknown command, or a parse error exits 2.
 
+Every command accepts ``--format text|json``. Text is the human-readable
+format documented below. JSON emits one JSON object per output frame on
+stdout, with the fields ``schema`` (``dseams.cli/v1``), ``command``, ``frame``,
+``status``, and ``text``. The ``text`` field contains the command's text output
+without changing its contents. ``--strict-input`` returns 2 when a requested
+frame has no atoms; without it, empty input retains the legacy text output.
+
 Commands
 --------
 
@@ -141,6 +148,10 @@ initializers (Argum does not write defaults into the help).
     | ``--last N``                  | omitted (``0``)                     | ``Last frame (inclusive). Omit for a single --frame``                    |
     +-------------------------------+-------------------------------------+--------------------------------------------------------------------------+
     | ``-j``, ``--jobs N``          | ``1``                               | ``Parallel frame workers (OpenMP). 1 is serial``                         |
+    +-------------------------------+-------------------------------------+--------------------------------------------------------------------------+
+    | ``--format KIND``             | ``text``                            | ``Output format: ~text`` (default) or ``json`` (JSONL)~                  |
+    +-------------------------------+-------------------------------------+--------------------------------------------------------------------------+
+    | ``--strict-input``            | off                                 | ``Fail when a requested frame produces no atoms``                        |
     +-------------------------------+-------------------------------------+--------------------------------------------------------------------------+
     | ``-t``, ``--type I``          | ``0``                               | ``Atom type (0 guesses oxygen then type 1; density-z: 0 is every atom)`` |
     +-------------------------------+-------------------------------------+--------------------------------------------------------------------------+
@@ -345,10 +356,12 @@ Frame ranges
 Omit ``--last``, or set it equal to ``--frame``, for one frame. That
 path calls ``load`` and works for every linked suffix.
 
-A range (``--last`` > ``--frame``) always walks a LAMMPS dump through
-``sinp::forEachLammpsFrame``. Each OpenMP worker opens its own handle
-and seeks the shared ``ITEM: TIMESTEP`` offset table. ``--jobs 1`` is
-serial. Non-LAMMPS suffixes are not walked this way.
+A range (``--last`` > ``--frame``) dispatches by suffix. LAMMPS dumps use
+``sinp::forEachLammpsFrame``, with one handle per OpenMP worker and
+deterministic output order. XYZ is a single-frame input and emits frame 1
+at most. Chemfiles and readcon inputs are read serially until the requested
+range or the first missing frame. ``--jobs 1`` is serial; non-LAMMPS readers
+do not use OpenMP workers.
 
 ``--features``
 --------------

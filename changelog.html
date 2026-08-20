@@ -254,6 +254,12 @@ data-aria-dark="Switch to auto color mode">
 <code class="docutils literal notranslate"><span class="pre">require(&quot;dseams&quot;)</span></code> (<a class="reference external" href="https://github.com/d-SEAMS/yodaStruct">yodaStruct</a>).</p>
 <section id="unreleased">
 <h2>Unreleased<a class="headerlink" href="#unreleased" title="Link to this heading">¶</a></h2>
+<p>The CLI preserves frame order for parallel LAMMPS ranges, dispatches ranges
+for XYZ, chemfiles, and readcon inputs, and offers versioned JSONL output
+through <code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">json</span></code>. <code class="docutils literal notranslate"><span class="pre">--strict-input</span></code> makes empty-frame handling an
+explicit error. XYZ input accepts coordinate-only rows and records its
+single frame as frame 1. Density regression coverage includes all Cartesian
+axes of a sheared cell.</p>
 </section>
 <section id="id1">
 <h2>2.6.0<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
