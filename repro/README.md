@@ -25,12 +25,14 @@ repro/elja_submit.sh prep
 ELJA_ACCOUNT=<account> repro/elja_submit.sh submit
 ```
 
-`prep` solves the `repro` pixi environment, downloads the meson subproject
-wraps for both trees, creates the baseline worktree at the pinned commit,
-records the tip SHA, and fetches the HyperQueue binary. `submit` queues one
-exclusive job whose body starts an `hq` server plus a worker and runs the
-DAG. The result is `repro/results/paper_manifest.json` next to the raw
-per-bench outputs and the conditions record (node, SHAs, load, CPU).
+`prep` solves the `repro` pixi environment, materializes the revisions in
+`repro/ecosystem-lock.json`, wires linkcell and both language frontends to
+this engine tree, downloads the Meson subproject wraps, creates the baseline
+worktree at the pinned commit, records the tip SHA, and fetches the
+HyperQueue binary. `submit` queues one exclusive job whose body starts an
+`hq` server plus a worker and runs the DAG. The result is
+`repro/results/paper_manifest.json` next to the raw per-bench outputs and the
+conditions record (node, SHAs, load, CPU).
 
 ## Anywhere else
 
@@ -72,6 +74,8 @@ first use into `repro/figshare/`.
 
 | Output | Feeds |
 |---|---|
+| `source-manifest.json` | exact seams-core, PydSEAMSlib, yodaStruct, and linkcell revisions |
+| `workflow-parity.json` | read, CHILL, CHILL+, cages, RDF, CN, H-bonds, pairs, density, and domains across CLI/Python/Lua |
 | `tip-pipeline.txt` | rings, k-NN and affiliation vs system size |
 | `tip-incremental-*.txt` | hop-bound updater vs full rebuild at each size |
 | `tip-stages-cubic.txt`, `tip-stages-nucleation.txt` | per-stage times on the cubic frame and the figshare nucleation deposit |
@@ -87,10 +91,11 @@ first use into `repro/figshare/`.
 | `tip-test.log` | the identity gate: a red suite aborts the DAG |
 | `paper_manifest.json` | everything above, parsed into one object |
 
+The frontend and linkcell revisions live in `repro/ecosystem-lock.json`.
 The baseline commit, sizes, trajectory, and repetition counts live in
-`repro/config.yaml`. Timings on a shared or loaded machine are not
-comparable to the paper's exclusive-node numbers; the conditions file
-records the load so a reviewer can tell.
+`repro/config.yaml`. Timings on a shared or loaded machine are not comparable
+to the paper's exclusive-node numbers; the conditions file records the load
+so a reviewer can tell.
 
 ## Validation contract
 
@@ -100,3 +105,6 @@ empty input, and the versioned `dseams.cli/v1` JSONL envelope. The density
 suite checks that profiles integrate to the selected atom count on an
 orthorhombic cell and on a sheared cell along x, y, and z. These checks run
 with the normal Meson test suite before the reproducibility DAG proceeds.
+The DAG also builds PydSEAMSlib and yodaStruct from the locked source graph,
+runs the yodaStruct Meson suite, and requires all normalized cross-frontend
+values to agree before writing the paper manifest.
