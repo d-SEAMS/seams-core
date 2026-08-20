@@ -30,6 +30,7 @@ import sys
 import time
 
 import numpy as np
+from pydseams import yoda
 
 BOND = 2.75  # O-O first-shell distance in ice, Angstrom
 CUTOFF = 3.5
@@ -117,10 +118,6 @@ def neighbour_check(pos: np.ndarray, box: np.ndarray):
 
 def jitter(pos: np.ndarray, box: np.ndarray, sigma: float, rng):
     return (pos + rng.normal(0.0, sigma, pos.shape)) % box if sigma else pos
-
-
-# ---------------------------------------------------------------- d-SEAMS
-from pydseams import yoda
 
 
 def make_cloud(pos: np.ndarray, box: np.ndarray):
@@ -283,12 +280,12 @@ def have(mod):
 
 
 def ovito_ptm(pos, box):
-    from ovito.data import DataCollection, ParticleType, SimulationCell
+    from ovito.data import DataCollection
     from ovito.modifiers import PolyhedralTemplateMatchingModifier
     from ovito.pipeline import Pipeline, StaticSource
 
     data = DataCollection()
-    cell = data.create_cell(
+    data.create_cell(
         matrix=[
             [box[0], 0, 0, 0],
             [0, box[1], 0, 0],
