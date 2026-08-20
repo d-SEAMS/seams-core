@@ -91,7 +91,7 @@ def fetch(lock: dict[str, Any], root: Path) -> None:
                 raise FileExistsError(
                     f"source path is not a Git checkout: {destination}"
                 )
-            _assert_clean_repository(destination)
+            _assert_clean_repository(destination, include_untracked=False)
             configured = _git("remote", "get-url", "origin", cwd=destination)
             if configured != component["repository"]:
                 raise RuntimeError(
