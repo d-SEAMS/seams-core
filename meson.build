@@ -457,6 +457,17 @@ if get_option('with_cli')
     depends: [seams_exe],
     timeout: 60)
   test(
+    'seams_json_range_is_ordered',
+    python3,
+    args: [
+      '-c',
+      'import json,subprocess,sys; p=subprocess.run([sys.argv[1],"--format","json","--frame","1","--last","3","--jobs","4","read",sys.argv[2]],capture_output=True,text=True); rows=[json.loads(line) for line in p.stdout.splitlines() if line]; sys.exit(0 if p.returncode==0 and [r["frame"] for r in rows]==[1,2,3] and all(r["schema"]=="dseams.cli/v1" for r in rows) else 1)',
+      seams_exe.full_path(),
+      meson.project_source_root() / 'input' / 'traj' / 'mW_cubic.lammpstrj',
+    ],
+    depends: [seams_exe],
+    timeout: 60)
+  test(
     'seams_strict_input_rejects_missing_file',
     python3,
     args: [
