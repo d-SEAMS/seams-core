@@ -81,7 +81,11 @@ class ComparisonTests(unittest.TestCase):
         self.assertTrue(all(check["pass"] for check in checks))
 
         checks = workflow_parity.compare_interfaces(
-            {"cli": reference, "python": {"count": 3, "values": [0.25, 1.5]}, "lua": reference}
+            {
+                "cli": reference,
+                "python": {"count": 3, "values": [0.25, 1.5]},
+                "lua": reference,
+            }
         )
         failed = [check for check in checks if not check["pass"]]
         self.assertEqual([check["key"] for check in failed], ["count"])
