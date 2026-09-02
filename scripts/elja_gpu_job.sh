@@ -226,10 +226,11 @@ configure_offload() {
   echo "configuring with $compiler CC=$cc CXX=$cxx" | tee -a "$OUT/setup.log"
   local extra=()
   if [[ $compiler == nvc++ ]]; then
-    # Meson 1.4 does not list C++20 for nvc++ 22.3. The flag is real;
-    # std=c++17 plus the host STL is enough for this tree.
+    # Meson 1.4 does not list C++20 for these nvc++ releases.
+    # The tree uses concepts (CoordinateScalar); nvc++ 23.7 accepts
+    # -std=c++20.
     extra+=(-Dcpp_std=none)
-    export CXXFLAGS="${CXXFLAGS:-} -std=c++17"
+    export CXXFLAGS="${CXXFLAGS:-} -std=c++20"
   fi
   if meson setup "$BUILD" --buildtype=debugoptimized \
     -Dwith_openmp_offload=enabled \
@@ -237,6 +238,7 @@ configure_offload() {
     -Dwith_lua=disabled \
     -Dwith_mpi=disabled \
     -Dwith_gpulite=disabled \
+    -Dcatch2:tests=false \
     "${extra[@]}" \
     >> "$OUT/setup.log" 2>&1; then
     meson configure "$BUILD" | tee "$OUT/meson-config.txt"
@@ -263,7 +265,7 @@ USED_COMPILER=
 # nvc++ 23.7 ships CUDA 12.2, which matches the A100 driver.
 # OpenHPC 22.3 ships only CUDA 11.6; the meson probe then needs
 # -gpu=cuda11.6. Meson does not list C++20 for these nvc++
-# releases, so setup uses -Dcpp_std=none -std=c++17. Clang 17
+# releases, so setup uses -Dcpp_std=none -std=c++20. Clang 17
 # has libomptarget bitcode but no NVPTX codegen target.
 export PATH=$GCCCORE/bin:$PATH
 if configure_offload nvc++ nvc++ "$GCCCORE/bin/gcc"; then
