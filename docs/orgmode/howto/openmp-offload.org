@@ -24,9 +24,9 @@ the tree carries a Catch2 3 wrap. CUDA 12.4 supplies ~nsys~ 2023.4.
 #+begin_src bash
 EB=/hpcapps/lib-edda/easybuild/software
 NVHPC_ROOT=/opt/ohpc/pub/compiler/nvhpc/22.3/Linux_x86_64/22.3
-export PATH=$NVHPC_ROOT/compilers/bin:$EB/Meson/1.4.0-GCCcore-13.3.0/bin:$EB/Ninja/1.12.1-GCCcore-13.3.0/bin:$EB/Python/3.12.3-GCCcore-13.3.0/bin:$EB/CUDA/12.4.0/bin:$PATH
+export PATH=$EB/CUDA/12.4.0/bin:$NVHPC_ROOT/compilers/bin:$EB/Meson/1.4.0-GCCcore-13.3.0/bin:$EB/Ninja/1.12.1-GCCcore-13.3.0/bin:$EB/Python/3.12.3-GCCcore-13.3.0/bin:$PATH
 export PKG_CONFIG_PATH=$EB/Eigen/3.4.0-GCCcore-13.3.0/share/pkgconfig:$EB/FlexiBLAS/3.4.4-GCC-13.3.0/lib/pkgconfig
-export LD_LIBRARY_PATH=$NVHPC_ROOT/compilers/lib:$NVHPC_ROOT/cuda/lib64:$NVHPC_ROOT/math_libs/lib64:$EB/GCCcore/13.3.0/lib64:$EB/FlexiBLAS/3.4.4-GCC-13.3.0/lib
+export LD_LIBRARY_PATH=$EB/Python/3.12.3-GCCcore-13.3.0/lib:$NVHPC_ROOT/compilers/lib:$NVHPC_ROOT/cuda/lib64:$NVHPC_ROOT/math_libs/lib64:$EB/GCCcore/13.3.0/lib64:$EB/FlexiBLAS/3.4.4-GCC-13.3.0/lib
 
 export CC=nvc
 export CXX=nvc++
