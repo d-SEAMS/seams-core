@@ -1,5 +1,5 @@
 #+TITLE: Contributing
-#+OPTIONS: toc:nil num:nil
+#+OPTIONS: toc:nil num:nil ^:nil
 
 This repository is the C++ engine (~libyodaLib~) and the ~seams~ CLI.
 Python bindings are [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
@@ -124,7 +124,7 @@ C++ tests are Catch2. Python tests live in
 [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
 
 ~tests/walk_compare~ is a Meson executable. Inputs and columns live
-on [[file:../reference/walk-compare.org][~walk_compare~]].
+on [[file:../reference/walk-compare.org][walk-compare]].
 
 Lean 4 statements about ~ring::ringAdjacentCompletion~ live in
 =lean/=. See [[file:lean.org][Lean proofs]].

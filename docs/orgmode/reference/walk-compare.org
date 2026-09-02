@@ -8,8 +8,8 @@ mutual and union four-nearest graphs, with the largest ice cluster of
 each score. Cage flags are hexagonal cage (HC) and double-diamond
 cage (DDC).
 
-The ~walk_compare~ binary is a Meson executable. ~pixi run setup &&
-pixi run build~ (~-Dwith_tests=true~) writes
+That dump walk is a Meson executable named ~walk_compare~. ~pixi run
+setup && pixi run build~ (~-Dwith_tests=true~) writes
 ~bbdir/tests/walk_compare~. A Nix develop tree writes the same name
 under the Meson build directory. Catch2 does not run this binary.
 
