@@ -28,6 +28,9 @@
 #ifdef SEAMS_HAS_LINKCELL
 #include <linkcell.hpp>
 #endif
+#ifdef SEAMS_HAS_MINIMAGE
+#include <minimage.h>
+#endif
 
 /** @file neighbours.hpp
  *  @brief Header file for neighbour list generation.
@@ -172,6 +175,34 @@ inline double dumpVolume(
 /// Map a LAMMPS dump box onto lc_cell.
 inline lc_cell lammpsBoxToLcCell(const std::vector<double> &box,
                                  const std::vector<double> &boxLow) {
+#ifdef SEAMS_HAS_MINIMAGE
+  const double xspan = box.size() > 0 ? box[0] : 0.0;
+  const double yspan = box.size() > 1 ? box[1] : 0.0;
+  const double zspan = box.size() > 2 ? box[2] : 0.0;
+  const double xy = box.size() >= 6 ? box[3] : 0.0;
+  const double xz = box.size() >= 6 ? box[4] : 0.0;
+  const double yz = box.size() >= 6 ? box[5] : 0.0;
+  const double xlo_b = boxLow.size() > 0 ? boxLow[0] : 0.0;
+  const double ylo_b = boxLow.size() > 1 ? boxLow[1] : 0.0;
+  const double zlo_b = boxLow.size() > 2 ? boxLow[2] : 0.0;
+  mi_cell raw;
+  mi_cell_from_lammps_bounds(xspan, yspan, zspan, xy, xz, yz, xlo_b, ylo_b,
+                             zlo_b, &raw);
+  lc_cell c = lc_cell_ortho(raw.ax, raw.by, raw.cz);
+  c.ax = raw.ax;
+  c.ay = raw.ay;
+  c.az = raw.az;
+  c.bx = raw.bx;
+  c.by = raw.by;
+  c.bz = raw.bz;
+  c.cx = raw.cx;
+  c.cy = raw.cy;
+  c.cz = raw.cz;
+  c.ox = raw.ox;
+  c.oy = raw.oy;
+  c.oz = raw.oz;
+  return c;
+#else
   double H[3][3], o[3];
   dumpBoundsToH(box, boxLow, H, o);
   lc_cell c = lc_cell_ortho(H[0][0], H[1][1], H[2][2]);
@@ -188,6 +219,7 @@ inline lc_cell lammpsBoxToLcCell(const std::vector<double> &box,
   c.oy = o[1];
   c.oz = o[2];
   return c;
+#endif
 }
 
 inline linkcell::Cell lammpsBoxToLinkcell(const std::vector<double> &box,

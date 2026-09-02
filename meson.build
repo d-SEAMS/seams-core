@@ -232,6 +232,13 @@ if linkcell_dep.found()
   _args += ['-DSEAMS_HAS_LINKCELL=1']
 endif
 
+minimage_dep = dependency('minimage', required: false,
+                          fallback: ['minimage', 'minimage_dep'])
+if minimage_dep.found()
+  _deps += [minimage_dep]
+  _args += ['-DSEAMS_HAS_MINIMAGE=1']
+endif
+
 chemfiles_dep = dependency('chemfiles', required: false)
 if chemfiles_dep.found()
   _deps += [chemfiles_dep]
@@ -415,6 +422,7 @@ summary({
   'Device-resident batches (gpulite)': gpulite_dep.found() and not gpulite_opt.disabled(),
   'Cell-list neighbours (vesin)': vesin_dep.found(),
   'Periodic k-nearest (linkcell)': linkcell_dep.found(),
+  'Minimum-image wrap (minimage)': minimage_dep.found(),
   'PDB/GRO/DCD readers (chemfiles)': chemfiles_dep.found(),
   '.con reader (readcon-core)': readcon_dep.found(),
   'IRA/SOFI shape matching (libira)': ira_found,
