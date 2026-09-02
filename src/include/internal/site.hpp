@@ -89,6 +89,7 @@ struct IonEnvironment {
   std::vector<int> shell;          ///< water molecules within the cutoff
   std::vector<double> iceFraction; ///< labelled share of that shell
   std::vector<IonState> state;
+  std::vector<std::vector<int>> members;  ///< per ion, the shell molecules (cloud indices)
   int nIce = 0;
   int nFront = 0;
   int nLiquid = 0;
@@ -100,6 +101,15 @@ IonEnvironment
 ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                const std::vector<bool> &iceFlag, const std::vector<int> &ionIndices,
                int waterType, double cutoff);
+
+/// Rings of the water network that pass through a first shell: the census
+/// by size of every ring with at least one vertex in `shell`. An ion is not
+/// a vertex of the network, so the rings it would have closed are gone and
+/// the rings its shell still carries measure how far the network survives
+/// around it (the hydration-shell ring census of a brine or an ionic
+/// solution). `census[s]` counts rings of size s up to `maxRingSize`.
+std::vector<int> shellRingCensus(const std::vector<std::vector<int>> &rings,
+                                 const std::vector<int> &shell, int maxRingSize);
 
 /// Guests read against enumerated cages. A cage is a set of vertex atoms;
 /// its centre is the periodic centroid of the vertices. A guest (methane,

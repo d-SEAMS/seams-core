@@ -309,6 +309,7 @@ ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     }
     int shell = 0;
     int labelled = 0;
+    std::vector<int> members;
     for (int j = 0; j < n; j++) {
       if (j == i || isIon[static_cast<std::size_t>(j)]) {
         continue;
@@ -320,6 +321,7 @@ ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
         continue;
       }
       ++shell;
+      members.push_back(j);
       if (static_cast<std::size_t>(j) < iceFlag.size() && iceFlag[static_cast<std::size_t>(j)]) {
         ++labelled;
       }
@@ -338,8 +340,27 @@ ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     out.shell.push_back(shell);
     out.iceFraction.push_back(shell > 0 ? static_cast<double>(labelled) / shell : 0.0);
     out.state.push_back(state);
+    out.members.push_back(std::move(members));
   }
   return out;
+}
+
+std::vector<int> shellRingCensus(const std::vector<std::vector<int>> &rings,
+                                 const std::vector<int> &shell, int maxRingSize) {
+  std::vector<int> census(static_cast<std::size_t>(std::max(maxRingSize, 0)) + 1, 0);
+  std::unordered_set<int> inShell(shell.begin(), shell.end());
+  for (const auto &ring : rings) {
+    if (ring.empty() || static_cast<int>(ring.size()) > maxRingSize) {
+      continue;
+    }
+    for (int a : ring) {
+      if (inShell.count(a)) {
+        census[ring.size()] += 1;
+        break;
+      }
+    }
+  }
+  return census;
 }
 
 
