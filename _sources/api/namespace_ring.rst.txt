@@ -120,7 +120,9 @@ Batch computation of the affiliation predicates for six-membered rings. nList is
 
 Seeded affiliation over two graphs on the same atoms: the strict graph (typically the mutual k-nearest bonds) supplies seeds, the permissive supergraph (typically the union bonds) supplies completions, and a permissively affiliated atom is accepted only when its bonded component of affiliated atoms contains a seed.
 
-Specificity on structureless input is structural rather than statistical: when the strict pass affiliates nothing, nothing is accepted regardless of what the permissive graph builds. Where both graphs label an atom, the strict labels win. With ringAdjacentCompletion a permissive six-ring with all but one vertex labelled has its last vertex labelled too.
+Specificity on structureless input is structural rather than statistical: when the strict pass affiliates nothing, nothing is accepted regardless of what the permissive graph builds. Where both graphs label an atom, the strict labels win.
+
+The fifth argument is the ring-adjacent completion flag. The default is false. When the flag is true the accepted labels pass through :ref:`ringAdjacentCompletion() <doxid-namespacering_1a52d5bc312612884ce62bd430d94fdb17>` on the permissive six-rings. HC and DDC complete on separate flag vectors. ``:ref:`seams <doxid-namespaceseams>` cages --complete`` sets the flag. tests/walk_compare leaves the flag false.
 
 
 
@@ -152,7 +154,7 @@ Specificity on structureless input is structural rather than statistical: when t
 	*
 		- ringAdjacentCompletion
 
-		- Fill the single unlabelled vertex of otherwise labelled permissive six-rings (:ref:`ringAdjacentCompletion() <doxid-namespacering_1a52d5bc312612884ce62bd430d94fdb17>`).
+		- When true, call :ref:`ringAdjacentCompletion() <doxid-namespacering_1a52d5bc312612884ce62bd430d94fdb17>` on the accepted labels. Default false.
 
 .. index:: pair: function; ringAdjacentCompletion
 .. _doxid-namespacering_1a52d5bc312612884ce62bd430d94fdb17:
@@ -164,7 +166,11 @@ Specificity on structureless input is structural rather than statistical: when t
 
 Ring completion of seeded labels.
 
-A permissive six-ring whose vertices all carry a cage label but one is a cage ring with a vacancy in the label, and its last vertex takes the label; repeated to a fixed point. A liquid ring touching a nucleus has at most a few labelled vertices, so the completion cannot walk into the liquid, and a frame the seeded pass left empty stays empty.
+A permissive six-ring whose vertices all carry a cage label but one is a cage ring with a vacancy. The last vertex takes that label. The walk repeats until a fixed point. HC and DDC complete on separate flag vectors.
+
+A liquid ring that only touches a nucleus has at most a few labelled vertices, so the all-but-one rule cannot walk into the liquid. An empty seed stays empty: no ring then has five labelled vertices.
+
+The result is the least fixed point above the seed. Visiting order does not change the labelled set. lean/DseamsProofs/Completion.lean states that claim. Catch2 covers the C++ identity on a crystal, the refill of a single vacancy, and the structural zero.
 
 
 

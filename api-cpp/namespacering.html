@@ -1084,7 +1084,9 @@ Changelog</h3>
 </div><div class="memdoc">
 
 <p>Ring completion of seeded labels. </p>
-<p>A permissive six-ring whose vertices all carry a cage label but one is a cage ring with a vacancy in the label, and its last vertex takes the label; repeated to a fixed point. A liquid ring touching a nucleus has at most a few labelled vertices, so the completion cannot walk into the liquid, and a frame the seeded pass left empty stays empty. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>A permissive six-ring whose vertices all carry a cage label but one is a cage ring with a vacancy. The last vertex takes that label. The walk repeats until a fixed point. HC and DDC complete on separate flag vectors.</p>
+<p>A liquid ring that only touches a nucleus has at most a few labelled vertices, so the all-but-one rule cannot walk into the liquid. An empty seed stays empty: no ring then has five labelled vertices.</p>
+<p>The result is the least fixed point above the seed. Visiting order does not change the labelled set. lean/DseamsProofs/Completion.lean states that claim. Catch2 covers the C++ identity on a crystal, the refill of a single vacancy, and the structural zero. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">labels</td><td>Seeded per-atom flags. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">permissiveRings</td><td>Six-membered rings of the permissive graph. </td></tr>
@@ -1137,13 +1139,14 @@ Changelog</h3>
 </div><div class="memdoc">
 
 <p>Seeded affiliation over two graphs on the same atoms: the strict graph (typically the mutual k-nearest bonds) supplies seeds, the permissive supergraph (typically the union bonds) supplies completions, and a permissively affiliated atom is accepted only when its bonded component of affiliated atoms contains a seed. </p>
-<p>Specificity on structureless input is structural rather than statistical: when the strict pass affiliates nothing, nothing is accepted regardless of what the permissive graph builds. Where both graphs label an atom, the strict labels win. With ringAdjacentCompletion a permissive six-ring with all but one vertex labelled has its last vertex labelled too. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Specificity on structureless input is structural rather than statistical: when the strict pass affiliates nothing, nothing is accepted regardless of what the permissive graph builds. Where both graphs label an atom, the strict labels win.</p>
+<p>The fifth argument is the ring-adjacent completion flag. The default is false. When the flag is true the accepted labels pass through <a class="el" href="#a52d5bc312612884ce62bd430d94fdb17" title="Ring completion of seeded labels.">ringAdjacentCompletion()</a> on the permissive six-rings. HC and DDC complete on separate flag vectors. <span class="tt"><a class="el" href="namespaceseams.html">seams</a> cages --complete</span> sets the flag. tests/walk_compare leaves the flag false. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">strictRings</td><td>Six-membered rings of the strict graph. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">strictNList</td><td>Strict graph, by index with leading self entries. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">permissiveRings</td><td>Six-membered rings of the permissive graph. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">permissiveNList</td><td>Permissive graph, same conventions. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">ringAdjacentCompletion</td><td>Fill the single unlabelled vertex of otherwise labelled permissive six-rings (<a class="el" href="#a52d5bc312612884ce62bd430d94fdb17" title="Ring completion of seeded labels.">ringAdjacentCompletion()</a>). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ringAdjacentCompletion</td><td>When true, call <a class="el" href="#a52d5bc312612884ce62bd430d94fdb17" title="Ring completion of seeded labels.">ringAdjacentCompletion()</a> on the accepted labels. Default false. </td></tr>
   </table>
   </dd>
 </dl>

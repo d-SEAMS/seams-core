@@ -2,8 +2,8 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>struct chill::LinearClassifier - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="struct chill::TemplateHit" href="struct_chill_TemplateHit.html" /><link rel="prev" title="enum chill::CrystalKind" href="enum_chill_CrystalKind.html" />
-      <link rel="canonical" href="https://docs.dseams.info/api/struct_chill_LinearClassifier.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Ring-adjacent completion - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Citation" href="citation.html" /><link rel="prev" title="CHILL+ versus cages" href="chill-plus-vs-cages.html" />
+      <link rel="canonical" href="https://docs.dseams.info/explanation/ring-completion.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
@@ -23,8 +23,8 @@
 }
 </style>
     <meta property="og:type" content="website"/>
-  <meta property="og:url" content="https://docs.dseams.info/api/struct_chill_LinearClassifier.html"/>
-  <meta property="og:title" content="struct chill::LinearClassifier"/>
+  <meta property="og:url" content="https://docs.dseams.info/explanation/ring-completion.html"/>
+  <meta property="og:title" content="Ring-adjacent completion"/>
     <meta name="twitter:card" content="summary"/>
   <!-- Antics analytics -->
 <script defer src="https://antics-api.turtletech.us/antics.js"></script>
@@ -107,69 +107,22 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/troubleshooting.html">Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Explanation</span></p>
-<ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/index.html">Explanation</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Repositories</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/ring-completion.html">Ring-adjacent completion</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">Citation</a></li>
+<ul class="current">
+<li class="toctree-l1 _expand"><a class="reference internal" href="index.html">Explanation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="architecture.html">Repositories</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Ring-adjacent completion</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="citation.html">Citation</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../reference/index.html">Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../reference/walk-compare.html">walk<sub>compare</sub></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../reference/api.html">API map</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="group_bond.html">Bond</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_prism3.html">Bulk prisms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_cage.html">Cage</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="group_chill.html">Chill</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_clump.html">Clump</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_gen.html">Gen</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_molSys.html">MolSys</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_nneigh.html">Nneigh</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_primitive.html">Primitive</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_rdf.html">Rdf</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_rdf2.html">Rdf2</a></li>
-<li class="toctree-l3"><a class="reference internal" href="group_sinp.html">Sinp</a></li>
-<li class="toctree-l3"><a class="reference internal" href="global.html">Global Namespace</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/index.html">Reference</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/walk-compare.html">walk<sub>compare</sub></a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API map</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="group_bond.html">Bond</a></li>
-<li class="toctree-l2"><a class="reference internal" href="group_prism3.html">Bulk prisms</a></li>
-<li class="toctree-l2"><a class="reference internal" href="group_cage.html">Cage</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="group_chill.html">Chill</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="namespace_chill.html">namespace chill</a></li>
-<li class="toctree-l3"><a class="reference internal" href="namespace_sph.html">namespace sph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="struct_chill_BondClassifier.html">struct chill::BondClassifier</a></li>
-<li class="toctree-l3"><a class="reference internal" href="struct_chill_QlmAtom.html">struct chill::QlmAtom</a></li>
-<li class="toctree-l3"><a class="reference internal" href="struct_chill_SteinhardtQl.html">struct chill::SteinhardtQl</a></li>
-<li class="toctree-l3"><a class="reference internal" href="struct_chill_YlmAtom.html">struct chill::YlmAtom</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="group_clump.html">Clump</a></li>
-<li class="toctree-l2"><a class="reference internal" href="group_gen.html">Gen</a></li>
-<li class="toctree-l2"><a class="reference internal" href="group_molSys.html">MolSys</a></li>
-<li class="toctree-l2"><a class="reference internal" href="group_nneigh.html">Nneigh</a></li>
-<li class="toctree-l2"><a class="reference internal" href="group_primitive.html">Primitive</a></li>
-<li class="toctree-l2"><a class="reference internal" href="group_rdf.html">Rdf</a></li>
-<li class="toctree-l2"><a class="reference internal" href="group_rdf2.html">Rdf2</a></li>
-<li class="toctree-l2"><a class="reference internal" href="group_sinp.html">Sinp</a></li>
-<li class="toctree-l2"><a class="reference internal" href="global.html">Global Namespace</a></li>
-</ul>
-</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/index.html">API Reference</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
@@ -187,7 +140,12 @@ data-aria-dark="Switch to auto color mode">
     <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
       <i class="i-lucide close"></i>
     </button>
-    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#the-all-but-one-rule">The all-but-one rule</a></li>
+<li><a class="reference internal" href="#the-flag-on-seededcageaffiliation">The flag on <code class="docutils literal notranslate"><span class="pre">seededCageAffiliation</span></code></a></li>
+<li><a class="reference internal" href="#least-fixed-point">Least fixed point</a></li>
+</ul>
+</div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
   data-type="github" data-user="d-SEAMS" data-repo="seams-core">
   <span class="w-8 flex items-center justify-around shrink-0 text-3xl">
     <iconify-icon icon="simple-icons:github"></iconify-icon>
@@ -209,7 +167,7 @@ data-aria-dark="Switch to auto color mode">
     </span>
   </span>
 </a><div class="edit-this-page">
-  <a href="https://github.com/d-SEAMS/seams-core/blob/main/docs/source/api/struct_chill_LinearClassifier.rst">Edit this page</a>
+  <a href="https://github.com/d-SEAMS/seams-core/blob/main/docs/source/explanation/ring-completion.rst">Edit this page</a>
 </div></div>
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
@@ -226,28 +184,12 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="../reference/index.html"><span itemprop="name">Reference</span></a>
+        <a itemprop="item" href="index.html"><span itemprop="name">Explanation</span></a>
         <span>/</span>
         <meta itemprop="position" content="2" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="../reference/api.html"><span itemprop="name">API map</span></a>
-        <span>/</span>
+        <strong itemprop="name">Ring-adjacent completion</strong>
         <meta itemprop="position" content="3" />
-      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="index.html"><span itemprop="name">API Reference</span></a>
-        <span>/</span>
-        <meta itemprop="position" content="4" />
-      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="group_chill.html"><span itemprop="name">Chill</span></a>
-        <span>/</span>
-        <meta itemprop="position" content="5" />
-      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="namespace_chill.html"><span itemprop="name">namespace chill</span></a>
-        <span>/</span>
-        <meta itemprop="position" content="6" />
-      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">struct chill::LinearClassifier</strong>
-        <meta itemprop="position" content="7" />
       </li></ol>
     <div class="xl:hidden ml-1">
       <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
@@ -263,7 +205,7 @@ data-aria-dark="Switch to auto color mode">
     <button
       type="button"
       class="js-copy px-3 py-1 inline-flex items-center gap-1"
-      data-url="https://docs.dseams.info/_sources/api/struct_chill_LinearClassifier.rst.txt"
+      data-url="https://docs.dseams.info/_sources/explanation/ring-completion.rst.txt"
     >
       <i class="i-lucide" data-icon="copy"></i>
       <span>Copy page</span>
@@ -277,46 +219,72 @@ data-aria-dark="Switch to auto color mode">
     <div role="presentation">
       <div class="flex flex-col" role="group">
         <button class="js-copy" type="button" role="menuitem"
-          data-url="https://docs.dseams.info/_sources/api/struct_chill_LinearClassifier.rst.txt">
+          data-url="https://docs.dseams.info/_sources/explanation/ring-completion.rst.txt">
           <span class="iconify-icon">
             <i class="i-lucide" data-icon="copy"></i>
           </span>
           <span>Copy page</span>
         </button>
-        <a role="menuitem" href="https://docs.dseams.info/_sources/api/struct_chill_LinearClassifier.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
-            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20https%3A//docs.dseams.info/_sources/api/struct_chill_LinearClassifier.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+        <a role="menuitem" href="https://docs.dseams.info/_sources/explanation/ring-completion.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
+            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20https%3A//docs.dseams.info/_sources/explanation/ring-completion.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
           <iconify-icon icon="bi:openai"></iconify-icon>
           <span>Open in ChatGPT</span>
-        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20https%3A//docs.dseams.info/_sources/api/struct_chill_LinearClassifier.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20https%3A//docs.dseams.info/_sources/explanation/ring-completion.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
           <iconify-icon icon="bi:claude"></iconify-icon>
           <span>Open in Claude</span>
         </a></div>
     </div>
   </div>
 </div><article class="yue dark-code" role="main">
-          <section id="struct-chill-linearclassifier">
-<span id="doxid-structchill-1-1-linear-classifier"></span><span id="index-0"></span><h1>struct chill::LinearClassifier<a class="headerlink" href="#struct-chill-linearclassifier" title="Link to this heading">¶</a></h1>
-<div class="toctree-wrapper compound">
+          <section id="ring-adjacent-completion">
+<h1>Ring-adjacent completion<a class="headerlink" href="#ring-adjacent-completion" title="Link to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">ring::ringAdjacentCompletion</span></code> fills a single vacancy on a labelled
+six-ring. <code class="docutils literal notranslate"><span class="pre">ring::seededCageAffiliation</span></code> exposes that walk as its fifth
+argument, a <code class="docutils literal notranslate"><span class="pre">bool</span></code> named <code class="docutils literal notranslate"><span class="pre">ringAdjacentCompletion</span></code>, default <code class="docutils literal notranslate"><span class="pre">false</span></code>.
+Cage flags are hexagonal cage (HC) and double-diamond cage (DDC).</p>
+<section id="the-all-but-one-rule">
+<h2>The all-but-one rule<a class="headerlink" href="#the-all-but-one-rule" title="Link to this heading">¶</a></h2>
+<p>Take the per-atom HC or DDC flags from a seeded pass and the
+six-membered rings of the permissive graph. A ring whose vertices all
+carry that cage label but one is a cage ring with a vacancy. The last
+vertex takes the label. The walk repeats until a fixed point. The HC
+flags and the DDC flags run as two walks.</p>
+<p>A liquid six-ring that touches a nucleus has at most a few labelled
+vertices. Five labelled vertices are required, so the walk cannot
+enter the liquid. An empty seed stays empty.</p>
+</section>
+<section id="the-flag-on-seededcageaffiliation">
+<h2>The flag on <code class="docutils literal notranslate"><span class="pre">seededCageAffiliation</span></code><a class="headerlink" href="#the-flag-on-seededcageaffiliation" title="Link to this heading">¶</a></h2>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">ring</span><span class="o">::</span><span class="n">SeededAtomLabels</span> <span class="n">seededCageAffiliation</span><span class="p">(</span>
+</span><span data-line="2">    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="o">&amp;</span><span class="n">strictRings</span><span class="p">,</span>
+</span><span data-line="3">    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="o">&amp;</span><span class="n">strictNList</span><span class="p">,</span>
+</span><span data-line="4">    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="o">&amp;</span><span class="n">permissiveRings</span><span class="p">,</span>
+</span><span data-line="5">    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="o">&amp;</span><span class="n">permissiveNList</span><span class="p">,</span>
+</span><span data-line="6">    <span class="kt">bool</span> <span class="n">ringAdjacentCompletion</span> <span class="o">=</span> <span class="nb">false</span><span class="p">);</span>
+</span></pre></div>
 </div>
-<p>One-versus-rest ridge classifier on a dense feature matrix.</p>
-<div class="doxyrest-overview-code-block highlight">
-<pre><span data-line="1"><span class="cp">#include</span> <span class="cpf">&lt;structure_desc.hpp&gt;</span></span>
-<span data-line="2"> </span>
-<span data-line="3"><span class="k">struct</span> <span class="n">LinearClassifier</span> <span class="p">{</span></span>
-<span data-line="4">    <span class="c1">// fields</span></span>
-<span data-line="5"> </span>
-<span data-line="6">    <span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-structchill_1_1_linear_classifier_1adbc7eb691580d4c569d3ae8f3b46d675"></span><span class="n">nClasses</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
-<span data-line="7">    <span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-structchill_1_1_linear_classifier_1a80420505e41f4d6462815d62e7b13671"></span><span class="n">nFeat</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
-<span data-line="8">    <span class="kt">double</span> <span class="doxyrest-code-target target" id="doxid-structchill_1_1_linear_classifier_1a5aabcb34def301a6c7146134c20f6483"></span><span class="n">ridge</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">;</span></span>
-<span data-line="9">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="doxyrest-code-target target" id="doxid-structchill_1_1_linear_classifier_1a4088b2d0b62d217535574e6e9ef2a2ae"></span><span class="n">weights</span><span class="p">;</span></span>
-<span data-line="10">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="doxyrest-code-target target" id="doxid-structchill_1_1_linear_classifier_1ac5d08fd477153fe168f77101330ac400"></span><span class="n">labels</span><span class="p">;</span></span>
-<span data-line="11"> </span>
-<span data-line="12">    <span class="c1">// methods</span></span>
-<span data-line="13"> </span>
-<span data-line="14">    <span class="kt">void</span> <span class="doxyrest-code-target target" id="doxid-structchill_1_1_linear_classifier_1a71891e00818b87d370748614fc3e84ff"></span><span class="n">fit</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&gt;&amp;</span> <span class="n">X</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">y</span><span class="p">);</span></span>
-<span data-line="15">    <span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-structchill_1_1_linear_classifier_1aa2e6670a82d536991b8efb24874c4886"></span><span class="n">predict</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">x</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span></span>
-<span data-line="16"><span class="p">};</span></span>
-</pre></div>
+<p>When the flag is <code class="docutils literal notranslate"><span class="pre">false</span></code> (the default), the function returns the
+seeded labels. When the flag is <code class="docutils literal notranslate"><span class="pre">true</span></code>, those labels pass through
+<code class="docutils literal notranslate"><span class="pre">ring::ringAdjacentCompletion</span></code> on <code class="docutils literal notranslate"><span class="pre">permissiveRings</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span> <span class="pre">--complete</span></code> sets the flag. <code class="docutils literal notranslate"><span class="pre">tests/walk_compare</span></code> leaves
+the flag <code class="docutils literal notranslate"><span class="pre">false</span></code>. Callers that want the walk pass <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p>
+<p>Catch2 (<code class="docutils literal notranslate"><span class="pre">tests/test_cage_affiliation.cpp</span></code>, tag
+<code class="docutils literal notranslate"><span class="pre">[cage_affiliation]</span></code>) checks three facts: the walk is the identity on
+a cubic crystal, a hand-cleared vacancy on that crystal is refilled,
+and an empty seed stays empty.</p>
+</section>
+<section id="least-fixed-point">
+<h2>Least fixed point<a class="headerlink" href="#least-fixed-point" title="Link to this heading">¶</a></h2>
+<p>The labelled set is the least fixed point of the all-but-one rule
+above the seed. Visiting order does not change that set. The Lean
+model in <code class="docutils literal notranslate"><span class="pre">lean/DseamsProofs/Completion.lean</span></code> states the claim; see
+<code class="docutils literal notranslate"><span class="pre">lean/README.org</span></code> for the theorem list and the <code class="docutils literal notranslate"><span class="pre">lake</span></code> build.</p>
+<p>Edge-sharing is a different rule. It accepts every vertex of a ring
+that shares two vertices with a fully labelled ring. That set is not
+the least fixed point. Two labelled vertices then label every vertex
+of the shared ring. The Lean file names that counterexample
+<code class="docutils literal notranslate"><span class="pre">edgeRule_not_sound</span></code>.</p>
+</section>
 </section>
 
         </article><button class="back-to-top" type="button">
@@ -325,16 +293,16 @@ data-aria-dark="Switch to auto color mode">
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="enum_chill_CrystalKind.html">
+    <a href="chill-plus-vs-cages.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">enum chill::CrystalKind</div></div>
+        <span>Previous</span><div class="title">CHILL+ versus cages</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="struct_chill_TemplateHit.html">
+    <a href="citation.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">struct chill::TemplateHit</div>
+        <div class="title">Citation</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

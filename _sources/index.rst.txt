@@ -141,6 +141,7 @@ framework.
    explanation/index
    explanation/architecture
    explanation/chill-plus-vs-cages
+   explanation/ring-completion
    explanation/citation
 
 .. toctree::
@@ -150,6 +151,7 @@ framework.
    reference/index
    reference/cli
    reference/data-formats
+   reference/walk-compare
    reference/nix
    reference/api
    api/index
@@ -161,6 +163,7 @@ framework.
    :caption: Development
 
    contributing/index
+   contributing/lean
 
 The in-book C++ pages under ``api/`` are Doxygen via doxyrest. A sibling
 doxyYoda HTML tree (inline source, treeview) is at

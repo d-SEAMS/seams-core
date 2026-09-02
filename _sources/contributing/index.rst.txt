@@ -85,7 +85,8 @@ Project structure
         bulkTUM.cpp          topological unit matching
         topo_one_dim.cpp     nanotubes
         topo_two_dim.cpp     sheets
-      tests/                 Catch2 binaries
+      tests/                 Catch2 binaries and walk_compare
+      lean/                  Lean 4 model of ringAdjacentCompletion
       input/traj/            example LAMMPS dumps
       input/xyz/             fixtures
       input/con/             eOn .con fixture
@@ -117,6 +118,9 @@ Core concepts
 ``cageAffiliation`` / ``seededCageAffiliation``
     Ice score on
     six-rings. HC = Ih, DDC = Ic, neither = water. Not the CHILL+ star.
+    The fifth argument of ``seededCageAffiliation`` is
+    ``ringAdjacentCompletion`` (default ``false``; ``seams cages --complete`` sets it). See
+    `Ring-adjacent completion <../explanation/ring-completion.rst>`_.
 
 ``ringNetwork``
     Franzblau primitive rings up to a depth.
@@ -131,6 +135,12 @@ Tests
 
 C++ tests are Catch2. Python tests live in
 `PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_.
+
+``tests/walk_compare`` is a Meson executable. Inputs and columns live
+on `walk\ :sub:`compare`\ <../reference/walk-compare.rst>`_.
+
+Lean 4 statements about ``ring::ringAdjacentCompletion`` live in
+``lean/``. See `Lean proofs <lean.rst>`_.
 
 Optional pixi environments: ``pixi run -e ira ...``, ``sphericart``,
 ``nauty``, ``mpi``, ``docs``, ``formalanalysis``, ``repro``.
@@ -157,3 +167,4 @@ and yodaStruct wraps) is `Release process <release.rst>`_.
    :maxdepth: 1
 
    release
+   lean

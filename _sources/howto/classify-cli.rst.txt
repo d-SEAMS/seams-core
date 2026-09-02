@@ -53,12 +53,14 @@ Bond graph for cages
 .. code:: bash
 
     seams cages FILE --graph seeded
+    seams cages FILE --graph seeded --complete
     seams cages FILE --graph cutoff --cutoff 3.5
     seams cages FILE --graph knn -k 4
     seams cages FILE --graph knn-union -k 4
 
 ``seeded`` is the CLI default: mutual four-nearest seeds, union
-completions. On a perfect cubic crystal the four graphs coincide.
+completions. ``--complete`` then runs ``ring::ringAdjacentCompletion``
+on those labels. On a perfect cubic crystal the four graphs coincide.
 
 Features of this binary
 -----------------------

@@ -111,6 +111,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/index.html">Explanation</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Repositories</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/ring-completion.html">Ring-adjacent completion</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">Citation</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
@@ -118,6 +119,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/index.html">Reference</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/walk-compare.html">walk<sub>compare</sub></a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API map</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/index.html">API Reference</a></li>
@@ -127,6 +129,7 @@ data-aria-dark="Switch to auto color mode">
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/lean.html">Lean proofs</a></li>
 </ul>
         </div>
       </div>
@@ -277,13 +280,15 @@ via <code class="docutils literal notranslate"><span class="pre">forEachLammpsFr
 <section id="bond-graph-for-cages">
 <h2>Bond graph for cages<a class="headerlink" href="#bond-graph-for-cages" title="Link to this heading">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span>cages<span class="w"> </span>FILE<span class="w"> </span>--graph<span class="w"> </span>seeded
-</span><span data-line="2">seams<span class="w"> </span>cages<span class="w"> </span>FILE<span class="w"> </span>--graph<span class="w"> </span>cutoff<span class="w"> </span>--cutoff<span class="w"> </span><span class="m">3</span>.5
-</span><span data-line="3">seams<span class="w"> </span>cages<span class="w"> </span>FILE<span class="w"> </span>--graph<span class="w"> </span>knn<span class="w"> </span>-k<span class="w"> </span><span class="m">4</span>
-</span><span data-line="4">seams<span class="w"> </span>cages<span class="w"> </span>FILE<span class="w"> </span>--graph<span class="w"> </span>knn-union<span class="w"> </span>-k<span class="w"> </span><span class="m">4</span>
+</span><span data-line="2">seams<span class="w"> </span>cages<span class="w"> </span>FILE<span class="w"> </span>--graph<span class="w"> </span>seeded<span class="w"> </span>--complete
+</span><span data-line="3">seams<span class="w"> </span>cages<span class="w"> </span>FILE<span class="w"> </span>--graph<span class="w"> </span>cutoff<span class="w"> </span>--cutoff<span class="w"> </span><span class="m">3</span>.5
+</span><span data-line="4">seams<span class="w"> </span>cages<span class="w"> </span>FILE<span class="w"> </span>--graph<span class="w"> </span>knn<span class="w"> </span>-k<span class="w"> </span><span class="m">4</span>
+</span><span data-line="5">seams<span class="w"> </span>cages<span class="w"> </span>FILE<span class="w"> </span>--graph<span class="w"> </span>knn-union<span class="w"> </span>-k<span class="w"> </span><span class="m">4</span>
 </span></pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">seeded</span></code> is the CLI default: mutual four-nearest seeds, union
-completions. On a perfect cubic crystal the four graphs coincide.</p>
+completions. <code class="docutils literal notranslate"><span class="pre">--complete</span></code> then runs <code class="docutils literal notranslate"><span class="pre">ring::ringAdjacentCompletion</span></code>
+on those labels. On a perfect cubic crystal the four graphs coincide.</p>
 </section>
 <section id="features-of-this-binary">
 <h2>Features of this binary<a class="headerlink" href="#features-of-this-binary" title="Link to this heading">¶</a></h2>
