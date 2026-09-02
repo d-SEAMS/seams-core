@@ -286,8 +286,8 @@ without changing its contents. <code class="docutils literal notranslate"><span 
 frame has no atoms; without it, empty input retains the legacy text output.</p>
 <section id="commands">
 <h2>Commands<a class="headerlink" href="#commands" title="Link to this heading">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">command</span></code> positional help string is <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">|</span> <span class="pre">chill</span> <span class="pre">|</span> <span class="pre">chill-plus</span> <span class="pre">|</span> <span class="pre">cages</span> <span class="pre">|</span> <span class="pre">rdf</span> <span class="pre">|</span> <span class="pre">cn</span> <span class="pre">|</span> <span class="pre">hbonds</span> <span class="pre">|</span> <span class="pre">pairs</span> <span class="pre">|</span> <span class="pre">density-z</span> <span class="pre">|</span> <span class="pre">domains</span></code>. <code class="docutils literal notranslate"><span class="pre">chill_plus</span></code>
-is an accepted alias of <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code> (not listed in that help string).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">command</span></code> positional help string is <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">|</span> <span class="pre">chill</span> <span class="pre">|</span> <span class="pre">chill-plus</span> <span class="pre">|</span> <span class="pre">cages</span> <span class="pre">|</span> <span class="pre">fingerprint</span> <span class="pre">|</span> <span class="pre">ions</span> <span class="pre">|</span> <span class="pre">rdf</span> <span class="pre">|</span> <span class="pre">cn</span> <span class="pre">|</span> <span class="pre">hbonds</span> <span class="pre">|</span> <span class="pre">pairs</span> <span class="pre">|</span> <span class="pre">density-z</span> <span class="pre">|</span> <span class="pre">domains</span></code>. <code class="docutils literal notranslate"><span class="pre">chill_plus</span></code> is an accepted alias of <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code> (not
+listed in that help string).</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -313,31 +313,51 @@ is an accepted alias of <code class="docutils literal notranslate"><span class="
 <td><p>ice score on six-membered rings</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">N</span> <span class="pre">graph</span> <span class="pre">KIND</span> <span class="pre">hexagonal</span> <span class="pre">IH</span> <span class="pre">cubic</span> <span class="pre">IC</span> <span class="pre">water</span> <span class="pre">W</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rdf</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cages</span> <span class="pre">--signature</span> <span class="pre">SPEC</span></code></p></td>
+<td><p>closed polyhedra whose ring-size census matches <code class="docutils literal notranslate"><span class="pre">SPEC</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">N</span> <span class="pre">graph</span> <span class="pre">KIND</span> <span class="pre">signature</span> <span class="pre">S</span> <span class="pre">cages</span> <span class="pre">C</span> <span class="pre">atoms</span> <span class="pre">A</span></code> and, with <code class="docutils literal notranslate"><span class="pre">--guest-types</span></code>, <code class="docutils literal notranslate"><span class="pre">guests</span> <span class="pre">G</span> <span class="pre">occupied</span> <span class="pre">O</span> <span class="pre">multiple</span> <span class="pre">M</span> <span class="pre">free</span> <span class="pre">F</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fingerprint</span></code></p></td>
+<td><p>topology keys of the bonded graph</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">N</span> <span class="pre">graph</span> <span class="pre">KIND</span> <span class="pre">hops</span> <span class="pre">H</span> <span class="pre">method</span> <span class="pre">M</span> <span class="pre">key</span> <span class="pre">K</span> <span class="pre">classes</span> <span class="pre">C</span> <span class="pre">rings</span> <span class="pre">3:a</span> <span class="pre">4:b</span> <span class="pre">...</span> <span class="pre">top</span> <span class="pre">key=count</span> <span class="pre">...</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fingerprint</span> <span class="pre">--emit-library</span> <span class="pre">LABEL</span></code></p></td>
+<td><p>the frame’s distinct keys as library lines</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">method</span> <span class="pre">M</span> <span class="pre">hops</span> <span class="pre">H</span> <span class="pre">colours</span> <span class="pre">C</span></code> then <code class="docutils literal notranslate"><span class="pre">key</span> <span class="pre">LABEL</span></code> rows</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fingerprint</span> <span class="pre">--library</span> <span class="pre">FILE[,FILE...]</span></code></p></td>
+<td><p>atoms named by key libraries</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">N</span> <span class="pre">graph</span> <span class="pre">KIND</span> <span class="pre">hops</span> <span class="pre">H</span> <span class="pre">method</span> <span class="pre">M</span> <span class="pre">matched</span> <span class="pre">X</span> <span class="pre">label=count</span> <span class="pre">...</span> <span class="pre">unmatched=U</span></code> and, with several libraries, <code class="docutils literal notranslate"><span class="pre">depth</span> <span class="pre">H1=n1</span> <span class="pre">H2=n2</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ions</span></code></p></td>
+<td><p>ions classed by their first water shell against the seeded cages</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">N</span> <span class="pre">ice</span> <span class="pre">A</span> <span class="pre">ions</span> <span class="pre">I</span> <span class="pre">in-ice</span> <span class="pre">X</span> <span class="pre">front</span> <span class="pre">Y</span> <span class="pre">liquid</span> <span class="pre">Z</span> <span class="pre">shell</span> <span class="pre">S</span> <span class="pre">shell-ice</span> <span class="pre">F</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rdf</span></code></p></td>
 <td><p>partial site-site <span class="math notranslate nohighlight">\(g_{IJ}(r)\)</span></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">r</span> <span class="pre">g</span> <span class="pre">count</span></code> then <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">types</span> <span class="pre">I</span> <span class="pre">J</span> <span class="pre">rmax</span> <span class="pre">R</span> <span class="pre">bins</span> <span class="pre">N</span> <span class="pre">volume</span> <span class="pre">V</span></code> then one <code class="docutils literal notranslate"><span class="pre">r</span> <span class="pre">g</span> <span class="pre">count</span></code> row per bin</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cn</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cn</span></code></p></td>
 <td><p>site-site coordination number</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">site-site</span></code> then <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">types</span> <span class="pre">I</span> <span class="pre">J</span> <span class="pre">cutoff</span> <span class="pre">R</span> <span class="pre">cn</span> <span class="pre">X</span> <span class="pre">nI</span> <span class="pre">N</span> <span class="pre">nJ</span> <span class="pre">M</span> <span class="pre">volume</span> <span class="pre">V</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cn</span> <span class="pre">--ions</span> <span class="pre">--site</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cn</span> <span class="pre">--ions</span> <span class="pre">--site</span></code></p></td>
 <td><p>cage degree on <code class="docutils literal notranslate"><span class="pre">ionCloud</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">cage</span> <span class="pre">ionCloud</span> <span class="pre">types</span> <span class="pre">1</span> <span class="pre">2</span> <span class="pre">cutoff</span> <span class="pre">R</span> <span class="pre">degree</span> <span class="pre">D</span> <span class="pre">nCation</span> <span class="pre">N</span> <span class="pre">nAnion</span> <span class="pre">M</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">hbonds</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">hbonds</span></code></p></td>
 <td><p>geometric hydrogen-bond count</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">N</span> <span class="pre">hbonds</span> <span class="pre">E</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pairs</span> <span class="pre">--site</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pairs</span> <span class="pre">--site</span></code></p></td>
 <td><p>mutual-nearest contact pairs</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">contact-pair</span> <span class="pre">count</span> <span class="pre">N</span> <span class="pre">nCation</span> <span class="pre">C</span> <span class="pre">nAnion</span> <span class="pre">A</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">density-z</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">density-z</span></code></p></td>
 <td><p>type-resolved <span class="math notranslate nohighlight">\(\rho\)</span> along one axis</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">z</span> <span class="pre">rho</span></code> then one <code class="docutils literal notranslate"><span class="pre">z</span> <span class="pre">rho</span></code> row per bin</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">domains</span> <span class="pre">--site</span> <span class="pre">--subset</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">domains</span> <span class="pre">--site</span> <span class="pre">--subset</span></code></p></td>
 <td><p>polar/apolar Stoddard component</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">subset</span> <span class="pre">polar</span> <span class="pre">n</span> <span class="pre">N</span> <span class="pre">largest</span> <span class="pre">L</span> <span class="pre">P</span> <span class="pre">P_inf</span></code></p></td>
 </tr>
@@ -402,7 +422,8 @@ TUM ice score (<code class="docutils literal notranslate"><span class="pre">seam
 the host.</p>
 <p><code class="docutils literal notranslate"><span class="pre">--cutoff</span></code> is in Angstrom. <code class="docutils literal notranslate"><span class="pre">-k</span></code> also applies to <code class="docutils literal notranslate"><span class="pre">knn-union</span></code> (the
 same <code class="docutils literal notranslate"><span class="pre">k</span></code> feeds <code class="docutils literal notranslate"><span class="pre">nneigh::kNearestNeighbourList</span></code>). <code class="docutils literal notranslate"><span class="pre">--graph</span></code> is used
-only by <code class="docutils literal notranslate"><span class="pre">cages</span></code>. <code class="docutils literal notranslate"><span class="pre">--complete</span></code> is used by <code class="docutils literal notranslate"><span class="pre">cages</span></code> and <code class="docutils literal notranslate"><span class="pre">ions</span></code>: it
+by <code class="docutils literal notranslate"><span class="pre">cages</span></code> and <code class="docutils literal notranslate"><span class="pre">fingerprint</span></code>; a fingerprint wants one graph, so
+<code class="docutils literal notranslate"><span class="pre">seeded</span></code> (two graphs) falls back to <code class="docutils literal notranslate"><span class="pre">cutoff</span></code> there. <code class="docutils literal notranslate"><span class="pre">--complete</span></code> is used by <code class="docutils literal notranslate"><span class="pre">cages</span></code> and <code class="docutils literal notranslate"><span class="pre">ions</span></code>: it
 passes <code class="docutils literal notranslate"><span class="pre">true</span></code> as the fifth argument of <code class="docutils literal notranslate"><span class="pre">seededCageAffiliation</span></code>.</p>
 </section>
 <section id="type">
