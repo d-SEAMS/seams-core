@@ -5,6 +5,9 @@ Changelog
 Unreleased
 ==========
 
+Version 2.9.1 (2026-09-02)
+===========================
+
 OpenMP target offload for the Steinhardt kernel compiles and
 links with nvc++ 23.7 (``-mp=gpu``) against CUDA 12.2 on an
 NVIDIA A100-PCIE-40GB. The Catch2 suite is green, including the
