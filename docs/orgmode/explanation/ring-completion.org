@@ -1,0 +1,55 @@
+#+TITLE: Ring-adjacent completion
+#+OPTIONS: toc:nil num:nil
+
+~ring::ringAdjacentCompletion~ fills a single vacancy on a labelled
+six-ring. ~ring::seededCageAffiliation~ exposes that walk as its fifth
+argument, a ~bool~ named ~ringAdjacentCompletion~, default ~false~.
+Cage flags are hexagonal cage (HC) and double-diamond cage (DDC).
+
+* The all-but-one rule
+
+Take the per-atom HC or DDC flags from a seeded pass and the
+six-membered rings of the permissive graph. A ring whose vertices all
+carry that cage label but one is a cage ring with a vacancy. The last
+vertex takes the label. The walk repeats until a fixed point. The HC
+flags and the DDC flags run as two walks.
+
+A liquid six-ring that touches a nucleus has at most a few labelled
+vertices. Five labelled vertices are required, so the walk cannot
+enter the liquid. An empty seed stays empty.
+
+* The flag on ~seededCageAffiliation~
+
+#+begin_src c++
+ring::SeededAtomLabels seededCageAffiliation(
+    const std::vector<std::vector<int>> &strictRings,
+    const std::vector<std::vector<int>> &strictNList,
+    const std::vector<std::vector<int>> &permissiveRings,
+    const std::vector<std::vector<int>> &permissiveNList,
+    bool ringAdjacentCompletion = false);
+#+end_src
+
+When the flag is ~false~ (the default), the function returns the
+seeded labels. When the flag is ~true~, those labels pass through
+~ring::ringAdjacentCompletion~ on ~permissiveRings~.
+
+~seams cages --complete~ sets the flag. ~tests/walk_compare~ leaves
+the flag ~false~. Callers that want the walk pass ~true~.
+
+Catch2 (~tests/test_cage_affiliation.cpp~, tag
+~[cage_affiliation]~) checks three facts: the walk is the identity on
+a cubic crystal, a hand-cleared vacancy on that crystal is refilled,
+and an empty seed stays empty.
+
+* Least fixed point
+
+The labelled set is the least fixed point of the all-but-one rule
+above the seed. Visiting order does not change that set. The Lean
+model in =lean/DseamsProofs/Completion.lean= states the claim; see
+=lean/README.org= for the theorem list and the ~lake~ build.
+
+Edge-sharing is a different rule. It accepts every vertex of a ring
+that shares two vertices with a fully labelled ring. That set is not
+the least fixed point. Two labelled vertices then label every vertex
+of the shared ring. The Lean file names that counterexample
+~edgeRule_not_sound~.

@@ -118,14 +118,18 @@ struct SeededAtomLabels {
  *  is structural rather than statistical: when the strict pass affiliates
  *  nothing, nothing is accepted regardless of what the permissive graph
  *  builds. Where both graphs label an atom, the strict labels win.
- *  With ringAdjacentCompletion a permissive six-ring with all but one
- *  vertex labelled has its last vertex labelled too.
+ *
+ *  The fifth argument is the ring-adjacent completion flag. The default
+ *  is false. When the flag is true the accepted labels pass through
+ *  ringAdjacentCompletion() on the permissive six-rings. HC and DDC
+ *  complete on separate flag vectors. `seams cages --complete` sets the
+ *  flag. tests/walk_compare leaves the flag false.
  * @param[in] strictRings Six-membered rings of the strict graph.
  * @param[in] strictNList Strict graph, by index with leading self entries.
  * @param[in] permissiveRings Six-membered rings of the permissive graph.
  * @param[in] permissiveNList Permissive graph, same conventions.
- * @param[in] ringAdjacentCompletion Fill the single unlabelled vertex of
- *  otherwise labelled permissive six-rings (ringAdjacentCompletion()).
+ * @param[in] ringAdjacentCompletion When true, call
+ *  ringAdjacentCompletion() on the accepted labels. Default false.
  */
 [[nodiscard]] SeededAtomLabels seededCageAffiliation(
     const std::vector<std::vector<int>> &strictRings,
@@ -134,12 +138,21 @@ struct SeededAtomLabels {
     const std::vector<std::vector<int>> &permissiveNList,
     bool ringAdjacentCompletion = false);
 
-/** Ring completion of seeded labels. A permissive six-ring whose vertices
- *  all carry a cage label but one is a cage ring with a vacancy in the
- *  label, and its last vertex takes the label; repeated to a fixed point.
- *  A liquid ring touching a nucleus has at most a few labelled vertices,
- *  so the completion cannot walk into the liquid, and a frame the seeded
- *  pass left empty stays empty.
+/** Ring completion of seeded labels.
+ *
+ *  A permissive six-ring whose vertices all carry a cage label but one
+ *  is a cage ring with a vacancy. The last vertex takes that label.
+ *  The walk repeats until a fixed point. HC and DDC complete on
+ *  separate flag vectors.
+ *
+ *  A liquid ring that only touches a nucleus has at most a few labelled
+ *  vertices, so the all-but-one rule cannot walk into the liquid. An
+ *  empty seed stays empty: no ring then has five labelled vertices.
+ *
+ *  The result is the least fixed point above the seed. Visiting order
+ *  does not change the labelled set. lean/DseamsProofs/Completion.lean
+ *  states that claim. Catch2 covers the C++ identity on a crystal, the
+ *  refill of a single vacancy, and the structural zero.
  * @param[in] labels Seeded per-atom flags.
  * @param[in] permissiveRings Six-membered rings of the permissive graph.
  */

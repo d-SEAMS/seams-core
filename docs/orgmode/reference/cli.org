@@ -131,6 +131,7 @@ initializers (Argum does not write defaults into the help).
 | ~--axis XYZ~ | ~z~ | ~Histogram axis for density-z (x, y, or z)~ |
 | ~-k N~ | ~4~ | ~k for knn / seeded cages~ |
 | ~--graph KIND~ | ~seeded~ | ~Bond graph for cages: cutoff \| knn \| knn-union \| seeded~ |
+| ~--complete~ | off | Seeded cages: fill the last vertex of six-rings whose other vertices carry a label (ring completion) |
 | ~--htype I~ | ~1~ | ~Hydrogen atom type for hbonds~ |
 | ~--hdist ANGSTROM~ | water C++ default | ~Acceptor-H distance cutoff for hbonds~ |
 | ~--hangle DEG~ | water C++ default | ~O-O-H angle cutoff for hbonds (acceptor-centered)~ |
@@ -151,7 +152,8 @@ the host.
 
 ~--cutoff~ is in Angstrom. ~-k~ also applies to ~knn-union~ (the
 same ~k~ feeds ~nneigh::kNearestNeighbourList~). ~--graph~ is used
-only by ~cages~.
+only by ~cages~. ~--complete~ is used by ~cages~ and ~ions~: it
+passes ~true~ as the fifth argument of ~seededCageAffiliation~.
 
 * ~--type~
 
@@ -199,7 +201,7 @@ Used only by ~cages~.
 
 | value | graph |
 |-------+-------|
-| ~seeded~ | mutual ~k~-nearest seeds, union completions (~ring::seededCageAffiliation~) |
+| ~seeded~ | mutual ~k~-nearest seeds, union completions (~ring::seededCageAffiliation~; ~--complete~ sets the fifth argument) |
 | ~cutoff~ | pairs inside ~--cutoff~ (~nneigh::neighListO~) |
 | ~knn~ | mutual k-nearest (~nneigh::BondGraph::KnnMutual~) |
 | ~knn-union~ | union k-nearest (~nneigh::BondGraph::KnnUnion~) |

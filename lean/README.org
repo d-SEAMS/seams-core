@@ -1,14 +1,47 @@
 #+TITLE: DseamsProofs
+#+OPTIONS: toc:nil num:nil
 
-Lean 4 (Mathlib) statements about the graph closures the engine computes.
-=Completion.lean= models the ring completion of the seeded cage
-assignment as a monotone closure on a finite vertex set and proves that
-the fixed point is reached within =card V= rounds, is the least fixed point
-above the seeds (so the C++ frontier walk and any other visiting order
-agree), is empty when the seeds are empty, and that every added vertex is
-certified by a ring whose other vertices are labelled. It also shows the
-edge-sharing rule the code first used is not sound in that sense.
+Lean 4 (Mathlib) model of ~ring::ringAdjacentCompletion~.
+The statements live in =DseamsProofs/Completion.lean=.
+
+* Theorems
+
+Vertices ~V~ are a finite type. ~R~ is a finite family of rings
+(finite sets of vertices). ~L~ is a labelled set. One ~step~ labels
+every vertex ~v~ for which some ring ~r~ in ~R~ contains ~v~ and has
+every other vertex labelled. That is the all-but-one rule.
+
+| theorem | claim |
+|---------+-------|
+| ~subset_step~, ~step_mono~ | ~step~ is extensive and monotone |
+| ~iter_stable~, ~step_closure~ | ~card V~ rounds reach a fixed point (~closure~) |
+| ~closure_le_of_fixed~ | ~closure L~ is the least fixed point above ~L~ |
+| ~closure_empty~ | empty seed stays empty when every ring has at least two vertices |
+| ~closure_sound~ | every added vertex sits on a ring whose other vertices lie in the closure |
+| ~edgeRule_not_sound~ | the edge-sharing rule labels a vertex the all-but-one rule leaves unlabelled |
+
+Least-fixed-point uniqueness implies that the C++ frontier walk and a
+round-by-round pass over every ring produce the same labelled set.
+
+* Outside the model
+
+The Lean file does not show that the C++ frontier bookkeeping
+computes ~step~. Catch2 covers that identity on a cubic crystal,
+the refill of a single vacancy, and the structural zero. The file
+also says nothing about which rings a physical liquid contains.
+
+* Build
+
+Toolchain pin: =lean-toolchain= (~leanprover/lean4:v4.15.0~).
+Mathlib pin: =lakefile.toml~ (~v4.15.0~). Install
+[[https://github.com/leanprover/elan][elan]], then:
 
 #+begin_src bash
-cd lean && lake exe cache get && lake build
+cd lean
+lake exe cache get
+lake build
 #+end_src
+
+~lake exe cache get~ fetches the Mathlib oleans. ~lake build~
+type-checks =DseamsProofs=. This tree is not the Coq/SymPy suite
+under =proofs/= (~pixi run -e formalanalysis verify-all~).

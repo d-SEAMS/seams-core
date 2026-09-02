@@ -7,6 +7,7 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 |------+---------------|
 | [[file:cli.org][seams CLI]] | ~seams~ subcommands, flags, colors |
 | [[file:data-formats.org][data formats]] | LAMMPS dump, XYZ, chemfiles, ~.con~ |
+| [[file:walk-compare.org][walk_compare]] | ~tests/walk_compare~ inputs and columns |
 | [[file:api.org][API map]] | fronts and headers; the tree is =api/index= |
 | [[file:../api/index][API Reference]] | Doxygen comments, via doxyrest |
 | [[file:nix.org][Nix flake]] | ~nix build~, ~nix develop~, flake outputs |
@@ -18,6 +19,7 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 
    cli
    data-formats
+   walk-compare
    api
    ../api/index
    nix

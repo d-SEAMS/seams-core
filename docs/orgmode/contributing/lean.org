@@ -1,0 +1,27 @@
+#+TITLE: Lean proofs
+#+OPTIONS: toc:nil num:nil
+
+=lean/= is a Lean 4 (Mathlib) model of
+~ring::ringAdjacentCompletion~. The statements live in
+=lean/DseamsProofs/Completion.lean=. =lean/README.org= lists every
+theorem and the ~lake~ build.
+
+The Lean file states that the all-but-one closure is the least fixed
+point above the seed, that it is empty on an empty seed, and that
+every added vertex sits on a ring whose other vertices are labelled.
+It also shows that an edge-sharing rule is not sound on a five-vertex
+instance. ~lake~ type-checks that closure on Lean 4.15.0 with Mathlib
+v4.15.0 (pins in =lean-toolchain= and =lakefile.toml=). Install
+[[https://github.com/leanprover/elan][elan]] for the toolchain. The
+Coq/SymPy suite under =proofs/= is a different tree.
+
+#+begin_src bash
+cd lean
+lake exe cache get
+lake build
+#+end_src
+
+Catch2 (~tests/test_cage_affiliation.cpp~) covers the C++ identity,
+vacancy refill, and structural zero of the same all-but-one closure.
+The algorithm is
+[[file:../explanation/ring-completion.org][Ring-adjacent completion]].
