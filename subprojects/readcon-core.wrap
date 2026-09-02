@@ -1,6 +1,6 @@
 [wrap-git]
 url = https://github.com/lode-org/readcon-core.git
-revision = v0.14.0
+revision = v0.14.9
 depth = 1
 
 [provide]
