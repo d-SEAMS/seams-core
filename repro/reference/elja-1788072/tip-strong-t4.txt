@@ -1,3 +1,0 @@
-nAtoms    ranks   thr     devs    neigh/ms        ql/ms           index/ms        rings/ms        
-65536     1       4       0       96.538          21.585          95.840          445.206         
-# neigh and index are replicated; ql and rings are threaded

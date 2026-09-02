@@ -1,8 +1,0 @@
-# traj repro/figshare/nucleation.lammpstrj frame 1 nop 4096 rings 7790 six 3409 ddc 122
-io_ms 3.012
-neigh_ms 6.107
-knn_ms 10.009
-knn_pair_ms 10.816
-rings_ms 28.788
-affil_ms 18.887
-seeded_ms 67.775

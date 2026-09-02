@@ -1,8 +1,0 @@
-# traj traj/mW_cubic.lammpstrj frame 1 nop 4096 rings 8192 six 8192 ddc 8192
-io_ms 2.549
-neigh_ms 5.024
-knn_ms 8.010
-knn_pair_ms 8.496
-rings_ms 12.180
-affil_ms 62.283
-seeded_ms 191.784

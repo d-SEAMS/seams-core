@@ -1,9 +1,0 @@
-hostname: compute-79
-jobid: 1788816
-partition: 64cpu_256mem
-exclusive: yes
-alloc_cpus: 128
-loadavg_before_workflow: 0.54
-model: Intel Xeon Platinum 8358
-base_sha: 1c8efa382c4ae88ebc68e40a991260c4d57edbd5
-note: leftover DAG after 1788072 benches; Lua figshare demos and notebooks
