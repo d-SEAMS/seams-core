@@ -21,6 +21,7 @@ var NAVTREEINDEX2 =
 "namespaceseams_1_1steinhardt.html#adf41cecc177768d88e4c00b88bef06d6":[2,0,17,2,7],
 "namespaceseams_1_1steinhardt.html#aef637bd4e52ad99c21c04c2530d464f9":[2,0,17,2,2],
 "namespaceseams_1_1steinhardt.html#af9c20d33b335cba28f07391b0bf2a7ec":[2,0,17,2,3],
+"namespaceseams_1_1steinhardt.html#afc83186a4ec1a9286658962d8325e363":[2,0,17,2,8],
 "namespacesinp.html":[1,11,0],
 "namespacesite.html":[2,0,19],
 "namespacesite.html#a05342583b5b8258d5347b3f18983d4b2":[2,0,19,11],
@@ -248,6 +249,5 @@ var NAVTREEINDEX2 =
 "structgpu_1_1Footprint.html#ab473038da5c197da756b2f3812d3258f":[2,0,6,2,5],
 "structgpu_1_1Footprint.html#ab473038da5c197da756b2f3812d3258f":[4,0,3,2,5],
 "structgpu_1_1Plan.html":[2,0,6,3],
-"structgpu_1_1Plan.html":[4,0,3,3],
-"structgpu_1_1Plan.html#a1086b17671aa3043e3228c29c0c783af":[2,0,6,3,1]
+"structgpu_1_1Plan.html":[4,0,3,3]
 };

@@ -7,5 +7,6 @@ var steinhardt__device_8hpp =
     [ "seams::steinhardt::qlmOneAtom", "namespaceseams_1_1steinhardt.html#a37d2da128add52c3ffd5aa4d682755f7", null ],
     [ "seams::steinhardt::qlmOneAtomDr", "namespaceseams_1_1steinhardt.html#a55aa32c67dd82d3268c94b0c553b8a5e", null ],
     [ "seams::steinhardt::qlOneAtom", "namespaceseams_1_1steinhardt.html#ad7a4bc8342952acfea0b25760b426796", null ],
-    [ "seams::steinhardt::ylmAll", "namespaceseams_1_1steinhardt.html#adf41cecc177768d88e4c00b88bef06d6", null ]
+    [ "seams::steinhardt::ylmAll", "namespaceseams_1_1steinhardt.html#adf41cecc177768d88e4c00b88bef06d6", null ],
+    [ "seams::steinhardt::ylmAllTrig", "namespaceseams_1_1steinhardt.html#afc83186a4ec1a9286658962d8325e363", null ]
 ];

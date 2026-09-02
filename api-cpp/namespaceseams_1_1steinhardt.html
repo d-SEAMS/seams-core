@@ -243,6 +243,7 @@ Functions</h2></td></tr>
 <tr class="memitem:a43d8f8936120055114714e6beff49149" id="r_a43d8f8936120055114714e6beff49149"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a43d8f8936120055114714e6beff49149">minImage</a> (double &amp;dx, double &amp;dy, double &amp;dz, double bx, double by, double bz)</td></tr>
 <tr class="memitem:aef637bd4e52ad99c21c04c2530d464f9" id="r_aef637bd4e52ad99c21c04c2530d464f9"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#aef637bd4e52ad99c21c04c2530d464f9">normLM</a> (int orderL, int absM)</td></tr>
 <tr class="memitem:a4266009e733515c8d90dcd7990d696fa" id="r_a4266009e733515c8d90dcd7990d696fa"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a4266009e733515c8d90dcd7990d696fa">legendreAmp</a> (int orderL, int absM, const double *s, const double *c)</td></tr>
+<tr class="memitem:afc83186a4ec1a9286658962d8325e363" id="r_afc83186a4ec1a9286658962d8325e363"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#afc83186a4ec1a9286658962d8325e363">ylmAllTrig</a> (int orderL, double sinT, double cosT, double cphi, double sphi, double *out)</td></tr>
 <tr class="memitem:adf41cecc177768d88e4c00b88bef06d6" id="r_adf41cecc177768d88e4c00b88bef06d6"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#adf41cecc177768d88e4c00b88bef06d6">ylmAll</a> (int orderL, double theta, double phi, double *out)</td></tr>
 <tr class="memitem:af9c20d33b335cba28f07391b0bf2a7ec" id="r_af9c20d33b335cba28f07391b0bf2a7ec"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#af9c20d33b335cba28f07391b0bf2a7ec">qlmAddBond</a> (int orderL, double dx, double dy, double dz, double *qlmInterleaved, int row, int nComp, int &amp;nUsed)</td></tr>
 <tr class="memitem:a37d2da128add52c3ffd5aa4d682755f7" id="r_a37d2da128add52c3ffd5aa4d682755f7"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a37d2da128add52c3ffd5aa4d682755f7">qlmOneAtom</a> (int iatom, int orderL, const double *xyz, const int *offsets, const int *cols, double bx, double by, double bz, double *qlmInterleaved)</td></tr>
@@ -605,24 +606,40 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="steinhardt__device_8hpp_source.html#l00245">245</a> of file <a class="el" href="steinhardt__device_8hpp_source.html">steinhardt_device.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  247</span>                                   {</div>
-<div class="line"><span class="lineno">  248</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> r2 = dx * dx + dy * dy + dz * dz;</div>
-<div class="line"><span class="lineno">  249</span>  <span class="keywordflow">if</span> (r2 == 0.0) {</div>
-<div class="line"><span class="lineno">  250</span>    <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  251</span>  }</div>
-<div class="line"><span class="lineno">  252</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> r = std::sqrt(r2);</div>
-<div class="line"><span class="lineno">  253</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> phi = std::atan2(dx, dy);</div>
-<div class="line"><span class="lineno">  254</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> theta = std::acos(dz / r);</div>
-<div class="line"><span class="lineno">  255</span>  <span class="keywordtype">double</span> ylm[34];</div>
-<div class="line"><span class="lineno">  256</span>  <a class="code hl_function" href="#adf41cecc177768d88e4c00b88bef06d6">ylmAll</a>(orderL, theta, phi, ylm);</div>
-<div class="line"><span class="lineno">  257</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; nComp; m++) {</div>
-<div class="line"><span class="lineno">  258</span>    qlmInterleaved[2 * (row + m)] += ylm[2 * m];</div>
-<div class="line"><span class="lineno">  259</span>    qlmInterleaved[2 * (row + m) + 1] += ylm[2 * m + 1];</div>
-<div class="line"><span class="lineno">  260</span>  }</div>
-<div class="line"><span class="lineno">  261</span>  nUsed++;</div>
-<div class="line"><span class="lineno">  262</span>}</div>
-<div class="ttc" id="anamespaceseams_1_1steinhardt_html_adf41cecc177768d88e4c00b88bef06d6"><div class="ttname"><a href="#adf41cecc177768d88e4c00b88bef06d6">seams::steinhardt::ylmAll</a></div><div class="ttdeci">void ylmAll(int orderL, double theta, double phi, double *out)</div><div class="ttdef"><b>Definition</b> <a href="steinhardt__device_8hpp_source.html#l00202">steinhardt_device.hpp:202</a></div></div>
+<p class="definition">Definition at line <a class="el" href="steinhardt__device_8hpp_source.html#l00252">252</a> of file <a class="el" href="steinhardt__device_8hpp_source.html">steinhardt_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  254</span>                                   {</div>
+<div class="line"><span class="lineno">  255</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> r2 = dx * dx + dy * dy + dz * dz;</div>
+<div class="line"><span class="lineno">  256</span>  <span class="keywordflow">if</span> (r2 == 0.0) {</div>
+<div class="line"><span class="lineno">  257</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  258</span>  }</div>
+<div class="line"><span class="lineno">  259</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> r = std::sqrt(r2);</div>
+<div class="line"><span class="lineno">  260</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> invr = 1.0 / r;</div>
+<div class="line"><span class="lineno">  261</span>  <span class="keywordtype">double</span> cosT = dz * invr;</div>
+<div class="line"><span class="lineno">  262</span>  <span class="keywordflow">if</span> (cosT &gt; 1.0) {</div>
+<div class="line"><span class="lineno">  263</span>    cosT = 1.0;</div>
+<div class="line"><span class="lineno">  264</span>  } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (cosT &lt; -1.0) {</div>
+<div class="line"><span class="lineno">  265</span>    cosT = -1.0;</div>
+<div class="line"><span class="lineno">  266</span>  }</div>
+<div class="line"><span class="lineno">  267</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rho2 = dx * dx + dy * dy;</div>
+<div class="line"><span class="lineno">  268</span>  <span class="keywordtype">double</span> sinT = 0.0;</div>
+<div class="line"><span class="lineno">  269</span>  <span class="keywordtype">double</span> cphi = 1.0;</div>
+<div class="line"><span class="lineno">  270</span>  <span class="keywordtype">double</span> sphi = 0.0;</div>
+<div class="line"><span class="lineno">  271</span>  <span class="keywordflow">if</span> (rho2 != 0.0) {</div>
+<div class="line"><span class="lineno">  272</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> rho = std::sqrt(rho2);</div>
+<div class="line"><span class="lineno">  273</span>    sinT = rho * invr;</div>
+<div class="line"><span class="lineno">  274</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> invrho = 1.0 / rho;</div>
+<div class="line"><span class="lineno">  275</span>    cphi = dy * invrho;</div>
+<div class="line"><span class="lineno">  276</span>    sphi = dx * invrho;</div>
+<div class="line"><span class="lineno">  277</span>  }</div>
+<div class="line"><span class="lineno">  278</span>  <span class="keywordtype">double</span> ylm[34];</div>
+<div class="line"><span class="lineno">  279</span>  <a class="code hl_function" href="#afc83186a4ec1a9286658962d8325e363">ylmAllTrig</a>(orderL, sinT, cosT, cphi, sphi, ylm);</div>
+<div class="line"><span class="lineno">  280</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; nComp; m++) {</div>
+<div class="line"><span class="lineno">  281</span>    qlmInterleaved[2 * (row + m)] += ylm[2 * m];</div>
+<div class="line"><span class="lineno">  282</span>    qlmInterleaved[2 * (row + m) + 1] += ylm[2 * m + 1];</div>
+<div class="line"><span class="lineno">  283</span>  }</div>
+<div class="line"><span class="lineno">  284</span>  nUsed++;</div>
+<div class="line"><span class="lineno">  285</span>}</div>
+<div class="ttc" id="anamespaceseams_1_1steinhardt_html_afc83186a4ec1a9286658962d8325e363"><div class="ttname"><a href="#afc83186a4ec1a9286658962d8325e363">seams::steinhardt::ylmAllTrig</a></div><div class="ttdeci">void ylmAllTrig(int orderL, double sinT, double cosT, double cphi, double sphi, double *out)</div><div class="ttdef"><b>Definition</b> <a href="steinhardt__device_8hpp_source.html#l00205">steinhardt_device.hpp:205</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -688,38 +705,38 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="steinhardt__device_8hpp_source.html#l00266">266</a> of file <a class="el" href="steinhardt__device_8hpp_source.html">steinhardt_device.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  268</span>                                                                     {</div>
-<div class="line"><span class="lineno">  269</span>  (void)bx;</div>
-<div class="line"><span class="lineno">  270</span>  (void)by;</div>
-<div class="line"><span class="lineno">  271</span>  (void)bz;</div>
-<div class="line"><span class="lineno">  272</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> nComp = 2 * orderL + 1;</div>
-<div class="line"><span class="lineno">  273</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> iOff = 3 * iatom;</div>
-<div class="line"><span class="lineno">  274</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> row = iatom * nComp;</div>
-<div class="line"><span class="lineno">  275</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; nComp; m++) {</div>
-<div class="line"><span class="lineno">  276</span>    qlmInterleaved[2 * (row + m)] = 0.0;</div>
-<div class="line"><span class="lineno">  277</span>    qlmInterleaved[2 * (row + m) + 1] = 0.0;</div>
-<div class="line"><span class="lineno">  278</span>  }</div>
-<div class="line"><span class="lineno">  279</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> j0 = offsets[iatom];</div>
-<div class="line"><span class="lineno">  280</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> j1 = offsets[iatom + 1];</div>
-<div class="line"><span class="lineno">  281</span>  <span class="keywordtype">int</span> nUsed = 0;</div>
-<div class="line"><span class="lineno">  282</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> p = j0; p &lt; j1; p++) {</div>
-<div class="line"><span class="lineno">  283</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> jatom = cols[p];</div>
-<div class="line"><span class="lineno">  284</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> dx = xyz[iOff] - xyz[3 * jatom];</div>
-<div class="line"><span class="lineno">  285</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> dy = xyz[iOff + 1] - xyz[3 * jatom + 1];</div>
-<div class="line"><span class="lineno">  286</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> dz = xyz[iOff + 2] - xyz[3 * jatom + 2];</div>
-<div class="line"><span class="lineno">  287</span>    <a class="code hl_function" href="#af9c20d33b335cba28f07391b0bf2a7ec">qlmAddBond</a>(orderL, dx, dy, dz, qlmInterleaved, row, nComp, nUsed);</div>
-<div class="line"><span class="lineno">  288</span>  }</div>
-<div class="line"><span class="lineno">  289</span>  <span class="keywordflow">if</span> (nUsed == 0) {</div>
-<div class="line"><span class="lineno">  290</span>    <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  291</span>  }</div>
-<div class="line"><span class="lineno">  292</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> inv = 1.0 / <span class="keyword">static_cast&lt;</span><span class="keywordtype">double</span><span class="keyword">&gt;</span>(nUsed);</div>
-<div class="line"><span class="lineno">  293</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; nComp; m++) {</div>
-<div class="line"><span class="lineno">  294</span>    qlmInterleaved[2 * (row + m)] *= inv;</div>
-<div class="line"><span class="lineno">  295</span>    qlmInterleaved[2 * (row + m) + 1] *= inv;</div>
-<div class="line"><span class="lineno">  296</span>  }</div>
-<div class="line"><span class="lineno">  297</span>}</div>
-<div class="ttc" id="anamespaceseams_1_1steinhardt_html_af9c20d33b335cba28f07391b0bf2a7ec"><div class="ttname"><a href="#af9c20d33b335cba28f07391b0bf2a7ec">seams::steinhardt::qlmAddBond</a></div><div class="ttdeci">void qlmAddBond(int orderL, double dx, double dy, double dz, double *qlmInterleaved, int row, int nComp, int &amp;nUsed)</div><div class="ttdef"><b>Definition</b> <a href="steinhardt__device_8hpp_source.html#l00245">steinhardt_device.hpp:245</a></div></div>
+<p class="definition">Definition at line <a class="el" href="steinhardt__device_8hpp_source.html#l00289">289</a> of file <a class="el" href="steinhardt__device_8hpp_source.html">steinhardt_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  291</span>                                                                     {</div>
+<div class="line"><span class="lineno">  292</span>  (void)bx;</div>
+<div class="line"><span class="lineno">  293</span>  (void)by;</div>
+<div class="line"><span class="lineno">  294</span>  (void)bz;</div>
+<div class="line"><span class="lineno">  295</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> nComp = 2 * orderL + 1;</div>
+<div class="line"><span class="lineno">  296</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> iOff = 3 * iatom;</div>
+<div class="line"><span class="lineno">  297</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> row = iatom * nComp;</div>
+<div class="line"><span class="lineno">  298</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; nComp; m++) {</div>
+<div class="line"><span class="lineno">  299</span>    qlmInterleaved[2 * (row + m)] = 0.0;</div>
+<div class="line"><span class="lineno">  300</span>    qlmInterleaved[2 * (row + m) + 1] = 0.0;</div>
+<div class="line"><span class="lineno">  301</span>  }</div>
+<div class="line"><span class="lineno">  302</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> j0 = offsets[iatom];</div>
+<div class="line"><span class="lineno">  303</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> j1 = offsets[iatom + 1];</div>
+<div class="line"><span class="lineno">  304</span>  <span class="keywordtype">int</span> nUsed = 0;</div>
+<div class="line"><span class="lineno">  305</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> p = j0; p &lt; j1; p++) {</div>
+<div class="line"><span class="lineno">  306</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> jatom = cols[p];</div>
+<div class="line"><span class="lineno">  307</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> dx = xyz[iOff] - xyz[3 * jatom];</div>
+<div class="line"><span class="lineno">  308</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> dy = xyz[iOff + 1] - xyz[3 * jatom + 1];</div>
+<div class="line"><span class="lineno">  309</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> dz = xyz[iOff + 2] - xyz[3 * jatom + 2];</div>
+<div class="line"><span class="lineno">  310</span>    <a class="code hl_function" href="#af9c20d33b335cba28f07391b0bf2a7ec">qlmAddBond</a>(orderL, dx, dy, dz, qlmInterleaved, row, nComp, nUsed);</div>
+<div class="line"><span class="lineno">  311</span>  }</div>
+<div class="line"><span class="lineno">  312</span>  <span class="keywordflow">if</span> (nUsed == 0) {</div>
+<div class="line"><span class="lineno">  313</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  314</span>  }</div>
+<div class="line"><span class="lineno">  315</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> inv = 1.0 / <span class="keyword">static_cast&lt;</span><span class="keywordtype">double</span><span class="keyword">&gt;</span>(nUsed);</div>
+<div class="line"><span class="lineno">  316</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; nComp; m++) {</div>
+<div class="line"><span class="lineno">  317</span>    qlmInterleaved[2 * (row + m)] *= inv;</div>
+<div class="line"><span class="lineno">  318</span>    qlmInterleaved[2 * (row + m) + 1] *= inv;</div>
+<div class="line"><span class="lineno">  319</span>  }</div>
+<div class="line"><span class="lineno">  320</span>}</div>
+<div class="ttc" id="anamespaceseams_1_1steinhardt_html_af9c20d33b335cba28f07391b0bf2a7ec"><div class="ttname"><a href="#af9c20d33b335cba28f07391b0bf2a7ec">seams::steinhardt::qlmAddBond</a></div><div class="ttdeci">void qlmAddBond(int orderL, double dx, double dy, double dz, double *qlmInterleaved, int row, int nComp, int &amp;nUsed)</div><div class="ttdef"><b>Definition</b> <a href="steinhardt__device_8hpp_source.html#l00252">steinhardt_device.hpp:252</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -770,30 +787,30 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="steinhardt__device_8hpp_source.html#l00301">301</a> of file <a class="el" href="steinhardt__device_8hpp_source.html">steinhardt_device.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  303</span>                                                 {</div>
-<div class="line"><span class="lineno">  304</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> nComp = 2 * orderL + 1;</div>
-<div class="line"><span class="lineno">  305</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> row = iatom * nComp;</div>
-<div class="line"><span class="lineno">  306</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; nComp; m++) {</div>
-<div class="line"><span class="lineno">  307</span>    qlmInterleaved[2 * (row + m)] = 0.0;</div>
-<div class="line"><span class="lineno">  308</span>    qlmInterleaved[2 * (row + m) + 1] = 0.0;</div>
-<div class="line"><span class="lineno">  309</span>  }</div>
-<div class="line"><span class="lineno">  310</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> j0 = offsets[iatom];</div>
-<div class="line"><span class="lineno">  311</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> j1 = offsets[iatom + 1];</div>
-<div class="line"><span class="lineno">  312</span>  <span class="keywordtype">int</span> nUsed = 0;</div>
-<div class="line"><span class="lineno">  313</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> p = j0; p &lt; j1; p++) {</div>
-<div class="line"><span class="lineno">  314</span>    <a class="code hl_function" href="#af9c20d33b335cba28f07391b0bf2a7ec">qlmAddBond</a>(orderL, dr[3 * p], dr[3 * p + 1], dr[3 * p + 2],</div>
-<div class="line"><span class="lineno">  315</span>               qlmInterleaved, row, nComp, nUsed);</div>
-<div class="line"><span class="lineno">  316</span>  }</div>
-<div class="line"><span class="lineno">  317</span>  <span class="keywordflow">if</span> (nUsed == 0) {</div>
-<div class="line"><span class="lineno">  318</span>    <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  319</span>  }</div>
-<div class="line"><span class="lineno">  320</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> inv = 1.0 / <span class="keyword">static_cast&lt;</span><span class="keywordtype">double</span><span class="keyword">&gt;</span>(nUsed);</div>
-<div class="line"><span class="lineno">  321</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; nComp; m++) {</div>
-<div class="line"><span class="lineno">  322</span>    qlmInterleaved[2 * (row + m)] *= inv;</div>
-<div class="line"><span class="lineno">  323</span>    qlmInterleaved[2 * (row + m) + 1] *= inv;</div>
-<div class="line"><span class="lineno">  324</span>  }</div>
-<div class="line"><span class="lineno">  325</span>}</div>
+<p class="definition">Definition at line <a class="el" href="steinhardt__device_8hpp_source.html#l00324">324</a> of file <a class="el" href="steinhardt__device_8hpp_source.html">steinhardt_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  326</span>                                                 {</div>
+<div class="line"><span class="lineno">  327</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> nComp = 2 * orderL + 1;</div>
+<div class="line"><span class="lineno">  328</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> row = iatom * nComp;</div>
+<div class="line"><span class="lineno">  329</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; nComp; m++) {</div>
+<div class="line"><span class="lineno">  330</span>    qlmInterleaved[2 * (row + m)] = 0.0;</div>
+<div class="line"><span class="lineno">  331</span>    qlmInterleaved[2 * (row + m) + 1] = 0.0;</div>
+<div class="line"><span class="lineno">  332</span>  }</div>
+<div class="line"><span class="lineno">  333</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> j0 = offsets[iatom];</div>
+<div class="line"><span class="lineno">  334</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> j1 = offsets[iatom + 1];</div>
+<div class="line"><span class="lineno">  335</span>  <span class="keywordtype">int</span> nUsed = 0;</div>
+<div class="line"><span class="lineno">  336</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> p = j0; p &lt; j1; p++) {</div>
+<div class="line"><span class="lineno">  337</span>    <a class="code hl_function" href="#af9c20d33b335cba28f07391b0bf2a7ec">qlmAddBond</a>(orderL, dr[3 * p], dr[3 * p + 1], dr[3 * p + 2],</div>
+<div class="line"><span class="lineno">  338</span>               qlmInterleaved, row, nComp, nUsed);</div>
+<div class="line"><span class="lineno">  339</span>  }</div>
+<div class="line"><span class="lineno">  340</span>  <span class="keywordflow">if</span> (nUsed == 0) {</div>
+<div class="line"><span class="lineno">  341</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  342</span>  }</div>
+<div class="line"><span class="lineno">  343</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> inv = 1.0 / <span class="keyword">static_cast&lt;</span><span class="keywordtype">double</span><span class="keyword">&gt;</span>(nUsed);</div>
+<div class="line"><span class="lineno">  344</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; nComp; m++) {</div>
+<div class="line"><span class="lineno">  345</span>    qlmInterleaved[2 * (row + m)] *= inv;</div>
+<div class="line"><span class="lineno">  346</span>    qlmInterleaved[2 * (row + m) + 1] *= inv;</div>
+<div class="line"><span class="lineno">  347</span>  }</div>
+<div class="line"><span class="lineno">  348</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -849,51 +866,51 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="steinhardt__device_8hpp_source.html#l00327">327</a> of file <a class="el" href="steinhardt__device_8hpp_source.html">steinhardt_device.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  329</span>                                     {</div>
-<div class="line"><span class="lineno">  330</span>  <span class="keyword">constexpr</span> <span class="keywordtype">double</span> pi = 3.14159265358979323846;</div>
-<div class="line"><span class="lineno">  331</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> nComp = 2 * orderL + 1;</div>
-<div class="line"><span class="lineno">  332</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> prefactor = 4.0 * pi / (2.0 * orderL + 1.0);</div>
-<div class="line"><span class="lineno">  333</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> row = iatom * nComp;</div>
-<div class="line"><span class="lineno">  334</span>  <span class="keywordtype">double</span> sumLocal = 0.0;</div>
-<div class="line"><span class="lineno">  335</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; nComp; m++) {</div>
-<div class="line"><span class="lineno">  336</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> re = qlmInterleaved[2 * (row + m)];</div>
-<div class="line"><span class="lineno">  337</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> im = qlmInterleaved[2 * (row + m) + 1];</div>
-<div class="line"><span class="lineno">  338</span>    sumLocal += re * re + im * im;</div>
-<div class="line"><span class="lineno">  339</span>  }</div>
-<div class="line"><span class="lineno">  340</span>  ql[iatom] = std::sqrt(prefactor * sumLocal);</div>
-<div class="line"><span class="lineno">  341</span> </div>
-<div class="line"><span class="lineno">  342</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> j0 = offsets[iatom];</div>
-<div class="line"><span class="lineno">  343</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> j1 = offsets[iatom + 1];</div>
-<div class="line"><span class="lineno">  344</span>  <span class="keywordflow">if</span> (j0 == j1) {</div>
-<div class="line"><span class="lineno">  345</span>    qlBar[iatom] = ql[iatom];</div>
-<div class="line"><span class="lineno">  346</span>    <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  347</span>  }</div>
-<div class="line"><span class="lineno">  348</span>  <span class="keywordtype">double</span> barRe[17];</div>
-<div class="line"><span class="lineno">  349</span>  <span class="keywordtype">double</span> barIm[17];</div>
-<div class="line"><span class="lineno">  350</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; nComp; m++) {</div>
-<div class="line"><span class="lineno">  351</span>    barRe[m] = qlmInterleaved[2 * (row + m)];</div>
-<div class="line"><span class="lineno">  352</span>    barIm[m] = qlmInterleaved[2 * (row + m) + 1];</div>
-<div class="line"><span class="lineno">  353</span>  }</div>
-<div class="line"><span class="lineno">  354</span>  <span class="keywordtype">int</span> nContrib = 1;</div>
-<div class="line"><span class="lineno">  355</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> p = j0; p &lt; j1; p++) {</div>
-<div class="line"><span class="lineno">  356</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> jatom = cols[p];</div>
-<div class="line"><span class="lineno">  357</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> jRow = jatom * nComp;</div>
-<div class="line"><span class="lineno">  358</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; nComp; m++) {</div>
-<div class="line"><span class="lineno">  359</span>      barRe[m] += qlmInterleaved[2 * (jRow + m)];</div>
-<div class="line"><span class="lineno">  360</span>      barIm[m] += qlmInterleaved[2 * (jRow + m) + 1];</div>
-<div class="line"><span class="lineno">  361</span>    }</div>
-<div class="line"><span class="lineno">  362</span>    nContrib++;</div>
-<div class="line"><span class="lineno">  363</span>  }</div>
-<div class="line"><span class="lineno">  364</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> inv = 1.0 / <span class="keyword">static_cast&lt;</span><span class="keywordtype">double</span><span class="keyword">&gt;</span>(nContrib);</div>
-<div class="line"><span class="lineno">  365</span>  <span class="keywordtype">double</span> sumBar = 0.0;</div>
-<div class="line"><span class="lineno">  366</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; nComp; m++) {</div>
-<div class="line"><span class="lineno">  367</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> re = barRe[m] * inv;</div>
-<div class="line"><span class="lineno">  368</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> im = barIm[m] * inv;</div>
-<div class="line"><span class="lineno">  369</span>    sumBar += re * re + im * im;</div>
+<p class="definition">Definition at line <a class="el" href="steinhardt__device_8hpp_source.html#l00350">350</a> of file <a class="el" href="steinhardt__device_8hpp_source.html">steinhardt_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  352</span>                                     {</div>
+<div class="line"><span class="lineno">  353</span>  <span class="keyword">constexpr</span> <span class="keywordtype">double</span> pi = 3.14159265358979323846;</div>
+<div class="line"><span class="lineno">  354</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> nComp = 2 * orderL + 1;</div>
+<div class="line"><span class="lineno">  355</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> prefactor = 4.0 * pi / (2.0 * orderL + 1.0);</div>
+<div class="line"><span class="lineno">  356</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> row = iatom * nComp;</div>
+<div class="line"><span class="lineno">  357</span>  <span class="keywordtype">double</span> sumLocal = 0.0;</div>
+<div class="line"><span class="lineno">  358</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; nComp; m++) {</div>
+<div class="line"><span class="lineno">  359</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> re = qlmInterleaved[2 * (row + m)];</div>
+<div class="line"><span class="lineno">  360</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> im = qlmInterleaved[2 * (row + m) + 1];</div>
+<div class="line"><span class="lineno">  361</span>    sumLocal += re * re + im * im;</div>
+<div class="line"><span class="lineno">  362</span>  }</div>
+<div class="line"><span class="lineno">  363</span>  ql[iatom] = std::sqrt(prefactor * sumLocal);</div>
+<div class="line"><span class="lineno">  364</span> </div>
+<div class="line"><span class="lineno">  365</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> j0 = offsets[iatom];</div>
+<div class="line"><span class="lineno">  366</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> j1 = offsets[iatom + 1];</div>
+<div class="line"><span class="lineno">  367</span>  <span class="keywordflow">if</span> (j0 == j1) {</div>
+<div class="line"><span class="lineno">  368</span>    qlBar[iatom] = ql[iatom];</div>
+<div class="line"><span class="lineno">  369</span>    <span class="keywordflow">return</span>;</div>
 <div class="line"><span class="lineno">  370</span>  }</div>
-<div class="line"><span class="lineno">  371</span>  qlBar[iatom] = std::sqrt(prefactor * sumBar);</div>
-<div class="line"><span class="lineno">  372</span>}</div>
+<div class="line"><span class="lineno">  371</span>  <span class="keywordtype">double</span> barRe[17];</div>
+<div class="line"><span class="lineno">  372</span>  <span class="keywordtype">double</span> barIm[17];</div>
+<div class="line"><span class="lineno">  373</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; nComp; m++) {</div>
+<div class="line"><span class="lineno">  374</span>    barRe[m] = qlmInterleaved[2 * (row + m)];</div>
+<div class="line"><span class="lineno">  375</span>    barIm[m] = qlmInterleaved[2 * (row + m) + 1];</div>
+<div class="line"><span class="lineno">  376</span>  }</div>
+<div class="line"><span class="lineno">  377</span>  <span class="keywordtype">int</span> nContrib = 1;</div>
+<div class="line"><span class="lineno">  378</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> p = j0; p &lt; j1; p++) {</div>
+<div class="line"><span class="lineno">  379</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> jatom = cols[p];</div>
+<div class="line"><span class="lineno">  380</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> jRow = jatom * nComp;</div>
+<div class="line"><span class="lineno">  381</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; nComp; m++) {</div>
+<div class="line"><span class="lineno">  382</span>      barRe[m] += qlmInterleaved[2 * (jRow + m)];</div>
+<div class="line"><span class="lineno">  383</span>      barIm[m] += qlmInterleaved[2 * (jRow + m) + 1];</div>
+<div class="line"><span class="lineno">  384</span>    }</div>
+<div class="line"><span class="lineno">  385</span>    nContrib++;</div>
+<div class="line"><span class="lineno">  386</span>  }</div>
+<div class="line"><span class="lineno">  387</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> inv = 1.0 / <span class="keyword">static_cast&lt;</span><span class="keywordtype">double</span><span class="keyword">&gt;</span>(nContrib);</div>
+<div class="line"><span class="lineno">  388</span>  <span class="keywordtype">double</span> sumBar = 0.0;</div>
+<div class="line"><span class="lineno">  389</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; nComp; m++) {</div>
+<div class="line"><span class="lineno">  390</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> re = barRe[m] * inv;</div>
+<div class="line"><span class="lineno">  391</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> im = barIm[m] * inv;</div>
+<div class="line"><span class="lineno">  392</span>    sumBar += re * re + im * im;</div>
+<div class="line"><span class="lineno">  393</span>  }</div>
+<div class="line"><span class="lineno">  394</span>  qlBar[iatom] = std::sqrt(prefactor * sumBar);</div>
+<div class="line"><span class="lineno">  395</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -934,22 +951,73 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="steinhardt__device_8hpp_source.html#l00202">202</a> of file <a class="el" href="steinhardt__device_8hpp_source.html">steinhardt_device.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  202</span>                                                                      {</div>
-<div class="line"><span class="lineno">  203</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> nComp = 2 * orderL + 1;</div>
-<div class="line"><span class="lineno">  204</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; nComp; k++) {</div>
-<div class="line"><span class="lineno">  205</span>    out[2 * k] = 0.0;</div>
-<div class="line"><span class="lineno">  206</span>    out[2 * k + 1] = 0.0;</div>
-<div class="line"><span class="lineno">  207</span>  }</div>
-<div class="line"><span class="lineno">  208</span> </div>
-<div class="line"><span class="lineno">  209</span>  <span class="keywordtype">double</span> s[9];</div>
-<div class="line"><span class="lineno">  210</span>  <span class="keywordtype">double</span> c[9];</div>
-<div class="line"><span class="lineno">  211</span>  <span class="keywordtype">double</span> pr[9];</div>
-<div class="line"><span class="lineno">  212</span>  <span class="keywordtype">double</span> pi[9];</div>
-<div class="line"><span class="lineno">  213</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> sinT = std::sin(theta);</div>
-<div class="line"><span class="lineno">  214</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> cosT = std::cos(theta);</div>
-<div class="line"><span class="lineno">  215</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> cphi = std::cos(phi);</div>
-<div class="line"><span class="lineno">  216</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> sphi = std::sin(phi);</div>
+<p class="definition">Definition at line <a class="el" href="steinhardt__device_8hpp_source.html#l00244">244</a> of file <a class="el" href="steinhardt__device_8hpp_source.html">steinhardt_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  244</span>                                                                      {</div>
+<div class="line"><span class="lineno">  245</span>  <a class="code hl_function" href="#afc83186a4ec1a9286658962d8325e363">ylmAllTrig</a>(orderL, std::sin(theta), std::cos(theta), std::cos(phi),</div>
+<div class="line"><span class="lineno">  246</span>             std::sin(phi), out);</div>
+<div class="line"><span class="lineno">  247</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="afc83186a4ec1a9286658962d8325e363" name="afc83186a4ec1a9286658962d8325e363"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc83186a4ec1a9286658962d8325e363">&#9670;&#160;</a></span>ylmAllTrig()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void seams::steinhardt::ylmAllTrig </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>orderL</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>sinT</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cosT</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cphi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>sphi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>out</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="steinhardt__device_8hpp_source.html#l00205">205</a> of file <a class="el" href="steinhardt__device_8hpp_source.html">steinhardt_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  206</span>                                                 {</div>
+<div class="line"><span class="lineno">  207</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> nComp = 2 * orderL + 1;</div>
+<div class="line"><span class="lineno">  208</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; nComp; k++) {</div>
+<div class="line"><span class="lineno">  209</span>    out[2 * k] = 0.0;</div>
+<div class="line"><span class="lineno">  210</span>    out[2 * k + 1] = 0.0;</div>
+<div class="line"><span class="lineno">  211</span>  }</div>
+<div class="line"><span class="lineno">  212</span> </div>
+<div class="line"><span class="lineno">  213</span>  <span class="keywordtype">double</span> s[9];</div>
+<div class="line"><span class="lineno">  214</span>  <span class="keywordtype">double</span> c[9];</div>
+<div class="line"><span class="lineno">  215</span>  <span class="keywordtype">double</span> pr[9];</div>
+<div class="line"><span class="lineno">  216</span>  <span class="keywordtype">double</span> pi[9];</div>
 <div class="line"><span class="lineno">  217</span>  s[0] = 1.0;</div>
 <div class="line"><span class="lineno">  218</span>  c[0] = 1.0;</div>
 <div class="line"><span class="lineno">  219</span>  pr[0] = 1.0;</div>

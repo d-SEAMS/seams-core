@@ -13,7 +13,8 @@ var namespaceseams =
       [ "qlmOneAtom", "namespaceseams_1_1steinhardt.html#a37d2da128add52c3ffd5aa4d682755f7", null ],
       [ "qlmOneAtomDr", "namespaceseams_1_1steinhardt.html#a55aa32c67dd82d3268c94b0c553b8a5e", null ],
       [ "qlOneAtom", "namespaceseams_1_1steinhardt.html#ad7a4bc8342952acfea0b25760b426796", null ],
-      [ "ylmAll", "namespaceseams_1_1steinhardt.html#adf41cecc177768d88e4c00b88bef06d6", null ]
+      [ "ylmAll", "namespaceseams_1_1steinhardt.html#adf41cecc177768d88e4c00b88bef06d6", null ],
+      [ "ylmAllTrig", "namespaceseams_1_1steinhardt.html#afc83186a4ec1a9286658962d8325e363", null ]
     ] ],
     [ "BatchPeriodicDistSq", "namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab", null ]
 ];

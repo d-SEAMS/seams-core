@@ -1,5 +1,6 @@
 var NAVTREEINDEX3 =
 {
+"structgpu_1_1Plan.html#a1086b17671aa3043e3228c29c0c783af":[2,0,6,3,1],
 "structgpu_1_1Plan.html#a1086b17671aa3043e3228c29c0c783af":[4,0,3,3,1],
 "structgpu_1_1Plan.html#a3e9b7b27194f7d4dc9ee50d024aa628a":[2,0,6,3,3],
 "structgpu_1_1Plan.html#a3e9b7b27194f7d4dc9ee50d024aa628a":[4,0,3,3,3],
