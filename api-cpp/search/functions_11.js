@@ -3,7 +3,7 @@ var searchData=
   ['samecertificate_0',['sameCertificate',['../namespacecage.html#ae431d00a43e0a0e99da9ff62d23a6e22',1,'cage']]],
   ['samplerdf_5faa_1',['sampleRDF_AA',['../group__rdf2.html#gae37c30b0c6e6c8d63f2471450b9b26ef',1,'rdf2']]],
   ['searchmollist_2',['searchMolList',['../group__molSys.html#ga4c1de58730efe0454ce4a92f1a96231b',1,'molSys']]],
-  ['seededcageaffiliation_3',['seededCageAffiliation',['../namespacering.html#a995edc47f2d855d9b3d19b6aedfa640c',1,'ring']]],
+  ['seededcageaffiliation_3',['seededCageAffiliation',['../namespacering.html#a1f59a70140bd3498eb53e448f916229f',1,'ring']]],
   ['setatomswithsamemolid_4',['setAtomsWithSameMolID',['../group__ring.html#gaa840597800d75f1e4819649e51a567bc',1,'gen']]],
   ['shapematchddc_5',['shapeMatchDDC',['../group__ring.html#gadc7a460ce02d21cf58026ba2d835580b',1,'tum3']]],
   ['shapematchhc_6',['shapeMatchHC',['../group__ring.html#ga6a40063c694390318235689274078616',1,'tum3']]],

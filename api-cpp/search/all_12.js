@@ -13,7 +13,7 @@ var searchData=
   ['seams_5foutput_2ehpp_10',['seams_output.hpp',['../seams__output_8hpp.html',1,'']]],
   ['searchmollist_11',['searchMolList',['../group__molSys.html#ga4c1de58730efe0454ce4a92f1a96231b',1,'molSys']]],
   ['seededatomlabels_12',['SeededAtomLabels',['../structring_1_1SeededAtomLabels.html',1,'ring']]],
-  ['seededcageaffiliation_13',['seededCageAffiliation',['../namespacering.html#a995edc47f2d855d9b3d19b6aedfa640c',1,'ring']]],
+  ['seededcageaffiliation_13',['seededCageAffiliation',['../namespacering.html#a1f59a70140bd3498eb53e448f916229f',1,'ring']]],
   ['selection_2ehpp_14',['selection.hpp',['../selection_8hpp.html',1,'']]],
   ['setatomswithsamemolid_15',['setAtomsWithSameMolID',['../group__ring.html#gaa840597800d75f1e4819649e51a567bc',1,'gen']]],
   ['shapematch_2ehpp_16',['shapeMatch.hpp',['../shapeMatch_8hpp.html',1,'']]],

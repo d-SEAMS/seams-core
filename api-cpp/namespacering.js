@@ -54,7 +54,8 @@ var namespacering =
     [ "printSliceGetEdgeMoleculesInRings", "group__ring.html#ga9ae29f498a7f2b5c5892dc30a6e8ab0f", null ],
     [ "prismAnalysis", "group__ring.html#ga12f36b4fcda3a6aef2e7db9f90eb65b4", null ],
     [ "relaxedPrismConditions", "group__ring.html#ga55b285a12dd4d3b71906d50714f15e8b", null ],
+    [ "ringAdjacentCompletion", "namespacering.html#a52d5bc312612884ce62bd430d94fdb17", null ],
     [ "rmAxialTranslations", "group__ring.html#ga5f5496ef80d800cb0e9b4d87b6cca4bf", null ],
-    [ "seededCageAffiliation", "namespacering.html#a995edc47f2d855d9b3d19b6aedfa640c", null ],
+    [ "seededCageAffiliation", "namespacering.html#a1f59a70140bd3498eb53e448f916229f", null ],
     [ "topoBulkAnalysis", "namespacering.html#ada5f6a19834edc41365e7f85d92e4b76", null ]
 ];

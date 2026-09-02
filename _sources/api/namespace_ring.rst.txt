@@ -37,7 +37,8 @@ Topological network criteria functions. :ref:`More...<details-namespacering>`
 	// global functions
 
 	:ref:`CageAffiliation<doxid-structring_1_1_cage_affiliation>` :ref:`cageAffiliation<doxid-namespacering_1a6a455f7a0da97df613534671c9377a45>`(const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList);
-	:ref:`SeededAtomLabels<doxid-structring_1_1_seeded_atom_labels>` :ref:`seededCageAffiliation<doxid-namespacering_1a995edc47f2d855d9b3d19b6aedfa640c>`(const std::vector<std::vector<int>>& strictRings, const std::vector<std::vector<int>>& strictNList, const std::vector<std::vector<int>>& permissiveRings, const std::vector<std::vector<int>>& permissiveNList);
+	:ref:`SeededAtomLabels<doxid-structring_1_1_seeded_atom_labels>` :ref:`seededCageAffiliation<doxid-namespacering_1a1f59a70140bd3498eb53e448f916229f>`(const std::vector<std::vector<int>>& strictRings, const std::vector<std::vector<int>>& strictNList, const std::vector<std::vector<int>>& permissiveRings, const std::vector<std::vector<int>>& permissiveNList, bool ringAdjacentCompletion = false);
+	:ref:`SeededAtomLabels<doxid-structring_1_1_seeded_atom_labels>` :ref:`ringAdjacentCompletion<doxid-namespacering_1a52d5bc312612884ce62bd430d94fdb17>`(const :ref:`SeededAtomLabels<doxid-structring_1_1_seeded_atom_labels>`& labels, const std::vector<std::vector<int>>& permissiveRings);
 	int :ref:`bulkPolygonRingAnalysis<doxid-namespacering_1a46bc67e817124b0e736c493bc8e4d6ee>`(std::string path, const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int maxDepth, int firstFrame);
 	int :ref:`topoBulkAnalysis<doxid-namespacering_1ada5f6a19834edc41365e7f85d92e4b76>`(std::string path, const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int firstFrame, bool onlyTetrahedral = true);
 	:ref:`RingSearchIndex<doxid-structring_1_1_ring_search_index>` :ref:`buildRingSearchIndex<doxid-namespacering_1a2314146c9c30c45799ab5217b8b69e61>`(const std::vector<std::vector<int>>& rings, int numAtoms);
@@ -110,16 +111,16 @@ Global Functions
 Batch computation of the affiliation predicates for six-membered rings. nList is by index with the leading self entry, as neighbourListByIndex produces.
 
 .. index:: pair: function; seededCageAffiliation
-.. _doxid-namespacering_1a995edc47f2d855d9b3d19b6aedfa640c:
+.. _doxid-namespacering_1a1f59a70140bd3498eb53e448f916229f:
 
 .. ref-code-block:: cpp
 	:class: doxyrest-title-code-block
 
-	:ref:`SeededAtomLabels<doxid-structring_1_1_seeded_atom_labels>` seededCageAffiliation(const std::vector<std::vector<int>>& strictRings, const std::vector<std::vector<int>>& strictNList, const std::vector<std::vector<int>>& permissiveRings, const std::vector<std::vector<int>>& permissiveNList)
+	:ref:`SeededAtomLabels<doxid-structring_1_1_seeded_atom_labels>` seededCageAffiliation(const std::vector<std::vector<int>>& strictRings, const std::vector<std::vector<int>>& strictNList, const std::vector<std::vector<int>>& permissiveRings, const std::vector<std::vector<int>>& permissiveNList, bool ringAdjacentCompletion = false)
 
 Seeded affiliation over two graphs on the same atoms: the strict graph (typically the mutual k-nearest bonds) supplies seeds, the permissive supergraph (typically the union bonds) supplies completions, and a permissively affiliated atom is accepted only when its bonded component of affiliated atoms contains a seed.
 
-Specificity on structureless input is structural rather than statistical: when the strict pass affiliates nothing, nothing is accepted regardless of what the permissive graph builds. Where both graphs label an atom, the strict labels win.
+Specificity on structureless input is structural rather than statistical: when the strict pass affiliates nothing, nothing is accepted regardless of what the permissive graph builds. Where both graphs label an atom, the strict labels win. With ringAdjacentCompletion a permissive six-ring with all but one vertex labelled has its last vertex labelled too.
 
 
 
@@ -147,6 +148,40 @@ Specificity on structureless input is structural rather than statistical: when t
 		- permissiveNList
 
 		- Permissive graph, same conventions.
+
+	*
+		- ringAdjacentCompletion
+
+		- Fill the single unlabelled vertex of otherwise labelled permissive six-rings (:ref:`ringAdjacentCompletion() <doxid-namespacering_1a52d5bc312612884ce62bd430d94fdb17>`).
+
+.. index:: pair: function; ringAdjacentCompletion
+.. _doxid-namespacering_1a52d5bc312612884ce62bd430d94fdb17:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`SeededAtomLabels<doxid-structring_1_1_seeded_atom_labels>` ringAdjacentCompletion(const :ref:`SeededAtomLabels<doxid-structring_1_1_seeded_atom_labels>`& labels, const std::vector<std::vector<int>>& permissiveRings)
+
+Ring completion of seeded labels.
+
+A permissive six-ring whose vertices all carry a cage label but one is a cage ring with a vacancy in the label, and its last vertex takes the label; repeated to a fixed point. A liquid ring touching a nucleus has at most a few labelled vertices, so the completion cannot walk into the liquid, and a frame the seeded pass left empty stays empty.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- labels
+
+		- Seeded per-atom flags.
+
+	*
+		- permissiveRings
+
+		- Six-membered rings of the permissive graph.
 
 .. index:: pair: function; bulkPolygonRingAnalysis
 .. _doxid-namespacering_1a46bc67e817124b0e736c493bc8e4d6ee:

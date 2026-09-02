@@ -1,5 +1,6 @@
 var NAVTREEINDEX2 =
 {
+"namespacesinp.html":[1,11,0],
 "namespacesite.html":[2,0,19],
 "namespacesite.html#a05342583b5b8258d5347b3f18983d4b2":[2,0,19,7],
 "namespacesite.html#a0e086c58b6a8de67c895bd1e034f58e6":[2,0,19,4],
@@ -248,6 +249,5 @@ var NAVTREEINDEX2 =
 "structring_1_1SeededAtomLabels.html":[4,0,9,3],
 "structring_1_1SeededAtomLabels.html#a850d14e4cf97556a4d09c6260a626b40":[2,0,16,3,0],
 "structring_1_1SeededAtomLabels.html#a850d14e4cf97556a4d09c6260a626b40":[4,0,9,3,0],
-"structring_1_1SeededAtomLabels.html#a86b70944057c6a0478cc33617e95d819":[2,0,16,3,1],
-"structring_1_1SeededAtomLabels.html#a86b70944057c6a0478cc33617e95d819":[4,0,9,3,1]
+"structring_1_1SeededAtomLabels.html#a86b70944057c6a0478cc33617e95d819":[2,0,16,3,1]
 };
