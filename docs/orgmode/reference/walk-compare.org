@@ -1,0 +1,70 @@
+#+TITLE: walk_compare
+#+OPTIONS: toc:nil num:nil
+
+~tests/walk_compare.cpp~ walks a LAMMPS dump and prints one row per
+frame. Each row lists four-neighbour star classifier (CHILL) plus
+labels on the cutoff graph, cage membership on that same graph, and
+the seeded assignment on the mutual and union four-nearest graphs.
+
+Meson writes the binary next to the other test programs.
+
+#+begin_src bash
+meson compile -C bbdir tests/walk_compare
+bbdir/tests/walk_compare TRAJ [lastFrame] [atomType] [stride]
+#+end_src
+
+* Inputs
+
+| argument | default | meaning |
+|----------+---------+---------|
+| ~TRAJ~ | (required) | LAMMPS dump path |
+| ~lastFrame~ | all frames | Inclusive last 1-based frame. ~0~ or a value past the dump length means every frame. |
+| ~atomType~ | ~1~ | LAMMPS type kept by ~sinp::readLammpsTrjO~ |
+| ~stride~ | ~1~ | Frame step. A non-positive value becomes ~1~. |
+
+The walk hard-codes cutoff ~3.5~, k-nearest candidate cutoff ~5.5~,
+and ~k = 4~. The call omits the ~ringAdjacentCompletion~ flag, so
+~seed_*~ is the default seeded assignment.
+
+The walk also writes a comment line that names the dump, the frame
+count, the last frame, and the stride. A second comment line names
+the columns.
+
+* Columns
+
+Twenty integers per data row, left to right.
+
+| column | meaning |
+|--------+---------|
+| ~frame~ | 1-based dump frame |
+| ~nop~ | Atoms kept of ~atomType~ |
+| ~chill_cubic~ | Cubic star label, including ~reCubic~ |
+| ~chill_hex~ | Hexagonal star label, including ~reHex~ |
+| ~chill_interfacial~ | Interfacial star label |
+| ~chill_clathrate~ | Clathrate star label |
+| ~chill_interclathrate~ | Interfacial clathrate star label |
+| ~chill_water~ | Water star label and every other leftover label |
+| ~chill_ice~ | Cubic plus hexagonal. Bulk ice in the sense of Nguyen and Molinero. Interfacial molecules are not ice. |
+| ~chill_max~ | Size of the largest connected component of ~chill_ice~ on the cutoff graph |
+| ~chill_clus~ | Number of those components |
+| ~cut_ice~ | Atoms on a hexagonal-cage or double-diamond-cage six-ring of the cutoff graph |
+| ~cut_max~ | Largest component of ~cut_ice~ on the cutoff graph |
+| ~cut_clus~ | Number of those components |
+| ~seed_ih~ | Hexagonal-cage without double-diamond |
+| ~seed_ic~ | Double-diamond without hexagonal-cage |
+| ~seed_both~ | Both hexagonal-cage and double-diamond |
+| ~seed_ice~ | ~seed_ih~ + ~seed_ic~ + ~seed_both~ |
+| ~seed_max~ | Largest component of ~seed_ice~ on the union four-nearest graph |
+| ~seed_clus~ | Number of those components |
+
+An empty frame prints ~frame~ and then nineteen zeros.
+
+Star labels and ~cut_*~ share the cutoff neighbour list. ~seed_*~
+uses ~nneigh::kNearestNeighbourPair~ (~k = 4~) and
+~ring::seededCageAffiliation~ on the mutual six-rings plus the union
+six-rings.
+
+See [[file:../explanation/chill-plus-vs-cages.org][CHILL+ versus cages]]
+for why the three scores disagree, and
+[[file:../explanation/ring-completion.org][Ring-adjacent completion]]
+for the optional all-but-one fill.
