@@ -14,7 +14,7 @@ project('seams-core', ['cpp', 'c'],
 host_system = host_machine.system()
 
 # Global accumulator variables (eOn pattern)
-_args = ['-funroll-loops']
+_args = []
 _link_args = []
 _deps = []
 _linkto = []
@@ -23,9 +23,10 @@ _incdirs = []
 cppc = meson.get_compiler('cpp')
 cpp_id = cppc.get_id()
 
-# GCC/clang warning suppressions. nvc++ (id nvidia/pgi) rejects several
-# of these -Wno flags, so they stay off that toolchain.
+# GCC/clang warning suppressions and -funroll-loops. nvc++ (id
+# nvidia / nvidia_hpc / pgi) rejects those switches.
 if cpp_id == 'gcc' or cpp_id == 'clang'
+  _args += ['-funroll-loops']
   _args += ['-Wno-sign-compare', '-Wno-unused-variable',
             '-Wno-unused-parameter', '-Wno-unused-but-set-variable']
   if cpp_id == 'gcc'
