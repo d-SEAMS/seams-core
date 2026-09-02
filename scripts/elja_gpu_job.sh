@@ -45,6 +45,12 @@ OUT=${OUT_DIR:-$ROOT/offload-elja-$JOB_ID}
 BUILD=$OUT/build
 mkdir -p "$OUT"
 cd "$ROOT"
+SYS_LOCALRC=$NVHPC_ROOT/compilers/bin/localrc
+if [[ -f $SYS_LOCALRC ]]; then
+  sed "s|set GCCDIR=/usr/lib/gcc/x86_64-redhat-linux/8;|set GCCDIR=$GCCCORE/lib/gcc/x86_64-pc-linux-gnu/13.3.0;|" \
+    "$SYS_LOCALRC" > "$OUT/nvc.localrc"
+  export NVLOCALRC=$OUT/nvc.localrc
+fi
 
 # GPU nodes have no glibc-devel. Login-node C runtime objects live
 # in elja-crt/ (copied before submit). gcc and clang find crt1.o
@@ -117,6 +123,14 @@ if ! grep -q ' /usr/lib64 ' /proc/mounts; then
     cp "$CRT"/libc.so "$CRT"/libm.so "$OVL/lib64-merged/" 2>/dev/null || true
   fi
   mount --bind "$OVL/lib64-merged" /usr/lib64
+fi
+# nvc++ localrc points at system GCC 8 startfiles. Overlay those
+# objects from the login copy when the directory is missing.
+GCC8=/usr/lib/gcc/x86_64-redhat-linux/8
+if [[ ! -e $GCC8/crtbegin.o && -d $CRT/gcc8 ]]; then
+  mkdir -p "$(dirname "$GCC8")" "$OVL/gcc8" "$GCC8"
+  cp "$CRT"/gcc8/crt*.o "$OVL/gcc8/"
+  mount --bind "$OVL/gcc8" "$GCC8"
 fi
 
 # EasyBuild meson is a Python entry point with a `python` shebang.
