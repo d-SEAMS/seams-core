@@ -15,13 +15,17 @@
 # path; SLURM_SUBMIT_DIR is.
 #
 # GPU batch shells do not have Lmod on PATH. Prefixes only: nvc++
-# from the OpenHPC NVIDIA HPC SDK, Meson/Ninja/Eigen/FlexiBLAS from
-# the GCCcore-13.3.0 EasyBuild tree, nsys from CUDA 12.4. Cluster
-# Catch2 is 2.x; the tree carries a Catch2 3 wrap.
+# from EasyBuild NVHPC 23.7 (CUDA 12.2, matches the A100 driver),
+# Meson/Ninja/Eigen/FlexiBLAS from the GCCcore-13.3.0 EasyBuild
+# tree, nsys from CUDA 12.4. OpenHPC nvc++ 22.3 is the fallback
+# (force -gpu=cuda11.6). Cluster Catch2 is 2.x; the tree carries
+# a Catch2 3 wrap.
 set -euo pipefail
 
 EB=/hpcapps/lib-edda/easybuild/software
-NVHPC_ROOT=/opt/ohpc/pub/compiler/nvhpc/22.3/Linux_x86_64/22.3
+NVHPC_23=$EB/NVHPC/23.7-CUDA-12.2.0/Linux_x86_64/23.7
+NVHPC_22=/opt/ohpc/pub/compiler/nvhpc/22.3/Linux_x86_64/22.3
+NVHPC_ROOT=$NVHPC_23
 MESON_PRE=$EB/Meson/1.4.0-GCCcore-13.3.0
 NINJA_PRE=$EB/Ninja/1.12.1-GCCcore-13.3.0
 EIGEN_PRE=$EB/Eigen/3.4.0-GCCcore-13.3.0
@@ -35,9 +39,9 @@ HWLOC=$EB/hwloc/2.9.2-GCCcore-13.2.0
 
 export PATH=$CUDA124/bin:$NVHPC_ROOT/compilers/bin:$MESON_PRE/bin:$NINJA_PRE/bin:$PY312/bin:$PATH
 export PKG_CONFIG_PATH=$EIGEN_PRE/share/pkgconfig:$FLEXI_PRE/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}
-export LD_LIBRARY_PATH=$PY312/lib:$NVHPC_ROOT/compilers/lib:$NVHPC_ROOT/cuda/lib64:$NVHPC_ROOT/math_libs/lib64:$GCCCORE/lib64:$FLEXI_PRE/lib:$Z3/lib:$HWLOC/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 export PYTHONPATH=$MESON_PRE/lib/python3.12/site-packages${PYTHONPATH:+:$PYTHONPATH}
-export NVHPC=/opt/ohpc/pub/compiler/nvhpc/22.3
+export NVHPC=$EB/NVHPC/23.7-CUDA-12.2.0
+export NVHPC_CUDA_HOME=$NVHPC_ROOT/cuda/12.2
 
 ROOT=${SLURM_SUBMIT_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}
 JOB_ID=${SLURM_JOB_ID:-manual}
@@ -46,17 +50,58 @@ BUILD=$OUT/build
 mkdir -p "$OUT"
 cd "$ROOT"
 INC=${SEAMS_INC:-$ROOT/elja-sysroot/usr/include}
-SYS_LOCALRC=$NVHPC_ROOT/compilers/bin/localrc
 GCC_LIB=$GCCCORE/lib/gcc/x86_64-pc-linux-gnu/13.3.0
-if [[ -f $SYS_LOCALRC ]]; then
+
+# Keep the vendor CUDA include list. OpenHPC 22.3 still names the
+# system GCC 8 tree; rewrite only that. Always append login glibc
+# headers.
+write_nvc_localrc() {
+  local sys=$1/compilers/bin/localrc
+  if [[ ! -f $sys ]]; then
+    unset NVLOCALRC
+    return 0
+  fi
   sed \
     -e "s|set GCCDIR=/usr/lib/gcc/x86_64-redhat-linux/8;|set GCCDIR=$GCC_LIB;|" \
     -e "s|set G77DIR=/usr/lib/gcc/x86_64-redhat-linux/8/;|set G77DIR=$GCC_LIB/;|" \
-    -e "s|set GCCINC=.*|set GCCINC= $GCC_LIB/include $INC /usr/include;|" \
-    -e "s|set GPPDIR=.*|set GPPDIR= $GCCCORE/include/c++/13.3.0 $GCCCORE/include/c++/13.3.0/x86_64-pc-linux-gnu $GCC_LIB/include $INC /usr/include;|" \
-    "$SYS_LOCALRC" > "$OUT/nvc.localrc"
+    -e "s|set GCCINC=\(.*\);|set GCCINC=\1 $INC;|" \
+    -e "s|set GPPDIR=\(.*\);|set GPPDIR=\1 $INC;|" \
+    "$sys" > "$OUT/nvc.localrc"
   export NVLOCALRC=$OUT/nvc.localrc
-fi
+}
+
+nvc_lib_path() {
+  local root=$1
+  local cuda_ver=$2
+  local p=$root/compilers/lib
+  if [[ -d $root/cuda/$cuda_ver/lib64 ]]; then
+    p=$p:$root/cuda/$cuda_ver/lib64
+  elif [[ -d $root/cuda/lib64 ]]; then
+    p=$p:$root/cuda/lib64
+  fi
+  if [[ -d $root/math_libs/$cuda_ver/lib64 ]]; then
+    p=$p:$root/math_libs/$cuda_ver/lib64
+  elif [[ -d $root/math_libs/lib64 ]]; then
+    p=$p:$root/math_libs/lib64
+  fi
+  echo "$p"
+}
+
+apply_nvhpc() {
+  local root=$1
+  local cuda_ver=$2
+  NVHPC_ROOT=$root
+  export PATH=$CUDA124/bin:$root/compilers/bin:$MESON_PRE/bin:$NINJA_PRE/bin:$PY312/bin:$PATH
+  export LD_LIBRARY_PATH=$PY312/lib:$(nvc_lib_path "$root" "$cuda_ver"):$GCCCORE/lib64:$FLEXI_PRE/lib:$Z3/lib:$HWLOC/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+  if [[ -d $root/cuda/$cuda_ver ]]; then
+    export NVHPC_CUDA_HOME=$root/cuda/$cuda_ver
+  elif [[ -d $root/cuda ]]; then
+    export NVHPC_CUDA_HOME=$root/cuda
+  fi
+  write_nvc_localrc "$root"
+}
+
+apply_nvhpc "$NVHPC_23" 12.2
 export CFLAGS="${CFLAGS:-} -I${GCC_LIB}/include"
 export CXXFLAGS="${CXXFLAGS:-} -I${GCC_LIB}/include"
 
@@ -211,27 +256,44 @@ configure_offload() {
 log_env
 
 USED_COMPILER=
-# nvc++ 22.3 accepts -mp=gpu. Meson does not treat it as a C++20
-# compiler, so the nvc++ path uses -Dcpp_std=none -std=c++17.
-# Clang 17 has libomptarget bitcode but no NVPTX codegen target.
-export PATH=$NVHPC_ROOT/compilers/bin:$GCCCORE/bin:$PATH
+# nvc++ 23.7 ships CUDA 12.2, which matches the A100 driver.
+# OpenHPC 22.3 ships only CUDA 11.6; the meson probe then needs
+# -gpu=cuda11.6. Meson does not list C++20 for these nvc++
+# releases, so setup uses -Dcpp_std=none -std=c++17. Clang 17
+# has libomptarget bitcode but no NVPTX codegen target.
+export PATH=$GCCCORE/bin:$PATH
 if configure_offload nvc++ nvc++ "$GCCCORE/bin/gcc"; then
-  USED_COMPILER=nvc++
+  USED_COMPILER=nvc++-23.7
 else
-  echo "nvc++ offload configure failed; trying clang++ 17" \
+  echo "nvc++ 23.7 offload configure failed; trying nvc++ 22.3" \
     | tee -a "$OUT/setup.log"
-  export PATH=$CLANG17/bin:$PATH
-  export LD_LIBRARY_PATH=$CLANG17/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
-  if [[ -x $CLANG17/bin/clang++ ]] && \
-     configure_offload clang++ "$CLANG17/bin/clang++" "$CLANG17/bin/clang"; then
-    USED_COMPILER=clang++
+  apply_nvhpc "$NVHPC_22" 11.6
+  export NVHPC=/opt/ohpc/pub/compiler/nvhpc/22.3
+  if configure_offload nvc++ nvc++ "$GCCCORE/bin/gcc"; then
+    USED_COMPILER=nvc++-22.3
   else
-    echo "offload probe failed for nvc++ and clang++; see $OUT/setup.log" >&2
-    tail -80 "$OUT/setup.log" >&2 || true
-    exit 1
+    echo "nvc++ offload configure failed; trying clang++ 17" \
+      | tee -a "$OUT/setup.log"
+    export PATH=$CLANG17/bin:$PATH
+    export LD_LIBRARY_PATH=$CLANG17/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+    if [[ -x $CLANG17/bin/clang++ ]] && \
+       configure_offload clang++ "$CLANG17/bin/clang++" "$CLANG17/bin/clang"; then
+      USED_COMPILER=clang++
+    else
+      echo "offload probe failed for nvc++ 23.7, nvc++ 22.3 and clang++; see $OUT/setup.log" >&2
+      tail -80 "$OUT/setup.log" >&2 || true
+      exit 1
+    fi
   fi
 fi
 echo "used_compiler: $USED_COMPILER" | tee -a "$OUT/gpu-conditions.txt"
+echo "NVHPC_ROOT=$NVHPC_ROOT NVHPC_CUDA_HOME=${NVHPC_CUDA_HOME:-}" \
+  | tee -a "$OUT/gpu-conditions.txt"
+
+if [[ ${PROBE_ONLY:-0} == 1 ]]; then
+  echo PROBE_OK compiler=$USED_COMPILER
+  exit 0
+fi
 
 meson compile -C "$BUILD" | tee "$OUT/compile.log"
 meson test -C "$BUILD" --print-errorlogs | tee "$OUT/gpu-test.log"
