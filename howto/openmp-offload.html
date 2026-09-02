@@ -276,20 +276,21 @@ Cluster Catch2 is 2.x; the tree carries a Catch2 3 wrap. CUDA
 </span><span data-line="15">
 </span><span data-line="16"><span class="c1"># nvc++ 23.7 accepts -mp=gpu against driver 12.2. Meson does not</span>
 </span><span data-line="17"><span class="c1"># list C++20 for this release, so setup uses -Dcpp_std=none and</span>
-</span><span data-line="18"><span class="c1"># -std=c++17.</span>
+</span><span data-line="18"><span class="c1"># -std=c++20 (the tree uses concepts).</span>
 </span><span data-line="19"><span class="nb">export</span><span class="w"> </span><span class="nv">CC</span><span class="o">=</span><span class="nv">$EB</span>/GCCcore/13.3.0/bin/gcc
 </span><span data-line="20"><span class="nb">export</span><span class="w"> </span><span class="nv">CXX</span><span class="o">=</span>nvc++
 </span><span data-line="21"><span class="nb">export</span><span class="w"> </span><span class="nv">CFLAGS</span><span class="o">=</span><span class="s2">&quot;-idirafter </span><span class="nv">$PWD</span><span class="s2">/elja-sysroot/usr/include&quot;</span>
-</span><span data-line="22"><span class="nb">export</span><span class="w"> </span><span class="nv">CXXFLAGS</span><span class="o">=</span><span class="s2">&quot;-std=c++17 -idirafter </span><span class="nv">$PWD</span><span class="s2">/elja-sysroot/usr/include&quot;</span>
+</span><span data-line="22"><span class="nb">export</span><span class="w"> </span><span class="nv">CXXFLAGS</span><span class="o">=</span><span class="s2">&quot;-std=c++20 -idirafter </span><span class="nv">$PWD</span><span class="s2">/elja-sysroot/usr/include&quot;</span>
 </span><span data-line="23">meson<span class="w"> </span>setup<span class="w"> </span>build-offload<span class="w"> </span>--buildtype<span class="o">=</span>debugoptimized<span class="w"> </span><span class="se">\</span>
 </span><span data-line="24"><span class="w">  </span>-Dcpp_std<span class="o">=</span>none<span class="w"> </span><span class="se">\</span>
 </span><span data-line="25"><span class="w">  </span>-Dwith_openmp_offload<span class="o">=</span>enabled<span class="w"> </span><span class="se">\</span>
 </span><span data-line="26"><span class="w">  </span>-Dwith_python<span class="o">=</span><span class="nb">false</span><span class="w"> </span><span class="se">\</span>
 </span><span data-line="27"><span class="w">  </span>-Dwith_lua<span class="o">=</span>disabled<span class="w"> </span><span class="se">\</span>
 </span><span data-line="28"><span class="w">  </span>-Dwith_mpi<span class="o">=</span>disabled<span class="w"> </span><span class="se">\</span>
-</span><span data-line="29"><span class="w">  </span>-Dwith_gpulite<span class="o">=</span>disabled
-</span><span data-line="30">meson<span class="w"> </span>compile<span class="w"> </span>-C<span class="w"> </span>build-offload
-</span><span data-line="31">meson<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-C<span class="w"> </span>build-offload<span class="w"> </span>--print-errorlogs
+</span><span data-line="29"><span class="w">  </span>-Dwith_gpulite<span class="o">=</span>disabled<span class="w"> </span><span class="se">\</span>
+</span><span data-line="30"><span class="w">  </span>-Dcatch2:tests<span class="o">=</span><span class="nb">false</span>
+</span><span data-line="31">meson<span class="w"> </span>compile<span class="w"> </span>-C<span class="w"> </span>build-offload
+</span><span data-line="32">meson<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-C<span class="w"> </span>build-offload<span class="w"> </span>--print-errorlogs
 </span></pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">meson</span> <span class="pre">setup</span></code> / <code class="docutils literal notranslate"><span class="pre">compile</span></code> / <code class="docutils literal notranslate"><span class="pre">test</span></code> run under <code class="docutils literal notranslate"><span class="pre">srun</span></code> or <code class="docutils literal notranslate"><span class="pre">sbatch</span></code>

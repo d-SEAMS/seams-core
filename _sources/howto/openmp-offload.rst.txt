@@ -47,18 +47,19 @@ Cluster Catch2 is 2.x; the tree carries a Catch2 3 wrap. CUDA
 
     # nvc++ 23.7 accepts -mp=gpu against driver 12.2. Meson does not
     # list C++20 for this release, so setup uses -Dcpp_std=none and
-    # -std=c++17.
+    # -std=c++20 (the tree uses concepts).
     export CC=$EB/GCCcore/13.3.0/bin/gcc
     export CXX=nvc++
     export CFLAGS="-idirafter $PWD/elja-sysroot/usr/include"
-    export CXXFLAGS="-std=c++17 -idirafter $PWD/elja-sysroot/usr/include"
+    export CXXFLAGS="-std=c++20 -idirafter $PWD/elja-sysroot/usr/include"
     meson setup build-offload --buildtype=debugoptimized \
       -Dcpp_std=none \
       -Dwith_openmp_offload=enabled \
       -Dwith_python=false \
       -Dwith_lua=disabled \
       -Dwith_mpi=disabled \
-      -Dwith_gpulite=disabled
+      -Dwith_gpulite=disabled \
+      -Dcatch2:tests=false
     meson compile -C build-offload
     meson test -C build-offload --print-errorlogs
 
