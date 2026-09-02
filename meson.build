@@ -82,7 +82,7 @@ endif
 # nvc++ 22.3 trips Meson's OpenMP version sniff (preprocessor
 # delimiters). The flag is -mp; do not call dependency('openmp').
 openmp_dep_ok = false
-if cpp_id == 'nvidia' or cpp_id == 'pgi'
+if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
   openmp_dep = declare_dependency(compile_args: ['-mp'], link_args: ['-mp'])
   openmp_dep_ok = true
 else
