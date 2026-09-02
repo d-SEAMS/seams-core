@@ -102,7 +102,6 @@ if [[ ${SEAMS_IN_SYSROOT:-0} != 1 ]]; then
   export SEAMS_IN_SYSROOT=1
   OVL=/tmp/seams-ovl-${SLURM_JOB_ID:-$$}
   mkdir -p "$OVL/lib64-upper" "$OVL/lib64-work" "$OVL/lib64-merged"
-  mkdir -p "$OVL/inc-upper" "$OVL/inc-work" "$OVL/inc-merged"
   export SEAMS_OVL=$OVL
   exec unshare --user --map-root-user --mount bash "$0" "$@"
 fi
@@ -112,24 +111,12 @@ if ! grep -q ' /usr/lib64 ' /proc/mounts; then
   mount -t overlay overlay \
     -o "lowerdir=/usr/lib64,upperdir=$OVL/lib64-upper,workdir=$OVL/lib64-work" \
     "$OVL/lib64-merged"
-  cp -a "$CRT"/crt1.o "$CRT"/crti.o "$CRT"/crtn.o "$CRT"/Scrt1.o \
+  cp "$CRT"/crt1.o "$CRT"/crti.o "$CRT"/crtn.o "$CRT"/Scrt1.o \
     "$OVL/lib64-merged/"
   if [[ -f $CRT/libc.so ]]; then
-    cp -a "$CRT"/libc.so "$CRT"/libm.so "$OVL/lib64-merged/" 2>/dev/null || true
+    cp "$CRT"/libc.so "$CRT"/libm.so "$OVL/lib64-merged/" 2>/dev/null || true
   fi
   mount --bind "$OVL/lib64-merged" /usr/lib64
-fi
-if [[ -d /usr/include ]]; then
-  if ! grep -q ' /usr/include ' /proc/mounts; then
-    mount -t overlay overlay \
-      -o "lowerdir=/usr/include,upperdir=$OVL/inc-upper,workdir=$OVL/inc-work" \
-      "$OVL/inc-merged"
-    cp -a "$INC"/. "$OVL/inc-merged/"
-    mount --bind "$OVL/inc-merged" /usr/include
-  fi
-else
-  mkdir -p /usr/include
-  mount --bind "$INC" /usr/include
 fi
 
 # EasyBuild meson is a Python entry point with a `python` shebang.
