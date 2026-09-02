@@ -86,6 +86,9 @@ openmp_dep_ok = false
 if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
   openmp_dep = declare_dependency(compile_args: ['-mp'], link_args: ['-mp'])
   openmp_dep_ok = true
+  # Host FMA vs device no-FMA (or the reverse) breaks the offload
+  # identity check. IEEE division and no FMA on both sides.
+  _args += ['-Kieee', '-Mnofma']
 else
   openmp_dep = dependency('openmp', required: false)
   openmp_dep_ok = openmp_dep.found()
@@ -179,6 +182,10 @@ if not offload_opt.disabled()
       _args += ['-DSEAMS_HAS_OFFLOAD=1']
       _args += offload_flags
       _link_args += offload_flags
+      if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
+        _args += ['-gpu=nofma']
+        _link_args += ['-gpu=nofma']
+      endif
     elif offload_opt.enabled()
       error('OpenMP target offload was requested but the compiler ' +
             'cannot link a target region (tried -mp=gpu and -fopenmp-targets=' +
