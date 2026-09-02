@@ -10,6 +10,7 @@ var topo__fingerprint_8hpp =
     [ "topo::hex", "namespacetopo.html#a704a6805e4842829fa83f16081405519", null ],
     [ "topo::hopNeighbourhood", "namespacetopo.html#ac22724ca2d62a9ecac9d20b5ab0b7182", null ],
     [ "topo::localKey", "namespacetopo.html#a4c926ab08f90e20ec25abcc63593821b", null ],
+    [ "topo::matchLibraries", "namespacetopo.html#a3fe468feddca93b3dc1bc79db0dad30e", null ],
     [ "topo::matchLibrary", "namespacetopo.html#a73c3376495bbd19d8f072ac21af98131", null ],
     [ "topo::readLibrary", "namespacetopo.html#ad78791f54d32c853345d0cffe9dcfa0b", null ],
     [ "topo::wlHash", "namespacetopo.html#a3c1e2aed1633a79c2b9ac530d63c28a6", null ],

@@ -27,6 +27,7 @@ Overview
 		std::map<std::string, int> :ref:`classes<doxid-structtopo_1_1_frame_fingerprint_1a7b460d00fe40ddad15c680fec009eecf>`;
 		std::vector<int> :ref:`ringCensus<doxid-structtopo_1_1_frame_fingerprint_1af25731956ad220bebec8965a6e8432bc>`;
 		int :target:`hops<doxid-structtopo_1_1_frame_fingerprint_1a436b359c7a9bb9b2c849d0e37d13962d>` = 0;
+		bool :ref:`coloured<doxid-structtopo_1_1_frame_fingerprint_1aac82494c5f215c4bdda77ba4b576e839>` = false;
 	};
 .. _details-structtopo_1_1_frame_fingerprint:
 
@@ -87,4 +88,14 @@ local key -> number of atoms carrying it
 	std::vector<int> ringCensus
 
 ringCensus[s] = primitive rings of size s
+
+.. index:: pair: variable; coloured
+.. _doxid-structtopo_1_1_frame_fingerprint_1aac82494c5f215c4bdda77ba4b576e839:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool coloured = false
+
+keys carry vertex colours
 

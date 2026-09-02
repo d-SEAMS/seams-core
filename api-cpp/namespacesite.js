@@ -1,6 +1,7 @@
 var namespacesite =
 [
     [ "DensityZ", "structsite_1_1DensityZ.html", "structsite_1_1DensityZ" ],
+    [ "GuestOccupancy", "structsite_1_1GuestOccupancy.html", "structsite_1_1GuestOccupancy" ],
     [ "IonEnvironment", "structsite_1_1IonEnvironment.html", "structsite_1_1IonEnvironment" ],
     [ "Table", "structsite_1_1Table.html", "structsite_1_1Table" ],
     [ "Family", "namespacesite.html#aa3661d15289b4b8576f48217ed337ca3", [
@@ -34,6 +35,7 @@ var namespacesite =
     [ "densityZ", "namespacesite.html#a0e086c58b6a8de67c895bd1e034f58e6", null ],
     [ "densityZ", "namespacesite.html#a75c8588cd72dda60fecb01240009ca6c", null ],
     [ "familyName", "namespacesite.html#a1dacaa43f0631e0bc75cc37531b89ce7", null ],
+    [ "guestOccupancy", "namespacesite.html#adf97b42407e86bc9d067855b19397ac8", null ],
     [ "iceScoreAllowed", "namespacesite.html#a05342583b5b8258d5347b3f18983d4b2", null ],
     [ "indicesOf", "namespacesite.html#a651f87e7aaca786cffd536a4d2b286c4", null ],
     [ "ionCloud", "namespacesite.html#a55a0dd31fcceddabfa6cda601eeb807c", null ],
@@ -41,5 +43,6 @@ var namespacesite =
     [ "lammpsTypeOfKind", "namespacesite.html#a1dd96ee4ccc36bc86f348ec029859b53", null ],
     [ "parseFamily", "namespacesite.html#a44e7fbcc66c892d4e98d896e5041cf4c", null ],
     [ "parseSiteSpec", "namespacesite.html#ab556d24c5f6d7d7be9ba2e4d975259be", null ],
+    [ "periodicCentroid", "namespacesite.html#a208c6e1f8e6106530d6c75bb16dccaad", null ],
     [ "refuseIceScore", "namespacesite.html#a3043411870d52f19774d045fa21dfc09", null ]
 ];

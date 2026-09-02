@@ -11,6 +11,7 @@ namespace site
 	enum_site_IonState.rst
 	enum_site_Kind.rst
 	struct_site_DensityZ.rst
+	struct_site_GuestOccupancy.rst
 	struct_site_IonEnvironment.rst
 	struct_site_Table.rst
 
@@ -35,6 +36,7 @@ Overview
 	// structs
 
 	struct :ref:`DensityZ<doxid-structsite_1_1_density_z>`;
+	struct :ref:`GuestOccupancy<doxid-structsite_1_1_guest_occupancy>`;
 	struct :ref:`IonEnvironment<doxid-structsite_1_1_ion_environment>`;
 	struct :ref:`Table<doxid-structsite_1_1_table>`;
 
@@ -51,6 +53,8 @@ Overview
 	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> :target:`ionCloud<doxid-namespacesite_1a55a0dd31fcceddabfa6cda601eeb807c>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& src, const :ref:`Table<doxid-structsite_1_1_table>`& table);
 	:ref:`Table<doxid-structsite_1_1_table>` :target:`parseSiteSpec<doxid-namespacesite_1ab556d24c5f6d7d7be9ba2e4d975259be>`(std::string_view spec);
 	:ref:`IonEnvironment<doxid-structsite_1_1_ion_environment>` :ref:`ionEnvironment<doxid-namespacesite_1a59c0f056c026caebb259d8c8e0d032e1>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<bool>& iceFlag, const std::vector<int>& ionIndices, int waterType, double cutoff);
+	:ref:`GuestOccupancy<doxid-structsite_1_1_guest_occupancy>` :ref:`guestOccupancy<doxid-namespacesite_1adf97b42407e86bc9d067855b19397ac8>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& cages, const std::vector<int>& guestIndices, double radius);
+	std::array<double, 3> :ref:`periodicCentroid<doxid-namespacesite_1a208c6e1f8e6106530d6c75bb16dccaad>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& atoms);
 
 	} // namespace site
 .. _details-namespacesite:
@@ -92,4 +96,24 @@ Same histogram, restricted to atoms whose :ref:`Table <doxid-structsite_1_1_tabl
 	:ref:`IonEnvironment<doxid-structsite_1_1_ion_environment>` ionEnvironment(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<bool>& iceFlag, const std::vector<int>& ionIndices, int waterType, double cutoff)
 
 ``iceFlag`` is indexed like ``yCloud.pts``; ``waterType`` selects the water oxygens (0 accepts every atom that is not an ion); ``cutoff`` is the first shell radius in the cloud's length unit.
+
+.. index:: pair: function; guestOccupancy
+.. _doxid-namespacesite_1adf97b42407e86bc9d067855b19397ac8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`GuestOccupancy<doxid-structsite_1_1_guest_occupancy>` guestOccupancy(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& cages, const std::vector<int>& guestIndices, double radius)
+
+``cages`` are vertex index lists into ``yCloud.pts``; ``radius`` in the cloud's length unit (half the cage diameter, about 4 A for a 5^12 cage).
+
+.. index:: pair: function; periodicCentroid
+.. _doxid-namespacesite_1a208c6e1f8e6106530d6c75bb16dccaad:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::array<double, 3> periodicCentroid(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& atoms)
+
+Periodic centroid of a set of atoms: every atom is unwrapped to its minimum image about the first, and the mean is taken there.
 

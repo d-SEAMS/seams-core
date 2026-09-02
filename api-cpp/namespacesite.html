@@ -241,6 +241,8 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacesite.
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:DensityZ" id="r_DensityZ"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1DensityZ.html">DensityZ</a></td></tr>
+<tr class="memitem:GuestOccupancy" id="r_GuestOccupancy"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1GuestOccupancy.html">GuestOccupancy</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Guests read against enumerated cages.  <a href="structsite_1_1GuestOccupancy.html#details">More...</a><br /></td></tr>
 <tr class="memitem:IonEnvironment" id="r_IonEnvironment"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1IonEnvironment.html">IonEnvironment</a></td></tr>
 <tr class="memitem:Table" id="r_Table"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1Table.html">Table</a></td></tr>
 </table><table class="memberdecls">
@@ -296,6 +298,10 @@ Functions</h2></td></tr>
 <tr class="memitem:ab556d24c5f6d7d7be9ba2e4d975259be" id="r_ab556d24c5f6d7d7be9ba2e4d975259be"><td class="memItemLeft"><a class="el" href="structsite_1_1Table.html">Table</a>&#160;</td><td class="memItemRight"><a class="el" href="#ab556d24c5f6d7d7be9ba2e4d975259be">parseSiteSpec</a> (std::string_view spec)</td></tr>
 <tr class="memitem:a59c0f056c026caebb259d8c8e0d032e1" id="r_a59c0f056c026caebb259d8c8e0d032e1"><td class="memItemLeft"><a class="el" href="structsite_1_1IonEnvironment.html">IonEnvironment</a>&#160;</td><td class="memItemRight"><a class="el" href="#a59c0f056c026caebb259d8c8e0d032e1">ionEnvironment</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; bool &gt; &amp;iceFlag, const std::vector&lt; int &gt; &amp;ionIndices, int waterType, double cutoff)</td></tr>
 <tr class="memdesc:a59c0f056c026caebb259d8c8e0d032e1"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt">iceFlag</span> is indexed like <span class="tt">yCloud.pts</span>; <span class="tt">waterType</span> selects the water oxygens (0 accepts every atom that is not an ion); <span class="tt">cutoff</span> is the first shell radius in the cloud's length unit.  <br /></td></tr>
+<tr class="memitem:adf97b42407e86bc9d067855b19397ac8" id="r_adf97b42407e86bc9d067855b19397ac8"><td class="memItemLeft"><a class="el" href="structsite_1_1GuestOccupancy.html">GuestOccupancy</a>&#160;</td><td class="memItemRight"><a class="el" href="#adf97b42407e86bc9d067855b19397ac8">guestOccupancy</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;cages, const std::vector&lt; int &gt; &amp;guestIndices, double radius)</td></tr>
+<tr class="memdesc:adf97b42407e86bc9d067855b19397ac8"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt">cages</span> are vertex index lists into <span class="tt">yCloud.pts</span>; <span class="tt">radius</span> in the cloud's length unit (half the cage diameter, about 4 A for a 5^12 cage).  <br /></td></tr>
+<tr class="memitem:a208c6e1f8e6106530d6c75bb16dccaad" id="r_a208c6e1f8e6106530d6c75bb16dccaad"><td class="memItemLeft">std::array&lt; double, 3 &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a208c6e1f8e6106530d6c75bb16dccaad">periodicCentroid</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;atoms)</td></tr>
+<tr class="memdesc:a208c6e1f8e6106530d6c75bb16dccaad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Periodic centroid of a set of atoms: every atom is unwrapped to its minimum image about the first, and the mean is taken there.  <br /></td></tr>
 </table>
 <a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
 <a id="aa3661d15289b4b8576f48217ed337ca3" name="aa3661d15289b4b8576f48217ed337ca3"></a>
@@ -328,25 +334,25 @@ Functions</h2></td></tr>
 <tr><td class="fieldname"><a id="aa3661d15289b4b8576f48217ed337ca3ae996e10174633eb116ed8f0b265bbd64" name="aa3661d15289b4b8576f48217ed337ca3ae996e10174633eb116ed8f0b265bbd64"></a>networkFormer&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00040">40</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   40</span>                  {</div>
-<div class="line"><span class="lineno">   41</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd">waterIce</a>,      <span class="comment">// default; CHILL/TUM allowed</span></div>
-<div class="line"><span class="lineno">   42</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3abd8c0f0db6e9f7ff0bf08fdebd75899d">ionicLiquid</a>,   <span class="comment">// CHILL/TUM refused</span></div>
-<div class="line"><span class="lineno">   43</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3a19ce1fb8a2c8fc923e07f1a4d3ba4c88">moltenSalt</a>,    <span class="comment">// CHILL/TUM refused</span></div>
-<div class="line"><span class="lineno">   44</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3a0ecee728bf87a4c1a02883004044dcd5">des</a>,           <span class="comment">// CHILL/TUM refused</span></div>
-<div class="line"><span class="lineno">   45</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3a0cac509065346a8209c8676a1ea3ed41">electrolyte</a>,   <span class="comment">// CHILL/TUM only if the caller also names a waterIce subset</span></div>
-<div class="line"><span class="lineno">   46</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3a7113d84245536a99eb7886ad378cf879">confinedIL</a>,    <span class="comment">// CHILL/TUM refused</span></div>
-<div class="line"><span class="lineno">   47</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3a10650fc2fc72044750176bdf86ff52b9">confinedWater</a>, <span class="comment">// 2D RDF / monolayer rings; bulk CHILL refused</span></div>
-<div class="line"><span class="lineno">   48</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3ae996e10174633eb116ed8f0b265bbd64">networkFormer</a>  <span class="comment">// silica / BeF2; Franzblau yes, CHILL no</span></div>
-<div class="line"><span class="lineno">   49</span>};</div>
-<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3a0cac509065346a8209c8676a1ea3ed41"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3a0cac509065346a8209c8676a1ea3ed41">site::Family::electrolyte</a></div><div class="ttdeci">@ electrolyte</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00045">site.hpp:45</a></div></div>
-<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3a0ecee728bf87a4c1a02883004044dcd5"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3a0ecee728bf87a4c1a02883004044dcd5">site::Family::des</a></div><div class="ttdeci">@ des</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00044">site.hpp:44</a></div></div>
-<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3a10650fc2fc72044750176bdf86ff52b9"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3a10650fc2fc72044750176bdf86ff52b9">site::Family::confinedWater</a></div><div class="ttdeci">@ confinedWater</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00047">site.hpp:47</a></div></div>
-<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3a19ce1fb8a2c8fc923e07f1a4d3ba4c88"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3a19ce1fb8a2c8fc923e07f1a4d3ba4c88">site::Family::moltenSalt</a></div><div class="ttdeci">@ moltenSalt</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00043">site.hpp:43</a></div></div>
-<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd">site::Family::waterIce</a></div><div class="ttdeci">@ waterIce</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00041">site.hpp:41</a></div></div>
-<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3a7113d84245536a99eb7886ad378cf879"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3a7113d84245536a99eb7886ad378cf879">site::Family::confinedIL</a></div><div class="ttdeci">@ confinedIL</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00046">site.hpp:46</a></div></div>
-<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3abd8c0f0db6e9f7ff0bf08fdebd75899d"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3abd8c0f0db6e9f7ff0bf08fdebd75899d">site::Family::ionicLiquid</a></div><div class="ttdeci">@ ionicLiquid</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00042">site.hpp:42</a></div></div>
-<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3ae996e10174633eb116ed8f0b265bbd64"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3ae996e10174633eb116ed8f0b265bbd64">site::Family::networkFormer</a></div><div class="ttdeci">@ networkFormer</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00048">site.hpp:48</a></div></div>
+<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00041">41</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   41</span>                  {</div>
+<div class="line"><span class="lineno">   42</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd">waterIce</a>,      <span class="comment">// default; CHILL/TUM allowed</span></div>
+<div class="line"><span class="lineno">   43</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3abd8c0f0db6e9f7ff0bf08fdebd75899d">ionicLiquid</a>,   <span class="comment">// CHILL/TUM refused</span></div>
+<div class="line"><span class="lineno">   44</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3a19ce1fb8a2c8fc923e07f1a4d3ba4c88">moltenSalt</a>,    <span class="comment">// CHILL/TUM refused</span></div>
+<div class="line"><span class="lineno">   45</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3a0ecee728bf87a4c1a02883004044dcd5">des</a>,           <span class="comment">// CHILL/TUM refused</span></div>
+<div class="line"><span class="lineno">   46</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3a0cac509065346a8209c8676a1ea3ed41">electrolyte</a>,   <span class="comment">// CHILL/TUM only if the caller also names a waterIce subset</span></div>
+<div class="line"><span class="lineno">   47</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3a7113d84245536a99eb7886ad378cf879">confinedIL</a>,    <span class="comment">// CHILL/TUM refused</span></div>
+<div class="line"><span class="lineno">   48</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3a10650fc2fc72044750176bdf86ff52b9">confinedWater</a>, <span class="comment">// 2D RDF / monolayer rings; bulk CHILL refused</span></div>
+<div class="line"><span class="lineno">   49</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3ae996e10174633eb116ed8f0b265bbd64">networkFormer</a>  <span class="comment">// silica / BeF2; Franzblau yes, CHILL no</span></div>
+<div class="line"><span class="lineno">   50</span>};</div>
+<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3a0cac509065346a8209c8676a1ea3ed41"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3a0cac509065346a8209c8676a1ea3ed41">site::Family::electrolyte</a></div><div class="ttdeci">@ electrolyte</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00046">site.hpp:46</a></div></div>
+<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3a0ecee728bf87a4c1a02883004044dcd5"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3a0ecee728bf87a4c1a02883004044dcd5">site::Family::des</a></div><div class="ttdeci">@ des</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00045">site.hpp:45</a></div></div>
+<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3a10650fc2fc72044750176bdf86ff52b9"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3a10650fc2fc72044750176bdf86ff52b9">site::Family::confinedWater</a></div><div class="ttdeci">@ confinedWater</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00048">site.hpp:48</a></div></div>
+<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3a19ce1fb8a2c8fc923e07f1a4d3ba4c88"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3a19ce1fb8a2c8fc923e07f1a4d3ba4c88">site::Family::moltenSalt</a></div><div class="ttdeci">@ moltenSalt</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00044">site.hpp:44</a></div></div>
+<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd">site::Family::waterIce</a></div><div class="ttdeci">@ waterIce</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00042">site.hpp:42</a></div></div>
+<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3a7113d84245536a99eb7886ad378cf879"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3a7113d84245536a99eb7886ad378cf879">site::Family::confinedIL</a></div><div class="ttdeci">@ confinedIL</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00047">site.hpp:47</a></div></div>
+<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3abd8c0f0db6e9f7ff0bf08fdebd75899d"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3abd8c0f0db6e9f7ff0bf08fdebd75899d">site::Family::ionicLiquid</a></div><div class="ttdeci">@ ionicLiquid</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00043">site.hpp:43</a></div></div>
+<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3ae996e10174633eb116ed8f0b265bbd64"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3ae996e10174633eb116ed8f0b265bbd64">site::Family::networkFormer</a></div><div class="ttdeci">@ networkFormer</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00049">site.hpp:49</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -378,11 +384,11 @@ Functions</h2></td></tr>
 <tr><td class="fieldname"><a id="a7cdb003964d40a8454361db4b34b4791a7bdff76536f12a7c5ffde207e72cfe3a" name="a7cdb003964d40a8454361db4b34b4791a7bdff76536f12a7c5ffde207e72cfe3a"></a>ice&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00085">85</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   85</span>{ <a class="code hl_enumvalue" href="#a7cdb003964d40a8454361db4b34b4791af80b6383d767feb24333c7d460bed98c">liquid</a> = 0, <a class="code hl_enumvalue" href="#a7cdb003964d40a8454361db4b34b4791ae6ec529ba185279aa0adcf93e645c7cd">front</a> = 1, <a class="code hl_enumvalue" href="#a7cdb003964d40a8454361db4b34b4791a7bdff76536f12a7c5ffde207e72cfe3a">ice</a> = 2 };</div>
-<div class="ttc" id="anamespacesite_html_a7cdb003964d40a8454361db4b34b4791a7bdff76536f12a7c5ffde207e72cfe3a"><div class="ttname"><a href="#a7cdb003964d40a8454361db4b34b4791a7bdff76536f12a7c5ffde207e72cfe3a">site::IonState::ice</a></div><div class="ttdeci">@ ice</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00085">site.hpp:85</a></div></div>
-<div class="ttc" id="anamespacesite_html_a7cdb003964d40a8454361db4b34b4791ae6ec529ba185279aa0adcf93e645c7cd"><div class="ttname"><a href="#a7cdb003964d40a8454361db4b34b4791ae6ec529ba185279aa0adcf93e645c7cd">site::IonState::front</a></div><div class="ttdeci">@ front</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00085">site.hpp:85</a></div></div>
-<div class="ttc" id="anamespacesite_html_a7cdb003964d40a8454361db4b34b4791af80b6383d767feb24333c7d460bed98c"><div class="ttname"><a href="#a7cdb003964d40a8454361db4b34b4791af80b6383d767feb24333c7d460bed98c">site::IonState::liquid</a></div><div class="ttdeci">@ liquid</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00085">site.hpp:85</a></div></div>
+<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00086">86</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   86</span>{ <a class="code hl_enumvalue" href="#a7cdb003964d40a8454361db4b34b4791af80b6383d767feb24333c7d460bed98c">liquid</a> = 0, <a class="code hl_enumvalue" href="#a7cdb003964d40a8454361db4b34b4791ae6ec529ba185279aa0adcf93e645c7cd">front</a> = 1, <a class="code hl_enumvalue" href="#a7cdb003964d40a8454361db4b34b4791a7bdff76536f12a7c5ffde207e72cfe3a">ice</a> = 2 };</div>
+<div class="ttc" id="anamespacesite_html_a7cdb003964d40a8454361db4b34b4791a7bdff76536f12a7c5ffde207e72cfe3a"><div class="ttname"><a href="#a7cdb003964d40a8454361db4b34b4791a7bdff76536f12a7c5ffde207e72cfe3a">site::IonState::ice</a></div><div class="ttdeci">@ ice</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00086">site.hpp:86</a></div></div>
+<div class="ttc" id="anamespacesite_html_a7cdb003964d40a8454361db4b34b4791ae6ec529ba185279aa0adcf93e645c7cd"><div class="ttname"><a href="#a7cdb003964d40a8454361db4b34b4791ae6ec529ba185279aa0adcf93e645c7cd">site::IonState::front</a></div><div class="ttdeci">@ front</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00086">site.hpp:86</a></div></div>
+<div class="ttc" id="anamespacesite_html_a7cdb003964d40a8454361db4b34b4791af80b6383d767feb24333c7d460bed98c"><div class="ttname"><a href="#a7cdb003964d40a8454361db4b34b4791af80b6383d767feb24333c7d460bed98c">site::IonState::liquid</a></div><div class="ttdeci">@ liquid</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00086">site.hpp:86</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -419,31 +425,31 @@ Functions</h2></td></tr>
 <tr><td class="fieldname"><a id="adda3a91ca98e5b5e1ffb889ae6440c90acb536c8fd095555b861ed4eb1d313e7f" name="adda3a91ca98e5b5e1ffb889ae6440c90acb536c8fd095555b861ed4eb1d313e7f"></a>solvent&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00026">26</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   26</span>                {</div>
-<div class="line"><span class="lineno">   27</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90ad415f0e30c471dfdd9bc4f827329ef48">unspecified</a>,</div>
-<div class="line"><span class="lineno">   28</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a0b8e52e34535b887af98225a7587dd63">cationHead</a>,</div>
-<div class="line"><span class="lineno">   29</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a507e935a0f2208b571dfc60bf56d38a6">anion</a>,</div>
-<div class="line"><span class="lineno">   30</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a7aea2552dfe7eb84b9443b6fc9ba6e01">tail</a>,</div>
-<div class="line"><span class="lineno">   31</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a484dd7cb8c261bbc7e46da795767797e">donorH</a>,</div>
-<div class="line"><span class="lineno">   32</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a2ac2f053dd34646d6bb6b76e1170630d">acceptor</a>,</div>
-<div class="line"><span class="lineno">   33</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90afa5caf54a500bad246188a8769cb9947">polar</a>,</div>
-<div class="line"><span class="lineno">   34</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90ae5e437761e40c78a4c0929be07a3ab04">apolar</a>,</div>
-<div class="line"><span class="lineno">   35</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a12d4612b078096f98216afac0e984ce8">waterO</a>,</div>
-<div class="line"><span class="lineno">   36</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a26dca521e814fabf8fe99711c652d2ab">waterH</a>,</div>
-<div class="line"><span class="lineno">   37</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90acb536c8fd095555b861ed4eb1d313e7f">solvent</a></div>
-<div class="line"><span class="lineno">   38</span>};</div>
-<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a0b8e52e34535b887af98225a7587dd63"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a0b8e52e34535b887af98225a7587dd63">site::Kind::cationHead</a></div><div class="ttdeci">@ cationHead</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00028">site.hpp:28</a></div></div>
-<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a12d4612b078096f98216afac0e984ce8"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a12d4612b078096f98216afac0e984ce8">site::Kind::waterO</a></div><div class="ttdeci">@ waterO</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00035">site.hpp:35</a></div></div>
-<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a26dca521e814fabf8fe99711c652d2ab"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a26dca521e814fabf8fe99711c652d2ab">site::Kind::waterH</a></div><div class="ttdeci">@ waterH</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00036">site.hpp:36</a></div></div>
-<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a2ac2f053dd34646d6bb6b76e1170630d"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a2ac2f053dd34646d6bb6b76e1170630d">site::Kind::acceptor</a></div><div class="ttdeci">@ acceptor</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00032">site.hpp:32</a></div></div>
-<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a484dd7cb8c261bbc7e46da795767797e"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a484dd7cb8c261bbc7e46da795767797e">site::Kind::donorH</a></div><div class="ttdeci">@ donorH</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00031">site.hpp:31</a></div></div>
-<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a507e935a0f2208b571dfc60bf56d38a6"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a507e935a0f2208b571dfc60bf56d38a6">site::Kind::anion</a></div><div class="ttdeci">@ anion</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00029">site.hpp:29</a></div></div>
-<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a7aea2552dfe7eb84b9443b6fc9ba6e01"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a7aea2552dfe7eb84b9443b6fc9ba6e01">site::Kind::tail</a></div><div class="ttdeci">@ tail</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00030">site.hpp:30</a></div></div>
-<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90acb536c8fd095555b861ed4eb1d313e7f"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90acb536c8fd095555b861ed4eb1d313e7f">site::Kind::solvent</a></div><div class="ttdeci">@ solvent</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00037">site.hpp:37</a></div></div>
-<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90ad415f0e30c471dfdd9bc4f827329ef48"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90ad415f0e30c471dfdd9bc4f827329ef48">site::Kind::unspecified</a></div><div class="ttdeci">@ unspecified</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00027">site.hpp:27</a></div></div>
-<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90ae5e437761e40c78a4c0929be07a3ab04"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90ae5e437761e40c78a4c0929be07a3ab04">site::Kind::apolar</a></div><div class="ttdeci">@ apolar</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00034">site.hpp:34</a></div></div>
-<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90afa5caf54a500bad246188a8769cb9947"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90afa5caf54a500bad246188a8769cb9947">site::Kind::polar</a></div><div class="ttdeci">@ polar</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00033">site.hpp:33</a></div></div>
+<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00027">27</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   27</span>                {</div>
+<div class="line"><span class="lineno">   28</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90ad415f0e30c471dfdd9bc4f827329ef48">unspecified</a>,</div>
+<div class="line"><span class="lineno">   29</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a0b8e52e34535b887af98225a7587dd63">cationHead</a>,</div>
+<div class="line"><span class="lineno">   30</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a507e935a0f2208b571dfc60bf56d38a6">anion</a>,</div>
+<div class="line"><span class="lineno">   31</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a7aea2552dfe7eb84b9443b6fc9ba6e01">tail</a>,</div>
+<div class="line"><span class="lineno">   32</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a484dd7cb8c261bbc7e46da795767797e">donorH</a>,</div>
+<div class="line"><span class="lineno">   33</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a2ac2f053dd34646d6bb6b76e1170630d">acceptor</a>,</div>
+<div class="line"><span class="lineno">   34</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90afa5caf54a500bad246188a8769cb9947">polar</a>,</div>
+<div class="line"><span class="lineno">   35</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90ae5e437761e40c78a4c0929be07a3ab04">apolar</a>,</div>
+<div class="line"><span class="lineno">   36</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a12d4612b078096f98216afac0e984ce8">waterO</a>,</div>
+<div class="line"><span class="lineno">   37</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a26dca521e814fabf8fe99711c652d2ab">waterH</a>,</div>
+<div class="line"><span class="lineno">   38</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90acb536c8fd095555b861ed4eb1d313e7f">solvent</a></div>
+<div class="line"><span class="lineno">   39</span>};</div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a0b8e52e34535b887af98225a7587dd63"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a0b8e52e34535b887af98225a7587dd63">site::Kind::cationHead</a></div><div class="ttdeci">@ cationHead</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00029">site.hpp:29</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a12d4612b078096f98216afac0e984ce8"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a12d4612b078096f98216afac0e984ce8">site::Kind::waterO</a></div><div class="ttdeci">@ waterO</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00036">site.hpp:36</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a26dca521e814fabf8fe99711c652d2ab"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a26dca521e814fabf8fe99711c652d2ab">site::Kind::waterH</a></div><div class="ttdeci">@ waterH</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00037">site.hpp:37</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a2ac2f053dd34646d6bb6b76e1170630d"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a2ac2f053dd34646d6bb6b76e1170630d">site::Kind::acceptor</a></div><div class="ttdeci">@ acceptor</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00033">site.hpp:33</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a484dd7cb8c261bbc7e46da795767797e"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a484dd7cb8c261bbc7e46da795767797e">site::Kind::donorH</a></div><div class="ttdeci">@ donorH</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00032">site.hpp:32</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a507e935a0f2208b571dfc60bf56d38a6"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a507e935a0f2208b571dfc60bf56d38a6">site::Kind::anion</a></div><div class="ttdeci">@ anion</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00030">site.hpp:30</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a7aea2552dfe7eb84b9443b6fc9ba6e01"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a7aea2552dfe7eb84b9443b6fc9ba6e01">site::Kind::tail</a></div><div class="ttdeci">@ tail</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00031">site.hpp:31</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90acb536c8fd095555b861ed4eb1d313e7f"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90acb536c8fd095555b861ed4eb1d313e7f">site::Kind::solvent</a></div><div class="ttdeci">@ solvent</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00038">site.hpp:38</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90ad415f0e30c471dfdd9bc4f827329ef48"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90ad415f0e30c471dfdd9bc4f827329ef48">site::Kind::unspecified</a></div><div class="ttdeci">@ unspecified</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00028">site.hpp:28</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90ae5e437761e40c78a4c0929be07a3ab04"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90ae5e437761e40c78a4c0929be07a3ab04">site::Kind::apolar</a></div><div class="ttdeci">@ apolar</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00035">site.hpp:35</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90afa5caf54a500bad246188a8769cb9947"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90afa5caf54a500bad246188a8769cb9947">site::Kind::polar</a></div><div class="ttdeci">@ polar</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00034">site.hpp:34</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -533,6 +539,39 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="adf97b42407e86bc9d067855b19397ac8" name="adf97b42407e86bc9d067855b19397ac8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf97b42407e86bc9d067855b19397ac8">&#9670;&#160;</a></span>guestOccupancy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1GuestOccupancy.html">GuestOccupancy</a> site::guestOccupancy </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cages</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>guestIndices</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>radius</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><span class="tt">cages</span> are vertex index lists into <span class="tt">yCloud.pts</span>; <span class="tt">radius</span> in the cloud's length unit (half the cage diameter, about 4 A for a 5^12 cage). </p>
 
 </div>
 </div>
@@ -690,6 +729,29 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="a208c6e1f8e6106530d6c75bb16dccaad" name="a208c6e1f8e6106530d6c75bb16dccaad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a208c6e1f8e6106530d6c75bb16dccaad">&#9670;&#160;</a></span>periodicCentroid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::array&lt; double, 3 &gt; site::periodicCentroid </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>atoms</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Periodic centroid of a set of atoms: every atom is unwrapped to its minimum image about the first, and the mean is taken there. </p>
 
 </div>
 </div>

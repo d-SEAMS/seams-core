@@ -5,5 +5,6 @@ var searchData=
   ['foot_2',['foot',['../structgpu_1_1Plan.html#a1086b17671aa3043e3228c29c0c783af',1,'gpu::Plan']]],
   ['frame_3',['frame',['../structseams_1_1cfg_1_1Runtime.html#a7cfcb2f861268d8aa7b218f97f2b83fe',1,'seams::cfg::Runtime']]],
   ['frames_4',['frames',['../structgpu_1_1Plan.html#ad96d06fdc72c18378dd452832a70ea83',1,'gpu::Plan']]],
-  ['freebytes_5',['freeBytes',['../structgpu_1_1DeviceInfo.html#ac316ae8f9bd37bee8327159b7d06e1be',1,'gpu::DeviceInfo']]]
+  ['free_5',['free',['../structsite_1_1GuestOccupancy.html#aca1af9a15208a80f6ddb598fa3a2c3bd',1,'site::GuestOccupancy']]],
+  ['freebytes_6',['freeBytes',['../structgpu_1_1DeviceInfo.html#ac316ae8f9bd37bee8327159b7d06e1be',1,'gpu::DeviceInfo']]]
 ];

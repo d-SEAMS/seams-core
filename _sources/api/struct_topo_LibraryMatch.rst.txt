@@ -23,6 +23,7 @@ Overview
 	
 		std::vector<std::string> :ref:`labels<doxid-structtopo_1_1_library_match_1a98c3689a908e2cdd1c3966c1cd3a2aeb>`;
 		std::map<std::string, int> :ref:`counts<doxid-structtopo_1_1_library_match_1a07862b670245a0fad0f3914224ad7323>`;
+		std::vector<int> :ref:`depth<doxid-structtopo_1_1_library_match_1ade4b4a551af0a37500a5f67bd6452e1c>`;
 		int :target:`matched<doxid-structtopo_1_1_library_match_1a94c255516e3f25321c5a95fc08ed1b6c>` = 0;
 	};
 .. _details-structtopo_1_1_library_match:
@@ -54,4 +55,14 @@ per atom; "" when no key matches
 	std::map<std::string, int> counts
 
 label -> atoms, "" for unmatched
+
+.. index:: pair: variable; depth
+.. _doxid-structtopo_1_1_library_match_1ade4b4a551af0a37500a5f67bd6452e1c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> depth
+
+per atom: hops of the library that named it, 0 when none
 

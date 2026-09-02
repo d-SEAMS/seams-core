@@ -266,10 +266,12 @@ Functions</h2></td></tr>
 <tr class="memitem:ab7a77ab1002ce0af5dda5656f84ae369" id="r_ab7a77ab1002ce0af5dda5656f84ae369"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ab7a77ab1002ce0af5dda5656f84ae369">addToLibrary</a> (<a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &amp;lib, const <a class="el" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> &amp;fp, const std::string &amp;label)</td></tr>
 <tr class="memdesc:ab7a77ab1002ce0af5dda5656f84ae369"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add every distinct key of <span class="tt">fp</span> under <span class="tt">label</span>; a key already present under other labels carries all of them, sorted and joined by '|'.  <br /></td></tr>
 <tr class="memitem:a57942af5bce01d27654ba8d544195fe0" id="r_a57942af5bce01d27654ba8d544195fe0"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#a57942af5bce01d27654ba8d544195fe0">writeLibrary</a> (const <a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &amp;lib)</td></tr>
-<tr class="memdesc:a57942af5bce01d27654ba8d544195fe0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Text form: a header line <span class="tt"># method M hops H</span>, then <span class="tt">key label</span> lines.  <br /></td></tr>
+<tr class="memdesc:a57942af5bce01d27654ba8d544195fe0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Text form: a header line <span class="tt"># method M hops H colours C</span> (C is 0 or 1; a header without it means uncoloured), then <span class="tt">key label</span> lines.  <br /></td></tr>
 <tr class="memitem:ad78791f54d32c853345d0cffe9dcfa0b" id="r_ad78791f54d32c853345d0cffe9dcfa0b"><td class="memItemLeft"><a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a>&#160;</td><td class="memItemRight"><a class="el" href="#ad78791f54d32c853345d0cffe9dcfa0b">readLibrary</a> (const std::string &amp;text)</td></tr>
 <tr class="memitem:a73c3376495bbd19d8f072ac21af98131" id="r_a73c3376495bbd19d8f072ac21af98131"><td class="memItemLeft"><a class="el" href="structtopo_1_1LibraryMatch.html">LibraryMatch</a>&#160;</td><td class="memItemRight"><a class="el" href="#a73c3376495bbd19d8f072ac21af98131">matchLibrary</a> (const <a class="el" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> &amp;fp, const <a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &amp;lib)</td></tr>
 <tr class="memdesc:a73c3376495bbd19d8f072ac21af98131"><td class="mdescLeft">&#160;</td><td class="mdescRight">Look every atom key of <span class="tt">fp</span> up in <span class="tt">lib</span>.  <br /></td></tr>
+<tr class="memitem:a3fe468feddca93b3dc1bc79db0dad30e" id="r_a3fe468feddca93b3dc1bc79db0dad30e"><td class="memItemLeft"><a class="el" href="structtopo_1_1LibraryMatch.html">LibraryMatch</a>&#160;</td><td class="memItemRight"><a class="el" href="#a3fe468feddca93b3dc1bc79db0dad30e">matchLibraries</a> (const <a class="el" href="#a770ae81afc5c8c715470d90d4e3c8e6e">Rows</a> &amp;rows, const std::vector&lt; <a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &gt; &amp;libs, int maxRingSize=7, const std::vector&lt; int &gt; &amp;colours={})</td></tr>
+<tr class="memdesc:a3fe468feddca93b3dc1bc79db0dad30e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Match against libraries at several depths: an atom takes the label of the deepest library that holds its key, and a molecule whose wide neighbourhood is disturbed (a defect two bonds away, a jittered dense polymorph) still gets named by its inner shells.  <br /></td></tr>
 </table>
 <a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Typedef Documentation</h2>
 <a id="a770ae81afc5c8c715470d90d4e3c8e6e" name="a770ae81afc5c8c715470d90d4e3c8e6e"></a>
@@ -434,6 +436,40 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a3fe468feddca93b3dc1bc79db0dad30e" name="a3fe468feddca93b3dc1bc79db0dad30e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3fe468feddca93b3dc1bc79db0dad30e">&#9670;&#160;</a></span>matchLibraries()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structtopo_1_1LibraryMatch.html">LibraryMatch</a> topo::matchLibraries </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="#a770ae81afc5c8c715470d90d4e3c8e6e">Rows</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rows</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>libs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxRingSize</em></span><span class="paramdefsep"> = </span><span class="paramdefval">7</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>colours</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Match against libraries at several depths: an atom takes the label of the deepest library that holds its key, and a molecule whose wide neighbourhood is disturbed (a defect two bonds away, a jittered dense polymorph) still gets named by its inner shells. </p>
+<p><span class="tt">depth</span> records the hops that named each atom. Every library must share the method of this build and the colouring (<span class="tt">colours</span> empty or one per row); throws std::invalid_argument otherwise, or when two libraries share a depth. </p>
+
+</div>
+</div>
 <a id="a73c3376495bbd19d8f072ac21af98131" name="a73c3376495bbd19d8f072ac21af98131"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a73c3376495bbd19d8f072ac21af98131">&#9670;&#160;</a></span>matchLibrary()</h2>
 
@@ -454,7 +490,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Look every atom key of <span class="tt">fp</span> up in <span class="tt">lib</span>. </p>
-<p>Throws std::invalid_argument when the methods or hop counts differ. </p>
+<p>Throws std::invalid_argument when the methods, hop counts or colourings differ. </p>
 
 </div>
 </div>
@@ -524,7 +560,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Text form: a header line <span class="tt"># method M hops H</span>, then <span class="tt">key label</span> lines. </p>
+<p>Text form: a header line <span class="tt"># method M hops H colours C</span> (C is 0 or 1; a header without it means uncoloured), then <span class="tt">key label</span> lines. </p>
 
 </div>
 </div>

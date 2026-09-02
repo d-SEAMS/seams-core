@@ -23,6 +23,7 @@ A dictionary from local keys to labels: the keys of reference structures (a poly
 	
 		std::string :ref:`method<doxid-structtopo_1_1_key_library_1a47594d7eb9d0e045c8dd5c4076e7d83d>`;
 		int :target:`hops<doxid-structtopo_1_1_key_library_1a25441f901b1852385ceb142544392c80>` = 0;
+		bool :ref:`coloured<doxid-structtopo_1_1_key_library_1a773f110b6c1c1e0359d7f0f25712b3e4>` = false;
 		std::map<std::string, std::string> :ref:`labelOf<doxid-structtopo_1_1_key_library_1a2d23aa2fd8634ff1c0479ba2cc5bd101>`;
 	};
 .. _details-structtopo_1_1_key_library:
@@ -46,6 +47,16 @@ Fields
 	std::string method
 
 "nauty" or "wl"
+
+.. index:: pair: variable; coloured
+.. _doxid-structtopo_1_1_key_library_1a773f110b6c1c1e0359d7f0f25712b3e4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool coloured = false
+
+keys were computed with vertex colours
 
 .. index:: pair: variable; labelOf
 .. _doxid-structtopo_1_1_key_library_1a2d23aa2fd8634ff1c0479ba2cc5bd101:

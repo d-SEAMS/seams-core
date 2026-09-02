@@ -28,6 +28,7 @@ var searchData=
   ['framefingerprint_25',['FrameFingerprint',['../structtopo_1_1FrameFingerprint.html',1,'topo']]],
   ['frames_26',['frames',['../structgpu_1_1Plan.html#ad96d06fdc72c18378dd452832a70ea83',1,'gpu::Plan']]],
   ['franzblau_2ehpp_27',['franzblau.hpp',['../franzblau_8hpp.html',1,'']]],
-  ['freebytes_28',['freeBytes',['../structgpu_1_1DeviceInfo.html#ac316ae8f9bd37bee8327159b7d06e1be',1,'gpu::DeviceInfo']]],
-  ['front_29',['front',['../namespacesite.html#a7cdb003964d40a8454361db4b34b4791ae6ec529ba185279aa0adcf93e645c7cd',1,'site']]]
+  ['free_28',['free',['../structsite_1_1GuestOccupancy.html#aca1af9a15208a80f6ddb598fa3a2c3bd',1,'site::GuestOccupancy']]],
+  ['freebytes_29',['freeBytes',['../structgpu_1_1DeviceInfo.html#ac316ae8f9bd37bee8327159b7d06e1be',1,'gpu::DeviceInfo']]],
+  ['front_30',['front',['../namespacesite.html#a7cdb003964d40a8454361db4b34b4791ae6ec529ba185279aa0adcf93e645c7cd',1,'site']]]
 ];

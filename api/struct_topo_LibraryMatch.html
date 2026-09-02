@@ -320,8 +320,9 @@ data-aria-dark="Switch to auto color mode">
 <span data-line="5"> </span>
 <span data-line="6">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-structtopo-1-1-library-match-1a98c3689a908e2cdd1c3966c1cd3a2aeb"><span class="std std-ref">labels</span></a><span class="p">;</span></span>
 <span data-line="7">    <span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-structtopo-1-1-library-match-1a07862b670245a0fad0f3914224ad7323"><span class="std std-ref">counts</span></a><span class="p">;</span></span>
-<span data-line="8">    <span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-structtopo_1_1_library_match_1a94c255516e3f25321c5a95fc08ed1b6c"></span><span class="n">matched</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
-<span data-line="9"><span class="p">};</span></span>
+<span data-line="8">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-structtopo-1-1-library-match-1ade4b4a551af0a37500a5f67bd6452e1c"><span class="std std-ref">depth</span></a><span class="p">;</span></span>
+<span data-line="9">    <span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-structtopo_1_1_library_match_1a94c255516e3f25321c5a95fc08ed1b6c"></span><span class="n">matched</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
+<span data-line="10"><span class="p">};</span></span>
 </pre></div>
 </section>
 <section id="detailed-documentation">
@@ -336,6 +337,10 @@ data-aria-dark="Switch to auto color mode">
 <span id="index-2"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">counts</span></span>
 </pre></div>
 <p>label -&gt; atoms, “” for unmatched</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-structtopo-1-1-library-match-1ade4b4a551af0a37500a5f67bd6452e1c">
+<span id="index-3"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">depth</span></span>
+</pre></div>
+<p>per atom: hops of the library that named it, 0 when none</p>
 </section>
 </section>
 </section>

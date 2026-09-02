@@ -246,11 +246,13 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a98c3689a908e2cdd1c3966c1cd3a2aeb"><td class="mdescLeft">&#160;</td><td class="mdescRight">per atom; "" when no key matches  <br /></td></tr>
 <tr class="memitem:a07862b670245a0fad0f3914224ad7323" id="r_a07862b670245a0fad0f3914224ad7323"><td class="memItemLeft">std::map&lt; std::string, int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a07862b670245a0fad0f3914224ad7323">counts</a></td></tr>
 <tr class="memdesc:a07862b670245a0fad0f3914224ad7323"><td class="mdescLeft">&#160;</td><td class="mdescRight">label -&gt; atoms, "" for unmatched  <br /></td></tr>
+<tr class="memitem:ade4b4a551af0a37500a5f67bd6452e1c" id="r_ade4b4a551af0a37500a5f67bd6452e1c"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ade4b4a551af0a37500a5f67bd6452e1c">depth</a></td></tr>
+<tr class="memdesc:ade4b4a551af0a37500a5f67bd6452e1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">per atom: hops of the library that named it, 0 when none  <br /></td></tr>
 <tr class="memitem:a94c255516e3f25321c5a95fc08ed1b6c" id="r_a94c255516e3f25321c5a95fc08ed1b6c"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a94c255516e3f25321c5a95fc08ed1b6c">matched</a> = 0</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00100">100</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00103">103</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
 <a id="a07862b670245a0fad0f3914224ad7323" name="a07862b670245a0fad0f3914224ad7323"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a07862b670245a0fad0f3914224ad7323">&#9670;&#160;</a></span>counts</h2>
@@ -266,7 +268,25 @@ Public Attributes</h2></td></tr>
 
 <p>label -&gt; atoms, "" for unmatched </p>
 
-<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00102">102</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00105">105</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ade4b4a551af0a37500a5f67bd6452e1c" name="ade4b4a551af0a37500a5f67bd6452e1c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade4b4a551af0a37500a5f67bd6452e1c">&#9670;&#160;</a></span>depth</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;int&gt; topo::LibraryMatch::depth</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>per atom: hops of the library that named it, 0 when none </p>
+
+<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00106">106</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
 
 </div>
 </div>
@@ -284,7 +304,7 @@ Public Attributes</h2></td></tr>
 
 <p>per atom; "" when no key matches </p>
 
-<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00101">101</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00104">104</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
 
 </div>
 </div>
@@ -300,7 +320,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00103">103</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00107">107</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
 
 </div>
 </div>

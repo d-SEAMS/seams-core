@@ -58,7 +58,7 @@ var NAVTREEINDEX =
 "absOrientation_8hpp.html",
 "group__rdf.html#ga2a54eea649f6c234be50494cec2cee82",
 "namespaceseams_1_1steinhardt.html#adf41cecc177768d88e4c00b88bef06d6",
-"structmolSys_1_1Result.html"
+"structira_1_1PointGroup.html#adae4a9fa2ea71c4b628ac94bfe79a4f7"
 ];
 
 const SYNCONMSG = 'click to disable panel synchronization';

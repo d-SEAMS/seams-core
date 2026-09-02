@@ -54,6 +54,7 @@ var annotated_dup =
     ] ],
     [ "site", "namespacesite.html", [
       [ "DensityZ", "structsite_1_1DensityZ.html", "structsite_1_1DensityZ" ],
+      [ "GuestOccupancy", "structsite_1_1GuestOccupancy.html", "structsite_1_1GuestOccupancy" ],
       [ "IonEnvironment", "structsite_1_1IonEnvironment.html", "structsite_1_1IonEnvironment" ],
       [ "Table", "structsite_1_1Table.html", "structsite_1_1Table" ]
     ] ],

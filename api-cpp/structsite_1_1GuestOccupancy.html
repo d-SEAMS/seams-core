@@ -15,7 +15,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
-<title>seams-core: site::Table Struct Reference</title>
+<title>seams-core: site::GuestOccupancy Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="dynsections.js"></script>
 <script type="text/javascript" src="codefolding.js"></script>
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 <script type="text/javascript">
-document.addEventListener('DOMContentLoaded',() => { initNavTree('structsite_1_1Table.html','','structsite_1_1Table-members'); });
+document.addEventListener('DOMContentLoaded',() => { initNavTree('structsite_1_1GuestOccupancy.html','','structsite_1_1GuestOccupancy-members'); });
 </script>
 <div id="container">
 <div id="doc-content">
@@ -234,107 +234,141 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('structsite_1_1
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">site::Table Struct Reference</div></div>
+  <div class="headertitle"><div class="title">site::GuestOccupancy Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
+<p>Guests read against enumerated cages.  
+ <a href="#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="site_8hpp_source.html">site.hpp</a>&gt;</code></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
-Public Member Functions</h2></td></tr>
-<tr class="memitem:adc5635e77a366b0e9e27dcfa0d80288e" id="r_adc5635e77a366b0e9e27dcfa0d80288e"><td class="memItemLeft"><a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90">Kind</a>&#160;</td><td class="memItemRight"><a class="el" href="#adc5635e77a366b0e9e27dcfa0d80288e">of</a> (const <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt; &amp;p) const</td></tr>
-<tr class="memitem:ada6cb01db577cf6d01e8703bdbfe8bbb" id="r_ada6cb01db577cf6d01e8703bdbfe8bbb"><td class="memItemLeft"><a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90">Kind</a>&#160;</td><td class="memItemRight"><a class="el" href="#ada6cb01db577cf6d01e8703bdbfe8bbb">ofType</a> (int typeId) const</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a38cfa99bc45bda42c6e76b2f48eb39dc" id="r_a38cfa99bc45bda42c6e76b2f48eb39dc"><td class="memItemLeft"><a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3">Family</a>&#160;</td><td class="memItemRight"><a class="el" href="#a38cfa99bc45bda42c6e76b2f48eb39dc">family</a> = <a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd">Family::waterIce</a></td></tr>
-<tr class="memitem:a84b073b27fb7b70b8891b4ca12007ab5" id="r_a84b073b27fb7b70b8891b4ca12007ab5"><td class="memItemLeft">std::unordered_map&lt; int, <a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90">Kind</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a84b073b27fb7b70b8891b4ca12007ab5">typeToKind</a></td></tr>
-<tr class="memitem:ae4fef91b396372693e47e15c4aaf149c" id="r_ae4fef91b396372693e47e15c4aaf149c"><td class="memItemLeft">std::unordered_map&lt; int, <a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90">Kind</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ae4fef91b396372693e47e15c4aaf149c">atomOverride</a></td></tr>
+<tr class="memitem:ad78f4f4cadb48de07aef52d1b8acd2f6" id="r_ad78f4f4cadb48de07aef52d1b8acd2f6"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ad78f4f4cadb48de07aef52d1b8acd2f6">guestsPerCage</a></td></tr>
+<tr class="memdesc:ad78f4f4cadb48de07aef52d1b8acd2f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">per cage, guests inside  <br /></td></tr>
+<tr class="memitem:a348095e631c60ed6ca36475b8d3b3d9b" id="r_a348095e631c60ed6ca36475b8d3b3d9b"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a348095e631c60ed6ca36475b8d3b3d9b">cageOfGuest</a></td></tr>
+<tr class="memdesc:a348095e631c60ed6ca36475b8d3b3d9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">per guest in input order, cage index or -1  <br /></td></tr>
+<tr class="memitem:a9c64c6621eb2d56b2ad7a3ab28d7d001" id="r_a9c64c6621eb2d56b2ad7a3ab28d7d001"><td class="memItemLeft">std::vector&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a9c64c6621eb2d56b2ad7a3ab28d7d001">centreDistance</a></td></tr>
+<tr class="memdesc:a9c64c6621eb2d56b2ad7a3ab28d7d001"><td class="mdescLeft">&#160;</td><td class="mdescRight">per guest, distance to its cage centre (-1 when free)  <br /></td></tr>
+<tr class="memitem:aa03cd68e5f4575f5aabf5fedc5234a34" id="r_aa03cd68e5f4575f5aabf5fedc5234a34"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aa03cd68e5f4575f5aabf5fedc5234a34">occupied</a> = 0</td></tr>
+<tr class="memdesc:aa03cd68e5f4575f5aabf5fedc5234a34"><td class="mdescLeft">&#160;</td><td class="mdescRight">cages with at least one guest  <br /></td></tr>
+<tr class="memitem:abdec0c14299ff5902b93dc131db43026" id="r_abdec0c14299ff5902b93dc131db43026"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#abdec0c14299ff5902b93dc131db43026">multiply</a> = 0</td></tr>
+<tr class="memdesc:abdec0c14299ff5902b93dc131db43026"><td class="mdescLeft">&#160;</td><td class="mdescRight">cages with more than one guest  <br /></td></tr>
+<tr class="memitem:aca1af9a15208a80f6ddb598fa3a2c3bd" id="r_aca1af9a15208a80f6ddb598fa3a2c3bd"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aca1af9a15208a80f6ddb598fa3a2c3bd">free</a> = 0</td></tr>
+<tr class="memdesc:aca1af9a15208a80f6ddb598fa3a2c3bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">guests in no cage  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00052">52</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
-</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="adc5635e77a366b0e9e27dcfa0d80288e" name="adc5635e77a366b0e9e27dcfa0d80288e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adc5635e77a366b0e9e27dcfa0d80288e">&#9670;&#160;</a></span>of()</h2>
+<div class="textblock"><p>Guests read against enumerated cages. </p>
+<p>A cage is a set of vertex atoms; its centre is the periodic centroid of the vertices. A guest (methane, THF, an ion, any atom outside the network) sits in the cage whose centre is nearest to it when that centre is within <span class="tt">radius</span>; a guest with no centre within <span class="tt">radius</span> is free. This is the occupancy of a clathrate hydrate (fraction of 5^12 and 5^12 6^2 cages filled) and the test of whether an ion sits inside the network rather than at a vertex. </p>
+
+<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00111">111</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
+</div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a348095e631c60ed6ca36475b8d3b3d9b" name="a348095e631c60ed6ca36475b8d3b3d9b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a348095e631c60ed6ca36475b8d3b3d9b">&#9670;&#160;</a></span>cageOfGuest</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90">Kind</a> site::Table::of </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>p</em></span></td><td>)</td>
-          <td> const</td>
+          <td class="memname">std::vector&lt;int&gt; site::GuestOccupancy::cageOfGuest</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
+<p>per guest in input order, cage index or -1 </p>
+
+<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00113">113</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
+
 </div>
 </div>
-<a id="ada6cb01db577cf6d01e8703bdbfe8bbb" name="ada6cb01db577cf6d01e8703bdbfe8bbb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ada6cb01db577cf6d01e8703bdbfe8bbb">&#9670;&#160;</a></span>ofType()</h2>
+<a id="a9c64c6621eb2d56b2ad7a3ab28d7d001" name="a9c64c6621eb2d56b2ad7a3ab28d7d001"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c64c6621eb2d56b2ad7a3ab28d7d001">&#9670;&#160;</a></span>centreDistance</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90">Kind</a> site::Table::ofType </td>
-          <td>(</td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeId</em></span></td><td>)</td>
-          <td> const</td>
+          <td class="memname">std::vector&lt;double&gt; site::GuestOccupancy::centreDistance</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
+<p>per guest, distance to its cage centre (-1 when free) </p>
+
+<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00114">114</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
+
 </div>
 </div>
-<a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
-<a id="ae4fef91b396372693e47e15c4aaf149c" name="ae4fef91b396372693e47e15c4aaf149c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae4fef91b396372693e47e15c4aaf149c">&#9670;&#160;</a></span>atomOverride</h2>
+<a id="aca1af9a15208a80f6ddb598fa3a2c3bd" name="aca1af9a15208a80f6ddb598fa3a2c3bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca1af9a15208a80f6ddb598fa3a2c3bd">&#9670;&#160;</a></span>free</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::unordered_map&lt;int, <a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90">Kind</a>&gt; site::Table::atomOverride</td>
+          <td class="memname">int site::GuestOccupancy::free = 0</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00055">55</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
+<p>guests in no cage </p>
+
+<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00117">117</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
 
 </div>
 </div>
-<a id="a38cfa99bc45bda42c6e76b2f48eb39dc" name="a38cfa99bc45bda42c6e76b2f48eb39dc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a38cfa99bc45bda42c6e76b2f48eb39dc">&#9670;&#160;</a></span>family</h2>
+<a id="ad78f4f4cadb48de07aef52d1b8acd2f6" name="ad78f4f4cadb48de07aef52d1b8acd2f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad78f4f4cadb48de07aef52d1b8acd2f6">&#9670;&#160;</a></span>guestsPerCage</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3">Family</a> site::Table::family = <a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd">Family::waterIce</a></td>
+          <td class="memname">std::vector&lt;int&gt; site::GuestOccupancy::guestsPerCage</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00053">53</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
+<p>per cage, guests inside </p>
+
+<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00112">112</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
 
 </div>
 </div>
-<a id="a84b073b27fb7b70b8891b4ca12007ab5" name="a84b073b27fb7b70b8891b4ca12007ab5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a84b073b27fb7b70b8891b4ca12007ab5">&#9670;&#160;</a></span>typeToKind</h2>
+<a id="abdec0c14299ff5902b93dc131db43026" name="abdec0c14299ff5902b93dc131db43026"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abdec0c14299ff5902b93dc131db43026">&#9670;&#160;</a></span>multiply</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::unordered_map&lt;int, <a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90">Kind</a>&gt; site::Table::typeToKind</td>
+          <td class="memname">int site::GuestOccupancy::multiply = 0</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00054">54</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
+<p>cages with more than one guest </p>
+
+<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00116">116</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
+
+</div>
+</div>
+<a id="aa03cd68e5f4575f5aabf5fedc5234a34" name="aa03cd68e5f4575f5aabf5fedc5234a34"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa03cd68e5f4575f5aabf5fedc5234a34">&#9670;&#160;</a></span>occupied</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int site::GuestOccupancy::occupied = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>cages with at least one guest </p>
+
+<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00115">115</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
 
 </div>
 </div>
@@ -366,7 +400,7 @@ Public Attributes</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="namespacesite.html">site</a></li><li class="navelem"><a href="structsite_1_1Table.html">Table</a></li>
+    <li class="navelem"><a href="namespacesite.html">site</a></li><li class="navelem"><a href="structsite_1_1GuestOccupancy.html">GuestOccupancy</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.17.0 </li>
   </ul>
 </div>

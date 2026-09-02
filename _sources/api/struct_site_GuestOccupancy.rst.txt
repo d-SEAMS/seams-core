@@ -1,0 +1,102 @@
+.. index:: pair: struct; site::GuestOccupancy
+.. _doxid-structsite_1_1_guest_occupancy:
+
+struct site::GuestOccupancy
+===========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Guests read against enumerated cages. :ref:`More...<details-structsite_1_1_guest_occupancy>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <site.hpp>
+	
+	struct GuestOccupancy {
+		// fields
+	
+		std::vector<int> :ref:`guestsPerCage<doxid-structsite_1_1_guest_occupancy_1ad78f4f4cadb48de07aef52d1b8acd2f6>`;
+		std::vector<int> :ref:`cageOfGuest<doxid-structsite_1_1_guest_occupancy_1a348095e631c60ed6ca36475b8d3b3d9b>`;
+		std::vector<double> :ref:`centreDistance<doxid-structsite_1_1_guest_occupancy_1a9c64c6621eb2d56b2ad7a3ab28d7d001>`;
+		int :ref:`occupied<doxid-structsite_1_1_guest_occupancy_1aa03cd68e5f4575f5aabf5fedc5234a34>` = 0;
+		int :ref:`multiply<doxid-structsite_1_1_guest_occupancy_1abdec0c14299ff5902b93dc131db43026>` = 0;
+		int :ref:`free<doxid-structsite_1_1_guest_occupancy_1aca1af9a15208a80f6ddb598fa3a2c3bd>` = 0;
+	};
+.. _details-structsite_1_1_guest_occupancy:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Guests read against enumerated cages.
+
+A cage is a set of vertex atoms; its centre is the periodic centroid of the vertices. A guest (methane, THF, an ion, any atom outside the network) sits in the cage whose centre is nearest to it when that centre is within ``radius``; a guest with no centre within ``radius`` is free. This is the occupancy of a clathrate hydrate (fraction of 5^12 and 5^12 6^2 cages filled) and the test of whether an ion sits inside the network rather than at a vertex.
+
+Fields
+------
+
+.. index:: pair: variable; guestsPerCage
+.. _doxid-structsite_1_1_guest_occupancy_1ad78f4f4cadb48de07aef52d1b8acd2f6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> guestsPerCage
+
+per cage, guests inside
+
+.. index:: pair: variable; cageOfGuest
+.. _doxid-structsite_1_1_guest_occupancy_1a348095e631c60ed6ca36475b8d3b3d9b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> cageOfGuest
+
+per guest in input order, cage index or -1
+
+.. index:: pair: variable; centreDistance
+.. _doxid-structsite_1_1_guest_occupancy_1a9c64c6621eb2d56b2ad7a3ab28d7d001:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> centreDistance
+
+per guest, distance to its cage centre (-1 when free)
+
+.. index:: pair: variable; occupied
+.. _doxid-structsite_1_1_guest_occupancy_1aa03cd68e5f4575f5aabf5fedc5234a34:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int occupied = 0
+
+cages with at least one guest
+
+.. index:: pair: variable; multiply
+.. _doxid-structsite_1_1_guest_occupancy_1abdec0c14299ff5902b93dc131db43026:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int multiply = 0
+
+cages with more than one guest
+
+.. index:: pair: variable; free
+.. _doxid-structsite_1_1_guest_occupancy_1aca1af9a15208a80f6ddb598fa3a2c3bd:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int free = 0
+
+guests in no cage
+

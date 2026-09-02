@@ -46,6 +46,7 @@ Overview
 	std::string :ref:`writeLibrary<doxid-namespacetopo_1a57942af5bce01d27654ba8d544195fe0>`(const :ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`& lib);
 	:ref:`KeyLibrary<doxid-structtopo_1_1_key_library>` :target:`readLibrary<doxid-namespacetopo_1ad78791f54d32c853345d0cffe9dcfa0b>`(const std::string& text);
 	:ref:`LibraryMatch<doxid-structtopo_1_1_library_match>` :ref:`matchLibrary<doxid-namespacetopo_1a73c3376495bbd19d8f072ac21af98131>`(const :ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>`& fp, const :ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`& lib);
+	:ref:`LibraryMatch<doxid-structtopo_1_1_library_match>` :ref:`matchLibraries<doxid-namespacetopo_1a3fe468feddca93b3dc1bc79db0dad30e>`(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, const std::vector<:ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`>& libs, int maxRingSize = 7, const std::vector<int>& colours = {});
 
 	} // namespace topo
 .. _details-namespacetopo:
@@ -145,7 +146,7 @@ Add every distinct key of ``fp`` under ``label``; a key already present under ot
 
 	std::string writeLibrary(const :ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`& lib)
 
-Text form: a header line ``# method M hops H``, then ``key label`` lines.
+Text form: a header line ``# method M hops H colours C`` (C is 0 or 1; a header without it means uncoloured), then ``key label`` lines.
 
 .. index:: pair: function; matchLibrary
 .. _doxid-namespacetopo_1a73c3376495bbd19d8f072ac21af98131:
@@ -157,5 +158,17 @@ Text form: a header line ``# method M hops H``, then ``key label`` lines.
 
 Look every atom key of ``fp`` up in ``lib``.
 
-Throws std::invalid_argument when the methods or hop counts differ.
+Throws std::invalid_argument when the methods, hop counts or colourings differ.
+
+.. index:: pair: function; matchLibraries
+.. _doxid-namespacetopo_1a3fe468feddca93b3dc1bc79db0dad30e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`LibraryMatch<doxid-structtopo_1_1_library_match>` matchLibraries(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, const std::vector<:ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`>& libs, int maxRingSize = 7, const std::vector<int>& colours = {})
+
+Match against libraries at several depths: an atom takes the label of the deepest library that holds its key, and a molecule whose wide neighbourhood is disturbed (a defect two bonds away, a jittered dense polymorph) still gets named by its inner shells.
+
+``depth`` records the hops that named each atom. Every library must share the method of this build and the colouring (``colours`` empty or one per row); throws std::invalid_argument otherwise, or when two libraries share a depth.
 
