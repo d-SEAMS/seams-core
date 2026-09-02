@@ -137,7 +137,7 @@ C++ tests are Catch2. Python tests live in
 `PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_.
 
 ``tests/walk_compare`` is a Meson executable. Inputs and columns live
-on `walk\ :sub:`compare`\ <../reference/walk-compare.rst>`_.
+on `walk\_compare <../reference/walk-compare.rst>`_.
 
 Lean 4 statements about ``ring::ringAdjacentCompletion`` live in
 ``lean/``. See `Lean proofs <lean.rst>`_.

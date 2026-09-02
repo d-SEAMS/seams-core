@@ -5,7 +5,7 @@ Ionic-liquid dumps
 
 A multi-type dump is not an ice frame. Keep CHILL and cages on
 one species with ``--type I``. Use ``seams rdf`` for a partial
-g\ :sub:`IJ`\(r) under the dump minimum image. Use ``seams density-z``
+g\_IJ(r) under the dump minimum image. Use ``seams density-z``
 for a type-resolved :math:`\rho(z)` in a slit.
 
 Pick one type

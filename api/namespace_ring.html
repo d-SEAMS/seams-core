@@ -119,7 +119,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 current"><a class="reference internal" href="../reference/index.html">Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../reference/walk-compare.html">walk<sub>compare</sub></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/walk-compare.html">walk_compare</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/api.html">API map</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="group_bond.html">Bond</a></li>
@@ -143,7 +143,7 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/walk-compare.html">walk<sub>compare</sub></a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/walk-compare.html">walk_compare</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API map</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
@@ -372,7 +372,7 @@ data-aria-dark="Switch to auto color mode">
 </pre></div>
 <p>Seeded affiliation over two graphs on the same atoms: the strict graph (typically the mutual k-nearest bonds) supplies seeds, the permissive supergraph (typically the union bonds) supplies completions, and a permissively affiliated atom is accepted only when its bonded component of affiliated atoms contains a seed.</p>
 <p>Specificity on structureless input is structural rather than statistical: when the strict pass affiliates nothing, nothing is accepted regardless of what the permissive graph builds. Where both graphs label an atom, the strict labels win.</p>
-<p>The fifth argument is the ring-adjacent completion flag. The default is false. When the flag is true the accepted labels pass through <a class="reference internal" href="#doxid-namespacering-1a52d5bc312612884ce62bd430d94fdb17"><span class="std std-ref">ringAdjacentCompletion()</span></a> on the permissive six-rings. HC and DDC complete on separate flag vectors. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span> <span class="pre">--complete</span></code> sets the flag. tests/walk_compare leaves the flag false.</p>
+<p>The fifth argument is the ring-adjacent completion flag. The default is false. When the flag is true the accepted labels pass through <a class="reference internal" href="#doxid-namespacering-1a52d5bc312612884ce62bd430d94fdb17"><span class="std std-ref">ringAdjacentCompletion()</span></a> on the permissive six-rings. HC and DDC complete on separate flag vectors. seams cages complete sets the flag. tests/walk_compare leaves the flag false.</p>
 <p class="rubric">Parameters:</p>
 <div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">

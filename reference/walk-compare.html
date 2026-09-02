@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>walkcompare - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="API map" href="api.html" /><link rel="prev" title="Data Formats" href="data-formats.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>walk_compare - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="API map" href="api.html" /><link rel="prev" title="Data Formats" href="data-formats.html" />
       <link rel="canonical" href="https://docs.dseams.info/reference/walk-compare.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -24,7 +24,7 @@
 </style>
     <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://docs.dseams.info/reference/walk-compare.html"/>
-  <meta property="og:title" content="walkcompare"/>
+  <meta property="og:title" content="walk_compare"/>
     <meta name="twitter:card" content="summary"/>
   <!-- Antics analytics -->
 <script defer src="https://antics-api.turtletech.us/antics.js"></script>
@@ -119,7 +119,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="cli.html">seams CLI</a></li>
 <li class="toctree-l2"><a class="reference internal" href="data-formats.html">Data Formats</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">walk<sub>compare</sub></a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">walk_compare</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api.html">API map</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api/index.html">API Reference</a></li>
 <li class="toctree-l2"><a class="reference internal" href="nix.html">Nix flake</a></li>
@@ -128,7 +128,7 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="cli.html">seams CLI</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="data-formats.html">Data Formats</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">walk<sub>compare</sub></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">walk_compare</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="nix.html">Nix flake</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="api.html">API map</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/index.html">API Reference</a></li>
@@ -197,7 +197,7 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="2" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">walk<sub>compare</sub></strong>
+        <strong itemprop="name">walk_compare</strong>
         <meta itemprop="position" content="3" />
       </li></ol>
     <div class="xl:hidden ml-1">
@@ -245,15 +245,15 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </div><article class="yue dark-code" role="main">
-          <section id="walkcompare">
-<h1>walk<sub>compare</sub><a class="headerlink" href="#walkcompare" title="Link to this heading">¶</a></h1>
+          <section id="walk-compare">
+<h1>walk_compare<a class="headerlink" href="#walk-compare" title="Link to this heading">¶</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">tests/walk_compare</span></code> walks a LAMMPS dump and prints one row per
 frame. Each row has four-neighbour star (<code class="docutils literal notranslate"><span class="pre">CHILL+</span></code>) counts, cage
 membership on the same cutoff graph, and the seeded assignment on the
 mutual and union four-nearest graphs, with the largest ice cluster of
 each score. Cage flags are hexagonal cage (HC) and double-diamond
 cage (DDC).</p>
-<p>The walk<sub>compare</sub>binary is a Meson executable. <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">setup</span> <span class="pre">&amp;&amp;</span> <span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">build</span></code> (<code class="docutils literal notranslate"><span class="pre">-Dwith_tests=true</span></code>) writes
+<p>The walk_compare binary is a Meson executable. <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">setup</span> <span class="pre">&amp;&amp;</span> <span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">build</span></code> (<code class="docutils literal notranslate"><span class="pre">-Dwith_tests=true</span></code>) writes
 <code class="docutils literal notranslate"><span class="pre">bbdir/tests/walk_compare</span></code>. A Nix develop tree writes the same name
 under the Meson build directory. Catch2 does not run this binary.</p>
 <section id="inputs">

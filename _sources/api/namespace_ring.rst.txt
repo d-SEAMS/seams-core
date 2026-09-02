@@ -122,7 +122,7 @@ Seeded affiliation over two graphs on the same atoms: the strict graph (typicall
 
 Specificity on structureless input is structural rather than statistical: when the strict pass affiliates nothing, nothing is accepted regardless of what the permissive graph builds. Where both graphs label an atom, the strict labels win.
 
-The fifth argument is the ring-adjacent completion flag. The default is false. When the flag is true the accepted labels pass through :ref:`ringAdjacentCompletion() <doxid-namespacering_1a52d5bc312612884ce62bd430d94fdb17>` on the permissive six-rings. HC and DDC complete on separate flag vectors. ``:ref:`seams <doxid-namespaceseams>` cages --complete`` sets the flag. tests/walk_compare leaves the flag false.
+The fifth argument is the ring-adjacent completion flag. The default is false. When the flag is true the accepted labels pass through :ref:`ringAdjacentCompletion() <doxid-namespacering_1a52d5bc312612884ce62bd430d94fdb17>` on the permissive six-rings. HC and DDC complete on separate flag vectors. seams cages complete sets the flag. tests/walk_compare leaves the flag false.
 
 
 
