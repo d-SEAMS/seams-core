@@ -144,7 +144,8 @@ TEST_CASE("hexagonal prism rings close and match the hc signature",
   REQUIRE(cage::isClosedPolyhedron(rings, all));
   REQUIRE_FALSE(cage::isClosedPolyhedron(rings, {0, 1}));
 
-  const auto found = cage::findBySignature(rings, cage::Signature::parse("hc"));
+  const auto found =
+      cage::findBySignature(rings, cage::Signature::parse("4:6,6:2"));
   REQUIRE(found.size() == 1);
   REQUIRE(found[0].vertices.size() == 12);
   REQUIRE(found[0].faces.size() == 8);
