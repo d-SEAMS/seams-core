@@ -64,6 +64,13 @@ if host_machine.system() == 'linux'
 endif
 
 foreach name, src : test_sources
+  # meson allows no nested ternary; the long-running suites get more time
+  _timeout = 120
+  if name == 'cage_enum'
+    _timeout = 300
+  elif name == 'bop' and offload_enabled
+    _timeout = 600
+  endif
   test(name,
     executable('test_' + name, src,
       dependencies: [yds_dep, catch2_dep],
@@ -73,7 +80,7 @@ foreach name, src : test_sources
       build_rpath: '$ORIGIN/../src'),
     workdir: meson.project_source_root() / 'input',
     env: _test_env,
-    timeout: name == 'cage_enum' ? 300 : (name == 'bop' and offload_enabled ? 600 : 120))
+    timeout: _timeout)
 endforeach
 
 # SIMD verification test (header-only, does not need libyodaLib)
