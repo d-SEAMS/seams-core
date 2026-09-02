@@ -71,17 +71,21 @@ Cloud load(const std::string &path, int frame, int typeI) {
   if (ext == "xyz") {
     return sinp::readXYZ(path);
   }
-#ifdef SEAMS_HAS_READCON
   if (ext == "con") {
+#ifdef SEAMS_HAS_READCON
     return sinp::readCon(path, frame, cloud);
-  }
+#else
+    throw std::runtime_error("readcon-core is not in this build; CON input needs it");
 #endif
-#ifdef SEAMS_HAS_CHEMFILES
+  }
   if (ext == "pdb" || ext == "gro" || ext == "dcd") {
+#ifdef SEAMS_HAS_CHEMFILES
     const int filter = typeI < 0 ? -1 : (typeI > 0 ? typeI : -1);
     return sinp::readChemfiles(path, frame, cloud, filter);
-  }
+#else
+    throw std::runtime_error("chemfiles is not in this build; " + ext + " input needs it");
 #endif
+  }
   if (typeI < 0) {
     return sinp::readLammpsTrj(path, frame, cloud);
   }
