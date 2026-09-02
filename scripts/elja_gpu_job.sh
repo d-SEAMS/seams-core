@@ -53,12 +53,33 @@ if [[ ! -f $CRT/crt1.o || ! -f $CRT/crti.o || ! -f $CRT/crtn.o ]]; then
   echo "missing C runtime objects in $CRT (copy crt1.o crti.o crtn.o Scrt1.o from a login /usr/lib64)" >&2
   exit 1
 fi
-export LIBRARY_PATH=$CRT${LIBRARY_PATH:+:$LIBRARY_PATH}
+# GPU images ship libc.so.6 but not the glibc-devel linker scripts.
+# Write those scripts here so -lc resolves to /lib64/libc.so.6.
+if [[ ! -f $CRT/libc.so ]]; then
+  cat > "$CRT/libc.so" <<EOF
+OUTPUT_FORMAT(elf64-x86-64)
+GROUP ( /lib64/libc.so.6 $CRT/libc_nonshared.a AS_NEEDED ( /lib64/ld-linux-x86-64.so.2 ) )
+EOF
+fi
+if [[ ! -f $CRT/libm.so ]]; then
+  cat > "$CRT/libm.so" <<'EOF'
+OUTPUT_FORMAT(elf64-x86-64)
+GROUP ( /lib64/libm.so.6 )
+EOF
+fi
+for pair in libpthread.so:libpthread.so.0 libdl.so:libdl.so.2 librt.so:librt.so.1; do
+  name=${pair%%:*}
+  target=${pair##*:}
+  if [[ ! -e $CRT/$name && -e /lib64/$target ]]; then
+    ln -sfn "/lib64/$target" "$CRT/$name"
+  fi
+done
+export LIBRARY_PATH=$CRT:/lib64${LIBRARY_PATH:+:$LIBRARY_PATH}
 # clang's driver does not search LIBRARY_PATH for startfiles.
 # -B is the prefix both gcc and clang use for crt1.o / Scrt1.o.
 export CFLAGS="${CFLAGS:-} -B${CRT}"
 export CXXFLAGS="${CXXFLAGS:-} -B${CRT}"
-export LDFLAGS="${LDFLAGS:-} -B${CRT}"
+export LDFLAGS="${LDFLAGS:-} -B${CRT} -L${CRT} -L/lib64"
 
 export SEAMS_OFFLOAD=${SEAMS_OFFLOAD:-1}
 
