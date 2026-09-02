@@ -268,20 +268,21 @@ the tree carries a Catch2 3 wrap. CUDA 12.4 supplies <code class="docutils liter
 </span><span data-line="12"><span class="nb">export</span><span class="w"> </span><span class="nv">CXXFLAGS</span><span class="o">=</span><span class="s2">&quot;-B</span><span class="nv">$PWD</span><span class="s2">/elja-crt&quot;</span>
 </span><span data-line="13"><span class="nb">export</span><span class="w"> </span><span class="nv">LDFLAGS</span><span class="o">=</span><span class="s2">&quot;-B</span><span class="nv">$PWD</span><span class="s2">/elja-crt -L</span><span class="nv">$PWD</span><span class="s2">/elja-crt -L/lib64 -L</span><span class="nv">$EB</span><span class="s2">/hwloc/2.9.2-GCCcore-13.2.0/lib -lhwloc&quot;</span>
 </span><span data-line="14">
-</span><span data-line="15"><span class="c1"># nvc++ 22.3 reports no C++20. Clang 17 with libomptarget is the</span>
-</span><span data-line="16"><span class="c1"># compiler that accepts cpp_std=c++20 and the offload probe.</span>
-</span><span data-line="17"><span class="nb">export</span><span class="w"> </span><span class="nv">CC</span><span class="o">=</span><span class="nv">$EB</span>/Clang/17.0.6-GCCcore-13.2.0/bin/clang
-</span><span data-line="18"><span class="nb">export</span><span class="w"> </span><span class="nv">CXX</span><span class="o">=</span><span class="nv">$EB</span>/Clang/17.0.6-GCCcore-13.2.0/bin/clang++
+</span><span data-line="15"><span class="c1"># nvc++ 22.3 accepts -mp=gpu. Meson does not list C++20 for that</span>
+</span><span data-line="16"><span class="c1"># release, so setup uses -Dcpp_std=none and -std=c++17.</span>
+</span><span data-line="17"><span class="nb">export</span><span class="w"> </span><span class="nv">CC</span><span class="o">=</span><span class="nv">$EB</span>/GCCcore/13.3.0/bin/gcc
+</span><span data-line="18"><span class="nb">export</span><span class="w"> </span><span class="nv">CXX</span><span class="o">=</span>nvc++
 </span><span data-line="19"><span class="nb">export</span><span class="w"> </span><span class="nv">CFLAGS</span><span class="o">=</span><span class="s2">&quot;-idirafter </span><span class="nv">$PWD</span><span class="s2">/elja-sysroot/usr/include&quot;</span>
-</span><span data-line="20"><span class="nb">export</span><span class="w"> </span><span class="nv">CXXFLAGS</span><span class="o">=</span><span class="s2">&quot;-idirafter </span><span class="nv">$PWD</span><span class="s2">/elja-sysroot/usr/include&quot;</span>
+</span><span data-line="20"><span class="nb">export</span><span class="w"> </span><span class="nv">CXXFLAGS</span><span class="o">=</span><span class="s2">&quot;-std=c++17 -idirafter </span><span class="nv">$PWD</span><span class="s2">/elja-sysroot/usr/include&quot;</span>
 </span><span data-line="21">meson<span class="w"> </span>setup<span class="w"> </span>build-offload<span class="w"> </span>--buildtype<span class="o">=</span>debugoptimized<span class="w"> </span><span class="se">\</span>
-</span><span data-line="22"><span class="w">  </span>-Dwith_openmp_offload<span class="o">=</span>enabled<span class="w"> </span><span class="se">\</span>
-</span><span data-line="23"><span class="w">  </span>-Dwith_python<span class="o">=</span><span class="nb">false</span><span class="w"> </span><span class="se">\</span>
-</span><span data-line="24"><span class="w">  </span>-Dwith_lua<span class="o">=</span>disabled<span class="w"> </span><span class="se">\</span>
-</span><span data-line="25"><span class="w">  </span>-Dwith_mpi<span class="o">=</span>disabled<span class="w"> </span><span class="se">\</span>
-</span><span data-line="26"><span class="w">  </span>-Dwith_gpulite<span class="o">=</span>disabled
-</span><span data-line="27">meson<span class="w"> </span>compile<span class="w"> </span>-C<span class="w"> </span>build-offload
-</span><span data-line="28">meson<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-C<span class="w"> </span>build-offload<span class="w"> </span>--print-errorlogs
+</span><span data-line="22"><span class="w">  </span>-Dcpp_std<span class="o">=</span>none<span class="w"> </span><span class="se">\</span>
+</span><span data-line="23"><span class="w">  </span>-Dwith_openmp_offload<span class="o">=</span>enabled<span class="w"> </span><span class="se">\</span>
+</span><span data-line="24"><span class="w">  </span>-Dwith_python<span class="o">=</span><span class="nb">false</span><span class="w"> </span><span class="se">\</span>
+</span><span data-line="25"><span class="w">  </span>-Dwith_lua<span class="o">=</span>disabled<span class="w"> </span><span class="se">\</span>
+</span><span data-line="26"><span class="w">  </span>-Dwith_mpi<span class="o">=</span>disabled<span class="w"> </span><span class="se">\</span>
+</span><span data-line="27"><span class="w">  </span>-Dwith_gpulite<span class="o">=</span>disabled
+</span><span data-line="28">meson<span class="w"> </span>compile<span class="w"> </span>-C<span class="w"> </span>build-offload
+</span><span data-line="29">meson<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-C<span class="w"> </span>build-offload<span class="w"> </span>--print-errorlogs
 </span></pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">meson</span> <span class="pre">setup</span></code> / <code class="docutils literal notranslate"><span class="pre">compile</span></code> / <code class="docutils literal notranslate"><span class="pre">test</span></code> run under <code class="docutils literal notranslate"><span class="pre">srun</span></code> or <code class="docutils literal notranslate"><span class="pre">sbatch</span></code>

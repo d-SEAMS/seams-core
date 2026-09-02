@@ -15,6 +15,5 @@ var namespaceseams =
       [ "qlOneAtom", "namespaceseams_1_1steinhardt.html#ad7a4bc8342952acfea0b25760b426796", null ],
       [ "ylmAll", "namespaceseams_1_1steinhardt.html#adf41cecc177768d88e4c00b88bef06d6", null ]
     ] ],
-    [ "BatchPeriodicDistSq", "namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab", null ],
-    [ "BatchPeriodicDistSq", "namespaceseams.html#a2657c8a3875c7edcdd7ceaf369ab34f6", null ]
+    [ "BatchPeriodicDistSq", "namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab", null ]
 ];

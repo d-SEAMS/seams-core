@@ -234,128 +234,133 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('simd__distance
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;cmath&gt;</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;algorithm&gt;</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;cstddef&gt;</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &lt;span&gt;</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#ifdef SEAMS_HAS_HWY</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;hwy/highway.h&quot;</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceseams.html">seams</a> {</div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">namespace </span>hn = hwy::HWY_NAMESPACE;</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">// Compute squared periodic distances for a batch of atom pairs.</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">// Orthorhombic lengths only: one independent wrap per axis.</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">// A LAMMPS dump with tilt (PointCloud.box.size() &gt;= 6) stores bound</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment">// spans in box[0..2], not lx, ly, lz. Call gen::periodicDistSq or</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">// gen::batchPeriodicDistSq for those clouds.</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">// dx, dy, dz: coordinate differences (length n)</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">// bx, by, bz: periodic box dimensions</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">// out: output squared distances (length n)</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">inline</span> HWY_ATTR <span class="keywordtype">void</span> <a class="code hl_function" href="namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab">BatchPeriodicDistSq</a>(<span class="keyword">const</span> <span class="keywordtype">double</span>* HWY_RESTRICT dx,</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>                                <span class="keyword">const</span> <span class="keywordtype">double</span>* HWY_RESTRICT dy,</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>                                <span class="keyword">const</span> <span class="keywordtype">double</span>* HWY_RESTRICT dz,</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>                                <span class="keywordtype">double</span> bx, <span class="keywordtype">double</span> by, <span class="keywordtype">double</span> bz,</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>                                <span class="keywordtype">double</span>* HWY_RESTRICT out, <span class="keywordtype">size_t</span> n) {</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>  <span class="keyword">const</span> hn::ScalableTag&lt;double&gt; d;</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  <span class="keyword">const</span> <span class="keywordtype">size_t</span> N = hn::Lanes(d);</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  <span class="keyword">const</span> <span class="keyword">auto</span> vbx = hn::Set(d, bx);</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>  <span class="keyword">const</span> <span class="keyword">auto</span> vby = hn::Set(d, by);</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>  <span class="keyword">const</span> <span class="keyword">auto</span> vbz = hn::Set(d, bz);</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <span class="comment">// The box is fixed across the batch, so the three divisions of the minimum</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="comment">// image convention collapse into one reciprocal each, hoisted out of the</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  <span class="comment">// loop. Vector division has several times the latency of multiplication.</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rbx = 1.0 / bx;</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rby = 1.0 / by;</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rbz = 1.0 / bz;</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  <span class="keyword">const</span> <span class="keyword">auto</span> vrbx = hn::Set(d, rbx);</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  <span class="keyword">const</span> <span class="keyword">auto</span> vrby = hn::Set(d, rby);</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  <span class="keyword">const</span> <span class="keyword">auto</span> vrbz = hn::Set(d, rbz);</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  <span class="keywordtype">size_t</span> i = 0;</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  <span class="keywordflow">for</span> (; i + N &lt;= n; i += N) {</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="comment">// Callers pass std::vector&lt;double&gt; scratch (16-byte typical). Load/Store</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="comment">// require native vector alignment and fault under AVX2/AVX-512.</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keyword">auto</span> vdx = hn::LoadU(d, dx + i);</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keyword">auto</span> vdy = hn::LoadU(d, dy + i);</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keyword">auto</span> vdz = hn::LoadU(d, dz + i);</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="comment">// Absolute values</span></div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    vdx = hn::Abs(vdx);</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    vdy = hn::Abs(vdy);</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    vdz = hn::Abs(vdz);</div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#if defined(__has_include)</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#if __has_include(&lt;span&gt;)</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;span&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#define SEAMS_HAS_STD_SPAN 1</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#ifdef SEAMS_HAS_HWY</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;hwy/highway.h&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceseams.html">seams</a> {</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">namespace </span>hn = hwy::HWY_NAMESPACE;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">// Compute squared periodic distances for a batch of atom pairs.</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">// Orthorhombic lengths only: one independent wrap per axis.</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">// A LAMMPS dump with tilt (PointCloud.box.size() &gt;= 6) stores bound</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment">// spans in box[0..2], not lx, ly, lz. Call gen::periodicDistSq or</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment">// gen::batchPeriodicDistSq for those clouds.</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment">// dx, dy, dz: coordinate differences (length n)</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">// bx, by, bz: periodic box dimensions</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment">// out: output squared distances (length n)</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="keyword">inline</span> HWY_ATTR <span class="keywordtype">void</span> <a class="code hl_function" href="namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab">BatchPeriodicDistSq</a>(<span class="keyword">const</span> <span class="keywordtype">double</span>* HWY_RESTRICT dx,</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>                                <span class="keyword">const</span> <span class="keywordtype">double</span>* HWY_RESTRICT dy,</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>                                <span class="keyword">const</span> <span class="keywordtype">double</span>* HWY_RESTRICT dz,</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>                                <span class="keywordtype">double</span> bx, <span class="keywordtype">double</span> by, <span class="keywordtype">double</span> bz,</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>                                <span class="keywordtype">double</span>* HWY_RESTRICT out, <span class="keywordtype">size_t</span> n) {</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>  <span class="keyword">const</span> hn::ScalableTag&lt;double&gt; d;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  <span class="keyword">const</span> <span class="keywordtype">size_t</span> N = hn::Lanes(d);</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="keyword">const</span> <span class="keyword">auto</span> vbx = hn::Set(d, bx);</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  <span class="keyword">const</span> <span class="keyword">auto</span> vby = hn::Set(d, by);</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  <span class="keyword">const</span> <span class="keyword">auto</span> vbz = hn::Set(d, bz);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  <span class="comment">// The box is fixed across the batch, so the three divisions of the minimum</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  <span class="comment">// image convention collapse into one reciprocal each, hoisted out of the</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  <span class="comment">// loop. Vector division has several times the latency of multiplication.</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rbx = 1.0 / bx;</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rby = 1.0 / by;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rbz = 1.0 / bz;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  <span class="keyword">const</span> <span class="keyword">auto</span> vrbx = hn::Set(d, rbx);</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <span class="keyword">const</span> <span class="keyword">auto</span> vrby = hn::Set(d, rby);</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  <span class="keyword">const</span> <span class="keyword">auto</span> vrbz = hn::Set(d, rbz);</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  <span class="keywordtype">size_t</span> i = 0;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  <span class="keywordflow">for</span> (; i + N &lt;= n; i += N) {</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="comment">// Callers pass std::vector&lt;double&gt; scratch (16-byte typical). Load/Store</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="comment">// require native vector alignment and fault under AVX2/AVX-512.</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keyword">auto</span> vdx = hn::LoadU(d, dx + i);</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keyword">auto</span> vdy = hn::LoadU(d, dy + i);</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keyword">auto</span> vdz = hn::LoadU(d, dz + i);</div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="comment">// Periodic wrap: dr -= box * round(dr * (1 / box))</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    vdx = hn::NegMulAdd(vbx, hn::Round(hn::Mul(vdx, vrbx)), vdx);</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    vdy = hn::NegMulAdd(vby, hn::Round(hn::Mul(vdy, vrby)), vdy);</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    vdz = hn::NegMulAdd(vbz, hn::Round(hn::Mul(vdz, vrbz)), vdz);</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="comment">// Absolute values</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    vdx = hn::Abs(vdx);</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    vdy = hn::Abs(vdy);</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    vdz = hn::Abs(vdz);</div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="comment">// r2 = dx*dx + dy*dy + dz*dz</span></div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keyword">auto</span> r2 = hn::MulAdd(vdx, vdx, hn::MulAdd(vdy, vdy, hn::Mul(vdz, vdz)));</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    hn::StoreU(r2, d, out + i);</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>  }</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="comment">// Periodic wrap: dr -= box * round(dr * (1 / box))</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    vdx = hn::NegMulAdd(vbx, hn::Round(hn::Mul(vdx, vrbx)), vdx);</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    vdy = hn::NegMulAdd(vby, hn::Round(hn::Mul(vdy, vrby)), vdy);</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    vdz = hn::NegMulAdd(vbz, hn::Round(hn::Mul(vdz, vrbz)), vdz);</div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>  <span class="comment">// Scalar remainder</span></div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  <span class="keywordflow">for</span> (; i &lt; n; i++) {</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <span class="keywordtype">double</span> ddx = std::fabs(dx[i]);</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keywordtype">double</span> ddy = std::fabs(dy[i]);</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="keywordtype">double</span> ddz = std::fabs(dz[i]);</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    ddx -= bx * std::round(ddx * rbx);</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    ddy -= by * std::round(ddy * rby);</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    ddz -= bz * std::round(ddz * rbz);</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    out[i] = ddx * ddx + ddy * ddy + ddz * ddz;</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  }</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>}</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>}  <span class="comment">// namespace seams</span></div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="preprocessor">#else  </span><span class="comment">// !SEAMS_HAS_HWY</span></div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="comment">// Scalar fallback</span></div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceseams.html">seams</a> {</div>
-<div class="foldopen" id="foldopen00088" data-start="{" data-end="}">
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab">   88</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab">BatchPeriodicDistSq</a>(<span class="keyword">const</span> <span class="keywordtype">double</span>* dx, <span class="keyword">const</span> <span class="keywordtype">double</span>* dy,</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>                                <span class="keyword">const</span> <span class="keywordtype">double</span>* dz, <span class="keywordtype">double</span> bx, <span class="keywordtype">double</span> by,</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>                                <span class="keywordtype">double</span> bz, <span class="keywordtype">double</span>* out, <span class="keywordtype">size_t</span> n) {</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  <span class="comment">// Matches the vectorised path: one reciprocal per axis for the whole batch</span></div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rbx = 1.0 / bx;</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rby = 1.0 / by;</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rbz = 1.0 / bz;</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; n; i++) {</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="keywordtype">double</span> ddx = std::fabs(dx[i]);</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    <span class="keywordtype">double</span> ddy = std::fabs(dy[i]);</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <span class="keywordtype">double</span> ddz = std::fabs(dz[i]);</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    ddx -= bx * std::round(ddx * rbx);</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    ddy -= by * std::round(ddy * rby);</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    ddz -= bz * std::round(ddz * rbz);</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    out[i] = ddx * ddx + ddy * ddy + ddz * ddz;</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>  }</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>}</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="comment">// r2 = dx*dx + dy*dy + dz*dz</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keyword">auto</span> r2 = hn::MulAdd(vdx, vdx, hn::MulAdd(vdy, vdy, hn::Mul(vdz, vdz)));</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    hn::StoreU(r2, d, out + i);</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>  }</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>  <span class="comment">// Scalar remainder</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>  <span class="keywordflow">for</span> (; i &lt; n; i++) {</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="keywordtype">double</span> ddx = std::fabs(dx[i]);</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keywordtype">double</span> ddy = std::fabs(dy[i]);</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="keywordtype">double</span> ddz = std::fabs(dz[i]);</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    ddx -= bx * std::round(ddx * rbx);</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    ddy -= by * std::round(ddy * rby);</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    ddz -= bz * std::round(ddz * rbz);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    out[i] = ddx * ddx + ddy * ddy + ddz * ddz;</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  }</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>}</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>}  <span class="comment">// namespace seams</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="preprocessor">#else  </span><span class="comment">// !SEAMS_HAS_HWY</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="comment">// Scalar fallback</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceseams.html">seams</a> {</div>
+<div class="foldopen" id="foldopen00093" data-start="{" data-end="}">
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab">   93</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab">BatchPeriodicDistSq</a>(<span class="keyword">const</span> <span class="keywordtype">double</span>* dx, <span class="keyword">const</span> <span class="keywordtype">double</span>* dy,</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>                                <span class="keyword">const</span> <span class="keywordtype">double</span>* dz, <span class="keywordtype">double</span> bx, <span class="keywordtype">double</span> by,</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>                                <span class="keywordtype">double</span> bz, <span class="keywordtype">double</span>* out, <span class="keywordtype">size_t</span> n) {</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  <span class="comment">// Matches the vectorised path: one reciprocal per axis for the whole batch</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rbx = 1.0 / bx;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rby = 1.0 / by;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rbz = 1.0 / bz;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; n; i++) {</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    <span class="keywordtype">double</span> ddx = std::fabs(dx[i]);</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    <span class="keywordtype">double</span> ddy = std::fabs(dy[i]);</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    <span class="keywordtype">double</span> ddz = std::fabs(dz[i]);</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    ddx -= bx * std::round(ddx * rbx);</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    ddy -= by * std::round(ddy * rby);</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    ddz -= bz * std::round(ddz * rbz);</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    out[i] = ddx * ddx + ddy * ddy + ddz * ddz;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  }</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>}</div>
 </div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>}  <span class="comment">// namespace seams</span></div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="preprocessor">#endif  </span><span class="comment">// SEAMS_HAS_HWY</span></div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceseams.html">seams</a> {</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span></div>
-<div class="foldopen" id="foldopen00121" data-start="{" data-end="}">
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno"><a class="line" href="namespaceseams.html#a2657c8a3875c7edcdd7ceaf369ab34f6">  121</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab">BatchPeriodicDistSq</a>(std::span&lt;const double&gt; dx,</div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>                                std::span&lt;const double&gt; dy,</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>                                std::span&lt;const double&gt; dz, <span class="keywordtype">double</span> bx,</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>                                <span class="keywordtype">double</span> by, <span class="keywordtype">double</span> bz, std::span&lt;double&gt; out) {</div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>  <span class="keyword">const</span> <span class="keywordtype">size_t</span> n = std::min({dx.size(), dy.size(), dz.size(), out.size()});</div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>  <a class="code hl_function" href="namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab">BatchPeriodicDistSq</a>(dx.data(), dy.data(), dz.data(), bx, by, bz, out.data(),</div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>                      n);</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>}</div>
-</div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>}  <span class="comment">// namespace seams</span></div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span><span class="preprocessor">#endif  </span><span class="comment">// SEAMS_SIMD_DISTANCE_H_</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>}  <span class="comment">// namespace seams</span></div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span><span class="preprocessor">#endif  </span><span class="comment">// SEAMS_HAS_HWY</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceseams.html">seams</a> {</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span><span class="preprocessor">#ifdef SEAMS_HAS_STD_SPAN</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab">BatchPeriodicDistSq</a>(std::span&lt;const double&gt; dx,</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>                                std::span&lt;const double&gt; dy,</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>                                std::span&lt;const double&gt; dz, <span class="keywordtype">double</span> bx,</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>                                <span class="keywordtype">double</span> by, <span class="keywordtype">double</span> bz, std::span&lt;double&gt; out) {</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>  <span class="keyword">const</span> <span class="keywordtype">size_t</span> n = std::min({dx.size(), dy.size(), dz.size(), out.size()});</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>  <a class="code hl_function" href="namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab">BatchPeriodicDistSq</a>(dx.data(), dy.data(), dz.data(), bx, by, bz, out.data(),</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>                      n);</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>}</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>}  <span class="comment">// namespace seams</span></div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span><span class="preprocessor">#endif  </span><span class="comment">// SEAMS_SIMD_DISTANCE_H_</span></div>
 <div class="ttc" id="anamespaceseams_html"><div class="ttname"><a href="namespaceseams.html">seams</a></div><div class="ttdef"><b>Definition</b> <a href="seams__config_8hpp_source.html#l00027">seams_config.hpp:27</a></div></div>
-<div class="ttc" id="anamespaceseams_html_a7b2dc4f3d8257cc99b099ffbebd1a5ab"><div class="ttname"><a href="namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab">seams::BatchPeriodicDistSq</a></div><div class="ttdeci">void BatchPeriodicDistSq(const double *dx, const double *dy, const double *dz, double bx, double by, double bz, double *out, size_t n)</div><div class="ttdef"><b>Definition</b> <a href="#l00088">simd_distance.hpp:88</a></div></div>
+<div class="ttc" id="anamespaceseams_html_a7b2dc4f3d8257cc99b099ffbebd1a5ab"><div class="ttname"><a href="namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab">seams::BatchPeriodicDistSq</a></div><div class="ttdeci">void BatchPeriodicDistSq(const double *dx, const double *dy, const double *dz, double bx, double by, double bz, double *out, size_t n)</div><div class="ttdef"><b>Definition</b> <a href="#l00093">simd_distance.hpp:93</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->

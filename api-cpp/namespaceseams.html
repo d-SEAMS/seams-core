@@ -247,12 +247,10 @@ Namespaces</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a7b2dc4f3d8257cc99b099ffbebd1a5ab" id="r_a7b2dc4f3d8257cc99b099ffbebd1a5ab"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a7b2dc4f3d8257cc99b099ffbebd1a5ab">BatchPeriodicDistSq</a> (const double *dx, const double *dy, const double *dz, double bx, double by, double bz, double *out, size_t n)</td></tr>
-<tr class="memitem:a2657c8a3875c7edcdd7ceaf369ab34f6" id="r_a2657c8a3875c7edcdd7ceaf369ab34f6"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a2657c8a3875c7edcdd7ceaf369ab34f6">BatchPeriodicDistSq</a> (std::span&lt; const double &gt; dx, std::span&lt; const double &gt; dy, std::span&lt; const double &gt; dz, double bx, double by, double bz, std::span&lt; double &gt; out)</td></tr>
-<tr class="memdesc:a2657c8a3875c7edcdd7ceaf369ab34f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Squared minimum-image distances for a batch of coordinate differences, with the extents carried alongside the data.  <br /></td></tr>
 </table>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
 <a id="a7b2dc4f3d8257cc99b099ffbebd1a5ab" name="a7b2dc4f3d8257cc99b099ffbebd1a5ab"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7b2dc4f3d8257cc99b099ffbebd1a5ab">&#9670;&#160;</a></span>BatchPeriodicDistSq() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b2dc4f3d8257cc99b099ffbebd1a5ab">&#9670;&#160;</a></span>BatchPeriodicDistSq()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -308,94 +306,22 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="simd__distance_8hpp_source.html#l00088">88</a> of file <a class="el" href="simd__distance_8hpp_source.html">simd_distance.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   90</span>                                                                  {</div>
-<div class="line"><span class="lineno">   91</span>  <span class="comment">// Matches the vectorised path: one reciprocal per axis for the whole batch</span></div>
-<div class="line"><span class="lineno">   92</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rbx = 1.0 / bx;</div>
-<div class="line"><span class="lineno">   93</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rby = 1.0 / by;</div>
-<div class="line"><span class="lineno">   94</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rbz = 1.0 / bz;</div>
-<div class="line"><span class="lineno">   95</span>  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; n; i++) {</div>
-<div class="line"><span class="lineno">   96</span>    <span class="keywordtype">double</span> ddx = std::fabs(dx[i]);</div>
-<div class="line"><span class="lineno">   97</span>    <span class="keywordtype">double</span> ddy = std::fabs(dy[i]);</div>
-<div class="line"><span class="lineno">   98</span>    <span class="keywordtype">double</span> ddz = std::fabs(dz[i]);</div>
-<div class="line"><span class="lineno">   99</span>    ddx -= bx * std::round(ddx * rbx);</div>
-<div class="line"><span class="lineno">  100</span>    ddy -= by * std::round(ddy * rby);</div>
-<div class="line"><span class="lineno">  101</span>    ddz -= bz * std::round(ddz * rbz);</div>
-<div class="line"><span class="lineno">  102</span>    out[i] = ddx * ddx + ddy * ddy + ddz * ddz;</div>
-<div class="line"><span class="lineno">  103</span>  }</div>
-<div class="line"><span class="lineno">  104</span>}</div>
-</div><!-- fragment -->
-</div>
-</div>
-<a id="a2657c8a3875c7edcdd7ceaf369ab34f6" name="a2657c8a3875c7edcdd7ceaf369ab34f6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2657c8a3875c7edcdd7ceaf369ab34f6">&#9670;&#160;</a></span>BatchPeriodicDistSq() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void seams::BatchPeriodicDistSq </td>
-          <td>(</td>
-          <td class="paramtype">std::span&lt; const double &gt;</td>          <td class="paramname"><span class="paramname"><em>dx</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::span&lt; const double &gt;</td>          <td class="paramname"><span class="paramname"><em>dy</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::span&lt; const double &gt;</td>          <td class="paramname"><span class="paramname"><em>dz</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>bx</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>by</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>bz</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::span&lt; double &gt;</td>          <td class="paramname"><span class="paramname"><em>out</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Squared minimum-image distances for a batch of coordinate differences, with the extents carried alongside the data. </p>
-<p>The ranges must agree in length; the shortest one bounds the work, so a mismatched call computes fewer results rather than running off the end of an array. This overload forwards to whichever kernel the build selected. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">dx,dy,dz</td><td>Coordinate differences. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bx,by,bz</td><td>Periodic box dimensions. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">out</td><td>Squared distances. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-<p class="definition">Definition at line <a class="el" href="simd__distance_8hpp_source.html#l00121">121</a> of file <a class="el" href="simd__distance_8hpp_source.html">simd_distance.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  124</span>                                                                           {</div>
-<div class="line"><span class="lineno">  125</span>  <span class="keyword">const</span> <span class="keywordtype">size_t</span> n = std::min({dx.size(), dy.size(), dz.size(), out.size()});</div>
-<div class="line"><span class="lineno">  126</span>  <a class="code hl_function" href="#a7b2dc4f3d8257cc99b099ffbebd1a5ab">BatchPeriodicDistSq</a>(dx.data(), dy.data(), dz.data(), bx, by, bz, out.data(),</div>
-<div class="line"><span class="lineno">  127</span>                      n);</div>
-<div class="line"><span class="lineno">  128</span>}</div>
-<div class="ttc" id="anamespaceseams_html_a7b2dc4f3d8257cc99b099ffbebd1a5ab"><div class="ttname"><a href="#a7b2dc4f3d8257cc99b099ffbebd1a5ab">seams::BatchPeriodicDistSq</a></div><div class="ttdeci">void BatchPeriodicDistSq(const double *dx, const double *dy, const double *dz, double bx, double by, double bz, double *out, size_t n)</div><div class="ttdef"><b>Definition</b> <a href="simd__distance_8hpp_source.html#l00088">simd_distance.hpp:88</a></div></div>
+<p class="definition">Definition at line <a class="el" href="simd__distance_8hpp_source.html#l00093">93</a> of file <a class="el" href="simd__distance_8hpp_source.html">simd_distance.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   95</span>                                                                  {</div>
+<div class="line"><span class="lineno">   96</span>  <span class="comment">// Matches the vectorised path: one reciprocal per axis for the whole batch</span></div>
+<div class="line"><span class="lineno">   97</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rbx = 1.0 / bx;</div>
+<div class="line"><span class="lineno">   98</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rby = 1.0 / by;</div>
+<div class="line"><span class="lineno">   99</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rbz = 1.0 / bz;</div>
+<div class="line"><span class="lineno">  100</span>  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; n; i++) {</div>
+<div class="line"><span class="lineno">  101</span>    <span class="keywordtype">double</span> ddx = std::fabs(dx[i]);</div>
+<div class="line"><span class="lineno">  102</span>    <span class="keywordtype">double</span> ddy = std::fabs(dy[i]);</div>
+<div class="line"><span class="lineno">  103</span>    <span class="keywordtype">double</span> ddz = std::fabs(dz[i]);</div>
+<div class="line"><span class="lineno">  104</span>    ddx -= bx * std::round(ddx * rbx);</div>
+<div class="line"><span class="lineno">  105</span>    ddy -= by * std::round(ddy * rby);</div>
+<div class="line"><span class="lineno">  106</span>    ddz -= bz * std::round(ddz * rbz);</div>
+<div class="line"><span class="lineno">  107</span>    out[i] = ddx * ddx + ddy * ddy + ddz * ddz;</div>
+<div class="line"><span class="lineno">  108</span>  }</div>
+<div class="line"><span class="lineno">  109</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>

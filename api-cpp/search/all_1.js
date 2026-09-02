@@ -4,7 +4,7 @@ var searchData=
   ['basalneighbours_1',['basalNeighbours',['../namespacering.html#a350f1fa3c3d5807fb720444054d6e340',1,'ring']]],
   ['basalprismconditions_2',['basalPrismConditions',['../namespaceprism3.html#ab03946085dcf2e67583da676ab7f869f',1,'prism3::basalPrismConditions()'],['../group__ring.html#ga7e4aa899821d2c2dbf314c85e0fd12ce',1,'ring::basalPrismConditions()']]],
   ['basalringsseparation_3',['basalRingsSeparation',['../namespaceprism3.html#ad85e1c83d20a91d7e8678f5facc7cb7a',1,'prism3']]],
-  ['batchperiodicdistsq_4',['BatchPeriodicDistSq',['../namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab',1,'seams::BatchPeriodicDistSq(const double *dx, const double *dy, const double *dz, double bx, double by, double bz, double *out, size_t n)'],['../namespaceseams.html#a2657c8a3875c7edcdd7ceaf369ab34f6',1,'seams::BatchPeriodicDistSq(std::span&lt; const double &gt; dx, std::span&lt; const double &gt; dy, std::span&lt; const double &gt; dz, double bx, double by, double bz, std::span&lt; double &gt; out)']]],
+  ['batchperiodicdistsq_4',['BatchPeriodicDistSq',['../namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab',1,'seams']]],
   ['batchperiodicdistsq_5',['batchPeriodicDistSq',['../group__gen.html#gacdbacffd9c9867dc307efc89686e5634',1,'gen']]],
   ['batchresult_6',['BatchResult',['../structgpu_1_1BatchResult.html',1,'gpu']]],
   ['bcc_7',['bcc',['../namespacechill.html#ac13b1a10b6669044f75448ec1abe5122adc9262a469f6f315f74c087a7b3a7f35',1,'chill']]],

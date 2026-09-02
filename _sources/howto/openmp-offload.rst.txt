@@ -39,13 +39,14 @@ the tree carries a Catch2 3 wrap. CUDA 12.4 supplies ``nsys`` 2023.4.
     export CXXFLAGS="-B$PWD/elja-crt"
     export LDFLAGS="-B$PWD/elja-crt -L$PWD/elja-crt -L/lib64 -L$EB/hwloc/2.9.2-GCCcore-13.2.0/lib -lhwloc"
 
-    # nvc++ 22.3 reports no C++20. Clang 17 with libomptarget is the
-    # compiler that accepts cpp_std=c++20 and the offload probe.
-    export CC=$EB/Clang/17.0.6-GCCcore-13.2.0/bin/clang
-    export CXX=$EB/Clang/17.0.6-GCCcore-13.2.0/bin/clang++
+    # nvc++ 22.3 accepts -mp=gpu. Meson does not list C++20 for that
+    # release, so setup uses -Dcpp_std=none and -std=c++17.
+    export CC=$EB/GCCcore/13.3.0/bin/gcc
+    export CXX=nvc++
     export CFLAGS="-idirafter $PWD/elja-sysroot/usr/include"
-    export CXXFLAGS="-idirafter $PWD/elja-sysroot/usr/include"
+    export CXXFLAGS="-std=c++17 -idirafter $PWD/elja-sysroot/usr/include"
     meson setup build-offload --buildtype=debugoptimized \
+      -Dcpp_std=none \
       -Dwith_openmp_offload=enabled \
       -Dwith_python=false \
       -Dwith_lua=disabled \

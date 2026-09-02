@@ -2,7 +2,6 @@ var NAVTREEINDEX2 =
 {
 "namespaces.html":[2,0],
 "namespaceseams.html":[2,0,17],
-"namespaceseams.html#a2657c8a3875c7edcdd7ceaf369ab34f6":[2,0,17,4],
 "namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab":[2,0,17,3],
 "namespaceseams_1_1cfg.html":[2,0,17,0],
 "namespaceseams_1_1cfg.html#a15a32127f8c951ab7ddc615b73dd2768":[2,0,17,0,1],
@@ -249,5 +248,6 @@ var NAVTREEINDEX2 =
 "structgpu_1_1Footprint.html#ab473038da5c197da756b2f3812d3258f":[2,0,6,2,5],
 "structgpu_1_1Footprint.html#ab473038da5c197da756b2f3812d3258f":[4,0,3,2,5],
 "structgpu_1_1Plan.html":[2,0,6,3],
-"structgpu_1_1Plan.html":[4,0,3,3]
+"structgpu_1_1Plan.html":[4,0,3,3],
+"structgpu_1_1Plan.html#a1086b17671aa3043e3228c29c0c783af":[2,0,6,3,1]
 };

@@ -11,9 +11,6 @@ namespace seams
 	namespace_seams_sphericart_ylm.rst
 	namespace_seams_steinhardt.rst
 
-Overview
-~~~~~~~~
-
 
 
 
@@ -32,70 +29,5 @@ Overview
 	// global functions
 
 	void :target:`BatchPeriodicDistSq<doxid-namespaceseams_1a7b2dc4f3d8257cc99b099ffbebd1a5ab>`(const double* dx, const double* dy, const double* dz, double bx, double by, double bz, double* out, size_t n);
-	void :ref:`BatchPeriodicDistSq<doxid-namespaceseams_1a2657c8a3875c7edcdd7ceaf369ab34f6>`(std::span<const double> dx, std::span<const double> dy, std::span<const double> dz, double bx, double by, double bz, std::span<double> out);
 
 	} // namespace seams
-.. _details-namespaceseams:
-
-Detailed Documentation
-~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-Global Functions
-----------------
-
-.. index:: pair: function; BatchPeriodicDistSq
-.. _doxid-namespaceseams_1a2657c8a3875c7edcdd7ceaf369ab34f6:
-
-.. ref-code-block:: cpp
-	:class: doxyrest-title-code-block
-
-	void BatchPeriodicDistSq(std::span<const double> dx, std::span<const double> dy, std::span<const double> dz, double bx, double by, double bz, std::span<double> out)
-
-Squared minimum-image distances for a batch of coordinate differences, with the extents carried alongside the data.
-
-The ranges must agree in length; the shortest one bounds the work, so a mismatched call computes fewer results rather than running off the end of an array. This overload forwards to whichever kernel the build selected.
-
-
-
-.. rubric:: Parameters:
-
-.. list-table::
-	:widths: 20 80
-
-	*
-		- dx
-
-		- 
-
-	*
-		- dy
-
-		- 
-
-	*
-		- dz
-
-		- Coordinate differences.
-
-	*
-		- bx
-
-		- 
-
-	*
-		- by
-
-		- 
-
-	*
-		- bz
-
-		- Periodic box dimensions.
-
-	*
-		- out
-
-		- Squared distances.
-
