@@ -79,9 +79,18 @@ endif
 # toolchain the flags it supplies drop the default libraries from the link, and
 # the failure surfaces as missing unwinder and locale symbols rather than as a
 # missing libomp, so probe an actual parallel region before committing to it.
-openmp_dep = dependency('openmp', required: false)
+# nvc++ 22.3 trips Meson's OpenMP version sniff (preprocessor
+# delimiters). The flag is -mp; do not call dependency('openmp').
+openmp_dep_ok = false
+if cpp_id == 'nvidia' or cpp_id == 'pgi'
+  openmp_dep = declare_dependency(compile_args: ['-mp'], link_args: ['-mp'])
+  openmp_dep_ok = true
+else
+  openmp_dep = dependency('openmp', required: false)
+  openmp_dep_ok = openmp_dep.found()
+endif
 openmp_found = false
-if openmp_dep.found()
+if openmp_dep_ok
   openmp_probe = '''
     #include <omp.h>
     int main() {
