@@ -14,7 +14,16 @@ configurations share a key. ``site::ionEnvironment`` classes ions by
 their first water shell against a per-atom ice flag. ``seams
 fingerprint`` and ``seams ions`` expose both; ``seams cages --graph
 seeded --complete`` turns on the ring completion; ``--hops``,
-``--ion-types`` and ``--ion-cutoff`` are new options.
+``--ion-types`` and ``--ion-cutoff`` are new options. Vertex colours
+(atom types) partition the keys by species (``--colour-types``). A
+``topo::KeyLibrary`` collects the keys of reference structures under
+labels and names any atom whose key it holds; a key shared by several
+references carries all their labels. ``seams fingerprint
+--emit-library LABEL`` writes a frame's keys as library lines and
+``--library FILE`` names the atoms of a frame by one. The readcon-core
+fallback follows the engine's library kind, so a static engine embeds
+the CON reader; CON and chemfiles input without their reader is refused
+instead of returning an empty frame.
 
 Version 2.7.0 (2026-09-02)
 ===========================
