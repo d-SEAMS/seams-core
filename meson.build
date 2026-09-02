@@ -187,8 +187,13 @@ if chemfiles_dep.found()
   _args += ['-DSEAMS_HAS_CHEMFILES=1']
 endif
 
+# The Rust reader follows the engine's library kind, so a static engine
+# embeds it and a shared engine ships it alongside; a shared reader under a
+# static engine would point consumers at a build-directory path.
+_readcon_kind = get_option('default_library') == 'static' ? 'static' : 'shared'
 readcon_dep = dependency('readcon-core', required: false,
-                         fallback: ['readcon-core', 'readcon_dep'])
+                         fallback: ['readcon-core', 'readcon_dep'],
+                         default_options: ['default_library=' + _readcon_kind])
 if readcon_dep.found()
   _deps += [readcon_dep]
   _args += ['-DSEAMS_HAS_READCON=1']
