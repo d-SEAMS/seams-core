@@ -245,6 +245,8 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:cage_3A_3ASignature" id="r_cage_3A_3ASignature"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcage_1_1Signature.html">cage::Signature</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ring-size census of a polyhedral cage: size -&gt; number of faces.  <a href="structcage_1_1Signature.html#details">More...</a><br /></td></tr>
 <tr class="memitem:cage_3A_3ACage" id="r_cage_3A_3ACage"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcage_1_1Cage.html">cage::Cage</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This contains a cage, with the constituent rings.  <a href="structcage_1_1Cage.html#details">More...</a><br /></td></tr>
 </table><table class="memberdecls">
@@ -252,6 +254,10 @@ Classes</h2></td></tr>
 Enumerations</h2></td></tr>
 <tr class="memitem:ga5787314f51b5927c213db48b81c21d95" id="r_ga5787314f51b5927c213db48b81c21d95"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#ga5787314f51b5927c213db48b81c21d95">cage::cageType</a> { <a class="el" href="#gga5787314f51b5927c213db48b81c21d95a642a6c140874b1f45791fed27e266477">cage::cageType::HexC</a>
 , <a class="el" href="#gga5787314f51b5927c213db48b81c21d95aaad57806cd9cd90f11a5ca800094ff73">cage::cageType::DoubleDiaC</a>
+ }</td></tr>
+<tr class="memitem:gaeaa9e4802e930824b43c274cec2486c5" id="r_gaeaa9e4802e930824b43c274cec2486c5"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#gaeaa9e4802e930824b43c274cec2486c5">cage::Signature::Kind</a> { <a class="el" href="#ggaeaa9e4802e930824b43c274cec2486c5a9e150a2b8f77e55bbb1c616c3edc8a64">cage::Signature::Kind::Census</a>
+, <a class="el" href="#ggaeaa9e4802e930824b43c274cec2486c5a642a6c140874b1f45791fed27e266477">cage::Signature::Kind::HexC</a>
+, <a class="el" href="#ggaeaa9e4802e930824b43c274cec2486c5aaad57806cd9cd90f11a5ca800094ff73">cage::Signature::Kind::DoubleDiaC</a>
  }</td></tr>
 <tr class="memitem:gaaac41828990e32b9d6e7db4426b61529" id="r_gaaac41828990e32b9d6e7db4426b61529"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#gaaac41828990e32b9d6e7db4426b61529">cage::iceType</a> { <br />
 &#160;&#160;<a class="el" href="#ggaaac41828990e32b9d6e7db4426b61529a275876e34cf609db118f3d84b799a790">cage::iceType::dummy</a>
@@ -264,8 +270,20 @@ Enumerations</h2></td></tr>
 <br />
  }</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ga6eaee7d8d7515dec228c388a305606ec" id="r_ga6eaee7d8d7515dec228c388a305606ec"><td class="memItemLeft">static <a class="el" href="structcage_1_1Signature.html">Signature</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga6eaee7d8d7515dec228c388a305606ec">cage::Signature::parse</a> (std::string_view spec)</td></tr>
+<tr class="memitem:gac8c529682fe69784b3a0df99c096ecc2" id="r_gac8c529682fe69784b3a0df99c096ecc2"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#gac8c529682fe69784b3a0df99c096ecc2">cage::Signature::str</a> () const</td></tr>
+<tr class="memitem:ga8911367fdf2b7710ed9c4c2a4da32782" id="r_ga8911367fdf2b7710ed9c4c2a4da32782"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ga8911367fdf2b7710ed9c4c2a4da32782">cage::Signature::faceCount</a> () const</td></tr>
+<tr class="memitem:gad5104ccecc1bdc8180c016d00d8f4f55" id="r_gad5104ccecc1bdc8180c016d00d8f4f55"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#gad5104ccecc1bdc8180c016d00d8f4f55">cage::Signature::maxRingSize</a> () const</td></tr>
+<tr class="memitem:ga3f99012c3d6e4ea8d40ff669340a8ed8" id="r_ga3f99012c3d6e4ea8d40ff669340a8ed8"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ga3f99012c3d6e4ea8d40ff669340a8ed8">cage::Signature::containsSize</a> (int size) const</td></tr>
+<tr class="memitem:gacbde2dfeea35b12d34fb44ef3406c232" id="r_gacbde2dfeea35b12d34fb44ef3406c232"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#gacbde2dfeea35b12d34fb44ef3406c232">cage::Signature::operator==</a> (const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;other) const</td></tr>
+<tr class="memitem:ga3241909e4cd663a30a2ff53329f54199" id="r_ga3241909e4cd663a30a2ff53329f54199"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ga3241909e4cd663a30a2ff53329f54199">cage::Signature::operator!=</a> (const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;other) const</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
+<tr class="memitem:gad47448e66b48e0598596796daa7b9ec4" id="r_gad47448e66b48e0598596796daa7b9ec4"><td class="memItemLeft">std::map&lt; int, int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gad47448e66b48e0598596796daa7b9ec4">cage::Signature::counts</a></td></tr>
+<tr class="memitem:gae19997b93f028ab056b7d5fe5bc18fd3" id="r_gae19997b93f028ab056b7d5fe5bc18fd3"><td class="memItemLeft"><a class="el" href="#gaeaa9e4802e930824b43c274cec2486c5">Kind</a>&#160;</td><td class="memItemRight"><a class="el" href="#gae19997b93f028ab056b7d5fe5bc18fd3">cage::Signature::kind</a> = <a class="el" href="#ggaeaa9e4802e930824b43c274cec2486c5a9e150a2b8f77e55bbb1c616c3edc8a64">Kind::Census</a></td></tr>
 <tr class="memitem:gabcbd2f167fb2ff545280b6180cf25692" id="r_gabcbd2f167fb2ff545280b6180cf25692"><td class="memItemLeft"><a class="el" href="#ga5787314f51b5927c213db48b81c21d95">cageType</a>&#160;</td><td class="memItemRight"><a class="el" href="#gabcbd2f167fb2ff545280b6180cf25692">cage::Cage::type</a></td></tr>
 <tr class="memitem:ga5b4c006e8de944ce67f924190123f178" id="r_ga5b4c006e8de944ce67f924190123f178"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga5b4c006e8de944ce67f924190123f178">cage::Cage::rings</a></td></tr>
 <tr class="memdesc:ga5b4c006e8de944ce67f924190123f178"><td class="mdescLeft">&#160;</td><td class="mdescRight">type of the cage : can be DDC or HC  <br /></td></tr>
@@ -298,10 +316,10 @@ Variables</h2></td></tr>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="cage_8hpp_source.html#l00054">54</a> of file <a class="el" href="cage_8hpp_source.html">cage.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   54</span>{ <a class="code hl_enumvalue" href="#gga5787314f51b5927c213db48b81c21d95a642a6c140874b1f45791fed27e266477">HexC</a>, <a class="code hl_enumvalue" href="#gga5787314f51b5927c213db48b81c21d95aaad57806cd9cd90f11a5ca800094ff73">DoubleDiaC</a> };</div>
-<div class="ttc" id="agroup__cage_html_gga5787314f51b5927c213db48b81c21d95a642a6c140874b1f45791fed27e266477"><div class="ttname"><a href="#gga5787314f51b5927c213db48b81c21d95a642a6c140874b1f45791fed27e266477">cage::cageType::HexC</a></div><div class="ttdeci">@ HexC</div><div class="ttdoc">The type for a hexagonal cage.</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00054">cage.hpp:54</a></div></div>
-<div class="ttc" id="agroup__cage_html_gga5787314f51b5927c213db48b81c21d95aaad57806cd9cd90f11a5ca800094ff73"><div class="ttname"><a href="#gga5787314f51b5927c213db48b81c21d95aaad57806cd9cd90f11a5ca800094ff73">cage::cageType::DoubleDiaC</a></div><div class="ttdeci">@ DoubleDiaC</div><div class="ttdoc">The type for a double-diamond cage.</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00054">cage.hpp:54</a></div></div>
+<p class="definition">Definition at line <a class="el" href="cage_8hpp_source.html#l00060">60</a> of file <a class="el" href="cage_8hpp_source.html">cage.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   60</span>{ <a class="code hl_enumvalue" href="#gga5787314f51b5927c213db48b81c21d95a642a6c140874b1f45791fed27e266477">HexC</a>, <a class="code hl_enumvalue" href="#gga5787314f51b5927c213db48b81c21d95aaad57806cd9cd90f11a5ca800094ff73">DoubleDiaC</a> };</div>
+<div class="ttc" id="agroup__cage_html_gga5787314f51b5927c213db48b81c21d95a642a6c140874b1f45791fed27e266477"><div class="ttname"><a href="#gga5787314f51b5927c213db48b81c21d95a642a6c140874b1f45791fed27e266477">cage::cageType::HexC</a></div><div class="ttdeci">@ HexC</div><div class="ttdoc">The type for a hexagonal cage.</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00060">cage.hpp:60</a></div></div>
+<div class="ttc" id="agroup__cage_html_gga5787314f51b5927c213db48b81c21d95aaad57806cd9cd90f11a5ca800094ff73"><div class="ttname"><a href="#gga5787314f51b5927c213db48b81c21d95aaad57806cd9cd90f11a5ca800094ff73">cage::cageType::DoubleDiaC</a></div><div class="ttdeci">@ DoubleDiaC</div><div class="ttdoc">The type for a double-diamond cage.</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00060">cage.hpp:60</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -337,18 +355,235 @@ Variables</h2></td></tr>
 <tr><td class="fieldname"><a id="ggaaac41828990e32b9d6e7db4426b61529a46e9b291e68a6be0227ba8520aed1f55" name="ggaaac41828990e32b9d6e7db4426b61529a46e9b291e68a6be0227ba8520aed1f55"></a>mixed2&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="cage_8hpp_source.html#l00075">75</a> of file <a class="el" href="cage_8hpp_source.html">cage.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   75</span>{ <a class="code hl_enumvalue" href="#ggaaac41828990e32b9d6e7db4426b61529a275876e34cf609db118f3d84b799a790">dummy</a>, <a class="code hl_enumvalue" href="#ggaaac41828990e32b9d6e7db4426b61529a6320c1115d5bc2b6ca615b96be050884">hc</a>, <a class="code hl_enumvalue" href="#ggaaac41828990e32b9d6e7db4426b61529ab66ef205d4bba3390bc51642b3f397d2">ddc</a>, <a class="code hl_enumvalue" href="#ggaaac41828990e32b9d6e7db4426b61529a1d770934d44de09b0d24f04fd01708ba">mixed</a>, <a class="code hl_enumvalue" href="#ggaaac41828990e32b9d6e7db4426b61529aa249368f2cd1048692453ad95620f4ff">pnc</a>, <a class="code hl_enumvalue" href="#ggaaac41828990e32b9d6e7db4426b61529a46e9b291e68a6be0227ba8520aed1f55">mixed2</a> };</div>
-<div class="ttc" id="agroup__cage_html_ggaaac41828990e32b9d6e7db4426b61529a1d770934d44de09b0d24f04fd01708ba"><div class="ttname"><a href="#ggaaac41828990e32b9d6e7db4426b61529a1d770934d44de09b0d24f04fd01708ba">cage::iceType::mixed</a></div><div class="ttdeci">@ mixed</div><div class="ttdoc">Type for an atom which is part of a mixed ring, shared by both a DDC and an HC.</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00075">cage.hpp:75</a></div></div>
-<div class="ttc" id="agroup__cage_html_ggaaac41828990e32b9d6e7db4426b61529a275876e34cf609db118f3d84b799a790"><div class="ttname"><a href="#ggaaac41828990e32b9d6e7db4426b61529a275876e34cf609db118f3d84b799a790">cage::iceType::dummy</a></div><div class="ttdeci">@ dummy</div><div class="ttdoc">Type for an atom which does not belong to any kind of cage.</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00075">cage.hpp:75</a></div></div>
-<div class="ttc" id="agroup__cage_html_ggaaac41828990e32b9d6e7db4426b61529a46e9b291e68a6be0227ba8520aed1f55"><div class="ttname"><a href="#ggaaac41828990e32b9d6e7db4426b61529a46e9b291e68a6be0227ba8520aed1f55">cage::iceType::mixed2</a></div><div class="ttdeci">@ mixed2</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00075">cage.hpp:75</a></div></div>
-<div class="ttc" id="agroup__cage_html_ggaaac41828990e32b9d6e7db4426b61529a6320c1115d5bc2b6ca615b96be050884"><div class="ttname"><a href="#ggaaac41828990e32b9d6e7db4426b61529a6320c1115d5bc2b6ca615b96be050884">cage::iceType::hc</a></div><div class="ttdeci">@ hc</div><div class="ttdoc">Type for an atom which belongs to an HC.</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00075">cage.hpp:75</a></div></div>
-<div class="ttc" id="agroup__cage_html_ggaaac41828990e32b9d6e7db4426b61529aa249368f2cd1048692453ad95620f4ff"><div class="ttname"><a href="#ggaaac41828990e32b9d6e7db4426b61529aa249368f2cd1048692453ad95620f4ff">cage::iceType::pnc</a></div><div class="ttdeci">@ pnc</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00075">cage.hpp:75</a></div></div>
-<div class="ttc" id="agroup__cage_html_ggaaac41828990e32b9d6e7db4426b61529ab66ef205d4bba3390bc51642b3f397d2"><div class="ttname"><a href="#ggaaac41828990e32b9d6e7db4426b61529ab66ef205d4bba3390bc51642b3f397d2">cage::iceType::ddc</a></div><div class="ttdeci">@ ddc</div><div class="ttdoc">Type for an atom which belongs to a DDC.</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00075">cage.hpp:75</a></div></div>
+<p class="definition">Definition at line <a class="el" href="cage_8hpp_source.html#l00106">106</a> of file <a class="el" href="cage_8hpp_source.html">cage.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  106</span>{ <a class="code hl_enumvalue" href="#ggaaac41828990e32b9d6e7db4426b61529a275876e34cf609db118f3d84b799a790">dummy</a>, <a class="code hl_enumvalue" href="#ggaaac41828990e32b9d6e7db4426b61529a6320c1115d5bc2b6ca615b96be050884">hc</a>, <a class="code hl_enumvalue" href="#ggaaac41828990e32b9d6e7db4426b61529ab66ef205d4bba3390bc51642b3f397d2">ddc</a>, <a class="code hl_enumvalue" href="#ggaaac41828990e32b9d6e7db4426b61529a1d770934d44de09b0d24f04fd01708ba">mixed</a>, <a class="code hl_enumvalue" href="#ggaaac41828990e32b9d6e7db4426b61529aa249368f2cd1048692453ad95620f4ff">pnc</a>, <a class="code hl_enumvalue" href="#ggaaac41828990e32b9d6e7db4426b61529a46e9b291e68a6be0227ba8520aed1f55">mixed2</a> };</div>
+<div class="ttc" id="agroup__cage_html_ggaaac41828990e32b9d6e7db4426b61529a1d770934d44de09b0d24f04fd01708ba"><div class="ttname"><a href="#ggaaac41828990e32b9d6e7db4426b61529a1d770934d44de09b0d24f04fd01708ba">cage::iceType::mixed</a></div><div class="ttdeci">@ mixed</div><div class="ttdoc">Type for an atom which is part of a mixed ring, shared by both a DDC and an HC.</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00106">cage.hpp:106</a></div></div>
+<div class="ttc" id="agroup__cage_html_ggaaac41828990e32b9d6e7db4426b61529a275876e34cf609db118f3d84b799a790"><div class="ttname"><a href="#ggaaac41828990e32b9d6e7db4426b61529a275876e34cf609db118f3d84b799a790">cage::iceType::dummy</a></div><div class="ttdeci">@ dummy</div><div class="ttdoc">Type for an atom which does not belong to any kind of cage.</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00106">cage.hpp:106</a></div></div>
+<div class="ttc" id="agroup__cage_html_ggaaac41828990e32b9d6e7db4426b61529a46e9b291e68a6be0227ba8520aed1f55"><div class="ttname"><a href="#ggaaac41828990e32b9d6e7db4426b61529a46e9b291e68a6be0227ba8520aed1f55">cage::iceType::mixed2</a></div><div class="ttdeci">@ mixed2</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00106">cage.hpp:106</a></div></div>
+<div class="ttc" id="agroup__cage_html_ggaaac41828990e32b9d6e7db4426b61529a6320c1115d5bc2b6ca615b96be050884"><div class="ttname"><a href="#ggaaac41828990e32b9d6e7db4426b61529a6320c1115d5bc2b6ca615b96be050884">cage::iceType::hc</a></div><div class="ttdeci">@ hc</div><div class="ttdoc">Type for an atom which belongs to an HC.</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00106">cage.hpp:106</a></div></div>
+<div class="ttc" id="agroup__cage_html_ggaaac41828990e32b9d6e7db4426b61529aa249368f2cd1048692453ad95620f4ff"><div class="ttname"><a href="#ggaaac41828990e32b9d6e7db4426b61529aa249368f2cd1048692453ad95620f4ff">cage::iceType::pnc</a></div><div class="ttdeci">@ pnc</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00106">cage.hpp:106</a></div></div>
+<div class="ttc" id="agroup__cage_html_ggaaac41828990e32b9d6e7db4426b61529ab66ef205d4bba3390bc51642b3f397d2"><div class="ttname"><a href="#ggaaac41828990e32b9d6e7db4426b61529ab66ef205d4bba3390bc51642b3f397d2">cage::iceType::ddc</a></div><div class="ttdeci">@ ddc</div><div class="ttdoc">Type for an atom which belongs to a DDC.</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00106">cage.hpp:106</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
+<a id="gaeaa9e4802e930824b43c274cec2486c5" name="gaeaa9e4802e930824b43c274cec2486c5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaeaa9e4802e930824b43c274cec2486c5">&#9670;&#160;</a></span>Kind</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#gaeaa9e4802e930824b43c274cec2486c5">cage::Signature::Kind</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaeaa9e4802e930824b43c274cec2486c5a9e150a2b8f77e55bbb1c616c3edc8a64" name="ggaeaa9e4802e930824b43c274cec2486c5a9e150a2b8f77e55bbb1c616c3edc8a64"></a>Census&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggaeaa9e4802e930824b43c274cec2486c5a642a6c140874b1f45791fed27e266477" name="ggaeaa9e4802e930824b43c274cec2486c5a642a6c140874b1f45791fed27e266477"></a>HexC&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggaeaa9e4802e930824b43c274cec2486c5aaad57806cd9cd90f11a5ca800094ff73" name="ggaeaa9e4802e930824b43c274cec2486c5aaad57806cd9cd90f11a5ca800094ff73"></a>DoubleDiaC&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="cage_8hpp_source.html#l00071">71</a> of file <a class="el" href="cage_8hpp_source.html">cage.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   71</span>{ Census, <a class="code hl_enumvalue" href="#gga5787314f51b5927c213db48b81c21d95a642a6c140874b1f45791fed27e266477">HexC</a>, <a class="code hl_enumvalue" href="#gga5787314f51b5927c213db48b81c21d95aaad57806cd9cd90f11a5ca800094ff73">DoubleDiaC</a> };</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="ga3f99012c3d6e4ea8d40ff669340a8ed8" name="ga3f99012c3d6e4ea8d40ff669340a8ed8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3f99012c3d6e4ea8d40ff669340a8ed8">&#9670;&#160;</a></span>containsSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool cage::Signature::containsSize </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>size</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ga8911367fdf2b7710ed9c4c2a4da32782" name="ga8911367fdf2b7710ed9c4c2a4da32782"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8911367fdf2b7710ed9c4c2a4da32782">&#9670;&#160;</a></span>faceCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int cage::Signature::faceCount </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="gad5104ccecc1bdc8180c016d00d8f4f55" name="gad5104ccecc1bdc8180c016d00d8f4f55"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad5104ccecc1bdc8180c016d00d8f4f55">&#9670;&#160;</a></span>maxRingSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int cage::Signature::maxRingSize </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ga3241909e4cd663a30a2ff53329f54199" name="ga3241909e4cd663a30a2ff53329f54199"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3241909e4cd663a30a2ff53329f54199">&#9670;&#160;</a></span>operator!=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool cage::Signature::operator!= </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>other</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="cage_8hpp_source.html#l00084">84</a> of file <a class="el" href="cage_8hpp_source.html">cage.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   84</span>{ <span class="keywordflow">return</span> !(*<span class="keyword">this</span> == <a class="code hl_enumvalue" href="namespacechill.html#ac13b1a10b6669044f75448ec1abe5122a795f3202b17cb6bc3d4b771d8c6c9eaf">other</a>); }</div>
+<div class="ttc" id="anamespacechill_html_ac13b1a10b6669044f75448ec1abe5122a795f3202b17cb6bc3d4b771d8c6c9eaf"><div class="ttname"><a href="namespacechill.html#ac13b1a10b6669044f75448ec1abe5122a795f3202b17cb6bc3d4b771d8c6c9eaf">chill::CrystalKind::other</a></div><div class="ttdeci">@ other</div><div class="ttdef"><b>Definition</b> <a href="structure__desc_8hpp_source.html#l00021">structure_desc.hpp:21</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gacbde2dfeea35b12d34fb44ef3406c232" name="gacbde2dfeea35b12d34fb44ef3406c232"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gacbde2dfeea35b12d34fb44ef3406c232">&#9670;&#160;</a></span>operator==()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool cage::Signature::operator== </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>other</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="cage_8hpp_source.html#l00081">81</a> of file <a class="el" href="cage_8hpp_source.html">cage.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   81</span>                                              {</div>
+<div class="line"><span class="lineno">   82</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="#gae19997b93f028ab056b7d5fe5bc18fd3">kind</a> == <a class="code hl_enumvalue" href="namespacechill.html#ac13b1a10b6669044f75448ec1abe5122a795f3202b17cb6bc3d4b771d8c6c9eaf">other</a>.kind &amp;&amp; <a class="code hl_variable" href="#gad47448e66b48e0598596796daa7b9ec4">counts</a> == <a class="code hl_enumvalue" href="namespacechill.html#ac13b1a10b6669044f75448ec1abe5122a795f3202b17cb6bc3d4b771d8c6c9eaf">other</a>.counts;</div>
+<div class="line"><span class="lineno">   83</span>  }</div>
+<div class="ttc" id="agroup__cage_html_gad47448e66b48e0598596796daa7b9ec4"><div class="ttname"><a href="#gad47448e66b48e0598596796daa7b9ec4">cage::Signature::counts</a></div><div class="ttdeci">std::map&lt; int, int &gt; counts</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00073">cage.hpp:73</a></div></div>
+<div class="ttc" id="agroup__cage_html_gae19997b93f028ab056b7d5fe5bc18fd3"><div class="ttname"><a href="#gae19997b93f028ab056b7d5fe5bc18fd3">cage::Signature::kind</a></div><div class="ttdeci">Kind kind</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00074">cage.hpp:74</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga6eaee7d8d7515dec228c388a305606ec" name="ga6eaee7d8d7515dec228c388a305606ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6eaee7d8d7515dec228c388a305606ec">&#9670;&#160;</a></span>parse()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcage_1_1Signature.html">Signature</a> cage::Signature::parse </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view</td>          <td class="paramname"><span class="paramname"><em>spec</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="gac8c529682fe69784b3a0df99c096ecc2" name="gac8c529682fe69784b3a0df99c096ecc2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac8c529682fe69784b3a0df99c096ecc2">&#9670;&#160;</a></span>str()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string cage::Signature::str </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="gad47448e66b48e0598596796daa7b9ec4" name="gad47448e66b48e0598596796daa7b9ec4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad47448e66b48e0598596796daa7b9ec4">&#9670;&#160;</a></span>counts</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::map&lt;int, int&gt; cage::Signature::counts</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="cage_8hpp_source.html#l00073">73</a> of file <a class="el" href="cage_8hpp_source.html">cage.hpp</a>.</p>
+
+</div>
+</div>
+<a id="gae19997b93f028ab056b7d5fe5bc18fd3" name="gae19997b93f028ab056b7d5fe5bc18fd3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae19997b93f028ab056b7d5fe5bc18fd3">&#9670;&#160;</a></span>kind</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="#gaeaa9e4802e930824b43c274cec2486c5">Kind</a> cage::Signature::kind = <a class="el" href="#ggaeaa9e4802e930824b43c274cec2486c5a9e150a2b8f77e55bbb1c616c3edc8a64">Kind::Census</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="cage_8hpp_source.html#l00074">74</a> of file <a class="el" href="cage_8hpp_source.html">cage.hpp</a>.</p>
+
+</div>
+</div>
 <a id="ga5b4c006e8de944ce67f924190123f178" name="ga5b4c006e8de944ce67f924190123f178"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga5b4c006e8de944ce67f924190123f178">&#9670;&#160;</a></span>rings</h2>
 
@@ -363,7 +598,7 @@ Variables</h2></td></tr>
 
 <p>type of the cage : can be DDC or HC </p>
 
-<p class="definition">Definition at line <a class="el" href="cage_8hpp_source.html#l00088">88</a> of file <a class="el" href="cage_8hpp_source.html">cage.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="cage_8hpp_source.html#l00119">119</a> of file <a class="el" href="cage_8hpp_source.html">cage.hpp</a>.</p>
 
 </div>
 </div>
@@ -379,7 +614,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="cage_8hpp_source.html#l00087">87</a> of file <a class="el" href="cage_8hpp_source.html">cage.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="cage_8hpp_source.html#l00118">118</a> of file <a class="el" href="cage_8hpp_source.html">cage.hpp</a>.</p>
 
 </div>
 </div>

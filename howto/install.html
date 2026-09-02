@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Install the engine - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Classify a dump" href="classify-cli.html" /><link rel="prev" title="How-to" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Install the engine - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="OpenMP target offload" href="openmp-offload.html" /><link rel="prev" title="How-to" href="index.html" />
       <link rel="canonical" href="https://docs.dseams.info/howto/install.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -97,6 +97,7 @@ data-aria-dark="Switch to auto color mode">
 <ul class="current">
 <li class="toctree-l1 _expand"><a class="reference internal" href="index.html">How-to</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="openmp-offload.html">OpenMP target offload</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="sheared-cells.html">Sheared cells</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="ionic-liquid.html">Ionic-liquid dumps</a></li>
@@ -143,6 +144,7 @@ data-aria-dark="Switch to auto color mode">
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#pixi">pixi</a></li>
 <li><a class="reference internal" href="#nix-flake">Nix flake</a></li>
+<li><a class="reference internal" href="#openmp-target-offload">OpenMP target offload</a></li>
 <li><a class="reference internal" href="#verify">Verify</a></li>
 </ul>
 </div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
@@ -267,6 +269,12 @@ nauty, and MPI stay off. vesin is cutoff; linkcell is k-NN. Binary
 cache: <code class="docutils literal notranslate"><span class="pre">cachix</span> <span class="pre">use</span> <span class="pre">dseams</span></code>.</p>
 <p>The flake on/off table lives on <a class="reference external" href="../reference/nix.rst">Nix</a>.</p>
 </section>
+<section id="openmp-target-offload">
+<h2>OpenMP target offload<a class="headerlink" href="#openmp-target-offload" title="Link to this heading">¶</a></h2>
+<p>The host-only pixi and flake builds leave <code class="docutils literal notranslate"><span class="pre">with_openmp_offload</span></code>
+off. The NVIDIA GPU path, including the Elja A100 module set and
+the Meson line, is <a class="reference external" href="openmp-offload.rst">OpenMP target offload</a>.</p>
+</section>
 <section id="verify">
 <h2>Verify<a class="headerlink" href="#verify" title="Link to this heading">¶</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span>--help
@@ -292,10 +300,10 @@ name <a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib"
         <span>Previous</span><div class="title">How-to</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="classify-cli.html">
+    <a href="openmp-offload.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">Classify a dump</div>
+        <div class="title">OpenMP target offload</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

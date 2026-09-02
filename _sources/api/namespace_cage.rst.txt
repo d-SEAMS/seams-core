@@ -7,6 +7,8 @@ namespace cage
 .. toctree::
 	:hidden:
 
+	struct_cage_FoundCage.rst
+
 Overview
 ~~~~~~~~
 
@@ -22,6 +24,8 @@ Functions for topological network criteria cage types. :ref:`More...<details-nam
 	// structs
 
 	struct :ref:`Cage<doxid-structcage_1_1_cage>`;
+	struct :ref:`FoundCage<doxid-structcage_1_1_found_cage>`;
+	struct :ref:`Signature<doxid-structcage_1_1_signature>`;
 
 	// global functions
 
@@ -31,6 +35,9 @@ Functions for topological network criteria cage types. :ref:`More...<details-nam
 	bool :target:`sameCertificate<doxid-namespacecage_1ae431d00a43e0a0e99da9ff62d23a6e22>`(const std::vector<std::vector<int>>& a, const std::vector<std::vector<int>>& b);
 	std::string :target:`canonicalCertificateRooted<doxid-namespacecage_1a1ff12e6c4c9298050913b02758546c6f>`(int n, const std::vector<std::pair<int, int>>& edges, int root);
 	std::string :target:`canonicalCertificateColoured<doxid-namespacecage_1ad4e5b234472ede0d6227ef6aefceb348>`(int n, const std::vector<std::pair<int, int>>& edges, const std::vector<int>& colours, int root);
+	bool :ref:`isClosedPolyhedron<doxid-namespacecage_1a40b05518af3bbd5128f459d056b85ac9>`(const std::vector<std::vector<int>>& rings, const std::vector<int>& faces);
+	std::vector<:ref:`FoundCage<doxid-structcage_1_1_found_cage>`> :ref:`findBySignature<doxid-namespacecage_1abe73ca6723c92832e5295714c07133c0>`(const std::vector<std::vector<int>>& rings, const :ref:`Signature<doxid-structcage_1_1_signature>`& signature);
+	std::vector<:ref:`FoundCage<doxid-structcage_1_1_found_cage>`> :ref:`findBySignature<doxid-namespacecage_1ac2f1937ffc84b09b4b552f39a4fbd62f>`(const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList, const :ref:`Signature<doxid-structcage_1_1_signature>`& signature);
 
 	} // namespace cage
 .. _details-namespacecage:
@@ -42,7 +49,7 @@ Functions for topological network criteria cage types.
 
 This namespace contains structs and enums for cage types
 
-Type definitions for atoms, rings and cages which are DDCs and HCs.
+Type definitions for atoms, rings and cages. HexC and DoubleDiaC are the TUM ice cages. A :ref:`Signature <doxid-structcage_1_1_signature>` names any polyhedron by its ring-size census (sodalite is {4:6, 6:8}); the enumerator in ``cage_enum.hpp`` grows face-sharing ring sets that match that census.
 
 
 
@@ -66,4 +73,43 @@ Changelog
 * Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Nov 13, 2019
 
 * Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+
+Global Functions
+----------------
+
+.. index:: pair: function; isClosedPolyhedron
+.. _doxid-namespacecage_1a40b05518af3bbd5128f459d056b85ac9:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool isClosedPolyhedron(const std::vector<std::vector<int>>& rings, const std::vector<int>& faces)
+
+True when every edge of the listed faces is used by exactly two of those faces.
+
+An empty face list is not closed.
+
+.. index:: pair: function; findBySignature
+.. _doxid-namespacecage_1abe73ca6723c92832e5295714c07133c0:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<:ref:`FoundCage<doxid-structcage_1_1_found_cage>`> findBySignature(const std::vector<std::vector<int>>& rings, const :ref:`Signature<doxid-structcage_1_1_signature>`& signature)
+
+Face-sharing rings whose size census equals ``signature`` and whose edges close.
+
+The input may hold rings of every size; only sizes that appear in the signature take part. Named ``hc`` and ``ddc`` without a neighbour list use the geometric census (``4:6,6:2`` and ``6:7``).
+
+.. index:: pair: function; findBySignature
+.. _doxid-namespacecage_1ac2f1937ffc84b09b4b552f39a4fbd62f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<:ref:`FoundCage<doxid-structcage_1_1_found_cage>`> findBySignature(const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList, const :ref:`Signature<doxid-structcage_1_1_signature>`& signature)
+
+As above.
+
+Named ``hc`` and ``ddc`` call findHC / findDDC on the six-membered rings so the vertex sets match those finders.
 

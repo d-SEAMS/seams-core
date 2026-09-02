@@ -15,5 +15,6 @@ var searchData=
   ['soapspectrumall_12',['soapSpectrumAll',['../namespacechill.html#a587a1bffcd6e21ecf2feb16a95fe01c1',1,'chill']]],
   ['spheriharmo_13',['spheriHarmo',['../group__chill.html#gaa9220b76da7400c9d934fa08ceeeba7a',1,'sph']]],
   ['steinhardtql_14',['steinhardtQl',['../group__chill.html#gad60f25b03dc9b26dc62d80fd3fac53c3',1,'chill']]],
-  ['steinhardtqlvoronoi_15',['steinhardtQlVoronoi',['../namespacechill.html#ac42b78e61e685301c32b8bc54d344ec1',1,'chill']]]
+  ['steinhardtqlvoronoi_15',['steinhardtQlVoronoi',['../namespacechill.html#ac42b78e61e685301c32b8bc54d344ec1',1,'chill']]],
+  ['str_16',['str',['../group__cage.html#gac8c529682fe69784b3a0df99c096ecc2',1,'cage::Signature']]]
 ];

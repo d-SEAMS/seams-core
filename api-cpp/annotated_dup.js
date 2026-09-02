@@ -1,7 +1,9 @@
 var annotated_dup =
 [
     [ "cage", "namespacecage.html", [
-      [ "Cage", "structcage_1_1Cage.html", "structcage_1_1Cage" ]
+      [ "Cage", "structcage_1_1Cage.html", "structcage_1_1Cage" ],
+      [ "FoundCage", "structcage_1_1FoundCage.html", "structcage_1_1FoundCage" ],
+      [ "Signature", "structcage_1_1Signature.html", "structcage_1_1Signature" ]
     ] ],
     [ "chill", "namespacechill.html", [
       [ "BondClassifier", "structchill_1_1BondClassifier.html", "structchill_1_1BondClassifier" ],

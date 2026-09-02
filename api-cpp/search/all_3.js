@@ -16,7 +16,7 @@ var searchData=
   ['domain_13',['Domain',['../structclump_1_1Domain.html',1,'clump']]],
   ['donatedhydrogenbond_14',['donatedHydrogenBond',['../group__bond.html#ga6da2515806a7ed8d96d2dfdcfcafd352',1,'bond']]],
   ['donorh_15',['donorH',['../namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90a484dd7cb8c261bbc7e46da795767797e',1,'site']]],
-  ['doublediac_16',['DoubleDiaC',['../group__cage.html#gga5787314f51b5927c213db48b81c21d95aaad57806cd9cd90f11a5ca800094ff73',1,'cage']]],
+  ['doublediac_16',['DoubleDiaC',['../group__cage.html#ggaeaa9e4802e930824b43c274cec2486c5aaad57806cd9cd90f11a5ca800094ff73',1,'cage::Signature::DoubleDiaC'],['../group__cage.html#gga5787314f51b5927c213db48b81c21d95aaad57806cd9cd90f11a5ca800094ff73',1,'cage::DoubleDiaC']]],
   ['downloadms_17',['downloadMs',['../structgpu_1_1BatchResult.html#ad4ba81e3f6d6bb265a5e689aee0de4fc',1,'gpu::BatchResult']]],
   ['droplammpsdumpindex_18',['dropLammpsDumpIndex',['../group__sinp.html#gaefac4aaf94bf39771d4c45f352f8615e',1,'sinp']]],
   ['dummy_19',['dummy',['../group__cage.html#ggaaac41828990e32b9d6e7db4426b61529a275876e34cf609db118f3d84b799a790',1,'cage']]],

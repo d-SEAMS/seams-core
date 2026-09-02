@@ -9,6 +9,7 @@ Cage
 
 	namespace_cage.rst
 	struct_cage_Cage.rst
+	struct_cage_Signature.rst
 
 
 
@@ -24,4 +25,5 @@ Cage
 	// structs
 
 	struct :ref:`cage::Cage<doxid-structcage_1_1_cage>`;
+	struct :ref:`cage::Signature<doxid-structcage_1_1_signature>`;
 

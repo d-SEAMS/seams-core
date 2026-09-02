@@ -18,6 +18,7 @@ var searchData=
   ['ionstate_15',['IonState',['../namespacesite.html#a7cdb003964d40a8454361db4b34b4791',1,'site']]],
   ['ira_16',['ira',['../namespaceira.html',1,'']]],
   ['ira_5fsofi_2ehpp_17',['ira_sofi.hpp',['../ira__sofi_8hpp.html',1,'']]],
-  ['ishexagonalprism_18',['isHexagonalPrism',['../namespacecage.html#a2b191b4c90fc095838928727d7c11b3e',1,'cage']]],
-  ['isinterfacial_19',['isInterfacial',['../group__chill.html#ga87291ed1a8fe073028ce4de34ff38da2',1,'chill']]]
+  ['isclosedpolyhedron_18',['isClosedPolyhedron',['../namespacecage.html#a40b05518af3bbd5128f459d056b85ac9',1,'cage']]],
+  ['ishexagonalprism_19',['isHexagonalPrism',['../namespacecage.html#a2b191b4c90fc095838928727d7c11b3e',1,'cage']]],
+  ['isinterfacial_20',['isInterfacial',['../group__chill.html#ga87291ed1a8fe073028ce4de34ff38da2',1,'chill']]]
 ];

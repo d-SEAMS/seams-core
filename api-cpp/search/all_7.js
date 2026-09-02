@@ -10,7 +10,7 @@ var searchData=
   ['hcprismatic_7',['HCprismatic',['../group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1af27ea6cef025a4bfd5f035ed8b234170',1,'ring']]],
   ['hex_8',['hex',['../namespacetopo.html#a704a6805e4842829fa83f16081405519',1,'topo']]],
   ['hexagonal_9',['hexagonal',['../group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a1839c642bbb4a69963fcb822d209d5ac',1,'molSys']]],
-  ['hexc_10',['HexC',['../group__cage.html#gga5787314f51b5927c213db48b81c21d95a642a6c140874b1f45791fed27e266477',1,'cage']]],
+  ['hexc_10',['HexC',['../group__cage.html#ggaeaa9e4802e930824b43c274cec2486c5a642a6c140874b1f45791fed27e266477',1,'cage::Signature::HexC'],['../group__cage.html#gga5787314f51b5927c213db48b81c21d95a642a6c140874b1f45791fed27e266477',1,'cage::HexC']]],
   ['hopneighbourhood_11',['hopNeighbourhood',['../namespacetopo.html#ac22724ca2d62a9ecac9d20b5ab0b7182',1,'topo']]],
   ['hops_12',['hops',['../structtopo_1_1FrameFingerprint.html#a436b359c7a9bb9b2c849d0e37d13962d',1,'topo::FrameFingerprint::hops'],['../structtopo_1_1KeyLibrary.html#a25441f901b1852385ceb142544392c80',1,'topo::KeyLibrary::hops']]],
   ['hornabsorientation_13',['hornAbsOrientation',['../namespaceabsor.html#a09d62115f686492810352905250fb0ef',1,'absor']]]

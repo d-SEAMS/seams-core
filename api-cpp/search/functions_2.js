@@ -28,10 +28,11 @@ var searchData=
   ['conditiononeddc_25',['conditionOneDDC',['../namespacering.html#a7cc755c188267af7b9ff9ae73ca77579',1,'ring::conditionOneDDC(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;peripheralRings, int iring)'],['../namespacering.html#a75c45309352d085d18f89f370dd42ab2',1,'ring::conditionOneDDC(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;peripheralRings, int iring, const RingSearchIndex &amp;index)']]],
   ['conditionthreeddc_26',['conditionThreeDDC',['../namespacering.html#abf88eff5d04ebb4bfad69693edaaa432',1,'ring']]],
   ['conditiontwoddc_27',['conditionTwoDDC',['../namespacering.html#a5bc5928258e125e0d9e52314221974b9',1,'ring::conditionTwoDDC(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;peripheralRings, int iring)'],['../namespacering.html#ac90a6cf68afb185f82a5b1d064a1f80f',1,'ring::conditionTwoDDC(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;peripheralRings, int iring, const RingSearchIndex &amp;index)']]],
-  ['coordinationnumber_28',['coordinationNumber',['../group__rdf.html#ga8e81848e99a437aeb449478d47d096e2',1,'rdf::coordinationNumber(const PartialRdf &amp;h, double rMax)'],['../group__rdf.html#ga0bfe751aa5d47556f24bebefdfa4dcc8',1,'rdf::coordinationNumber(const PartialRdf &amp;h, double rMax, double rhoJ)']]],
-  ['countallringsfromindex_29',['countAllRingsFromIndex',['../group__primitive.html#gac81b1dd4b67e8200de61e52c498c1b2f',1,'primitive']]],
-  ['createbondsfromcages_30',['createBondsFromCages',['../group__bond.html#ga41156a4dd14e84d45a1f6f22ba3a4b41',1,'bond']]],
-  ['createidmolidmap_31',['createIDMolIDmap',['../group__molSys.html#gad236d6a772972d62643eb5d135e3d50d',1,'molSys']]],
-  ['createmolidatomidmultimap_32',['createMolIDAtomIDMultiMap',['../group__molSys.html#gafb65f01cfbb0d80cfa7b311d68d9c109',1,'molSys']]],
-  ['createprismblock_33',['createPrismBlock',['../namespacepntToPnt.html#ab2aaa39d1afd5e2b9a2f23d26323d339',1,'pntToPnt']]]
+  ['containssize_28',['containsSize',['../group__cage.html#ga3f99012c3d6e4ea8d40ff669340a8ed8',1,'cage::Signature']]],
+  ['coordinationnumber_29',['coordinationNumber',['../group__rdf.html#ga8e81848e99a437aeb449478d47d096e2',1,'rdf::coordinationNumber(const PartialRdf &amp;h, double rMax)'],['../group__rdf.html#ga0bfe751aa5d47556f24bebefdfa4dcc8',1,'rdf::coordinationNumber(const PartialRdf &amp;h, double rMax, double rhoJ)']]],
+  ['countallringsfromindex_30',['countAllRingsFromIndex',['../group__primitive.html#gac81b1dd4b67e8200de61e52c498c1b2f',1,'primitive']]],
+  ['createbondsfromcages_31',['createBondsFromCages',['../group__bond.html#ga41156a4dd14e84d45a1f6f22ba3a4b41',1,'bond']]],
+  ['createidmolidmap_32',['createIDMolIDmap',['../group__molSys.html#gad236d6a772972d62643eb5d135e3d50d',1,'molSys']]],
+  ['createmolidatomidmultimap_33',['createMolIDAtomIDMultiMap',['../group__molSys.html#gafb65f01cfbb0d80cfa7b311d68d9c109',1,'molSys']]],
+  ['createprismblock_34',['createPrismBlock',['../namespacepntToPnt.html#ab2aaa39d1afd5e2b9a2f23d26323d339',1,'pntToPnt']]]
 ];

@@ -1,0 +1,23 @@
+.. index:: pair: struct; cage::Signature
+.. _doxid-structcage_1_1_signature:
+
+struct cage::Signature
+======================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Ring-size census of a polyhedral cage: size -> number of faces. :ref:`More...<details-structcage_1_1_signature>`
+
+.. _details-structcage_1_1_signature:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Ring-size census of a polyhedral cage: size -> number of faces.
+
+Parse a comma list (``4:6,6:8``) or a named table entry (``sodalite``, ``alpha``, ``512``, ``51262``, ``hc``, ``ddc``). Counts of a repeated size add. Every size and count must be positive. The names ``hc`` and ``ddc`` keep the TUM ice finders (five hexagons and seven hexagons); a raw list ``4:6,6:2`` is the hexagonal prism.
+

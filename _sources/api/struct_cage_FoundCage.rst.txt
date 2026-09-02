@@ -1,0 +1,68 @@
+.. index:: pair: struct; cage::FoundCage
+.. _doxid-structcage_1_1_found_cage:
+
+struct cage::FoundCage
+======================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+One closed polyhedron matching a signature. :ref:`More...<details-structcage_1_1_found_cage>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <cage_enum.hpp>
+	
+	struct FoundCage {
+		// fields
+	
+		:ref:`Signature<doxid-structcage_1_1_signature>` :target:`signature<doxid-structcage_1_1_found_cage_1a5de16a1306e895fd65cd4b44b9fdddc0>`;
+		std::vector<int> :ref:`faces<doxid-structcage_1_1_found_cage_1a195d96130e05b294524772d8d5a1572d>`;
+		std::vector<int> :ref:`vertices<doxid-structcage_1_1_found_cage_1af7b6c0760f27407dd0b2b4da91155d3b>`;
+		std::string :ref:`certificate<doxid-structcage_1_1_found_cage_1a8415a1763a942d096d45a7e0f1c68211>`;
+	};
+.. _details-structcage_1_1_found_cage:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+One closed polyhedron matching a signature.
+
+Fields
+------
+
+.. index:: pair: variable; faces
+.. _doxid-structcage_1_1_found_cage_1a195d96130e05b294524772d8d5a1572d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> faces
+
+ring indices into the input vector
+
+.. index:: pair: variable; vertices
+.. _doxid-structcage_1_1_found_cage_1af7b6c0760f27407dd0b2b4da91155d3b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> vertices
+
+sorted unique atom indices
+
+.. index:: pair: variable; certificate
+.. _doxid-structcage_1_1_found_cage_1a8415a1763a942d096d45a7e0f1c68211:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::string certificate
+
+nauty hex, empty when nauty is off
+

@@ -245,6 +245,10 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacecage.
 Classes</h2></td></tr>
 <tr class="memitem:Cage" id="r_Cage"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcage_1_1Cage.html">Cage</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This contains a cage, with the constituent rings.  <a href="structcage_1_1Cage.html#details">More...</a><br /></td></tr>
+<tr class="memitem:FoundCage" id="r_FoundCage"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcage_1_1FoundCage.html">FoundCage</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One closed polyhedron matching a signature.  <a href="structcage_1_1FoundCage.html#details">More...</a><br /></td></tr>
+<tr class="memitem:Signature" id="r_Signature"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcage_1_1Signature.html">Signature</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ring-size census of a polyhedral cage: size -&gt; number of faces.  <a href="structcage_1_1Signature.html#details">More...</a><br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -270,11 +274,17 @@ Functions</h2></td></tr>
 <tr class="memitem:ae431d00a43e0a0e99da9ff62d23a6e22" id="r_ae431d00a43e0a0e99da9ff62d23a6e22"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ae431d00a43e0a0e99da9ff62d23a6e22">sameCertificate</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;a, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;b)</td></tr>
 <tr class="memitem:a1ff12e6c4c9298050913b02758546c6f" id="r_a1ff12e6c4c9298050913b02758546c6f"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#a1ff12e6c4c9298050913b02758546c6f">canonicalCertificateRooted</a> (int n, const std::vector&lt; std::pair&lt; int, int &gt; &gt; &amp;edges, int root)</td></tr>
 <tr class="memitem:ad4e5b234472ede0d6227ef6aefceb348" id="r_ad4e5b234472ede0d6227ef6aefceb348"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#ad4e5b234472ede0d6227ef6aefceb348">canonicalCertificateColoured</a> (int n, const std::vector&lt; std::pair&lt; int, int &gt; &gt; &amp;edges, const std::vector&lt; int &gt; &amp;colours, int root)</td></tr>
+<tr class="memitem:a40b05518af3bbd5128f459d056b85ac9" id="r_a40b05518af3bbd5128f459d056b85ac9"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a40b05518af3bbd5128f459d056b85ac9">isClosedPolyhedron</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; int &gt; &amp;faces)</td></tr>
+<tr class="memdesc:a40b05518af3bbd5128f459d056b85ac9"><td class="mdescLeft">&#160;</td><td class="mdescRight">True when every edge of the listed faces is used by exactly two of those faces.  <br /></td></tr>
+<tr class="memitem:abe73ca6723c92832e5295714c07133c0" id="r_abe73ca6723c92832e5295714c07133c0"><td class="memItemLeft">std::vector&lt; <a class="el" href="structcage_1_1FoundCage.html">FoundCage</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#abe73ca6723c92832e5295714c07133c0">findBySignature</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;signature)</td></tr>
+<tr class="memdesc:abe73ca6723c92832e5295714c07133c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Face-sharing rings whose size census equals <span class="tt">signature</span> and whose edges close.  <br /></td></tr>
+<tr class="memitem:ac2f1937ffc84b09b4b552f39a4fbd62f" id="r_ac2f1937ffc84b09b4b552f39a4fbd62f"><td class="memItemLeft">std::vector&lt; <a class="el" href="structcage_1_1FoundCage.html">FoundCage</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ac2f1937ffc84b09b4b552f39a4fbd62f">findBySignature</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;signature)</td></tr>
+<tr class="memdesc:ac2f1937ffc84b09b4b552f39a4fbd62f"><td class="mdescLeft">&#160;</td><td class="mdescRight">As above.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Functions for topological network criteria cage types. </p>
 <p>This namespace contains structs and enums for cage types</p>
-<p>Type definitions for atoms, rings and cages which are DDCs and HCs.</p>
+<p>Type definitions for atoms, rings and cages. HexC and DoubleDiaC are the TUM ice cages. A <a class="el" href="structcage_1_1Signature.html" title="Ring-size census of a polyhedral cage: size -&gt; number of faces.">Signature</a> names any polyhedron by its ring-size census (sodalite is {4:6, 6:8}); the enumerator in <a class="el" href="cage__enum_8hpp.html" title="Signature-guided enumeration of polyhedral cages.">cage_enum.hpp</a> grows face-sharing ring sets that match that census.</p>
 <h3 class="doxsection"><a class="anchor" id="autotoc_md3"></a>
 Changelog</h3>
 <ul>
@@ -353,6 +363,83 @@ Changelog</h3>
         </tr>
       </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="abe73ca6723c92832e5295714c07133c0" name="abe73ca6723c92832e5295714c07133c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe73ca6723c92832e5295714c07133c0">&#9670;&#160;</a></span>findBySignature() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; <a class="el" href="structcage_1_1FoundCage.html">FoundCage</a> &gt; cage::findBySignature </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>signature</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Face-sharing rings whose size census equals <span class="tt">signature</span> and whose edges close. </p>
+<p>The input may hold rings of every size; only sizes that appear in the signature take part. Named <span class="tt">hc</span> and <span class="tt">ddc</span> without a neighbour list use the geometric census (<span class="tt">4:6,6:2</span> and <span class="tt">6:7</span>). </p>
+
+</div>
+</div>
+<a id="ac2f1937ffc84b09b4b552f39a4fbd62f" name="ac2f1937ffc84b09b4b552f39a4fbd62f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2f1937ffc84b09b4b552f39a4fbd62f">&#9670;&#160;</a></span>findBySignature() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; <a class="el" href="structcage_1_1FoundCage.html">FoundCage</a> &gt; cage::findBySignature </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>signature</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>As above. </p>
+<p>Named <span class="tt">hc</span> and <span class="tt">ddc</span> call findHC / findDDC on the six-membered rings so the vertex sets match those finders. </p>
+
+</div>
+</div>
+<a id="a40b05518af3bbd5128f459d056b85ac9" name="a40b05518af3bbd5128f459d056b85ac9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a40b05518af3bbd5128f459d056b85ac9">&#9670;&#160;</a></span>isClosedPolyhedron()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool cage::isClosedPolyhedron </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>faces</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>True when every edge of the listed faces is used by exactly two of those faces. </p>
+<p>An empty face list is not closed. </p>
 
 </div>
 </div>

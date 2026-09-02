@@ -125,6 +125,7 @@ framework.
 
    howto/index
    howto/install
+   howto/openmp-offload
    howto/classify-cli
    howto/sheared-cells
    howto/ionic-liquid

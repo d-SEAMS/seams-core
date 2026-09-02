@@ -97,6 +97,7 @@ data-aria-dark="Switch to auto color mode">
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">How-to</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/openmp-offload.html">OpenMP target offload</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/sheared-cells.html">Sheared cells</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ionic-liquid.html">Ionic-liquid dumps</a></li>
@@ -369,7 +370,7 @@ API; the header table below is only a map onto those pages.</p>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cage.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">cage</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">Cage</span></code>, <code class="docutils literal notranslate"><span class="pre">cageType</span></code>, <code class="docutils literal notranslate"><span class="pre">iceType</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Cage</span></code>, <code class="docutils literal notranslate"><span class="pre">cageType</span></code>, <code class="docutils literal notranslate"><span class="pre">iceType</span></code>, <code class="docutils literal notranslate"><span class="pre">Signature</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cage_affiliation.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">ring</span></code></p></td>
@@ -379,75 +380,79 @@ API; the header table below is only a map onto those pages.</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">cage</span></code></p></td>
 <td><p>nauty canonical certificates</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bulkTUM.hpp</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cage_enum.hpp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cage</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">findBySignature</span></code>, closed polyhedra from a ring-size census</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bulkTUM.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">tum3</span></code></p></td>
 <td><p>topological unit matching</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bond.hpp</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bond.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">bond</span></code></p></td>
 <td><p>geometric hydrogen bonds</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">absOrientation.hpp</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">absOrientation.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">absor</span></code></p></td>
 <td><p>Horn absolute orientation</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pntCorrespondence.hpp</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pntCorrespondence.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">pntToPnt</span></code></p></td>
 <td><p>reference / target point sets</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">shapeMatch.hpp</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">shapeMatch.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">match</span></code></p></td>
 <td><p>prism shape-matching</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cluster.hpp</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cluster.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">clump</span></code></p></td>
 <td><p>Stillinger ice clusters</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">order_parameter.hpp</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">order_parameter.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">topoparam</span></code></p></td>
 <td><p>height% and coverage area</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rdf.hpp</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rdf.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">rdf</span></code></p></td>
 <td><p>partial 3D <code class="docutils literal notranslate"><span class="pre">g_IJ(r)</span></code> and site-site CN</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rdf2d.hpp</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rdf2d.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">rdf2</span></code></p></td>
 <td><p>in-plane radial distribution</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">density.hpp</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">density.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">site</span></code></p></td>
 <td><p>type- or kind-resolved <span class="math notranslate nohighlight">\(\rho\)</span> along one axis</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">selection.hpp</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">selection.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">gen</span></code>, <code class="docutils literal notranslate"><span class="pre">ring</span></code></p></td>
 <td><p>type and slice selections</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">generic.hpp</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">generic.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">gen</span></code></p></td>
 <td><p>periodic distance, angles, medians</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">structure_desc.hpp</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">structure_desc.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">chill</span></code></p></td>
 <td><p>SOAP, template overlay, linear classifier</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">voronoi_qlm.hpp</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">voronoi_qlm.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">chill</span></code></p></td>
 <td><p>Voronoi-weighted Steinhardt</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ira_sofi.hpp</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ira_sofi.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">ira</span></code></p></td>
 <td><p>IRA match and SOFI point groups</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sphericart_ylm.hpp</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sphericart_ylm.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams::sphericart_ylm</span></code></p></td>
 <td><p>batched Cartesian <code class="docutils literal notranslate"><span class="pre">Y_lm</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">steinhardt_device.hpp</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">steinhardt_device.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams::steinhardt</span></code></p></td>
 <td><p>host / MPI / offload Steinhardt kernel</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">simd_distance.hpp</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">simd_distance.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams</span></code></p></td>
 <td><p>Highway periodic distance</p></td>
 </tr>

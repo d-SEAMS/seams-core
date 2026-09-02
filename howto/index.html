@@ -97,6 +97,7 @@ data-aria-dark="Switch to auto color mode">
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">How-to</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="install.html">Install the engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openmp-offload.html">OpenMP target offload</a></li>
 <li class="toctree-l2"><a class="reference internal" href="classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sheared-cells.html">Sheared cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ionic-liquid.html">Ionic-liquid dumps</a></li>
@@ -108,6 +109,7 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="install.html">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="openmp-offload.html">OpenMP target offload</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="sheared-cells.html">Sheared cells</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="ionic-liquid.html">Ionic-liquid dumps</a></li>
@@ -252,28 +254,31 @@ data-aria-dark="Switch to auto color mode">
 <tr class="row-even"><td><p><a class="reference external" href="install.rst">Install the engine</a></p></td>
 <td><p>Get a <code class="docutils literal notranslate"><span class="pre">seams</span></code> binary</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="classify-cli.rst">Classify a dump</a></p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="openmp-offload.rst">OpenMP target offload</a></p></td>
+<td><p>Build the Steinhardt kernel for an NVIDIA GPU</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="classify-cli.rst">Classify a dump</a></p></td>
 <td><p>Run <code class="docutils literal notranslate"><span class="pre">read</span></code> / <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code> / <code class="docutils literal notranslate"><span class="pre">cages</span></code> on a file you have</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="sheared-cells.rst">Sheared cells</a></p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="sheared-cells.rst">Sheared cells</a></p></td>
 <td><p>Triclinic dump: bound spans are not edge lengths; recover H</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="ionic-liquid.rst">Ionic-liquid dumps</a></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="ionic-liquid.rst">Ionic-liquid dumps</a></p></td>
 <td><p>Keep one species with <code class="docutils literal notranslate"><span class="pre">--type</span></code>; unlike-pair <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">rdf</span> <span class="pre">--types</span> <span class="pre">I,J</span></code>; confined <span class="math notranslate nohighlight">\(\rho(z)\)</span></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="ase-integration.rst">ASE</a></p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="ase-integration.rst">ASE</a></p></td>
 <td><p>Pointer to the pydseams ASE howto</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="solvis.rst">View a classified frame</a></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="solvis.rst">View a classified frame</a></p></td>
 <td><p>solvis via pydseams, not OVITO</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="confined-ice.rst">Confined ice</a></p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="confined-ice.rst">Confined ice</a></p></td>
 <td><p>Nanotube and monolayer classification</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="faq.rst">FAQ</a></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="faq.rst">FAQ</a></p></td>
 <td><p>Short answers</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="troubleshooting.rst">Troubleshooting</a></p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="troubleshooting.rst">Troubleshooting</a></p></td>
 <td><p>Symptom, cause, fix</p></td>
 </tr>
 </tbody>
@@ -282,6 +287,7 @@ data-aria-dark="Switch to auto color mode">
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Install the engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openmp-offload.html">OpenMP target offload</a></li>
 <li class="toctree-l1"><a class="reference internal" href="classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sheared-cells.html">Sheared cells</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionic-liquid.html">Ionic-liquid dumps</a></li>

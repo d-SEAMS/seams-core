@@ -1,0 +1,84 @@
+=====================
+OpenMP target offload
+=====================
+
+
+Build the Steinhardt kernel for an NVIDIA GPU. This is not the
+gpulite TUM path and it is not the host-only pixi environment.
+
+The Meson option is ``-Dwith_openmp_offload=enabled``. Configure
+probes a real ``target teams distribute parallel for`` and records
+``OpenMP target offload: YES`` only when that link succeeds. nvc++
+is tried first (``-mp=gpu``, then ``-mp=gpu -gpu=cc80``). clang with
+libomptarget is the fallback (``-fopenmp -fopenmp-targets=nvptx64-nvidia-cuda``).
+
+Elja A100
+---------
+
+GPU partitions: ``gpu-1xA100``, ``gpu-2xA100``, ``gpu-long``. Account:
+``chem-ui``. Do not compile on the login node.
+
+GPU batch shells do not have Lmod on ``PATH``. Use the OpenHPC
+nvc++ prefix and the GCCcore-13.3.0 EasyBuild prefixes for Meson,
+Ninja, Eigen, FlexiBLAS, and Python 3.12. Cluster Catch2 is 2.x;
+the tree carries a Catch2 3 wrap. CUDA 12.4 supplies ``nsys`` 2023.4.
+
+.. code:: bash
+
+    EB=/hpcapps/lib-edda/easybuild/software
+    NVHPC_ROOT=/opt/ohpc/pub/compiler/nvhpc/22.3/Linux_x86_64/22.3
+    export PATH=$EB/CUDA/12.4.0/bin:$NVHPC_ROOT/compilers/bin:$EB/Meson/1.4.0-GCCcore-13.3.0/bin:$EB/Ninja/1.12.1-GCCcore-13.3.0/bin:$EB/Python/3.12.3-GCCcore-13.3.0/bin:$PATH
+    export PKG_CONFIG_PATH=$EB/Eigen/3.4.0-GCCcore-13.3.0/share/pkgconfig:$EB/FlexiBLAS/3.4.4-GCC-13.3.0/lib/pkgconfig
+    export LD_LIBRARY_PATH=$EB/Python/3.12.3-GCCcore-13.3.0/lib:$NVHPC_ROOT/compilers/lib:$NVHPC_ROOT/cuda/lib64:$NVHPC_ROOT/math_libs/lib64:$EB/GCCcore/13.3.0/lib64:$EB/FlexiBLAS/3.4.4-GCC-13.3.0/lib
+
+    export CC=nvc
+    export CXX=nvc++
+    meson setup build-offload --buildtype=debugoptimized \
+      -Dwith_openmp_offload=enabled \
+      -Dwith_python=false \
+      -Dwith_lua=disabled \
+      -Dwith_mpi=disabled \
+      -Dwith_gpulite=disabled
+    meson compile -C build-offload
+    meson test -C build-offload --print-errorlogs
+
+``meson setup`` / ``compile`` / ``test`` run under ``srun`` or ``sbatch``
+on a GPU node, for example:
+
+.. code:: bash
+
+    srun --partition=gpu-2xA100 --gres=gpu:2 --account=chem-ui \
+      --time=02:00:00 --pty bash
+    # gpu-1xA100 nodes do not advertise GRES, so --gres=gpu:1 is
+    # rejected. gpu-2xA100 advertises gpu:2.
+
+Eigen, Catch2, FlexiBLAS, Meson, and Ninja come from the
+``GCC/13.3.0`` EasyBuild toolchain on this cluster (``module spider``
+the name if a version is missing). They do not come from pixi.
+
+If nvc++ refuses the sources, swap the compiler to a clang that
+ships libomptarget and keep ``-Dwith_openmp_offload=enabled``. The
+probe then takes ``-fopenmp-targets=nvptx64-nvidia-cuda``.
+
+Runtime
+-------
+
+``SEAMS_OFFLOAD=0`` forces the host path in an offload build.
+Unset, or any value other than ``0``, uses the device when
+``omp_get_num_devices() > 0``.
+
+``seams --features`` prints whether the binary was compiled with
+the offload define.
+
+The Catch2 case ``steinhardtQl offload matches serial and threaded bit for bit`` compiles only when the probe succeeded. It compares
+the device path to one-thread and four-thread host paths on the
+FCC lattice and on ``input/traj/mW_cubic.lammpstrj``, and it checks
+the FCC ``q4`` / ``q6`` reference values.
+
+Profile
+-------
+
+``scripts/elja_gpu_job.sh`` is the sbatch body: it configures the
+offload build, runs the test suite, then ``nsys profile`` and
+``nsys stats --force-export=true``. The stats file must be
+non-empty.
