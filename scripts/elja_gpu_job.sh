@@ -75,6 +75,16 @@ for pair in libpthread.so:libpthread.so.0 libdl.so:libdl.so.2 librt.so:librt.so.
   fi
 done
 export LIBRARY_PATH=$CRT:/lib64${LIBRARY_PATH:+:$LIBRARY_PATH}
+# GPU nodes have no glibc-devel headers. Login /usr/include is
+# copied to elja-sysroot/usr/include before submit.
+INC=${SEAMS_INC:-$ROOT/elja-sysroot/usr/include}
+if [[ ! -f $INC/features.h ]]; then
+  echo "missing $INC/features.h (rsync /usr/include from a login node)" >&2
+  exit 1
+fi
+export CPATH=$INC${CPATH:+:$CPATH}
+export C_INCLUDE_PATH=$INC${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}
+export CPLUS_INCLUDE_PATH=$INC${CPLUS_INCLUDE_PATH:+:$CPLUS_INCLUDE_PATH}
 # clang's driver does not search LIBRARY_PATH for startfiles.
 # -B is the prefix both gcc and clang use for crt1.o / Scrt1.o.
 export CFLAGS="${CFLAGS:-} -B${CRT}"
@@ -153,27 +163,20 @@ configure_offload() {
 log_env
 
 USED_COMPILER=
-# nvc as CC fails Meson's C sanity check. Host C is GCCcore; nvc++
-# is the C++ compiler that owns -mp=gpu.
-export PATH=$GCCCORE/bin:$PATH
-if configure_offload nvc++ nvc++ "$GCCCORE/bin/gcc"; then
+# nvc++ 22.3 reports no C++20 to Meson. Clang 17 with libomptarget
+# is the compiler that accepts the project's cpp_std and the offload
+# probe. nvc++ is still tried if clang fails, for a recorded log.
+export PATH=$CLANG17/bin:$GCCCORE/bin:$PATH
+export LD_LIBRARY_PATH=$CLANG17/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+if [[ -x $CLANG17/bin/clang++ ]] && \
+   configure_offload clang++ "$CLANG17/bin/clang++" "$CLANG17/bin/clang"; then
+  USED_COMPILER=clang++
+elif configure_offload nvc++ nvc++ "$GCCCORE/bin/gcc"; then
   USED_COMPILER=nvc++
 else
-  echo "nvc++ offload configure failed; trying clang++ 17 libomptarget" \
-    | tee -a "$OUT/setup.log"
-  if [[ ! -x $CLANG17/bin/clang++ ]]; then
-    echo "clang++ 17 prefix missing: $CLANG17" >&2
-    exit 1
-  fi
-  export PATH=$CLANG17/bin:$PATH
-  export LD_LIBRARY_PATH=$CLANG17/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
-  if configure_offload clang++ "$CLANG17/bin/clang++" "$CLANG17/bin/clang"; then
-    USED_COMPILER=clang++
-  else
-    echo "offload probe failed for nvc++ and clang++; see $OUT/setup.log" >&2
-    tail -80 "$OUT/setup.log" >&2 || true
-    exit 1
-  fi
+  echo "offload probe failed for clang++ and nvc++; see $OUT/setup.log" >&2
+  tail -80 "$OUT/setup.log" >&2 || true
+  exit 1
 fi
 echo "used_compiler: $USED_COMPILER" | tee -a "$OUT/gpu-conditions.txt"
 

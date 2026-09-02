@@ -28,15 +28,19 @@ export PATH=$EB/CUDA/12.4.0/bin:$NVHPC_ROOT/compilers/bin:$EB/Meson/1.4.0-GCCcor
 export PKG_CONFIG_PATH=$EB/Eigen/3.4.0-GCCcore-13.3.0/share/pkgconfig:$EB/FlexiBLAS/3.4.4-GCC-13.3.0/lib/pkgconfig
 export LD_LIBRARY_PATH=$EB/Python/3.12.3-GCCcore-13.3.0/lib:$NVHPC_ROOT/compilers/lib:$NVHPC_ROOT/cuda/lib64:$NVHPC_ROOT/math_libs/lib64:$EB/GCCcore/13.3.0/lib64:$EB/FlexiBLAS/3.4.4-GCC-13.3.0/lib:$EB/Z3/4.13.0-GCCcore-13.2.0/lib
 export PYTHONPATH=$EB/Meson/1.4.0-GCCcore-13.3.0/lib/python3.12/site-packages
-# GPU nodes lack glibc-devel. Copy crt1.o crti.o crtn.o Scrt1.o
-# from a login /usr/lib64 into elja-crt/ before sbatch.
+# GPU nodes lack glibc-devel. Before sbatch, from a login node:
+#   cp /usr/lib64/crt1.o crti.o crtn.o Scrt1.o elja-crt/
+#   rsync -a /usr/include/ elja-sysroot/usr/include/
 export LIBRARY_PATH=$PWD/elja-crt:/lib64
 export CFLAGS="-B$PWD/elja-crt"
 export CXXFLAGS="-B$PWD/elja-crt"
 export LDFLAGS="-B$PWD/elja-crt -L$PWD/elja-crt -L/lib64"
 
-export CC=$EB/GCCcore/13.3.0/bin/gcc
-export CXX=nvc++
+# nvc++ 22.3 reports no C++20. Clang 17 with libomptarget is the
+# compiler that accepts cpp_std=c++20 and the offload probe.
+export CC=$EB/Clang/17.0.6-GCCcore-13.2.0/bin/clang
+export CXX=$EB/Clang/17.0.6-GCCcore-13.2.0/bin/clang++
+export CPATH=$PWD/elja-sysroot/usr/include
 meson setup build-offload --buildtype=debugoptimized \
   -Dwith_openmp_offload=enabled \
   -Dwith_python=false \
