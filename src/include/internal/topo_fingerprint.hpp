@@ -90,7 +90,7 @@ struct KeyLibrary {
 };
 
 /// Add every distinct key of `fp` under `label`; a key already present
-/// under another label becomes "ambiguous".
+/// under other labels carries all of them, sorted and joined by '|'.
 void addToLibrary(KeyLibrary &lib, const FrameFingerprint &fp, const std::string &label);
 
 /// Text form: a header line `# method M hops H`, then `key label` lines.

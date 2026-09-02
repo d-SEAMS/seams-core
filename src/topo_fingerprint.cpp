@@ -261,9 +261,32 @@ void addToLibrary(KeyLibrary &lib, const FrameFingerprint &fp, const std::string
     auto it = lib.labelOf.find(kv.first);
     if (it == lib.labelOf.end()) {
       lib.labelOf.emplace(kv.first, label);
-    } else if (it->second != label) {
-      it->second = "ambiguous";
+      continue;
     }
+    // a key seen under several labels names all of them, sorted and
+    // joined by '|', so the census says which references share an
+    // environment
+    std::vector<std::string> parts;
+    std::string cur;
+    for (char ch : it->second) {
+      if (ch == '|') {
+        parts.push_back(cur);
+        cur.clear();
+      } else {
+        cur.push_back(ch);
+      }
+    }
+    parts.push_back(cur);
+    if (std::find(parts.begin(), parts.end(), label) != parts.end()) {
+      continue;
+    }
+    parts.push_back(label);
+    std::sort(parts.begin(), parts.end());
+    std::string joined;
+    for (std::size_t i = 0; i < parts.size(); i++) {
+      joined += (i ? "|" : "") + parts[i];
+    }
+    it->second = joined;
   }
 }
 
