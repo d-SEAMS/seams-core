@@ -144,3 +144,33 @@ TEST_CASE("hop neighbourhoods grow by one shell per hop", "[topo]") {
   REQUIRE(topo::hopNeighbourhood(rows, 5, 2).size() == 17);
   REQUIRE(topo::hopNeighbourhood(rows, 5, 2)[0] == 5);
 }
+
+TEST_CASE("vertex colours split the classes and travel with a permutation", "[topo]") {
+  const auto rows = diamondRows(3);
+  const int n = static_cast<int>(rows.size());
+  // the two sublattices of the diamond cell are the two species of zincblende
+  std::vector<int> colours(static_cast<std::size_t>(n));
+  for (int i = 0; i < n; i++) {
+    colours[static_cast<std::size_t>(i)] = (i % 8 < 4) ? 1 : 2;
+  }
+  const auto fp = topo::fingerprint(rows, 2, 7, colours);
+  REQUIRE(fp.classes.size() == 2);
+  for (const auto &kv : fp.classes) {
+    REQUIRE(kv.second == n / 2);
+  }
+  REQUIRE(fp.key != topo::fingerprint(rows, 2, 7).key);
+  std::vector<int> perm(rows.size());
+  std::iota(perm.begin(), perm.end(), 0);
+  std::mt19937 rng(11);
+  std::shuffle(perm.begin(), perm.end(), rng);
+  std::vector<int> permColours(static_cast<std::size_t>(n));
+  for (int i = 0; i < n; i++) {
+    permColours[static_cast<std::size_t>(perm[static_cast<std::size_t>(i)])] =
+        colours[static_cast<std::size_t>(i)];
+  }
+  const auto fq = topo::fingerprint(permute(rows, perm), 2, 7, permColours);
+  REQUIRE(fq.key == fp.key);
+  REQUIRE(fq.classes == fp.classes);
+  // the local key of an atom and of its image agree
+  REQUIRE(fq.atomKeys[static_cast<std::size_t>(perm[3])] == fp.atomKeys[3]);
+}

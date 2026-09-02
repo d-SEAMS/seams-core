@@ -77,12 +77,17 @@ std::vector<int> hopNeighbourhood(const Rows &rows, int atom, int hops) {
 }
 
 std::uint64_t wlHash(const std::vector<std::vector<int>> &adjacency, int root,
-                     int rounds) {
+                     int rounds, const std::vector<int> &colours) {
   const int n = static_cast<int>(adjacency.size());
+  const bool coloured = static_cast<int>(colours.size()) == n;
   std::vector<std::uint64_t> colour(static_cast<std::size_t>(n));
   for (int i = 0; i < n; i++) {
     const std::uint64_t deg = static_cast<std::uint64_t>(adjacency[static_cast<std::size_t>(i)].size());
-    colour[static_cast<std::size_t>(i)] = mix(kOffset, deg + (i == root ? 0x9e3779b97f4a7c15ULL : 0ULL));
+    std::uint64_t h = mix(kOffset, deg + (i == root ? 0x9e3779b97f4a7c15ULL : 0ULL));
+    if (coloured) {
+      h = mix(h, static_cast<std::uint64_t>(static_cast<std::int64_t>(colours[static_cast<std::size_t>(i)])) + 1ULL);
+    }
+    colour[static_cast<std::size_t>(i)] = h;
   }
   std::vector<std::uint64_t> next(static_cast<std::size_t>(n));
   std::vector<std::uint64_t> bag;
@@ -113,8 +118,9 @@ std::uint64_t wlHash(const std::vector<std::vector<int>> &adjacency, int root,
   return h;
 }
 
-LocalKey localKey(const Rows &rows, int atom, int hops) {
+LocalKey localKey(const Rows &rows, int atom, int hops, const std::vector<int> &colours) {
   LocalKey out;
+  const bool coloured = colours.size() == rows.size() && !rows.empty();
   const std::vector<int> atoms = hopNeighbourhood(rows, atom, hops);
   if (atoms.empty()) {
     out.method = "wl";
@@ -147,28 +153,54 @@ LocalKey localKey(const Rows &rows, int atom, int hops) {
   edges.erase(std::unique(edges.begin(), edges.end()), edges.end());
   out.vertices = n;
   out.edges = static_cast<int>(edges.size());
-  const std::string cert = cage::canonicalCertificateRooted(n, edges, 0);
+  std::vector<int> localColours;
+  if (coloured) {
+    localColours.reserve(atoms.size());
+    for (int a : atoms) {
+      localColours.push_back(colours[static_cast<std::size_t>(a)]);
+    }
+  }
+  const std::string cert = coloured
+                               ? cage::canonicalCertificateColoured(n, edges, localColours, 0)
+                               : cage::canonicalCertificateRooted(n, edges, 0);
   if (!cert.empty()) {
     out.method = "nauty";
-    out.key = hex(hashString(cert));
+    // the certificate is canonical for the coloured graph given the colour
+    // cells; the cells themselves (colour value and size, sorted) complete
+    // the class and do not depend on the input numbering
+    std::string tagged = cert;
+    if (coloured) {
+      std::vector<int> sorted(localColours);
+      std::sort(sorted.begin(), sorted.end());
+      tagged += "|";
+      for (std::size_t i = 0; i < sorted.size(); i++) {
+        if (i == 0 || sorted[i] != sorted[i - 1]) {
+          tagged += std::to_string(sorted[i]) + ":";
+        }
+        tagged += ".";
+      }
+    }
+    out.key = hex(hashString(tagged));
     return out;
   }
   out.method = "wl";
-  out.key = hex(wlHash(adjacency, 0, hops + 2));
+  out.key = hex(wlHash(adjacency, 0, hops + 2, localColours));
   return out;
 }
 
-FrameFingerprint fingerprint(const Rows &rows, int hops, int maxRingSize) {
+FrameFingerprint fingerprint(const Rows &rows, int hops, int maxRingSize,
+                             const std::vector<int> &colours) {
   FrameFingerprint out;
   out.hops = hops;
   const int n = static_cast<int>(rows.size());
+  const bool coloured = colours.size() == rows.size() && !rows.empty();
   out.atomKeys.reserve(static_cast<std::size_t>(n));
   // The frame key is built from the refinement hash in every build so that
   // a nauty host and a plain host name the same frame the same way; the
   // per-atom keys carry the exact certificate when it exists.
   std::vector<std::uint64_t> wl(static_cast<std::size_t>(n));
   for (int i = 0; i < n; i++) {
-    LocalKey lk = localKey(rows, i, hops);
+    LocalKey lk = localKey(rows, i, hops, colours);
     out.method = lk.method;
     out.classes[lk.key] += 1;
     out.atomKeys.push_back(std::move(lk.key));
@@ -188,7 +220,14 @@ FrameFingerprint fingerprint(const Rows &rows, int hops, int maxRingSize) {
       }
       std::sort(adjacency[k].begin(), adjacency[k].end());
     }
-    wl[static_cast<std::size_t>(i)] = atoms.empty() ? 0 : wlHash(adjacency, 0, hops + 2);
+    std::vector<int> localColours;
+    if (coloured) {
+      for (int a : atoms) {
+        localColours.push_back(colours[static_cast<std::size_t>(a)]);
+      }
+    }
+    wl[static_cast<std::size_t>(i)] =
+        atoms.empty() ? 0 : wlHash(adjacency, 0, hops + 2, localColours);
   }
   std::sort(wl.begin(), wl.end());
   std::uint64_t h = mix(kOffset, static_cast<std::uint64_t>(n));

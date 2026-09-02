@@ -38,7 +38,8 @@ void collectAtoms(const std::vector<std::vector<int>> &rings,
 
 #ifdef SEAMS_HAS_NAUTY
 std::string densenautyCertificate(int n, const std::vector<std::pair<int, int>> &edges,
-                                  int root = -1) {
+                                  int root = -1,
+                                  const std::vector<int> &colours = {}) {
   if (n <= 0 || n > MAXN) {
     return {};
   }
@@ -52,23 +53,31 @@ std::string densenautyCertificate(int n, const std::vector<std::pair<int, int>> 
   std::vector<int> lab(static_cast<size_t>(n), 0);
   std::vector<int> ptn(static_cast<size_t>(n), 0);
   std::vector<int> orbits(static_cast<size_t>(n), 0);
-  if (root >= 0 && root < n) {
-    // two colour cells: {root} and the rest; ptn marks the end of a cell
-    // with 0 and the inside of a cell with 1
+  const bool coloured = static_cast<int>(colours.size()) == n;
+  if ((root >= 0 && root < n) || coloured) {
+    // colour cells in order: {root} first, then every other vertex sorted
+    // by colour; ptn marks the end of a cell with 0 and the inside with 1
     options.defaultptn = FALSE;
-    int pos = 0;
-    lab[static_cast<size_t>(pos)] = root;
-    ptn[static_cast<size_t>(pos)] = 0;
-    ++pos;
+    std::vector<std::pair<int, int>> order;  // (colour, vertex)
     for (int v = 0; v < n; v++) {
       if (v == root) {
         continue;
       }
-      lab[static_cast<size_t>(pos)] = v;
-      ptn[static_cast<size_t>(pos)] = 1;
+      order.emplace_back(coloured ? colours[static_cast<size_t>(v)] : 0, v);
+    }
+    std::sort(order.begin(), order.end());
+    int pos = 0;
+    if (root >= 0 && root < n) {
+      lab[static_cast<size_t>(pos)] = root;
+      ptn[static_cast<size_t>(pos)] = 0;
       ++pos;
     }
-    ptn[static_cast<size_t>(n - 1)] = 0;
+    for (size_t i = 0; i < order.size(); i++) {
+      lab[static_cast<size_t>(pos)] = order[i].second;
+      const bool last = i + 1 == order.size() || order[i + 1].first != order[i].first;
+      ptn[static_cast<size_t>(pos)] = last ? 0 : 1;
+      ++pos;
+    }
   }
   EMPTYGRAPH(g.data(), m, n);
   for (const auto &e : edges) {
@@ -193,6 +202,30 @@ std::string canonicalCertificateRooted(int n,
   std::sort(local.begin(), local.end());
   local.erase(std::unique(local.begin(), local.end()), local.end());
   return densenautyCertificate(n, local, root);
+#endif
+}
+
+std::string canonicalCertificateColoured(int n,
+                                         const std::vector<std::pair<int, int>> &edges,
+                                         const std::vector<int> &colours, int root) {
+#ifndef SEAMS_HAS_NAUTY
+  (void)n;
+  (void)edges;
+  (void)colours;
+  (void)root;
+  return {};
+#else
+  std::vector<std::pair<int, int>> local;
+  local.reserve(edges.size());
+  for (const auto &e : edges) {
+    if (e.first < 0 || e.second < 0 || e.first >= n || e.second >= n || e.first == e.second) {
+      continue;
+    }
+    local.emplace_back(std::min(e.first, e.second), std::max(e.first, e.second));
+  }
+  std::sort(local.begin(), local.end());
+  local.erase(std::unique(local.begin(), local.end()), local.end());
+  return densenautyCertificate(n, local, root, colours);
 #endif
 }
 

@@ -541,7 +541,7 @@ int cmdDensityZ(std::ostream &os, Cloud &cloud, int typeI, int bins, int axis) {
 // for the rooted neighbourhood within `hops` bonds, the histogram of keys,
 // the primitive ring census, and a frame key over all of it.
 int cmdFingerprint(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
-                   const std::string &graphName, int hops) {
+                   const std::string &graphName, int hops, bool colourTypes) {
   if (cloud.nop == 0) {
     os << colorizer.heading("nop") << " 0\n";
     return 0;
@@ -561,7 +561,15 @@ int cmdFingerprint(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int
     nList = nneigh::kNearestNeighbourList(cloud, k, cand, typ, mutual);
   }
   const auto rows = nneigh::neighbourListByIndex(cloud, nList);
-  const auto fp = topo::fingerprint(rows, hops, 7);
+  std::vector<int> colours;
+  if (colourTypes) {
+    colours.reserve(static_cast<std::size_t>(cloud.nop));
+    for (int i = 0; i < cloud.nop; ++i) {
+      colours.push_back(cloud.pts[static_cast<std::size_t>(i)].type);
+    }
+    colours.resize(rows.size(), 0);
+  }
+  const auto fp = topo::fingerprint(rows, hops, 7, colours);
   os << colorizer.heading("nop") << " " << rows.size() << " "
      << colorizer.longOption("graph") << " " << name << " "
      << colorizer.longOption("hops") << " " << hops << " "
@@ -855,6 +863,7 @@ int main(int argc, char *argv[]) {
   std::string siteSpec;
   bool ionsFlag = false;
   bool completeFlag = false;
+  bool colourTypes = false;
   int hops = 2;
   std::string ionTypesFlag;
   double ionCutoff = 0.0;
@@ -1009,6 +1018,11 @@ int main(int argc, char *argv[]) {
                  .help("Seeded cages: fill the last vertex of six-rings whose "
                        "other vertices carry a label (ring completion)")
                  .handler([&]() { completeFlag = true; }));
+
+  parser.add(Option("--colour-types")
+                 .help("fingerprint: colour vertices by LAMMPS type, so species "
+                       "never match across types")
+                 .handler([&]() { colourTypes = true; }));
 
   parser.add(Option("--hops")
                  .argName("N")
@@ -1264,7 +1278,7 @@ int main(int argc, char *argv[]) {
     }
     if (cmd == "fingerprint") {
       try {
-        return cmdFingerprint(os, cloud, cutoff, typeI, k, graph, hops);
+        return cmdFingerprint(os, cloud, cutoff, typeI, k, graph, hops, colourTypes);
       } catch (const std::exception &e) {
         os << colorizer.error(e.what()) << "\n";
         return 2;

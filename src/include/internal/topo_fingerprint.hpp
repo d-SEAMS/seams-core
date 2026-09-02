@@ -58,16 +58,22 @@ struct FrameFingerprint {
 std::vector<int> hopNeighbourhood(const Rows &rows, int atom, int hops);
 
 /// Weisfeiler-Lehman refinement hash of a graph given by local adjacency
-/// lists; `root` (or -1) starts in its own colour. `rounds` refinements.
+/// lists; `root` (or -1) starts in its own colour; `colours` (empty or one
+/// integer per vertex, such as the atom type) seeds the initial colours.
+/// `rounds` refinements.
 std::uint64_t wlHash(const std::vector<std::vector<int>> &adjacency, int root,
-                     int rounds);
+                     int rounds, const std::vector<int> &colours = {});
 
-/// Key of the rooted neighbourhood of `atom`.
-LocalKey localKey(const Rows &rows, int atom, int hops);
+/// Key of the rooted neighbourhood of `atom`. `colours` is empty or one
+/// class per row (atom type, species); coloured vertices never match
+/// vertices of another colour.
+LocalKey localKey(const Rows &rows, int atom, int hops,
+                  const std::vector<int> &colours = {});
 
 /// Keys of every atom, their histogram, the ring census up to
-/// `maxRingSize`, and the frame key.
-FrameFingerprint fingerprint(const Rows &rows, int hops = 2, int maxRingSize = 7);
+/// `maxRingSize`, and the frame key. `colours` as in localKey.
+FrameFingerprint fingerprint(const Rows &rows, int hops = 2, int maxRingSize = 7,
+                             const std::vector<int> &colours = {});
 
 /// Hex string of a 64-bit hash.
 std::string hex(std::uint64_t value);

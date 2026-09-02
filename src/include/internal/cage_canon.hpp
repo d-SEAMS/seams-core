@@ -33,6 +33,13 @@ std::string canonicalCertificateRooted(int n,
                                        const std::vector<std::pair<int, int>> &edges,
                                        int root);
 
+// The same with a colour per vertex (an integer class such as the atom
+// type): vertices of different colours never map onto each other, and the
+// root still sits in a cell of its own. `colours` may be empty.
+std::string canonicalCertificateColoured(int n,
+                                         const std::vector<std::pair<int, int>> &edges,
+                                         const std::vector<int> &colours, int root);
+
 } // namespace cage
 
 #endif
