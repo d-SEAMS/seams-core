@@ -99,11 +99,15 @@ apply_nvhpc() {
     export NVHPC_CUDA_HOME=$root/cuda
   fi
   write_nvc_localrc "$root"
+  # OpenHPC 22.3 needs GCCcore 13.3 stddef.h. nvc++ 23.7 already
+  # uses GCCcore 12.3; putting 13.3 xmmintrin.h first ICEs cpp1.
+  if [[ $cuda_ver == 11.6 ]]; then
+    export CFLAGS="${CFLAGS:-} -I${GCC_LIB}/include"
+    export CXXFLAGS="${CXXFLAGS:-} -I${GCC_LIB}/include"
+  fi
 }
 
 apply_nvhpc "$NVHPC_23" 12.2
-export CFLAGS="${CFLAGS:-} -I${GCC_LIB}/include"
-export CXXFLAGS="${CXXFLAGS:-} -I${GCC_LIB}/include"
 
 # GPU nodes have no glibc-devel. Login-node C runtime objects live
 # in elja-crt/ (copied before submit). gcc and clang find crt1.o
