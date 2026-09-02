@@ -544,7 +544,11 @@ int cmdFingerprint(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int
   }
   const int typ = typeOf(cloud, typeI);
   const double cand = cutoff + 1.5;
-  const auto graph = nneigh::bondGraphFromName(graphName);
+  // the seeded assignment is two graphs; a fingerprint wants one, so the
+  // cages default falls back to the cutoff graph here
+  const std::string name =
+      (graphName.empty() || graphName == "seeded") ? std::string("cutoff") : graphName;
+  const auto graph = nneigh::bondGraphFromName(name);
   std::vector<std::vector<int>> nList;
   if (graph == nneigh::BondGraph::Cutoff) {
     nList = nneigh::neighListO(cutoff, cloud, typ);
@@ -553,9 +557,9 @@ int cmdFingerprint(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int
     nList = nneigh::kNearestNeighbourList(cloud, k, cand, typ, mutual);
   }
   const auto rows = nneigh::neighbourListByIndex(cloud, nList);
-  const auto fp = topo::fingerprint(rows, hops, 8);
+  const auto fp = topo::fingerprint(rows, hops, 7);
   os << colorizer.heading("nop") << " " << rows.size() << " "
-     << colorizer.longOption("graph") << " " << graphName << " "
+     << colorizer.longOption("graph") << " " << name << " "
      << colorizer.longOption("hops") << " " << hops << " "
      << colorizer.longOption("method") << " " << fp.method << " "
      << colorizer.longOption("key") << " " << fp.key << " "
@@ -1255,7 +1259,12 @@ int main(int argc, char *argv[]) {
       }
     }
     if (cmd == "fingerprint") {
-      return cmdFingerprint(os, cloud, cutoff, typeI, k, graph, hops);
+      try {
+        return cmdFingerprint(os, cloud, cutoff, typeI, k, graph, hops);
+      } catch (const std::exception &e) {
+        os << colorizer.error(e.what()) << "\n";
+        return 2;
+      }
     }
     if (cmd == "ions") {
       std::vector<int> ionTypes;
