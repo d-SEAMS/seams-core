@@ -61,7 +61,7 @@ Every file under =src/include/internal=.
 | =topo_one_dim.hpp= | ~ring~ | ice-nanotube prisms |
 | =topo_two_dim.hpp= | ~ring~ | monolayer polygons |
 | =cage.hpp= | ~cage~ | ~Cage~, ~cageType~, ~iceType~ |
-| =cage_affiliation.hpp= | ~ring~ | claim-free HC / DDC flags |
+| =cage_affiliation.hpp= | ~ring~ | claim-free HC / DDC flags; ~seededCageAffiliation~ and ~ringAdjacentCompletion~ |
 | =cage_canon.hpp= | ~cage~ | nauty canonical certificates |
 | =bulkTUM.hpp= | ~tum3~ | topological unit matching |
 | =bond.hpp= | ~bond~ | geometric hydrogen bonds |

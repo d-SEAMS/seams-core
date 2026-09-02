@@ -199,7 +199,7 @@ Used only by ~cages~.
 
 | value | graph |
 |-------+-------|
-| ~seeded~ | mutual ~k~-nearest seeds, union completions (~ring::seededCageAffiliation~) |
+| ~seeded~ | mutual ~k~-nearest seeds, union completions (~ring::seededCageAffiliation~, completion flag ~false~) |
 | ~cutoff~ | pairs inside ~--cutoff~ (~nneigh::neighListO~) |
 | ~knn~ | mutual k-nearest (~nneigh::BondGraph::KnnMutual~) |
 | ~knn-union~ | union k-nearest (~nneigh::BondGraph::KnnUnion~) |

@@ -14,6 +14,20 @@ explicit error. XYZ input accepts coordinate-only rows and records its
 single frame as frame 1. Density regression coverage includes all Cartesian
 axes of a sheared cell.
 
+* 2.7.0
+
+~ring::seededCageAffiliation~ takes an optional completion flag.
+~ring::ringAdjacentCompletion~ fills the last vertex of any six-ring
+whose other vertices carry a cage label, iterated to a fixed point,
+separately for the hexagonal cage (HC) and double-diamond cage (DDC)
+labels. The rule is stated in =lean/= (Mathlib): the completion is
+the least fixed point above the seed and is independent of visiting
+order; an edge-sharing rule is unsound on a five-vertex instance.
+~tests/walk_compare~ walks a trajectory and prints per-frame
+four-neighbour star (CHILL) and cage labels with their largest
+clusters. The reproducibility workflow lives in the ~dseams2_repro~
+package.
+
 * 2.6.0
 
 Meson links FlexiBLAS when pkg-config or ~libflexiblas~ is present,
