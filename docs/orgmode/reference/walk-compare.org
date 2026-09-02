@@ -1,5 +1,5 @@
 #+TITLE: walk_compare
-#+OPTIONS: toc:nil num:nil
+#+OPTIONS: toc:nil num:nil ^:nil
 
 ~tests/walk_compare~ walks a LAMMPS dump and prints one row per
 frame. Each row has four-neighbour star (~CHILL+~) counts, cage

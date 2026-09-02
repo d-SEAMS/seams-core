@@ -1,5 +1,5 @@
 #+TITLE: Reference
-#+OPTIONS: toc:nil num:nil
+#+OPTIONS: toc:nil num:nil ^:nil
 
 Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 

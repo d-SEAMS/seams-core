@@ -1,5 +1,5 @@
 #+TITLE: Contributing
-#+OPTIONS: toc:nil num:nil
+#+OPTIONS: toc:nil num:nil ^:nil
 
 This repository is the C++ engine (~libyodaLib~) and the ~seams~ CLI.
 Python bindings are [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].

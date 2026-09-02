@@ -23,6 +23,9 @@
 (setq org-export-with-toc nil)
 (setq org-export-with-author nil)
 (setq org-export-with-timestamps nil)
+;; Identifiers such as walk_compare must stay literal. ox-rst otherwise
+;; emits walk :sub:`compare` from a bare underscore.
+(setq org-export-with-sub-superscripts nil)
 (setq org-rst-headline-underline ?-)
 
 (setq org-publish-project-alist
@@ -35,7 +38,8 @@
          :headline-levels 4
          :with-toc nil
          :section-numbers nil
-         :with-author nil)
+         :with-author nil
+         :with-sub-superscript nil)
         ("sphinx-images"
          :base-directory "./orgmode/"
          :base-extension "svg\\|png\\|jpg"
