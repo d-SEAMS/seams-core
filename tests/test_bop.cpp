@@ -11,9 +11,13 @@
 #include <algorithm>
 #include <cmath>
 #include <complex>
+#include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <filesystem>
+#include <iomanip>
 #include <numeric>
+#include <sstream>
 
 #ifdef SEAMS_HAS_OPENMP
 #include <omp.h>
@@ -1203,11 +1207,23 @@ TEST_CASE("qlmOneAtom matches qlmOneAtomDr on an ortho pair", "[bop]") {
 #ifdef SEAMS_HAS_OFFLOAD
 namespace {
 
-void requireBitIdentical(const chill::SteinhardtQl &a,
+std::string hexBits(double x) {
+  std::uint64_t u = 0;
+  std::memcpy(&u, &x, sizeof(u));
+  std::ostringstream os;
+  os << std::hex << std::setfill('0') << std::setw(16) << u;
+  return os.str();
+}
+
+void requireBitIdentical(const char *label, const chill::SteinhardtQl &a,
                          const chill::SteinhardtQl &b) {
+  INFO(label);
   REQUIRE(a.ql.size() == b.ql.size());
   REQUIRE(a.qlBar.size() == b.qlBar.size());
   for (size_t i = 0; i < a.ql.size(); ++i) {
+    INFO("i=" << i << " ql " << hexBits(a.ql[i]) << " vs " << hexBits(b.ql[i])
+              << " qlBar " << hexBits(a.qlBar[i]) << " vs "
+              << hexBits(b.qlBar[i]));
     REQUIRE(a.ql[i] == b.ql[i]);
     REQUIRE(a.qlBar[i] == b.qlBar[i]);
   }
@@ -1231,9 +1247,9 @@ void checkOffloadIdentity(
   const auto serial = runSteinhardt(cloud, nList, orderL, false, 1);
   const auto threaded = runSteinhardt(cloud, nList, orderL, false, 4);
   const auto offload = runSteinhardt(cloud, nList, orderL, true, 1);
-  requireBitIdentical(offload, serial);
-  requireBitIdentical(offload, threaded);
-  requireBitIdentical(threaded, serial);
+  requireBitIdentical("offload vs serial", offload, serial);
+  requireBitIdentical("offload vs threaded", offload, threaded);
+  requireBitIdentical("threaded vs serial", threaded, serial);
 }
 
 } // namespace
