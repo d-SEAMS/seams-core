@@ -1,14 +1,49 @@
 #+TITLE: DseamsProofs
 
-Lean 4 (Mathlib) statements about the graph closures the engine computes.
-=Completion.lean= models the ring completion of the seeded cage
-assignment as a monotone closure on a finite vertex set and proves that
-the fixed point is reached within =card V= rounds, is the least fixed point
-above the seeds (so the C++ frontier walk and any other visiting order
-agree), is empty when the seeds are empty, and that every added vertex is
-certified by a ring whose other vertices are labelled. It also shows the
-edge-sharing rule the code first used is not sound in that sense.
+Lean 4 (Mathlib) statements about the graph closures the engine
+computes. The package models ~ring::ringAdjacentCompletion~ as a
+monotone operator on a finite vertex set.
+
+* What the theorems establish
+
+=DseamsProofs/Completion.lean= defines one completion round (=step=)
+and the =card V= iterate (=closure=). The statements are:
+
+- =step= is extensive and monotone.
+- Iterating =step= reaches a fixed point within =card V= rounds
+  (=iter_stable=, =step_closure=).
+- =closure L= is the least fixed point of =step= above =L=
+  (=closure_le_of_fixed=). Any visiting order agrees with any other.
+- =closure ∅ = ∅= once every ring has at least two vertices
+  (=closure_empty=). An empty seed stays empty.
+- Each added vertex sits on a ring. The other vertices of that ring
+  lie in the closure (=closure_sound=). The all-but-one rule is its
+  own certificate.
+
+The file also states an edge-sharing operator (=edgeStep=): a ring is
+accepted when it shares two vertices with a fully labelled ring.
+=edgeRule_not_sound= is a five-vertex instance where that operator
+labels a vertex the all-but-one closure leaves unlabelled.
+
+The file does not show that the C++ frontier bookkeeping computes
+=step=. Catch2 covers that identity, the crystal refill, and the
+structural zero. The file says nothing about which rings a physical
+liquid contains.
+
+* How to build
+
+Toolchain pin: =lean-toolchain= is ~leanprover/lean4:v4.15.0~.
+Mathlib pin: =lakefile.toml= requires Mathlib ~v4.15.0~.
 
 #+begin_src bash
-cd lean && lake exe cache get && lake build
+cd lean
+lake exe cache get
+lake build
 #+end_src
+
+=lake build= type-checks =DseamsProofs= (=DseamsProofs.lean=
+imports =DseamsProofs.Completion=).
+
+The pixi ~formalanalysis~ environment is Coq and SymPy
+(~proofs/~, ~analysis/~). That environment does not install Lean.
+Use =lake= from a Lean 4 toolchain for this directory.
