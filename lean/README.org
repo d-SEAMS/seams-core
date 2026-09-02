@@ -1,0 +1,14 @@
+#+TITLE: DseamsProofs
+
+Lean 4 (Mathlib) statements about the graph closures the engine computes.
+=Completion.lean= models the ring completion of the seeded cage
+assignment as a monotone closure on a finite vertex set and proves that
+the fixed point is reached within =card V= rounds, is the least fixed point
+above the seeds (so the C++ frontier walk and any other visiting order
+agree), is empty when the seeds are empty, and that every added vertex is
+certified by a ring whose other vertices are labelled. It also shows the
+edge-sharing rule the code first used is not sound in that sense.
+
+#+begin_src bash
+cd lean && lake exe cache get && lake build
+#+end_src
