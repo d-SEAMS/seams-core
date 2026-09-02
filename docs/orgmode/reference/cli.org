@@ -34,8 +34,9 @@ frame has no atoms; without it, empty input retains the legacy text output.
 * Commands
 
 The ~command~ positional help string is ~read | chill | chill-plus |
-cages | rdf | cn | hbonds | pairs | density-z | domains~. ~chill_plus~
-is an accepted alias of ~chill-plus~ (not listed in that help string).
+cages | fingerprint | ions | rdf | cn | hbonds | pairs | density-z |
+domains~. ~chill_plus~ is an accepted alias of ~chill-plus~ (not
+listed in that help string).
 
 | command | action | stdout |
 |---------+--------+--------|
@@ -43,6 +44,11 @@ is an accepted alias of ~chill-plus~ (not listed in that help string).
 | ~chill~ | CHILL four-neighbour labels | ~nop N~ then ~name count~ for each ice type present |
 | ~chill-plus~ | CHILL+ four-neighbour labels | same as ~chill~ |
 | ~cages~ | ice score on six-membered rings | ~nop N graph KIND hexagonal IH cubic IC water W~ |
+| ~cages --signature SPEC~ | closed polyhedra whose ring-size census matches ~SPEC~ | ~nop N graph KIND signature S cages C atoms A~ and, with ~--guest-types~, ~guests G occupied O multiple M free F~ |
+| ~fingerprint~ | topology keys of the bonded graph | ~nop N graph KIND hops H method M key K classes C rings 3:a 4:b ... top key=count ...~ |
+| ~fingerprint --emit-library LABEL~ | the frame's distinct keys as library lines | ~# method M hops H colours C~ then ~key LABEL~ rows |
+| ~fingerprint --library FILE[,FILE...]~ | atoms named by key libraries | ~nop N graph KIND hops H method M matched X label=count ... unmatched=U~ and, with several libraries, ~depth H1=n1 H2=n2~ |
+| ~ions~ | ions classed by their first water shell against the seeded cages | ~nop N ice A ions I in-ice X front Y liquid Z shell S shell-ice F~ |
 | ~rdf~ | partial site-site \(g_{IJ}(r)\) | ~# r g count~ then ~# types I J rmax R bins N volume V~ then one ~r g count~ row per bin |
 | ~cn~ | site-site coordination number | ~# site-site~ then ~# types I J cutoff R cn X nI N nJ M volume V~ |
 | ~cn --ions --site~ | cage degree on ~ionCloud~ | ~cage ionCloud types 1 2 cutoff R degree D nCation N nAnion M~ |
@@ -132,6 +138,15 @@ initializers (Argum does not write defaults into the help).
 | ~-k N~ | ~4~ | ~k for knn / seeded cages~ |
 | ~--graph KIND~ | ~seeded~ | ~Bond graph for cages: cutoff \| knn \| knn-union \| seeded~ |
 | ~--complete~ | off | Seeded cages: fill the last vertex of six-rings whose other vertices carry a label (ring completion) |
+| ~--signature SPEC~ | | ~cages: ring-size census (4:6,6:8) or a named table entry (sodalite\vert{}alpha\vert{}512\vert{}51262\vert{}hc\vert{}ddc)~ |
+| ~--guest-types T,U~ | | ~cages --signature: LAMMPS types of guests (methane, THF, ions) placed in the found cages by their periodic centroids~ |
+| ~--guest-radius R~ | ~4.0~ | ~cages --signature: a guest belongs to the nearest cage centre within R~ |
+| ~--hops N~ | ~2~ | ~fingerprint: bonds from the centre in each local key~ |
+| ~--colour-types~ | off | ~fingerprint: colour vertices by LAMMPS type, so species never match across types~ |
+| ~--library FILE~ | | ~fingerprint: key library (from --emit-library) to name atoms by; several, comma separated, at different hop counts name each atom by the deepest that knows it~ |
+| ~--emit-library LABEL~ | | ~fingerprint: print the frame's distinct keys as library lines under LABEL instead of the summary~ |
+| ~--ion-types I,J~ | | ~ions: LAMMPS types read against the cage assignment~ |
+| ~--ion-cutoff ANGSTROM~ | ~--cutoff~ | ~ions: first water shell radius~ |
 | ~--htype I~ | ~1~ | ~Hydrogen atom type for hbonds~ |
 | ~--hdist ANGSTROM~ | water C++ default | ~Acceptor-H distance cutoff for hbonds~ |
 | ~--hangle DEG~ | water C++ default | ~O-O-H angle cutoff for hbonds (acceptor-centered)~ |
@@ -152,7 +167,8 @@ the host.
 
 ~--cutoff~ is in Angstrom. ~-k~ also applies to ~knn-union~ (the
 same ~k~ feeds ~nneigh::kNearestNeighbourList~). ~--graph~ is used
-only by ~cages~. ~--complete~ is used by ~cages~ and ~ions~: it
+by ~cages~ and ~fingerprint~; a fingerprint wants one graph, so
+~seeded~ (two graphs) falls back to ~cutoff~ there. ~--complete~ is used by ~cages~ and ~ions~: it
 passes ~true~ as the fifth argument of ~seededCageAffiliation~.
 
 * ~--type~
