@@ -34,6 +34,7 @@ test_sources = {
   'voronoi': 'test_voronoi.cpp',
   'structure_desc': 'test_structure_desc.cpp',
   'cage_affiliation': 'test_cage_affiliation.cpp',
+  'cage_enum': 'test_cage_enum.cpp',
   'gpu_residency': 'test_gpu_residency.cpp',
   'config': 'test_config.cpp',
   'site': 'test_site.cpp',
@@ -70,7 +71,7 @@ foreach name, src : test_sources
       build_rpath: '$ORIGIN/../src'),
     workdir: meson.project_source_root() / 'input',
     env: _test_env,
-    timeout: 120)
+    timeout: name == 'cage_enum' ? 300 : 120)
 endforeach
 
 # SIMD verification test (header-only, does not need libyodaLib)

@@ -7,6 +7,7 @@
 #include <bond.hpp>
 #include <bop.hpp>
 #include <cage_affiliation.hpp>
+#include <cage_enum.hpp>
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <generic.hpp>
@@ -774,8 +775,17 @@ int cmdChill(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
 }
 
 int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
-             const std::string &graphName, bool complete = false) {
+             const std::string &graphName, bool complete = false,
+             const std::string &signatureSpec = {}) {
   if (cloud.nop == 0) {
+    if (!signatureSpec.empty()) {
+      const auto sig = cage::Signature::parse(signatureSpec);
+      os << colorizer.heading("nop") << " 0 "
+         << colorizer.longOption("graph") << " " << graphName << " "
+         << colorizer.longOption("signature") << " " << sig.str()
+         << " cages 0 atoms 0\n";
+      return 0;
+    }
     os << colorizer.heading("nop") << " 0 "
        << colorizer.longOption("graph") << " " << graphName << " "
        << iceColor("hexagonal") << " 0 " << iceColor("cubic") << " 0 "
@@ -784,6 +794,39 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
   }
   const int typ = typeOf(cloud, typeI);
   const double cand = cutoff + 1.5;
+
+  if (!signatureSpec.empty()) {
+    const auto emit = [&](const std::vector<std::vector<int>> &idx) {
+      const auto sig = cage::Signature::parse(signatureSpec);
+      const int depth = std::max(sig.maxRingSize(), 3);
+      const auto rings = primitive::ringNetwork(idx, depth);
+      const auto found = cage::findBySignature(rings, sig);
+      std::set<int> atoms;
+      for (const auto &c : found) {
+        atoms.insert(c.vertices.begin(), c.vertices.end());
+      }
+      os << colorizer.heading("nop") << " " << cloud.nop << " "
+         << colorizer.longOption("graph") << " " << graphName << " "
+         << colorizer.longOption("signature") << " " << sig.str() << " cages "
+         << found.size() << " atoms " << atoms.size() << "\n";
+      return 0;
+    };
+    if (graphName == "seeded") {
+      auto graphs = nneigh::kNearestNeighbourPair(cloud, k, cand, typ);
+      auto idxU = nneigh::neighbourListByIndex(cloud, graphs.second);
+      return emit(idxU);
+    }
+    const auto graph = nneigh::bondGraphFromName(graphName);
+    std::vector<std::vector<int>> nList;
+    if (graph == nneigh::BondGraph::Cutoff) {
+      nList = nneigh::neighListO(cutoff, cloud, typ);
+    } else {
+      const bool mutual = graph == nneigh::BondGraph::KnnMutual;
+      nList = nneigh::kNearestNeighbourList(cloud, k, cand, typ, mutual);
+    }
+    auto idx = nneigh::neighbourListByIndex(cloud, nList);
+    return emit(idx);
+  }
 
   auto sixOf = [](const std::vector<std::vector<int>> &rings) {
     std::vector<std::vector<int>> six;
@@ -919,6 +962,7 @@ int main(int argc, char *argv[]) {
   std::string siteSpec;
   bool ionsFlag = false;
   bool completeFlag = false;
+  std::string signatureSpec;
   bool colourTypes = false;
   std::string libraryPath;
   std::string emitLabel;
@@ -1076,6 +1120,14 @@ int main(int argc, char *argv[]) {
                  .help("Seeded cages: fill the last vertex of six-rings whose "
                        "other vertices carry a label (ring completion)")
                  .handler([&]() { completeFlag = true; }));
+
+  parser.add(Option("--signature")
+                 .argName("SPEC")
+                 .help("cages: ring-size census (4:6,6:8) or a named table "
+                       "entry (sodalite|alpha|512|51262|hc|ddc)")
+                 .handler([&](std::string_view value) {
+                   signatureSpec = std::string(value);
+                 }));
 
   parser.add(Option("--colour-types")
                  .help("fingerprint: colour vertices by LAMMPS type, so species "
@@ -1345,7 +1397,8 @@ int main(int argc, char *argv[]) {
     }
     if (cmd == "cages") {
       try {
-        return cmdCages(os, cloud, cutoff, typeI, k, graph, completeFlag);
+        return cmdCages(os, cloud, cutoff, typeI, k, graph, completeFlag,
+                        signatureSpec);
       } catch (const std::exception &e) {
         os << colorizer.error(e.what()) << "\n";
         return 2;

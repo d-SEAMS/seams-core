@@ -14,10 +14,13 @@ double-diamond cages (DDC), and mixed rings sit on the ice cluster.
 
 ```bash
 seams cages nucleation.lammpstrj --type 2
+seams cages nucleation.lammpstrj --signature hc --graph cutoff
+seams cages sodalite.lammpstrj --signature sodalite --graph cutoff
 ```
 
 Add `--graph knn` / `knn-union` / `seeded` when the bond graph is not
-the cutoff list.
+the cutoff list. `--signature` takes a ring-size census (`4:6,6:8`) or
+a named table entry (`sodalite|alpha|512|51262|hc|ddc`).
 
 ## Python
 

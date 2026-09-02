@@ -7,6 +7,7 @@ ydslib_sources = files(
   'bop.cpp',
   'bulkTUM.cpp',
   'cage_affiliation.cpp',
+  'cage_enum.cpp',
   'cluster.cpp',
   'franzblau.cpp',
   'gpu_residency.cpp',

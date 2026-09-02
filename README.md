@@ -149,6 +149,7 @@ cachix use dseams
 seams read input/traj/exampleTraj.lammpstrj
 seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5
 seams cages input/traj/exampleTraj.lammpstrj
+seams cages input/traj/exampleTraj.lammpstrj --signature sodalite --graph cutoff
 ```
 
 Lua scripts live in the [yodaStruct](https://github.com/d-SEAMS/yodaStruct)
@@ -182,6 +183,7 @@ nix build
 ./result/bin/seams --frame 1 --last 100 --jobs 8 --type 1 --graph seeded cages dump.lammpstrj
 ./result/bin/seams --graph cutoff cages dump.lammpstrj
 ./result/bin/seams --graph knn cages dump.lammpstrj
+./result/bin/seams --graph cutoff cages dump.lammpstrj --signature 4:6,6:8
 ```
 
 To run the sample inputs, stay in the repository root so `input/` is a

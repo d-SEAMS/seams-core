@@ -14,6 +14,9 @@
 
 #ifndef SEAMS_CAGE_H_
 #define SEAMS_CAGE_H_
+#include <map>
+#include <string>
+#include <string_view>
 #include <vector>
 
 /** @file cage.hpp
@@ -29,7 +32,10 @@
 /** @brief Functions for topological network criteria cage types.
  *         This namespace contains structs and enums for cage types
  *
- * Type definitions for atoms, rings and cages which are DDCs and HCs.
+ * Type definitions for atoms, rings and cages. HexC and DoubleDiaC are
+ * the TUM ice cages. A Signature names any polyhedron by its ring-size
+ * census (sodalite is {4:6, 6:8}); the enumerator in cage_enum.hpp
+ * grows face-sharing ring sets that match that census.
  *
  * ### Changelog ###
  *
@@ -52,6 +58,24 @@ namespace cage {
  * The type for a double-diamond cage
  */
 enum class cageType { HexC, DoubleDiaC };
+
+/** Ring-size census of a polyhedral cage: size -> number of faces.
+ *
+ *  Parse a comma list (`4:6,6:8`) or a named table entry
+ *  (`sodalite`, `alpha`, `512`, `51262`, `hc`, `ddc`). Counts of a
+ *  repeated size add. Every size and count must be positive.
+ */
+struct Signature {
+  std::map<int, int> counts;
+
+  static Signature parse(std::string_view spec);
+  std::string str() const;
+  int faceCount() const;
+  int maxRingSize() const;
+  bool containsSize(int size) const;
+  bool operator==(const Signature &other) const { return counts == other.counts; }
+  bool operator!=(const Signature &other) const { return !(*this == other); }
+};
 
 // Type of ice for a particular atom. Dummy means that the atom is unclassified
 // and is most probably water
