@@ -60,13 +60,14 @@ var searchData=
   ['core_20c_20api_57',['seams-core C++ API',['../index.html',1,'']]],
   ['count_58',['count',['../group__rdf.html#ga6a7fe8ab4c2603482500fc57a2b132b1',1,'rdf::PartialRdf']]],
   ['countallringsfromindex_59',['countAllRingsFromIndex',['../group__primitive.html#gac81b1dd4b67e8200de61e52c498c1b2f',1,'primitive']]],
-  ['createbondsfromcages_60',['createBondsFromCages',['../group__bond.html#ga41156a4dd14e84d45a1f6f22ba3a4b41',1,'bond']]],
-  ['createidmolidmap_61',['createIDMolIDmap',['../group__molSys.html#gad236d6a772972d62643eb5d135e3d50d',1,'molSys']]],
-  ['createmolidatomidmultimap_62',['createMolIDAtomIDMultiMap',['../group__molSys.html#gafb65f01cfbb0d80cfa7b311d68d9c109',1,'molSys']]],
-  ['createprismblock_63',['createPrismBlock',['../namespacepntToPnt.html#ab2aaa39d1afd5e2b9a2f23d26323d339',1,'pntToPnt']]],
-  ['crystalkind_64',['CrystalKind',['../namespacechill.html#ac13b1a10b6669044f75448ec1abe5122',1,'chill']]],
-  ['cubic_65',['cubic',['../group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a7ab93feeb36d98e584d10de2e2f68843',1,'molSys']]],
-  ['currentframe_66',['currentFrame',['../group__molSys.html#gafccb5a0daab40c3ccc83e4494f4176d7',1,'molSys::PointCloud']]],
-  ['cutoff_67',['Cutoff',['../group__nneigh.html#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084',1,'nneigh']]],
-  ['cutoff_68',['cutoff',['../structseams_1_1cfg_1_1Runtime.html#a6c22ad1c8eae1acfba7a026c38391863',1,'seams::cfg::Runtime']]]
+  ['counts_60',['counts',['../structtopo_1_1LibraryMatch.html#a07862b670245a0fad0f3914224ad7323',1,'topo::LibraryMatch']]],
+  ['createbondsfromcages_61',['createBondsFromCages',['../group__bond.html#ga41156a4dd14e84d45a1f6f22ba3a4b41',1,'bond']]],
+  ['createidmolidmap_62',['createIDMolIDmap',['../group__molSys.html#gad236d6a772972d62643eb5d135e3d50d',1,'molSys']]],
+  ['createmolidatomidmultimap_63',['createMolIDAtomIDMultiMap',['../group__molSys.html#gafb65f01cfbb0d80cfa7b311d68d9c109',1,'molSys']]],
+  ['createprismblock_64',['createPrismBlock',['../namespacepntToPnt.html#ab2aaa39d1afd5e2b9a2f23d26323d339',1,'pntToPnt']]],
+  ['crystalkind_65',['CrystalKind',['../namespacechill.html#ac13b1a10b6669044f75448ec1abe5122',1,'chill']]],
+  ['cubic_66',['cubic',['../group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a7ab93feeb36d98e584d10de2e2f68843',1,'molSys']]],
+  ['currentframe_67',['currentFrame',['../group__molSys.html#gafccb5a0daab40c3ccc83e4494f4176d7',1,'molSys::PointCloud']]],
+  ['cutoff_68',['Cutoff',['../group__nneigh.html#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084',1,'nneigh']]],
+  ['cutoff_69',['cutoff',['../structseams_1_1cfg_1_1Runtime.html#a6c22ad1c8eae1acfba7a026c38391863',1,'seams::cfg::Runtime']]]
 ];

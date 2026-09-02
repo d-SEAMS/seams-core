@@ -12,6 +12,6 @@ var searchData=
   ['hexagonal_9',['hexagonal',['../group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a1839c642bbb4a69963fcb822d209d5ac',1,'molSys']]],
   ['hexc_10',['HexC',['../group__cage.html#gga5787314f51b5927c213db48b81c21d95a642a6c140874b1f45791fed27e266477',1,'cage']]],
   ['hopneighbourhood_11',['hopNeighbourhood',['../namespacetopo.html#ac22724ca2d62a9ecac9d20b5ab0b7182',1,'topo']]],
-  ['hops_12',['hops',['../structtopo_1_1FrameFingerprint.html#a436b359c7a9bb9b2c849d0e37d13962d',1,'topo::FrameFingerprint']]],
+  ['hops_12',['hops',['../structtopo_1_1FrameFingerprint.html#a436b359c7a9bb9b2c849d0e37d13962d',1,'topo::FrameFingerprint::hops'],['../structtopo_1_1KeyLibrary.html#a25441f901b1852385ceb142544392c80',1,'topo::KeyLibrary::hops']]],
   ['hornabsorientation_13',['hornAbsOrientation',['../namespaceabsor.html#a09d62115f686492810352905250fb0ef',1,'absor']]]
 ];

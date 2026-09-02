@@ -59,6 +59,8 @@ var annotated_dup =
     ] ],
     [ "topo", "namespacetopo.html", [
       [ "LocalKey", "structtopo_1_1LocalKey.html", "structtopo_1_1LocalKey" ],
-      [ "FrameFingerprint", "structtopo_1_1FrameFingerprint.html", "structtopo_1_1FrameFingerprint" ]
+      [ "FrameFingerprint", "structtopo_1_1FrameFingerprint.html", "structtopo_1_1FrameFingerprint" ],
+      [ "KeyLibrary", "structtopo_1_1KeyLibrary.html", "structtopo_1_1KeyLibrary" ],
+      [ "LibraryMatch", "structtopo_1_1LibraryMatch.html", "structtopo_1_1LibraryMatch" ]
     ] ]
 ];

@@ -8,6 +8,8 @@ namespace topo
 	:hidden:
 
 	struct_topo_FrameFingerprint.rst
+	struct_topo_KeyLibrary.rst
+	struct_topo_LibraryMatch.rst
 	struct_topo_LocalKey.rst
 
 Overview
@@ -29,6 +31,8 @@ Overview
 	// structs
 
 	struct :ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>`;
+	struct :ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`;
+	struct :ref:`LibraryMatch<doxid-structtopo_1_1_library_match>`;
 	struct :ref:`LocalKey<doxid-structtopo_1_1_local_key>`;
 
 	// global functions
@@ -38,6 +42,10 @@ Overview
 	:ref:`LocalKey<doxid-structtopo_1_1_local_key>` :ref:`localKey<doxid-namespacetopo_1a4c926ab08f90e20ec25abcc63593821b>`(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int atom, int hops, const std::vector<int>& colours = {});
 	:ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>` :ref:`fingerprint<doxid-namespacetopo_1a31e36c2b000ef45e1e0370ceffcc7b07>`(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int hops = 2, int maxRingSize = 7, const std::vector<int>& colours = {});
 	std::string :ref:`hex<doxid-namespacetopo_1a704a6805e4842829fa83f16081405519>`(std::uint64_t value);
+	void :ref:`addToLibrary<doxid-namespacetopo_1ab7a77ab1002ce0af5dda5656f84ae369>`(:ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`& lib, const :ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>`& fp, const std::string& label);
+	std::string :ref:`writeLibrary<doxid-namespacetopo_1a57942af5bce01d27654ba8d544195fe0>`(const :ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`& lib);
+	:ref:`KeyLibrary<doxid-structtopo_1_1_key_library>` :target:`readLibrary<doxid-namespacetopo_1ad78791f54d32c853345d0cffe9dcfa0b>`(const std::string& text);
+	:ref:`LibraryMatch<doxid-structtopo_1_1_library_match>` :ref:`matchLibrary<doxid-namespacetopo_1a73c3376495bbd19d8f072ac21af98131>`(const :ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>`& fp, const :ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`& lib);
 
 	} // namespace topo
 .. _details-namespacetopo:
@@ -118,4 +126,36 @@ Keys of every atom, their histogram, the ring census up to ``maxRingSize``, and 
 	std::string hex(std::uint64_t value)
 
 Hex string of a 64-bit hash.
+
+.. index:: pair: function; addToLibrary
+.. _doxid-namespacetopo_1ab7a77ab1002ce0af5dda5656f84ae369:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void addToLibrary(:ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`& lib, const :ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>`& fp, const std::string& label)
+
+Add every distinct key of ``fp`` under ``label``; a key already present under another label becomes "ambiguous".
+
+.. index:: pair: function; writeLibrary
+.. _doxid-namespacetopo_1a57942af5bce01d27654ba8d544195fe0:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::string writeLibrary(const :ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`& lib)
+
+Text form: a header line ``# method M hops H``, then ``key label`` lines.
+
+.. index:: pair: function; matchLibrary
+.. _doxid-namespacetopo_1a73c3376495bbd19d8f072ac21af98131:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`LibraryMatch<doxid-structtopo_1_1_library_match>` matchLibrary(const :ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>`& fp, const :ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`& lib)
+
+Look every atom key of ``fp`` up in ``lib``.
+
+Throws std::invalid_argument when the methods or hop counts differ.
 

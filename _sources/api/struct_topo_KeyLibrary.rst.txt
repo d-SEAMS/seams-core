@@ -1,0 +1,59 @@
+.. index:: pair: struct; topo::KeyLibrary
+.. _doxid-structtopo_1_1_key_library:
+
+struct topo::KeyLibrary
+=======================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+A dictionary from local keys to labels: the keys of reference structures (a polymorph library), so any molecule whose rooted neighbourhood matches a reference gets that reference's name. :ref:`More...<details-structtopo_1_1_key_library>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <topo_fingerprint.hpp>
+	
+	struct KeyLibrary {
+		// fields
+	
+		std::string :ref:`method<doxid-structtopo_1_1_key_library_1a47594d7eb9d0e045c8dd5c4076e7d83d>`;
+		int :target:`hops<doxid-structtopo_1_1_key_library_1a25441f901b1852385ceb142544392c80>` = 0;
+		std::map<std::string, std::string> :ref:`labelOf<doxid-structtopo_1_1_key_library_1a2d23aa2fd8634ff1c0479ba2cc5bd101>`;
+	};
+.. _details-structtopo_1_1_key_library:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+A dictionary from local keys to labels: the keys of reference structures (a polymorph library), so any molecule whose rooted neighbourhood matches a reference gets that reference's name.
+
+Keys are only comparable when they come from the same method, hop count and colouring, which the header records.
+
+Fields
+------
+
+.. index:: pair: variable; method
+.. _doxid-structtopo_1_1_key_library_1a47594d7eb9d0e045c8dd5c4076e7d83d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::string method
+
+"nauty" or "wl"
+
+.. index:: pair: variable; labelOf
+.. _doxid-structtopo_1_1_key_library_1a2d23aa2fd8634ff1c0479ba2cc5bd101:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::map<std::string, std::string> labelOf
+
+key -> label
+

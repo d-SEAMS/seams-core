@@ -1,0 +1,57 @@
+.. index:: pair: struct; topo::LibraryMatch
+.. _doxid-structtopo_1_1_library_match:
+
+struct topo::LibraryMatch
+=========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <topo_fingerprint.hpp>
+	
+	struct LibraryMatch {
+		// fields
+	
+		std::vector<std::string> :ref:`labels<doxid-structtopo_1_1_library_match_1a98c3689a908e2cdd1c3966c1cd3a2aeb>`;
+		std::map<std::string, int> :ref:`counts<doxid-structtopo_1_1_library_match_1a07862b670245a0fad0f3914224ad7323>`;
+		int :target:`matched<doxid-structtopo_1_1_library_match_1a94c255516e3f25321c5a95fc08ed1b6c>` = 0;
+	};
+.. _details-structtopo_1_1_library_match:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; labels
+.. _doxid-structtopo_1_1_library_match_1a98c3689a908e2cdd1c3966c1cd3a2aeb:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::string> labels
+
+per atom; "" when no key matches
+
+.. index:: pair: variable; counts
+.. _doxid-structtopo_1_1_library_match_1a07862b670245a0fad0f3914224ad7323:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::map<std::string, int> counts
+
+label -> atoms, "" for unmatched
+

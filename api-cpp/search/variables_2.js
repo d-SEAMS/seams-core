@@ -11,6 +11,7 @@ var searchData=
   ['computems_8',['computeMs',['../structgpu_1_1BatchResult.html#a7db619777f01296286cb224c04ff6ba7',1,'gpu::BatchResult']]],
   ['coordinationnumber_9',['coordinationNumber',['../group__chill.html#ga85100f5928056281b3c93e4dca7a1d5b',1,'chill::BondClassifier']]],
   ['count_10',['count',['../group__rdf.html#ga6a7fe8ab4c2603482500fc57a2b132b1',1,'rdf::PartialRdf']]],
-  ['currentframe_11',['currentFrame',['../group__molSys.html#gafccb5a0daab40c3ccc83e4494f4176d7',1,'molSys::PointCloud']]],
-  ['cutoff_12',['cutoff',['../structseams_1_1cfg_1_1Runtime.html#a6c22ad1c8eae1acfba7a026c38391863',1,'seams::cfg::Runtime']]]
+  ['counts_11',['counts',['../structtopo_1_1LibraryMatch.html#a07862b670245a0fad0f3914224ad7323',1,'topo::LibraryMatch']]],
+  ['currentframe_12',['currentFrame',['../group__molSys.html#gafccb5a0daab40c3ccc83e4494f4176d7',1,'molSys::PointCloud']]],
+  ['cutoff_13',['cutoff',['../structseams_1_1cfg_1_1Runtime.html#a6c22ad1c8eae1acfba7a026c38391863',1,'seams::cfg::Runtime']]]
 ];

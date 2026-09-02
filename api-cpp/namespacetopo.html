@@ -242,6 +242,9 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacetopo.
 Classes</h2></td></tr>
 <tr class="memitem:LocalKey" id="r_LocalKey"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structtopo_1_1LocalKey.html">LocalKey</a></td></tr>
 <tr class="memitem:FrameFingerprint" id="r_FrameFingerprint"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a></td></tr>
+<tr class="memitem:KeyLibrary" id="r_KeyLibrary"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A dictionary from local keys to labels: the keys of reference structures (a polymorph library), so any molecule whose rooted neighbourhood matches a reference gets that reference's name.  <a href="structtopo_1_1KeyLibrary.html#details">More...</a><br /></td></tr>
+<tr class="memitem:LibraryMatch" id="r_LibraryMatch"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structtopo_1_1LibraryMatch.html">LibraryMatch</a></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-typedef-members" class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
@@ -260,6 +263,13 @@ Functions</h2></td></tr>
 <tr class="memdesc:a31e36c2b000ef45e1e0370ceffcc7b07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keys of every atom, their histogram, the ring census up to <span class="tt">maxRingSize</span>, and the frame key.  <br /></td></tr>
 <tr class="memitem:a704a6805e4842829fa83f16081405519" id="r_a704a6805e4842829fa83f16081405519"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#a704a6805e4842829fa83f16081405519">hex</a> (std::uint64_t value)</td></tr>
 <tr class="memdesc:a704a6805e4842829fa83f16081405519"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hex string of a 64-bit hash.  <br /></td></tr>
+<tr class="memitem:ab7a77ab1002ce0af5dda5656f84ae369" id="r_ab7a77ab1002ce0af5dda5656f84ae369"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ab7a77ab1002ce0af5dda5656f84ae369">addToLibrary</a> (<a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &amp;lib, const <a class="el" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> &amp;fp, const std::string &amp;label)</td></tr>
+<tr class="memdesc:ab7a77ab1002ce0af5dda5656f84ae369"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add every distinct key of <span class="tt">fp</span> under <span class="tt">label</span>; a key already present under another label becomes "ambiguous".  <br /></td></tr>
+<tr class="memitem:a57942af5bce01d27654ba8d544195fe0" id="r_a57942af5bce01d27654ba8d544195fe0"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#a57942af5bce01d27654ba8d544195fe0">writeLibrary</a> (const <a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &amp;lib)</td></tr>
+<tr class="memdesc:a57942af5bce01d27654ba8d544195fe0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Text form: a header line <span class="tt"># method M hops H</span>, then <span class="tt">key label</span> lines.  <br /></td></tr>
+<tr class="memitem:ad78791f54d32c853345d0cffe9dcfa0b" id="r_ad78791f54d32c853345d0cffe9dcfa0b"><td class="memItemLeft"><a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a>&#160;</td><td class="memItemRight"><a class="el" href="#ad78791f54d32c853345d0cffe9dcfa0b">readLibrary</a> (const std::string &amp;text)</td></tr>
+<tr class="memitem:a73c3376495bbd19d8f072ac21af98131" id="r_a73c3376495bbd19d8f072ac21af98131"><td class="memItemLeft"><a class="el" href="structtopo_1_1LibraryMatch.html">LibraryMatch</a>&#160;</td><td class="memItemRight"><a class="el" href="#a73c3376495bbd19d8f072ac21af98131">matchLibrary</a> (const <a class="el" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> &amp;fp, const <a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &amp;lib)</td></tr>
+<tr class="memdesc:a73c3376495bbd19d8f072ac21af98131"><td class="mdescLeft">&#160;</td><td class="mdescRight">Look every atom key of <span class="tt">fp</span> up in <span class="tt">lib</span>.  <br /></td></tr>
 </table>
 <a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Typedef Documentation</h2>
 <a id="a770ae81afc5c8c715470d90d4e3c8e6e" name="a770ae81afc5c8c715470d90d4e3c8e6e"></a>
@@ -281,6 +291,34 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="ab7a77ab1002ce0af5dda5656f84ae369" name="ab7a77ab1002ce0af5dda5656f84ae369"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab7a77ab1002ce0af5dda5656f84ae369">&#9670;&#160;</a></span>addToLibrary()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void topo::addToLibrary </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>lib</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>fp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>label</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Add every distinct key of <span class="tt">fp</span> under <span class="tt">label</span>; a key already present under another label becomes "ambiguous". </p>
+
+</div>
+</div>
 <a id="a31e36c2b000ef45e1e0370ceffcc7b07" name="a31e36c2b000ef45e1e0370ceffcc7b07"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a31e36c2b000ef45e1e0370ceffcc7b07">&#9670;&#160;</a></span>fingerprint()</h2>
 
@@ -396,6 +434,47 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a73c3376495bbd19d8f072ac21af98131" name="a73c3376495bbd19d8f072ac21af98131"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a73c3376495bbd19d8f072ac21af98131">&#9670;&#160;</a></span>matchLibrary()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structtopo_1_1LibraryMatch.html">LibraryMatch</a> topo::matchLibrary </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>fp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>lib</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Look every atom key of <span class="tt">fp</span> up in <span class="tt">lib</span>. </p>
+<p>Throws std::invalid_argument when the methods or hop counts differ. </p>
+
+</div>
+</div>
+<a id="ad78791f54d32c853345d0cffe9dcfa0b" name="ad78791f54d32c853345d0cffe9dcfa0b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad78791f54d32c853345d0cffe9dcfa0b">&#9670;&#160;</a></span>readLibrary()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> topo::readLibrary </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>text</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a3c1e2aed1633a79c2b9ac530d63c28a6" name="a3c1e2aed1633a79c2b9ac530d63c28a6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3c1e2aed1633a79c2b9ac530d63c28a6">&#9670;&#160;</a></span>wlHash()</h2>
 
@@ -427,6 +506,25 @@ Functions</h2></td></tr>
 
 <p>Weisfeiler-Lehman refinement hash of a graph given by local adjacency lists; <span class="tt">root</span> (or -1) starts in its own colour; <span class="tt">colours</span> (empty or one integer per vertex, such as the atom type) seeds the initial colours. </p>
 <p><span class="tt">rounds</span> refinements. </p>
+
+</div>
+</div>
+<a id="a57942af5bce01d27654ba8d544195fe0" name="a57942af5bce01d27654ba8d544195fe0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57942af5bce01d27654ba8d544195fe0">&#9670;&#160;</a></span>writeLibrary()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string topo::writeLibrary </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>lib</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Text form: a header line <span class="tt"># method M hops H</span>, then <span class="tt">key label</span> lines. </p>
 
 </div>
 </div>
