@@ -428,3 +428,38 @@ TEST_CASE("seeded affiliation: structural zero, consistency, recovery",
       ring::seededCageAffiliation(sixCut, cut, six, idx);
   REQUIRE(seeded.ddc == plainDdcAtoms);
 }
+
+TEST_CASE("ring-adjacent completion: identity on a crystal, empty on nothing",
+          "[cage_affiliation]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  auto idx = nneigh::neighbourListByIndex(yCloud, nList);
+  auto six = sixMembered(primitive::ringNetwork(idx, 7));
+  REQUIRE(six.size() == 8192);
+
+  // Every atom of the perfect crystal is already accepted; completion is
+  // the identity there
+  const auto plain = ring::seededCageAffiliation(six, idx, six, idx, false);
+  const auto completed = ring::seededCageAffiliation(six, idx, six, idx, true);
+  REQUIRE(plain.hc == completed.hc);
+  REQUIRE(plain.ddc == completed.ddc);
+  REQUIRE(std::count(completed.ddc.begin(), completed.ddc.end(), true) ==
+          yCloud.nop);
+
+  // Remove one atom's labels by hand: the completion restores them from the
+  // rings it shares edges with
+  ring::SeededAtomLabels holed = plain;
+  holed.ddc[137] = false;
+  const auto filled = ring::ringAdjacentCompletion(holed, six);
+  REQUIRE(filled.ddc[137]);
+  REQUIRE(filled.ddc == plain.ddc);
+
+  // With no accepted ring there is nothing to extend: structural zero
+  ring::SeededAtomLabels empty;
+  empty.hc.assign(yCloud.nop, false);
+  empty.ddc.assign(yCloud.nop, false);
+  const auto still = ring::ringAdjacentCompletion(empty, six);
+  REQUIRE(std::count(still.hc.begin(), still.hc.end(), true) == 0);
+  REQUIRE(std::count(still.ddc.begin(), still.ddc.end(), true) == 0);
+}

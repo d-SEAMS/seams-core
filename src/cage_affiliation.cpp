@@ -503,7 +503,8 @@ ring::SeededAtomLabels ring::seededCageAffiliation(
     const std::vector<std::vector<int>> &strictRings,
     const std::vector<std::vector<int>> &strictNList,
     const std::vector<std::vector<int>> &permissiveRings,
-    const std::vector<std::vector<int>> &permissiveNList) {
+    const std::vector<std::vector<int>> &permissiveNList,
+    bool ringAdjacentCompletion) {
   const int nAtoms = static_cast<int>(permissiveNList.size());
   SeededAtomLabels out;
   out.hc.assign(nAtoms, false);
@@ -584,5 +585,77 @@ ring::SeededAtomLabels ring::seededCageAffiliation(
       out.ddc[a] = ddcS[a] || ddcP[a];
     }
   }
+  if (ringAdjacentCompletion) {
+    return ring::ringAdjacentCompletion(out, permissiveRings);
+  }
+  return out;
+}
+
+ring::SeededAtomLabels
+ring::ringAdjacentCompletion(const SeededAtomLabels &labels,
+                             const std::vector<std::vector<int>> &rings) {
+  SeededAtomLabels out = labels;
+  const int nAtoms = static_cast<int>(out.hc.size());
+  const int nRings = static_cast<int>(rings.size());
+  if (nAtoms == 0 || nRings == 0) {
+    return out;
+  }
+  // Edge -> rings sharing it
+  std::unordered_map<long long, std::vector<int>> ringsOfEdge;
+  auto edgeKey = [](int a, int b) {
+    if (a > b) {
+      std::swap(a, b);
+    }
+    return (static_cast<long long>(a) << 32) | static_cast<unsigned>(b);
+  };
+  for (int r = 0; r < nRings; r++) {
+    const auto &ring = rings[r];
+    const int k = static_cast<int>(ring.size());
+    for (int i = 0; i < k; i++) {
+      ringsOfEdge[edgeKey(ring[i], ring[(i + 1) % k])].push_back(r);
+    }
+  }
+  auto complete = [&](std::vector<bool> &flag) {
+    std::vector<char> accepted(nRings, 0);
+    auto allFlagged = [&](int r) {
+      for (const int a : rings[r]) {
+        if (a < 0 || a >= nAtoms || !flag[a]) {
+          return false;
+        }
+      }
+      return true;
+    };
+    std::vector<int> frontier;
+    for (int r = 0; r < nRings; r++) {
+      if (allFlagged(r)) {
+        accepted[r] = 1;
+        frontier.push_back(r);
+      }
+    }
+    // A newly accepted ring can extend the network further, so the
+    // frontier grows until no ring shares an edge with an accepted ring
+    while (!frontier.empty()) {
+      const int r = frontier.back();
+      frontier.pop_back();
+      const auto &ring = rings[r];
+      const int k = static_cast<int>(ring.size());
+      for (int i = 0; i < k; i++) {
+        for (const int s : ringsOfEdge[edgeKey(ring[i], ring[(i + 1) % k])]) {
+          if (accepted[s]) {
+            continue;
+          }
+          for (const int a : rings[s]) {
+            if (a >= 0 && a < nAtoms) {
+              flag[a] = true;
+            }
+          }
+          accepted[s] = 1;
+          frontier.push_back(s);
+        }
+      }
+    }
+  };
+  complete(out.hc);
+  complete(out.ddc);
   return out;
 }
