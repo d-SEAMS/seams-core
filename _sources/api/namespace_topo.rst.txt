@@ -34,9 +34,9 @@ Overview
 	// global functions
 
 	std::vector<int> :ref:`hopNeighbourhood<doxid-namespacetopo_1ac22724ca2d62a9ecac9d20b5ab0b7182>`(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int atom, int hops);
-	std::uint64_t :ref:`wlHash<doxid-namespacetopo_1a97e0968ef146c556bbb00afed7651cef>`(const std::vector<std::vector<int>>& adjacency, int root, int rounds);
-	:ref:`LocalKey<doxid-structtopo_1_1_local_key>` :ref:`localKey<doxid-namespacetopo_1a8ffe7b63847075b2586677366f1d4393>`(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int atom, int hops);
-	:ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>` :ref:`fingerprint<doxid-namespacetopo_1a4f36620e788fd0170d9b2df1b99f8f98>`(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int hops = 2, int maxRingSize = 7);
+	std::uint64_t :ref:`wlHash<doxid-namespacetopo_1a3c1e2aed1633a79c2b9ac530d63c28a6>`(const std::vector<std::vector<int>>& adjacency, int root, int rounds, const std::vector<int>& colours = {});
+	:ref:`LocalKey<doxid-structtopo_1_1_local_key>` :ref:`localKey<doxid-namespacetopo_1a4c926ab08f90e20ec25abcc63593821b>`(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int atom, int hops, const std::vector<int>& colours = {});
+	:ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>` :ref:`fingerprint<doxid-namespacetopo_1a31e36c2b000ef45e1e0370ceffcc7b07>`(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int hops = 2, int maxRingSize = 7, const std::vector<int>& colours = {});
 	std::string :ref:`hex<doxid-namespacetopo_1a704a6805e4842829fa83f16081405519>`(std::uint64_t value);
 
 	} // namespace topo
@@ -74,36 +74,40 @@ Global Functions
 Atoms within ``hops`` bonds of ``atom``, the atom itself first, then in breadth-first order.
 
 .. index:: pair: function; wlHash
-.. _doxid-namespacetopo_1a97e0968ef146c556bbb00afed7651cef:
+.. _doxid-namespacetopo_1a3c1e2aed1633a79c2b9ac530d63c28a6:
 
 .. ref-code-block:: cpp
 	:class: doxyrest-title-code-block
 
-	std::uint64_t wlHash(const std::vector<std::vector<int>>& adjacency, int root, int rounds)
+	std::uint64_t wlHash(const std::vector<std::vector<int>>& adjacency, int root, int rounds, const std::vector<int>& colours = {})
 
-Weisfeiler-Lehman refinement hash of a graph given by local adjacency lists; ``root`` (or -1) starts in its own colour.
+Weisfeiler-Lehman refinement hash of a graph given by local adjacency lists; ``root`` (or -1) starts in its own colour; ``colours`` (empty or one integer per vertex, such as the atom type) seeds the initial colours.
 
 ``rounds`` refinements.
 
 .. index:: pair: function; localKey
-.. _doxid-namespacetopo_1a8ffe7b63847075b2586677366f1d4393:
+.. _doxid-namespacetopo_1a4c926ab08f90e20ec25abcc63593821b:
 
 .. ref-code-block:: cpp
 	:class: doxyrest-title-code-block
 
-	:ref:`LocalKey<doxid-structtopo_1_1_local_key>` localKey(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int atom, int hops)
+	:ref:`LocalKey<doxid-structtopo_1_1_local_key>` localKey(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int atom, int hops, const std::vector<int>& colours = {})
 
 Key of the rooted neighbourhood of ``atom``.
 
+``colours`` is empty or one class per row (atom type, species); coloured vertices never match vertices of another colour.
+
 .. index:: pair: function; fingerprint
-.. _doxid-namespacetopo_1a4f36620e788fd0170d9b2df1b99f8f98:
+.. _doxid-namespacetopo_1a31e36c2b000ef45e1e0370ceffcc7b07:
 
 .. ref-code-block:: cpp
 	:class: doxyrest-title-code-block
 
-	:ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>` fingerprint(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int hops = 2, int maxRingSize = 7)
+	:ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>` fingerprint(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int hops = 2, int maxRingSize = 7, const std::vector<int>& colours = {})
 
 Keys of every atom, their histogram, the ring census up to ``maxRingSize``, and the frame key.
+
+``colours`` as in localKey.
 
 .. index:: pair: function; hex
 .. _doxid-namespacetopo_1a704a6805e4842829fa83f16081405519:

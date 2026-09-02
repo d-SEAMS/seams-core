@@ -30,6 +30,7 @@ Functions for topological network criteria cage types. :ref:`More...<details-nam
 	bool :target:`isHexagonalPrism<doxid-namespacecage_1a2b191b4c90fc095838928727d7c11b3e>`(const std::vector<std::vector<int>>& rings);
 	bool :target:`sameCertificate<doxid-namespacecage_1ae431d00a43e0a0e99da9ff62d23a6e22>`(const std::vector<std::vector<int>>& a, const std::vector<std::vector<int>>& b);
 	std::string :target:`canonicalCertificateRooted<doxid-namespacecage_1a1ff12e6c4c9298050913b02758546c6f>`(int n, const std::vector<std::pair<int, int>>& edges, int root);
+	std::string :target:`canonicalCertificateColoured<doxid-namespacecage_1ad4e5b234472ede0d6227ef6aefceb348>`(int n, const std::vector<std::pair<int, int>>& edges, const std::vector<int>& colours, int root);
 
 	} // namespace cage
 .. _details-namespacecage:

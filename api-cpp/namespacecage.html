@@ -269,6 +269,7 @@ Functions</h2></td></tr>
 <tr class="memitem:a2b191b4c90fc095838928727d7c11b3e" id="r_a2b191b4c90fc095838928727d7c11b3e"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a2b191b4c90fc095838928727d7c11b3e">isHexagonalPrism</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings)</td></tr>
 <tr class="memitem:ae431d00a43e0a0e99da9ff62d23a6e22" id="r_ae431d00a43e0a0e99da9ff62d23a6e22"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ae431d00a43e0a0e99da9ff62d23a6e22">sameCertificate</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;a, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;b)</td></tr>
 <tr class="memitem:a1ff12e6c4c9298050913b02758546c6f" id="r_a1ff12e6c4c9298050913b02758546c6f"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#a1ff12e6c4c9298050913b02758546c6f">canonicalCertificateRooted</a> (int n, const std::vector&lt; std::pair&lt; int, int &gt; &gt; &amp;edges, int root)</td></tr>
+<tr class="memitem:ad4e5b234472ede0d6227ef6aefceb348" id="r_ad4e5b234472ede0d6227ef6aefceb348"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#ad4e5b234472ede0d6227ef6aefceb348">canonicalCertificateColoured</a> (int n, const std::vector&lt; std::pair&lt; int, int &gt; &gt; &amp;edges, const std::vector&lt; int &gt; &amp;colours, int root)</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Functions for topological network criteria cage types. </p>
@@ -292,6 +293,37 @@ Changelog</h3>
           <td>(</td>
           <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span></td><td>)</td>
           <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad4e5b234472ede0d6227ef6aefceb348" name="ad4e5b234472ede0d6227ef6aefceb348"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4e5b234472ede0d6227ef6aefceb348">&#9670;&#160;</a></span>canonicalCertificateColoured()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string cage::canonicalCertificateColoured </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::pair&lt; int, int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>edges</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>colours</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>root</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">

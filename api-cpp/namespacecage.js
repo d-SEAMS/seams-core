@@ -14,6 +14,7 @@ var namespacecage =
       [ "mixed2", "group__cage.html#ggaaac41828990e32b9d6e7db4426b61529a46e9b291e68a6be0227ba8520aed1f55", null ]
     ] ],
     [ "canonicalCertificate", "namespacecage.html#a9d73050e1b7374d21a15c61e21e39ecb", null ],
+    [ "canonicalCertificateColoured", "namespacecage.html#ad4e5b234472ede0d6227ef6aefceb348", null ],
     [ "canonicalCertificateRooted", "namespacecage.html#a1ff12e6c4c9298050913b02758546c6f", null ],
     [ "isHexagonalPrism", "namespacecage.html#a2b191b4c90fc095838928727d7c11b3e", null ],
     [ "nautyAvailable", "namespacecage.html#af3048384a261c7ffc3487cb54af20cb1", null ],

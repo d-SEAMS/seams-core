@@ -1,5 +1,6 @@
 var NAVTREEINDEX3 =
 {
+"structring_1_1CageAffiliation.html":[2,0,16,1],
 "structring_1_1CageAffiliation.html":[4,0,9,1],
 "structring_1_1CageAffiliation.html#a62e4f552cead2f3be6c2de3cc23e4952":[2,0,16,1,0],
 "structring_1_1CageAffiliation.html#a62e4f552cead2f3be6c2de3cc23e4952":[4,0,9,1,0],

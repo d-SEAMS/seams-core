@@ -57,7 +57,7 @@ var NAVTREEINDEX =
 [
 "absOrientation_8hpp.html",
 "group__rdf.html#ga2a54eea649f6c234be50494cec2cee82",
-"namespaceseams_1_1steinhardt.html#aef637bd4e52ad99c21c04c2530d464f9",
+"namespaceseams_1_1steinhardt.html#adf41cecc177768d88e4c00b88bef06d6",
 "structring_1_1CageAffiliation.html"
 ];
 
