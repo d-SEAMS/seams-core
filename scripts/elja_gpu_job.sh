@@ -46,11 +46,18 @@ BUILD=$OUT/build
 mkdir -p "$OUT"
 cd "$ROOT"
 SYS_LOCALRC=$NVHPC_ROOT/compilers/bin/localrc
+GCC_LIB=$GCCCORE/lib/gcc/x86_64-pc-linux-gnu/13.3.0
 if [[ -f $SYS_LOCALRC ]]; then
-  sed "s|set GCCDIR=/usr/lib/gcc/x86_64-redhat-linux/8;|set GCCDIR=$GCCCORE/lib/gcc/x86_64-pc-linux-gnu/13.3.0;|" \
+  sed \
+    -e "s|set GCCDIR=/usr/lib/gcc/x86_64-redhat-linux/8;|set GCCDIR=$GCC_LIB;|" \
+    -e "s|set G77DIR=/usr/lib/gcc/x86_64-redhat-linux/8/;|set G77DIR=$GCC_LIB/;|" \
+    -e "s|set GCCINC=.*|set GCCINC= $GCC_LIB/include $INC /usr/include;|" \
+    -e "s|set GPPDIR=.*|set GPPDIR= $GCCCORE/include/c++/13.3.0 $GCCCORE/include/c++/13.3.0/x86_64-pc-linux-gnu $GCC_LIB/include $INC /usr/include;|" \
     "$SYS_LOCALRC" > "$OUT/nvc.localrc"
   export NVLOCALRC=$OUT/nvc.localrc
 fi
+export CFLAGS="${CFLAGS:-} -I${GCC_LIB}/include"
+export CXXFLAGS="${CXXFLAGS:-} -I${GCC_LIB}/include"
 
 # GPU nodes have no glibc-devel. Login-node C runtime objects live
 # in elja-crt/ (copied before submit). gcc and clang find crt1.o
