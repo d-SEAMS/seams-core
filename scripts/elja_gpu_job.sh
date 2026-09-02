@@ -54,6 +54,11 @@ if [[ ! -f $CRT/crt1.o || ! -f $CRT/crti.o || ! -f $CRT/crtn.o ]]; then
   exit 1
 fi
 export LIBRARY_PATH=$CRT${LIBRARY_PATH:+:$LIBRARY_PATH}
+# clang's driver does not search LIBRARY_PATH for startfiles.
+# -B is the prefix both gcc and clang use for crt1.o / Scrt1.o.
+export CFLAGS="${CFLAGS:-} -B${CRT}"
+export CXXFLAGS="${CXXFLAGS:-} -B${CRT}"
+export LDFLAGS="${LDFLAGS:-} -B${CRT}"
 
 export SEAMS_OFFLOAD=${SEAMS_OFFLOAD:-1}
 

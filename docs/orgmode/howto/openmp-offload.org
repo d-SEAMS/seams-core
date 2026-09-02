@@ -31,6 +31,9 @@ export PYTHONPATH=$EB/Meson/1.4.0-GCCcore-13.3.0/lib/python3.12/site-packages
 # GPU nodes lack glibc-devel. Copy crt1.o crti.o crtn.o Scrt1.o
 # from a login /usr/lib64 into elja-crt/ before sbatch.
 export LIBRARY_PATH=$PWD/elja-crt
+export CFLAGS="-B$PWD/elja-crt"
+export CXXFLAGS="-B$PWD/elja-crt"
+export LDFLAGS="-B$PWD/elja-crt"
 
 export CC=$EB/GCCcore/13.3.0/bin/gcc
 export CXX=nvc++
