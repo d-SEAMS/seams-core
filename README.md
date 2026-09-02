@@ -150,7 +150,19 @@ seams read input/traj/exampleTraj.lammpstrj
 seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5
 seams cages input/traj/exampleTraj.lammpstrj
 seams cages input/traj/exampleTraj.lammpstrj --signature sodalite --graph cutoff
+seams cages input/traj/genice_sI.lammpstrj --graph cutoff --signature 512 --guest-types 2
+seams fingerprint input/traj/genice_sI.lammpstrj --graph knn --hops 3 --emit-library sI > si.keys
+seams fingerprint input/traj/genice_sII.lammpstrj --graph knn --hops 3 --library si.keys
+seams ions brine.lammpstrj --ion-types 3,4 --complete
 ```
+
+`fingerprint` keys every molecule's rooted bonded neighbourhood (nauty
+certificate when linked, Weisfeiler-Leman hash otherwise), builds key
+libraries from reference lattices and names molecules by them, several
+libraries at different hop counts falling back to the deepest that knows
+a molecule; `ions` classes ions by their first water shell against the
+seeded cage assignment; `cages --signature` enumerates polyhedra by
+ring-size census and, with `--guest-types`, places guests in them.
 
 Lua scripts live in the [yodaStruct](https://github.com/d-SEAMS/yodaStruct)
 checkout (`require("dseams")`). Paths in those examples are relative to
