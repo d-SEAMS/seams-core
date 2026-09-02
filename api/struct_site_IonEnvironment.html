@@ -323,10 +323,11 @@ data-aria-dark="Switch to auto color mode">
 <span data-line="7">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-structsite-1-1-ion-environment-1a277b78dca0eb1dddf9a9ff7698a60706"><span class="std std-ref">shell</span></a><span class="p">;</span></span>
 <span data-line="8">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-structsite-1-1-ion-environment-1ab8c73ad7e47ebef7f210b178707e735d"><span class="std std-ref">iceFraction</span></a><span class="p">;</span></span>
 <span data-line="9">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="enum_site_IonState.html#doxid-namespacesite-1a7cdb003964d40a8454361db4b34b4791"><span class="std std-ref">IonState</span></a><span class="o">&gt;</span> <span class="doxyrest-code-target target" id="doxid-structsite_1_1_ion_environment_1acc7b909a25297a34f700ba58a835dcc3"></span><span class="n">state</span><span class="p">;</span></span>
-<span data-line="10">    <span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-structsite_1_1_ion_environment_1a30493f96ed37b238ce348fc7abbffc72"></span><span class="n">nIce</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
-<span data-line="11">    <span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-structsite_1_1_ion_environment_1a243d509ea9c0e3eba197c7fcf74936d8"></span><span class="n">nFront</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
-<span data-line="12">    <span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-structsite_1_1_ion_environment_1af5b02f27a8173063836d90a7382a3c3b"></span><span class="n">nLiquid</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
-<span data-line="13"><span class="p">};</span></span>
+<span data-line="10">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-structsite-1-1-ion-environment-1a34ba0e96160a91395416185d4c3dfb94"><span class="std std-ref">members</span></a><span class="p">;</span></span>
+<span data-line="11">    <span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-structsite_1_1_ion_environment_1a30493f96ed37b238ce348fc7abbffc72"></span><span class="n">nIce</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
+<span data-line="12">    <span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-structsite_1_1_ion_environment_1a243d509ea9c0e3eba197c7fcf74936d8"></span><span class="n">nFront</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
+<span data-line="13">    <span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-structsite_1_1_ion_environment_1af5b02f27a8173063836d90a7382a3c3b"></span><span class="n">nLiquid</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
+<span data-line="14"><span class="p">};</span></span>
 </pre></div>
 </section>
 <section id="detailed-documentation">
@@ -345,6 +346,10 @@ data-aria-dark="Switch to auto color mode">
 <span id="index-3"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">iceFraction</span></span>
 </pre></div>
 <p>labelled share of that shell</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-structsite-1-1-ion-environment-1a34ba0e96160a91395416185d4c3dfb94">
+<span id="index-4"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">members</span></span>
+</pre></div>
+<p>per ion, the shell molecules (cloud indices)</p>
 </section>
 </section>
 </section>

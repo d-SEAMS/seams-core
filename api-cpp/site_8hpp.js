@@ -37,5 +37,6 @@ var site_8hpp =
     [ "site::ionEnvironment", "namespacesite.html#a59c0f056c026caebb259d8c8e0d032e1", null ],
     [ "site::lammpsTypeOfKind", "namespacesite.html#a1dd96ee4ccc36bc86f348ec029859b53", null ],
     [ "site::parseSiteSpec", "namespacesite.html#ab556d24c5f6d7d7be9ba2e4d975259be", null ],
-    [ "site::periodicCentroid", "namespacesite.html#a208c6e1f8e6106530d6c75bb16dccaad", null ]
+    [ "site::periodicCentroid", "namespacesite.html#a208c6e1f8e6106530d6c75bb16dccaad", null ],
+    [ "site::shellRingCensus", "namespacesite.html#a3327b0f82b57a80d113b241dec0eb711", null ]
 ];

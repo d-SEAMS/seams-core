@@ -44,5 +44,6 @@ var namespacesite =
     [ "parseFamily", "namespacesite.html#a44e7fbcc66c892d4e98d896e5041cf4c", null ],
     [ "parseSiteSpec", "namespacesite.html#ab556d24c5f6d7d7be9ba2e4d975259be", null ],
     [ "periodicCentroid", "namespacesite.html#a208c6e1f8e6106530d6c75bb16dccaad", null ],
-    [ "refuseIceScore", "namespacesite.html#a3043411870d52f19774d045fa21dfc09", null ]
+    [ "refuseIceScore", "namespacesite.html#a3043411870d52f19774d045fa21dfc09", null ],
+    [ "shellRingCensus", "namespacesite.html#a3327b0f82b57a80d113b241dec0eb711", null ]
 ];

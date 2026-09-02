@@ -25,6 +25,7 @@ Overview
 		std::vector<int> :ref:`shell<doxid-structsite_1_1_ion_environment_1a277b78dca0eb1dddf9a9ff7698a60706>`;
 		std::vector<double> :ref:`iceFraction<doxid-structsite_1_1_ion_environment_1ab8c73ad7e47ebef7f210b178707e735d>`;
 		std::vector<:ref:`IonState<doxid-namespacesite_1a7cdb003964d40a8454361db4b34b4791>`> :target:`state<doxid-structsite_1_1_ion_environment_1acc7b909a25297a34f700ba58a835dcc3>`;
+		std::vector<std::vector<int>> :ref:`members<doxid-structsite_1_1_ion_environment_1a34ba0e96160a91395416185d4c3dfb94>`;
 		int :target:`nIce<doxid-structsite_1_1_ion_environment_1a30493f96ed37b238ce348fc7abbffc72>` = 0;
 		int :target:`nFront<doxid-structsite_1_1_ion_environment_1a243d509ea9c0e3eba197c7fcf74936d8>` = 0;
 		int :target:`nLiquid<doxid-structsite_1_1_ion_environment_1af5b02f27a8173063836d90a7382a3c3b>` = 0;
@@ -68,4 +69,14 @@ water molecules within the cutoff
 	std::vector<double> iceFraction
 
 labelled share of that shell
+
+.. index:: pair: variable; members
+.. _doxid-structsite_1_1_ion_environment_1a34ba0e96160a91395416185d4c3dfb94:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> members
+
+per ion, the shell molecules (cloud indices)
 
