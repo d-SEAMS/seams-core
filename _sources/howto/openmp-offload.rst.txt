@@ -9,8 +9,10 @@ gpulite TUM path and it is not the host-only pixi environment.
 The Meson option is ``-Dwith_openmp_offload=enabled``. Configure
 probes a real ``target teams distribute parallel for`` and records
 ``OpenMP target offload: YES`` only when that link succeeds. nvc++
-is tried first (``-mp=gpu``, then ``-mp=gpu -gpu=cc80``). clang with
-libomptarget is the fallback (``-fopenmp -fopenmp-targets=nvptx64-nvidia-cuda``).
+is tried first (``-mp=gpu``, then ``-gpu=cc80``, then
+``-gpu=cuda12.2`` / ``-gpu=cuda11.6`` so an HPC SDK that does not
+ship a toolkit matching the driver can still use a bundled
+release). clang with libomptarget is the fallback (``-fopenmp -fopenmp-targets=nvptx64-nvidia-cuda``).
 
 Elja A100
 ---------
@@ -18,18 +20,22 @@ Elja A100
 GPU partitions: ``gpu-1xA100``, ``gpu-2xA100``, ``gpu-long``. Account:
 ``chem-ui``. Do not compile on the login node.
 
-GPU batch shells do not have Lmod on ``PATH``. Use the OpenHPC
-nvc++ prefix and the GCCcore-13.3.0 EasyBuild prefixes for Meson,
-Ninja, Eigen, FlexiBLAS, and Python 3.12. Cluster Catch2 is 2.x;
-the tree carries a Catch2 3 wrap. CUDA 12.4 supplies ``nsys`` 2023.4.
+GPU batch shells do not have Lmod on ``PATH``. Use EasyBuild NVHPC
+23.7-CUDA-12.2.0 (the A100 driver is 12.2; OpenHPC nvc++ 22.3
+ships only CUDA 11.6 and refuses ``-mp=gpu`` against that driver
+unless ``-gpu=cuda11.6`` is set) and the GCCcore-13.3.0 EasyBuild
+prefixes for Meson, Ninja, Eigen, FlexiBLAS, and Python 3.12.
+Cluster Catch2 is 2.x; the tree carries a Catch2 3 wrap. CUDA
+12.4 supplies ``nsys`` 2023.4.
 
 .. code:: bash
 
     EB=/hpcapps/lib-edda/easybuild/software
-    NVHPC_ROOT=/opt/ohpc/pub/compiler/nvhpc/22.3/Linux_x86_64/22.3
+    NVHPC_ROOT=$EB/NVHPC/23.7-CUDA-12.2.0/Linux_x86_64/23.7
+    export NVHPC_CUDA_HOME=$NVHPC_ROOT/cuda/12.2
     export PATH=$EB/CUDA/12.4.0/bin:$NVHPC_ROOT/compilers/bin:$EB/Meson/1.4.0-GCCcore-13.3.0/bin:$EB/Ninja/1.12.1-GCCcore-13.3.0/bin:$EB/Python/3.12.3-GCCcore-13.3.0/bin:$PATH
     export PKG_CONFIG_PATH=$EB/Eigen/3.4.0-GCCcore-13.3.0/share/pkgconfig:$EB/FlexiBLAS/3.4.4-GCC-13.3.0/lib/pkgconfig
-    export LD_LIBRARY_PATH=$EB/Python/3.12.3-GCCcore-13.3.0/lib:$NVHPC_ROOT/compilers/lib:$NVHPC_ROOT/cuda/lib64:$NVHPC_ROOT/math_libs/lib64:$EB/GCCcore/13.3.0/lib64:$EB/FlexiBLAS/3.4.4-GCC-13.3.0/lib:$EB/Z3/4.13.0-GCCcore-13.2.0/lib:$EB/hwloc/2.9.2-GCCcore-13.2.0/lib
+    export LD_LIBRARY_PATH=$EB/Python/3.12.3-GCCcore-13.3.0/lib:$NVHPC_ROOT/compilers/lib:$NVHPC_ROOT/cuda/12.2/lib64:$NVHPC_ROOT/math_libs/12.2/lib64:$EB/GCCcore/13.3.0/lib64:$EB/FlexiBLAS/3.4.4-GCC-13.3.0/lib:$EB/Z3/4.13.0-GCCcore-13.2.0/lib:$EB/hwloc/2.9.2-GCCcore-13.2.0/lib
     export PYTHONPATH=$EB/Meson/1.4.0-GCCcore-13.3.0/lib/python3.12/site-packages
     # GPU nodes lack glibc-devel. Before sbatch, from a login node:
     #   cp /usr/lib64/crt1.o crti.o crtn.o Scrt1.o elja-crt/
@@ -39,8 +45,9 @@ the tree carries a Catch2 3 wrap. CUDA 12.4 supplies ``nsys`` 2023.4.
     export CXXFLAGS="-B$PWD/elja-crt"
     export LDFLAGS="-B$PWD/elja-crt -L$PWD/elja-crt -L/lib64 -L$EB/hwloc/2.9.2-GCCcore-13.2.0/lib -lhwloc"
 
-    # nvc++ 22.3 accepts -mp=gpu. Meson does not list C++20 for that
-    # release, so setup uses -Dcpp_std=none and -std=c++17.
+    # nvc++ 23.7 accepts -mp=gpu against driver 12.2. Meson does not
+    # list C++20 for this release, so setup uses -Dcpp_std=none and
+    # -std=c++17.
     export CC=$EB/GCCcore/13.3.0/bin/gcc
     export CXX=nvc++
     export CFLAGS="-idirafter $PWD/elja-sysroot/usr/include"

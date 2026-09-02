@@ -244,45 +244,52 @@ gpulite TUM path and it is not the host-only pixi environment.</p>
 <p>The Meson option is <code class="docutils literal notranslate"><span class="pre">-Dwith_openmp_offload=enabled</span></code>. Configure
 probes a real <code class="docutils literal notranslate"><span class="pre">target</span> <span class="pre">teams</span> <span class="pre">distribute</span> <span class="pre">parallel</span> <span class="pre">for</span></code> and records
 <code class="docutils literal notranslate"><span class="pre">OpenMP</span> <span class="pre">target</span> <span class="pre">offload:</span> <span class="pre">YES</span></code> only when that link succeeds. nvc++
-is tried first (<code class="docutils literal notranslate"><span class="pre">-mp=gpu</span></code>, then <code class="docutils literal notranslate"><span class="pre">-mp=gpu</span> <span class="pre">-gpu=cc80</span></code>). clang with
-libomptarget is the fallback (<code class="docutils literal notranslate"><span class="pre">-fopenmp</span> <span class="pre">-fopenmp-targets=nvptx64-nvidia-cuda</span></code>).</p>
+is tried first (<code class="docutils literal notranslate"><span class="pre">-mp=gpu</span></code>, then <code class="docutils literal notranslate"><span class="pre">-gpu=cc80</span></code>, then
+<code class="docutils literal notranslate"><span class="pre">-gpu=cuda12.2</span></code> / <code class="docutils literal notranslate"><span class="pre">-gpu=cuda11.6</span></code> so an HPC SDK that does not
+ship a toolkit matching the driver can still use a bundled
+release). clang with libomptarget is the fallback (<code class="docutils literal notranslate"><span class="pre">-fopenmp</span> <span class="pre">-fopenmp-targets=nvptx64-nvidia-cuda</span></code>).</p>
 <section id="elja-a100">
 <h2>Elja A100<a class="headerlink" href="#elja-a100" title="Link to this heading">¶</a></h2>
 <p>GPU partitions: <code class="docutils literal notranslate"><span class="pre">gpu-1xA100</span></code>, <code class="docutils literal notranslate"><span class="pre">gpu-2xA100</span></code>, <code class="docutils literal notranslate"><span class="pre">gpu-long</span></code>. Account:
 <code class="docutils literal notranslate"><span class="pre">chem-ui</span></code>. Do not compile on the login node.</p>
-<p>GPU batch shells do not have Lmod on <code class="docutils literal notranslate"><span class="pre">PATH</span></code>. Use the OpenHPC
-nvc++ prefix and the GCCcore-13.3.0 EasyBuild prefixes for Meson,
-Ninja, Eigen, FlexiBLAS, and Python 3.12. Cluster Catch2 is 2.x;
-the tree carries a Catch2 3 wrap. CUDA 12.4 supplies <code class="docutils literal notranslate"><span class="pre">nsys</span></code> 2023.4.</p>
+<p>GPU batch shells do not have Lmod on <code class="docutils literal notranslate"><span class="pre">PATH</span></code>. Use EasyBuild NVHPC
+23.7-CUDA-12.2.0 (the A100 driver is 12.2; OpenHPC nvc++ 22.3
+ships only CUDA 11.6 and refuses <code class="docutils literal notranslate"><span class="pre">-mp=gpu</span></code> against that driver
+unless <code class="docutils literal notranslate"><span class="pre">-gpu=cuda11.6</span></code> is set) and the GCCcore-13.3.0 EasyBuild
+prefixes for Meson, Ninja, Eigen, FlexiBLAS, and Python 3.12.
+Cluster Catch2 is 2.x; the tree carries a Catch2 3 wrap. CUDA
+12.4 supplies <code class="docutils literal notranslate"><span class="pre">nsys</span></code> 2023.4.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nv">EB</span><span class="o">=</span>/hpcapps/lib-edda/easybuild/software
-</span><span data-line="2"><span class="nv">NVHPC_ROOT</span><span class="o">=</span>/opt/ohpc/pub/compiler/nvhpc/22.3/Linux_x86_64/22.3
-</span><span data-line="3"><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$EB</span>/CUDA/12.4.0/bin:<span class="nv">$NVHPC_ROOT</span>/compilers/bin:<span class="nv">$EB</span>/Meson/1.4.0-GCCcore-13.3.0/bin:<span class="nv">$EB</span>/Ninja/1.12.1-GCCcore-13.3.0/bin:<span class="nv">$EB</span>/Python/3.12.3-GCCcore-13.3.0/bin:<span class="nv">$PATH</span>
-</span><span data-line="4"><span class="nb">export</span><span class="w"> </span><span class="nv">PKG_CONFIG_PATH</span><span class="o">=</span><span class="nv">$EB</span>/Eigen/3.4.0-GCCcore-13.3.0/share/pkgconfig:<span class="nv">$EB</span>/FlexiBLAS/3.4.4-GCC-13.3.0/lib/pkgconfig
-</span><span data-line="5"><span class="nb">export</span><span class="w"> </span><span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span><span class="nv">$EB</span>/Python/3.12.3-GCCcore-13.3.0/lib:<span class="nv">$NVHPC_ROOT</span>/compilers/lib:<span class="nv">$NVHPC_ROOT</span>/cuda/lib64:<span class="nv">$NVHPC_ROOT</span>/math_libs/lib64:<span class="nv">$EB</span>/GCCcore/13.3.0/lib64:<span class="nv">$EB</span>/FlexiBLAS/3.4.4-GCC-13.3.0/lib:<span class="nv">$EB</span>/Z3/4.13.0-GCCcore-13.2.0/lib:<span class="nv">$EB</span>/hwloc/2.9.2-GCCcore-13.2.0/lib
-</span><span data-line="6"><span class="nb">export</span><span class="w"> </span><span class="nv">PYTHONPATH</span><span class="o">=</span><span class="nv">$EB</span>/Meson/1.4.0-GCCcore-13.3.0/lib/python3.12/site-packages
-</span><span data-line="7"><span class="c1"># GPU nodes lack glibc-devel. Before sbatch, from a login node:</span>
-</span><span data-line="8"><span class="c1">#   cp /usr/lib64/crt1.o crti.o crtn.o Scrt1.o elja-crt/</span>
-</span><span data-line="9"><span class="c1">#   rsync -a /usr/include/ elja-sysroot/usr/include/</span>
-</span><span data-line="10"><span class="nb">export</span><span class="w"> </span><span class="nv">LIBRARY_PATH</span><span class="o">=</span><span class="nv">$PWD</span>/elja-crt:/lib64
-</span><span data-line="11"><span class="nb">export</span><span class="w"> </span><span class="nv">CFLAGS</span><span class="o">=</span><span class="s2">&quot;-B</span><span class="nv">$PWD</span><span class="s2">/elja-crt&quot;</span>
-</span><span data-line="12"><span class="nb">export</span><span class="w"> </span><span class="nv">CXXFLAGS</span><span class="o">=</span><span class="s2">&quot;-B</span><span class="nv">$PWD</span><span class="s2">/elja-crt&quot;</span>
-</span><span data-line="13"><span class="nb">export</span><span class="w"> </span><span class="nv">LDFLAGS</span><span class="o">=</span><span class="s2">&quot;-B</span><span class="nv">$PWD</span><span class="s2">/elja-crt -L</span><span class="nv">$PWD</span><span class="s2">/elja-crt -L/lib64 -L</span><span class="nv">$EB</span><span class="s2">/hwloc/2.9.2-GCCcore-13.2.0/lib -lhwloc&quot;</span>
-</span><span data-line="14">
-</span><span data-line="15"><span class="c1"># nvc++ 22.3 accepts -mp=gpu. Meson does not list C++20 for that</span>
-</span><span data-line="16"><span class="c1"># release, so setup uses -Dcpp_std=none and -std=c++17.</span>
-</span><span data-line="17"><span class="nb">export</span><span class="w"> </span><span class="nv">CC</span><span class="o">=</span><span class="nv">$EB</span>/GCCcore/13.3.0/bin/gcc
-</span><span data-line="18"><span class="nb">export</span><span class="w"> </span><span class="nv">CXX</span><span class="o">=</span>nvc++
-</span><span data-line="19"><span class="nb">export</span><span class="w"> </span><span class="nv">CFLAGS</span><span class="o">=</span><span class="s2">&quot;-idirafter </span><span class="nv">$PWD</span><span class="s2">/elja-sysroot/usr/include&quot;</span>
-</span><span data-line="20"><span class="nb">export</span><span class="w"> </span><span class="nv">CXXFLAGS</span><span class="o">=</span><span class="s2">&quot;-std=c++17 -idirafter </span><span class="nv">$PWD</span><span class="s2">/elja-sysroot/usr/include&quot;</span>
-</span><span data-line="21">meson<span class="w"> </span>setup<span class="w"> </span>build-offload<span class="w"> </span>--buildtype<span class="o">=</span>debugoptimized<span class="w"> </span><span class="se">\</span>
-</span><span data-line="22"><span class="w">  </span>-Dcpp_std<span class="o">=</span>none<span class="w"> </span><span class="se">\</span>
-</span><span data-line="23"><span class="w">  </span>-Dwith_openmp_offload<span class="o">=</span>enabled<span class="w"> </span><span class="se">\</span>
-</span><span data-line="24"><span class="w">  </span>-Dwith_python<span class="o">=</span><span class="nb">false</span><span class="w"> </span><span class="se">\</span>
-</span><span data-line="25"><span class="w">  </span>-Dwith_lua<span class="o">=</span>disabled<span class="w"> </span><span class="se">\</span>
-</span><span data-line="26"><span class="w">  </span>-Dwith_mpi<span class="o">=</span>disabled<span class="w"> </span><span class="se">\</span>
-</span><span data-line="27"><span class="w">  </span>-Dwith_gpulite<span class="o">=</span>disabled
-</span><span data-line="28">meson<span class="w"> </span>compile<span class="w"> </span>-C<span class="w"> </span>build-offload
-</span><span data-line="29">meson<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-C<span class="w"> </span>build-offload<span class="w"> </span>--print-errorlogs
+</span><span data-line="2"><span class="nv">NVHPC_ROOT</span><span class="o">=</span><span class="nv">$EB</span>/NVHPC/23.7-CUDA-12.2.0/Linux_x86_64/23.7
+</span><span data-line="3"><span class="nb">export</span><span class="w"> </span><span class="nv">NVHPC_CUDA_HOME</span><span class="o">=</span><span class="nv">$NVHPC_ROOT</span>/cuda/12.2
+</span><span data-line="4"><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$EB</span>/CUDA/12.4.0/bin:<span class="nv">$NVHPC_ROOT</span>/compilers/bin:<span class="nv">$EB</span>/Meson/1.4.0-GCCcore-13.3.0/bin:<span class="nv">$EB</span>/Ninja/1.12.1-GCCcore-13.3.0/bin:<span class="nv">$EB</span>/Python/3.12.3-GCCcore-13.3.0/bin:<span class="nv">$PATH</span>
+</span><span data-line="5"><span class="nb">export</span><span class="w"> </span><span class="nv">PKG_CONFIG_PATH</span><span class="o">=</span><span class="nv">$EB</span>/Eigen/3.4.0-GCCcore-13.3.0/share/pkgconfig:<span class="nv">$EB</span>/FlexiBLAS/3.4.4-GCC-13.3.0/lib/pkgconfig
+</span><span data-line="6"><span class="nb">export</span><span class="w"> </span><span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span><span class="nv">$EB</span>/Python/3.12.3-GCCcore-13.3.0/lib:<span class="nv">$NVHPC_ROOT</span>/compilers/lib:<span class="nv">$NVHPC_ROOT</span>/cuda/12.2/lib64:<span class="nv">$NVHPC_ROOT</span>/math_libs/12.2/lib64:<span class="nv">$EB</span>/GCCcore/13.3.0/lib64:<span class="nv">$EB</span>/FlexiBLAS/3.4.4-GCC-13.3.0/lib:<span class="nv">$EB</span>/Z3/4.13.0-GCCcore-13.2.0/lib:<span class="nv">$EB</span>/hwloc/2.9.2-GCCcore-13.2.0/lib
+</span><span data-line="7"><span class="nb">export</span><span class="w"> </span><span class="nv">PYTHONPATH</span><span class="o">=</span><span class="nv">$EB</span>/Meson/1.4.0-GCCcore-13.3.0/lib/python3.12/site-packages
+</span><span data-line="8"><span class="c1"># GPU nodes lack glibc-devel. Before sbatch, from a login node:</span>
+</span><span data-line="9"><span class="c1">#   cp /usr/lib64/crt1.o crti.o crtn.o Scrt1.o elja-crt/</span>
+</span><span data-line="10"><span class="c1">#   rsync -a /usr/include/ elja-sysroot/usr/include/</span>
+</span><span data-line="11"><span class="nb">export</span><span class="w"> </span><span class="nv">LIBRARY_PATH</span><span class="o">=</span><span class="nv">$PWD</span>/elja-crt:/lib64
+</span><span data-line="12"><span class="nb">export</span><span class="w"> </span><span class="nv">CFLAGS</span><span class="o">=</span><span class="s2">&quot;-B</span><span class="nv">$PWD</span><span class="s2">/elja-crt&quot;</span>
+</span><span data-line="13"><span class="nb">export</span><span class="w"> </span><span class="nv">CXXFLAGS</span><span class="o">=</span><span class="s2">&quot;-B</span><span class="nv">$PWD</span><span class="s2">/elja-crt&quot;</span>
+</span><span data-line="14"><span class="nb">export</span><span class="w"> </span><span class="nv">LDFLAGS</span><span class="o">=</span><span class="s2">&quot;-B</span><span class="nv">$PWD</span><span class="s2">/elja-crt -L</span><span class="nv">$PWD</span><span class="s2">/elja-crt -L/lib64 -L</span><span class="nv">$EB</span><span class="s2">/hwloc/2.9.2-GCCcore-13.2.0/lib -lhwloc&quot;</span>
+</span><span data-line="15">
+</span><span data-line="16"><span class="c1"># nvc++ 23.7 accepts -mp=gpu against driver 12.2. Meson does not</span>
+</span><span data-line="17"><span class="c1"># list C++20 for this release, so setup uses -Dcpp_std=none and</span>
+</span><span data-line="18"><span class="c1"># -std=c++17.</span>
+</span><span data-line="19"><span class="nb">export</span><span class="w"> </span><span class="nv">CC</span><span class="o">=</span><span class="nv">$EB</span>/GCCcore/13.3.0/bin/gcc
+</span><span data-line="20"><span class="nb">export</span><span class="w"> </span><span class="nv">CXX</span><span class="o">=</span>nvc++
+</span><span data-line="21"><span class="nb">export</span><span class="w"> </span><span class="nv">CFLAGS</span><span class="o">=</span><span class="s2">&quot;-idirafter </span><span class="nv">$PWD</span><span class="s2">/elja-sysroot/usr/include&quot;</span>
+</span><span data-line="22"><span class="nb">export</span><span class="w"> </span><span class="nv">CXXFLAGS</span><span class="o">=</span><span class="s2">&quot;-std=c++17 -idirafter </span><span class="nv">$PWD</span><span class="s2">/elja-sysroot/usr/include&quot;</span>
+</span><span data-line="23">meson<span class="w"> </span>setup<span class="w"> </span>build-offload<span class="w"> </span>--buildtype<span class="o">=</span>debugoptimized<span class="w"> </span><span class="se">\</span>
+</span><span data-line="24"><span class="w">  </span>-Dcpp_std<span class="o">=</span>none<span class="w"> </span><span class="se">\</span>
+</span><span data-line="25"><span class="w">  </span>-Dwith_openmp_offload<span class="o">=</span>enabled<span class="w"> </span><span class="se">\</span>
+</span><span data-line="26"><span class="w">  </span>-Dwith_python<span class="o">=</span><span class="nb">false</span><span class="w"> </span><span class="se">\</span>
+</span><span data-line="27"><span class="w">  </span>-Dwith_lua<span class="o">=</span>disabled<span class="w"> </span><span class="se">\</span>
+</span><span data-line="28"><span class="w">  </span>-Dwith_mpi<span class="o">=</span>disabled<span class="w"> </span><span class="se">\</span>
+</span><span data-line="29"><span class="w">  </span>-Dwith_gpulite<span class="o">=</span>disabled
+</span><span data-line="30">meson<span class="w"> </span>compile<span class="w"> </span>-C<span class="w"> </span>build-offload
+</span><span data-line="31">meson<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-C<span class="w"> </span>build-offload<span class="w"> </span>--print-errorlogs
 </span></pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">meson</span> <span class="pre">setup</span></code> / <code class="docutils literal notranslate"><span class="pre">compile</span></code> / <code class="docutils literal notranslate"><span class="pre">test</span></code> run under <code class="docutils literal notranslate"><span class="pre">srun</span></code> or <code class="docutils literal notranslate"><span class="pre">sbatch</span></code>
