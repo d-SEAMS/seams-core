@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cmath>
 #include <complex>
+#include <cstdlib>
 #include <filesystem>
 #include <numeric>
 
@@ -1198,3 +1199,73 @@ TEST_CASE("qlmOneAtom matches qlmOneAtomDr on an ortho pair", "[bop]") {
     REQUIRE_THAT(qlmDr[i], Catch::Matchers::WithinAbs(qlmXyz[i], 1e-12));
   }
 }
+
+#ifdef SEAMS_HAS_OFFLOAD
+namespace {
+
+void requireBitIdentical(const chill::SteinhardtQl &a,
+                         const chill::SteinhardtQl &b) {
+  REQUIRE(a.ql.size() == b.ql.size());
+  REQUIRE(a.qlBar.size() == b.qlBar.size());
+  for (size_t i = 0; i < a.ql.size(); ++i) {
+    REQUIRE(a.ql[i] == b.ql[i]);
+    REQUIRE(a.qlBar[i] == b.qlBar[i]);
+  }
+}
+
+chill::SteinhardtQl runSteinhardt(
+    const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+    const std::vector<std::vector<int>> &nList, int orderL, bool offload,
+    int nThreads) {
+#ifdef SEAMS_HAS_OPENMP
+  omp_set_dynamic(0);
+  omp_set_num_threads(nThreads);
+#endif
+  setenv("SEAMS_OFFLOAD", offload ? "1" : "0", 1);
+  return chill::steinhardtQl(cloud, nList, orderL);
+}
+
+void checkOffloadIdentity(
+    const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+    const std::vector<std::vector<int>> &nList, int orderL) {
+  const auto serial = runSteinhardt(cloud, nList, orderL, false, 1);
+  const auto threaded = runSteinhardt(cloud, nList, orderL, false, 4);
+  const auto offload = runSteinhardt(cloud, nList, orderL, true, 1);
+  requireBitIdentical(offload, serial);
+  requireBitIdentical(offload, threaded);
+  requireBitIdentical(threaded, serial);
+}
+
+} // namespace
+
+TEST_CASE("steinhardtQl offload matches serial and threaded bit for bit",
+          "[bop][offload]") {
+  REQUIRE(omp_get_num_devices() > 0);
+
+  const double lattice = 4.0;
+  auto fcc = fccCloud(4, lattice);
+  const double cutoff = 0.85 * lattice;
+  auto fccList = nneigh::neighListO(cutoff, fcc, 1);
+
+  molSys::PointCloud<molSys::Point<double>, double> mw;
+  mw = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, mw, 1);
+  REQUIRE(mw.nop > 0);
+  auto mwList = nneigh::neighListO(3.5, mw, 1);
+
+  for (int orderL : {3, 4, 6, 8}) {
+    checkOffloadIdentity(fcc, fccList, orderL);
+    checkOffloadIdentity(mw, mwList, orderL);
+  }
+
+  setenv("SEAMS_OFFLOAD", "1", 1);
+  const auto q4 = chill::steinhardtQl(fcc, fccList, 4);
+  const auto q6 = chill::steinhardtQl(fcc, fccList, 6);
+  REQUIRE(q4.ql.size() == static_cast<size_t>(fcc.nop));
+  for (int i = 0; i < fcc.nop; i++) {
+    REQUIRE_THAT(q4.ql[i], Catch::Matchers::WithinAbs(0.190941, 1e-5));
+    REQUIRE_THAT(q6.ql[i], Catch::Matchers::WithinAbs(0.574524, 1e-5));
+    REQUIRE_THAT(q4.qlBar[i], Catch::Matchers::WithinAbs(q4.ql[i], 1e-9));
+    REQUIRE_THAT(q6.qlBar[i], Catch::Matchers::WithinAbs(q6.ql[i], 1e-9));
+  }
+}
+#endif
