@@ -14,32 +14,27 @@
 # the batch script into the spool, so BASH_SOURCE is not the repo
 # path; SLURM_SUBMIT_DIR is.
 #
-# Hierarchical EasyBuild modules live under
-# /hpcapps/lib-edda/modules/all. GCC/13.3.0 and nvidia/nvhpc/22.3
-# both claim the compiler family, so this script loads nvhpc (or
-# uses clang++ from a prefix) and puts Meson, Ninja, Eigen, and
-# FlexiBLAS on PATH / PKG_CONFIG_PATH from the GCCcore-13.3.0
-# prefixes. Cluster Catch2 is 2.x; the tree carries a Catch2 3 wrap.
+# GPU batch shells do not have Lmod on PATH. Prefixes only: nvc++
+# from the OpenHPC NVIDIA HPC SDK, Meson/Ninja/Eigen/FlexiBLAS from
+# the GCCcore-13.3.0 EasyBuild tree, nsys from CUDA 12.4. Cluster
+# Catch2 is 2.x; the tree carries a Catch2 3 wrap.
 set -euo pipefail
 
-if [ -f /etc/profile.d/lmod.sh ]; then
-  # shellcheck disable=SC1091
-  source /etc/profile.d/lmod.sh
-fi
-module use /hpcapps/lib-edda/modules/all
-module load nvidia/nvhpc/22.3
-
 EB=/hpcapps/lib-edda/easybuild/software
+NVHPC_ROOT=/opt/ohpc/pub/compiler/nvhpc/22.3/Linux_x86_64/22.3
 MESON_PRE=$EB/Meson/1.4.0-GCCcore-13.3.0
 NINJA_PRE=$EB/Ninja/1.12.1-GCCcore-13.3.0
 EIGEN_PRE=$EB/Eigen/3.4.0-GCCcore-13.3.0
 FLEXI_PRE=$EB/FlexiBLAS/3.4.4-GCC-13.3.0
+GCCCORE=$EB/GCCcore/13.3.0
+PY312=$EB/Python/3.12.3-GCCcore-13.3.0
 CUDA124=$EB/CUDA/12.4.0
 CLANG17=$EB/Clang/17.0.6-GCCcore-13.2.0
 
-export PATH=$MESON_PRE/bin:$NINJA_PRE/bin:$CUDA124/bin:$PATH
+export PATH=$NVHPC_ROOT/compilers/bin:$MESON_PRE/bin:$NINJA_PRE/bin:$PY312/bin:$CUDA124/bin:$PATH
 export PKG_CONFIG_PATH=$EIGEN_PRE/share/pkgconfig:$FLEXI_PRE/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}
-export LD_LIBRARY_PATH=$FLEXI_PRE/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+export LD_LIBRARY_PATH=$NVHPC_ROOT/compilers/lib:$NVHPC_ROOT/cuda/lib64:$NVHPC_ROOT/math_libs/lib64:$GCCCORE/lib64:$FLEXI_PRE/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+export NVHPC=/opt/ohpc/pub/compiler/nvhpc/22.3
 
 ROOT=${SLURM_SUBMIT_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}
 JOB_ID=${SLURM_JOB_ID:-manual}
@@ -49,6 +44,12 @@ mkdir -p "$OUT"
 cd "$ROOT"
 
 export SEAMS_OFFLOAD=${SEAMS_OFFLOAD:-1}
+
+# EasyBuild meson is a Python entry point with a `python` shebang.
+# GPU images have python3 from the prefix, not /usr/bin/python.
+meson() {
+  "$PY312/bin/python3" "$MESON_PRE/bin/meson" "$@"
+}
 
 log_env() {
   {
@@ -63,8 +64,7 @@ log_env() {
     echo "meson: $(command -v meson || echo missing)"
     echo "ninja: $(command -v ninja || echo missing)"
     echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
-    echo "modules:"
-    module list 2>&1 || true
+    echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
     nvidia-smi -L 2>/dev/null || true
     echo "loadavg_at_start: $(cut -d' ' -f1 /proc/loadavg)"
   } | tee "$OUT/gpu-conditions.txt"
