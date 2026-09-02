@@ -4,7 +4,12 @@
 #include <cmath>
 #include <algorithm>
 #include <cstddef>
+#if defined(__has_include)
+#if __has_include(<span>)
 #include <span>
+#define SEAMS_HAS_STD_SPAN 1
+#endif
+#endif
 
 #ifdef SEAMS_HAS_HWY
 
@@ -118,6 +123,7 @@ namespace seams {
  * @param[in] bx,by,bz Periodic box dimensions.
  * @param[out] out Squared distances.
  */
+#ifdef SEAMS_HAS_STD_SPAN
 inline void BatchPeriodicDistSq(std::span<const double> dx,
                                 std::span<const double> dy,
                                 std::span<const double> dz, double bx,
@@ -126,6 +132,7 @@ inline void BatchPeriodicDistSq(std::span<const double> dx,
   BatchPeriodicDistSq(dx.data(), dy.data(), dz.data(), bx, by, bz, out.data(),
                       n);
 }
+#endif
 
 }  // namespace seams
 

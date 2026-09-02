@@ -138,12 +138,20 @@ configure_offload() {
   export CC=$cc
   export CXX=$cxx
   echo "configuring with $compiler CC=$cc CXX=$cxx" | tee -a "$OUT/setup.log"
+  local extra=()
+  if [[ $compiler == nvc++ ]]; then
+    # Meson 1.4 does not list C++20 for nvc++ 22.3. The flag is real;
+    # std=c++17 plus the host STL is enough for this tree.
+    extra+=(-Dcpp_std=none)
+    export CXXFLAGS="${CXXFLAGS:-} -std=c++17"
+  fi
   if meson setup "$BUILD" --buildtype=debugoptimized \
     -Dwith_openmp_offload=enabled \
     -Dwith_python=false \
     -Dwith_lua=disabled \
     -Dwith_mpi=disabled \
     -Dwith_gpulite=disabled \
+    "${extra[@]}" \
     >> "$OUT/setup.log" 2>&1; then
     meson configure "$BUILD" | tee "$OUT/meson-config.txt"
     if grep -E 'OpenMP target offload.*NO|cannot link a target region' \
@@ -166,20 +174,25 @@ configure_offload() {
 log_env
 
 USED_COMPILER=
-# nvc++ 22.3 reports no C++20 to Meson. Clang 17 with libomptarget
-# is the compiler that accepts the project's cpp_std and the offload
-# probe. nvc++ is still tried if clang fails, for a recorded log.
-export PATH=$CLANG17/bin:$GCCCORE/bin:$PATH
-export LD_LIBRARY_PATH=$CLANG17/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
-if [[ -x $CLANG17/bin/clang++ ]] && \
-   configure_offload clang++ "$CLANG17/bin/clang++" "$CLANG17/bin/clang"; then
-  USED_COMPILER=clang++
-elif configure_offload nvc++ nvc++ "$GCCCORE/bin/gcc"; then
+# nvc++ 22.3 accepts -mp=gpu. Meson does not treat it as a C++20
+# compiler, so the nvc++ path uses -Dcpp_std=none -std=c++17.
+# Clang 17 has libomptarget bitcode but no NVPTX codegen target.
+export PATH=$NVHPC_ROOT/compilers/bin:$GCCCORE/bin:$PATH
+if configure_offload nvc++ nvc++ "$GCCCORE/bin/gcc"; then
   USED_COMPILER=nvc++
 else
-  echo "offload probe failed for clang++ and nvc++; see $OUT/setup.log" >&2
-  tail -80 "$OUT/setup.log" >&2 || true
-  exit 1
+  echo "nvc++ offload configure failed; trying clang++ 17" \
+    | tee -a "$OUT/setup.log"
+  export PATH=$CLANG17/bin:$PATH
+  export LD_LIBRARY_PATH=$CLANG17/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+  if [[ -x $CLANG17/bin/clang++ ]] && \
+     configure_offload clang++ "$CLANG17/bin/clang++" "$CLANG17/bin/clang"; then
+    USED_COMPILER=clang++
+  else
+    echo "offload probe failed for nvc++ and clang++; see $OUT/setup.log" >&2
+    tail -80 "$OUT/setup.log" >&2 || true
+    exit 1
+  fi
 fi
 echo "used_compiler: $USED_COMPILER" | tee -a "$OUT/gpu-conditions.txt"
 

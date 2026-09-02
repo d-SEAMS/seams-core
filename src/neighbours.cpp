@@ -18,7 +18,6 @@
 #include <limits>
 #include <numeric>
 #include <queue>
-#include <span>
 #include <stdexcept>
 #include <string>
 #include <utility>
