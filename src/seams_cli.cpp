@@ -542,9 +542,31 @@ int cmdDensityZ(std::ostream &os, Cloud &cloud, int typeI, int bins, int axis) {
 // Label-independent topology keys of the bonded graph: one key per atom
 // for the rooted neighbourhood within `hops` bonds, the histogram of keys,
 // the primitive ring census, and a frame key over all of it.
+// One LAMMPS dump frame with an extra per-atom column, so OVITO, VMD or a
+// script can colour a trajectory by what the engine decided. `values` is
+// indexed like `cloud.pts`; missing entries write 0.
+void writePerAtomDump(const std::string &path, const Cloud &cloud, const std::string &column,
+                      const std::vector<int> &values) {
+  std::ofstream out(path, std::ios::app);
+  if (!out) {
+    throw std::runtime_error("cannot write per-atom dump " + path);
+  }
+  out << "ITEM: TIMESTEP\n" << cloud.currentFrame << "\n";
+  out << "ITEM: NUMBER OF ATOMS\n" << cloud.nop << "\n";
+  gen::writeDumpBoxBounds(out, cloud);
+  out << "ITEM: ATOMS id type x y z " << column << "\n";
+  for (int i = 0; i < cloud.nop; ++i) {
+    const auto &pt = cloud.pts[static_cast<std::size_t>(i)];
+    const int v = static_cast<std::size_t>(i) < values.size() ? values[static_cast<std::size_t>(i)] : 0;
+    out << pt.atomID << ' ' << pt.type << ' ' << pt.x << ' ' << pt.y << ' ' << pt.z << ' ' << v
+        << '\n';
+  }
+}
+
 int cmdFingerprint(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
                    const std::string &graphName, int hops, bool colourTypes,
-                   const std::string &libraryPath, const std::string &emitLabel) {
+                   const std::string &libraryPath, const std::string &emitLabel,
+                   const std::string &perAtomPath = {}) {
   if (cloud.nop == 0) {
     os << colorizer.heading("nop") << " 0\n";
     return 0;
@@ -604,6 +626,26 @@ int cmdFingerprint(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int
     }
     const auto match = libs.size() == 1 ? topo::matchLibrary(fp, libs.front())
                                         : topo::matchLibraries(rows, libs, 7, colours);
+    if (!perAtomPath.empty()) {
+      // label index in sorted order of the labels seen, 0 for unmatched
+      std::vector<std::string> labels;
+      for (const auto &kv : match.counts) {
+        if (!kv.first.empty()) {
+          labels.push_back(kv.first);
+        }
+      }
+      std::vector<int> values(static_cast<std::size_t>(cloud.nop), 0);
+      for (std::size_t a = 0; a < match.labels.size() && a < values.size(); ++a) {
+        const auto it = std::find(labels.begin(), labels.end(), match.labels[a]);
+        values[a] = it == labels.end() ? 0 : static_cast<int>(it - labels.begin()) + 1;
+      }
+      writePerAtomDump(perAtomPath, cloud, "label", values);
+      os << colorizer.longOption("labels");
+      for (std::size_t i = 0; i < labels.size(); ++i) {
+        os << " " << i + 1 << "=" << labels[i];
+      }
+      os << " ";
+    }
     os << colorizer.heading("nop") << " " << rows.size() << " "
        << colorizer.longOption("graph") << " " << name << " "
        << colorizer.longOption("hops") << " " << hops << " "
@@ -645,6 +687,18 @@ int cmdFingerprint(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int
   std::sort(top.begin(), top.end(), [](const auto &a, const auto &b) {
     return a.first != b.first ? a.first > b.first : a.second < b.second;
   });
+  if (!perAtomPath.empty()) {
+    // class rank by population, 1 the most populated
+    std::map<std::string, int> rank;
+    for (std::size_t t = 0; t < top.size(); ++t) {
+      rank[top[t].second] = static_cast<int>(t) + 1;
+    }
+    std::vector<int> values(static_cast<std::size_t>(cloud.nop), 0);
+    for (std::size_t a = 0; a < fp.atomKeys.size() && a < values.size(); ++a) {
+      values[a] = rank[fp.atomKeys[a]];
+    }
+    writePerAtomDump(perAtomPath, cloud, "class", values);
+  }
   os << " " << colorizer.longOption("top");
   for (std::size_t t = 0; t < top.size() && t < 5; ++t) {
     os << " " << top[t].second << "=" << top[t].first;
@@ -656,7 +710,8 @@ int cmdFingerprint(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int
 // Ions read against the seeded cage assignment of the water: how many sit
 // in ice, at the front, or in liquid by their first water shell.
 int cmdIons(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
-            bool complete, const std::vector<int> &ionTypes, double ionCutoff) {
+            bool complete, const std::vector<int> &ionTypes, double ionCutoff,
+            const std::string &perAtomPath = {}) {
   if (cloud.nop == 0) {
     os << colorizer.heading("nop") << " 0\n";
     return 0;
@@ -692,6 +747,17 @@ int cmdIons(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
     }
   }
   const auto env = site::ionEnvironment(cloud, ice, ions, typ, ionCutoff);
+  if (!perAtomPath.empty()) {
+    // water: 0 liquid, 1 ice; ions: 2 liquid, 3 front, 4 ice
+    std::vector<int> values(static_cast<std::size_t>(cloud.nop), 0);
+    for (std::size_t i = 0; i < values.size() && i < ice.size(); ++i) {
+      values[i] = ice[i] ? 1 : 0;
+    }
+    for (std::size_t i = 0; i < env.ion.size(); ++i) {
+      values[static_cast<std::size_t>(env.ion[i])] = 2 + static_cast<int>(env.state[i]);
+    }
+    writePerAtomDump(perAtomPath, cloud, "state", values);
+  }
   double meanShell = 0.0;
   double meanFraction = 0.0;
   for (std::size_t i = 0; i < env.ion.size(); ++i) {
@@ -777,7 +843,8 @@ int cmdChill(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
 int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
              const std::string &graphName, bool complete = false,
              const std::string &signatureSpec = {},
-             const std::vector<int> &guestTypes = {}, double guestRadius = 4.0) {
+             const std::vector<int> &guestTypes = {}, double guestRadius = 4.0,
+             const std::string &perAtomPath = {}) {
   if (cloud.nop == 0) {
     if (!signatureSpec.empty()) {
       const auto sig = cage::Signature::parse(signatureSpec);
@@ -874,6 +941,16 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
       } else {
         ++water;
       }
+    }
+    if (!perAtomPath.empty()) {
+      // 0 water, 1 hexagonal cage, 2 double-diamond cage, 3 both
+      std::vector<int> values(static_cast<std::size_t>(cloud.nop), 0);
+      for (int i = 0; i < n && i < cloud.nop; ++i) {
+        const bool h = hc[static_cast<std::size_t>(i)];
+        const bool d = ddc[static_cast<std::size_t>(i)];
+        values[static_cast<std::size_t>(i)] = h && d ? 3 : h ? 1 : d ? 2 : 0;
+      }
+      writePerAtomDump(perAtomPath, cloud, "cage", values);
     }
   };
 
@@ -986,6 +1063,7 @@ int main(int argc, char *argv[]) {
   std::string signatureSpec;
   std::string guestTypesFlag;
   double guestRadius = 4.0;
+  std::string perAtomPath;
   bool colourTypes = false;
   std::string libraryPath;
   std::string emitLabel;
@@ -1158,6 +1236,14 @@ int main(int argc, char *argv[]) {
                        "placed in the found cages by their periodic centroids")
                  .handler([&](std::string_view value) {
                    guestTypesFlag = std::string(value);
+                 }));
+
+  parser.add(Option("--per-atom")
+                 .argName("FILE")
+                 .help("cages|fingerprint|ions: append a LAMMPS dump frame with one extra "
+                       "per-atom column (cage, class or label, state) for OVITO or VMD")
+                 .handler([&](std::string_view value) {
+                   perAtomPath = std::string(value);
                  }));
 
   parser.add(Option("--guest-radius")
@@ -1445,7 +1531,7 @@ int main(int argc, char *argv[]) {
           }
         }
         return cmdCages(os, cloud, cutoff, typeI, k, graph, completeFlag,
-                        signatureSpec, guestTypes, guestRadius);
+                        signatureSpec, guestTypes, guestRadius, perAtomPath);
       } catch (const std::exception &e) {
         os << colorizer.error(e.what()) << "\n";
         return 2;
@@ -1454,7 +1540,7 @@ int main(int argc, char *argv[]) {
     if (cmd == "fingerprint") {
       try {
         return cmdFingerprint(os, cloud, cutoff, typeI, k, graph, hops, colourTypes,
-                              libraryPath, emitLabel);
+                              libraryPath, emitLabel, perAtomPath);
       } catch (const std::exception &e) {
         os << colorizer.error(e.what()) << "\n";
         return 2;
@@ -1470,7 +1556,7 @@ int main(int argc, char *argv[]) {
         }
       }
       return cmdIons(os, cloud, cutoff, typeI, k, completeFlag, ionTypes,
-                     ionCutoff > 0.0 ? ionCutoff : cutoff);
+                     ionCutoff > 0.0 ? ionCutoff : cutoff, perAtomPath);
     }
     if (cmd == "rdf") {
       return cmdRdf(os, cloud, cutoff, bins, rdfTypeI, rdfTypeJ);

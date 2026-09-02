@@ -22,6 +22,10 @@ clathrate hydrate; ``site::periodicCentroid`` is the helper.
 pass through a shell, by size: how far the network survives around an
 ion. ``seams cages --signature SPEC --guest-types T,U`` places guests
 in the found cages and reports occupied, multiply occupied and free.
+``--per-atom FILE`` on ``cages``, ``fingerprint`` and ``ions`` appends
+a LAMMPS dump frame with one extra column (cage membership, topology
+class or library label, water and ion state) so OVITO or VMD colour
+the trajectory by the engine's decision.
 
 Version 2.8.0 (2026-09-02)
 ===========================

@@ -645,6 +645,17 @@ if get_option('with_cli')
     depends: [seams_exe],
     timeout: 120)
   test(
+    'seams_cages_per_atom_dump',
+    python3,
+    args: [
+      '-c',
+      'import subprocess,sys,tempfile,os; d=tempfile.mkdtemp(); out=os.path.join(d,"cages.lammpstrj"); p=subprocess.run([sys.argv[1],"cages",sys.argv[2],"--graph","cutoff","--cutoff","3.5","--type","1","--per-atom",out],capture_output=True,text=True); text=open(out).read() if os.path.exists(out) else ""; lines=text.splitlines(); n=int(lines[3]) if len(lines)>3 else -1; rows=[l for l in lines[9:9+n]]; sys.exit(0 if p.returncode==0 and "ITEM: ATOMS id type x y z cage" in text and len(rows)==n and all(l.split()[-1] in ("0","1","2","3") for l in rows) else 1)',
+      seams_exe.full_path(),
+      meson.project_source_root() / 'input' / 'traj' / 'genice_sI.lammpstrj',
+    ],
+    depends: [seams_exe],
+    timeout: 120)
+  test(
     'seams_pairs_contact',
     python3,
     args: [
