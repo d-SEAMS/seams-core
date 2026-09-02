@@ -199,7 +199,11 @@ inline double legendreAmp(int orderL, int absM, const double *s,
 }
 
 // Writes 2*orderL+1 complex Y_lm as interleaved re,im starting at out.
-inline void ylmAll(int orderL, double theta, double phi, double *out) {
+// sinT, cosT, cphi, sphi are the direction; callers that already have
+// a displacement use those components so host and device skip libm
+// sin/cos/atan2/acos, which do not agree bit for bit.
+inline void ylmAllTrig(int orderL, double sinT, double cosT, double cphi,
+                       double sphi, double *out) {
   const int nComp = 2 * orderL + 1;
   for (int k = 0; k < nComp; k++) {
     out[2 * k] = 0.0;
@@ -210,10 +214,6 @@ inline void ylmAll(int orderL, double theta, double phi, double *out) {
   double c[9];
   double pr[9];
   double pi[9];
-  const double sinT = std::sin(theta);
-  const double cosT = std::cos(theta);
-  const double cphi = std::cos(phi);
-  const double sphi = std::sin(phi);
   s[0] = 1.0;
   c[0] = 1.0;
   pr[0] = 1.0;
@@ -241,7 +241,14 @@ inline void ylmAll(int orderL, double theta, double phi, double *out) {
   }
 }
 
+inline void ylmAll(int orderL, double theta, double phi, double *out) {
+  ylmAllTrig(orderL, std::sin(theta), std::cos(theta), std::cos(phi),
+             std::sin(phi), out);
+}
+
 // Accumulate one packed displacement into the interleaved qlm row.
+// phi in this tree is atan2(dx, dy), so cos(phi)=dy/rho and
+// sin(phi)=dx/rho.
 inline void qlmAddBond(int orderL, double dx, double dy, double dz,
                        double *qlmInterleaved, int row, int nComp,
                        int &nUsed) {
@@ -250,10 +257,26 @@ inline void qlmAddBond(int orderL, double dx, double dy, double dz,
     return;
   }
   const double r = std::sqrt(r2);
-  const double phi = std::atan2(dx, dy);
-  const double theta = std::acos(dz / r);
+  const double invr = 1.0 / r;
+  double cosT = dz * invr;
+  if (cosT > 1.0) {
+    cosT = 1.0;
+  } else if (cosT < -1.0) {
+    cosT = -1.0;
+  }
+  const double rho2 = dx * dx + dy * dy;
+  double sinT = 0.0;
+  double cphi = 1.0;
+  double sphi = 0.0;
+  if (rho2 != 0.0) {
+    const double rho = std::sqrt(rho2);
+    sinT = rho * invr;
+    const double invrho = 1.0 / rho;
+    cphi = dy * invrho;
+    sphi = dx * invrho;
+  }
   double ylm[34];
-  ylmAll(orderL, theta, phi, ylm);
+  ylmAllTrig(orderL, sinT, cosT, cphi, sphi, ylm);
   for (int m = 0; m < nComp; m++) {
     qlmInterleaved[2 * (row + m)] += ylm[2 * m];
     qlmInterleaved[2 * (row + m) + 1] += ylm[2 * m + 1];
