@@ -8,8 +8,10 @@ namespace site
 	:hidden:
 
 	enum_site_Family.rst
+	enum_site_IonState.rst
 	enum_site_Kind.rst
 	struct_site_DensityZ.rst
+	struct_site_IonEnvironment.rst
 	struct_site_Table.rst
 
 Overview
@@ -27,11 +29,13 @@ Overview
 	// enums
 
 	enum :ref:`Family<doxid-namespacesite_1aa3661d15289b4b8576f48217ed337ca3>`;
+	enum :ref:`IonState<doxid-namespacesite_1a7cdb003964d40a8454361db4b34b4791>`;
 	enum :ref:`Kind<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90>`;
 
 	// structs
 
 	struct :ref:`DensityZ<doxid-structsite_1_1_density_z>`;
+	struct :ref:`IonEnvironment<doxid-structsite_1_1_ion_environment>`;
 	struct :ref:`Table<doxid-structsite_1_1_table>`;
 
 	// global functions
@@ -46,6 +50,7 @@ Overview
 	int :target:`lammpsTypeOfKind<doxid-namespacesite_1a1dd96ee4ccc36bc86f348ec029859b53>`(const :ref:`Table<doxid-structsite_1_1_table>`& table, :ref:`Kind<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90>` kind);
 	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> :target:`ionCloud<doxid-namespacesite_1a55a0dd31fcceddabfa6cda601eeb807c>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& src, const :ref:`Table<doxid-structsite_1_1_table>`& table);
 	:ref:`Table<doxid-structsite_1_1_table>` :target:`parseSiteSpec<doxid-namespacesite_1ab556d24c5f6d7d7be9ba2e4d975259be>`(std::string_view spec);
+	:ref:`IonEnvironment<doxid-structsite_1_1_ion_environment>` :ref:`ionEnvironment<doxid-namespacesite_1a59c0f056c026caebb259d8c8e0d032e1>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<bool>& iceFlag, const std::vector<int>& ionIndices, int waterType, double cutoff);
 
 	} // namespace site
 .. _details-namespacesite:
@@ -77,4 +82,14 @@ Histogram Point::{x,y,z} for typeI (0 = every atom). axis is 0, 1, or 2.
 	:ref:`DensityZ<doxid-structsite_1_1_density_z>` densityZ(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const :ref:`Table<doxid-structsite_1_1_table>`& table, :ref:`Kind<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90>` kind, int nbin, int axis)
 
 Same histogram, restricted to atoms whose :ref:`Table <doxid-structsite_1_1_table>` kind matches.
+
+.. index:: pair: function; ionEnvironment
+.. _doxid-namespacesite_1a59c0f056c026caebb259d8c8e0d032e1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`IonEnvironment<doxid-structsite_1_1_ion_environment>` ionEnvironment(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<bool>& iceFlag, const std::vector<int>& ionIndices, int waterType, double cutoff)
+
+``iceFlag`` is indexed like ``yCloud.pts``; ``waterType`` selects the water oxygens (0 accepts every atom that is not an ion); ``cutoff`` is the first shell radius in the cloud's length unit.
 

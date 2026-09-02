@@ -1,0 +1,71 @@
+.. index:: pair: struct; site::IonEnvironment
+.. _doxid-structsite_1_1_ion_environment:
+
+struct site::IonEnvironment
+===========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <site.hpp>
+	
+	struct IonEnvironment {
+		// fields
+	
+		std::vector<int> :ref:`ion<doxid-structsite_1_1_ion_environment_1a02bd5a73c0cc445e9f466ed3add1835a>`;
+		std::vector<int> :ref:`shell<doxid-structsite_1_1_ion_environment_1a277b78dca0eb1dddf9a9ff7698a60706>`;
+		std::vector<double> :ref:`iceFraction<doxid-structsite_1_1_ion_environment_1ab8c73ad7e47ebef7f210b178707e735d>`;
+		std::vector<:ref:`IonState<doxid-namespacesite_1a7cdb003964d40a8454361db4b34b4791>`> :target:`state<doxid-structsite_1_1_ion_environment_1acc7b909a25297a34f700ba58a835dcc3>`;
+		int :target:`nIce<doxid-structsite_1_1_ion_environment_1a30493f96ed37b238ce348fc7abbffc72>` = 0;
+		int :target:`nFront<doxid-structsite_1_1_ion_environment_1a243d509ea9c0e3eba197c7fcf74936d8>` = 0;
+		int :target:`nLiquid<doxid-structsite_1_1_ion_environment_1af5b02f27a8173063836d90a7382a3c3b>` = 0;
+	};
+.. _details-structsite_1_1_ion_environment:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; ion
+.. _doxid-structsite_1_1_ion_environment_1a02bd5a73c0cc445e9f466ed3add1835a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> ion
+
+cloud indices of the ions, in input order
+
+.. index:: pair: variable; shell
+.. _doxid-structsite_1_1_ion_environment_1a277b78dca0eb1dddf9a9ff7698a60706:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> shell
+
+water molecules within the cutoff
+
+.. index:: pair: variable; iceFraction
+.. _doxid-structsite_1_1_ion_environment_1ab8c73ad7e47ebef7f210b178707e735d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> iceFraction
+
+labelled share of that shell
+

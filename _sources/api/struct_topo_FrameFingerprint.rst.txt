@@ -1,0 +1,90 @@
+.. index:: pair: struct; topo::FrameFingerprint
+.. _doxid-structtopo_1_1_frame_fingerprint:
+
+struct topo::FrameFingerprint
+=============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <topo_fingerprint.hpp>
+	
+	struct FrameFingerprint {
+		// fields
+	
+		std::string :ref:`key<doxid-structtopo_1_1_frame_fingerprint_1ae73caf3f7d168ea457feb9b8fdb9c9fe>`;
+		std::string :ref:`method<doxid-structtopo_1_1_frame_fingerprint_1a4d7179bcacbf440ed2a9bd1a8aefb260>`;
+		std::vector<std::string> :ref:`atomKeys<doxid-structtopo_1_1_frame_fingerprint_1a7552450f798d8591d7580e8d9422bcb6>`;
+		std::map<std::string, int> :ref:`classes<doxid-structtopo_1_1_frame_fingerprint_1a7b460d00fe40ddad15c680fec009eecf>`;
+		std::vector<int> :ref:`ringCensus<doxid-structtopo_1_1_frame_fingerprint_1af25731956ad220bebec8965a6e8432bc>`;
+		int :target:`hops<doxid-structtopo_1_1_frame_fingerprint_1a436b359c7a9bb9b2c849d0e37d13962d>` = 0;
+	};
+.. _details-structtopo_1_1_frame_fingerprint:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; key
+.. _doxid-structtopo_1_1_frame_fingerprint_1ae73caf3f7d168ea457feb9b8fdb9c9fe:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::string key
+
+hash of the sorted local keys and the ring census
+
+.. index:: pair: variable; method
+.. _doxid-structtopo_1_1_frame_fingerprint_1a4d7179bcacbf440ed2a9bd1a8aefb260:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::string method
+
+method of the local keys
+
+.. index:: pair: variable; atomKeys
+.. _doxid-structtopo_1_1_frame_fingerprint_1a7552450f798d8591d7580e8d9422bcb6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::string> atomKeys
+
+one local key per atom
+
+.. index:: pair: variable; classes
+.. _doxid-structtopo_1_1_frame_fingerprint_1a7b460d00fe40ddad15c680fec009eecf:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::map<std::string, int> classes
+
+local key -> number of atoms carrying it
+
+.. index:: pair: variable; ringCensus
+.. _doxid-structtopo_1_1_frame_fingerprint_1af25731956ad220bebec8965a6e8432bc:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> ringCensus
+
+ringCensus[s] = primitive rings of size s
+

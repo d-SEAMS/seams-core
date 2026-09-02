@@ -16,6 +16,7 @@ Global Namespace
 	namespace_site.rst
 	namespace_sout.rst
 	namespace_std.rst
+	namespace_topo.rst
 	namespace_topoparam.rst
 
 
@@ -53,6 +54,7 @@ Global Namespace
 	namespace :ref:`sout<doxid-namespacesout>`;
 	namespace :ref:`sph<doxid-namespacesph>`;
 	namespace :ref:`std<doxid-namespacestd>`;
+	namespace :ref:`topo<doxid-namespacetopo>`;
 	namespace :ref:`topoparam<doxid-namespacetopoparam>`;
 	namespace :ref:`tum3<doxid-namespacetum3>`;
 

@@ -1,0 +1,78 @@
+.. index:: pair: struct; topo::LocalKey
+.. _doxid-structtopo_1_1_local_key:
+
+struct topo::LocalKey
+=====================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <topo_fingerprint.hpp>
+	
+	struct LocalKey {
+		// fields
+	
+		std::string :ref:`key<doxid-structtopo_1_1_local_key_1ade47bf93aa5a68aa40a351f66460f8f4>`;
+		std::string :ref:`method<doxid-structtopo_1_1_local_key_1a6d9432eaa28df087d4066dff12e6b779>`;
+		int :ref:`vertices<doxid-structtopo_1_1_local_key_1aaa45c4d7a15d8dff80b3b93e76117655>` = 0;
+		int :ref:`edges<doxid-structtopo_1_1_local_key_1a46842962761d0b24c821e614b0598506>` = 0;
+	};
+.. _details-structtopo_1_1_local_key:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; key
+.. _doxid-structtopo_1_1_local_key_1ade47bf93aa5a68aa40a351f66460f8f4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::string key
+
+canonical certificate or refinement hash
+
+.. index:: pair: variable; method
+.. _doxid-structtopo_1_1_local_key_1a6d9432eaa28df087d4066dff12e6b779:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::string method
+
+"nauty" or "wl"
+
+.. index:: pair: variable; vertices
+.. _doxid-structtopo_1_1_local_key_1aaa45c4d7a15d8dff80b3b93e76117655:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int vertices = 0
+
+atoms in the neighbourhood, centre included
+
+.. index:: pair: variable; edges
+.. _doxid-structtopo_1_1_local_key_1a46842962761d0b24c821e614b0598506:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int edges = 0
+
+bonds among them
+

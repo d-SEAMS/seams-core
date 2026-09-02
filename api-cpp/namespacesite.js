@@ -1,6 +1,7 @@
 var namespacesite =
 [
     [ "DensityZ", "structsite_1_1DensityZ.html", "structsite_1_1DensityZ" ],
+    [ "IonEnvironment", "structsite_1_1IonEnvironment.html", "structsite_1_1IonEnvironment" ],
     [ "Table", "structsite_1_1Table.html", "structsite_1_1Table" ],
     [ "Family", "namespacesite.html#aa3661d15289b4b8576f48217ed337ca3", [
       [ "waterIce", "namespacesite.html#aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd", null ],
@@ -11,6 +12,11 @@ var namespacesite =
       [ "confinedIL", "namespacesite.html#aa3661d15289b4b8576f48217ed337ca3a7113d84245536a99eb7886ad378cf879", null ],
       [ "confinedWater", "namespacesite.html#aa3661d15289b4b8576f48217ed337ca3a10650fc2fc72044750176bdf86ff52b9", null ],
       [ "networkFormer", "namespacesite.html#aa3661d15289b4b8576f48217ed337ca3ae996e10174633eb116ed8f0b265bbd64", null ]
+    ] ],
+    [ "IonState", "namespacesite.html#a7cdb003964d40a8454361db4b34b4791", [
+      [ "liquid", "namespacesite.html#a7cdb003964d40a8454361db4b34b4791af80b6383d767feb24333c7d460bed98c", null ],
+      [ "front", "namespacesite.html#a7cdb003964d40a8454361db4b34b4791ae6ec529ba185279aa0adcf93e645c7cd", null ],
+      [ "ice", "namespacesite.html#a7cdb003964d40a8454361db4b34b4791a7bdff76536f12a7c5ffde207e72cfe3a", null ]
     ] ],
     [ "Kind", "namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90", [
       [ "unspecified", "namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90ad415f0e30c471dfdd9bc4f827329ef48", null ],
@@ -31,6 +37,7 @@ var namespacesite =
     [ "iceScoreAllowed", "namespacesite.html#a05342583b5b8258d5347b3f18983d4b2", null ],
     [ "indicesOf", "namespacesite.html#a651f87e7aaca786cffd536a4d2b286c4", null ],
     [ "ionCloud", "namespacesite.html#a55a0dd31fcceddabfa6cda601eeb807c", null ],
+    [ "ionEnvironment", "namespacesite.html#a59c0f056c026caebb259d8c8e0d032e1", null ],
     [ "lammpsTypeOfKind", "namespacesite.html#a1dd96ee4ccc36bc86f348ec029859b53", null ],
     [ "parseFamily", "namespacesite.html#a44e7fbcc66c892d4e98d896e5041cf4c", null ],
     [ "parseSiteSpec", "namespacesite.html#ab556d24c5f6d7d7be9ba2e4d975259be", null ],

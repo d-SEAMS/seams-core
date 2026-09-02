@@ -250,6 +250,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('site_8hpp.html
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:site_3A_3ATable" id="r_site_3A_3ATable"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1Table.html">site::Table</a></td></tr>
+<tr class="memitem:site_3A_3AIonEnvironment" id="r_site_3A_3AIonEnvironment"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1IonEnvironment.html">site::IonEnvironment</a></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
@@ -285,6 +286,11 @@ Enumerations</h2></td></tr>
 , <a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3ae996e10174633eb116ed8f0b265bbd64">site::networkFormer</a>
 <br />
  }</td></tr>
+<tr class="memitem:a7cdb003964d40a8454361db4b34b4791" id="r_a7cdb003964d40a8454361db4b34b4791"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a7cdb003964d40a8454361db4b34b4791">site::IonState</a> { <a class="el" href="namespacesite.html#a7cdb003964d40a8454361db4b34b4791af80b6383d767feb24333c7d460bed98c">site::liquid</a> = 0
+, <a class="el" href="namespacesite.html#a7cdb003964d40a8454361db4b34b4791ae6ec529ba185279aa0adcf93e645c7cd">site::front</a> = 1
+, <a class="el" href="namespacesite.html#a7cdb003964d40a8454361db4b34b4791a7bdff76536f12a7c5ffde207e72cfe3a">site::ice</a> = 2
+ }</td></tr>
+<tr class="memdesc:a7cdb003964d40a8454361db4b34b4791"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ions read against a per-atom ice assignment.  <a href="namespacesite.html#a7cdb003964d40a8454361db4b34b4791">More...</a><br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
@@ -292,6 +298,8 @@ Functions</h2></td></tr>
 <tr class="memitem:a1dd96ee4ccc36bc86f348ec029859b53" id="r_a1dd96ee4ccc36bc86f348ec029859b53"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a1dd96ee4ccc36bc86f348ec029859b53">site::lammpsTypeOfKind</a> (const <a class="el" href="structsite_1_1Table.html">Table</a> &amp;table, <a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90">Kind</a> kind)</td></tr>
 <tr class="memitem:a55a0dd31fcceddabfa6cda601eeb807c" id="r_a55a0dd31fcceddabfa6cda601eeb807c"><td class="memItemLeft"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a55a0dd31fcceddabfa6cda601eeb807c">site::ionCloud</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;src, const <a class="el" href="structsite_1_1Table.html">Table</a> &amp;table)</td></tr>
 <tr class="memitem:ab556d24c5f6d7d7be9ba2e4d975259be" id="r_ab556d24c5f6d7d7be9ba2e4d975259be"><td class="memItemLeft"><a class="el" href="structsite_1_1Table.html">Table</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#ab556d24c5f6d7d7be9ba2e4d975259be">site::parseSiteSpec</a> (std::string_view spec)</td></tr>
+<tr class="memitem:a59c0f056c026caebb259d8c8e0d032e1" id="r_a59c0f056c026caebb259d8c8e0d032e1"><td class="memItemLeft"><a class="el" href="structsite_1_1IonEnvironment.html">IonEnvironment</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a59c0f056c026caebb259d8c8e0d032e1">site::ionEnvironment</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; bool &gt; &amp;iceFlag, const std::vector&lt; int &gt; &amp;ionIndices, int waterType, double cutoff)</td></tr>
+<tr class="memdesc:a59c0f056c026caebb259d8c8e0d032e1"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt">iceFlag</span> is indexed like <span class="tt">yCloud.pts</span>; <span class="tt">waterType</span> selects the water oxygens (0 accepts every atom that is not an ion); <span class="tt">cutoff</span> is the first shell radius in the cloud's length unit.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Per-atom site chemistry, separate from CHILL ice labels. </p>

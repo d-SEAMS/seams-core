@@ -32,6 +32,7 @@ var dir_37a9b835d5ced2a8f90c237a2ad84fdf =
     [ "steinhardt_device.hpp", "steinhardt__device_8hpp.html", "steinhardt__device_8hpp" ],
     [ "structure_desc.hpp", "structure__desc_8hpp.html", "structure__desc_8hpp" ],
     [ "topo_bulk.hpp", "topo__bulk_8hpp.html", "topo__bulk_8hpp" ],
+    [ "topo_fingerprint.hpp", "topo__fingerprint_8hpp.html", "topo__fingerprint_8hpp" ],
     [ "topo_one_dim.hpp", "topo__one__dim_8hpp.html", "topo__one__dim_8hpp" ],
     [ "topo_two_dim.hpp", "topo__two__dim_8hpp.html", "topo__two__dim_8hpp" ],
     [ "voronoi_qlm.hpp", "voronoi__qlm_8hpp.html", "voronoi__qlm_8hpp" ]

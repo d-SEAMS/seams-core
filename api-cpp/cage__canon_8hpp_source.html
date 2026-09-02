@@ -232,31 +232,42 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('cage__canon_8h
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define SEAMS_CAGE_CANON_H_</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">// Nauty (McKay and Piperno, J. Symbolic Comput. 60, 94 (2014);</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">// 10.1016/j.jsc.2013.09.003) produces a canonical adjacency certificate</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">// for the undirected graph of a ring set. findHC/findDDC stay the</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">// enumerators; this is the label-independent signature.</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacecage.html">cage</a> {</div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="namespacecage.html#af3048384a261c7ffc3487cb54af20cb1">   14</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacecage.html#af3048384a261c7ffc3487cb54af20cb1">nautyAvailable</a>();</div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">// Hex encoding of the canonical adjacency matrix. Empty if nauty is</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">// off or the ring set has no vertices.</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="namespacecage.html#a9d73050e1b7374d21a15c61e21e39ecb">   18</a></span>std::string <a class="code hl_function" href="namespacecage.html#a9d73050e1b7374d21a15c61e21e39ecb">canonicalCertificate</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings);</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment">// True when the ring graph is isomorphic to the hexagonal prism (HC).</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="namespacecage.html#a2b191b4c90fc095838928727d7c11b3e">   21</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacecage.html#a2b191b4c90fc095838928727d7c11b3e">isHexagonalPrism</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings);</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="namespacecage.html#ae431d00a43e0a0e99da9ff62d23a6e22">   23</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacecage.html#ae431d00a43e0a0e99da9ff62d23a6e22">sameCertificate</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;a,</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>                     <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;b);</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>} <span class="comment">// namespace cage</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;utility&gt;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">// Nauty (McKay and Piperno, J. Symbolic Comput. 60, 94 (2014);</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">// 10.1016/j.jsc.2013.09.003) produces a canonical adjacency certificate</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">// for the undirected graph of a ring set. findHC/findDDC stay the</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// enumerators; this is the label-independent signature.</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacecage.html">cage</a> {</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="namespacecage.html#af3048384a261c7ffc3487cb54af20cb1">   15</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacecage.html#af3048384a261c7ffc3487cb54af20cb1">nautyAvailable</a>();</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">// Hex encoding of the canonical adjacency matrix. Empty if nauty is</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">// off or the ring set has no vertices.</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="namespacecage.html#a9d73050e1b7374d21a15c61e21e39ecb">   19</a></span>std::string <a class="code hl_function" href="namespacecage.html#a9d73050e1b7374d21a15c61e21e39ecb">canonicalCertificate</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings);</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">// True when the ring graph is isomorphic to the hexagonal prism (HC).</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="namespacecage.html#a2b191b4c90fc095838928727d7c11b3e">   22</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacecage.html#a2b191b4c90fc095838928727d7c11b3e">isHexagonalPrism</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings);</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="namespacecage.html#ae431d00a43e0a0e99da9ff62d23a6e22">   24</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacecage.html#ae431d00a43e0a0e99da9ff62d23a6e22">sameCertificate</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;a,</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>                     <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;b);</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment">// Certificate of an arbitrary graph on n local vertices given by its edge</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">// list, with vertex `root` in its own colour cell so that rooted</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment">// neighbourhoods with different centres get different certificates</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment">// (root &lt; 0 colours nothing). Empty if nauty is off, n is zero, or n</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment">// exceeds the dense-graph limit.</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="namespacecage.html#a1ff12e6c4c9298050913b02758546c6f">   32</a></span>std::string <a class="code hl_function" href="namespacecage.html#a1ff12e6c4c9298050913b02758546c6f">canonicalCertificateRooted</a>(<span class="keywordtype">int</span> n,</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>                                       <span class="keyword">const</span> std::vector&lt;std::pair&lt;int, int&gt;&gt; &amp;edges,</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>                                       <span class="keywordtype">int</span> root);</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>} <span class="comment">// namespace cage</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="anamespacecage_html"><div class="ttname"><a href="namespacecage.html">cage</a></div><div class="ttdoc">Functions for topological network criteria cage types.</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00041">cage.hpp:41</a></div></div>
+<div class="ttc" id="anamespacecage_html_a1ff12e6c4c9298050913b02758546c6f"><div class="ttname"><a href="namespacecage.html#a1ff12e6c4c9298050913b02758546c6f">cage::canonicalCertificateRooted</a></div><div class="ttdeci">std::string canonicalCertificateRooted(int n, const std::vector&lt; std::pair&lt; int, int &gt; &gt; &amp;edges, int root)</div></div>
 <div class="ttc" id="anamespacecage_html_a2b191b4c90fc095838928727d7c11b3e"><div class="ttname"><a href="namespacecage.html#a2b191b4c90fc095838928727d7c11b3e">cage::isHexagonalPrism</a></div><div class="ttdeci">bool isHexagonalPrism(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings)</div></div>
 <div class="ttc" id="anamespacecage_html_a9d73050e1b7374d21a15c61e21e39ecb"><div class="ttname"><a href="namespacecage.html#a9d73050e1b7374d21a15c61e21e39ecb">cage::canonicalCertificate</a></div><div class="ttdeci">std::string canonicalCertificate(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings)</div></div>
 <div class="ttc" id="anamespacecage_html_ae431d00a43e0a0e99da9ff62d23a6e22"><div class="ttname"><a href="namespacecage.html#ae431d00a43e0a0e99da9ff62d23a6e22">cage::sameCertificate</a></div><div class="ttdeci">bool sameCertificate(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;a, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;b)</div></div>

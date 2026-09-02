@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['ylmatom_0',['YlmAtom',['../structchill_1_1YlmAtom.html',1,'chill']]]
+  ['vertex_0',['Vertex',['../structprimitive_1_1Vertex.html',1,'primitive']]],
+  ['voronoiweights_1',['VoronoiWeights',['../structchill_1_1VoronoiWeights.html',1,'chill']]]
 ];

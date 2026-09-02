@@ -1,0 +1,117 @@
+.. index:: pair: namespace; topo
+.. _doxid-namespacetopo:
+
+namespace topo
+==============
+
+.. toctree::
+	:hidden:
+
+	struct_topo_FrameFingerprint.rst
+	struct_topo_LocalKey.rst
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace topo {
+
+	// typedefs
+
+	typedef std::vector<std::vector<int>> :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`;
+
+	// structs
+
+	struct :ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>`;
+	struct :ref:`LocalKey<doxid-structtopo_1_1_local_key>`;
+
+	// global functions
+
+	std::vector<int> :ref:`hopNeighbourhood<doxid-namespacetopo_1ac22724ca2d62a9ecac9d20b5ab0b7182>`(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int atom, int hops);
+	std::uint64_t :ref:`wlHash<doxid-namespacetopo_1a97e0968ef146c556bbb00afed7651cef>`(const std::vector<std::vector<int>>& adjacency, int root, int rounds);
+	:ref:`LocalKey<doxid-structtopo_1_1_local_key>` :ref:`localKey<doxid-namespacetopo_1a8ffe7b63847075b2586677366f1d4393>`(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int atom, int hops);
+	:ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>` :ref:`fingerprint<doxid-namespacetopo_1a4f36620e788fd0170d9b2df1b99f8f98>`(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int hops = 2, int maxRingSize = 7);
+	std::string :ref:`hex<doxid-namespacetopo_1a704a6805e4842829fa83f16081405519>`(std::uint64_t value);
+
+	} // namespace topo
+.. _details-namespacetopo:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Typedefs
+--------
+
+.. index:: pair: typedef; Rows
+.. _doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	typedef std::vector<std::vector<int>> Rows
+
+Neighbour rows by index, each row leading with the atom itself, as :ref:`nneigh::neighbourListByIndex <doxid-group__nneigh_1gacf46d8c4b42f15e634ff0076ac83c012>` returns them.
+
+Global Functions
+----------------
+
+.. index:: pair: function; hopNeighbourhood
+.. _doxid-namespacetopo_1ac22724ca2d62a9ecac9d20b5ab0b7182:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> hopNeighbourhood(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int atom, int hops)
+
+Atoms within ``hops`` bonds of ``atom``, the atom itself first, then in breadth-first order.
+
+.. index:: pair: function; wlHash
+.. _doxid-namespacetopo_1a97e0968ef146c556bbb00afed7651cef:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::uint64_t wlHash(const std::vector<std::vector<int>>& adjacency, int root, int rounds)
+
+Weisfeiler-Lehman refinement hash of a graph given by local adjacency lists; ``root`` (or -1) starts in its own colour.
+
+``rounds`` refinements.
+
+.. index:: pair: function; localKey
+.. _doxid-namespacetopo_1a8ffe7b63847075b2586677366f1d4393:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`LocalKey<doxid-structtopo_1_1_local_key>` localKey(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int atom, int hops)
+
+Key of the rooted neighbourhood of ``atom``.
+
+.. index:: pair: function; fingerprint
+.. _doxid-namespacetopo_1a4f36620e788fd0170d9b2df1b99f8f98:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>` fingerprint(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int hops = 2, int maxRingSize = 7)
+
+Keys of every atom, their histogram, the ring census up to ``maxRingSize``, and the frame key.
+
+.. index:: pair: function; hex
+.. _doxid-namespacetopo_1a704a6805e4842829fa83f16081405519:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::string hex(std::uint64_t value)
+
+Hex string of a 64-bit hash.
+

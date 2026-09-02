@@ -7,10 +7,13 @@ var searchData=
   ['neighlistindex_4',['neighListIndex',['../group__primitive.html#gabbf40e41b84205035d4053be2180f6b2',1,'primitive::Vertex']]],
   ['nfeat_5',['nFeat',['../structchill_1_1LinearClassifier.html#a80420505e41f4d6462815d62e7b13671',1,'chill::LinearClassifier']]],
   ['nframes_6',['nFrames',['../structgpu_1_1Footprint.html#a0e4fc0f777fae3d42f0b19b2326b42f0',1,'gpu::Footprint']]],
-  ['ni_7',['nI',['../group__rdf.html#ga71a5ed9266ea41b597649fba59a6c699',1,'rdf::PartialRdf']]],
-  ['nj_8',['nJ',['../group__rdf.html#gad206f2047add393eb6e1c3a95b0da7b5',1,'rdf::PartialRdf']]],
-  ['nlistbytes_9',['nlistBytes',['../structgpu_1_1Footprint.html#ab473038da5c197da756b2f3812d3258f',1,'gpu::Footprint']]],
-  ['nop_10',['nop',['../group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1',1,'molSys::PointCloud']]],
-  ['noperations_11',['nOperations',['../structira_1_1PointGroup.html#a1e65b4956b4fa7c746d8153cae52cda9',1,'ira::PointGroup']]],
-  ['nrings_12',['nRings',['../structgpu_1_1BatchResult.html#ab851d787241b52d9210cd08b9dc3c361',1,'gpu::BatchResult']]]
+  ['nfront_7',['nFront',['../structsite_1_1IonEnvironment.html#a243d509ea9c0e3eba197c7fcf74936d8',1,'site::IonEnvironment']]],
+  ['ni_8',['nI',['../group__rdf.html#ga71a5ed9266ea41b597649fba59a6c699',1,'rdf::PartialRdf']]],
+  ['nice_9',['nIce',['../structsite_1_1IonEnvironment.html#a30493f96ed37b238ce348fc7abbffc72',1,'site::IonEnvironment']]],
+  ['nj_10',['nJ',['../group__rdf.html#gad206f2047add393eb6e1c3a95b0da7b5',1,'rdf::PartialRdf']]],
+  ['nliquid_11',['nLiquid',['../structsite_1_1IonEnvironment.html#af5b02f27a8173063836d90a7382a3c3b',1,'site::IonEnvironment']]],
+  ['nlistbytes_12',['nlistBytes',['../structgpu_1_1Footprint.html#ab473038da5c197da756b2f3812d3258f',1,'gpu::Footprint']]],
+  ['nop_13',['nop',['../group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1',1,'molSys::PointCloud']]],
+  ['noperations_14',['nOperations',['../structira_1_1PointGroup.html#a1e65b4956b4fa7c746d8153cae52cda9',1,'ira::PointGroup']]],
+  ['nrings_15',['nRings',['../structgpu_1_1BatchResult.html#ab851d787241b52d9210cd08b9dc3c361',1,'gpu::BatchResult']]]
 ];

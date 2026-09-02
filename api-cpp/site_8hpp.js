@@ -1,6 +1,7 @@
 var site_8hpp =
 [
     [ "site::Table", "structsite_1_1Table.html", "structsite_1_1Table" ],
+    [ "site::IonEnvironment", "structsite_1_1IonEnvironment.html", "structsite_1_1IonEnvironment" ],
     [ "site::Family", "namespacesite.html#aa3661d15289b4b8576f48217ed337ca3", [
       [ "site::Family::waterIce", "namespacesite.html#aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd", null ],
       [ "site::Family::ionicLiquid", "namespacesite.html#aa3661d15289b4b8576f48217ed337ca3abd8c0f0db6e9f7ff0bf08fdebd75899d", null ],
@@ -10,6 +11,11 @@ var site_8hpp =
       [ "site::Family::confinedIL", "namespacesite.html#aa3661d15289b4b8576f48217ed337ca3a7113d84245536a99eb7886ad378cf879", null ],
       [ "site::Family::confinedWater", "namespacesite.html#aa3661d15289b4b8576f48217ed337ca3a10650fc2fc72044750176bdf86ff52b9", null ],
       [ "site::Family::networkFormer", "namespacesite.html#aa3661d15289b4b8576f48217ed337ca3ae996e10174633eb116ed8f0b265bbd64", null ]
+    ] ],
+    [ "site::IonState", "namespacesite.html#a7cdb003964d40a8454361db4b34b4791", [
+      [ "site::IonState::liquid", "namespacesite.html#a7cdb003964d40a8454361db4b34b4791af80b6383d767feb24333c7d460bed98c", null ],
+      [ "site::IonState::front", "namespacesite.html#a7cdb003964d40a8454361db4b34b4791ae6ec529ba185279aa0adcf93e645c7cd", null ],
+      [ "site::IonState::ice", "namespacesite.html#a7cdb003964d40a8454361db4b34b4791a7bdff76536f12a7c5ffde207e72cfe3a", null ]
     ] ],
     [ "site::Kind", "namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90", [
       [ "site::Kind::unspecified", "namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90ad415f0e30c471dfdd9bc4f827329ef48", null ],
@@ -26,6 +32,7 @@ var site_8hpp =
     ] ],
     [ "site::indicesOf", "namespacesite.html#a651f87e7aaca786cffd536a4d2b286c4", null ],
     [ "site::ionCloud", "namespacesite.html#a55a0dd31fcceddabfa6cda601eeb807c", null ],
+    [ "site::ionEnvironment", "namespacesite.html#a59c0f056c026caebb259d8c8e0d032e1", null ],
     [ "site::lammpsTypeOfKind", "namespacesite.html#a1dd96ee4ccc36bc86f348ec029859b53", null ],
     [ "site::parseSiteSpec", "namespacesite.html#ab556d24c5f6d7d7be9ba2e4d975259be", null ]
 ];

@@ -1,0 +1,31 @@
+.. index:: pair: enum; IonState
+.. _doxid-namespacesite_1a7cdb003964d40a8454361db4b34b4791:
+
+enum site::IonState
+===================
+
+Overview
+~~~~~~~~
+
+Ions read against a per-atom ice assignment. :ref:`More...<details-namespacesite_1a7cdb003964d40a8454361db4b34b4791>`
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <site.hpp>
+
+	enum IonState {
+	    :target:`liquid<doxid-namespacesite_1a7cdb003964d40a8454361db4b34b4791af80b6383d767feb24333c7d460bed98c>` = 0,
+	    :target:`front<doxid-namespacesite_1a7cdb003964d40a8454361db4b34b4791ae6ec529ba185279aa0adcf93e645c7cd>`  = 1,
+	    :target:`ice<doxid-namespacesite_1a7cdb003964d40a8454361db4b34b4791a7bdff76536f12a7c5ffde207e72cfe3a>`    = 2,
+	};
+
+.. _details-namespacesite_1a7cdb003964d40a8454361db4b34b4791:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Ions read against a per-atom ice assignment.
+
+Ions are not part of the hydrogen-bond network; the assignment is computed on the water and each ion is classed by its first water shell: every shell molecule labelled is ``ice``, none is ``liquid``, otherwise ``front``. An ion with an empty shell is liquid.
+

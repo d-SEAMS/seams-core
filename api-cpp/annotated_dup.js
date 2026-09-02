@@ -54,6 +54,11 @@ var annotated_dup =
     ] ],
     [ "site", "namespacesite.html", [
       [ "DensityZ", "structsite_1_1DensityZ.html", "structsite_1_1DensityZ" ],
+      [ "IonEnvironment", "structsite_1_1IonEnvironment.html", "structsite_1_1IonEnvironment" ],
       [ "Table", "structsite_1_1Table.html", "structsite_1_1Table" ]
+    ] ],
+    [ "topo", "namespacetopo.html", [
+      [ "LocalKey", "structtopo_1_1LocalKey.html", "structtopo_1_1LocalKey" ],
+      [ "FrameFingerprint", "structtopo_1_1FrameFingerprint.html", "structtopo_1_1FrameFingerprint" ]
     ] ]
 ];
