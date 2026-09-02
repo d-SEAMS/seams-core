@@ -14,23 +14,28 @@ project('seams-core', ['cpp', 'c'],
 host_system = host_machine.system()
 
 # Global accumulator variables (eOn pattern)
-_args = ['-funroll-loops', '-Wno-sign-compare', '-Wno-unused-variable',
-         '-Wno-unused-parameter', '-Wno-unused-but-set-variable']
+_args = ['-funroll-loops']
+_link_args = []
 _deps = []
 _linkto = []
 _incdirs = []
 
 cppc = meson.get_compiler('cpp')
+cpp_id = cppc.get_id()
 
-# GCC vs clang warning flag differences
-if cppc.get_id() == 'gcc'
-  _args += ['-Wno-maybe-uninitialized']
-else
-  _args += ['-Wno-uninitialized']
+# GCC/clang warning suppressions. nvc++ (id nvidia/pgi) rejects several
+# of these -Wno flags, so they stay off that toolchain.
+if cpp_id == 'gcc' or cpp_id == 'clang'
+  _args += ['-Wno-sign-compare', '-Wno-unused-variable',
+            '-Wno-unused-parameter', '-Wno-unused-but-set-variable']
+  if cpp_id == 'gcc'
+    _args += ['-Wno-maybe-uninitialized']
+  else
+    _args += ['-Wno-uninitialized']
+  endif
+  # Suppress [[nodiscard]] warnings from legacy callers
+  _args += ['-Wno-unused-result']
 endif
-
-# Suppress [[nodiscard]] warnings from legacy callers (to be fixed incrementally)
-_args += ['-Wno-unused-result']
 
 # Platform conditionals
 if host_system == 'darwin'
@@ -112,16 +117,18 @@ endif
 # OpenMP target offload. The probe must actually link the combined
 # construct the library ships; a bare -fopenmp-targets flag or an
 # empty `#pragma omp target {}` is not enough (missing nvptx bitcode
-# still outlines to the host).
+# still outlines to the host). nvc++ takes -mp=gpu; clang/LLVM takes
+# -fopenmp-targets=<triple>. The first set that links wins, and those
+# flags go on both the compile and the link line.
 offload_opt = get_option('with_openmp_offload')
 offload_enabled = false
+offload_flags = []
 if not offload_opt.disabled()
   if not openmp_found
     if offload_opt.enabled()
       error('with_openmp_offload=enabled but OpenMP does not link')
     endif
   else
-    offload_arg = '-fopenmp-targets=' + get_option('offload_triple')
     offload_probe = '''
       #include <omp.h>
       int main() {
@@ -132,16 +139,36 @@ if not offload_opt.disabled()
         return x[0] == 1.0 ? 0 : 1;
       }
     '''
-    if cppc.links(offload_probe, args: ['-fopenmp', offload_arg],
-                  name: 'OpenMP target offload link')
-      _args += ['-DSEAMS_HAS_OFFLOAD=1', offload_arg]
-      offload_enabled = true
+    offload_triple = get_option('offload_triple')
+    offload_try = [
+      ['-mp=gpu'],
+      ['-mp=gpu', '-gpu=cc80'],
+      ['-fopenmp', '-fopenmp-targets=' + offload_triple],
+    ]
+    foreach flags : offload_try
+      if not offload_enabled
+        probe_name = 'OpenMP target offload'
+        foreach f : flags
+          probe_name += ' ' + f
+        endforeach
+        if cppc.links(offload_probe, args: flags, dependencies: [openmp_dep],
+                      name: probe_name)
+          offload_flags = flags
+          offload_enabled = true
+        endif
+      endif
+    endforeach
+    if offload_enabled
+      _args += ['-DSEAMS_HAS_OFFLOAD=1']
+      _args += offload_flags
+      _link_args += offload_flags
     elif offload_opt.enabled()
       error('OpenMP target offload was requested but the compiler ' +
-            'cannot link a target region for ' + get_option('offload_triple'))
+            'cannot link a target region (tried -mp=gpu and -fopenmp-targets=' +
+            offload_triple + ')')
     else
-      message('OpenMP target offload probe failed for ' +
-              get_option('offload_triple') + '; host OpenMP only')
+      message('OpenMP target offload probe failed for -mp=gpu and ' +
+              offload_triple + '; host OpenMP only')
     endif
   endif
 endif
@@ -404,7 +431,7 @@ if not get_option('with_lua').disabled()
 endif
 
 if get_option('with_cli')
-  seams_cli_link = []
+  seams_cli_link = _link_args
   if host_machine.system() == 'linux'
     seams_cli_link += ['-Wl,--enable-new-dtags']
   endif

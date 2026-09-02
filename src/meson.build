@@ -43,6 +43,7 @@ ydslib = library('yodaLib',
   ydslib_sources,
   dependencies: _deps,
   cpp_args: _args,
+  link_args: _link_args,
   include_directories: _incdirs,
   install: true)
 
@@ -52,6 +53,7 @@ yds_dep = declare_dependency(
   link_with: [ydslib],
   include_directories: _incdirs,
   compile_args: _args,
+  link_args: _link_args,
   dependencies: _deps)
 
 # Installed interface.

@@ -1,6 +1,7 @@
 # d-SEAMS tests (Catch2 v3)
 
-catch2_dep = dependency('catch2-with-main', required: true)
+catch2_dep = dependency('catch2-with-main', required: true,
+  fallback: ['catch2', 'catch2_with_main_dep'])
 
 test_sources = {
   'franzblau': 'franzblau-test.cpp',
@@ -56,7 +57,7 @@ _test_env = environment()
 _test_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
 
 # --enable-new-dtags is Linux-only (macOS ld does not support it)
-_test_link_args = []
+_test_link_args = _link_args
 if host_machine.system() == 'linux'
   _test_link_args += ['-Wl,--enable-new-dtags']
 endif
@@ -71,7 +72,7 @@ foreach name, src : test_sources
       build_rpath: '$ORIGIN/../src'),
     workdir: meson.project_source_root() / 'input',
     env: _test_env,
-    timeout: name == 'cage_enum' ? 300 : 120)
+    timeout: name == 'cage_enum' ? 300 : (name == 'bop' and offload_enabled ? 600 : 120))
 endforeach
 
 # SIMD verification test (header-only, does not need libyodaLib)
