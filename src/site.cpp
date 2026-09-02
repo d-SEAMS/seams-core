@@ -9,6 +9,8 @@
 #include <mol_sys.hpp>
 
 #include <algorithm>
+#include <array>
+#include <cmath>
 #include <stdexcept>
 #include <string>
 #include <unordered_set>
@@ -336,6 +338,94 @@ ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     out.shell.push_back(shell);
     out.iceFraction.push_back(shell > 0 ? static_cast<double>(labelled) / shell : 0.0);
     out.state.push_back(state);
+  }
+  return out;
+}
+
+
+namespace {
+// minimum-image displacement r - p for a point r and a reference p
+std::array<double, 3>
+minImage(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double rx,
+         double ry, double rz, double px, double py, double pz) {
+  if (yCloud.box.size() >= 6) {
+    return gen::triclinicMinImage(yCloud, rx, ry, rz, px, py, pz);
+  }
+  std::array<double, 3> dr = {rx - px, ry - py, rz - pz};
+  for (int k = 0; k < 3; k++) {
+    const double L = yCloud.box[static_cast<std::size_t>(k)];
+    if (L > 0.0) {
+      dr[static_cast<std::size_t>(k)] -= L * std::round(dr[static_cast<std::size_t>(k)] / L);
+    }
+  }
+  return dr;
+}
+} // namespace
+
+std::array<double, 3>
+periodicCentroid(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                 const std::vector<int> &atoms) {
+  std::array<double, 3> c = {0.0, 0.0, 0.0};
+  if (atoms.empty()) {
+    return c;
+  }
+  const auto &p0 = yCloud.pts[static_cast<std::size_t>(atoms.front())];
+  for (int a : atoms) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(a)];
+    const auto dr = minImage(yCloud, p.x, p.y, p.z, p0.x, p0.y, p0.z);
+    for (int k = 0; k < 3; k++) {
+      c[static_cast<std::size_t>(k)] += dr[static_cast<std::size_t>(k)];
+    }
+  }
+  const double inv = 1.0 / static_cast<double>(atoms.size());
+  c[0] = p0.x + c[0] * inv;
+  c[1] = p0.y + c[1] * inv;
+  c[2] = p0.z + c[2] * inv;
+  return c;
+}
+
+GuestOccupancy
+guestOccupancy(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+               const std::vector<std::vector<int>> &cages,
+               const std::vector<int> &guestIndices, double radius) {
+  GuestOccupancy out;
+  out.guestsPerCage.assign(cages.size(), 0);
+  std::vector<std::array<double, 3>> centres;
+  centres.reserve(cages.size());
+  for (const auto &cage : cages) {
+    centres.push_back(periodicCentroid(yCloud, cage));
+  }
+  const double r2max = radius * radius;
+  for (int g : guestIndices) {
+    if (g < 0 || g >= yCloud.nop) {
+      continue;
+    }
+    const auto &p = yCloud.pts[static_cast<std::size_t>(g)];
+    int best = -1;
+    double bestSq = r2max;
+    for (std::size_t c = 0; c < centres.size(); c++) {
+      const auto dr = minImage(yCloud, p.x, p.y, p.z, centres[c][0], centres[c][1], centres[c][2]);
+      const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+      if (d2 <= bestSq) {
+        bestSq = d2;
+        best = static_cast<int>(c);
+      }
+    }
+    out.cageOfGuest.push_back(best);
+    out.centreDistance.push_back(best < 0 ? -1.0 : std::sqrt(bestSq));
+    if (best < 0) {
+      ++out.free;
+    } else {
+      ++out.guestsPerCage[static_cast<std::size_t>(best)];
+    }
+  }
+  for (int n : out.guestsPerCage) {
+    if (n > 0) {
+      ++out.occupied;
+    }
+    if (n > 1) {
+      ++out.multiply;
+    }
   }
   return out;
 }

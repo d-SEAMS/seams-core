@@ -8,6 +8,7 @@
 
 #include <mol_sys.hpp>
 
+#include <array>
 #include <string_view>
 #include <unordered_map>
 #include <vector>
@@ -99,6 +100,34 @@ IonEnvironment
 ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                const std::vector<bool> &iceFlag, const std::vector<int> &ionIndices,
                int waterType, double cutoff);
+
+/// Guests read against enumerated cages. A cage is a set of vertex atoms;
+/// its centre is the periodic centroid of the vertices. A guest (methane,
+/// THF, an ion, any atom outside the network) sits in the cage whose
+/// centre is nearest to it when that centre is within `radius`; a guest
+/// with no centre within `radius` is free. This is the occupancy of a
+/// clathrate hydrate (fraction of 5^12 and 5^12 6^2 cages filled) and the
+/// test of whether an ion sits inside the network rather than at a vertex.
+struct GuestOccupancy {
+  std::vector<int> guestsPerCage;        ///< per cage, guests inside
+  std::vector<int> cageOfGuest;          ///< per guest in input order, cage index or -1
+  std::vector<double> centreDistance;    ///< per guest, distance to its cage centre (-1 when free)
+  int occupied = 0;                      ///< cages with at least one guest
+  int multiply = 0;                      ///< cages with more than one guest
+  int free = 0;                          ///< guests in no cage
+};
+/// `cages` are vertex index lists into `yCloud.pts`; `radius` in the
+/// cloud's length unit (half the cage diameter, about 4 A for a 5^12 cage).
+GuestOccupancy
+guestOccupancy(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+               const std::vector<std::vector<int>> &cages,
+               const std::vector<int> &guestIndices, double radius);
+
+/// Periodic centroid of a set of atoms: every atom is unwrapped to its
+/// minimum image about the first, and the mean is taken there.
+std::array<double, 3>
+periodicCentroid(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                 const std::vector<int> &atoms);
 } // namespace site
 
 #endif // SEAMS_SITE_H_

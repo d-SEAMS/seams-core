@@ -13,6 +13,10 @@ Libraries record whether their keys carry vertex colours (``colours``
 in the header; an absent field reads as uncoloured) and a coloured
 library is refused against plain keys. ``seams fingerprint --library``
 accepts a comma separated list and prints the per-depth counts.
+``site::guestOccupancy`` places guests (methane, THF, ions) in
+enumerated cages by the periodic centroid of each cage's vertices and
+counts occupied, multiply occupied and free, the occupancy of a
+clathrate hydrate; ``site::periodicCentroid`` is the helper.
 
 Version 2.8.0 (2026-09-02)
 ===========================
