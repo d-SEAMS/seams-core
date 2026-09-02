@@ -5,6 +5,20 @@ Changelog
 Unreleased
 ==========
 
+Version 2.7.0 (2026-09-02)
+===========================
+
+``ring::seededCageAffiliation`` takes an optional completion flag:
+``ring::ringAdjacentCompletion`` fills the last vertex of any six-ring
+whose other vertices carry a cage label, iterated to a fixed point,
+separately for the HC and DDC labels. The rule is stated and proven in
+``lean/`` (Mathlib): the completion is the least fixed point above the
+seed, empty on an empty seed, sound, and independent of visiting
+order; the edge-sharing rule it replaces is shown unsound on a
+five-vertex instance. ``tests/walk_compare`` walks a trajectory and
+prints per-frame CHILL+ and cage labels with their largest clusters.
+The reproducibility workflow moved to the ``dseams2_repro`` package.
+
 Version 2.6.0 (2026-08-17)
 ===========================
 
