@@ -122,7 +122,7 @@ struct SeededAtomLabels {
  *  The fifth argument is the ring-adjacent completion flag. The default
  *  is false. When the flag is true the accepted labels pass through
  *  ringAdjacentCompletion() on the permissive six-rings. HC and DDC
- *  complete on separate flag vectors. `seams cages --complete` sets the
+ *  complete on separate flag vectors. seams cages --complete sets the
  *  flag. tests/walk_compare leaves the flag false.
  * @param[in] strictRings Six-membered rings of the strict graph.
  * @param[in] strictNList Strict graph, by index with leading self entries.

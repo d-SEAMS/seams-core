@@ -1,5 +1,5 @@
 #+TITLE: walk_compare
-#+OPTIONS: toc:nil num:nil
+#+OPTIONS: toc:nil num:nil ^:nil
 
 ~tests/walk_compare~ walks a LAMMPS dump and prints one row per
 frame. Each row has four-neighbour star (~CHILL+~) counts, cage
@@ -8,7 +8,7 @@ mutual and union four-nearest graphs, with the largest ice cluster of
 each score. Cage flags are hexagonal cage (HC) and double-diamond
 cage (DDC).
 
-The walk_compare binary is a Meson executable. ~pixi run setup &&
+The ~walk_compare~ binary is a Meson executable. ~pixi run setup &&
 pixi run build~ (~-Dwith_tests=true~) writes
 ~bbdir/tests/walk_compare~. A Nix develop tree writes the same name
 under the Meson build directory. Catch2 does not run this binary.
