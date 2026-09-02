@@ -225,3 +225,71 @@ TEST_CASE("findBySignature(hc) and findBySignature(ddc) match findHC/findDDC "
   REQUIRE(vertexSetsOf(ddc) ==
           vertexSetsOf(cageList, cage::cageType::DoubleDiaC, six));
 }
+
+struct DumpCages {
+  std::vector<std::vector<int>> rings;
+  std::vector<cage::FoundCage> found;
+};
+
+static DumpCages cagesOnDump(const char *path, const char *spec) {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO(path, 1, yCloud, 1);
+  REQUIRE(yCloud.nop > 0);
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  nList = nneigh::neighbourListByIndex(yCloud, nList);
+  const auto sig = cage::Signature::parse(spec);
+  DumpCages out;
+  out.rings = primitive::ringNetwork(nList, std::max(sig.maxRingSize(), 6));
+  out.found = cage::findBySignature(out.rings, nList, sig);
+  return out;
+}
+
+TEST_CASE("sodalite signature finds 24-vertex cages on GenIce SOD",
+          "[cage_enum]") {
+  const auto run = cagesOnDump("traj/genice_sod.lammpstrj", "sodalite");
+  REQUIRE_FALSE(run.found.empty());
+  for (const auto &c : run.found) {
+    REQUIRE(c.vertices.size() == 24);
+    REQUIRE(c.faces.size() == 14);
+    REQUIRE(cage::isClosedPolyhedron(run.rings, c.faces));
+  }
+}
+
+TEST_CASE("sodalite signature finds 24-vertex cages on GenIce FAU",
+          "[cage_enum]") {
+  const auto run = cagesOnDump("traj/genice_fau.lammpstrj", "sodalite");
+  REQUIRE_FALSE(run.found.empty());
+  for (const auto &c : run.found) {
+    REQUIRE(c.vertices.size() == 24);
+    REQUIRE(c.faces.size() == 14);
+    REQUIRE(cage::isClosedPolyhedron(run.rings, c.faces));
+  }
+}
+
+TEST_CASE("512 and 51262 signatures find hydrate cages on GenIce sI",
+          "[cage_enum]") {
+  const auto dodeca = cagesOnDump("traj/genice_sI.lammpstrj", "512");
+  REQUIRE_FALSE(dodeca.found.empty());
+  for (const auto &c : dodeca.found) {
+    REQUIRE(c.vertices.size() == 20);
+    REQUIRE(c.faces.size() == 12);
+    REQUIRE(cage::isClosedPolyhedron(dodeca.rings, c.faces));
+  }
+  const auto tetra = cagesOnDump("traj/genice_sI.lammpstrj", "51262");
+  REQUIRE_FALSE(tetra.found.empty());
+  for (const auto &c : tetra.found) {
+    REQUIRE(c.vertices.size() == 24);
+    REQUIRE(c.faces.size() == 14);
+    REQUIRE(cage::isClosedPolyhedron(tetra.rings, c.faces));
+  }
+}
+
+TEST_CASE("512 signature finds 20-vertex cages on GenIce sII", "[cage_enum]") {
+  const auto run = cagesOnDump("traj/genice_sII.lammpstrj", "512");
+  REQUIRE_FALSE(run.found.empty());
+  for (const auto &c : run.found) {
+    REQUIRE(c.vertices.size() == 20);
+    REQUIRE(c.faces.size() == 12);
+    REQUIRE(cage::isClosedPolyhedron(run.rings, c.faces));
+  }
+}
