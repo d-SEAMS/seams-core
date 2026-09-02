@@ -30,10 +30,11 @@ GCCCORE=$EB/GCCcore/13.3.0
 PY312=$EB/Python/3.12.3-GCCcore-13.3.0
 CUDA124=$EB/CUDA/12.4.0
 CLANG17=$EB/Clang/17.0.6-GCCcore-13.2.0
+Z3=$EB/Z3/4.13.0-GCCcore-13.2.0
 
 export PATH=$CUDA124/bin:$NVHPC_ROOT/compilers/bin:$MESON_PRE/bin:$NINJA_PRE/bin:$PY312/bin:$PATH
 export PKG_CONFIG_PATH=$EIGEN_PRE/share/pkgconfig:$FLEXI_PRE/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}
-export LD_LIBRARY_PATH=$PY312/lib:$NVHPC_ROOT/compilers/lib:$NVHPC_ROOT/cuda/lib64:$NVHPC_ROOT/math_libs/lib64:$GCCCORE/lib64:$FLEXI_PRE/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+export LD_LIBRARY_PATH=$PY312/lib:$NVHPC_ROOT/compilers/lib:$NVHPC_ROOT/cuda/lib64:$NVHPC_ROOT/math_libs/lib64:$GCCCORE/lib64:$FLEXI_PRE/lib:$Z3/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 export PYTHONPATH=$MESON_PRE/lib/python3.12/site-packages${PYTHONPATH:+:$PYTHONPATH}
 export NVHPC=/opt/ohpc/pub/compiler/nvhpc/22.3
 
@@ -80,6 +81,9 @@ configure_offload() {
   local compiler=$1
   local cxx=$2
   local cc=$3
+  if [[ -f $BUILD/meson-logs/meson-log.txt ]]; then
+    cp "$BUILD/meson-logs/meson-log.txt" "$OUT/meson-log-$compiler.txt" || true
+  fi
   rm -rf "$BUILD"
   mkdir -p "$BUILD"
   export CC=$cc
@@ -113,7 +117,10 @@ configure_offload() {
 log_env
 
 USED_COMPILER=
-if configure_offload nvc++ nvc++ nvc; then
+# nvc as CC fails Meson's C sanity check. Host C is GCCcore; nvc++
+# is the C++ compiler that owns -mp=gpu.
+export PATH=$GCCCORE/bin:$PATH
+if configure_offload nvc++ nvc++ "$GCCCORE/bin/gcc"; then
   USED_COMPILER=nvc++
 else
   echo "nvc++ offload configure failed; trying clang++ 17 libomptarget" \
