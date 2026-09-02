@@ -5,6 +5,15 @@ Changelog
 Unreleased
 ==========
 
+OpenMP target offload for the Steinhardt kernel compiles and
+links with nvc++ 23.7 (``-mp=gpu``) against CUDA 12.2 on an
+NVIDIA A100-PCIE-40GB. The Catch2 suite is green, including the
+identity check that the device path matches the serial and
+threaded host paths bit for bit on the FCC lattice and on
+``input/traj/mW_cubic.lammpstrj``. ``nsys stats --force-export=true``
+writes a non-empty kernel and memcpy summary. ``SEAMS_OFFLOAD=0``
+still forces the host path.
+
 Version 2.9.0 (2026-09-02)
 ===========================
 
