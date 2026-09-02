@@ -195,6 +195,7 @@ FrameFingerprint fingerprint(const Rows &rows, int hops, int maxRingSize,
   out.hops = hops;
   const int n = static_cast<int>(rows.size());
   const bool coloured = colours.size() == rows.size() && !rows.empty();
+  out.coloured = coloured;
   out.atomKeys.reserve(static_cast<std::size_t>(n));
   // The frame key is built from the refinement hash in every build so that
   // a nauty host and a plain host name the same frame the same way; the
@@ -254,8 +255,9 @@ void addToLibrary(KeyLibrary &lib, const FrameFingerprint &fp, const std::string
   if (lib.labelOf.empty()) {
     lib.method = fp.method;
     lib.hops = fp.hops;
-  } else if (lib.method != fp.method || lib.hops != fp.hops) {
-    throw std::invalid_argument("key library mixes methods or hop counts");
+    lib.coloured = fp.coloured;
+  } else if (lib.method != fp.method || lib.hops != fp.hops || lib.coloured != fp.coloured) {
+    throw std::invalid_argument("key library mixes methods, hop counts or colourings");
   }
   for (const auto &kv : fp.classes) {
     auto it = lib.labelOf.find(kv.first);
@@ -292,7 +294,8 @@ void addToLibrary(KeyLibrary &lib, const FrameFingerprint &fp, const std::string
 
 std::string writeLibrary(const KeyLibrary &lib) {
   std::ostringstream out;
-  out << "# method " << lib.method << " hops " << lib.hops << "\n";
+  out << "# method " << lib.method << " hops " << lib.hops << " colours "
+      << (lib.coloured ? 1 : 0) << "\n";
   for (const auto &kv : lib.labelOf) {
     out << kv.first << " " << kv.second << "\n";
   }
@@ -315,6 +318,10 @@ KeyLibrary readLibrary(const std::string &text) {
           head >> lib.method;
         } else if (word == "hops") {
           head >> lib.hops;
+        } else if (word == "colours") {
+          int flag = 0;
+          head >> flag;
+          lib.coloured = flag != 0;
         }
       }
       continue;
@@ -330,11 +337,13 @@ KeyLibrary readLibrary(const std::string &text) {
 }
 
 LibraryMatch matchLibrary(const FrameFingerprint &fp, const KeyLibrary &lib) {
-  if (fp.method != lib.method || fp.hops != lib.hops) {
-    throw std::invalid_argument("fingerprint and library differ in method or hops");
+  if (fp.method != lib.method || fp.hops != lib.hops || fp.coloured != lib.coloured) {
+    throw std::invalid_argument(
+        "fingerprint and library differ in method, hops or colouring");
   }
   LibraryMatch out;
   out.labels.reserve(fp.atomKeys.size());
+  out.depth.reserve(fp.atomKeys.size());
   for (const auto &key : fp.atomKeys) {
     const auto it = lib.labelOf.find(key);
     const std::string label = it == lib.labelOf.end() ? std::string() : it->second;
@@ -342,7 +351,54 @@ LibraryMatch matchLibrary(const FrameFingerprint &fp, const KeyLibrary &lib) {
     if (!label.empty()) {
       ++out.matched;
     }
+    out.depth.push_back(label.empty() ? 0 : lib.hops);
     out.labels.push_back(label);
+  }
+  return out;
+}
+
+LibraryMatch matchLibraries(const Rows &rows, const std::vector<KeyLibrary> &libs,
+                            int maxRingSize, const std::vector<int> &colours) {
+  if (libs.empty()) {
+    throw std::invalid_argument("no key library to match against");
+  }
+  // deepest first, so the most specific name wins
+  std::vector<const KeyLibrary *> order;
+  for (const auto &lib : libs) {
+    order.push_back(&lib);
+  }
+  std::sort(order.begin(), order.end(),
+            [](const KeyLibrary *a, const KeyLibrary *b) { return a->hops > b->hops; });
+  for (std::size_t i = 1; i < order.size(); ++i) {
+    if (order[i - 1]->hops == order[i]->hops) {
+      throw std::invalid_argument("two key libraries share a hop count");
+    }
+  }
+  LibraryMatch out;
+  out.labels.assign(rows.size(), std::string());
+  out.depth.assign(rows.size(), 0);
+  for (const KeyLibrary *lib : order) {
+    const auto fp = fingerprint(rows, lib->hops, maxRingSize, colours);
+    if (fp.method != lib->method || fp.coloured != lib->coloured) {
+      throw std::invalid_argument(
+          "fingerprint and library differ in method or colouring");
+    }
+    for (std::size_t a = 0; a < rows.size(); ++a) {
+      if (!out.labels[a].empty()) {
+        continue;
+      }
+      const auto it = lib->labelOf.find(fp.atomKeys[a]);
+      if (it != lib->labelOf.end()) {
+        out.labels[a] = it->second;
+        out.depth[a] = lib->hops;
+      }
+    }
+  }
+  for (const auto &label : out.labels) {
+    out.counts[label] += 1;
+    if (!label.empty()) {
+      ++out.matched;
+    }
   }
   return out;
 }

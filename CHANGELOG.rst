@@ -5,6 +5,15 @@ Changelog
 Unreleased
 ==========
 
+``topo::matchLibraries`` names atoms against key libraries at several
+hop counts, the deepest library that holds an atom's key winning, and
+reports the depth that named each atom, so a molecule whose wide
+neighbourhood is disturbed still gets its name from the inner shells.
+Libraries record whether their keys carry vertex colours (``colours``
+in the header; an absent field reads as uncoloured) and a coloured
+library is refused against plain keys. ``seams fingerprint --library``
+accepts a comma separated list and prints the per-depth counts.
+
 Version 2.8.0 (2026-09-02)
 ===========================
 

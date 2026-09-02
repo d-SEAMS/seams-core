@@ -51,6 +51,7 @@ struct FrameFingerprint {
   std::map<std::string, int> classes; ///< local key -> number of atoms carrying it
   std::vector<int> ringCensus;        ///< ringCensus[s] = primitive rings of size s
   int hops = 0;
+  bool coloured = false;              ///< keys carry vertex colours
 };
 
 /// Atoms within `hops` bonds of `atom`, the atom itself first, then in
@@ -86,6 +87,7 @@ std::string hex(std::uint64_t value);
 struct KeyLibrary {
   std::string method;  ///< "nauty" or "wl"
   int hops = 0;
+  bool coloured = false;  ///< keys were computed with vertex colours
   std::map<std::string, std::string> labelOf;  ///< key -> label
 };
 
@@ -93,19 +95,31 @@ struct KeyLibrary {
 /// under other labels carries all of them, sorted and joined by '|'.
 void addToLibrary(KeyLibrary &lib, const FrameFingerprint &fp, const std::string &label);
 
-/// Text form: a header line `# method M hops H`, then `key label` lines.
+/// Text form: a header line `# method M hops H colours C` (C is 0 or 1;
+/// a header without it means uncoloured), then `key label` lines.
 std::string writeLibrary(const KeyLibrary &lib);
 KeyLibrary readLibrary(const std::string &text);
 
 struct LibraryMatch {
   std::vector<std::string> labels;      ///< per atom; "" when no key matches
   std::map<std::string, int> counts;    ///< label -> atoms, "" for unmatched
+  std::vector<int> depth;               ///< per atom: hops of the library that named it, 0 when none
   int matched = 0;
 };
 
 /// Look every atom key of `fp` up in `lib`. Throws std::invalid_argument
-/// when the methods or hop counts differ.
+/// when the methods, hop counts or colourings differ.
 LibraryMatch matchLibrary(const FrameFingerprint &fp, const KeyLibrary &lib);
+
+/// Match against libraries at several depths: an atom takes the label of
+/// the deepest library that holds its key, and a molecule whose wide
+/// neighbourhood is disturbed (a defect two bonds away, a jittered dense
+/// polymorph) still gets named by its inner shells. `depth` records the
+/// hops that named each atom. Every library must share the method of this
+/// build and the colouring (`colours` empty or one per row); throws
+/// std::invalid_argument otherwise, or when two libraries share a depth.
+LibraryMatch matchLibraries(const Rows &rows, const std::vector<KeyLibrary> &libs,
+                            int maxRingSize = 7, const std::vector<int> &colours = {});
 
 } // namespace topo
 

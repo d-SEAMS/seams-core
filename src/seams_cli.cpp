@@ -579,14 +579,30 @@ int cmdFingerprint(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int
     return 0;
   }
   if (!libraryPath.empty()) {
-    std::ifstream in(libraryPath);
-    if (!in) {
-      throw std::runtime_error("cannot read key library " + libraryPath);
+    // several libraries, comma separated, at different depths: the
+    // deepest that knows an atom names it
+    std::vector<topo::KeyLibrary> libs;
+    std::size_t start = 0;
+    while (start <= libraryPath.size()) {
+      std::size_t comma = libraryPath.find(',', start);
+      if (comma == std::string::npos) {
+        comma = libraryPath.size();
+      }
+      const std::string path = libraryPath.substr(start, comma - start);
+      start = comma + 1;
+      if (path.empty()) {
+        continue;
+      }
+      std::ifstream in(path);
+      if (!in) {
+        throw std::runtime_error("cannot read key library " + path);
+      }
+      std::stringstream buf;
+      buf << in.rdbuf();
+      libs.push_back(topo::readLibrary(buf.str()));
     }
-    std::stringstream buf;
-    buf << in.rdbuf();
-    const auto lib = topo::readLibrary(buf.str());
-    const auto match = topo::matchLibrary(fp, lib);
+    const auto match = libs.size() == 1 ? topo::matchLibrary(fp, libs.front())
+                                        : topo::matchLibraries(rows, libs, 7, colours);
     os << colorizer.heading("nop") << " " << rows.size() << " "
        << colorizer.longOption("graph") << " " << name << " "
        << colorizer.longOption("hops") << " " << hops << " "
@@ -594,6 +610,18 @@ int cmdFingerprint(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int
        << colorizer.longOption("matched") << " " << match.matched;
     for (const auto &kv : match.counts) {
       os << " " << (kv.first.empty() ? std::string("unmatched") : kv.first) << "=" << kv.second;
+    }
+    if (libs.size() > 1) {
+      std::map<int, int> byDepth;
+      for (const int d : match.depth) {
+        if (d > 0) {
+          byDepth[d] += 1;
+        }
+      }
+      os << " " << colorizer.longOption("depth");
+      for (auto it = byDepth.rbegin(); it != byDepth.rend(); ++it) {
+        os << " " << it->first << "=" << it->second;
+      }
     }
     os << "\n";
     return 0;
@@ -1056,7 +1084,9 @@ int main(int argc, char *argv[]) {
 
   parser.add(Option("--library")
                  .argName("FILE")
-                 .help("fingerprint: key library (from --emit-library) to name atoms by")
+                 .help("fingerprint: key library (from --emit-library) to name atoms "
+                       "by; several, comma separated, at different hop counts name "
+                       "each atom by the deepest that knows it")
                  .handler([&](std::string_view value) {
                    libraryPath = std::string(value);
                  }));

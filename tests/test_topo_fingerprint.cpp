@@ -186,7 +186,10 @@ TEST_CASE("a key library names the atoms it was built from and no others", "[top
   const auto back = topo::readLibrary(text);
   REQUIRE(back.method == fp.method);
   REQUIRE(back.hops == 2);
+  REQUIRE_FALSE(back.coloured);
   REQUIRE(back.labelOf == lib.labelOf);
+  REQUIRE(text.rfind("# method ", 0) == 0);
+  REQUIRE(text.find(" colours 0\n") != std::string::npos);
   std::vector<int> perm(rows.size());
   std::iota(perm.begin(), perm.end(), 0);
   std::mt19937 rng(5);
@@ -204,4 +207,71 @@ TEST_CASE("a key library names the atoms it was built from and no others", "[top
   REQUIRE(partial.counts.at("") > 0);
   REQUIRE(partial.labels[0].empty());
   REQUIRE_THROWS_AS(topo::matchLibrary(topo::fingerprint(rows, 3, 7), back), std::invalid_argument);
+}
+
+TEST_CASE("a shallower library names what a defect hides from the deeper one", "[topo]") {
+  const auto rows = diamondRows(4);
+  const int n = static_cast<int>(rows.size());
+  topo::KeyLibrary deep;
+  topo::addToLibrary(deep, topo::fingerprint(rows, 3, 7), "diamond");
+  topo::KeyLibrary shallow;
+  topo::addToLibrary(shallow, topo::fingerprint(rows, 2, 7), "diamond");
+  // remove one bond: the two ends lose a neighbour, and every atom within
+  // three hops of either end sees a different three-hop neighbourhood
+  auto broken = rows;
+  const int v = broken[0][1];
+  broken[0].erase(broken[0].begin() + 1);
+  auto &rv = broken[static_cast<std::size_t>(v)];
+  rv.erase(std::find(rv.begin() + 1, rv.end(), 0));
+  const auto only3 = topo::matchLibrary(topo::fingerprint(broken, 3, 7), deep);
+  const auto only2 = topo::matchLibrary(topo::fingerprint(broken, 2, 7), shallow);
+  REQUIRE(only3.matched < only2.matched);
+  REQUIRE(only2.matched < n);
+  const auto both = topo::matchLibraries(broken, {shallow, deep});
+  // the fallback names exactly the union: deep where it can, shallow otherwise
+  REQUIRE(both.matched == only2.matched);
+  REQUIRE(static_cast<int>(both.depth.size()) == n);
+  int at3 = 0;
+  int at2 = 0;
+  int at0 = 0;
+  for (int a = 0; a < n; ++a) {
+    const auto idx = static_cast<std::size_t>(a);
+    if (both.depth[idx] == 3) {
+      ++at3;
+      REQUIRE(only3.labels[idx] == "diamond");
+    } else if (both.depth[idx] == 2) {
+      ++at2;
+      REQUIRE(only3.labels[idx].empty());
+      REQUIRE(only2.labels[idx] == "diamond");
+    } else {
+      ++at0;
+      REQUIRE(both.depth[idx] == 0);
+      REQUIRE(both.labels[idx].empty());
+    }
+  }
+  REQUIRE(at3 == only3.matched);
+  REQUIRE(at2 > 0);
+  REQUIRE(at0 == n - only2.matched);
+  // the two bond ends have three neighbours and no library at any depth knows them
+  REQUIRE(both.labels[0].empty());
+  REQUIRE(both.labels[static_cast<std::size_t>(v)].empty());
+  REQUIRE(both.counts.at("diamond") == both.matched);
+  // ordering of the libraries does not matter
+  const auto swapped = topo::matchLibraries(broken, {deep, shallow});
+  REQUIRE(swapped.labels == both.labels);
+  REQUIRE(swapped.depth == both.depth);
+  // two libraries at one depth, or a coloured library against plain keys, are refused
+  REQUIRE_THROWS_AS(topo::matchLibraries(broken, {deep, deep}), std::invalid_argument);
+  std::vector<int> colours(static_cast<std::size_t>(n), 1);
+  topo::KeyLibrary tinted;
+  topo::addToLibrary(tinted, topo::fingerprint(rows, 2, 7, colours), "diamond");
+  REQUIRE(tinted.coloured);
+  REQUIRE(topo::readLibrary(topo::writeLibrary(tinted)).coloured);
+  REQUIRE_THROWS_AS(topo::matchLibrary(topo::fingerprint(rows, 2, 7), tinted), std::invalid_argument);
+  REQUIRE_THROWS_AS(topo::matchLibraries(rows, {tinted}), std::invalid_argument);
+  REQUIRE(topo::matchLibraries(rows, {tinted}, 7, colours).matched == n);
+  // a header written without the colours field reads as uncoloured
+  const auto legacy = topo::readLibrary("# method wl hops 2\nabc diamond\n");
+  REQUIRE_FALSE(legacy.coloured);
+  REQUIRE(legacy.hops == 2);
 }
