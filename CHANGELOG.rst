@@ -20,7 +20,8 @@ clathrate hydrate; ``site::periodicCentroid`` is the helper.
 ``site::IonEnvironment`` lists each ion's shell molecules and
 ``site::shellRingCensus`` counts the rings of the water network that
 pass through a shell, by size: how far the network survives around an
-ion.
+ion. ``seams cages --signature SPEC --guest-types T,U`` places guests
+in the found cages and reports occupied, multiply occupied and free.
 
 Version 2.8.0 (2026-09-02)
 ===========================

@@ -634,6 +634,17 @@ if get_option('with_cli')
     depends: [seams_exe],
     timeout: 60)
   test(
+    'seams_cages_signature_guests',
+    python3,
+    args: [
+      '-c',
+      'import subprocess,sys; p=subprocess.run([sys.argv[1],"cages",sys.argv[2],"--graph","cutoff","--cutoff","3.5","--type","1","--signature","512","--guest-types","1","--guest-radius","4.0"],capture_output=True,text=True); text=p.stdout+p.stderr; sys.exit(0 if p.returncode==0 and "cages" in text and "guests" in text and "occupied" in text else 1)',
+      seams_exe.full_path(),
+      meson.project_source_root() / 'input' / 'traj' / 'genice_sI.lammpstrj',
+    ],
+    depends: [seams_exe],
+    timeout: 120)
+  test(
     'seams_pairs_contact',
     python3,
     args: [

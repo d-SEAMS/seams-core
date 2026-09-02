@@ -776,7 +776,8 @@ int cmdChill(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
 
 int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
              const std::string &graphName, bool complete = false,
-             const std::string &signatureSpec = {}) {
+             const std::string &signatureSpec = {},
+             const std::vector<int> &guestTypes = {}, double guestRadius = 4.0) {
   if (cloud.nop == 0) {
     if (!signatureSpec.empty()) {
       const auto sig = cage::Signature::parse(signatureSpec);
@@ -808,7 +809,27 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
       os << colorizer.heading("nop") << " " << cloud.nop << " "
          << colorizer.longOption("graph") << " " << graphName << " "
          << colorizer.longOption("signature") << " " << sig.str() << " cages "
-         << found.size() << " atoms " << atoms.size() << "\n";
+         << found.size() << " atoms " << atoms.size();
+      if (!guestTypes.empty()) {
+        // guests (methane, THF, ions) placed in the found cages by the
+        // periodic centroid of each cage's vertices
+        std::vector<int> guests;
+        for (int i = 0; i < cloud.nop; ++i) {
+          const int t = cloud.pts[static_cast<std::size_t>(i)].type;
+          if (std::find(guestTypes.begin(), guestTypes.end(), t) != guestTypes.end()) {
+            guests.push_back(i);
+          }
+        }
+        std::vector<std::vector<int>> cages;
+        cages.reserve(found.size());
+        for (const auto &c : found) {
+          cages.push_back(c.vertices);
+        }
+        const auto occ = site::guestOccupancy(cloud, cages, guests, guestRadius);
+        os << " " << colorizer.longOption("guests") << " " << guests.size() << " occupied "
+           << occ.occupied << " multiple " << occ.multiply << " free " << occ.free;
+      }
+      os << "\n";
       return 0;
     };
     if (graphName == "seeded") {
@@ -963,6 +984,8 @@ int main(int argc, char *argv[]) {
   bool ionsFlag = false;
   bool completeFlag = false;
   std::string signatureSpec;
+  std::string guestTypesFlag;
+  double guestRadius = 4.0;
   bool colourTypes = false;
   std::string libraryPath;
   std::string emitLabel;
@@ -1127,6 +1150,22 @@ int main(int argc, char *argv[]) {
                        "entry (sodalite|alpha|512|51262|hc|ddc)")
                  .handler([&](std::string_view value) {
                    signatureSpec = std::string(value);
+                 }));
+
+  parser.add(Option("--guest-types")
+                 .argName("T,U")
+                 .help("cages --signature: LAMMPS types of guests (methane, THF, ions) "
+                       "placed in the found cages by their periodic centroids")
+                 .handler([&](std::string_view value) {
+                   guestTypesFlag = std::string(value);
+                 }));
+
+  parser.add(Option("--guest-radius")
+                 .argName("R")
+                 .help("cages --signature: a guest belongs to the nearest cage centre "
+                       "within R (default 4.0)")
+                 .handler([&](std::string_view value) {
+                   guestRadius = parseFloatingPoint<double>(value);
                  }));
 
   parser.add(Option("--colour-types")
@@ -1397,8 +1436,16 @@ int main(int argc, char *argv[]) {
     }
     if (cmd == "cages") {
       try {
+        std::vector<int> guestTypes;
+        std::string tok;
+        std::istringstream in(guestTypesFlag);
+        while (std::getline(in, tok, ',')) {
+          if (!tok.empty()) {
+            guestTypes.push_back(parseIntegral<int>(tok));
+          }
+        }
         return cmdCages(os, cloud, cutoff, typeI, k, graph, completeFlag,
-                        signatureSpec);
+                        signatureSpec, guestTypes, guestRadius);
       } catch (const std::exception &e) {
         os << colorizer.error(e.what()) << "\n";
         return 2;
