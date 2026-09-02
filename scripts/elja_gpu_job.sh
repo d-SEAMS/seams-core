@@ -154,7 +154,10 @@ export CXXFLAGS="${CXXFLAGS:-} -idirafter ${INC}"
 # clang's driver does not search LIBRARY_PATH for startfiles.
 # gcc accepts -B; nvc++ rejects it. Keep -B on CFLAGS only.
 export CFLAGS="${CFLAGS:-} -B${CRT}"
-export LDFLAGS="${LDFLAGS:-} -L${CRT} -L/lib64 -L${HWLOC}/lib -lhwloc"
+# --start-group must appear before the Catch2 static archives so ld
+# can rescan them for Catch::Session. tests/meson.build closes the
+# group for nvc++.
+export LDFLAGS="-Wl,--start-group ${LDFLAGS:-} -L${CRT} -L/lib64 -L${HWLOC}/lib -lhwloc"
 
 export SEAMS_OFFLOAD=${SEAMS_OFFLOAD:-1}
 

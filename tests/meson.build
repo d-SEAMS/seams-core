@@ -62,6 +62,12 @@ _test_link_args = _link_args
 if host_machine.system() == 'linux'
   _test_link_args += ['-Wl,--enable-new-dtags']
 endif
+# nvc++ as the linker walks static archives once. Catch2Main needs
+# symbols from Catch2; --end-group pairs with --start-group on
+# LDFLAGS so ld rescans both archives.
+if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
+  _test_link_args += ['-Wl,--end-group']
+endif
 
 foreach name, src : test_sources
   # meson allows no nested ternary; the long-running suites get more time
