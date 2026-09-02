@@ -124,14 +124,6 @@ if ! grep -q ' /usr/lib64 ' /proc/mounts; then
   fi
   mount --bind "$OVL/lib64-merged" /usr/lib64
 fi
-# nvc++ localrc points at system GCC 8 startfiles. Overlay those
-# objects from the login copy when the directory is missing.
-GCC8=/usr/lib/gcc/x86_64-redhat-linux/8
-if [[ ! -e $GCC8/crtbegin.o && -d $CRT/gcc8 ]]; then
-  mkdir -p "$(dirname "$GCC8")" "$OVL/gcc8" "$GCC8"
-  cp "$CRT"/gcc8/crt*.o "$OVL/gcc8/"
-  mount --bind "$OVL/gcc8" "$GCC8"
-fi
 
 # EasyBuild meson is a Python entry point with a `python` shebang.
 # GPU images have python3 from the prefix, not /usr/bin/python.
