@@ -67,3 +67,13 @@ on:
 
 On a perfect cubic crystal the four graphs coincide. On a mixed
 nucleation dump they do not have to.
+
+* Ring-adjacent completion
+
+~ring::seededCageAffiliation~ takes an optional fifth argument
+(~ringAdjacentCompletion~, default off). A set flag runs
+~ring::ringAdjacentCompletion~, which fills the last unlabelled
+vertex of each permissive six-ring whose other vertices already
+carry a cage label. Hexagonal-cage and double-diamond-cage flags
+run on separate bit vectors, each to a fixed point. See
+[[file:ring-completion.org][Ring-adjacent completion]].

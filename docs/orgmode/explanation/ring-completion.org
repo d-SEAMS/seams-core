@@ -1,0 +1,45 @@
+#+TITLE: Ring-adjacent completion
+#+OPTIONS: toc:nil num:nil
+
+The seeded ice score labels an atom when a seed-bearing component of
+the permissive graph contains it. Five vertices of a six-membered
+cage ring can carry a cage label while the sixth does not.
+~ring::ringAdjacentCompletion~ fills that vacancy.
+
+Declarations live in ~src/include/internal/cage_affiliation.hpp~.
+
+* All-but-one rule
+
+Hexagonal-cage (HC) flags and double-diamond-cage (DDC) flags run
+on separate bit vectors. For each flag the walk looks at every
+permissive six-ring. A ring with one unlabelled vertex and five
+labelled vertices is a cage ring with a vacancy. The missing vertex
+takes the flag. The walk repeats until no such ring remains.
+
+That closed set is the least set that contains the input labels and
+obeys the all-but-one rule. Any visiting order of the rings yields
+the same flags. A frame the seeded pass left empty stays empty: no
+ring has five labelled vertices when none has one. A crystal whose
+every vertex already carries a label is a fixed point.
+
+A liquid six-ring may touch a nucleus at a few vertices. The
+all-but-one rule cannot grow that ring. An edge-sharing rule
+accepts a ring that shares two vertices with a fully labelled ring.
+That rule can grow into the liquid. The Lean development in
+~lean/~ states both rules.
+=edgeRule_not_sound= is a five-vertex instance where the
+edge-sharing operator labels a vertex the all-but-one closure leaves
+unlabelled. See [[file:../contributing/lean.org][Lean statements]].
+
+* The ~ringAdjacentCompletion~ flag
+
+~ring::seededCageAffiliation~ takes a fifth argument,
+~ringAdjacentCompletion~, default off. A set flag returns
+~ring::ringAdjacentCompletion~ of the seeded labels on the
+permissive six-rings. An unset flag returns the seeded labels
+unchanged.
+
+~seams cages --graph seeded~ calls ~seededCageAffiliation~ without
+the flag, so the CLI path keeps the default. Catch2 covers both
+values of the flag and the standalone completion in
+~tests/test_cage_affiliation.cpp~.
