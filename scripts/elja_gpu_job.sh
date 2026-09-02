@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #SBATCH --job-name=seams-offload
-#SBATCH --partition=gpu-1xA100
+#SBATCH --partition=gpu-2xA100
 #SBATCH --account=chem-ui
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:2
 #SBATCH --time=02:00:00
 #SBATCH --output=offload-elja-%j.out
 #

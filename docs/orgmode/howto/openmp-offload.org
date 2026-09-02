@@ -47,8 +47,10 @@ meson test -C build-offload --print-errorlogs
 on a GPU node, for example:
 
 #+begin_src bash
-srun --partition=gpu-1xA100 --gres=gpu:1 --account=chem-ui \
+srun --partition=gpu-2xA100 --gres=gpu:2 --account=chem-ui \
   --time=02:00:00 --pty bash
+# gpu-1xA100 nodes do not advertise GRES, so --gres=gpu:1 is
+# rejected. gpu-2xA100 advertises gpu:2.
 #+end_src
 
 Eigen, Catch2, FlexiBLAS, Meson, and Ninja come from the
