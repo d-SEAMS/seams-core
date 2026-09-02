@@ -100,13 +100,14 @@ export SEAMS_OFFLOAD=${SEAMS_OFFLOAD:-1}
 # objects and headers without hiding the runtime libc.
 if [[ ${SEAMS_IN_SYSROOT:-0} != 1 ]]; then
   export SEAMS_IN_SYSROOT=1
-  OVL=$OUT/overlay
+  OVL=/tmp/seams-ovl-${SLURM_JOB_ID:-$$}
   mkdir -p "$OVL/lib64-upper" "$OVL/lib64-work" "$OVL/lib64-merged"
   mkdir -p "$OVL/inc-upper" "$OVL/inc-work" "$OVL/inc-merged"
+  export SEAMS_OVL=$OVL
   exec unshare --user --map-root-user --mount bash "$0" "$@"
 fi
 
-OVL=$OUT/overlay
+OVL=${SEAMS_OVL:-/tmp/seams-ovl-${SLURM_JOB_ID:-$$}}
 if ! grep -q ' /usr/lib64 ' /proc/mounts; then
   mount -t overlay overlay \
     -o "lowerdir=/usr/lib64,upperdir=$OVL/lib64-upper,workdir=$OVL/lib64-work" \
@@ -119,7 +120,7 @@ if ! grep -q ' /usr/lib64 ' /proc/mounts; then
   mount --bind "$OVL/lib64-merged" /usr/lib64
 fi
 if [[ -d /usr/include ]]; then
-  if ! mountpoint -q /usr/include 2>/dev/null; then
+  if ! grep -q ' /usr/include ' /proc/mounts; then
     mount -t overlay overlay \
       -o "lowerdir=/usr/include,upperdir=$OVL/inc-upper,workdir=$OVL/inc-work" \
       "$OVL/inc-merged"
