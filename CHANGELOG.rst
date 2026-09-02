@@ -5,6 +5,9 @@ Changelog
 Unreleased
 ==========
 
+Version 2.8.0 (2026-09-02)
+===========================
+
 ``topo::localKey`` names the isomorphism class of an atom's rooted bonded
 neighbourhood within a number of hops (the nauty certificate with the
 centre in its own colour cell when nauty is linked, a Weisfeiler-Lehman
