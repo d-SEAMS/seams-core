@@ -13,6 +13,8 @@
 | DDC | Double-diamond cage (ice Ic, 14 waters) |
 | ice score | Per-atom HC / DDC membership (~seams cages~) |
 | ~seeded~ | Mutual four-nearest seeds, union completions |
+| ring-adjacent completion | All-but-one fill of seeded hexagonal-cage / double-diamond-cage labels (~ring::ringAdjacentCompletion~) |
+| ~walk_compare~ | Per-frame star-classifier, cutoff-cage, and seeded counts |
 | ~nop~ | Number of particles in the analysed cloud |
 | TUM | Topological unit matching |
 | ~PointCloud~ | Positions, types, box, and per-atom labels |

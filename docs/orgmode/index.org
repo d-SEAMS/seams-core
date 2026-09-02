@@ -145,6 +145,7 @@ framework.
    explanation/index
    explanation/architecture
    explanation/chill-plus-vs-cages
+   explanation/ring-completion
    explanation/citation
 
 .. toctree::
@@ -157,6 +158,7 @@ framework.
    reference/nix
    reference/api
    api/index
+   reference/walk-compare
    reference/glossary
    changelog
 
@@ -165,6 +167,7 @@ framework.
    :caption: Development
 
    contributing/index
+   contributing/lean
 #+end_export
 
 The in-book C++ pages under =api/= are Doxygen via doxyrest. A sibling

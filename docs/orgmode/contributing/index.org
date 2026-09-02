@@ -79,6 +79,8 @@ seams-core/
     topo_one_dim.cpp     nanotubes
     topo_two_dim.cpp     sheets
   tests/                 Catch2 binaries
+  tests/walk_compare.cpp CHILL+ vs cage walk
+  lean/                  Lean 4 / Mathlib statements of ring completion
   input/traj/            example LAMMPS dumps
   input/xyz/             fixtures
   input/con/             eOn .con fixture
@@ -105,6 +107,9 @@ seams-core/
 
 - ~cageAffiliation~ / ~seededCageAffiliation~ :: Ice score on
   six-rings. HC = Ih, DDC = Ic, neither = water. Not the CHILL+ star.
+  The fifth argument of ~seededCageAffiliation~ is
+  ~ringAdjacentCompletion~ (default off). See
+  [[file:../explanation/ring-completion.org][Ring-adjacent completion]].
 
 - ~ringNetwork~ :: Franzblau primitive rings up to a depth.
 
@@ -117,6 +122,13 @@ nix develop --command meson test -C bbdir
 
 C++ tests are Catch2. Python tests live in
 [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
+
+~tests/walk_compare~ prints per-frame star-classifier and cage
+counts. Inputs and columns are
+[[file:../reference/walk-compare.org][walk_compare]].
+
+Lean statements of the ring-completion operator live in ~lean/~.
+Theorems and the lake build are [[file:lean.org][Lean statements]].
 
 Optional pixi environments: ~pixi run -e ira ...~, ~sphericart~,
 ~nauty~, ~mpi~, ~docs~, ~formalanalysis~, ~repro~.
@@ -142,4 +154,5 @@ and yodaStruct wraps) is [[file:release.org][Release process]].
    :maxdepth: 1
 
    release
+   lean
 #+end_export

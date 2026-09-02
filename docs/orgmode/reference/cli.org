@@ -199,16 +199,17 @@ Used only by ~cages~.
 
 | value | graph |
 |-------+-------|
-| ~seeded~ | mutual ~k~-nearest seeds, union completions (~ring::seededCageAffiliation~) |
+| ~seeded~ | mutual ~k~-nearest seeds, union completions (~ring::seededCageAffiliation~, completion flag off) |
 | ~cutoff~ | pairs inside ~--cutoff~ (~nneigh::neighListO~) |
 | ~knn~ | mutual k-nearest (~nneigh::BondGraph::KnnMutual~) |
 | ~knn-union~ | union k-nearest (~nneigh::BondGraph::KnnUnion~) |
 
 ~nneigh::bondGraphFromName~ also accepts ~knn-mutual~ and ~mutual~
 as ~knn~, and ~union~ as ~knn-union~. ~seeded~ is handled in the CLI
-and is not a ~BondGraph~ enumerator. Any other name throws
-~std::invalid_argument~ (~unknown bond graph 'NAME' (use cutoff,
-knn, knn-union)~) and ~cages~ exits 2.
+and is not a ~BondGraph~ enumerator. The CLI call omits the
+~ringAdjacentCompletion~ flag, so the fifth argument stays off.
+Any other name throws ~std::invalid_argument~ (~unknown bond graph
+'NAME' (use cutoff, knn, knn-union)~) and ~cages~ exits 2.
 
 Candidate cutoff for the knn graphs is ~--cutoff + 1.5~.
 

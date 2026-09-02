@@ -9,6 +9,7 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 | [[file:data-formats.org][data formats]] | LAMMPS dump, XYZ, chemfiles, ~.con~ |
 | [[file:api.org][API map]] | fronts and headers; the tree is =api/index= |
 | [[file:../api/index][API Reference]] | Doxygen comments, via doxyrest |
+| [[file:walk-compare.org][walk_compare]] | Trajectory walk: inputs and columns |
 | [[file:nix.org][Nix flake]] | ~nix build~, ~nix develop~, flake outputs |
 | [[file:glossary.org][glossary]] | Engine terms |
 
@@ -20,6 +21,7 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
    data-formats
    api
    ../api/index
+   walk-compare
    nix
    glossary
 #+end_export
