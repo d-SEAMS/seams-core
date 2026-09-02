@@ -149,9 +149,16 @@ if not offload_opt.disabled()
       }
     '''
     offload_triple = get_option('offload_triple')
+    # nvc++ picks a CUDA toolkit that matches the driver. An HPC SDK
+    # that does not ship that toolkit fails unless -gpu=cudaX.Y names
+    # a bundled release (22.3 ships 11.6; 23.7 ships 12.2).
     offload_try = [
       ['-mp=gpu'],
       ['-mp=gpu', '-gpu=cc80'],
+      ['-mp=gpu', '-gpu=cuda12.2'],
+      ['-mp=gpu', '-gpu=cc80,cuda12.2'],
+      ['-mp=gpu', '-gpu=cuda11.6'],
+      ['-mp=gpu', '-gpu=cc80,cuda11.6'],
       ['-fopenmp', '-fopenmp-targets=' + offload_triple],
     ]
     foreach flags : offload_try
