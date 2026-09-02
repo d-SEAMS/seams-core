@@ -34,6 +34,12 @@ cache: ~cachix use dseams~.
 
 The flake on/off table lives on [[file:../reference/nix.org][Nix]].
 
+* OpenMP target offload
+
+The host-only pixi and flake builds leave ~with_openmp_offload~
+off. The NVIDIA GPU path, including the Elja A100 module set and
+the Meson line, is [[file:openmp-offload.org][OpenMP target offload]].
+
 * Verify
 
 #+begin_src bash

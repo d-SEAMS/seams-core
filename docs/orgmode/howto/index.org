@@ -6,6 +6,7 @@ A how-to solves a goal you already have. It is not a learning path.
 | guide | goal |
 |-------+------|
 | [[file:install.org][Install the engine]] | Get a ~seams~ binary |
+| [[file:openmp-offload.org][OpenMP target offload]] | Build the Steinhardt kernel for an NVIDIA GPU |
 | [[file:classify-cli.org][Classify a dump]] | Run ~read~ / ~chill-plus~ / ~cages~ on a file you have |
 | [[file:sheared-cells.org][Sheared cells]] | Triclinic dump: bound spans are not edge lengths; recover H |
 | [[file:ionic-liquid.org][Ionic-liquid dumps]] | Keep one species with ~--type~; unlike-pair ~seams rdf --types I,J~; confined \(\rho(z)\) |
@@ -20,6 +21,7 @@ A how-to solves a goal you already have. It is not a learning path.
    :maxdepth: 1
 
    install
+   openmp-offload
    classify-cli
    sheared-cells
    ionic-liquid
