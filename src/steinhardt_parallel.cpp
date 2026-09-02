@@ -197,20 +197,20 @@ void runOffload(const NeighbourCSR &g, int orderL, std::vector<double> &qlm,
   const int offN = n + 1;
   const int qlmN = static_cast<int>(qlm.size());
 
+  // Ylm lives on the device. ql / qlBar average qlm of an atom and
+  // its neighbours; that reduction is 1 ULP apart from the host
+  // libm path if it also runs as a target region, so pass 2 stays
+  // on the host.
 #pragma omp target data map(to : dr[0 : drN], offsets[0 : offN],                      \
                                 cols[0 : nnz], orderL)                                \
-    map(alloc : qlmP[0 : qlmN]) map(from : qlP[0 : n], qlBarP[0 : n])
+    map(from : qlmP[0 : qlmN])
   {
 #pragma omp target teams distribute parallel for
     for (int i = 0; i < n; i++) {
       seams::steinhardt::qlmOneAtomDr(i, orderL, dr, offsets, cols, qlmP);
     }
-#pragma omp target teams distribute parallel for
-    for (int i = 0; i < n; i++) {
-      seams::steinhardt::qlOneAtom(i, orderL, qlmP, offsets, cols, qlP,
-                                   qlBarP);
-    }
   }
+  runPass2(g, orderL, 0, n, qlm, ql, qlBar);
 }
 #endif
 
