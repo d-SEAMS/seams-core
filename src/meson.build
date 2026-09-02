@@ -14,6 +14,7 @@ ydslib_sources = files(
   'generic.cpp',
   'ira_sofi.cpp',
   'cage_canon.cpp',
+  'topo_fingerprint.cpp',
   'mol_sys.cpp',
   'sphericart_ylm.cpp',
   'neighbours.cpp',

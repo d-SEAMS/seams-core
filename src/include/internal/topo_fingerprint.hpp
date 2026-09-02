@@ -1,0 +1,77 @@
+//-----------------------------------------------------------------------------------
+// d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations
+// SPDX-License-Identifier: MIT
+//-----------------------------------------------------------------------------------
+#ifndef SEAMS_TOPO_FINGERPRINT_H_
+#define SEAMS_TOPO_FINGERPRINT_H_
+
+#include <cstdint>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+
+/** @file topo_fingerprint.hpp
+ *  @brief Label-independent keys for bonded topologies.
+ *
+ *  A local key names the isomorphism class of the rooted bonded graph
+ *  within a number of hops of one atom: two atoms share a key exactly when
+ *  their neighbourhoods are the same graph with the same centre, whatever
+ *  the atom indices. A frame key names the multiset of local keys together
+ *  with the primitive ring census, so two configurations share a frame key
+ *  when every atom has a counterpart with the same environment. This is
+ *  the topological classification k-ART uses to index its event catalogue
+ *  (Trochet, Beland, Joly, Brommer and Mousseau, Phys. Rev. B 91, 224106
+ *  (2015)), here on the graphs the ring and cage code already builds.
+ *
+ *  With nauty linked the local key is the canonical certificate of the
+ *  rooted graph (the centre in its own colour cell), an exact invariant.
+ *  Without it the key is a Weisfeiler-Lehman colour refinement hash, which
+ *  separates every pair of graphs the refinement can distinguish and is
+ *  what the frame key uses in either build so that keys compare across
+ *  hosts. The method is recorded on every result.
+ */
+namespace topo {
+
+/// Neighbour rows by index, each row leading with the atom itself, as
+/// nneigh::neighbourListByIndex returns them.
+using Rows = std::vector<std::vector<int>>;
+
+struct LocalKey {
+  std::string key;     ///< canonical certificate or refinement hash
+  std::string method;  ///< "nauty" or "wl"
+  int vertices = 0;    ///< atoms in the neighbourhood, centre included
+  int edges = 0;       ///< bonds among them
+};
+
+struct FrameFingerprint {
+  std::string key;                    ///< hash of the sorted local keys and the ring census
+  std::string method;                 ///< method of the local keys
+  std::vector<std::string> atomKeys;  ///< one local key per atom
+  std::map<std::string, int> classes; ///< local key -> number of atoms carrying it
+  std::vector<int> ringCensus;        ///< ringCensus[s] = primitive rings of size s
+  int hops = 0;
+};
+
+/// Atoms within `hops` bonds of `atom`, the atom itself first, then in
+/// breadth-first order.
+std::vector<int> hopNeighbourhood(const Rows &rows, int atom, int hops);
+
+/// Weisfeiler-Lehman refinement hash of a graph given by local adjacency
+/// lists; `root` (or -1) starts in its own colour. `rounds` refinements.
+std::uint64_t wlHash(const std::vector<std::vector<int>> &adjacency, int root,
+                     int rounds);
+
+/// Key of the rooted neighbourhood of `atom`.
+LocalKey localKey(const Rows &rows, int atom, int hops);
+
+/// Keys of every atom, their histogram, the ring census up to
+/// `maxRingSize`, and the frame key.
+FrameFingerprint fingerprint(const Rows &rows, int hops = 2, int maxRingSize = 7);
+
+/// Hex string of a 64-bit hash.
+std::string hex(std::uint64_t value);
+
+} // namespace topo
+
+#endif // SEAMS_TOPO_FINGERPRINT_H_

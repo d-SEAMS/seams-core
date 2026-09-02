@@ -76,6 +76,29 @@ ionCloud(const molSys::PointCloud<molSys::Point<double>, double> &src,
 
 Table parseSiteSpec(std::string_view spec);
 
+
+/// Ions read against a per-atom ice assignment. Ions are not part of the
+/// hydrogen-bond network; the assignment is computed on the water and each
+/// ion is classed by its first water shell: every shell molecule labelled
+/// is `ice`, none is `liquid`, otherwise `front`. An ion with an empty shell
+/// is liquid.
+enum class IonState { liquid = 0, front = 1, ice = 2 };
+struct IonEnvironment {
+  std::vector<int> ion;            ///< cloud indices of the ions, in input order
+  std::vector<int> shell;          ///< water molecules within the cutoff
+  std::vector<double> iceFraction; ///< labelled share of that shell
+  std::vector<IonState> state;
+  int nIce = 0;
+  int nFront = 0;
+  int nLiquid = 0;
+};
+/// `iceFlag` is indexed like `yCloud.pts`; `waterType` selects the water
+/// oxygens (0 accepts every atom that is not an ion); `cutoff` is the first
+/// shell radius in the cloud's length unit.
+IonEnvironment
+ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+               const std::vector<bool> &iceFlag, const std::vector<int> &ionIndices,
+               int waterType, double cutoff);
 } // namespace site
 
 #endif // SEAMS_SITE_H_

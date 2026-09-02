@@ -37,7 +37,8 @@ void collectAtoms(const std::vector<std::vector<int>> &rings,
 }
 
 #ifdef SEAMS_HAS_NAUTY
-std::string densenautyCertificate(int n, const std::vector<std::pair<int, int>> &edges) {
+std::string densenautyCertificate(int n, const std::vector<std::pair<int, int>> &edges,
+                                  int root = -1) {
   if (n <= 0 || n > MAXN) {
     return {};
   }
@@ -51,6 +52,24 @@ std::string densenautyCertificate(int n, const std::vector<std::pair<int, int>> 
   std::vector<int> lab(static_cast<size_t>(n), 0);
   std::vector<int> ptn(static_cast<size_t>(n), 0);
   std::vector<int> orbits(static_cast<size_t>(n), 0);
+  if (root >= 0 && root < n) {
+    // two colour cells: {root} and the rest; ptn marks the end of a cell
+    // with 0 and the inside of a cell with 1
+    options.defaultptn = FALSE;
+    int pos = 0;
+    lab[static_cast<size_t>(pos)] = root;
+    ptn[static_cast<size_t>(pos)] = 0;
+    ++pos;
+    for (int v = 0; v < n; v++) {
+      if (v == root) {
+        continue;
+      }
+      lab[static_cast<size_t>(pos)] = v;
+      ptn[static_cast<size_t>(pos)] = 1;
+      ++pos;
+    }
+    ptn[static_cast<size_t>(n - 1)] = 0;
+  }
   EMPTYGRAPH(g.data(), m, n);
   for (const auto &e : edges) {
     if (e.first == e.second) {
@@ -152,6 +171,29 @@ bool sameCertificate(const std::vector<std::vector<int>> &a,
   const std::string ca = canonicalCertificate(a);
   const std::string cb = canonicalCertificate(b);
   return !ca.empty() && ca == cb;
+}
+
+std::string canonicalCertificateRooted(int n,
+                                       const std::vector<std::pair<int, int>> &edges,
+                                       int root) {
+#ifndef SEAMS_HAS_NAUTY
+  (void)n;
+  (void)edges;
+  (void)root;
+  return {};
+#else
+  std::vector<std::pair<int, int>> local;
+  local.reserve(edges.size());
+  for (const auto &e : edges) {
+    if (e.first < 0 || e.second < 0 || e.first >= n || e.second >= n || e.first == e.second) {
+      continue;
+    }
+    local.emplace_back(std::min(e.first, e.second), std::max(e.first, e.second));
+  }
+  std::sort(local.begin(), local.end());
+  local.erase(std::unique(local.begin(), local.end()), local.end());
+  return densenautyCertificate(n, local, root);
+#endif
 }
 
 } // namespace cage

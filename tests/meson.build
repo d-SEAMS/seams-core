@@ -28,6 +28,8 @@ test_sources = {
   'ira_sofi': 'test_ira_sofi.cpp',
   'sphericart': 'test_sphericart.cpp',
   'cage_canon': 'test_cage_canon.cpp',
+  'topo_fingerprint': 'test_topo_fingerprint.cpp',
+  'ion_env': 'test_ion_env.cpp',
   'voronoi': 'test_voronoi.cpp',
   'structure_desc': 'test_structure_desc.cpp',
   'cage_affiliation': 'test_cage_affiliation.cpp',

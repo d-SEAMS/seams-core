@@ -17,6 +17,7 @@
 #include <seams_config.hpp>
 #include <seams_input.hpp>
 #include <site.hpp>
+#include <topo_fingerprint.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -532,6 +533,113 @@ int cmdDensityZ(std::ostream &os, Cloud &cloud, int typeI, int bins, int axis) {
   return 0;
 }
 
+// Label-independent topology keys of the bonded graph: one key per atom
+// for the rooted neighbourhood within `hops` bonds, the histogram of keys,
+// the primitive ring census, and a frame key over all of it.
+int cmdFingerprint(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
+                   const std::string &graphName, int hops) {
+  if (cloud.nop == 0) {
+    os << colorizer.heading("nop") << " 0\n";
+    return 0;
+  }
+  const int typ = typeOf(cloud, typeI);
+  const double cand = cutoff + 1.5;
+  const auto graph = nneigh::bondGraphFromName(graphName);
+  std::vector<std::vector<int>> nList;
+  if (graph == nneigh::BondGraph::Cutoff) {
+    nList = nneigh::neighListO(cutoff, cloud, typ);
+  } else {
+    const bool mutual = graph == nneigh::BondGraph::KnnMutual;
+    nList = nneigh::kNearestNeighbourList(cloud, k, cand, typ, mutual);
+  }
+  const auto rows = nneigh::neighbourListByIndex(cloud, nList);
+  const auto fp = topo::fingerprint(rows, hops, 8);
+  os << colorizer.heading("nop") << " " << rows.size() << " "
+     << colorizer.longOption("graph") << " " << graphName << " "
+     << colorizer.longOption("hops") << " " << hops << " "
+     << colorizer.longOption("method") << " " << fp.method << " "
+     << colorizer.longOption("key") << " " << fp.key << " "
+     << colorizer.longOption("classes") << " " << fp.classes.size() << " "
+     << colorizer.longOption("rings");
+  for (std::size_t sz = 3; sz < fp.ringCensus.size(); ++sz) {
+    os << " " << sz << ":" << fp.ringCensus[sz];
+  }
+  // the most populated classes, largest first
+  std::vector<std::pair<int, std::string>> top;
+  for (const auto &kv : fp.classes) {
+    top.emplace_back(kv.second, kv.first);
+  }
+  std::sort(top.begin(), top.end(), [](const auto &a, const auto &b) {
+    return a.first != b.first ? a.first > b.first : a.second < b.second;
+  });
+  os << " " << colorizer.longOption("top");
+  for (std::size_t t = 0; t < top.size() && t < 5; ++t) {
+    os << " " << top[t].second << "=" << top[t].first;
+  }
+  os << "\n";
+  return 0;
+}
+
+// Ions read against the seeded cage assignment of the water: how many sit
+// in ice, at the front, or in liquid by their first water shell.
+int cmdIons(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
+            bool complete, const std::vector<int> &ionTypes, double ionCutoff) {
+  if (cloud.nop == 0) {
+    os << colorizer.heading("nop") << " 0\n";
+    return 0;
+  }
+  const int typ = typeOf(cloud, typeI);
+  const double cand = cutoff + 1.5;
+  auto graphs = nneigh::kNearestNeighbourPair(cloud, k, cand, typ);
+  auto idxS = nneigh::neighbourListByIndex(cloud, graphs.first);
+  auto idxU = nneigh::neighbourListByIndex(cloud, graphs.second);
+  auto sixOf = [](const std::vector<std::vector<int>> &rings) {
+    std::vector<std::vector<int>> six;
+    for (const auto &r : rings) {
+      if (r.size() == 6) {
+        six.push_back(r);
+      }
+    }
+    return six;
+  };
+  const auto sixS = sixOf(primitive::ringNetwork(idxS, 6));
+  const auto sixU = sixOf(primitive::ringNetwork(idxU, 6));
+  const auto aff = ring::seededCageAffiliation(sixS, idxS, sixU, idxU, complete);
+  std::vector<bool> ice(static_cast<std::size_t>(cloud.nop), false);
+  int nIce = 0;
+  for (std::size_t i = 0; i < ice.size() && i < aff.hc.size(); ++i) {
+    ice[i] = aff.hc[i] || aff.ddc[i];
+    nIce += ice[i] ? 1 : 0;
+  }
+  std::vector<int> ions;
+  for (int i = 0; i < cloud.nop; ++i) {
+    const int t = cloud.pts[static_cast<std::size_t>(i)].type;
+    if (std::find(ionTypes.begin(), ionTypes.end(), t) != ionTypes.end()) {
+      ions.push_back(i);
+    }
+  }
+  const auto env = site::ionEnvironment(cloud, ice, ions, typ, ionCutoff);
+  double meanShell = 0.0;
+  double meanFraction = 0.0;
+  for (std::size_t i = 0; i < env.ion.size(); ++i) {
+    meanShell += env.shell[i];
+    meanFraction += env.iceFraction[i];
+  }
+  if (!env.ion.empty()) {
+    meanShell /= static_cast<double>(env.ion.size());
+    meanFraction /= static_cast<double>(env.ion.size());
+  }
+  os << colorizer.heading("nop") << " " << cloud.nop << " "
+     << colorizer.longOption("ice") << " " << nIce << " "
+     << colorizer.longOption("ions") << " " << env.ion.size() << " "
+     << colorizer.longOption("in-ice") << " " << env.nIce << " "
+     << colorizer.longOption("front") << " " << env.nFront << " "
+     << colorizer.longOption("liquid") << " " << env.nLiquid << " "
+     << colorizer.longOption("shell") << " " << meanShell << " "
+     << colorizer.longOption("shell-ice") << " " << meanFraction << "\n";
+  return 0;
+}
+
 int cmdRdf(std::ostream &os, Cloud &cloud, double rmax, int bins, int typeI,
            int typeJ) {
   if (bins <= 0) {
@@ -594,7 +702,7 @@ int cmdChill(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
 }
 
 int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
-             const std::string &graphName) {
+             const std::string &graphName, bool complete = false) {
   if (cloud.nop == 0) {
     os << colorizer.heading("nop") << " 0 "
        << colorizer.longOption("graph") << " " << graphName << " "
@@ -641,7 +749,7 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
     auto idxU = nneigh::neighbourListByIndex(cloud, uni);
     auto sixS = sixOf(primitive::ringNetwork(idxS, 6));
     auto sixU = sixOf(primitive::ringNetwork(idxU, 6));
-    const auto aff = ring::seededCageAffiliation(sixS, idxS, sixU, idxU);
+    const auto aff = ring::seededCageAffiliation(sixS, idxS, sixU, idxU, complete);
     tallyAtoms(aff.hc, aff.ddc);
   } else {
     const auto graph = nneigh::bondGraphFromName(graphName);
@@ -738,6 +846,10 @@ int main(int argc, char *argv[]) {
   std::string typesFlag;
   std::string siteSpec;
   bool ionsFlag = false;
+  bool completeFlag = false;
+  int hops = 2;
+  std::string ionTypesFlag;
+  double ionCutoff = 0.0;
   std::string subsetFlag;
   int rdfTypeI = 0;
   int rdfTypeJ = 0;
@@ -885,6 +997,32 @@ int main(int argc, char *argv[]) {
                  .help("Bond graph for cages: cutoff | knn | knn-union | seeded")
                  .handler([&](std::string_view value) { graph = value; }));
 
+  parser.add(Option("--complete")
+                 .help("Seeded cages: fill the last vertex of six-rings whose "
+                       "other vertices carry a label (ring completion)")
+                 .handler([&]() { completeFlag = true; }));
+
+  parser.add(Option("--hops")
+                 .argName("N")
+                 .help("fingerprint: bonds from the centre in each local key (default 2)")
+                 .handler([&](std::string_view value) {
+                   hops = parseIntegral<int>(value);
+                 }));
+
+  parser.add(Option("--ion-types")
+                 .argName("I,J")
+                 .help("ions: LAMMPS types read against the cage assignment")
+                 .handler([&](std::string_view value) {
+                   ionTypesFlag = std::string(value);
+                 }));
+
+  parser.add(Option("--ion-cutoff")
+                 .argName("ANGSTROM")
+                 .help("ions: first water shell radius (default --cutoff)")
+                 .handler([&](std::string_view value) {
+                   ionCutoff = parseFloatingPoint<double>(value);
+                 }));
+
   parser.add(Option("--htype")
                  .argName("I")
                  .help("Hydrogen atom type for hbonds")
@@ -952,8 +1090,8 @@ int main(int argc, char *argv[]) {
                  }));
 
   parser.add(Positional("command")
-                 .help("read | chill | chill-plus | cages | rdf | cn | hbonds | "
-                       "pairs | density-z | domains")
+                 .help("read | chill | chill-plus | cages | fingerprint | ions | "
+                       "rdf | cn | hbonds | pairs | density-z | domains")
                  .occurs(zeroOrOneTime)
                  .handler([&](std::string_view value) { cmd = value; }));
 
@@ -1043,7 +1181,7 @@ int main(int argc, char *argv[]) {
   }
 
   const bool iceCmd = cmd == "chill" || cmd == "chill-plus" ||
-                      cmd == "chill_plus" || cmd == "cages";
+                      cmd == "chill_plus" || cmd == "cages" || cmd == "ions";
   if (iceCmd && !site::iceScoreAllowed(family)) {
     std::cerr << colorizer.error(site::refuseIceScore(family)) << "\n";
     return 2;
@@ -1058,6 +1196,10 @@ int main(int argc, char *argv[]) {
       std::cerr << colorizer.error(e.what()) << "\n";
       return 2;
     }
+  }
+  if (cmd == "ions" && ionTypesFlag.empty()) {
+    std::cerr << colorizer.error("ions needs --ion-types") << "\n";
+    return 2;
   }
   if (cmd == "pairs" && siteSpec.empty()) {
     std::cerr << colorizer.error("pairs needs --site") << "\n";
@@ -1106,11 +1248,26 @@ int main(int argc, char *argv[]) {
     }
     if (cmd == "cages") {
       try {
-        return cmdCages(os, cloud, cutoff, typeI, k, graph);
+        return cmdCages(os, cloud, cutoff, typeI, k, graph, completeFlag);
       } catch (const std::exception &e) {
         os << colorizer.error(e.what()) << "\n";
         return 2;
       }
+    }
+    if (cmd == "fingerprint") {
+      return cmdFingerprint(os, cloud, cutoff, typeI, k, graph, hops);
+    }
+    if (cmd == "ions") {
+      std::vector<int> ionTypes;
+      std::string tok;
+      std::istringstream in(ionTypesFlag);
+      while (std::getline(in, tok, ',')) {
+        if (!tok.empty()) {
+          ionTypes.push_back(parseIntegral<int>(tok));
+        }
+      }
+      return cmdIons(os, cloud, cutoff, typeI, k, completeFlag, ionTypes,
+                     ionCutoff > 0.0 ? ionCutoff : cutoff);
     }
     if (cmd == "rdf") {
       return cmdRdf(os, cloud, cutoff, bins, rdfTypeI, rdfTypeJ);
@@ -1140,7 +1297,7 @@ int main(int argc, char *argv[]) {
   };
 
   const bool loadAll =
-      cmd == "pairs" || (cmd == "cn" && ionsFlag) ||
+      cmd == "pairs" || cmd == "ions" || (cmd == "cn" && ionsFlag) ||
       ((cmd == "rdf" || cmd == "cn") && typesSet && rdfTypeI != rdfTypeJ) ||
       (cmd == "density-z" && typeI <= 0) || cmd == "domains";
   const int loadType = loadAll ? -1 : typeI;

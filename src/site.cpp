@@ -288,4 +288,56 @@ Table parseSiteSpec(std::string_view spec) {
   return table;
 }
 
+IonEnvironment
+ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+               const std::vector<bool> &iceFlag, const std::vector<int> &ionIndices,
+               int waterType, double cutoff) {
+  IonEnvironment out;
+  const int n = yCloud.nop;
+  std::vector<char> isIon(static_cast<std::size_t>(std::max(n, 0)), 0);
+  for (int i : ionIndices) {
+    if (i >= 0 && i < n) {
+      isIon[static_cast<std::size_t>(i)] = 1;
+    }
+  }
+  const double cut2 = cutoff * cutoff;
+  for (int i : ionIndices) {
+    if (i < 0 || i >= n) {
+      continue;
+    }
+    int shell = 0;
+    int labelled = 0;
+    for (int j = 0; j < n; j++) {
+      if (j == i || isIon[static_cast<std::size_t>(j)]) {
+        continue;
+      }
+      if (waterType != 0 && yCloud.pts[static_cast<std::size_t>(j)].type != waterType) {
+        continue;
+      }
+      if (gen::periodicDistSq(yCloud, i, j) >= cut2) {
+        continue;
+      }
+      ++shell;
+      if (static_cast<std::size_t>(j) < iceFlag.size() && iceFlag[static_cast<std::size_t>(j)]) {
+        ++labelled;
+      }
+    }
+    IonState state = IonState::liquid;
+    if (shell > 0 && labelled == shell) {
+      state = IonState::ice;
+      ++out.nIce;
+    } else if (labelled > 0) {
+      state = IonState::front;
+      ++out.nFront;
+    } else {
+      ++out.nLiquid;
+    }
+    out.ion.push_back(i);
+    out.shell.push_back(shell);
+    out.iceFraction.push_back(shell > 0 ? static_cast<double>(labelled) / shell : 0.0);
+    out.state.push_back(state);
+  }
+  return out;
+}
+
 } // namespace site

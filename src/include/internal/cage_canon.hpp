@@ -2,6 +2,7 @@
 #define SEAMS_CAGE_CANON_H_
 
 #include <string>
+#include <utility>
 #include <vector>
 
 // Nauty (McKay and Piperno, J. Symbolic Comput. 60, 94 (2014);
@@ -22,6 +23,15 @@ bool isHexagonalPrism(const std::vector<std::vector<int>> &rings);
 
 bool sameCertificate(const std::vector<std::vector<int>> &a,
                      const std::vector<std::vector<int>> &b);
+
+// Certificate of an arbitrary graph on n local vertices given by its edge
+// list, with vertex `root` in its own colour cell so that rooted
+// neighbourhoods with different centres get different certificates
+// (root < 0 colours nothing). Empty if nauty is off, n is zero, or n
+// exceeds the dense-graph limit.
+std::string canonicalCertificateRooted(int n,
+                                       const std::vector<std::pair<int, int>> &edges,
+                                       int root);
 
 } // namespace cage
 
