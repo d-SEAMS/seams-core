@@ -83,9 +83,11 @@ if [[ ! -f $INC/features.h ]]; then
   echo "missing $INC/features.h (rsync /usr/include from a login node)" >&2
   exit 1
 fi
-export CPATH=$INC${CPATH:+:$CPATH}
-export C_INCLUDE_PATH=$INC${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}
-export CPLUS_INCLUDE_PATH=$INC${CPLUS_INCLUDE_PATH:+:$CPLUS_INCLUDE_PATH}
+# -idirafter keeps glibc after libstdc++ so include_next <stdlib.h>
+# in cstdlib still finds the C header. CPATH would be searched first
+# and include_next would then skip it.
+export CFLAGS="${CFLAGS:-} -idirafter ${INC}"
+export CXXFLAGS="${CXXFLAGS:-} -idirafter ${INC}"
 # clang's driver does not search LIBRARY_PATH for startfiles.
 # -B is the prefix both gcc and clang use for crt1.o / Scrt1.o.
 export CFLAGS="${CFLAGS:-} -B${CRT}"
