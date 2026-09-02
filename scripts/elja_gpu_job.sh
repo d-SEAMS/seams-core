@@ -34,6 +34,7 @@ CLANG17=$EB/Clang/17.0.6-GCCcore-13.2.0
 export PATH=$CUDA124/bin:$NVHPC_ROOT/compilers/bin:$MESON_PRE/bin:$NINJA_PRE/bin:$PY312/bin:$PATH
 export PKG_CONFIG_PATH=$EIGEN_PRE/share/pkgconfig:$FLEXI_PRE/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}
 export LD_LIBRARY_PATH=$PY312/lib:$NVHPC_ROOT/compilers/lib:$NVHPC_ROOT/cuda/lib64:$NVHPC_ROOT/math_libs/lib64:$GCCCORE/lib64:$FLEXI_PRE/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+export PYTHONPATH=$MESON_PRE/lib/python3.12/site-packages${PYTHONPATH:+:$PYTHONPATH}
 export NVHPC=/opt/ohpc/pub/compiler/nvhpc/22.3
 
 ROOT=${SLURM_SUBMIT_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}
