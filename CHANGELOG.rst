@@ -5,6 +5,17 @@ Changelog
 Unreleased
 ==========
 
+``topo::localKey`` names the isomorphism class of an atom's rooted bonded
+neighbourhood within a number of hops (the nauty certificate with the
+centre in its own colour cell when nauty is linked, a Weisfeiler-Lehman
+refinement hash otherwise); ``topo::fingerprint`` keys a frame by the
+sorted refinement hashes and the primitive ring census, so relabelled
+configurations share a key. ``site::ionEnvironment`` classes ions by
+their first water shell against a per-atom ice flag. ``seams
+fingerprint`` and ``seams ions`` expose both; ``seams cages --graph
+seeded --complete`` turns on the ring completion; ``--hops``,
+``--ion-types`` and ``--ion-cutoff`` are new options.
+
 Version 2.7.0 (2026-09-02)
 ===========================
 
