@@ -600,56 +600,51 @@ ring::ringAdjacentCompletion(const SeededAtomLabels &labels,
   if (nAtoms == 0 || nRings == 0) {
     return out;
   }
-  // Edge -> rings sharing it
-  std::unordered_map<long long, std::vector<int>> ringsOfEdge;
-  auto edgeKey = [](int a, int b) {
-    if (a > b) {
-      std::swap(a, b);
-    }
-    return (static_cast<long long>(a) << 32) | static_cast<unsigned>(b);
-  };
+  // Rings through each atom, so that accepting one vertex only revisits
+  // the rings it belongs to
+  std::vector<std::vector<int>> ringsOf(static_cast<std::size_t>(nAtoms));
   for (int r = 0; r < nRings; r++) {
-    const auto &ring = rings[r];
-    const int k = static_cast<int>(ring.size());
-    for (int i = 0; i < k; i++) {
-      ringsOfEdge[edgeKey(ring[i], ring[(i + 1) % k])].push_back(r);
+    for (const int a : rings[r]) {
+      if (a >= 0 && a < nAtoms) {
+        ringsOf[static_cast<std::size_t>(a)].push_back(r);
+      }
     }
   }
+  // A ring with every vertex but one labelled is a cage ring with a
+  // vacancy in the label, not a liquid ring at the interface: a liquid
+  // six-ring touching a nucleus has at most a few labelled vertices.
+  // Requiring all but one keeps the completion from walking into the
+  // liquid, where a single shared edge would let it flood.
   auto complete = [&](std::vector<bool> &flag) {
-    std::vector<char> accepted(nRings, 0);
-    auto allFlagged = [&](int r) {
-      for (const int a : rings[r]) {
-        if (a < 0 || a >= nAtoms || !flag[a]) {
-          return false;
-        }
-      }
-      return true;
-    };
     std::vector<int> frontier;
+    frontier.reserve(static_cast<std::size_t>(nRings));
     for (int r = 0; r < nRings; r++) {
-      if (allFlagged(r)) {
-        accepted[r] = 1;
-        frontier.push_back(r);
-      }
+      frontier.push_back(r);
     }
-    // A newly accepted ring can extend the network further, so the
-    // frontier grows until no ring shares an edge with an accepted ring
+    std::vector<char> queued(static_cast<std::size_t>(nRings), 1);
     while (!frontier.empty()) {
       const int r = frontier.back();
       frontier.pop_back();
-      const auto &ring = rings[r];
-      const int k = static_cast<int>(ring.size());
-      for (int i = 0; i < k; i++) {
-        for (const int s : ringsOfEdge[edgeKey(ring[i], ring[(i + 1) % k])]) {
-          if (accepted[s]) {
-            continue;
-          }
-          for (const int a : rings[s]) {
-            if (a >= 0 && a < nAtoms) {
-              flag[a] = true;
-            }
-          }
-          accepted[s] = 1;
+      queued[static_cast<std::size_t>(r)] = 0;
+      int missing = -1;
+      int nMissing = 0;
+      for (const int a : rings[r]) {
+        if (a < 0 || a >= nAtoms) {
+          nMissing = 2;
+          break;
+        }
+        if (!flag[static_cast<std::size_t>(a)]) {
+          ++nMissing;
+          missing = a;
+        }
+      }
+      if (nMissing != 1) {
+        continue;
+      }
+      flag[static_cast<std::size_t>(missing)] = true;
+      for (const int s : ringsOf[static_cast<std::size_t>(missing)]) {
+        if (!queued[static_cast<std::size_t>(s)]) {
+          queued[static_cast<std::size_t>(s)] = 1;
           frontier.push_back(s);
         }
       }

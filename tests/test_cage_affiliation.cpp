@@ -447,15 +447,15 @@ TEST_CASE("ring-adjacent completion: identity on a crystal, empty on nothing",
   REQUIRE(std::count(completed.ddc.begin(), completed.ddc.end(), true) ==
           yCloud.nop);
 
-  // Remove one atom's labels by hand: the completion restores them from the
-  // rings it shares edges with
+  // Remove one atom's labels by hand: every six-ring through it now has
+  // five labelled vertices, and the completion restores the sixth
   ring::SeededAtomLabels holed = plain;
   holed.ddc[137] = false;
   const auto filled = ring::ringAdjacentCompletion(holed, six);
   REQUIRE(filled.ddc[137]);
   REQUIRE(filled.ddc == plain.ddc);
 
-  // With no accepted ring there is nothing to extend: structural zero
+  // With no labelled vertex no ring has five: structural zero
   ring::SeededAtomLabels empty;
   empty.hc.assign(yCloud.nop, false);
   empty.ddc.assign(yCloud.nop, false);

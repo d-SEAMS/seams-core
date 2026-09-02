@@ -118,14 +118,14 @@ struct SeededAtomLabels {
  *  is structural rather than statistical: when the strict pass affiliates
  *  nothing, nothing is accepted regardless of what the permissive graph
  *  builds. Where both graphs label an atom, the strict labels win.
- *  With ringAdjacentCompletion the accepted labels are extended over
- *  permissive six-rings that share an edge with an accepted ring.
+ *  With ringAdjacentCompletion a permissive six-ring with all but one
+ *  vertex labelled has its last vertex labelled too.
  * @param[in] strictRings Six-membered rings of the strict graph.
  * @param[in] strictNList Strict graph, by index with leading self entries.
  * @param[in] permissiveRings Six-membered rings of the permissive graph.
  * @param[in] permissiveNList Permissive graph, same conventions.
- * @param[in] ringAdjacentCompletion Extend accepted labels over edge-sharing
- *  permissive rings (ringAdjacentCompletion()).
+ * @param[in] ringAdjacentCompletion Fill the single unlabelled vertex of
+ *  otherwise labelled permissive six-rings (ringAdjacentCompletion()).
  */
 [[nodiscard]] SeededAtomLabels seededCageAffiliation(
     const std::vector<std::vector<int>> &strictRings,
@@ -134,11 +134,12 @@ struct SeededAtomLabels {
     const std::vector<std::vector<int>> &permissiveNList,
     bool ringAdjacentCompletion = false);
 
-/** Ring-adjacent completion of seeded labels. A permissive six-ring that
- *  shares an edge with a ring whose vertices all carry a cage label is
- *  part of that cage network; its vertices take the same label. Repeats
- *  until no ring changes. With no accepted ring there is nothing to
- *  extend, so a frame the seeded pass left empty stays empty.
+/** Ring completion of seeded labels. A permissive six-ring whose vertices
+ *  all carry a cage label but one is a cage ring with a vacancy in the
+ *  label, and its last vertex takes the label; repeated to a fixed point.
+ *  A liquid ring touching a nucleus has at most a few labelled vertices,
+ *  so the completion cannot walk into the liquid, and a frame the seeded
+ *  pass left empty stays empty.
  * @param[in] labels Seeded per-atom flags.
  * @param[in] permissiveRings Six-membered rings of the permissive graph.
  */
