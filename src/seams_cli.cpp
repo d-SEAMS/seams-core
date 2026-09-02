@@ -800,7 +800,7 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
       const auto sig = cage::Signature::parse(signatureSpec);
       const int depth = std::max(sig.maxRingSize(), 3);
       const auto rings = primitive::ringNetwork(idx, depth);
-      const auto found = cage::findBySignature(rings, sig);
+      const auto found = cage::findBySignature(rings, idx, sig);
       std::set<int> atoms;
       for (const auto &c : found) {
         atoms.insert(c.vertices.begin(), c.vertices.end());

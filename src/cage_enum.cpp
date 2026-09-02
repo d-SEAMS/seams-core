@@ -5,6 +5,7 @@
 
 #include <cage_canon.hpp>
 #include <cage_enum.hpp>
+#include <topo_bulk.hpp>
 
 #include <algorithm>
 #include <cctype>
@@ -374,11 +375,20 @@ Signature Signature::parse(std::string_view spec) {
     throw std::invalid_argument("empty cage signature");
   }
   std::string body = raw;
-  const auto named = namedTable().find(lowerCopy(raw));
-  if (named != namedTable().end()) {
-    body = named->second;
-  }
   Signature out;
+  const std::string key = lowerCopy(raw);
+  if (key == "hc") {
+    out.kind = Signature::Kind::HexC;
+    body = "4:6,6:2";
+  } else if (key == "ddc") {
+    out.kind = Signature::Kind::DoubleDiaC;
+    body = "6:7";
+  } else {
+    const auto named = namedTable().find(key);
+    if (named != namedTable().end()) {
+      body = named->second;
+    }
+  }
   std::string token;
   std::istringstream in(body);
   while (std::getline(in, token, ',')) {
@@ -475,6 +485,68 @@ std::vector<FoundCage> findBySignature(const std::vector<std::vector<int>> &ring
   Search search(rings, signature);
   search.run();
   return search.found;
+}
+
+namespace {
+
+std::vector<FoundCage>
+tumByType(const std::vector<std::vector<int>> &rings,
+          const std::vector<std::vector<int>> &nList, cageType want,
+          const Signature &signature) {
+  std::vector<std::vector<int>> six;
+  std::vector<int> origin;
+  six.reserve(rings.size());
+  origin.reserve(rings.size());
+  for (int i = 0; i < static_cast<int>(rings.size()); ++i) {
+    if (rings[static_cast<size_t>(i)].size() == 6) {
+      six.push_back(rings[static_cast<size_t>(i)]);
+      origin.push_back(i);
+    }
+  }
+  std::vector<ring::strucType> ringType(six.size());
+  std::vector<Cage> cageList;
+  const auto listHC = ring::findHC(six, ringType, nList, cageList);
+  if (want == cageType::DoubleDiaC) {
+    ring::findDDC(six, ringType, listHC, cageList);
+  }
+  std::vector<FoundCage> out;
+  for (const auto &c : cageList) {
+    if (c.type != want) {
+      continue;
+    }
+    FoundCage found;
+    found.signature = signature;
+    found.faces.reserve(c.rings.size());
+    for (const int si : c.rings) {
+      if (si >= 0 && si < static_cast<int>(origin.size())) {
+        found.faces.push_back(origin[static_cast<size_t>(si)]);
+      }
+    }
+    found.vertices = uniqueVertices(rings, found.faces);
+    std::vector<std::vector<int>> faceRings;
+    faceRings.reserve(found.faces.size());
+    for (const int fi : found.faces) {
+      faceRings.push_back(rings[static_cast<size_t>(fi)]);
+    }
+    found.certificate = canonicalCertificate(faceRings);
+    out.push_back(std::move(found));
+  }
+  return out;
+}
+
+} // namespace
+
+std::vector<FoundCage>
+findBySignature(const std::vector<std::vector<int>> &rings,
+                const std::vector<std::vector<int>> &nList,
+                const Signature &signature) {
+  if (signature.kind == Signature::Kind::HexC) {
+    return tumByType(rings, nList, cageType::HexC, signature);
+  }
+  if (signature.kind == Signature::Kind::DoubleDiaC) {
+    return tumByType(rings, nList, cageType::DoubleDiaC, signature);
+  }
+  return findBySignature(rings, signature);
 }
 
 } // namespace cage

@@ -3,5 +3,6 @@
 face-sharing primitive rings that close (every edge shared by exactly
 two faces). ``seams cages --signature 4:6,6:8`` or a named table
 entry (``sodalite|alpha|512|51262|hc|ddc``) prints the cage and atom
-counts. HC ``{4:6, 6:2}`` and DDC ``{6:7}`` match ``findHC`` /
-``findDDC`` vertex sets on the in-tree fixtures.
+counts. Named ``hc`` and ``ddc`` call ``findHC`` / ``findDDC`` so the
+vertex sets match those finders; a raw list ``4:6,6:2`` is the
+hexagonal prism.

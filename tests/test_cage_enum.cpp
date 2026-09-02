@@ -8,6 +8,7 @@
 #include <topo_bulk.hpp>
 
 #include <algorithm>
+#include <map>
 #include <set>
 #include <stdexcept>
 #include <string>
@@ -110,8 +111,16 @@ TEST_CASE("Signature parse accepts lists and the named table", "[cage_enum]") {
   REQUIRE(cage::Signature::parse("512") == cage::Signature::parse("5:12"));
   REQUIRE(cage::Signature::parse("51262") ==
           cage::Signature::parse("5:12,6:2"));
-  REQUIRE(cage::Signature::parse("hc") == cage::Signature::parse("4:6,6:2"));
-  REQUIRE(cage::Signature::parse("DDC") == cage::Signature::parse("6:7"));
+  REQUIRE(cage::Signature::parse("hc").counts ==
+          cage::Signature::parse("4:6,6:2").counts);
+  REQUIRE(cage::Signature::parse("hc").kind == cage::Signature::Kind::HexC);
+  REQUIRE(cage::Signature::parse("4:6,6:2").kind ==
+          cage::Signature::Kind::Census);
+  REQUIRE(cage::Signature::parse("hc") != cage::Signature::parse("4:6,6:2"));
+  REQUIRE(cage::Signature::parse("DDC").kind ==
+          cage::Signature::Kind::DoubleDiaC);
+  REQUIRE(cage::Signature::parse("DDC").counts ==
+          cage::Signature::parse("6:7").counts);
   REQUIRE(cage::Signature::parse(" 4:6, 6:8 ") == sod);
   REQUIRE(cage::Signature::parse("4:3,4:3") == cage::Signature::parse("4:6"));
 }
@@ -163,13 +172,25 @@ TEST_CASE("findBySignature(hc) matches findHC vertices on the twelve-atom HC",
   nList = nneigh::neighbourListByIndex(yCloud, nList);
   auto rings = primitive::ringNetwork(nList, 7);
   auto six = sixOf(rings);
+  std::map<int, int> census;
+  for (const auto &r : rings) {
+    census[static_cast<int>(r.size())] += 1;
+  }
+  std::string censusText;
+  for (const auto &kv : census) {
+    censusText += " size" + std::to_string(kv.first) + "=" +
+                  std::to_string(kv.second);
+  }
+  INFO("ring census" << censusText << " nRings=" << rings.size()
+                     << " nSix=" << six.size());
 
   std::vector<ring::strucType> ringType(six.size());
   std::vector<cage::Cage> cageList;
   ring::findHC(six, ringType, nList, cageList);
 
   const auto found =
-      cage::findBySignature(rings, cage::Signature::parse("hc"));
+      cage::findBySignature(rings, nList, cage::Signature::parse("hc"));
+  INFO("found=" << found.size() << " findHC=" << cageList.size());
   REQUIRE(vertexSetsOf(found) ==
           vertexSetsOf(cageList, cage::cageType::HexC, six));
   REQUIRE(found.size() == 1);
@@ -194,9 +215,9 @@ TEST_CASE("findBySignature(hc) and findBySignature(ddc) match findHC/findDDC "
   ring::findDDC(six, ringType, listHC, cageList);
 
   const auto hc =
-      cage::findBySignature(rings, cage::Signature::parse("hc"));
+      cage::findBySignature(rings, nList, cage::Signature::parse("hc"));
   const auto ddc =
-      cage::findBySignature(rings, cage::Signature::parse("ddc"));
+      cage::findBySignature(rings, nList, cage::Signature::parse("ddc"));
 
   REQUIRE(vertexSetsOf(hc) ==
           vertexSetsOf(cageList, cage::cageType::HexC, six));

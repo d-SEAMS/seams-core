@@ -64,16 +64,23 @@ enum class cageType { HexC, DoubleDiaC };
  *  Parse a comma list (`4:6,6:8`) or a named table entry
  *  (`sodalite`, `alpha`, `512`, `51262`, `hc`, `ddc`). Counts of a
  *  repeated size add. Every size and count must be positive.
+ *  The names `hc` and `ddc` keep the TUM ice finders (five hexagons
+ *  and seven hexagons); a raw list `4:6,6:2` is the hexagonal prism.
  */
 struct Signature {
+  enum class Kind { Census, HexC, DoubleDiaC };
+
   std::map<int, int> counts;
+  Kind kind = Kind::Census;
 
   static Signature parse(std::string_view spec);
   std::string str() const;
   int faceCount() const;
   int maxRingSize() const;
   bool containsSize(int size) const;
-  bool operator==(const Signature &other) const { return counts == other.counts; }
+  bool operator==(const Signature &other) const {
+    return kind == other.kind && counts == other.counts;
+  }
   bool operator!=(const Signature &other) const { return !(*this == other); }
 };
 

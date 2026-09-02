@@ -39,9 +39,18 @@ bool isClosedPolyhedron(const std::vector<std::vector<int>> &rings,
 
 /** Face-sharing rings whose size census equals `signature` and whose
  *  edges close. The input may hold rings of every size; only sizes
- *  that appear in the signature take part. */
+ *  that appear in the signature take part. Named `hc` and `ddc`
+ *  without a neighbour list use the geometric census
+ *  (`4:6,6:2` and `6:7`). */
 std::vector<FoundCage>
 findBySignature(const std::vector<std::vector<int>> &rings,
+                const Signature &signature);
+
+/** As above. Named `hc` and `ddc` call findHC / findDDC on the
+ *  six-membered rings so the vertex sets match those finders. */
+std::vector<FoundCage>
+findBySignature(const std::vector<std::vector<int>> &rings,
+                const std::vector<std::vector<int>> &nList,
                 const Signature &signature);
 
 } // namespace cage
