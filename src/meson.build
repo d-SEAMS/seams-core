@@ -39,11 +39,19 @@ ydslib_sources = files(
   'topo_two_dim.cpp',
 )
 
+_lib_link_args = _link_args
+# nvc++ records the output path (src/libyodaLib.so) as DT_NEEDED.
+# The Catch2 tests run with workdir input/, so that relative name
+# does not resolve. Name the soname the same way gcc does.
+if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
+  _lib_link_args += ['-Wl,-soname,libyodaLib.so']
+endif
+
 ydslib = library('yodaLib',
   ydslib_sources,
   dependencies: _deps,
   cpp_args: _args,
-  link_args: _link_args,
+  link_args: _lib_link_args,
   include_directories: _incdirs,
   install: true)
 
