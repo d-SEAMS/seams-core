@@ -45,6 +45,7 @@ OUT=${OUT_DIR:-$ROOT/offload-elja-$JOB_ID}
 BUILD=$OUT/build
 mkdir -p "$OUT"
 cd "$ROOT"
+INC=${SEAMS_INC:-$ROOT/elja-sysroot/usr/include}
 SYS_LOCALRC=$NVHPC_ROOT/compilers/bin/localrc
 GCC_LIB=$GCCCORE/lib/gcc/x86_64-pc-linux-gnu/13.3.0
 if [[ -f $SYS_LOCALRC ]]; then
