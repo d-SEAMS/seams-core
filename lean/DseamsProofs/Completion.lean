@@ -34,7 +34,10 @@
 import Mathlib.Data.Finset.Basic
 import Mathlib.Data.Finset.Card
 import Mathlib.Data.Fintype.Basic
-import Mathlib.Order.FixedPoints
+import Mathlib.Data.Fintype.Card
+import Mathlib.Data.Fintype.Fin
+import Mathlib.Data.Fin.Basic
+import Mathlib.Tactic
 
 namespace Dseams
 
@@ -55,6 +58,7 @@ def step (R : Finset (Finset V)) (L : Finset V) : Finset V :=
 theorem subset_step (R : Finset (Finset V)) (L : Finset V) : L ⊆ step R L :=
   Finset.subset_union_left
 
+omit [Fintype V] in
 theorem fills_mono {L L' : Finset V} (h : L ⊆ L') {r : Finset V} {v : V}
     (hf : fills L r v) : fills L' r v :=
   ⟨hf.1, hf.2.trans h⟩
@@ -81,7 +85,7 @@ theorem iter_mono_succ (R : Finset (Finset V)) (L : Finset V) (n : ℕ) :
 theorem iter_mono (R : Finset (Finset V)) (L : Finset V) {m n : ℕ} (h : m ≤ n) :
     iter R L m ⊆ iter R L n := by
   induction h with
-  | refl => exact le_rfl
+  | refl => exact Finset.Subset.refl _
   | step _ ih => exact ih.trans (iter_mono_succ R L _)
 
 theorem subset_iter (R : Finset (Finset V)) (L : Finset V) (n : ℕ) : L ⊆ iter R L n :=
@@ -140,8 +144,7 @@ theorem iter_stable (R : Finset (Finset V)) (L : Finset V) (k : ℕ) :
 /-- The closure is a fixed point of one round. -/
 theorem step_closure (R : Finset (Finset V)) (L : Finset V) :
     step R (closure R L) = closure R L := by
-  have := iter_stable R L 1
-  simpa [iter] using this
+  exact iter_stable R L 1
 
 theorem subset_closure (R : Finset (Finset V)) (L : Finset V) : L ⊆ closure R L :=
   subset_iter R L _
@@ -167,7 +170,7 @@ theorem closure_mono (R : Finset (Finset V)) {L L' : Finset V} (h : L ⊆ L') :
 theorem closure_idem (R : Finset (Finset V)) (L : Finset V) :
     closure R (closure R L) = closure R L :=
   Finset.Subset.antisymm
-    (closure_le_of_fixed R _ _ le_rfl (step_closure R L))
+    (closure_le_of_fixed R _ _ (Finset.Subset.refl _) (step_closure R L))
     (subset_closure R _)
 
 /-- Nothing fills a vertex from the empty labelled set once rings have at
@@ -204,21 +207,24 @@ theorem step_sound (R : Finset (Finset V)) (L : Finset V) {v : V}
   · exact absurd h hnew
   · exact (Finset.mem_filter.mp h).2
 
-/-- Soundness of the closure: every added vertex sits on a ring whose other
-vertices are in the closure. The all-but-one rule is its own certificate. -/
-theorem closure_sound (R : Finset (Finset V)) (L : Finset V) {v : V}
-    (hv : v ∈ closure R L) (hnew : v ∉ L) : ∃ r ∈ R, fills (closure R L) r v := by
-  -- find the first round that contains v
-  unfold closure at hv ⊢
-  generalize hn : Fintype.card V = n at hv
+/-- Soundness after `n` rounds: every vertex added by round `n` or earlier
+lies on a ring whose other vertices are labelled after round `n`. -/
+theorem iter_sound (R : Finset (Finset V)) (L : Finset V) (n : ℕ) {v : V}
+    (hv : v ∈ iter R L n) (hnew : v ∉ L) : ∃ r ∈ R, fills (iter R L n) r v := by
   induction n with
   | zero => exact absurd hv hnew
   | succ n ih =>
     by_cases hprev : v ∈ iter R L n
-    · obtain ⟨r, hr, hf⟩ := ih (by omega) hprev
+    · obtain ⟨r, hr, hf⟩ := ih hprev
       exact ⟨r, hr, fills_mono (iter_mono_succ R L n) hf⟩
     · obtain ⟨r, hr, hf⟩ := step_sound R (iter R L n) hv hprev
       exact ⟨r, hr, fills_mono (iter_mono_succ R L n) hf⟩
+
+/-- Soundness of the closure: every added vertex sits on a ring whose other
+vertices are in the closure. The all-but-one rule is its own certificate. -/
+theorem closure_sound (R : Finset (Finset V)) (L : Finset V) {v : V}
+    (hv : v ∈ closure R L) (hnew : v ∉ L) : ∃ r ∈ R, fills (closure R L) r v :=
+  iter_sound R L (Fintype.card V) hv hnew
 
 /-! ### The rule that flooded a liquid
 
@@ -232,34 +238,31 @@ whose vertices are all labelled. -/
 def edgeAccepts (R : Finset (Finset V)) (L : Finset V) (r : Finset V) : Prop :=
   ∃ r' ∈ R, r' ⊆ L ∧ 2 ≤ (r ∩ r').card
 
+instance (R : Finset (Finset V)) (L r : Finset V) : Decidable (edgeAccepts R L r) := by
+  unfold edgeAccepts; infer_instance
+
 def edgeStep (R : Finset (Finset V)) (L : Finset V) : Finset V :=
   L ∪ Finset.univ.filter (fun v => ∃ r ∈ R, v ∈ r ∧ edgeAccepts R L r)
 
-/-- Two labelled vertices accept a ring with an unlabelled remainder:
-a concrete four-vertex instance. `a b` are labelled and form a ring with
-`c`; the ring `{a, b, d}` is then accepted although `d` is unlabelled and
-`{a, b, d}` has two unlabelled-free vertices only. -/
+/-- The two rings of the counterexample: the labelled triangle `{0, 1, 2}`
+and the four-ring `{0, 1, 3, 4}` sharing the edge `{0, 1}` with it. -/
+def twoRings : Finset (Finset (Fin 5)) := {{0, 1, 2}, {0, 1, 3, 4}}
+
+/-- Two labelled vertices accept a ring with two unlabelled vertices. With
+`{0, 1, 2}` labelled, the edge rule labels `3` through the ring
+`{0, 1, 3, 4}`, which shares `0` and `1` with the labelled ring; the
+all-but-one rule does not, because the only ring through `3` still has `4`
+unlabelled. -/
 theorem edgeRule_not_sound :
-    let a : Fin 4 := 0; let b : Fin 4 := 1; let c : Fin 4 := 2; let d : Fin 4 := 3
-    let R : Finset (Finset (Fin 4)) := {{a, b, c}, {a, b, d}}
-    let L : Finset (Fin 4) := {a, b, c}
-    d ∈ edgeStep R L ∧ ¬ ∃ r ∈ R, fills L r d := by
-  intro a b c d R L
-  refine ⟨?_, ?_⟩
-  · -- d is accepted through the ring {a, b, d}, which shares a and b with {a, b, c}
-    refine Finset.mem_union_right _ (Finset.mem_filter.mpr ⟨Finset.mem_univ _, {a, b, d}, ?_, ?_, ?_⟩)
-    · simp [R]
-    · simp [a, b, d]
-    · refine ⟨{a, b, c}, by simp [R], by simp [L], ?_⟩
-      decide
-  · -- but no ring has all its other vertices labelled: {a, b, d} misses d only if d ∈ L, and it is not
-    rintro ⟨r, hr, hv, hsub⟩
-    simp only [R, Finset.mem_insert, Finset.mem_singleton] at hr
-    rcases hr with rfl | rfl
-    · simp [a, b, c, d] at hv
-    · have : c ∈ r.erase d := by decide
-      have := hsub this
-      simp [L, a, b, c] at this
-      revert this; decide
+    (3 : Fin 5) ∈ edgeStep twoRings {0, 1, 2} ∧
+      ¬ ∃ r ∈ twoRings, fills ({0, 1, 2} : Finset (Fin 5)) r 3 := by
+  decide
+
+/-- The all-but-one closure of the same instance adds nothing: the seed
+`{0, 1, 2}` stays `{0, 1, 2}`, while `edgeStep` grows it. -/
+theorem closure_twoRings :
+    closure twoRings ({0, 1, 2} : Finset (Fin 5)) = {0, 1, 2} ∧
+      edgeStep twoRings ({0, 1, 2} : Finset (Fin 5)) = {0, 1, 2, 3, 4} := by
+  decide
 
 end Dseams
