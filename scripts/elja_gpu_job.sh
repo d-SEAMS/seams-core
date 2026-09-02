@@ -45,6 +45,16 @@ BUILD=$OUT/build
 mkdir -p "$OUT"
 cd "$ROOT"
 
+# GPU nodes have no glibc-devel. Login-node C runtime objects live
+# in elja-crt/ (copied before submit). gcc and clang find crt1.o
+# via LIBRARY_PATH.
+CRT=${SEAMS_CRT:-$ROOT/elja-crt}
+if [[ ! -f $CRT/crt1.o || ! -f $CRT/crti.o || ! -f $CRT/crtn.o ]]; then
+  echo "missing C runtime objects in $CRT (copy crt1.o crti.o crtn.o Scrt1.o from a login /usr/lib64)" >&2
+  exit 1
+fi
+export LIBRARY_PATH=$CRT${LIBRARY_PATH:+:$LIBRARY_PATH}
+
 export SEAMS_OFFLOAD=${SEAMS_OFFLOAD:-1}
 
 # EasyBuild meson is a Python entry point with a `python` shebang.

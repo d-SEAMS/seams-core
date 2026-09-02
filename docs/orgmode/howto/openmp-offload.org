@@ -28,6 +28,9 @@ export PATH=$EB/CUDA/12.4.0/bin:$NVHPC_ROOT/compilers/bin:$EB/Meson/1.4.0-GCCcor
 export PKG_CONFIG_PATH=$EB/Eigen/3.4.0-GCCcore-13.3.0/share/pkgconfig:$EB/FlexiBLAS/3.4.4-GCC-13.3.0/lib/pkgconfig
 export LD_LIBRARY_PATH=$EB/Python/3.12.3-GCCcore-13.3.0/lib:$NVHPC_ROOT/compilers/lib:$NVHPC_ROOT/cuda/lib64:$NVHPC_ROOT/math_libs/lib64:$EB/GCCcore/13.3.0/lib64:$EB/FlexiBLAS/3.4.4-GCC-13.3.0/lib:$EB/Z3/4.13.0-GCCcore-13.2.0/lib
 export PYTHONPATH=$EB/Meson/1.4.0-GCCcore-13.3.0/lib/python3.12/site-packages
+# GPU nodes lack glibc-devel. Copy crt1.o crti.o crtn.o Scrt1.o
+# from a login /usr/lib64 into elja-crt/ before sbatch.
+export LIBRARY_PATH=$PWD/elja-crt
 
 export CC=$EB/GCCcore/13.3.0/bin/gcc
 export CXX=nvc++
