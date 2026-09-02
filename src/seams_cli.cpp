@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <map>
 #include <mutex>
@@ -541,7 +542,8 @@ int cmdDensityZ(std::ostream &os, Cloud &cloud, int typeI, int bins, int axis) {
 // for the rooted neighbourhood within `hops` bonds, the histogram of keys,
 // the primitive ring census, and a frame key over all of it.
 int cmdFingerprint(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
-                   const std::string &graphName, int hops, bool colourTypes) {
+                   const std::string &graphName, int hops, bool colourTypes,
+                   const std::string &libraryPath, const std::string &emitLabel) {
   if (cloud.nop == 0) {
     os << colorizer.heading("nop") << " 0\n";
     return 0;
@@ -570,6 +572,32 @@ int cmdFingerprint(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int
     colours.resize(rows.size(), 0);
   }
   const auto fp = topo::fingerprint(rows, hops, 7, colours);
+  if (!emitLabel.empty()) {
+    topo::KeyLibrary lib;
+    topo::addToLibrary(lib, fp, emitLabel);
+    os << topo::writeLibrary(lib);
+    return 0;
+  }
+  if (!libraryPath.empty()) {
+    std::ifstream in(libraryPath);
+    if (!in) {
+      throw std::runtime_error("cannot read key library " + libraryPath);
+    }
+    std::stringstream buf;
+    buf << in.rdbuf();
+    const auto lib = topo::readLibrary(buf.str());
+    const auto match = topo::matchLibrary(fp, lib);
+    os << colorizer.heading("nop") << " " << rows.size() << " "
+       << colorizer.longOption("graph") << " " << name << " "
+       << colorizer.longOption("hops") << " " << hops << " "
+       << colorizer.longOption("method") << " " << fp.method << " "
+       << colorizer.longOption("matched") << " " << match.matched;
+    for (const auto &kv : match.counts) {
+      os << " " << (kv.first.empty() ? std::string("unmatched") : kv.first) << "=" << kv.second;
+    }
+    os << "\n";
+    return 0;
+  }
   os << colorizer.heading("nop") << " " << rows.size() << " "
      << colorizer.longOption("graph") << " " << name << " "
      << colorizer.longOption("hops") << " " << hops << " "
@@ -864,6 +892,8 @@ int main(int argc, char *argv[]) {
   bool ionsFlag = false;
   bool completeFlag = false;
   bool colourTypes = false;
+  std::string libraryPath;
+  std::string emitLabel;
   int hops = 2;
   std::string ionTypesFlag;
   double ionCutoff = 0.0;
@@ -1023,6 +1053,21 @@ int main(int argc, char *argv[]) {
                  .help("fingerprint: colour vertices by LAMMPS type, so species "
                        "never match across types")
                  .handler([&]() { colourTypes = true; }));
+
+  parser.add(Option("--library")
+                 .argName("FILE")
+                 .help("fingerprint: key library (from --emit-library) to name atoms by")
+                 .handler([&](std::string_view value) {
+                   libraryPath = std::string(value);
+                 }));
+
+  parser.add(Option("--emit-library")
+                 .argName("LABEL")
+                 .help("fingerprint: print the frame's distinct keys as library lines "
+                       "under LABEL instead of the summary")
+                 .handler([&](std::string_view value) {
+                   emitLabel = std::string(value);
+                 }));
 
   parser.add(Option("--hops")
                  .argName("N")
@@ -1278,7 +1323,8 @@ int main(int argc, char *argv[]) {
     }
     if (cmd == "fingerprint") {
       try {
-        return cmdFingerprint(os, cloud, cutoff, typeI, k, graph, hops, colourTypes);
+        return cmdFingerprint(os, cloud, cutoff, typeI, k, graph, hops, colourTypes,
+                              libraryPath, emitLabel);
       } catch (const std::exception &e) {
         os << colorizer.error(e.what()) << "\n";
         return 2;

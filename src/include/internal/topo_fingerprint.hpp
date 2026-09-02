@@ -78,6 +78,35 @@ FrameFingerprint fingerprint(const Rows &rows, int hops = 2, int maxRingSize = 7
 /// Hex string of a 64-bit hash.
 std::string hex(std::uint64_t value);
 
+/// A dictionary from local keys to labels: the keys of reference
+/// structures (a polymorph library), so any molecule whose rooted
+/// neighbourhood matches a reference gets that reference's name. Keys are
+/// only comparable when they come from the same method, hop count and
+/// colouring, which the header records.
+struct KeyLibrary {
+  std::string method;  ///< "nauty" or "wl"
+  int hops = 0;
+  std::map<std::string, std::string> labelOf;  ///< key -> label
+};
+
+/// Add every distinct key of `fp` under `label`; a key already present
+/// under another label becomes "ambiguous".
+void addToLibrary(KeyLibrary &lib, const FrameFingerprint &fp, const std::string &label);
+
+/// Text form: a header line `# method M hops H`, then `key label` lines.
+std::string writeLibrary(const KeyLibrary &lib);
+KeyLibrary readLibrary(const std::string &text);
+
+struct LibraryMatch {
+  std::vector<std::string> labels;      ///< per atom; "" when no key matches
+  std::map<std::string, int> counts;    ///< label -> atoms, "" for unmatched
+  int matched = 0;
+};
+
+/// Look every atom key of `fp` up in `lib`. Throws std::invalid_argument
+/// when the methods or hop counts differ.
+LibraryMatch matchLibrary(const FrameFingerprint &fp, const KeyLibrary &lib);
+
 } // namespace topo
 
 #endif // SEAMS_TOPO_FINGERPRINT_H_

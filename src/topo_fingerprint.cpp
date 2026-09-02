@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
+#include <stdexcept>
 #include <unordered_map>
 
 namespace {
@@ -246,6 +247,80 @@ FrameFingerprint fingerprint(const Rows &rows, int hops, int maxRingSize,
     h = mix(h, static_cast<std::uint64_t>(out.ringCensus[static_cast<std::size_t>(s)]));
   }
   out.key = hex(h);
+  return out;
+}
+
+void addToLibrary(KeyLibrary &lib, const FrameFingerprint &fp, const std::string &label) {
+  if (lib.labelOf.empty()) {
+    lib.method = fp.method;
+    lib.hops = fp.hops;
+  } else if (lib.method != fp.method || lib.hops != fp.hops) {
+    throw std::invalid_argument("key library mixes methods or hop counts");
+  }
+  for (const auto &kv : fp.classes) {
+    auto it = lib.labelOf.find(kv.first);
+    if (it == lib.labelOf.end()) {
+      lib.labelOf.emplace(kv.first, label);
+    } else if (it->second != label) {
+      it->second = "ambiguous";
+    }
+  }
+}
+
+std::string writeLibrary(const KeyLibrary &lib) {
+  std::ostringstream out;
+  out << "# method " << lib.method << " hops " << lib.hops << "\n";
+  for (const auto &kv : lib.labelOf) {
+    out << kv.first << " " << kv.second << "\n";
+  }
+  return out.str();
+}
+
+KeyLibrary readLibrary(const std::string &text) {
+  KeyLibrary lib;
+  std::istringstream in(text);
+  std::string line;
+  while (std::getline(in, line)) {
+    if (line.empty()) {
+      continue;
+    }
+    if (line[0] == '#') {
+      std::istringstream head(line.substr(1));
+      std::string word;
+      while (head >> word) {
+        if (word == "method") {
+          head >> lib.method;
+        } else if (word == "hops") {
+          head >> lib.hops;
+        }
+      }
+      continue;
+    }
+    std::istringstream row(line);
+    std::string key;
+    std::string label;
+    if (row >> key >> label) {
+      lib.labelOf[key] = label;
+    }
+  }
+  return lib;
+}
+
+LibraryMatch matchLibrary(const FrameFingerprint &fp, const KeyLibrary &lib) {
+  if (fp.method != lib.method || fp.hops != lib.hops) {
+    throw std::invalid_argument("fingerprint and library differ in method or hops");
+  }
+  LibraryMatch out;
+  out.labels.reserve(fp.atomKeys.size());
+  for (const auto &key : fp.atomKeys) {
+    const auto it = lib.labelOf.find(key);
+    const std::string label = it == lib.labelOf.end() ? std::string() : it->second;
+    out.counts[label] += 1;
+    if (!label.empty()) {
+      ++out.matched;
+    }
+    out.labels.push_back(label);
+  }
   return out;
 }
 

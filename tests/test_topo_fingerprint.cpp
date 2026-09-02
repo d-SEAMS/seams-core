@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <numeric>
 #include <random>
+#include <stdexcept>
 #include <vector>
 
 namespace {
@@ -173,4 +174,34 @@ TEST_CASE("vertex colours split the classes and travel with a permutation", "[to
   REQUIRE(fq.classes == fp.classes);
   // the local key of an atom and of its image agree
   REQUIRE(fq.atomKeys[static_cast<std::size_t>(perm[3])] == fp.atomKeys[3]);
+}
+
+TEST_CASE("a key library names the atoms it was built from and no others", "[topo]") {
+  const auto rows = diamondRows(3);
+  const auto fp = topo::fingerprint(rows, 2, 7);
+  topo::KeyLibrary lib;
+  topo::addToLibrary(lib, fp, "diamond");
+  REQUIRE(lib.labelOf.size() == 1);
+  const auto text = topo::writeLibrary(lib);
+  const auto back = topo::readLibrary(text);
+  REQUIRE(back.method == fp.method);
+  REQUIRE(back.hops == 2);
+  REQUIRE(back.labelOf == lib.labelOf);
+  std::vector<int> perm(rows.size());
+  std::iota(perm.begin(), perm.end(), 0);
+  std::mt19937 rng(5);
+  std::shuffle(perm.begin(), perm.end(), rng);
+  const auto same = topo::matchLibrary(topo::fingerprint(permute(rows, perm), 2, 7), back);
+  REQUIRE(same.matched == static_cast<int>(rows.size()));
+  REQUIRE(same.counts.at("diamond") == static_cast<int>(rows.size()));
+  auto broken = rows;
+  const int v = broken[0][1];
+  broken[0].erase(broken[0].begin() + 1);
+  auto &rv = broken[static_cast<std::size_t>(v)];
+  rv.erase(std::find(rv.begin() + 1, rv.end(), 0));
+  const auto partial = topo::matchLibrary(topo::fingerprint(broken, 2, 7), back);
+  REQUIRE(partial.matched < static_cast<int>(rows.size()));
+  REQUIRE(partial.counts.at("") > 0);
+  REQUIRE(partial.labels[0].empty());
+  REQUIRE_THROWS_AS(topo::matchLibrary(topo::fingerprint(rows, 3, 7), back), std::invalid_argument);
 }
