@@ -14,6 +14,7 @@
 #include <steinhardt_device.hpp>
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdlib>
 #include <vector>
 
@@ -27,7 +28,7 @@
 
 namespace {
 
-constexpr int kParallelThreshold = 50000;
+constexpr int kParallelThreshold = 256;
 
 struct NeighbourCSR {
   std::vector<double> dr;
@@ -42,22 +43,53 @@ NeighbourCSR flatten(const molSys::PointCloud<molSys::Point<double>, double> &yC
   g.nop = yCloud.nop;
   g.offsets.resize(static_cast<size_t>(g.nop) + 1, 0);
 
+  int maxId = 0;
+  for (int i = 0; i < g.nop; i++) {
+    if (yCloud.pts[static_cast<size_t>(i)].atomID > maxId) {
+      maxId = yCloud.pts[static_cast<size_t>(i)].atomID;
+    }
+  }
+  const bool dense = maxId > 0 && maxId < g.nop * 8 + 8;
+  std::vector<int> idToIdx;
+  if (dense) {
+    idToIdx.assign(static_cast<size_t>(maxId) + 1, -1);
+    for (int i = 0; i < g.nop; i++) {
+      idToIdx[static_cast<size_t>(yCloud.pts[static_cast<size_t>(i)].atomID)] = i;
+    }
+  }
+
+  int nnzGuess = 0;
+  for (int i = 0; i < g.nop && static_cast<size_t>(i) < nList.size(); i++) {
+    if (nList[static_cast<size_t>(i)].size() > 1) {
+      nnzGuess += static_cast<int>(nList[static_cast<size_t>(i)].size()) - 1;
+    }
+  }
+  g.cols.reserve(static_cast<size_t>(std::max(nnzGuess, 0)));
+  g.dr.reserve(static_cast<size_t>(std::max(nnzGuess, 0)) * 3);
+
   int nnz = 0;
   for (int i = 0; i < g.nop; i++) {
-    if (static_cast<size_t>(i) >= nList.size() || nList[i].size() < 2) {
+    if (static_cast<size_t>(i) >= nList.size() ||
+        nList[static_cast<size_t>(i)].size() < 2) {
       g.offsets[static_cast<size_t>(i) + 1] = nnz;
       continue;
     }
-    for (size_t j = 1; j < nList[i].size(); j++) {
-      const auto it = yCloud.idIndexMap.find(nList[i][j]);
-      if (it == yCloud.idIndexMap.end()) {
+    for (size_t j = 1; j < nList[static_cast<size_t>(i)].size(); j++) {
+      const int atomId = nList[static_cast<size_t>(i)][j];
+      int jidx = -1;
+      if (dense && atomId >= 0 && atomId <= maxId) {
+        jidx = idToIdx[static_cast<size_t>(atomId)];
+      } else {
+        const auto it = yCloud.idIndexMap.find(atomId);
+        if (it != yCloud.idIndexMap.end()) {
+          jidx = it->second;
+        }
+      }
+      if (jidx < 0 || jidx >= g.nop) {
         continue;
       }
-      if (it->second < 0 || it->second >= g.nop) {
-        continue;
-      }
-      g.cols.push_back(it->second);
-      const auto d = gen::relDist(yCloud, i, it->second);
+      g.cols.push_back(jidx);
+      const auto d = gen::relDist(yCloud, i, jidx);
       g.dr.push_back(d[0]);
       g.dr.push_back(d[1]);
       g.dr.push_back(d[2]);
@@ -183,24 +215,88 @@ bool wantOffload() {
   return omp_get_num_devices() > 0;
 }
 
-void runOffload(const NeighbourCSR &g, int orderL, std::vector<double> &qlm,
-                std::vector<double> &ql, std::vector<double> &qlBar) {
+// One device allocation per process. map() on every call was a
+// managed malloc (~20 ms) around a ~0.1 ms Ylm kernel.
+struct DeviceScratch {
+  int device = -1;
+  int nCap = 0;
+  int nnzCap = 0;
+  int qlmCap = 0;
+  double *dr = nullptr;
+  int *offsets = nullptr;
+  int *cols = nullptr;
+  double *qlm = nullptr;
+
+  void release() {
+    if (device < 0) {
+      return;
+    }
+    if (dr != nullptr) {
+      omp_target_free(dr, device);
+    }
+    if (offsets != nullptr) {
+      omp_target_free(offsets, device);
+    }
+    if (cols != nullptr) {
+      omp_target_free(cols, device);
+    }
+    if (qlm != nullptr) {
+      omp_target_free(qlm, device);
+    }
+    dr = nullptr;
+    offsets = nullptr;
+    cols = nullptr;
+    qlm = nullptr;
+    nCap = 0;
+    nnzCap = 0;
+    qlmCap = 0;
+    device = -1;
+  }
+
+  bool ensure(int n, int nnz, int qlmN) {
+    const int dev = omp_get_default_device();
+    if (device == dev && nCap >= n + 1 && nnzCap >= nnz && qlmCap >= qlmN &&
+        dr != nullptr && offsets != nullptr && cols != nullptr &&
+        qlm != nullptr) {
+      return true;
+    }
+    release();
+    device = dev;
+    const int nnzUse = std::max(nnz, 1);
+    const int qlmUse = std::max(qlmN, 1);
+    dr = static_cast<double *>(
+        omp_target_alloc(sizeof(double) * 3 * static_cast<size_t>(nnzUse), dev));
+    offsets = static_cast<int *>(
+        omp_target_alloc(sizeof(int) * static_cast<size_t>(n + 1), dev));
+    cols = static_cast<int *>(
+        omp_target_alloc(sizeof(int) * static_cast<size_t>(nnzUse), dev));
+    qlm = static_cast<double *>(
+        omp_target_alloc(sizeof(double) * static_cast<size_t>(qlmUse), dev));
+    if (dr == nullptr || offsets == nullptr || cols == nullptr ||
+        qlm == nullptr) {
+      release();
+      return false;
+    }
+    nCap = n + 1;
+    nnzCap = nnzUse;
+    qlmCap = qlmUse;
+    return true;
+  }
+};
+
+DeviceScratch gOffloadScratch;
+
+void runOffloadMapped(const NeighbourCSR &g, int orderL, std::vector<double> &qlm,
+                      std::vector<double> &ql, std::vector<double> &qlBar) {
   const int n = g.nop;
   const int nnz = static_cast<int>(g.cols.size());
   const double *dr = g.dr.data();
   const int *offsets = g.offsets.data();
   const int *cols = g.cols.data();
   double *qlmP = qlm.data();
-  double *qlP = ql.data();
-  double *qlBarP = qlBar.data();
   const int drN = 3 * nnz;
   const int offN = n + 1;
   const int qlmN = static_cast<int>(qlm.size());
-
-  // Ylm lives on the device. ql / qlBar average qlm of an atom and
-  // its neighbours; that reduction is 1 ULP apart from the host
-  // libm path if it also runs as a target region, so pass 2 stays
-  // on the host.
 #pragma omp target data map(to : dr[0 : drN], offsets[0 : offN],                      \
                                 cols[0 : nnz], orderL)                                \
     map(from : qlmP[0 : qlmN])
@@ -209,6 +305,48 @@ void runOffload(const NeighbourCSR &g, int orderL, std::vector<double> &qlm,
     for (int i = 0; i < n; i++) {
       seams::steinhardt::qlmOneAtomDr(i, orderL, dr, offsets, cols, qlmP);
     }
+  }
+  runPass2(g, orderL, 0, n, qlm, ql, qlBar);
+}
+
+void runOffload(const NeighbourCSR &g, int orderL, std::vector<double> &qlm,
+                std::vector<double> &ql, std::vector<double> &qlBar) {
+  const int n = g.nop;
+  const int nnz = static_cast<int>(g.cols.size());
+  const int qlmN = static_cast<int>(qlm.size());
+  if (n <= 0 || nnz <= 0 || qlmN <= 0 ||
+      !gOffloadScratch.ensure(n, nnz, qlmN)) {
+    runOffloadMapped(g, orderL, qlm, ql, qlBar);
+    return;
+  }
+  const int hostDev = omp_get_initial_device();
+  const int dev = gOffloadScratch.device;
+  if (omp_target_memcpy(gOffloadScratch.dr, g.dr.data(),
+                        sizeof(double) * 3 * static_cast<size_t>(nnz), 0, 0, dev,
+                        hostDev) != 0 ||
+      omp_target_memcpy(gOffloadScratch.offsets, g.offsets.data(),
+                        sizeof(int) * static_cast<size_t>(n + 1), 0, 0, dev,
+                        hostDev) != 0 ||
+      omp_target_memcpy(gOffloadScratch.cols, g.cols.data(),
+                        sizeof(int) * static_cast<size_t>(nnz), 0, 0, dev,
+                        hostDev) != 0) {
+    runOffloadMapped(g, orderL, qlm, ql, qlBar);
+    return;
+  }
+  double *dDr = gOffloadScratch.dr;
+  int *dOff = gOffloadScratch.offsets;
+  int *dCols = gOffloadScratch.cols;
+  double *dQlm = gOffloadScratch.qlm;
+#pragma omp target teams distribute parallel for is_device_ptr(dDr, dOff, dCols, \
+                                                               dQlm)
+  for (int i = 0; i < n; i++) {
+    seams::steinhardt::qlmOneAtomDr(i, orderL, dDr, dOff, dCols, dQlm);
+  }
+  if (omp_target_memcpy(qlm.data(), dQlm,
+                        sizeof(double) * static_cast<size_t>(qlmN), 0, 0,
+                        hostDev, dev) != 0) {
+    runOffloadMapped(g, orderL, qlm, ql, qlBar);
+    return;
   }
   runPass2(g, orderL, 0, n, qlm, ql, qlBar);
 }
