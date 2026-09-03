@@ -23,7 +23,7 @@ d-SEAMS is five packages:
     +-------------------------------------------------------------+-------------------------------------+
     | `linkcell <https://github.com/d-SEAMS/linkcell>`_           | periodic k-nearest neighbour search |
     +-------------------------------------------------------------+-------------------------------------+
-    | `dseams-plumed <https://github.com/HaoZeke/dseams-plumed>`_ | ``DSEAMS_CAGES`` PLUMED action      |
+    | `dseams-plumed <https://github.com/d-SEAMS/dseams-plumed>`_ | ``DSEAMS_CAGES`` PLUMED action      |
     +-------------------------------------------------------------+-------------------------------------+
 
 Bindings do not live in seams-core. ``-Dwith_python=true`` and
