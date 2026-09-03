@@ -247,7 +247,7 @@ data-aria-dark="Switch to auto color mode">
 runs <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">release</span> <span class="pre">create</span></code> when a <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag is pushed. Versions,
 newsfragments, bindings wraps, and the Zenodo pin are not
 automated.</p>
-<p>d-SEAMS is three packages:</p>
+<p>d-SEAMS is five packages:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -265,6 +265,12 @@ automated.</p>
 <tr class="row-even"><td><p><a class="reference external" href="https://github.com/d-SEAMS/yodaStruct">yodaStruct</a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">dseams</span></code> Lua/Fennel</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/d-SEAMS/linkcell">linkcell</a></p></td>
+<td><p>periodic k-nearest neighbour search</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/HaoZeke/dseams-plumed">dseams-plumed</a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DSEAMS_CAGES</span></code> PLUMED action</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -278,21 +284,22 @@ Do not add a language binding here. Do not resurrect
 <li><p>Feature work is on <code class="docutils literal notranslate"><span class="pre">main</span></code>, or on a native GitHub stack that
 lands on <code class="docutils literal notranslate"><span class="pre">main</span></code>.</p></li>
 <li><p>CI is green on the merge commit (<code class="docutils literal notranslate"><span class="pre">CI</span></code> and <code class="docutils literal notranslate"><span class="pre">Docs</span></code>).</p></li>
-<li><p>Collect newsfragments under <code class="docutils literal notranslate"><span class="pre">docs/newsfragments/</span></code> that are
-<strong>not</strong> already in <code class="docutils literal notranslate"><span class="pre">CHANGELOG.rst</span></code>. Fragments whose text is
-already in that file reprint those notes if they stay in the
+<li><p>Collect Keep a Changelog fragments under <code class="docutils literal notranslate"><span class="pre">changelog.d/</span></code> that
+are <strong>not</strong> already in <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code>. Name each file
+<code class="docutils literal notranslate"><span class="pre">+slug.added.md</span></code> (or <code class="docutils literal notranslate"><span class="pre">changed</span></code>, <code class="docutils literal notranslate"><span class="pre">deprecated</span></code>, <code class="docutils literal notranslate"><span class="pre">removed</span></code>,
+<code class="docutils literal notranslate"><span class="pre">fixed</span></code>, <code class="docutils literal notranslate"><span class="pre">security</span></code>). Fragments whose text is already in
+<code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> reprint those notes if they stay in the
 directory.
 Then:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">towncrier<span class="w"> </span>build<span class="w"> </span>--version<span class="w"> </span>X.Y.Z
 </span></pre></div>
 </div>
-<p>That writes <code class="docutils literal notranslate"><span class="pre">CHANGELOG.rst</span></code> and removes the consumed fragments.</p>
+<p>That writes <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> and removes the consumed fragments.</p>
 </li>
-<li><p>Bump <code class="docutils literal notranslate"><span class="pre">pixi.toml</span></code>, <code class="docutils literal notranslate"><span class="pre">meson.build</span></code>, <code class="docutils literal notranslate"><span class="pre">CITATION.cff</span></code>, and
-<code class="docutils literal notranslate"><span class="pre">towncrier.toml</span></code> together. Set <code class="docutils literal notranslate"><span class="pre">towncrier.toml</span></code> <code class="docutils literal notranslate"><span class="pre">version</span></code> to
-<code class="docutils literal notranslate"><span class="pre">X.Y.Z</span></code> so a build without <code class="docutils literal notranslate"><span class="pre">--version</span></code> does not write the
-wrong header. Sync
-<code class="docutils literal notranslate"><span class="pre">docs/orgmode/changelog.org</span></code> with the new <code class="docutils literal notranslate"><span class="pre">CHANGELOG.rst</span></code>
+<li><p>Bump <code class="docutils literal notranslate"><span class="pre">pixi.toml</span></code>, <code class="docutils literal notranslate"><span class="pre">meson.build</span></code>, and <code class="docutils literal notranslate"><span class="pre">CITATION.cff</span></code> together.
+Pass <code class="docutils literal notranslate"><span class="pre">--version</span> <span class="pre">X.Y.Z</span></code> to towncrier; do not store a stale
+version in <code class="docutils literal notranslate"><span class="pre">towncrier.toml</span></code>. Sync
+<code class="docutils literal notranslate"><span class="pre">docs/orgmode/changelog.org</span></code> with the new <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code>
 section. <code class="docutils literal notranslate"><span class="pre">nix/package.nix</span></code> and
 <code class="docutils literal notranslate"><span class="pre">docs/source/Doxyfile_seams.cfg</span></code> <code class="docutils literal notranslate"><span class="pre">PROJECT_NUMBER</span></code> also carry a
 version string; do not leave them behind the cut.</p></li>
@@ -343,11 +350,11 @@ object is to stay intact.</p></li>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CITATION.cff</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">version</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">towncrier.toml</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">[tool.towncrier]</span> <span class="pre">version</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code></p></td>
+<td><p>towncrier output for <code class="docutils literal notranslate"><span class="pre">X.Y.Z</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">docs/orgmode/changelog.org</span></code></p></td>
-<td><p>new section from <code class="docutils literal notranslate"><span class="pre">CHANGELOG.rst</span></code></p></td>
+<td><p>new section from <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nix/package.nix</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">version</span></code></p></td>
@@ -388,11 +395,13 @@ object is to stay intact.</p></li>
 </section>
 <section id="newsfragments">
 <h2>Newsfragments<a class="headerlink" href="#newsfragments" title="Link to this heading">¶</a></h2>
-<p>One file per user-visible change, under <code class="docutils literal notranslate"><span class="pre">docs/newsfragments/</span></code>,
-named <code class="docutils literal notranslate"><span class="pre">&lt;slug&gt;.&lt;type&gt;</span></code> (<code class="docutils literal notranslate"><span class="pre">feature</span></code>, <code class="docutils literal notranslate"><span class="pre">bugfix</span></code>, …). Write the
-fragment in the same pull request as the change. The cut in step
-3 consumes only fragments that are not already reflected in
-<code class="docutils literal notranslate"><span class="pre">CHANGELOG.rst</span></code>.</p>
+<p>One file for each user-visible change, under <code class="docutils literal notranslate"><span class="pre">changelog.d/</span></code>,
+named <code class="docutils literal notranslate"><span class="pre">+slug.&lt;type&gt;.md</span></code> or <code class="docutils literal notranslate"><span class="pre">&lt;github-issue&gt;.&lt;type&gt;.md</span></code>. Types are
+the Keep a Changelog set: <code class="docutils literal notranslate"><span class="pre">added</span></code>, <code class="docutils literal notranslate"><span class="pre">changed</span></code>, <code class="docutils literal notranslate"><span class="pre">deprecated</span></code>,
+<code class="docutils literal notranslate"><span class="pre">removed</span></code>, <code class="docutils literal notranslate"><span class="pre">fixed</span></code>, <code class="docutils literal notranslate"><span class="pre">security</span></code>. Write the fragment in the same
+pull request as the change. The cut in step 3 consumes only
+fragments that are not already reflected in <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code>.
+Every d-SEAMS package uses this layout.</p>
 </section>
 </section>
 

@@ -7,6 +7,10 @@ The C++ engine is this repository. Python is ``pydseams``
 (`PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_). Lua is
 ``require("dseams")`` (`yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_).
 
+The release history is `CHANGELOG.md <../../CHANGELOG.md>`_
+(Keep a Changelog, assembled by towncrier). This page is the
+narrative cut used in the book.
+
 Unreleased
 ----------
 
