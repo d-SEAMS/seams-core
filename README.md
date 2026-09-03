@@ -37,6 +37,10 @@ Periodic k-nearest neighbour search is
 Build with `pixi run setup && pixi run build && pixi run test`, or with
 the Nix flake: `nix build` and `nix develop`.
 
+Released versions live in [CHANGELOG.md](CHANGELOG.md) (Keep a Changelog).
+Unreleased notes are files under `changelog.d/`. The cut is
+`towncrier build --version X.Y.Z`.
+
 # Runtime configuration
 
 Knobs that change between machines and jobs are twelve-factor: they

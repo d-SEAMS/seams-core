@@ -5,6 +5,10 @@ The C++ engine is this repository. Python is ~pydseams~
 ([[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]). Lua is
 ~require("dseams")~ ([[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]).
 
+The release history is [[file:../../CHANGELOG.md][CHANGELOG.md]]
+(Keep a Changelog, assembled by towncrier). This page is the
+narrative cut used in the book.
+
 * Unreleased
 
 The CLI preserves frame order for parallel LAMMPS ranges, dispatches ranges

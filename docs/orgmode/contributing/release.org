@@ -6,13 +6,15 @@ runs ~gh release create~ when a ~v*~ tag is pushed. Versions,
 newsfragments, bindings wraps, and the Zenodo pin are not
 automated.
 
-d-SEAMS is three packages:
+d-SEAMS is five packages:
 
 | repo | product |
 |------+---------|
 | [[https://github.com/d-SEAMS/seams-core][seams-core]] | ~libyodaLib~ and ~seams~ |
 | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseams~ |
 | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | ~dseams~ Lua/Fennel |
+| [[https://github.com/d-SEAMS/linkcell][linkcell]] | periodic k-nearest neighbour search |
+| [[https://github.com/HaoZeke/dseams-plumed][dseams-plumed]] | ~DSEAMS_CAGES~ PLUMED action |
 
 Bindings do not live in seams-core. ~-Dwith_python=true~ and
 ~-Dwith_lua=enabled~ are Meson errors that name those repositories.
@@ -24,9 +26,11 @@ Do not add a language binding here. Do not resurrect
 1. Feature work is on ~main~, or on a native GitHub stack that
    lands on ~main~.
 2. CI is green on the merge commit (~CI~ and ~Docs~).
-3. Collect newsfragments under ~docs/newsfragments/~ that are
-   *not* already in ~CHANGELOG.rst~. Fragments whose text is
-   already in that file reprint those notes if they stay in the
+3. Collect Keep a Changelog fragments under ~changelog.d/~ that
+   are *not* already in ~CHANGELOG.md~. Name each file
+   ~+slug.added.md~ (or ~changed~, ~deprecated~, ~removed~,
+   ~fixed~, ~security~). Fragments whose text is already in
+   ~CHANGELOG.md~ reprint those notes if they stay in the
    directory.
    Then:
 
@@ -34,12 +38,11 @@ Do not add a language binding here. Do not resurrect
    towncrier build --version X.Y.Z
    #+end_src
 
-   That writes ~CHANGELOG.rst~ and removes the consumed fragments.
-4. Bump ~pixi.toml~, ~meson.build~, ~CITATION.cff~, and
-   ~towncrier.toml~ together. Set ~towncrier.toml~ ~version~ to
-   ~X.Y.Z~ so a build without ~--version~ does not write the
-   wrong header. Sync
-   ~docs/orgmode/changelog.org~ with the new ~CHANGELOG.rst~
+   That writes ~CHANGELOG.md~ and removes the consumed fragments.
+4. Bump ~pixi.toml~, ~meson.build~, and ~CITATION.cff~ together.
+   Pass ~--version X.Y.Z~ to towncrier; do not store a stale
+   version in ~towncrier.toml~. Sync
+   ~docs/orgmode/changelog.org~ with the new ~CHANGELOG.md~
    section. ~nix/package.nix~ and
    ~docs/source/Doxyfile_seams.cfg~ ~PROJECT_NUMBER~ also carry a
    version string; do not leave them behind the cut.
@@ -78,8 +81,8 @@ seams-core cut:
 | ~meson.build~ | ~project(..., version:)~ |
 | ~pixi.toml~ | ~[workspace] version~ |
 | ~CITATION.cff~ | ~version~ |
-| ~towncrier.toml~ | ~[tool.towncrier] version~ |
-| ~docs/orgmode/changelog.org~ | new section from ~CHANGELOG.rst~ |
+| ~CHANGELOG.md~ | towncrier output for ~X.Y.Z~ |
+| ~docs/orgmode/changelog.org~ | new section from ~CHANGELOG.md~ |
 | ~nix/package.nix~ | ~version~ |
 | ~docs/source/Doxyfile_seams.cfg~ | ~PROJECT_NUMBER~ |
 
@@ -95,8 +98,10 @@ Front ends, after the engine tag exists:
 
 * Newsfragments
 
-One file per user-visible change, under ~docs/newsfragments/~,
-named ~<slug>.<type>~ (~feature~, ~bugfix~, ...). Write the
-fragment in the same pull request as the change. The cut in step
-3 consumes only fragments that are not already reflected in
-~CHANGELOG.rst~.
+One file for each user-visible change, under ~changelog.d/~,
+named ~+slug.<type>.md~ or ~<github-issue>.<type>.md~. Types are
+the Keep a Changelog set: ~added~, ~changed~, ~deprecated~,
+~removed~, ~fixed~, ~security~. Write the fragment in the same
+pull request as the change. The cut in step 3 consumes only
+fragments that are not already reflected in ~CHANGELOG.md~.
+Every d-SEAMS package uses this layout.
