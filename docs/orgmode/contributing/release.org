@@ -14,7 +14,7 @@ d-SEAMS is five packages:
 | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseams~ |
 | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | ~dseams~ Lua/Fennel |
 | [[https://github.com/d-SEAMS/linkcell][linkcell]] | periodic k-nearest neighbour search |
-| [[https://github.com/HaoZeke/dseams-plumed][dseams-plumed]] | ~DSEAMS_CAGES~ PLUMED action |
+| [[https://github.com/d-SEAMS/dseams-plumed][dseams-plumed]] | ~DSEAMS_CAGES~ PLUMED action |
 
 Bindings do not live in seams-core. ~-Dwith_python=true~ and
 ~-Dwith_lua=enabled~ are Meson errors that name those repositories.

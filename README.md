@@ -209,7 +209,7 @@ child directory.
 
 The benchmark campaign, the public-trajectory walks and the tool comparison
 behind the d-SEAMS 2.0 paper live in
-[dseams2_repro](https://github.com/HaoZeke/dseams2_repro), which builds
+[dseams2_repro](https://github.com/d-SEAMS/dseams2_repro), which builds
 this engine at a locked revision alongside its baseline and both front
 ends.
 
