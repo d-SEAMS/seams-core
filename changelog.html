@@ -142,28 +142,31 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#unreleased">Unreleased</a></li>
-<li><a class="reference internal" href="#id1">2.7.0</a></li>
-<li><a class="reference internal" href="#id2">2.6.0</a></li>
-<li><a class="reference internal" href="#id3">2.5.0</a></li>
-<li><a class="reference internal" href="#id4">2.4.0</a></li>
-<li><a class="reference internal" href="#id5">2.3.4</a></li>
-<li><a class="reference internal" href="#id6">2.3.3</a></li>
-<li><a class="reference internal" href="#id7">2.3.2</a></li>
-<li><a class="reference internal" href="#id8">2.3.1</a></li>
-<li><a class="reference internal" href="#id9">2.3.0</a></li>
-<li><a class="reference internal" href="#id10">2.2.5</a></li>
-<li><a class="reference internal" href="#id11">2.2.4</a></li>
-<li><a class="reference internal" href="#id12">2.2.3</a></li>
-<li><a class="reference internal" href="#id13">2.2.2</a></li>
-<li><a class="reference internal" href="#id14">2.2.1</a></li>
-<li><a class="reference internal" href="#id15">2.2.0</a></li>
-<li><a class="reference internal" href="#id16">2.1.2</a></li>
-<li><a class="reference internal" href="#id17">2.1.1</a></li>
-<li><a class="reference internal" href="#id18">2.1.0</a></li>
-<li><a class="reference internal" href="#id19">2.0.1</a></li>
-<li><a class="reference internal" href="#id20">2.0.0</a></li>
-<li><a class="reference internal" href="#id21">1.0.0</a></li>
+<li><a class="reference internal" href="#id1">2.9.2</a></li>
+<li><a class="reference internal" href="#id2">2.9.1</a></li>
+<li><a class="reference internal" href="#id3">2.9.0</a></li>
+<li><a class="reference internal" href="#id4">2.8.0</a></li>
+<li><a class="reference internal" href="#id5">2.7.0</a></li>
+<li><a class="reference internal" href="#id6">2.6.0</a></li>
+<li><a class="reference internal" href="#id7">2.5.0</a></li>
+<li><a class="reference internal" href="#id8">2.4.0</a></li>
+<li><a class="reference internal" href="#id9">2.3.4</a></li>
+<li><a class="reference internal" href="#id10">2.3.3</a></li>
+<li><a class="reference internal" href="#id11">2.3.2</a></li>
+<li><a class="reference internal" href="#id12">2.3.1</a></li>
+<li><a class="reference internal" href="#id13">2.3.0</a></li>
+<li><a class="reference internal" href="#id14">2.2.5</a></li>
+<li><a class="reference internal" href="#id15">2.2.4</a></li>
+<li><a class="reference internal" href="#id16">2.2.3</a></li>
+<li><a class="reference internal" href="#id17">2.2.2</a></li>
+<li><a class="reference internal" href="#id18">2.2.1</a></li>
+<li><a class="reference internal" href="#id19">2.2.0</a></li>
+<li><a class="reference internal" href="#id20">2.1.2</a></li>
+<li><a class="reference internal" href="#id21">2.1.1</a></li>
+<li><a class="reference internal" href="#id22">2.1.0</a></li>
+<li><a class="reference internal" href="#id23">2.0.1</a></li>
+<li><a class="reference internal" href="#id24">2.0.0</a></li>
+<li><a class="reference internal" href="#id25">1.0.0</a></li>
 </ul>
 </div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
   data-type="github" data-user="d-SEAMS" data-repo="seams-core">
@@ -260,18 +263,52 @@ data-aria-dark="Switch to auto color mode">
 <p>The release history is <a class="reference external" href="../../CHANGELOG.md">CHANGELOG.md</a>
 (Keep a Changelog, assembled by towncrier). This page is the
 narrative cut used in the book.</p>
-<section id="unreleased">
-<h2>Unreleased<a class="headerlink" href="#unreleased" title="Link to this heading">¶</a></h2>
-<p>The CLI preserves frame order for parallel LAMMPS ranges, dispatches ranges
-for XYZ, chemfiles, and readcon inputs, and offers versioned JSONL output
-through <code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">json</span></code>. <code class="docutils literal notranslate"><span class="pre">--strict-input</span></code> makes empty-frame handling an
-explicit error. XYZ input accepts coordinate-only rows and records its
-single frame as frame 1. Density regression coverage includes all Cartesian
-axes of a sheared cell. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span> <span class="pre">--graph</span> <span class="pre">seeded</span> <span class="pre">--complete</span></code> turns on
-the ring completion.</p>
-</section>
 <section id="id1">
-<h2>2.7.0<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<h2>2.9.2<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<p>Every host stage of the ring pipeline threads. The cutoff neighbour
+list and the index-ordered list come from a threaded cell list that
+bins molecules in fractional coordinates of the recovered triclinic
+cell and builds each row on one thread, equal row for row to the
+minimum-image reference; the ID-to-index conversion threads too.
+<code class="docutils literal notranslate"><span class="pre">bench_strong</span></code> times every stage and their sum as the best of five
+pinned runs. On a 16-core workstation the 65536-molecule pipeline
+falls from 906 to 99 ms.</p>
+</section>
+<section id="id2">
+<h2>2.9.1<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<p>The OpenMP target offload of the Steinhardt kernel compiles with
+nvc++ 23.7 against CUDA 12.2 on an A100 and matches the serial and
+threaded host results bit for bit; <code class="docutils literal notranslate"><span class="pre">SEAMS_OFFLOAD=0</span></code> keeps the host
+path.</p>
+</section>
+<section id="id3">
+<h2>2.9.0<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">cage::findBySignature</span></code> enumerates closed polyhedra by their
+ring-size census (<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span> <span class="pre">--signature</span></code>), key libraries stack
+across hop counts with the depth that named each atom
+(<code class="docutils literal notranslate"><span class="pre">topo::matchLibraries</span></code>), guests are placed in enumerated cages by
+periodic centroids (<code class="docutils literal notranslate"><span class="pre">site::guestOccupancy</span></code>, <code class="docutils literal notranslate"><span class="pre">--guest-types</span></code>), ion
+environments list their shell and <code class="docutils literal notranslate"><span class="pre">site::shellRingCensus</span></code> counts the
+rings through it, and <code class="docutils literal notranslate"><span class="pre">--per-atom</span> <span class="pre">FILE</span></code> writes a LAMMPS dump with the
+engine’s per-atom decision for OVITO or VMD.</p>
+</section>
+<section id="id4">
+<h2>2.8.0<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<p>Topology keys (<code class="docutils literal notranslate"><span class="pre">topo::localKey</span></code>, <code class="docutils literal notranslate"><span class="pre">topo::fingerprint</span></code>, nauty
+certificate or Weisfeiler-Leman hash), key libraries
+(<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">fingerprint</span> <span class="pre">--emit-library</span></code>, <code class="docutils literal notranslate"><span class="pre">--library</span></code>), ions read against
+the cage assignment (<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">ions</span></code>), vertex colours by species, the
+embedded CON reader, and a refusal of CON and chemfiles input when
+their reader is absent. The CLI preserves frame order for parallel
+LAMMPS ranges, dispatches ranges for XYZ, chemfiles, and readcon
+inputs, and offers versioned JSONL output through <code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">json</span></code>.
+<code class="docutils literal notranslate"><span class="pre">--strict-input</span></code> makes empty-frame handling an explicit error. XYZ
+input accepts coordinate-only rows and records its single frame as
+frame 1. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span> <span class="pre">--graph</span> <span class="pre">seeded</span> <span class="pre">--complete</span></code> turns on the ring
+completion.</p>
+</section>
+<section id="id5">
+<h2>2.7.0<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ring::seededCageAffiliation</span></code> takes an optional completion flag.
 <code class="docutils literal notranslate"><span class="pre">ring::ringAdjacentCompletion</span></code> fills the last vertex of any six-ring
 whose other vertices carry a cage label, iterated to a fixed point,
@@ -284,8 +321,8 @@ rule it replaces is shown unsound on a five-vertex instance.
 CHILL+ and cage labels with their largest clusters. The
 reproducibility workflow moved to the <code class="docutils literal notranslate"><span class="pre">dseams2_repro</span></code> package.</p>
 </section>
-<section id="id2">
-<h2>2.6.0<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<section id="id6">
+<h2>2.6.0<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h2>
 <p>Meson links FlexiBLAS when pkg-config or <code class="docutils literal notranslate"><span class="pre">libflexiblas</span></code> is present,
 and falls back to the conda-forge <code class="docutils literal notranslate"><span class="pre">libblas</span></code> / <code class="docutils literal notranslate"><span class="pre">liblapack</span></code> ABI
 packages. The reproducibility campaign no longer configures in-tree
@@ -293,8 +330,8 @@ Python; bindings come from <code class="docutils literal notranslate"><span clas
 notebook reads <code class="docutils literal notranslate"><span class="pre">CageScore</span></code> fields. Figshare Lua demos resolve
 <code class="docutils literal notranslate"><span class="pre">example_lua</span></code> from yodaStruct.</p>
 </section>
-<section id="id3">
-<h2>2.5.0<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<section id="id7">
+<h2>2.5.0<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">--family</span></code> (default <code class="docutils literal notranslate"><span class="pre">waterIce</span></code>) is an input. Ice scores refuse
 non-water families and name the family. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cn</span> <span class="pre">--ions</span></code> is cage
 degree on <code class="docutils literal notranslate"><span class="pre">site::ionCloud</span></code>; <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">pairs</span></code> is the mutual-nearest
@@ -305,8 +342,8 @@ and the first minimum of <span class="math notranslate nohighlight">\(g_{IJ}\)</
 <code class="docutils literal notranslate"><span class="pre">firstMinimumBin</span></code>. Dump writers emit <code class="docutils literal notranslate"><span class="pre">xy,</span> <span class="pre">xz,</span> <span class="pre">yz</span></code> when the cloud
 carries tilt.</p>
 </section>
-<section id="id4">
-<h2>2.4.0<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<section id="id8">
+<h2>2.4.0<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
 <p>Partial 3D site-site <span class="math notranslate nohighlight">\(g_{IJ}(r)\)</span> and coordination numbers under
 the dump MIC, via <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">rdf</span></code> and <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cn</span></code>. Site chemistry is a
 <code class="docutils literal notranslate"><span class="pre">site::Table</span></code> of LAMMPS types and optional atom-ID overrides;
@@ -319,30 +356,30 @@ uses the dump-cell volume <span class="math notranslate nohighlight">\(|\det H|\
 in-plane area <span class="math notranslate nohighlight">\(lx \times ly\)</span>, not the particle AABB or bound-span
 product.</p>
 </section>
-<section id="id5">
-<h2>2.3.4<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<section id="id9">
+<h2>2.3.4<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
 <p>Steinhardt, hydrogen-bond, and cluster wraps use the dump
 minimum image, not an independent-axis wrap on bound spans.</p>
 </section>
-<section id="id6">
-<h2>2.3.3<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h2>
+<section id="id10">
+<h2>2.3.3<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
 <p>Cutoff fallbacks and the skin Verlet refresh use the dump 3x3
 minimum image, not a diagonal of bound spans.</p>
 </section>
-<section id="id7">
-<h2>2.3.2<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<section id="id11">
+<h2>2.3.2<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h2>
 <p>Cutoff lists take the LAMMPS dump 3x3, not a diagonal of bound
 spans. Device ice-score batches pass <code class="docutils literal notranslate"><span class="pre">lammpsBoxToLinkcell</span></code> when
 the dump tilt is present. <code class="docutils literal notranslate"><span class="pre">linkcell</span></code> wrap pin is v0.3.1.</p>
 </section>
-<section id="id8">
-<h2>2.3.1<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<section id="id12">
+<h2>2.3.1<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">neighList</span></code>, <code class="docutils literal notranslate"><span class="pre">halfNeighList</span></code>, and the in-plane RDF sampler use
 the vesin cell list (same helper as <code class="docutils literal notranslate"><span class="pre">neighListO</span></code>). Brute force
 remains the fallback. The GPU ice-score workspace is unchanged.</p>
 </section>
-<section id="id9">
-<h2>2.3.0<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<section id="id13">
+<h2>2.3.0<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h2>
 <p>The TUM ice score (mutual four-nearest graph, primitive hexagons,
 HC/DDC) runs as a device-resident frame batch when gpulite and
 <code class="docutils literal notranslate"><span class="pre">linkcell</span></code> 0.3.0 are present. CHILL and <span class="math notranslate nohighlight">\(q_{lm}\)</span> stay on the
@@ -353,14 +390,14 @@ use <code class="docutils literal notranslate"><span class="pre">seams</span></c
 <code class="docutils literal notranslate"><span class="pre">yodaStruct</span> <span class="pre">-c</span></code> / <code class="docutils literal notranslate"><span class="pre">conf.yaml</span></code> surface is gone.</p>
 <p>The C++ API in the book is Doxygen via doxyrest (<code class="docutils literal notranslate"><span class="pre">api/index</span></code>).</p>
 </section>
-<section id="id10">
-<h2>2.2.5<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
+<section id="id14">
+<h2>2.2.5<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">subprojects/linkcell.wrap</span></code> is v0.2.4. A static <code class="docutils literal notranslate"><span class="pre">libyodaLib.a</span></code>
 no longer passes <code class="docutils literal notranslate"><span class="pre">liblinkcell.so</span></code> to <code class="docutils literal notranslate"><span class="pre">ar</span></code>. Wrap consumers link
 the static archive. Dump doubles parse with <code class="docutils literal notranslate"><span class="pre">strtod</span></code> on Apple libc++.</p>
 </section>
-<section id="id11">
-<h2>2.2.4<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h2>
+<section id="id15">
+<h2>2.2.4<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h2>
 <p>Periodic <em>k</em>-nearest graphs via <a class="reference external" href="https://github.com/d-SEAMS/linkcell">d-SEAMS/linkcell</a> v0.2.2.
 <code class="docutils literal notranslate"><span class="pre">kNearestNeighbourList</span></code> / <code class="docutils literal notranslate"><span class="pre">kNearestNeighbourPair</span></code> write packed
 <code class="docutils literal notranslate"><span class="pre">n*k</span></code> nominations. Mutual and union come from one walk. The LAMMPS
@@ -369,18 +406,18 @@ H. Empty frames no longer abort the walker.</p>
 <p>Docs orgmode covers the <code class="docutils literal notranslate"><span class="pre">seams</span></code> CLI, the Nix flake, and the
 three-repo split.</p>
 </section>
-<section id="id12">
-<h2>2.2.3<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h2>
+<section id="id16">
+<h2>2.2.3<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">seams</span></code> CLI uses Argum. Help, errors, ice-type counts, and
 <code class="docutils literal notranslate"><span class="pre">--features</span></code> are colorized. <code class="docutils literal notranslate"><span class="pre">NO_COLOR</span></code> turns the colors off.</p>
 </section>
-<section id="id13">
-<h2>2.2.2<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h2>
+<section id="id17">
+<h2>2.2.2<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h2>
 <p>The compiled Python surface is <code class="docutils literal notranslate"><span class="pre">pydseams.yoda</span></code>. <code class="docutils literal notranslate"><span class="pre">_core</span></code> remains an
 alias.</p>
 </section>
-<section id="id14">
-<h2>2.2.1<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h2>
+<section id="id18">
+<h2>2.2.1<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Flake package for <code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code> and <code class="docutils literal notranslate"><span class="pre">seams</span></code> (Meson, not the
 CMake-era <code class="docutils literal notranslate"><span class="pre">yodaStruct</span></code> derivation).</p></li>
@@ -391,24 +428,24 @@ CMake-era <code class="docutils literal notranslate"><span class="pre">yodaStruc
 are absent.</p></li>
 </ul>
 </section>
-<section id="id15">
-<h2>2.2.0<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h2>
+<section id="id19">
+<h2>2.2.0<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">seams</span></code> CLI: <code class="docutils literal notranslate"><span class="pre">read</span></code>, <code class="docutils literal notranslate"><span class="pre">chill</span></code>, <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code>, <code class="docutils literal notranslate"><span class="pre">cages</span></code>. This is the
 engine command line.</p>
 </section>
-<section id="id16">
-<h2>2.1.2<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h2>
+<section id="id20">
+<h2>2.1.2<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h2>
 <p>Removed CMake-era Nix entrypoints that still named the product
 <code class="docutils literal notranslate"><span class="pre">yodaStruct</span></code>. Build with pixi or <code class="docutils literal notranslate"><span class="pre">nix</span> <span class="pre">build</span></code>.</p>
 </section>
-<section id="id17">
-<h2>2.1.1<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h2>
+<section id="id21">
+<h2>2.1.1<a class="headerlink" href="#id21" title="Link to this heading">¶</a></h2>
 <p>CHILL interfacial walk uses the same four-neighbour star as <code class="docutils literal notranslate"><span class="pre">c_ij</span></code>.
 Atoms without four recorded bonds go to water. Seeded affiliation
 floods HC and DDC separately.</p>
 </section>
-<section id="id18">
-<h2>2.1.0<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h2>
+<section id="id22">
+<h2>2.1.0<a class="headerlink" href="#id22" title="Link to this heading">¶</a></h2>
 <p>The C++ engine is this repository. Front ends are not.</p>
 <ul class="simple">
 <li><p>The <code class="docutils literal notranslate"><span class="pre">yodaStruct</span></code> Lua/Fennel CLI moved to
@@ -420,19 +457,19 @@ error that names that repository.</p></li>
 <code class="docutils literal notranslate"><span class="pre">void</span></code>.</p></li>
 </ul>
 </section>
-<section id="id19">
-<h2>2.0.1<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h2>
+<section id="id23">
+<h2>2.0.1<a class="headerlink" href="#id23" title="Link to this heading">¶</a></h2>
 <p>Python bindings moved to PydSEAMSlib. This repository is the C++
 engine.</p>
 </section>
-<section id="id20">
-<h2>2.0.0<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h2>
+<section id="id24">
+<h2>2.0.0<a class="headerlink" href="#id24" title="Link to this heading">¶</a></h2>
 <p>Meson replaces CMake. License is MIT. Optional vesin neighbour lists,
 Highway SIMD, chemfiles, and readcon-core. Catch2 suite for the
 engine.</p>
 </section>
-<section id="id21">
-<h2>1.0.0<a class="headerlink" href="#id21" title="Link to this heading">¶</a></h2>
+<section id="id25">
+<h2>1.0.0<a class="headerlink" href="#id25" title="Link to this heading">¶</a></h2>
 <p>Initial release. See Goswami et al., J. Chem. Inf. Model. 2020, 60,
 2169-2177.</p>
 </section>
