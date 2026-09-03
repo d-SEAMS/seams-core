@@ -3,10 +3,11 @@
 **
 ** SPDX-License-Identifier: MIT
 **
-** Strong scaling of the Steinhardt kernel and of primitive rings at
-** fixed N. Neighbour-list construction is timed separately and is
-** still replicated on every rank; do not read a drop in t_neigh as an
-** MPI or GPU win.
+** Strong scaling at fixed N of every stage the ring-and-cage pipeline
+** runs on the host: the cutoff neighbour list (threaded cell list), the
+** Steinhardt kernel, the index-ordered list and primitive rings. Every
+** stage is timed as the best of `reps` runs; `total` is their sum. Under
+** MPI the neighbour list is still built on every rank.
 **
 **   bench_strong [nAtoms] [reps]
 **
@@ -95,7 +96,7 @@ int main(int argc, char **argv) {
 #endif
 
   const int nAtoms = argc > 1 ? std::atoi(argv[1]) : 65536;
-  const int reps = argc > 2 ? std::atoi(argv[2]) : 3;
+  const int reps = argc > 2 ? std::atoi(argv[2]) : 5;
   int nThreads = 1;
 #ifdef SEAMS_HAS_OPENMP
   nThreads = omp_get_max_threads();
@@ -136,13 +137,14 @@ int main(int argc, char **argv) {
               << "ranks" << std::setw(8) << "thr" << std::setw(8) << "devs"
               << std::setw(16) << "neigh/ms" << std::setw(16) << "ql/ms"
               << std::setw(16) << "index/ms" << std::setw(16) << "rings/ms"
-              << "\n";
+              << std::setw(16) << "total/ms" << "\n";
     std::cout << std::left << std::setw(10) << nAtoms << std::setw(8) << nranks
               << std::setw(8) << nThreads << std::setw(8) << nDevices
               << std::setw(16) << std::fixed << std::setprecision(3) << tNeigh
               << std::setw(16) << tQl << std::setw(16) << tIndex
-              << std::setw(16) << tRings << "\n";
-    std::cout << "# neigh and index are replicated; ql and rings are threaded\n";
+              << std::setw(16) << tRings << std::setw(16)
+              << (tNeigh + tQl + tIndex + tRings) << "\n";
+    std::cout << "# every stage threaded on the host; best of " << reps << " runs\n";
   }
 
 #ifdef SEAMS_HAS_MPI

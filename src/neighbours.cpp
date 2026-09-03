@@ -14,6 +14,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <iostream>
 #include <limits>
 #include <numeric>
@@ -24,6 +25,10 @@
 
 #include <neighbours.hpp>
 #include <simd_distance.hpp>
+
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
 
 #ifdef SEAMS_HAS_VESIN
 #include <vesin.h>
@@ -247,6 +252,130 @@ nneigh::neighList(double rcutoff,
  * @param[in] typeI Type ID of the \f$ i^{th} \f$ particle type.
  * @return Row-ordered full neighbour list, by atom ID.
  */
+
+namespace {
+constexpr int kThreadedCellRowsMinAtoms = 2048;
+} // namespace
+
+bool nneigh::cellListRowsThreaded(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &subset, double rcutoff,
+    std::vector<std::vector<int>> &rows) {
+  const std::size_t n = subset.size();
+  if (n == 0) {
+    rows.clear();
+    return true;
+  }
+  if (rcutoff <= 0.0 || !hasPeriodicBox(yCloud)) {
+    return false;
+  }
+  double H[3][3];
+  double origin[3];
+  nneigh::dumpBoundsToH(yCloud.box, yCloud.boxLow, H, origin);
+  const double lx = H[0][0];
+  const double ly = H[1][1];
+  const double lz = H[2][2];
+  const double xy = H[1][0];
+  const double xz = H[2][0];
+  const double yz = H[2][1];
+  if (lx <= 0.0 || ly <= 0.0 || lz <= 0.0) {
+    return false;
+  }
+  // perpendicular widths of the cell along a, b and c: V / |b x c| etc.
+  const double volume = lx * ly * lz;
+  const auto norm3 = [](double x, double y, double z) {
+    return std::sqrt(x * x + y * y + z * z);
+  };
+  // a = (lx, 0, 0), b = (xy, ly, 0), c = (xz, yz, lz)
+  const double bxc = norm3(ly * lz, -xy * lz, xy * yz - ly * xz);
+  const double cxa = norm3(0.0, xz * 0.0 + lz * lx, -yz * lx);
+  const double axb = norm3(0.0, 0.0, lx * ly);
+  const double width[3] = {volume / bxc, volume / cxa, volume / axb};
+  int ncell[3];
+  for (int k = 0; k < 3; k++) {
+    ncell[k] = static_cast<int>(std::floor(width[k] / rcutoff));
+    if (ncell[k] < 3) {
+      return false;
+    }
+  }
+  // fractional coordinates of the subset, wrapped into [0, 1)
+  std::vector<int> cellOf(n);
+  const auto wrap = [](double f) {
+    f -= std::floor(f);
+    return f >= 1.0 ? 0.0 : f;
+  };
+  for (std::size_t k = 0; k < n; k++) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(subset[k])];
+    const double rx = p.x - origin[0];
+    const double ry = p.y - origin[1];
+    const double rz = p.z - origin[2];
+    const double fc = rz / lz;
+    const double fb = (ry - fc * yz) / ly;
+    const double fa = (rx - fb * xy - fc * xz) / lx;
+    const double f[3] = {wrap(fa), wrap(fb), wrap(fc)};
+    int c[3];
+    for (int d = 0; d < 3; d++) {
+      c[d] = std::min(ncell[d] - 1, static_cast<int>(f[d] * ncell[d]));
+    }
+    cellOf[k] = (c[0] * ncell[1] + c[1]) * ncell[2] + c[2];
+  }
+  const int nCells = ncell[0] * ncell[1] * ncell[2];
+  std::vector<int> cellStart(static_cast<std::size_t>(nCells) + 1, 0);
+  for (std::size_t k = 0; k < n; k++) {
+    ++cellStart[static_cast<std::size_t>(cellOf[k]) + 1];
+  }
+  for (int cidx = 0; cidx < nCells; cidx++) {
+    cellStart[static_cast<std::size_t>(cidx) + 1] += cellStart[static_cast<std::size_t>(cidx)];
+  }
+  std::vector<int> cellAtoms(n);
+  {
+    std::vector<int> fill(cellStart.begin(), cellStart.end() - 1);
+    for (std::size_t k = 0; k < n; k++) {
+      cellAtoms[static_cast<std::size_t>(fill[static_cast<std::size_t>(cellOf[k])]++)] =
+          static_cast<int>(k);
+    }
+  }
+  rows.assign(n, {});
+  const double rc2 = rcutoff * rcutoff;
+  // each row belongs to one thread; the 27 cells around an atom hold the
+  // nearest image of every neighbour because every axis has at least
+  // three cells of width rcutoff
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(dynamic, 256) if (n >= 4096)
+#endif
+  for (std::int64_t kk = 0; kk < static_cast<std::int64_t>(n); kk++) {
+    const std::size_t k = static_cast<std::size_t>(kk);
+    const int i = subset[k];
+    const int cid = cellOf[k];
+    const int cz = cid % ncell[2];
+    const int cy = (cid / ncell[2]) % ncell[1];
+    const int cx = cid / (ncell[1] * ncell[2]);
+    auto &row = rows[k];
+    for (int dx = -1; dx <= 1; dx++) {
+      const int nx = (cx + dx + ncell[0]) % ncell[0];
+      for (int dy = -1; dy <= 1; dy++) {
+        const int ny = (cy + dy + ncell[1]) % ncell[1];
+        for (int dz = -1; dz <= 1; dz++) {
+          const int nz = (cz + dz + ncell[2]) % ncell[2];
+          const int ncid = (nx * ncell[1] + ny) * ncell[2] + nz;
+          for (int m = cellStart[static_cast<std::size_t>(ncid)];
+               m < cellStart[static_cast<std::size_t>(ncid) + 1]; m++) {
+            const int j = subset[static_cast<std::size_t>(cellAtoms[static_cast<std::size_t>(m)])];
+            if (j == i) {
+              continue;
+            }
+            if (gen::periodicDistSq(yCloud, i, j) <= rc2) {
+              row.push_back(j);
+            }
+          }
+        }
+      }
+    }
+    std::sort(row.begin(), row.end());
+  }
+  return true;
+}
+
 std::vector<std::vector<int>>
 nneigh::neighListO(double rcutoff,
                    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
@@ -268,6 +397,23 @@ nneigh::neighListO(double rcutoff,
       typeIIndices.push_back(i);
     }
   }
+
+#ifdef SEAMS_HAS_OPENMP
+  // threaded cell list: one row per thread, the same minimum-image set
+  if (typeIIndices.size() >= static_cast<std::size_t>(kThreadedCellRowsMinAtoms)) {
+    std::vector<std::vector<int>> rows;
+    if (cellListRowsThreaded(yCloud, typeIIndices, rcutoff, rows)) {
+      nList = seedWithSelfIDs(indexToID, yCloud.nop);
+      for (std::size_t k = 0; k < rows.size(); k++) {
+        auto &dest = nList[static_cast<std::size_t>(typeIIndices[k])];
+        for (const int j : rows[k]) {
+          dest.push_back(indexToID[static_cast<std::size_t>(j)]);
+        }
+      }
+      return nList;
+    }
+  }
+#endif
 
 #ifdef SEAMS_HAS_VESIN
   // O(n) cell-list neighbor search via vesin
@@ -514,6 +660,19 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
     nList[iatom].push_back(iatom);
   } // end of init
   // -------------------------------------------------------
+#ifdef SEAMS_HAS_OPENMP
+  if (yCloud.nop >= kThreadedCellRowsMinAtoms) {
+    std::vector<int> allIndices(static_cast<std::size_t>(yCloud.nop));
+    std::iota(allIndices.begin(), allIndices.end(), 0);
+    std::vector<std::vector<int>> rows;
+    if (cellListRowsThreaded(yCloud, allIndices, cutoff, rows)) {
+      for (std::size_t k = 0; k < rows.size(); k++) {
+        nList[k].insert(nList[k].end(), rows[k].begin(), rows[k].end());
+      }
+      return nList;
+    }
+  }
+#endif
 #ifdef SEAMS_HAS_VESIN
   // O(n) cell-list neighbour search via vesin, over every particle
   {
@@ -578,27 +737,30 @@ std::vector<std::vector<int>> nneigh::neighbourListByIndex(
     const std::vector<std::vector<int>> &nList) {
   //
   std::vector<std::vector<int>> indexNlist(nList.size());
-  int iatomID, jatomID;
-  int iatomIndex;
 
-  for (size_t iatom = 0; iatom < nList.size(); iatom++) {
+  // rows are independent and the map is only read, so each row is one task
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nList.size() >= 4096)
+#endif
+  for (std::int64_t ii = 0; ii < static_cast<std::int64_t>(nList.size()); ii++) {
+    const std::size_t iatom = static_cast<std::size_t>(ii);
     if (nList[iatom].empty()) {
       continue;
     }
-    iatomID = nList[iatom][0];
+    const int iatomID = nList[iatom][0];
     auto gotI = yCloud.idIndexMap.find(iatomID);
     if (gotI == yCloud.idIndexMap.end()) {
       continue;
     }
-    iatomIndex = gotI->second;
-    indexNlist[iatom].push_back(iatomIndex);
+    auto &out = indexNlist[iatom];
+    out.reserve(nList[iatom].size());
+    out.push_back(gotI->second);
     for (size_t j = 1; j < nList[iatom].size(); j++) {
-      jatomID = nList[iatom][j];
-      auto gotJ = yCloud.idIndexMap.find(jatomID);
+      auto gotJ = yCloud.idIndexMap.find(nList[iatom][j]);
       if (gotJ == yCloud.idIndexMap.end()) {
         continue;
       }
-      indexNlist[iatom].push_back(gotJ->second);
+      out.push_back(gotJ->second);
     }
   }
 

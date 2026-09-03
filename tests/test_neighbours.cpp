@@ -7,6 +7,7 @@
 #include <seams_input.hpp>
 
 #include <algorithm>
+#include <numeric>
 #include <array>
 #include <stdexcept>
 #include <string>
@@ -821,3 +822,97 @@ TEST_CASE("residentFrameCell stays ortho for three lengths", "[neighbours]") {
   REQUIRE_THAT(cell.c[2], Catch::Matchers::WithinAbs(12.0, 1e-12));
 }
 #endif
+
+namespace {
+
+// A jittered simple-cubic lattice of `side`^3 atoms at spacing `a`, in an
+// orthorhombic box or a sheared one (tilts xy, xz, yz in Angstrom).
+molSys::PointCloud<molSys::Point<double>, double>
+jitteredLattice(int side, double a, double xy, double xz, double yz) {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  const double L = side * a;
+  const bool tilted = xy != 0.0 || xz != 0.0 || yz != 0.0;
+  if (tilted) {
+    // LAMMPS bound spans: lo/hi bounds widen by the tilt extents
+    const double xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));
+    const double xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));
+    cloud.box = {L + xmax - xmin, L + std::max(0.0, yz) - std::min(0.0, yz), L, xy, xz, yz};
+    cloud.boxLow = {xmin, std::min(0.0, yz), 0.0};
+  } else {
+    cloud.box = {L, L, L};
+    cloud.boxLow = {0.0, 0.0, 0.0};
+  }
+  unsigned long long state = 0x9E3779B97F4A7C15ULL;
+  int id = 0;
+  for (int i = 0; i < side; i++) {
+    for (int j = 0; j < side; j++) {
+      for (int k = 0; k < side; k++) {
+        double f[3];
+        for (double &fk : f) {
+          state ^= state << 13;
+          state ^= state >> 7;
+          state ^= state << 17;
+          fk = (static_cast<double>(state >> 11) / 9007199254740992.0 - 0.5) * 0.3 / side;
+        }
+        const double fa = (i + 0.5) / side + f[0];
+        const double fb = (j + 0.5) / side + f[1];
+        const double fc = (k + 0.5) / side + f[2];
+        molSys::Point<double> p;
+        p.type = 1;
+        p.atomID = id + 1;
+        p.molID = id + 1;
+        // r = fa a + fb b + fc c with a = (L,0,0), b = (xy,L,0), c = (xz,yz,L)
+        p.x = fa * L + fb * xy + fc * xz;
+        p.y = fb * L + fc * yz;
+        p.z = fc * L;
+        cloud.pts.push_back(p);
+        cloud.idIndexMap[p.atomID] = id;
+        ++id;
+      }
+    }
+  }
+  cloud.nop = id;
+  return cloud;
+}
+
+} // namespace
+
+TEST_CASE("threaded cell-list rows are the minimum-image neighbours", "[neighbours]") {
+  const double cutoff = 3.5;
+  for (const auto tilt : {std::array<double, 3>{0.0, 0.0, 0.0}, std::array<double, 3>{4.0, 2.0, 3.0}}) {
+    const auto cloud = jitteredLattice(14, 3.0, tilt[0], tilt[1], tilt[2]);
+    REQUIRE(cloud.nop == 14 * 14 * 14);
+    std::vector<int> all(static_cast<std::size_t>(cloud.nop));
+    std::iota(all.begin(), all.end(), 0);
+    std::vector<std::vector<int>> rows;
+    REQUIRE(nneigh::cellListRowsThreaded(cloud, all, cutoff, rows));
+    REQUIRE(rows.size() == all.size());
+    for (int iatom = 0; iatom < cloud.nop; iatom += 37) {
+      INFO("tilt " << tilt[0] << " atom " << iatom);
+      REQUIRE(rows[static_cast<std::size_t>(iatom)] == minimumImageNeighbours(cloud, iatom, cutoff));
+    }
+    // the public builders take the same path above the size threshold and
+    // agree with the brute-force reference row by row
+    const auto byIndex = nneigh::getNewNeighbourListByIndex(cloud, cutoff);
+    const auto byID = nneigh::neighbourListByIndex(cloud, nneigh::neighListO(cutoff, cloud, 1));
+    REQUIRE(byIndex.size() == all.size());
+    REQUIRE(byID.size() == all.size());
+    for (int iatom = 0; iatom < cloud.nop; iatom += 53) {
+      std::vector<int> a(byIndex[static_cast<std::size_t>(iatom)].begin() + 1,
+                         byIndex[static_cast<std::size_t>(iatom)].end());
+      std::vector<int> b(byID[static_cast<std::size_t>(iatom)].begin() + 1,
+                         byID[static_cast<std::size_t>(iatom)].end());
+      std::sort(a.begin(), a.end());
+      std::sort(b.begin(), b.end());
+      REQUIRE(a == minimumImageNeighbours(cloud, iatom, cutoff));
+      REQUIRE(b == a);
+    }
+  }
+  // a cell with fewer than three cutoff widths on an axis refuses, and the
+  // callers fall back to the other builders
+  const auto tight = jitteredLattice(3, 3.0, 0.0, 0.0, 0.0);
+  std::vector<int> all(static_cast<std::size_t>(tight.nop));
+  std::iota(all.begin(), all.end(), 0);
+  std::vector<std::vector<int>> rows;
+  REQUIRE_FALSE(nneigh::cellListRowsThreaded(tight, all, cutoff, rows));
+}

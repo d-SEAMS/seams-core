@@ -234,7 +234,21 @@ std::vector<std::vector<int>> neighListPair(
     double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     int typeI, int typeJ);
 
-//! Full neighbour list for one type (vesin cell list, brute-force fallback)
+//! Threaded cell-list neighbour rows. `rows[k]` holds the indices within
+//! `rcutoff` of `subset[k]` under the minimum image convention, ascending
+//! and without the atom itself. Atoms are binned in fractional coordinates
+//! of the recovered triclinic cell H; every axis needs at least three cells
+//! of perpendicular width `rcutoff`, so that the nearest image of every
+//! neighbour sits in one of the 27 surrounding cells. Returns false, with
+//! `rows` untouched, when the cell is too small for that, and the caller
+//! takes the vesin or brute-force path. Each row is built by one thread.
+bool cellListRowsThreaded(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &subset, double rcutoff,
+    std::vector<std::vector<int>> &rows);
+
+//! Full neighbour list for one type (threaded cell list from 2048 atoms
+//! when OpenMP is compiled, vesin cell list, brute-force fallback)
 //! You can only use this for neighbour lists with one type
 std::vector<std::vector<int>> neighListO(
     double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
