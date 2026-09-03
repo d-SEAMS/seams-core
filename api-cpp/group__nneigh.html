@@ -275,6 +275,7 @@ Functions</h2></td></tr>
 <tr class="memitem:ga9566a384474993ea7356e7abc414e40e" id="r_ga9566a384474993ea7356e7abc414e40e"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga9566a384474993ea7356e7abc414e40e">nneigh::neighList</a> (double rcutoff, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</td></tr>
 <tr class="memdesc:ga9566a384474993ea7356e7abc414e40e"><td class="mdescLeft">&#160;</td><td class="mdescRight">All these functions use atom IDs and not indices.  <br /></td></tr>
 <tr class="memitem:gadd6ed18f0c7e2e5fbd10d7cdbf6af429" id="r_gadd6ed18f0c7e2e5fbd10d7cdbf6af429"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gadd6ed18f0c7e2e5fbd10d7cdbf6af429">nneigh::neighListPair</a> (double rcutoff, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</td></tr>
+<tr class="memitem:ga8f5dd92092f5be635273a1ea18b57cb7" id="r_ga8f5dd92092f5be635273a1ea18b57cb7"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ga8f5dd92092f5be635273a1ea18b57cb7">nneigh::cellListRowsThreaded</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;subset, double rcutoff, std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rows)</td></tr>
 <tr class="memitem:gafaf0f0ff09cef581076f99a68018b023" id="r_gafaf0f0ff09cef581076f99a68018b023"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gafaf0f0ff09cef581076f99a68018b023">nneigh::neighListO</a> (double rcutoff, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI)</td></tr>
 <tr class="memitem:ga651839704a066d725b22212c13c74327" id="r_ga651839704a066d725b22212c13c74327"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga651839704a066d725b22212c13c74327">nneigh::halfNeighList</a> (double rcutoff, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI=1)</td></tr>
 <tr class="memitem:gacf46d8c4b42f15e634ff0076ac83c012" id="r_gacf46d8c4b42f15e634ff0076ac83c012"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gacf46d8c4b42f15e634ff0076ac83c012">nneigh::neighbourListByIndex</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</td></tr>
@@ -331,11 +332,11 @@ Functions</h2></td></tr>
 <tr><td class="fieldname"><a id="ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706" name="ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706"></a>KnnUnion&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00326">326</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  326</span>{ <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">Cutoff</a>, <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">KnnMutual</a>, <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">KnnUnion</a> };</div>
-<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">nneigh::BondGraph::KnnUnion</a></div><div class="ttdeci">@ KnnUnion</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00326">neighbours.hpp:326</a></div></div>
-<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">nneigh::BondGraph::KnnMutual</a></div><div class="ttdeci">@ KnnMutual</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00326">neighbours.hpp:326</a></div></div>
-<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">nneigh::BondGraph::Cutoff</a></div><div class="ttdeci">@ Cutoff</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00326">neighbours.hpp:326</a></div></div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00340">340</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  340</span>{ <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">Cutoff</a>, <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">KnnMutual</a>, <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">KnnUnion</a> };</div>
+<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">nneigh::BondGraph::KnnUnion</a></div><div class="ttdeci">@ KnnUnion</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00340">neighbours.hpp:340</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">nneigh::BondGraph::KnnMutual</a></div><div class="ttdeci">@ KnnMutual</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00340">neighbours.hpp:340</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">nneigh::BondGraph::Cutoff</a></div><div class="ttdeci">@ Cutoff</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00340">neighbours.hpp:340</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -397,11 +398,43 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00356">356</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  356</span>                                                               {</div>
-<div class="line"><span class="lineno">  357</span>    <span class="keywordflow">return</span> nList_;</div>
-<div class="line"><span class="lineno">  358</span>  }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00370">370</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  370</span>                                                               {</div>
+<div class="line"><span class="lineno">  371</span>    <span class="keywordflow">return</span> nList_;</div>
+<div class="line"><span class="lineno">  372</span>  }</div>
 </div><!-- fragment -->
+</div>
+</div>
+<a id="ga8f5dd92092f5be635273a1ea18b57cb7" name="ga8f5dd92092f5be635273a1ea18b57cb7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8f5dd92092f5be635273a1ea18b57cb7">&#9670;&#160;</a></span>cellListRowsThreaded()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool nneigh::cellListRowsThreaded </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>subset</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>rcutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rows</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Threaded cell-list neighbour rows. <span class="tt">rows[k]</span> holds the indices within <span class="tt">rcutoff</span> of <span class="tt">subset[k]</span> under the minimum image convention, ascending and without the atom itself. Atoms are binned in fractional coordinates of the recovered triclinic cell H; every axis needs at least three cells of perpendicular width <span class="tt">rcutoff</span>, so that the nearest image of every neighbour sits in one of the 27 surrounding cells. Returns false, with <span class="tt">rows</span> untouched, when the cell is too small for that, and the caller takes the vesin or brute-force path. Each row is built by one thread. </p>
+
 </div>
 </div>
 <a id="ga752d3e4cbd98fa454a6dc36a4307b75a" name="ga752d3e4cbd98fa454a6dc36a4307b75a"></a>
@@ -857,8 +890,8 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00346">346</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  346</span>{ <span class="keywordflow">return</span> graph_; }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00360">360</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  360</span>{ <span class="keywordflow">return</span> graph_; }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -987,8 +1020,8 @@ Functions</h2></td></tr>
 
 <p>Atoms whose cutoff bond set changed on the last update. </p>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00355">355</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  355</span>{ <span class="keywordflow">return</span> changedAtoms_; }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00369">369</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  369</span>{ <span class="keywordflow">return</span> changedAtoms_; }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1015,8 +1048,8 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00353">353</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  353</span>{ <span class="keywordflow">return</span> rebuilt_; }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00367">367</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  367</span>{ <span class="keywordflow">return</span> rebuilt_; }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1158,7 +1191,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Full neighbour list for one type (vesin cell list, brute-force fallback) You can only use this for neighbour lists with one type </p>
+<p>Full neighbour list for one type (threaded cell list from 2048 atoms when OpenMP is compiled, vesin cell list, brute-force fallback) You can only use this for neighbour lists with one type </p>
 
 </div>
 </div>

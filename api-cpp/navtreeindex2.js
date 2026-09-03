@@ -1,5 +1,6 @@
 var NAVTREEINDEX2 =
 {
+"namespacering.html#af2bab9ed638ed3e3a1ed3392d7e4a576":[2,0,16,25],
 "namespaces.html":[2,0],
 "namespaceseams.html":[2,0,17],
 "namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab":[2,0,17,3],
@@ -248,6 +249,5 @@ var NAVTREEINDEX2 =
 "structgpu_1_1Footprint.html#ab16986c20c49edf9ff98cb97867fc38a":[4,0,3,2,2],
 "structgpu_1_1Footprint.html#ab473038da5c197da756b2f3812d3258f":[2,0,6,2,5],
 "structgpu_1_1Footprint.html#ab473038da5c197da756b2f3812d3258f":[4,0,3,2,5],
-"structgpu_1_1Plan.html":[2,0,6,3],
-"structgpu_1_1Plan.html":[4,0,3,3]
+"structgpu_1_1Plan.html":[2,0,6,3]
 };

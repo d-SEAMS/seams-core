@@ -57,9 +57,9 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "absOrientation_8hpp.html",
-"group__primitive.html#ga61b88624c282b4573177cba65781a2f1",
-"namespaces.html",
-"structgpu_1_1Plan.html#a1086b17671aa3043e3228c29c0c783af"
+"group__primitive.html#ga6031dcefe2fd5432b7d26cb6c9f38f47",
+"namespacering.html#af2bab9ed638ed3e3a1ed3392d7e4a576",
+"structgpu_1_1Plan.html"
 ];
 
 const SYNCONMSG = 'click to disable panel synchronization';
