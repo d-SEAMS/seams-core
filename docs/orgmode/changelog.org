@@ -9,15 +9,49 @@ The release history is [[file:../../CHANGELOG.md][CHANGELOG.md]]
 (Keep a Changelog, assembled by towncrier). This page is the
 narrative cut used in the book.
 
-* Unreleased
+* 2.9.2
 
-The CLI preserves frame order for parallel LAMMPS ranges, dispatches ranges
-for XYZ, chemfiles, and readcon inputs, and offers versioned JSONL output
-through ~--format json~. ~--strict-input~ makes empty-frame handling an
-explicit error. XYZ input accepts coordinate-only rows and records its
-single frame as frame 1. Density regression coverage includes all Cartesian
-axes of a sheared cell. ~seams cages --graph seeded --complete~ turns on
-the ring completion.
+Every host stage of the ring pipeline threads. The cutoff neighbour
+list and the index-ordered list come from a threaded cell list that
+bins molecules in fractional coordinates of the recovered triclinic
+cell and builds each row on one thread, equal row for row to the
+minimum-image reference; the ID-to-index conversion threads too.
+~bench_strong~ times every stage and their sum as the best of five
+pinned runs. On a 16-core workstation the 65536-molecule pipeline
+falls from 906 to 99 ms.
+
+* 2.9.1
+
+The OpenMP target offload of the Steinhardt kernel compiles with
+nvc++ 23.7 against CUDA 12.2 on an A100 and matches the serial and
+threaded host results bit for bit; ~SEAMS_OFFLOAD=0~ keeps the host
+path.
+
+* 2.9.0
+
+~cage::findBySignature~ enumerates closed polyhedra by their
+ring-size census (~seams cages --signature~), key libraries stack
+across hop counts with the depth that named each atom
+(~topo::matchLibraries~), guests are placed in enumerated cages by
+periodic centroids (~site::guestOccupancy~, ~--guest-types~), ion
+environments list their shell and ~site::shellRingCensus~ counts the
+rings through it, and ~--per-atom FILE~ writes a LAMMPS dump with the
+engine's per-atom decision for OVITO or VMD.
+
+* 2.8.0
+
+Topology keys (~topo::localKey~, ~topo::fingerprint~, nauty
+certificate or Weisfeiler-Leman hash), key libraries
+(~seams fingerprint --emit-library~, ~--library~), ions read against
+the cage assignment (~seams ions~), vertex colours by species, the
+embedded CON reader, and a refusal of CON and chemfiles input when
+their reader is absent. The CLI preserves frame order for parallel
+LAMMPS ranges, dispatches ranges for XYZ, chemfiles, and readcon
+inputs, and offers versioned JSONL output through ~--format json~.
+~--strict-input~ makes empty-frame handling an explicit error. XYZ
+input accepts coordinate-only rows and records its single frame as
+frame 1. ~seams cages --graph seeded --complete~ turns on the ring
+completion.
 
 * 2.7.0
 

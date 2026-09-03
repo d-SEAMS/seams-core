@@ -10,6 +10,29 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## [2.9.2] - 2026-09-02
+
+### Added
+
+- The cutoff neighbour list and the index-ordered list are built by a threaded cell list (`nneigh::cellListRowsThreaded`) from 2048 atoms when OpenMP is compiled: atoms are binned in fractional coordinates of the recovered triclinic cell, every axis needs three cells of perpendicular width one cutoff, and each row is one thread's task; the rows equal the minimum-image reference. `neighbourListByIndex` runs one row per thread. `bench_strong` times every host stage of the ring pipeline, prints their sum and takes the best of five runs, so the strong-scaling figure covers the whole pipeline rather than the ring stage alone.
+
+### Changed
+
+- Document the two LAMMPS type-filtered readers: ~readLammpsTrjO~
+  flags ~inSlice~ and keeps every atom of the type;
+  ~readLammpsTrjreduced~ drops atoms outside the slice. An axis with
+  ~lo == hi~ is unconstrained.
+
+### Fixed
+
+- The nucleation notebook rule declares ``figshare-incremental.json``
+  as an output. A later ``test -s`` stamp cannot see a side-effect
+  file because Snakemake deletes declared outputs before the job.
+- The reproducibility DAG builds yodaStruct as ``require("dseams")`` and
+  runs the five figshare deposits through that library. There is no
+  in-tree ``yodaStruct`` binary.
+
+
 ## [2.9.1] - 2026-09-02
 
 ### Added
