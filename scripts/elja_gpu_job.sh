@@ -307,18 +307,37 @@ fi
 meson compile -C "$BUILD" | tee "$OUT/compile.log"
 meson test -C "$BUILD" --print-errorlogs | tee "$OUT/gpu-test.log"
 
+export LD_LIBRARY_PATH=$BUILD/src${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+{
+  echo "=== host vs offload Steinhardt (same binary) ==="
+  for n in 4096 32768 65536; do
+    reps=5
+    if [[ $n -ge 65536 ]]; then
+      reps=3
+    fi
+    for off in 0 1; do
+      for thr in 1 8; do
+        echo "--- n=$n SEAMS_OFFLOAD=$off OMP_NUM_THREADS=$thr reps=$reps ---"
+        SEAMS_OFFLOAD=$off OMP_NUM_THREADS=$thr \
+          "$BUILD/tests/bench_strong" "$n" "$reps"
+      done
+    done
+  done
+} | tee "$OUT/ql-ab.txt"
+
 NSYS=$(command -v nsys || true)
 if [[ -z $NSYS ]]; then
   echo "nsys not on PATH" >&2
   exit 1
 fi
 
-export LD_LIBRARY_PATH=$BUILD/src${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 cd "$ROOT/input"
+export SEAMS_OFFLOAD=1
+export OMP_NUM_THREADS=1
 $NSYS profile --trace=cuda,nvtx,osrt,openmp --sample=none --cpuctxsw=none \
   --force-overwrite=true \
   -o "$OUT/tip-gpu-nsys" \
-  "$BUILD/tests/bench_strong" 4096 2 \
+  "$BUILD/tests/bench_strong" 32768 5 \
   | tee "$OUT/tip-gpu-batch.txt"
 
 $NSYS stats --force-export=true --report cuda_gpu_kern_sum \

@@ -183,8 +183,8 @@ if not offload_opt.disabled()
       _args += offload_flags
       _link_args += offload_flags
       if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
-        _args += ['-gpu=nofma']
-        _link_args += ['-gpu=nofma']
+        _args += ['-gpu=nofma', '-gpu=nomanaged']
+        _link_args += ['-gpu=nofma', '-gpu=nomanaged']
       endif
     elif offload_opt.enabled()
       error('OpenMP target offload was requested but the compiler ' +
