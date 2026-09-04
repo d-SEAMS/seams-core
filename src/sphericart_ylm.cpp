@@ -31,7 +31,9 @@ int ylmCartesian(int orderL, const double *xyz, int nVec, double *ylmOut) {
   (void)ylmOut;
   return 1;
 #else
-  if ((orderL != 3 && orderL != 4 && orderL != 6 && orderL != 8) || nVec < 0) {
+  if ((orderL != 3 && orderL != 4 && orderL != 6 && orderL != 8 &&
+       orderL != 12) ||
+      nVec < 0) {
     return 1;
   }
   const int nComp = 2 * orderL + 1;
@@ -43,6 +45,7 @@ int ylmCartesian(int orderL, const double *xyz, int nVec, double *ylmOut) {
   static sphericart::SphericalHarmonics<double> calc4(4);
   static sphericart::SphericalHarmonics<double> calc6(6);
   static sphericart::SphericalHarmonics<double> calc8(8);
+  static sphericart::SphericalHarmonics<double> calc12(12);
   sphericart::SphericalHarmonics<double> *calc = &calc6;
   if (orderL == 3) {
     calc = &calc3;
@@ -50,6 +53,8 @@ int ylmCartesian(int orderL, const double *xyz, int nVec, double *ylmOut) {
     calc = &calc4;
   } else if (orderL == 8) {
     calc = &calc8;
+  } else if (orderL == 12) {
+    calc = &calc12;
   }
   std::vector<double> sph;
   calc->compute(cart, sph);

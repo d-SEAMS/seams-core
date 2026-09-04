@@ -324,12 +324,14 @@ struct SteinhardtQl {
   std::vector<double> qlBar; //! Averaged @f$\bar{q}_l(i)@f$
 };
 
-//! Local and neighbour-averaged Steinhardt parameters of degree 3, 4 or 6.
-//! Local ql is Steinhardt, Nelson and Ronchetti; qlBar is the Lechner-Dellago
-//! average of q_lm over the particle and its neighbours. The compute path
-//! flattens the neighbour list to CSR so the same kernel can run on the
-//! host (OpenMP), across MPI ranks (atom split plus Allgatherv of q_lm),
-//! or under OpenMP target offload when the build provides a device.
+//! Local and neighbour-averaged Steinhardt parameters of degree 3, 4, 6,
+//! 8, or 12. Local ql is Steinhardt, Nelson and Ronchetti; qlBar is the
+//! Lechner-Dellago average of q_lm over the particle and its neighbours.
+//! l=12 is host sphericart only (Zeron hydrate pair with l=3); the
+//! device Ylm path has no l=12. Other degrees return zeros. The compute
+//! path flattens the neighbour list to CSR so the same kernel can run on
+//! the host (OpenMP), across MPI ranks (atom split plus Allgatherv of
+//! q_lm), or under OpenMP target offload when the build provides a device.
 [[nodiscard]] SteinhardtQl
 steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
              const std::vector<std::vector<int>> &nList, int orderL);

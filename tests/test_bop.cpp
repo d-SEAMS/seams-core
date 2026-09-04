@@ -1055,6 +1055,34 @@ TEST_CASE("Q8 satisfies the addition theorem and Condon-Shortley", "[bop]") {
   }
 }
 
+TEST_CASE("steinhardtQl l=12 is finite on FCC and differs from q3", "[bop]") {
+  const double lattice = 4.0;
+  auto cloud = fccCloud(4, lattice);
+  const double cutoff = 0.85 * lattice;
+  auto nList = nneigh::neighListO(cutoff, cloud, 1);
+  auto q3 = chill::steinhardtQl(cloud, nList, 3);
+  auto q12 = chill::steinhardtQl(cloud, nList, 12);
+  REQUIRE(q12.ql.size() == static_cast<size_t>(cloud.nop));
+#ifdef SEAMS_HAS_SPHERICART
+  int nFinite = 0;
+  for (int i = 0; i < cloud.nop; i++) {
+    REQUIRE(std::isfinite(q12.ql[static_cast<std::size_t>(i)]));
+    REQUIRE(std::isfinite(q12.qlBar[static_cast<std::size_t>(i)]));
+    if (q12.ql[static_cast<std::size_t>(i)] != 0.0) {
+      ++nFinite;
+    }
+    REQUIRE_THAT(q3.ql[static_cast<std::size_t>(i)],
+                 Catch::Matchers::WithinAbs(0.0, 1e-9));
+  }
+  REQUIRE(nFinite > 0);
+  REQUIRE(std::fabs(q12.ql[0] - q3.ql[0]) > 1e-6);
+#else
+  for (double v : q12.ql) {
+    REQUIRE(v == 0.0);
+  }
+#endif
+}
+
 TEST_CASE("steinhardtQl accepts l=8 and averages correctly on FCC", "[bop]") {
   // FCC reference value q8 = 0.40391 for twelve nearest neighbours
   // (Steinhardt, Nelson and Ronchetti 1983); uniform environment makes the

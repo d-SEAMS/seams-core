@@ -84,6 +84,24 @@ TEST_CASE("guests are assigned to the cage whose centre they are nearest", "[gue
   REQUIRE(occ.centreDistance[2] == -1.0);
 }
 
+TEST_CASE("ray-parity occupancy keeps a centre guest and rejects one outside",
+          "[guests]") {
+  const auto cloud = twoCubes({{2.0, 2.0, 2.0}, {10.0, 10.0, 10.0}, {2.0, 2.0, -0.5}});
+  // Cube 0: vertices 0-7. Faces as 6 rings of 4.
+  const std::vector<std::vector<int>> rings = {
+      {0, 1, 3, 2}, {4, 5, 7, 6}, {0, 1, 5, 4},
+      {2, 3, 7, 6}, {0, 2, 6, 4}, {1, 3, 7, 5},
+      {8, 9, 11, 10}, {12, 13, 15, 14}, {8, 9, 13, 12},
+      {10, 11, 15, 14}, {8, 10, 14, 12}, {9, 11, 15, 13}};
+  const std::vector<std::vector<int>> faces = {
+      {0, 1, 2, 3, 4, 5}, {6, 7, 8, 9, 10, 11}};
+  const auto occ = site::guestOccupancyInside(cloud, rings, faces, {16, 17, 18});
+  REQUIRE(occ.cageOfGuest == std::vector<int>{0, -1, -1});
+  REQUIRE(occ.guestsPerCage == std::vector<int>{1, 0});
+  REQUIRE(occ.occupied == 1);
+  REQUIRE(occ.free == 2);
+}
+
 TEST_CASE("two guests in one cage count as multiple occupancy", "[guests]") {
   const auto cloud = twoCubes({{1.5, 2.0, 2.0}, {2.5, 2.0, 2.0}});
   const std::vector<std::vector<int>> cages = {range(0, 8), range(8, 16)};

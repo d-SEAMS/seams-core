@@ -140,6 +140,9 @@ void runPass1Sphericart(const NeighbourCSR &g, int orderL, int begin, int end,
   std::vector<double> ylm(static_cast<size_t>(b) * nComp * 2, 0.0);
   if (seams::sphericart_ylm::ylmCartesian(orderL, cart.data(), b, ylm.data()) !=
       0) {
+    if (orderL == 12) {
+      return;
+    }
     for (int i = begin; i < end; i++) {
       seams::steinhardt::qlmOneAtomDr(i, orderL, g.dr.data(), g.offsets.data(),
                                       g.cols.data(), qlm.data());
@@ -177,9 +180,20 @@ void runPass1Sphericart(const NeighbourCSR &g, int orderL, int begin, int end,
 
 void runPass1(const NeighbourCSR &g, int orderL, int begin, int end,
               std::vector<double> &qlm) {
+  // l=12 has no closed-form device/host Ylm (arrays cap at l=8).
 #ifdef SEAMS_HAS_SPHERICART
+  if (orderL == 12) {
+    if (seams::sphericart_ylm::available()) {
+      runPass1Sphericart(g, orderL, begin, end, qlm);
+    }
+    return;
+  }
   if (seams::sphericart_ylm::available()) {
     runPass1Sphericart(g, orderL, begin, end, qlm);
+    return;
+  }
+#else
+  if (orderL == 12) {
     return;
   }
 #endif
@@ -383,7 +397,8 @@ SteinhardtQl steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double
   result.ql.assign(yCloud.nop, 0.0);
   result.qlBar.assign(yCloud.nop, 0.0);
 
-  if (orderL != 3 && orderL != 4 && orderL != 6 && orderL != 8) {
+  if (orderL != 3 && orderL != 4 && orderL != 6 && orderL != 8 &&
+      orderL != 12) {
     return result;
   }
   if (yCloud.nop <= 0) {
@@ -395,7 +410,8 @@ SteinhardtQl steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double
   std::vector<double> qlm(static_cast<size_t>(graph.nop) * nComp * 2, 0.0);
 
 #ifdef SEAMS_HAS_OFFLOAD
-  if (wantOffload()) {
+  // Device Ylm has no l=12; force the host sphericart path.
+  if (orderL != 12 && wantOffload()) {
     runOffload(graph, orderL, qlm, result.ql, result.qlBar);
     return result;
   }

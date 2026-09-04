@@ -52,6 +52,33 @@ std::vector<double>
 projAreaSingleRing(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                    const std::vector<int> &ring);
 
+//! Per-atom Rodger F4 = mean of cos(3 phi) over H-O...O-H dihedrals of
+//! this oxygen with its oxygen neighbours. Hydrogens share molID with
+//! their oxygen. An oxygen with no hydrogens (mW) is quiet_NaN.
+//! nList is by atom ID with the leading self entry, as neighListO.
+std::vector<double>
+rodgerF4(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+         const std::vector<std::vector<int>> &nList, int oxygenType,
+         int hydrogenType);
+
+//! Mean of the finite per-atom F4 values; quiet_NaN when none are finite.
+double meanFinite(const std::vector<double> &values);
+
+//! CHILL+ cubic/hexagonal molecules binned into basal layers along
+//! `axis` (0=x, 1=y, 2=z). phiC is N_Ic / (N_Ic + N_Ih). sequence is
+//! one character per layer: C cubic-majority, H hexagonal-majority,
+//! M a tie with ice present, . empty.
+struct LayerStack {
+  double phiC = 0.0;
+  std::string sequence;
+  std::vector<int> cubicPerLayer;
+  std::vector<int> hexPerLayer;
+};
+
+LayerStack
+layerCubicity(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+              int axis = 2, double layerWidth = 3.7);
+
 } // namespace topoparam
 
 #endif // SEAMS_ORDER_PARAMETER_H_
