@@ -191,6 +191,26 @@ TEST_CASE("a prism missing one face is an incomplete cage, not a closed one",
   REQUIRE(noCups.empty());
 }
 
+TEST_CASE("a full-census prism with an extra attaching quad is an open cup",
+          "[cage_enum]") {
+  auto rings = hexPrismRings();
+  rings.pop_back();
+  rings.push_back({5, 0, 12, 13});
+  const auto sig = cage::Signature::parse("4:6,6:2");
+  const auto closed = cage::findBySignature(rings, sig);
+  REQUIRE(closed.empty());
+  const auto cups = cage::findIncompleteBySignature(rings, sig, 6);
+  REQUIRE_FALSE(cups.empty());
+  const bool hasFullCensus = std::any_of(
+      cups.begin(), cups.end(), [](const cage::FoundCage &c) {
+        return c.faces.size() == 8 && !c.closed && c.danglingEdges > 0;
+      });
+  REQUIRE(hasFullCensus);
+  const auto full = hexPrismRings();
+  const auto stillClosed = cage::findBySignature(full, sig);
+  REQUIRE(stillClosed.size() == 1);
+}
+
 TEST_CASE("a half-prism cup is found at the default minFaces floor",
           "[cage_enum]") {
   auto rings = hexPrismRings();

@@ -355,6 +355,8 @@ struct Search {
     if (countsEqual(have, sig)) {
       if (allEdgesPaired()) {
         accept(true);
+      } else {
+        maybeAcceptIncomplete();
       }
       restore(mark);
       return;
