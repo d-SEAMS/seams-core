@@ -2,6 +2,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <mol_sys.hpp>
+#include <neighbours.hpp>
 #include <order_parameter.hpp>
 
 #include <algorithm>
@@ -174,10 +175,18 @@ TEST_CASE("TUM stacking uses ring planes and stays empty without basal rings",
   std::vector<bool> equatorial = {false, false, false};
   const auto tum = topoparam::tumLayerStack(cloud, rings, basal, equatorial, 2, 3.7);
   REQUIRE(tum.sequence.size() == 4);
-  REQUIRE(std::count(tum.sequence.begin(), tum.sequence.end(), 'H') == 2);
+  REQUIRE(tum.sequence[0] == 'H');
+  REQUIRE(tum.sequence[2] == 'H');
   REQUIRE(tum.phiC == 0.0);
   // the five-ring is not a plane: no C letter
   REQUIRE(tum.sequence.find('C') == std::string::npos);
+
+  // A clathrate 5-ring is not a stacking plane even if a caller flags it.
+  std::vector<bool> flaggedFive = {true, true, true};
+  const auto five = topoparam::tumLayerStack(cloud, rings, flaggedFive,
+                                            equatorial, 2, 3.7);
+  REQUIRE(five.sequence == tum.sequence);
+  REQUIRE(five.phiC == 0.0);
 
   std::vector<bool> eq = {false, true, false};
   const auto mixed = topoparam::tumLayerStack(cloud, rings, basal, eq, 2, 3.7);
@@ -185,6 +194,28 @@ TEST_CASE("TUM stacking uses ring planes and stays empty without basal rings",
   REQUIRE(mixed.phiC < 1.0);
   REQUIRE(mixed.sequence.find('C') != std::string::npos);
   REQUIRE(mixed.sequence.find('H') != std::string::npos);
+}
+
+TEST_CASE("ions stay off the type-filtered oxygen neighbour graph",
+          "[order_parameter]") {
+  auto cloud = makeCloud({{0, 0, 0}, {2.8, 0, 0}, {1.4, 2.4, 0},
+                          {0, 0, 2.8}, {10, 10, 10}},
+                         20.0);
+  cloud.pts[4].type = 3;
+  cloud.pts[4].atomID = 99;
+  cloud.idIndexMap.clear();
+  for (int i = 0; i < cloud.nop; i++) {
+    cloud.idIndexMap[cloud.pts[static_cast<std::size_t>(i)].atomID] = i;
+  }
+  const auto nList = nneigh::kNearestNeighbourList(cloud, 4, 5.5, 1, true);
+  REQUIRE(nList.size() == static_cast<std::size_t>(cloud.nop));
+  REQUIRE(nList[4].size() == 1);
+  REQUIRE(nList[4][0] == 99);
+  for (int i = 0; i < 4; i++) {
+    REQUIRE(std::find(nList[static_cast<std::size_t>(i)].begin(),
+                      nList[static_cast<std::size_t>(i)].end(),
+                      99) == nList[static_cast<std::size_t>(i)].end());
+  }
 }
 
 TEST_CASE("normHeightPercent uses recovered lz not tilt",

@@ -413,32 +413,34 @@ topoparam::tumLayerStack(
   int nEq = 0;
   const std::size_t nR = rings.size();
   for (std::size_t r = 0; r < nR; r++) {
+    if (rings[r].size() != 6) {
+      continue;
+    }
     const bool h = r < basal.size() && basal[r];
     const bool c = r < equatorial.size() && equatorial[r];
     if (!h && !c) {
-      continue;
-    }
-    if (rings[r].empty()) {
       continue;
     }
     const int a0 = rings[r][0];
     if (a0 < 0 || a0 >= yCloud.nop) {
       continue;
     }
-    double acc = axis == 0 ? yCloud.pts[static_cast<std::size_t>(a0)].x
-                           : (axis == 1 ? yCloud.pts[static_cast<std::size_t>(a0)].y
-                                        : yCloud.pts[static_cast<std::size_t>(a0)].z);
+    // Centroid is z0 + mean MIC displacement. Averaging unwrapped
+    // z0+dr values does not preserve a planar ring at k * w.
+    const double z0 = axis == 0 ? yCloud.pts[static_cast<std::size_t>(a0)].x
+                                : (axis == 1 ? yCloud.pts[static_cast<std::size_t>(a0)].y
+                                             : yCloud.pts[static_cast<std::size_t>(a0)].z);
+    double disp = 0.0;
     for (std::size_t k = 1; k < rings[r].size(); k++) {
       const int a = rings[r][k];
       if (a < 0 || a >= yCloud.nop) {
         continue;
       }
       const auto dr = gen::relDist(yCloud, a, a0);
-      acc += (axis == 0 ? yCloud.pts[static_cast<std::size_t>(a0)].x + dr[0]
-                        : (axis == 1 ? yCloud.pts[static_cast<std::size_t>(a0)].y + dr[1]
-                                     : yCloud.pts[static_cast<std::size_t>(a0)].z + dr[2]));
+      disp += axis == 0 ? dr[0] : (axis == 1 ? dr[1] : dr[2]);
     }
-    acc /= static_cast<double>(rings[r].size());
+    const double acc =
+        z0 + disp / static_cast<double>(rings[r].size());
     double u = acc - lo;
     u -= L * std::floor(u / L);
     if (u < 0.0) {
