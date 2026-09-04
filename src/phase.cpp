@@ -16,14 +16,6 @@ constexpr double kXXIc = 7.891;
 constexpr int kXXIn = 152;
 constexpr double kXXIrho = 1.413; // g/cm^3, water mass 18.015
 
-double wrap(double x, double L) {
-  x = std::fmod(x, L);
-  if (x < 0.0) {
-    x += L;
-  }
-  return x;
-}
-
 } // namespace
 
 int phase::openChannelCount(
