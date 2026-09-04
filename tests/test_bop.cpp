@@ -1124,7 +1124,6 @@ TEST_CASE("steinhardtQl l=12 is finite on FCC and differs from q3", "[bop]") {
   auto q3 = chill::steinhardtQl(cloud, nList, 3);
   auto q12 = chill::steinhardtQl(cloud, nList, 12);
   REQUIRE(q12.ql.size() == static_cast<size_t>(cloud.nop));
-#ifdef SEAMS_HAS_SPHERICART
   int nFinite = 0;
   for (int i = 0; i < cloud.nop; i++) {
     REQUIRE(std::isfinite(q12.ql[static_cast<std::size_t>(i)]));
@@ -1143,11 +1142,6 @@ TEST_CASE("steinhardtQl l=12 is finite on FCC and differs from q3", "[bop]") {
   }
   REQUIRE(nFinite > 0);
   REQUIRE(std::fabs(q12.ql[0] - q3.ql[0]) > 1e-6);
-#else
-  for (double v : q12.ql) {
-    REQUIRE(v == 0.0);
-  }
-#endif
 }
 
 // Hard-sphere liquid at the hydrate number density. Simple cubic has
@@ -1211,7 +1205,6 @@ disorderedLiquid(const std::vector<double> &box, int n, unsigned seed,
   return out;
 }
 
-#ifdef SEAMS_HAS_SPHERICART
 TEST_CASE("Zeron q3/q12 pair separates sI hydrate from liquid on a mixed frame",
           "[bop]") {
   molSys::PointCloud<molSys::Point<double>, double> sI;
@@ -1282,14 +1275,13 @@ TEST_CASE("Zeron q3/q12 pair separates sI hydrate from liquid on a mixed frame",
   REQUIRE(std::isfinite(liqQ3));
   REQUIRE(std::isfinite(hydQ12Bar));
   REQUIRE(std::isfinite(liqQ12Bar));
+  REQUIRE(hydQ12Bar != 0.0);
   REQUIRE(hydQ3 > liqQ3);
-  REQUIRE(hydQ12Bar > liqQ12Bar);
+  REQUIRE(hydQ12Bar > liqQ12Bar + 0.05);
   const double dq3 = hydQ3 - liqQ3;
   const double dq12 = hydQ12 - liqQ12;
   REQUIRE(dq3 * dq3 + dq12 * dq12 > 0.02);
 }
-
-#endif
 
 TEST_CASE("Zeron q3/q12 pair separates sI hydrate from liquid", "[bop]") {
   molSys::PointCloud<molSys::Point<double>, double> sI;
@@ -1302,6 +1294,7 @@ TEST_CASE("Zeron q3/q12 pair separates sI hydrate from liquid", "[bop]") {
   const double q12barH = topoparam::meanFinite(q12h.qlBar);
   REQUIRE(std::isfinite(q3barH));
   REQUIRE(std::isfinite(q12barH));
+  REQUIRE(q12barH != 0.0);
 
   auto liquid = disorderedLiquid(sI.box, sI.nop, 13);
   auto nLiq = nneigh::neighListO(5.5, liquid, 1);
@@ -1317,16 +1310,8 @@ TEST_CASE("Zeron q3/q12 pair separates sI hydrate from liquid", "[bop]") {
   // l=3 is always on the host Ylm path. A 46-molecule cell is smaller
   // than the Zeron thermal samples; 0.03 still separates the means.
   REQUIRE(std::fabs(q3barH - q3barL) > 0.03);
-#ifdef SEAMS_HAS_SPHERICART
-  REQUIRE(q12barH > 0.0);
   REQUIRE(q12barH > q12barL + 0.05);
   REQUIRE(std::fabs(q3barH - q3barL) + std::fabs(q12barH - q12barL) > 0.08);
-#else
-  // l=12 Ylm is sphericart-only; a no-sphericart green run is not the
-  // Zeron pair. qlBar stays zero when SEAMS_HAS_SPHERICART is off.
-  REQUIRE(q12barH == 0.0);
-  REQUIRE(q12barL == 0.0);
-#endif
 }
 
 TEST_CASE("steinhardtQl accepts l=8 and averages correctly on FCC", "[bop]") {

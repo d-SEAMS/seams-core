@@ -108,6 +108,145 @@ void atomRange(int n, int rank, int nranks, int &begin, int &end) {
   end = begin + base + (rank < rem ? 1 : 0);
 }
 
+// Host-only l=12 Ylm. Associated Legendre with the same Condon-Shortley
+// pairing as ylmAllTrig (Y_{l,m} = (-1)^m Y_{l,-m}^*). The device header
+// keeps barRe[17] and no l=12 tables.
+void ylm12Host(double sinT, double cosT, double cphi, double sphi,
+               double *out) {
+  constexpr int orderL = 12;
+  constexpr int nComp = 25;
+  constexpr double pi = 3.14159265358979323846;
+  for (int k = 0; k < nComp; k++) {
+    out[2 * k] = 0.0;
+    out[2 * k + 1] = 0.0;
+  }
+  double pmm = 1.0;
+  double fact = 1.0;
+  double pL[13];
+  for (int m = 0; m <= orderL; m++) {
+    double plm;
+    if (m == orderL) {
+      plm = pmm;
+    } else {
+      double pmm1 = cosT * (2.0 * static_cast<double>(m) + 1.0) * pmm;
+      if (m + 1 == orderL) {
+        plm = pmm1;
+      } else {
+        double plm2 = pmm;
+        double plm1 = pmm1;
+        for (int l = m + 2; l <= orderL; l++) {
+          const double pl =
+              ((2.0 * static_cast<double>(l) - 1.0) * cosT * plm1 -
+               (static_cast<double>(l + m) - 1.0) * plm2) /
+              static_cast<double>(l - m);
+          plm2 = plm1;
+          plm1 = pl;
+        }
+        plm = plm1;
+      }
+    }
+    pL[m] = plm;
+    if (m < orderL) {
+      pmm *= -fact * sinT;
+      fact += 2.0;
+    }
+  }
+  double pr[13];
+  double piIm[13];
+  pr[0] = 1.0;
+  piIm[0] = 0.0;
+  for (int k = 1; k <= orderL; k++) {
+    pr[k] = pr[k - 1] * cphi - piIm[k - 1] * sphi;
+    piIm[k] = pr[k - 1] * sphi + piIm[k - 1] * cphi;
+  }
+  for (int absM = 0; absM <= orderL; absM++) {
+    double ratio = 1.0;
+    for (int k = orderL - absM + 1; k <= orderL + absM; k++) {
+      ratio /= static_cast<double>(k);
+    }
+    const double norm =
+        std::sqrt((2.0 * orderL + 1.0) / (4.0 * pi) * ratio);
+    const double amp = norm * pL[absM];
+    const double nre = amp * pr[absM];
+    const double nim = -amp * piIm[absM];
+    const int ineg = orderL - absM;
+    out[2 * ineg] = nre;
+    out[2 * ineg + 1] = nim;
+    const double sign = (absM % 2 == 0) ? 1.0 : -1.0;
+    const int ipos = orderL + absM;
+    out[2 * ipos] = sign * amp * pr[absM];
+    out[2 * ipos + 1] = sign * amp * piIm[absM];
+  }
+}
+
+void qlmAddBond12(double dx, double dy, double dz, double *qlmInterleaved,
+                  int row, int &nUsed) {
+  const double r2 = dx * dx + dy * dy + dz * dz;
+  if (r2 == 0.0) {
+    return;
+  }
+  const double r = std::sqrt(r2);
+  const double invr = 1.0 / r;
+  double cosT = dz * invr;
+  if (cosT > 1.0) {
+    cosT = 1.0;
+  } else if (cosT < -1.0) {
+    cosT = -1.0;
+  }
+  const double rho2 = dx * dx + dy * dy;
+  double sinT = 0.0;
+  double cphi = 1.0;
+  double sphi = 0.0;
+  if (rho2 != 0.0) {
+    const double rho = std::sqrt(rho2);
+    sinT = rho * invr;
+    const double invrho = 1.0 / rho;
+    cphi = dy * invrho;
+    sphi = dx * invrho;
+  }
+  double ylm[50];
+  ylm12Host(sinT, cosT, cphi, sphi, ylm);
+  constexpr int nComp = 25;
+  for (int m = 0; m < nComp; m++) {
+    qlmInterleaved[2 * (row + m)] += ylm[2 * m];
+    qlmInterleaved[2 * (row + m) + 1] += ylm[2 * m + 1];
+  }
+  nUsed++;
+}
+
+void runPass1Host12(const NeighbourCSR &g, int begin, int end,
+                    std::vector<double> &qlm) {
+  constexpr int nComp = 25;
+#ifdef SEAMS_HAS_OPENMP
+  const bool useThreads = g.nop >= kParallelThreshold;
+#pragma omp parallel for schedule(static) if (useThreads)
+#endif
+  for (int i = begin; i < end; i++) {
+    const int row = i * nComp;
+    for (int m = 0; m < nComp; m++) {
+      qlm[static_cast<size_t>(2 * (row + m))] = 0.0;
+      qlm[static_cast<size_t>(2 * (row + m) + 1)] = 0.0;
+    }
+    const int j0 = g.offsets[static_cast<size_t>(i)];
+    const int j1 = g.offsets[static_cast<size_t>(i) + 1];
+    int nUsed = 0;
+    for (int p = j0; p < j1; p++) {
+      qlmAddBond12(g.dr[static_cast<size_t>(3 * p)],
+                   g.dr[static_cast<size_t>(3 * p + 1)],
+                   g.dr[static_cast<size_t>(3 * p + 2)], qlm.data(), row,
+                   nUsed);
+    }
+    if (nUsed == 0) {
+      continue;
+    }
+    const double inv = 1.0 / static_cast<double>(nUsed);
+    for (int m = 0; m < nComp; m++) {
+      qlm[static_cast<size_t>(2 * (row + m))] *= inv;
+      qlm[static_cast<size_t>(2 * (row + m) + 1)] *= inv;
+    }
+  }
+}
+
 #ifdef SEAMS_HAS_SPHERICART
 void runPass1Sphericart(const NeighbourCSR &g, int orderL, int begin, int end,
                         std::vector<double> &qlm) {
@@ -142,6 +281,7 @@ void runPass1Sphericart(const NeighbourCSR &g, int orderL, int begin, int end,
   if (seams::sphericart_ylm::ylmCartesian(orderL, cart.data(), b, ylm.data()) !=
       0) {
     if (orderL == 12) {
+      runPass1Host12(g, begin, end, qlm);
       return;
     }
     for (int i = begin; i < end; i++) {
@@ -181,20 +321,21 @@ void runPass1Sphericart(const NeighbourCSR &g, int orderL, int begin, int end,
 
 void runPass1(const NeighbourCSR &g, int orderL, int begin, int end,
               std::vector<double> &qlm) {
-  // l=12 has no closed-form device/host Ylm (arrays cap at l=8).
-#ifdef SEAMS_HAS_SPHERICART
+  // l=12 is host-only. Prefer sphericart; otherwise associated Legendre.
+  // Device arrays still cap at l=8.
   if (orderL == 12) {
+#ifdef SEAMS_HAS_SPHERICART
     if (seams::sphericart_ylm::available()) {
       runPass1Sphericart(g, orderL, begin, end, qlm);
+      return;
     }
+#endif
+    runPass1Host12(g, begin, end, qlm);
     return;
   }
+#ifdef SEAMS_HAS_SPHERICART
   if (seams::sphericart_ylm::available()) {
     runPass1Sphericart(g, orderL, begin, end, qlm);
-    return;
-  }
-#else
-  if (orderL == 12) {
     return;
   }
 #endif
@@ -467,7 +608,7 @@ SteinhardtQl steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double
   std::vector<double> qlm(static_cast<size_t>(graph.nop) * nComp * 2, 0.0);
 
 #ifdef SEAMS_HAS_OFFLOAD
-  // Device Ylm has no l=12; force the host sphericart path.
+  // Device Ylm has no l=12; force the host path (sphericart or Legendre).
   if (orderL != 12 && wantOffload()) {
     runOffload(graph, orderL, qlm, result.ql, result.qlBar);
     return result;
