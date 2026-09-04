@@ -24,7 +24,7 @@
  */
 namespace cage {
 
-/** One closed polyhedron matching a signature. */
+/** One cage matching a signature, closed or incomplete. */
 struct FoundCage {
   Signature signature;
   std::vector<int> faces;     ///< ring indices into the input vector

@@ -351,9 +351,6 @@ struct Search {
     if (countsEqual(have, sig)) {
       if (allEdgesPaired()) {
         accept(true);
-      } else if (allowIncomplete &&
-                 static_cast<int>(chosen.size()) >= minFaces) {
-        accept(false);
       }
       restore(mark);
       return;
@@ -537,8 +534,10 @@ findIncompleteBySignature(const std::vector<std::vector<int>> &rings,
   search.run();
   const auto closed = findBySignature(rings, signature);
   std::set<int> closedFaces;
+  std::set<int> closedVerts;
   for (const auto &cl : closed) {
     closedFaces.insert(cl.faces.begin(), cl.faces.end());
+    closedVerts.insert(cl.vertices.begin(), cl.vertices.end());
   }
   std::vector<FoundCage> out;
   out.reserve(search.found.size());
@@ -553,9 +552,24 @@ findIncompleteBySignature(const std::vector<std::vector<int>> &rings,
         break;
       }
     }
-    if (!allFacesClosed) {
-      out.push_back(std::move(c));
+    if (allFacesClosed) {
+      continue;
     }
+    if (!closedVerts.empty()) {
+      bool anyIn = false;
+      bool anyOut = false;
+      for (const int v : c.vertices) {
+        if (closedVerts.find(v) != closedVerts.end()) {
+          anyIn = true;
+        } else {
+          anyOut = true;
+        }
+      }
+      if (anyIn && anyOut) {
+        continue;
+      }
+    }
+    out.push_back(std::move(c));
   }
   return out;
 }
