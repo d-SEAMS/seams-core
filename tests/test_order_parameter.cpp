@@ -389,6 +389,21 @@ TEST_CASE("rodgerF4 is near -0.4 on ice Ih when hydrogens exist",
   REQUIRE(mean < -0.25);
 }
 
+TEST_CASE("rodgerF4 is finite on exampleTraj when hydrogens are kept",
+          "[order_parameter]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud = sinp::readLammpsTrj("traj/exampleTraj.lammpstrj", 1, cloud);
+  REQUIRE(cloud.nop > 0);
+  auto nList = nneigh::kNearestNeighbourList(cloud, 4, 3.5, 2, true);
+  const auto f4 = topoparam::rodgerF4(cloud, nList, 2, 1);
+  int nFinite = 0;
+  for (double v : f4) {
+    nFinite += std::isfinite(v) ? 1 : 0;
+  }
+  REQUIRE(nFinite > 0);
+  REQUIRE(std::isfinite(topoparam::meanFinite(f4)));
+}
+
 TEST_CASE("rodgerF4 is near 0.7 on filled sI when hydrogens exist",
           "[order_parameter]") {
   molSys::PointCloud<molSys::Point<double>, double> sI;
