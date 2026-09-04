@@ -363,6 +363,21 @@ TEST_CASE("perfect sI keeps closed 512 counts; leftover cups stay open",
   }
 }
 
+TEST_CASE("a nucleation dump reports incomplete cages", "[cage_enum]") {
+  const auto nuc = cagesOnDump("traj/exampleTraj.lammpstrj", "hc");
+  const auto sig = cage::Signature::parse("hc");
+  const auto cups = cage::findIncompleteBySignature(nuc.rings, sig, 0);
+  REQUIRE_FALSE(cups.empty());
+  for (const auto &c : cups) {
+    REQUIRE_FALSE(c.closed);
+    REQUIRE(c.danglingEdges > 0);
+  }
+  const auto si = cagesOnDump("traj/genice_sI.lammpstrj", "512");
+  const auto nClosed = cage::findBySignature(si.rings, cage::Signature::parse("512")).size();
+  REQUIRE(nClosed == si.found.size());
+  REQUIRE(nClosed > 0);
+}
+
 TEST_CASE("512 signature finds 20-vertex cages on GenIce sII", "[cage_enum]") {
   const auto run = cagesOnDump("traj/genice_sII.lammpstrj", "512");
   REQUIRE_FALSE(run.found.empty());
