@@ -20,6 +20,7 @@
 #include <seams_input.hpp>
 #include <site.hpp>
 #include <topo_fingerprint.hpp>
+#include <tum_offload.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -1157,22 +1158,33 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
       nList = knnOf(mutual);
     }
     auto idx = nneigh::neighbourListByIndex(cloud, nList);
-    auto six = sixOf(primitive::ringNetwork(idx, 6));
-    const auto aff = ring::cageAffiliation(six, idx);
-    // cageAffiliation is per-ring; map to atoms
-    std::vector<bool> hc(static_cast<std::size_t>(cloud.nop), false);
-    std::vector<bool> ddc(static_cast<std::size_t>(cloud.nop), false);
-    for (std::size_t r = 0; r < six.size(); ++r) {
-      for (const int a : six[r]) {
-        if (a >= 0 && a < cloud.nop) {
-          hc[static_cast<std::size_t>(a)] =
-              hc[static_cast<std::size_t>(a)] || aff.hc[r];
-          ddc[static_cast<std::size_t>(a)] =
-              ddc[static_cast<std::size_t>(a)] || aff.ddc[r];
+    if (tum::preferOffload()) {
+      const auto counts = tum::cageCounts(idx);
+      std::vector<bool> hc(static_cast<std::size_t>(cloud.nop), false);
+      std::vector<bool> ddc(static_cast<std::size_t>(cloud.nop), false);
+      const int n = std::min(cloud.nop, static_cast<int>(counts.atomHc.size()));
+      for (int i = 0; i < n; ++i) {
+        hc[static_cast<std::size_t>(i)] = counts.atomHc[static_cast<std::size_t>(i)] != 0;
+        ddc[static_cast<std::size_t>(i)] = counts.atomDdc[static_cast<std::size_t>(i)] != 0;
+      }
+      tallyAtoms(hc, ddc);
+    } else {
+      auto six = sixOf(primitive::ringNetwork(idx, 6));
+      const auto aff = ring::cageAffiliation(six, idx);
+      std::vector<bool> hc(static_cast<std::size_t>(cloud.nop), false);
+      std::vector<bool> ddc(static_cast<std::size_t>(cloud.nop), false);
+      for (std::size_t r = 0; r < six.size(); ++r) {
+        for (const int a : six[r]) {
+          if (a >= 0 && a < cloud.nop) {
+            hc[static_cast<std::size_t>(a)] =
+                hc[static_cast<std::size_t>(a)] || aff.hc[r];
+            ddc[static_cast<std::size_t>(a)] =
+                ddc[static_cast<std::size_t>(a)] || aff.ddc[r];
+          }
         }
       }
+      tallyAtoms(hc, ddc);
     }
-    tallyAtoms(hc, ddc);
   }
   os << colorizer.heading("nop") << " " << waterNop(cloud, waterTypes) << " "
      << colorizer.longOption("graph") << " " << graphName << " "
