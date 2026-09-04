@@ -498,7 +498,11 @@ SteinhardtQl steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double
     allgathervDoubles(qlm, graph.nop, 2 * nComp, rank, nranks);
   }
 #endif
-  runPass2(graph, orderL, begin, end, qlm, result.ql, result.qlBar);
+  if (hostPass2) {
+    runPass2Host(graph, orderL, begin, end, qlm, result.ql, result.qlBar);
+  } else {
+    runPass2(graph, orderL, begin, end, qlm, result.ql, result.qlBar);
+  }
 #ifdef SEAMS_HAS_MPI
   if (initialized && nranks > 1) {
     allgathervDoubles(result.ql, graph.nop, 1, rank, nranks);
