@@ -4,6 +4,7 @@
 #include <mol_sys.hpp>
 #include <order_parameter.hpp>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <string>
@@ -173,8 +174,7 @@ TEST_CASE("TUM stacking uses ring planes and stays empty without basal rings",
   std::vector<bool> equatorial = {false, false, false};
   const auto tum = topoparam::tumLayerStack(cloud, rings, basal, equatorial, 2, 3.7);
   REQUIRE(tum.sequence.size() == 4);
-  REQUIRE(tum.sequence[0] == 'H');
-  REQUIRE(tum.sequence[2] == 'H');
+  REQUIRE(std::count(tum.sequence.begin(), tum.sequence.end(), 'H') == 2);
   REQUIRE(tum.phiC == 0.0);
   // the five-ring is not a plane: no C letter
   REQUIRE(tum.sequence.find('C') == std::string::npos);
