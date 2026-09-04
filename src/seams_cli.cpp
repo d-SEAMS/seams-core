@@ -888,7 +888,18 @@ int cmdF4(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int hType) {
        << colorizer.longOption("f4") << " nan\n";
     return 0;
   }
-  const int typ = typeOf(cloud, typeI);
+  int typ = typeI;
+  if (typ <= 0) {
+    for (const auto &p : cloud.pts) {
+      if (p.type != hType) {
+        typ = p.type;
+        break;
+      }
+    }
+  }
+  if (typ <= 0) {
+    typ = typeOf(cloud, typeI);
+  }
   const double cand = cutoff + 1.5;
   auto nList = nneigh::kNearestNeighbourList(cloud, 4, cand, typ, true);
   const auto f4 = topoparam::rodgerF4(cloud, nList, typ, hType);
@@ -1410,7 +1421,7 @@ int main(int argc, char *argv[]) {
 
   parser.add(Option("--htype")
                  .argName("I")
-                 .help("Hydrogen atom type for hbonds")
+                 .help("Hydrogen atom type for hbonds and f4")
                  .handler([&](std::string_view value) {
                    htype = parseIntegral<int>(value);
                  }));
@@ -1706,7 +1717,8 @@ int main(int argc, char *argv[]) {
   };
 
   const bool loadAll =
-      cmd == "pairs" || cmd == "ions" || (cmd == "cn" && ionsFlag) ||
+      cmd == "pairs" || cmd == "ions" || cmd == "f4" ||
+      (cmd == "cn" && ionsFlag) ||
       ((cmd == "rdf" || cmd == "cn") && typesSet && rdfTypeI != rdfTypeJ) ||
       (cmd == "density-z" && typeI <= 0) || cmd == "domains";
   const int loadType = loadAll ? -1 : typeI;
