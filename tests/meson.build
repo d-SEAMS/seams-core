@@ -107,6 +107,13 @@ test('simd',
   env: _test_env)
 
 # Performance benchmark binaries (not in regular test suite)
+executable('sota_f4_zeron', 'sota_f4_zeron.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
 executable('bench_algorithms', 'bench_algorithms.cpp',
   dependencies: [yds_dep, catch2_dep],
   cpp_args: _args,
