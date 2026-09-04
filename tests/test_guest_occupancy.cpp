@@ -1,10 +1,17 @@
 #include <catch2/catch_test_macros.hpp>
 
+#include <cage.hpp>
+#include <cage_enum.hpp>
+#include <franzblau.hpp>
 #include <mol_sys.hpp>
+#include <neighbours.hpp>
+#include <seams_input.hpp>
 #include <site.hpp>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
+#include <numeric>
 #include <vector>
 
 namespace {
@@ -117,4 +124,51 @@ TEST_CASE("two guests in one cage count as multiple occupancy", "[guests]") {
   const auto none = site::guestOccupancy(cloud, cages, {16, 17}, 0.1);
   REQUIRE(none.free == 2);
   REQUIRE(none.occupied == 0);
+}
+
+TEST_CASE("two H2 in a GenIce sII 51264 cage report integer occupancy",
+          "[guests]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/genice_sII.lammpstrj", 1, yCloud, 1);
+  REQUIRE(yCloud.nop > 0);
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  nList = nneigh::neighbourListByIndex(yCloud, nList);
+  const auto sig = cage::Signature::parse("51264");
+  const auto rings = primitive::ringNetwork(nList, std::max(sig.maxRingSize(), 6));
+  const auto found = cage::findBySignature(rings, nList, sig);
+  REQUIRE_FALSE(found.empty());
+  REQUIRE(found[0].vertices.size() == 28);
+
+  const auto centre = site::periodicCentroid(yCloud, found[0].vertices);
+  auto addGuest = [&](double dx, double dy, double dz) {
+    molSys::Point<double> p;
+    p.x = centre[0] + dx;
+    p.y = centre[1] + dy;
+    p.z = centre[2] + dz;
+    p.type = 2;
+    p.atomID = yCloud.nop + 1;
+    p.molID = yCloud.nop + 1;
+    yCloud.pts.push_back(p);
+    yCloud.idIndexMap[p.atomID] = yCloud.nop;
+    ++yCloud.nop;
+  };
+  addGuest(-0.4, 0.0, 0.0);
+  addGuest(0.4, 0.0, 0.0);
+
+  std::vector<std::vector<int>> cages;
+  cages.reserve(found.size());
+  for (const auto &c : found) {
+    cages.push_back(c.vertices);
+  }
+  const auto occ =
+      site::guestOccupancy(yCloud, cages, {yCloud.nop - 2, yCloud.nop - 1}, 4.0);
+  REQUIRE(occ.occupied == 1);
+  REQUIRE(occ.multiply == 1);
+  REQUIRE(occ.free == 0);
+  REQUIRE(occ.guestsPerCage[0] == 2);
+  REQUIRE(occ.occupancyHistogram.size() >= 3);
+  REQUIRE(occ.occupancyHistogram[2] == 1);
+  const int histSum =
+      std::accumulate(occ.occupancyHistogram.begin(), occ.occupancyHistogram.end(), 0);
+  REQUIRE(histSum == static_cast<int>(found.size()));
 }
