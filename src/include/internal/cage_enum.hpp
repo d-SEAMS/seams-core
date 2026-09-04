@@ -30,6 +30,8 @@ struct FoundCage {
   std::vector<int> faces;     ///< ring indices into the input vector
   std::vector<int> vertices;  ///< sorted unique atom indices
   std::string certificate;    ///< nauty hex, empty when nauty is off
+  bool closed = true;         ///< every face edge used twice
+  int danglingEdges = 0;      ///< edges used once (cups / incomplete)
 };
 
 /** True when every edge of the listed faces is used by exactly two
@@ -52,6 +54,13 @@ std::vector<FoundCage>
 findBySignature(const std::vector<std::vector<int>> &rings,
                 const std::vector<std::vector<int>> &nList,
                 const Signature &signature);
+
+/** Connected face sets that stay inside the signature budget, have at
+ *  least `minFaces` faces, and are not closed. Cups and incomplete
+ *  cages during hydrate nucleation. Closed polyhedra are omitted. */
+std::vector<FoundCage>
+findIncompleteBySignature(const std::vector<std::vector<int>> &rings,
+                          const Signature &signature, int minFaces);
 
 } // namespace cage
 

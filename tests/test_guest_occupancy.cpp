@@ -110,6 +110,9 @@ TEST_CASE("two guests in one cage count as multiple occupancy", "[guests]") {
   REQUIRE(occ.occupied == 1);
   REQUIRE(occ.multiply == 1);
   REQUIRE(occ.free == 0);
+  REQUIRE(occ.occupancyHistogram.size() >= 3);
+  REQUIRE(occ.occupancyHistogram[0] == 1);
+  REQUIRE(occ.occupancyHistogram[2] == 1);
   // a radius too small leaves every guest free
   const auto none = site::guestOccupancy(cloud, cages, {16, 17}, 0.1);
   REQUIRE(none.free == 2);

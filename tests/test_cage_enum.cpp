@@ -111,6 +111,13 @@ TEST_CASE("Signature parse accepts lists and the named table", "[cage_enum]") {
   REQUIRE(cage::Signature::parse("512") == cage::Signature::parse("5:12"));
   REQUIRE(cage::Signature::parse("51262") ==
           cage::Signature::parse("5:12,6:2"));
+  REQUIRE(cage::Signature::parse("51264") ==
+          cage::Signature::parse("5:12,6:4"));
+  REQUIRE(cage::Signature::parse("51268") ==
+          cage::Signature::parse("5:12,6:8"));
+  REQUIRE(cage::Signature::parse("sh") ==
+          cage::Signature::parse("4:3,5:6,6:3"));
+  REQUIRE(cage::Signature::parse("sH") == cage::Signature::parse("sh"));
   REQUIRE(cage::Signature::parse("hc").counts ==
           cage::Signature::parse("4:6,6:2").counts);
   REQUIRE(cage::Signature::parse("hc").kind == cage::Signature::Kind::HexC);
@@ -162,6 +169,26 @@ TEST_CASE("hexagonal prism rings close and match the hc signature",
        rings[static_cast<size_t>(found[0].faces[7])]}));
   REQUIRE_FALSE(found[0].certificate.empty());
 #endif
+}
+
+TEST_CASE("a prism missing one face is an incomplete cage, not a closed one",
+          "[cage_enum]") {
+  auto rings = hexPrismRings();
+  rings.pop_back();
+  const auto sig = cage::Signature::parse("4:6,6:2");
+  const auto closed = cage::findBySignature(rings, sig);
+  REQUIRE(closed.empty());
+  const auto cups = cage::findIncompleteBySignature(rings, sig, 6);
+  REQUIRE_FALSE(cups.empty());
+  REQUIRE_FALSE(cups[0].closed);
+  REQUIRE(cups[0].danglingEdges > 0);
+  REQUIRE(cups[0].faces.size() >= 6);
+  const auto full = hexPrismRings();
+  const auto stillClosed = cage::findBySignature(full, sig);
+  REQUIRE(stillClosed.size() == 1);
+  REQUIRE(stillClosed[0].closed);
+  const auto noCups = cage::findIncompleteBySignature(full, sig, 6);
+  REQUIRE(noCups.empty());
 }
 
 TEST_CASE("findBySignature(hc) matches findHC vertices on the twelve-atom HC",

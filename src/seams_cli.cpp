@@ -230,6 +230,16 @@ int typeOf(const Cloud &cloud, int requested) {
   return cloud.pts[0].type;
 }
 
+std::vector<std::vector<int>>
+waterGraph(Cloud &cloud, double cutoff, int typ,
+           const std::vector<int> &waterTypes, int k = 4, bool mutual = true) {
+  const double cand = cutoff + 1.5;
+  if (!waterTypes.empty()) {
+    return nneigh::kNearestNeighbourList(cloud, k, cand, waterTypes, mutual);
+  }
+  return nneigh::kNearestNeighbourList(cloud, k, cand, typ, mutual);
+}
+
 std::string iceColor(std::string_view name) {
   if (name == "cubic" || name == "reCubic") {
     return colorizer.longOption(name);
@@ -834,14 +844,14 @@ int cmdCn(std::ostream &os, Cloud &cloud, double rmax, int bins, int typeI,
 
 int cmdChillPlus(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
                  bool layers = false, bool tumLayers = false, int axis = 2,
-                 double layerWidth = 3.7) {
+                 double layerWidth = 3.7,
+                 const std::vector<int> &waterTypes = {}) {
   if (cloud.nop == 0) {
     printCounts(os, cloud);
     return 0;
   }
   const int typ = typeOf(cloud, typeI);
-  const double cand = cutoff + 1.5;
-  auto nList = nneigh::kNearestNeighbourList(cloud, 4, cand, typ, true);
+  auto nList = waterGraph(cloud, cutoff, typ, waterTypes);
   chill::getCorrelPlus(cloud, nList, false);
   chill::getIceTypePlusNoPrint(cloud, nList, false);
   printCounts(os, cloud);
@@ -868,14 +878,14 @@ int cmdChillPlus(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
   return 0;
 }
 
-int cmdChill(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
+int cmdChill(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
+             const std::vector<int> &waterTypes = {}) {
   if (cloud.nop == 0) {
     printCounts(os, cloud);
     return 0;
   }
   const int typ = typeOf(cloud, typeI);
-  const double cand = cutoff + 1.5;
-  auto nList = nneigh::kNearestNeighbourList(cloud, 4, cand, typ, true);
+  auto nList = waterGraph(cloud, cutoff, typ, waterTypes);
   chill::getCorrel(cloud, nList, false);
   chill::getIceTypeNoPrint(cloud, nList, false);
   printCounts(os, cloud);
@@ -937,7 +947,8 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
              const std::string &graphName, bool complete = false,
              const std::string &signatureSpec = {},
              const std::vector<int> &guestTypes = {}, double guestRadius = 4.0,
-             const std::string &perAtomPath = {}, bool inside = false) {
+             const std::string &perAtomPath = {}, bool inside = false,
+             bool incomplete = false, const std::vector<int> &waterTypes = {}) {
   if (cloud.nop == 0) {
     if (!signatureSpec.empty()) {
       const auto sig = cage::Signature::parse(signatureSpec);
@@ -955,6 +966,18 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
   }
   const int typ = typeOf(cloud, typeI);
   const double cand = cutoff + 1.5;
+  auto knnOf = [&](bool mutual) {
+    if (!waterTypes.empty()) {
+      return nneigh::kNearestNeighbourList(cloud, k, cand, waterTypes, mutual);
+    }
+    return nneigh::kNearestNeighbourList(cloud, k, cand, typ, mutual);
+  };
+  auto knnPairOf = [&]() {
+    if (!waterTypes.empty()) {
+      return nneigh::kNearestNeighbourPair(cloud, k, cand, waterTypes);
+    }
+    return nneigh::kNearestNeighbourPair(cloud, k, cand, typ);
+  };
 
   if (!signatureSpec.empty()) {
     const auto emit = [&](const std::vector<std::vector<int>> &idx) {
@@ -962,6 +985,10 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
       const int depth = std::max(sig.maxRingSize(), 3);
       const auto rings = primitive::ringNetwork(idx, depth);
       const auto found = cage::findBySignature(rings, idx, sig);
+      std::vector<cage::FoundCage> cups;
+      if (incomplete) {
+        cups = cage::findIncompleteBySignature(rings, sig, 0);
+      }
       std::set<int> atoms;
       for (const auto &c : found) {
         atoms.insert(c.vertices.begin(), c.vertices.end());
@@ -970,6 +997,9 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
          << colorizer.longOption("graph") << " " << graphName << " "
          << colorizer.longOption("signature") << " " << sig.str() << " cages "
          << found.size() << " atoms " << atoms.size();
+      if (incomplete) {
+        os << " " << colorizer.longOption("incomplete") << " " << cups.size();
+      }
       if (!guestTypes.empty()) {
         // guests (methane, THF, ions) placed in the found cages by the
         // periodic centroid of each cage's vertices
@@ -999,22 +1029,29 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
         os << " " << colorizer.longOption("guests") << " " << guests.size() << " occupied "
            << occ.occupied << " multiple " << occ.multiply << " free " << occ.free
            << (inside ? " inside 1" : "");
+        if (!occ.occupancyHistogram.empty()) {
+          os << " " << colorizer.longOption("occ");
+          for (std::size_t k = 0; k < occ.occupancyHistogram.size(); ++k) {
+            os << " " << k << ":" << occ.occupancyHistogram[k];
+          }
+        }
       }
       os << "\n";
       return 0;
     };
     if (graphName == "seeded") {
-      auto graphs = nneigh::kNearestNeighbourPair(cloud, k, cand, typ);
+      auto graphs = knnPairOf();
       auto idxU = nneigh::neighbourListByIndex(cloud, graphs.second);
       return emit(idxU);
     }
     const auto graph = nneigh::bondGraphFromName(graphName);
     std::vector<std::vector<int>> nList;
     if (graph == nneigh::BondGraph::Cutoff) {
-      nList = nneigh::neighListO(cutoff, cloud, typ);
+      nList = nneigh::neighListO(cutoff, cloud,
+                                waterTypes.empty() ? typ : waterTypes.front());
     } else {
       const bool mutual = graph == nneigh::BondGraph::KnnMutual;
-      nList = nneigh::kNearestNeighbourList(cloud, k, cand, typ, mutual);
+      nList = knnOf(mutual);
     }
     auto idx = nneigh::neighbourListByIndex(cloud, nList);
     return emit(idx);
@@ -1059,7 +1096,7 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
   };
 
   if (graphName == "seeded") {
-    auto graphs = nneigh::kNearestNeighbourPair(cloud, k, cand, typ);
+    auto graphs = knnPairOf();
     const auto &mutual = graphs.first;
     const auto &uni = graphs.second;
     auto idxS = nneigh::neighbourListByIndex(cloud, mutual);
@@ -1072,10 +1109,11 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
     const auto graph = nneigh::bondGraphFromName(graphName);
     std::vector<std::vector<int>> nList;
     if (graph == nneigh::BondGraph::Cutoff) {
-      nList = nneigh::neighListO(cutoff, cloud, typ);
+      nList = nneigh::neighListO(cutoff, cloud,
+                                waterTypes.empty() ? typ : waterTypes.front());
     } else {
       const bool mutual = graph == nneigh::BondGraph::KnnMutual;
-      nList = nneigh::kNearestNeighbourList(cloud, k, cand, typ, mutual);
+      nList = knnOf(mutual);
     }
     auto idx = nneigh::neighbourListByIndex(cloud, nList);
     auto six = sixOf(primitive::ringNetwork(idx, 6));
@@ -1177,6 +1215,8 @@ int main(int argc, char *argv[]) {
   bool insideFlag = false;
   bool layersFlag = false;
   bool tumLayersFlag = false;
+  bool incompleteFlag = false;
+  std::string waterTypesFlag;
   std::string subsetFlag;
   int rdfTypeI = 0;
   int rdfTypeJ = 0;
@@ -1332,7 +1372,7 @@ int main(int argc, char *argv[]) {
   parser.add(Option("--signature")
                  .argName("SPEC")
                  .help("cages: ring-size census (4:6,6:8) or a named table "
-                       "entry (sodalite|alpha|512|51262|hc|ddc)")
+                       "entry (sodalite|alpha|512|51262|51264|51268|sh|hc|ddc)")
                  .handler([&](std::string_view value) {
                    signatureSpec = std::string(value);
                  }));
@@ -1375,6 +1415,19 @@ int main(int argc, char *argv[]) {
                  .help("chill-plus: TUM stacking from HC-basal and "
                        "DDC-equatorial rings, not CHILL+ molecules")
                  .handler([&]() { tumLayersFlag = true; }));
+
+  parser.add(Option("--water-types")
+                 .argName("T,U")
+                 .help("Neighbour graph on these LAMMPS types only (OW). "
+                       "Substrate and ions never enter the 4-NN list")
+                 .handler([&](std::string_view value) {
+                   waterTypesFlag = std::string(value);
+                 }));
+
+  parser.add(Option("--incomplete")
+                 .help("cages --signature: also report cups and incomplete "
+                       "cages on the ring graph")
+                 .handler([&]() { incompleteFlag = true; }));
 
   parser.add(Option("--colour-types")
                  .help("fingerprint: colour vertices by LAMMPS type, so species "
@@ -1610,6 +1663,16 @@ int main(int argc, char *argv[]) {
     std::cerr << colorizer.error("domains needs --site") << "\n";
     return 2;
   }
+  std::vector<int> waterTypes;
+  {
+    std::string tok;
+    std::istringstream in(waterTypesFlag);
+    while (std::getline(in, tok, ',')) {
+      if (!tok.empty()) {
+        waterTypes.push_back(parseIntegral<int>(tok));
+      }
+    }
+  }
   site::Kind domainKind = site::Kind::polar;
   if (cmd == "domains") {
     if (subsetFlag == "apolar" || subsetFlag == "tail") {
@@ -1639,10 +1702,10 @@ int main(int argc, char *argv[]) {
     }
     if (cmd == "chill-plus" || cmd == "chill_plus") {
       return cmdChillPlus(os, cloud, cutoff, typeI, layersFlag, tumLayersFlag,
-                          densAxis, 3.7);
+                          densAxis, 3.7, waterTypes);
     }
     if (cmd == "chill") {
-      return cmdChill(os, cloud, cutoff, typeI);
+      return cmdChill(os, cloud, cutoff, typeI, waterTypes);
     }
     if (cmd == "cages") {
       try {
@@ -1656,7 +1719,7 @@ int main(int argc, char *argv[]) {
         }
         return cmdCages(os, cloud, cutoff, typeI, k, graph, completeFlag,
                         signatureSpec, guestTypes, guestRadius, perAtomPath,
-                        insideFlag);
+                        insideFlag, incompleteFlag, waterTypes);
       } catch (const std::exception &e) {
         os << colorizer.error(e.what()) << "\n";
         return 2;

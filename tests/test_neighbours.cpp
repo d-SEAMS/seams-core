@@ -916,3 +916,41 @@ TEST_CASE("threaded cell-list rows are the minimum-image neighbours", "[neighbou
   std::vector<std::vector<int>> rows;
   REQUIRE_FALSE(nneigh::cellListRowsThreaded(tight, all, cutoff, rows));
 }
+
+TEST_CASE("water-type mask keeps Ag out of the 4-NN list", "[neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {20.0, 20.0, 20.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  // Five waters in a plus, Ag sitting closer to the centre than one water.
+  const double coords[6][3] = {{0, 0, 0},
+                               {3, 0, 0},
+                               {-3, 0, 0},
+                               {0, 3, 0},
+                               {0, -3, 0},
+                               {1.0, 0, 0}};
+  const int types[6] = {1, 1, 1, 1, 1, 3};
+  for (int i = 0; i < 6; i++) {
+    molSys::Point<double> pt;
+    pt.type = types[i];
+    pt.atomID = i + 1;
+    pt.molID = i + 1;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+  cloud.nop = 6;
+  const auto nList =
+      nneigh::kNearestNeighbourList(cloud, 4, 6.0, std::vector<int>{1}, true);
+  REQUIRE(nList.size() == static_cast<std::size_t>(cloud.nop));
+  for (const auto &row : nList) {
+    for (std::size_t m = 1; m < row.size(); m++) {
+      const auto it = cloud.idIndexMap.find(row[m]);
+      REQUIRE(it != cloud.idIndexMap.end());
+      REQUIRE(cloud.pts[static_cast<std::size_t>(it->second)].type == 1);
+    }
+  }
+  // Ag has no water-graph row bonds
+  REQUIRE(nList[5].size() <= 1);
+}

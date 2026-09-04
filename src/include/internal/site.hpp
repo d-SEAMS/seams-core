@@ -125,6 +125,7 @@ struct GuestOccupancy {
   int occupied = 0;                      ///< cages with at least one guest
   int multiply = 0;                      ///< cages with more than one guest
   int free = 0;                          ///< guests in no cage
+  std::vector<int> occupancyHistogram;   ///< hist[k] = cages with k guests
 };
 /// `cages` are vertex index lists into `yCloud.pts`; `radius` in the
 /// cloud's length unit (half the cage diameter, about 4 A for a 5^12 cage).

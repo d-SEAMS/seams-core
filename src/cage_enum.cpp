@@ -47,6 +47,10 @@ const std::unordered_map<std::string, std::string> &namedTable() {
       {"alpha", "4:6,6:8,8:6"},
       {"512", "5:12"},
       {"51262", "5:12,6:2"},
+      {"51264", "5:12,6:4"},
+      {"51268", "5:12,6:8"},
+      {"sh", "4:3,5:6,6:3"},
+      {"sH", "4:3,5:6,6:3"},
       {"hc", "4:6,6:2"},
       {"ddc", "6:7"},
   };
@@ -125,6 +129,8 @@ struct Search {
   std::set<std::vector<int>> seenVerts;
   std::vector<cage::FoundCage> found;
   int seed = 0;
+  bool allowIncomplete = false;
+  int minFaces = 1;
 
   explicit Search(const std::vector<std::vector<int>> &allRings,
                   const cage::Signature &signature)
@@ -259,11 +265,20 @@ struct Search {
     return true;
   }
 
-  void accept() {
+  void accept(bool closed) {
     std::vector<int> faces = chosen;
     std::sort(faces.begin(), faces.end());
     std::vector<int> verts = uniqueVertices(rings, faces);
     if (!seenVerts.insert(verts).second) {
+      return;
+    }
+    int dangling = 0;
+    for (const auto &kv : edgeUse) {
+      if (kv.second == 1) {
+        ++dangling;
+      }
+    }
+    if (!closed && dangling == 0) {
       return;
     }
     std::vector<std::vector<int>> faceRings;
@@ -276,6 +291,8 @@ struct Search {
     cage.faces = std::move(faces);
     cage.vertices = std::move(verts);
     cage.certificate = cage::canonicalCertificate(faceRings);
+    cage.closed = closed;
+    cage.danglingEdges = dangling;
     found.push_back(std::move(cage));
   }
 
@@ -323,13 +340,20 @@ struct Search {
     }
     if (countsEqual(have, sig)) {
       if (allEdgesPaired()) {
-        accept();
+        accept(true);
+      } else if (allowIncomplete &&
+                 static_cast<int>(chosen.size()) >= minFaces) {
+        accept(false);
       }
       restore(mark);
       return;
     }
     const auto br = branchEdge();
     if (br.second.empty()) {
+      if (allowIncomplete && static_cast<int>(chosen.size()) >= minFaces &&
+          !allEdgesPaired()) {
+        accept(false);
+      }
       restore(mark);
       return;
     }
@@ -347,16 +371,18 @@ struct Search {
   void run() {
     for (const int r : cand) {
       seed = r;
-      bool seedOk = true;
-      for (const Edge e : edges[static_cast<size_t>(r)]) {
-        const auto it = ringsOf.find(e);
-        if (it == ringsOf.end() || it->second.size() < 2) {
-          seedOk = false;
-          break;
+      if (!allowIncomplete) {
+        bool seedOk = true;
+        for (const Edge e : edges[static_cast<size_t>(r)]) {
+          const auto it = ringsOf.find(e);
+          if (it == ringsOf.end() || it->second.size() < 2) {
+            seedOk = false;
+            break;
+          }
         }
-      }
-      if (!seedOk) {
-        continue;
+        if (!seedOk) {
+          continue;
+        }
       }
       addRing(r);
       search();
@@ -485,6 +511,40 @@ std::vector<FoundCage> findBySignature(const std::vector<std::vector<int>> &ring
   Search search(rings, signature);
   search.run();
   return search.found;
+}
+
+std::vector<FoundCage>
+findIncompleteBySignature(const std::vector<std::vector<int>> &rings,
+                          const Signature &signature, int minFaces) {
+  if (signature.counts.empty() || signature.faceCount() <= 0) {
+    return {};
+  }
+  const int floor = minFaces > 0 ? minFaces
+                                 : std::max(1, signature.faceCount() - 2);
+  Search search(rings, signature);
+  search.allowIncomplete = true;
+  search.minFaces = floor;
+  search.run();
+  const auto closed = findBySignature(rings, signature);
+  std::vector<FoundCage> out;
+  out.reserve(search.found.size());
+  for (auto &c : search.found) {
+    if (c.closed) {
+      continue;
+    }
+    bool insideClosed = false;
+    for (const auto &cl : closed) {
+      if (std::includes(cl.vertices.begin(), cl.vertices.end(),
+                        c.vertices.begin(), c.vertices.end())) {
+        insideClosed = true;
+        break;
+      }
+    }
+    if (!insideClosed) {
+      out.push_back(std::move(c));
+    }
+  }
+  return out;
 }
 
 namespace {

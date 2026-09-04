@@ -449,6 +449,14 @@ guestOccupancy(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
       ++out.multiply;
     }
   }
+  int maxG = 0;
+  for (int n : out.guestsPerCage) {
+    maxG = std::max(maxG, n);
+  }
+  out.occupancyHistogram.assign(static_cast<std::size_t>(maxG) + 1, 0);
+  for (int n : out.guestsPerCage) {
+    ++out.occupancyHistogram[static_cast<std::size_t>(n)];
+  }
   return out;
 }
 
@@ -608,6 +616,14 @@ guestOccupancyInside(const molSys::PointCloud<molSys::Point<double>, double> &yC
     if (n > 1) {
       ++out.multiply;
     }
+  }
+  int maxG = 0;
+  for (int n : out.guestsPerCage) {
+    maxG = std::max(maxG, n);
+  }
+  out.occupancyHistogram.assign(static_cast<std::size_t>(maxG) + 1, 0);
+  for (int n : out.guestsPerCage) {
+    ++out.occupancyHistogram[static_cast<std::size_t>(n)];
   }
   return out;
 }
