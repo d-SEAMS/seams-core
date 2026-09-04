@@ -419,6 +419,25 @@ TEST_CASE("masked 4-NN never scores Ag as ice", "[bop][neighbours]") {
   REQUIRE(cloud.pts[5].iceType == molSys::atom_state_type::unclassified);
 }
 
+TEST_CASE("mixed AgI+water dump scores ice on OW only", "[bop][neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud = sinp::readLammpsTrj("traj/agi_water_tiny.lammpstrj", 1, cloud);
+  REQUIRE(cloud.nop == 7);
+  const auto nList =
+      nneigh::kNearestNeighbourList(cloud, 4, 6.0, std::vector<int>{1}, true);
+  chill::getCorrelPlus(cloud, nList, false);
+  chill::getIceTypePlusNoPrint(cloud, nList, false);
+  chill::clearIceTypesExcept(cloud, std::vector<int>{1});
+  for (int i = 0; i < cloud.nop; i++) {
+    const auto &pt = cloud.pts[static_cast<std::size_t>(i)];
+    if (pt.type == 1) {
+      continue;
+    }
+    REQUIRE(pt.iceType == molSys::atom_state_type::unclassified);
+    REQUIRE(nList[static_cast<std::size_t>(i)].size() <= 1);
+  }
+}
+
 TEST_CASE("getIceTypePlusNoPrint classifies without writing", "[bop]") {
   auto cloud = makeTetraCloud();
   auto nList = nneigh::neighListO(3.0, cloud, 1);

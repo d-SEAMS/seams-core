@@ -1023,3 +1023,48 @@ TEST_CASE("water-type set bonds two water types and drops Ag", "[neighbours]") {
     }
   }
 }
+
+TEST_CASE("mixed AgI+water dump keeps Ag and I out of the water 4-NN list",
+          "[neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud = sinp::readLammpsTrj("traj/agi_water_tiny.lammpstrj", 1, cloud);
+  REQUIRE(cloud.nop == 7);
+  int nAg = 0;
+  int nI = 0;
+  int nOw = 0;
+  for (const auto &pt : cloud.pts) {
+    nOw += pt.type == 1 ? 1 : 0;
+    nAg += pt.type == 3 ? 1 : 0;
+    nI += pt.type == 4 ? 1 : 0;
+  }
+  REQUIRE(nOw == 5);
+  REQUIRE(nAg == 1);
+  REQUIRE(nI == 1);
+  const auto nList =
+      nneigh::kNearestNeighbourList(cloud, 4, 6.0, std::vector<int>{1}, true);
+  REQUIRE(nList.size() == static_cast<std::size_t>(cloud.nop));
+  for (const auto &row : nList) {
+    for (std::size_t m = 1; m < row.size(); m++) {
+      const auto it = cloud.idIndexMap.find(row[m]);
+      REQUIRE(it != cloud.idIndexMap.end());
+      const int t = cloud.pts[static_cast<std::size_t>(it->second)].type;
+      REQUIRE(t == 1);
+      REQUIRE(t != 3);
+      REQUIRE(t != 4);
+    }
+  }
+  int agIdx = -1;
+  int iIdx = -1;
+  for (int i = 0; i < cloud.nop; i++) {
+    if (cloud.pts[static_cast<std::size_t>(i)].type == 3) {
+      agIdx = i;
+    }
+    if (cloud.pts[static_cast<std::size_t>(i)].type == 4) {
+      iIdx = i;
+    }
+  }
+  REQUIRE(agIdx >= 0);
+  REQUIRE(iIdx >= 0);
+  REQUIRE(nList[static_cast<std::size_t>(agIdx)].size() <= 1);
+  REQUIRE(nList[static_cast<std::size_t>(iIdx)].size() <= 1);
+}
