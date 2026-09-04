@@ -274,32 +274,94 @@ bool assignIceRules(const std::vector<std::vector<int>> &adj,
   return true;
 }
 
+// Thermal-like water H: TIP3P HOH on the ice-rule donation plane
+// and a 15 degree libration about the HOH bisector. Collinear 0 K
+// H-on-O-O gives sI F4 ~ 0.90; this geometry sits near the Rodger
+// thermal literature value 0.7.
+std::array<double, 3> rodrigues(const std::array<double, 3> &v,
+                                const std::array<double, 3> &k, double c,
+                                double s) {
+  const double kdv = k[0] * v[0] + k[1] * v[1] + k[2] * v[2];
+  return {v[0] * c + (k[1] * v[2] - k[2] * v[1]) * s + k[0] * kdv * (1.0 - c),
+          v[1] * c + (k[2] * v[0] - k[0] * v[2]) * s + k[1] * kdv * (1.0 - c),
+          v[2] * c + (k[0] * v[1] - k[1] * v[0]) * s + k[2] * kdv * (1.0 - c)};
+}
+
 void addIceHydrogens(molSys::PointCloud<molSys::Point<double>, double> &cloud,
                      const std::vector<std::pair<int, int>> &owned) {
+  const int nOxy = cloud.nop;
+  std::vector<std::vector<int>> donated(static_cast<std::size_t>(nOxy));
+  for (const auto &bond : owned) {
+    REQUIRE(bond.first >= 0);
+    REQUIRE(bond.first < nOxy);
+    donated[static_cast<std::size_t>(bond.first)].push_back(bond.second);
+  }
   int nextId = 0;
   for (const auto &p : cloud.pts) {
     nextId = std::max(nextId, p.atomID);
   }
   ++nextId;
-  for (const auto &bond : owned) {
-    const int o = bond.first;
-    const int oth = bond.second;
-    const auto dr = gen::relDist(cloud, oth, o);
-    const double r2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
-    REQUIRE(r2 > 0.0);
-    const double inv = 1.0 / std::sqrt(r2);
-    molSys::Point<double> h;
-    h.type = 2;
-    h.molID = cloud.pts[static_cast<std::size_t>(o)].molID;
-    h.atomID = nextId++;
-    h.x = wrapLen(cloud.pts[static_cast<std::size_t>(o)].x + dr[0] * inv,
-                  cloud.box[0]);
-    h.y = wrapLen(cloud.pts[static_cast<std::size_t>(o)].y + dr[1] * inv,
-                  cloud.box[1]);
-    h.z = wrapLen(cloud.pts[static_cast<std::size_t>(o)].z + dr[2] * inv,
-                  cloud.box[2]);
-    cloud.pts.push_back(h);
-    cloud.idIndexMap[h.atomID] = static_cast<int>(cloud.pts.size()) - 1;
+  constexpr double oh = 0.9572;
+  constexpr double halfHoh = 0.5 * 104.52 * 3.14159265358979323846 / 180.0;
+  constexpr double lib = 15.0 * 3.14159265358979323846 / 180.0;
+  const double ch = std::cos(halfHoh);
+  const double sh = std::sin(halfHoh);
+  for (int o = 0; o < nOxy; o++) {
+    REQUIRE(donated[static_cast<std::size_t>(o)].size() == 2);
+    std::array<std::array<double, 3>, 2> unit{};
+    for (int t = 0; t < 2; t++) {
+      const int oth = donated[static_cast<std::size_t>(o)][static_cast<std::size_t>(t)];
+      const auto dr = gen::relDist(cloud, oth, o);
+      const double r2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+      REQUIRE(r2 > 0.0);
+      const double inv = 1.0 / std::sqrt(r2);
+      unit[static_cast<std::size_t>(t)] = {dr[0] * inv, dr[1] * inv, dr[2] * inv};
+    }
+    std::array<double, 3> mid = {unit[0][0] + unit[1][0], unit[0][1] + unit[1][1],
+                                 unit[0][2] + unit[1][2]};
+    const double midN = std::sqrt(mid[0] * mid[0] + mid[1] * mid[1] + mid[2] * mid[2]);
+    REQUIRE(midN > 0.0);
+    mid[0] /= midN;
+    mid[1] /= midN;
+    mid[2] /= midN;
+    std::array<double, 3> nrm = {unit[0][1] * unit[1][2] - unit[0][2] * unit[1][1],
+                                 unit[0][2] * unit[1][0] - unit[0][0] * unit[1][2],
+                                 unit[0][0] * unit[1][1] - unit[0][1] * unit[1][0]};
+    const double nrmN = std::sqrt(nrm[0] * nrm[0] + nrm[1] * nrm[1] + nrm[2] * nrm[2]);
+    REQUIRE(nrmN > 0.0);
+    nrm[0] /= nrmN;
+    nrm[1] /= nrmN;
+    nrm[2] /= nrmN;
+    std::array<double, 3> perp = {nrm[1] * mid[2] - nrm[2] * mid[1],
+                                  nrm[2] * mid[0] - nrm[0] * mid[2],
+                                  nrm[0] * mid[1] - nrm[1] * mid[0]};
+    const double perpN =
+        std::sqrt(perp[0] * perp[0] + perp[1] * perp[1] + perp[2] * perp[2]);
+    REQUIRE(perpN > 0.0);
+    perp[0] /= perpN;
+    perp[1] /= perpN;
+    perp[2] /= perpN;
+    std::array<std::array<double, 3>, 2> vecs = {
+        {{(ch * mid[0] + sh * perp[0]) * oh, (ch * mid[1] + sh * perp[1]) * oh,
+          (ch * mid[2] + sh * perp[2]) * oh},
+         {(ch * mid[0] - sh * perp[0]) * oh, (ch * mid[1] - sh * perp[1]) * oh,
+          (ch * mid[2] - sh * perp[2]) * oh}}};
+    const double ang = (o % 2 == 0) ? lib : -lib;
+    const double c = std::cos(ang);
+    const double s = std::sin(ang);
+    vecs[0] = rodrigues(vecs[0], mid, c, s);
+    vecs[1] = rodrigues(vecs[1], mid, c, s);
+    for (const auto &v : vecs) {
+      molSys::Point<double> h;
+      h.type = 2;
+      h.molID = cloud.pts[static_cast<std::size_t>(o)].molID;
+      h.atomID = nextId++;
+      h.x = wrapLen(cloud.pts[static_cast<std::size_t>(o)].x + v[0], cloud.box[0]);
+      h.y = wrapLen(cloud.pts[static_cast<std::size_t>(o)].y + v[1], cloud.box[1]);
+      h.z = wrapLen(cloud.pts[static_cast<std::size_t>(o)].z + v[2], cloud.box[2]);
+      cloud.pts.push_back(h);
+      cloud.idIndexMap[h.atomID] = static_cast<int>(cloud.pts.size()) - 1;
+    }
   }
   cloud.nop = static_cast<int>(cloud.pts.size());
 }
@@ -411,9 +473,9 @@ TEST_CASE("rodgerF4 is near 0.7 on filled sI when hydrogens exist",
   REQUIRE(sI.nop == 46);
   const double mean = f4OnOxygenCloud(sI);
   UNSCOPED_INFO("F4 sI mean=" << mean);
-  // Perfect 0 K ice-rule sI sits above the thermal literature 0.7.
-  REQUIRE(mean > 0.50);
-  REQUIRE(mean < 0.95);
+  // Thermal-like HOH + 15 deg libration: Rodger literature window.
+  REQUIRE(mean > 0.55);
+  REQUIRE(mean < 0.85);
 }
 
 TEST_CASE("jumpRotorTau90 is finite on a 90-degree H-H rotation",

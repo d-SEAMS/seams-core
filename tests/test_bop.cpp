@@ -1150,6 +1150,67 @@ TEST_CASE("steinhardtQl l=12 is finite on FCC and differs from q3", "[bop]") {
 #endif
 }
 
+// Hard-sphere liquid at the hydrate number density. Simple cubic has
+// high even-l Steinhardt weight and inverts the Zeron q12 contrast.
+molSys::PointCloud<molSys::Point<double>, double>
+disorderedLiquid(const std::vector<double> &box, int n, unsigned seed,
+                 double mind = 2.3) {
+  molSys::PointCloud<molSys::Point<double>, double> out;
+  out.box = box;
+  out.boxLow = {0.0, 0.0, 0.0};
+  out.currentFrame = 1;
+  std::mt19937 rng(seed);
+  std::uniform_real_distribution<double> ux(0.0, box[0]);
+  std::uniform_real_distribution<double> uy(0.0, box[1]);
+  std::uniform_real_distribution<double> uz(0.0, box[2]);
+  auto wrap = [](double x, double L) {
+    x -= L * std::floor(x / L);
+    if (x < 0.0) {
+      x += L;
+    }
+    if (x >= L) {
+      x = 0.0;
+    }
+    return x;
+  };
+  auto tooClose = [&](double x, double y, double z) {
+    for (const auto &p : out.pts) {
+      double dx = x - p.x;
+      double dy = y - p.y;
+      double dz = z - p.z;
+      dx -= box[0] * std::round(dx / box[0]);
+      dy -= box[1] * std::round(dy / box[1]);
+      dz -= box[2] * std::round(dz / box[2]);
+      if (dx * dx + dy * dy + dz * dz < mind * mind) {
+        return true;
+      }
+    }
+    return false;
+  };
+  int atomID = 1;
+  for (int attempt = 0; attempt < n * 400 && out.nop < n; attempt++) {
+    const double x = wrap(ux(rng), box[0]);
+    const double y = wrap(uy(rng), box[1]);
+    const double z = wrap(uz(rng), box[2]);
+    if (tooClose(x, y, z)) {
+      continue;
+    }
+    molSys::Point<double> p;
+    p.type = 1;
+    p.x = x;
+    p.y = y;
+    p.z = z;
+    p.atomID = atomID;
+    p.molID = atomID;
+    out.pts.push_back(p);
+    out.idIndexMap[atomID] = out.nop;
+    ++atomID;
+    ++out.nop;
+  }
+  REQUIRE(out.nop == n);
+  return out;
+}
+
 #ifdef SEAMS_HAS_SPHERICART
 TEST_CASE("Zeron q3/q12 pair separates sI hydrate from liquid on a mixed frame",
           "[bop]") {
@@ -1176,41 +1237,22 @@ TEST_CASE("Zeron q3/q12 pair separates sI hydrate from liquid on a mixed frame",
   }
   mixed.nop = static_cast<int>(mixed.pts.size());
   const int nHyd = mixed.nop;
-  std::mt19937 rng(7);
-  std::uniform_real_distribution<double> jitter(-2.4, 2.4);
   const double x0 = lx + gap;
+  auto liquid = disorderedLiquid({lx, ly, lz}, nHyd, 11);
   for (int i = 0; i < nHyd; i++) {
-    molSys::Point<double> p = sI.pts[static_cast<std::size_t>(i)];
+    molSys::Point<double> p = liquid.pts[static_cast<std::size_t>(i)];
     p.type = 1;
     p.atomID = atomID++;
     p.molID = p.atomID;
-    p.x = sI.pts[static_cast<std::size_t>(i)].x + x0 + jitter(rng);
-    p.y = sI.pts[static_cast<std::size_t>(i)].y + jitter(rng);
-    p.z = sI.pts[static_cast<std::size_t>(i)].z + jitter(rng);
-    if (p.x < x0) {
-      p.x = x0 + 0.2;
-    }
-    if (p.x >= x0 + lx) {
-      p.x = x0 + lx - 0.2;
-    }
-    if (p.y < 0.0) {
-      p.y += ly;
-    }
-    if (p.y >= ly) {
-      p.y -= ly;
-    }
-    if (p.z < 0.0) {
-      p.z += lz;
-    }
-    if (p.z >= lz) {
-      p.z -= lz;
-    }
+    p.x += x0;
     mixed.pts.push_back(p);
     mixed.idIndexMap[p.atomID] = static_cast<int>(mixed.pts.size()) - 1;
   }
   mixed.nop = static_cast<int>(mixed.pts.size());
   REQUIRE(mixed.nop == 2 * nHyd);
-  auto nList = nneigh::kNearestNeighbourList(mixed, 4, 5.0, 1, true);
+  // Cutoff shell matches the separate-frame Zeron case. k=4 on a
+  // jittered crystal inverts bar-q12 relative to the hydrate.
+  auto nList = nneigh::neighListO(5.5, mixed, 1);
   const auto q3 = chill::steinhardtQl(mixed, nList, 3);
   const auto q12 = chill::steinhardtQl(mixed, nList, 12);
   auto meanRange = [](const std::vector<double> &v, int lo, int hi) {
@@ -1241,6 +1283,7 @@ TEST_CASE("Zeron q3/q12 pair separates sI hydrate from liquid on a mixed frame",
   REQUIRE(std::isfinite(hydQ12Bar));
   REQUIRE(std::isfinite(liqQ12Bar));
   REQUIRE(hydQ3 > liqQ3);
+  REQUIRE(hydQ12Bar > liqQ12Bar);
   const double dq3 = hydQ3 - liqQ3;
   const double dq12 = hydQ12 - liqQ12;
   REQUIRE(dq3 * dq3 + dq12 * dq12 > 0.02);
@@ -1260,23 +1303,7 @@ TEST_CASE("Zeron q3/q12 pair separates sI hydrate from liquid", "[bop]") {
   REQUIRE(std::isfinite(q3barH));
   REQUIRE(std::isfinite(q12barH));
 
-  auto liquid = sI;
-  // Strong jitter of the sI sites is a disordered liquid in the same
-  // box. A simple-cubic lattice has a large q12 and is not the contrast.
-  std::mt19937 rng(11);
-  std::uniform_real_distribution<double> jitter(-2.4, 2.4);
-  for (int i = 0; i < liquid.nop; i++) {
-    auto &p = liquid.pts[static_cast<std::size_t>(i)];
-    p.x += jitter(rng);
-    p.y += jitter(rng);
-    p.z += jitter(rng);
-    const double lx = liquid.box[0];
-    const double ly = liquid.box[1];
-    const double lz = liquid.box[2];
-    p.x -= lx * std::floor(p.x / lx);
-    p.y -= ly * std::floor(p.y / ly);
-    p.z -= lz * std::floor(p.z / lz);
-  }
+  auto liquid = disorderedLiquid(sI.box, sI.nop, 13);
   auto nLiq = nneigh::neighListO(5.5, liquid, 1);
   const auto q3l = chill::steinhardtQl(liquid, nLiq, 3);
   const auto q12l = chill::steinhardtQl(liquid, nLiq, 12);
@@ -1291,8 +1318,14 @@ TEST_CASE("Zeron q3/q12 pair separates sI hydrate from liquid", "[bop]") {
   // than the Zeron thermal samples; 0.03 still separates the means.
   REQUIRE(std::fabs(q3barH - q3barL) > 0.03);
 #ifdef SEAMS_HAS_SPHERICART
+  REQUIRE(q12barH > 0.0);
   REQUIRE(q12barH > q12barL + 0.05);
   REQUIRE(std::fabs(q3barH - q3barL) + std::fabs(q12barH - q12barL) > 0.08);
+#else
+  // l=12 Ylm is sphericart-only; a no-sphericart green run is not the
+  // Zeron pair. qlBar stays zero when SEAMS_HAS_SPHERICART is off.
+  REQUIRE(q12barH == 0.0);
+  REQUIRE(q12barL == 0.0);
 #endif
 }
 
