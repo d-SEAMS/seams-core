@@ -57,7 +57,9 @@ listed in that help string).
 | ~density-z~ | type-resolved \(\rho\) along one axis | ~# z rho~ then one ~z rho~ row per bin |
 | ~domains --site --subset~ | polar/apolar Stoddard component | ~subset polar n N largest L P P_inf~ |
 
-~chill~ / ~chill-plus~ call ~nneigh::neighListO~, then
+~chill~ / ~chill-plus~ call ~nneigh::kNearestNeighbourList~ with
+~k = 4~ (mutual). ~--cutoff~ is only the cell-size hint
+(~cutoff + 1.5~); vesin cutoff pairs stay on ~neighListO~. Then
 ~chill::getCorrel~ / ~chill::getIceTypeNoPrint~ or
 ~chill::getCorrelPlus~ / ~chill::getIceTypePlusNoPrint~. Ice names
 are the ~molSys::atom_state_type~ enumerators: ~cubic~, ~hexagonal~,

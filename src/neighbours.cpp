@@ -780,22 +780,8 @@ int nneigh::clearNeighbourList(std::vector<std::vector<int>> &nList) {
   return 0;
 }
 
-/**
- * @details Bonded graph from the k nearest neighbours of each particle,
- *  union-symmetrized: i and j are bonded when either lists the other among
- *  its k nearest. Candidates come from the same cell-list search as
- *  neighListO at @a candidateCutoff, which must comfortably exceed the k-th
- *  neighbour distance. On an undistorted tetrahedral lattice with k = 4 this
- *  equals the first-shell cutoff graph; under thermal distortion it keeps
- *  the neighbour identities a hard cutoff loses, which is what the ring and
- *  cage predicates consume.
- * @param[in] yCloud The input molSys::PointCloud.
- * @param[in] k Number of nearest neighbours each particle nominates.
- * @param[in] candidateCutoff Cell-list search radius for the candidates.
- * @param[in] typeI Type ID of the particles in the graph.
- * @return Row-ordered full neighbour list by atom ID, one row per atom with
- *  the leading self entry, like neighListO.
- */
+// k-nearest nominations: linkcell mesh, not vesin occupancy.
+// candidateCutoff is a cell-size hint for knearest_into.
 namespace {
 
 #ifdef SEAMS_HAS_LINKCELL
