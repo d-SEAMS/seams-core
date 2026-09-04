@@ -1261,15 +1261,21 @@ TEST_CASE("Zeron q3/q12 pair separates sI hydrate from liquid", "[bop]") {
   REQUIRE(std::isfinite(q12barH));
 
   auto liquid = sI;
-  // Simple-cubic packing in the same box is not tetrahedral.
-  const double spacing = liquid.box[0] / 4.0;
+  // Strong jitter of the sI sites is a disordered liquid in the same
+  // box. A simple-cubic lattice has a large q12 and is not the contrast.
+  std::mt19937 rng(11);
+  std::uniform_real_distribution<double> jitter(-2.4, 2.4);
   for (int i = 0; i < liquid.nop; i++) {
-    const int ix = i % 4;
-    const int iy = (i / 4) % 4;
-    const int iz = i / 16;
-    liquid.pts[static_cast<std::size_t>(i)].x = (ix + 0.5) * spacing;
-    liquid.pts[static_cast<std::size_t>(i)].y = (iy + 0.5) * spacing;
-    liquid.pts[static_cast<std::size_t>(i)].z = (iz + 0.5) * spacing;
+    auto &p = liquid.pts[static_cast<std::size_t>(i)];
+    p.x += jitter(rng);
+    p.y += jitter(rng);
+    p.z += jitter(rng);
+    const double lx = liquid.box[0];
+    const double ly = liquid.box[1];
+    const double lz = liquid.box[2];
+    p.x -= lx * std::floor(p.x / lx);
+    p.y -= ly * std::floor(p.y / ly);
+    p.z -= lz * std::floor(p.z / lz);
   }
   auto nLiq = nneigh::neighListO(5.5, liquid, 1);
   const auto q3l = chill::steinhardtQl(liquid, nLiq, 3);
