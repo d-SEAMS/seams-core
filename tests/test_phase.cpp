@@ -44,7 +44,8 @@ TEST_CASE("a hexagonal channel is not a closed 512 cage", "[phase]") {
     }
   }
   auto cloud = cloudFrom(xyz, {20, 20, 20});
-  auto nList = nneigh::kNearestNeighbourList(cloud, 4, 3.5, 1, true);
+  auto nList = nneigh::neighListO(3.5, cloud, 1);
+  nList = nneigh::neighbourListByIndex(cloud, nList);
   const auto rings = primitive::ringNetwork(nList, 6);
   const auto closed = cage::findBySignature(rings, nList, cage::Signature::parse("512"));
   REQUIRE(closed.empty());
