@@ -380,6 +380,43 @@ TEST_CASE("CHILL+ on the mixed TIP4P example is twelve interClathrate",
   REQUIRE(other == 0);
 }
 
+TEST_CASE("masked 4-NN never scores Ag as ice", "[bop][neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {20.0, 20.0, 20.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  const double coords[6][3] = {{0, 0, 0},
+                               {3, 0, 0},
+                               {-3, 0, 0},
+                               {0, 3, 0},
+                               {0, -3, 0},
+                               {1.0, 0, 0}};
+  const int types[6] = {1, 1, 1, 1, 1, 3};
+  for (int i = 0; i < 6; i++) {
+    molSys::Point<double> pt;
+    pt.type = types[i];
+    pt.atomID = i + 1;
+    pt.molID = i + 1;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+  cloud.nop = 6;
+  const auto nList =
+      nneigh::kNearestNeighbourList(cloud, 4, 6.0, std::vector<int>{1}, true);
+  chill::getCorrelPlus(cloud, nList, false);
+  chill::getIceTypePlusNoPrint(cloud, nList, false);
+  const auto &ag = cloud.pts[5];
+  REQUIRE(ag.type == 3);
+  REQUIRE(nList[5].size() <= 1);
+  REQUIRE(ag.iceType != molSys::atom_state_type::cubic);
+  REQUIRE(ag.iceType != molSys::atom_state_type::hexagonal);
+  REQUIRE(ag.iceType != molSys::atom_state_type::interfacial);
+  REQUIRE(ag.iceType != molSys::atom_state_type::clathrate);
+  REQUIRE(ag.iceType != molSys::atom_state_type::interClathrate);
+}
+
 TEST_CASE("getIceTypePlusNoPrint classifies without writing", "[bop]") {
   auto cloud = makeTetraCloud();
   auto nList = nneigh::neighListO(3.0, cloud, 1);

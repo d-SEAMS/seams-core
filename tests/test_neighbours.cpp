@@ -954,3 +954,60 @@ TEST_CASE("water-type mask keeps Ag out of the 4-NN list", "[neighbours]") {
   // Ag has no water-graph row bonds
   REQUIRE(nList[5].size() <= 1);
 }
+
+TEST_CASE("water-type set bonds two water types and drops Ag", "[neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {20.0, 20.0, 20.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  // Type 1 and type 2 are both water; type 3 is Ag closer than one water.
+  const double coords[6][3] = {{0, 0, 0},
+                               {3, 0, 0},
+                               {-3, 0, 0},
+                               {0, 3, 0},
+                               {0, -3, 0},
+                               {0.4, 0, 0}};
+  const int types[6] = {1, 2, 1, 2, 1, 3};
+  for (int i = 0; i < 6; i++) {
+    molSys::Point<double> pt;
+    pt.type = types[i];
+    pt.atomID = i + 1;
+    pt.molID = i + 1;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+  cloud.nop = 6;
+  const std::vector<int> water{1, 2};
+  const auto nList =
+      nneigh::kNearestNeighbourList(cloud, 4, 6.0, water, true);
+  REQUIRE(nList.size() == static_cast<std::size_t>(cloud.nop));
+  bool sawType2 = false;
+  for (const auto &row : nList) {
+    for (std::size_t m = 1; m < row.size(); m++) {
+      const auto it = cloud.idIndexMap.find(row[m]);
+      REQUIRE(it != cloud.idIndexMap.end());
+      const int t = cloud.pts[static_cast<std::size_t>(it->second)].type;
+      REQUIRE((t == 1 || t == 2));
+      REQUIRE(t != 3);
+      if (t == 2) {
+        sawType2 = true;
+      }
+    }
+  }
+  REQUIRE(sawType2);
+  REQUIRE(nList[5].size() <= 1);
+  const auto empty =
+      nneigh::kNearestNeighbourList(cloud, 4, 6.0, std::vector<int>{}, true);
+  REQUIRE(empty.empty());
+  const auto pair = nneigh::kNearestNeighbourPair(cloud, 4, 6.0, water);
+  REQUIRE(pair.first.size() == static_cast<std::size_t>(cloud.nop));
+  for (const auto &row : pair.first) {
+    for (std::size_t m = 1; m < row.size(); m++) {
+      const auto it = cloud.idIndexMap.find(row[m]);
+      REQUIRE(it != cloud.idIndexMap.end());
+      REQUIRE(cloud.pts[static_cast<std::size_t>(it->second)].type != 3);
+    }
+  }
+}

@@ -130,6 +130,7 @@ initializers (Argum does not write defaults into the help).
 | ~--format KIND~ | ~text~ | ~Output format: ~text~ (default) or ~json~ (JSONL)~ |
 | ~--strict-input~ | off | ~Fail when a requested frame produces no atoms~ |
 | ~-t~, ~--type I~ | ~0~ | ~Atom type (0 guesses oxygen then type 1; density-z: 0 is every atom)~ |
+| ~--water-types T,U~ | unset | Neighbour graph on these LAMMPS types only (OW). Substrate and ions never enter the 4-NN list |
 | ~--types I,J~ | ~I = J = --type~ | ~Pair types for site-site rdf/cn (default I=J=--type)~ |
 | ~--family NAME~ | ~waterIce~ | Material family. Ice scores refuse every value except ~waterIce~ |
 | ~--site SPEC~ | | Type-to-kind map for ~ionCloud~ (~1=cationHead,2=anion~) |
@@ -186,6 +187,23 @@ the read (type 0 then becomes 1).
 A mixed-type dump that is not the water guess needs ~--type I~.
 ~density-z~ treats ~0~ as every atom, not the oxygen guess.
 See [[file:../howto/ionic-liquid.org][Ionic-liquid dumps]].
+
+* ~--water-types~
+
+~--type~ is a load filter (one LAMMPS type, or the oxygen guess).
+It is not the neighbour mask. ~--water-types T,U~ loads the mixed
+dump (~loadType = -1~) and builds ~nneigh::kNearestNeighbourList~
+/ ~kNearestNeighbourPair~ on that type set. Ag, I, protein and
+ions stay in the cloud for guests and ~ions~, but they never
+enter the four neighbours of OW. ~chill~, ~chill-plus~, ~cages~
+and ~ions~ honour the flag. Ice and cage counts are the water
+types only.
+
+#+begin_src bash
+seams chill-plus FILE --water-types 1
+seams cages FILE --graph seeded --water-types 1
+seams ions FILE --ion-types 3,4 --water-types 1
+#+end_src
 
 * ~--types~
 

@@ -1,1 +1,1 @@
-Build CHILL+, cages and k-NN on an explicit water-type mask so substrate and ions never enter the four-neighbour list.
+Build CHILL+, cages, seeded ions and k-NN on an explicit water-type mask (`--water-types`) so substrate and ions never enter the four-neighbour list. The flag loads the mixed dump; ice and cage counts are the water types only.
