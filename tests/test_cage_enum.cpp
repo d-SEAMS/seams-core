@@ -191,6 +191,22 @@ TEST_CASE("a prism missing one face is an incomplete cage, not a closed one",
   REQUIRE(noCups.empty());
 }
 
+TEST_CASE("a half-prism cup is found at the default minFaces floor",
+          "[cage_enum]") {
+  auto rings = hexPrismRings();
+  rings.erase(rings.begin() + 4, rings.end());
+  REQUIRE(rings.size() == 4);
+  const auto sig = cage::Signature::parse("4:6,6:2");
+  REQUIRE(sig.faceCount() / 2 == 4);
+  const auto closed = cage::findBySignature(rings, sig);
+  REQUIRE(closed.empty());
+  const auto cups = cage::findIncompleteBySignature(rings, sig, 0);
+  REQUIRE_FALSE(cups.empty());
+  REQUIRE_FALSE(cups[0].closed);
+  REQUIRE(cups[0].faces.size() >= 4);
+  REQUIRE(cups[0].danglingEdges > 0);
+}
+
 TEST_CASE("findBySignature(hc) matches findHC vertices on the twelve-atom HC",
           "[cage_enum]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
@@ -308,6 +324,20 @@ TEST_CASE("512 and 51262 signatures find hydrate cages on GenIce sI",
     REQUIRE(c.vertices.size() == 24);
     REQUIRE(c.faces.size() == 14);
     REQUIRE(cage::isClosedPolyhedron(tetra.rings, c.faces));
+  }
+}
+
+TEST_CASE("perfect sI keeps closed 512 counts; leftover cups stay open",
+          "[cage_enum]") {
+  const auto run = cagesOnDump("traj/genice_sI.lammpstrj", "512");
+  const auto sig = cage::Signature::parse("512");
+  const auto nClosed = run.found.size();
+  REQUIRE(cage::findBySignature(run.rings, sig).size() == nClosed);
+  REQUIRE_FALSE(run.found.empty());
+  const auto cups = cage::findIncompleteBySignature(run.rings, sig, 0);
+  for (const auto &c : cups) {
+    REQUIRE_FALSE(c.closed);
+    REQUIRE(c.danglingEdges > 0);
   }
 }
 

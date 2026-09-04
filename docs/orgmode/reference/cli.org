@@ -44,7 +44,7 @@ listed in that help string).
 | ~chill~ | CHILL four-neighbour labels | ~nop N~ then ~name count~ for each ice type present |
 | ~chill-plus~ | CHILL+ four-neighbour labels | same as ~chill~ |
 | ~cages~ | ice score on six-membered rings | ~nop N graph KIND hexagonal IH cubic IC water W~ |
-| ~cages --signature SPEC~ | closed polyhedra whose ring-size census matches ~SPEC~ | ~nop N graph KIND signature S cages C atoms A~ and, with ~--guest-types~, ~guests G occupied O multiple M free F~ |
+| ~cages --signature SPEC~ | closed polyhedra whose ring-size census matches ~SPEC~ | ~nop N graph KIND signature S cages C atoms A~ and, with ~--incomplete~, ~incomplete K~ cups on the ring graph; with ~--guest-types~, ~guests G occupied O multiple M free F~ |
 | ~fingerprint~ | topology keys of the bonded graph | ~nop N graph KIND hops H method M key K classes C rings 3:a 4:b ... top key=count ...~ |
 | ~fingerprint --emit-library LABEL~ | the frame's distinct keys as library lines | ~# method M hops H colours C~ then ~key LABEL~ rows |
 | ~fingerprint --library FILE[,FILE...]~ | atoms named by key libraries | ~nop N graph KIND hops H method M matched X label=count ... unmatched=U~ and, with several libraries, ~depth H1=n1 H2=n2~ |
@@ -144,6 +144,7 @@ initializers (Argum does not write defaults into the help).
 | ~--graph KIND~ | ~seeded~ | ~Bond graph for cages: cutoff \| knn \| knn-union \| seeded~ |
 | ~--complete~ | off | Seeded cages: fill the last vertex of six-rings whose other vertices carry a label (ring completion) |
 | ~--signature SPEC~ | | ~cages: ring-size census (4:6,6:8) or a named table entry (sodalite\vert{}alpha\vert{}512\vert{}51262\vert{}51264\vert{}51268\vert{}sh\vert{}hc\vert{}ddc)~ |
+| ~--incomplete~ | off | ~cages --signature: also report cups and incomplete cages on the ring graph~ |
 | ~--guest-types T,U~ | | ~cages --signature: LAMMPS types of guests (methane, THF, ions) placed in the found cages by their periodic centroids~ |
 | ~--guest-radius R~ | ~4.0~ | ~cages --signature: a guest belongs to the nearest cage centre within R~ |
 | ~--hops N~ | ~2~ | ~fingerprint: bonds from the centre in each local key~ |

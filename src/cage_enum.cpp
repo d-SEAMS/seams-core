@@ -216,6 +216,9 @@ struct Search {
       }
       const auto rit = ringsOf.find(kv.first);
       if (rit == ringsOf.end()) {
+        if (allowIncomplete) {
+          continue;
+        }
         return 0;
       }
       int only = -1;
@@ -231,6 +234,9 @@ struct Search {
         }
       }
       if (nOpt == 0) {
+        if (allowIncomplete) {
+          continue;
+        }
         return 0;
       }
       if (nOpt == 1) {
@@ -332,28 +338,30 @@ struct Search {
     }
   }
 
+  void maybeAcceptIncomplete() {
+    if (allowIncomplete && static_cast<int>(chosen.size()) >= minFaces &&
+        !allEdgesPaired()) {
+      accept(false);
+    }
+  }
+
   void search() {
     const size_t mark = chosen.size();
     if (!propagate()) {
+      maybeAcceptIncomplete();
       restore(mark);
       return;
     }
     if (countsEqual(have, sig)) {
       if (allEdgesPaired()) {
         accept(true);
-      } else if (allowIncomplete &&
-                 static_cast<int>(chosen.size()) >= minFaces) {
-        accept(false);
       }
       restore(mark);
       return;
     }
     const auto br = branchEdge();
     if (br.second.empty()) {
-      if (allowIncomplete && static_cast<int>(chosen.size()) >= minFaces &&
-          !allEdgesPaired()) {
-        accept(false);
-      }
+      maybeAcceptIncomplete();
       restore(mark);
       return;
     }
@@ -520,27 +528,32 @@ findIncompleteBySignature(const std::vector<std::vector<int>> &rings,
     return {};
   }
   const int floor = minFaces > 0 ? minFaces
-                                 : std::max(1, signature.faceCount() - 2);
+                                 : std::max(1, signature.faceCount() / 2);
   Search search(rings, signature);
   search.allowIncomplete = true;
   search.minFaces = floor;
   search.run();
   const auto closed = findBySignature(rings, signature);
+  std::set<int> closedFaces;
+  for (const auto &cl : closed) {
+    closedFaces.insert(cl.faces.begin(), cl.faces.end());
+  }
   std::vector<FoundCage> out;
   out.reserve(search.found.size());
   for (auto &c : search.found) {
     if (c.closed) {
       continue;
     }
-    bool insideClosed = false;
-    for (const auto &cl : closed) {
-      if (std::includes(cl.vertices.begin(), cl.vertices.end(),
-                        c.vertices.begin(), c.vertices.end())) {
-        insideClosed = true;
-        break;
+    bool allInClosed = !closedFaces.empty();
+    if (allInClosed) {
+      for (const int f : c.faces) {
+        if (closedFaces.find(f) == closedFaces.end()) {
+          allInClosed = false;
+          break;
+        }
       }
     }
-    if (!insideClosed) {
+    if (!allInClosed) {
       out.push_back(std::move(c));
     }
   }

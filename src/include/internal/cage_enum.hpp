@@ -24,7 +24,7 @@
  */
 namespace cage {
 
-/** One closed polyhedron matching a signature. */
+/** One cage matching a signature, closed or incomplete. */
 struct FoundCage {
   Signature signature;
   std::vector<int> faces;     ///< ring indices into the input vector
@@ -57,7 +57,9 @@ findBySignature(const std::vector<std::vector<int>> &rings,
 
 /** Connected face sets that stay inside the signature budget, have at
  *  least `minFaces` faces, and are not closed. Cups and incomplete
- *  cages during hydrate nucleation. Closed polyhedra are omitted. */
+ *  cages during hydrate nucleation. Closed polyhedra are omitted.
+ *  `minFaces <= 0` uses `max(1, signature.faceCount() / 2)`. A cup
+ *  whose every face already belongs to a closed cage is omitted. */
 std::vector<FoundCage>
 findIncompleteBySignature(const std::vector<std::vector<int>> &rings,
                           const Signature &signature, int minFaces);
