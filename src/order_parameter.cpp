@@ -413,12 +413,12 @@ topoparam::tumLayerStack(
   int nEq = 0;
   const std::size_t nR = rings.size();
   for (std::size_t r = 0; r < nR; r++) {
+    if (rings[r].size() != 6) {
+      continue;
+    }
     const bool h = r < basal.size() && basal[r];
     const bool c = r < equatorial.size() && equatorial[r];
     if (!h && !c) {
-      continue;
-    }
-    if (rings[r].empty()) {
       continue;
     }
     const int a0 = rings[r][0];
