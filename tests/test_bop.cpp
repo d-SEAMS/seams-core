@@ -5,6 +5,7 @@
 #include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <order_parameter.hpp>
 #include <seams_input.hpp>
 #include <steinhardt_device.hpp>
 
@@ -1073,6 +1074,12 @@ TEST_CASE("steinhardtQl l=12 is finite on FCC and differs from q3", "[bop]") {
     }
     REQUIRE_THAT(q3.ql[static_cast<std::size_t>(i)],
                  Catch::Matchers::WithinAbs(0.0, 1e-9));
+    // Steinhardt, Nelson and Ronchetti 1983 Table I, FCC Q12.
+    REQUIRE_THAT(q12.ql[static_cast<std::size_t>(i)],
+                 Catch::Matchers::WithinAbs(0.60008, 2e-3));
+    REQUIRE_THAT(q12.qlBar[static_cast<std::size_t>(i)],
+                 Catch::Matchers::WithinAbs(q12.ql[static_cast<std::size_t>(i)],
+                                           1e-9));
   }
   REQUIRE(nFinite > 0);
   REQUIRE(std::fabs(q12.ql[0] - q3.ql[0]) > 1e-6);
@@ -1080,6 +1087,48 @@ TEST_CASE("steinhardtQl l=12 is finite on FCC and differs from q3", "[bop]") {
   for (double v : q12.ql) {
     REQUIRE(v == 0.0);
   }
+#endif
+}
+
+TEST_CASE("Zeron q3/q12 pair separates sI hydrate from liquid", "[bop]") {
+  molSys::PointCloud<molSys::Point<double>, double> sI;
+  sI = sinp::readLammpsTrjO("traj/genice_sI.lammpstrj", 1, sI, 1);
+  REQUIRE(sI.nop == 46);
+  auto nHyd = nneigh::neighListO(5.5, sI, 1);
+  const auto q3h = chill::steinhardtQl(sI, nHyd, 3);
+  const auto q12h = chill::steinhardtQl(sI, nHyd, 12);
+  const double q3barH = topoparam::meanFinite(q3h.qlBar);
+  const double q12barH = topoparam::meanFinite(q12h.qlBar);
+  REQUIRE(std::isfinite(q3barH));
+  REQUIRE(std::isfinite(q12barH));
+
+  auto liquid = sI;
+  // Simple-cubic packing in the same box is not tetrahedral.
+  const double spacing = liquid.box[0] / 4.0;
+  for (int i = 0; i < liquid.nop; i++) {
+    const int ix = i % 4;
+    const int iy = (i / 4) % 4;
+    const int iz = i / 16;
+    liquid.pts[static_cast<std::size_t>(i)].x = (ix + 0.5) * spacing;
+    liquid.pts[static_cast<std::size_t>(i)].y = (iy + 0.5) * spacing;
+    liquid.pts[static_cast<std::size_t>(i)].z = (iz + 0.5) * spacing;
+  }
+  auto nLiq = nneigh::neighListO(5.5, liquid, 1);
+  const auto q3l = chill::steinhardtQl(liquid, nLiq, 3);
+  const auto q12l = chill::steinhardtQl(liquid, nLiq, 12);
+  const double q3barL = topoparam::meanFinite(q3l.qlBar);
+  const double q12barL = topoparam::meanFinite(q12l.qlBar);
+  REQUIRE(std::isfinite(q3barL));
+  REQUIRE(std::isfinite(q12barL));
+  UNSCOPED_INFO("q3bar hydrate=" << q3barH << " liquid=" << q3barL
+                                 << " q12bar hydrate=" << q12barH
+                                 << " liquid=" << q12barL);
+  // l=3 is always on the host Ylm path. A 46-molecule cell is smaller
+  // than the Zeron thermal samples; 0.03 still separates the means.
+  REQUIRE(std::fabs(q3barH - q3barL) > 0.03);
+#ifdef SEAMS_HAS_SPHERICART
+  REQUIRE(q12barH > q12barL + 0.05);
+  REQUIRE(std::fabs(q3barH - q3barL) + std::fabs(q12barH - q12barL) > 0.08);
 #endif
 }
 
