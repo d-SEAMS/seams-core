@@ -30,7 +30,7 @@ int phase::openChannelCount(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList) {
   const auto sig = cage::Signature::parse("512");
-  const auto rings = primitive::ringNetwork(nList, 6);
+  const auto rings = primitive::ringNetwork(nList, 7);
   const auto closed = cage::findBySignature(rings, nList, sig);
   if (!closed.empty()) {
     return 0;
