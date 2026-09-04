@@ -64,6 +64,14 @@ rodgerF4(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 //! Mean of the finite per-atom F4 values; quiet_NaN when none are finite.
 double meanFinite(const std::vector<double> &values);
 
+//! Jump-rotor tau_90 from two frames. Each water is the H-H vector of
+//! the two hydrogens that share the oxygen molID. Returns dt when any
+//! molecule rotates by at least 90 degrees, quiet_NaN otherwise.
+double jumpRotorTau90(
+    const molSys::PointCloud<molSys::Point<double>, double> &frame0,
+    const molSys::PointCloud<molSys::Point<double>, double> &frame1, double dt,
+    int oxygenType, int hydrogenType);
+
 //! CHILL+ cubic/hexagonal molecules binned into basal layers along
 //! `axis` (0=x, 1=y, 2=z). phiC is N_Ic / (N_Ic + N_Ih). sequence is
 //! one character per layer: C cubic-majority, H hexagonal-majority,

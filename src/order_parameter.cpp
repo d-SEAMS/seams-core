@@ -315,6 +315,66 @@ double topoparam::meanFinite(const std::vector<double> &values) {
   return acc / static_cast<double>(n);
 }
 
+namespace {
+
+std::unordered_map<int, std::array<double, 3>>
+hhAxes(const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+       int oxygenType, int hydrogenType) {
+  std::unordered_map<int, std::vector<std::array<double, 3>>> hs;
+  std::unordered_map<int, std::array<double, 3>> out;
+  for (const auto &p : cloud.pts) {
+    if (p.type != hydrogenType) {
+      continue;
+    }
+    hs[p.molID].push_back({p.x, p.y, p.z});
+  }
+  for (const auto &p : cloud.pts) {
+    if (p.type != oxygenType) {
+      continue;
+    }
+    const auto it = hs.find(p.molID);
+    if (it == hs.end() || it->second.size() < 2) {
+      continue;
+    }
+    std::array<double, 3> v = {it->second[0][0] - it->second[1][0],
+                               it->second[0][1] - it->second[1][1],
+                               it->second[0][2] - it->second[1][2]};
+    const double n =
+        std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    if (n <= 0.0) {
+      continue;
+    }
+    out[p.molID] = {v[0] / n, v[1] / n, v[2] / n};
+  }
+  return out;
+}
+
+} // namespace
+
+double topoparam::jumpRotorTau90(
+    const molSys::PointCloud<molSys::Point<double>, double> &frame0,
+    const molSys::PointCloud<molSys::Point<double>, double> &frame1, double dt,
+    int oxygenType, int hydrogenType) {
+  if (!(dt > 0.0)) {
+    return std::numeric_limits<double>::quiet_NaN();
+  }
+  const auto a0 = hhAxes(frame0, oxygenType, hydrogenType);
+  const auto a1 = hhAxes(frame1, oxygenType, hydrogenType);
+  for (const auto &kv : a0) {
+    const auto it = a1.find(kv.first);
+    if (it == a1.end()) {
+      continue;
+    }
+    const double dot = kv.second[0] * it->second[0] +
+                       kv.second[1] * it->second[1] +
+                       kv.second[2] * it->second[2];
+    if (dot <= 0.0) {
+      return dt;
+    }
+  }
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
 topoparam::LayerStack
 topoparam::layerCubicity(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int axis,

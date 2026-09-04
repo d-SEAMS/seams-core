@@ -416,6 +416,36 @@ TEST_CASE("rodgerF4 is near 0.7 on filled sI when hydrogens exist",
   REQUIRE(mean < 0.95);
 }
 
+TEST_CASE("jumpRotorTau90 is finite on a 90-degree H-H rotation",
+          "[order_parameter]") {
+  auto a = makeCloud({{0, 0, 0}, {1, 0, 0}, {-1, 0, 0}}, 10.0);
+  a.pts[0].type = 1;
+  a.pts[1].type = 2;
+  a.pts[2].type = 2;
+  a.pts[0].molID = 1;
+  a.pts[1].molID = 1;
+  a.pts[2].molID = 1;
+  auto b = a;
+  b.pts[1].x = 0.0;
+  b.pts[1].y = 1.0;
+  b.pts[2].x = 0.0;
+  b.pts[2].y = -1.0;
+  const double tau = topoparam::jumpRotorTau90(a, b, 1.0, 1, 2);
+  REQUIRE(std::isfinite(tau));
+  REQUIRE_THAT(tau, Catch::Matchers::WithinAbs(1.0, 1e-12));
+}
+
+TEST_CASE("jumpRotorTau90 is NaN on a static ice Ih dump",
+          "[order_parameter]") {
+  auto ih = iceIhOxygens();
+  auto nO = nneigh::kNearestNeighbourList(ih, 4, 3.5, 1, true);
+  std::vector<std::pair<int, int>> owned;
+  REQUIRE(assignIceRules(oxygenAdj(ih, nO), owned));
+  addIceHydrogens(ih, owned);
+  const double tau = topoparam::jumpRotorTau90(ih, ih, 1.0, 1, 2);
+  REQUIRE_FALSE(std::isfinite(tau));
+}
+
 TEST_CASE("CHILL+ layerCubicity reproduces the literature I_sd string",
           "[order_parameter]") {
   // Four layers along z at 0, 3.7, 7.4, 11.1 in a 14.8 box: C H C H
