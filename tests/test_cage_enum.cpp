@@ -320,3 +320,32 @@ TEST_CASE("512 signature finds 20-vertex cages on GenIce sII", "[cage_enum]") {
     REQUIRE(cage::isClosedPolyhedron(run.rings, c.faces));
   }
 }
+
+TEST_CASE("51264 signature finds 28-vertex cages on GenIce sII", "[cage_enum]") {
+  const auto run = cagesOnDump("traj/genice_sII.lammpstrj", "51264");
+  REQUIRE_FALSE(run.found.empty());
+  for (const auto &c : run.found) {
+    REQUIRE(c.vertices.size() == 28);
+    REQUIRE(c.faces.size() == 16);
+    REQUIRE(cage::isClosedPolyhedron(run.rings, c.faces));
+  }
+}
+
+TEST_CASE("sH and 51268 signatures find cages on GenIce sH", "[cage_enum]") {
+  const auto medium = cagesOnDump("traj/genice_sH.lammpstrj", "sH");
+  REQUIRE_FALSE(medium.found.empty());
+  for (const auto &c : medium.found) {
+    REQUIRE(c.vertices.size() == 20);
+    REQUIRE(c.faces.size() == 12);
+    REQUIRE(c.signature == cage::Signature::parse("4:3,5:6,6:3"));
+    REQUIRE(cage::isClosedPolyhedron(medium.rings, c.faces));
+  }
+  const auto large = cagesOnDump("traj/genice_sH.lammpstrj", "51268");
+  REQUIRE_FALSE(large.found.empty());
+  for (const auto &c : large.found) {
+    REQUIRE(c.vertices.size() == 36);
+    REQUIRE(c.faces.size() == 20);
+    REQUIRE(c.signature == cage::Signature::parse("5:12,6:8"));
+    REQUIRE(cage::isClosedPolyhedron(large.rings, c.faces));
+  }
+}

@@ -141,7 +141,7 @@ initializers (Argum does not write defaults into the help).
 | ~-k N~ | ~4~ | ~k for knn / seeded cages~ |
 | ~--graph KIND~ | ~seeded~ | ~Bond graph for cages: cutoff \| knn \| knn-union \| seeded~ |
 | ~--complete~ | off | Seeded cages: fill the last vertex of six-rings whose other vertices carry a label (ring completion) |
-| ~--signature SPEC~ | | ~cages: ring-size census (4:6,6:8) or a named table entry (sodalite\vert{}alpha\vert{}512\vert{}51262\vert{}hc\vert{}ddc)~ |
+| ~--signature SPEC~ | | ~cages: ring-size census (4:6,6:8) or a named table entry (sodalite\vert{}alpha\vert{}512\vert{}51262\vert{}51264\vert{}51268\vert{}sh\vert{}hc\vert{}ddc)~ |
 | ~--guest-types T,U~ | | ~cages --signature: LAMMPS types of guests (methane, THF, ions) placed in the found cages by their periodic centroids~ |
 | ~--guest-radius R~ | ~4.0~ | ~cages --signature: a guest belongs to the nearest cage centre within R~ |
 | ~--hops N~ | ~2~ | ~fingerprint: bonds from the centre in each local key~ |
