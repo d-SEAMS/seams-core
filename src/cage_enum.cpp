@@ -231,6 +231,9 @@ struct Search {
         }
       }
       if (nOpt == 0) {
+        if (allowIncomplete) {
+          continue;
+        }
         return 0;
       }
       if (nOpt == 1) {

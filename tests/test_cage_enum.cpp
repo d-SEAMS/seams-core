@@ -325,9 +325,15 @@ TEST_CASE("512 and 51262 signatures find hydrate cages on GenIce sI",
     REQUIRE(c.faces.size() == 14);
     REQUIRE(cage::isClosedPolyhedron(tetra.rings, c.faces));
   }
-  REQUIRE(cage::findIncompleteBySignature(
-              dodeca.rings, cage::Signature::parse("512"), 0)
-              .empty());
+  const auto sig512 = cage::Signature::parse("512");
+  const auto nClosed = dodeca.found.size();
+  const auto cups = cage::findIncompleteBySignature(dodeca.rings, sig512, 0);
+  INFO("incomplete=" << cups.size() << " closed=" << nClosed);
+  REQUIRE(cage::findBySignature(dodeca.rings, sig512).size() == nClosed);
+  for (const auto &c : cups) {
+    REQUIRE_FALSE(c.closed);
+    REQUIRE(c.danglingEdges > 0);
+  }
 }
 
 TEST_CASE("512 signature finds 20-vertex cages on GenIce sII", "[cage_enum]") {
