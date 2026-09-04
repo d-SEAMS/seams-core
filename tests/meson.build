@@ -37,6 +37,7 @@ test_sources = {
   'structure_desc': 'test_structure_desc.cpp',
   'cage_affiliation': 'test_cage_affiliation.cpp',
   'cage_enum': 'test_cage_enum.cpp',
+  'c_api': 'test_c_api.cpp',
   'gpu_residency': 'test_gpu_residency.cpp',
   'config': 'test_config.cpp',
   'site': 'test_site.cpp',

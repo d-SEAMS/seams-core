@@ -30,6 +30,7 @@ ydslib_sources = files(
   'seams_output.cpp',
   'selection.cpp',
   'shapeMatch.cpp',
+  'seams_c_api.cpp',
   'site.cpp',
   'steinhardt_parallel.cpp',
   'topo_bulk.cpp',
