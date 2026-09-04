@@ -1,14 +1,18 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <order_parameter.hpp>
+#include <seams_input.hpp>
 
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <functional>
 #include <string>
+#include <utility>
 #include <vector>
 
 // Helper to build a PointCloud from a list of (x,y,z) coordinates
@@ -135,6 +139,281 @@ TEST_CASE("rodgerF4 is NaN on mW with no hydrogens", "[order_parameter]") {
   REQUIRE_FALSE(std::isfinite(f4[0]));
   REQUIRE_FALSE(std::isfinite(f4[1]));
   REQUIRE_FALSE(std::isfinite(topoparam::meanFinite(f4)));
+}
+
+namespace {
+
+double wrapLen(double x, double L) {
+  x -= L * std::floor(x / L);
+  if (x < 0.0) {
+    x += L;
+  }
+  if (x >= L) {
+    x = 0.0;
+  }
+  return x;
+}
+
+// Ice-rule orientation: each oxygen donates exactly two hydrogens.
+bool assignIceRules(const std::vector<std::vector<int>> &adj,
+                    std::vector<std::pair<int, int>> &owned) {
+  const int nO = static_cast<int>(adj.size());
+  std::vector<std::pair<int, int>> bonds;
+  std::vector<std::vector<int>> inc(static_cast<std::size_t>(nO));
+  for (int i = 0; i < nO; i++) {
+    for (int j : adj[static_cast<std::size_t>(i)]) {
+      if (i < j) {
+        inc[static_cast<std::size_t>(i)].push_back(
+            static_cast<int>(bonds.size()));
+        inc[static_cast<std::size_t>(j)].push_back(
+            static_cast<int>(bonds.size()));
+        bonds.push_back({i, j});
+      }
+    }
+  }
+  if (bonds.empty()) {
+    return false;
+  }
+  std::vector<int> owner(bonds.size(), -1);
+  std::vector<int> outc(static_cast<std::size_t>(nO), 0);
+
+  auto propagate = [&]() -> bool {
+    bool changed = true;
+    while (changed) {
+      changed = false;
+      for (int v = 0; v < nO; v++) {
+        int freeB = 0;
+        for (int b : inc[static_cast<std::size_t>(v)]) {
+          if (owner[static_cast<std::size_t>(b)] < 0) {
+            ++freeB;
+          }
+        }
+        if (outc[static_cast<std::size_t>(v)] > 2) {
+          return false;
+        }
+        if (outc[static_cast<std::size_t>(v)] + freeB < 2) {
+          return false;
+        }
+        if (outc[static_cast<std::size_t>(v)] == 2) {
+          for (int b : inc[static_cast<std::size_t>(v)]) {
+            if (owner[static_cast<std::size_t>(b)] < 0) {
+              const int oth = bonds[static_cast<std::size_t>(b)].first == v
+                                  ? bonds[static_cast<std::size_t>(b)].second
+                                  : bonds[static_cast<std::size_t>(b)].first;
+              owner[static_cast<std::size_t>(b)] = oth;
+              ++outc[static_cast<std::size_t>(oth)];
+              changed = true;
+              if (outc[static_cast<std::size_t>(oth)] > 2) {
+                return false;
+              }
+            }
+          }
+        }
+        if (outc[static_cast<std::size_t>(v)] + freeB == 2 && freeB > 0) {
+          for (int b : inc[static_cast<std::size_t>(v)]) {
+            if (owner[static_cast<std::size_t>(b)] < 0) {
+              owner[static_cast<std::size_t>(b)] = v;
+              ++outc[static_cast<std::size_t>(v)];
+              changed = true;
+            }
+          }
+        }
+      }
+    }
+    return true;
+  };
+
+  std::function<bool()> dfs = [&]() -> bool {
+    if (!propagate()) {
+      return false;
+    }
+    int undecided = -1;
+    for (std::size_t b = 0; b < bonds.size(); b++) {
+      if (owner[b] < 0) {
+        undecided = static_cast<int>(b);
+        break;
+      }
+    }
+    if (undecided < 0) {
+      for (int c : outc) {
+        if (c != 2) {
+          return false;
+        }
+      }
+      return true;
+    }
+    const auto snapOwner = owner;
+    const auto snapOut = outc;
+    const int i = bonds[static_cast<std::size_t>(undecided)].first;
+    const int j = bonds[static_cast<std::size_t>(undecided)].second;
+    for (int cand : {i, j}) {
+      owner = snapOwner;
+      outc = snapOut;
+      owner[static_cast<std::size_t>(undecided)] = cand;
+      ++outc[static_cast<std::size_t>(cand)];
+      if (dfs()) {
+        return true;
+      }
+    }
+    owner = snapOwner;
+    outc = snapOut;
+    return false;
+  };
+
+  if (!dfs()) {
+    return false;
+  }
+  owned.clear();
+  owned.reserve(bonds.size());
+  for (std::size_t b = 0; b < bonds.size(); b++) {
+    const int o = owner[b];
+    const int oth =
+        bonds[b].first == o ? bonds[b].second : bonds[b].first;
+    owned.push_back({o, oth});
+  }
+  return true;
+}
+
+void addIceHydrogens(molSys::PointCloud<molSys::Point<double>, double> &cloud,
+                     const std::vector<std::pair<int, int>> &owned) {
+  int nextId = 0;
+  for (const auto &p : cloud.pts) {
+    nextId = std::max(nextId, p.atomID);
+  }
+  ++nextId;
+  for (const auto &bond : owned) {
+    const int o = bond.first;
+    const int oth = bond.second;
+    const auto dr = gen::relDist(cloud, oth, o);
+    const double r2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+    REQUIRE(r2 > 0.0);
+    const double inv = 1.0 / std::sqrt(r2);
+    molSys::Point<double> h;
+    h.type = 2;
+    h.molID = cloud.pts[static_cast<std::size_t>(o)].molID;
+    h.atomID = nextId++;
+    h.x = wrapLen(cloud.pts[static_cast<std::size_t>(o)].x + dr[0] * inv,
+                  cloud.box[0]);
+    h.y = wrapLen(cloud.pts[static_cast<std::size_t>(o)].y + dr[1] * inv,
+                  cloud.box[1]);
+    h.z = wrapLen(cloud.pts[static_cast<std::size_t>(o)].z + dr[2] * inv,
+                  cloud.box[2]);
+    cloud.pts.push_back(h);
+    cloud.idIndexMap[h.atomID] = static_cast<int>(cloud.pts.size()) - 1;
+  }
+  cloud.nop = static_cast<int>(cloud.pts.size());
+}
+
+std::vector<std::vector<int>>
+oxygenAdj(const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+          const std::vector<std::vector<int>> &nList) {
+  std::vector<std::vector<int>> adj(static_cast<std::size_t>(cloud.nop));
+  for (int i = 0; i < cloud.nop; i++) {
+    if (static_cast<std::size_t>(i) >= nList.size() ||
+        nList[static_cast<std::size_t>(i)].size() < 2) {
+      continue;
+    }
+    for (std::size_t k = 1; k < nList[static_cast<std::size_t>(i)].size();
+         k++) {
+      const auto it =
+          cloud.idIndexMap.find(nList[static_cast<std::size_t>(i)][k]);
+      if (it == cloud.idIndexMap.end()) {
+        continue;
+      }
+      adj[static_cast<std::size_t>(i)].push_back(it->second);
+    }
+  }
+  return adj;
+}
+
+molSys::PointCloud<molSys::Point<double>, double> iceIhOxygens() {
+  const double a = 4.5115;
+  const double c = 7.3463;
+  const double b = a * std::sqrt(3.0);
+  const int nx = 2;
+  const int ny = 2;
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {nx * a, ny * b, c};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  const double frac[4][3] = {{1.0 / 3.0, 2.0 / 3.0, 1.0 / 16.0},
+                             {2.0 / 3.0, 1.0 / 3.0, 9.0 / 16.0},
+                             {2.0 / 3.0, 1.0 / 3.0, 15.0 / 16.0},
+                             {1.0 / 3.0, 2.0 / 3.0, 7.0 / 16.0}};
+  for (int ix = 0; ix < nx; ix++) {
+    for (int iy = 0; iy < ny; iy++) {
+      for (int s = 0; s < 2; s++) {
+        const double dx = (static_cast<double>(ix) + 0.5 * s) * a;
+        const double dy = (static_cast<double>(iy) + 0.5 * s) * b;
+        for (const auto &f : frac) {
+          molSys::Point<double> p;
+          p.type = 1;
+          p.x = wrapLen(a * f[0] + (-0.5 * a) * f[1] + dx, cloud.box[0]);
+          p.y = wrapLen((0.5 * a * std::sqrt(3.0)) * f[1] + dy, cloud.box[1]);
+          p.z = wrapLen(c * f[2], cloud.box[2]);
+          p.atomID = static_cast<int>(cloud.pts.size()) + 1;
+          p.molID = p.atomID;
+          cloud.pts.push_back(p);
+          cloud.idIndexMap[p.atomID] = static_cast<int>(cloud.pts.size()) - 1;
+        }
+      }
+    }
+  }
+  cloud.nop = static_cast<int>(cloud.pts.size());
+  return cloud;
+}
+
+double f4OnOxygenCloud(
+    molSys::PointCloud<molSys::Point<double>, double> oxy) {
+  auto nO = nneigh::kNearestNeighbourList(oxy, 4, 3.5, 1, true);
+  for (int i = 0; i < oxy.nop; i++) {
+    REQUIRE(nO[static_cast<std::size_t>(i)].size() == 5);
+  }
+  std::vector<std::pair<int, int>> owned;
+  REQUIRE(assignIceRules(oxygenAdj(oxy, nO), owned));
+  addIceHydrogens(oxy, owned);
+  auto nList = nneigh::kNearestNeighbourList(oxy, 4, 3.5, 1, true);
+  const auto f4 = topoparam::rodgerF4(oxy, nList, 1, 2);
+  const double mean = topoparam::meanFinite(f4);
+  REQUIRE(std::isfinite(mean));
+  return mean;
+}
+
+} // namespace
+
+TEST_CASE("rodgerF4 is near -0.4 on ice Ih when hydrogens exist",
+          "[order_parameter]") {
+  const double mean = f4OnOxygenCloud(iceIhOxygens());
+  UNSCOPED_INFO("F4 ice Ih mean=" << mean);
+  REQUIRE(mean > -0.55);
+  REQUIRE(mean < -0.25);
+}
+
+TEST_CASE("rodgerF4 is finite on exampleTraj when hydrogens are kept",
+          "[order_parameter]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud = sinp::readLammpsTrj("traj/exampleTraj.lammpstrj", 1, cloud);
+  REQUIRE(cloud.nop > 0);
+  auto nList = nneigh::kNearestNeighbourList(cloud, 4, 3.5, 2, true);
+  const auto f4 = topoparam::rodgerF4(cloud, nList, 2, 1);
+  int nFinite = 0;
+  for (double v : f4) {
+    nFinite += std::isfinite(v) ? 1 : 0;
+  }
+  REQUIRE(nFinite > 0);
+  REQUIRE(std::isfinite(topoparam::meanFinite(f4)));
+}
+
+TEST_CASE("rodgerF4 is near 0.7 on filled sI when hydrogens exist",
+          "[order_parameter]") {
+  molSys::PointCloud<molSys::Point<double>, double> sI;
+  sI = sinp::readLammpsTrjO("traj/genice_sI.lammpstrj", 1, sI, 1);
+  REQUIRE(sI.nop == 46);
+  const double mean = f4OnOxygenCloud(sI);
+  UNSCOPED_INFO("F4 sI mean=" << mean);
+  // Perfect 0 K ice-rule sI sits above the thermal literature 0.7.
+  REQUIRE(mean > 0.50);
+  REQUIRE(mean < 0.95);
 }
 
 TEST_CASE("CHILL+ layerCubicity reproduces the literature I_sd string",
