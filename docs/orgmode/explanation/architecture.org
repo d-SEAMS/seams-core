@@ -79,13 +79,14 @@ name PydSEAMSlib and yodaStruct.
 
 * Device paths
 
-Optional CUDA via gpulite (~-Dwith_gpulite~) runs the TUM ice score
-only: linkcell k-NN, mutual four-nearest graph, primitive six-rings,
-HC/DDC. CHILL and \(q_{lm}\) stay on the host.
+Optional CUDA via gpulite (~-Dwith_gpulite~) runs a resident TUM
+frame batch: linkcell k-NN, mutual four-nearest graph, primitive
+six-rings, HC/DDC. CHILL and \(q_{lm}\) stay on the host.
 
-OpenMP target offload is a second GPU path, Steinhardt-only, meson
-off by default (~-Dwith_openmp_offload~, ~SEAMS_OFFLOAD~). It is
-not gpulite.
+OpenMP target offload (~-Dwith_openmp_offload~, ~SEAMS_OFFLOAD~)
+covers Steinhardt Ylm and the TUM ice score (hop-bound six-rings
+and cage affiliation) on the same neighbour graph the host uses.
+Device CHILL+ is not a product. It is not gpulite.
 
 * Runtime knobs
 

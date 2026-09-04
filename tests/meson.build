@@ -75,6 +75,8 @@ foreach name, src : test_sources
   _timeout = 120
   if name == 'cage_enum'
     _timeout = 300
+  elif name == 'bulkTUM'
+    _timeout = 300
   elif name == 'bop' and offload_enabled
     _timeout = 600
   endif

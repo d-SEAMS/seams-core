@@ -81,6 +81,7 @@ Every file under =src/include/internal=.
 | =ira_sofi.hpp= | ~ira~ | IRA match and SOFI point groups |
 | =sphericart_ylm.hpp= | ~seams::sphericart_ylm~ | batched Cartesian ~Y_lm~ |
 | =steinhardt_device.hpp= | ~seams::steinhardt~ | host / MPI / offload Steinhardt kernel |
+| =tum_offload.hpp= | ~tum~ | hop-bound six-rings and cage affiliation; ~SEAMS_OFFLOAD~ |
 | =simd_distance.hpp= | ~seams~ | Highway periodic distance |
 
 ~pydseams.yoda~ and ~dseams.core~ register the C++ spellings from
