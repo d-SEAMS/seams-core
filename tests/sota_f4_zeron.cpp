@@ -396,13 +396,7 @@ int main() {
   std::cout << "# ic n=" << ic0.size() << " ih n=" << ih0.size()
             << " null n=" << null0.size() << "\n";
 
-  const auto f4Ic0 = f4OnOxygens(ic0, icBox);
-  const auto f4Ih0 = f4OnOxygens(ih0, ihBox);
-  const auto f4N0 = f4OnOxygens(null0, icBox);
-  const double f4Ice = 0.5 * (meanFinite(f4Ic0) + meanFinite(f4Ih0));
-  const double f4Thr = 0.5 * (f4Ice + meanFinite(f4N0));
-  std::cout << "# f4_ice=" << f4Ice << " f4_null=" << meanFinite(f4N0)
-            << " f4_thr=" << f4Thr << "\n";
+  std::cout << "# rodger-f4 undefined on these oxygen-only mW lattices\n";
 
   const auto zIc0 = zeronOnOxygens(ic0, icBox);
   const auto zIh0 = zeronOnOxygens(ih0, ihBox);
@@ -430,22 +424,8 @@ int main() {
             kSeed + static_cast<std::uint64_t>(sigma * 1000.0) +
             7919ULL * static_cast<std::uint64_t>(seed);
         const auto pos = jitter(*sys.pos, *sys.box, sigma, js);
-        const auto f4 = f4OnOxygens(pos, *sys.box);
-        int nIce = 0;
-        int nFin = 0;
-        for (double v : f4) {
-          if (!std::isfinite(v)) {
-            continue;
-          }
-          ++nFin;
-          if (v < f4Thr) {
-            ++nIce;
-          }
-        }
-        const double f4c =
-            nFin > 0 ? static_cast<double>(nIce) / static_cast<double>(f4.size())
-                     : 0.0;
-        report("rodger-f4", sys.name, sigma, seed, f4c, "ice-vs-not");
+        report("rodger-f4", sys.name, sigma, seed, std::numeric_limits<double>::quiet_NaN(),
+               "undefined-on-mW");
 
         const auto z = zeronOnOxygens(pos, *sys.box);
         int nQ3 = 0;
