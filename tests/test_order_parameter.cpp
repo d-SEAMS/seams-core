@@ -6,6 +6,7 @@
 
 #include <array>
 #include <cmath>
+#include <string>
 #include <vector>
 
 // Helper to build a PointCloud from a list of (x,y,z) coordinates
@@ -134,7 +135,7 @@ TEST_CASE("rodgerF4 is NaN on mW with no hydrogens", "[order_parameter]") {
   REQUIRE_FALSE(std::isfinite(topoparam::meanFinite(f4)));
 }
 
-TEST_CASE("layerCubicity reports Phi_c and the H/C string of stacked layers",
+TEST_CASE("CHILL+ layerCubicity reproduces the literature I_sd string",
           "[order_parameter]") {
   // Four layers along z at 0, 3.7, 7.4, 11.1 in a 14.8 box: C H C H
   std::vector<std::array<double, 3>> coords;
@@ -153,6 +154,37 @@ TEST_CASE("layerCubicity reports Phi_c and the H/C string of stacked layers",
   REQUIRE_THAT(st.phiC, Catch::Matchers::WithinAbs(0.5, 1e-12));
   REQUIRE(st.phiC > 0.0);
   REQUIRE(st.phiC < 1.0);
+}
+
+TEST_CASE("TUM stacking uses ring planes and stays empty without basal rings",
+          "[order_parameter]") {
+  // Two disjoint six-rings stacked along z, marked basal. Their centroids
+  // fall in two H layers. A five-ring (clathrate face) does not vote.
+  auto cloud = makeCloud({{0, 0, 0}, {2, 0, 0}, {3, 1.5, 0},
+                          {2, 3, 0}, {0, 3, 0}, {-1, 1.5, 0},
+                          {0, 0, 7.4}, {2, 0, 7.4}, {3, 1.5, 7.4},
+                          {2, 3, 7.4}, {0, 3, 7.4}, {-1, 1.5, 7.4},
+                          {1, 1, 3.7}, {2, 1, 3.7}, {2.5, 2, 3.7},
+                          {1.5, 2.8, 3.7}, {0.5, 2, 3.7}},
+                         14.8);
+  const std::vector<std::vector<int>> rings = {
+      {0, 1, 2, 3, 4, 5}, {6, 7, 8, 9, 10, 11}, {12, 13, 14, 15, 16}};
+  std::vector<bool> basal = {true, true, false};
+  std::vector<bool> equatorial = {false, false, false};
+  const auto tum = topoparam::tumLayerStack(cloud, rings, basal, equatorial, 2, 3.7);
+  REQUIRE(tum.sequence.size() == 4);
+  REQUIRE(tum.sequence[0] == 'H');
+  REQUIRE(tum.sequence[2] == 'H');
+  REQUIRE(tum.phiC == 0.0);
+  // the five-ring is not a plane: no C letter
+  REQUIRE(tum.sequence.find('C') == std::string::npos);
+
+  std::vector<bool> eq = {false, true, false};
+  const auto mixed = topoparam::tumLayerStack(cloud, rings, basal, eq, 2, 3.7);
+  REQUIRE(mixed.phiC > 0.0);
+  REQUIRE(mixed.phiC < 1.0);
+  REQUIRE(mixed.sequence.find('C') != std::string::npos);
+  REQUIRE(mixed.sequence.find('H') != std::string::npos);
 }
 
 TEST_CASE("normHeightPercent uses recovered lz not tilt",

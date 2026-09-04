@@ -117,6 +117,38 @@ TEST_CASE("cageAffiliation matches the greedy classification on mW",
   }
 }
 
+TEST_CASE("stackingPlanes marks HC basals and keeps them off DDC equatorials",
+          "[cage_affiliation]") {
+  auto yCloud = hcCloud();
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  auto idx = nneigh::neighbourListByIndex(yCloud, nList);
+  auto six = sixMembered(primitive::ringNetwork(idx, 7));
+  const auto planes = ring::stackingPlanes(six, idx);
+  REQUIRE(planes.basal.size() == six.size());
+  REQUIRE(planes.equatorial.size() == six.size());
+  int nBasal = 0;
+  int nBoth = 0;
+  for (size_t i = 0; i < six.size(); i++) {
+    if (planes.basal[i]) {
+      ++nBasal;
+    }
+    if (planes.basal[i] && planes.equatorial[i]) {
+      ++nBoth;
+    }
+  }
+  REQUIRE(nBasal == 2);
+  REQUIRE(nBoth == 0);
+  const auto aff = ring::cageAffiliation(six, idx);
+  for (size_t i = 0; i < six.size(); i++) {
+    if (planes.basal[i]) {
+      REQUIRE(aff.hc[i]);
+    }
+    if (planes.equatorial[i]) {
+      REQUIRE(aff.ddc[i]);
+    }
+  }
+}
+
 TEST_CASE("cageAffiliation marks the rings of an isolated hexagonal cage",
           "[cage_affiliation]") {
   auto yCloud = hcCloud();

@@ -833,7 +833,8 @@ int cmdCn(std::ostream &os, Cloud &cloud, double rmax, int bins, int typeI,
 }
 
 int cmdChillPlus(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
-                 bool layers = false, int axis = 2, double layerWidth = 3.7) {
+                 bool layers = false, bool tumLayers = false, int axis = 2,
+                 double layerWidth = 3.7) {
   if (cloud.nop == 0) {
     printCounts(os, cloud);
     return 0;
@@ -848,6 +849,21 @@ int cmdChillPlus(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
     const auto st = topoparam::layerCubicity(cloud, axis, layerWidth);
     os << colorizer.longOption("phi-c") << " " << st.phiC << " "
        << colorizer.longOption("stack") << " " << st.sequence << "\n";
+  }
+  if (tumLayers) {
+    auto idx = nneigh::neighbourListByIndex(cloud, nList);
+    std::vector<std::vector<int>> six;
+    for (const auto &r : primitive::ringNetwork(idx, 6)) {
+      if (r.size() == 6) {
+        six.push_back(r);
+      }
+    }
+    const auto planes = ring::stackingPlanes(six, idx);
+    const auto st =
+        topoparam::tumLayerStack(cloud, six, planes.basal, planes.equatorial,
+                                 axis, layerWidth);
+    os << colorizer.longOption("tum-phi-c") << " " << st.phiC << " "
+       << colorizer.longOption("tum-stack") << " " << st.sequence << "\n";
   }
   return 0;
 }
@@ -1149,6 +1165,7 @@ int main(int argc, char *argv[]) {
   double ionCutoff = 0.0;
   bool insideFlag = false;
   bool layersFlag = false;
+  bool tumLayersFlag = false;
   std::string subsetFlag;
   int rdfTypeI = 0;
   int rdfTypeJ = 0;
@@ -1339,8 +1356,14 @@ int main(int argc, char *argv[]) {
                  .handler([&]() { insideFlag = true; }));
 
   parser.add(Option("--layers")
-                 .help("chill-plus: emit cubicity Phi_c and the basal H/C string")
+                 .help("chill-plus: literature I_sd reference from CHILL+ "
+                       "molecule bins (Phi_c and H/C string)")
                  .handler([&]() { layersFlag = true; }));
+
+  parser.add(Option("--tum-layers")
+                 .help("chill-plus: TUM stacking from HC-basal and "
+                       "DDC-equatorial rings, not CHILL+ molecules")
+                 .handler([&]() { tumLayersFlag = true; }));
 
   parser.add(Option("--colour-types")
                  .help("fingerprint: colour vertices by LAMMPS type, so species "
@@ -1604,7 +1627,8 @@ int main(int argc, char *argv[]) {
       return cmdRead(os, cloud);
     }
     if (cmd == "chill-plus" || cmd == "chill_plus") {
-      return cmdChillPlus(os, cloud, cutoff, typeI, layersFlag, densAxis, 3.7);
+      return cmdChillPlus(os, cloud, cutoff, typeI, layersFlag, tumLayersFlag,
+                          densAxis, 3.7);
     }
     if (cmd == "chill") {
       return cmdChill(os, cloud, cutoff, typeI);

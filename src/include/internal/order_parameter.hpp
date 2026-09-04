@@ -79,6 +79,17 @@ LayerStack
 layerCubicity(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
               int axis = 2, double layerWidth = 3.7);
 
+//! Literature I_sd reference: CHILL+ molecules binned by coordinate.
+//! TUM/rings stacking: only HC-basal and DDC-equatorial six-rings vote.
+//! Prismatic/peripheral rings and non-plane cages (clathrate 5^12) do
+//! not write a letter. Ions stay off the ring graph the caller passes.
+//! phiC is N_equatorial / (N_basal + N_equatorial) over plane rings.
+LayerStack
+tumLayerStack(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+              const std::vector<std::vector<int>> &rings,
+              const std::vector<bool> &basal, const std::vector<bool> &equatorial,
+              int axis = 2, double layerWidth = 3.7);
+
 } // namespace topoparam
 
 #endif // SEAMS_ORDER_PARAMETER_H_

@@ -388,3 +388,96 @@ topoparam::layerCubicity(
   }
   return out;
 }
+
+topoparam::LayerStack
+topoparam::tumLayerStack(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<std::vector<int>> &rings, const std::vector<bool> &basal,
+    const std::vector<bool> &equatorial, int axis, double layerWidth) {
+  LayerStack out;
+  if (yCloud.nop <= 0 || axis < 0 || axis > 2 || yCloud.box.size() < 3) {
+    return out;
+  }
+  const double L = yCloud.box[static_cast<std::size_t>(axis)];
+  if (!(L > 0.0) || !(layerWidth > 0.0)) {
+    return out;
+  }
+  const int nLayers = std::max(1, static_cast<int>(std::lround(L / layerWidth)));
+  const double w = L / static_cast<double>(nLayers);
+  out.cubicPerLayer.assign(static_cast<std::size_t>(nLayers), 0);
+  out.hexPerLayer.assign(static_cast<std::size_t>(nLayers), 0);
+  const double lo = yCloud.boxLow.size() > static_cast<std::size_t>(axis)
+                        ? yCloud.boxLow[static_cast<std::size_t>(axis)]
+                        : 0.0;
+  int nBasal = 0;
+  int nEq = 0;
+  const std::size_t nR = rings.size();
+  for (std::size_t r = 0; r < nR; r++) {
+    const bool h = r < basal.size() && basal[r];
+    const bool c = r < equatorial.size() && equatorial[r];
+    if (!h && !c) {
+      continue;
+    }
+    if (rings[r].empty()) {
+      continue;
+    }
+    const int a0 = rings[r][0];
+    if (a0 < 0 || a0 >= yCloud.nop) {
+      continue;
+    }
+    double acc = axis == 0 ? yCloud.pts[static_cast<std::size_t>(a0)].x
+                           : (axis == 1 ? yCloud.pts[static_cast<std::size_t>(a0)].y
+                                        : yCloud.pts[static_cast<std::size_t>(a0)].z);
+    for (std::size_t k = 1; k < rings[r].size(); k++) {
+      const int a = rings[r][k];
+      if (a < 0 || a >= yCloud.nop) {
+        continue;
+      }
+      const auto dr = gen::relDist(yCloud, a, a0);
+      acc += (axis == 0 ? yCloud.pts[static_cast<std::size_t>(a0)].x + dr[0]
+                        : (axis == 1 ? yCloud.pts[static_cast<std::size_t>(a0)].y + dr[1]
+                                     : yCloud.pts[static_cast<std::size_t>(a0)].z + dr[2]));
+    }
+    acc /= static_cast<double>(rings[r].size());
+    double u = acc - lo;
+    u -= L * std::floor(u / L);
+    if (u < 0.0) {
+      u += L;
+    }
+    if (u >= L) {
+      u = 0.0;
+    }
+    int layer = static_cast<int>(std::floor(u / w));
+    if (layer < 0) {
+      layer = 0;
+    }
+    if (layer >= nLayers) {
+      layer = nLayers - 1;
+    }
+    if (c) {
+      ++out.cubicPerLayer[static_cast<std::size_t>(layer)];
+      ++nEq;
+    } else {
+      ++out.hexPerLayer[static_cast<std::size_t>(layer)];
+      ++nBasal;
+    }
+  }
+  out.phiC = (nBasal + nEq) > 0
+                 ? static_cast<double>(nEq) / static_cast<double>(nBasal + nEq)
+                 : 0.0;
+  out.sequence.resize(static_cast<std::size_t>(nLayers), '.');
+  for (int k = 0; k < nLayers; k++) {
+    const int c = out.cubicPerLayer[static_cast<std::size_t>(k)];
+    const int h = out.hexPerLayer[static_cast<std::size_t>(k)];
+    if (c == 0 && h == 0) {
+      out.sequence[static_cast<std::size_t>(k)] = '.';
+    } else if (c > h) {
+      out.sequence[static_cast<std::size_t>(k)] = 'C';
+    } else if (h > c) {
+      out.sequence[static_cast<std::size_t>(k)] = 'H';
+    } else {
+      out.sequence[static_cast<std::size_t>(k)] = 'M';
+    }
+  }
+  return out;
+}
