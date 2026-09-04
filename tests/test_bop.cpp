@@ -415,6 +415,8 @@ TEST_CASE("masked 4-NN never scores Ag as ice", "[bop][neighbours]") {
   REQUIRE(ag.iceType != molSys::atom_state_type::interfacial);
   REQUIRE(ag.iceType != molSys::atom_state_type::clathrate);
   REQUIRE(ag.iceType != molSys::atom_state_type::interClathrate);
+  chill::clearIceTypesExcept(cloud, std::vector<int>{1});
+  REQUIRE(cloud.pts[5].iceType == molSys::atom_state_type::unclassified);
 }
 
 TEST_CASE("getIceTypePlusNoPrint classifies without writing", "[bop]") {

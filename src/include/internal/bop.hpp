@@ -282,6 +282,13 @@ getIceTypePlusNoPrint(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList, bool isSlice = false);
 
+//! Set iceType to unclassified for atoms whose LAMMPS type is not in types.
+//! Empty types leaves the cloud unchanged. Used after a water-type k-NN so
+//! substrate and ions are not scored as water.
+void clearIceTypesExcept(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &types);
+
 //! q6 can distinguish between water and ice. Use this for the largest ice
 //! cluster
 std::vector<double>

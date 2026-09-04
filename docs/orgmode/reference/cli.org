@@ -61,8 +61,10 @@ listed in that help string).
 ~k = 4~ (mutual). ~--cutoff~ is only the cell-size hint
 (~cutoff + 1.5~); vesin cutoff pairs stay on ~neighListO~. Then
 ~chill::getCorrel~ / ~chill::getIceTypeNoPrint~ or
-~chill::getCorrelPlus~ / ~chill::getIceTypePlusNoPrint~. Ice names
-are the ~molSys::atom_state_type~ enumerators: ~cubic~, ~hexagonal~,
+~chill::getCorrelPlus~ / ~chill::getIceTypePlusNoPrint~.
+~--water-types T,U~ is the neighbour mask (OW only); ~--type~ is the
+load filter and is not that mask. Ice names are the
+~molSys::atom_state_type~ enumerators: ~cubic~, ~hexagonal~,
 ~water~, ~interfacial~, ~clathrate~, ~interClathrate~, ~reCubic~,
 ~reHex~, ~unclassified~.
 

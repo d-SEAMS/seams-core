@@ -251,17 +251,6 @@ int waterNop(const Cloud &cloud, const std::vector<int> &waterTypes) {
   return n;
 }
 
-void resetNonWaterIce(Cloud &cloud, const std::vector<int> &waterTypes) {
-  if (waterTypes.empty()) {
-    return;
-  }
-  for (auto &pt : cloud.pts) {
-    if (!isWaterType(pt.type, waterTypes)) {
-      pt.iceType = molSys::atom_state_type::unclassified;
-    }
-  }
-}
-
 std::vector<std::vector<int>>
 waterGraph(Cloud &cloud, double cutoff, int typ,
            const std::vector<int> &waterTypes, int k = 4, bool mutual = true) {
@@ -812,7 +801,8 @@ int cmdIons(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
       ions.push_back(i);
     }
   }
-  const auto env = site::ionEnvironment(cloud, ice, ions, typ, ionCutoff);
+  const int waterTyp = waterTypes.empty() ? typ : waterTypes.front();
+  const auto env = site::ionEnvironment(cloud, ice, ions, waterTyp, ionCutoff);
   if (!perAtomPath.empty()) {
     // water: 0 liquid, 1 ice; ions: 2 liquid, 3 front, 4 ice
     std::vector<int> values(static_cast<std::size_t>(cloud.nop), 0);
@@ -899,7 +889,7 @@ int cmdChillPlus(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
   auto nList = waterGraph(cloud, cutoff, typ, waterTypes);
   chill::getCorrelPlus(cloud, nList, false);
   chill::getIceTypePlusNoPrint(cloud, nList, false);
-  resetNonWaterIce(cloud, waterTypes);
+  chill::clearIceTypesExcept(cloud, waterTypes);
   printCounts(os, cloud, waterTypes);
   if (layers) {
     const auto st = topoparam::layerCubicity(cloud, axis, layerWidth);
@@ -934,7 +924,7 @@ int cmdChill(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
   auto nList = waterGraph(cloud, cutoff, typ, waterTypes);
   chill::getCorrel(cloud, nList, false);
   chill::getIceTypeNoPrint(cloud, nList, false);
-  resetNonWaterIce(cloud, waterTypes);
+  chill::clearIceTypesExcept(cloud, waterTypes);
   printCounts(os, cloud, waterTypes);
   return 0;
 }
