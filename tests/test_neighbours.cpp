@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <bop.hpp>
 #include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
@@ -915,4 +916,155 @@ TEST_CASE("threaded cell-list rows are the minimum-image neighbours", "[neighbou
   std::iota(all.begin(), all.end(), 0);
   std::vector<std::vector<int>> rows;
   REQUIRE_FALSE(nneigh::cellListRowsThreaded(tight, all, cutoff, rows));
+}
+
+TEST_CASE("water-type mask keeps Ag out of the 4-NN list", "[neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {20.0, 20.0, 20.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  // Five waters in a plus, Ag sitting closer to the centre than one water.
+  const double coords[6][3] = {{0, 0, 0},
+                               {3, 0, 0},
+                               {-3, 0, 0},
+                               {0, 3, 0},
+                               {0, -3, 0},
+                               {1.0, 0, 0}};
+  const int types[6] = {1, 1, 1, 1, 1, 3};
+  for (int i = 0; i < 6; i++) {
+    molSys::Point<double> pt;
+    pt.type = types[i];
+    pt.atomID = i + 1;
+    pt.molID = i + 1;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+  cloud.nop = 6;
+  const auto nList =
+      nneigh::kNearestNeighbourList(cloud, 4, 6.0, std::vector<int>{1}, true);
+  REQUIRE(nList.size() == static_cast<std::size_t>(cloud.nop));
+  for (const auto &row : nList) {
+    for (std::size_t m = 1; m < row.size(); m++) {
+      const auto it = cloud.idIndexMap.find(row[m]);
+      REQUIRE(it != cloud.idIndexMap.end());
+      REQUIRE(cloud.pts[static_cast<std::size_t>(it->second)].type == 1);
+    }
+  }
+  // Ag has no water-graph row bonds
+  REQUIRE(nList[5].size() <= 1);
+  const auto both =
+      nneigh::kNearestNeighbourPair(cloud, 4, 6.0, std::vector<int>{1});
+  REQUIRE(both.first[5].size() <= 1);
+  REQUIRE(both.second[5].size() <= 1);
+  for (const auto &row : both.first) {
+    for (std::size_t m = 1; m < row.size(); m++) {
+      const auto it = cloud.idIndexMap.find(row[m]);
+      REQUIRE(it != cloud.idIndexMap.end());
+      REQUIRE(cloud.pts[static_cast<std::size_t>(it->second)].type == 1);
+    }
+  }
+}
+
+TEST_CASE("water-type set bonds two water types and drops Ag", "[neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {20.0, 20.0, 20.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  // Type 1 and type 2 are both water; type 3 is Ag closer than one water.
+  const double coords[6][3] = {{0, 0, 0},
+                               {3, 0, 0},
+                               {-3, 0, 0},
+                               {0, 3, 0},
+                               {0, -3, 0},
+                               {0.4, 0, 0}};
+  const int types[6] = {1, 2, 1, 2, 1, 3};
+  for (int i = 0; i < 6; i++) {
+    molSys::Point<double> pt;
+    pt.type = types[i];
+    pt.atomID = i + 1;
+    pt.molID = i + 1;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+  cloud.nop = 6;
+  const std::vector<int> water{1, 2};
+  const auto nList =
+      nneigh::kNearestNeighbourList(cloud, 4, 6.0, water, true);
+  REQUIRE(nList.size() == static_cast<std::size_t>(cloud.nop));
+  bool sawType2 = false;
+  for (const auto &row : nList) {
+    for (std::size_t m = 1; m < row.size(); m++) {
+      const auto it = cloud.idIndexMap.find(row[m]);
+      REQUIRE(it != cloud.idIndexMap.end());
+      const int t = cloud.pts[static_cast<std::size_t>(it->second)].type;
+      REQUIRE((t == 1 || t == 2));
+      REQUIRE(t != 3);
+      if (t == 2) {
+        sawType2 = true;
+      }
+    }
+  }
+  REQUIRE(sawType2);
+  REQUIRE(nList[5].size() <= 1);
+  const auto empty =
+      nneigh::kNearestNeighbourList(cloud, 4, 6.0, std::vector<int>{}, true);
+  REQUIRE(empty.empty());
+  const auto pair = nneigh::kNearestNeighbourPair(cloud, 4, 6.0, water);
+  REQUIRE(pair.first.size() == static_cast<std::size_t>(cloud.nop));
+  for (const auto &row : pair.first) {
+    for (std::size_t m = 1; m < row.size(); m++) {
+      const auto it = cloud.idIndexMap.find(row[m]);
+      REQUIRE(it != cloud.idIndexMap.end());
+      REQUIRE(cloud.pts[static_cast<std::size_t>(it->second)].type != 3);
+    }
+  }
+}
+
+TEST_CASE("mixed AgI+water dump keeps Ag and I out of the water 4-NN list",
+          "[neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud = sinp::readLammpsTrj("traj/agi_water_tiny.lammpstrj", 1, cloud);
+  REQUIRE(cloud.nop == 7);
+  int nAg = 0;
+  int nI = 0;
+  int nOw = 0;
+  for (const auto &pt : cloud.pts) {
+    nOw += pt.type == 1 ? 1 : 0;
+    nAg += pt.type == 3 ? 1 : 0;
+    nI += pt.type == 4 ? 1 : 0;
+  }
+  REQUIRE(nOw == 5);
+  REQUIRE(nAg == 1);
+  REQUIRE(nI == 1);
+  const auto nList =
+      nneigh::kNearestNeighbourList(cloud, 4, 6.0, std::vector<int>{1}, true);
+  REQUIRE(nList.size() == static_cast<std::size_t>(cloud.nop));
+  for (const auto &row : nList) {
+    for (std::size_t m = 1; m < row.size(); m++) {
+      const auto it = cloud.idIndexMap.find(row[m]);
+      REQUIRE(it != cloud.idIndexMap.end());
+      const int t = cloud.pts[static_cast<std::size_t>(it->second)].type;
+      REQUIRE(t == 1);
+      REQUIRE(t != 3);
+      REQUIRE(t != 4);
+    }
+  }
+  int agIdx = -1;
+  int iIdx = -1;
+  for (int i = 0; i < cloud.nop; i++) {
+    if (cloud.pts[static_cast<std::size_t>(i)].type == 3) {
+      agIdx = i;
+    }
+    if (cloud.pts[static_cast<std::size_t>(i)].type == 4) {
+      iIdx = i;
+    }
+  }
+  REQUIRE(agIdx >= 0);
+  REQUIRE(iIdx >= 0);
+  REQUIRE(nList[static_cast<std::size_t>(agIdx)].size() <= 1);
+  REQUIRE(nList[static_cast<std::size_t>(iIdx)].size() <= 1);
 }

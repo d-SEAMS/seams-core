@@ -62,6 +62,23 @@ struct CageAffiliation {
   std::vector<bool> ddc;  //! Equatorial pass, or peripheral of one
 };
 
+/** Six-rings that are ice-I stacking planes.
+ *
+ *  A basal ring of a passing HC pair is a hexagonal stacking plane.
+ *  A DDC equatorial ring (HC-affiliated rings excluded, as in findDDC)
+ *  is a cubic stacking plane. Prismatic and peripheral rings connect
+ *  planes and do not vote. The two plane sets are disjoint because an
+ *  HC-affiliated ring is not an equatorial candidate.
+ */
+struct StackingPlanes {
+  std::vector<bool> basal;       //! HC basal of a passing pair
+  std::vector<bool> equatorial;  //! DDC equatorial pass
+};
+
+[[nodiscard]] StackingPlanes stackingPlanes(
+    const std::vector<std::vector<int>> &rings,
+    const std::vector<std::vector<int>> &nList);
+
 //! Batch computation of the affiliation predicates for six-membered rings.
 //! nList is by index with the leading self entry, as neighbourListByIndex
 //! produces.

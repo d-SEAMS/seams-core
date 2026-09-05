@@ -44,7 +44,7 @@ listed in that help string).
 | ~chill~ | CHILL four-neighbour labels | ~nop N~ then ~name count~ for each ice type present |
 | ~chill-plus~ | CHILL+ four-neighbour labels | same as ~chill~ |
 | ~cages~ | ice score on six-membered rings | ~nop N graph KIND hexagonal IH cubic IC water W~ |
-| ~cages --signature SPEC~ | closed polyhedra whose ring-size census matches ~SPEC~ | ~nop N graph KIND signature S cages C atoms A~ and, with ~--guest-types~, ~guests G occupied O multiple M free F~ |
+| ~cages --signature SPEC~ | closed polyhedra whose ring-size census matches ~SPEC~ | ~nop N graph KIND signature S cages C atoms A~ and, with ~--incomplete~, ~incomplete K~ cups on the ring graph; with ~--guest-types~, ~guests G occupied O multiple M free F~ |
 | ~fingerprint~ | topology keys of the bonded graph | ~nop N graph KIND hops H method M key K classes C rings 3:a 4:b ... top key=count ...~ |
 | ~fingerprint --emit-library LABEL~ | the frame's distinct keys as library lines | ~# method M hops H colours C~ then ~key LABEL~ rows |
 | ~fingerprint --library FILE[,FILE...]~ | atoms named by key libraries | ~nop N graph KIND hops H method M matched X label=count ... unmatched=U~ and, with several libraries, ~depth H1=n1 H2=n2~ |
@@ -57,10 +57,14 @@ listed in that help string).
 | ~density-z~ | type-resolved \(\rho\) along one axis | ~# z rho~ then one ~z rho~ row per bin |
 | ~domains --site --subset~ | polar/apolar Stoddard component | ~subset polar n N largest L P P_inf~ |
 
-~chill~ / ~chill-plus~ call ~nneigh::neighListO~, then
+~chill~ / ~chill-plus~ call ~nneigh::kNearestNeighbourList~ with
+~k = 4~ (mutual). ~--cutoff~ is only the cell-size hint
+(~cutoff + 1.5~); vesin cutoff pairs stay on ~neighListO~. Then
 ~chill::getCorrel~ / ~chill::getIceTypeNoPrint~ or
-~chill::getCorrelPlus~ / ~chill::getIceTypePlusNoPrint~. Ice names
-are the ~molSys::atom_state_type~ enumerators: ~cubic~, ~hexagonal~,
+~chill::getCorrelPlus~ / ~chill::getIceTypePlusNoPrint~.
+~--water-types T,U~ is the neighbour mask (OW only); ~--type~ is the
+load filter and is not that mask. Ice names are the
+~molSys::atom_state_type~ enumerators: ~cubic~, ~hexagonal~,
 ~water~, ~interfacial~, ~clathrate~, ~interClathrate~, ~reCubic~,
 ~reHex~, ~unclassified~.
 
@@ -128,6 +132,7 @@ initializers (Argum does not write defaults into the help).
 | ~--format KIND~ | ~text~ | ~Output format: ~text~ (default) or ~json~ (JSONL)~ |
 | ~--strict-input~ | off | ~Fail when a requested frame produces no atoms~ |
 | ~-t~, ~--type I~ | ~0~ | ~Atom type (0 guesses oxygen then type 1; density-z: 0 is every atom)~ |
+| ~--water-types T,U~ | unset | Neighbour graph on these LAMMPS types only (OW). Substrate and ions never enter the 4-NN list |
 | ~--types I,J~ | ~I = J = --type~ | ~Pair types for site-site rdf/cn (default I=J=--type)~ |
 | ~--family NAME~ | ~waterIce~ | Material family. Ice scores refuse every value except ~waterIce~ |
 | ~--site SPEC~ | | Type-to-kind map for ~ionCloud~ (~1=cationHead,2=anion~) |
@@ -138,7 +143,8 @@ initializers (Argum does not write defaults into the help).
 | ~-k N~ | ~4~ | ~k for knn / seeded cages~ |
 | ~--graph KIND~ | ~seeded~ | ~Bond graph for cages: cutoff \| knn \| knn-union \| seeded~ |
 | ~--complete~ | off | Seeded cages: fill the last vertex of six-rings whose other vertices carry a label (ring completion) |
-| ~--signature SPEC~ | | ~cages: ring-size census (4:6,6:8) or a named table entry (sodalite\vert{}alpha\vert{}512\vert{}51262\vert{}hc\vert{}ddc)~ |
+| ~--signature SPEC~ | | ~cages: ring-size census (4:6,6:8) or a named table entry (sodalite\vert{}alpha\vert{}512\vert{}51262\vert{}51264\vert{}51268\vert{}sh\vert{}hc\vert{}ddc)~ |
+| ~--incomplete~ | off | ~cages --signature: also report cups and incomplete cages on the ring graph~ |
 | ~--guest-types T,U~ | | ~cages --signature: LAMMPS types of guests (methane, THF, ions) placed in the found cages by their periodic centroids~ |
 | ~--guest-radius R~ | ~4.0~ | ~cages --signature: a guest belongs to the nearest cage centre within R~ |
 | ~--hops N~ | ~2~ | ~fingerprint: bonds from the centre in each local key~ |
@@ -184,6 +190,23 @@ the read (type 0 then becomes 1).
 A mixed-type dump that is not the water guess needs ~--type I~.
 ~density-z~ treats ~0~ as every atom, not the oxygen guess.
 See [[file:../howto/ionic-liquid.org][Ionic-liquid dumps]].
+
+* ~--water-types~
+
+~--type~ is a load filter (one LAMMPS type, or the oxygen guess).
+It is not the neighbour mask. ~--water-types T,U~ loads the mixed
+dump (~loadType = -1~) and builds ~nneigh::kNearestNeighbourList~
+/ ~kNearestNeighbourPair~ on that type set. Ag, I, protein and
+ions stay in the cloud for guests and ~ions~, but they never
+enter the four neighbours of OW. ~chill~, ~chill-plus~, ~cages~
+and ~ions~ honour the flag. Ice and cage counts are the water
+types only.
+
+#+begin_src bash
+seams chill-plus FILE --water-types 1
+seams cages FILE --graph seeded --water-types 1
+seams ions FILE --ion-types 3,4 --water-types 1
+#+end_src
 
 * ~--types~
 
@@ -250,7 +273,7 @@ the table.
 | ~SEAMS_CELL~ | ~3.0~ |
 | ~SEAMS_TPP~ / ~LINKCELL_TPP~ | occupancy picker (~0~) |
 | ~SEAMS_BLOCK~ / ~LINKCELL_BLOCK~ | occupancy picker (~0~) |
-| ~SEAMS_OFFLOAD~ | ~false~ |
+| ~SEAMS_OFFLOAD~ | ~false~ (Steinhardt Ylm and TUM cages; ~0~ forces host) |
 | ~YODA_FENNEL_PATH~ / ~YODA_LUA_PATH~ | empty |
 
 Analysis choice (which command) is not this table.

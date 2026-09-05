@@ -9,7 +9,16 @@
 #include <ring.hpp>
 #include <seams_input.hpp>
 #include <topo_bulk.hpp>
+#include <tum_offload.hpp>
 
+#ifdef SEAMS_HAS_OFFLOAD
+#include <omp.h>
+#endif
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
+
+#include <cstdlib>
 #include <filesystem>
 #include <vector>
 
@@ -161,6 +170,40 @@ TEST_CASE("shapeMatchHC computes RMSD for a known HC cage", "[bulkTUM]") {
   REQUIRE(rmsd >= 0.0);
   // Quaternion should have 4 elements
   REQUIRE(quat.size() == 4);
+}
+
+TEST_CASE("SEAMS_OFFLOAD TUM cage counts match host on mW cubic",
+          "[bulkTUM][offload]") {
+  auto yCloud = readMwCubicFrame1();
+  REQUIRE(yCloud.nop > 0);
+
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  nList = nneigh::neighbourListByIndex(yCloud, nList);
+
+  setenv("SEAMS_OFFLOAD", "0", 1);
+  const auto host = tum::hostCageCounts(nList);
+  REQUIRE(host.nSix > 0);
+  REQUIRE((host.nHcRings + host.nDdcRings) > 0);
+  REQUIRE((host.nHcAtoms + host.nDdcAtoms) > 0);
+
+  setenv("SEAMS_OFFLOAD", "1", 1);
+  const auto off = tum::specializedCageCounts(nList);
+  REQUIRE(off.ringsDropped == 0);
+  REQUIRE(off.nSix == host.nSix);
+  REQUIRE(off.nHcRings == host.nHcRings);
+  REQUIRE(off.nDdcRings == host.nDdcRings);
+  REQUIRE(off.nHcAtoms == host.nHcAtoms);
+  REQUIRE(off.nDdcAtoms == host.nDdcAtoms);
+  REQUIRE(off.atomHc.size() == host.atomHc.size());
+  REQUIRE(off.atomDdc.size() == host.atomDdc.size());
+  REQUIRE(off.atomHc == host.atomHc);
+  REQUIRE(off.atomDdc == host.atomDdc);
+
+#ifdef SEAMS_HAS_OFFLOAD
+  if (omp_get_num_devices() > 0) {
+    REQUIRE(off.usedDevice);
+  }
+#endif
 }
 
 TEST_CASE("atomsFromCages extracts unique atom indices from cage list",
