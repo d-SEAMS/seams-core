@@ -299,6 +299,44 @@ ring::cageAffiliation(const std::vector<std::vector<int>> &rings,
   return result;
 }
 
+ring::StackingPlanes
+ring::stackingPlanes(const std::vector<std::vector<int>> &rings,
+                     const std::vector<std::vector<int>> &nList) {
+  StackingPlanes out;
+  const size_t nRings = rings.size();
+  out.basal.assign(nRings, false);
+  out.equatorial.assign(nRings, false);
+  if (nRings == 0) {
+    return out;
+  }
+  FrameContext ctx(rings, nList);
+  std::vector<bool> hc(nRings, false);
+  for (size_t i = 0; i < nRings; i++) {
+    const std::vector<int> &candidates = ctx.basalCandidates(static_cast<int>(i));
+    for (const int j : candidates) {
+      if (!ctx.basalPair(static_cast<int>(i), j)) {
+        continue;
+      }
+      out.basal[i] = true;
+      out.basal[static_cast<std::size_t>(j)] = true;
+      hc[i] = true;
+      hc[static_cast<std::size_t>(j)] = true;
+      for (const int k : ctx.prismaticOf(static_cast<int>(i), j)) {
+        if (k >= 0 && static_cast<std::size_t>(k) < nRings) {
+          hc[static_cast<std::size_t>(k)] = true;
+        }
+      }
+    }
+  }
+  std::vector<int> peripherals;
+  for (size_t i = 0; i < nRings; i++) {
+    if (ctx.equatorialPass(static_cast<int>(i), hc[i], peripherals)) {
+      out.equatorial[i] = true;
+    }
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------------------
 
 struct ring::AffiliationUpdater::Impl {

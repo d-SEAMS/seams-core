@@ -4,12 +4,14 @@
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <order_parameter.hpp>
 #include <ring.hpp>
 #include <seams_input.hpp>
 #include <topo_bulk.hpp>
 
 #include <algorithm>
 #include <map>
+#include <string>
 #include <vector>
 
 namespace {
@@ -115,6 +117,49 @@ TEST_CASE("cageAffiliation matches the greedy classification on mW",
     REQUIRE(affiliation.ddc[i]);
     REQUIRE_FALSE(affiliation.hc[i]);
   }
+}
+
+TEST_CASE("stackingPlanes marks HC basals and keeps them off DDC equatorials",
+          "[cage_affiliation]") {
+  auto yCloud = hcCloud();
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  auto idx = nneigh::neighbourListByIndex(yCloud, nList);
+  auto six = sixMembered(primitive::ringNetwork(idx, 7));
+  const auto planes = ring::stackingPlanes(six, idx);
+  REQUIRE(planes.basal.size() == six.size());
+  REQUIRE(planes.equatorial.size() == six.size());
+  int nBasal = 0;
+  int nEq = 0;
+  int nBoth = 0;
+  for (size_t i = 0; i < six.size(); i++) {
+    if (planes.basal[i]) {
+      ++nBasal;
+    }
+    if (planes.equatorial[i]) {
+      ++nEq;
+    }
+    if (planes.basal[i] && planes.equatorial[i]) {
+      ++nBoth;
+    }
+  }
+  REQUIRE(nBasal == 2);
+  REQUIRE(nEq == 0);
+  REQUIRE(nBoth == 0);
+  const auto aff = ring::cageAffiliation(six, idx);
+  for (size_t i = 0; i < six.size(); i++) {
+    if (planes.basal[i]) {
+      REQUIRE(aff.hc[i]);
+    }
+    if (planes.equatorial[i]) {
+      REQUIRE(aff.ddc[i]);
+    }
+  }
+  const auto tum =
+      topoparam::tumLayerStack(yCloud, six, planes.basal, planes.equatorial, 2,
+                               3.7);
+  REQUIRE(std::count(tum.sequence.begin(), tum.sequence.end(), 'H') == 2);
+  REQUIRE(tum.sequence.find('C') == std::string::npos);
+  REQUIRE(tum.phiC == 0.0);
 }
 
 TEST_CASE("cageAffiliation marks the rings of an isolated hexagonal cage",

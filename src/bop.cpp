@@ -891,6 +891,21 @@ chill::getIceTypePlusNoPrint(
                     interClath, total);
 }
 
+void chill::clearIceTypesExcept(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &types) {
+  if (types.empty()) {
+    return;
+  }
+  for (int i = 0; i < yCloud.nop; i++) {
+    const int t = yCloud.pts[static_cast<std::size_t>(i)].type;
+    if (std::find(types.begin(), types.end(), t) == types.end()) {
+      yCloud.pts[static_cast<std::size_t>(i)].iceType =
+          molSys::atom_state_type::unclassified;
+    }
+  }
+}
+
 void
 chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                       const std::vector<std::vector<int>> &nList, std::string path,

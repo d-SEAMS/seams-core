@@ -780,29 +780,23 @@ int nneigh::clearNeighbourList(std::vector<std::vector<int>> &nList) {
   return 0;
 }
 
-/**
- * @details Bonded graph from the k nearest neighbours of each particle,
- *  union-symmetrized: i and j are bonded when either lists the other among
- *  its k nearest. Candidates come from the same cell-list search as
- *  neighListO at @a candidateCutoff, which must comfortably exceed the k-th
- *  neighbour distance. On an undistorted tetrahedral lattice with k = 4 this
- *  equals the first-shell cutoff graph; under thermal distortion it keeps
- *  the neighbour identities a hard cutoff loses, which is what the ring and
- *  cage predicates consume.
- * @param[in] yCloud The input molSys::PointCloud.
- * @param[in] k Number of nearest neighbours each particle nominates.
- * @param[in] candidateCutoff Cell-list search radius for the candidates.
- * @param[in] typeI Type ID of the particles in the graph.
- * @return Row-ordered full neighbour list by atom ID, one row per atom with
- *  the leading self entry, like neighListO.
- */
+// k-nearest nominations: linkcell mesh, not vesin occupancy.
+// candidateCutoff is a cell-size hint for knearest_into.
 namespace {
+
+bool typeAllowed(int type, int typeI, const std::vector<int> *types) {
+  if (types == nullptr || types->empty()) {
+    return type == typeI;
+  }
+  return std::find(types->begin(), types->end(), type) != types->end();
+}
 
 #ifdef SEAMS_HAS_LINKCELL
 // Writes n*k cloud indices, nearest first, unused slots -1.
 bool nominateByLinkcell(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
-    int typeI, double cellHint, std::vector<int> &nom) {
+    int typeI, double cellHint, std::vector<int> &nom,
+    const std::vector<int> *types = nullptr) {
   const int n = yCloud.nop;
   if (n <= 0 || k <= 0 || yCloud.box.size() < 3) {
     return true;
@@ -821,7 +815,7 @@ bool nominateByLinkcell(
     xyz[static_cast<std::size_t>(i) * 3 + 0] = p.x;
     xyz[static_cast<std::size_t>(i) * 3 + 1] = p.y;
     xyz[static_cast<std::size_t>(i) * 3 + 2] = p.z;
-    if (p.type == typeI) {
+    if (typeAllowed(p.type, typeI, types)) {
       mask[static_cast<std::size_t>(i)] = 1;
       ++nSrc;
     }
@@ -847,7 +841,7 @@ bool nominateByLinkcell(
 // Packed n*k nominations, nearest first, unused slots -1.
 std::vector<int> nominatePacked(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
-    int typeI, double cellHint) {
+    int typeI, double cellHint, const std::vector<int> *types = nullptr) {
   const int n = yCloud.nop;
   std::vector<int> nom(static_cast<std::size_t>(n) * static_cast<std::size_t>(k),
                        -1);
@@ -855,14 +849,14 @@ std::vector<int> nominatePacked(
     return nom;
   }
 #ifdef SEAMS_HAS_LINKCELL
-  if (nominateByLinkcell(yCloud, k, typeI, cellHint, nom)) {
+  if (nominateByLinkcell(yCloud, k, typeI, cellHint, nom, types)) {
     return nom;
   }
 #endif
   std::vector<int> owners;
   owners.reserve(static_cast<std::size_t>(n));
   for (int i = 0; i < n; i++) {
-    if (yCloud.pts[static_cast<std::size_t>(i)].type == typeI) {
+    if (typeAllowed(yCloud.pts[static_cast<std::size_t>(i)].type, typeI, types)) {
       owners.push_back(i);
     }
   }
@@ -1129,6 +1123,35 @@ nneigh::kNearestNeighbourPair(
   }
   const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
   const auto nom = nominatePacked(yCloud, k, typeI, hint);
+  std::vector<std::vector<int>> mutual;
+  std::vector<std::vector<int>> uni;
+  fillBothGraphsFromNom(yCloud, nom, k, mutual, uni);
+  return {std::move(mutual), std::move(uni)};
+}
+
+std::vector<std::vector<int>>
+nneigh::kNearestNeighbourList(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, const std::vector<int> &types, bool mutual) {
+  if (yCloud.nop <= 0 || k <= 0 || types.empty()) {
+    return {};
+  }
+  const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
+  const auto nom = nominatePacked(yCloud, k, types.front(), hint, &types);
+  std::vector<std::vector<int>> out;
+  fillGraphFromNom(yCloud, nom, k, mutual, out);
+  return out;
+}
+
+std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
+nneigh::kNearestNeighbourPair(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, const std::vector<int> &types) {
+  if (yCloud.nop <= 0 || k <= 0 || types.empty()) {
+    return {{}, {}};
+  }
+  const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
+  const auto nom = nominatePacked(yCloud, k, types.front(), hint, &types);
   std::vector<std::vector<int>> mutual;
   std::vector<std::vector<int>> uni;
   fillBothGraphsFromNom(yCloud, nom, k, mutual, uni);
