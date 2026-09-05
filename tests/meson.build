@@ -96,6 +96,9 @@ if hwy_dep.found()
   _simd_deps += [hwy_dep]
   _simd_args += ['-DSEAMS_HAS_HWY=1']
 endif
+if minimage_dep.found()
+  _simd_deps += [minimage_dep]
+endif
 test('simd',
   executable('test_simd', 'test_simd.cpp',
     dependencies: _simd_deps,

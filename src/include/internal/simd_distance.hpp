@@ -11,6 +11,10 @@
 #endif
 #endif
 
+#ifdef SEAMS_HAS_MINIMAGE
+#include <minimage.h>
+#endif
+
 #ifdef SEAMS_HAS_HWY
 
 #include "hwy/highway.h"
@@ -32,6 +36,10 @@ inline HWY_ATTR void BatchPeriodicDistSq(const double* HWY_RESTRICT dx,
                                 const double* HWY_RESTRICT dz,
                                 double bx, double by, double bz,
                                 double* HWY_RESTRICT out, size_t n) {
+#ifdef SEAMS_HAS_MINIMAGE
+  mi_dist2_ortho_diffs(dx, dy, dz, bx, by, bz, out, n);
+  return;
+#endif
   const hn::ScalableTag<double> d;
   const size_t N = hn::Lanes(d);
 
@@ -93,6 +101,10 @@ namespace seams {
 inline void BatchPeriodicDistSq(const double* dx, const double* dy,
                                 const double* dz, double bx, double by,
                                 double bz, double* out, size_t n) {
+#ifdef SEAMS_HAS_MINIMAGE
+  mi_dist2_ortho_diffs(dx, dy, dz, bx, by, bz, out, n);
+  return;
+#endif
   // Matches the vectorised path: one reciprocal per axis for the whole batch
   const double rbx = 1.0 / bx;
   const double rby = 1.0 / by;
