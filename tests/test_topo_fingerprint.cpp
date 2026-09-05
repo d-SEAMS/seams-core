@@ -111,6 +111,43 @@ TEST_CASE("the frame key is independent of atom numbering", "[topo]") {
   REQUIRE(a.ringCensus == b.ringCensus);
 }
 
+TEST_CASE("incremental fingerprint updates only the hop-ball of a vacancy hop",
+          "[topo]") {
+  auto rows = diamondRows(3);
+  const auto whole = topo::fingerprint(rows, 2, 7);
+  const int u = 0;
+  const int v = rows[0][1];
+  rows[0].erase(rows[0].begin() + 1);
+  auto &rv = rows[static_cast<std::size_t>(v)];
+  rv.erase(std::find(rv.begin() + 1, rv.end(), u));
+  const auto full = topo::fingerprint(rows, 2, 7);
+  const auto incr = topo::incrementalFingerprint(whole, rows, {u, v}, 2, 7);
+  REQUIRE(incr.key == full.key);
+  REQUIRE(incr.atomKeys == full.atomKeys);
+  REQUIRE(incr.ringCensus == full.ringCensus);
+  REQUIRE(incr.classes == full.classes);
+  const auto dirty = topo::hopNeighbourhood(rows, u, 2);
+  std::vector<bool> inBall(rows.size(), false);
+  for (int a : dirty) {
+    inBall[static_cast<std::size_t>(a)] = true;
+  }
+  for (int a : topo::hopNeighbourhood(rows, v, 2)) {
+    inBall[static_cast<std::size_t>(a)] = true;
+  }
+  int changed = 0;
+  int kept = 0;
+  for (std::size_t i = 0; i < rows.size(); i++) {
+    if (incr.atomKeys[i] != whole.atomKeys[i]) {
+      REQUIRE(inBall[i]);
+      ++changed;
+    } else {
+      ++kept;
+    }
+  }
+  REQUIRE(changed > 0);
+  REQUIRE(kept > 0);
+}
+
 TEST_CASE("one broken bond splits the classes and changes the frame key", "[topo]") {
   auto rows = diamondRows(3);
   const auto whole = topo::fingerprint(rows, 2, 7);

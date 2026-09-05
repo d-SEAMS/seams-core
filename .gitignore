@@ -66,6 +66,7 @@ output/
 # Ignore histories
 .gdb_history
 *.lammpstrj
+!input/traj/*.lammpstrj
 bin/
 build/
 # docs/source/*.rst is generated from orgmode, but track orgmode + conf.py

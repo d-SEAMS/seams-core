@@ -2,7 +2,8 @@
 #+OPTIONS: toc:nil num:nil
 
 A multi-type dump is not an ice frame. Keep CHILL and cages on
-one species with ~--type I~. Use ~seams rdf~ for a partial
+water with ~--water-types T~ (the neighbour mask; ~--type~ is
+only a load filter). Use ~seams rdf~ for a partial
 g_IJ(r) under the dump minimum image. Use ~seams density-z~
 for a type-resolved \(\rho(z)\) in a slit.
 

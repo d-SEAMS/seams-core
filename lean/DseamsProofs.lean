@@ -1,1 +1,3 @@
 import DseamsProofs.Completion
+import DseamsProofs.Stacking
+import DseamsProofs.Occupancy

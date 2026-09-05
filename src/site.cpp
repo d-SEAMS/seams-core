@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <limits>
 #include <stdexcept>
 #include <string>
 #include <unordered_set>
@@ -446,6 +447,250 @@ guestOccupancy(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     }
     if (n > 1) {
       ++out.multiply;
+    }
+  }
+  int maxG = 0;
+  for (int n : out.guestsPerCage) {
+    maxG = std::max(maxG, n);
+  }
+  out.occupancyHistogram.assign(static_cast<std::size_t>(maxG) + 1, 0);
+  for (int n : out.guestsPerCage) {
+    ++out.occupancyHistogram[static_cast<std::size_t>(n)];
+  }
+  return out;
+}
+
+namespace {
+
+std::array<double, 3> sub3(const std::array<double, 3> &a,
+                           const std::array<double, 3> &b) {
+  return {a[0] - b[0], a[1] - b[1], a[2] - b[2]};
+}
+
+std::array<double, 3> crossP(const std::array<double, 3> &a,
+                             const std::array<double, 3> &b) {
+  return {a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2],
+          a[0] * b[1] - a[1] * b[0]};
+}
+
+double dotP(const std::array<double, 3> &a, const std::array<double, 3> &b) {
+  return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+// Moller-Trumbore: ray origin + t * dir hits triangle abc, t > eps.
+bool rayHitsTriangle(const std::array<double, 3> &orig,
+                     const std::array<double, 3> &dir,
+                     const std::array<double, 3> &a,
+                     const std::array<double, 3> &b,
+                     const std::array<double, 3> &c) {
+  constexpr double eps = 1e-12;
+  const auto e1 = sub3(b, a);
+  const auto e2 = sub3(c, a);
+  const auto pvec = crossP(dir, e2);
+  const double det = dotP(e1, pvec);
+  if (std::fabs(det) < eps) {
+    return false;
+  }
+  const double inv = 1.0 / det;
+  const auto tvec = sub3(orig, a);
+  const double u = inv * dotP(tvec, pvec);
+  if (u < 0.0 || u > 1.0) {
+    return false;
+  }
+  const auto qvec = crossP(tvec, e1);
+  const double v = inv * dotP(dir, qvec);
+  if (v < 0.0 || u + v > 1.0) {
+    return false;
+  }
+  const double t = inv * dotP(e2, qvec);
+  return t > eps;
+}
+
+bool pointInFaces(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                  const std::vector<std::vector<int>> &rings,
+                  const std::vector<int> &faces,
+                  const std::array<double, 3> &guest) {
+  if (faces.empty()) {
+    return false;
+  }
+  std::vector<int> verts;
+  for (int f : faces) {
+    if (f < 0 || static_cast<std::size_t>(f) >= rings.size()) {
+      continue;
+    }
+    verts.insert(verts.end(), rings[static_cast<std::size_t>(f)].begin(),
+                 rings[static_cast<std::size_t>(f)].end());
+  }
+  if (verts.empty()) {
+    return false;
+  }
+  const auto centre = periodicCentroid(yCloud, verts);
+  auto unwrap = [&](int atom) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(atom)];
+    const auto dr = minImage(yCloud, p.x, p.y, p.z, centre[0], centre[1], centre[2]);
+    return std::array<double, 3>{centre[0] + dr[0], centre[1] + dr[1],
+                                 centre[2] + dr[2]};
+  };
+  const auto gdr = minImage(yCloud, guest[0], guest[1], guest[2], centre[0],
+                            centre[1], centre[2]);
+  const std::array<double, 3> orig = {centre[0] + gdr[0], centre[1] + gdr[1],
+                                      centre[2] + gdr[2]};
+  // Slightly off-axis ray so a hit is not an edge of a cube face.
+  const std::array<double, 3> dir = {1.0, 1e-4, 2e-4};
+  int hits = 0;
+  for (int f : faces) {
+    if (f < 0 || static_cast<std::size_t>(f) >= rings.size()) {
+      continue;
+    }
+    const auto &ring = rings[static_cast<std::size_t>(f)];
+    if (ring.size() < 3) {
+      continue;
+    }
+    const auto a = unwrap(ring[0]);
+    for (std::size_t k = 1; k + 1 < ring.size(); k++) {
+      if (rayHitsTriangle(orig, dir, a, unwrap(ring[k]), unwrap(ring[k + 1]))) {
+        ++hits;
+      }
+    }
+  }
+  return (hits % 2) == 1;
+}
+
+} // namespace
+
+GuestOccupancy
+guestOccupancyInside(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                     const std::vector<std::vector<int>> &rings,
+                     const std::vector<std::vector<int>> &cageFaces,
+                     const std::vector<int> &guestIndices) {
+  GuestOccupancy out;
+  out.guestsPerCage.assign(cageFaces.size(), 0);
+  std::vector<std::array<double, 3>> centres;
+  centres.reserve(cageFaces.size());
+  std::vector<std::vector<int>> cageVerts(cageFaces.size());
+  for (std::size_t c = 0; c < cageFaces.size(); c++) {
+    std::unordered_set<int> uniq;
+    for (int f : cageFaces[c]) {
+      if (f < 0 || static_cast<std::size_t>(f) >= rings.size()) {
+        continue;
+      }
+      for (int v : rings[static_cast<std::size_t>(f)]) {
+        uniq.insert(v);
+      }
+    }
+    cageVerts[c].assign(uniq.begin(), uniq.end());
+    centres.push_back(periodicCentroid(yCloud, cageVerts[c]));
+  }
+  for (int g : guestIndices) {
+    if (g < 0 || g >= yCloud.nop) {
+      continue;
+    }
+    const auto &p = yCloud.pts[static_cast<std::size_t>(g)];
+    const std::array<double, 3> gp = {p.x, p.y, p.z};
+    int best = -1;
+    double bestSq = std::numeric_limits<double>::infinity();
+    for (std::size_t c = 0; c < cageFaces.size(); c++) {
+      if (!pointInFaces(yCloud, rings, cageFaces[c], gp)) {
+        continue;
+      }
+      const auto dr = minImage(yCloud, p.x, p.y, p.z, centres[c][0],
+                               centres[c][1], centres[c][2]);
+      const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+      if (d2 <= bestSq) {
+        bestSq = d2;
+        best = static_cast<int>(c);
+      }
+    }
+    out.cageOfGuest.push_back(best);
+    out.centreDistance.push_back(best < 0 ? -1.0 : std::sqrt(bestSq));
+    if (best < 0) {
+      ++out.free;
+    } else {
+      ++out.guestsPerCage[static_cast<std::size_t>(best)];
+    }
+  }
+  for (int n : out.guestsPerCage) {
+    if (n > 0) {
+      ++out.occupied;
+    }
+    if (n > 1) {
+      ++out.multiply;
+    }
+  }
+  int maxG = 0;
+  for (int n : out.guestsPerCage) {
+    maxG = std::max(maxG, n);
+  }
+  out.occupancyHistogram.assign(static_cast<std::size_t>(maxG) + 1, 0);
+  for (int n : out.guestsPerCage) {
+    ++out.occupancyHistogram[static_cast<std::size_t>(n)];
+  }
+  return out;
+}
+
+IceClusterIons
+iceClusterIonCensus(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                    const std::vector<bool> &ice,
+                    const std::vector<std::vector<int>> &nListByIndex,
+                    const std::vector<int> &ionIndices, double cutoff) {
+  IceClusterIons out;
+  const int n = yCloud.nop;
+  out.clusterOf.assign(static_cast<std::size_t>(n), -1);
+  out.clusterOfIon.assign(ionIndices.size(), -1);
+  std::vector<int> stack;
+  for (int a = 0; a < n; a++) {
+    if (a >= static_cast<int>(ice.size()) || !ice[static_cast<std::size_t>(a)] ||
+        out.clusterOf[static_cast<std::size_t>(a)] >= 0) {
+      continue;
+    }
+    const int cid = out.nClusters++;
+    stack.push_back(a);
+    out.clusterOf[static_cast<std::size_t>(a)] = cid;
+    while (!stack.empty()) {
+      const int u = stack.back();
+      stack.pop_back();
+      if (u < 0 || static_cast<std::size_t>(u) >= nListByIndex.size()) {
+        continue;
+      }
+      for (std::size_t m = 1; m < nListByIndex[static_cast<std::size_t>(u)].size();
+           m++) {
+        const int v = nListByIndex[static_cast<std::size_t>(u)][m];
+        if (v < 0 || v >= n || v >= static_cast<int>(ice.size())) {
+          continue;
+        }
+        if (!ice[static_cast<std::size_t>(v)] ||
+            out.clusterOf[static_cast<std::size_t>(v)] >= 0) {
+          continue;
+        }
+        out.clusterOf[static_cast<std::size_t>(v)] = cid;
+        stack.push_back(v);
+      }
+    }
+  }
+  out.ionsInCluster.assign(static_cast<std::size_t>(out.nClusters), 0);
+  const double r2max = cutoff * cutoff;
+  for (std::size_t k = 0; k < ionIndices.size(); k++) {
+    const int g = ionIndices[k];
+    if (g < 0 || g >= n) {
+      continue;
+    }
+    int best = -1;
+    double bestSq = r2max;
+    for (int a = 0; a < n; a++) {
+      if (out.clusterOf[static_cast<std::size_t>(a)] < 0) {
+        continue;
+      }
+      const auto dr = gen::relDist(yCloud, g, a);
+      const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+      if (d2 <= bestSq) {
+        bestSq = d2;
+        best = a;
+      }
+    }
+    if (best >= 0) {
+      const int cid = out.clusterOf[static_cast<std::size_t>(best)];
+      out.clusterOfIon[k] = cid;
+      ++out.ionsInCluster[static_cast<std::size_t>(cid)];
     }
   }
   return out;
