@@ -5,6 +5,7 @@
 #include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <order_parameter.hpp>
 #include <seams_input.hpp>
 #include <steinhardt_device.hpp>
 
@@ -16,7 +17,9 @@
 #include <cstring>
 #include <filesystem>
 #include <iomanip>
+#include <limits>
 #include <numeric>
+#include <random>
 #include <sstream>
 
 #ifdef SEAMS_HAS_OPENMP
@@ -375,6 +378,64 @@ TEST_CASE("CHILL+ on the mixed TIP4P example is twelve interClathrate",
   REQUIRE(interClath == 12);
   REQUIRE(water == 238);
   REQUIRE(other == 0);
+}
+
+TEST_CASE("masked 4-NN never scores Ag as ice", "[bop][neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {20.0, 20.0, 20.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  const double coords[6][3] = {{0, 0, 0},
+                               {3, 0, 0},
+                               {-3, 0, 0},
+                               {0, 3, 0},
+                               {0, -3, 0},
+                               {1.0, 0, 0}};
+  const int types[6] = {1, 1, 1, 1, 1, 3};
+  for (int i = 0; i < 6; i++) {
+    molSys::Point<double> pt;
+    pt.type = types[i];
+    pt.atomID = i + 1;
+    pt.molID = i + 1;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+  cloud.nop = 6;
+  const auto nList =
+      nneigh::kNearestNeighbourList(cloud, 4, 6.0, std::vector<int>{1}, true);
+  chill::getCorrelPlus(cloud, nList, false);
+  chill::getIceTypePlusNoPrint(cloud, nList, false);
+  const auto &ag = cloud.pts[5];
+  REQUIRE(ag.type == 3);
+  REQUIRE(nList[5].size() <= 1);
+  REQUIRE(ag.iceType != molSys::atom_state_type::cubic);
+  REQUIRE(ag.iceType != molSys::atom_state_type::hexagonal);
+  REQUIRE(ag.iceType != molSys::atom_state_type::interfacial);
+  REQUIRE(ag.iceType != molSys::atom_state_type::clathrate);
+  REQUIRE(ag.iceType != molSys::atom_state_type::interClathrate);
+  chill::clearIceTypesExcept(cloud, std::vector<int>{1});
+  REQUIRE(cloud.pts[5].iceType == molSys::atom_state_type::unclassified);
+}
+
+TEST_CASE("mixed AgI+water dump scores ice on OW only", "[bop][neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud = sinp::readLammpsTrj("traj/agi_water_tiny.lammpstrj", 1, cloud);
+  REQUIRE(cloud.nop == 7);
+  const auto nList =
+      nneigh::kNearestNeighbourList(cloud, 4, 6.0, std::vector<int>{1}, true);
+  chill::getCorrelPlus(cloud, nList, false);
+  chill::getIceTypePlusNoPrint(cloud, nList, false);
+  chill::clearIceTypesExcept(cloud, std::vector<int>{1});
+  for (int i = 0; i < cloud.nop; i++) {
+    const auto &pt = cloud.pts[static_cast<std::size_t>(i)];
+    if (pt.type == 1) {
+      continue;
+    }
+    REQUIRE(pt.iceType == molSys::atom_state_type::unclassified);
+    REQUIRE(nList[static_cast<std::size_t>(i)].size() <= 1);
+  }
 }
 
 TEST_CASE("getIceTypePlusNoPrint classifies without writing", "[bop]") {
@@ -1053,6 +1114,204 @@ TEST_CASE("Q8 satisfies the addition theorem and Condon-Shortley", "[bop]") {
                    Catch::Matchers::WithinAbs(q8[m].imag(), 1e-15));
     }
   }
+}
+
+TEST_CASE("steinhardtQl l=12 is finite on FCC and differs from q3", "[bop]") {
+  const double lattice = 4.0;
+  auto cloud = fccCloud(4, lattice);
+  const double cutoff = 0.85 * lattice;
+  auto nList = nneigh::neighListO(cutoff, cloud, 1);
+  auto q3 = chill::steinhardtQl(cloud, nList, 3);
+  auto q12 = chill::steinhardtQl(cloud, nList, 12);
+  REQUIRE(q12.ql.size() == static_cast<size_t>(cloud.nop));
+  int nFinite = 0;
+  for (int i = 0; i < cloud.nop; i++) {
+    REQUIRE(std::isfinite(q12.ql[static_cast<std::size_t>(i)]));
+    REQUIRE(std::isfinite(q12.qlBar[static_cast<std::size_t>(i)]));
+    if (q12.ql[static_cast<std::size_t>(i)] != 0.0) {
+      ++nFinite;
+    }
+    REQUIRE_THAT(q3.ql[static_cast<std::size_t>(i)],
+                 Catch::Matchers::WithinAbs(0.0, 1e-9));
+    // Steinhardt, Nelson and Ronchetti 1983 Table I, FCC Q12.
+    REQUIRE_THAT(q12.ql[static_cast<std::size_t>(i)],
+                 Catch::Matchers::WithinAbs(0.60008, 2e-3));
+    REQUIRE_THAT(q12.qlBar[static_cast<std::size_t>(i)],
+                 Catch::Matchers::WithinAbs(q12.ql[static_cast<std::size_t>(i)],
+                                           1e-9));
+  }
+  REQUIRE(nFinite > 0);
+  REQUIRE(std::fabs(q12.ql[0] - q3.ql[0]) > 1e-6);
+}
+
+// Hard-sphere liquid at the hydrate number density. Simple cubic has
+// high even-l Steinhardt weight and inverts the Zeron q12 contrast.
+molSys::PointCloud<molSys::Point<double>, double>
+disorderedLiquid(const std::vector<double> &box, int n, unsigned seed,
+                 double mind = 2.3) {
+  molSys::PointCloud<molSys::Point<double>, double> out;
+  out.box = box;
+  out.boxLow = {0.0, 0.0, 0.0};
+  out.currentFrame = 1;
+  std::mt19937 rng(seed);
+  std::uniform_real_distribution<double> ux(0.0, box[0]);
+  std::uniform_real_distribution<double> uy(0.0, box[1]);
+  std::uniform_real_distribution<double> uz(0.0, box[2]);
+  auto wrap = [](double x, double L) {
+    x -= L * std::floor(x / L);
+    if (x < 0.0) {
+      x += L;
+    }
+    if (x >= L) {
+      x = 0.0;
+    }
+    return x;
+  };
+  auto tooClose = [&](double x, double y, double z) {
+    for (const auto &p : out.pts) {
+      double dx = x - p.x;
+      double dy = y - p.y;
+      double dz = z - p.z;
+      dx -= box[0] * std::round(dx / box[0]);
+      dy -= box[1] * std::round(dy / box[1]);
+      dz -= box[2] * std::round(dz / box[2]);
+      if (dx * dx + dy * dy + dz * dz < mind * mind) {
+        return true;
+      }
+    }
+    return false;
+  };
+  int atomID = 1;
+  for (int attempt = 0; attempt < n * 400 && out.nop < n; attempt++) {
+    const double x = wrap(ux(rng), box[0]);
+    const double y = wrap(uy(rng), box[1]);
+    const double z = wrap(uz(rng), box[2]);
+    if (tooClose(x, y, z)) {
+      continue;
+    }
+    molSys::Point<double> p;
+    p.type = 1;
+    p.x = x;
+    p.y = y;
+    p.z = z;
+    p.atomID = atomID;
+    p.molID = atomID;
+    out.pts.push_back(p);
+    out.idIndexMap[atomID] = out.nop;
+    ++atomID;
+    ++out.nop;
+  }
+  REQUIRE(out.nop == n);
+  return out;
+}
+
+TEST_CASE("Zeron q3/q12 pair separates sI hydrate from liquid on a mixed frame",
+          "[bop]") {
+  molSys::PointCloud<molSys::Point<double>, double> sI;
+  sI = sinp::readLammpsTrjO("traj/genice_sI.lammpstrj", 1, sI, 1);
+  REQUIRE(sI.nop == 46);
+  REQUIRE(sI.box.size() >= 3);
+  const double lx = sI.box[0];
+  const double ly = sI.box[1];
+  const double lz = sI.box[2];
+  molSys::PointCloud<molSys::Point<double>, double> mixed;
+  const double gap = 10.0;
+  mixed.box = {2.0 * lx + gap, ly, lz};
+  mixed.boxLow = {0.0, 0.0, 0.0};
+  mixed.currentFrame = 1;
+  int atomID = 1;
+  for (int i = 0; i < sI.nop; i++) {
+    molSys::Point<double> p = sI.pts[static_cast<std::size_t>(i)];
+    p.type = 1;
+    p.atomID = atomID++;
+    p.molID = p.atomID;
+    mixed.pts.push_back(p);
+    mixed.idIndexMap[p.atomID] = static_cast<int>(mixed.pts.size()) - 1;
+  }
+  mixed.nop = static_cast<int>(mixed.pts.size());
+  const int nHyd = mixed.nop;
+  const double x0 = lx + gap;
+  auto liquid = disorderedLiquid({lx, ly, lz}, nHyd, 11);
+  for (int i = 0; i < nHyd; i++) {
+    molSys::Point<double> p = liquid.pts[static_cast<std::size_t>(i)];
+    p.type = 1;
+    p.atomID = atomID++;
+    p.molID = p.atomID;
+    p.x += x0;
+    mixed.pts.push_back(p);
+    mixed.idIndexMap[p.atomID] = static_cast<int>(mixed.pts.size()) - 1;
+  }
+  mixed.nop = static_cast<int>(mixed.pts.size());
+  REQUIRE(mixed.nop == 2 * nHyd);
+  // Cutoff shell matches the separate-frame Zeron case. k=4 on a
+  // jittered crystal inverts bar-q12 relative to the hydrate.
+  auto nList = nneigh::neighListO(5.5, mixed, 1);
+  const auto q3 = chill::steinhardtQl(mixed, nList, 3);
+  const auto q12 = chill::steinhardtQl(mixed, nList, 12);
+  auto meanRange = [](const std::vector<double> &v, int lo, int hi) {
+    double acc = 0.0;
+    int n = 0;
+    for (int i = lo; i < hi; i++) {
+      if (std::isfinite(v[static_cast<std::size_t>(i)])) {
+        acc += v[static_cast<std::size_t>(i)];
+        ++n;
+      }
+    }
+    return n > 0 ? acc / static_cast<double>(n)
+                 : std::numeric_limits<double>::quiet_NaN();
+  };
+  const double hydQ12 = meanRange(q12.ql, 0, nHyd);
+  const double liqQ12 = meanRange(q12.ql, nHyd, mixed.nop);
+  const double hydQ3 = meanRange(q3.ql, 0, nHyd);
+  const double liqQ3 = meanRange(q3.ql, nHyd, mixed.nop);
+  const double hydQ12Bar = meanRange(q12.qlBar, 0, nHyd);
+  const double liqQ12Bar = meanRange(q12.qlBar, nHyd, mixed.nop);
+  INFO("hyd q3=" << hydQ3 << " q12=" << hydQ12 << " q12bar=" << hydQ12Bar
+                 << " liq q3=" << liqQ3 << " q12=" << liqQ12
+                 << " q12bar=" << liqQ12Bar);
+  REQUIRE(std::isfinite(hydQ12));
+  REQUIRE(std::isfinite(liqQ12));
+  REQUIRE(std::isfinite(hydQ3));
+  REQUIRE(std::isfinite(liqQ3));
+  REQUIRE(std::isfinite(hydQ12Bar));
+  REQUIRE(std::isfinite(liqQ12Bar));
+  REQUIRE(hydQ12Bar != 0.0);
+  REQUIRE(hydQ3 > liqQ3);
+  REQUIRE(hydQ12Bar > liqQ12Bar + 0.05);
+  const double dq3 = hydQ3 - liqQ3;
+  const double dq12 = hydQ12 - liqQ12;
+  REQUIRE(dq3 * dq3 + dq12 * dq12 > 0.02);
+}
+
+TEST_CASE("Zeron q3/q12 pair separates sI hydrate from liquid", "[bop]") {
+  molSys::PointCloud<molSys::Point<double>, double> sI;
+  sI = sinp::readLammpsTrjO("traj/genice_sI.lammpstrj", 1, sI, 1);
+  REQUIRE(sI.nop == 46);
+  auto nHyd = nneigh::neighListO(5.5, sI, 1);
+  const auto q3h = chill::steinhardtQl(sI, nHyd, 3);
+  const auto q12h = chill::steinhardtQl(sI, nHyd, 12);
+  const double q3barH = topoparam::meanFinite(q3h.qlBar);
+  const double q12barH = topoparam::meanFinite(q12h.qlBar);
+  REQUIRE(std::isfinite(q3barH));
+  REQUIRE(std::isfinite(q12barH));
+  REQUIRE(q12barH != 0.0);
+
+  auto liquid = disorderedLiquid(sI.box, sI.nop, 13);
+  auto nLiq = nneigh::neighListO(5.5, liquid, 1);
+  const auto q3l = chill::steinhardtQl(liquid, nLiq, 3);
+  const auto q12l = chill::steinhardtQl(liquid, nLiq, 12);
+  const double q3barL = topoparam::meanFinite(q3l.qlBar);
+  const double q12barL = topoparam::meanFinite(q12l.qlBar);
+  REQUIRE(std::isfinite(q3barL));
+  REQUIRE(std::isfinite(q12barL));
+  UNSCOPED_INFO("q3bar hydrate=" << q3barH << " liquid=" << q3barL
+                                 << " q12bar hydrate=" << q12barH
+                                 << " liquid=" << q12barL);
+  // l=3 is always on the host Ylm path. A 46-molecule cell is smaller
+  // than the Zeron thermal samples; 0.03 still separates the means.
+  REQUIRE(std::fabs(q3barH - q3barL) > 0.03);
+  REQUIRE(q12barH > q12barL + 0.05);
+  REQUIRE(std::fabs(q3barH - q3barL) + std::fabs(q12barH - q12barL) > 0.08);
 }
 
 TEST_CASE("steinhardtQl accepts l=8 and averages correctly on FCC", "[bop]") {

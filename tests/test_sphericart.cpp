@@ -19,6 +19,17 @@ TEST_CASE("sphericart_ylm::available matches the compile-time flag",
 
 #ifdef SEAMS_HAS_SPHERICART
 
+TEST_CASE("sphericart_ylm accepts l=12", "[sphericart]") {
+  const double xyz[3] = {0.3, 0.4, 0.8660254037844386};
+  double cart[50];
+  REQUIRE(seams::sphericart_ylm::ylmCartesian(12, xyz, 1, cart) == 0);
+  double mod = 0.0;
+  for (int m = 0; m < 25; m++) {
+    mod += cart[2 * m] * cart[2 * m] + cart[2 * m + 1] * cart[2 * m + 1];
+  }
+  REQUIRE(mod > 0.0);
+}
+
 TEST_CASE("sphericart real Ylm have the same l=6 modulus as ylmAll",
           "[sphericart]") {
   const double xyz[3] = {0.3, 0.4, 0.8660254037844386};

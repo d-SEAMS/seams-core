@@ -23,10 +23,21 @@ seams rdf FILE --type 2 --cutoff 10
 ~--type 0~ (default) guesses type 2 then type 1. Mixed water dumps in
 this tree use type 2 oxygen. Single-site mW dumps use type 1. A
 mixed-type dump that is not that guess needs ~--type I~; see
-[[file:ionic-liquid.org][Ionic-liquid dumps]]. ~--family~ defaults to
-~waterIce~. ~chill~ / ~chill-plus~ / ~cages~ refuse every other family.
-A triclinic dump uses the stored tilt; see
-[[file:sheared-cells.org][Sheared cells]].
+[[file:ionic-liquid.org][Ionic-liquid dumps]]. ~--type~ is that load
+filter, not the neighbour mask. AgI, kaolinite, INP and brine
+dumps keep substrate and ions out of the four neighbours with
+~--water-types~ (OW LAMMPS types). That flag loads the mixed
+frame and scores ice on those types only.
+
+#+begin_src bash
+seams chill-plus FILE --water-types 1
+seams cages FILE --graph seeded --water-types 1
+seams ions FILE --ion-types 3,4 --water-types 1
+#+end_src
+
+~--family~ defaults to ~waterIce~. ~chill~ / ~chill-plus~ / ~cages~
+refuse every other family. A triclinic dump uses the stored tilt;
+see [[file:sheared-cells.org][Sheared cells]].
 
 #+begin_src bash
 seams chill-plus FILE --type 2

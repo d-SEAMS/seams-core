@@ -15,6 +15,7 @@ test_sources = {
   'cluster': 'test_cluster.cpp',
   'generic': 'test_generic.cpp',
   'order_parameter': 'test_order_parameter.cpp',
+  'phase': 'test_phase.cpp',
   'rdf': 'test_rdf.cpp',
   'rdf2d': 'test_rdf2d.cpp',
   'density': 'test_density.cpp',
@@ -37,6 +38,7 @@ test_sources = {
   'structure_desc': 'test_structure_desc.cpp',
   'cage_affiliation': 'test_cage_affiliation.cpp',
   'cage_enum': 'test_cage_enum.cpp',
+  'c_api': 'test_c_api.cpp',
   'gpu_residency': 'test_gpu_residency.cpp',
   'config': 'test_config.cpp',
   'site': 'test_site.cpp',
@@ -106,6 +108,13 @@ test('simd',
   env: _test_env)
 
 # Performance benchmark binaries (not in regular test suite)
+executable('sota_f4_zeron', 'sota_f4_zeron.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
 executable('bench_algorithms', 'bench_algorithms.cpp',
   dependencies: [yds_dep, catch2_dep],
   cpp_args: _args,
