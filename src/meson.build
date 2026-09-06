@@ -20,6 +20,7 @@ ydslib_sources = files(
   'sphericart_ylm.cpp',
   'neighbours.cpp',
   'order_parameter.cpp',
+  'phase.cpp',
   'pntCorrespondence.cpp',
   'density.cpp',
   'rdf.cpp',
