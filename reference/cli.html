@@ -287,8 +287,8 @@ without changing its contents. <code class="docutils literal notranslate"><span 
 frame has no atoms; without it, empty input retains the legacy text output.</p>
 <section id="commands">
 <h2>Commands<a class="headerlink" href="#commands" title="Link to this heading">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">command</span></code> positional help string is <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">|</span> <span class="pre">chill</span> <span class="pre">|</span> <span class="pre">chill-plus</span> <span class="pre">|</span> <span class="pre">cages</span> <span class="pre">|</span> <span class="pre">fingerprint</span> <span class="pre">|</span> <span class="pre">ions</span> <span class="pre">|</span> <span class="pre">rdf</span> <span class="pre">|</span> <span class="pre">cn</span> <span class="pre">|</span> <span class="pre">hbonds</span> <span class="pre">|</span> <span class="pre">pairs</span> <span class="pre">|</span> <span class="pre">density-z</span> <span class="pre">|</span> <span class="pre">domains</span></code>. <code class="docutils literal notranslate"><span class="pre">chill_plus</span></code> is an accepted alias of <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code> (not
-listed in that help string).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">command</span></code> positional help string is <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">|</span> <span class="pre">chill</span> <span class="pre">|</span> <span class="pre">chill-plus</span> <span class="pre">|</span> <span class="pre">cages</span> <span class="pre">|</span> <span class="pre">fingerprint</span> <span class="pre">|</span> <span class="pre">ions</span> <span class="pre">|</span> <span class="pre">f4</span> <span class="pre">|</span> <span class="pre">steinhardt</span> <span class="pre">|</span> <span class="pre">rdf</span> <span class="pre">|</span> <span class="pre">cn</span> <span class="pre">|</span> <span class="pre">hbonds</span> <span class="pre">|</span> <span class="pre">pairs</span> <span class="pre">|</span> <span class="pre">density-z</span> <span class="pre">|</span> <span class="pre">domains</span></code>. <code class="docutils literal notranslate"><span class="pre">chill_plus</span></code> is an accepted alias of
+<code class="docutils literal notranslate"><span class="pre">chill-plus</span></code> (not listed in that help string).</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -333,6 +333,14 @@ listed in that help string).</p>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ions</span></code></p></td>
 <td><p>ions classed by their first water shell against the seeded cages</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">N</span> <span class="pre">ice</span> <span class="pre">A</span> <span class="pre">ions</span> <span class="pre">I</span> <span class="pre">in-ice</span> <span class="pre">X</span> <span class="pre">front</span> <span class="pre">Y</span> <span class="pre">liquid</span> <span class="pre">Z</span> <span class="pre">shell</span> <span class="pre">S</span> <span class="pre">shell-ice</span> <span class="pre">F</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">f4</span></code></p></td>
+<td><p>Rodger F4 on H-O…O-H pairs</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">N</span> <span class="pre">f4</span> <span class="pre">MEAN</span> <span class="pre">n</span> <span class="pre">M</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">steinhardt</span></code></p></td>
+<td><p>host <span class="math notranslate nohighlight">\(q_3\)</span>, <span class="math notranslate nohighlight">\(\bar q_3\)</span>, <span class="math notranslate nohighlight">\(q_{12}\)</span>, <span class="math notranslate nohighlight">\(\bar q_{12}\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">N</span> <span class="pre">q3</span> <span class="pre">A</span> <span class="pre">q3bar</span> <span class="pre">B</span> <span class="pre">q12</span> <span class="pre">C</span> <span class="pre">q12bar</span> <span class="pre">D</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rdf</span></code></p></td>
 <td><p>partial site-site <span class="math notranslate nohighlight">\(g_{IJ}(r)\)</span></p></td>
