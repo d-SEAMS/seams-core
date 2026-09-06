@@ -1,0 +1,21 @@
+.. index:: pair: enum; GlassKind
+.. _doxid-namespacephase_1a45206ea8c1350d175974e9a54cde9c71:
+
+enum phase::GlassKind
+=====================
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <phase.hpp>
+
+	enum GlassKind {
+	    :target:`other<doxid-namespacephase_1a45206ea8c1350d175974e9a54cde9c71a795f3202b17cb6bc3d4b771d8c6c9eaf>` = 0,
+	    :target:`ice<doxid-namespacephase_1a45206ea8c1350d175974e9a54cde9c71a7bdff76536f12a7c5ffde207e72cfe3a>`,
+	    :target:`lda<doxid-namespacephase_1a45206ea8c1350d175974e9a54cde9c71ad4f501681f5aef29d242c2b6e4d988f4>`,
+	    :target:`mda<doxid-namespacephase_1a45206ea8c1350d175974e9a54cde9c71ac112c8b88569f1cb2d8f22eca738a4b7>`,
+	    :target:`hda<doxid-namespacephase_1a45206ea8c1350d175974e9a54cde9c71a34131c9eef54abfe3aaed6fa275d01dd>`,
+	};
+

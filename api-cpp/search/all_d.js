@@ -32,5 +32,7 @@ var searchData=
   ['normlm_29',['normLM',['../namespaceseams_1_1steinhardt.html#aef637bd4e52ad99c21c04c2530d464f9',1,'seams::steinhardt']]],
   ['notneighboursofring_30',['notNeighboursOfRing',['../namespacering.html#a5db4898b22ebb13511cc37fae6674e5c',1,'ring']]],
   ['nrings_31',['nRings',['../structgpu_1_1BatchResult.html#ab851d787241b52d9210cd08b9dc3c361',1,'gpu::BatchResult']]],
-  ['numstaggered_32',['numStaggered',['../group__chill.html#gaba97c889c36d860a4842f43a3f81a6b5',1,'chill']]]
+  ['nsites_32',['nSites',['../structphase_1_1IceXXIHit.html#a5661ccb01600822c76a777f890e6695b',1,'phase::IceXXIHit']]],
+  ['nsix_33',['nSix',['../structphase_1_1IceXXIHit.html#a5b206d823b13ee7168c0472f193ce03e',1,'phase::IceXXIHit']]],
+  ['numstaggered_34',['numStaggered',['../group__chill.html#gaba97c889c36d860a4842f43a3f81a6b5',1,'chill']]]
 ];

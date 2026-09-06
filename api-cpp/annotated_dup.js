@@ -35,6 +35,9 @@ var annotated_dup =
     [ "nneigh", "namespacenneigh.html", [
       [ "SkinNeighborList", "classnneigh_1_1SkinNeighborList.html", "classnneigh_1_1SkinNeighborList" ]
     ] ],
+    [ "phase", "namespacephase.html", [
+      [ "IceXXIHit", "structphase_1_1IceXXIHit.html", "structphase_1_1IceXXIHit" ]
+    ] ],
     [ "primitive", "namespaceprimitive.html", [
       [ "Vertex", "structprimitive_1_1Vertex.html", "structprimitive_1_1Vertex" ],
       [ "Graph", "structprimitive_1_1Graph.html", "structprimitive_1_1Graph" ],

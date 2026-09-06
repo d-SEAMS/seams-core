@@ -1,0 +1,135 @@
+.. index:: pair: namespace; phase
+.. _doxid-namespacephase:
+
+namespace phase
+===============
+
+.. toctree::
+	:hidden:
+
+	enum_phase_GlassKind.rst
+	struct_phase_IceXXIHit.rst
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace phase {
+
+	// enums
+
+	enum :ref:`GlassKind<doxid-namespacephase_1a45206ea8c1350d175974e9a54cde9c71>`;
+
+	// structs
+
+	struct :ref:`IceXXIHit<doxid-structphase_1_1_ice_x_x_i_hit>`;
+
+	// global functions
+
+	int :ref:`openChannelCount<doxid-namespacephase_1a896a28798e9ac2e9e32e8807ca720cc1>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList);
+	std::uint64_t :ref:`protonKey<doxid-namespacephase_1a42af4d330d8e1ad0aeb8da9ffea7cfaa>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int oxygenType, int hydrogenType);
+	double :ref:`hydrogenMSD<doxid-namespacephase_1ac8231bd6a050a06d0f6c90f15aafb0fb>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& frame0, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& frame1, int hydrogenType);
+	:ref:`IceXXIHit<doxid-structphase_1_1_ice_x_x_i_hit>` :target:`iceXXILibrary<doxid-namespacephase_1aabcf1d0b33a4557dbe42262621400d5f>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud);
+	std::vector<double> :ref:`localDensity<doxid-namespacephase_1a51566a8a99570b9169d7046326bc9544>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double rcut);
+	double :ref:`frameDensity<doxid-namespacephase_1a548c3829160adf36ec9d7ba7dbb065a1>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud);
+	:ref:`GlassKind<doxid-namespacephase_1a45206ea8c1350d175974e9a54cde9c71>` :ref:`glassFromDensity<doxid-namespacephase_1a201ed8bb3cd747bc5663cce11a23c2fa>`(double rho, double iceMax, double ldaMax, double mdaMin);
+	:ref:`GlassKind<doxid-namespacephase_1a45206ea8c1350d175974e9a54cde9c71>` :ref:`glassFromDensity<doxid-namespacephase_1a31b88f162592c1601d40e4363cb87898>`(double rho, double iceMax, double mdaMin);
+	:ref:`GlassKind<doxid-namespacephase_1a45206ea8c1350d175974e9a54cde9c71>` :ref:`glassFromDensity<doxid-namespacephase_1a8eaa4d3fda3aef905fddd4f5e9bc502c>`(double rho);
+
+	} // namespace phase
+.. _details-namespacephase:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Global Functions
+----------------
+
+.. index:: pair: function; openChannelCount
+.. _doxid-namespacephase_1a896a28798e9ac2e9e32e8807ca720cc1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int openChannelCount(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList)
+
+Open hexagonal channel along z: six-rings stacked, not a closed 512.
+
+.. index:: pair: function; protonKey
+.. _doxid-namespacephase_1a42af4d330d8e1ad0aeb8da9ffea7cfaa:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::uint64_t protonKey(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int oxygenType, int hydrogenType)
+
+64-bit key of donated H directions per oxygen (molID-shared hydrogens).
+
+.. index:: pair: function; hydrogenMSD
+.. _doxid-namespacephase_1ac8231bd6a050a06d0f6c90f15aafb0fb:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double hydrogenMSD(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& frame0, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& frame1, int hydrogenType)
+
+Mean squared displacement of hydrogenType between two frames.
+
+.. index:: pair: function; localDensity
+.. _doxid-namespacephase_1a51566a8a99570b9169d7046326bc9544:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> localDensity(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double rcut)
+
+Local number density (1/A^3) in a sphere of radius rcut.
+
+.. index:: pair: function; frameDensity
+.. _doxid-namespacephase_1a548c3829160adf36ec9d7ba7dbb065a1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double frameDensity(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud)
+
+Bulk mass density in g/cm^3 from nop and the box (18.015 g/mol).
+
+.. index:: pair: function; glassFromDensity
+.. _doxid-namespacephase_1a201ed8bb3cd747bc5663cce11a23c2fa:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`GlassKind<doxid-namespacephase_1a45206ea8c1350d175974e9a54cde9c71>` glassFromDensity(double rho, double iceMax, double ldaMax, double mdaMin)
+
+HDA/MDA/LDA/ice from local number density (1/A^3). Ice first-shell density is four neighbours in the 3.5 A sphere (~0.022 A^-3). HDA is the dense shell (>= 0.070 A^-3). ldaMax splits LDA from MDA.
+
+.. index:: pair: function; glassFromDensity
+.. _doxid-namespacephase_1a31b88f162592c1601d40e4363cb87898:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`GlassKind<doxid-namespacephase_1a45206ea8c1350d175974e9a54cde9c71>` glassFromDensity(double rho, double iceMax, double mdaMin)
+
+Three-argument form: LDA/MDA split at the midpoint of iceMax and mdaMin.
+
+.. index:: pair: function; glassFromDensity
+.. _doxid-namespacephase_1a8eaa4d3fda3aef905fddd4f5e9bc502c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`GlassKind<doxid-namespacephase_1a45206ea8c1350d175974e9a54cde9c71>` glassFromDensity(double rho)
+
+Literature local-density windows: ice < 0.028, LDA < 0.040, MDA < 0.070, else HDA.
+

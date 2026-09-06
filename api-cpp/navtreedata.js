@@ -62,9 +62,9 @@ var NAVTREEINDEX =
 [
 "absOrientation_8hpp.html",
 "group__nneigh.html#ga80f555acadad22b5edcc4af8285006ed",
-"namespacepntToPnt.html#add7f31e0a4e17beae5c3ded8752e9259",
-"structgpu_1_1BatchResult.html#a904866eb6e3bc39730f2e2626530a129",
-"structtopo_1_1LocalKey.html#a46842962761d0b24c821e614b0598506"
+"namespacephase.html#a548c3829160adf36ec9d7ba7dbb065a1",
+"structchill_1_1VoronoiWeights.html",
+"structtopo_1_1FrameFingerprint.html#a4d7179bcacbf440ed2a9bd1a8aefb260"
 ];
 
 const SYNCONMSG = 'click to disable panel synchronization';

@@ -20,5 +20,6 @@ var searchData=
   ['firstminimumbin_17',['firstMinimumBin',['../group__rdf.html#ga69992a657891f8f1142240d0522b3e47',1,'rdf']]],
   ['fit_18',['fit',['../structchill_1_1LinearClassifier.html#a71891e00818b87d370748614fc3e84ff',1,'chill::LinearClassifier']]],
   ['foreachlammpsframe_19',['forEachLammpsFrame',['../group__sinp.html#ga4fe394481a2ab435bb497c1423235033',1,'sinp']]],
-  ['formatdumpbox_20',['formatDumpBox',['../group__gen.html#ga92412c34a5480e96297c968633b07652',1,'gen']]]
+  ['formatdumpbox_20',['formatDumpBox',['../group__gen.html#ga92412c34a5480e96297c968633b07652',1,'gen']]],
+  ['framedensity_21',['frameDensity',['../namespacephase.html#a548c3829160adf36ec9d7ba7dbb065a1',1,'phase']]]
 ];

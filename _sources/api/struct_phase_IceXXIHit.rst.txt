@@ -1,0 +1,28 @@
+.. index:: pair: struct; phase::IceXXIHit
+.. _doxid-structphase_1_1_ice_x_x_i_hit:
+
+struct phase::IceXXIHit
+=======================
+
+.. toctree::
+	:hidden:
+
+Ice XXI library: Lee et al., Nat. Mater. 25, 302 (2026), I-4 2d, Z=152, a=b=20.197 A, c=7.891 A, 1.413 g/cm^3. A hit also requires a tetrahedral 3.5 A graph (mean coordination in [3.5, 4.5]) and at least one primitive six-ring. A simple-cubic packing of 152 sites in that cell is not a hit.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <phase.hpp>
+	
+	struct IceXXIHit {
+		// fields
+	
+		bool :target:`match<doxid-structphase_1_1_ice_x_x_i_hit_1a595d2dc59b6d161de41d79466ef740e3>` = false;
+		int :target:`nSites<doxid-structphase_1_1_ice_x_x_i_hit_1a5661ccb01600822c76a777f890e6695b>` = 0;
+		int :target:`nSix<doxid-structphase_1_1_ice_x_x_i_hit_1a5b206d823b13ee7168c0472f193ce03e>` = 0;
+		double :target:`a<doxid-structphase_1_1_ice_x_x_i_hit_1ad460af558a81e77fe720269e23a9f4d7>` = 0.0;
+		double :target:`c<doxid-structphase_1_1_ice_x_x_i_hit_1a1a872e0a52bd6f72e69777182083769b>` = 0.0;
+		double :target:`density<doxid-structphase_1_1_ice_x_x_i_hit_1ad68eea6102729132f408bea7bb70585e>` = 0.0;
+		double :target:`meanCoord<doxid-structphase_1_1_ice_x_x_i_hit_1ada69293ebab3b1ba2d813fe8cb7fa6a2>` = 0.0;
+	};

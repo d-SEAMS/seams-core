@@ -16,5 +16,7 @@ var searchData=
   ['nlistbytes_13',['nlistBytes',['../structgpu_1_1Footprint.html#ab473038da5c197da756b2f3812d3258f',1,'gpu::Footprint']]],
   ['nop_14',['nop',['../group__molSys.html#ga2bdcb9260bd83f313a2d27fcc6437ef1',1,'molSys::PointCloud']]],
   ['noperations_15',['nOperations',['../structira_1_1PointGroup.html#a1e65b4956b4fa7c746d8153cae52cda9',1,'ira::PointGroup']]],
-  ['nrings_16',['nRings',['../structgpu_1_1BatchResult.html#ab851d787241b52d9210cd08b9dc3c361',1,'gpu::BatchResult']]]
+  ['nrings_16',['nRings',['../structgpu_1_1BatchResult.html#ab851d787241b52d9210cd08b9dc3c361',1,'gpu::BatchResult']]],
+  ['nsites_17',['nSites',['../structphase_1_1IceXXIHit.html#a5661ccb01600822c76a777f890e6695b',1,'phase::IceXXIHit']]],
+  ['nsix_18',['nSix',['../structphase_1_1IceXXIHit.html#a5b206d823b13ee7168c0472f193ce03e',1,'phase::IceXXIHit']]]
 ];

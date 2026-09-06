@@ -64,6 +64,7 @@ var namespaces_dup =
     ] ],
     [ "molSys", "namespacemolSys.html", "namespacemolSys" ],
     [ "nneigh", "namespacenneigh.html", "namespacenneigh" ],
+    [ "phase", "namespacephase.html", "namespacephase" ],
     [ "pntToPnt", "namespacepntToPnt.html", [
       [ "changeDiaCageOrder", "namespacepntToPnt.html#a76f40693a1710a7a2d065a211de8b033", null ],
       [ "changeHexCageOrder", "namespacepntToPnt.html#a640219c17f532aa11fe3269cd5d3a4e8", null ],

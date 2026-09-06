@@ -11,6 +11,7 @@ Global Namespace
 	namespace_gpu.rst
 	namespace_ira.rst
 	namespace_match.rst
+	namespace_phase.rst
 	namespace_pntToPnt.rst
 	namespace_seams.rst
 	namespace_site.rst
@@ -39,6 +40,7 @@ Global Namespace
 	namespace :ref:`match<doxid-namespacematch>`;
 	namespace :ref:`molSys<doxid-namespacemol_sys>`;
 	namespace :ref:`nneigh<doxid-namespacenneigh>`;
+	namespace :ref:`phase<doxid-namespacephase>`;
 	namespace :ref:`pntToPnt<doxid-namespacepnt_to_pnt>`;
 	namespace :ref:`primitive<doxid-namespaceprimitive>`;
 	namespace :ref:`prism3<doxid-namespaceprism3>`;

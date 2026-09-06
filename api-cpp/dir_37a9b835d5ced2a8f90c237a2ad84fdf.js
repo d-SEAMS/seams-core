@@ -18,6 +18,7 @@ var dir_37a9b835d5ced2a8f90c237a2ad84fdf =
     [ "mol_sys.hpp", "mol__sys_8hpp.html", "mol__sys_8hpp" ],
     [ "neighbours.hpp", "neighbours_8hpp.html", "neighbours_8hpp" ],
     [ "order_parameter.hpp", "order__parameter_8hpp.html", "order__parameter_8hpp" ],
+    [ "phase.hpp", "phase_8hpp.html", "phase_8hpp" ],
     [ "pntCorrespondence.hpp", "pntCorrespondence_8hpp.html", "pntCorrespondence_8hpp" ],
     [ "rdf.hpp", "rdf_8hpp.html", "rdf_8hpp" ],
     [ "rdf2d.hpp", "rdf2d_8hpp.html", "rdf2d_8hpp" ],

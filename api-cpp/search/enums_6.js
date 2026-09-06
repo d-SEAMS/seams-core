@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['structype_0',['strucType',['../group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1',1,'ring']]]
+  ['kind_0',['Kind',['../group__cage.html#gaeaa9e4802e930824b43c274cec2486c5',1,'cage::Signature::Kind'],['../namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90',1,'site::Kind']]]
 ];
