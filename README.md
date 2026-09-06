@@ -59,7 +59,7 @@ environment. `seams --print-config` prints the resolved table.
 | `SEAMS_GRAPH` | `cutoff` / `knn` / `knn-union` / `seeded` | `seeded` |
 | `SEAMS_RESIDENT` | Fraction of free GPU memory for a TUM batch | `0.80` |
 | `SEAMS_CELL` | Link-cell hint so NPT frames share a grid (Å) | `3.0` |
-| `SEAMS_OFFLOAD` | OpenMP target Steinhardt (`0` disables) | on if devices exist |
+| `SEAMS_OFFLOAD` | OpenMP target Steinhardt and TUM cages (`0` disables) | on if devices exist |
 | `LINKCELL_TPP` | Threads per particle on the device k-NN | occupancy picker |
 | `LINKCELL_BLOCK` | CUDA block size | occupancy picker |
 | `YODA_FENNEL_PATH` / `YODA_LUA_PATH` | Installed Lua/Fennel search roots | build paths |
