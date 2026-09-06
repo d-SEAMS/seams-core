@@ -120,7 +120,7 @@ TEST_CASE("ice XXI library rejects a 152-site simple-cubic BCT packing",
   REQUIRE(hit.nSites == 152);
   REQUIRE_THAT(hit.a, Catch::Matchers::WithinAbs(a, 1e-9));
   REQUIRE_THAT(hit.c, Catch::Matchers::WithinAbs(c, 1e-9));
-  REQUIRE(hit.meanCoord > 4.5);
+  REQUIRE(hit.nSix < 50);
   REQUIRE_FALSE(hit.match);
   molSys::PointCloud<molSys::Point<double>, double> sI;
   sI = sinp::readLammpsTrjO("traj/genice_sI.lammpstrj", 1, sI, 1);
@@ -128,6 +128,21 @@ TEST_CASE("ice XXI library rejects a 152-site simple-cubic BCT packing",
   molSys::PointCloud<molSys::Point<double>, double> ic;
   ic = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, ic, 1);
   REQUIRE_FALSE(phase::iceXXILibrary(ic).match);
+}
+
+TEST_CASE("ice XXI library hits the Lee 2026 I-42d oxygen cell", "[phase]") {
+  molSys::PointCloud<molSys::Point<double>, double> xxi;
+  xxi = sinp::readLammpsTrjO("traj/iceXXI_lee2026.lammpstrj", 1, xxi, 1);
+  REQUIRE(xxi.nop == 152);
+  const auto hit = phase::iceXXILibrary(xxi);
+  REQUIRE(hit.nSites == 152);
+  REQUIRE_THAT(hit.a, Catch::Matchers::WithinAbs(20.1966, 0.01));
+  REQUIRE_THAT(hit.c, Catch::Matchers::WithinAbs(7.8912, 0.01));
+  REQUIRE_THAT(hit.density, Catch::Matchers::WithinAbs(1.413, 0.02));
+  REQUIRE(hit.meanCoord >= 3.5);
+  REQUIRE(hit.meanCoord <= 4.5);
+  REQUIRE(hit.nSix > 0);
+  REQUIRE(hit.match);
 }
 
 TEST_CASE("dense local shells bin as HDA; tetrahedral ice does not",

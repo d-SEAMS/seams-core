@@ -210,7 +210,9 @@ phase::IceXXIHit phase::iceXXILibrary(
   const bool aOk = std::fabs(hit.a - kXXIa) < 0.4;
   const bool cOk = std::fabs(hit.c - kXXIc) < 0.3;
   const bool rhoOk = std::fabs(hit.density - kXXIrho) < 0.08;
-  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  // Ice I uses 3.5 A; ice XXI at 1.413 g/cm3 has a 3.0 A first shell.
+  // Four-nearest neighbours are the tetrahedral graph in both cells.
+  auto nList = nneigh::kNearestNeighbourList(yCloud, 4, 3.5, 1, true);
   nList = nneigh::neighbourListByIndex(yCloud, nList);
   double coord = 0.0;
   for (const auto &row : nList) {
@@ -224,7 +226,10 @@ phase::IceXXIHit phase::iceXXILibrary(
     hit.nSix += static_cast<int>(r.size() == 6);
   }
   const bool tetra = hit.meanCoord >= 3.5 && hit.meanCoord <= 4.5;
-  hit.match = nOk && aOk && cOk && rhoOk && tetra && hit.nSix > 0;
+  // The Lee cell has ~112 primitive six-rings on the 4-NN graph.
+  // A cubic packing of the same box can form one accidental six-ring.
+  const bool ringsOk = hit.nSix >= 50;
+  hit.match = nOk && aOk && cOk && rhoOk && tetra && ringsOk;
   return hit;
 }
 

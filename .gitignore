@@ -368,3 +368,4 @@ repro/figshare/
 repro/results/
 repro/zenodo/payload/
 .tip_sha
+/.lammps-src
