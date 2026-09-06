@@ -9,6 +9,17 @@ The release history is [[file:../../CHANGELOG.md][CHANGELOG.md]]
 (Keep a Changelog, assembled by towncrier). This page is the
 narrative cut used in the book.
 
+* 2.10.0
+
+Rodger F4 and host \(q_{12}\) are CLI fields. CHILL and CHILL+ use
+the mutual four-nearest graph and an optional water-type mask.
+Incomplete cups sit next to closed signatures. TUM stacking planes
+sit next to the CHILL+ \(I_{sd}\) bins; ~SEAMS_OFFLOAD=1~ runs the
+hop-bound TUM cages (host when there is no device). Ice XXI is the
+Lee 2026 BCT cell plus a tetrahedral six-ring graph. Hexagonal
+channels are stacked six-ring prisms. ~compute dseams~ writes
+CHILL+ from the C ABI and ships ~water.data~.
+
 * 2.9.2
 
 Every host stage of the ring pipeline threads. The cutoff neighbour

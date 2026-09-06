@@ -10,6 +10,36 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## [2.10.0] - 2026-09-06
+
+### Added
+
+- Add Rodger F4 and host-only Steinhardt l=12 so the Zeron q3/q12 hydrate pair is a per-atom field.
+- Add TUM/rings stacking planes (HC-basal and DDC-equatorial) next to the CHILL+ I_sd molecule-bin reference.
+- Add a C ABI seams_chill_plus for native and emscripten builds.
+- Add extras/lammps compute dseams that writes seams_chill_plus per atom.
+- Assign guests by ray-parity inside fan-triangulated cage faces, and count ions per ice cluster on the oxygen graph.
+- Bin CHILL+ cubic and hexagonal molecules into basal layers and emit cubicity Phi_c plus the H/C stacking string.
+- Build CHILL+, cages, seeded ions and k-NN on an explicit water-type mask (`--water-types`) so substrate and ions never enter the four-neighbour list. The flag loads the mixed dump; ice and cage counts are the water types only.
+- Enumerate cups and incomplete cages on the ring graph; closed signature counts stay the closed path.
+- Hexagonal channels are stacked six-ring prisms, not a raw six-ring count. Ice XXI (Lee et al. 2026, Z=152 BCT) also requires a tetrahedral 3.5 A graph and a primitive six-ring. Hydrogen MSD uses the minimum image. Glass labels use local-density windows for ice/LDA/MDA/HDA. `compute dseams` ships with `water.data` and `pair_style zero`.
+- Name 51264, 51268 and sH cages, and report a per-cage occupancy histogram.
+- OpenMP target offload of the TUM ice score: hop-bound primitive six-rings and HC/DDC cage affiliation. `SEAMS_OFFLOAD=1` cage counts match the host on mW cubic, including `seams cages --graph seeded` (union 4-NN graph). Device CHILL+ is not this path.
+- Update topology keys only on the hop-ball of atoms whose neighbourhood changed.
+
+### Changed
+
+- CHILL and CHILL+ default to the mutual four-nearest graph. vesin still owns cutoff pairs; linkcell still owns k-nearest.
+- Dump MIC and vesin pair reduction go through the minimage wrap. The simd Catch2 binary links it when the wrap is present.
+
+### Fixed
+
+- Accept a cup that fills the signature face count with dangling edges.
+- Evaluate Steinhardt l=12 qlBar on the host so the 25-component average does not overflow the device barRe[17] buffer.
+- Load oxygen and hydrogen together for `seams f4` so Rodger F4 is finite when mol IDs exist.
+- Place sI hydrogens with TIP3P HOH and a 15 degree libration so Rodger F4 sits near 0.7, score Zeron q12bar against a disordered liquid, and evaluate host l=12 Ylm when sphericart is off.
+
+
 ## [2.9.2] - 2026-09-02
 
 ### Added
