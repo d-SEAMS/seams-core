@@ -20,6 +20,7 @@ var namespacechill =
     [ "chillRule", "group__chill.html#ga1bc0f302f0567e60061fd3f82a472b81", null ],
     [ "classifyBonds", "group__chill.html#ga685e260b6bf728585deefc814eb82be1", null ],
     [ "classifyTemplates", "namespacechill.html#a6235256c303786bfee2a6143044b46a8", null ],
+    [ "clearIceTypesExcept", "group__chill.html#ga6c253832dc8e20f4450ed81d1edc7bf7", null ],
     [ "getCorrel", "group__chill.html#ga4017efb120fe038acfabec9175e2aef6", null ],
     [ "getCorrelPlus", "group__chill.html#ga00437c7dd47b3126a35b5bb410904ee2", null ],
     [ "getIceType", "group__chill.html#ga86fb1f94d087bcc2d0a55f487629ca17", null ],

@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>struct site::GuestOccupancy - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="struct site::IonEnvironment" href="struct_site_IonEnvironment.html" /><link rel="prev" title="struct site::DensityZ" href="struct_site_DensityZ.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>struct site::GuestOccupancy - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="struct site::IceClusterIons" href="struct_site_IceClusterIons.html" /><link rel="prev" title="struct site::DensityZ" href="struct_site_DensityZ.html" />
       <link rel="canonical" href="https://docs.dseams.info/api/struct_site_GuestOccupancy.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -326,7 +326,8 @@ data-aria-dark="Switch to auto color mode">
 <span data-line="9">    <span class="kt">int</span> <a class="doxyrest-code-link reference internal" href="#doxid-structsite-1-1-guest-occupancy-1aa03cd68e5f4575f5aabf5fedc5234a34"><span class="std std-ref">occupied</span></a> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
 <span data-line="10">    <span class="kt">int</span> <a class="doxyrest-code-link reference internal" href="#doxid-structsite-1-1-guest-occupancy-1abdec0c14299ff5902b93dc131db43026"><span class="std std-ref">multiply</span></a> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
 <span data-line="11">    <span class="kt">int</span> <a class="doxyrest-code-link reference internal" href="#doxid-structsite-1-1-guest-occupancy-1aca1af9a15208a80f6ddb598fa3a2c3bd"><span class="std std-ref">free</span></a> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
-<span data-line="12"><span class="p">};</span></span>
+<span data-line="12">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-structsite-1-1-guest-occupancy-1ae9b40cb83485c4236287f1332c563bb6"><span class="std std-ref">occupancyHistogram</span></a><span class="p">;</span></span>
+<span data-line="13"><span class="p">};</span></span>
 </pre></div>
 </section>
 <section id="detailed-documentation">
@@ -359,6 +360,10 @@ data-aria-dark="Switch to auto color mode">
 <span id="index-6"></span><pre><span data-line="1"><span class="kt">int</span> <span class="n">free</span> <span class="o">=</span> <span class="mi">0</span></span>
 </pre></div>
 <p>guests in no cage</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-structsite-1-1-guest-occupancy-1ae9b40cb83485c4236287f1332c563bb6">
+<span id="index-7"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">occupancyHistogram</span></span>
+</pre></div>
+<p>hist[k] = cages with k guests</p>
 </section>
 </section>
 </section>
@@ -375,10 +380,10 @@ data-aria-dark="Switch to auto color mode">
         <span>Previous</span><div class="title">struct site::DensityZ</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="struct_site_IonEnvironment.html">
+    <a href="struct_site_IceClusterIons.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">struct site::IonEnvironment</div>
+        <div class="title">struct site::IceClusterIons</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

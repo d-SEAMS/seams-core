@@ -306,22 +306,26 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="simd__distance_8hpp_source.html#l00093">93</a> of file <a class="el" href="simd__distance_8hpp_source.html">simd_distance.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   95</span>                                                                  {</div>
-<div class="line"><span class="lineno">   96</span>  <span class="comment">// Matches the vectorised path: one reciprocal per axis for the whole batch</span></div>
-<div class="line"><span class="lineno">   97</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rbx = 1.0 / bx;</div>
-<div class="line"><span class="lineno">   98</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rby = 1.0 / by;</div>
-<div class="line"><span class="lineno">   99</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rbz = 1.0 / bz;</div>
-<div class="line"><span class="lineno">  100</span>  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; n; i++) {</div>
-<div class="line"><span class="lineno">  101</span>    <span class="keywordtype">double</span> ddx = std::fabs(dx[i]);</div>
-<div class="line"><span class="lineno">  102</span>    <span class="keywordtype">double</span> ddy = std::fabs(dy[i]);</div>
-<div class="line"><span class="lineno">  103</span>    <span class="keywordtype">double</span> ddz = std::fabs(dz[i]);</div>
-<div class="line"><span class="lineno">  104</span>    ddx -= bx * std::round(ddx * rbx);</div>
-<div class="line"><span class="lineno">  105</span>    ddy -= by * std::round(ddy * rby);</div>
-<div class="line"><span class="lineno">  106</span>    ddz -= bz * std::round(ddz * rbz);</div>
-<div class="line"><span class="lineno">  107</span>    out[i] = ddx * ddx + ddy * ddy + ddz * ddz;</div>
-<div class="line"><span class="lineno">  108</span>  }</div>
-<div class="line"><span class="lineno">  109</span>}</div>
+<p class="definition">Definition at line <a class="el" href="simd__distance_8hpp_source.html#l00101">101</a> of file <a class="el" href="simd__distance_8hpp_source.html">simd_distance.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  103</span>                                                                  {</div>
+<div class="line"><span class="lineno">  104</span><span class="preprocessor">#ifdef SEAMS_HAS_MINIMAGE</span></div>
+<div class="line"><span class="lineno">  105</span>  mi_dist2_ortho_diffs(dx, dy, dz, bx, by, bz, out, n);</div>
+<div class="line"><span class="lineno">  106</span>  <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  107</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  108</span>  <span class="comment">// Matches the vectorised path: one reciprocal per axis for the whole batch</span></div>
+<div class="line"><span class="lineno">  109</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rbx = 1.0 / bx;</div>
+<div class="line"><span class="lineno">  110</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rby = 1.0 / by;</div>
+<div class="line"><span class="lineno">  111</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rbz = 1.0 / bz;</div>
+<div class="line"><span class="lineno">  112</span>  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; n; i++) {</div>
+<div class="line"><span class="lineno">  113</span>    <span class="keywordtype">double</span> ddx = std::fabs(dx[i]);</div>
+<div class="line"><span class="lineno">  114</span>    <span class="keywordtype">double</span> ddy = std::fabs(dy[i]);</div>
+<div class="line"><span class="lineno">  115</span>    <span class="keywordtype">double</span> ddz = std::fabs(dz[i]);</div>
+<div class="line"><span class="lineno">  116</span>    ddx -= bx * std::round(ddx * rbx);</div>
+<div class="line"><span class="lineno">  117</span>    ddy -= by * std::round(ddy * rby);</div>
+<div class="line"><span class="lineno">  118</span>    ddz -= bz * std::round(ddz * rbz);</div>
+<div class="line"><span class="lineno">  119</span>    out[i] = ddx * ddx + ddy * ddy + ddz * ddz;</div>
+<div class="line"><span class="lineno">  120</span>  }</div>
+<div class="line"><span class="lineno">  121</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>

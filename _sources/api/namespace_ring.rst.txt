@@ -10,6 +10,7 @@ namespace ring
 	struct_ring_CageAffiliation.rst
 	struct_ring_RingSearchIndex.rst
 	struct_ring_SeededAtomLabels.rst
+	struct_ring_StackingPlanes.rst
 	class_ring_AffiliationUpdater.rst
 
 Overview
@@ -29,6 +30,7 @@ Topological network criteria functions. :ref:`More...<details-namespacering>`
 	struct :ref:`CageAffiliation<doxid-structring_1_1_cage_affiliation>`;
 	struct :ref:`RingSearchIndex<doxid-structring_1_1_ring_search_index>`;
 	struct :ref:`SeededAtomLabels<doxid-structring_1_1_seeded_atom_labels>`;
+	struct :ref:`StackingPlanes<doxid-structring_1_1_stacking_planes>`;
 
 	// classes
 
@@ -36,6 +38,7 @@ Topological network criteria functions. :ref:`More...<details-namespacering>`
 
 	// global functions
 
+	:ref:`StackingPlanes<doxid-structring_1_1_stacking_planes>` :target:`stackingPlanes<doxid-namespacering_1aac3cc296115f9c2beabbd4bb01c30002>`(const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList);
 	:ref:`CageAffiliation<doxid-structring_1_1_cage_affiliation>` :ref:`cageAffiliation<doxid-namespacering_1a6a455f7a0da97df613534671c9377a45>`(const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList);
 	:ref:`SeededAtomLabels<doxid-structring_1_1_seeded_atom_labels>` :ref:`seededCageAffiliation<doxid-namespacering_1a1f59a70140bd3498eb53e448f916229f>`(const std::vector<std::vector<int>>& strictRings, const std::vector<std::vector<int>>& strictNList, const std::vector<std::vector<int>>& permissiveRings, const std::vector<std::vector<int>>& permissiveNList, bool ringAdjacentCompletion = false);
 	:ref:`SeededAtomLabels<doxid-structring_1_1_seeded_atom_labels>` :ref:`ringAdjacentCompletion<doxid-namespacering_1a52d5bc312612884ce62bd430d94fdb17>`(const :ref:`SeededAtomLabels<doxid-structring_1_1_seeded_atom_labels>`& labels, const std::vector<std::vector<int>>& permissiveRings);

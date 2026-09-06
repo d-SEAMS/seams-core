@@ -324,9 +324,10 @@ data-aria-dark="Switch to auto color mode">
 <span data-line="8">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-structtopo-1-1-frame-fingerprint-1a7552450f798d8591d7580e8d9422bcb6"><span class="std std-ref">atomKeys</span></a><span class="p">;</span></span>
 <span data-line="9">    <span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-structtopo-1-1-frame-fingerprint-1a7b460d00fe40ddad15c680fec009eecf"><span class="std std-ref">classes</span></a><span class="p">;</span></span>
 <span data-line="10">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-structtopo-1-1-frame-fingerprint-1af25731956ad220bebec8965a6e8432bc"><span class="std std-ref">ringCensus</span></a><span class="p">;</span></span>
-<span data-line="11">    <span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-structtopo_1_1_frame_fingerprint_1a436b359c7a9bb9b2c849d0e37d13962d"></span><span class="n">hops</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
-<span data-line="12">    <span class="kt">bool</span> <a class="doxyrest-code-link reference internal" href="#doxid-structtopo-1-1-frame-fingerprint-1aac82494c5f215c4bdda77ba4b576e839"><span class="std std-ref">coloured</span></a> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span></span>
-<span data-line="13"><span class="p">};</span></span>
+<span data-line="11">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">uint64_t</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-structtopo-1-1-frame-fingerprint-1a410ffeaef275b28480cdfca323f48985"><span class="std std-ref">wlAtom</span></a><span class="p">;</span></span>
+<span data-line="12">    <span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-structtopo_1_1_frame_fingerprint_1a436b359c7a9bb9b2c849d0e37d13962d"></span><span class="n">hops</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
+<span data-line="13">    <span class="kt">bool</span> <a class="doxyrest-code-link reference internal" href="#doxid-structtopo-1-1-frame-fingerprint-1aac82494c5f215c4bdda77ba4b576e839"><span class="std std-ref">coloured</span></a> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span></span>
+<span data-line="14"><span class="p">};</span></span>
 </pre></div>
 </section>
 <section id="detailed-documentation">
@@ -353,8 +354,12 @@ data-aria-dark="Switch to auto color mode">
 <span id="index-5"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">ringCensus</span></span>
 </pre></div>
 <p>ringCensus[s] = primitive rings of size s</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-structtopo-1-1-frame-fingerprint-1a410ffeaef275b28480cdfca323f48985">
+<span id="index-6"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">uint64_t</span><span class="o">&gt;</span> <span class="n">wlAtom</span></span>
+</pre></div>
+<p>per-atom WL hash used in the frame key</p>
 <div class="doxyrest-title-code-block highlight" id="doxid-structtopo-1-1-frame-fingerprint-1aac82494c5f215c4bdda77ba4b576e839">
-<span id="index-6"></span><pre><span data-line="1"><span class="kt">bool</span> <span class="n">coloured</span> <span class="o">=</span> <span class="nb">false</span></span>
+<span id="index-7"></span><pre><span data-line="1"><span class="kt">bool</span> <span class="n">coloured</span> <span class="o">=</span> <span class="nb">false</span></span>
 </pre></div>
 <p>keys carry vertex colours</p>
 </section>

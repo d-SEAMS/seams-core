@@ -305,7 +305,7 @@ data-aria-dark="Switch to auto color mode">
 </div>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
-<p>One closed polyhedron matching a signature. <a class="reference internal" href="#details-structcage-1-1-found-cage"><span class="std std-ref">More…</span></a></p>
+<p>One cage matching a signature, closed or incomplete. <a class="reference internal" href="#details-structcage-1-1-found-cage"><span class="std std-ref">More…</span></a></p>
 <div class="doxyrest-overview-code-block highlight">
 <pre><span data-line="1"><span class="cp">#include</span> <span class="cpf">&lt;cage_enum.hpp&gt;</span></span>
 <span data-line="2"> </span>
@@ -316,12 +316,14 @@ data-aria-dark="Switch to auto color mode">
 <span data-line="7">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-structcage-1-1-found-cage-1a195d96130e05b294524772d8d5a1572d"><span class="std std-ref">faces</span></a><span class="p">;</span></span>
 <span data-line="8">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-structcage-1-1-found-cage-1af7b6c0760f27407dd0b2b4da91155d3b"><span class="std std-ref">vertices</span></a><span class="p">;</span></span>
 <span data-line="9">    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <a class="doxyrest-code-link reference internal" href="#doxid-structcage-1-1-found-cage-1a8415a1763a942d096d45a7e0f1c68211"><span class="std std-ref">certificate</span></a><span class="p">;</span></span>
-<span data-line="10"><span class="p">};</span></span>
+<span data-line="10">    <span class="kt">bool</span> <a class="doxyrest-code-link reference internal" href="#doxid-structcage-1-1-found-cage-1ae337c5cd45e8136dce02fc84eee25ac8"><span class="std std-ref">closed</span></a> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span></span>
+<span data-line="11">    <span class="kt">int</span> <a class="doxyrest-code-link reference internal" href="#doxid-structcage-1-1-found-cage-1a9ef2755df5d9fa2bb11e5543b0f02004"><span class="std std-ref">danglingEdges</span></a> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
+<span data-line="12"><span class="p">};</span></span>
 </pre></div>
 </section>
 <section id="detailed-documentation">
 <span id="details-structcage-1-1-found-cage"></span><h2>Detailed Documentation<a class="headerlink" href="#detailed-documentation" title="Link to this heading">¶</a></h2>
-<p>One closed polyhedron matching a signature.</p>
+<p>One cage matching a signature, closed or incomplete.</p>
 <section id="fields">
 <h3>Fields<a class="headerlink" href="#fields" title="Link to this heading">¶</a></h3>
 <div class="doxyrest-title-code-block highlight" id="doxid-structcage-1-1-found-cage-1a195d96130e05b294524772d8d5a1572d">
@@ -336,6 +338,14 @@ data-aria-dark="Switch to auto color mode">
 <span id="index-3"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">certificate</span></span>
 </pre></div>
 <p>nauty hex, empty when nauty is off</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-structcage-1-1-found-cage-1ae337c5cd45e8136dce02fc84eee25ac8">
+<span id="index-4"></span><pre><span data-line="1"><span class="kt">bool</span> <span class="n">closed</span> <span class="o">=</span> <span class="nb">true</span></span>
+</pre></div>
+<p>every face edge used twice</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-structcage-1-1-found-cage-1a9ef2755df5d9fa2bb11e5543b0f02004">
+<span id="index-5"></span><pre><span data-line="1"><span class="kt">int</span> <span class="n">danglingEdges</span> <span class="o">=</span> <span class="mi">0</span></span>
+</pre></div>
+<p>edges used once (cups / incomplete)</p>
 </section>
 </section>
 </section>

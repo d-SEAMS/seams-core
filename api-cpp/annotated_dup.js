@@ -47,7 +47,8 @@ var annotated_dup =
       [ "AffiliationUpdater", "classring_1_1AffiliationUpdater.html", "classring_1_1AffiliationUpdater" ],
       [ "CageAffiliation", "structring_1_1CageAffiliation.html", "structring_1_1CageAffiliation" ],
       [ "RingSearchIndex", "structring_1_1RingSearchIndex.html", "structring_1_1RingSearchIndex" ],
-      [ "SeededAtomLabels", "structring_1_1SeededAtomLabels.html", "structring_1_1SeededAtomLabels" ]
+      [ "SeededAtomLabels", "structring_1_1SeededAtomLabels.html", "structring_1_1SeededAtomLabels" ],
+      [ "StackingPlanes", "structring_1_1StackingPlanes.html", "structring_1_1StackingPlanes" ]
     ] ],
     [ "seams", "namespaceseams.html", [
       [ "cfg", "namespaceseams_1_1cfg.html", [
@@ -57,6 +58,7 @@ var annotated_dup =
     [ "site", "namespacesite.html", [
       [ "DensityZ", "structsite_1_1DensityZ.html", "structsite_1_1DensityZ" ],
       [ "GuestOccupancy", "structsite_1_1GuestOccupancy.html", "structsite_1_1GuestOccupancy" ],
+      [ "IceClusterIons", "structsite_1_1IceClusterIons.html", "structsite_1_1IceClusterIons" ],
       [ "IonEnvironment", "structsite_1_1IonEnvironment.html", "structsite_1_1IonEnvironment" ],
       [ "Table", "structsite_1_1Table.html", "structsite_1_1Table" ]
     ] ],
@@ -65,5 +67,8 @@ var annotated_dup =
       [ "FrameFingerprint", "structtopo_1_1FrameFingerprint.html", "structtopo_1_1FrameFingerprint" ],
       [ "KeyLibrary", "structtopo_1_1KeyLibrary.html", "structtopo_1_1KeyLibrary" ],
       [ "LibraryMatch", "structtopo_1_1LibraryMatch.html", "structtopo_1_1LibraryMatch" ]
+    ] ],
+    [ "topoparam", "namespacetopoparam.html", [
+      [ "LayerStack", "structtopoparam_1_1LayerStack.html", "structtopoparam_1_1LayerStack" ]
     ] ]
 ];

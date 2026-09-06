@@ -42,14 +42,18 @@ var NAVTREE =
       [ "Class List", "annotated.html", "annotated_dup" ],
       [ "Class Index", "classes.html", null ],
       [ "Class Members", "functions.html", [
-        [ "All", "functions.html", null ],
+        [ "All", "functions.html", "functions_dup" ],
         [ "Functions", "functions_func.html", null ],
         [ "Variables", "functions_vars.html", null ],
         [ "Enumerations", "functions_enum.html", null ]
       ] ]
     ] ],
     [ "Files", "files.html", [
-      [ "File List", "files.html", "files_dup" ]
+      [ "File List", "files.html", "files_dup" ],
+      [ "File Members", "globals.html", [
+        [ "All", "globals.html", null ],
+        [ "Functions", "globals_func.html", null ]
+      ] ]
     ] ]
   ] ]
 ];
@@ -57,9 +61,10 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "absOrientation_8hpp.html",
-"group__primitive.html#ga6031dcefe2fd5432b7d26cb6c9f38f47",
-"namespacering.html#af2bab9ed638ed3e3a1ed3392d7e4a576",
-"structgpu_1_1Plan.html"
+"group__nneigh.html#ga80f555acadad22b5edcc4af8285006ed",
+"namespacepntToPnt.html#add7f31e0a4e17beae5c3ded8752e9259",
+"structgpu_1_1BatchResult.html#a904866eb6e3bc39730f2e2626530a129",
+"structtopo_1_1LocalKey.html#a46842962761d0b24c821e614b0598506"
 ];
 
 const SYNCONMSG = 'click to disable panel synchronization';

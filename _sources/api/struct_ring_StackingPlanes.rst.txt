@@ -1,0 +1,48 @@
+.. index:: pair: struct; ring::StackingPlanes
+.. _doxid-structring_1_1_stacking_planes:
+
+struct ring::StackingPlanes
+===========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Six-rings that are ice-I stacking planes. :ref:`More...<details-structring_1_1_stacking_planes>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <cage_affiliation.hpp>
+	
+	struct StackingPlanes {
+		// fields
+	
+		std::vector<bool> :target:`basal<doxid-structring_1_1_stacking_planes_1aff950d67ff47b8506f32040d0911dbcc>`;
+		std::vector<bool> :ref:`equatorial<doxid-structring_1_1_stacking_planes_1a54f00fad4c7f6f65f74e1cb49af88e78>`;
+	};
+.. _details-structring_1_1_stacking_planes:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Six-rings that are ice-I stacking planes.
+
+A basal ring of a passing HC pair is a hexagonal stacking plane. A DDC equatorial ring (HC-affiliated rings excluded, as in findDDC) is a cubic stacking plane. Prismatic and peripheral rings connect planes and do not vote. The two plane sets are disjoint because an HC-affiliated ring is not an equatorial candidate.
+
+Fields
+------
+
+.. index:: pair: variable; equatorial
+.. _doxid-structring_1_1_stacking_planes_1a54f00fad4c7f6f65f74e1cb49af88e78:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<bool> equatorial
+
+HC basal of a passing pair.
+

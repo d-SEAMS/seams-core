@@ -1,0 +1,68 @@
+.. index:: pair: struct; site::IceClusterIons
+.. _doxid-structsite_1_1_ice_cluster_ions:
+
+struct site::IceClusterIons
+===========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Connected components of ice atoms on the water graph, and the ion count per component: each ion is assigned to the cluster of the nearest ice atom within ``cutoff``. :ref:`More...<details-structsite_1_1_ice_cluster_ions>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <site.hpp>
+	
+	struct IceClusterIons {
+		// fields
+	
+		std::vector<int> :ref:`clusterOf<doxid-structsite_1_1_ice_cluster_ions_1afebdc4e97453433dfbc70810eeb97e90>`;
+		std::vector<int> :ref:`ionsInCluster<doxid-structsite_1_1_ice_cluster_ions_1ad5061f8b24f2e8b999b4c8c18b93e666>`;
+		std::vector<int> :ref:`clusterOfIon<doxid-structsite_1_1_ice_cluster_ions_1a8ab7fb5fe89720faef8ae58c2e859715>`;
+		int :target:`nClusters<doxid-structsite_1_1_ice_cluster_ions_1a35ffe3a82f4f8975ef5292e1d9dd06bc>` = 0;
+	};
+.. _details-structsite_1_1_ice_cluster_ions:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Connected components of ice atoms on the water graph, and the ion count per component: each ion is assigned to the cluster of the nearest ice atom within ``cutoff``.
+
+Fields
+------
+
+.. index:: pair: variable; clusterOf
+.. _doxid-structsite_1_1_ice_cluster_ions_1afebdc4e97453433dfbc70810eeb97e90:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> clusterOf
+
+per atom, cluster id or -1
+
+.. index:: pair: variable; ionsInCluster
+.. _doxid-structsite_1_1_ice_cluster_ions_1ad5061f8b24f2e8b999b4c8c18b93e666:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> ionsInCluster
+
+per cluster
+
+.. index:: pair: variable; clusterOfIon
+.. _doxid-structsite_1_1_ice_cluster_ions_1a8ab7fb5fe89720faef8ae58c2e859715:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> clusterOfIon
+
+per ion in input order, or -1
+

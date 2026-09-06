@@ -243,6 +243,8 @@ Classes</h2></td></tr>
 <tr class="memitem:DensityZ" id="r_DensityZ"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1DensityZ.html">DensityZ</a></td></tr>
 <tr class="memitem:GuestOccupancy" id="r_GuestOccupancy"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1GuestOccupancy.html">GuestOccupancy</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Guests read against enumerated cages.  <a href="structsite_1_1GuestOccupancy.html#details">More...</a><br /></td></tr>
+<tr class="memitem:IceClusterIons" id="r_IceClusterIons"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1IceClusterIons.html">IceClusterIons</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Connected components of ice atoms on the water graph, and the ion count per component: each ion is assigned to the cluster of the nearest ice atom within <span class="tt">cutoff</span>.  <a href="structsite_1_1IceClusterIons.html#details">More...</a><br /></td></tr>
 <tr class="memitem:IonEnvironment" id="r_IonEnvironment"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1IonEnvironment.html">IonEnvironment</a></td></tr>
 <tr class="memitem:Table" id="r_Table"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1Table.html">Table</a></td></tr>
 </table><table class="memberdecls">
@@ -304,6 +306,9 @@ Functions</h2></td></tr>
 <tr class="memdesc:adf97b42407e86bc9d067855b19397ac8"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt">cages</span> are vertex index lists into <span class="tt">yCloud.pts</span>; <span class="tt">radius</span> in the cloud's length unit (half the cage diameter, about 4 A for a 5^12 cage).  <br /></td></tr>
 <tr class="memitem:a208c6e1f8e6106530d6c75bb16dccaad" id="r_a208c6e1f8e6106530d6c75bb16dccaad"><td class="memItemLeft">std::array&lt; double, 3 &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a208c6e1f8e6106530d6c75bb16dccaad">periodicCentroid</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;atoms)</td></tr>
 <tr class="memdesc:a208c6e1f8e6106530d6c75bb16dccaad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Periodic centroid of a set of atoms: every atom is unwrapped to its minimum image about the first, and the mean is taken there.  <br /></td></tr>
+<tr class="memitem:a84113178c851924869bd3fee27af749b" id="r_a84113178c851924869bd3fee27af749b"><td class="memItemLeft"><a class="el" href="structsite_1_1GuestOccupancy.html">GuestOccupancy</a>&#160;</td><td class="memItemRight"><a class="el" href="#a84113178c851924869bd3fee27af749b">guestOccupancyInside</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;cageFaces, const std::vector&lt; int &gt; &amp;guestIndices)</td></tr>
+<tr class="memdesc:a84113178c851924869bd3fee27af749b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Occupancy by ray-parity: a guest sits in a cage when a ray from the guest, in the frame that unwraps the cage about its periodic centroid, crosses an odd number of fan-triangulated faces.  <br /></td></tr>
+<tr class="memitem:a2c1ad7bff89d54bbb4c2a22f93e3eeaf" id="r_a2c1ad7bff89d54bbb4c2a22f93e3eeaf"><td class="memItemLeft"><a class="el" href="structsite_1_1IceClusterIons.html">IceClusterIons</a>&#160;</td><td class="memItemRight"><a class="el" href="#a2c1ad7bff89d54bbb4c2a22f93e3eeaf">iceClusterIonCensus</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; bool &gt; &amp;ice, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nListByIndex, const std::vector&lt; int &gt; &amp;ionIndices, double cutoff)</td></tr>
 </table>
 <a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
 <a id="aa3661d15289b4b8576f48217ed337ca3" name="aa3661d15289b4b8576f48217ed337ca3"></a>
@@ -574,6 +579,76 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p><span class="tt">cages</span> are vertex index lists into <span class="tt">yCloud.pts</span>; <span class="tt">radius</span> in the cloud's length unit (half the cage diameter, about 4 A for a 5^12 cage). </p>
+
+</div>
+</div>
+<a id="a84113178c851924869bd3fee27af749b" name="a84113178c851924869bd3fee27af749b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a84113178c851924869bd3fee27af749b">&#9670;&#160;</a></span>guestOccupancyInside()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1GuestOccupancy.html">GuestOccupancy</a> site::guestOccupancyInside </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cageFaces</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>guestIndices</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Occupancy by ray-parity: a guest sits in a cage when a ray from the guest, in the frame that unwraps the cage about its periodic centroid, crosses an odd number of fan-triangulated faces. </p>
+<p>Among cages that contain the guest the nearest centroid wins. <span class="tt">rings</span> is the ring list the cage faces index; <span class="tt">cageFaces[c]</span> is the face indices of cage c. </p>
+
+</div>
+</div>
+<a id="a2c1ad7bff89d54bbb4c2a22f93e3eeaf" name="a2c1ad7bff89d54bbb4c2a22f93e3eeaf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c1ad7bff89d54bbb4c2a22f93e3eeaf">&#9670;&#160;</a></span>iceClusterIonCensus()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1IceClusterIons.html">IceClusterIons</a> site::iceClusterIonCensus </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; bool &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>ice</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nListByIndex</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>ionIndices</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>

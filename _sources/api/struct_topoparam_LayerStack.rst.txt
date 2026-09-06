@@ -1,0 +1,25 @@
+.. index:: pair: struct; topoparam::LayerStack
+.. _doxid-structtopoparam_1_1_layer_stack:
+
+struct topoparam::LayerStack
+============================
+
+.. toctree::
+	:hidden:
+
+CHILL+ cubic/hexagonal molecules binned into basal layers along ``axis`` (0=x, 1=y, 2=z). phiC is N_Ic / (N_Ic + N_Ih). sequence is one character per layer: C cubic-majority, H hexagonal-majority, M a tie with ice present, . empty.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <order_parameter.hpp>
+	
+	struct LayerStack {
+		// fields
+	
+		double :target:`phiC<doxid-structtopoparam_1_1_layer_stack_1a0a688de296b4939a985cfe57dcd55697>` = 0.0;
+		std::string :target:`sequence<doxid-structtopoparam_1_1_layer_stack_1a7d3bd78c11d6cb4e414fdf8e5e5dc7fe>`;
+		std::vector<int> :target:`cubicPerLayer<doxid-structtopoparam_1_1_layer_stack_1a51889a8da36018140833c0633ccfc672>`;
+		std::vector<int> :target:`hexPerLayer<doxid-structtopoparam_1_1_layer_stack_1ae5019d26e1fc0a62d76c698b12953353>`;
+	};

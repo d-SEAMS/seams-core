@@ -289,9 +289,11 @@ the type is explicit.</p>
 </section>
 <section id="step-2-chill-from-the-cli">
 <h2>Step 2: CHILL+ from the CLI<a class="headerlink" href="#step-2-chill-from-the-cli" title="Link to this heading">¶</a></h2>
-<p>CHILL+ looks at each oxygen’s four nearest neighbours inside the
-cutoff. Each of those four bonds is staggered or eclipsed from the
-pair correlation <code class="docutils literal notranslate"><span class="pre">c_ij</span></code>. The star of four labels is the ice type:</p>
+<p>CHILL+ looks at each oxygen’s four nearest neighbours (mutual
+<code class="docutils literal notranslate"><span class="pre">kNearestNeighbourList</span></code>, <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">4</span></code>). <code class="docutils literal notranslate"><span class="pre">--cutoff</span></code> is the cell-size
+hint, not the pair list. Each of those four bonds is staggered or
+eclipsed from the pair correlation <code class="docutils literal notranslate"><span class="pre">c_ij</span></code>. The star of four labels
+is the ice type:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>

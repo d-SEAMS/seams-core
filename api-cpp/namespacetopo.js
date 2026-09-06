@@ -9,6 +9,7 @@ var namespacetopo =
     [ "fingerprint", "namespacetopo.html#a31e36c2b000ef45e1e0370ceffcc7b07", null ],
     [ "hex", "namespacetopo.html#a704a6805e4842829fa83f16081405519", null ],
     [ "hopNeighbourhood", "namespacetopo.html#ac22724ca2d62a9ecac9d20b5ab0b7182", null ],
+    [ "incrementalFingerprint", "namespacetopo.html#a61f23864462f8e8888ef6e681800a42f", null ],
     [ "localKey", "namespacetopo.html#a4c926ab08f90e20ec25abcc63593821b", null ],
     [ "matchLibraries", "namespacetopo.html#a3fe468feddca93b3dc1bc79db0dad30e", null ],
     [ "matchLibrary", "namespacetopo.html#a73c3376495bbd19d8f072ac21af98131", null ],

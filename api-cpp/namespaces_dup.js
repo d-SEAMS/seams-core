@@ -153,11 +153,7 @@ var namespaces_dup =
       [ "spheriHarmo", "group__chill.html#gaa9220b76da7400c9d934fa08ceeeba7a", null ]
     ] ],
     [ "topo", "namespacetopo.html", "namespacetopo" ],
-    [ "topoparam", "namespacetopoparam.html", [
-      [ "calcCoverageArea", "namespacetopoparam.html#a9c3eb2dbcb32ec7523ed28f8ad4d6b19", null ],
-      [ "normHeightPercent", "namespacetopoparam.html#a473e7ca29f517802126410c59756c974", null ],
-      [ "projAreaSingleRing", "namespacetopoparam.html#a2e190293e3c4603ddd1026e4c8f3896a", null ]
-    ] ],
+    [ "topoparam", "namespacetopoparam.html", "namespacetopoparam" ],
     [ "tum3", "namespacetum3.html", [
       [ "atomsFromCages", "group__ring.html#ga11cd9029a926adccce0454064cfb9e45", null ],
       [ "averageRMSDatom", "group__ring.html#gaeb733184d3f90032143304cf1c7b4b2e", null ],

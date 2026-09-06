@@ -3,6 +3,7 @@ var site_8hpp =
     [ "site::Table", "structsite_1_1Table.html", "structsite_1_1Table" ],
     [ "site::IonEnvironment", "structsite_1_1IonEnvironment.html", "structsite_1_1IonEnvironment" ],
     [ "site::GuestOccupancy", "structsite_1_1GuestOccupancy.html", "structsite_1_1GuestOccupancy" ],
+    [ "site::IceClusterIons", "structsite_1_1IceClusterIons.html", "structsite_1_1IceClusterIons" ],
     [ "site::Family", "namespacesite.html#aa3661d15289b4b8576f48217ed337ca3", [
       [ "site::Family::waterIce", "namespacesite.html#aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd", null ],
       [ "site::Family::ionicLiquid", "namespacesite.html#aa3661d15289b4b8576f48217ed337ca3abd8c0f0db6e9f7ff0bf08fdebd75899d", null ],
@@ -32,6 +33,8 @@ var site_8hpp =
       [ "site::Kind::solvent", "namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90acb536c8fd095555b861ed4eb1d313e7f", null ]
     ] ],
     [ "site::guestOccupancy", "namespacesite.html#adf97b42407e86bc9d067855b19397ac8", null ],
+    [ "site::guestOccupancyInside", "namespacesite.html#a84113178c851924869bd3fee27af749b", null ],
+    [ "site::iceClusterIonCensus", "namespacesite.html#a2c1ad7bff89d54bbb4c2a22f93e3eeaf", null ],
     [ "site::indicesOf", "namespacesite.html#a651f87e7aaca786cffd536a4d2b286c4", null ],
     [ "site::ionCloud", "namespacesite.html#a55a0dd31fcceddabfa6cda601eeb807c", null ],
     [ "site::ionEnvironment", "namespacesite.html#a59c0f056c026caebb259d8c8e0d032e1", null ],

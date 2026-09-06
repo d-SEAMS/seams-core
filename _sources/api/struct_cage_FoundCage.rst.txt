@@ -10,7 +10,7 @@ struct cage::FoundCage
 Overview
 ~~~~~~~~
 
-One closed polyhedron matching a signature. :ref:`More...<details-structcage_1_1_found_cage>`
+One cage matching a signature, closed or incomplete. :ref:`More...<details-structcage_1_1_found_cage>`
 
 
 .. ref-code-block:: cpp
@@ -25,13 +25,15 @@ One closed polyhedron matching a signature. :ref:`More...<details-structcage_1_1
 		std::vector<int> :ref:`faces<doxid-structcage_1_1_found_cage_1a195d96130e05b294524772d8d5a1572d>`;
 		std::vector<int> :ref:`vertices<doxid-structcage_1_1_found_cage_1af7b6c0760f27407dd0b2b4da91155d3b>`;
 		std::string :ref:`certificate<doxid-structcage_1_1_found_cage_1a8415a1763a942d096d45a7e0f1c68211>`;
+		bool :ref:`closed<doxid-structcage_1_1_found_cage_1ae337c5cd45e8136dce02fc84eee25ac8>` = true;
+		int :ref:`danglingEdges<doxid-structcage_1_1_found_cage_1a9ef2755df5d9fa2bb11e5543b0f02004>` = 0;
 	};
 .. _details-structcage_1_1_found_cage:
 
 Detailed Documentation
 ~~~~~~~~~~~~~~~~~~~~~~
 
-One closed polyhedron matching a signature.
+One cage matching a signature, closed or incomplete.
 
 Fields
 ------
@@ -65,4 +67,24 @@ sorted unique atom indices
 	std::string certificate
 
 nauty hex, empty when nauty is off
+
+.. index:: pair: variable; closed
+.. _doxid-structcage_1_1_found_cage_1ae337c5cd45e8136dce02fc84eee25ac8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool closed = true
+
+every face edge used twice
+
+.. index:: pair: variable; danglingEdges
+.. _doxid-structcage_1_1_found_cage_1a9ef2755df5d9fa2bb11e5543b0f02004:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int danglingEdges = 0
+
+edges used once (cups / incomplete)
 

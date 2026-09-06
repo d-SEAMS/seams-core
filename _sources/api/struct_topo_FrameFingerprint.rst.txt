@@ -26,6 +26,7 @@ Overview
 		std::vector<std::string> :ref:`atomKeys<doxid-structtopo_1_1_frame_fingerprint_1a7552450f798d8591d7580e8d9422bcb6>`;
 		std::map<std::string, int> :ref:`classes<doxid-structtopo_1_1_frame_fingerprint_1a7b460d00fe40ddad15c680fec009eecf>`;
 		std::vector<int> :ref:`ringCensus<doxid-structtopo_1_1_frame_fingerprint_1af25731956ad220bebec8965a6e8432bc>`;
+		std::vector<std::uint64_t> :ref:`wlAtom<doxid-structtopo_1_1_frame_fingerprint_1a410ffeaef275b28480cdfca323f48985>`;
 		int :target:`hops<doxid-structtopo_1_1_frame_fingerprint_1a436b359c7a9bb9b2c849d0e37d13962d>` = 0;
 		bool :ref:`coloured<doxid-structtopo_1_1_frame_fingerprint_1aac82494c5f215c4bdda77ba4b576e839>` = false;
 	};
@@ -88,6 +89,16 @@ local key -> number of atoms carrying it
 	std::vector<int> ringCensus
 
 ringCensus[s] = primitive rings of size s
+
+.. index:: pair: variable; wlAtom
+.. _doxid-structtopo_1_1_frame_fingerprint_1a410ffeaef275b28480cdfca323f48985:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::uint64_t> wlAtom
+
+per-atom WL hash used in the frame key
 
 .. index:: pair: variable; coloured
 .. _doxid-structtopo_1_1_frame_fingerprint_1aac82494c5f215c4bdda77ba4b576e839:

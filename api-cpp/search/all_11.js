@@ -50,8 +50,9 @@ var searchData=
   ['rmax_47',['rmax',['../group__rdf.html#gaf633cbb773b23a72ae1e070d691c76ec',1,'rdf::PartialRdf']]],
   ['rmaxialtranslations_48',['rmAxialTranslations',['../group__ring.html#ga5f5496ef80d800cb0e9b4d87b6cca4bf',1,'ring']]],
   ['rmsd_49',['rmsd',['../structira_1_1Match.html#ab14b20ac985fe3c9fb6359973da2b5c9',1,'ira::Match::rmsd'],['../structchill_1_1TemplateHit.html#ab9b9bdbf34e6272e29ab3bdcf2c9e1c2',1,'chill::TemplateHit::rmsd']]],
-  ['rotation_50',['rotation',['../structira_1_1Match.html#a4a98f0d5bfd17ab0b1aa668dbf72c415',1,'ira::Match']]],
-  ['rows_51',['Rows',['../namespacetopo.html#a770ae81afc5c8c715470d90d4e3c8e6e',1,'topo']]],
-  ['runningcn_52',['runningCN',['../group__rdf.html#ga2a54eea649f6c234be50494cec2cee82',1,'rdf::runningCN(const PartialRdf &amp;h)'],['../group__rdf.html#ga86d11871fc6dcad3daa99cddf7fc11dc',1,'rdf::runningCN(const PartialRdf &amp;h, double rhoJ)']]],
-  ['runtime_53',['Runtime',['../structseams_1_1cfg_1_1Runtime.html',1,'seams::cfg']]]
+  ['rodgerf4_50',['rodgerF4',['../namespacetopoparam.html#ac9f9075f5de0b04fb6d0431ee15a29b9',1,'topoparam']]],
+  ['rotation_51',['rotation',['../structira_1_1Match.html#a4a98f0d5bfd17ab0b1aa668dbf72c415',1,'ira::Match']]],
+  ['rows_52',['Rows',['../namespacetopo.html#a770ae81afc5c8c715470d90d4e3c8e6e',1,'topo']]],
+  ['runningcn_53',['runningCN',['../group__rdf.html#ga2a54eea649f6c234be50494cec2cee82',1,'rdf::runningCN(const PartialRdf &amp;h)'],['../group__rdf.html#ga86d11871fc6dcad3daa99cddf7fc11dc',1,'rdf::runningCN(const PartialRdf &amp;h, double rhoJ)']]],
+  ['runtime_54',['Runtime',['../structseams_1_1cfg_1_1Runtime.html',1,'seams::cfg']]]
 ];

@@ -2,6 +2,7 @@ var namespacesite =
 [
     [ "DensityZ", "structsite_1_1DensityZ.html", "structsite_1_1DensityZ" ],
     [ "GuestOccupancy", "structsite_1_1GuestOccupancy.html", "structsite_1_1GuestOccupancy" ],
+    [ "IceClusterIons", "structsite_1_1IceClusterIons.html", "structsite_1_1IceClusterIons" ],
     [ "IonEnvironment", "structsite_1_1IonEnvironment.html", "structsite_1_1IonEnvironment" ],
     [ "Table", "structsite_1_1Table.html", "structsite_1_1Table" ],
     [ "Family", "namespacesite.html#aa3661d15289b4b8576f48217ed337ca3", [
@@ -36,6 +37,8 @@ var namespacesite =
     [ "densityZ", "namespacesite.html#a75c8588cd72dda60fecb01240009ca6c", null ],
     [ "familyName", "namespacesite.html#a1dacaa43f0631e0bc75cc37531b89ce7", null ],
     [ "guestOccupancy", "namespacesite.html#adf97b42407e86bc9d067855b19397ac8", null ],
+    [ "guestOccupancyInside", "namespacesite.html#a84113178c851924869bd3fee27af749b", null ],
+    [ "iceClusterIonCensus", "namespacesite.html#a2c1ad7bff89d54bbb4c2a22f93e3eeaf", null ],
     [ "iceScoreAllowed", "namespacesite.html#a05342583b5b8258d5347b3f18983d4b2", null ],
     [ "indicesOf", "namespacesite.html#a651f87e7aaca786cffd536a4d2b286c4", null ],
     [ "ionCloud", "namespacesite.html#a55a0dd31fcceddabfa6cda601eeb807c", null ],

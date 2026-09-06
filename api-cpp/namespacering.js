@@ -4,6 +4,7 @@ var namespacering =
     [ "CageAffiliation", "structring_1_1CageAffiliation.html", "structring_1_1CageAffiliation" ],
     [ "RingSearchIndex", "structring_1_1RingSearchIndex.html", "structring_1_1RingSearchIndex" ],
     [ "SeededAtomLabels", "structring_1_1SeededAtomLabels.html", "structring_1_1SeededAtomLabels" ],
+    [ "StackingPlanes", "structring_1_1StackingPlanes.html", "structring_1_1StackingPlanes" ],
     [ "strucType", "group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1", [
       [ "unclassified", "group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1af8c13bb601e2113b166ef926763585b4", null ],
       [ "DDC", "group__ring.html#gga301cfdc88452cfe51bd4f745d223a7e1a34ccd3ae5d03f22bd20e6792834a2702", null ],
@@ -57,5 +58,6 @@ var namespacering =
     [ "ringAdjacentCompletion", "namespacering.html#a52d5bc312612884ce62bd430d94fdb17", null ],
     [ "rmAxialTranslations", "group__ring.html#ga5f5496ef80d800cb0e9b4d87b6cca4bf", null ],
     [ "seededCageAffiliation", "namespacering.html#a1f59a70140bd3498eb53e448f916229f", null ],
+    [ "stackingPlanes", "namespacering.html#aac3cc296115f9c2beabbd4bb01c30002", null ],
     [ "topoBulkAnalysis", "namespacering.html#ada5f6a19834edc41365e7f85d92e4b76", null ]
 ];

@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('structcage_1_1
 </div><!--header-->
 <div class="contents">
 
-<p>One closed polyhedron matching a signature.  
+<p>One cage matching a signature, closed or incomplete.  
  <a href="#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="cage__enum_8hpp_source.html">cage_enum.hpp</a>&gt;</code></p>
@@ -252,9 +252,13 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:af7b6c0760f27407dd0b2b4da91155d3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">sorted unique atom indices  <br /></td></tr>
 <tr class="memitem:a8415a1763a942d096d45a7e0f1c68211" id="r_a8415a1763a942d096d45a7e0f1c68211"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#a8415a1763a942d096d45a7e0f1c68211">certificate</a></td></tr>
 <tr class="memdesc:a8415a1763a942d096d45a7e0f1c68211"><td class="mdescLeft">&#160;</td><td class="mdescRight">nauty hex, empty when nauty is off  <br /></td></tr>
+<tr class="memitem:ae337c5cd45e8136dce02fc84eee25ac8" id="r_ae337c5cd45e8136dce02fc84eee25ac8"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ae337c5cd45e8136dce02fc84eee25ac8">closed</a> = true</td></tr>
+<tr class="memdesc:ae337c5cd45e8136dce02fc84eee25ac8"><td class="mdescLeft">&#160;</td><td class="mdescRight">every face edge used twice  <br /></td></tr>
+<tr class="memitem:a9ef2755df5d9fa2bb11e5543b0f02004" id="r_a9ef2755df5d9fa2bb11e5543b0f02004"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a9ef2755df5d9fa2bb11e5543b0f02004">danglingEdges</a> = 0</td></tr>
+<tr class="memdesc:a9ef2755df5d9fa2bb11e5543b0f02004"><td class="mdescLeft">&#160;</td><td class="mdescRight">edges used once (cups / incomplete)  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>One closed polyhedron matching a signature. </p>
+<div class="textblock"><p>One cage matching a signature, closed or incomplete. </p>
 
 <p class="definition">Definition at line <a class="el" href="cage__enum_8hpp_source.html#l00028">28</a> of file <a class="el" href="cage__enum_8hpp_source.html">cage_enum.hpp</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
@@ -273,6 +277,42 @@ Public Attributes</h2></td></tr>
 <p>nauty hex, empty when nauty is off </p>
 
 <p class="definition">Definition at line <a class="el" href="cage__enum_8hpp_source.html#l00032">32</a> of file <a class="el" href="cage__enum_8hpp_source.html">cage_enum.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ae337c5cd45e8136dce02fc84eee25ac8" name="ae337c5cd45e8136dce02fc84eee25ac8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae337c5cd45e8136dce02fc84eee25ac8">&#9670;&#160;</a></span>closed</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool cage::FoundCage::closed = true</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>every face edge used twice </p>
+
+<p class="definition">Definition at line <a class="el" href="cage__enum_8hpp_source.html#l00033">33</a> of file <a class="el" href="cage__enum_8hpp_source.html">cage_enum.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a9ef2755df5d9fa2bb11e5543b0f02004" name="a9ef2755df5d9fa2bb11e5543b0f02004"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ef2755df5d9fa2bb11e5543b0f02004">&#9670;&#160;</a></span>danglingEdges</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int cage::FoundCage::danglingEdges = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>edges used once (cups / incomplete) </p>
+
+<p class="definition">Definition at line <a class="el" href="cage__enum_8hpp_source.html#l00034">34</a> of file <a class="el" href="cage__enum_8hpp_source.html">cage_enum.hpp</a>.</p>
 
 </div>
 </div>

@@ -58,3 +58,7 @@ Global Namespace
 	namespace :ref:`topoparam<doxid-namespacetopoparam>`;
 	namespace :ref:`tum3<doxid-namespacetum3>`;
 
+	// global functions
+
+	int :target:`seams_chill_plus<doxid-seams__c__api_8h_1a4aa681772840118e245156666761a0ac>`(const double* xyz, int n, const double* box, int* labels);
+

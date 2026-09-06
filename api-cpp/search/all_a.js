@@ -7,8 +7,8 @@ var searchData=
   ['kind_4',['Kind',['../group__cage.html#gaeaa9e4802e930824b43c274cec2486c5',1,'cage::Signature::Kind'],['../namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90',1,'site::Kind']]],
   ['kind_5',['kind',['../group__cage.html#gae19997b93f028ab056b7d5fe5bc18fd3',1,'cage::Signature::kind'],['../structchill_1_1TemplateHit.html#ae13a09b6ba70e05e96b251cb0c326212',1,'chill::TemplateHit::kind']]],
   ['kmax_6',['kMax',['../structgpu_1_1Footprint.html#aaad6c2ec782a264df743ce61cef37ba8',1,'gpu::Footprint']]],
-  ['knearestneighbourlist_7',['kNearestNeighbourList',['../group__nneigh.html#ga18cda509d1fc5e680abf22e36348fc61',1,'nneigh']]],
-  ['knearestneighbourpair_8',['kNearestNeighbourPair',['../group__nneigh.html#ga553a0b3d4dddd477c0dcb06d93361eae',1,'nneigh']]],
+  ['knearestneighbourlist_7',['kNearestNeighbourList',['../group__nneigh.html#ga18cda509d1fc5e680abf22e36348fc61',1,'nneigh::kNearestNeighbourList(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int k, double candidateCutoff, int typeI, bool mutual=true)'],['../group__nneigh.html#ga5aeb17070b1a13a028fdcc5d3e7470b6',1,'nneigh::kNearestNeighbourList(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int k, double candidateCutoff, const std::vector&lt; int &gt; &amp;types, bool mutual=true)']]],
+  ['knearestneighbourpair_8',['kNearestNeighbourPair',['../group__nneigh.html#ga553a0b3d4dddd477c0dcb06d93361eae',1,'nneigh::kNearestNeighbourPair(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int k, double candidateCutoff, int typeI)'],['../group__nneigh.html#gae83921eb2fdda24a0dcda3638c8a2ebc',1,'nneigh::kNearestNeighbourPair(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int k, double candidateCutoff, const std::vector&lt; int &gt; &amp;types)']]],
   ['knnmutual_9',['KnnMutual',['../group__nneigh.html#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604',1,'nneigh']]],
   ['knnunion_10',['KnnUnion',['../group__nneigh.html#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706',1,'nneigh']]]
 ];

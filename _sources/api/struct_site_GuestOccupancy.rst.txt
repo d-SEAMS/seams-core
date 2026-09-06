@@ -27,6 +27,7 @@ Guests read against enumerated cages. :ref:`More...<details-structsite_1_1_guest
 		int :ref:`occupied<doxid-structsite_1_1_guest_occupancy_1aa03cd68e5f4575f5aabf5fedc5234a34>` = 0;
 		int :ref:`multiply<doxid-structsite_1_1_guest_occupancy_1abdec0c14299ff5902b93dc131db43026>` = 0;
 		int :ref:`free<doxid-structsite_1_1_guest_occupancy_1aca1af9a15208a80f6ddb598fa3a2c3bd>` = 0;
+		std::vector<int> :ref:`occupancyHistogram<doxid-structsite_1_1_guest_occupancy_1ae9b40cb83485c4236287f1332c563bb6>`;
 	};
 .. _details-structsite_1_1_guest_occupancy:
 
@@ -99,4 +100,14 @@ cages with more than one guest
 	int free = 0
 
 guests in no cage
+
+.. index:: pair: variable; occupancyHistogram
+.. _doxid-structsite_1_1_guest_occupancy_1ae9b40cb83485c4236287f1332c563bb6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> occupancyHistogram
+
+hist[k] = cages with k guests
 

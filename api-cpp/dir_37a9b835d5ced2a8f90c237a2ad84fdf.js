@@ -22,6 +22,7 @@ var dir_37a9b835d5ced2a8f90c237a2ad84fdf =
     [ "rdf.hpp", "rdf_8hpp.html", "rdf_8hpp" ],
     [ "rdf2d.hpp", "rdf2d_8hpp.html", "rdf2d_8hpp" ],
     [ "ring.hpp", "ring_8hpp.html", "ring_8hpp" ],
+    [ "seams_c_api.h", "seams__c__api_8h.html", "seams__c__api_8h" ],
     [ "seams_config.hpp", "seams__config_8hpp.html", "seams__config_8hpp" ],
     [ "seams_input.hpp", "seams__input_8hpp.html", "seams__input_8hpp" ],
     [ "seams_output.hpp", "seams__output_8hpp.html", "seams__output_8hpp" ],

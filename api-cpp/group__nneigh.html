@@ -282,8 +282,11 @@ Functions</h2></td></tr>
 <tr class="memitem:ga97ad6e2c7bfaa504c7e021a527effe73" id="r_ga97ad6e2c7bfaa504c7e021a527effe73"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga97ad6e2c7bfaa504c7e021a527effe73">nneigh::getNewNeighbourListByIndex</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double cutoff)</td></tr>
 <tr class="memitem:ga18cda509d1fc5e680abf22e36348fc61" id="r_ga18cda509d1fc5e680abf22e36348fc61"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga18cda509d1fc5e680abf22e36348fc61">nneigh::kNearestNeighbourList</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int k, double candidateCutoff, int typeI, bool mutual=true)</td></tr>
 <tr class="memdesc:ga18cda509d1fc5e680abf22e36348fc61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bonded graph from the k nearest neighbours of each particle rather than a distance cutoff.  <br /></td></tr>
+<tr class="memitem:ga5aeb17070b1a13a028fdcc5d3e7470b6" id="r_ga5aeb17070b1a13a028fdcc5d3e7470b6"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga5aeb17070b1a13a028fdcc5d3e7470b6">nneigh::kNearestNeighbourList</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int k, double candidateCutoff, const std::vector&lt; int &gt; &amp;types, bool mutual=true)</td></tr>
+<tr class="memdesc:ga5aeb17070b1a13a028fdcc5d3e7470b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">k-nearest graph on a type set (water oxygens).  <br /></td></tr>
 <tr class="memitem:ga553a0b3d4dddd477c0dcb06d93361eae" id="r_ga553a0b3d4dddd477c0dcb06d93361eae"><td class="memItemLeft">std::pair&lt; std::vector&lt; std::vector&lt; int &gt; &gt;, std::vector&lt; std::vector&lt; int &gt; &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga553a0b3d4dddd477c0dcb06d93361eae">nneigh::kNearestNeighbourPair</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int k, double candidateCutoff, int typeI)</td></tr>
 <tr class="memdesc:ga553a0b3d4dddd477c0dcb06d93361eae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mutual and union k-nearest graphs from one candidate search.  <br /></td></tr>
+<tr class="memitem:gae83921eb2fdda24a0dcda3638c8a2ebc" id="r_gae83921eb2fdda24a0dcda3638c8a2ebc"><td class="memItemLeft">std::pair&lt; std::vector&lt; std::vector&lt; int &gt; &gt;, std::vector&lt; std::vector&lt; int &gt; &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gae83921eb2fdda24a0dcda3638c8a2ebc">nneigh::kNearestNeighbourPair</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int k, double candidateCutoff, const std::vector&lt; int &gt; &amp;types)</td></tr>
 <tr class="memitem:ga139165088e10b53a5efa6034434c9423" id="r_ga139165088e10b53a5efa6034434c9423"><td class="memItemLeft">std::pair&lt; double, double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga139165088e10b53a5efa6034434c9423">nneigh::shellSeparation</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int k, int typeI)</td></tr>
 <tr class="memdesc:ga139165088e10b53a5efa6034434c9423"><td class="mdescLeft">&#160;</td><td class="mdescRight">The shell-separation certificate for the exact reduction of the k-nearest graph to the cutoff graph: returns {max_i d_k(i), min_i d_{k+1}(i)} over particles of the type.  <br /></td></tr>
 <tr class="memitem:ga57e7804488c926a85c21131b895b6491" id="r_ga57e7804488c926a85c21131b895b6491"><td class="memItemLeft">std::vector&lt; std::tuple&lt; int, int, double &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga57e7804488c926a85c21131b895b6491">nneigh::nearestUnlike</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</td></tr>
@@ -332,11 +335,11 @@ Functions</h2></td></tr>
 <tr><td class="fieldname"><a id="ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706" name="ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706"></a>KnnUnion&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00340">340</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  340</span>{ <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">Cutoff</a>, <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">KnnMutual</a>, <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">KnnUnion</a> };</div>
-<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">nneigh::BondGraph::KnnUnion</a></div><div class="ttdeci">@ KnnUnion</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00340">neighbours.hpp:340</a></div></div>
-<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">nneigh::BondGraph::KnnMutual</a></div><div class="ttdeci">@ KnnMutual</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00340">neighbours.hpp:340</a></div></div>
-<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">nneigh::BondGraph::Cutoff</a></div><div class="ttdeci">@ Cutoff</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00340">neighbours.hpp:340</a></div></div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00383">383</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  383</span>{ <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">Cutoff</a>, <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">KnnMutual</a>, <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">KnnUnion</a> };</div>
+<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">nneigh::BondGraph::KnnUnion</a></div><div class="ttdeci">@ KnnUnion</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00383">neighbours.hpp:383</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">nneigh::BondGraph::KnnMutual</a></div><div class="ttdeci">@ KnnMutual</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00383">neighbours.hpp:383</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">nneigh::BondGraph::Cutoff</a></div><div class="ttdeci">@ Cutoff</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00383">neighbours.hpp:383</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -398,10 +401,10 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00370">370</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  370</span>                                                               {</div>
-<div class="line"><span class="lineno">  371</span>    <span class="keywordflow">return</span> nList_;</div>
-<div class="line"><span class="lineno">  372</span>  }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00413">413</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  413</span>                                                               {</div>
+<div class="line"><span class="lineno">  414</span>    <span class="keywordflow">return</span> nList_;</div>
+<div class="line"><span class="lineno">  415</span>  }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -487,13 +490,13 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00128">128</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  129</span>                                                                 {</div>
-<div class="line"><span class="lineno">  130</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#ga87d0da315b8e67fc843f91099dceb349">dumpAxialDim</a>(yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>, yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>);</div>
-<div class="line"><span class="lineno">  131</span>}</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00131">131</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  132</span>                                                                 {</div>
+<div class="line"><span class="lineno">  133</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#ga87d0da315b8e67fc843f91099dceb349">dumpAxialDim</a>(yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>, yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>);</div>
+<div class="line"><span class="lineno">  134</span>}</div>
 <div class="ttc" id="agroup__molSys_html_gaa7d9b8543780baf4a495c7acdb1f87d8"><div class="ttname"><a href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">molSys::PointCloud::box</a></div><div class="ttdeci">std::vector&lt; T &gt; box</div><div class="ttdoc">Number of atoms.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00177">mol_sys.hpp:177</a></div></div>
 <div class="ttc" id="agroup__molSys_html_gac861daaeb2b1e75a6ac9eb3390bc6105"><div class="ttname"><a href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">molSys::PointCloud::boxLow</a></div><div class="ttdeci">std::vector&lt; T &gt; boxLow</div><div class="ttdoc">Periodic box lengths.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00178">mol_sys.hpp:178</a></div></div>
-<div class="ttc" id="agroup__nneigh_html_ga87d0da315b8e67fc843f91099dceb349"><div class="ttname"><a href="#ga87d0da315b8e67fc843f91099dceb349">nneigh::dumpAxialDim</a></div><div class="ttdeci">int dumpAxialDim(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</div><div class="ttdoc">Longest recovered length: 0 = x, 1 = y, 2 = z.</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00114">neighbours.hpp:114</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ga87d0da315b8e67fc843f91099dceb349"><div class="ttname"><a href="#ga87d0da315b8e67fc843f91099dceb349">nneigh::dumpAxialDim</a></div><div class="ttdeci">int dumpAxialDim(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</div><div class="ttdoc">Longest recovered length: 0 = x, 1 = y, 2 = z.</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00117">neighbours.hpp:117</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -526,20 +529,20 @@ Functions</h2></td></tr>
 
 <p>Longest recovered length: 0 = x, 1 = y, 2 = z. </p>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00114">114</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  115</span>                                                         {</div>
-<div class="line"><span class="lineno">  116</span>  <span class="keywordtype">double</span> lengths[3];</div>
-<div class="line"><span class="lineno">  117</span>  <a class="code hl_function" href="#ga4b7e08068d9fba7d981793100b62de6c">dumpCellLengths</a>(box, boxLow, lengths);</div>
-<div class="line"><span class="lineno">  118</span>  <span class="keywordtype">int</span> axial = 0;</div>
-<div class="line"><span class="lineno">  119</span>  <span class="keywordflow">if</span> (lengths[1] &gt; lengths[axial]) {</div>
-<div class="line"><span class="lineno">  120</span>    axial = 1;</div>
-<div class="line"><span class="lineno">  121</span>  }</div>
-<div class="line"><span class="lineno">  122</span>  <span class="keywordflow">if</span> (lengths[2] &gt; lengths[axial]) {</div>
-<div class="line"><span class="lineno">  123</span>    axial = 2;</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00117">117</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  118</span>                                                         {</div>
+<div class="line"><span class="lineno">  119</span>  <span class="keywordtype">double</span> lengths[3];</div>
+<div class="line"><span class="lineno">  120</span>  <a class="code hl_function" href="#ga4b7e08068d9fba7d981793100b62de6c">dumpCellLengths</a>(box, boxLow, lengths);</div>
+<div class="line"><span class="lineno">  121</span>  <span class="keywordtype">int</span> axial = 0;</div>
+<div class="line"><span class="lineno">  122</span>  <span class="keywordflow">if</span> (lengths[1] &gt; lengths[axial]) {</div>
+<div class="line"><span class="lineno">  123</span>    axial = 1;</div>
 <div class="line"><span class="lineno">  124</span>  }</div>
-<div class="line"><span class="lineno">  125</span>  <span class="keywordflow">return</span> axial;</div>
-<div class="line"><span class="lineno">  126</span>}</div>
-<div class="ttc" id="agroup__nneigh_html_ga4b7e08068d9fba7d981793100b62de6c"><div class="ttname"><a href="#ga4b7e08068d9fba7d981793100b62de6c">nneigh::dumpCellLengths</a></div><div class="ttdeci">void dumpCellLengths(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow, double lengths[3])</div><div class="ttdoc">Recovered restricted-triclinic lengths lx, ly, lz (H diagonal).</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00102">neighbours.hpp:102</a></div></div>
+<div class="line"><span class="lineno">  125</span>  <span class="keywordflow">if</span> (lengths[2] &gt; lengths[axial]) {</div>
+<div class="line"><span class="lineno">  126</span>    axial = 2;</div>
+<div class="line"><span class="lineno">  127</span>  }</div>
+<div class="line"><span class="lineno">  128</span>  <span class="keywordflow">return</span> axial;</div>
+<div class="line"><span class="lineno">  129</span>}</div>
+<div class="ttc" id="agroup__nneigh_html_ga4b7e08068d9fba7d981793100b62de6c"><div class="ttname"><a href="#ga4b7e08068d9fba7d981793100b62de6c">nneigh::dumpCellLengths</a></div><div class="ttdeci">void dumpCellLengths(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow, double lengths[3])</div><div class="ttdoc">Recovered restricted-triclinic lengths lx, ly, lz (H diagonal).</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00105">neighbours.hpp:105</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -583,34 +586,34 @@ Functions</h2></td></tr>
 <p>LAMMPS dump bound spans to restricted triclinic H (rows a, b, c). </p>
 <p><span class="tt">box[0..2]</span> are <span class="tt">xhi_bound - xlo_bound</span> etc. Optional <span class="tt">box[3..5]</span> are tilt <span class="tt">xy, xz, yz</span>. <span class="tt">boxLow</span> is the bound lo. Inverse of <span class="tt">xlo_bound = xlo + min(0, xy, xz, xy+xz)</span>. </p>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00071">71</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   73</span>                                            {</div>
-<div class="line"><span class="lineno">   74</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xspan = box.size() &gt; 0 ? box[0] : 0.0;</div>
-<div class="line"><span class="lineno">   75</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yspan = box.size() &gt; 1 ? box[1] : 0.0;</div>
-<div class="line"><span class="lineno">   76</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zspan = box.size() &gt; 2 ? box[2] : 0.0;</div>
-<div class="line"><span class="lineno">   77</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xlo_b = boxLow.size() &gt; 0 ? boxLow[0] : 0.0;</div>
-<div class="line"><span class="lineno">   78</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ylo_b = boxLow.size() &gt; 1 ? boxLow[1] : 0.0;</div>
-<div class="line"><span class="lineno">   79</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zlo_b = boxLow.size() &gt; 2 ? boxLow[2] : 0.0;</div>
-<div class="line"><span class="lineno">   80</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xy = box.size() &gt;= 6 ? box[3] : 0.0;</div>
-<div class="line"><span class="lineno">   81</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xz = box.size() &gt;= 6 ? box[4] : 0.0;</div>
-<div class="line"><span class="lineno">   82</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yz = box.size() &gt;= 6 ? box[5] : 0.0;</div>
-<div class="line"><span class="lineno">   83</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));</div>
-<div class="line"><span class="lineno">   84</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));</div>
-<div class="line"><span class="lineno">   85</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymin = std::min(0.0, yz);</div>
-<div class="line"><span class="lineno">   86</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymax = std::max(0.0, yz);</div>
-<div class="line"><span class="lineno">   87</span>  H[0][0] = xspan - xmax + xmin;</div>
-<div class="line"><span class="lineno">   88</span>  H[0][1] = 0.0;</div>
-<div class="line"><span class="lineno">   89</span>  H[0][2] = 0.0;</div>
-<div class="line"><span class="lineno">   90</span>  H[1][0] = xy;</div>
-<div class="line"><span class="lineno">   91</span>  H[1][1] = yspan - ymax + ymin;</div>
-<div class="line"><span class="lineno">   92</span>  H[1][2] = 0.0;</div>
-<div class="line"><span class="lineno">   93</span>  H[2][0] = xz;</div>
-<div class="line"><span class="lineno">   94</span>  H[2][1] = yz;</div>
-<div class="line"><span class="lineno">   95</span>  H[2][2] = zspan;</div>
-<div class="line"><span class="lineno">   96</span>  origin[0] = xlo_b - xmin;</div>
-<div class="line"><span class="lineno">   97</span>  origin[1] = ylo_b - ymin;</div>
-<div class="line"><span class="lineno">   98</span>  origin[2] = zlo_b;</div>
-<div class="line"><span class="lineno">   99</span>}</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00074">74</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   76</span>                                            {</div>
+<div class="line"><span class="lineno">   77</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xspan = box.size() &gt; 0 ? box[0] : 0.0;</div>
+<div class="line"><span class="lineno">   78</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yspan = box.size() &gt; 1 ? box[1] : 0.0;</div>
+<div class="line"><span class="lineno">   79</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zspan = box.size() &gt; 2 ? box[2] : 0.0;</div>
+<div class="line"><span class="lineno">   80</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xlo_b = boxLow.size() &gt; 0 ? boxLow[0] : 0.0;</div>
+<div class="line"><span class="lineno">   81</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ylo_b = boxLow.size() &gt; 1 ? boxLow[1] : 0.0;</div>
+<div class="line"><span class="lineno">   82</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zlo_b = boxLow.size() &gt; 2 ? boxLow[2] : 0.0;</div>
+<div class="line"><span class="lineno">   83</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xy = box.size() &gt;= 6 ? box[3] : 0.0;</div>
+<div class="line"><span class="lineno">   84</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xz = box.size() &gt;= 6 ? box[4] : 0.0;</div>
+<div class="line"><span class="lineno">   85</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yz = box.size() &gt;= 6 ? box[5] : 0.0;</div>
+<div class="line"><span class="lineno">   86</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));</div>
+<div class="line"><span class="lineno">   87</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));</div>
+<div class="line"><span class="lineno">   88</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymin = std::min(0.0, yz);</div>
+<div class="line"><span class="lineno">   89</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymax = std::max(0.0, yz);</div>
+<div class="line"><span class="lineno">   90</span>  H[0][0] = xspan - xmax + xmin;</div>
+<div class="line"><span class="lineno">   91</span>  H[0][1] = 0.0;</div>
+<div class="line"><span class="lineno">   92</span>  H[0][2] = 0.0;</div>
+<div class="line"><span class="lineno">   93</span>  H[1][0] = xy;</div>
+<div class="line"><span class="lineno">   94</span>  H[1][1] = yspan - ymax + ymin;</div>
+<div class="line"><span class="lineno">   95</span>  H[1][2] = 0.0;</div>
+<div class="line"><span class="lineno">   96</span>  H[2][0] = xz;</div>
+<div class="line"><span class="lineno">   97</span>  H[2][1] = yz;</div>
+<div class="line"><span class="lineno">   98</span>  H[2][2] = zspan;</div>
+<div class="line"><span class="lineno">   99</span>  origin[0] = xlo_b - xmin;</div>
+<div class="line"><span class="lineno">  100</span>  origin[1] = ylo_b - ymin;</div>
+<div class="line"><span class="lineno">  101</span>  origin[2] = zlo_b;</div>
+<div class="line"><span class="lineno">  102</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -648,16 +651,16 @@ Functions</h2></td></tr>
 
 <p>Recovered restricted-triclinic lengths lx, ly, lz (H diagonal). </p>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00102">102</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  104</span>                                               {</div>
-<div class="line"><span class="lineno">  105</span>  <span class="keywordtype">double</span> H[3][3];</div>
-<div class="line"><span class="lineno">  106</span>  <span class="keywordtype">double</span> origin[3];</div>
-<div class="line"><span class="lineno">  107</span>  <a class="code hl_function" href="#ga342ae6a7675f0a32caf8087f43d679d8">dumpBoundsToH</a>(box, boxLow, H, origin);</div>
-<div class="line"><span class="lineno">  108</span>  lengths[0] = H[0][0];</div>
-<div class="line"><span class="lineno">  109</span>  lengths[1] = H[1][1];</div>
-<div class="line"><span class="lineno">  110</span>  lengths[2] = H[2][2];</div>
-<div class="line"><span class="lineno">  111</span>}</div>
-<div class="ttc" id="agroup__nneigh_html_ga342ae6a7675f0a32caf8087f43d679d8"><div class="ttname"><a href="#ga342ae6a7675f0a32caf8087f43d679d8">nneigh::dumpBoundsToH</a></div><div class="ttdeci">void dumpBoundsToH(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow, double H[3][3], double origin[3])</div><div class="ttdoc">LAMMPS dump bound spans to restricted triclinic H (rows a, b, c).</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00071">neighbours.hpp:71</a></div></div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00105">105</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  107</span>                                               {</div>
+<div class="line"><span class="lineno">  108</span>  <span class="keywordtype">double</span> H[3][3];</div>
+<div class="line"><span class="lineno">  109</span>  <span class="keywordtype">double</span> origin[3];</div>
+<div class="line"><span class="lineno">  110</span>  <a class="code hl_function" href="#ga342ae6a7675f0a32caf8087f43d679d8">dumpBoundsToH</a>(box, boxLow, H, origin);</div>
+<div class="line"><span class="lineno">  111</span>  lengths[0] = H[0][0];</div>
+<div class="line"><span class="lineno">  112</span>  lengths[1] = H[1][1];</div>
+<div class="line"><span class="lineno">  113</span>  lengths[2] = H[2][2];</div>
+<div class="line"><span class="lineno">  114</span>}</div>
+<div class="ttc" id="agroup__nneigh_html_ga342ae6a7675f0a32caf8087f43d679d8"><div class="ttname"><a href="#ga342ae6a7675f0a32caf8087f43d679d8">nneigh::dumpBoundsToH</a></div><div class="ttdeci">void dumpBoundsToH(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow, double H[3][3], double origin[3])</div><div class="ttdoc">LAMMPS dump bound spans to restricted triclinic H (rows a, b, c).</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00074">neighbours.hpp:74</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -700,12 +703,12 @@ Functions</h2></td></tr>
 
 <p>Fractional to cartesian coordinates via dump H. </p>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00148">148</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  149</span>                                                         {</div>
-<div class="line"><span class="lineno">  150</span>  r[0] = origin[0] + H[0][0] * s[0] + H[1][0] * s[1] + H[2][0] * s[2];</div>
-<div class="line"><span class="lineno">  151</span>  r[1] = origin[1] + H[1][1] * s[1] + H[2][1] * s[2];</div>
-<div class="line"><span class="lineno">  152</span>  r[2] = origin[2] + H[2][2] * s[2];</div>
-<div class="line"><span class="lineno">  153</span>}</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00151">151</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  152</span>                                                         {</div>
+<div class="line"><span class="lineno">  153</span>  r[0] = origin[0] + H[0][0] * s[0] + H[1][0] * s[1] + H[2][0] * s[2];</div>
+<div class="line"><span class="lineno">  154</span>  r[1] = origin[1] + H[1][1] * s[1] + H[2][1] * s[2];</div>
+<div class="line"><span class="lineno">  155</span>  r[2] = origin[2] + H[2][2] * s[2];</div>
+<div class="line"><span class="lineno">  156</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -758,18 +761,18 @@ Functions</h2></td></tr>
 
 <p>Cartesian to fractional coordinates via dump H. </p>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00134">134</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  135</span>                                                        {</div>
-<div class="line"><span class="lineno">  136</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lx = H[0][0];</div>
-<div class="line"><span class="lineno">  137</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ly = H[1][1];</div>
-<div class="line"><span class="lineno">  138</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lz = H[2][2];</div>
-<div class="line"><span class="lineno">  139</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xy = H[1][0];</div>
-<div class="line"><span class="lineno">  140</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xz = H[2][0];</div>
-<div class="line"><span class="lineno">  141</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yz = H[2][1];</div>
-<div class="line"><span class="lineno">  142</span>  s[2] = (z - origin[2]) / lz;</div>
-<div class="line"><span class="lineno">  143</span>  s[1] = (y - origin[1] - yz * s[2]) / ly;</div>
-<div class="line"><span class="lineno">  144</span>  s[0] = (x - origin[0] - xy * s[1] - xz * s[2]) / lx;</div>
-<div class="line"><span class="lineno">  145</span>}</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00137">137</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  138</span>                                                        {</div>
+<div class="line"><span class="lineno">  139</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lx = H[0][0];</div>
+<div class="line"><span class="lineno">  140</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ly = H[1][1];</div>
+<div class="line"><span class="lineno">  141</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lz = H[2][2];</div>
+<div class="line"><span class="lineno">  142</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xy = H[1][0];</div>
+<div class="line"><span class="lineno">  143</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xz = H[2][0];</div>
+<div class="line"><span class="lineno">  144</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yz = H[2][1];</div>
+<div class="line"><span class="lineno">  145</span>  s[2] = (z - origin[2]) / lz;</div>
+<div class="line"><span class="lineno">  146</span>  s[1] = (y - origin[1] - yz * s[2]) / ly;</div>
+<div class="line"><span class="lineno">  147</span>  s[0] = (x - origin[0] - xy * s[1] - xz * s[2]) / lx;</div>
+<div class="line"><span class="lineno">  148</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -796,11 +799,11 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00166">166</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  167</span>                                                                 {</div>
-<div class="line"><span class="lineno">  168</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#gad17e972366865905372aa796e946a351">dumpVolume</a>(yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>, yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>);</div>
-<div class="line"><span class="lineno">  169</span>}</div>
-<div class="ttc" id="agroup__nneigh_html_gad17e972366865905372aa796e946a351"><div class="ttname"><a href="#gad17e972366865905372aa796e946a351">nneigh::dumpVolume</a></div><div class="ttdeci">double dumpVolume(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</div><div class="ttdoc">Triclinic dump-cell volume |det(H)| from dumpBoundsToH.</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00157">neighbours.hpp:157</a></div></div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00169">169</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  170</span>                                                                 {</div>
+<div class="line"><span class="lineno">  171</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#gad17e972366865905372aa796e946a351">dumpVolume</a>(yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>, yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>);</div>
+<div class="line"><span class="lineno">  172</span>}</div>
+<div class="ttc" id="agroup__nneigh_html_gad17e972366865905372aa796e946a351"><div class="ttname"><a href="#gad17e972366865905372aa796e946a351">nneigh::dumpVolume</a></div><div class="ttdeci">double dumpVolume(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</div><div class="ttdoc">Triclinic dump-cell volume |det(H)| from dumpBoundsToH.</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00160">neighbours.hpp:160</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -834,14 +837,14 @@ Functions</h2></td></tr>
 <p>Triclinic dump-cell volume |det(H)| from dumpBoundsToH. </p>
 <p>Bound spans Lx*Ly*Lz are not the cell volume when tilt is present. </p>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00157">157</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  158</span>                                                          {</div>
-<div class="line"><span class="lineno">  159</span>  <span class="keywordtype">double</span> H[3][3];</div>
-<div class="line"><span class="lineno">  160</span>  <span class="keywordtype">double</span> origin[3];</div>
-<div class="line"><span class="lineno">  161</span>  <a class="code hl_function" href="#ga342ae6a7675f0a32caf8087f43d679d8">dumpBoundsToH</a>(box, boxLow, H, origin);</div>
-<div class="line"><span class="lineno">  162</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> vol = H[0][0] * H[1][1] * H[2][2];</div>
-<div class="line"><span class="lineno">  163</span>  <span class="keywordflow">return</span> vol &lt; 0.0 ? -vol : vol;</div>
-<div class="line"><span class="lineno">  164</span>}</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00160">160</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  161</span>                                                          {</div>
+<div class="line"><span class="lineno">  162</span>  <span class="keywordtype">double</span> H[3][3];</div>
+<div class="line"><span class="lineno">  163</span>  <span class="keywordtype">double</span> origin[3];</div>
+<div class="line"><span class="lineno">  164</span>  <a class="code hl_function" href="#ga342ae6a7675f0a32caf8087f43d679d8">dumpBoundsToH</a>(box, boxLow, H, origin);</div>
+<div class="line"><span class="lineno">  165</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> vol = H[0][0] * H[1][1] * H[2][2];</div>
+<div class="line"><span class="lineno">  166</span>  <span class="keywordflow">return</span> vol &lt; 0.0 ? -vol : vol;</div>
+<div class="line"><span class="lineno">  167</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -890,8 +893,8 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00360">360</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  360</span>{ <span class="keywordflow">return</span> graph_; }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00403">403</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  403</span>{ <span class="keywordflow">return</span> graph_; }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -922,8 +925,47 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="ga5aeb17070b1a13a028fdcc5d3e7470b6" name="ga5aeb17070b1a13a028fdcc5d3e7470b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5aeb17070b1a13a028fdcc5d3e7470b6">&#9670;&#160;</a></span>kNearestNeighbourList() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; nneigh::kNearestNeighbourList </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>k</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>candidateCutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>types</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>mutual</em></span><span class="paramdefsep"> = </span><span class="paramdefval">true</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>k-nearest graph on a type set (water oxygens). </p>
+<p>Substrate, ions and other species never appear as neighbours. An empty set is no atoms. </p>
+
+</div>
+</div>
 <a id="ga18cda509d1fc5e680abf22e36348fc61" name="ga18cda509d1fc5e680abf22e36348fc61"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga18cda509d1fc5e680abf22e36348fc61">&#9670;&#160;</a></span>kNearestNeighbourList()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ga18cda509d1fc5e680abf22e36348fc61">&#9670;&#160;</a></span>kNearestNeighbourList() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -961,8 +1003,39 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="gae83921eb2fdda24a0dcda3638c8a2ebc" name="gae83921eb2fdda24a0dcda3638c8a2ebc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae83921eb2fdda24a0dcda3638c8a2ebc">&#9670;&#160;</a></span>kNearestNeighbourPair() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::pair&lt; std::vector&lt; std::vector&lt; int &gt; &gt;, std::vector&lt; std::vector&lt; int &gt; &gt; &gt; nneigh::kNearestNeighbourPair </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>k</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>candidateCutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>types</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ga553a0b3d4dddd477c0dcb06d93361eae" name="ga553a0b3d4dddd477c0dcb06d93361eae"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga553a0b3d4dddd477c0dcb06d93361eae">&#9670;&#160;</a></span>kNearestNeighbourPair()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ga553a0b3d4dddd477c0dcb06d93361eae">&#9670;&#160;</a></span>kNearestNeighbourPair() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1020,8 +1093,8 @@ Functions</h2></td></tr>
 
 <p>Atoms whose cutoff bond set changed on the last update. </p>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00369">369</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  369</span>{ <span class="keywordflow">return</span> changedAtoms_; }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00412">412</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  412</span>{ <span class="keywordflow">return</span> changedAtoms_; }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1048,8 +1121,8 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00367">367</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  367</span>{ <span class="keywordflow">return</span> rebuilt_; }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00410">410</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  410</span>{ <span class="keywordflow">return</span> rebuilt_; }</div>
 </div><!-- fragment -->
 </div>
 </div>

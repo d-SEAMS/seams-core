@@ -41,6 +41,7 @@ Overview
 	std::uint64_t :ref:`wlHash<doxid-namespacetopo_1a3c1e2aed1633a79c2b9ac530d63c28a6>`(const std::vector<std::vector<int>>& adjacency, int root, int rounds, const std::vector<int>& colours = {});
 	:ref:`LocalKey<doxid-structtopo_1_1_local_key>` :ref:`localKey<doxid-namespacetopo_1a4c926ab08f90e20ec25abcc63593821b>`(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int atom, int hops, const std::vector<int>& colours = {});
 	:ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>` :ref:`fingerprint<doxid-namespacetopo_1a31e36c2b000ef45e1e0370ceffcc7b07>`(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int hops = 2, int maxRingSize = 7, const std::vector<int>& colours = {});
+	:ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>` :ref:`incrementalFingerprint<doxid-namespacetopo_1a61f23864462f8e8888ef6e681800a42f>`(const :ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>`& prev, const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, const std::vector<int>& dirtyAtoms, int hops, int maxRingSize = 7, const std::vector<int>& colours = {});
 	std::string :ref:`hex<doxid-namespacetopo_1a704a6805e4842829fa83f16081405519>`(std::uint64_t value);
 	void :ref:`addToLibrary<doxid-namespacetopo_1ab7a77ab1002ce0af5dda5656f84ae369>`(:ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`& lib, const :ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>`& fp, const std::string& label);
 	std::string :ref:`writeLibrary<doxid-namespacetopo_1a57942af5bce01d27654ba8d544195fe0>`(const :ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`& lib);
@@ -117,6 +118,18 @@ Key of the rooted neighbourhood of ``atom``.
 Keys of every atom, their histogram, the ring census up to ``maxRingSize``, and the frame key.
 
 ``colours`` as in localKey.
+
+.. index:: pair: function; incrementalFingerprint
+.. _doxid-namespacetopo_1a61f23864462f8e8888ef6e681800a42f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>` incrementalFingerprint(const :ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>`& prev, const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, const std::vector<int>& dirtyAtoms, int hops, int maxRingSize = 7, const std::vector<int>& colours = {})
+
+Recompute local keys only for the hop-ball of ``dirtyAtoms`` and keep the rest of ``prev``.
+
+The ring census is taken on ``rows``. A size or hop mismatch falls back to a full fingerprint.
 
 .. index:: pair: function; hex
 .. _doxid-namespacetopo_1a704a6805e4842829fa83f16081405519:

@@ -246,7 +246,7 @@ Classes</h2></td></tr>
 <tr class="memitem:Cage" id="r_Cage"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcage_1_1Cage.html">Cage</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This contains a cage, with the constituent rings.  <a href="structcage_1_1Cage.html#details">More...</a><br /></td></tr>
 <tr class="memitem:FoundCage" id="r_FoundCage"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcage_1_1FoundCage.html">FoundCage</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One closed polyhedron matching a signature.  <a href="structcage_1_1FoundCage.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One cage matching a signature, closed or incomplete.  <a href="structcage_1_1FoundCage.html#details">More...</a><br /></td></tr>
 <tr class="memitem:Signature" id="r_Signature"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcage_1_1Signature.html">Signature</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ring-size census of a polyhedral cage: size -&gt; number of faces.  <a href="structcage_1_1Signature.html#details">More...</a><br /></td></tr>
 </table><table class="memberdecls">
@@ -280,6 +280,8 @@ Functions</h2></td></tr>
 <tr class="memdesc:abe73ca6723c92832e5295714c07133c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Face-sharing rings whose size census equals <span class="tt">signature</span> and whose edges close.  <br /></td></tr>
 <tr class="memitem:ac2f1937ffc84b09b4b552f39a4fbd62f" id="r_ac2f1937ffc84b09b4b552f39a4fbd62f"><td class="memItemLeft">std::vector&lt; <a class="el" href="structcage_1_1FoundCage.html">FoundCage</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ac2f1937ffc84b09b4b552f39a4fbd62f">findBySignature</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;signature)</td></tr>
 <tr class="memdesc:ac2f1937ffc84b09b4b552f39a4fbd62f"><td class="mdescLeft">&#160;</td><td class="mdescRight">As above.  <br /></td></tr>
+<tr class="memitem:a04500ad966b000abb178562e6df327b6" id="r_a04500ad966b000abb178562e6df327b6"><td class="memItemLeft">std::vector&lt; <a class="el" href="structcage_1_1FoundCage.html">FoundCage</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a04500ad966b000abb178562e6df327b6">findIncompleteBySignature</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;signature, int minFaces)</td></tr>
+<tr class="memdesc:a04500ad966b000abb178562e6df327b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Connected face sets that stay inside the signature budget, have at least <span class="tt">minFaces</span> faces, and are not closed.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Functions for topological network criteria cage types. </p>
@@ -416,6 +418,35 @@ Changelog</h3>
 
 <p>As above. </p>
 <p>Named <span class="tt">hc</span> and <span class="tt">ddc</span> call findHC / findDDC on the six-membered rings so the vertex sets match those finders. </p>
+
+</div>
+</div>
+<a id="a04500ad966b000abb178562e6df327b6" name="a04500ad966b000abb178562e6df327b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a04500ad966b000abb178562e6df327b6">&#9670;&#160;</a></span>findIncompleteBySignature()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; <a class="el" href="structcage_1_1FoundCage.html">FoundCage</a> &gt; cage::findIncompleteBySignature </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>signature</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>minFaces</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Connected face sets that stay inside the signature budget, have at least <span class="tt">minFaces</span> faces, and are not closed. </p>
+<p>Cups and incomplete cages during hydrate nucleation. Closed polyhedra are omitted. <span class="tt">minFaces &lt;= 0</span> uses <span class="tt">max(1, signature.faceCount() / 2)</span>. A cup whose every face already belongs to a closed cage is omitted. </p>
 
 </div>
 </div>

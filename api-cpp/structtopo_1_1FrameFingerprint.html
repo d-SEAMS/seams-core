@@ -252,6 +252,8 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a7b460d00fe40ddad15c680fec009eecf"><td class="mdescLeft">&#160;</td><td class="mdescRight">local key -&gt; number of atoms carrying it  <br /></td></tr>
 <tr class="memitem:af25731956ad220bebec8965a6e8432bc" id="r_af25731956ad220bebec8965a6e8432bc"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#af25731956ad220bebec8965a6e8432bc">ringCensus</a></td></tr>
 <tr class="memdesc:af25731956ad220bebec8965a6e8432bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">ringCensus[s] = primitive rings of size s  <br /></td></tr>
+<tr class="memitem:a410ffeaef275b28480cdfca323f48985" id="r_a410ffeaef275b28480cdfca323f48985"><td class="memItemLeft">std::vector&lt; std::uint64_t &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a410ffeaef275b28480cdfca323f48985">wlAtom</a></td></tr>
+<tr class="memdesc:a410ffeaef275b28480cdfca323f48985"><td class="mdescLeft">&#160;</td><td class="mdescRight">per-atom WL hash used in the frame key  <br /></td></tr>
 <tr class="memitem:a436b359c7a9bb9b2c849d0e37d13962d" id="r_a436b359c7a9bb9b2c849d0e37d13962d"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a436b359c7a9bb9b2c849d0e37d13962d">hops</a> = 0</td></tr>
 <tr class="memitem:aac82494c5f215c4bdda77ba4b576e839" id="r_aac82494c5f215c4bdda77ba4b576e839"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#aac82494c5f215c4bdda77ba4b576e839">coloured</a> = false</td></tr>
 <tr class="memdesc:aac82494c5f215c4bdda77ba4b576e839"><td class="mdescLeft">&#160;</td><td class="mdescRight">keys carry vertex colours  <br /></td></tr>
@@ -310,7 +312,7 @@ Public Attributes</h2></td></tr>
 
 <p>keys carry vertex colours </p>
 
-<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00054">54</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00055">55</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
 
 </div>
 </div>
@@ -326,7 +328,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00053">53</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00054">54</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
 
 </div>
 </div>
@@ -381,6 +383,24 @@ Public Attributes</h2></td></tr>
 <p>ringCensus[s] = primitive rings of size s </p>
 
 <p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00052">52</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a410ffeaef275b28480cdfca323f48985" name="a410ffeaef275b28480cdfca323f48985"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a410ffeaef275b28480cdfca323f48985">&#9670;&#160;</a></span>wlAtom</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::uint64_t&gt; topo::FrameFingerprint::wlAtom</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>per-atom WL hash used in the frame key </p>
+
+<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00053">53</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
 
 </div>
 </div>

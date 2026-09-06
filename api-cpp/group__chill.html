@@ -276,6 +276,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:gaf494786ce8fdcfe596b6181ef2a9979f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classifies each atom according to the CHILL+ algorithm.  <br /></td></tr>
 <tr class="memitem:ga02005590b436de59a09ab102fd5d78cc" id="r_ga02005590b436de59a09ab102fd5d78cc"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ga02005590b436de59a09ab102fd5d78cc">chill::getIceTypePlusNoPrint</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false)</td></tr>
 <tr class="memdesc:ga02005590b436de59a09ab102fd5d78cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">CHILL+ ice types on the cloud. Does not write a file.  <br /></td></tr>
+<tr class="memitem:ga6c253832dc8e20f4450ed81d1edc7bf7" id="r_ga6c253832dc8e20f4450ed81d1edc7bf7"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ga6c253832dc8e20f4450ed81d1edc7bf7">chill::clearIceTypesExcept</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;types)</td></tr>
 <tr class="memitem:gaa4cd8fa09ced6b06f44bf2258304a5e3" id="r_gaa4cd8fa09ced6b06f44bf2258304a5e3"><td class="memItemLeft">std::vector&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gaa4cd8fa09ced6b06f44bf2258304a5e3">chill::getq6</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false)</td></tr>
 <tr class="memitem:gaaad5ad6884511e350e8b2cda1baeaea2" id="r_gaaad5ad6884511e350e8b2cda1baeaea2"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#gaaad5ad6884511e350e8b2cda1baeaea2">chill::reclassifyWater</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::vector&lt; double &gt; &amp;q6)</td></tr>
 <tr class="memitem:ga0981b3101b04cacd525c2b5dc52f8a96" id="r_ga0981b3101b04cacd525c2b5dc52f8a96"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ga0981b3101b04cacd525c2b5dc52f8a96">chill::printIceType</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::string path, int firstFrame, bool isSlice=false, std::string outputFileName=&quot;superChill.txt&quot;)</td></tr>
@@ -454,6 +455,28 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Compute and classify the bond correlations c_ij under an arbitrary rule set, filling yCloud.pts[i].c_ij. getCorrel and getCorrelPlus are this engine under their canonical water rules. </p>
+
+</div>
+</div>
+<a id="ga6c253832dc8e20f4450ed81d1edc7bf7" name="ga6c253832dc8e20f4450ed81d1edc7bf7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6c253832dc8e20f4450ed81d1edc7bf7">&#9670;&#160;</a></span>clearIceTypesExcept()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::clearIceTypesExcept </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>types</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set iceType to unclassified for atoms whose LAMMPS type is not in types. Empty types leaves the cloud unchanged. Used after a water-type k-NN so substrate and ions are not scored as water. </p>
 
 </div>
 </div>
@@ -1124,7 +1147,7 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Local and neighbour-averaged Steinhardt parameters of degree 3, 4 or 6. Local ql is Steinhardt, Nelson and Ronchetti; qlBar is the Lechner-Dellago average of q_lm over the particle and its neighbours. The compute path flattens the neighbour list to CSR so the same kernel can run on the host (OpenMP), across MPI ranks (atom split plus Allgatherv of q_lm), or under OpenMP target offload when the build provides a device. </p>
+<p>Local and neighbour-averaged Steinhardt parameters of degree 3, 4, 6, 8, or 12. Local ql is Steinhardt, Nelson and Ronchetti; qlBar is the Lechner-Dellago average of q_lm over the particle and its neighbours. l=12 is host-only (associated Legendre, or sphericart when linked) for the Zeron hydrate pair with l=3; the device Ylm path has no l=12. Other degrees return zeros. The compute path flattens the neighbour list to CSR so the same kernel can run on the host (OpenMP), across MPI ranks (atom split plus Allgatherv of q_lm), or under OpenMP target offload when the build provides a device. </p>
 
 </div>
 </div>
@@ -1211,7 +1234,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="bop_8hpp_source.html#l00323">323</a> of file <a class="el" href="bop_8hpp_source.html">bop.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="bop_8hpp_source.html#l00330">330</a> of file <a class="el" href="bop_8hpp_source.html">bop.hpp</a>.</p>
 
 </div>
 </div>
@@ -1229,7 +1252,7 @@ Variables</h2></td></tr>
 
 <p>Local \(q_l(i)\). </p>
 
-<p class="definition">Definition at line <a class="el" href="bop_8hpp_source.html#l00324">324</a> of file <a class="el" href="bop_8hpp_source.html">bop.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="bop_8hpp_source.html#l00331">331</a> of file <a class="el" href="bop_8hpp_source.html">bop.hpp</a>.</p>
 
 </div>
 </div>

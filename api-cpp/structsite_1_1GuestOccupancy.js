@@ -5,5 +5,6 @@ var structsite_1_1GuestOccupancy =
     [ "free", "structsite_1_1GuestOccupancy.html#aca1af9a15208a80f6ddb598fa3a2c3bd", null ],
     [ "guestsPerCage", "structsite_1_1GuestOccupancy.html#ad78f4f4cadb48de07aef52d1b8acd2f6", null ],
     [ "multiply", "structsite_1_1GuestOccupancy.html#abdec0c14299ff5902b93dc131db43026", null ],
+    [ "occupancyHistogram", "structsite_1_1GuestOccupancy.html#ae9b40cb83485c4236287f1332c563bb6", null ],
     [ "occupied", "structsite_1_1GuestOccupancy.html#aa03cd68e5f4575f5aabf5fedc5234a34", null ]
 ];

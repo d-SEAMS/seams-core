@@ -20,6 +20,7 @@ var namespacecage =
     [ "canonicalCertificateRooted", "namespacecage.html#a1ff12e6c4c9298050913b02758546c6f", null ],
     [ "findBySignature", "namespacecage.html#abe73ca6723c92832e5295714c07133c0", null ],
     [ "findBySignature", "namespacecage.html#ac2f1937ffc84b09b4b552f39a4fbd62f", null ],
+    [ "findIncompleteBySignature", "namespacecage.html#a04500ad966b000abb178562e6df327b6", null ],
     [ "isClosedPolyhedron", "namespacecage.html#a40b05518af3bbd5128f459d056b85ac9", null ],
     [ "isHexagonalPrism", "namespacecage.html#a2b191b4c90fc095838928727d7c11b3e", null ],
     [ "nautyAvailable", "namespacecage.html#af3048384a261c7ffc3487cb54af20cb1", null ],
