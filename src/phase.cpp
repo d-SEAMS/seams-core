@@ -210,7 +210,9 @@ phase::IceXXIHit phase::iceXXILibrary(
   const bool aOk = std::fabs(hit.a - kXXIa) < 0.4;
   const bool cOk = std::fabs(hit.c - kXXIc) < 0.3;
   const bool rhoOk = std::fabs(hit.density - kXXIrho) < 0.08;
-  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  // Ice I uses 3.5 A; ice XXI at 1.413 g/cm3 has a 3.0 A first shell.
+  // Four-nearest neighbours are the tetrahedral graph in both cells.
+  auto nList = nneigh::kNearestNeighbourList(yCloud, 4, 3.5, 1, true);
   nList = nneigh::neighbourListByIndex(yCloud, nList);
   double coord = 0.0;
   for (const auto &row : nList) {

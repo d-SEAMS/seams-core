@@ -17,5 +17,6 @@ and writes `dump.chill`. The compute still copies `nlocal` xyz and calls
 `seams_chill_plus`; it does not take the LAMMPS neighbour list.
 
 `tests/test_phase.cpp` checks that the compute's label function is
-`seams_chill_plus`. A live `lmp -in in.dseams` run needs these two
-sources in `LAMMPS/src` and a link against `libyodaLib`.
+`seams_chill_plus`. `build_compute.sh PREFIX` clones LAMMPS
+`stable_22Jul2025_update5`, copies these two sources into `src/`,
+links `libyodaLib` from `PREFIX`, and runs `in.dseams`.
