@@ -12,5 +12,10 @@ The dump column is the same integer table as `seams chill-plus`
 5 interClathrate, 6 unclassified). Copy these two sources into
 `LAMMPS/src` and add `-I` to the seams-core include path.
 
+`in.dseams` reads `water.data` (four oxygen sites) with `pair_style zero`
+and writes `dump.chill`. The compute still copies `nlocal` xyz and calls
+`seams_chill_plus`; it does not take the LAMMPS neighbour list.
+
 `tests/test_phase.cpp` checks that the compute's label function is
-`seams_chill_plus`.
+`seams_chill_plus`. A live `lmp -in in.dseams` run needs these two
+sources in `LAMMPS/src` and a link against `libyodaLib`.

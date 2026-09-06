@@ -49,7 +49,15 @@ TEST_CASE("a hexagonal channel is not a closed 512 cage", "[phase]") {
   const auto rings = primitive::ringNetwork(nList, 6);
   const auto closed = cage::findBySignature(rings, nList, cage::Signature::parse("512"));
   REQUIRE(closed.empty());
-  REQUIRE(phase::openChannelCount(cloud, nList) > 0);
+  REQUIRE(phase::openChannelCount(cloud, nList) == 1);
+}
+
+TEST_CASE("a 512 cage frame has no open hexagonal channel", "[phase]") {
+  molSys::PointCloud<molSys::Point<double>, double> sI;
+  sI = sinp::readLammpsTrjO("traj/genice_sI.lammpstrj", 1, sI, 1);
+  auto nList = nneigh::neighListO(3.5, sI, 1);
+  nList = nneigh::neighbourListByIndex(sI, nList);
+  REQUIRE(phase::openChannelCount(sI, nList) == 0);
 }
 
 TEST_CASE("Ih and a flipped-proton copy have different proton keys", "[phase]") {
@@ -80,7 +88,17 @@ TEST_CASE("mobile hydrogens report a finite MSD", "[phase]") {
   REQUIRE_THAT(msd, Catch::Matchers::WithinAbs(1.0, 1e-12));
 }
 
-TEST_CASE("ice XXI library hits a 152-site BCT cell and misses ice Ih",
+TEST_CASE("hydrogen MSD uses the minimum image", "[phase]") {
+  auto a = cloudFrom({{0, 0, 0}, {0.2, 0, 0}}, {10, 10, 10});
+  a.pts[0].type = 1;
+  a.pts[1].type = 2;
+  auto b = a;
+  b.pts[1].x = 9.7;
+  const double msd = phase::hydrogenMSD(a, b, 2);
+  REQUIRE_THAT(msd, Catch::Matchers::WithinAbs(0.25, 1e-12));
+}
+
+TEST_CASE("ice XXI library rejects a 152-site simple-cubic BCT packing",
           "[phase]") {
   std::vector<std::array<double, 3>> xyz;
   const double a = 20.197;
@@ -97,18 +115,26 @@ TEST_CASE("ice XXI library hits a 152-site BCT cell and misses ice Ih",
     }
   }
   REQUIRE(xyz.size() == 152);
-  auto xxi = cloudFrom(xyz, {a, a, c});
-  const auto hit = phase::iceXXILibrary(xxi);
-  REQUIRE(hit.match);
-  molSys::PointCloud<molSys::Point<double>, double> ih;
-  ih = sinp::readLammpsTrjO("traj/genice_sI.lammpstrj", 1, ih, 1);
-  REQUIRE_FALSE(phase::iceXXILibrary(ih).match);
-}
-
-TEST_CASE("dense null bins as HDA/MDA; ice I does not", "[phase]") {
+  auto packed = cloudFrom(xyz, {a, a, c});
+  const auto hit = phase::iceXXILibrary(packed);
+  REQUIRE(hit.nSites == 152);
+  REQUIRE_THAT(hit.a, Catch::Matchers::WithinAbs(a, 1e-9));
+  REQUIRE_THAT(hit.c, Catch::Matchers::WithinAbs(c, 1e-9));
+  REQUIRE(hit.meanCoord > 4.5);
+  REQUIRE_FALSE(hit.match);
   molSys::PointCloud<molSys::Point<double>, double> sI;
   sI = sinp::readLammpsTrjO("traj/genice_sI.lammpstrj", 1, sI, 1);
-  const auto rhoI = phase::localDensity(sI, 3.5);
+  REQUIRE_FALSE(phase::iceXXILibrary(sI).match);
+  molSys::PointCloud<molSys::Point<double>, double> ic;
+  ic = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, ic, 1);
+  REQUIRE_FALSE(phase::iceXXILibrary(ic).match);
+}
+
+TEST_CASE("dense local shells bin as HDA; tetrahedral ice does not",
+          "[phase]") {
+  molSys::PointCloud<molSys::Point<double>, double> ic;
+  ic = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, ic, 1);
+  const auto rhoI = phase::localDensity(ic, 3.5);
   double meanI = 0.0;
   for (double r : rhoI) {
     meanI += r;
@@ -130,11 +156,10 @@ TEST_CASE("dense null bins as HDA/MDA; ice I does not", "[phase]") {
   }
   meanN /= static_cast<double>(rhoN.size());
   REQUIRE(meanN > meanI);
-  const double cut = 0.5 * (meanI + meanN);
-  REQUIRE(phase::glassFromDensity(meanI, cut, meanN - 1e-9) ==
-          phase::GlassKind::ice);
-  REQUIRE(phase::glassFromDensity(meanN, cut, meanN - 1e-9) ==
-          phase::GlassKind::hda);
+  REQUIRE(phase::glassFromDensity(meanI) == phase::GlassKind::ice);
+  REQUIRE(phase::glassFromDensity(meanN) == phase::GlassKind::hda);
+  REQUIRE(phase::glassFromDensity(0.033) == phase::GlassKind::lda);
+  REQUIRE(phase::glassFromDensity(0.050) == phase::GlassKind::mda);
 }
 
 TEST_CASE("LAMMPS compute dump column is seams_chill_plus", "[phase][lammps]") {
