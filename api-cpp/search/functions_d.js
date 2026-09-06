@@ -10,6 +10,6 @@ var searchData=
   ['normalizerdf_7',['normalizeRDF',['../group__rdf2.html#ga7f3e0b969a3ad28ce57dc8e7e74b6b98',1,'rdf2']]],
   ['normheightpercent_8',['normHeightPercent',['../namespacetopoparam.html#a473e7ca29f517802126410c59756c974',1,'topoparam']]],
   ['normlm_9',['normLM',['../namespaceseams_1_1steinhardt.html#aef637bd4e52ad99c21c04c2530d464f9',1,'seams::steinhardt']]],
-  ['notneighboursofring_10',['notNeighboursOfRing',['../namespacering.html#a5db4898b22ebb13511cc37fae6674e5c',1,'ring']]],
+  ['notneighboursofring_10',['notNeighboursOfRing',['../namespacering.html#a5db4898b22ebb13511cc37fae6674e5c',1,'ring::notNeighboursOfRing()'],['../namespacetum_1_1device.html#a86a03666098ac7a14626540315097b6c',1,'tum::device::notNeighboursOfRing()']]],
   ['numstaggered_11',['numStaggered',['../group__chill.html#gaba97c889c36d860a4842f43a3f81a6b5',1,'chill']]]
 ];

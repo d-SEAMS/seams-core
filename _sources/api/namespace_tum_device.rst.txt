@@ -1,0 +1,88 @@
+.. index:: pair: namespace; tum::device
+.. _doxid-namespacetum_1_1device:
+
+namespace tum::device
+=====================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace device {
+
+	// global functions
+
+	bool :target:`bonded<doxid-namespacetum_1_1device_1a67c370b04ce0484e28e18a47a341a6c3>`(const int* deg, const int* cols, int nAtoms, int kMax, int a, int b);
+	bool :target:`inSix<doxid-namespacetum_1_1device_1a0d0b742692a97da157edb94e385c3368>`(const int* r, int atom);
+	bool :target:`shareAtoms<doxid-namespacetum_1_1device_1aca8e51f6362549d29fcf3ca1f19cbf8e>`(const int* a, const int* b);
+	int :target:`commonCount<doxid-namespacetum_1_1device_1ac7e35c8a5c2538699d6ac0edddb5e31f>`(const int* a, const int* b);
+	bool :target:`commonInThree<doxid-namespacetum_1_1device_1a8787f7d01fd208b5e9353f946562fe5a>`(const int* a, const int* b, const int* c);
+	bool :target:`shareNeigh<doxid-namespacetum_1_1device_1a061391c12acf0965ef0b283462f43fd1>`(const int* deg, const int* cols, int nAtoms, int kMax, int a, int b);
+	int :ref:`hopsAtMost<doxid-namespacetum_1_1device_1ae9a6f5c08baa53d7971e42539faeb3f1>`(const int* deg, const int* cols, int nAtoms, int kMax, int a, int b, int cap);
+	bool :ref:`hopBoundPrimitiveSix<doxid-namespacetum_1_1device_1adb611a8926577921d4770b84aacc5902>`(const int* r, const int* deg, const int* cols, int nAtoms, int kMax);
+	bool :target:`basalNeighbours<doxid-namespacetum_1_1device_1a487f570c01a950bf28365b6d07850b07>`(const int* deg, const int* cols, int nAtoms, int kMax, int n1, int n2, int atomOne, int atomTwo);
+	bool :target:`notNeighboursOfRing<doxid-namespacetum_1_1device_1a86a03666098ac7a14626540315097b6c>`(const int* deg, const int* cols, int nAtoms, int kMax, const int* trip, const int* ring);
+	bool :target:`basalConditions<doxid-namespacetum_1_1device_1adb708068694dc11d88417382669ee78e>`(const int* deg, const int* cols, int nAtoms, int kMax, const int* b1, const int* b2);
+	int :target:`firstRingThrough<doxid-namespacetum_1_1device_1a1e28269a0e7df30aede0377144f889f8>`(const int* A, int nA, const int* B, int nB, const int* C, int nC, int skipA, int skipB);
+	int :target:`ringsThrough<doxid-namespacetum_1_1device_1a65530a55ba9f0502f557be5cc08974ca>`(const int* A, int nA, const int* B, int nB, const int* C, int nC, int skipA, int skipB, int* out, int cap);
+	int :target:`fetchAdd<doxid-namespacetum_1_1device_1a19baaa6f3828a39fc70ec4bbfa5c6159>`(int* p);
+	void :ref:`enumSixFrom<doxid-namespacetum_1_1device_1a306c6a414e63cd34a04365f1e2b03d93>`(int i, const int* deg, const int* cols, int nAtoms, int kMax, int maxRings, int* nRings, int* ringAtoms, int* dropped);
+	void :target:`invertOneRing<doxid-namespacetum_1_1device_1a436c92ddb65af7ea004651faae730d7d>`(int r, const int* nRings, const int* ringAtoms, int nAtoms, int maxPer, int* throughCount, int* through);
+	void :target:`sortThroughRow<doxid-namespacetum_1_1device_1a8d76398842299f9311380465bdbf82be>`(int* row, int n);
+	void :target:`emitBasalFrom<doxid-namespacetum_1_1device_1a33474d52479649f2f0198231001716a5>`(int i, const int* nRings, const int* ringAtoms, const int* deg, const int* cols, const int* throughCount, const int* through, int nAtoms, int kMax, int maxPer, int maxPairs, int* nPairs, int* pairs);
+	void :target:`applyHcPair<doxid-namespacetum_1_1device_1a41c542baa7e9bc8746f60ce93aad60dd>`(int p, const int* nPairs, const int* pairs, const int* ringAtoms, const int* throughCount, const int* through, int nAtoms, int maxPer, int* hc);
+	void :target:`ddcFrom<doxid-namespacetum_1_1device_1a96b35dc94857641cfc85cdb983e3f2e7>`(int i, const int* nRings, const int* ringAtoms, const int* throughCount, const int* through, const int* hc, int nAtoms, int maxPer, int* ddc);
+	void :target:`atomIceFrom<doxid-namespacetum_1_1device_1ac99948f997289c69b78611f94bc3e61b>`(int r, const int* nRings, const int* ringAtoms, const int* hc, const int* ddc, int nAtoms, int* atomHc, int* atomDdc);
+
+	} // namespace device
+.. _details-namespacetum_1_1device:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Global Functions
+----------------
+
+.. index:: pair: function; hopsAtMost
+.. _doxid-namespacetum_1_1device_1ae9a6f5c08baa53d7971e42539faeb3f1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int hopsAtMost(const int* deg, const int* cols, int nAtoms, int kMax, int a, int b, int cap)
+
+Graph distance from a to b when it is at most cap, else -1.
+
+cap is 1 or 2: the Franzblau reject bound for a six-ring.
+
+.. index:: pair: function; hopBoundPrimitiveSix
+.. _doxid-namespacetum_1_1device_1adb611a8926577921d4770b84aacc5902:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool hopBoundPrimitiveSix(const int* r, const int* deg, const int* cols, int nAtoms, int kMax)
+
+Hop-bounded Franzblau SP test on a six-cycle of the bond graph.
+
+.. index:: pair: function; enumSixFrom
+.. _doxid-namespacetum_1_1device_1a306c6a414e63cd34a04365f1e2b03d93:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void enumSixFrom(int i, const int* deg, const int* cols, int nAtoms, int kMax, int maxRings, int* nRings, int* ringAtoms, int* dropped)
+
+Enumerate hop-bound primitive six-rings whose lowest vertex is i.
+

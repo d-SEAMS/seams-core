@@ -6,8 +6,10 @@ var searchData=
   ['edges_3',['edges',['../structtopo_1_1LocalKey.html#a46842962761d0b24c821e614b0598506',1,'topo::LocalKey']]],
   ['eigenvecangle_4',['eigenVecAngle',['../group__gen.html#ga48d1277f242712a0948bb029883328e4',1,'gen']]],
   ['electrolyte_5',['electrolyte',['../namespacesite.html#aa3661d15289b4b8576f48217ed337ca3a0cac509065346a8209c8676a1ea3ed41',1,'site']]],
-  ['equatorial_6',['equatorial',['../structring_1_1StackingPlanes.html#a54f00fad4c7f6f65f74e1cb49af88e78',1,'ring::StackingPlanes']]],
-  ['error_7',['error',['../structgpu_1_1BatchResult.html#a9b8289baca55bd98812d4e30239ac4c9',1,'gpu::BatchResult']]],
-  ['estimatefootprint_8',['estimateFootprint',['../namespacegpu.html#a5e96b0fb97bcce4c6cca5e5888bea7a6',1,'gpu']]],
-  ['exportenviron_9',['exportEnviron',['../namespaceseams_1_1cfg.html#aabf071e8f8e859b7daa9df9a9024377f',1,'seams::cfg']]]
+  ['emitbasalfrom_6',['emitBasalFrom',['../namespacetum_1_1device.html#a33474d52479649f2f0198231001716a5',1,'tum::device']]],
+  ['enumsixfrom_7',['enumSixFrom',['../namespacetum_1_1device.html#a306c6a414e63cd34a04365f1e2b03d93',1,'tum::device']]],
+  ['equatorial_8',['equatorial',['../structring_1_1StackingPlanes.html#a54f00fad4c7f6f65f74e1cb49af88e78',1,'ring::StackingPlanes']]],
+  ['error_9',['error',['../structgpu_1_1BatchResult.html#a9b8289baca55bd98812d4e30239ac4c9',1,'gpu::BatchResult']]],
+  ['estimatefootprint_10',['estimateFootprint',['../namespacegpu.html#a5e96b0fb97bcce4c6cca5e5888bea7a6',1,'gpu']]],
+  ['exportenviron_11',['exportEnviron',['../namespaceseams_1_1cfg.html#aabf071e8f8e859b7daa9df9a9024377f',1,'seams::cfg']]]
 ];

@@ -38,5 +38,7 @@ var dir_37a9b835d5ced2a8f90c237a2ad84fdf =
     [ "topo_fingerprint.hpp", "topo__fingerprint_8hpp.html", "topo__fingerprint_8hpp" ],
     [ "topo_one_dim.hpp", "topo__one__dim_8hpp.html", "topo__one__dim_8hpp" ],
     [ "topo_two_dim.hpp", "topo__two__dim_8hpp.html", "topo__two__dim_8hpp" ],
+    [ "tum_device.hpp", "tum__device_8hpp.html", "tum__device_8hpp" ],
+    [ "tum_offload.hpp", "tum__offload_8hpp.html", "tum__offload_8hpp" ],
     [ "voronoi_qlm.hpp", "voronoi__qlm_8hpp.html", "voronoi__qlm_8hpp" ]
 ];

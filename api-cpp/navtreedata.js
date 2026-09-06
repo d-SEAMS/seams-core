@@ -63,8 +63,8 @@ var NAVTREEINDEX =
 "absOrientation_8hpp.html",
 "group__nneigh.html#ga80f555acadad22b5edcc4af8285006ed",
 "namespacephase.html#a548c3829160adf36ec9d7ba7dbb065a1",
-"structchill_1_1VoronoiWeights.html",
-"structtopo_1_1FrameFingerprint.html#a4d7179bcacbf440ed2a9bd1a8aefb260"
+"structchill_1_1BondClassifier.html",
+"structsite_1_1IonEnvironment.html#a30493f96ed37b238ce348fc7abbffc72"
 ];
 
 const SYNCONMSG = 'click to disable panel synchronization';

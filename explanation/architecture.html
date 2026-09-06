@@ -336,12 +336,13 @@ Not a drop-in for vesin cutoff lists.</p></li>
 </section>
 <section id="device-paths">
 <h2>Device paths<a class="headerlink" href="#device-paths" title="Link to this heading">¶</a></h2>
-<p>Optional CUDA via gpulite (<code class="docutils literal notranslate"><span class="pre">-Dwith_gpulite</span></code>) runs the TUM ice score
-only: linkcell k-NN, mutual four-nearest graph, primitive six-rings,
-HC/DDC. CHILL and <span class="math notranslate nohighlight">\(q_{lm}\)</span> stay on the host.</p>
-<p>OpenMP target offload is a second GPU path, Steinhardt-only, meson
-off by default (<code class="docutils literal notranslate"><span class="pre">-Dwith_openmp_offload</span></code>, <code class="docutils literal notranslate"><span class="pre">SEAMS_OFFLOAD</span></code>). It is
-not gpulite.</p>
+<p>Optional CUDA via gpulite (<code class="docutils literal notranslate"><span class="pre">-Dwith_gpulite</span></code>) runs a resident TUM
+frame batch: linkcell k-NN, mutual four-nearest graph, primitive
+six-rings, HC/DDC. CHILL and <span class="math notranslate nohighlight">\(q_{lm}\)</span> stay on the host.</p>
+<p>OpenMP target offload (<code class="docutils literal notranslate"><span class="pre">-Dwith_openmp_offload</span></code>, <code class="docutils literal notranslate"><span class="pre">SEAMS_OFFLOAD</span></code>)
+covers Steinhardt Ylm and the TUM ice score (hop-bound six-rings
+and cage affiliation) on the same neighbour graph the host uses.
+Device CHILL+ is not a product. It is not gpulite.</p>
 </section>
 <section id="runtime-knobs">
 <h2>Runtime knobs<a class="headerlink" href="#runtime-knobs" title="Link to this heading">¶</a></h2>

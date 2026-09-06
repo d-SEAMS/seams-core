@@ -1,0 +1,92 @@
+.. index:: pair: namespace; tum
+.. _doxid-namespacetum:
+
+namespace tum
+=============
+
+.. toctree::
+	:hidden:
+
+	namespace_tum_device.rst
+	struct_tum_CageCounts.rst
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace tum {
+
+	// namespaces
+
+	namespace :ref:`tum::device<doxid-namespacetum_1_1device>`;
+
+	// structs
+
+	struct :ref:`CageCounts<doxid-structtum_1_1_cage_counts>`;
+
+	// global functions
+
+	bool :ref:`preferOffload<doxid-namespacetum_1a9dc1d26c60d5f757e66305b65b42aed0>`();
+	:ref:`CageCounts<doxid-structtum_1_1_cage_counts>` :ref:`hostCageCounts<doxid-namespacetum_1a5b6f992c67dea89064fe1bbe224f7533>`(const std::vector<std::vector<int>>& nList);
+	:ref:`CageCounts<doxid-structtum_1_1_cage_counts>` :ref:`specializedCageCounts<doxid-namespacetum_1a50a0ddf8a6606b733a73b4689bda3efa>`(const std::vector<std::vector<int>>& nList);
+	:ref:`CageCounts<doxid-structtum_1_1_cage_counts>` :ref:`cageCounts<doxid-namespacetum_1a5db91702c7f7d13a3878708e01999945>`(const std::vector<std::vector<int>>& nList);
+
+	} // namespace tum
+.. _details-namespacetum:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Global Functions
+----------------
+
+.. index:: pair: function; preferOffload
+.. _doxid-namespacetum_1a9dc1d26c60d5f757e66305b65b42aed0:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool preferOffload()
+
+True when SEAMS_OFFLOAD is set and is not "0".
+
+.. index:: pair: function; hostCageCounts
+.. _doxid-namespacetum_1a5b6f992c67dea89064fe1bbe224f7533:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`CageCounts<doxid-structtum_1_1_cage_counts>` hostCageCounts(const std::vector<std::vector<int>>& nList)
+
+Host Franzblau six-rings plus cageAffiliation on an index nList (leading self entry, as neighbourListByIndex produces).
+
+.. index:: pair: function; specializedCageCounts
+.. _doxid-namespacetum_1a50a0ddf8a6606b733a73b4689bda3efa:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`CageCounts<doxid-structtum_1_1_cage_counts>` specializedCageCounts(const std::vector<std::vector<int>>& nList)
+
+Hop-bound six-ring enumerator plus affiliation predicates.
+
+Uses the OpenMP target device when offload is compiled and a device exists.
+
+.. index:: pair: function; cageCounts
+.. _doxid-namespacetum_1a5db91702c7f7d13a3878708e01999945:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`CageCounts<doxid-structtum_1_1_cage_counts>` cageCounts(const std::vector<std::vector<int>>& nList)
+
+:ref:`preferOffload() <doxid-namespacetum_1a9dc1d26c60d5f757e66305b65b42aed0>` selects specializedCageCounts, otherwise hostCageCounts.
+

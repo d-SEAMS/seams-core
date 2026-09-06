@@ -1,0 +1,1923 @@
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="generator" content="Doxygen 1.17.0"/>
+<title>seams-core: tum::device Namespace Reference</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default';
+mermaid.initialize({ startOnLoad: true, theme: theme });
+</script>
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.hostname!==location.hostname)antics.event("Outbound Link",{url:a.href});});</script>
+<!-- doxyYoda owns presentation; stock doxygen.css is not linked (theme SCSS covers Doxygen classes). -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+/* doxyYoda theme boot: apply stored or OS preference before first paint */
+(function () {
+  try {
+    var stored = localStorage.getItem("doxyYoda-theme");
+    var root = document.documentElement;
+    if (stored === "dark") {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    } else if (stored === "light") {
+      root.classList.add("light");
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    }
+  } catch (e) { /* private mode */ }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area" aria-label="Project">
+<div class="title_area__start"></div>
+<div class="title_area__center">
+<span class="project_info">seams-core v2.6.0</span>
+<span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
+</div>
+<div class="title_area__end">
+<button type="button" class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false">&#9790;</button>
+</div>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+/* doxyYoda interactive: foldable fragments, copy buttons, dark-mode toggle */
+document.addEventListener("DOMContentLoaded", function () {
+  function prefersDark() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function isDarkMode() {
+    var root = document.documentElement;
+    if (root.classList.contains("dark") || root.classList.contains("dark-mode")) return true;
+    if (root.classList.contains("light")) return false;
+    return prefersDark();
+  }
+  // Optional folding: wrap .fragment in open <details class="code-details">.
+  // Skip fragments already inside details and native Doxygen .foldopen listings.
+  document.querySelectorAll(".fragment").forEach(function (frag) {
+    if (frag.closest("details.code-details")) return;
+    if (frag.querySelector(".foldopen")) return;
+    var details = document.createElement("details");
+    details.className = "code-details";
+    details.open = true;
+    var summary = document.createElement("summary");
+    summary.textContent = "Code";
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard on div.fragment (themed .copy-btn only)
+  document.querySelectorAll("div.fragment").forEach(function (frag) {
+    if (frag.querySelector(".copy-btn")) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-btn";
+    btn.textContent = "Copy";
+    btn.setAttribute("aria-label", "Copy code");
+    btn.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      var clone = frag.cloneNode(true);
+      var extra = clone.querySelector(".copy-btn");
+      if (extra) extra.remove();
+      var lines = clone.querySelectorAll(".line");
+      var text = lines.length
+        ? Array.prototype.map.call(lines, function (l) { return l.textContent; }).join("\n")
+        : clone.textContent;
+      var done = function () {
+        btn.textContent = "Copied!";
+        setTimeout(function () { btn.textContent = "Copy"; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {
+          /* ignore */
+        });
+      }
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById("darkModeToggle");
+  if (toggle) {
+    function updateIcon() {
+      var dark = isDarkMode();
+      toggle.innerHTML = dark ? "&#9788;" : "&#9790;";
+      toggle.setAttribute("aria-pressed", dark ? "true" : "false");
+    }
+    updateIcon();
+    toggle.addEventListener("click", function () {
+      var root = document.documentElement;
+      var nextDark = !isDarkMode();
+      root.classList.toggle("dark", nextDark);
+      root.classList.toggle("dark-mode", nextDark);
+      root.classList.toggle("light", !nextDark);
+      try {
+        localStorage.setItem("doxyYoda-theme", nextDark ? "dark" : "light");
+      } catch (e) { /* private mode */ }
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.17.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', () => {
+  initMenu('',true);
+  init_search();
+});
+</script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1" style="position:absolute;right:8px;top:8px;height:36px;"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2" style="float:right">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon" onmouseover="return searchBox.OnSearchSelectShow()" onmouseout="return searchBox.OnSearchSelectHide()"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacetum_1_1device.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">tum::device Namespace Reference</div></div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a67c370b04ce0484e28e18a47a341a6c3" id="r_a67c370b04ce0484e28e18a47a341a6c3"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a67c370b04ce0484e28e18a47a341a6c3">bonded</a> (const int *deg, const int *cols, int nAtoms, int kMax, int a, int b)</td></tr>
+<tr class="memitem:a0d0b742692a97da157edb94e385c3368" id="r_a0d0b742692a97da157edb94e385c3368"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a0d0b742692a97da157edb94e385c3368">inSix</a> (const int *r, int atom)</td></tr>
+<tr class="memitem:aca8e51f6362549d29fcf3ca1f19cbf8e" id="r_aca8e51f6362549d29fcf3ca1f19cbf8e"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#aca8e51f6362549d29fcf3ca1f19cbf8e">shareAtoms</a> (const int *a, const int *b)</td></tr>
+<tr class="memitem:ac7e35c8a5c2538699d6ac0edddb5e31f" id="r_ac7e35c8a5c2538699d6ac0edddb5e31f"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ac7e35c8a5c2538699d6ac0edddb5e31f">commonCount</a> (const int *a, const int *b)</td></tr>
+<tr class="memitem:a8787f7d01fd208b5e9353f946562fe5a" id="r_a8787f7d01fd208b5e9353f946562fe5a"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a8787f7d01fd208b5e9353f946562fe5a">commonInThree</a> (const int *a, const int *b, const int *c)</td></tr>
+<tr class="memitem:a061391c12acf0965ef0b283462f43fd1" id="r_a061391c12acf0965ef0b283462f43fd1"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a061391c12acf0965ef0b283462f43fd1">shareNeigh</a> (const int *deg, const int *cols, int nAtoms, int kMax, int a, int b)</td></tr>
+<tr class="memitem:ae9a6f5c08baa53d7971e42539faeb3f1" id="r_ae9a6f5c08baa53d7971e42539faeb3f1"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ae9a6f5c08baa53d7971e42539faeb3f1">hopsAtMost</a> (const int *deg, const int *cols, int nAtoms, int kMax, int a, int b, int cap)</td></tr>
+<tr class="memdesc:ae9a6f5c08baa53d7971e42539faeb3f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Graph distance from a to b when it is at most cap, else -1.  <br /></td></tr>
+<tr class="memitem:adb611a8926577921d4770b84aacc5902" id="r_adb611a8926577921d4770b84aacc5902"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#adb611a8926577921d4770b84aacc5902">hopBoundPrimitiveSix</a> (const int *r, const int *deg, const int *cols, int nAtoms, int kMax)</td></tr>
+<tr class="memdesc:adb611a8926577921d4770b84aacc5902"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hop-bounded Franzblau SP test on a six-cycle of the bond graph.  <br /></td></tr>
+<tr class="memitem:a487f570c01a950bf28365b6d07850b07" id="r_a487f570c01a950bf28365b6d07850b07"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a487f570c01a950bf28365b6d07850b07">basalNeighbours</a> (const int *deg, const int *cols, int nAtoms, int kMax, int n1, int n2, int atomOne, int atomTwo)</td></tr>
+<tr class="memitem:a86a03666098ac7a14626540315097b6c" id="r_a86a03666098ac7a14626540315097b6c"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a86a03666098ac7a14626540315097b6c">notNeighboursOfRing</a> (const int *deg, const int *cols, int nAtoms, int kMax, const int *trip, const int *ring)</td></tr>
+<tr class="memitem:adb708068694dc11d88417382669ee78e" id="r_adb708068694dc11d88417382669ee78e"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#adb708068694dc11d88417382669ee78e">basalConditions</a> (const int *deg, const int *cols, int nAtoms, int kMax, const int *b1, const int *b2)</td></tr>
+<tr class="memitem:a1e28269a0e7df30aede0377144f889f8" id="r_a1e28269a0e7df30aede0377144f889f8"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a1e28269a0e7df30aede0377144f889f8">firstRingThrough</a> (const int *A, int nA, const int *B, int nB, const int *C, int nC, int skipA, int skipB)</td></tr>
+<tr class="memitem:a65530a55ba9f0502f557be5cc08974ca" id="r_a65530a55ba9f0502f557be5cc08974ca"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a65530a55ba9f0502f557be5cc08974ca">ringsThrough</a> (const int *A, int nA, const int *B, int nB, const int *C, int nC, int skipA, int skipB, int *out, int cap)</td></tr>
+<tr class="memitem:a19baaa6f3828a39fc70ec4bbfa5c6159" id="r_a19baaa6f3828a39fc70ec4bbfa5c6159"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a19baaa6f3828a39fc70ec4bbfa5c6159">fetchAdd</a> (int *p)</td></tr>
+<tr class="memitem:a306c6a414e63cd34a04365f1e2b03d93" id="r_a306c6a414e63cd34a04365f1e2b03d93"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a306c6a414e63cd34a04365f1e2b03d93">enumSixFrom</a> (int i, const int *deg, const int *cols, int nAtoms, int kMax, int maxRings, int *nRings, int *ringAtoms, int *dropped)</td></tr>
+<tr class="memdesc:a306c6a414e63cd34a04365f1e2b03d93"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumerate hop-bound primitive six-rings whose lowest vertex is i.  <br /></td></tr>
+<tr class="memitem:a436c92ddb65af7ea004651faae730d7d" id="r_a436c92ddb65af7ea004651faae730d7d"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a436c92ddb65af7ea004651faae730d7d">invertOneRing</a> (int r, const int *nRings, const int *ringAtoms, int nAtoms, int maxPer, int *throughCount, int *through)</td></tr>
+<tr class="memitem:a8d76398842299f9311380465bdbf82be" id="r_a8d76398842299f9311380465bdbf82be"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a8d76398842299f9311380465bdbf82be">sortThroughRow</a> (int *row, int n)</td></tr>
+<tr class="memitem:a33474d52479649f2f0198231001716a5" id="r_a33474d52479649f2f0198231001716a5"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a33474d52479649f2f0198231001716a5">emitBasalFrom</a> (int i, const int *nRings, const int *ringAtoms, const int *deg, const int *cols, const int *throughCount, const int *through, int nAtoms, int kMax, int maxPer, int maxPairs, int *nPairs, int *pairs)</td></tr>
+<tr class="memitem:a41c542baa7e9bc8746f60ce93aad60dd" id="r_a41c542baa7e9bc8746f60ce93aad60dd"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a41c542baa7e9bc8746f60ce93aad60dd">applyHcPair</a> (int p, const int *nPairs, const int *pairs, const int *ringAtoms, const int *throughCount, const int *through, int nAtoms, int maxPer, int *hc)</td></tr>
+<tr class="memitem:a96b35dc94857641cfc85cdb983e3f2e7" id="r_a96b35dc94857641cfc85cdb983e3f2e7"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a96b35dc94857641cfc85cdb983e3f2e7">ddcFrom</a> (int i, const int *nRings, const int *ringAtoms, const int *throughCount, const int *through, const int *hc, int nAtoms, int maxPer, int *ddc)</td></tr>
+<tr class="memitem:ac99948f997289c69b78611f94bc3e61b" id="r_ac99948f997289c69b78611f94bc3e61b"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ac99948f997289c69b78611f94bc3e61b">atomIceFrom</a> (int r, const int *nRings, const int *ringAtoms, const int *hc, const int *ddc, int nAtoms, int *atomHc, int *atomDdc)</td></tr>
+</table>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a41c542baa7e9bc8746f60ce93aad60dd" name="a41c542baa7e9bc8746f60ce93aad60dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a41c542baa7e9bc8746f60ce93aad60dd">&#9670;&#160;</a></span>applyHcPair()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void tum::device::applyHcPair </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>p</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>nPairs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>pairs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>ringAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>throughCount</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>through</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxPer</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>hc</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00431">431</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  433</span>                                                                             {</div>
+<div class="line"><span class="lineno">  434</span>  <span class="keywordflow">if</span> (p &gt;= *nPairs) {</div>
+<div class="line"><span class="lineno">  435</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  436</span>  }</div>
+<div class="line"><span class="lineno">  437</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> i = pairs[p * 2];</div>
+<div class="line"><span class="lineno">  438</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> j = pairs[p * 2 + 1];</div>
+<div class="line"><span class="lineno">  439</span>  hc[i] = 1;</div>
+<div class="line"><span class="lineno">  440</span>  hc[j] = 1;</div>
+<div class="line"><span class="lineno">  441</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> *bi = ringAtoms + i * 6;</div>
+<div class="line"><span class="lineno">  442</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> *bj = ringAtoms + j * 6;</div>
+<div class="line"><span class="lineno">  443</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> q = 0; q &lt; 6; ++q) {</div>
+<div class="line"><span class="lineno">  444</span>    <span class="keywordtype">int</span> trip[3];</div>
+<div class="line"><span class="lineno">  445</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; 3; ++m) {</div>
+<div class="line"><span class="lineno">  446</span>      trip[m] = bi[(q + m) % 6];</div>
+<div class="line"><span class="lineno">  447</span>    }</div>
+<div class="line"><span class="lineno">  448</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> nA = throughCount[trip[0]];</div>
+<div class="line"><span class="lineno">  449</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> nB = throughCount[trip[1]];</div>
+<div class="line"><span class="lineno">  450</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> nC = throughCount[trip[2]];</div>
+<div class="line"><span class="lineno">  451</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> *A = through + trip[0] * maxPer;</div>
+<div class="line"><span class="lineno">  452</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> *B = through + trip[1] * maxPer;</div>
+<div class="line"><span class="lineno">  453</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> *C = through + trip[2] * maxPer;</div>
+<div class="line"><span class="lineno">  454</span>    <span class="keywordtype">int</span> cand[16];</div>
+<div class="line"><span class="lineno">  455</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> nc = <a class="code hl_function" href="#a65530a55ba9f0502f557be5cc08974ca">ringsThrough</a>(A, nA, B, nB, C, nC, i, j, cand, 16);</div>
+<div class="line"><span class="lineno">  456</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> c = 0; c &lt; nc; ++c) {</div>
+<div class="line"><span class="lineno">  457</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> kr = cand[c];</div>
+<div class="line"><span class="lineno">  458</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> *bk = ringAtoms + kr * 6;</div>
+<div class="line"><span class="lineno">  459</span>      <span class="keywordtype">int</span> rest[3];</div>
+<div class="line"><span class="lineno">  460</span>      <span class="keywordtype">int</span> nrst = 0;</div>
+<div class="line"><span class="lineno">  461</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> u = 0; u &lt; 6; ++u) {</div>
+<div class="line"><span class="lineno">  462</span>        <span class="keywordflow">if</span> (!<a class="code hl_function" href="#a0d0b742692a97da157edb94e385c3368">inSix</a>(trip, bk[u]) &amp;&amp; nrst &lt; 3) {</div>
+<div class="line"><span class="lineno">  463</span>          rest[nrst++] = bk[u];</div>
+<div class="line"><span class="lineno">  464</span>        }</div>
+<div class="line"><span class="lineno">  465</span>      }</div>
+<div class="line"><span class="lineno">  466</span>      <span class="keywordflow">if</span> (nrst == 3 &amp;&amp; <a class="code hl_function" href="#ac7e35c8a5c2538699d6ac0edddb5e31f">commonCount</a>(rest, bj) == 3) {</div>
+<div class="line"><span class="lineno">  467</span>        <a class="code hl_enumvalue" href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529a6320c1115d5bc2b6ca615b96be050884">hc</a>[kr] = 1;</div>
+<div class="line"><span class="lineno">  468</span>      }</div>
+<div class="line"><span class="lineno">  469</span>    }</div>
+<div class="line"><span class="lineno">  470</span>  }</div>
+<div class="line"><span class="lineno">  471</span>}</div>
+<div class="ttc" id="agroup__cage_html_ggaaac41828990e32b9d6e7db4426b61529a6320c1115d5bc2b6ca615b96be050884"><div class="ttname"><a href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529a6320c1115d5bc2b6ca615b96be050884">cage::iceType::hc</a></div><div class="ttdeci">@ hc</div><div class="ttdoc">Type for an atom which belongs to an HC.</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00107">cage.hpp:107</a></div></div>
+<div class="ttc" id="anamespacetum_1_1device_html_a0d0b742692a97da157edb94e385c3368"><div class="ttname"><a href="#a0d0b742692a97da157edb94e385c3368">tum::device::inSix</a></div><div class="ttdeci">bool inSix(const int *r, int atom)</div><div class="ttdef"><b>Definition</b> <a href="tum__device_8hpp_source.html#l00040">tum_device.hpp:40</a></div></div>
+<div class="ttc" id="anamespacetum_1_1device_html_a65530a55ba9f0502f557be5cc08974ca"><div class="ttname"><a href="#a65530a55ba9f0502f557be5cc08974ca">tum::device::ringsThrough</a></div><div class="ttdeci">int ringsThrough(const int *A, int nA, const int *B, int nB, const int *C, int nC, int skipA, int skipB, int *out, int cap)</div><div class="ttdef"><b>Definition</b> <a href="tum__device_8hpp_source.html#l00238">tum_device.hpp:238</a></div></div>
+<div class="ttc" id="anamespacetum_1_1device_html_ac7e35c8a5c2538699d6ac0edddb5e31f"><div class="ttname"><a href="#ac7e35c8a5c2538699d6ac0edddb5e31f">tum::device::commonCount</a></div><div class="ttdeci">int commonCount(const int *a, const int *b)</div><div class="ttdef"><b>Definition</b> <a href="tum__device_8hpp_source.html#l00058">tum_device.hpp:58</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ac99948f997289c69b78611f94bc3e61b" name="ac99948f997289c69b78611f94bc3e61b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac99948f997289c69b78611f94bc3e61b">&#9670;&#160;</a></span>atomIceFrom()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void tum::device::atomIceFrom </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>r</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>nRings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>ringAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>hc</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>ddc</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>atomHc</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>atomDdc</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00548">548</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  550</span>                                      {</div>
+<div class="line"><span class="lineno">  551</span>  <span class="keywordflow">if</span> (r &gt;= *nRings) {</div>
+<div class="line"><span class="lineno">  552</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  553</span>  }</div>
+<div class="line"><span class="lineno">  554</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> *<a class="code hl_namespace" href="namespacering.html">ring</a> = ringAtoms + r * 6;</div>
+<div class="line"><span class="lineno">  555</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> isHc = hc[r];</div>
+<div class="line"><span class="lineno">  556</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> isDdc = ddc[r];</div>
+<div class="line"><span class="lineno">  557</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> t = 0; t &lt; 6; ++t) {</div>
+<div class="line"><span class="lineno">  558</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> a = <a class="code hl_namespace" href="namespacering.html">ring</a>[t];</div>
+<div class="line"><span class="lineno">  559</span>    <span class="keywordflow">if</span> (a &lt; 0 || a &gt;= nAtoms) {</div>
+<div class="line"><span class="lineno">  560</span>      <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  561</span>    }</div>
+<div class="line"><span class="lineno">  562</span>    <span class="keywordflow">if</span> (isHc) {</div>
+<div class="line"><span class="lineno">  563</span>      atomHc[a] = 1;</div>
+<div class="line"><span class="lineno">  564</span>    }</div>
+<div class="line"><span class="lineno">  565</span>    <span class="keywordflow">if</span> (isDdc) {</div>
+<div class="line"><span class="lineno">  566</span>      atomDdc[a] = 1;</div>
+<div class="line"><span class="lineno">  567</span>    }</div>
+<div class="line"><span class="lineno">  568</span>  }</div>
+<div class="line"><span class="lineno">  569</span>}</div>
+<div class="ttc" id="anamespacering_html"><div class="ttname"><a href="namespacering.html">ring</a></div><div class="ttdoc">Topological network criteria functions.</div><div class="ttdef"><b>Definition</b> <a href="cage__affiliation_8hpp_source.html#l00055">cage_affiliation.hpp:55</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="adb708068694dc11d88417382669ee78e" name="adb708068694dc11d88417382669ee78e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb708068694dc11d88417382669ee78e">&#9670;&#160;</a></span>basalConditions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool tum::device::basalConditions </td>
+          <td>(</td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>deg</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>kMax</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>b1</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>b2</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00149">149</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  150</span>                                                                    {</div>
+<div class="line"><span class="lineno">  151</span>  <span class="keywordtype">int</span> kIndex = -1;</div>
+<div class="line"><span class="lineno">  152</span>  <span class="keywordtype">int</span> compare1 = 0;</div>
+<div class="line"><span class="lineno">  153</span>  <span class="keywordtype">int</span> compare2 = 0;</div>
+<div class="line"><span class="lineno">  154</span>  <span class="keywordtype">bool</span> l1n = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  155</span>  <span class="keywordtype">bool</span> l2n = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  156</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> l1 = b1[0];</div>
+<div class="line"><span class="lineno">  157</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> l2 = b1[1];</div>
+<div class="line"><span class="lineno">  158</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 6; ++k) {</div>
+<div class="line"><span class="lineno">  159</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> mk = b2[k];</div>
+<div class="line"><span class="lineno">  160</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="#a67c370b04ce0484e28e18a47a341a6c3">bonded</a>(deg, cols, nAtoms, kMax, l1, mk)) {</div>
+<div class="line"><span class="lineno">  161</span>      compare1 = b1[2];</div>
+<div class="line"><span class="lineno">  162</span>      compare2 = b1[4];</div>
+<div class="line"><span class="lineno">  163</span>      kIndex = k;</div>
+<div class="line"><span class="lineno">  164</span>      l1n = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  165</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">  166</span>    }</div>
+<div class="line"><span class="lineno">  167</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="#a67c370b04ce0484e28e18a47a341a6c3">bonded</a>(deg, cols, nAtoms, kMax, l2, mk)) {</div>
+<div class="line"><span class="lineno">  168</span>      compare1 = b1[3];</div>
+<div class="line"><span class="lineno">  169</span>      compare2 = b1[5];</div>
+<div class="line"><span class="lineno">  170</span>      kIndex = k;</div>
+<div class="line"><span class="lineno">  171</span>      l2n = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  172</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">  173</span>    }</div>
+<div class="line"><span class="lineno">  174</span>  }</div>
+<div class="line"><span class="lineno">  175</span>  <span class="keywordflow">if</span> (!l1n &amp;&amp; !l2n) {</div>
+<div class="line"><span class="lineno">  176</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  177</span>  }</div>
+<div class="line"><span class="lineno">  178</span>  <span class="keywordtype">int</span> evenT[3];</div>
+<div class="line"><span class="lineno">  179</span>  <span class="keywordtype">int</span> oddT[3];</div>
+<div class="line"><span class="lineno">  180</span>  <span class="keywordtype">int</span> ie = 0;</div>
+<div class="line"><span class="lineno">  181</span>  <span class="keywordtype">int</span> io = 0;</div>
+<div class="line"><span class="lineno">  182</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt;= 5; ++k) {</div>
+<div class="line"><span class="lineno">  183</span>    <span class="keywordtype">int</span> ck = kIndex + k;</div>
+<div class="line"><span class="lineno">  184</span>    <span class="keywordflow">if</span> (ck &gt;= 6) {</div>
+<div class="line"><span class="lineno">  185</span>      ck -= 6;</div>
+<div class="line"><span class="lineno">  186</span>    }</div>
+<div class="line"><span class="lineno">  187</span>    <span class="keywordflow">if</span> (k % 2 == 0) {</div>
+<div class="line"><span class="lineno">  188</span>      evenT[ie++] = b2[ck];</div>
+<div class="line"><span class="lineno">  189</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  190</span>      oddT[io++] = b2[ck];</div>
+<div class="line"><span class="lineno">  191</span>    }</div>
+<div class="line"><span class="lineno">  192</span>  }</div>
+<div class="line"><span class="lineno">  193</span>  <span class="keywordflow">if</span> (!<a class="code hl_function" href="#a487f570c01a950bf28365b6d07850b07">basalNeighbours</a>(deg, cols, nAtoms, kMax, evenT[1], evenT[2], compare1,</div>
+<div class="line"><span class="lineno">  194</span>                       compare2)) {</div>
+<div class="line"><span class="lineno">  195</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  196</span>  }</div>
+<div class="line"><span class="lineno">  197</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#a86a03666098ac7a14626540315097b6c">notNeighboursOfRing</a>(deg, cols, nAtoms, kMax, oddT, b1);</div>
+<div class="line"><span class="lineno">  198</span>}</div>
+<div class="ttc" id="anamespacetum_1_1device_html_a487f570c01a950bf28365b6d07850b07"><div class="ttname"><a href="#a487f570c01a950bf28365b6d07850b07">tum::device::basalNeighbours</a></div><div class="ttdeci">bool basalNeighbours(const int *deg, const int *cols, int nAtoms, int kMax, int n1, int n2, int atomOne, int atomTwo)</div><div class="ttdef"><b>Definition</b> <a href="tum__device_8hpp_source.html#l00123">tum_device.hpp:123</a></div></div>
+<div class="ttc" id="anamespacetum_1_1device_html_a67c370b04ce0484e28e18a47a341a6c3"><div class="ttname"><a href="#a67c370b04ce0484e28e18a47a341a6c3">tum::device::bonded</a></div><div class="ttdeci">bool bonded(const int *deg, const int *cols, int nAtoms, int kMax, int a, int b)</div><div class="ttdef"><b>Definition</b> <a href="tum__device_8hpp_source.html#l00025">tum_device.hpp:25</a></div></div>
+<div class="ttc" id="anamespacetum_1_1device_html_a86a03666098ac7a14626540315097b6c"><div class="ttname"><a href="#a86a03666098ac7a14626540315097b6c">tum::device::notNeighboursOfRing</a></div><div class="ttdeci">bool notNeighboursOfRing(const int *deg, const int *cols, int nAtoms, int kMax, const int *trip, const int *ring)</div><div class="ttdef"><b>Definition</b> <a href="tum__device_8hpp_source.html#l00137">tum_device.hpp:137</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a487f570c01a950bf28365b6d07850b07" name="a487f570c01a950bf28365b6d07850b07"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a487f570c01a950bf28365b6d07850b07">&#9670;&#160;</a></span>basalNeighbours()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool tum::device::basalNeighbours </td>
+          <td>(</td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>deg</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>kMax</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n1</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n2</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>atomOne</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>atomTwo</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00123">123</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  125</span>                                         {</div>
+<div class="line"><span class="lineno">  126</span>  <span class="keyword">const</span> <span class="keywordtype">bool</span> n1one = <a class="code hl_function" href="#a67c370b04ce0484e28e18a47a341a6c3">bonded</a>(deg, cols, nAtoms, kMax, atomOne, n1);</div>
+<div class="line"><span class="lineno">  127</span>  <span class="keyword">const</span> <span class="keywordtype">bool</span> n1two = <a class="code hl_function" href="#a67c370b04ce0484e28e18a47a341a6c3">bonded</a>(deg, cols, nAtoms, kMax, atomTwo, n1);</div>
+<div class="line"><span class="lineno">  128</span>  <span class="keywordflow">if</span> (!n1one &amp;&amp; !n1two) {</div>
+<div class="line"><span class="lineno">  129</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  130</span>  }</div>
+<div class="line"><span class="lineno">  131</span>  <span class="keywordflow">if</span> (n1one) {</div>
+<div class="line"><span class="lineno">  132</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="#a67c370b04ce0484e28e18a47a341a6c3">bonded</a>(deg, cols, nAtoms, kMax, atomTwo, n2);</div>
+<div class="line"><span class="lineno">  133</span>  }</div>
+<div class="line"><span class="lineno">  134</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#a67c370b04ce0484e28e18a47a341a6c3">bonded</a>(deg, cols, nAtoms, kMax, atomOne, n2);</div>
+<div class="line"><span class="lineno">  135</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a67c370b04ce0484e28e18a47a341a6c3" name="a67c370b04ce0484e28e18a47a341a6c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a67c370b04ce0484e28e18a47a341a6c3">&#9670;&#160;</a></span>bonded()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool tum::device::bonded </td>
+          <td>(</td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>deg</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>kMax</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>b</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00025">25</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   26</span>                                 {</div>
+<div class="line"><span class="lineno">   27</span>  <span class="keywordflow">if</span> (a &lt; 0 || b &lt; 0 || a &gt;= nAtoms || b &gt;= nAtoms) {</div>
+<div class="line"><span class="lineno">   28</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   29</span>  }</div>
+<div class="line"><span class="lineno">   30</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> d = deg[a];</div>
+<div class="line"><span class="lineno">   31</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> row = a * kMax;</div>
+<div class="line"><span class="lineno">   32</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> t = 0; t &lt; d; ++t) {</div>
+<div class="line"><span class="lineno">   33</span>    <span class="keywordflow">if</span> (cols[row + t] == b) {</div>
+<div class="line"><span class="lineno">   34</span>      <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">   35</span>    }</div>
+<div class="line"><span class="lineno">   36</span>  }</div>
+<div class="line"><span class="lineno">   37</span>  <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   38</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ac7e35c8a5c2538699d6ac0edddb5e31f" name="ac7e35c8a5c2538699d6ac0edddb5e31f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7e35c8a5c2538699d6ac0edddb5e31f">&#9670;&#160;</a></span>commonCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int tum::device::commonCount </td>
+          <td>(</td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>b</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00058">58</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   58</span>                                                   {</div>
+<div class="line"><span class="lineno">   59</span>  <span class="keywordtype">int</span> n = 0;</div>
+<div class="line"><span class="lineno">   60</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 6; ++i) {</div>
+<div class="line"><span class="lineno">   61</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="#a0d0b742692a97da157edb94e385c3368">inSix</a>(b, a[i])) {</div>
+<div class="line"><span class="lineno">   62</span>      ++n;</div>
+<div class="line"><span class="lineno">   63</span>    }</div>
+<div class="line"><span class="lineno">   64</span>  }</div>
+<div class="line"><span class="lineno">   65</span>  <span class="keywordflow">return</span> n;</div>
+<div class="line"><span class="lineno">   66</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a8787f7d01fd208b5e9353f946562fe5a" name="a8787f7d01fd208b5e9353f946562fe5a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8787f7d01fd208b5e9353f946562fe5a">&#9670;&#160;</a></span>commonInThree()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool tum::device::commonInThree </td>
+          <td>(</td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>b</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>c</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00068">68</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   68</span>                                                                    {</div>
+<div class="line"><span class="lineno">   69</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 6; ++i) {</div>
+<div class="line"><span class="lineno">   70</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="#a0d0b742692a97da157edb94e385c3368">inSix</a>(b, a[i]) &amp;&amp; <a class="code hl_function" href="#a0d0b742692a97da157edb94e385c3368">inSix</a>(c, a[i])) {</div>
+<div class="line"><span class="lineno">   71</span>      <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">   72</span>    }</div>
+<div class="line"><span class="lineno">   73</span>  }</div>
+<div class="line"><span class="lineno">   74</span>  <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   75</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a96b35dc94857641cfc85cdb983e3f2e7" name="a96b35dc94857641cfc85cdb983e3f2e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96b35dc94857641cfc85cdb983e3f2e7">&#9670;&#160;</a></span>ddcFrom()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void tum::device::ddcFrom </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>i</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>nRings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>ringAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>throughCount</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>through</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>hc</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxPer</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>ddc</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00473">473</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  475</span>                                                      {</div>
+<div class="line"><span class="lineno">  476</span>  <span class="keywordflow">if</span> (i &gt;= *nRings) {</div>
+<div class="line"><span class="lineno">  477</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  478</span>  }</div>
+<div class="line"><span class="lineno">  479</span>  <span class="keywordflow">if</span> (hc[i]) {</div>
+<div class="line"><span class="lineno">  480</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  481</span>  }</div>
+<div class="line"><span class="lineno">  482</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> *bi = ringAtoms + i * 6;</div>
+<div class="line"><span class="lineno">  483</span>  <span class="keywordtype">int</span> peri[32];</div>
+<div class="line"><span class="lineno">  484</span>  <span class="keywordtype">int</span> nPeri = 0;</div>
+<div class="line"><span class="lineno">  485</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; 6; ++m) {</div>
+<div class="line"><span class="lineno">  486</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> atom = bi[m];</div>
+<div class="line"><span class="lineno">  487</span>    <span class="keywordflow">if</span> (atom &lt; 0 || atom &gt;= nAtoms) {</div>
+<div class="line"><span class="lineno">  488</span>      <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  489</span>    }</div>
+<div class="line"><span class="lineno">  490</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> nr = throughCount[atom];</div>
+<div class="line"><span class="lineno">  491</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> *row = through + atom * maxPer;</div>
+<div class="line"><span class="lineno">  492</span>    <span class="keywordtype">int</span> common = 0;</div>
+<div class="line"><span class="lineno">  493</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> t = 0; t &lt; nr; ++t) {</div>
+<div class="line"><span class="lineno">  494</span>      <span class="keywordflow">if</span> (row[t] == i) {</div>
+<div class="line"><span class="lineno">  495</span>        <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  496</span>      }</div>
+<div class="line"><span class="lineno">  497</span>      ++common;</div>
+<div class="line"><span class="lineno">  498</span>      <span class="keywordflow">if</span> (nPeri &lt; 32) {</div>
+<div class="line"><span class="lineno">  499</span>        peri[nPeri++] = row[t];</div>
+<div class="line"><span class="lineno">  500</span>      }</div>
+<div class="line"><span class="lineno">  501</span>    }</div>
+<div class="line"><span class="lineno">  502</span>    <span class="keywordflow">if</span> (common &lt; 3) {</div>
+<div class="line"><span class="lineno">  503</span>      <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  504</span>    }</div>
+<div class="line"><span class="lineno">  505</span>  }</div>
+<div class="line"><span class="lineno">  506</span>  <span class="keywordtype">int</span> newP[6];</div>
+<div class="line"><span class="lineno">  507</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 6; ++k) {</div>
+<div class="line"><span class="lineno">  508</span>    <span class="keywordtype">int</span> trip[3];</div>
+<div class="line"><span class="lineno">  509</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> t = 0; t &lt; 3; ++t) {</div>
+<div class="line"><span class="lineno">  510</span>      trip[t] = bi[(k + t) % 6];</div>
+<div class="line"><span class="lineno">  511</span>    }</div>
+<div class="line"><span class="lineno">  512</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> nA = throughCount[trip[0]];</div>
+<div class="line"><span class="lineno">  513</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> nB = throughCount[trip[1]];</div>
+<div class="line"><span class="lineno">  514</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> nC = throughCount[trip[2]];</div>
+<div class="line"><span class="lineno">  515</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> *A = through + trip[0] * maxPer;</div>
+<div class="line"><span class="lineno">  516</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> *B = through + trip[1] * maxPer;</div>
+<div class="line"><span class="lineno">  517</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> *C = through + trip[2] * maxPer;</div>
+<div class="line"><span class="lineno">  518</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> j = <a class="code hl_function" href="#a1e28269a0e7df30aede0377144f889f8">firstRingThrough</a>(A, nA, B, nB, C, nC, i, -1);</div>
+<div class="line"><span class="lineno">  519</span>    <span class="keywordflow">if</span> (j &lt; 0) {</div>
+<div class="line"><span class="lineno">  520</span>      <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  521</span>    }</div>
+<div class="line"><span class="lineno">  522</span>    newP[k] = j;</div>
+<div class="line"><span class="lineno">  523</span>  }</div>
+<div class="line"><span class="lineno">  524</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> *p0 = ringAtoms + newP[0] * 6;</div>
+<div class="line"><span class="lineno">  525</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> *p1 = ringAtoms + newP[1] * 6;</div>
+<div class="line"><span class="lineno">  526</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> *p2 = ringAtoms + newP[2] * 6;</div>
+<div class="line"><span class="lineno">  527</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> *p3 = ringAtoms + newP[3] * 6;</div>
+<div class="line"><span class="lineno">  528</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> *p4 = ringAtoms + newP[4] * 6;</div>
+<div class="line"><span class="lineno">  529</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> *p5 = ringAtoms + newP[5] * 6;</div>
+<div class="line"><span class="lineno">  530</span>  <span class="keywordflow">if</span> (!<a class="code hl_function" href="#a8787f7d01fd208b5e9353f946562fe5a">commonInThree</a>(p0, p2, p4)) {</div>
+<div class="line"><span class="lineno">  531</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  532</span>  }</div>
+<div class="line"><span class="lineno">  533</span>  <span class="keywordflow">if</span> (!<a class="code hl_function" href="#a8787f7d01fd208b5e9353f946562fe5a">commonInThree</a>(p1, p3, p5)) {</div>
+<div class="line"><span class="lineno">  534</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  535</span>  }</div>
+<div class="line"><span class="lineno">  536</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> *pairs[4][2] = {{p0, p2}, {p1, p3}, {p2, p4}, {p3, p5}};</div>
+<div class="line"><span class="lineno">  537</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> t = 0; t &lt; 4; ++t) {</div>
+<div class="line"><span class="lineno">  538</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="#ac7e35c8a5c2538699d6ac0edddb5e31f">commonCount</a>(pairs[t][0], pairs[t][1]) &lt; 3) {</div>
+<div class="line"><span class="lineno">  539</span>      <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  540</span>    }</div>
+<div class="line"><span class="lineno">  541</span>  }</div>
+<div class="line"><span class="lineno">  542</span>  <a class="code hl_enumvalue" href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529ab66ef205d4bba3390bc51642b3f397d2">ddc</a>[i] = 1;</div>
+<div class="line"><span class="lineno">  543</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> t = 0; t &lt; 6; ++t) {</div>
+<div class="line"><span class="lineno">  544</span>    <a class="code hl_enumvalue" href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529ab66ef205d4bba3390bc51642b3f397d2">ddc</a>[newP[t]] = 1;</div>
+<div class="line"><span class="lineno">  545</span>  }</div>
+<div class="line"><span class="lineno">  546</span>}</div>
+<div class="ttc" id="agroup__cage_html_ggaaac41828990e32b9d6e7db4426b61529ab66ef205d4bba3390bc51642b3f397d2"><div class="ttname"><a href="group__cage.html#ggaaac41828990e32b9d6e7db4426b61529ab66ef205d4bba3390bc51642b3f397d2">cage::iceType::ddc</a></div><div class="ttdeci">@ ddc</div><div class="ttdoc">Type for an atom which belongs to a DDC.</div><div class="ttdef"><b>Definition</b> <a href="cage_8hpp_source.html#l00107">cage.hpp:107</a></div></div>
+<div class="ttc" id="anamespacetum_1_1device_html_a1e28269a0e7df30aede0377144f889f8"><div class="ttname"><a href="#a1e28269a0e7df30aede0377144f889f8">tum::device::firstRingThrough</a></div><div class="ttdeci">int firstRingThrough(const int *A, int nA, const int *B, int nB, const int *C, int nC, int skipA, int skipB)</div><div class="ttdef"><b>Definition</b> <a href="tum__device_8hpp_source.html#l00200">tum_device.hpp:200</a></div></div>
+<div class="ttc" id="anamespacetum_1_1device_html_a8787f7d01fd208b5e9353f946562fe5a"><div class="ttname"><a href="#a8787f7d01fd208b5e9353f946562fe5a">tum::device::commonInThree</a></div><div class="ttdeci">bool commonInThree(const int *a, const int *b, const int *c)</div><div class="ttdef"><b>Definition</b> <a href="tum__device_8hpp_source.html#l00068">tum_device.hpp:68</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a33474d52479649f2f0198231001716a5" name="a33474d52479649f2f0198231001716a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a33474d52479649f2f0198231001716a5">&#9670;&#160;</a></span>emitBasalFrom()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void tum::device::emitBasalFrom </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>i</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>nRings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>ringAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>deg</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>throughCount</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>through</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>kMax</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxPer</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxPairs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>nPairs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>pairs</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00386">386</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  390</span>                                                   {</div>
+<div class="line"><span class="lineno">  391</span>  <span class="keywordflow">if</span> (i &gt;= *nRings) {</div>
+<div class="line"><span class="lineno">  392</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  393</span>  }</div>
+<div class="line"><span class="lineno">  394</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> *bi = ringAtoms + i * 6;</div>
+<div class="line"><span class="lineno">  395</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> slot = 0; slot &lt; 2; ++slot) {</div>
+<div class="line"><span class="lineno">  396</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> anchor = bi[slot];</div>
+<div class="line"><span class="lineno">  397</span>    <span class="keywordflow">if</span> (anchor &lt; 0 || anchor &gt;= nAtoms) {</div>
+<div class="line"><span class="lineno">  398</span>      <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  399</span>    }</div>
+<div class="line"><span class="lineno">  400</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> da = deg[anchor];</div>
+<div class="line"><span class="lineno">  401</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> arow = anchor * kMax;</div>
+<div class="line"><span class="lineno">  402</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> n = 0; n &lt; da; ++n) {</div>
+<div class="line"><span class="lineno">  403</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> nb = cols[arow + n];</div>
+<div class="line"><span class="lineno">  404</span>      <span class="keywordflow">if</span> (nb &lt; 0 || nb &gt;= nAtoms) {</div>
+<div class="line"><span class="lineno">  405</span>        <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  406</span>      }</div>
+<div class="line"><span class="lineno">  407</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> nr = throughCount[nb];</div>
+<div class="line"><span class="lineno">  408</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> *row = through + nb * maxPer;</div>
+<div class="line"><span class="lineno">  409</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> t = 0; t &lt; nr; ++t) {</div>
+<div class="line"><span class="lineno">  410</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> j = row[t];</div>
+<div class="line"><span class="lineno">  411</span>        <span class="keywordflow">if</span> (j == i) {</div>
+<div class="line"><span class="lineno">  412</span>          <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  413</span>        }</div>
+<div class="line"><span class="lineno">  414</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> *bj = ringAtoms + j * 6;</div>
+<div class="line"><span class="lineno">  415</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="#aca8e51f6362549d29fcf3ca1f19cbf8e">shareAtoms</a>(bi, bj)) {</div>
+<div class="line"><span class="lineno">  416</span>          <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  417</span>        }</div>
+<div class="line"><span class="lineno">  418</span>        <span class="keywordflow">if</span> (!<a class="code hl_function" href="#adb708068694dc11d88417382669ee78e">basalConditions</a>(deg, cols, nAtoms, kMax, bi, bj)) {</div>
+<div class="line"><span class="lineno">  419</span>          <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  420</span>        }</div>
+<div class="line"><span class="lineno">  421</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> slotp = <a class="code hl_function" href="#a19baaa6f3828a39fc70ec4bbfa5c6159">fetchAdd</a>(nPairs);</div>
+<div class="line"><span class="lineno">  422</span>        <span class="keywordflow">if</span> (slotp &lt; maxPairs) {</div>
+<div class="line"><span class="lineno">  423</span>          pairs[slotp * 2] = i;</div>
+<div class="line"><span class="lineno">  424</span>          pairs[slotp * 2 + 1] = j;</div>
+<div class="line"><span class="lineno">  425</span>        }</div>
+<div class="line"><span class="lineno">  426</span>      }</div>
+<div class="line"><span class="lineno">  427</span>    }</div>
+<div class="line"><span class="lineno">  428</span>  }</div>
+<div class="line"><span class="lineno">  429</span>}</div>
+<div class="ttc" id="anamespacetum_1_1device_html_a19baaa6f3828a39fc70ec4bbfa5c6159"><div class="ttname"><a href="#a19baaa6f3828a39fc70ec4bbfa5c6159">tum::device::fetchAdd</a></div><div class="ttdeci">int fetchAdd(int *p)</div><div class="ttdef"><b>Definition</b> <a href="tum__device_8hpp_source.html#l00278">tum_device.hpp:278</a></div></div>
+<div class="ttc" id="anamespacetum_1_1device_html_aca8e51f6362549d29fcf3ca1f19cbf8e"><div class="ttname"><a href="#aca8e51f6362549d29fcf3ca1f19cbf8e">tum::device::shareAtoms</a></div><div class="ttdeci">bool shareAtoms(const int *a, const int *b)</div><div class="ttdef"><b>Definition</b> <a href="tum__device_8hpp_source.html#l00049">tum_device.hpp:49</a></div></div>
+<div class="ttc" id="anamespacetum_1_1device_html_adb708068694dc11d88417382669ee78e"><div class="ttname"><a href="#adb708068694dc11d88417382669ee78e">tum::device::basalConditions</a></div><div class="ttdeci">bool basalConditions(const int *deg, const int *cols, int nAtoms, int kMax, const int *b1, const int *b2)</div><div class="ttdef"><b>Definition</b> <a href="tum__device_8hpp_source.html#l00149">tum_device.hpp:149</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a306c6a414e63cd34a04365f1e2b03d93" name="a306c6a414e63cd34a04365f1e2b03d93"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a306c6a414e63cd34a04365f1e2b03d93">&#9670;&#160;</a></span>enumSixFrom()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void tum::device::enumSixFrom </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>i</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>deg</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>kMax</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxRings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>nRings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>ringAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>dropped</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Enumerate hop-bound primitive six-rings whose lowest vertex is i. </p>
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00290">290</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  292</span>                                      {</div>
+<div class="line"><span class="lineno">  293</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> di = deg[i];</div>
+<div class="line"><span class="lineno">  294</span>  <span class="keywordflow">if</span> (di &lt; 2) {</div>
+<div class="line"><span class="lineno">  295</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  296</span>  }</div>
+<div class="line"><span class="lineno">  297</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> irow = i * kMax;</div>
+<div class="line"><span class="lineno">  298</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ia = 0; ia &lt; di; ++ia) {</div>
+<div class="line"><span class="lineno">  299</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> a = cols[irow + ia];</div>
+<div class="line"><span class="lineno">  300</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ib = ia + 1; ib &lt; di; ++ib) {</div>
+<div class="line"><span class="lineno">  301</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> b = cols[irow + ib];</div>
+<div class="line"><span class="lineno">  302</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> da = deg[a];</div>
+<div class="line"><span class="lineno">  303</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> db = deg[b];</div>
+<div class="line"><span class="lineno">  304</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> arow = a * kMax;</div>
+<div class="line"><span class="lineno">  305</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> brow = b * kMax;</div>
+<div class="line"><span class="lineno">  306</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ix = 0; ix &lt; da; ++ix) {</div>
+<div class="line"><span class="lineno">  307</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> x = cols[arow + ix];</div>
+<div class="line"><span class="lineno">  308</span>        <span class="keywordflow">if</span> (x == i || x == b) {</div>
+<div class="line"><span class="lineno">  309</span>          <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  310</span>        }</div>
+<div class="line"><span class="lineno">  311</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iy = 0; iy &lt; db; ++iy) {</div>
+<div class="line"><span class="lineno">  312</span>          <span class="keyword">const</span> <span class="keywordtype">int</span> y = cols[brow + iy];</div>
+<div class="line"><span class="lineno">  313</span>          <span class="keywordflow">if</span> (y == i || y == a || y == x) {</div>
+<div class="line"><span class="lineno">  314</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  315</span>          }</div>
+<div class="line"><span class="lineno">  316</span>          <span class="keyword">const</span> <span class="keywordtype">int</span> dx = deg[x];</div>
+<div class="line"><span class="lineno">  317</span>          <span class="keyword">const</span> <span class="keywordtype">int</span> xrow = x * kMax;</div>
+<div class="line"><span class="lineno">  318</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iz = 0; iz &lt; dx; ++iz) {</div>
+<div class="line"><span class="lineno">  319</span>            <span class="keyword">const</span> <span class="keywordtype">int</span> z = cols[xrow + iz];</div>
+<div class="line"><span class="lineno">  320</span>            <span class="keywordflow">if</span> (z == i || z == a || z == b || z == y) {</div>
+<div class="line"><span class="lineno">  321</span>              <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  322</span>            }</div>
+<div class="line"><span class="lineno">  323</span>            <span class="keywordflow">if</span> (!<a class="code hl_function" href="#a67c370b04ce0484e28e18a47a341a6c3">bonded</a>(deg, cols, nAtoms, kMax, z, y)) {</div>
+<div class="line"><span class="lineno">  324</span>              <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  325</span>            }</div>
+<div class="line"><span class="lineno">  326</span>            <span class="keyword">const</span> <span class="keywordtype">int</span> cyc[6] = {i, a, x, z, y, b};</div>
+<div class="line"><span class="lineno">  327</span>            <span class="keywordtype">int</span> mn = i;</div>
+<div class="line"><span class="lineno">  328</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> t = 1; t &lt; 6; ++t) {</div>
+<div class="line"><span class="lineno">  329</span>              <span class="keywordflow">if</span> (cyc[t] &lt; mn) {</div>
+<div class="line"><span class="lineno">  330</span>                mn = cyc[t];</div>
+<div class="line"><span class="lineno">  331</span>              }</div>
+<div class="line"><span class="lineno">  332</span>            }</div>
+<div class="line"><span class="lineno">  333</span>            <span class="keywordflow">if</span> (mn != i) {</div>
+<div class="line"><span class="lineno">  334</span>              <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  335</span>            }</div>
+<div class="line"><span class="lineno">  336</span>            <span class="keywordflow">if</span> (!<a class="code hl_function" href="#adb611a8926577921d4770b84aacc5902">hopBoundPrimitiveSix</a>(cyc, deg, cols, nAtoms, kMax)) {</div>
+<div class="line"><span class="lineno">  337</span>              <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  338</span>            }</div>
+<div class="line"><span class="lineno">  339</span>            <span class="keyword">const</span> <span class="keywordtype">int</span> slot = <a class="code hl_function" href="#a19baaa6f3828a39fc70ec4bbfa5c6159">fetchAdd</a>(nRings);</div>
+<div class="line"><span class="lineno">  340</span>            <span class="keywordflow">if</span> (slot &gt;= maxRings) {</div>
+<div class="line"><span class="lineno">  341</span>              <a class="code hl_function" href="#a19baaa6f3828a39fc70ec4bbfa5c6159">fetchAdd</a>(dropped);</div>
+<div class="line"><span class="lineno">  342</span>              <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  343</span>            }</div>
+<div class="line"><span class="lineno">  344</span>            <span class="keyword">const</span> <span class="keywordtype">int</span> dest = slot * 6;</div>
+<div class="line"><span class="lineno">  345</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> t = 0; t &lt; 6; ++t) {</div>
+<div class="line"><span class="lineno">  346</span>              ringAtoms[dest + t] = cyc[t];</div>
+<div class="line"><span class="lineno">  347</span>            }</div>
+<div class="line"><span class="lineno">  348</span>          }</div>
+<div class="line"><span class="lineno">  349</span>        }</div>
+<div class="line"><span class="lineno">  350</span>      }</div>
+<div class="line"><span class="lineno">  351</span>    }</div>
+<div class="line"><span class="lineno">  352</span>  }</div>
+<div class="line"><span class="lineno">  353</span>}</div>
+<div class="ttc" id="anamespacetum_1_1device_html_adb611a8926577921d4770b84aacc5902"><div class="ttname"><a href="#adb611a8926577921d4770b84aacc5902">tum::device::hopBoundPrimitiveSix</a></div><div class="ttdeci">bool hopBoundPrimitiveSix(const int *r, const int *deg, const int *cols, int nAtoms, int kMax)</div><div class="ttdoc">Hop-bounded Franzblau SP test on a six-cycle of the bond graph.</div><div class="ttdef"><b>Definition</b> <a href="tum__device_8hpp_source.html#l00109">tum_device.hpp:109</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a19baaa6f3828a39fc70ec4bbfa5c6159" name="a19baaa6f3828a39fc70ec4bbfa5c6159"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a19baaa6f3828a39fc70ec4bbfa5c6159">&#9670;&#160;</a></span>fetchAdd()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int tum::device::fetchAdd </td>
+          <td>(</td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>p</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00278">278</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  278</span>                            {</div>
+<div class="line"><span class="lineno">  279</span>  <span class="keywordtype">int</span> old;</div>
+<div class="line"><span class="lineno">  280</span><span class="preprocessor">#if defined(_OPENMP)</span></div>
+<div class="line"><span class="lineno">  281</span><span class="preprocessor">#pragma omp atomic capture</span></div>
+<div class="line"><span class="lineno">  282</span>  old = (*p)++;</div>
+<div class="line"><span class="lineno">  283</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  284</span>  old = (*p)++;</div>
+<div class="line"><span class="lineno">  285</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  286</span>  <span class="keywordflow">return</span> old;</div>
+<div class="line"><span class="lineno">  287</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a1e28269a0e7df30aede0377144f889f8" name="a1e28269a0e7df30aede0377144f889f8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1e28269a0e7df30aede0377144f889f8">&#9670;&#160;</a></span>firstRingThrough()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int tum::device::firstRingThrough </td>
+          <td>(</td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>A</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nA</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>B</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nB</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>C</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nC</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>skipA</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>skipB</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00200">200</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  201</span>                                                                        {</div>
+<div class="line"><span class="lineno">  202</span>  <span class="keywordtype">int</span> i = 0;</div>
+<div class="line"><span class="lineno">  203</span>  <span class="keywordtype">int</span> j = 0;</div>
+<div class="line"><span class="lineno">  204</span>  <span class="keywordtype">int</span> k = 0;</div>
+<div class="line"><span class="lineno">  205</span>  <span class="keywordflow">while</span> (i &lt; nA &amp;&amp; j &lt; nB &amp;&amp; k &lt; nC) {</div>
+<div class="line"><span class="lineno">  206</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> x = A[i];</div>
+<div class="line"><span class="lineno">  207</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> y = B[j];</div>
+<div class="line"><span class="lineno">  208</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> z = C[k];</div>
+<div class="line"><span class="lineno">  209</span>    <span class="keywordflow">if</span> (x == y &amp;&amp; y == z) {</div>
+<div class="line"><span class="lineno">  210</span>      <span class="keywordflow">if</span> (x != skipA &amp;&amp; x != skipB) {</div>
+<div class="line"><span class="lineno">  211</span>        <span class="keywordflow">return</span> x;</div>
+<div class="line"><span class="lineno">  212</span>      }</div>
+<div class="line"><span class="lineno">  213</span>      ++i;</div>
+<div class="line"><span class="lineno">  214</span>      ++j;</div>
+<div class="line"><span class="lineno">  215</span>      ++k;</div>
+<div class="line"><span class="lineno">  216</span>      <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  217</span>    }</div>
+<div class="line"><span class="lineno">  218</span>    <span class="keywordtype">int</span> lo = x;</div>
+<div class="line"><span class="lineno">  219</span>    <span class="keywordflow">if</span> (y &lt; lo) {</div>
+<div class="line"><span class="lineno">  220</span>      lo = y;</div>
+<div class="line"><span class="lineno">  221</span>    }</div>
+<div class="line"><span class="lineno">  222</span>    <span class="keywordflow">if</span> (z &lt; lo) {</div>
+<div class="line"><span class="lineno">  223</span>      lo = z;</div>
+<div class="line"><span class="lineno">  224</span>    }</div>
+<div class="line"><span class="lineno">  225</span>    <span class="keywordflow">if</span> (x == lo) {</div>
+<div class="line"><span class="lineno">  226</span>      ++i;</div>
+<div class="line"><span class="lineno">  227</span>    }</div>
+<div class="line"><span class="lineno">  228</span>    <span class="keywordflow">if</span> (y == lo) {</div>
+<div class="line"><span class="lineno">  229</span>      ++j;</div>
+<div class="line"><span class="lineno">  230</span>    }</div>
+<div class="line"><span class="lineno">  231</span>    <span class="keywordflow">if</span> (z == lo) {</div>
+<div class="line"><span class="lineno">  232</span>      ++k;</div>
+<div class="line"><span class="lineno">  233</span>    }</div>
+<div class="line"><span class="lineno">  234</span>  }</div>
+<div class="line"><span class="lineno">  235</span>  <span class="keywordflow">return</span> -1;</div>
+<div class="line"><span class="lineno">  236</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="adb611a8926577921d4770b84aacc5902" name="adb611a8926577921d4770b84aacc5902"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb611a8926577921d4770b84aacc5902">&#9670;&#160;</a></span>hopBoundPrimitiveSix()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool tum::device::hopBoundPrimitiveSix </td>
+          <td>(</td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>r</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>deg</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>kMax</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Hop-bounded Franzblau SP test on a six-cycle of the bond graph. </p>
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00109">109</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  110</span>                                                       {</div>
+<div class="line"><span class="lineno">  111</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> pairI[9] = {0, 1, 2, 3, 4, 5, 0, 1, 2};</div>
+<div class="line"><span class="lineno">  112</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> pairJ[9] = {2, 3, 4, 5, 0, 1, 3, 4, 5};</div>
+<div class="line"><span class="lineno">  113</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> ringHops[9] = {2, 2, 2, 2, 2, 2, 3, 3, 3};</div>
+<div class="line"><span class="lineno">  114</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> t = 0; t &lt; 9; ++t) {</div>
+<div class="line"><span class="lineno">  115</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="#ae9a6f5c08baa53d7971e42539faeb3f1">hopsAtMost</a>(deg, cols, nAtoms, kMax, r[pairI[t]], r[pairJ[t]],</div>
+<div class="line"><span class="lineno">  116</span>                   ringHops[t] - 1) &gt;= 0) {</div>
+<div class="line"><span class="lineno">  117</span>      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  118</span>    }</div>
+<div class="line"><span class="lineno">  119</span>  }</div>
+<div class="line"><span class="lineno">  120</span>  <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  121</span>}</div>
+<div class="ttc" id="anamespacetum_1_1device_html_ae9a6f5c08baa53d7971e42539faeb3f1"><div class="ttname"><a href="#ae9a6f5c08baa53d7971e42539faeb3f1">tum::device::hopsAtMost</a></div><div class="ttdeci">int hopsAtMost(const int *deg, const int *cols, int nAtoms, int kMax, int a, int b, int cap)</div><div class="ttdoc">Graph distance from a to b when it is at most cap, else -1.</div><div class="ttdef"><b>Definition</b> <a href="tum__device_8hpp_source.html#l00091">tum_device.hpp:91</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ae9a6f5c08baa53d7971e42539faeb3f1" name="ae9a6f5c08baa53d7971e42539faeb3f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9a6f5c08baa53d7971e42539faeb3f1">&#9670;&#160;</a></span>hopsAtMost()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int tum::device::hopsAtMost </td>
+          <td>(</td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>deg</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>kMax</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>b</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>cap</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Graph distance from a to b when it is at most cap, else -1. </p>
+<p>cap is 1 or 2: the Franzblau reject bound for a six-ring. </p>
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00091">91</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   92</span>                                             {</div>
+<div class="line"><span class="lineno">   93</span>  <span class="keywordflow">if</span> (a == b) {</div>
+<div class="line"><span class="lineno">   94</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">   95</span>  }</div>
+<div class="line"><span class="lineno">   96</span>  <span class="keywordflow">if</span> (<a class="code hl_function" href="#a67c370b04ce0484e28e18a47a341a6c3">bonded</a>(deg, cols, nAtoms, kMax, a, b)) {</div>
+<div class="line"><span class="lineno">   97</span>    <span class="keywordflow">return</span> 1;</div>
+<div class="line"><span class="lineno">   98</span>  }</div>
+<div class="line"><span class="lineno">   99</span>  <span class="keywordflow">if</span> (cap &lt; 2) {</div>
+<div class="line"><span class="lineno">  100</span>    <span class="keywordflow">return</span> -1;</div>
+<div class="line"><span class="lineno">  101</span>  }</div>
+<div class="line"><span class="lineno">  102</span>  <span class="keywordflow">if</span> (<a class="code hl_function" href="#a061391c12acf0965ef0b283462f43fd1">shareNeigh</a>(deg, cols, nAtoms, kMax, a, b)) {</div>
+<div class="line"><span class="lineno">  103</span>    <span class="keywordflow">return</span> 2;</div>
+<div class="line"><span class="lineno">  104</span>  }</div>
+<div class="line"><span class="lineno">  105</span>  <span class="keywordflow">return</span> -1;</div>
+<div class="line"><span class="lineno">  106</span>}</div>
+<div class="ttc" id="anamespacetum_1_1device_html_a061391c12acf0965ef0b283462f43fd1"><div class="ttname"><a href="#a061391c12acf0965ef0b283462f43fd1">tum::device::shareNeigh</a></div><div class="ttdeci">bool shareNeigh(const int *deg, const int *cols, int nAtoms, int kMax, int a, int b)</div><div class="ttdef"><b>Definition</b> <a href="tum__device_8hpp_source.html#l00077">tum_device.hpp:77</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a0d0b742692a97da157edb94e385c3368" name="a0d0b742692a97da157edb94e385c3368"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d0b742692a97da157edb94e385c3368">&#9670;&#160;</a></span>inSix()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool tum::device::inSix </td>
+          <td>(</td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>r</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>atom</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00040">40</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   40</span>                                          {</div>
+<div class="line"><span class="lineno">   41</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> t = 0; t &lt; 6; ++t) {</div>
+<div class="line"><span class="lineno">   42</span>    <span class="keywordflow">if</span> (r[t] == atom) {</div>
+<div class="line"><span class="lineno">   43</span>      <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">   44</span>    }</div>
+<div class="line"><span class="lineno">   45</span>  }</div>
+<div class="line"><span class="lineno">   46</span>  <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   47</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a436c92ddb65af7ea004651faae730d7d" name="a436c92ddb65af7ea004651faae730d7d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a436c92ddb65af7ea004651faae730d7d">&#9670;&#160;</a></span>invertOneRing()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void tum::device::invertOneRing </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>r</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>nRings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>ringAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxPer</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>throughCount</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>through</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00355">355</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  357</span>                                        {</div>
+<div class="line"><span class="lineno">  358</span>  <span class="keywordflow">if</span> (r &gt;= *nRings) {</div>
+<div class="line"><span class="lineno">  359</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  360</span>  }</div>
+<div class="line"><span class="lineno">  361</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> *<a class="code hl_namespace" href="namespacering.html">ring</a> = ringAtoms + r * 6;</div>
+<div class="line"><span class="lineno">  362</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> t = 0; t &lt; 6; ++t) {</div>
+<div class="line"><span class="lineno">  363</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> atom = <a class="code hl_namespace" href="namespacering.html">ring</a>[t];</div>
+<div class="line"><span class="lineno">  364</span>    <span class="keywordflow">if</span> (atom &lt; 0 || atom &gt;= nAtoms) {</div>
+<div class="line"><span class="lineno">  365</span>      <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  366</span>    }</div>
+<div class="line"><span class="lineno">  367</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> slot = <a class="code hl_function" href="#a19baaa6f3828a39fc70ec4bbfa5c6159">fetchAdd</a>(throughCount + atom);</div>
+<div class="line"><span class="lineno">  368</span>    <span class="keywordflow">if</span> (slot &lt; maxPer) {</div>
+<div class="line"><span class="lineno">  369</span>      through[atom * maxPer + slot] = r;</div>
+<div class="line"><span class="lineno">  370</span>    }</div>
+<div class="line"><span class="lineno">  371</span>  }</div>
+<div class="line"><span class="lineno">  372</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a86a03666098ac7a14626540315097b6c" name="a86a03666098ac7a14626540315097b6c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86a03666098ac7a14626540315097b6c">&#9670;&#160;</a></span>notNeighboursOfRing()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool tum::device::notNeighboursOfRing </td>
+          <td>(</td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>deg</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>kMax</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>trip</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>ring</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00137">137</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  138</span>                                                                            {</div>
+<div class="line"><span class="lineno">  139</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 3; ++i) {</div>
+<div class="line"><span class="lineno">  140</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; 6; ++j) {</div>
+<div class="line"><span class="lineno">  141</span>      <span class="keywordflow">if</span> (<a class="code hl_function" href="#a67c370b04ce0484e28e18a47a341a6c3">bonded</a>(deg, cols, nAtoms, kMax, <a class="code hl_namespace" href="namespacering.html">ring</a>[j], trip[i])) {</div>
+<div class="line"><span class="lineno">  142</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  143</span>      }</div>
+<div class="line"><span class="lineno">  144</span>    }</div>
+<div class="line"><span class="lineno">  145</span>  }</div>
+<div class="line"><span class="lineno">  146</span>  <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  147</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a65530a55ba9f0502f557be5cc08974ca" name="a65530a55ba9f0502f557be5cc08974ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65530a55ba9f0502f557be5cc08974ca">&#9670;&#160;</a></span>ringsThrough()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int tum::device::ringsThrough </td>
+          <td>(</td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>A</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nA</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>B</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nB</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>C</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nC</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>skipA</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>skipB</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>out</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>cap</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00238">238</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  240</span>                                 {</div>
+<div class="line"><span class="lineno">  241</span>  <span class="keywordtype">int</span> i = 0;</div>
+<div class="line"><span class="lineno">  242</span>  <span class="keywordtype">int</span> j = 0;</div>
+<div class="line"><span class="lineno">  243</span>  <span class="keywordtype">int</span> k = 0;</div>
+<div class="line"><span class="lineno">  244</span>  <span class="keywordtype">int</span> n = 0;</div>
+<div class="line"><span class="lineno">  245</span>  <span class="keywordflow">while</span> (i &lt; nA &amp;&amp; j &lt; nB &amp;&amp; k &lt; nC) {</div>
+<div class="line"><span class="lineno">  246</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> x = A[i];</div>
+<div class="line"><span class="lineno">  247</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> y = B[j];</div>
+<div class="line"><span class="lineno">  248</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> z = C[k];</div>
+<div class="line"><span class="lineno">  249</span>    <span class="keywordflow">if</span> (x == y &amp;&amp; y == z) {</div>
+<div class="line"><span class="lineno">  250</span>      <span class="keywordflow">if</span> (x != skipA &amp;&amp; x != skipB &amp;&amp; n &lt; cap) {</div>
+<div class="line"><span class="lineno">  251</span>        out[n++] = x;</div>
+<div class="line"><span class="lineno">  252</span>      }</div>
+<div class="line"><span class="lineno">  253</span>      ++i;</div>
+<div class="line"><span class="lineno">  254</span>      ++j;</div>
+<div class="line"><span class="lineno">  255</span>      ++k;</div>
+<div class="line"><span class="lineno">  256</span>      <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  257</span>    }</div>
+<div class="line"><span class="lineno">  258</span>    <span class="keywordtype">int</span> lo = x;</div>
+<div class="line"><span class="lineno">  259</span>    <span class="keywordflow">if</span> (y &lt; lo) {</div>
+<div class="line"><span class="lineno">  260</span>      lo = y;</div>
+<div class="line"><span class="lineno">  261</span>    }</div>
+<div class="line"><span class="lineno">  262</span>    <span class="keywordflow">if</span> (z &lt; lo) {</div>
+<div class="line"><span class="lineno">  263</span>      lo = z;</div>
+<div class="line"><span class="lineno">  264</span>    }</div>
+<div class="line"><span class="lineno">  265</span>    <span class="keywordflow">if</span> (x == lo) {</div>
+<div class="line"><span class="lineno">  266</span>      ++i;</div>
+<div class="line"><span class="lineno">  267</span>    }</div>
+<div class="line"><span class="lineno">  268</span>    <span class="keywordflow">if</span> (y == lo) {</div>
+<div class="line"><span class="lineno">  269</span>      ++j;</div>
+<div class="line"><span class="lineno">  270</span>    }</div>
+<div class="line"><span class="lineno">  271</span>    <span class="keywordflow">if</span> (z == lo) {</div>
+<div class="line"><span class="lineno">  272</span>      ++k;</div>
+<div class="line"><span class="lineno">  273</span>    }</div>
+<div class="line"><span class="lineno">  274</span>  }</div>
+<div class="line"><span class="lineno">  275</span>  <span class="keywordflow">return</span> n;</div>
+<div class="line"><span class="lineno">  276</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="aca8e51f6362549d29fcf3ca1f19cbf8e" name="aca8e51f6362549d29fcf3ca1f19cbf8e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca8e51f6362549d29fcf3ca1f19cbf8e">&#9670;&#160;</a></span>shareAtoms()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool tum::device::shareAtoms </td>
+          <td>(</td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>b</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00049">49</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   49</span>                                                   {</div>
+<div class="line"><span class="lineno">   50</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 6; ++i) {</div>
+<div class="line"><span class="lineno">   51</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="#a0d0b742692a97da157edb94e385c3368">inSix</a>(b, a[i])) {</div>
+<div class="line"><span class="lineno">   52</span>      <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">   53</span>    }</div>
+<div class="line"><span class="lineno">   54</span>  }</div>
+<div class="line"><span class="lineno">   55</span>  <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   56</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a061391c12acf0965ef0b283462f43fd1" name="a061391c12acf0965ef0b283462f43fd1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a061391c12acf0965ef0b283462f43fd1">&#9670;&#160;</a></span>shareNeigh()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool tum::device::shareNeigh </td>
+          <td>(</td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>deg</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>kMax</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>b</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00077">77</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   78</span>                                     {</div>
+<div class="line"><span class="lineno">   79</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> da = deg[a];</div>
+<div class="line"><span class="lineno">   80</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> ra = a * kMax;</div>
+<div class="line"><span class="lineno">   81</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> t = 0; t &lt; da; ++t) {</div>
+<div class="line"><span class="lineno">   82</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="#a67c370b04ce0484e28e18a47a341a6c3">bonded</a>(deg, cols, nAtoms, kMax, b, cols[ra + t])) {</div>
+<div class="line"><span class="lineno">   83</span>      <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">   84</span>    }</div>
+<div class="line"><span class="lineno">   85</span>  }</div>
+<div class="line"><span class="lineno">   86</span>  <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   87</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a8d76398842299f9311380465bdbf82be" name="a8d76398842299f9311380465bdbf82be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d76398842299f9311380465bdbf82be">&#9670;&#160;</a></span>sortThroughRow()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void tum::device::sortThroughRow </td>
+          <td>(</td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>row</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__device_8hpp_source.html#l00374">374</a> of file <a class="el" href="tum__device_8hpp_source.html">tum_device.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  374</span>                                            {</div>
+<div class="line"><span class="lineno">  375</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> a = 1; a &lt; n; ++a) {</div>
+<div class="line"><span class="lineno">  376</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> key = row[a];</div>
+<div class="line"><span class="lineno">  377</span>    <span class="keywordtype">int</span> p = a;</div>
+<div class="line"><span class="lineno">  378</span>    <span class="keywordflow">while</span> (p &gt; 0 &amp;&amp; row[p - 1] &gt; key) {</div>
+<div class="line"><span class="lineno">  379</span>      row[p] = row[p - 1];</div>
+<div class="line"><span class="lineno">  380</span>      --p;</div>
+<div class="line"><span class="lineno">  381</span>    }</div>
+<div class="line"><span class="lineno">  382</span>    row[p] = key;</div>
+<div class="line"><span class="lineno">  383</span>  }</div>
+<div class="line"><span class="lineno">  384</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!-- Doxygen already closed #doc-content and #container before this template. -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespacetum.html">tum</a></li><li class="navelem"><a href="namespacetum_1_1device.html">device</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.17.0 </li>
+  </ul>
+</div>
+<div class="doxyyoda-attrib" role="contentinfo">
+  <span class="doxyyoda-attrib__item">
+    <span>Generated by <a href="https://www.doxygen.org/index.html">Doxygen 1.17.0</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z"/></svg>
+    <span>Analytics by <a href="https://antics.turtletech.us/" target="_blank" rel="noopener noreferrer">Antics</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <span>provided by</span>
+    <span class="doxyyoda-attrib__brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1.4em" height="1.4em" viewBox="0 0 64 64" aria-hidden="true"><g fill-rule="evenodd"><ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9"/><path fill="#80D25B" d="M20.3,46c0,0-3.2,9.9.3,13.8c3.5,3.9 6.1,3.4 6.1-6C26.8,44.3 20.3,46 20.3,46Z"/><path fill="#80D25B" d="M38.3,46c0,0-3.2,9.9.4,13.8c3.5,3.9 6.1,3.4 6.1-6C44.8,44.3 38.3,46 38.3,46Z" transform="matrix(-1 0 0 1 81.8 0)"/><path fill="#80D25B" d="M20.6,21.2c0,0-6.7-5.8-10.5-5.2C6.2,16.7 6,22.2 6,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L20.6,21.2Z"/><path fill="#80D25B" d="M57.6,21.2c0,0-6.6-5.8-10.5-5.2C43.2,16.7 43,22.2 43,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L57.6,21.2Z" transform="matrix(-1 0 0 1 100.623 0)"/><path fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32,53C40.8,53 48,44.5 48,34C48,23.5 46.7,17 32,17C17.3,17 16,23.5 16,34C16,44.5 23.2,53 32,53Z"/><polygon fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" points="32 22 38.9 26 38.9 34 32 38 25.1 34 25.1 26"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M30,8C28.9,8 28,8.9 28,10"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M36,8C34.9,8 34,8.9 34,10" transform="matrix(-1 0 0 1 70 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32.1,38.2L32.1,52.4M32,21.7L32,17M25.2,26L17.7,23.1M25.1,34.2L16.8,38.9"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M46.2,26L38.7,23.1" transform="matrix(-1 0 0 1 84.951 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M47.1,34.2L38.8,38.9" transform="matrix(-1 0 0 1 85.891 0)"/></g></svg>
+      <a href="https://turtletech.us/" target="_blank" rel="noopener noreferrer">TurtleTech ehf</a>
+    </span>
+  </span>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

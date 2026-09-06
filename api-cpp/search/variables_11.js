@@ -9,7 +9,7 @@ var searchData=
   ['rings_6',['rings',['../group__cage.html#ga5b4c006e8de944ce67f924190123f178',1,'cage::Cage::rings'],['../group__primitive.html#gac591e6693cef9a022fdbc24b8596bfd3',1,'primitive::Graph::rings']]],
   ['ringsbytes_7',['ringsBytes',['../structgpu_1_1Footprint.html#a0c4b0995a0210b0def820bd933d79d9b',1,'gpu::Footprint']]],
   ['ringscontainingatom_8',['ringsContainingAtom',['../structring_1_1RingSearchIndex.html#a8e4433086bf9bec113ee61bc3c17b8bb',1,'ring::RingSearchIndex']]],
-  ['ringsdropped_9',['ringsDropped',['../structgpu_1_1BatchResult.html#aa2bf91a0e7f7a2dccfc3c4139e54f6fa',1,'gpu::BatchResult']]],
+  ['ringsdropped_9',['ringsDropped',['../structgpu_1_1BatchResult.html#aa2bf91a0e7f7a2dccfc3c4139e54f6fa',1,'gpu::BatchResult::ringsDropped'],['../structtum_1_1CageCounts.html#a8ba2a68345d60657b3fcf399a54ded38',1,'tum::CageCounts::ringsDropped']]],
   ['rmax_10',['rmax',['../group__rdf.html#gaf633cbb773b23a72ae1e070d691c76ec',1,'rdf::PartialRdf']]],
   ['rmsd_11',['rmsd',['../structira_1_1Match.html#ab14b20ac985fe3c9fb6359973da2b5c9',1,'ira::Match::rmsd'],['../structchill_1_1TemplateHit.html#ab9b9bdbf34e6272e29ab3bdcf2c9e1c2',1,'chill::TemplateHit::rmsd']]],
   ['rotation_12',['rotation',['../structira_1_1Match.html#a4a98f0d5bfd17ab0b1aa668dbf72c415',1,'ira::Match']]]

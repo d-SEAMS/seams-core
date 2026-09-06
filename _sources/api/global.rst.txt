@@ -19,6 +19,7 @@ Global Namespace
 	namespace_std.rst
 	namespace_topo.rst
 	namespace_topoparam.rst
+	namespace_tum.rst
 
 
 
@@ -58,6 +59,8 @@ Global Namespace
 	namespace :ref:`std<doxid-namespacestd>`;
 	namespace :ref:`topo<doxid-namespacetopo>`;
 	namespace :ref:`topoparam<doxid-namespacetopoparam>`;
+	namespace :ref:`tum<doxid-namespacetum>`;
+		namespace :ref:`tum::device<doxid-namespacetum_1_1device>`;
 	namespace :ref:`tum3<doxid-namespacetum3>`;
 
 	// global functions

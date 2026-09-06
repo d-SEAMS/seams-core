@@ -239,8 +239,10 @@ data-aria-dark="Switch to auto color mode">
 </div><article class="yue dark-code" role="main">
           <section id="openmp-target-offload">
 <h1>OpenMP target offload<a class="headerlink" href="#openmp-target-offload" title="Link to this heading">¶</a></h1>
-<p>Build the Steinhardt kernel for an NVIDIA GPU. This is not the
-gpulite TUM path and it is not the host-only pixi environment.</p>
+<p>Build the Steinhardt kernel and the TUM ice score (hop-bound
+six-rings and cage affiliation) for an NVIDIA GPU. This is not the
+gpulite resident-batch path and it is not the host-only pixi
+environment. Device CHILL+ is not in this build.</p>
 <p>The Meson option is <code class="docutils literal notranslate"><span class="pre">-Dwith_openmp_offload=enabled</span></code>. Configure
 probes a real <code class="docutils literal notranslate"><span class="pre">target</span> <span class="pre">teams</span> <span class="pre">distribute</span> <span class="pre">parallel</span> <span class="pre">for</span></code> and records
 <code class="docutils literal notranslate"><span class="pre">OpenMP</span> <span class="pre">target</span> <span class="pre">offload:</span> <span class="pre">YES</span></code> only when that link succeeds. nvc++
@@ -319,6 +321,12 @@ the offload define.</p>
 the device path to one-thread and four-thread host paths on the
 FCC lattice and on <code class="docutils literal notranslate"><span class="pre">input/traj/mW_cubic.lammpstrj</span></code>, and it checks
 the FCC <code class="docutils literal notranslate"><span class="pre">q4</span></code> / <code class="docutils literal notranslate"><span class="pre">q6</span></code> reference values.</p>
+<p>The case <code class="docutils literal notranslate"><span class="pre">SEAMS_OFFLOAD</span> <span class="pre">TUM</span> <span class="pre">cage</span> <span class="pre">counts</span> <span class="pre">match</span> <span class="pre">host</span> <span class="pre">on</span> <span class="pre">mW</span> <span class="pre">cubic</span></code>
+(<code class="docutils literal notranslate"><span class="pre">[bulkTUM][offload]</span></code>) compares hop-bound six-ring and HC/DDC
+affiliation counts to host <code class="docutils literal notranslate"><span class="pre">ringNetwork</span></code> plus <code class="docutils literal notranslate"><span class="pre">cageAffiliation</span></code>
+on the same cutoff graph. <code class="docutils literal notranslate"><span class="pre">SEAMS_OFFLOAD=1</span></code> selects that path;
+<code class="docutils literal notranslate"><span class="pre">SEAMS_OFFLOAD=0</span></code> stays on Franzblau. When the probe succeeded
+and a device is present the TUM kernels run in a target region.</p>
 </section>
 <section id="profile">
 <h2>Profile<a class="headerlink" href="#profile" title="Link to this heading">¶</a></h2>

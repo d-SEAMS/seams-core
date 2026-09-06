@@ -155,6 +155,7 @@ var namespaces_dup =
     ] ],
     [ "topo", "namespacetopo.html", "namespacetopo" ],
     [ "topoparam", "namespacetopoparam.html", "namespacetopoparam" ],
+    [ "tum", "namespacetum.html", "namespacetum" ],
     [ "tum3", "namespacetum3.html", [
       [ "atomsFromCages", "group__ring.html#ga11cd9029a926adccce0454064cfb9e45", null ],
       [ "averageRMSDatom", "group__ring.html#gaeb733184d3f90032143304cf1c7b4b2e", null ],

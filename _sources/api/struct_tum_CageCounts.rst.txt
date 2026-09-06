@@ -1,0 +1,30 @@
+.. index:: pair: struct; tum::CageCounts
+.. _doxid-structtum_1_1_cage_counts:
+
+struct tum::CageCounts
+======================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <tum_offload.hpp>
+	
+	struct CageCounts {
+		// fields
+	
+		int :target:`nSix<doxid-structtum_1_1_cage_counts_1a433edbf0305cabc6b0a0675912162afe>` = 0;
+		int :target:`nHcRings<doxid-structtum_1_1_cage_counts_1aa14e5fdaac8fb7af6bd4676f760f6acc>` = 0;
+		int :target:`nDdcRings<doxid-structtum_1_1_cage_counts_1a9c557c74c32c82309dfa739906810042>` = 0;
+		int :target:`nHcAtoms<doxid-structtum_1_1_cage_counts_1a72b7d09cb1577e8fb3d0bef3da85e962>` = 0;
+		int :target:`nDdcAtoms<doxid-structtum_1_1_cage_counts_1aab9b1b63e36af777deba13568cd12c76>` = 0;
+		int :target:`ringsDropped<doxid-structtum_1_1_cage_counts_1a8ba2a68345d60657b3fcf399a54ded38>` = 0;
+		bool :target:`usedDevice<doxid-structtum_1_1_cage_counts_1a7e7282c1f800764983b24c4b9ce20738>` = false;
+		std::vector<int> :target:`atomHc<doxid-structtum_1_1_cage_counts_1a1a15e0ef307c7b4998dfdd35cfce0933>`;
+		std::vector<int> :target:`atomDdc<doxid-structtum_1_1_cage_counts_1af6c75cf2229b391d64049656ead9fbee>`;
+	};

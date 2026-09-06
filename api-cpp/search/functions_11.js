@@ -23,8 +23,9 @@ var searchData=
   ['restoreedgesfromindices_20',['restoreEdgesFromIndices',['../group__primitive.html#ga30435e6338c201e8908991462d0fb228',1,'primitive']]],
   ['ringadjacentcompletion_21',['ringAdjacentCompletion',['../namespacering.html#a52d5bc312612884ce62bd430d94fdb17',1,'ring']]],
   ['ringnetwork_22',['ringNetwork',['../group__primitive.html#ga69f1b870183f33e58426c88ee93f0635',1,'primitive']]],
-  ['ringupdater_23',['RingUpdater',['../group__primitive.html#ga61b88624c282b4573177cba65781a2f1',1,'primitive::RingUpdater::RingUpdater(int maxDepth)'],['../group__primitive.html#ga5d186144c78bff338a8c6d3bc88b5d47',1,'primitive::RingUpdater::RingUpdater(RingUpdater &amp;&amp;) noexcept'],['../group__primitive.html#ga8cc0a54ed956da02142a250c4c7bf8c2',1,'primitive::RingUpdater::RingUpdater(const RingUpdater &amp;)=delete']]],
-  ['rmaxialtranslations_24',['rmAxialTranslations',['../group__ring.html#ga5f5496ef80d800cb0e9b4d87b6cca4bf',1,'ring']]],
-  ['rodgerf4_25',['rodgerF4',['../namespacetopoparam.html#ac9f9075f5de0b04fb6d0431ee15a29b9',1,'topoparam']]],
-  ['runningcn_26',['runningCN',['../group__rdf.html#ga2a54eea649f6c234be50494cec2cee82',1,'rdf::runningCN(const PartialRdf &amp;h)'],['../group__rdf.html#ga86d11871fc6dcad3daa99cddf7fc11dc',1,'rdf::runningCN(const PartialRdf &amp;h, double rhoJ)']]]
+  ['ringsthrough_23',['ringsThrough',['../namespacetum_1_1device.html#a65530a55ba9f0502f557be5cc08974ca',1,'tum::device']]],
+  ['ringupdater_24',['RingUpdater',['../group__primitive.html#ga61b88624c282b4573177cba65781a2f1',1,'primitive::RingUpdater::RingUpdater(int maxDepth)'],['../group__primitive.html#ga5d186144c78bff338a8c6d3bc88b5d47',1,'primitive::RingUpdater::RingUpdater(RingUpdater &amp;&amp;) noexcept'],['../group__primitive.html#ga8cc0a54ed956da02142a250c4c7bf8c2',1,'primitive::RingUpdater::RingUpdater(const RingUpdater &amp;)=delete']]],
+  ['rmaxialtranslations_25',['rmAxialTranslations',['../group__ring.html#ga5f5496ef80d800cb0e9b4d87b6cca4bf',1,'ring']]],
+  ['rodgerf4_26',['rodgerF4',['../namespacetopoparam.html#ac9f9075f5de0b04fb6d0431ee15a29b9',1,'topoparam']]],
+  ['runningcn_27',['runningCN',['../group__rdf.html#ga2a54eea649f6c234be50494cec2cee82',1,'rdf::runningCN(const PartialRdf &amp;h)'],['../group__rdf.html#ga86d11871fc6dcad3daa99cddf7fc11dc',1,'rdf::runningCN(const PartialRdf &amp;h, double rhoJ)']]]
 ];
