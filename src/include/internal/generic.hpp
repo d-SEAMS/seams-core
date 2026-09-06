@@ -26,6 +26,10 @@
 #include <vector>
 #include <mol_sys.hpp>
 
+#ifdef SEAMS_HAS_MINIMAGE
+#include <minimage.h>
+#endif
+
 // C++20
 #include <numbers>
 // Eigen
@@ -99,6 +103,29 @@ inline double calcMedian(std::vector<double> *input) {
   return median;
 }
 
+#ifdef SEAMS_HAS_MINIMAGE
+// Dump bound spans plus optional tilt onto an mi_cell.
+inline mi_cell pointCloudCell(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  const auto &box = yCloud.box;
+  const auto &boxLow = yCloud.boxLow;
+  const double xlo_b = boxLow.size() > 0 ? boxLow[0] : 0.0;
+  const double ylo_b = boxLow.size() > 1 ? boxLow[1] : 0.0;
+  const double zlo_b = boxLow.size() > 2 ? boxLow[2] : 0.0;
+  mi_cell c = mi_cell_ortho(0.0, 0.0, 0.0);
+  if (box.size() >= 6) {
+    mi_cell_from_lammps_bounds(box[0], box[1], box[2], box[3], box[4], box[5],
+                               xlo_b, ylo_b, zlo_b, &c);
+  } else if (box.size() >= 3) {
+    c = mi_cell_ortho(box[0], box[1], box[2]);
+    c.ox = xlo_b;
+    c.oy = ylo_b;
+    c.oz = zlo_b;
+  }
+  return c;
+}
+#endif
+
 // Recover H (columns a, b, c) and origin from a LAMMPS dump box with the
 // same mapping as nneigh::lammpsBoxToLcCell: box[0..3] are bound spans,
 // box[3..6] are tilt factors xy, xz, yz, boxLow is the bound lo.
@@ -107,6 +134,14 @@ inline double calcMedian(std::vector<double> *input) {
 inline std::array<double, 3> triclinicMinImage(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double xi,
     double yi, double zi, double xj, double yj, double zj) {
+#ifdef SEAMS_HAS_MINIMAGE
+  const mi_cell cell = pointCloudCell(yCloud);
+  const double p[3] = {xj, yj, zj};
+  const double q[3] = {xi, yi, zi};
+  double dr[3] = {0.0, 0.0, 0.0};
+  mi_displacement(&cell, p, q, dr);
+  return {dr[0], dr[1], dr[2]};
+#else
   const auto &box = yCloud.box;
   const auto &boxLow = yCloud.boxLow;
   const double xspan = box[0];
@@ -144,6 +179,7 @@ inline std::array<double, 3> triclinicMinImage(
   dsy -= std::round(dsy);
   dsz -= std::round(dsz);
   return {lx * dsx + xy * dsy + xz * dsz, ly * dsy + yz * dsz, lz * dsz};
+#endif
 }
 
 // Generic function for getting the unwrapped distance
@@ -159,6 +195,16 @@ inline std::array<double, 3> triclinicMinImage(
 inline double
 periodicDistSq(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                int iatom, int jatom) {
+#ifdef SEAMS_HAS_MINIMAGE
+  const mi_cell cell = pointCloudCell(yCloud);
+  const double p[3] = {yCloud.pts[iatom].x, yCloud.pts[iatom].y,
+                       yCloud.pts[iatom].z};
+  const double q[3] = {yCloud.pts[jatom].x, yCloud.pts[jatom].y,
+                       yCloud.pts[jatom].z};
+  double out = 0.0;
+  mi_dist2(&cell, p, q, &out);
+  return out;
+#else
   if (yCloud.box.size() >= 6) {
     const auto dr = triclinicMinImage(
         yCloud, yCloud.pts[iatom].x, yCloud.pts[iatom].y, yCloud.pts[iatom].z,
@@ -181,6 +227,7 @@ periodicDistSq(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
   }
 
   return r2;
+#endif
 }
 
 /**
@@ -258,6 +305,15 @@ inline void writeDumpBoxBounds(
 inline std::array<double, 3> relDistFromPoint(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
     double xj, double yj, double zj) {
+#ifdef SEAMS_HAS_MINIMAGE
+  const mi_cell cell = pointCloudCell(yCloud);
+  const double p[3] = {xj, yj, zj};
+  const double q[3] = {yCloud.pts[iatom].x, yCloud.pts[iatom].y,
+                       yCloud.pts[iatom].z};
+  double dr[3] = {0.0, 0.0, 0.0};
+  mi_displacement(&cell, p, q, dr);
+  return {dr[0], dr[1], dr[2]};
+#else
   if (yCloud.box.size() >= 6) {
     return triclinicMinImage(yCloud, yCloud.pts[iatom].x, yCloud.pts[iatom].y,
                              yCloud.pts[iatom].z, xj, yj, zj);
@@ -274,6 +330,7 @@ inline std::array<double, 3> relDistFromPoint(
     }
   }
   return dr;
+#endif
 }
 
 inline double unWrappedDistFromPoint(
