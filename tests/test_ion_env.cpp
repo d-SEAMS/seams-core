@@ -73,6 +73,36 @@ TEST_CASE("an ion with no labelled neighbour is in liquid, a mixed shell is at t
   REQUIRE(env.nFront == 1);
 }
 
+TEST_CASE("ice cluster census assigns an ion to the nearest ice component",
+          "[ions]") {
+  const auto cloud = lattice({13});
+  std::vector<bool> ice(static_cast<std::size_t>(cloud.nop), false);
+  // 4 and 22 are the +/-x shell of the ion at 13; 0 is a far ice atom.
+  ice[4] = true;
+  ice[22] = true;
+  ice[0] = true;
+  std::vector<std::vector<int>> rows(static_cast<std::size_t>(cloud.nop));
+  const int n = cloud.nop;
+  auto add = [&](int a, int b) {
+    rows[static_cast<std::size_t>(a)].push_back(b);
+    rows[static_cast<std::size_t>(b)].push_back(a);
+  };
+  for (int i = 0; i < n; i++) {
+    rows[static_cast<std::size_t>(i)].push_back(i);
+  }
+  add(4, 22);
+  const auto census = site::iceClusterIonCensus(cloud, ice, rows, {13}, 3.5);
+  REQUIRE(census.nClusters == 2);
+  REQUIRE(census.clusterOf[4] == census.clusterOf[22]);
+  REQUIRE(census.clusterOf[4] != census.clusterOf[0]);
+  int assigned = 0;
+  for (int nIon : census.ionsInCluster) {
+    assigned += nIon;
+  }
+  REQUIRE(assigned == 1);
+  REQUIRE(census.clusterOfIon[0] == census.clusterOf[4]);
+}
+
 TEST_CASE("ions do not count in each other's shells and the periodic image is seen",
           "[ions]") {
   // 0 at the origin and 2 at (0, 0, 6): under the 9.0 box they sit 3.0 apart

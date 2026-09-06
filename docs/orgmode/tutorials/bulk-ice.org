@@ -40,9 +40,11 @@ the type is explicit.
 
 * Step 2: CHILL+ from the CLI
 
-CHILL+ looks at each oxygen's four nearest neighbours inside the
-cutoff. Each of those four bonds is staggered or eclipsed from the
-pair correlation ~c_ij~. The star of four labels is the ice type:
+CHILL+ looks at each oxygen's four nearest neighbours (mutual
+~kNearestNeighbourList~, ~k = 4~). ~--cutoff~ is the cell-size
+hint, not the pair list. Each of those four bonds is staggered or
+eclipsed from the pair correlation ~c_ij~. The star of four labels
+is the ice type:
 
 | label           | four-neighbour star              |
 |-----------------+----------------------------------|

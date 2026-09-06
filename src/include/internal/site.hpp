@@ -125,6 +125,7 @@ struct GuestOccupancy {
   int occupied = 0;                      ///< cages with at least one guest
   int multiply = 0;                      ///< cages with more than one guest
   int free = 0;                          ///< guests in no cage
+  std::vector<int> occupancyHistogram;   ///< hist[k] = cages with k guests
 };
 /// `cages` are vertex index lists into `yCloud.pts`; `radius` in the
 /// cloud's length unit (half the cage diameter, about 4 A for a 5^12 cage).
@@ -138,6 +139,34 @@ guestOccupancy(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 std::array<double, 3>
 periodicCentroid(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                  const std::vector<int> &atoms);
+
+/// Occupancy by ray-parity: a guest sits in a cage when a ray from the
+/// guest, in the frame that unwraps the cage about its periodic
+/// centroid, crosses an odd number of fan-triangulated faces. Among
+/// cages that contain the guest the nearest centroid wins. `rings` is
+/// the ring list the cage faces index; `cageFaces[c]` is the face
+/// indices of cage c.
+GuestOccupancy
+guestOccupancyInside(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                     const std::vector<std::vector<int>> &rings,
+                     const std::vector<std::vector<int>> &cageFaces,
+                     const std::vector<int> &guestIndices);
+
+/// Connected components of ice atoms on the water graph, and the ion
+/// count per component: each ion is assigned to the cluster of the
+/// nearest ice atom within `cutoff`.
+struct IceClusterIons {
+  std::vector<int> clusterOf;      ///< per atom, cluster id or -1
+  std::vector<int> ionsInCluster;  ///< per cluster
+  std::vector<int> clusterOfIon;   ///< per ion in input order, or -1
+  int nClusters = 0;
+};
+
+IceClusterIons
+iceClusterIonCensus(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                    const std::vector<bool> &ice,
+                    const std::vector<std::vector<int>> &nListByIndex,
+                    const std::vector<int> &ionIndices, double cutoff);
 } // namespace site
 
 #endif // SEAMS_SITE_H_

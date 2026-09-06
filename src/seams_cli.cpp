@@ -12,6 +12,7 @@
 #include <mol_sys.hpp>
 #include <generic.hpp>
 #include <neighbours.hpp>
+#include <order_parameter.hpp>
 #include <cluster.hpp>
 #include <density.hpp>
 #include <rdf.hpp>
@@ -229,6 +230,37 @@ int typeOf(const Cloud &cloud, int requested) {
   return cloud.pts[0].type;
 }
 
+bool isWaterType(int type, const std::vector<int> &waterTypes) {
+  if (waterTypes.empty()) {
+    return true;
+  }
+  return std::find(waterTypes.begin(), waterTypes.end(), type) !=
+         waterTypes.end();
+}
+
+int waterNop(const Cloud &cloud, const std::vector<int> &waterTypes) {
+  if (waterTypes.empty()) {
+    return cloud.nop;
+  }
+  int n = 0;
+  for (const auto &pt : cloud.pts) {
+    if (isWaterType(pt.type, waterTypes)) {
+      ++n;
+    }
+  }
+  return n;
+}
+
+std::vector<std::vector<int>>
+waterGraph(Cloud &cloud, double cutoff, int typ,
+           const std::vector<int> &waterTypes, int k = 4, bool mutual = true) {
+  const double cand = cutoff + 1.5;
+  if (!waterTypes.empty()) {
+    return nneigh::kNearestNeighbourList(cloud, k, cand, waterTypes, mutual);
+  }
+  return nneigh::kNearestNeighbourList(cloud, k, cand, typ, mutual);
+}
+
 std::string iceColor(std::string_view name) {
   if (name == "cubic" || name == "reCubic") {
     return colorizer.longOption(name);
@@ -248,12 +280,18 @@ std::string iceColor(std::string_view name) {
   return colorizer.error(name);
 }
 
-void printCounts(std::ostream &os, const Cloud &cloud) {
+void printCounts(std::ostream &os, const Cloud &cloud,
+                 const std::vector<int> &waterTypes = {}) {
   std::map<std::string, int> hist;
+  int scored = 0;
   for (const auto &pt : cloud.pts) {
+    if (!isWaterType(pt.type, waterTypes)) {
+      continue;
+    }
     hist[iceName(pt.iceType)]++;
+    ++scored;
   }
-  os << colorizer.heading("nop") << " " << cloud.nop;
+  os << colorizer.heading("nop") << " " << scored;
   for (const auto &[name, n] : hist) {
     if (n > 0) {
       os << " " << iceColor(name) << " " << n;
@@ -711,14 +749,28 @@ int cmdFingerprint(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int
 // in ice, at the front, or in liquid by their first water shell.
 int cmdIons(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
             bool complete, const std::vector<int> &ionTypes, double ionCutoff,
-            const std::string &perAtomPath = {}) {
+            const std::string &perAtomPath = {},
+            const std::vector<int> &waterTypes = {}) {
   if (cloud.nop == 0) {
     os << colorizer.heading("nop") << " 0\n";
     return 0;
   }
-  const int typ = typeOf(cloud, typeI);
+  int typ = typeOf(cloud, typeI);
+  if (!ionTypes.empty() &&
+      std::find(ionTypes.begin(), ionTypes.end(), typ) != ionTypes.end()) {
+    for (int i = 0; i < cloud.nop; ++i) {
+      const int t = cloud.pts[static_cast<std::size_t>(i)].type;
+      if (std::find(ionTypes.begin(), ionTypes.end(), t) == ionTypes.end()) {
+        typ = t;
+        break;
+      }
+    }
+  }
   const double cand = cutoff + 1.5;
-  auto graphs = nneigh::kNearestNeighbourPair(cloud, k, cand, typ);
+  auto graphs =
+      waterTypes.empty()
+          ? nneigh::kNearestNeighbourPair(cloud, k, cand, typ)
+          : nneigh::kNearestNeighbourPair(cloud, k, cand, waterTypes);
   auto idxS = nneigh::neighbourListByIndex(cloud, graphs.first);
   auto idxU = nneigh::neighbourListByIndex(cloud, graphs.second);
   auto sixOf = [](const std::vector<std::vector<int>> &rings) {
@@ -736,6 +788,9 @@ int cmdIons(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
   std::vector<bool> ice(static_cast<std::size_t>(cloud.nop), false);
   int nIce = 0;
   for (std::size_t i = 0; i < ice.size() && i < aff.hc.size(); ++i) {
+    if (!isWaterType(cloud.pts[i].type, waterTypes)) {
+      continue;
+    }
     ice[i] = aff.hc[i] || aff.ddc[i];
     nIce += ice[i] ? 1 : 0;
   }
@@ -746,7 +801,8 @@ int cmdIons(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
       ions.push_back(i);
     }
   }
-  const auto env = site::ionEnvironment(cloud, ice, ions, typ, ionCutoff);
+  const int waterTyp = waterTypes.empty() ? typ : waterTypes.front();
+  const auto env = site::ionEnvironment(cloud, ice, ions, waterTyp, ionCutoff);
   if (!perAtomPath.empty()) {
     // water: 0 liquid, 1 ice; ions: 2 liquid, 3 front, 4 ice
     std::vector<int> values(static_cast<std::size_t>(cloud.nop), 0);
@@ -768,6 +824,11 @@ int cmdIons(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
     meanShell /= static_cast<double>(env.ion.size());
     meanFraction /= static_cast<double>(env.ion.size());
   }
+  const auto census = site::iceClusterIonCensus(cloud, ice, idxU, ions, ionCutoff);
+  int ionsInIce = 0;
+  for (int n : census.ionsInCluster) {
+    ionsInIce += n;
+  }
   os << colorizer.heading("nop") << " " << cloud.nop << " "
      << colorizer.longOption("ice") << " " << nIce << " "
      << colorizer.longOption("ions") << " " << env.ion.size() << " "
@@ -775,7 +836,9 @@ int cmdIons(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
      << colorizer.longOption("front") << " " << env.nFront << " "
      << colorizer.longOption("liquid") << " " << env.nLiquid << " "
      << colorizer.longOption("shell") << " " << meanShell << " "
-     << colorizer.longOption("shell-ice") << " " << meanFraction << "\n";
+     << colorizer.longOption("shell-ice") << " " << meanFraction << " "
+     << colorizer.longOption("clusters") << " " << census.nClusters << " "
+     << colorizer.longOption("ions-in-ice") << " " << ionsInIce << "\n";
   return 0;
 }
 
@@ -814,29 +877,106 @@ int cmdCn(std::ostream &os, Cloud &cloud, double rmax, int bins, int typeI,
   return 0;
 }
 
-int cmdChillPlus(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
+int cmdChillPlus(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
+                 bool layers = false, bool tumLayers = false, int axis = 2,
+                 double layerWidth = 3.7,
+                 const std::vector<int> &waterTypes = {}) {
   if (cloud.nop == 0) {
     printCounts(os, cloud);
     return 0;
   }
   const int typ = typeOf(cloud, typeI);
-  auto nList = nneigh::neighListO(cutoff, cloud, typ);
+  auto nList = waterGraph(cloud, cutoff, typ, waterTypes);
   chill::getCorrelPlus(cloud, nList, false);
   chill::getIceTypePlusNoPrint(cloud, nList, false);
-  printCounts(os, cloud);
+  chill::clearIceTypesExcept(cloud, waterTypes);
+  printCounts(os, cloud, waterTypes);
+  if (layers) {
+    const auto st = topoparam::layerCubicity(cloud, axis, layerWidth);
+    os << colorizer.longOption("phi-c") << " " << st.phiC << " "
+       << colorizer.longOption("stack") << " " << st.sequence << "\n";
+  }
+  if (tumLayers) {
+    auto idx = nneigh::neighbourListByIndex(cloud, nList);
+    std::vector<std::vector<int>> six;
+    for (const auto &r : primitive::ringNetwork(idx, 6)) {
+      if (r.size() == 6) {
+        six.push_back(r);
+      }
+    }
+    const auto planes = ring::stackingPlanes(six, idx);
+    const auto st =
+        topoparam::tumLayerStack(cloud, six, planes.basal, planes.equatorial,
+                                 axis, layerWidth);
+    os << colorizer.longOption("tum-phi-c") << " " << st.phiC << " "
+       << colorizer.longOption("tum-stack") << " " << st.sequence << "\n";
+  }
   return 0;
 }
 
-int cmdChill(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
+int cmdChill(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
+             const std::vector<int> &waterTypes = {}) {
   if (cloud.nop == 0) {
     printCounts(os, cloud);
     return 0;
   }
   const int typ = typeOf(cloud, typeI);
-  auto nList = nneigh::neighListO(cutoff, cloud, typ);
+  auto nList = waterGraph(cloud, cutoff, typ, waterTypes);
   chill::getCorrel(cloud, nList, false);
   chill::getIceTypeNoPrint(cloud, nList, false);
-  printCounts(os, cloud);
+  chill::clearIceTypesExcept(cloud, waterTypes);
+  printCounts(os, cloud, waterTypes);
+  return 0;
+}
+
+int cmdF4(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int hType) {
+  if (cloud.nop == 0) {
+    os << colorizer.heading("nop") << " 0 "
+       << colorizer.longOption("f4") << " nan\n";
+    return 0;
+  }
+  int typ = typeI;
+  if (typ <= 0) {
+    for (const auto &p : cloud.pts) {
+      if (p.type != hType) {
+        typ = p.type;
+        break;
+      }
+    }
+  }
+  if (typ <= 0) {
+    typ = typeOf(cloud, typeI);
+  }
+  const double cand = cutoff + 1.5;
+  auto nList = nneigh::kNearestNeighbourList(cloud, 4, cand, typ, true);
+  const auto f4 = topoparam::rodgerF4(cloud, nList, typ, hType);
+  int nFinite = 0;
+  for (double v : f4) {
+    nFinite += std::isfinite(v) ? 1 : 0;
+  }
+  os << colorizer.heading("nop") << " " << cloud.nop << " "
+     << colorizer.longOption("f4") << " " << topoparam::meanFinite(f4) << " "
+     << colorizer.longOption("n") << " " << nFinite << "\n";
+  return 0;
+}
+
+int cmdSteinhardt(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
+  if (cloud.nop == 0) {
+    os << colorizer.heading("nop") << " 0\n";
+    return 0;
+  }
+  const int typ = typeOf(cloud, typeI);
+  const double cand = cutoff + 1.5;
+  auto nList = nneigh::kNearestNeighbourList(cloud, 4, cand, typ, true);
+  const auto q3 = chill::steinhardtQl(cloud, nList, 3);
+  const auto q12 = chill::steinhardtQl(cloud, nList, 12);
+  os << colorizer.heading("nop") << " " << cloud.nop << " "
+     << colorizer.longOption("q3") << " " << topoparam::meanFinite(q3.ql) << " "
+     << colorizer.longOption("q3bar") << " " << topoparam::meanFinite(q3.qlBar)
+     << " " << colorizer.longOption("q12") << " "
+     << topoparam::meanFinite(q12.ql) << " "
+     << colorizer.longOption("q12bar") << " "
+     << topoparam::meanFinite(q12.qlBar) << "\n";
   return 0;
 }
 
@@ -844,7 +984,8 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
              const std::string &graphName, bool complete = false,
              const std::string &signatureSpec = {},
              const std::vector<int> &guestTypes = {}, double guestRadius = 4.0,
-             const std::string &perAtomPath = {}) {
+             const std::string &perAtomPath = {}, bool inside = false,
+             bool incomplete = false, const std::vector<int> &waterTypes = {}) {
   if (cloud.nop == 0) {
     if (!signatureSpec.empty()) {
       const auto sig = cage::Signature::parse(signatureSpec);
@@ -862,6 +1003,18 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
   }
   const int typ = typeOf(cloud, typeI);
   const double cand = cutoff + 1.5;
+  auto knnOf = [&](bool mutual) {
+    if (!waterTypes.empty()) {
+      return nneigh::kNearestNeighbourList(cloud, k, cand, waterTypes, mutual);
+    }
+    return nneigh::kNearestNeighbourList(cloud, k, cand, typ, mutual);
+  };
+  auto knnPairOf = [&]() {
+    if (!waterTypes.empty()) {
+      return nneigh::kNearestNeighbourPair(cloud, k, cand, waterTypes);
+    }
+    return nneigh::kNearestNeighbourPair(cloud, k, cand, typ);
+  };
 
   if (!signatureSpec.empty()) {
     const auto emit = [&](const std::vector<std::vector<int>> &idx) {
@@ -869,6 +1022,10 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
       const int depth = std::max(sig.maxRingSize(), 3);
       const auto rings = primitive::ringNetwork(idx, depth);
       const auto found = cage::findBySignature(rings, idx, sig);
+      std::vector<cage::FoundCage> cups;
+      if (incomplete) {
+        cups = cage::findIncompleteBySignature(rings, sig, 0);
+      }
       std::set<int> atoms;
       for (const auto &c : found) {
         atoms.insert(c.vertices.begin(), c.vertices.end());
@@ -877,6 +1034,9 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
          << colorizer.longOption("graph") << " " << graphName << " "
          << colorizer.longOption("signature") << " " << sig.str() << " cages "
          << found.size() << " atoms " << atoms.size();
+      if (incomplete) {
+        os << " " << colorizer.longOption("incomplete") << " " << cups.size();
+      }
       if (!guestTypes.empty()) {
         // guests (methane, THF, ions) placed in the found cages by the
         // periodic centroid of each cage's vertices
@@ -892,25 +1052,43 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
         for (const auto &c : found) {
           cages.push_back(c.vertices);
         }
-        const auto occ = site::guestOccupancy(cloud, cages, guests, guestRadius);
+        site::GuestOccupancy occ;
+        if (inside) {
+          std::vector<std::vector<int>> faces;
+          faces.reserve(found.size());
+          for (const auto &c : found) {
+            faces.push_back(c.faces);
+          }
+          occ = site::guestOccupancyInside(cloud, rings, faces, guests);
+        } else {
+          occ = site::guestOccupancy(cloud, cages, guests, guestRadius);
+        }
         os << " " << colorizer.longOption("guests") << " " << guests.size() << " occupied "
-           << occ.occupied << " multiple " << occ.multiply << " free " << occ.free;
+           << occ.occupied << " multiple " << occ.multiply << " free " << occ.free
+           << (inside ? " inside 1" : "");
+        if (!occ.occupancyHistogram.empty()) {
+          os << " " << colorizer.longOption("occ");
+          for (std::size_t k = 0; k < occ.occupancyHistogram.size(); ++k) {
+            os << " " << k << ":" << occ.occupancyHistogram[k];
+          }
+        }
       }
       os << "\n";
       return 0;
     };
     if (graphName == "seeded") {
-      auto graphs = nneigh::kNearestNeighbourPair(cloud, k, cand, typ);
+      auto graphs = knnPairOf();
       auto idxU = nneigh::neighbourListByIndex(cloud, graphs.second);
       return emit(idxU);
     }
     const auto graph = nneigh::bondGraphFromName(graphName);
     std::vector<std::vector<int>> nList;
     if (graph == nneigh::BondGraph::Cutoff) {
-      nList = nneigh::neighListO(cutoff, cloud, typ);
+      nList = nneigh::neighListO(cutoff, cloud,
+                                waterTypes.empty() ? typ : waterTypes.front());
     } else {
       const bool mutual = graph == nneigh::BondGraph::KnnMutual;
-      nList = nneigh::kNearestNeighbourList(cloud, k, cand, typ, mutual);
+      nList = knnOf(mutual);
     }
     auto idx = nneigh::neighbourListByIndex(cloud, nList);
     return emit(idx);
@@ -934,6 +1112,10 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
     ih = ic = water = 0;
     const int n = static_cast<int>(hc.size());
     for (int i = 0; i < n; ++i) {
+      if (i < cloud.nop && !isWaterType(cloud.pts[static_cast<std::size_t>(i)].type,
+                                        waterTypes)) {
+        continue;
+      }
       if (hc[static_cast<std::size_t>(i)]) {
         ++ih;
       } else if (ddc[static_cast<std::size_t>(i)]) {
@@ -955,7 +1137,7 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
   };
 
   if (graphName == "seeded") {
-    auto graphs = nneigh::kNearestNeighbourPair(cloud, k, cand, typ);
+    auto graphs = knnPairOf();
     const auto &mutual = graphs.first;
     const auto &uni = graphs.second;
     auto idxS = nneigh::neighbourListByIndex(cloud, mutual);
@@ -968,10 +1150,11 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
     const auto graph = nneigh::bondGraphFromName(graphName);
     std::vector<std::vector<int>> nList;
     if (graph == nneigh::BondGraph::Cutoff) {
-      nList = nneigh::neighListO(cutoff, cloud, typ);
+      nList = nneigh::neighListO(cutoff, cloud,
+                                waterTypes.empty() ? typ : waterTypes.front());
     } else {
       const bool mutual = graph == nneigh::BondGraph::KnnMutual;
-      nList = nneigh::kNearestNeighbourList(cloud, k, cand, typ, mutual);
+      nList = knnOf(mutual);
     }
     auto idx = nneigh::neighbourListByIndex(cloud, nList);
     auto six = sixOf(primitive::ringNetwork(idx, 6));
@@ -991,7 +1174,7 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
     }
     tallyAtoms(hc, ddc);
   }
-  os << colorizer.heading("nop") << " " << cloud.nop << " "
+  os << colorizer.heading("nop") << " " << waterNop(cloud, waterTypes) << " "
      << colorizer.longOption("graph") << " " << graphName << " "
      << iceColor("hexagonal") << " " << ih << " " << iceColor("cubic") << " "
      << ic << " " << iceColor("water") << " " << water << "\n";
@@ -1070,6 +1253,11 @@ int main(int argc, char *argv[]) {
   int hops = 2;
   std::string ionTypesFlag;
   double ionCutoff = 0.0;
+  bool insideFlag = false;
+  bool layersFlag = false;
+  bool tumLayersFlag = false;
+  bool incompleteFlag = false;
+  std::string waterTypesFlag;
   std::string subsetFlag;
   int rdfTypeI = 0;
   int rdfTypeJ = 0;
@@ -1225,7 +1413,7 @@ int main(int argc, char *argv[]) {
   parser.add(Option("--signature")
                  .argName("SPEC")
                  .help("cages: ring-size census (4:6,6:8) or a named table "
-                       "entry (sodalite|alpha|512|51262|hc|ddc)")
+                       "entry (sodalite|alpha|512|51262|51264|51268|sh|hc|ddc)")
                  .handler([&](std::string_view value) {
                    signatureSpec = std::string(value);
                  }));
@@ -1253,6 +1441,34 @@ int main(int argc, char *argv[]) {
                  .handler([&](std::string_view value) {
                    guestRadius = parseFloatingPoint<double>(value);
                  }));
+
+  parser.add(Option("--inside")
+                 .help("cages --guest-types: assign by ray-parity inside the "
+                       "fan-triangulated faces, not nearest centroid")
+                 .handler([&]() { insideFlag = true; }));
+
+  parser.add(Option("--layers")
+                 .help("chill-plus: literature I_sd reference from CHILL+ "
+                       "molecule bins (Phi_c and H/C string)")
+                 .handler([&]() { layersFlag = true; }));
+
+  parser.add(Option("--tum-layers")
+                 .help("chill-plus: TUM stacking from HC-basal and "
+                       "DDC-equatorial rings, not CHILL+ molecules")
+                 .handler([&]() { tumLayersFlag = true; }));
+
+  parser.add(Option("--water-types")
+                 .argName("T,U")
+                 .help("Neighbour graph on these LAMMPS types only (OW). "
+                       "Substrate and ions never enter the 4-NN list")
+                 .handler([&](std::string_view value) {
+                   waterTypesFlag = std::string(value);
+                 }));
+
+  parser.add(Option("--incomplete")
+                 .help("cages --signature: also report cups and incomplete "
+                       "cages on the ring graph")
+                 .handler([&]() { incompleteFlag = true; }));
 
   parser.add(Option("--colour-types")
                  .help("fingerprint: colour vertices by LAMMPS type, so species "
@@ -1299,7 +1515,7 @@ int main(int argc, char *argv[]) {
 
   parser.add(Option("--htype")
                  .argName("I")
-                 .help("Hydrogen atom type for hbonds")
+                 .help("Hydrogen atom type for hbonds and f4")
                  .handler([&](std::string_view value) {
                    htype = parseIntegral<int>(value);
                  }));
@@ -1365,7 +1581,8 @@ int main(int argc, char *argv[]) {
 
   parser.add(Positional("command")
                  .help("read | chill | chill-plus | cages | fingerprint | ions | "
-                       "rdf | cn | hbonds | pairs | density-z | domains")
+                       "f4 | steinhardt | rdf | cn | hbonds | pairs | density-z | "
+                       "domains")
                  .occurs(zeroOrOneTime)
                  .handler([&](std::string_view value) { cmd = value; }));
 
@@ -1487,6 +1704,16 @@ int main(int argc, char *argv[]) {
     std::cerr << colorizer.error("domains needs --site") << "\n";
     return 2;
   }
+  std::vector<int> waterTypes;
+  {
+    std::string tok;
+    std::istringstream in(waterTypesFlag);
+    while (std::getline(in, tok, ',')) {
+      if (!tok.empty()) {
+        waterTypes.push_back(parseIntegral<int>(tok));
+      }
+    }
+  }
   site::Kind domainKind = site::Kind::polar;
   if (cmd == "domains") {
     if (subsetFlag == "apolar" || subsetFlag == "tail") {
@@ -1515,10 +1742,11 @@ int main(int argc, char *argv[]) {
       return cmdRead(os, cloud);
     }
     if (cmd == "chill-plus" || cmd == "chill_plus") {
-      return cmdChillPlus(os, cloud, cutoff, typeI);
+      return cmdChillPlus(os, cloud, cutoff, typeI, layersFlag, tumLayersFlag,
+                          densAxis, 3.7, waterTypes);
     }
     if (cmd == "chill") {
-      return cmdChill(os, cloud, cutoff, typeI);
+      return cmdChill(os, cloud, cutoff, typeI, waterTypes);
     }
     if (cmd == "cages") {
       try {
@@ -1531,7 +1759,8 @@ int main(int argc, char *argv[]) {
           }
         }
         return cmdCages(os, cloud, cutoff, typeI, k, graph, completeFlag,
-                        signatureSpec, guestTypes, guestRadius, perAtomPath);
+                        signatureSpec, guestTypes, guestRadius, perAtomPath,
+                        insideFlag, incompleteFlag, waterTypes);
       } catch (const std::exception &e) {
         os << colorizer.error(e.what()) << "\n";
         return 2;
@@ -1556,7 +1785,14 @@ int main(int argc, char *argv[]) {
         }
       }
       return cmdIons(os, cloud, cutoff, typeI, k, completeFlag, ionTypes,
-                     ionCutoff > 0.0 ? ionCutoff : cutoff, perAtomPath);
+                     ionCutoff > 0.0 ? ionCutoff : cutoff, perAtomPath,
+                     waterTypes);
+    }
+    if (cmd == "f4") {
+      return cmdF4(os, cloud, cutoff, typeI, htype);
+    }
+    if (cmd == "steinhardt") {
+      return cmdSteinhardt(os, cloud, cutoff, typeI);
     }
     if (cmd == "rdf") {
       return cmdRdf(os, cloud, cutoff, bins, rdfTypeI, rdfTypeJ);
@@ -1586,9 +1822,11 @@ int main(int argc, char *argv[]) {
   };
 
   const bool loadAll =
-      cmd == "pairs" || cmd == "ions" || (cmd == "cn" && ionsFlag) ||
+      cmd == "pairs" || cmd == "ions" || cmd == "f4" ||
+      (cmd == "cn" && ionsFlag) ||
       ((cmd == "rdf" || cmd == "cn") && typesSet && rdfTypeI != rdfTypeJ) ||
-      (cmd == "density-z" && typeI <= 0) || cmd == "domains";
+      (cmd == "density-z" && typeI <= 0) || cmd == "domains" ||
+      !waterTypes.empty();
   const int loadType = loadAll ? -1 : typeI;
 
   if (last <= 0 || last == frame) {

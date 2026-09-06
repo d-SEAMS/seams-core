@@ -14,6 +14,7 @@
 #include <steinhardt_device.hpp>
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <cstdlib>
 #include <vector>
@@ -107,6 +108,145 @@ void atomRange(int n, int rank, int nranks, int &begin, int &end) {
   end = begin + base + (rank < rem ? 1 : 0);
 }
 
+// Host-only l=12 Ylm. Associated Legendre with the same Condon-Shortley
+// pairing as ylmAllTrig (Y_{l,m} = (-1)^m Y_{l,-m}^*). The device header
+// keeps barRe[17] and no l=12 tables.
+void ylm12Host(double sinT, double cosT, double cphi, double sphi,
+               double *out) {
+  constexpr int orderL = 12;
+  constexpr int nComp = 25;
+  constexpr double pi = 3.14159265358979323846;
+  for (int k = 0; k < nComp; k++) {
+    out[2 * k] = 0.0;
+    out[2 * k + 1] = 0.0;
+  }
+  double pmm = 1.0;
+  double fact = 1.0;
+  double pL[13];
+  for (int m = 0; m <= orderL; m++) {
+    double plm;
+    if (m == orderL) {
+      plm = pmm;
+    } else {
+      double pmm1 = cosT * (2.0 * static_cast<double>(m) + 1.0) * pmm;
+      if (m + 1 == orderL) {
+        plm = pmm1;
+      } else {
+        double plm2 = pmm;
+        double plm1 = pmm1;
+        for (int l = m + 2; l <= orderL; l++) {
+          const double pl =
+              ((2.0 * static_cast<double>(l) - 1.0) * cosT * plm1 -
+               (static_cast<double>(l + m) - 1.0) * plm2) /
+              static_cast<double>(l - m);
+          plm2 = plm1;
+          plm1 = pl;
+        }
+        plm = plm1;
+      }
+    }
+    pL[m] = plm;
+    if (m < orderL) {
+      pmm *= -fact * sinT;
+      fact += 2.0;
+    }
+  }
+  double pr[13];
+  double piIm[13];
+  pr[0] = 1.0;
+  piIm[0] = 0.0;
+  for (int k = 1; k <= orderL; k++) {
+    pr[k] = pr[k - 1] * cphi - piIm[k - 1] * sphi;
+    piIm[k] = pr[k - 1] * sphi + piIm[k - 1] * cphi;
+  }
+  for (int absM = 0; absM <= orderL; absM++) {
+    double ratio = 1.0;
+    for (int k = orderL - absM + 1; k <= orderL + absM; k++) {
+      ratio /= static_cast<double>(k);
+    }
+    const double norm =
+        std::sqrt((2.0 * orderL + 1.0) / (4.0 * pi) * ratio);
+    const double amp = norm * pL[absM];
+    const double nre = amp * pr[absM];
+    const double nim = -amp * piIm[absM];
+    const int ineg = orderL - absM;
+    out[2 * ineg] = nre;
+    out[2 * ineg + 1] = nim;
+    const double sign = (absM % 2 == 0) ? 1.0 : -1.0;
+    const int ipos = orderL + absM;
+    out[2 * ipos] = sign * amp * pr[absM];
+    out[2 * ipos + 1] = sign * amp * piIm[absM];
+  }
+}
+
+void qlmAddBond12(double dx, double dy, double dz, double *qlmInterleaved,
+                  int row, int &nUsed) {
+  const double r2 = dx * dx + dy * dy + dz * dz;
+  if (r2 == 0.0) {
+    return;
+  }
+  const double r = std::sqrt(r2);
+  const double invr = 1.0 / r;
+  double cosT = dz * invr;
+  if (cosT > 1.0) {
+    cosT = 1.0;
+  } else if (cosT < -1.0) {
+    cosT = -1.0;
+  }
+  const double rho2 = dx * dx + dy * dy;
+  double sinT = 0.0;
+  double cphi = 1.0;
+  double sphi = 0.0;
+  if (rho2 != 0.0) {
+    const double rho = std::sqrt(rho2);
+    sinT = rho * invr;
+    const double invrho = 1.0 / rho;
+    cphi = dy * invrho;
+    sphi = dx * invrho;
+  }
+  double ylm[50];
+  ylm12Host(sinT, cosT, cphi, sphi, ylm);
+  constexpr int nComp = 25;
+  for (int m = 0; m < nComp; m++) {
+    qlmInterleaved[2 * (row + m)] += ylm[2 * m];
+    qlmInterleaved[2 * (row + m) + 1] += ylm[2 * m + 1];
+  }
+  nUsed++;
+}
+
+void runPass1Host12(const NeighbourCSR &g, int begin, int end,
+                    std::vector<double> &qlm) {
+  constexpr int nComp = 25;
+#ifdef SEAMS_HAS_OPENMP
+  const bool useThreads = g.nop >= kParallelThreshold;
+#pragma omp parallel for schedule(static) if (useThreads)
+#endif
+  for (int i = begin; i < end; i++) {
+    const int row = i * nComp;
+    for (int m = 0; m < nComp; m++) {
+      qlm[static_cast<size_t>(2 * (row + m))] = 0.0;
+      qlm[static_cast<size_t>(2 * (row + m) + 1)] = 0.0;
+    }
+    const int j0 = g.offsets[static_cast<size_t>(i)];
+    const int j1 = g.offsets[static_cast<size_t>(i) + 1];
+    int nUsed = 0;
+    for (int p = j0; p < j1; p++) {
+      qlmAddBond12(g.dr[static_cast<size_t>(3 * p)],
+                   g.dr[static_cast<size_t>(3 * p + 1)],
+                   g.dr[static_cast<size_t>(3 * p + 2)], qlm.data(), row,
+                   nUsed);
+    }
+    if (nUsed == 0) {
+      continue;
+    }
+    const double inv = 1.0 / static_cast<double>(nUsed);
+    for (int m = 0; m < nComp; m++) {
+      qlm[static_cast<size_t>(2 * (row + m))] *= inv;
+      qlm[static_cast<size_t>(2 * (row + m) + 1)] *= inv;
+    }
+  }
+}
+
 #ifdef SEAMS_HAS_SPHERICART
 void runPass1Sphericart(const NeighbourCSR &g, int orderL, int begin, int end,
                         std::vector<double> &qlm) {
@@ -140,6 +280,10 @@ void runPass1Sphericart(const NeighbourCSR &g, int orderL, int begin, int end,
   std::vector<double> ylm(static_cast<size_t>(b) * nComp * 2, 0.0);
   if (seams::sphericart_ylm::ylmCartesian(orderL, cart.data(), b, ylm.data()) !=
       0) {
+    if (orderL == 12) {
+      runPass1Host12(g, begin, end, qlm);
+      return;
+    }
     for (int i = begin; i < end; i++) {
       seams::steinhardt::qlmOneAtomDr(i, orderL, g.dr.data(), g.offsets.data(),
                                       g.cols.data(), qlm.data());
@@ -177,6 +321,18 @@ void runPass1Sphericart(const NeighbourCSR &g, int orderL, int begin, int end,
 
 void runPass1(const NeighbourCSR &g, int orderL, int begin, int end,
               std::vector<double> &qlm) {
+  // l=12 is host-only. Prefer sphericart; otherwise associated Legendre.
+  // Device arrays still cap at l=8.
+  if (orderL == 12) {
+#ifdef SEAMS_HAS_SPHERICART
+    if (seams::sphericart_ylm::available()) {
+      runPass1Sphericart(g, orderL, begin, end, qlm);
+      return;
+    }
+#endif
+    runPass1Host12(g, begin, end, qlm);
+    return;
+  }
 #ifdef SEAMS_HAS_SPHERICART
   if (seams::sphericart_ylm::available()) {
     runPass1Sphericart(g, orderL, begin, end, qlm);
@@ -190,6 +346,62 @@ void runPass1(const NeighbourCSR &g, int orderL, int begin, int end,
   for (int i = begin; i < end; i++) {
     seams::steinhardt::qlmOneAtomDr(i, orderL, g.dr.data(), g.offsets.data(),
                                     g.cols.data(), qlm.data());
+  }
+}
+
+// qlOneAtom keeps barRe[17] for the device l<=8 path. l=12 uses
+// heap buffers on the host.
+void runPass2Host(const NeighbourCSR &g, int orderL, int begin, int end,
+                  const std::vector<double> &qlm, std::vector<double> &ql,
+                  std::vector<double> &qlBar) {
+  const int nComp = 2 * orderL + 1;
+  constexpr double pi = 3.14159265358979323846;
+  const double prefactor = 4.0 * pi / (2.0 * orderL + 1.0);
+#ifdef SEAMS_HAS_OPENMP
+  const bool useThreads = g.nop >= kParallelThreshold;
+#pragma omp parallel for schedule(static) if (useThreads)
+#endif
+  for (int i = begin; i < end; i++) {
+    const int row = i * nComp;
+    double sumLocal = 0.0;
+    for (int m = 0; m < nComp; m++) {
+      const double re = qlm[static_cast<size_t>(2 * (row + m))];
+      const double im = qlm[static_cast<size_t>(2 * (row + m) + 1)];
+      sumLocal += re * re + im * im;
+    }
+    ql[static_cast<size_t>(i)] = std::sqrt(prefactor * sumLocal);
+    const int j0 = g.offsets[static_cast<size_t>(i)];
+    const int j1 = g.offsets[static_cast<size_t>(i) + 1];
+    if (j0 == j1) {
+      qlBar[static_cast<size_t>(i)] = ql[static_cast<size_t>(i)];
+      continue;
+    }
+    std::vector<double> barRe(static_cast<size_t>(nComp), 0.0);
+    std::vector<double> barIm(static_cast<size_t>(nComp), 0.0);
+    for (int m = 0; m < nComp; m++) {
+      barRe[static_cast<size_t>(m)] = qlm[static_cast<size_t>(2 * (row + m))];
+      barIm[static_cast<size_t>(m)] = qlm[static_cast<size_t>(2 * (row + m) + 1)];
+    }
+    int nContrib = 1;
+    for (int p = j0; p < j1; p++) {
+      const int jatom = g.cols[static_cast<size_t>(p)];
+      const int jRow = jatom * nComp;
+      for (int m = 0; m < nComp; m++) {
+        barRe[static_cast<size_t>(m)] +=
+            qlm[static_cast<size_t>(2 * (jRow + m))];
+        barIm[static_cast<size_t>(m)] +=
+            qlm[static_cast<size_t>(2 * (jRow + m) + 1)];
+      }
+      nContrib++;
+    }
+    const double inv = 1.0 / static_cast<double>(nContrib);
+    double sumBar = 0.0;
+    for (int m = 0; m < nComp; m++) {
+      const double re = barRe[static_cast<size_t>(m)] * inv;
+      const double im = barIm[static_cast<size_t>(m)] * inv;
+      sumBar += re * re + im * im;
+    }
+    qlBar[static_cast<size_t>(i)] = std::sqrt(prefactor * sumBar);
   }
 }
 
@@ -383,7 +595,8 @@ SteinhardtQl steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double
   result.ql.assign(yCloud.nop, 0.0);
   result.qlBar.assign(yCloud.nop, 0.0);
 
-  if (orderL != 3 && orderL != 4 && orderL != 6 && orderL != 8) {
+  if (orderL != 3 && orderL != 4 && orderL != 6 && orderL != 8 &&
+      orderL != 12) {
     return result;
   }
   if (yCloud.nop <= 0) {
@@ -395,7 +608,8 @@ SteinhardtQl steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double
   std::vector<double> qlm(static_cast<size_t>(graph.nop) * nComp * 2, 0.0);
 
 #ifdef SEAMS_HAS_OFFLOAD
-  if (wantOffload()) {
+  // Device Ylm has no l=12; force the host path (sphericart or Legendre).
+  if (orderL != 12 && wantOffload()) {
     runOffload(graph, orderL, qlm, result.ql, result.qlBar);
     return result;
   }
@@ -416,6 +630,7 @@ SteinhardtQl steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double
   int end = graph.nop;
   atomRange(graph.nop, rank, nranks, begin, end);
   runPass1(graph, orderL, begin, end, qlm);
+  const bool hostPass2 = orderL == 12;
 
 #ifdef SEAMS_HAS_MPI
   if (initialized && nranks > 1) {
@@ -424,7 +639,11 @@ SteinhardtQl steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double
     allgathervDoubles(qlm, graph.nop, 2 * nComp, rank, nranks);
   }
 #endif
-  runPass2(graph, orderL, begin, end, qlm, result.ql, result.qlBar);
+  if (hostPass2) {
+    runPass2Host(graph, orderL, begin, end, qlm, result.ql, result.qlBar);
+  } else {
+    runPass2(graph, orderL, begin, end, qlm, result.ql, result.qlBar);
+  }
 #ifdef SEAMS_HAS_MPI
   if (initialized && nranks > 1) {
     allgathervDoubles(result.ql, graph.nop, 1, rank, nranks);

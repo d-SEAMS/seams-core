@@ -12,6 +12,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace {
 
@@ -231,6 +232,7 @@ FrameFingerprint fingerprint(const Rows &rows, int hops, int maxRingSize,
     wl[static_cast<std::size_t>(i)] =
         atoms.empty() ? 0 : wlHash(adjacency, 0, hops + 2, localColours);
   }
+  out.wlAtom = wl;
   std::sort(wl.begin(), wl.end());
   std::uint64_t h = mix(kOffset, static_cast<std::uint64_t>(n));
   for (std::uint64_t v : wl) {
@@ -248,6 +250,98 @@ FrameFingerprint fingerprint(const Rows &rows, int hops, int maxRingSize,
     h = mix(h, static_cast<std::uint64_t>(out.ringCensus[static_cast<std::size_t>(s)]));
   }
   out.key = hex(h);
+  return out;
+}
+
+namespace {
+
+std::uint64_t atomWl(const Rows &rows, int atom, int hops,
+                     const std::vector<int> &colours) {
+  const std::vector<int> atoms = hopNeighbourhood(rows, atom, hops);
+  if (atoms.empty()) {
+    return 0;
+  }
+  std::unordered_map<int, int> local;
+  for (std::size_t k = 0; k < atoms.size(); k++) {
+    local[atoms[k]] = static_cast<int>(k);
+  }
+  std::vector<std::vector<int>> adjacency(atoms.size());
+  for (std::size_t k = 0; k < atoms.size(); k++) {
+    const auto &row = rows[static_cast<std::size_t>(atoms[k])];
+    for (std::size_t m = 1; m < row.size(); m++) {
+      const auto it = local.find(row[m]);
+      if (it != local.end() && it->second != static_cast<int>(k)) {
+        adjacency[k].push_back(it->second);
+      }
+    }
+    std::sort(adjacency[k].begin(), adjacency[k].end());
+  }
+  std::vector<int> localColours;
+  if (colours.size() == rows.size()) {
+    for (int a : atoms) {
+      localColours.push_back(colours[static_cast<std::size_t>(a)]);
+    }
+  }
+  return wlHash(adjacency, 0, hops + 2, localColours);
+}
+
+void rebuildFrameKey(FrameFingerprint &fp, int maxRingSize) {
+  std::vector<std::uint64_t> wl = fp.wlAtom;
+  std::sort(wl.begin(), wl.end());
+  std::uint64_t h = mix(kOffset, static_cast<std::uint64_t>(fp.atomKeys.size()));
+  for (std::uint64_t v : wl) {
+    h = mix(h, v);
+  }
+  for (int s = 0; s <= maxRingSize && s < static_cast<int>(fp.ringCensus.size());
+       s++) {
+    h = mix(h, static_cast<std::uint64_t>(fp.ringCensus[static_cast<std::size_t>(s)]));
+  }
+  fp.key = hex(h);
+}
+
+} // namespace
+
+FrameFingerprint incrementalFingerprint(const FrameFingerprint &prev,
+                                        const Rows &rows,
+                                        const std::vector<int> &dirtyAtoms,
+                                        int hops, int maxRingSize,
+                                        const std::vector<int> &colours) {
+  const int n = static_cast<int>(rows.size());
+  if (n == 0 || static_cast<int>(prev.atomKeys.size()) != n ||
+      prev.hops != hops || prev.wlAtom.size() != rows.size()) {
+    return fingerprint(rows, hops, maxRingSize, colours);
+  }
+  std::unordered_set<int> dirty;
+  for (int a : dirtyAtoms) {
+    if (a < 0 || a >= n) {
+      continue;
+    }
+    for (int b : hopNeighbourhood(rows, a, hops)) {
+      dirty.insert(b);
+    }
+  }
+  FrameFingerprint out = prev;
+  out.hops = hops;
+  out.coloured = colours.size() == rows.size() && !rows.empty();
+  out.classes.clear();
+  for (int i : dirty) {
+    LocalKey lk = localKey(rows, i, hops, colours);
+    out.method = lk.method;
+    out.atomKeys[static_cast<std::size_t>(i)] = std::move(lk.key);
+    out.wlAtom[static_cast<std::size_t>(i)] = atomWl(rows, i, hops, colours);
+  }
+  for (const auto &k : out.atomKeys) {
+    out.classes[k] += 1;
+  }
+  out.ringCensus.assign(static_cast<std::size_t>(maxRingSize) + 1, 0);
+  if (n > 0 && maxRingSize >= 3) {
+    for (const auto &ring : primitive::ringNetwork(rows, maxRingSize)) {
+      if (ring.size() <= static_cast<std::size_t>(maxRingSize)) {
+        out.ringCensus[ring.size()] += 1;
+      }
+    }
+  }
+  rebuildFrameKey(out, maxRingSize);
   return out;
 }
 

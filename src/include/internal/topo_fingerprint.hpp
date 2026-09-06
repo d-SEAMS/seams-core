@@ -50,6 +50,7 @@ struct FrameFingerprint {
   std::vector<std::string> atomKeys;  ///< one local key per atom
   std::map<std::string, int> classes; ///< local key -> number of atoms carrying it
   std::vector<int> ringCensus;        ///< ringCensus[s] = primitive rings of size s
+  std::vector<std::uint64_t> wlAtom;  ///< per-atom WL hash used in the frame key
   int hops = 0;
   bool coloured = false;              ///< keys carry vertex colours
 };
@@ -75,6 +76,15 @@ LocalKey localKey(const Rows &rows, int atom, int hops,
 /// `maxRingSize`, and the frame key. `colours` as in localKey.
 FrameFingerprint fingerprint(const Rows &rows, int hops = 2, int maxRingSize = 7,
                              const std::vector<int> &colours = {});
+
+/// Recompute local keys only for the hop-ball of `dirtyAtoms` and keep
+/// the rest of `prev`. The ring census is taken on `rows`. A size or
+/// hop mismatch falls back to a full fingerprint.
+FrameFingerprint incrementalFingerprint(const FrameFingerprint &prev,
+                                        const Rows &rows,
+                                        const std::vector<int> &dirtyAtoms,
+                                        int hops, int maxRingSize = 7,
+                                        const std::vector<int> &colours = {});
 
 /// Hex string of a 64-bit hash.
 std::string hex(std::uint64_t value);

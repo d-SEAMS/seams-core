@@ -20,7 +20,7 @@ seams cages sodalite.lammpstrj --signature sodalite --graph cutoff
 
 Add `--graph knn` / `knn-union` / `seeded` when the bond graph is not
 the cutoff list. `--signature` takes a ring-size census (`4:6,6:8`) or
-a named table entry (`sodalite|alpha|512|51262|hc|ddc`).
+a named table entry (`sodalite|alpha|512|51262|51264|51268|sh|hc|ddc`).
 
 ## Python
 

@@ -13,7 +13,14 @@
 //-----------------------------------------------------------------------------------
 
 #include <order_parameter.hpp>
+#include <generic.hpp>
 #include <neighbours.hpp>
+
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <limits>
+#include <unordered_map>
 
 /**
  * @details The average height of prism blocks remains relatively constant. We
@@ -174,4 +181,365 @@ std::vector<double> topoparam::projAreaSingleRing(
   areaYZ = std::abs(areaYZ);
 
   return {areaXY, areaXZ, areaYZ};
+}
+
+namespace {
+
+std::array<double, 3> cross3(const std::array<double, 3> &a,
+                             const std::array<double, 3> &b) {
+  return {a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2],
+          a[0] * b[1] - a[1] * b[0]};
+}
+
+double dot3(const std::array<double, 3> &a, const std::array<double, 3> &b) {
+  return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+double norm2(const std::array<double, 3> &a) { return dot3(a, a); }
+
+// Dihedral of H1-O1-O2-H2 from MIC displacements O1-H1, O2-O1, H2-O2.
+bool dihedralCos3(const std::array<double, 3> &b1, const std::array<double, 3> &b2,
+                  const std::array<double, 3> &b3, double &out) {
+  const auto n1 = cross3(b1, b2);
+  const auto n2 = cross3(b2, b3);
+  const double n1s = norm2(n1);
+  const double n2s = norm2(n2);
+  const double b2s = norm2(b2);
+  if (n1s == 0.0 || n2s == 0.0 || b2s == 0.0) {
+    return false;
+  }
+  const auto n1xn2 = cross3(n1, n2);
+  const double phi = std::atan2(dot3(n1xn2, b2) / std::sqrt(b2s), dot3(n1, n2));
+  out = std::cos(3.0 * phi);
+  return true;
+}
+
+int outerHydrogen(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                  const std::vector<int> &hs, int otherO) {
+  int best = -1;
+  double bestD2 = -1.0;
+  for (int h : hs) {
+    const auto dr = gen::relDist(yCloud, h, otherO);
+    const double d2 = norm2(dr);
+    if (d2 > bestD2) {
+      bestD2 = d2;
+      best = h;
+    }
+  }
+  return best;
+}
+
+} // namespace
+
+std::vector<double>
+topoparam::rodgerF4(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                    const std::vector<std::vector<int>> &nList, int oxygenType,
+                    int hydrogenType) {
+  std::vector<double> out(static_cast<std::size_t>(yCloud.nop),
+                          std::numeric_limits<double>::quiet_NaN());
+  if (yCloud.nop <= 0) {
+    return out;
+  }
+  std::unordered_map<int, std::vector<int>> hydrogens;
+  for (int i = 0; i < yCloud.nop; i++) {
+    if (yCloud.pts[static_cast<std::size_t>(i)].type == hydrogenType) {
+      hydrogens[yCloud.pts[static_cast<std::size_t>(i)].molID].push_back(i);
+    }
+  }
+  for (int i = 0; i < yCloud.nop; i++) {
+    const auto &pi = yCloud.pts[static_cast<std::size_t>(i)];
+    if (pi.type != oxygenType) {
+      continue;
+    }
+    const auto hit = hydrogens.find(pi.molID);
+    if (hit == hydrogens.end() || hit->second.empty()) {
+      continue;
+    }
+    if (static_cast<std::size_t>(i) >= nList.size() ||
+        nList[static_cast<std::size_t>(i)].size() < 2) {
+      continue;
+    }
+    double acc = 0.0;
+    int nPair = 0;
+    for (std::size_t m = 1; m < nList[static_cast<std::size_t>(i)].size(); m++) {
+      const int jid = nList[static_cast<std::size_t>(i)][m];
+      const auto it = yCloud.idIndexMap.find(jid);
+      if (it == yCloud.idIndexMap.end()) {
+        continue;
+      }
+      const int j = it->second;
+      if (j < 0 || j >= yCloud.nop || j == i) {
+        continue;
+      }
+      const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
+      if (pj.type != oxygenType) {
+        continue;
+      }
+      const auto hjt = hydrogens.find(pj.molID);
+      if (hjt == hydrogens.end() || hjt->second.empty()) {
+        continue;
+      }
+      const int h1 = outerHydrogen(yCloud, hit->second, j);
+      const int h2 = outerHydrogen(yCloud, hjt->second, i);
+      if (h1 < 0 || h2 < 0) {
+        continue;
+      }
+      const auto o1h1 = gen::relDist(yCloud, i, h1);
+      const auto o2o1 = gen::relDist(yCloud, j, i);
+      const auto h2o2 = gen::relDist(yCloud, h2, j);
+      double c3 = 0.0;
+      if (dihedralCos3(o1h1, o2o1, h2o2, c3)) {
+        acc += c3;
+        ++nPair;
+      }
+    }
+    if (nPair > 0) {
+      out[static_cast<std::size_t>(i)] = acc / static_cast<double>(nPair);
+    }
+  }
+  return out;
+}
+
+double topoparam::meanFinite(const std::vector<double> &values) {
+  double acc = 0.0;
+  int n = 0;
+  for (double v : values) {
+    if (std::isfinite(v)) {
+      acc += v;
+      ++n;
+    }
+  }
+  if (n == 0) {
+    return std::numeric_limits<double>::quiet_NaN();
+  }
+  return acc / static_cast<double>(n);
+}
+
+namespace {
+
+std::unordered_map<int, std::array<double, 3>>
+hhAxes(const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+       int oxygenType, int hydrogenType) {
+  std::unordered_map<int, std::vector<std::array<double, 3>>> hs;
+  std::unordered_map<int, std::array<double, 3>> out;
+  for (const auto &p : cloud.pts) {
+    if (p.type != hydrogenType) {
+      continue;
+    }
+    hs[p.molID].push_back({p.x, p.y, p.z});
+  }
+  for (const auto &p : cloud.pts) {
+    if (p.type != oxygenType) {
+      continue;
+    }
+    const auto it = hs.find(p.molID);
+    if (it == hs.end() || it->second.size() < 2) {
+      continue;
+    }
+    std::array<double, 3> v = {it->second[0][0] - it->second[1][0],
+                               it->second[0][1] - it->second[1][1],
+                               it->second[0][2] - it->second[1][2]};
+    const double n =
+        std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    if (n <= 0.0) {
+      continue;
+    }
+    out[p.molID] = {v[0] / n, v[1] / n, v[2] / n};
+  }
+  return out;
+}
+
+} // namespace
+
+double topoparam::jumpRotorTau90(
+    const molSys::PointCloud<molSys::Point<double>, double> &frame0,
+    const molSys::PointCloud<molSys::Point<double>, double> &frame1, double dt,
+    int oxygenType, int hydrogenType) {
+  if (!(dt > 0.0)) {
+    return std::numeric_limits<double>::quiet_NaN();
+  }
+  const auto a0 = hhAxes(frame0, oxygenType, hydrogenType);
+  const auto a1 = hhAxes(frame1, oxygenType, hydrogenType);
+  for (const auto &kv : a0) {
+    const auto it = a1.find(kv.first);
+    if (it == a1.end()) {
+      continue;
+    }
+    const double dot = kv.second[0] * it->second[0] +
+                       kv.second[1] * it->second[1] +
+                       kv.second[2] * it->second[2];
+    if (dot <= 0.0) {
+      return dt;
+    }
+  }
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
+topoparam::LayerStack
+topoparam::layerCubicity(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int axis,
+    double layerWidth) {
+  LayerStack out;
+  if (yCloud.nop <= 0 || axis < 0 || axis > 2 || yCloud.box.size() < 3) {
+    return out;
+  }
+  const double L = yCloud.box[static_cast<std::size_t>(axis)];
+  if (!(L > 0.0) || !(layerWidth > 0.0)) {
+    return out;
+  }
+  const int nLayers = std::max(1, static_cast<int>(std::lround(L / layerWidth)));
+  const double w = L / static_cast<double>(nLayers);
+  out.cubicPerLayer.assign(static_cast<std::size_t>(nLayers), 0);
+  out.hexPerLayer.assign(static_cast<std::size_t>(nLayers), 0);
+  int nC = 0;
+  int nH = 0;
+  const double lo = yCloud.boxLow.size() > static_cast<std::size_t>(axis)
+                        ? yCloud.boxLow[static_cast<std::size_t>(axis)]
+                        : 0.0;
+  for (int i = 0; i < yCloud.nop; i++) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+    const bool cubic = p.iceType == molSys::atom_state_type::cubic ||
+                       p.iceType == molSys::atom_state_type::reCubic;
+    const bool hex = p.iceType == molSys::atom_state_type::hexagonal ||
+                     p.iceType == molSys::atom_state_type::reHex;
+    if (!cubic && !hex) {
+      continue;
+    }
+    const double coord = axis == 0 ? p.x : (axis == 1 ? p.y : p.z);
+    double u = coord - lo;
+    u -= L * std::floor(u / L);
+    if (u < 0.0) {
+      u += L;
+    }
+    if (u >= L) {
+      u = 0.0;
+    }
+    int layer = static_cast<int>(std::floor(u / w));
+    if (layer < 0) {
+      layer = 0;
+    }
+    if (layer >= nLayers) {
+      layer = nLayers - 1;
+    }
+    if (cubic) {
+      ++out.cubicPerLayer[static_cast<std::size_t>(layer)];
+      ++nC;
+    } else {
+      ++out.hexPerLayer[static_cast<std::size_t>(layer)];
+      ++nH;
+    }
+  }
+  out.phiC = (nC + nH) > 0
+                 ? static_cast<double>(nC) / static_cast<double>(nC + nH)
+                 : 0.0;
+  out.sequence.resize(static_cast<std::size_t>(nLayers), '.');
+  for (int k = 0; k < nLayers; k++) {
+    const int c = out.cubicPerLayer[static_cast<std::size_t>(k)];
+    const int h = out.hexPerLayer[static_cast<std::size_t>(k)];
+    if (c == 0 && h == 0) {
+      out.sequence[static_cast<std::size_t>(k)] = '.';
+    } else if (c > h) {
+      out.sequence[static_cast<std::size_t>(k)] = 'C';
+    } else if (h > c) {
+      out.sequence[static_cast<std::size_t>(k)] = 'H';
+    } else {
+      out.sequence[static_cast<std::size_t>(k)] = 'M';
+    }
+  }
+  return out;
+}
+
+topoparam::LayerStack
+topoparam::tumLayerStack(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<std::vector<int>> &rings, const std::vector<bool> &basal,
+    const std::vector<bool> &equatorial, int axis, double layerWidth) {
+  LayerStack out;
+  if (yCloud.nop <= 0 || axis < 0 || axis > 2 || yCloud.box.size() < 3) {
+    return out;
+  }
+  const double L = yCloud.box[static_cast<std::size_t>(axis)];
+  if (!(L > 0.0) || !(layerWidth > 0.0)) {
+    return out;
+  }
+  const int nLayers = std::max(1, static_cast<int>(std::lround(L / layerWidth)));
+  const double w = L / static_cast<double>(nLayers);
+  out.cubicPerLayer.assign(static_cast<std::size_t>(nLayers), 0);
+  out.hexPerLayer.assign(static_cast<std::size_t>(nLayers), 0);
+  const double lo = yCloud.boxLow.size() > static_cast<std::size_t>(axis)
+                        ? yCloud.boxLow[static_cast<std::size_t>(axis)]
+                        : 0.0;
+  int nBasal = 0;
+  int nEq = 0;
+  const std::size_t nR = rings.size();
+  for (std::size_t r = 0; r < nR; r++) {
+    if (rings[r].size() != 6) {
+      continue;
+    }
+    const bool h = r < basal.size() && basal[r];
+    const bool c = r < equatorial.size() && equatorial[r];
+    if (!h && !c) {
+      continue;
+    }
+    const int a0 = rings[r][0];
+    if (a0 < 0 || a0 >= yCloud.nop) {
+      continue;
+    }
+    // Centroid is z0 + mean MIC displacement. Averaging unwrapped
+    // z0+dr values does not preserve a planar ring at k * w.
+    const double z0 = axis == 0 ? yCloud.pts[static_cast<std::size_t>(a0)].x
+                                : (axis == 1 ? yCloud.pts[static_cast<std::size_t>(a0)].y
+                                             : yCloud.pts[static_cast<std::size_t>(a0)].z);
+    double disp = 0.0;
+    for (std::size_t k = 1; k < rings[r].size(); k++) {
+      const int a = rings[r][k];
+      if (a < 0 || a >= yCloud.nop) {
+        continue;
+      }
+      const auto dr = gen::relDist(yCloud, a, a0);
+      disp += axis == 0 ? dr[0] : (axis == 1 ? dr[1] : dr[2]);
+    }
+    const double acc =
+        z0 + disp / static_cast<double>(rings[r].size());
+    double u = acc - lo;
+    u -= L * std::floor(u / L);
+    if (u < 0.0) {
+      u += L;
+    }
+    if (u >= L) {
+      u = 0.0;
+    }
+    int layer = static_cast<int>(std::floor(u / w));
+    if (layer < 0) {
+      layer = 0;
+    }
+    if (layer >= nLayers) {
+      layer = nLayers - 1;
+    }
+    if (c) {
+      ++out.cubicPerLayer[static_cast<std::size_t>(layer)];
+      ++nEq;
+    } else {
+      ++out.hexPerLayer[static_cast<std::size_t>(layer)];
+      ++nBasal;
+    }
+  }
+  out.phiC = (nBasal + nEq) > 0
+                 ? static_cast<double>(nEq) / static_cast<double>(nBasal + nEq)
+                 : 0.0;
+  out.sequence.resize(static_cast<std::size_t>(nLayers), '.');
+  for (int k = 0; k < nLayers; k++) {
+    const int c = out.cubicPerLayer[static_cast<std::size_t>(k)];
+    const int h = out.hexPerLayer[static_cast<std::size_t>(k)];
+    if (c == 0 && h == 0) {
+      out.sequence[static_cast<std::size_t>(k)] = '.';
+    } else if (c > h) {
+      out.sequence[static_cast<std::size_t>(k)] = 'C';
+    } else if (h > c) {
+      out.sequence[static_cast<std::size_t>(k)] = 'H';
+    } else {
+      out.sequence[static_cast<std::size_t>(k)] = 'M';
+    }
+  }
+  return out;
 }
