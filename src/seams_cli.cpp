@@ -1143,10 +1143,27 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
     const auto &uni = graphs.second;
     auto idxS = nneigh::neighbourListByIndex(cloud, mutual);
     auto idxU = nneigh::neighbourListByIndex(cloud, uni);
-    auto sixS = sixOf(primitive::ringNetwork(idxS, 6));
-    auto sixU = sixOf(primitive::ringNetwork(idxU, 6));
-    const auto aff = ring::seededCageAffiliation(sixS, idxS, sixU, idxU, complete);
-    tallyAtoms(aff.hc, aff.ddc);
+    if (tum::preferOffload()) {
+      // Hop-bound cages on the union 4-NN graph. The dual-graph seeded
+      // affiliation stays on the host when SEAMS_OFFLOAD is unset or 0.
+      const auto counts = tum::cageCounts(idxU);
+      std::vector<bool> hc(static_cast<std::size_t>(cloud.nop), false);
+      std::vector<bool> ddc(static_cast<std::size_t>(cloud.nop), false);
+      const int n = std::min(cloud.nop, static_cast<int>(counts.atomHc.size()));
+      for (int i = 0; i < n; ++i) {
+        hc[static_cast<std::size_t>(i)] =
+            counts.atomHc[static_cast<std::size_t>(i)] != 0;
+        ddc[static_cast<std::size_t>(i)] =
+            counts.atomDdc[static_cast<std::size_t>(i)] != 0;
+      }
+      tallyAtoms(hc, ddc);
+    } else {
+      auto sixS = sixOf(primitive::ringNetwork(idxS, 6));
+      auto sixU = sixOf(primitive::ringNetwork(idxU, 6));
+      const auto aff =
+          ring::seededCageAffiliation(sixS, idxS, sixU, idxU, complete);
+      tallyAtoms(aff.hc, aff.ddc);
+    }
   } else {
     const auto graph = nneigh::bondGraphFromName(graphName);
     std::vector<std::vector<int>> nList;

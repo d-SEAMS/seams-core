@@ -18,8 +18,9 @@
  *  ringNetwork plus cageAffiliation. Any other SEAMS_OFFLOAD value
  *  selects the hop-bound six-ring enumerator and the same affiliation
  *  predicates, on the OpenMP target device when the build provides one
- *  and omp_get_num_devices() > 0, otherwise on the host. CHILL+ stays
- *  on the host. Steinhardt offload is unchanged.
+ *  and omp_get_num_devices() > 0, otherwise on the host. The seeded
+ *  CLI path uses that enumerator on the union four-nearest graph.
+ *  CHILL+ stays on the host. Steinhardt offload is unchanged.
  */
 
 namespace tum {
