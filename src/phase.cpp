@@ -226,7 +226,10 @@ phase::IceXXIHit phase::iceXXILibrary(
     hit.nSix += static_cast<int>(r.size() == 6);
   }
   const bool tetra = hit.meanCoord >= 3.5 && hit.meanCoord <= 4.5;
-  hit.match = nOk && aOk && cOk && rhoOk && tetra && hit.nSix > 0;
+  // The Lee cell has ~112 primitive six-rings on the 4-NN graph.
+  // A cubic packing of the same box can form one accidental six-ring.
+  const bool ringsOk = hit.nSix >= 50;
+  hit.match = nOk && aOk && cOk && rhoOk && tetra && ringsOk;
   return hit;
 }
 
