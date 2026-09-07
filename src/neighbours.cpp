@@ -357,7 +357,11 @@ bool nneigh::cellListRowsThreaded(
   // nearest image of every neighbour because every axis has at least
   // three cells of width rcutoff
 #ifdef SEAMS_HAS_OPENMP
+  // nvc++ -mp=gpu (SEAMS_HAS_OFFLOAD) SIGSEGVs this host parallel-for
+  // in libnvomp (__kmpc_fork_call).
+#if !defined(SEAMS_HAS_OFFLOAD)
 #pragma omp parallel for schedule(dynamic, 256) if (n >= 4096)
+#endif
 #endif
   for (std::int64_t kk = 0; kk < static_cast<std::int64_t>(n); kk++) {
     const std::size_t k = static_cast<std::size_t>(kk);
@@ -755,7 +759,8 @@ std::vector<std::vector<int>> nneigh::neighbourListByIndex(
   std::vector<std::vector<int>> indexNlist(nList.size());
 
   // rows are independent and the map is only read, so each row is one task
-#ifdef SEAMS_HAS_OPENMP
+  // nvc++ -mp=gpu SIGSEGVs this host parallel-for in libnvomp
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
 #pragma omp parallel for schedule(static) if (nList.size() >= 4096)
 #endif
   for (std::int64_t ii = 0; ii < static_cast<std::int64_t>(nList.size()); ii++) {
