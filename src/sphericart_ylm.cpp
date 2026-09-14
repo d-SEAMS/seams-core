@@ -37,10 +37,7 @@ int ylmCartesian(int orderL, const double *xyz, int nVec, double *ylmOut) {
     return 1;
   }
   const int nComp = 2 * orderL + 1;
-  std::vector<double> cart(static_cast<size_t>(nVec) * 3);
-  for (int i = 0; i < nVec * 3; i++) {
-    cart[static_cast<size_t>(i)] = xyz[i];
-  }
+  std::vector<double> cart(xyz, xyz + static_cast<size_t>(nVec) * 3);
   static sphericart::SphericalHarmonics<double> calc3(3);
   static sphericart::SphericalHarmonics<double> calc4(4);
   static sphericart::SphericalHarmonics<double> calc6(6);

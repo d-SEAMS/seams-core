@@ -376,29 +376,28 @@ void runPass2Host(const NeighbourCSR &g, int orderL, int begin, int end,
       qlBar[static_cast<size_t>(i)] = ql[static_cast<size_t>(i)];
       continue;
     }
-    std::vector<double> barRe(static_cast<size_t>(nComp), 0.0);
-    std::vector<double> barIm(static_cast<size_t>(nComp), 0.0);
+    // l<=12 so nComp<=25; stack, not a heap vector per atom
+    double barRe[25] = {};
+    double barIm[25] = {};
     for (int m = 0; m < nComp; m++) {
-      barRe[static_cast<size_t>(m)] = qlm[static_cast<size_t>(2 * (row + m))];
-      barIm[static_cast<size_t>(m)] = qlm[static_cast<size_t>(2 * (row + m) + 1)];
+      barRe[m] = qlm[static_cast<size_t>(2 * (row + m))];
+      barIm[m] = qlm[static_cast<size_t>(2 * (row + m) + 1)];
     }
     int nContrib = 1;
     for (int p = j0; p < j1; p++) {
       const int jatom = g.cols[static_cast<size_t>(p)];
       const int jRow = jatom * nComp;
       for (int m = 0; m < nComp; m++) {
-        barRe[static_cast<size_t>(m)] +=
-            qlm[static_cast<size_t>(2 * (jRow + m))];
-        barIm[static_cast<size_t>(m)] +=
-            qlm[static_cast<size_t>(2 * (jRow + m) + 1)];
+        barRe[m] += qlm[static_cast<size_t>(2 * (jRow + m))];
+        barIm[m] += qlm[static_cast<size_t>(2 * (jRow + m) + 1)];
       }
       nContrib++;
     }
     const double inv = 1.0 / static_cast<double>(nContrib);
     double sumBar = 0.0;
     for (int m = 0; m < nComp; m++) {
-      const double re = barRe[static_cast<size_t>(m)] * inv;
-      const double im = barIm[static_cast<size_t>(m)] * inv;
+      const double re = barRe[m] * inv;
+      const double im = barIm[m] * inv;
       sumBar += re * re + im * im;
     }
     qlBar[static_cast<size_t>(i)] = std::sqrt(prefactor * sumBar);

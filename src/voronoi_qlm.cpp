@@ -38,7 +38,9 @@ using Vec3 = std::array<double, 3>;
  * @return The facet area; zero when the candidates close the facet off.
  */
 double facetArea(size_t target, const std::vector<Vec3> &disp,
-                 double halfExtent, double &maxVertexDistSq) {
+                 double halfExtent, double &maxVertexDistSq,
+                 std::vector<std::array<double, 2>> &poly,
+                 std::vector<std::array<double, 2>> &next) {
   const Vec3 &d = disp[target];
   const double r = std::sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
   if (r <= 0.0) {
@@ -61,13 +63,14 @@ double facetArea(size_t target, const std::vector<Vec3> &disp,
                    u[0] * e1[1] - u[1] * e1[0]};
 
   // Starting polygon: a large square about the plane's foot point (r/2) u
-  std::vector<std::array<double, 2>> poly = {{-halfExtent, -halfExtent},
-                                             {halfExtent, -halfExtent},
-                                             {halfExtent, halfExtent},
-                                             {-halfExtent, halfExtent}};
+  poly.clear();
+  poly.push_back({-halfExtent, -halfExtent});
+  poly.push_back({halfExtent, -halfExtent});
+  poly.push_back({halfExtent, halfExtent});
+  poly.push_back({-halfExtent, halfExtent});
   const double h = 0.5 * r;
 
-  std::vector<std::array<double, 2>> next;
+  next.clear();
   for (size_t k = 0; k < disp.size(); k++) {
     if (k == target || poly.empty()) {
       continue;
@@ -132,6 +135,10 @@ std::vector<chill::VoronoiWeights> chill::voronoiFacetWeights(
   // Growth schedule for cells failing the exactness certificate; 1.5^6 gives
   // an order of magnitude before the honest certified=false verdict
   constexpr int kMaxEnlarge = 6;
+  std::vector<std::array<double, 2>> poly;
+  std::vector<std::array<double, 2>> next;
+  poly.reserve(32);
+  next.reserve(32);
 
   for (int i = 0; i < yCloud.nop; i++) {
     double cutoff = candidateCutoff;
@@ -155,7 +162,7 @@ std::vector<chill::VoronoiWeights> chill::voronoiFacetWeights(
       double maxVertexDistSq = 0.0;
       std::vector<double> areas(disp.size(), 0.0);
       for (size_t t = 0; t < disp.size(); t++) {
-        areas[t] = facetArea(t, disp, cutoff, maxVertexDistSq);
+        areas[t] = facetArea(t, disp, cutoff, maxVertexDistSq, poly, next);
         total += areas[t];
       }
 
