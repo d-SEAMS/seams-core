@@ -10,13 +10,16 @@ if [[ ! -d "$SRC/.git" ]]; then
     https://github.com/lammps/lammps.git "$SRC"
 fi
 cp -f "$HERE/compute_dseams.cpp" "$HERE/compute_dseams.h" "$SRC/src/"
+SPH=${SPHERICART_LIB:-$HOME/.local/lib/python3.12/site-packages/sphericart/lib}
 cmake -S "$SRC/cmake" -B "$SRC/build-dseams" \
   -D CMAKE_BUILD_TYPE=Release \
   -D BUILD_MPI=off \
   -D BUILD_SHARED_LIBS=off \
   -D PKG_MOLECULE=off \
+  -D CMAKE_CXX_COMPILER_WORKS=TRUE \
+  -D CMAKE_C_COMPILER_WORKS=TRUE \
   -D CMAKE_CXX_FLAGS="-I${PREFIX}/include/internal -I${PREFIX}/include" \
-  -D CMAKE_EXE_LINKER_FLAGS="-L${PREFIX}/lib -L${PREFIX}/lib64 -Wl,-rpath,${PREFIX}/lib -Wl,-rpath,${PREFIX}/lib64 -lyodaLib"
+  -D CMAKE_EXE_LINKER_FLAGS="-L${PREFIX}/lib -L${PREFIX}/lib64 -L${SPH} -Wl,-rpath,${PREFIX}/lib -Wl,-rpath,${SPH} -lyodaLib -lsphericart -lpthread -lm"
 cmake --build "$SRC/build-dseams" -j"$(nproc)" --target lmp
 LMP="$SRC/build-dseams/lmp"
 test -x "$LMP"
