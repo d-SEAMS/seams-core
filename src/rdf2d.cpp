@@ -15,6 +15,8 @@
 #include <neighbours.hpp>
 #include <rdf2d.hpp>
 
+#include <algorithm>
+
 #ifdef SEAMS_HAS_VESIN
 #include <vesin.h>
 #endif
@@ -133,7 +135,15 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   histogram.resize(nbin);
 
 #ifdef SEAMS_HAS_VESIN
-  if (yCloud.nop > 0 && yCloud.box.size() >= 3) {
+  // vesin full=true returns every periodic image inside cutoff.
+  // sampleRDF_AA is defined as one MIC pair (see the brute loop
+  // below). Images past L/2 are extra counts. Use vesin only when
+  // cutoff cannot see a second image.
+  double halfMin = 0.0;
+  if (yCloud.box.size() >= 3) {
+    halfMin = 0.5 * std::min({yCloud.box[0], yCloud.box[1], yCloud.box[2]});
+  }
+  if (yCloud.nop > 0 && yCloud.box.size() >= 3 && cutoff <= halfMin) {
     std::vector<std::array<double, 3>> positions(
         static_cast<size_t>(yCloud.nop));
     for (int i = 0; i < yCloud.nop; i++) {
