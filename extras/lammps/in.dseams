@@ -1,7 +1,7 @@
 units real
 atom_style atomic
 boundary p p p
-plugin load compute_dseams.so
+plugin load ./compute_dseams.so
 read_data water.data
 mass 1 18.015
 pair_style zero 4.0

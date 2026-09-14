@@ -9,8 +9,9 @@ PREFIX="${3:?seams prefix with include/internal and lib/libyodaLib.so}"
 OUT="$HERE/compute_dseams.so"
 SPH=${SPHERICART_LIB:-$HOME/.local/lib/python3.12/site-packages/sphericart/lib}
 CXX=${CXX:-c++}
+MPI_INC=${MPI_INC:-}
 "$CXX" -shared -fPIC -std=c++17 \
-  -I"$LMPSRC" -I"$PREFIX/include/internal" -I"$PREFIX/include" \
+  -I"$LMPSRC" -I"$PREFIX/include/internal" -I"$PREFIX/include" ${MPI_INC:+-I"$MPI_INC"} \
   "$HERE/compute_dseams.cpp" "$HERE/plugin_dseams.cpp" \
   -L"$PREFIX/lib" -L"$LMPLIB" -L"$SPH" \
   -Wl,-rpath,"$PREFIX/lib" -Wl,-rpath,"$LMPLIB" -Wl,-rpath,"$SPH" \
