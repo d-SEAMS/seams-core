@@ -33,6 +33,7 @@ molSys::PointCloud<molSys::Point<double>, double> molSys::clearPointCloud(
   tempBox.swap(yCloud.box);
   tempBox1.swap(yCloud.boxLow);
   yCloud.idIndexMap.clear();
+  yCloud.nop = 0;
 
   return yCloud;
 }

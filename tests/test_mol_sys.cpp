@@ -65,6 +65,7 @@ TEST_CASE("clearPointCloud empties all vectors", "[mol_sys]") {
   REQUIRE(cloud.box.empty());
   REQUIRE(cloud.boxLow.empty());
   REQUIRE(cloud.idIndexMap.empty());
+  REQUIRE(cloud.nop == 0);
 }
 
 TEST_CASE("createIDMolIDmap maps atomID to molID", "[mol_sys]") {

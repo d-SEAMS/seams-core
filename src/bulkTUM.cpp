@@ -72,7 +72,7 @@ int tum3::topoUnitMatchingBulk(
   std::vector<cage::iceType>
       atomTypes; // This vector will have a value for every atom
   // Number of types
-  int numHC, numDDC, mixedRings, prismaticRings, basalRings;
+  int numHC = 0, numDDC = 0, mixedRings = 0, prismaticRings = 0, basalRings = 0;
   // Shape-matching variables ----
   double rmsd;              // RMSD value for a particular cage type
   std::vector<double> quat; // Quaternion obtained from shape-matching
@@ -492,7 +492,11 @@ int tum3::updateRMSDatom(const std::vector<std::vector<int>> &rings,
                          std::vector<double> &rmsdPerAtom,
                          std::vector<int> &noOfCommonAtoms,
                          const std::vector<cage::iceType> &atomTypes) {
-  //
+  // A failed Horn match leaves rmsd at the unset sentinel (-1). Adding that
+  // into a later success makes the per-atom average schedule-dependent.
+  if (rmsd < 0.0) {
+    return 0;
+  }
   int nRings = cageUnit.rings.size(); // Number of rings in the current cage
   int iring; // Index according to the rings vector of vector, for the current
              // ring inside the cage
