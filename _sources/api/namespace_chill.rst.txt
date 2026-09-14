@@ -47,6 +47,7 @@ CHILL and CHILL+ structure classification. :ref:`More...<details-namespacechill>
 	std::vector<std::vector<double>> :ref:`voronoiFeatures<doxid-namespacechill_1a0e8f53a909d946d418fb28cc3cb4b082>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double candidateCutoff);
 	std::vector<:ref:`VoronoiWeights<doxid-structchill_1_1_voronoi_weights>`> :ref:`voronoiFacetWeights<doxid-namespacechill_1a99f37a13584cd3861607a78d8a4e10eb>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double candidateCutoff);
 	:ref:`SteinhardtQl<doxid-structchill_1_1_steinhardt_ql>` :ref:`steinhardtQlVoronoi<doxid-namespacechill_1ac42b78e61e685301c32b8bc54d344ec1>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double candidateCutoff, int orderL);
+	:ref:`SteinhardtQl<doxid-structchill_1_1_steinhardt_ql>` :target:`steinhardtQlVoronoi<doxid-namespacechill_1a97ec0cac9a6ea6fbcc25ccbaab1e4b31>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<:ref:`VoronoiWeights<doxid-structchill_1_1_voronoi_weights>`>& cells, int orderL);
 
 	} // namespace chill
 .. _details-namespacechill:

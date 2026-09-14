@@ -36,6 +36,7 @@ var namespacechill =
     [ "soapSpectrum", "namespacechill.html#a7ce20c1ee581242dfd8e0dc80ddc17bc", null ],
     [ "soapSpectrumAll", "namespacechill.html#a587a1bffcd6e21ecf2feb16a95fe01c1", null ],
     [ "steinhardtQl", "group__chill.html#gad60f25b03dc9b26dc62d80fd3fac53c3", null ],
+    [ "steinhardtQlVoronoi", "namespacechill.html#a97ec0cac9a6ea6fbcc25ccbaab1e4b31", null ],
     [ "steinhardtQlVoronoi", "namespacechill.html#ac42b78e61e685301c32b8bc54d344ec1", null ],
     [ "voronoiFacetWeights", "namespacechill.html#a99f37a13584cd3861607a78d8a4e10eb", null ],
     [ "voronoiFeature", "namespacechill.html#af9780d7bcf4a3a4436a2d59cc26606bb", null ],

@@ -22,6 +22,6 @@ var searchData=
   ['spheriharmo_19',['spheriHarmo',['../group__chill.html#gaa9220b76da7400c9d934fa08ceeeba7a',1,'sph']]],
   ['stackingplanes_20',['stackingPlanes',['../namespacering.html#aac3cc296115f9c2beabbd4bb01c30002',1,'ring']]],
   ['steinhardtql_21',['steinhardtQl',['../group__chill.html#gad60f25b03dc9b26dc62d80fd3fac53c3',1,'chill']]],
-  ['steinhardtqlvoronoi_22',['steinhardtQlVoronoi',['../namespacechill.html#ac42b78e61e685301c32b8bc54d344ec1',1,'chill']]],
+  ['steinhardtqlvoronoi_22',['steinhardtQlVoronoi',['../namespacechill.html#ac42b78e61e685301c32b8bc54d344ec1',1,'chill::steinhardtQlVoronoi(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, double candidateCutoff, int orderL)'],['../namespacechill.html#a97ec0cac9a6ea6fbcc25ccbaab1e4b31',1,'chill::steinhardtQlVoronoi(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; VoronoiWeights &gt; &amp;cells, int orderL)']]],
   ['str_23',['str',['../group__cage.html#gac8c529682fe69784b3a0df99c096ecc2',1,'cage::Signature']]]
 ];

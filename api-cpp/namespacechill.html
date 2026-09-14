@@ -308,6 +308,7 @@ Functions</h2></td></tr>
 <tr class="memitem:a99f37a13584cd3861607a78d8a4e10eb" id="r_a99f37a13584cd3861607a78d8a4e10eb"><td class="memItemLeft">std::vector&lt; <a class="el" href="structchill_1_1VoronoiWeights.html">VoronoiWeights</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a99f37a13584cd3861607a78d8a4e10eb">voronoiFacetWeights</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double candidateCutoff)</td></tr>
 <tr class="memdesc:a99f37a13584cd3861607a78d8a4e10eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Facet neighbours and area weights for every particle, with an a posteriori exactness certificate.  <br /></td></tr>
 <tr class="memitem:ac42b78e61e685301c32b8bc54d344ec1" id="r_ac42b78e61e685301c32b8bc54d344ec1"><td class="memItemLeft"><a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a>&#160;</td><td class="memItemRight"><a class="el" href="#ac42b78e61e685301c32b8bc54d344ec1">steinhardtQlVoronoi</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double candidateCutoff, int orderL)</td></tr>
+<tr class="memitem:a97ec0cac9a6ea6fbcc25ccbaab1e4b31" id="r_a97ec0cac9a6ea6fbcc25ccbaab1e4b31"><td class="memItemLeft"><a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a>&#160;</td><td class="memItemRight"><a class="el" href="#a97ec0cac9a6ea6fbcc25ccbaab1e4b31">steinhardtQlVoronoi</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; <a class="el" href="structchill_1_1VoronoiWeights.html">VoronoiWeights</a> &gt; &amp;cells, int orderL)</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>CHILL and CHILL+ structure classification. </p>
@@ -522,8 +523,42 @@ Changelog</h3>
 
 </div>
 </div>
+<a id="a97ec0cac9a6ea6fbcc25ccbaab1e4b31" name="a97ec0cac9a6ea6fbcc25ccbaab1e4b31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a97ec0cac9a6ea6fbcc25ccbaab1e4b31">&#9670;&#160;</a></span>steinhardtQlVoronoi() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a> chill::steinhardtQlVoronoi </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="structchill_1_1VoronoiWeights.html">VoronoiWeights</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cells</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>orderL</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ac42b78e61e685301c32b8bc54d344ec1" name="ac42b78e61e685301c32b8bc54d344ec1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac42b78e61e685301c32b8bc54d344ec1">&#9670;&#160;</a></span>steinhardtQlVoronoi()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ac42b78e61e685301c32b8bc54d344ec1">&#9670;&#160;</a></span>steinhardtQlVoronoi() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">

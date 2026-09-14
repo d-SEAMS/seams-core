@@ -263,9 +263,13 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('voronoi__qlm_8
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="keywordtype">double</span> candidateCutoff, <span class="keywordtype">int</span> orderL);</div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>} <span class="comment">// namespace chill</span></div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">#endif </span><span class="comment">// SEAMS_VORONOI_QLM_H_</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="namespacechill.html#a97ec0cac9a6ea6fbcc25ccbaab1e4b31">   63</a></span>[[nodiscard]] <a class="code hl_struct" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a> <a class="code hl_function" href="namespacechill.html#ac42b78e61e685301c32b8bc54d344ec1">steinhardtQlVoronoi</a>(</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keyword">const</span> std::vector&lt;VoronoiWeights&gt; &amp;cells, <span class="keywordtype">int</span> orderL);</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>} <span class="comment">// namespace chill</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#endif </span><span class="comment">// SEAMS_VORONOI_QLM_H_</span></div>
 <div class="ttc" id="abop_8hpp_html"><div class="ttname"><a href="bop_8hpp.html">bop.hpp</a></div><div class="ttdoc">File for the bond order parameter analysis.</div></div>
 <div class="ttc" id="amol__sys_8hpp_html"><div class="ttname"><a href="mol__sys_8hpp.html">mol_sys.hpp</a></div><div class="ttdoc">The main molecular system handler.</div></div>
 <div class="ttc" id="anamespacechill_html"><div class="ttname"><a href="namespacechill.html">chill</a></div><div class="ttdoc">CHILL and CHILL+ structure classification.</div><div class="ttdef"><b>Definition</b> <a href="bop_8hpp_source.html#l00136">bop.hpp:136</a></div></div>

@@ -1,5 +1,6 @@
 var NAVTREEINDEX3 =
 {
+"structcage_1_1Signature.html":[1,3,1],
 "structchill_1_1BondClassifier.html":[1,2,4],
 "structchill_1_1LinearClassifier.html":[2,0,3,1],
 "structchill_1_1LinearClassifier.html":[4,0,1,1],
@@ -248,6 +249,5 @@ var NAVTREEINDEX3 =
 "structsite_1_1IonEnvironment.html#a243d509ea9c0e3eba197c7fcf74936d8":[2,0,20,3,3],
 "structsite_1_1IonEnvironment.html#a243d509ea9c0e3eba197c7fcf74936d8":[4,0,12,3,3],
 "structsite_1_1IonEnvironment.html#a277b78dca0eb1dddf9a9ff7698a60706":[2,0,20,3,6],
-"structsite_1_1IonEnvironment.html#a277b78dca0eb1dddf9a9ff7698a60706":[4,0,12,3,6],
-"structsite_1_1IonEnvironment.html#a30493f96ed37b238ce348fc7abbffc72":[2,0,20,3,4]
+"structsite_1_1IonEnvironment.html#a277b78dca0eb1dddf9a9ff7698a60706":[4,0,12,3,6]
 };

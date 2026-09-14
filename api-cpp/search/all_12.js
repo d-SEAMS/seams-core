@@ -56,7 +56,7 @@ var searchData=
   ['steinhardt_5fdevice_2ehpp_53',['steinhardt_device.hpp',['../steinhardt__device_8hpp.html',1,'']]],
   ['steinhardtql_54',['SteinhardtQl',['../structchill_1_1SteinhardtQl.html',1,'chill']]],
   ['steinhardtql_55',['steinhardtQl',['../group__chill.html#gad60f25b03dc9b26dc62d80fd3fac53c3',1,'chill']]],
-  ['steinhardtqlvoronoi_56',['steinhardtQlVoronoi',['../namespacechill.html#ac42b78e61e685301c32b8bc54d344ec1',1,'chill']]],
+  ['steinhardtqlvoronoi_56',['steinhardtQlVoronoi',['../namespacechill.html#ac42b78e61e685301c32b8bc54d344ec1',1,'chill::steinhardtQlVoronoi(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, double candidateCutoff, int orderL)'],['../namespacechill.html#a97ec0cac9a6ea6fbcc25ccbaab1e4b31',1,'chill::steinhardtQlVoronoi(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; VoronoiWeights &gt; &amp;cells, int orderL)']]],
   ['str_57',['str',['../group__cage.html#gac8c529682fe69784b3a0df99c096ecc2',1,'cage::Signature']]],
   ['structure_5fdesc_2ehpp_58',['structure_desc.hpp',['../structure__desc_8hpp.html',1,'']]],
   ['structype_59',['strucType',['../group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1',1,'ring']]],
