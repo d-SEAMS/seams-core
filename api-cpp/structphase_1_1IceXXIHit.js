@@ -5,6 +5,7 @@ var structphase_1_1IceXXIHit =
     [ "density", "structphase_1_1IceXXIHit.html#ad68eea6102729132f408bea7bb70585e", null ],
     [ "match", "structphase_1_1IceXXIHit.html#a595d2dc59b6d161de41d79466ef740e3", null ],
     [ "meanCoord", "structphase_1_1IceXXIHit.html#ada69293ebab3b1ba2d813fe8cb7fa6a2", null ],
+    [ "nClasses", "structphase_1_1IceXXIHit.html#a6301718265906c57922c84478009b882", null ],
     [ "nSites", "structphase_1_1IceXXIHit.html#a5661ccb01600822c76a777f890e6695b", null ],
     [ "nSix", "structphase_1_1IceXXIHit.html#a5b206d823b13ee7168c0472f193ce03e", null ]
 ];

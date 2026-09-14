@@ -64,7 +64,7 @@ var NAVTREEINDEX =
 "group__nneigh.html#ga752d3e4cbd98fa454a6dc36a4307b75a",
 "namespacephase.html#a42af4d330d8e1ad0aeb8da9ffea7cfaa",
 "structcage_1_1FoundCage.html#a8415a1763a942d096d45a7e0f1c68211",
-"structsite_1_1IceClusterIons.html#a8ab7fb5fe89720faef8ae58c2e859715"
+"structsite_1_1IceClusterIons.html#a35ffe3a82f4f8975ef5292e1d9dd06bc"
 ];
 
 const SYNCONMSG = 'click to disable panel synchronization';

@@ -3,7 +3,7 @@ var searchData=
   ['name_0',['name',['../structgpu_1_1DeviceInfo.html#a65c0117d3c9104a8e938319372ac666b',1,'gpu::DeviceInfo::name'],['../structchill_1_1TemplateHit.html#a69c28bf3fc7a3a7831b3b7ab3b113a73',1,'chill::TemplateHit::name']]],
   ['natoms_1',['nAtoms',['../structgpu_1_1Footprint.html#a9465d5bc892337f8c15b80c98b71e216',1,'gpu::Footprint']]],
   ['nautyavailable_2',['nautyAvailable',['../namespacecage.html#af3048384a261c7ffc3487cb54af20cb1',1,'cage']]],
-  ['nclasses_3',['nClasses',['../structchill_1_1LinearClassifier.html#adbc7eb691580d4c569d3ae8f3b46d675',1,'chill::LinearClassifier']]],
+  ['nclasses_3',['nClasses',['../structphase_1_1IceXXIHit.html#a6301718265906c57922c84478009b882',1,'phase::IceXXIHit::nClasses'],['../structchill_1_1LinearClassifier.html#adbc7eb691580d4c569d3ae8f3b46d675',1,'chill::LinearClassifier::nClasses']]],
   ['nclusters_4',['nClusters',['../structsite_1_1IceClusterIons.html#a35ffe3a82f4f8975ef5292e1d9dd06bc',1,'site::IceClusterIons']]],
   ['nddcatoms_5',['nDdcAtoms',['../structtum_1_1CageCounts.html#aab9b1b63e36af777deba13568cd12c76',1,'tum::CageCounts']]],
   ['nddcrings_6',['nDdcRings',['../structtum_1_1CageCounts.html#a9c557c74c32c82309dfa739906810042',1,'tum::CageCounts']]],

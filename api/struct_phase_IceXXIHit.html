@@ -306,7 +306,7 @@ data-aria-dark="Switch to auto color mode">
 <span id="doxid-structphase-1-1-ice-x-x-i-hit"></span><span id="index-0"></span><h1>struct phase::IceXXIHit<a class="headerlink" href="#struct-phase-icexxihit" title="Link to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
-<p>Ice XXI library: Lee et al., Nat. Mater. 25, 302 (2026), I-4 2d, Z=152, a=b=20.197 A, c=7.891 A, 1.413 g/cm^3. A hit also requires a tetrahedral four-nearest graph (mean coordination in [3.5, 4.5]) and at least 50 primitive six-rings. A simple-cubic packing of 152 sites in that cell is not a hit.</p>
+<p>Ice XXI library: Lee et al., Nat. Mater. 25, 302 (2026), I-4 2d, Z=152, a=b=20.197 A, c=7.891 A, 1.413 g/cm^3. A hit also requires a tetrahedral four-nearest graph (mean coordination in [3.5, 4.5]) and an I-42d 4-NN fingerprint: six-ring census near 112, not the ice-I 2*n law, and more than one local-key class. Occupancy and density alone are not a match.</p>
 <div class="doxyrest-overview-code-block highlight">
 <pre><span data-line="1"><span class="cp">#include</span> <span class="cpf">&lt;phase.hpp&gt;</span></span>
 <span data-line="2"> </span>
@@ -316,11 +316,12 @@ data-aria-dark="Switch to auto color mode">
 <span data-line="6">    <span class="kt">bool</span> <span class="doxyrest-code-target target" id="doxid-structphase_1_1_ice_x_x_i_hit_1a595d2dc59b6d161de41d79466ef740e3"></span><span class="n">match</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span></span>
 <span data-line="7">    <span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-structphase_1_1_ice_x_x_i_hit_1a5661ccb01600822c76a777f890e6695b"></span><span class="n">nSites</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
 <span data-line="8">    <span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-structphase_1_1_ice_x_x_i_hit_1a5b206d823b13ee7168c0472f193ce03e"></span><span class="n">nSix</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
-<span data-line="9">    <span class="kt">double</span> <span class="doxyrest-code-target target" id="doxid-structphase_1_1_ice_x_x_i_hit_1ad460af558a81e77fe720269e23a9f4d7"></span><span class="n">a</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span></span>
-<span data-line="10">    <span class="kt">double</span> <span class="doxyrest-code-target target" id="doxid-structphase_1_1_ice_x_x_i_hit_1a1a872e0a52bd6f72e69777182083769b"></span><span class="n">c</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span></span>
-<span data-line="11">    <span class="kt">double</span> <span class="doxyrest-code-target target" id="doxid-structphase_1_1_ice_x_x_i_hit_1ad68eea6102729132f408bea7bb70585e"></span><span class="n">density</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span></span>
-<span data-line="12">    <span class="kt">double</span> <span class="doxyrest-code-target target" id="doxid-structphase_1_1_ice_x_x_i_hit_1ada69293ebab3b1ba2d813fe8cb7fa6a2"></span><span class="n">meanCoord</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span></span>
-<span data-line="13"><span class="p">};</span></span>
+<span data-line="9">    <span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-structphase_1_1_ice_x_x_i_hit_1a6301718265906c57922c84478009b882"></span><span class="n">nClasses</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
+<span data-line="10">    <span class="kt">double</span> <span class="doxyrest-code-target target" id="doxid-structphase_1_1_ice_x_x_i_hit_1ad460af558a81e77fe720269e23a9f4d7"></span><span class="n">a</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span></span>
+<span data-line="11">    <span class="kt">double</span> <span class="doxyrest-code-target target" id="doxid-structphase_1_1_ice_x_x_i_hit_1a1a872e0a52bd6f72e69777182083769b"></span><span class="n">c</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span></span>
+<span data-line="12">    <span class="kt">double</span> <span class="doxyrest-code-target target" id="doxid-structphase_1_1_ice_x_x_i_hit_1ad68eea6102729132f408bea7bb70585e"></span><span class="n">density</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span></span>
+<span data-line="13">    <span class="kt">double</span> <span class="doxyrest-code-target target" id="doxid-structphase_1_1_ice_x_x_i_hit_1ada69293ebab3b1ba2d813fe8cb7fa6a2"></span><span class="n">meanCoord</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span></span>
+<span data-line="14"><span class="p">};</span></span>
 </pre></div>
 </section>
 

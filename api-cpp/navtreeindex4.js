@@ -1,5 +1,7 @@
 var NAVTREEINDEX4 =
 {
+"structsite_1_1IceClusterIons.html#a35ffe3a82f4f8975ef5292e1d9dd06bc":[4,0,12,2,3],
+"structsite_1_1IceClusterIons.html#a8ab7fb5fe89720faef8ae58c2e859715":[2,0,20,2,1],
 "structsite_1_1IceClusterIons.html#a8ab7fb5fe89720faef8ae58c2e859715":[4,0,12,2,1],
 "structsite_1_1IceClusterIons.html#ad5061f8b24f2e8b999b4c8c18b93e666":[2,0,20,2,2],
 "structsite_1_1IceClusterIons.html#ad5061f8b24f2e8b999b4c8c18b93e666":[4,0,12,2,2],
