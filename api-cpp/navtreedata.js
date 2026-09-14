@@ -61,10 +61,10 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "absOrientation_8hpp.html",
-"group__nneigh.html#ga786c8abbd20d2751403eb4f2c603cd95",
-"namespacephase.html#a45206ea8c1350d175974e9a54cde9c71ad4f501681f5aef29d242c2b6e4d988f4",
-"structcage_1_1FoundCage.html#af7b6c0760f27407dd0b2b4da91155d3b",
-"structsite_1_1IonEnvironment.html#a277b78dca0eb1dddf9a9ff7698a60706"
+"group__nneigh.html#ga752d3e4cbd98fa454a6dc36a4307b75a",
+"namespacephase.html#a42af4d330d8e1ad0aeb8da9ffea7cfaa",
+"structcage_1_1FoundCage.html#a8415a1763a942d096d45a7e0f1c68211",
+"structsite_1_1IceClusterIons.html#a8ab7fb5fe89720faef8ae58c2e859715"
 ];
 
 const SYNCONMSG = 'click to disable panel synchronization';

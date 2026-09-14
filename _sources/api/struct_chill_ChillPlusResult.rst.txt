@@ -1,0 +1,23 @@
+.. index:: pair: struct; chill::ChillPlusResult
+.. _doxid-structchill_1_1_chill_plus_result:
+
+struct chill::ChillPlusResult
+=============================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <chill_offload.hpp>
+	
+	struct ChillPlusResult {
+		// fields
+	
+		std::vector<int> :target:`iceType<doxid-structchill_1_1_chill_plus_result_1a893a70db579cee2a93d727c7abfc309e>`;
+		bool :target:`usedDevice<doxid-structchill_1_1_chill_plus_result_1a3a142660eed77f73ab39a504d0425af1>` = false;
+	};

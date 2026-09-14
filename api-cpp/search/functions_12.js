@@ -19,10 +19,11 @@ var searchData=
   ['soapspectrumall_16',['soapSpectrumAll',['../namespacechill.html#a587a1bffcd6e21ecf2feb16a95fe01c1',1,'chill']]],
   ['sortthroughrow_17',['sortThroughRow',['../namespacetum_1_1device.html#a8d76398842299f9311380465bdbf82be',1,'tum::device']]],
   ['specializedcagecounts_18',['specializedCageCounts',['../namespacetum.html#a50a0ddf8a6606b733a73b4689bda3efa',1,'tum']]],
-  ['spheriharmo_19',['spheriHarmo',['../group__chill.html#gaa9220b76da7400c9d934fa08ceeeba7a',1,'sph']]],
-  ['spheriharmointo_20',['spheriHarmoInto',['../group__chill.html#ga54a26a87d40f9d1be9253f71ecac02c0',1,'sph']]],
-  ['stackingplanes_21',['stackingPlanes',['../namespacering.html#aac3cc296115f9c2beabbd4bb01c30002',1,'ring']]],
-  ['steinhardtql_22',['steinhardtQl',['../group__chill.html#gad60f25b03dc9b26dc62d80fd3fac53c3',1,'chill']]],
-  ['steinhardtqlvoronoi_23',['steinhardtQlVoronoi',['../namespacechill.html#ac42b78e61e685301c32b8bc54d344ec1',1,'chill::steinhardtQlVoronoi(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, double candidateCutoff, int orderL)'],['../namespacechill.html#a97ec0cac9a6ea6fbcc25ccbaab1e4b31',1,'chill::steinhardtQlVoronoi(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; VoronoiWeights &gt; &amp;cells, int orderL)']]],
-  ['str_24',['str',['../group__cage.html#gac8c529682fe69784b3a0df99c096ecc2',1,'cage::Signature']]]
+  ['specializedchillplus_19',['specializedChillPlus',['../namespacechill.html#a30ed8d4d44a99044fddf3ea0b7f0ee0c',1,'chill']]],
+  ['spheriharmo_20',['spheriHarmo',['../group__chill.html#gaa9220b76da7400c9d934fa08ceeeba7a',1,'sph']]],
+  ['spheriharmointo_21',['spheriHarmoInto',['../group__chill.html#ga54a26a87d40f9d1be9253f71ecac02c0',1,'sph']]],
+  ['stackingplanes_22',['stackingPlanes',['../namespacering.html#aac3cc296115f9c2beabbd4bb01c30002',1,'ring']]],
+  ['steinhardtql_23',['steinhardtQl',['../group__chill.html#gad60f25b03dc9b26dc62d80fd3fac53c3',1,'chill']]],
+  ['steinhardtqlvoronoi_24',['steinhardtQlVoronoi',['../namespacechill.html#ac42b78e61e685301c32b8bc54d344ec1',1,'chill::steinhardtQlVoronoi(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, double candidateCutoff, int orderL)'],['../namespacechill.html#a97ec0cac9a6ea6fbcc25ccbaab1e4b31',1,'chill::steinhardtQlVoronoi(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; VoronoiWeights &gt; &amp;cells, int orderL)']]],
+  ['str_25',['str',['../group__cage.html#gac8c529682fe69784b3a0df99c096ecc2',1,'cage::Signature']]]
 ];

@@ -8,6 +8,7 @@ var dir_37a9b835d5ced2a8f90c237a2ad84fdf =
     [ "cage_affiliation.hpp", "cage__affiliation_8hpp.html", "cage__affiliation_8hpp" ],
     [ "cage_canon.hpp", "cage__canon_8hpp.html", "cage__canon_8hpp" ],
     [ "cage_enum.hpp", "cage__enum_8hpp.html", "cage__enum_8hpp" ],
+    [ "chill_offload.hpp", "chill__offload_8hpp.html", "chill__offload_8hpp" ],
     [ "cluster.hpp", "cluster_8hpp.html", "cluster_8hpp" ],
     [ "density.hpp", "density_8hpp.html", "density_8hpp" ],
     [ "franzblau.hpp", "franzblau_8hpp.html", "franzblau_8hpp" ],

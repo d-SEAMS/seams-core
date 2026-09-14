@@ -19,5 +19,6 @@ var searchData=
   ['hopsatmost_16',['hopsAtMost',['../namespacetum_1_1device.html#ae9a6f5c08baa53d7971e42539faeb3f1',1,'tum::device']]],
   ['hornabsorientation_17',['hornAbsOrientation',['../namespaceabsor.html#a09d62115f686492810352905250fb0ef',1,'absor']]],
   ['hostcagecounts_18',['hostCageCounts',['../namespacetum.html#a5b6f992c67dea89064fe1bbe224f7533',1,'tum']]],
-  ['hydrogenmsd_19',['hydrogenMSD',['../namespacephase.html#ac8231bd6a050a06d0f6c90f15aafb0fb',1,'phase']]]
+  ['hostchillplus_19',['hostChillPlus',['../namespacechill.html#a2d5243660db62c90ccdad3bb9cda319e',1,'chill']]],
+  ['hydrogenmsd_20',['hydrogenMSD',['../namespacephase.html#ac8231bd6a050a06d0f6c90f15aafb0fb',1,'phase']]]
 ];

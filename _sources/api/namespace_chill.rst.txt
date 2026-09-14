@@ -8,6 +8,7 @@ namespace chill
 	:hidden:
 
 	enum_chill_CrystalKind.rst
+	struct_chill_ChillPlusResult.rst
 	struct_chill_LinearClassifier.rst
 	struct_chill_TemplateHit.rst
 	struct_chill_VoronoiWeights.rst
@@ -31,6 +32,7 @@ CHILL and CHILL+ structure classification. :ref:`More...<details-namespacechill>
 	// structs
 
 	struct :ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>`;
+	struct :ref:`ChillPlusResult<doxid-structchill_1_1_chill_plus_result>`;
 	struct :ref:`LinearClassifier<doxid-structchill_1_1_linear_classifier>`;
 	struct :ref:`QlmAtom<doxid-structchill_1_1_qlm_atom>`;
 	struct :ref:`SteinhardtQl<doxid-structchill_1_1_steinhardt_ql>`;
@@ -40,6 +42,10 @@ CHILL and CHILL+ structure classification. :ref:`More...<details-namespacechill>
 
 	// global functions
 
+	bool :target:`preferOffload<doxid-namespacechill_1ac3eb9f55035d401247072181b24b563a>`();
+	:ref:`ChillPlusResult<doxid-structchill_1_1_chill_plus_result>` :ref:`hostChillPlus<doxid-namespacechill_1a2d5243660db62c90ccdad3bb9cda319e>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList);
+	:ref:`ChillPlusResult<doxid-structchill_1_1_chill_plus_result>` :ref:`specializedChillPlus<doxid-namespacechill_1a30ed8d4d44a99044fddf3ea0b7f0ee0c>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList);
+	:ref:`ChillPlusResult<doxid-structchill_1_1_chill_plus_result>` :target:`chillPlus<doxid-namespacechill_1ae9068c355d803c1932d2aa7e7cc27ec8>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList);
 	std::vector<:ref:`TemplateHit<doxid-structchill_1_1_template_hit>`> :ref:`classifyTemplates<doxid-namespacechill_1a6235256c303786bfee2a6143044b46a8>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int kNeigh = 12);
 	std::vector<double> :ref:`soapSpectrum<doxid-namespacechill_1a7ce20c1ee581242dfd8e0dc80ddc17bc>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, const std::vector<std::vector<int>>& nList, int nMax, int lMax, double rcut);
 	std::vector<std::vector<double>> :ref:`soapSpectrumAll<doxid-namespacechill_1a587a1bffcd6e21ecf2feb16a95fe01c1>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int nMax, int lMax, double rcut);
@@ -129,6 +135,28 @@ Changelog
 
 Global Functions
 ----------------
+
+.. index:: pair: function; hostChillPlus
+.. _doxid-namespacechill_1a2d5243660db62c90ccdad3bb9cda319e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`ChillPlusResult<doxid-structchill_1_1_chill_plus_result>` hostChillPlus(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList)
+
+Host CHILL+ (classifyBonds + getIceTypePlusNoPrint).
+
+.. index:: pair: function; specializedChillPlus
+.. _doxid-namespacechill_1a30ed8d4d44a99044fddf3ea0b7f0ee0c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`ChillPlusResult<doxid-structchill_1_1_chill_plus_result>` specializedChillPlus(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList)
+
+Flattened CHILL+.
+
+Target device when compiled with offload.
 
 .. index:: pair: function; classifyTemplates
 .. _doxid-namespacechill_1a6235256c303786bfee2a6143044b46a8:

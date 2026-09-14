@@ -5,7 +5,7 @@ var searchData=
   ['iceclusterions_2',['IceClusterIons',['../structsite_1_1IceClusterIons.html',1,'site']]],
   ['icefraction_3',['iceFraction',['../structsite_1_1IonEnvironment.html#ab8c73ad7e47ebef7f210b178707e735d',1,'site::IonEnvironment']]],
   ['icescoreallowed_4',['iceScoreAllowed',['../namespacesite.html#a05342583b5b8258d5347b3f18983d4b2',1,'site']]],
-  ['icetype_5',['iceType',['../group__molSys.html#ga3b139c528b716173634931897dd13f73',1,'molSys::Point::iceType'],['../group__cage.html#gaaac41828990e32b9d6e7db4426b61529',1,'cage::iceType']]],
+  ['icetype_5',['iceType',['../structchill_1_1ChillPlusResult.html#a893a70db579cee2a93d727c7abfc309e',1,'chill::ChillPlusResult::iceType'],['../group__molSys.html#ga3b139c528b716173634931897dd13f73',1,'molSys::Point::iceType'],['../group__cage.html#gaaac41828990e32b9d6e7db4426b61529',1,'cage::iceType']]],
   ['icexxihit_6',['IceXXIHit',['../structphase_1_1IceXXIHit.html',1,'phase']]],
   ['icexxilibrary_7',['iceXXILibrary',['../namespacephase.html#aabcf1d0b33a4557dbe42262621400d5f',1,'phase']]],
   ['idindexmap_8',['idIndexMap',['../group__molSys.html#ga8e48a0ae066c2585e7320cdaa0cbc8db',1,'molSys::PointCloud']]],

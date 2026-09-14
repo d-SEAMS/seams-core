@@ -7,6 +7,7 @@ var annotated_dup =
     ] ],
     [ "chill", "namespacechill.html", [
       [ "BondClassifier", "structchill_1_1BondClassifier.html", "structchill_1_1BondClassifier" ],
+      [ "ChillPlusResult", "structchill_1_1ChillPlusResult.html", "structchill_1_1ChillPlusResult" ],
       [ "LinearClassifier", "structchill_1_1LinearClassifier.html", "structchill_1_1LinearClassifier" ],
       [ "QlmAtom", "structchill_1_1QlmAtom.html", "structchill_1_1QlmAtom" ],
       [ "SteinhardtQl", "structchill_1_1SteinhardtQl.html", "structchill_1_1SteinhardtQl" ],

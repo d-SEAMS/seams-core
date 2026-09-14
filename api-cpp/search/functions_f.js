@@ -18,7 +18,7 @@ var searchData=
   ['populatehbondsfromdonors_15',['populateHbondsFromDonors',['../group__bond.html#ga9f06dd103536f428975d2d74b6ca76aa',1,'bond']]],
   ['populatehbondswithinputclouds_16',['populateHbondsWithInputClouds',['../group__bond.html#gae349d52bd4fcad7dfc379793b3318f90',1,'bond']]],
   ['predict_17',['predict',['../structchill_1_1LinearClassifier.html#aa2e6670a82d536991b8efb24874c4886',1,'chill::LinearClassifier']]],
-  ['preferoffload_18',['preferOffload',['../namespacetum.html#a9dc1d26c60d5f757e66305b65b42aed0',1,'tum']]],
+  ['preferoffload_18',['preferOffload',['../namespacechill.html#ac3eb9f55035d401247072181b24b563a',1,'chill::preferOffload()'],['../namespacetum.html#a9dc1d26c60d5f757e66305b65b42aed0',1,'tum::preferOffload()']]],
   ['prettyprintyoda_19',['prettyPrintYoda',['../group__gen.html#gaaf97563c332410a372be92dcb8f81b3f',1,'gen']]],
   ['printicetype_20',['printIceType',['../group__chill.html#ga0981b3101b04cacd525c2b5dc52f8a96',1,'chill']]],
   ['printrdf_21',['printRDF',['../namespacesout.html#a77cc523102fc57d203495a657703dab5',1,'sout']]],
