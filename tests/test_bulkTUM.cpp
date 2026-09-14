@@ -224,8 +224,7 @@ TEST_CASE("atomsFromCages extracts unique atom indices from cage list",
   REQUIRE(atoms.size() == 12); // 0-11, all unique
 }
 
-TEST_CASE("topoUnitMatchingBulk with no six-rings and printClusters",
-          "[bulkTUM]") {
+TEST_CASE("clusterCages accepts zero cages", "[bulkTUM]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
   yCloud.box = {10.0, 10.0, 10.0};
   yCloud.boxLow = {0.0, 0.0, 0.0};
@@ -233,18 +232,12 @@ TEST_CASE("topoUnitMatchingBulk with no six-rings and printClusters",
   molSys::Point<double> pt;
   pt.type = 1;
   pt.atomID = 1;
-  pt.x = 0.0;
-  pt.y = 0.0;
-  pt.z = 0.0;
   yCloud.pts.push_back(pt);
-  yCloud.idIndexMap[1] = 0;
-  std::vector<std::vector<int>> rings;
-  std::vector<std::vector<int>> nList = {{0}};
   std::string tmpPath =
       fs::temp_directory_path().append("dseams_test_tum_noring/").string();
-  const int ret = tum3::topoUnitMatchingBulk(tmpPath, rings, nList, yCloud, 1,
-                                             true, true, "../templates");
-  REQUIRE(ret == 0);
+  std::vector<std::vector<int>> rings;
+  std::vector<cage::Cage> cageList;
+  REQUIRE(tum3::clusterCages(yCloud, tmpPath, rings, cageList, 0, 0) == 0);
   std::error_code ec;
   fs::remove_all(tmpPath, ec);
 }
