@@ -3,6 +3,7 @@
 #include <franzblau.hpp>
 #include <generic.hpp>
 #include <neighbours.hpp>
+#include <topo_fingerprint.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -221,15 +222,15 @@ phase::IceXXIHit phase::iceXXILibrary(
     }
   }
   hit.meanCoord = nList.empty() ? 0.0 : coord / static_cast<double>(nList.size());
-  const auto rings = primitive::ringNetwork(nList, 6);
-  for (const auto &r : rings) {
-    hit.nSix += static_cast<int>(r.size() == 6);
-  }
+  const auto fp = topo::fingerprint(nList, 2, 7);
+  hit.nSix = (fp.ringCensus.size() > 6) ? fp.ringCensus[6] : 0;
+  hit.nClasses = static_cast<int>(fp.classes.size());
   const bool tetra = hit.meanCoord >= 3.5 && hit.meanCoord <= 4.5;
-  // The Lee cell has ~112 primitive six-rings on the 4-NN graph.
-  // A cubic packing of the same box can form one accidental six-ring.
-  const bool ringsOk = hit.nSix >= 50;
-  hit.match = nOk && aOk && cOk && rhoOk && tetra && ringsOk;
+  // Lee I-42d: ~112 six-rings, several independent O sites.
+  // Ice I on 152 sites: ~304 six-rings and one local-key class.
+  const bool ringsOk = hit.nSix >= 80 && hit.nSix <= 160;
+  const bool classesOk = hit.nClasses >= 2;
+  hit.match = nOk && aOk && cOk && rhoOk && tetra && ringsOk && classesOk;
   return hit;
 }
 

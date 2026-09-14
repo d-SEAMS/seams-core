@@ -30,13 +30,15 @@ double hydrogenMSD(
 
 //! Ice XXI library: Lee et al., Nat. Mater. 25, 302 (2026), I-4 2d,
 //! Z=152, a=b=20.197 A, c=7.891 A, 1.413 g/cm^3. A hit also requires a
-//! tetrahedral four-nearest graph (mean coordination in [3.5, 4.5]) and at
-//! least 50 primitive six-rings. A simple-cubic packing of 152 sites in that
-//! cell is not a hit.
+//! tetrahedral four-nearest graph (mean coordination in [3.5, 4.5]) and an
+//! I-42d 4-NN fingerprint: six-ring census near 112, not the ice-I 2*n
+//! law, and more than one local-key class. Occupancy and density alone
+//! are not a match.
 struct IceXXIHit {
   bool match = false;
   int nSites = 0;
   int nSix = 0;
+  int nClasses = 0;
   double a = 0.0;
   double c = 0.0;
   double density = 0.0;
