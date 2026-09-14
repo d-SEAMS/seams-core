@@ -12,10 +12,11 @@
 **   chill_interclathrate chill_water chill_ice chill_max chill_clus
 **   cut_ice cut_max cut_clus
 **   seed_ih seed_ic seed_both seed_ice seed_max seed_clus
-** CHILL+ reads the cutoff graph. chill_ice is cubic plus hexagonal, the
-** bulk-ice count of Nguyen and Molinero; interfacial molecules are not
-** ice. cut_* is cage membership on the same cutoff graph; seed_* is the
-** seeded assignment on the mutual and union four-nearest graphs.
+** CHILL+ reads the mutual 4-NN graph (same as seams chill-plus).
+** chill_ice is cubic plus hexagonal, the bulk-ice count of Nguyen and
+** Molinero; interfacial molecules are not ice. cut_* is cage membership
+** on the cutoff graph; seed_* is the seeded assignment on the mutual
+** and union four-nearest graphs.
 */
 
 #include <bop.hpp>
@@ -205,11 +206,12 @@ int main(int argc, char **argv) {
     }
     const int nop = cloud.nop;
 
-    // CHILL+ on the cutoff graph
+    // CHILL+ on mutual 4-NN, same graph as seams chill-plus
+    auto knn = nneigh::kNearestNeighbourList(cloud, k, cand, typeI, true);
     auto cutRows = nneigh::neighListO(cutoff, cloud, typeI);
     auto idxC = nneigh::neighbourListByIndex(cloud, cutRows);
-    chill::getCorrelPlus(cloud, cutRows, false);
-    chill::getIceTypePlusNoPrint(cloud, cutRows, false);
+    chill::getCorrelPlus(cloud, knn, false);
+    chill::getIceTypePlusNoPrint(cloud, knn, false);
     std::vector<char> chillIce;
     const ChillCounts cc = tallyChill(cloud, chillIce);
     int chillN = 0, chillMax = 0, chillClus = 0;

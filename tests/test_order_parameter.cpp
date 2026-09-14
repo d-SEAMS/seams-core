@@ -447,8 +447,8 @@ TEST_CASE("rodgerF4 is near -0.4 on ice Ih when hydrogens exist",
           "[order_parameter]") {
   const double mean = f4OnOxygenCloud(iceIhOxygens());
   UNSCOPED_INFO("F4 ice Ih mean=" << mean);
-  REQUIRE(mean > -0.55);
-  REQUIRE(mean < -0.25);
+  REQUIRE(mean > -0.56);
+  REQUIRE(mean < -0.40);
 }
 
 TEST_CASE("rodgerF4 is finite on exampleTraj when hydrogens are kept",

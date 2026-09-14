@@ -11,6 +11,10 @@
 
 #include <array>
 #include <cmath>
+#include <cstdlib>
+#include <fstream>
+#include <sstream>
+#include <string>
 #include <vector>
 
 static molSys::PointCloud<molSys::Point<double>, double>
@@ -236,4 +240,36 @@ TEST_CASE("LAMMPS compute dump column is seams_chill_plus", "[phase][lammps]") {
   for (int i = 0; i < 4; i++) {
     REQUIRE(labels[i] >= 0);
   }
+  // If extras/lammps/dump.chill exists (from lmp -in in.dseams), the last
+  // column must match seams_chill_plus by atom id.
+  const char *dumpPath = std::getenv("SEAMS_LAMMPS_DUMP");
+  if (dumpPath == nullptr) {
+    dumpPath = "../extras/lammps/dump.chill";
+  }
+  std::ifstream in(dumpPath);
+  if (!in) {
+    return;
+  }
+  std::string line;
+  int matched = 0;
+  while (std::getline(in, line)) {
+    if (line.empty() || line[0] == 'I' || line[0] == 'A' || line[0] == 'N' ||
+        line.find("ITEM") == 0) {
+      continue;
+    }
+    std::istringstream iss(line);
+    int id = 0;
+    int type = 0;
+    double x = 0, y = 0, z = 0, c = -1;
+    if (!(iss >> id >> type >> x >> y >> z >> c)) {
+      continue;
+    }
+    if (id < 1 || id > 4) {
+      continue;
+    }
+    REQUIRE_THAT(c, Catch::Matchers::WithinAbs(
+                        static_cast<double>(labels[id - 1]), 1e-12));
+    ++matched;
+  }
+  REQUIRE(matched == 4);
 }
