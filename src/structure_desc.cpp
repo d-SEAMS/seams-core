@@ -394,9 +394,10 @@ std::vector<std::vector<double>> chill::voronoiFeatures(
   if (yCloud.nop <= 0) {
     return out;
   }
-  const auto q4 = chill::steinhardtQlVoronoi(yCloud, candidateCutoff, 4);
-  const auto q6 = chill::steinhardtQlVoronoi(yCloud, candidateCutoff, 6);
-  const auto q8 = chill::steinhardtQlVoronoi(yCloud, candidateCutoff, 8);
+  const auto cells = chill::voronoiFacetWeights(yCloud, candidateCutoff);
+  const auto q4 = chill::steinhardtQlVoronoi(yCloud, cells, 4);
+  const auto q6 = chill::steinhardtQlVoronoi(yCloud, cells, 6);
+  const auto q8 = chill::steinhardtQlVoronoi(yCloud, cells, 8);
   for (int i = 0; i < yCloud.nop; i++) {
     const size_t row = static_cast<size_t>(i);
     out[row][0] = q4.ql[row];
