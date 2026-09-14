@@ -134,7 +134,8 @@ int match(const Eigen::MatrixXd &ref, const Eigen::MatrixXd &target, Match &out,
     }
     const Eigen::Vector3d a(ref(i, 0), ref(i, 1), ref(i, 2));
     const Eigen::Vector3d b(target(j, 0), target(j, 1), target(j, 2));
-    const Eigen::Vector3d d = out.rotation * a + out.translation - b;
+    // libira overlay: R * target + t ≈ ref (structure 2 onto structure 1).
+    const Eigen::Vector3d d = a - (out.rotation * b + out.translation);
     sum += d.squaredNorm();
     used++;
   }
