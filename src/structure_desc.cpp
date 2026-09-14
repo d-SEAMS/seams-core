@@ -151,10 +151,12 @@ Eigen::MatrixXd sc6() {
   return m;
 }
 
-double overlayRmsd(Eigen::MatrixXd ref, Eigen::MatrixXd tgt) {
-  if (ref.rows() != tgt.rows() || ref.rows() == 0) {
+double overlayRmsd(const Eigen::MatrixXd &refIn, const Eigen::MatrixXd &tgtIn) {
+  if (refIn.rows() != tgtIn.rows() || refIn.rows() == 0) {
     return 1e300;
   }
+  Eigen::MatrixXd ref = refIn;
+  Eigen::MatrixXd tgt = tgtIn;
   scaleToUnit(ref);
   scaleToUnit(tgt);
   double best = 1e300;
@@ -181,7 +183,9 @@ double overlayRmsd(Eigen::MatrixXd ref, Eigen::MatrixXd tgt) {
     Eigen::MatrixXd r = ref;
     sortRows(r);
     sortRows(rot);
-    std::vector<double> quat, perAtom;
+    std::vector<double> quat;
+    std::vector<double> perAtom;
+    quat.reserve(4);
     double rmsd = 0.0;
     double scale = 1.0;
     if (absor::hornAbsOrientation(r, rot, quat, rmsd, perAtom, scale) == 0) {
@@ -273,13 +277,15 @@ std::vector<chill::TemplateHit> chill::classifyTemplates(
                    {CrystalKind::hcp, "hcp", hcp12, 12},
                    {CrystalKind::bcc, "bcc", bcc8, 8},
                    {CrystalKind::sc, "sc", sc6, 6}};
+  const Eigen::MatrixXd refMats[] = {fcc12(), hcp12(), bcc8(), sc6()};
 
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (yCloud.nop >= 64)
 #endif
   for (int i = 0; i < yCloud.nop; i++) {
     TemplateHit best;
-    for (const auto &tmpl : templates) {
+    for (int t = 0; t < 4; t++) {
+      const auto &tmpl = templates[t];
       if (kNeigh > 0 && kNeigh < tmpl.k) {
         continue;
       }
@@ -290,7 +296,7 @@ std::vector<chill::TemplateHit> chill::classifyTemplates(
       if (shell.rows() > tmpl.k) {
         shell.conservativeResize(tmpl.k, 3);
       }
-      const double rmsd = overlayRmsd(tmpl.make(), shell);
+      const double rmsd = overlayRmsd(refMats[t], shell);
       if (rmsd < best.rmsd) {
         best.kind = tmpl.kind;
         best.name = tmpl.name;

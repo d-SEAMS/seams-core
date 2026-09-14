@@ -738,45 +738,23 @@ Eigen::MatrixXd pntToPnt::changeHexCageOrder(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &basal1, const std::vector<int> &basal2, int startingIndex) {
   Eigen::MatrixXd pointSet(12, 3);
-  int iatomIndex, jatomIndex; // Current atom index in yCloud, according to
-                              // basal1 and basal2 respectively
-  int iPnt;                   // Current index in the Eigen matrix pointSet
-  int cageSize = 12;          // Number of points in the cage
-  std::vector<int> newBasal1, newBasal2;
-  std::array<double, 3> dr; // Components of the distance
-  int iatomOne;             // Index of the first atom
+  int iatomIndex, jatomIndex;
+  std::array<double, 3> dr;
+  int iatomOne;
 
-  // Checks and balances
-  //
   if (startingIndex > 5 || startingIndex < 0) {
     startingIndex = 0;
-  } // no invalid starting index
+  }
+  auto basalAt = [startingIndex](const std::vector<int> &basal, int k) {
+    return basal[static_cast<std::size_t>((k + startingIndex) % 6)];
+  };
 
-  // Change the order
-  if (startingIndex > 0) {
-    for (int k = 0; k < 6; k++) {
-      iPnt = k + startingIndex;
-      if (iPnt >= 6) {
-        iPnt -= 6;
-      } // wrap-around
-      newBasal1.push_back(basal1[iPnt]);
-      newBasal2.push_back(basal2[iPnt]);
-    } // change the order
-  }   // end of filling for startingIndex>0
-  else {
-    newBasal1 = basal1;
-    newBasal2 = basal2;
-  } // end of filling up the reordered basal rings
-
-  //
-  // FIRST POINT
-  // basal1
-  iatomOne = newBasal1[0];
+  iatomOne = basalAt(basal1, 0);
   pointSet(0, 0) = yCloud.pts[iatomOne].x;
   pointSet(0, 1) = yCloud.pts[iatomOne].y;
   pointSet(0, 2) = yCloud.pts[iatomOne].z;
   // basal2
-  jatomIndex = newBasal2[0];
+  jatomIndex = basalAt(basal2, 0);
   // Get the distance from basal1
   dr = gen::relDist(yCloud, iatomOne, jatomIndex);
 
@@ -788,8 +766,8 @@ Eigen::MatrixXd pntToPnt::changeHexCageOrder(
   // Loop through the rest of the points
   for (int i = 1; i < 6; i++) {
     // basal1
-    iatomIndex = newBasal1[i]; // Atom index to be filled for basal1
-    jatomIndex = newBasal2[i]; // Atom index to be filled for basal2
+    iatomIndex = basalAt(basal1, i);
+    jatomIndex = basalAt(basal2, i);
     //
     // Get the distance from the first atom
     dr = gen::relDist(yCloud, iatomOne, iatomIndex);

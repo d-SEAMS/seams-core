@@ -509,32 +509,39 @@ bool rayHitsTriangle(const std::array<double, 3> &orig,
 bool pointInFaces(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                   const std::vector<std::vector<int>> &rings,
                   const std::vector<int> &faces,
-                  const std::array<double, 3> &guest) {
+                  const std::array<double, 3> &guest,
+                  const std::array<double, 3> *centreOpt = nullptr) {
   if (faces.empty()) {
     return false;
   }
-  std::vector<int> verts;
-  for (int f : faces) {
-    if (f < 0 || static_cast<std::size_t>(f) >= rings.size()) {
-      continue;
+  std::array<double, 3> centreStore{};
+  const std::array<double, 3> *centre = centreOpt;
+  if (centre == nullptr) {
+    std::vector<int> verts;
+    for (int f : faces) {
+      if (f < 0 || static_cast<std::size_t>(f) >= rings.size()) {
+        continue;
+      }
+      verts.insert(verts.end(), rings[static_cast<std::size_t>(f)].begin(),
+                   rings[static_cast<std::size_t>(f)].end());
     }
-    verts.insert(verts.end(), rings[static_cast<std::size_t>(f)].begin(),
-                 rings[static_cast<std::size_t>(f)].end());
+    if (verts.empty()) {
+      return false;
+    }
+    centreStore = periodicCentroid(yCloud, verts);
+    centre = &centreStore;
   }
-  if (verts.empty()) {
-    return false;
-  }
-  const auto centre = periodicCentroid(yCloud, verts);
   auto unwrap = [&](int atom) {
     const auto &p = yCloud.pts[static_cast<std::size_t>(atom)];
-    const auto dr = minImage(yCloud, p.x, p.y, p.z, centre[0], centre[1], centre[2]);
-    return std::array<double, 3>{centre[0] + dr[0], centre[1] + dr[1],
-                                 centre[2] + dr[2]};
+    const auto dr = minImage(yCloud, p.x, p.y, p.z, (*centre)[0], (*centre)[1],
+                             (*centre)[2]);
+    return std::array<double, 3>{(*centre)[0] + dr[0], (*centre)[1] + dr[1],
+                                 (*centre)[2] + dr[2]};
   };
-  const auto gdr = minImage(yCloud, guest[0], guest[1], guest[2], centre[0],
-                            centre[1], centre[2]);
-  const std::array<double, 3> orig = {centre[0] + gdr[0], centre[1] + gdr[1],
-                                      centre[2] + gdr[2]};
+  const auto gdr = minImage(yCloud, guest[0], guest[1], guest[2], (*centre)[0],
+                            (*centre)[1], (*centre)[2]);
+  const std::array<double, 3> orig = {(*centre)[0] + gdr[0], (*centre)[1] + gdr[1],
+                                      (*centre)[2] + gdr[2]};
   // Slightly off-axis ray so a hit is not an edge of a cube face.
   const std::array<double, 3> dir = {1.0, 1e-4, 2e-4};
   int hits = 0;
@@ -590,7 +597,7 @@ guestOccupancyInside(const molSys::PointCloud<molSys::Point<double>, double> &yC
     int best = -1;
     double bestSq = std::numeric_limits<double>::infinity();
     for (std::size_t c = 0; c < cageFaces.size(); c++) {
-      if (!pointInFaces(yCloud, rings, cageFaces[c], gp)) {
+      if (!pointInFaces(yCloud, rings, cageFaces[c], gp, &centres[c])) {
         continue;
       }
       const auto dr = minImage(yCloud, p.x, p.y, p.z, centres[c][0],
