@@ -201,16 +201,17 @@ std::vector<chill::VoronoiWeights> chill::voronoiFacetWeights(
   return result;
 }
 
-chill::SteinhardtQl chill::steinhardtQlVoronoi(
+namespace {
+
+chill::SteinhardtQl steinhardtQlFromCells(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-    double candidateCutoff, int orderL) {
+    const std::vector<chill::VoronoiWeights> &cells, int orderL) {
   chill::SteinhardtQl result;
   result.ql.assign(yCloud.nop, 0.0);
   result.qlBar.assign(yCloud.nop, 0.0);
   if (orderL != 3 && orderL != 4 && orderL != 6 && orderL != 8) {
     return result;
   }
-  const auto cells = chill::voronoiFacetWeights(yCloud, candidateCutoff);
   const int nComp = 2 * orderL + 1;
   const double prefactor = 4.0 * std::numbers::pi / (2.0 * orderL + 1.0);
 
@@ -260,4 +261,19 @@ chill::SteinhardtQl chill::steinhardtQlVoronoi(
     result.qlBar[i] = std::sqrt(prefactor * sumBar);
   }
   return result;
+}
+
+} // namespace
+
+chill::SteinhardtQl chill::steinhardtQlVoronoi(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    double candidateCutoff, int orderL) {
+  return steinhardtQlFromCells(yCloud, chill::voronoiFacetWeights(yCloud, candidateCutoff),
+                               orderL);
+}
+
+chill::SteinhardtQl chill::steinhardtQlVoronoi(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<chill::VoronoiWeights> &cells, int orderL) {
+  return steinhardtQlFromCells(yCloud, cells, orderL);
 }

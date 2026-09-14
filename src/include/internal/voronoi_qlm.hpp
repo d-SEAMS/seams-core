@@ -60,6 +60,10 @@ struct VoronoiWeights {
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     double candidateCutoff, int orderL);
 
+[[nodiscard]] SteinhardtQl steinhardtQlVoronoi(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<VoronoiWeights> &cells, int orderL);
+
 } // namespace chill
 
 #endif // SEAMS_VORONOI_QLM_H_
