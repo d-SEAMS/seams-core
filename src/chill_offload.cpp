@@ -25,6 +25,18 @@ bool envOffload() {
   return v != nullptr && v[0] != '\0' && !(v[0] == '0' && v[1] == '\0');
 }
 
+#ifdef SEAMS_HAS_OFFLOAD
+#pragma omp declare target
+#endif
+double mic1(double d, double L) {
+  if (L <= 0.0) {
+    return d;
+  }
+  const double q = d / L;
+  const double n = q >= 0.0 ? (long long)(q + 0.5) : (long long)(q - 0.5);
+  return d - L * n;
+}
+
 void y3(double dx, double dy, double dz, double *re, double *im) {
   const double r = std::sqrt(dx * dx + dy * dy + dz * dz);
   const double phi = std::atan2(dx, dy);
@@ -67,6 +79,9 @@ void y3(double dx, double dy, double dz, double *re, double *im) {
   re[6] = -amp3 * c3p;
   im[6] = -amp3 * s3p;
 }
+#ifdef SEAMS_HAS_OFFLOAD
+#pragma omp end declare target
+#endif
 
 int classifyAtom(int nstag, int neclip, int nb, const int *neigh,
                  const int *nstagN) {
@@ -180,17 +195,18 @@ chill::ChillPlusResult chill::specializedChillPlus(
 #endif
   out.usedDevice = onDevice;
 
-  auto mic = [&](double d, double L) {
-    if (L <= 0.0) {
-      return d;
-    }
-    return d - L * std::round(d / L);
-  };
+  double *xyzp = xyz.data();
+  int *neighp = neigh.data();
+  int *nbp = nb.data();
+  double *qrep = qre.data();
+  double *qimp = qim.data();
+  int *nstagp = nstag.data();
+  int *neclipp = neclip.data();
 
 #ifdef SEAMS_HAS_OFFLOAD
 #pragma omp target teams distribute parallel for if (onDevice) \
-    map(to : xyz[0 : n * 3], neigh[0 : n * kNb], nb[0 : n], box[0 : 3]) \
-    map(from : qre[0 : n * kM], qim[0 : n * kM])
+    map(to : xyzp[0 : n * 3], neighp[0 : n * kNb], nbp[0 : n], box[0 : 3]) \
+    map(from : qrep[0 : n * kM], qimp[0 : n * kM])
 #endif
 #ifndef SEAMS_HAS_OFFLOAD
 #ifdef SEAMS_HAS_OPENMP
@@ -200,21 +216,15 @@ chill::ChillPlusResult chill::specializedChillPlus(
   for (int i = 0; i < n; i++) {
     double accRe[kM] = {};
     double accIm[kM] = {};
-    const int nbi = nb[static_cast<std::size_t>(i)];
+    const int nbi = nbp[i];
     for (int t = 0; t < nbi; t++) {
-      const int j = neigh[static_cast<std::size_t>(i * kNb + t)];
+      const int j = neighp[i * kNb + t];
       if (j < 0 || j >= n) {
         continue;
       }
-      const double dx = mic(xyz[static_cast<std::size_t>(3 * j)] -
-                                xyz[static_cast<std::size_t>(3 * i)],
-                            box[0]);
-      const double dy = mic(xyz[static_cast<std::size_t>(3 * j + 1)] -
-                                xyz[static_cast<std::size_t>(3 * i + 1)],
-                            box[1]);
-      const double dz = mic(xyz[static_cast<std::size_t>(3 * j + 2)] -
-                                xyz[static_cast<std::size_t>(3 * i + 2)],
-                            box[2]);
+      const double dx = mic1(xyzp[3 * j] - xyzp[3 * i], box[0]);
+      const double dy = mic1(xyzp[3 * j + 1] - xyzp[3 * i + 1], box[1]);
+      const double dz = mic1(xyzp[3 * j + 2] - xyzp[3 * i + 2], box[2]);
       double re[kM], im[kM];
       y3(dx, dy, dz, re, im);
       for (int m = 0; m < kM; m++) {
@@ -224,15 +234,15 @@ chill::ChillPlusResult chill::specializedChillPlus(
     }
     const double inv = (nbi > 0) ? 1.0 / static_cast<double>(nbi) : 0.0;
     for (int m = 0; m < kM; m++) {
-      qre[static_cast<std::size_t>(i * kM + m)] = accRe[m] * inv;
-      qim[static_cast<std::size_t>(i * kM + m)] = accIm[m] * inv;
+      qrep[i * kM + m] = accRe[m] * inv;
+      qimp[i * kM + m] = accIm[m] * inv;
     }
   }
 
 #ifdef SEAMS_HAS_OFFLOAD
 #pragma omp target teams distribute parallel for if (onDevice) \
-    map(to : qre[0 : n * kM], qim[0 : n * kM], neigh[0 : n * kNb], nb[0 : n]) \
-    map(from : nstag[0 : n], neclip[0 : n])
+    map(to : qrep[0 : n * kM], qimp[0 : n * kM], neighp[0 : n * kNb], nbp[0 : n]) \
+    map(from : nstagp[0 : n], neclipp[0 : n])
 #endif
 #ifndef SEAMS_HAS_OFFLOAD
 #ifdef SEAMS_HAS_OPENMP
@@ -242,18 +252,18 @@ chill::ChillPlusResult chill::specializedChillPlus(
   for (int i = 0; i < n; i++) {
     int ns = 0;
     int ne = 0;
-    const int nbi = nb[static_cast<std::size_t>(i)];
+    const int nbi = nbp[i];
     for (int t = 0; t < nbi; t++) {
-      const int j = neigh[static_cast<std::size_t>(i * kNb + t)];
+      const int j = neighp[i * kNb + t];
       if (j < 0 || j >= n) {
         continue;
       }
       double dotR = 0.0, iN = 0.0, jN = 0.0;
       for (int m = 0; m < kM; m++) {
-        const double qiR = qre[static_cast<std::size_t>(i * kM + m)];
-        const double qiI = qim[static_cast<std::size_t>(i * kM + m)];
-        const double qjR = qre[static_cast<std::size_t>(j * kM + m)];
-        const double qjI = qim[static_cast<std::size_t>(j * kM + m)];
+        const double qiR = qrep[i * kM + m];
+        const double qiI = qimp[i * kM + m];
+        const double qjR = qrep[j * kM + m];
+        const double qjI = qimp[j * kM + m];
         dotR += qiR * qjR + qiI * qjI;
         iN += qiR * qiR + qiI * qiI;
         jN += qjR * qjR + qjI * qjI;
@@ -266,8 +276,8 @@ chill::ChillPlusResult chill::specializedChillPlus(
         ++ne;
       }
     }
-    nstag[static_cast<std::size_t>(i)] = ns;
-    neclip[static_cast<std::size_t>(i)] = ne;
+    nstagp[i] = ns;
+    neclipp[i] = ne;
   }
 
   for (int i = 0; i < n; i++) {
