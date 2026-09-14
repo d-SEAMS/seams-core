@@ -223,3 +223,38 @@ TEST_CASE("atomsFromCages extracts unique atom indices from cage list",
   // Should have unique atoms from all 3 rings
   REQUIRE(atoms.size() == 12); // 0-11, all unique
 }
+
+TEST_CASE("clusterCages accepts zero cages", "[bulkTUM]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud.box = {10.0, 10.0, 10.0};
+  yCloud.boxLow = {0.0, 0.0, 0.0};
+  yCloud.nop = 1;
+  molSys::Point<double> pt;
+  pt.type = 1;
+  pt.atomID = 1;
+  yCloud.pts.push_back(pt);
+  std::string tmpPath =
+      fs::temp_directory_path().append("dseams_test_tum_noring/").string();
+  std::vector<std::vector<int>> rings;
+  std::vector<cage::Cage> cageList;
+  REQUIRE(tum3::clusterCages(yCloud, tmpPath, rings, cageList, 0, 0) == 0);
+  std::error_code ec;
+  fs::remove_all(tmpPath, ec);
+}
+
+TEST_CASE("updateRMSDatom ignores a failed Horn sentinel", "[bulkTUM]") {
+  std::vector<std::vector<int>> rings = {{0, 1, 2, 3, 4, 5}};
+  cage::Cage cageUnit;
+  cageUnit.type = cage::cageType::HexC;
+  cageUnit.rings = {0};
+  std::vector<double> rmsdPerAtom(6, 0.5);
+  std::vector<int> noOfCommonAtoms(6, 1);
+  std::vector<cage::iceType> atomTypes(6, cage::iceType::hc);
+  REQUIRE(tum3::updateRMSDatom(rings, cageUnit, -1.0, rmsdPerAtom,
+                               noOfCommonAtoms, atomTypes) == 0);
+  for (int i = 0; i < 6; i++) {
+    REQUIRE_THAT(rmsdPerAtom[static_cast<std::size_t>(i)],
+                 Catch::Matchers::WithinAbs(0.5, 1e-15));
+    REQUIRE(noOfCommonAtoms[static_cast<std::size_t>(i)] == 1);
+  }
+}

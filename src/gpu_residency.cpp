@@ -75,8 +75,14 @@ Footprint estimateFootprint(int nAtoms, int nFrames, int kMax,
   f.labelBytes = alignUp(nf * n * 2 * sizeof(int));
   const std::size_t flags = alignUp(nf * maxRings * 2 * sizeof(int));
   const std::size_t cells = alignUp(nf * n * sizeof(int));
+  // Workspace::ensure also allocates basal pairs (maxRings*8) plus
+  // nPairs and dropped counters.
+  const std::size_t maxPairs = maxRings * 8;
+  const std::size_t pairBytes = alignUp(nf * maxPairs * 2 * sizeof(int)) +
+                                alignUp(nf * sizeof(int)) +
+                                alignUp(nf * sizeof(int));
   f.totalBytes = f.xyzBytes + boxBytes + f.nlistBytes + f.ringsBytes +
-                 f.labelBytes + flags + cells;
+                 f.labelBytes + flags + cells + pairBytes;
   return f;
 }
 

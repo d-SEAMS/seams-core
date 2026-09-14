@@ -219,7 +219,7 @@ extern "C" __global__ void mutual_knn(const int* cols,
     const int j = cols[row + a];
     bool back = false;
     const int jrow = (f * nAtoms + j) * kMax;
-    for (int t = 0; t < kMax; ++t) {
+    for (int t = 0; t < 4; ++t) {
       if (cols[jrow + t] < 0) break;
       if (cols[jrow + t] == i) {
         back = true;
