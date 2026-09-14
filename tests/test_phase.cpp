@@ -9,6 +9,7 @@
 #include <seams_c_api.h>
 #include <seams_input.hpp>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstdlib>
@@ -133,6 +134,73 @@ TEST_CASE("ice XXI library rejects a 152-site simple-cubic BCT packing",
   molSys::PointCloud<molSys::Point<double>, double> ic;
   ic = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, ic, 1);
   REQUIRE_FALSE(phase::iceXXILibrary(ic).match);
+}
+
+static double wrapLen(double x, double L) {
+  if (L <= 0.0) {
+    return x;
+  }
+  x = std::fmod(x, L);
+  if (x < 0.0) {
+    x += L;
+  }
+  return x;
+}
+
+static molSys::PointCloud<molSys::Point<double>, double>
+iceIhInLeeBox(int nSites) {
+  const double aIh = 4.5115;
+  const double cIh = 7.3463;
+  const double bIh = aIh * std::sqrt(3.0);
+  const double a = 20.197;
+  const double c = 7.891;
+  const double frac[4][3] = {{1.0 / 3.0, 2.0 / 3.0, 1.0 / 16.0},
+                             {2.0 / 3.0, 1.0 / 3.0, 9.0 / 16.0},
+                             {2.0 / 3.0, 1.0 / 3.0, 15.0 / 16.0},
+                             {1.0 / 3.0, 2.0 / 3.0, 7.0 / 16.0}};
+  std::vector<std::array<double, 3>> xyz;
+  xyz.reserve(static_cast<std::size_t>(nSites));
+  for (int ix = 0; static_cast<int>(xyz.size()) < nSites; ix++) {
+    for (int iy = 0; static_cast<int>(xyz.size()) < nSites; iy++) {
+      for (int s = 0; s < 2 && static_cast<int>(xyz.size()) < nSites; s++) {
+        const double dx = (static_cast<double>(ix) + 0.5 * s) * aIh;
+        const double dy = (static_cast<double>(iy) + 0.5 * s) * bIh;
+        for (const auto &f : frac) {
+          if (static_cast<int>(xyz.size()) >= nSites) {
+            break;
+          }
+          const double x = aIh * f[0] + (-0.5 * aIh) * f[1] + dx;
+          const double y = (0.5 * aIh * std::sqrt(3.0)) * f[1] + dy;
+          const double z = cIh * f[2];
+          xyz.push_back({x, y, z});
+        }
+      }
+    }
+  }
+  double maxX = 1.0;
+  double maxY = 1.0;
+  double maxZ = 1.0;
+  for (const auto &p : xyz) {
+    maxX = std::max(maxX, p[0]);
+    maxY = std::max(maxY, p[1]);
+    maxZ = std::max(maxZ, p[2]);
+  }
+  for (auto &p : xyz) {
+    p[0] = wrapLen(p[0] / maxX * a, a);
+    p[1] = wrapLen(p[1] / maxY * a, a);
+    p[2] = wrapLen(p[2] / maxZ * c, c);
+  }
+  return cloudFrom(xyz, {a, a, c});
+}
+
+TEST_CASE("ice XXI library rejects ice Ih in the Lee box", "[phase]") {
+  auto ih = iceIhInLeeBox(152);
+  REQUIRE(ih.nop == 152);
+  const auto hit = phase::iceXXILibrary(ih);
+  REQUIRE(hit.nSites == 152);
+  REQUIRE_THAT(hit.a, Catch::Matchers::WithinAbs(20.197, 1e-9));
+  REQUIRE_THAT(hit.c, Catch::Matchers::WithinAbs(7.891, 1e-9));
+  REQUIRE_FALSE(hit.match);
 }
 
 TEST_CASE("ice XXI library hits the Lee 2026 I-42d oxygen cell", "[phase]") {
