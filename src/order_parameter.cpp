@@ -116,61 +116,45 @@ std::vector<double> topoparam::projAreaSingleRing(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &ring) {
   //
-  int iatomIndex, jatomIndex; // Atom indices of the i^th and j^th atoms
-  int ringSize = ring.size(); // Number of nodes in the ring
-  double areaXY, areaXZ, areaYZ;
-  double x_iatom, y_iatom, z_iatom; // Coordinates of iatom
-  double x_jatom, y_jatom, z_jatom; // Coordinates of jatom
-  // ----------------------------------------
-  // Calculate projected area onto the XY, YZ and XZ planes for basal1
+  const int ringSize = static_cast<int>(ring.size());
+  if (ringSize < 3) {
+    return {0.0, 0.0, 0.0};
+  }
+  double areaXY = 0.0;
+  double areaXZ = 0.0;
+  double areaYZ = 0.0;
+  double x_iatom, y_iatom, z_iatom;
+  double x_jatom, y_jatom, z_jatom;
 
-  // Init the projected area
-  areaXY = 0.0;
-  areaXZ = 0.0;
-  areaYZ = 0.0;
-
-  jatomIndex = ring[0];
-
-  // All points except the first pair
+  // Unwrap every vertex against ring[0]. Pairwise MIC per edge is not a
+  // ring unwrap: shoelace needs one origin.
+  std::vector<double> xs(static_cast<std::size_t>(ringSize));
+  std::vector<double> ys(static_cast<std::size_t>(ringSize));
+  std::vector<double> zs(static_cast<std::size_t>(ringSize));
+  const int origin = ring[0];
+  const auto &p0 = yCloud.pts[static_cast<std::size_t>(origin)];
+  xs[0] = p0.x;
+  ys[0] = p0.y;
+  zs[0] = p0.z;
   for (int k = 1; k < ringSize; k++) {
-    iatomIndex = ring[k]; // Current vertex
-
-    // --------------------------------------------------------------------
-    // SHIFT PARTICLES TEMPORARILY (IN CASE OF UNWRAPPED COORDINATES)
-    gen::unwrappedCoordShift(yCloud, iatomIndex, jatomIndex, &x_iatom, &y_iatom,
-                             &z_iatom, &x_jatom, &y_jatom, &z_jatom);
-    // --------------------------------------------------------------------
-
-    // Add to the polygon area
-    // ------
-    // XY plane
-    areaXY += (x_jatom + x_iatom) * (y_jatom - y_iatom);
-    // ------
-    // XZ plane
-    areaXZ += (x_jatom + x_iatom) * (z_jatom - z_iatom);
-    // ------
-    // YZ plane
-    areaYZ += (y_jatom + y_iatom) * (z_jatom - z_iatom);
-    // ------
-    jatomIndex = iatomIndex;
+    const auto dr = gen::relDist(yCloud, origin, ring[k]);
+    xs[static_cast<std::size_t>(k)] = p0.x - dr[0];
+    ys[static_cast<std::size_t>(k)] = p0.y - dr[1];
+    zs[static_cast<std::size_t>(k)] = p0.z - dr[2];
   }
 
-  // Closure point
-  iatomIndex = ring[0];
-  // Unwrapped coordinates needed
-  gen::unwrappedCoordShift(yCloud, iatomIndex, jatomIndex, &x_iatom, &y_iatom,
-                           &z_iatom, &x_jatom, &y_jatom, &z_jatom);
-  // ------
-  // XY plane
-  areaXY += (x_jatom + x_iatom) * (y_jatom - y_iatom);
-  // ------
-  // XZ plane
-  areaXZ += (x_jatom + x_iatom) * (z_jatom - z_iatom);
-  // ------
-  // YZ plane
-  areaYZ += (y_jatom + y_iatom) * (z_jatom - z_iatom);
-  // ------
-  // The actual projected area is half of this
+  for (int k = 0; k < ringSize; k++) {
+    const int kn = (k + 1) % ringSize;
+    x_iatom = xs[static_cast<std::size_t>(k)];
+    y_iatom = ys[static_cast<std::size_t>(k)];
+    z_iatom = zs[static_cast<std::size_t>(k)];
+    x_jatom = xs[static_cast<std::size_t>(kn)];
+    y_jatom = ys[static_cast<std::size_t>(kn)];
+    z_jatom = zs[static_cast<std::size_t>(kn)];
+    areaXY += (x_jatom + x_iatom) * (y_jatom - y_iatom);
+    areaXZ += (x_jatom + x_iatom) * (z_jatom - z_iatom);
+    areaYZ += (y_jatom + y_iatom) * (z_jatom - z_iatom);
+  }
   areaXY *= 0.5;
   areaXZ *= 0.5;
   areaYZ *= 0.5;
@@ -320,13 +304,13 @@ namespace {
 std::unordered_map<int, std::array<double, 3>>
 hhAxes(const molSys::PointCloud<molSys::Point<double>, double> &cloud,
        int oxygenType, int hydrogenType) {
-  std::unordered_map<int, std::vector<std::array<double, 3>>> hs;
+  std::unordered_map<int, std::vector<int>> hs;
   std::unordered_map<int, std::array<double, 3>> out;
-  for (const auto &p : cloud.pts) {
-    if (p.type != hydrogenType) {
+  for (int i = 0; i < cloud.nop; i++) {
+    if (cloud.pts[static_cast<std::size_t>(i)].type != hydrogenType) {
       continue;
     }
-    hs[p.molID].push_back({p.x, p.y, p.z});
+    hs[cloud.pts[static_cast<std::size_t>(i)].molID].push_back(i);
   }
   for (const auto &p : cloud.pts) {
     if (p.type != oxygenType) {
@@ -336,9 +320,8 @@ hhAxes(const molSys::PointCloud<molSys::Point<double>, double> &cloud,
     if (it == hs.end() || it->second.size() < 2) {
       continue;
     }
-    std::array<double, 3> v = {it->second[0][0] - it->second[1][0],
-                               it->second[0][1] - it->second[1][1],
-                               it->second[0][2] - it->second[1][2]};
+    const auto dr = gen::relDist(cloud, it->second[0], it->second[1]);
+    std::array<double, 3> v = {dr[0], dr[1], dr[2]};
     const double n =
         std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
     if (n <= 0.0) {
