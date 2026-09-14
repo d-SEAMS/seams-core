@@ -331,3 +331,37 @@ TEST_CASE("changeHexCageOrder fills Eigen matrix for HC matching",
   REQUIRE(pts.rows() == 12);
   REQUIRE(pts.cols() == 3);
 }
+
+TEST_CASE("relOrderHC miss returns 1 and empty correspondence",
+          "[pntCorrespondence]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {40.0, 40.0, 40.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 12;
+  molSys::Point<double> pt;
+  pt.type = 1;
+  for (int i = 0; i < 12; i++) {
+    pt.atomID = i;
+    pt.x = static_cast<double>(i % 6);
+    pt.y = 0.0;
+    pt.z = (i < 6) ? 0.0 : 20.0;
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i] = i;
+  }
+  std::vector<int> basal1 = {0, 1, 2, 3, 4, 5};
+  std::vector<int> basal2 = {6, 7, 8, 9, 10, 11};
+  std::vector<std::vector<int>> nList(12);
+  for (int i = 0; i < 6; i++) {
+    const int nxt = (i + 1) % 6;
+    const int prv = (i + 5) % 6;
+    nList[static_cast<std::size_t>(i)] = {i, nxt, prv};
+    nList[static_cast<std::size_t>(i + 6)] = {i + 6, nxt + 6, prv + 6};
+  }
+  std::vector<int> matchedBasal1(6, 99);
+  std::vector<int> matchedBasal2(6, 99);
+  const int ret = pntToPnt::relOrderHC(cloud, basal1, basal2, nList,
+                                       matchedBasal1, matchedBasal2);
+  REQUIRE(ret == 1);
+  REQUIRE(matchedBasal1.empty());
+  REQUIRE(matchedBasal2.empty());
+}

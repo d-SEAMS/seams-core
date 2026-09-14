@@ -597,3 +597,32 @@ TEST_CASE("normHeightPercent uses recovered lz not tilt",
   const double h = topoparam::normHeightPercent(cloud, 10, 2.5);
   REQUIRE_THAT(h, Catch::Matchers::WithinAbs(50.0, 1e-10));
 }
+
+TEST_CASE("projAreaSingleRing unwraps a wrapping rectangle",
+          "[order_parameter]") {
+  auto cloud = makeCloud(
+      {{0.1, 0.1, 0.0}, {9.9, 0.1, 0.0}, {9.9, 0.9, 0.0}, {0.1, 0.9, 0.0}},
+      10.0);
+  std::vector<int> ring = {0, 1, 2, 3};
+  const auto areas = topoparam::projAreaSingleRing(cloud, ring);
+  REQUIRE_THAT(areas[0], Catch::Matchers::WithinAbs(0.16, 1e-9));
+}
+
+TEST_CASE("jumpRotorTau90 does not fire when a water crosses the box face",
+          "[order_parameter]") {
+  auto water = [](double ox, double h1x, double h2x) {
+    auto cloud = makeCloud({{ox, 5.0, 5.0}, {h1x, 5.0, 5.0}, {h2x, 5.0, 5.0}},
+                           10.0);
+    cloud.pts[0].type = 1;
+    cloud.pts[0].molID = 1;
+    cloud.pts[1].type = 2;
+    cloud.pts[1].molID = 1;
+    cloud.pts[2].type = 2;
+    cloud.pts[2].molID = 1;
+    return cloud;
+  };
+  const auto f0 = water(5.0, 5.1, 4.9);
+  const auto f1 = water(0.05, 0.15, 9.95);
+  const double tau = topoparam::jumpRotorTau90(f0, f1, 1.0, 1, 2);
+  REQUIRE_FALSE(std::isfinite(tau));
+}
