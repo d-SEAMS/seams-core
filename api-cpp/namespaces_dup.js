@@ -151,7 +151,8 @@ var namespaces_dup =
       [ "lookupTableQ8", "group__chill.html#gac7a53e67f5244c83d541c78d7d7bf710", null ],
       [ "lookupTableQ8Vec", "group__chill.html#gadf0ba61f373430a782cbee2886628211", null ],
       [ "radialCoord", "group__chill.html#ga514fadfbfeabee5d144ef4102fb3004d", null ],
-      [ "spheriHarmo", "group__chill.html#gaa9220b76da7400c9d934fa08ceeeba7a", null ]
+      [ "spheriHarmo", "group__chill.html#gaa9220b76da7400c9d934fa08ceeeba7a", null ],
+      [ "spheriHarmoInto", "group__chill.html#ga54a26a87d40f9d1be9253f71ecac02c0", null ]
     ] ],
     [ "topo", "namespacetopo.html", "namespacetopo" ],
     [ "topoparam", "namespacetopoparam.html", "namespacetopoparam" ],

@@ -1,5 +1,6 @@
 var NAVTREEINDEX1 =
 {
+"group__nneigh.html#ga786c8abbd20d2751403eb4f2c603cd95":[1,8,14],
 "group__nneigh.html#ga80f555acadad22b5edcc4af8285006ed":[1,8,32],
 "group__nneigh.html#ga81af9074f6b9311b1cba1321b64f21d7":[1,8,33],
 "group__nneigh.html#ga87d0da315b8e67fc843f91099dceb349":[1,8,9],
@@ -248,6 +249,5 @@ var NAVTREEINDEX1 =
 "namespacephase.html#a45206ea8c1350d175974e9a54cde9c71a34131c9eef54abfe3aaed6fa275d01dd":[2,0,11,1,4],
 "namespacephase.html#a45206ea8c1350d175974e9a54cde9c71a795f3202b17cb6bc3d4b771d8c6c9eaf":[2,0,11,1,0],
 "namespacephase.html#a45206ea8c1350d175974e9a54cde9c71a7bdff76536f12a7c5ffde207e72cfe3a":[2,0,11,1,1],
-"namespacephase.html#a45206ea8c1350d175974e9a54cde9c71ac112c8b88569f1cb2d8f22eca738a4b7":[2,0,11,1,3],
-"namespacephase.html#a45206ea8c1350d175974e9a54cde9c71ad4f501681f5aef29d242c2b6e4d988f4":[2,0,11,1,2]
+"namespacephase.html#a45206ea8c1350d175974e9a54cde9c71ac112c8b88569f1cb2d8f22eca738a4b7":[2,0,11,1,3]
 };

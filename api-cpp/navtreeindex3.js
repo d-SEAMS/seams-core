@@ -1,5 +1,6 @@
 var NAVTREEINDEX3 =
 {
+"structcage_1_1FoundCage.html#af7b6c0760f27407dd0b2b4da91155d3b":[4,0,0,1,5],
 "structcage_1_1Signature.html":[1,3,1],
 "structchill_1_1BondClassifier.html":[1,2,4],
 "structchill_1_1LinearClassifier.html":[2,0,3,1],
@@ -248,6 +249,5 @@ var NAVTREEINDEX3 =
 "structsite_1_1IonEnvironment.html#a02bd5a73c0cc445e9f466ed3add1835a":[4,0,12,3,1],
 "structsite_1_1IonEnvironment.html#a243d509ea9c0e3eba197c7fcf74936d8":[2,0,20,3,3],
 "structsite_1_1IonEnvironment.html#a243d509ea9c0e3eba197c7fcf74936d8":[4,0,12,3,3],
-"structsite_1_1IonEnvironment.html#a277b78dca0eb1dddf9a9ff7698a60706":[2,0,20,3,6],
-"structsite_1_1IonEnvironment.html#a277b78dca0eb1dddf9a9ff7698a60706":[4,0,12,3,6]
+"structsite_1_1IonEnvironment.html#a277b78dca0eb1dddf9a9ff7698a60706":[2,0,20,3,6]
 };

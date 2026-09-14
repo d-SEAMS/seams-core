@@ -1,5 +1,6 @@
 var NAVTREEINDEX4 =
 {
+"structsite_1_1IonEnvironment.html#a277b78dca0eb1dddf9a9ff7698a60706":[4,0,12,3,6],
 "structsite_1_1IonEnvironment.html#a30493f96ed37b238ce348fc7abbffc72":[2,0,20,3,4],
 "structsite_1_1IonEnvironment.html#a30493f96ed37b238ce348fc7abbffc72":[4,0,12,3,4],
 "structsite_1_1IonEnvironment.html#a34ba0e96160a91395416185d4c3dfb94":[2,0,20,3,2],

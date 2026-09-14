@@ -46,6 +46,7 @@ var group__chill =
     [ "chill::reclassifyWater", "group__chill.html#gaaad5ad6884511e350e8b2cda1baeaea2", null ],
     [ "chill::registerBondClassifier", "group__chill.html#gafdbd8e7d77ca3e23619b0073b02a2e05", null ],
     [ "sph::spheriHarmo", "group__chill.html#gaa9220b76da7400c9d934fa08ceeeba7a", null ],
+    [ "sph::spheriHarmoInto", "group__chill.html#ga54a26a87d40f9d1be9253f71ecac02c0", null ],
     [ "chill::steinhardtQl", "group__chill.html#gad60f25b03dc9b26dc62d80fd3fac53c3", null ],
     [ "chill::BondClassifier::coordinationNumber", "group__chill.html#ga85100f5928056281b3c93e4dca7a1d5b", null ],
     [ "chill::BondClassifier::eclipsedMax", "group__chill.html#gaa9f8b29d2f9ab31e7cda7a399f2b4466", null ],
