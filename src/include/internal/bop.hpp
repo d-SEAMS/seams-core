@@ -364,6 +364,10 @@ namespace sph {
 std::vector<std::complex<double>>
 spheriHarmo(int orderL, std::array<double, 2> radialCoord);
 
+//! Fill `out` with Y_lm, m = -l .. +l. Reuses `out` capacity.
+void spheriHarmoInto(int orderL, std::array<double, 2> radialCoord,
+                     std::vector<std::complex<double>> &out);
+
 std::array<double, 2> radialCoord(std::array<double, 3> cartCoord);
 
 //! Lookup table for Q3

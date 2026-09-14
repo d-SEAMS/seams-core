@@ -207,6 +207,7 @@ std::vector<double> soapOne(const Cloud &yCloud, int iatom,
                                0.0);
   }
   const double sigma = rcut / static_cast<double>(nMax);
+  std::vector<std::complex<double>> ylmScratch;
   auto addNeighbour = [&](const Vec3 &d) {
     const double r = std::sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
     if (r <= 0.0 || r >= rcut) {
@@ -224,12 +225,10 @@ std::vector<double> soapOne(const Cloud &yCloud, int iatom,
               g * (0.5 / std::sqrt(std::numbers::pi));
           continue;
         }
-        if (l != 3 && l != 4 && l != 6 && l != 8) {
-          continue;
-        }
-        const auto ylm = sph::spheriHarmo(l, angles);
+        sph::spheriHarmoInto(l, angles, ylmScratch);
         for (int m = 0; m < 2 * l + 1; m++) {
-          coeff[static_cast<size_t>(n) * nComp + base + m] += g * ylm[m];
+          coeff[static_cast<size_t>(n) * nComp + base + m] +=
+              g * ylmScratch[static_cast<size_t>(m)];
         }
       }
     }
