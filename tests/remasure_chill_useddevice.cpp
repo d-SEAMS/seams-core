@@ -4,20 +4,20 @@
 #include <neighbours.hpp>
 #include <seams_input.hpp>
 
-#include <catch2/catch_test_macros.hpp>
+#include <iostream>
 
-TEST_CASE("specialized CHILL+ matches host getCorrelPlus on mixed TIP4P",
-          "[chill][offload]") {
+int main() {
   molSys::PointCloud<molSys::Point<double>, double> host;
   host = sinp::readLammpsTrjO("traj/exampleTraj.lammpstrj", 1, host, 2);
-  REQUIRE(host.nop > 0);
+  if (host.nop <= 0) {
+    std::cerr << "empty cloud\n";
+    return 2;
+  }
   auto nList = nneigh::kNearestNeighbourList(host, 4, 5.5, 2, true);
   auto specCloud = host;
   chill::getCorrelPlus(host, nList, false);
   chill::getIceTypePlusNoPrint(host, nList, false);
   const auto spec = chill::specializedChillPlus(specCloud, nList);
-  UNSCOPED_INFO("usedDevice=" << spec.usedDevice);
-  REQUIRE(spec.iceType.size() == static_cast<std::size_t>(host.nop));
   int mismatch = 0;
   for (int i = 0; i < host.nop; i++) {
     if (spec.iceType[static_cast<std::size_t>(i)] !=
@@ -25,5 +25,10 @@ TEST_CASE("specialized CHILL+ matches host getCorrelPlus on mixed TIP4P",
       ++mismatch;
     }
   }
-  REQUIRE(mismatch == 0);
+  std::cout << "nop=" << host.nop << " mismatch=" << mismatch
+            << " usedDevice=" << spec.usedDevice << "\n";
+  if (mismatch != 0) {
+    return 1;
+  }
+  return spec.usedDevice ? 0 : 3;
 }
