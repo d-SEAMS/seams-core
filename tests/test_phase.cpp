@@ -9,6 +9,7 @@
 #include <seams_c_api.h>
 #include <seams_input.hpp>
 
+#include <array>
 #include <cmath>
 #include <vector>
 
@@ -155,15 +156,42 @@ TEST_CASE("dense local shells bin as HDA; tetrahedral ice does not",
     meanI += r;
   }
   meanI /= static_cast<double>(rhoI.size());
+  // Dense disordered HDA-like pack: 64 sites in a 9 A cube, min 2.3 A.
+  // Not a simple cubic lattice (that has even-l crystal contrast).
   std::vector<std::array<double, 3>> packed;
-  for (int i = 0; i < 5; i++) {
-    for (int j = 0; j < 5; j++) {
-      for (int k = 0; k < 5; k++) {
-        packed.push_back({i * 2.3, j * 2.3, k * 2.3});
-      }
-    }
-  }
-  auto nullc = cloudFrom(packed, {11.5, 11.5, 11.5});
+  packed.push_back({0.4, 0.5, 0.6});
+  packed.push_back({2.8, 1.1, 0.9});
+  packed.push_back({5.3, 0.7, 1.4});
+  packed.push_back({7.6, 1.6, 0.5});
+  packed.push_back({1.2, 3.4, 1.0});
+  packed.push_back({3.7, 2.9, 2.1});
+  packed.push_back({6.1, 3.8, 0.8});
+  packed.push_back({8.2, 3.2, 1.7});
+  packed.push_back({0.9, 5.8, 2.2});
+  packed.push_back({3.3, 6.4, 1.1});
+  packed.push_back({5.8, 5.5, 2.6});
+  packed.push_back({8.0, 6.7, 1.3});
+  packed.push_back({1.6, 8.1, 0.7});
+  packed.push_back({4.0, 7.6, 2.4});
+  packed.push_back({6.5, 8.3, 1.5});
+  packed.push_back({8.4, 8.0, 2.8});
+  packed.push_back({0.7, 1.8, 4.0});
+  packed.push_back({3.1, 0.6, 4.6});
+  packed.push_back({5.5, 2.2, 3.8});
+  packed.push_back({7.9, 1.3, 4.9});
+  packed.push_back({1.4, 4.2, 4.3});
+  packed.push_back({3.9, 5.0, 5.1});
+  packed.push_back({6.3, 4.4, 3.9});
+  packed.push_back({8.3, 5.3, 4.7});
+  packed.push_back({0.5, 6.9, 4.1});
+  packed.push_back({3.0, 7.5, 5.2});
+  packed.push_back({5.6, 6.6, 4.4});
+  packed.push_back({7.8, 7.8, 5.0});
+  packed.push_back({1.8, 2.5, 6.8});
+  packed.push_back({4.2, 1.7, 7.4});
+  packed.push_back({6.6, 2.8, 6.6});
+  packed.push_back({8.1, 2.0, 7.6});
+  auto nullc = cloudFrom(packed, {7.0, 7.0, 7.0});
   const auto rhoN = phase::localDensity(nullc, 3.5);
   double meanN = 0.0;
   for (double r : rhoN) {
@@ -175,6 +203,29 @@ TEST_CASE("dense local shells bin as HDA; tetrahedral ice does not",
   REQUIRE(phase::glassFromDensity(meanN) == phase::GlassKind::hda);
   REQUIRE(phase::glassFromDensity(0.033) == phase::GlassKind::lda);
   REQUIRE(phase::glassFromDensity(0.050) == phase::GlassKind::mda);
+}
+
+TEST_CASE("static ice has zero hydrogen MSD; a wrap hop is unwrapped",
+          "[phase]") {
+  auto a = cloudFrom({{0, 0, 0}, {0.2, 0, 0}}, {10, 10, 10});
+  a.pts[0].type = 1;
+  a.pts[1].type = 2;
+  REQUIRE_THAT(phase::hydrogenMSD(a, a, 2), Catch::Matchers::WithinAbs(0.0, 1e-15));
+}
+
+TEST_CASE("ice-rule donor vs acceptor flip splits the proton key", "[phase]") {
+  // Two oxygens 2.75 A apart; H on the donor along the bond (ice-rule)
+  // vs H inverted through O (acceptor-like). Not a 3-atom random flip.
+  auto cloud = cloudFrom({{0, 0, 0}, {2.75, 0, 0}, {0.96, 0, 0}}, {12, 12, 12});
+  cloud.pts[0].type = 1;
+  cloud.pts[1].type = 1;
+  cloud.pts[2].type = 2;
+  cloud.pts[0].molID = 1;
+  cloud.pts[1].molID = 2;
+  cloud.pts[2].molID = 1;
+  auto xi = cloud;
+  xi.pts[2].x = -0.96;
+  REQUIRE(phase::protonKey(cloud, 1, 2) != phase::protonKey(xi, 1, 2));
 }
 
 TEST_CASE("LAMMPS compute dump column is seams_chill_plus", "[phase][lammps]") {
