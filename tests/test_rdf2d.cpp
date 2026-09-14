@@ -157,6 +157,46 @@ TEST_CASE("sampleRDF_AA produces histogram with correct bin count", "[rdf2d]") {
   REQUIRE(hist[1] == 0);
 }
 
+TEST_CASE("sampleRDF_AA cutoff past L/2 matches MIC-once", "[rdf2d]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {5.0, 5.0, 5.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  molSys::Point<double> p0, p1;
+  p0.type = 1;
+  p0.atomID = 0;
+  p0.molID = 0;
+  p0.x = 0.0;
+  p0.y = 0.0;
+  p0.z = 0.0;
+  p1.type = 1;
+  p1.atomID = 1;
+  p1.molID = 1;
+  p1.x = 2.0;
+  p1.y = 0.0;
+  p1.z = 0.0;
+  cloud.pts.push_back(p0);
+  cloud.pts.push_back(p1);
+  cloud.nop = 2;
+  cloud.idIndexMap[0] = 0;
+  cloud.idIndexMap[1] = 1;
+  REQUIRE_THAT(gen::periodicDist(cloud, 0, 1),
+               Catch::Matchers::WithinAbs(2.0, 1e-12));
+  const double cutoff = 4.0;
+  const double binwidth = 0.5;
+  const int nbin = 8;
+  auto hist = rdf2::sampleRDF_AA(cloud, cutoff, binwidth, nbin);
+  REQUIRE(hist.size() == static_cast<std::size_t>(nbin));
+  REQUIRE(hist[4] == 2);
+  int extra = 0;
+  for (int i = 0; i < nbin; i++) {
+    if (i != 4) {
+      extra += hist[static_cast<std::size_t>(i)];
+    }
+  }
+  REQUIRE(extra == 0);
+}
+
 TEST_CASE("sampleRDF_AA histograms the tilt a-image pair", "[rdf2d]") {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
