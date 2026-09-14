@@ -275,29 +275,100 @@ std::vector<int> nearestNeighbourIndices(
   return nearest;
 }
 
+void associatedP(int L, double x, std::vector<double> &p) {
+  p.assign(static_cast<std::size_t>(L) + 1, 0.0);
+  if (L < 0) {
+    return;
+  }
+  const double s = std::sqrt(std::max(0.0, 1.0 - x * x));
+  double pmm = 1.0;
+  for (int m = 0; m <= L; m++) {
+    if (m > 0) {
+      pmm *= -(2.0 * m - 1.0) * s;
+    }
+    if (m == L) {
+      p[static_cast<std::size_t>(m)] = pmm;
+      break;
+    }
+    double pll2 = pmm;
+    double pll1 = x * (2.0 * m + 1.0) * pmm;
+    if (L == m + 1) {
+      p[static_cast<std::size_t>(m)] = pll1;
+      continue;
+    }
+    double pll = 0.0;
+    for (int ll = m + 2; ll <= L; ll++) {
+      pll = (x * (2.0 * ll - 1.0) * pll1 - (ll + m - 1.0) * pll2) /
+            static_cast<double>(ll - m);
+      pll2 = pll1;
+      pll1 = pll;
+    }
+    p[static_cast<std::size_t>(m)] = pll;
+  }
+}
+
+double nlmNorm(int l, int m) {
+  constexpr double pi = 3.14159265358979323846;
+  double f = (2.0 * l + 1.0) / (4.0 * pi);
+  for (int k = 1; k <= 2 * m; k++) {
+    f /= static_cast<double>(l - m + k);
+  }
+  return std::sqrt(f);
+}
+
+void spheriHarmoGeneral(int orderL, std::array<double, 2> angles,
+                        std::vector<std::complex<double>> &out) {
+  out.assign(static_cast<std::size_t>(2 * orderL + 1), {0.0, 0.0});
+  if (orderL < 0) {
+    return;
+  }
+  std::vector<double> p;
+  associatedP(orderL, std::cos(angles[1]), p);
+  const double phi = angles[0];
+  for (int m = 0; m <= orderL; m++) {
+    const double amp = nlmNorm(orderL, m) * p[static_cast<std::size_t>(m)];
+    const std::complex<double> yp =
+        amp * std::polar(1.0, static_cast<double>(m) * phi);
+    out[static_cast<std::size_t>(orderL + m)] = yp;
+    if (m == 0) {
+      continue;
+    }
+    const double sign = (m % 2 == 0) ? 1.0 : -1.0;
+    out[static_cast<std::size_t>(orderL - m)] = sign * std::conj(yp);
+  }
+}
+
+void harmonicPairInto(int orderL, std::array<double, 2> angles,
+                      std::vector<std::complex<double>> &out) {
+  const AngularTerms terms(angles[1], angles[0]);
+  out.resize(static_cast<std::size_t>(2 * orderL + 1));
+  for (int m = 0; m <= orderL; m++) {
+    const auto [negative, positive] = harmonicPair(orderL, m, terms);
+    out[static_cast<std::size_t>(orderL - m)] = negative;
+    out[static_cast<std::size_t>(orderL + m)] = positive;
+  }
+}
+
 } // namespace
 
-/**
- * @details Function for calculating spherical harmonics. Dispatches to
- *  the closed forms for l=3, l=4 and l=6.
- *
- *  @param[in] orderL The int value of l (must be 3, 4 or 6)
- *  @param[in] radialCoord Array containing the polar and azimuth angles
- *  @return a complex vector of length 2l+1
- */
+void sph::spheriHarmoInto(int orderL, std::array<double, 2> radialCoord,
+                          std::vector<std::complex<double>> &out) {
+  if (orderL < 0) {
+    out.clear();
+    return;
+  }
+  if (orderL == 3 || orderL == 4 || orderL == 6 || orderL == 8) {
+    harmonicPairInto(orderL, radialCoord, out);
+    return;
+  }
+  spheriHarmoGeneral(orderL, radialCoord, out);
+}
+
 std::vector<std::complex<double>>
 sph::spheriHarmo(int orderL, std::array<double, 2> radialCoord) {
-  if (orderL == 3) {
-    return sph::lookupTableQ3Vec(radialCoord);
-  } else if (orderL == 4) {
-    return sph::lookupTableQ4Vec(radialCoord);
-  } else if (orderL == 6) {
-    return sph::lookupTableQ6Vec(radialCoord);
-  } else if (orderL == 8) {
-    return sph::lookupTableQ8Vec(radialCoord);
-  }
-  // Fallback: return zeros for unsupported l values
-  return std::vector<std::complex<double>>(2 * orderL + 1, {0.0, 0.0});
+  std::vector<std::complex<double>> out;
+  spheriHarmoInto(orderL, radialCoord, out);
+  return out;
 }
 
 
@@ -524,10 +595,10 @@ void chill::classifyBonds(
 
       // Now add over all nearest neighbours
       if (j == 0) {
-        QlmTotal.ptq[iatom].ylm = sph::spheriHarmo(l, angles);
+        sph::spheriHarmoInto(l, angles, QlmTotal.ptq[iatom].ylm);
         continue;
       }
-      yl = sph::spheriHarmo(l, angles);
+      sph::spheriHarmoInto(l, angles, yl);
       for (int m = 0; m < 2 * l + 1; m++) {
         QlmTotal.ptq[iatom].ylm[m] += yl[m];
       }
@@ -979,11 +1050,11 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
       angles[0] = atan2(delta[0], delta[1]);
 
       if (first) {
-        QlmTotal.ptq[iatom].ylm = sph::lookupTableQ6Vec(angles);
+        sph::spheriHarmoInto(l, angles, QlmTotal.ptq[iatom].ylm);
         first = false;
         continue;
       }
-      yl = sph::spheriHarmo(l, angles);
+      sph::spheriHarmoInto(l, angles, yl);
       for (int m = 0; m < 2 * l + 1; m++) {
         QlmTotal.ptq[iatom].ylm[m] += yl[m];
       }

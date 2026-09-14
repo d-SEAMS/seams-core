@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <bop.hpp>
 #include <ira_sofi.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
@@ -226,4 +227,42 @@ TEST_CASE("voronoiFeatures matches voronoiFeature for atom 0",
   for (size_t i = 0; i < 3; i++) {
     REQUIRE_THAT(all[0][i], Catch::Matchers::WithinAbs(one[i], 1e-12));
   }
+}
+
+TEST_CASE("spheriHarmo l=6 matches the Q6 lookup table", "[structure_desc]") {
+  const std::array<double, 2> angles = {0.4, 1.1};
+  const auto a = sph::spheriHarmo(6, angles);
+  const auto b = sph::lookupTableQ6Vec(angles);
+  REQUIRE(a.size() == 13);
+  REQUIRE(b.size() == 13);
+  for (size_t i = 0; i < a.size(); i++) {
+    REQUIRE_THAT(a[i].real(), Catch::Matchers::WithinAbs(b[i].real(), 1e-12));
+    REQUIRE_THAT(a[i].imag(), Catch::Matchers::WithinAbs(b[i].imag(), 1e-12));
+  }
+}
+
+TEST_CASE("soapSpectrum includes l=1 and l=2", "[structure_desc]") {
+  auto cloud = fcc();
+  auto nList = nneigh::neighListO(3.2, cloud, 1);
+  auto spec = chill::soapSpectrum(cloud, 0, nList, 2, 2, 3.2);
+  REQUIRE(spec.size() == 2 * 2 * 3);
+  double l1 = 0.0;
+  double l2 = 0.0;
+  // slots: for n,np in 0..1, l in 0..2
+  int slot = 0;
+  for (int n = 0; n < 2; n++) {
+    for (int np = 0; np < 2; np++) {
+      for (int l = 0; l <= 2; l++) {
+        if (l == 1) {
+          l1 += spec[static_cast<size_t>(slot)] * spec[static_cast<size_t>(slot)];
+        }
+        if (l == 2) {
+          l2 += spec[static_cast<size_t>(slot)] * spec[static_cast<size_t>(slot)];
+        }
+        slot++;
+      }
+    }
+  }
+  REQUIRE(l1 > 0.0);
+  REQUIRE(l2 > 0.0);
 }
