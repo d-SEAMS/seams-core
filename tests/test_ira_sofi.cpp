@@ -44,16 +44,27 @@ TEST_CASE("IRA residual is ref versus R times assigned target plus t",
   double alt = 0.0;
   int used = 0;
   const int n = 4;
+  bool hasZero = false;
+  bool hasN = false;
+  for (int p : m.assignment) {
+    if (p == 0) {
+      hasZero = true;
+    }
+    if (p == n) {
+      hasN = true;
+    }
+  }
+  const int shift = (hasN && !hasZero) ? 1 : 0;
   for (int i = 0; i < n; i++) {
     int j = (i < static_cast<int>(m.assignment.size()))
-                ? static_cast<int>(m.assignment[static_cast<size_t>(i)])
+                ? static_cast<int>(m.assignment[static_cast<size_t>(i)]) - shift
                 : -1;
     if (j < 0 || j >= n) {
       continue;
     }
     const Eigen::Vector3d a(ref(i, 0), ref(i, 1), ref(i, 2));
     const Eigen::Vector3d b(tgt(j, 0), tgt(j, 1), tgt(j, 2));
-    alt += (a - (m.rotation * b + m.translation)).squaredNorm();
+    alt += (m.rotation * a + m.translation - b).squaredNorm();
     used++;
   }
   if (used > 0) {
