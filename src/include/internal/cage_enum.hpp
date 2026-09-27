@@ -48,6 +48,20 @@ std::vector<FoundCage>
 findBySignature(const std::vector<std::vector<int>> &rings,
                 const Signature &signature);
 
+/** True when `cycle` is `pattern` rotated or reversed. */
+bool speciesCycleMatches(const std::vector<int> &cycle,
+                         const std::vector<int> &pattern);
+
+/** As findBySignature. A ring is a face only when its species sequence
+ *  matches one pattern of the same length, up to rotation and reversal.
+ *  An empty pattern list keeps every ring whose size is in the census.
+ *  `species` is one class per atom index. A vertex past the end of
+ *  `species` keeps its ring out. */
+std::vector<FoundCage>
+findBySignature(const std::vector<std::vector<int>> &rings,
+                const Signature &signature, const std::vector<int> &species,
+                const std::vector<std::vector<int>> &patterns);
+
 /** As above. Named `hc` and `ddc` call findHC / findDDC on the
  *  six-membered rings so the vertex sets match those finders. */
 std::vector<FoundCage>

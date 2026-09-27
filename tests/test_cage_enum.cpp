@@ -416,3 +416,35 @@ TEST_CASE("sH and 51268 signatures find cages on GenIce sH", "[cage_enum]") {
     REQUIRE(cage::isClosedPolyhedron(large.rings, c.faces));
   }
 }
+
+TEST_CASE("a species cycle matches under rotation and reversal", "[cage_enum]") {
+  REQUIRE(cage::speciesCycleMatches({1, 2, 1, 2}, {2, 1, 2, 1}));
+  REQUIRE(cage::speciesCycleMatches({1, 2, 1, 2}, {2, 1, 2, 1}));
+  REQUIRE(cage::speciesCycleMatches({1, 2, 3}, {1, 3, 2}));
+  REQUIRE_FALSE(cage::speciesCycleMatches({1, 1, 2, 2}, {1, 2, 1, 2}));
+}
+
+TEST_CASE("alternating faces close a cube and a homopolar face does not",
+          "[cage_enum]") {
+  const std::vector<std::vector<int>> faces = {
+      {0, 1, 2, 3}, {4, 5, 6, 7}, {0, 1, 5, 4},
+      {1, 2, 6, 5}, {2, 3, 7, 6}, {3, 0, 4, 7}};
+  const auto sig = cage::Signature::parse("4:6");
+  const std::vector<int> alternating = {1, 2, 1, 2, 2, 1, 2, 1};
+  const std::vector<std::vector<int>> pattern = {{1, 2, 1, 2}};
+  const auto closed =
+      cage::findBySignature(faces, sig, alternating, pattern);
+  REQUIRE(closed.size() == 1);
+  REQUIRE(closed[0].closed);
+  REQUIRE(closed[0].vertices.size() == 8);
+  REQUIRE(cage::isClosedPolyhedron(faces, closed[0].faces));
+
+  std::vector<int> homopolar = alternating;
+  homopolar[6] = 1;
+  const auto rejected =
+      cage::findBySignature(faces, sig, homopolar, pattern);
+  REQUIRE(rejected.empty());
+
+  const auto uncolored = cage::findBySignature(faces, sig);
+  REQUIRE(uncolored.size() == 1);
+}
