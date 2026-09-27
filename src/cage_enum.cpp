@@ -5,9 +5,11 @@
 
 #include <cage_canon.hpp>
 #include <cage_enum.hpp>
+#include <ira_sofi.hpp>
 #include <topo_bulk.hpp>
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <cstdint>
 #include <map>
@@ -132,13 +134,21 @@ struct Search {
   bool allowIncomplete = false;
   int minFaces = 1;
 
+  const std::vector<char> *admit = nullptr;
+
   explicit Search(const std::vector<std::vector<int>> &allRings,
-                  const cage::Signature &signature)
-      : rings(allRings), sig(signature) {
+                  const cage::Signature &signature,
+                  const std::vector<char> *admitMask = nullptr)
+      : rings(allRings), sig(signature), admit(admitMask) {
     const int nRings = static_cast<int>(rings.size());
     used.assign(static_cast<size_t>(nRings), 0);
     edges.resize(static_cast<size_t>(nRings));
     for (int i = 0; i < nRings; ++i) {
+      if (admit != nullptr &&
+          (static_cast<size_t>(i) >= admit->size() ||
+           (*admit)[static_cast<size_t>(i)] == 0)) {
+        continue;
+      }
       const int sz = static_cast<int>(rings[static_cast<size_t>(i)].size());
       if (!sig.containsSize(sz)) {
         continue;
@@ -487,6 +497,66 @@ bool Signature::containsSize(int size) const {
   return counts.find(size) != counts.end();
 }
 
+bool speciesCycleMatches(const std::vector<int> &cycle,
+                         const std::vector<int> &pattern) {
+  const size_t n = cycle.size();
+  if (n == 0 || n != pattern.size()) {
+    return false;
+  }
+  for (size_t shift = 0; shift < n; ++shift) {
+    bool forward = true;
+    bool reverse = true;
+    for (size_t i = 0; i < n; ++i) {
+      if (cycle[(shift + i) % n] != pattern[i]) {
+        forward = false;
+      }
+      if (cycle[(shift + n - i) % n] != pattern[i]) {
+        reverse = false;
+      }
+    }
+    if (forward || reverse) {
+      return true;
+    }
+  }
+  return false;
+}
+
+namespace {
+
+std::vector<int> speciesCycle(const std::vector<int> &ring,
+                              const std::vector<int> &species) {
+  std::vector<int> cycle;
+  cycle.reserve(ring.size());
+  for (const int atom : ring) {
+    if (atom < 0 || static_cast<size_t>(atom) >= species.size()) {
+      return {};
+    }
+    cycle.push_back(species[static_cast<size_t>(atom)]);
+  }
+  return cycle;
+}
+
+std::vector<char> admitBySpecies(const std::vector<std::vector<int>> &rings,
+                                 const std::vector<int> &species,
+                                 const std::vector<std::vector<int>> &patterns) {
+  std::vector<char> admit(rings.size(), 0);
+  for (size_t i = 0; i < rings.size(); ++i) {
+    const auto cycle = speciesCycle(rings[i], species);
+    if (cycle.empty()) {
+      continue;
+    }
+    for (const auto &pattern : patterns) {
+      if (speciesCycleMatches(cycle, pattern)) {
+        admit[i] = 1;
+        break;
+      }
+    }
+  }
+  return admit;
+}
+
+} // namespace
+
 bool isClosedPolyhedron(const std::vector<std::vector<int>> &rings,
                         const std::vector<int> &faces) {
   if (faces.empty()) {
@@ -521,6 +591,136 @@ std::vector<FoundCage> findBySignature(const std::vector<std::vector<int>> &ring
   Search search(rings, signature);
   search.run();
   return search.found;
+}
+
+std::vector<FoundCage>
+findBySignature(const std::vector<std::vector<int>> &rings,
+                const Signature &signature, const std::vector<int> &species,
+                const std::vector<std::vector<int>> &patterns) {
+  if (patterns.empty()) {
+    return findBySignature(rings, signature);
+  }
+  if (signature.counts.empty() || signature.faceCount() <= 0) {
+    return {};
+  }
+  const auto admit = admitBySpecies(rings, species, patterns);
+  Search search(rings, signature, &admit);
+  search.run();
+  return search.found;
+}
+
+namespace {
+
+Eigen::MatrixXd asMatrix(const std::vector<std::array<double, 3>> &xyz) {
+  Eigen::MatrixXd m(static_cast<Eigen::Index>(xyz.size()), 3);
+  for (size_t i = 0; i < xyz.size(); ++i) {
+    m(static_cast<Eigen::Index>(i), 0) = xyz[i][0];
+    m(static_cast<Eigen::Index>(i), 1) = xyz[i][1];
+    m(static_cast<Eigen::Index>(i), 2) = xyz[i][2];
+  }
+  return m;
+}
+
+} // namespace
+
+std::vector<std::array<double, 3>>
+coordsOfVertices(const std::vector<std::array<double, 3>> &all,
+                 const std::vector<int> &vertices) {
+  std::vector<std::array<double, 3>> out;
+  out.reserve(vertices.size());
+  for (const int v : vertices) {
+    if (v < 0 || static_cast<size_t>(v) >= all.size()) {
+      continue;
+    }
+    out.push_back(all[static_cast<size_t>(v)]);
+  }
+  return out;
+}
+
+CageShape shapeOfVertices(const std::vector<std::array<double, 3>> &cageXyz) {
+  CageShape shape;
+  shape.nVertices = static_cast<int>(cageXyz.size());
+  if (cageXyz.empty() || !ira::available()) {
+    return shape;
+  }
+  ira::PointGroup group;
+  shape.status = ira::pointGroup(asMatrix(cageXyz), group);
+  if (shape.status == 0) {
+    shape.pointGroup = group.symbol;
+  }
+  return shape;
+}
+
+std::vector<FormerRow>
+formerRows(const std::vector<std::vector<int>> &nList,
+           const std::vector<std::vector<int>> &rings,
+           const std::vector<int> &species, int formerSpecies) {
+  const int n = static_cast<int>(nList.size());
+  std::vector<std::map<int, int>> through(static_cast<size_t>(n));
+  for (const auto &ring : rings) {
+    const int size = static_cast<int>(ring.size());
+    for (const int atom : ring) {
+      if (atom < 0 || atom >= n) {
+        continue;
+      }
+      through[static_cast<size_t>(atom)][size] += 1;
+    }
+  }
+  std::vector<FormerRow> out;
+  for (int i = 0; i < n; ++i) {
+    const int sp = static_cast<size_t>(i) < species.size()
+                       ? species[static_cast<size_t>(i)]
+                       : 0;
+    if (formerSpecies >= 0 && sp != formerSpecies) {
+      continue;
+    }
+    FormerRow row;
+    row.index = i;
+    row.species = sp;
+    row.coord = static_cast<int>(nList[static_cast<size_t>(i)].size());
+    for (const int nb : nList[static_cast<size_t>(i)]) {
+      if (nb < 0 || static_cast<size_t>(nb) >= species.size()) {
+        continue;
+      }
+      if (species[static_cast<size_t>(nb)] == sp) {
+        row.homopolar += 1;
+      }
+    }
+    row.rings = through[static_cast<size_t>(i)];
+    out.push_back(row);
+  }
+  return out;
+}
+
+bool sameNetwork(const std::vector<FormerRow> &early,
+                 const std::vector<FormerRow> &late) {
+  if (early.size() != late.size()) {
+    return false;
+  }
+  for (size_t i = 0; i < early.size(); ++i) {
+    const auto &a = early[i];
+    const auto &b = late[i];
+    if (a.index != b.index || a.species != b.species || a.coord != b.coord ||
+        a.homopolar != b.homopolar || a.rings != b.rings) {
+      return false;
+    }
+  }
+  return true;
+}
+
+CageShape overlayVertices(const std::vector<std::array<double, 3>> &ref,
+                          const std::vector<std::array<double, 3>> &cageXyz) {
+  CageShape shape;
+  shape.nVertices = static_cast<int>(cageXyz.size());
+  if (cageXyz.empty() || ref.size() != cageXyz.size() || !ira::available()) {
+    return shape;
+  }
+  ira::Match hit;
+  shape.status = ira::match(asMatrix(ref), asMatrix(cageXyz), hit);
+  if (shape.status == 0) {
+    shape.rmsd = hit.rmsd;
+  }
+  return shape;
 }
 
 std::vector<FoundCage>

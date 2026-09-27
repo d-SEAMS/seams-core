@@ -7,6 +7,8 @@
 
 #include <cage.hpp>
 
+#include <array>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -48,6 +50,20 @@ std::vector<FoundCage>
 findBySignature(const std::vector<std::vector<int>> &rings,
                 const Signature &signature);
 
+/** True when `cycle` is `pattern` rotated or reversed. */
+bool speciesCycleMatches(const std::vector<int> &cycle,
+                         const std::vector<int> &pattern);
+
+/** As findBySignature. A ring is a face only when its species sequence
+ *  matches one pattern of the same length, up to rotation and reversal.
+ *  An empty pattern list keeps every ring whose size is in the census.
+ *  `species` is one class per atom index. A vertex past the end of
+ *  `species` keeps its ring out. */
+std::vector<FoundCage>
+findBySignature(const std::vector<std::vector<int>> &rings,
+                const Signature &signature, const std::vector<int> &species,
+                const std::vector<std::vector<int>> &patterns);
+
 /** As above. Named `hc` and `ddc` call findHC / findDDC on the
  *  six-membered rings so the vertex sets match those finders. */
 std::vector<FoundCage>
@@ -63,6 +79,51 @@ findBySignature(const std::vector<std::vector<int>> &rings,
 std::vector<FoundCage>
 findIncompleteBySignature(const std::vector<std::vector<int>> &rings,
                           const Signature &signature, int minFaces);
+
+/** IRA/SOFI result for one cage. status 0 means the library ran on
+ *  these vertices. status 1 means it is absent or the cloud is empty.
+ *  nVertices is the cage, not the frame. */
+struct CageShape {
+  int nVertices = 0;
+  int status = 1;
+  double rmsd = -1.0;
+  std::string pointGroup;
+};
+
+/** Coordinates of `vertices` only. An index past `all` is skipped. */
+std::vector<std::array<double, 3>>
+coordsOfVertices(const std::vector<std::array<double, 3>> &all,
+                 const std::vector<int> &vertices);
+
+/** Point group of this vertex set. Does not see any other atom. */
+CageShape shapeOfVertices(const std::vector<std::array<double, 3>> &cageXyz);
+
+/** Overlay `cageXyz` on `ref`. Row counts must agree. Does not see
+ *  any atom outside the two sets. */
+CageShape overlayVertices(const std::vector<std::array<double, 3>> &ref,
+                          const std::vector<std::array<double, 3>> &cageXyz);
+
+/** One network-former atom: coordination, same-species bonds, and the
+ *  primitive rings that pass through it. `rings` counts are through
+ *  this atom, so a ring of size n contributes to n rows. */
+struct FormerRow {
+  int index = -1;
+  int species = 0;
+  int coord = 0;
+  int homopolar = 0;
+  std::map<int, int> rings;
+};
+
+/** `formerSpecies < 0` keeps every atom. */
+std::vector<FormerRow>
+formerRows(const std::vector<std::vector<int>> &nList,
+           const std::vector<std::vector<int>> &rings,
+           const std::vector<int> &species, int formerSpecies);
+
+/** True when the two tables have the same per-atom species, coordination,
+ *  homopolar count, and ring-size multiset. */
+bool sameNetwork(const std::vector<FormerRow> &early,
+                 const std::vector<FormerRow> &late);
 
 } // namespace cage
 

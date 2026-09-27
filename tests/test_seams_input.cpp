@@ -49,6 +49,23 @@ TEST_CASE("readXYZ creates a synthetic file and reads it back",
   fs::remove(tmpFile);
 }
 
+TEST_CASE("readXYZ gives each element its own type", "[seams_input]") {
+  std::string tmpFile = fs::temp_directory_path().append("dseams_test_readxyz_sin.xyz").string();
+  {
+    std::ofstream f(tmpFile);
+    f << "3\n\n";
+    f << "Si 0.0 0.0 0.0\n";
+    f << "N 1.7 0.0 0.0\n";
+    f << "N 2.8 0.0 0.0\n";
+  }
+  auto cloud = sinp::readXYZ(tmpFile);
+  REQUIRE(cloud.nop == 3);
+  REQUIRE(cloud.pts[0].type == 1);
+  REQUIRE(cloud.pts[1].type == 2);
+  REQUIRE(cloud.pts[2].type == 2);
+  fs::remove(tmpFile);
+}
+
 // -- readLammpsTrj tests --
 
 TEST_CASE("readLammpsTrj reads frame 1 from trajectory", "[seams_input]") {

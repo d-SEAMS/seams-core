@@ -1,6 +1,7 @@
 #include <cage.hpp>
 #include <cage_canon.hpp>
 #include <cage_enum.hpp>
+#include <ira_sofi.hpp>
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
@@ -414,5 +415,98 @@ TEST_CASE("sH and 51268 signatures find cages on GenIce sH", "[cage_enum]") {
     REQUIRE(c.faces.size() == 20);
     REQUIRE(c.signature == cage::Signature::parse("5:12,6:8"));
     REQUIRE(cage::isClosedPolyhedron(large.rings, c.faces));
+  }
+}
+
+TEST_CASE("a species cycle matches under rotation and reversal", "[cage_enum]") {
+  REQUIRE(cage::speciesCycleMatches({1, 2, 1, 2}, {2, 1, 2, 1}));
+  REQUIRE(cage::speciesCycleMatches({1, 2, 1, 2}, {2, 1, 2, 1}));
+  REQUIRE(cage::speciesCycleMatches({1, 2, 3}, {1, 3, 2}));
+  REQUIRE_FALSE(cage::speciesCycleMatches({1, 1, 2, 2}, {1, 2, 1, 2}));
+}
+
+TEST_CASE("alternating faces close a cube and a homopolar face does not",
+          "[cage_enum]") {
+  const std::vector<std::vector<int>> faces = {
+      {0, 1, 2, 3}, {4, 5, 6, 7}, {0, 1, 5, 4},
+      {1, 2, 6, 5}, {2, 3, 7, 6}, {3, 0, 4, 7}};
+  const auto sig = cage::Signature::parse("4:6");
+  const std::vector<int> alternating = {1, 2, 1, 2, 2, 1, 2, 1};
+  const std::vector<std::vector<int>> pattern = {{1, 2, 1, 2}};
+  const auto closed =
+      cage::findBySignature(faces, sig, alternating, pattern);
+  REQUIRE(closed.size() == 1);
+  REQUIRE(closed[0].closed);
+  REQUIRE(closed[0].vertices.size() == 8);
+  REQUIRE(cage::isClosedPolyhedron(faces, closed[0].faces));
+
+  std::vector<int> homopolar = alternating;
+  homopolar[6] = 1;
+  const auto rejected =
+      cage::findBySignature(faces, sig, homopolar, pattern);
+  REQUIRE(rejected.empty());
+
+  const auto uncolored = cage::findBySignature(faces, sig);
+  REQUIRE(uncolored.size() == 1);
+}
+
+TEST_CASE("a homopolar edge is counted on the atoms it joins", "[cage_enum]") {
+  const std::vector<std::vector<int>> nList = {{1, 3}, {0, 2}, {1, 3}, {0, 2}};
+  const std::vector<std::vector<int>> rings = {{0, 1, 2, 3}};
+  const std::vector<int> species = {1, 1, 2, 2};
+  const auto rows = cage::formerRows(nList, rings, species, -1);
+  REQUIRE(rows.size() == 4);
+  REQUIRE(rows[0].coord == 2);
+  REQUIRE(rows[0].homopolar == 1);
+  REQUIRE(rows[0].rings.at(4) == 1);
+  REQUIRE(rows[2].homopolar == 1);
+  const auto formers = cage::formerRows(nList, rings, species, 1);
+  REQUIRE(formers.size() == 2);
+  REQUIRE(formers[0].index == 0);
+  REQUIRE(formers[1].index == 1);
+  REQUIRE(cage::sameNetwork(rows, rows));
+  std::vector<int> split = {1, 2, 2, 2};
+  const auto late = cage::formerRows(nList, rings, split, -1);
+  REQUIRE(late[0].homopolar == 0);
+  REQUIRE_FALSE(cage::sameNetwork(rows, late));
+}
+
+TEST_CASE("IRA and SOFI see the cage vertices and not the frame", "[cage_enum]") {
+  std::vector<std::array<double, 3>> all(10);
+  for (int i = 0; i < 8; ++i) {
+    const int x = i & 1;
+    const int y = (i >> 1) & 1;
+    const int z = (i >> 2) & 1;
+    all[static_cast<std::size_t>(i)] = {static_cast<double>(x),
+                                        static_cast<double>(y),
+                                        static_cast<double>(z)};
+  }
+  all[8] = {99.0, 99.0, 99.0};
+  all[9] = {-99.0, -99.0, -99.0};
+  const std::vector<int> vertices = {0, 1, 2, 3, 4, 5, 6, 7};
+  const auto cageXyz = cage::coordsOfVertices(all, vertices);
+  REQUIRE(cageXyz.size() == 8);
+  for (const auto &p : cageXyz) {
+    REQUIRE(p[0] > -2.0);
+    REQUIRE(p[0] < 2.0);
+    REQUIRE(p[1] > -2.0);
+    REQUIRE(p[1] < 2.0);
+    REQUIRE(p[2] > -2.0);
+    REQUIRE(p[2] < 2.0);
+  }
+  const auto shape = cage::shapeOfVertices(cageXyz);
+  REQUIRE(shape.nVertices == 8);
+  const auto mismatch = cage::overlayVertices(all, cageXyz);
+  REQUIRE(mismatch.nVertices == 8);
+  REQUIRE(mismatch.status == 1);
+  if (!ira::available()) {
+    REQUIRE(shape.status == 1);
+    REQUIRE(shape.pointGroup.empty());
+  } else {
+    REQUIRE(shape.status == 0);
+    REQUIRE_FALSE(shape.pointGroup.empty());
+    const auto same = cage::overlayVertices(cageXyz, cageXyz);
+    REQUIRE(same.status == 0);
+    REQUIRE(same.rmsd < 1e-6);
   }
 }

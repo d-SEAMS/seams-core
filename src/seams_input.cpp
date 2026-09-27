@@ -22,6 +22,7 @@
 #include <filesystem>
 #include <fstream>
 #include <generic.hpp>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <seams_input.hpp>
@@ -480,6 +481,7 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
     yCloud.pts.reserve(nop);
     yCloud.nop = nop;
     // Run this until EOF or you reach the next timestep
+    std::map<std::string, int> elementType;
     while (std::getline((*xyzFile), line)) {
 
       // Read in lines and tokenize them into std::string words and <double>
@@ -497,8 +499,26 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
         continue;
       }
 
-      // Put logic for checking atom type here later
-      iPoint.type = 1; // Oxygen type; hard-coded!
+      // One element stays type 1. A second element takes the next type,
+      // in order of first appearance, so Si then N is 1 then 2.
+      if (coordinateOffset == 1) {
+        const std::string &symbol = tokens[0];
+        char *end = nullptr;
+        std::strtod(symbol.c_str(), &end);
+        const bool numeric = end != symbol.c_str() && *end == '\0';
+        if (numeric) {
+          iPoint.type = 1;
+        } else {
+          auto found = elementType.find(symbol);
+          if (found == elementType.end()) {
+            const int id = static_cast<int>(elementType.size()) + 1;
+            found = elementType.emplace(symbol, id).first;
+          }
+          iPoint.type = found->second;
+        }
+      } else {
+        iPoint.type = 1;
+      }
       iPoint.x = std::stod(tokens[coordinateOffset]);
       iPoint.y = std::stod(tokens[coordinateOffset + 1]);
       iPoint.z = std::stod(tokens[coordinateOffset + 2]);
