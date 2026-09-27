@@ -44,7 +44,7 @@ var NAVTREE =
       [ "Class Members", "functions.html", [
         [ "All", "functions.html", "functions_dup" ],
         [ "Functions", "functions_func.html", null ],
-        [ "Variables", "functions_vars.html", null ],
+        [ "Variables", "functions_vars.html", "functions_vars" ],
         [ "Enumerations", "functions_enum.html", null ]
       ] ]
     ] ],
@@ -61,10 +61,10 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "absOrientation_8hpp.html",
-"group__nneigh.html#ga752d3e4cbd98fa454a6dc36a4307b75a",
-"namespacephase.html#a42af4d330d8e1ad0aeb8da9ffea7cfaa",
-"structcage_1_1FoundCage.html#a8415a1763a942d096d45a7e0f1c68211",
-"structsite_1_1IceClusterIons.html#a35ffe3a82f4f8975ef5292e1d9dd06bc"
+"group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2",
+"namespacemembers_func_q.html",
+"rdf_8hpp.html",
+"structseams_1_1cfg_1_1Runtime.html#a435f96bf622cece732267afe1daddc4d"
 ];
 
 const SYNCONMSG = 'click to disable panel synchronization';

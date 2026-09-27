@@ -17,10 +17,11 @@ var searchData=
   ['computemajor_14',['computeMajor',['../structgpu_1_1DeviceInfo.html#ab85fa71864d523b0c41d735a053fb064',1,'gpu::DeviceInfo']]],
   ['computeminor_15',['computeMinor',['../structgpu_1_1DeviceInfo.html#ad07d8780126008d9aad09d8b9da844b1',1,'gpu::DeviceInfo']]],
   ['computems_16',['computeMs',['../structgpu_1_1BatchResult.html#a7db619777f01296286cb224c04ff6ba7',1,'gpu::BatchResult']]],
-  ['coordinationnumber_17',['coordinationNumber',['../group__chill.html#ga85100f5928056281b3c93e4dca7a1d5b',1,'chill::BondClassifier']]],
-  ['count_18',['count',['../group__rdf.html#ga6a7fe8ab4c2603482500fc57a2b132b1',1,'rdf::PartialRdf']]],
-  ['counts_19',['counts',['../group__cage.html#gad47448e66b48e0598596796daa7b9ec4',1,'cage::Signature::counts'],['../structtopo_1_1LibraryMatch.html#a07862b670245a0fad0f3914224ad7323',1,'topo::LibraryMatch::counts']]],
-  ['cubicperlayer_20',['cubicPerLayer',['../structtopoparam_1_1LayerStack.html#a51889a8da36018140833c0633ccfc672',1,'topoparam::LayerStack']]],
-  ['currentframe_21',['currentFrame',['../group__molSys.html#gafccb5a0daab40c3ccc83e4494f4176d7',1,'molSys::PointCloud']]],
-  ['cutoff_22',['cutoff',['../structseams_1_1cfg_1_1Runtime.html#a6c22ad1c8eae1acfba7a026c38391863',1,'seams::cfg::Runtime']]]
+  ['coord_17',['coord',['../structcage_1_1FormerRow.html#aeb5d90e4d6998dd867ea1454aab08dc3',1,'cage::FormerRow']]],
+  ['coordinationnumber_18',['coordinationNumber',['../group__chill.html#ga85100f5928056281b3c93e4dca7a1d5b',1,'chill::BondClassifier']]],
+  ['count_19',['count',['../group__rdf.html#ga6a7fe8ab4c2603482500fc57a2b132b1',1,'rdf::PartialRdf']]],
+  ['counts_20',['counts',['../group__cage.html#gad47448e66b48e0598596796daa7b9ec4',1,'cage::Signature::counts'],['../structtopo_1_1LibraryMatch.html#a07862b670245a0fad0f3914224ad7323',1,'topo::LibraryMatch::counts']]],
+  ['cubicperlayer_21',['cubicPerLayer',['../structtopoparam_1_1LayerStack.html#a51889a8da36018140833c0633ccfc672',1,'topoparam::LayerStack']]],
+  ['currentframe_22',['currentFrame',['../group__molSys.html#gafccb5a0daab40c3ccc83e4494f4176d7',1,'molSys::PointCloud']]],
+  ['cutoff_23',['cutoff',['../structseams_1_1cfg_1_1Runtime.html#a6c22ad1c8eae1acfba7a026c38391863',1,'seams::cfg::Runtime']]]
 ];

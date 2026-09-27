@@ -1,6 +1,8 @@
 var namespacecage =
 [
     [ "Cage", "structcage_1_1Cage.html", "structcage_1_1Cage" ],
+    [ "CageShape", "structcage_1_1CageShape.html", "structcage_1_1CageShape" ],
+    [ "FormerRow", "structcage_1_1FormerRow.html", "structcage_1_1FormerRow" ],
     [ "FoundCage", "structcage_1_1FoundCage.html", "structcage_1_1FoundCage" ],
     [ "Signature", "structcage_1_1Signature.html", "structcage_1_1Signature" ],
     [ "cageType", "group__cage.html#ga5787314f51b5927c213db48b81c21d95", [
@@ -18,11 +20,18 @@ var namespacecage =
     [ "canonicalCertificate", "namespacecage.html#a9d73050e1b7374d21a15c61e21e39ecb", null ],
     [ "canonicalCertificateColoured", "namespacecage.html#ad4e5b234472ede0d6227ef6aefceb348", null ],
     [ "canonicalCertificateRooted", "namespacecage.html#a1ff12e6c4c9298050913b02758546c6f", null ],
+    [ "coordsOfVertices", "namespacecage.html#abd559edfed90ce42a4b9e65e0470c186", null ],
     [ "findBySignature", "namespacecage.html#abe73ca6723c92832e5295714c07133c0", null ],
+    [ "findBySignature", "namespacecage.html#a8d763ec0049239c7f6c0a4deb207121b", null ],
     [ "findBySignature", "namespacecage.html#ac2f1937ffc84b09b4b552f39a4fbd62f", null ],
     [ "findIncompleteBySignature", "namespacecage.html#a04500ad966b000abb178562e6df327b6", null ],
+    [ "formerRows", "namespacecage.html#af3f2527405729e81960c0351ce17e00b", null ],
     [ "isClosedPolyhedron", "namespacecage.html#a40b05518af3bbd5128f459d056b85ac9", null ],
     [ "isHexagonalPrism", "namespacecage.html#a2b191b4c90fc095838928727d7c11b3e", null ],
     [ "nautyAvailable", "namespacecage.html#af3048384a261c7ffc3487cb54af20cb1", null ],
-    [ "sameCertificate", "namespacecage.html#ae431d00a43e0a0e99da9ff62d23a6e22", null ]
+    [ "overlayVertices", "namespacecage.html#aed0eb6a1e977e36efaeab5046ab334fb", null ],
+    [ "sameCertificate", "namespacecage.html#ae431d00a43e0a0e99da9ff62d23a6e22", null ],
+    [ "sameNetwork", "namespacecage.html#a379043e83acae8e41e2d7c1b1715ffe3", null ],
+    [ "shapeOfVertices", "namespacecage.html#a4c183fc496e5ae03f1390cffb7c968d1", null ],
+    [ "speciesCycleMatches", "namespacecage.html#ac88ef3281ac1ce4742f88829eedfc183", null ]
 ];

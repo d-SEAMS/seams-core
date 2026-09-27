@@ -13,12 +13,13 @@ var searchData=
   ['hexagonal_10',['hexagonal',['../group__molSys.html#gga13ffe3a39a0816627553f195e102abb5a1839c642bbb4a69963fcb822d209d5ac',1,'molSys']]],
   ['hexc_11',['HexC',['../group__cage.html#ggaeaa9e4802e930824b43c274cec2486c5a642a6c140874b1f45791fed27e266477',1,'cage::Signature::HexC'],['../group__cage.html#gga5787314f51b5927c213db48b81c21d95a642a6c140874b1f45791fed27e266477',1,'cage::HexC']]],
   ['hexperlayer_12',['hexPerLayer',['../structtopoparam_1_1LayerStack.html#ae5019d26e1fc0a62d76c698b12953353',1,'topoparam::LayerStack']]],
-  ['hopboundprimitivesix_13',['hopBoundPrimitiveSix',['../namespacetum_1_1device.html#adb611a8926577921d4770b84aacc5902',1,'tum::device']]],
-  ['hopneighbourhood_14',['hopNeighbourhood',['../namespacetopo.html#ac22724ca2d62a9ecac9d20b5ab0b7182',1,'topo']]],
-  ['hops_15',['hops',['../structtopo_1_1FrameFingerprint.html#a436b359c7a9bb9b2c849d0e37d13962d',1,'topo::FrameFingerprint::hops'],['../structtopo_1_1KeyLibrary.html#a25441f901b1852385ceb142544392c80',1,'topo::KeyLibrary::hops']]],
-  ['hopsatmost_16',['hopsAtMost',['../namespacetum_1_1device.html#ae9a6f5c08baa53d7971e42539faeb3f1',1,'tum::device']]],
-  ['hornabsorientation_17',['hornAbsOrientation',['../namespaceabsor.html#a09d62115f686492810352905250fb0ef',1,'absor']]],
-  ['hostcagecounts_18',['hostCageCounts',['../namespacetum.html#a5b6f992c67dea89064fe1bbe224f7533',1,'tum']]],
-  ['hostchillplus_19',['hostChillPlus',['../namespacechill.html#a2d5243660db62c90ccdad3bb9cda319e',1,'chill']]],
-  ['hydrogenmsd_20',['hydrogenMSD',['../namespacephase.html#ac8231bd6a050a06d0f6c90f15aafb0fb',1,'phase']]]
+  ['homopolar_13',['homopolar',['../structcage_1_1FormerRow.html#a4980d806deea31204f4203af083483f7',1,'cage::FormerRow']]],
+  ['hopboundprimitivesix_14',['hopBoundPrimitiveSix',['../namespacetum_1_1device.html#adb611a8926577921d4770b84aacc5902',1,'tum::device']]],
+  ['hopneighbourhood_15',['hopNeighbourhood',['../namespacetopo.html#ac22724ca2d62a9ecac9d20b5ab0b7182',1,'topo']]],
+  ['hops_16',['hops',['../structtopo_1_1FrameFingerprint.html#a436b359c7a9bb9b2c849d0e37d13962d',1,'topo::FrameFingerprint::hops'],['../structtopo_1_1KeyLibrary.html#a25441f901b1852385ceb142544392c80',1,'topo::KeyLibrary::hops']]],
+  ['hopsatmost_17',['hopsAtMost',['../namespacetum_1_1device.html#ae9a6f5c08baa53d7971e42539faeb3f1',1,'tum::device']]],
+  ['hornabsorientation_18',['hornAbsOrientation',['../namespaceabsor.html#a09d62115f686492810352905250fb0ef',1,'absor']]],
+  ['hostcagecounts_19',['hostCageCounts',['../namespacetum.html#a5b6f992c67dea89064fe1bbe224f7533',1,'tum']]],
+  ['hostchillplus_20',['hostChillPlus',['../namespacechill.html#a2d5243660db62c90ccdad3bb9cda319e',1,'chill']]],
+  ['hydrogenmsd_21',['hydrogenMSD',['../namespacephase.html#ac8231bd6a050a06d0f6c90f15aafb0fb',1,'phase']]]
 ];

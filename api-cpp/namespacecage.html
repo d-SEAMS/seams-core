@@ -245,6 +245,10 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacecage.
 Classes</h2></td></tr>
 <tr class="memitem:Cage" id="r_Cage"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcage_1_1Cage.html">Cage</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This contains a cage, with the constituent rings.  <a href="structcage_1_1Cage.html#details">More...</a><br /></td></tr>
+<tr class="memitem:CageShape" id="r_CageShape"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcage_1_1CageShape.html">CageShape</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">IRA/SOFI result for one cage.  <a href="structcage_1_1CageShape.html#details">More...</a><br /></td></tr>
+<tr class="memitem:FormerRow" id="r_FormerRow"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcage_1_1FormerRow.html">FormerRow</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One network-former atom: coordination, same-species bonds, and the primitive rings that pass through it.  <a href="structcage_1_1FormerRow.html#details">More...</a><br /></td></tr>
 <tr class="memitem:FoundCage" id="r_FoundCage"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcage_1_1FoundCage.html">FoundCage</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One cage matching a signature, closed or incomplete.  <a href="structcage_1_1FoundCage.html#details">More...</a><br /></td></tr>
 <tr class="memitem:Signature" id="r_Signature"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcage_1_1Signature.html">Signature</a></td></tr>
@@ -278,10 +282,24 @@ Functions</h2></td></tr>
 <tr class="memdesc:a40b05518af3bbd5128f459d056b85ac9"><td class="mdescLeft">&#160;</td><td class="mdescRight">True when every edge of the listed faces is used by exactly two of those faces.  <br /></td></tr>
 <tr class="memitem:abe73ca6723c92832e5295714c07133c0" id="r_abe73ca6723c92832e5295714c07133c0"><td class="memItemLeft">std::vector&lt; <a class="el" href="structcage_1_1FoundCage.html">FoundCage</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#abe73ca6723c92832e5295714c07133c0">findBySignature</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;signature)</td></tr>
 <tr class="memdesc:abe73ca6723c92832e5295714c07133c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Face-sharing rings whose size census equals <span class="tt">signature</span> and whose edges close.  <br /></td></tr>
+<tr class="memitem:ac88ef3281ac1ce4742f88829eedfc183" id="r_ac88ef3281ac1ce4742f88829eedfc183"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ac88ef3281ac1ce4742f88829eedfc183">speciesCycleMatches</a> (const std::vector&lt; int &gt; &amp;cycle, const std::vector&lt; int &gt; &amp;pattern)</td></tr>
+<tr class="memdesc:ac88ef3281ac1ce4742f88829eedfc183"><td class="mdescLeft">&#160;</td><td class="mdescRight">True when <span class="tt">cycle</span> is <span class="tt">pattern</span> rotated or reversed.  <br /></td></tr>
+<tr class="memitem:a8d763ec0049239c7f6c0a4deb207121b" id="r_a8d763ec0049239c7f6c0a4deb207121b"><td class="memItemLeft">std::vector&lt; <a class="el" href="structcage_1_1FoundCage.html">FoundCage</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a8d763ec0049239c7f6c0a4deb207121b">findBySignature</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;signature, const std::vector&lt; int &gt; &amp;species, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;patterns)</td></tr>
+<tr class="memdesc:a8d763ec0049239c7f6c0a4deb207121b"><td class="mdescLeft">&#160;</td><td class="mdescRight">As findBySignature.  <br /></td></tr>
 <tr class="memitem:ac2f1937ffc84b09b4b552f39a4fbd62f" id="r_ac2f1937ffc84b09b4b552f39a4fbd62f"><td class="memItemLeft">std::vector&lt; <a class="el" href="structcage_1_1FoundCage.html">FoundCage</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ac2f1937ffc84b09b4b552f39a4fbd62f">findBySignature</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;signature)</td></tr>
 <tr class="memdesc:ac2f1937ffc84b09b4b552f39a4fbd62f"><td class="mdescLeft">&#160;</td><td class="mdescRight">As above.  <br /></td></tr>
 <tr class="memitem:a04500ad966b000abb178562e6df327b6" id="r_a04500ad966b000abb178562e6df327b6"><td class="memItemLeft">std::vector&lt; <a class="el" href="structcage_1_1FoundCage.html">FoundCage</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a04500ad966b000abb178562e6df327b6">findIncompleteBySignature</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;signature, int minFaces)</td></tr>
 <tr class="memdesc:a04500ad966b000abb178562e6df327b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Connected face sets that stay inside the signature budget, have at least <span class="tt">minFaces</span> faces, and are not closed.  <br /></td></tr>
+<tr class="memitem:abd559edfed90ce42a4b9e65e0470c186" id="r_abd559edfed90ce42a4b9e65e0470c186"><td class="memItemLeft">std::vector&lt; std::array&lt; double, 3 &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#abd559edfed90ce42a4b9e65e0470c186">coordsOfVertices</a> (const std::vector&lt; std::array&lt; double, 3 &gt; &gt; &amp;all, const std::vector&lt; int &gt; &amp;vertices)</td></tr>
+<tr class="memdesc:abd559edfed90ce42a4b9e65e0470c186"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coordinates of <span class="tt">vertices</span> only.  <br /></td></tr>
+<tr class="memitem:a4c183fc496e5ae03f1390cffb7c968d1" id="r_a4c183fc496e5ae03f1390cffb7c968d1"><td class="memItemLeft"><a class="el" href="structcage_1_1CageShape.html">CageShape</a>&#160;</td><td class="memItemRight"><a class="el" href="#a4c183fc496e5ae03f1390cffb7c968d1">shapeOfVertices</a> (const std::vector&lt; std::array&lt; double, 3 &gt; &gt; &amp;cageXyz)</td></tr>
+<tr class="memdesc:a4c183fc496e5ae03f1390cffb7c968d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Point group of this vertex set.  <br /></td></tr>
+<tr class="memitem:aed0eb6a1e977e36efaeab5046ab334fb" id="r_aed0eb6a1e977e36efaeab5046ab334fb"><td class="memItemLeft"><a class="el" href="structcage_1_1CageShape.html">CageShape</a>&#160;</td><td class="memItemRight"><a class="el" href="#aed0eb6a1e977e36efaeab5046ab334fb">overlayVertices</a> (const std::vector&lt; std::array&lt; double, 3 &gt; &gt; &amp;ref, const std::vector&lt; std::array&lt; double, 3 &gt; &gt; &amp;cageXyz)</td></tr>
+<tr class="memdesc:aed0eb6a1e977e36efaeab5046ab334fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Overlay <span class="tt">cageXyz</span> on <span class="tt">ref</span>.  <br /></td></tr>
+<tr class="memitem:af3f2527405729e81960c0351ce17e00b" id="r_af3f2527405729e81960c0351ce17e00b"><td class="memItemLeft">std::vector&lt; <a class="el" href="structcage_1_1FormerRow.html">FormerRow</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#af3f2527405729e81960c0351ce17e00b">formerRows</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; int &gt; &amp;species, int formerSpecies)</td></tr>
+<tr class="memdesc:af3f2527405729e81960c0351ce17e00b"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt">formerSpecies &lt; 0</span> keeps every atom.  <br /></td></tr>
+<tr class="memitem:a379043e83acae8e41e2d7c1b1715ffe3" id="r_a379043e83acae8e41e2d7c1b1715ffe3"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a379043e83acae8e41e2d7c1b1715ffe3">sameNetwork</a> (const std::vector&lt; <a class="el" href="structcage_1_1FormerRow.html">FormerRow</a> &gt; &amp;early, const std::vector&lt; <a class="el" href="structcage_1_1FormerRow.html">FormerRow</a> &gt; &amp;late)</td></tr>
+<tr class="memdesc:a379043e83acae8e41e2d7c1b1715ffe3"><td class="mdescLeft">&#160;</td><td class="mdescRight">True when the two tables have the same per-atom species, coordination, homopolar count, and ring-size multiset.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Functions for topological network criteria cage types. </p>
@@ -368,8 +386,32 @@ Changelog</h3>
 
 </div>
 </div>
+<a id="abd559edfed90ce42a4b9e65e0470c186" name="abd559edfed90ce42a4b9e65e0470c186"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd559edfed90ce42a4b9e65e0470c186">&#9670;&#160;</a></span>coordsOfVertices()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::array&lt; double, 3 &gt; &gt; cage::coordsOfVertices </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::array&lt; double, 3 &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>all</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>vertices</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Coordinates of <span class="tt">vertices</span> only. </p>
+<p>An index past <span class="tt">all</span> is skipped. </p>
+
+</div>
+</div>
 <a id="abe73ca6723c92832e5295714c07133c0" name="abe73ca6723c92832e5295714c07133c0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abe73ca6723c92832e5295714c07133c0">&#9670;&#160;</a></span>findBySignature() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#abe73ca6723c92832e5295714c07133c0">&#9670;&#160;</a></span>findBySignature() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -392,8 +434,42 @@ Changelog</h3>
 
 </div>
 </div>
+<a id="a8d763ec0049239c7f6c0a4deb207121b" name="a8d763ec0049239c7f6c0a4deb207121b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d763ec0049239c7f6c0a4deb207121b">&#9670;&#160;</a></span>findBySignature() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; <a class="el" href="structcage_1_1FoundCage.html">FoundCage</a> &gt; cage::findBySignature </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>signature</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>species</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>patterns</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>As findBySignature. </p>
+<p>A ring is a face only when its species sequence matches one pattern of the same length, up to rotation and reversal. An empty pattern list keeps every ring whose size is in the census. <span class="tt">species</span> is one class per atom index. A vertex past the end of <span class="tt">species</span> keeps its ring out. </p>
+
+</div>
+</div>
 <a id="ac2f1937ffc84b09b4b552f39a4fbd62f" name="ac2f1937ffc84b09b4b552f39a4fbd62f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac2f1937ffc84b09b4b552f39a4fbd62f">&#9670;&#160;</a></span>findBySignature() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2f1937ffc84b09b4b552f39a4fbd62f">&#9670;&#160;</a></span>findBySignature() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -447,6 +523,39 @@ Changelog</h3>
 
 <p>Connected face sets that stay inside the signature budget, have at least <span class="tt">minFaces</span> faces, and are not closed. </p>
 <p>Cups and incomplete cages during hydrate nucleation. Closed polyhedra are omitted. <span class="tt">minFaces &lt;= 0</span> uses <span class="tt">max(1, signature.faceCount() / 2)</span>. A cup whose every face already belongs to a closed cage is omitted. </p>
+
+</div>
+</div>
+<a id="af3f2527405729e81960c0351ce17e00b" name="af3f2527405729e81960c0351ce17e00b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af3f2527405729e81960c0351ce17e00b">&#9670;&#160;</a></span>formerRows()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; <a class="el" href="structcage_1_1FormerRow.html">FormerRow</a> &gt; cage::formerRows </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>species</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>formerSpecies</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><span class="tt">formerSpecies &lt; 0</span> keeps every atom. </p>
 
 </div>
 </div>
@@ -508,6 +617,30 @@ Changelog</h3>
 
 </div>
 </div>
+<a id="aed0eb6a1e977e36efaeab5046ab334fb" name="aed0eb6a1e977e36efaeab5046ab334fb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aed0eb6a1e977e36efaeab5046ab334fb">&#9670;&#160;</a></span>overlayVertices()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcage_1_1CageShape.html">CageShape</a> cage::overlayVertices </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::array&lt; double, 3 &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>ref</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::array&lt; double, 3 &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cageXyz</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Overlay <span class="tt">cageXyz</span> on <span class="tt">ref</span>. </p>
+<p>Row counts must agree. Does not see any atom outside the two sets. </p>
+
+</div>
+</div>
 <a id="ae431d00a43e0a0e99da9ff62d23a6e22" name="ae431d00a43e0a0e99da9ff62d23a6e22"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae431d00a43e0a0e99da9ff62d23a6e22">&#9670;&#160;</a></span>sameCertificate()</h2>
 
@@ -526,6 +659,72 @@ Changelog</h3>
         </tr>
       </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="a379043e83acae8e41e2d7c1b1715ffe3" name="a379043e83acae8e41e2d7c1b1715ffe3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a379043e83acae8e41e2d7c1b1715ffe3">&#9670;&#160;</a></span>sameNetwork()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool cage::sameNetwork </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="structcage_1_1FormerRow.html">FormerRow</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>early</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="structcage_1_1FormerRow.html">FormerRow</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>late</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>True when the two tables have the same per-atom species, coordination, homopolar count, and ring-size multiset. </p>
+
+</div>
+</div>
+<a id="a4c183fc496e5ae03f1390cffb7c968d1" name="a4c183fc496e5ae03f1390cffb7c968d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c183fc496e5ae03f1390cffb7c968d1">&#9670;&#160;</a></span>shapeOfVertices()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcage_1_1CageShape.html">CageShape</a> cage::shapeOfVertices </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::array&lt; double, 3 &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cageXyz</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Point group of this vertex set. </p>
+<p>Does not see any other atom. </p>
+
+</div>
+</div>
+<a id="ac88ef3281ac1ce4742f88829eedfc183" name="ac88ef3281ac1ce4742f88829eedfc183"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac88ef3281ac1ce4742f88829eedfc183">&#9670;&#160;</a></span>speciesCycleMatches()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool cage::speciesCycleMatches </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cycle</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>pattern</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>True when <span class="tt">cycle</span> is <span class="tt">pattern</span> rotated or reversed. </p>
 
 </div>
 </div>

@@ -7,6 +7,8 @@ namespace cage
 .. toctree::
 	:hidden:
 
+	struct_cage_CageShape.rst
+	struct_cage_FormerRow.rst
 	struct_cage_FoundCage.rst
 
 Overview
@@ -24,6 +26,8 @@ Functions for topological network criteria cage types. :ref:`More...<details-nam
 	// structs
 
 	struct :ref:`Cage<doxid-structcage_1_1_cage>`;
+	struct :ref:`CageShape<doxid-structcage_1_1_cage_shape>`;
+	struct :ref:`FormerRow<doxid-structcage_1_1_former_row>`;
 	struct :ref:`FoundCage<doxid-structcage_1_1_found_cage>`;
 	struct :ref:`Signature<doxid-structcage_1_1_signature>`;
 
@@ -37,8 +41,15 @@ Functions for topological network criteria cage types. :ref:`More...<details-nam
 	std::string :target:`canonicalCertificateColoured<doxid-namespacecage_1ad4e5b234472ede0d6227ef6aefceb348>`(int n, const std::vector<std::pair<int, int>>& edges, const std::vector<int>& colours, int root);
 	bool :ref:`isClosedPolyhedron<doxid-namespacecage_1a40b05518af3bbd5128f459d056b85ac9>`(const std::vector<std::vector<int>>& rings, const std::vector<int>& faces);
 	std::vector<:ref:`FoundCage<doxid-structcage_1_1_found_cage>`> :ref:`findBySignature<doxid-namespacecage_1abe73ca6723c92832e5295714c07133c0>`(const std::vector<std::vector<int>>& rings, const :ref:`Signature<doxid-structcage_1_1_signature>`& signature);
+	bool :ref:`speciesCycleMatches<doxid-namespacecage_1ac88ef3281ac1ce4742f88829eedfc183>`(const std::vector<int>& cycle, const std::vector<int>& pattern);
+	std::vector<:ref:`FoundCage<doxid-structcage_1_1_found_cage>`> :ref:`findBySignature<doxid-namespacecage_1a8d763ec0049239c7f6c0a4deb207121b>`(const std::vector<std::vector<int>>& rings, const :ref:`Signature<doxid-structcage_1_1_signature>`& signature, const std::vector<int>& species, const std::vector<std::vector<int>>& patterns);
 	std::vector<:ref:`FoundCage<doxid-structcage_1_1_found_cage>`> :ref:`findBySignature<doxid-namespacecage_1ac2f1937ffc84b09b4b552f39a4fbd62f>`(const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList, const :ref:`Signature<doxid-structcage_1_1_signature>`& signature);
 	std::vector<:ref:`FoundCage<doxid-structcage_1_1_found_cage>`> :ref:`findIncompleteBySignature<doxid-namespacecage_1a04500ad966b000abb178562e6df327b6>`(const std::vector<std::vector<int>>& rings, const :ref:`Signature<doxid-structcage_1_1_signature>`& signature, int minFaces);
+	std::vector<std::array<double, 3>> :ref:`coordsOfVertices<doxid-namespacecage_1abd559edfed90ce42a4b9e65e0470c186>`(const std::vector<std::array<double, 3>>& all, const std::vector<int>& vertices);
+	:ref:`CageShape<doxid-structcage_1_1_cage_shape>` :ref:`shapeOfVertices<doxid-namespacecage_1a4c183fc496e5ae03f1390cffb7c968d1>`(const std::vector<std::array<double, 3>>& cageXyz);
+	:ref:`CageShape<doxid-structcage_1_1_cage_shape>` :ref:`overlayVertices<doxid-namespacecage_1aed0eb6a1e977e36efaeab5046ab334fb>`(const std::vector<std::array<double, 3>>& ref, const std::vector<std::array<double, 3>>& cageXyz);
+	std::vector<:ref:`FormerRow<doxid-structcage_1_1_former_row>`> :ref:`formerRows<doxid-namespacecage_1af3f2527405729e81960c0351ce17e00b>`(const std::vector<std::vector<int>>& nList, const std::vector<std::vector<int>>& rings, const std::vector<int>& species, int formerSpecies);
+	bool :ref:`sameNetwork<doxid-namespacecage_1a379043e83acae8e41e2d7c1b1715ffe3>`(const std::vector<:ref:`FormerRow<doxid-structcage_1_1_former_row>`>& early, const std::vector<:ref:`FormerRow<doxid-structcage_1_1_former_row>`>& late);
 
 	} // namespace cage
 .. _details-namespacecage:
@@ -102,6 +113,28 @@ Face-sharing rings whose size census equals ``signature`` and whose edges close.
 
 The input may hold rings of every size; only sizes that appear in the signature take part. Named ``hc`` and ``ddc`` without a neighbour list use the geometric census (``4:6,6:2`` and ``6:7``).
 
+.. index:: pair: function; speciesCycleMatches
+.. _doxid-namespacecage_1ac88ef3281ac1ce4742f88829eedfc183:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool speciesCycleMatches(const std::vector<int>& cycle, const std::vector<int>& pattern)
+
+True when ``cycle`` is ``pattern`` rotated or reversed.
+
+.. index:: pair: function; findBySignature
+.. _doxid-namespacecage_1a8d763ec0049239c7f6c0a4deb207121b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<:ref:`FoundCage<doxid-structcage_1_1_found_cage>`> findBySignature(const std::vector<std::vector<int>>& rings, const :ref:`Signature<doxid-structcage_1_1_signature>`& signature, const std::vector<int>& species, const std::vector<std::vector<int>>& patterns)
+
+As findBySignature.
+
+A ring is a face only when its species sequence matches one pattern of the same length, up to rotation and reversal. An empty pattern list keeps every ring whose size is in the census. ``species`` is one class per atom index. A vertex past the end of ``species`` keeps its ring out.
+
 .. index:: pair: function; findBySignature
 .. _doxid-namespacecage_1ac2f1937ffc84b09b4b552f39a4fbd62f:
 
@@ -125,4 +158,60 @@ Named ``hc`` and ``ddc`` call findHC / findDDC on the six-membered rings so the 
 Connected face sets that stay inside the signature budget, have at least ``minFaces`` faces, and are not closed.
 
 Cups and incomplete cages during hydrate nucleation. Closed polyhedra are omitted. ``minFaces <= 0`` uses ``max(1, signature.faceCount() / 2)``. A cup whose every face already belongs to a closed cage is omitted.
+
+.. index:: pair: function; coordsOfVertices
+.. _doxid-namespacecage_1abd559edfed90ce42a4b9e65e0470c186:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::array<double, 3>> coordsOfVertices(const std::vector<std::array<double, 3>>& all, const std::vector<int>& vertices)
+
+Coordinates of ``vertices`` only.
+
+An index past ``all`` is skipped.
+
+.. index:: pair: function; shapeOfVertices
+.. _doxid-namespacecage_1a4c183fc496e5ae03f1390cffb7c968d1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`CageShape<doxid-structcage_1_1_cage_shape>` shapeOfVertices(const std::vector<std::array<double, 3>>& cageXyz)
+
+Point group of this vertex set.
+
+Does not see any other atom.
+
+.. index:: pair: function; overlayVertices
+.. _doxid-namespacecage_1aed0eb6a1e977e36efaeab5046ab334fb:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`CageShape<doxid-structcage_1_1_cage_shape>` overlayVertices(const std::vector<std::array<double, 3>>& ref, const std::vector<std::array<double, 3>>& cageXyz)
+
+Overlay ``cageXyz`` on ``ref``.
+
+Row counts must agree. Does not see any atom outside the two sets.
+
+.. index:: pair: function; formerRows
+.. _doxid-namespacecage_1af3f2527405729e81960c0351ce17e00b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<:ref:`FormerRow<doxid-structcage_1_1_former_row>`> formerRows(const std::vector<std::vector<int>>& nList, const std::vector<std::vector<int>>& rings, const std::vector<int>& species, int formerSpecies)
+
+``formerSpecies < 0`` keeps every atom.
+
+.. index:: pair: function; sameNetwork
+.. _doxid-namespacecage_1a379043e83acae8e41e2d7c1b1715ffe3:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool sameNetwork(const std::vector<:ref:`FormerRow<doxid-structcage_1_1_former_row>`>& early, const std::vector<:ref:`FormerRow<doxid-structcage_1_1_former_row>`>& late)
+
+True when the two tables have the same per-atom species, coordination, homopolar count, and ring-size multiset.
 

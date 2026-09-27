@@ -22,5 +22,6 @@ var searchData=
   ['noperations_19',['nOperations',['../structira_1_1PointGroup.html#a1e65b4956b4fa7c746d8153cae52cda9',1,'ira::PointGroup']]],
   ['nrings_20',['nRings',['../structgpu_1_1BatchResult.html#ab851d787241b52d9210cd08b9dc3c361',1,'gpu::BatchResult']]],
   ['nsites_21',['nSites',['../structphase_1_1IceXXIHit.html#a5661ccb01600822c76a777f890e6695b',1,'phase::IceXXIHit']]],
-  ['nsix_22',['nSix',['../structphase_1_1IceXXIHit.html#a5b206d823b13ee7168c0472f193ce03e',1,'phase::IceXXIHit::nSix'],['../structtum_1_1CageCounts.html#a433edbf0305cabc6b0a0675912162afe',1,'tum::CageCounts::nSix']]]
+  ['nsix_22',['nSix',['../structphase_1_1IceXXIHit.html#a5b206d823b13ee7168c0472f193ce03e',1,'phase::IceXXIHit::nSix'],['../structtum_1_1CageCounts.html#a433edbf0305cabc6b0a0675912162afe',1,'tum::CageCounts::nSix']]],
+  ['nvertices_23',['nVertices',['../structcage_1_1CageShape.html#aed55e7b9d5f73008fc49b462d8c4559a',1,'cage::CageShape']]]
 ];

@@ -23,7 +23,7 @@ var searchData=
   ['point_20',['Point',['../structmolSys_1_1Point.html',1,'molSys']]],
   ['pointcloud_21',['PointCloud',['../structmolSys_1_1PointCloud.html',1,'molSys']]],
   ['pointgroup_22',['PointGroup',['../structira_1_1PointGroup.html',1,'ira']]],
-  ['pointgroup_23',['pointGroup',['../namespaceira.html#aa9b334b9ee20ce45a89d779f800a8fad',1,'ira']]],
+  ['pointgroup_23',['pointGroup',['../structcage_1_1CageShape.html#af97eb7fe8c7b176b387003fb2a30fbab',1,'cage::CageShape::pointGroup'],['../namespaceira.html#aa9b334b9ee20ce45a89d779f800a8fad',1,'ira::pointGroup()']]],
   ['polar_24',['polar',['../namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90afa5caf54a500bad246188a8769cb9947',1,'site']]],
   ['polygonringanalysis_25',['polygonRingAnalysis',['../group__ring.html#ga346b2c43ca9cf794e95cb70f0dd5c642',1,'ring']]],
   ['populatebonds_26',['populateBonds',['../group__bond.html#ga8f1473246e183fb78fc3ceef0ef1c363',1,'bond::populateBonds(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud)'],['../group__bond.html#ga0014dcec62d33a21212d98067bfeec5d',1,'bond::populateBonds(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; cage::iceType &gt; &amp;atomTypes)']]],

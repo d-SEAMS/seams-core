@@ -1,0 +1,37 @@
+.. index:: pair: struct; cage::CageShape
+.. _doxid-structcage_1_1_cage_shape:
+
+struct cage::CageShape
+======================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+IRA/SOFI result for one cage. :ref:`More...<details-structcage_1_1_cage_shape>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <cage_enum.hpp>
+	
+	struct CageShape {
+		// fields
+	
+		int :target:`nVertices<doxid-structcage_1_1_cage_shape_1aed55e7b9d5f73008fc49b462d8c4559a>` = 0;
+		int :target:`status<doxid-structcage_1_1_cage_shape_1afeea49168dac071ae90babcc1065a365>` = 1;
+		double :target:`rmsd<doxid-structcage_1_1_cage_shape_1aff481658b1a1979a566dfc1667b36a9d>` = -1.0;
+		std::string :target:`pointGroup<doxid-structcage_1_1_cage_shape_1af97eb7fe8c7b176b387003fb2a30fbab>`;
+	};
+.. _details-structcage_1_1_cage_shape:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+IRA/SOFI result for one cage.
+
+status 0 means the library ran on these vertices. status 1 means it is absent or the cloud is empty. nVertices is the cage, not the frame.
+

@@ -1,0 +1,38 @@
+.. index:: pair: struct; cage::FormerRow
+.. _doxid-structcage_1_1_former_row:
+
+struct cage::FormerRow
+======================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+One network-former atom: coordination, same-species bonds, and the primitive rings that pass through it. :ref:`More...<details-structcage_1_1_former_row>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <cage_enum.hpp>
+	
+	struct FormerRow {
+		// fields
+	
+		int :target:`index<doxid-structcage_1_1_former_row_1add9c789d79abd4898b8d9d05bd7c7378>` = -1;
+		int :target:`species<doxid-structcage_1_1_former_row_1af59daf6d60866bd457e3628a934dd67f>` = 0;
+		int :target:`coord<doxid-structcage_1_1_former_row_1aeb5d90e4d6998dd867ea1454aab08dc3>` = 0;
+		int :target:`homopolar<doxid-structcage_1_1_former_row_1a4980d806deea31204f4203af083483f7>` = 0;
+		std::map<int, int> :target:`rings<doxid-structcage_1_1_former_row_1ae427133e1513cfea1afae90af6039689>`;
+	};
+.. _details-structcage_1_1_former_row:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+One network-former atom: coordination, same-species bonds, and the primitive rings that pass through it.
+
+``:ref:`rings <doxid-structcage_1_1_former_row_1ae427133e1513cfea1afae90af6039689>``` counts are through this atom, so a ring of size n contributes to n rows.
+
