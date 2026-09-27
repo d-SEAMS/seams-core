@@ -5,9 +5,11 @@
 
 #include <cage_canon.hpp>
 #include <cage_enum.hpp>
+#include <ira_sofi.hpp>
 #include <topo_bulk.hpp>
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <cstdint>
 #include <map>
@@ -605,6 +607,63 @@ findBySignature(const std::vector<std::vector<int>> &rings,
   Search search(rings, signature, &admit);
   search.run();
   return search.found;
+}
+
+namespace {
+
+Eigen::MatrixXd asMatrix(const std::vector<std::array<double, 3>> &xyz) {
+  Eigen::MatrixXd m(static_cast<Eigen::Index>(xyz.size()), 3);
+  for (size_t i = 0; i < xyz.size(); ++i) {
+    m(static_cast<Eigen::Index>(i), 0) = xyz[i][0];
+    m(static_cast<Eigen::Index>(i), 1) = xyz[i][1];
+    m(static_cast<Eigen::Index>(i), 2) = xyz[i][2];
+  }
+  return m;
+}
+
+} // namespace
+
+std::vector<std::array<double, 3>>
+coordsOfVertices(const std::vector<std::array<double, 3>> &all,
+                 const std::vector<int> &vertices) {
+  std::vector<std::array<double, 3>> out;
+  out.reserve(vertices.size());
+  for (const int v : vertices) {
+    if (v < 0 || static_cast<size_t>(v) >= all.size()) {
+      continue;
+    }
+    out.push_back(all[static_cast<size_t>(v)]);
+  }
+  return out;
+}
+
+CageShape shapeOfVertices(const std::vector<std::array<double, 3>> &cageXyz) {
+  CageShape shape;
+  shape.nVertices = static_cast<int>(cageXyz.size());
+  if (cageXyz.empty() || !ira::available()) {
+    return shape;
+  }
+  ira::PointGroup group;
+  shape.status = ira::pointGroup(asMatrix(cageXyz), group);
+  if (shape.status == 0) {
+    shape.pointGroup = group.symbol;
+  }
+  return shape;
+}
+
+CageShape overlayVertices(const std::vector<std::array<double, 3>> &ref,
+                          const std::vector<std::array<double, 3>> &cageXyz) {
+  CageShape shape;
+  shape.nVertices = static_cast<int>(cageXyz.size());
+  if (cageXyz.empty() || ref.size() != cageXyz.size() || !ira::available()) {
+    return shape;
+  }
+  ira::Match hit;
+  shape.status = ira::match(asMatrix(ref), asMatrix(cageXyz), hit);
+  if (shape.status == 0) {
+    shape.rmsd = hit.rmsd;
+  }
+  return shape;
 }
 
 std::vector<FoundCage>

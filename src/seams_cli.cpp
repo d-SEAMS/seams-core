@@ -986,7 +986,8 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
              const std::string &signatureSpec = {},
              const std::vector<int> &guestTypes = {}, double guestRadius = 4.0,
              const std::string &perAtomPath = {}, bool inside = false,
-             bool incomplete = false, const std::vector<int> &waterTypes = {}) {
+             bool incomplete = false, const std::vector<int> &waterTypes = {},
+             bool shape = false) {
   if (cloud.nop == 0) {
     if (!signatureSpec.empty()) {
       const auto sig = cage::Signature::parse(signatureSpec);
@@ -1072,6 +1073,20 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
           for (std::size_t k = 0; k < occ.occupancyHistogram.size(); ++k) {
             os << " " << k << ":" << occ.occupancyHistogram[k];
           }
+        }
+      }
+      if (shape) {
+        std::vector<std::array<double, 3>> all(static_cast<std::size_t>(cloud.nop));
+        for (int i = 0; i < cloud.nop; ++i) {
+          const auto &p = cloud.pts[static_cast<std::size_t>(i)];
+          all[static_cast<std::size_t>(i)] = {p.x, p.y, p.z};
+        }
+        os << " " << colorizer.longOption("shape");
+        for (const auto &c : found) {
+          const auto xyz = cage::coordsOfVertices(all, c.vertices);
+          const auto sh = cage::shapeOfVertices(xyz);
+          os << " " << sh.nVertices << ":"
+             << (sh.status == 0 ? sh.pointGroup : "off");
         }
       }
       os << "\n";
@@ -1286,6 +1301,7 @@ int main(int argc, char *argv[]) {
   bool layersFlag = false;
   bool tumLayersFlag = false;
   bool incompleteFlag = false;
+  bool shapeFlag = false;
   std::string waterTypesFlag;
   std::string subsetFlag;
   int rdfTypeI = 0;
@@ -1438,6 +1454,11 @@ int main(int argc, char *argv[]) {
                  .help("Seeded cages: fill the last vertex of six-rings whose "
                        "other vertices carry a label (ring completion)")
                  .handler([&]() { completeFlag = true; }));
+
+  parser.add(Option("--shape")
+                 .help("cages --signature: point group of each found cage, "
+                       "from those vertices only")
+                 .handler([&]() { shapeFlag = true; }));
 
   parser.add(Option("--signature")
                  .argName("SPEC")
@@ -1789,7 +1810,7 @@ int main(int argc, char *argv[]) {
         }
         return cmdCages(os, cloud, cutoff, typeI, k, graph, completeFlag,
                         signatureSpec, guestTypes, guestRadius, perAtomPath,
-                        insideFlag, incompleteFlag, waterTypes);
+                        insideFlag, incompleteFlag, waterTypes, shapeFlag);
       } catch (const std::exception &e) {
         os << colorizer.error(e.what()) << "\n";
         return 2;

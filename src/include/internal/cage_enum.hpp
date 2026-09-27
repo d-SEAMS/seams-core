@@ -7,6 +7,7 @@
 
 #include <cage.hpp>
 
+#include <array>
 #include <string>
 #include <vector>
 
@@ -77,6 +78,29 @@ findBySignature(const std::vector<std::vector<int>> &rings,
 std::vector<FoundCage>
 findIncompleteBySignature(const std::vector<std::vector<int>> &rings,
                           const Signature &signature, int minFaces);
+
+/** IRA/SOFI result for one cage. status 0 means the library ran on
+ *  these vertices. status 1 means it is absent or the cloud is empty.
+ *  nVertices is the cage, not the frame. */
+struct CageShape {
+  int nVertices = 0;
+  int status = 1;
+  double rmsd = -1.0;
+  std::string pointGroup;
+};
+
+/** Coordinates of `vertices` only. An index past `all` is skipped. */
+std::vector<std::array<double, 3>>
+coordsOfVertices(const std::vector<std::array<double, 3>> &all,
+                 const std::vector<int> &vertices);
+
+/** Point group of this vertex set. Does not see any other atom. */
+CageShape shapeOfVertices(const std::vector<std::array<double, 3>> &cageXyz);
+
+/** Overlay `cageXyz` on `ref`. Row counts must agree. Does not see
+ *  any atom outside the two sets. */
+CageShape overlayVertices(const std::vector<std::array<double, 3>> &ref,
+                          const std::vector<std::array<double, 3>> &cageXyz);
 
 } // namespace cage
 

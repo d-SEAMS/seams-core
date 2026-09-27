@@ -1,6 +1,7 @@
 #include <cage.hpp>
 #include <cage_canon.hpp>
 #include <cage_enum.hpp>
+#include <ira_sofi.hpp>
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
@@ -447,4 +448,44 @@ TEST_CASE("alternating faces close a cube and a homopolar face does not",
 
   const auto uncolored = cage::findBySignature(faces, sig);
   REQUIRE(uncolored.size() == 1);
+}
+
+TEST_CASE("IRA and SOFI see the cage vertices and not the frame", "[cage_enum]") {
+  std::vector<std::array<double, 3>> all(10);
+  for (int i = 0; i < 8; ++i) {
+    const int x = i & 1;
+    const int y = (i >> 1) & 1;
+    const int z = (i >> 2) & 1;
+    all[static_cast<std::size_t>(i)] = {static_cast<double>(x),
+                                        static_cast<double>(y),
+                                        static_cast<double>(z)};
+  }
+  all[8] = {99.0, 99.0, 99.0};
+  all[9] = {-99.0, -99.0, -99.0};
+  const std::vector<int> vertices = {0, 1, 2, 3, 4, 5, 6, 7};
+  const auto cageXyz = cage::coordsOfVertices(all, vertices);
+  REQUIRE(cageXyz.size() == 8);
+  for (const auto &p : cageXyz) {
+    REQUIRE(p[0] > -2.0);
+    REQUIRE(p[0] < 2.0);
+    REQUIRE(p[1] > -2.0);
+    REQUIRE(p[1] < 2.0);
+    REQUIRE(p[2] > -2.0);
+    REQUIRE(p[2] < 2.0);
+  }
+  const auto shape = cage::shapeOfVertices(cageXyz);
+  REQUIRE(shape.nVertices == 8);
+  const auto mismatch = cage::overlayVertices(all, cageXyz);
+  REQUIRE(mismatch.nVertices == 8);
+  REQUIRE(mismatch.status == 1);
+  if (!ira::available()) {
+    REQUIRE(shape.status == 1);
+    REQUIRE(shape.pointGroup.empty());
+  } else {
+    REQUIRE(shape.status == 0);
+    REQUIRE_FALSE(shape.pointGroup.empty());
+    const auto same = cage::overlayVertices(cageXyz, cageXyz);
+    REQUIRE(same.status == 0);
+    REQUIRE(same.rmsd < 1e-6);
+  }
 }
