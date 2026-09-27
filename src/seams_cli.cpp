@@ -605,7 +605,7 @@ void writePerAtomDump(const std::string &path, const Cloud &cloud, const std::st
 int cmdFingerprint(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
                    const std::string &graphName, int hops, bool colourTypes,
                    const std::string &libraryPath, const std::string &emitLabel,
-                   const std::string &perAtomPath = {}) {
+                   const std::string &perAtomPath = {}, bool byAtom = false) {
   if (cloud.nop == 0) {
     os << colorizer.heading("nop") << " 0\n";
     return 0;
@@ -717,6 +717,24 @@ int cmdFingerprint(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int
      << colorizer.longOption("rings");
   for (std::size_t sz = 3; sz < fp.ringCensus.size(); ++sz) {
     os << " " << sz << ":" << fp.ringCensus[sz];
+  }
+  if (byAtom) {
+    std::vector<int> species(rows.size(), 0);
+    for (int i = 0; i < cloud.nop && static_cast<std::size_t>(i) < species.size(); ++i) {
+      species[static_cast<std::size_t>(i)] = cloud.pts[static_cast<std::size_t>(i)].type;
+    }
+    const auto rings = primitive::ringNetwork(rows, std::max(hops, 6));
+    const auto table = cage::formerRows(rows, rings, species, -1);
+    os << "\n";
+    for (const auto &row : table) {
+      os << "atom " << row.index << " species " << row.species << " coord " << row.coord
+         << " homopolar " << row.homopolar << " rings";
+      for (const auto &kv : row.rings) {
+        os << " " << kv.first << ":" << kv.second;
+      }
+      os << "\n";
+    }
+    return 0;
   }
   // the most populated classes, largest first
   std::vector<std::pair<int, std::string>> top;
@@ -1302,6 +1320,7 @@ int main(int argc, char *argv[]) {
   bool tumLayersFlag = false;
   bool incompleteFlag = false;
   bool shapeFlag = false;
+  bool byAtomFlag = false;
   std::string waterTypesFlag;
   std::string subsetFlag;
   int rdfTypeI = 0;
@@ -1548,6 +1567,11 @@ int main(int argc, char *argv[]) {
                  .handler([&](std::string_view value) {
                    hops = parseIntegral<int>(value);
                  }));
+
+  parser.add(Option("--by-atom")
+                 .help("fingerprint: one row per atom with coordination, "
+                       "same-species bonds, and primitive rings through that atom")
+                 .handler([&]() { byAtomFlag = true; }));
 
   parser.add(Option("--ion-types")
                  .argName("I,J")
@@ -1819,7 +1843,7 @@ int main(int argc, char *argv[]) {
     if (cmd == "fingerprint") {
       try {
         return cmdFingerprint(os, cloud, cutoff, typeI, k, graph, hops, colourTypes,
-                              libraryPath, emitLabel, perAtomPath);
+                              libraryPath, emitLabel, perAtomPath, byAtomFlag);
       } catch (const std::exception &e) {
         os << colorizer.error(e.what()) << "\n";
         return 2;

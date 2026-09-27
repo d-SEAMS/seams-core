@@ -450,6 +450,27 @@ TEST_CASE("alternating faces close a cube and a homopolar face does not",
   REQUIRE(uncolored.size() == 1);
 }
 
+TEST_CASE("a homopolar edge is counted on the atoms it joins", "[cage_enum]") {
+  const std::vector<std::vector<int>> nList = {{1, 3}, {0, 2}, {1, 3}, {0, 2}};
+  const std::vector<std::vector<int>> rings = {{0, 1, 2, 3}};
+  const std::vector<int> species = {1, 1, 2, 2};
+  const auto rows = cage::formerRows(nList, rings, species, -1);
+  REQUIRE(rows.size() == 4);
+  REQUIRE(rows[0].coord == 2);
+  REQUIRE(rows[0].homopolar == 1);
+  REQUIRE(rows[0].rings.at(4) == 1);
+  REQUIRE(rows[2].homopolar == 1);
+  const auto formers = cage::formerRows(nList, rings, species, 1);
+  REQUIRE(formers.size() == 2);
+  REQUIRE(formers[0].index == 0);
+  REQUIRE(formers[1].index == 1);
+  REQUIRE(cage::sameNetwork(rows, rows));
+  std::vector<int> split = {1, 2, 2, 2};
+  const auto late = cage::formerRows(nList, rings, split, -1);
+  REQUIRE(late[0].homopolar == 0);
+  REQUIRE_FALSE(cage::sameNetwork(rows, late));
+}
+
 TEST_CASE("IRA and SOFI see the cage vertices and not the frame", "[cage_enum]") {
   std::vector<std::array<double, 3>> all(10);
   for (int i = 0; i < 8; ++i) {

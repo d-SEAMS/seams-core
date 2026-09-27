@@ -651,6 +651,63 @@ CageShape shapeOfVertices(const std::vector<std::array<double, 3>> &cageXyz) {
   return shape;
 }
 
+std::vector<FormerRow>
+formerRows(const std::vector<std::vector<int>> &nList,
+           const std::vector<std::vector<int>> &rings,
+           const std::vector<int> &species, int formerSpecies) {
+  const int n = static_cast<int>(nList.size());
+  std::vector<std::map<int, int>> through(static_cast<size_t>(n));
+  for (const auto &ring : rings) {
+    const int size = static_cast<int>(ring.size());
+    for (const int atom : ring) {
+      if (atom < 0 || atom >= n) {
+        continue;
+      }
+      through[static_cast<size_t>(atom)][size] += 1;
+    }
+  }
+  std::vector<FormerRow> out;
+  for (int i = 0; i < n; ++i) {
+    const int sp = static_cast<size_t>(i) < species.size()
+                       ? species[static_cast<size_t>(i)]
+                       : 0;
+    if (formerSpecies >= 0 && sp != formerSpecies) {
+      continue;
+    }
+    FormerRow row;
+    row.index = i;
+    row.species = sp;
+    row.coord = static_cast<int>(nList[static_cast<size_t>(i)].size());
+    for (const int nb : nList[static_cast<size_t>(i)]) {
+      if (nb < 0 || static_cast<size_t>(nb) >= species.size()) {
+        continue;
+      }
+      if (species[static_cast<size_t>(nb)] == sp) {
+        row.homopolar += 1;
+      }
+    }
+    row.rings = through[static_cast<size_t>(i)];
+    out.push_back(row);
+  }
+  return out;
+}
+
+bool sameNetwork(const std::vector<FormerRow> &early,
+                 const std::vector<FormerRow> &late) {
+  if (early.size() != late.size()) {
+    return false;
+  }
+  for (size_t i = 0; i < early.size(); ++i) {
+    const auto &a = early[i];
+    const auto &b = late[i];
+    if (a.index != b.index || a.species != b.species || a.coord != b.coord ||
+        a.homopolar != b.homopolar || a.rings != b.rings) {
+      return false;
+    }
+  }
+  return true;
+}
+
 CageShape overlayVertices(const std::vector<std::array<double, 3>> &ref,
                           const std::vector<std::array<double, 3>> &cageXyz) {
   CageShape shape;

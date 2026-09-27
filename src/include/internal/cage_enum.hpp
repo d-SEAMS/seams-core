@@ -8,6 +8,7 @@
 #include <cage.hpp>
 
 #include <array>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -101,6 +102,28 @@ CageShape shapeOfVertices(const std::vector<std::array<double, 3>> &cageXyz);
  *  any atom outside the two sets. */
 CageShape overlayVertices(const std::vector<std::array<double, 3>> &ref,
                           const std::vector<std::array<double, 3>> &cageXyz);
+
+/** One network-former atom: coordination, same-species bonds, and the
+ *  primitive rings that pass through it. `rings` counts are through
+ *  this atom, so a ring of size n contributes to n rows. */
+struct FormerRow {
+  int index = -1;
+  int species = 0;
+  int coord = 0;
+  int homopolar = 0;
+  std::map<int, int> rings;
+};
+
+/** `formerSpecies < 0` keeps every atom. */
+std::vector<FormerRow>
+formerRows(const std::vector<std::vector<int>> &nList,
+           const std::vector<std::vector<int>> &rings,
+           const std::vector<int> &species, int formerSpecies);
+
+/** True when the two tables have the same per-atom species, coordination,
+ *  homopolar count, and ring-size multiset. */
+bool sameNetwork(const std::vector<FormerRow> &early,
+                 const std::vector<FormerRow> &late);
 
 } // namespace cage
 
