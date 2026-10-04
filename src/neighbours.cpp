@@ -453,23 +453,6 @@ nneigh::neighListO(double rcutoff,
     }
   }
 
-#ifdef SEAMS_HAS_OPENMP
-  // threaded cell list: one row per thread, the same minimum-image set
-  if (typeIIndices.size() >= static_cast<std::size_t>(kThreadedCellRowsMinAtoms)) {
-    std::vector<std::vector<int>> rows;
-    if (cellListRowsThreaded(yCloud, typeIIndices, rcutoff, rows)) {
-      nList = seedWithSelfIDs(indexToID, yCloud.nop);
-      for (std::size_t k = 0; k < rows.size(); k++) {
-        auto &dest = nList[static_cast<std::size_t>(typeIIndices[k])];
-        for (const int j : rows[k]) {
-          dest.push_back(indexToID[static_cast<std::size_t>(j)]);
-        }
-      }
-      return nList;
-    }
-  }
-#endif
-
 #ifdef SEAMS_HAS_CUTOFF_LIST
   // Cutoff list: linkcell pairs_within, or vesin when that library is absent.
   {
@@ -485,7 +468,24 @@ nneigh::neighListO(double rcutoff,
 
       return nList;
     }
-    // If vesin failed, fall through to brute-force
+    // If the cutoff list failed, fall through.
+  }
+#endif
+
+#ifdef SEAMS_HAS_OPENMP
+  // threaded cell list: one row per thread, the same minimum-image set
+  if (typeIIndices.size() >= static_cast<std::size_t>(kThreadedCellRowsMinAtoms)) {
+    std::vector<std::vector<int>> rows;
+    if (cellListRowsThreaded(yCloud, typeIIndices, rcutoff, rows)) {
+      nList = seedWithSelfIDs(indexToID, yCloud.nop);
+      for (std::size_t k = 0; k < rows.size(); k++) {
+        auto &dest = nList[static_cast<std::size_t>(typeIIndices[k])];
+        for (const int j : rows[k]) {
+          dest.push_back(indexToID[static_cast<std::size_t>(j)]);
+        }
+      }
+      return nList;
+    }
   }
 #endif
 
@@ -716,19 +716,6 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
     nList[iatom].push_back(iatom);
   } // end of init
   // -------------------------------------------------------
-#ifdef SEAMS_HAS_OPENMP
-  if (yCloud.nop >= kThreadedCellRowsMinAtoms) {
-    std::vector<int> allIndices(static_cast<std::size_t>(yCloud.nop));
-    std::iota(allIndices.begin(), allIndices.end(), 0);
-    std::vector<std::vector<int>> rows;
-    if (cellListRowsThreaded(yCloud, allIndices, cutoff, rows)) {
-      for (std::size_t k = 0; k < rows.size(); k++) {
-        nList[k].insert(nList[k].end(), rows[k].begin(), rows[k].end());
-      }
-      return nList;
-    }
-  }
-#endif
 #ifdef SEAMS_HAS_CUTOFF_LIST
   // Cutoff list over every particle.
   {
@@ -743,7 +730,19 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
       }
       return nList;
     }
-    // If vesin failed, fall through to brute-force
+  }
+#endif
+#ifdef SEAMS_HAS_OPENMP
+  if (yCloud.nop >= kThreadedCellRowsMinAtoms) {
+    std::vector<int> allIndices(static_cast<std::size_t>(yCloud.nop));
+    std::iota(allIndices.begin(), allIndices.end(), 0);
+    std::vector<std::vector<int>> rows;
+    if (cellListRowsThreaded(yCloud, allIndices, cutoff, rows)) {
+      for (std::size_t k = 0; k < rows.size(); k++) {
+        nList[k].insert(nList[k].end(), rows[k].begin(), rows[k].end());
+      }
+      return nList;
+    }
   }
 #endif
   // -------------------------------------------------------
