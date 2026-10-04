@@ -20,6 +20,11 @@
 #ifdef SEAMS_HAS_VESIN
 #include <vesin.h>
 #endif
+#ifdef SEAMS_HAS_LINKCELL
+#include <linkcell.hpp>
+#include <cmath>
+#include <limits>
+#endif
 
 // -----------------------------------------------------------------------------------------------------
 // IN-PLANE RDF
@@ -133,6 +138,59 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
 
   // Init the histogram to 0
   histogram.resize(nbin);
+
+#ifdef SEAMS_HAS_LINKCELL
+  // One minimum-image pair. pairs_within is the cutoff list; the half
+  // list keeps i < j. Images past L/2 would be extra histogram counts,
+  // so this path runs only when the cutoff cannot see a second image.
+  double halfMinLc = 0.0;
+  if (yCloud.box.size() >= 3) {
+    halfMinLc = 0.5 * std::min({yCloud.box[0], yCloud.box[1], yCloud.box[2]});
+  }
+  if (yCloud.nop > 0 && yCloud.box.size() >= 3 && cutoff <= halfMinLc) {
+    std::vector<std::array<double, 3>> positions(
+        static_cast<size_t>(yCloud.nop));
+    for (int i = 0; i < yCloud.nop; i++) {
+      positions[static_cast<size_t>(i)] = {
+          yCloud.pts[i].x, yCloud.pts[i].y, yCloud.pts[i].z};
+    }
+    double box[3][3];
+    double origin[3];
+    nneigh::dumpBoundsToH(yCloud.box, yCloud.boxLow, box, origin);
+    const linkcell::Cell cell = linkcell::Cell::from_vectors(
+        {box[0][0], box[0][1], box[0][2]}, {box[1][0], box[1][1], box[1][2]},
+        {box[2][0], box[2][1], box[2][2]},
+        {origin[0], origin[1], origin[2]});
+    const double query =
+        std::nextafter(cutoff, std::numeric_limits<double>::infinity());
+    try {
+      const std::vector<linkcell::ShiftedPair> rows = linkcell::pairs_within(
+          positions[0].data(), static_cast<std::size_t>(yCloud.nop), cell,
+          query, nullptr, 0.0, true);
+      for (const linkcell::ShiftedPair &row : rows) {
+        if (row.i >= row.j) {
+          continue;
+        }
+        const double rij = std::sqrt(row.dist2);
+        if (rij > cutoff) {
+          continue;
+        }
+        int bin = static_cast<int>(rij / binwidth);
+        if (bin < 0) {
+          continue;
+        }
+        if (bin >= nbin) {
+          bin = nbin - 1;
+        }
+        histogram[static_cast<size_t>(bin)] += 2;
+      }
+      return histogram;
+    } catch (const linkcell::Error &err) {
+      std::cerr << "linkcell pairs_within failed: " << err.what()
+                << "; falling back.\n";
+    }
+  }
+#endif
 
 #ifdef SEAMS_HAS_VESIN
   // vesin full=true returns every periodic image inside cutoff.

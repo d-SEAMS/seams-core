@@ -39,6 +39,9 @@
 #ifdef SEAMS_HAS_LINKCELL
 #include <linkcell.hpp>
 #endif
+#if defined(SEAMS_HAS_LINKCELL) || defined(SEAMS_HAS_VESIN)
+#define SEAMS_HAS_CUTOFF_LIST 1
+#endif
 
 namespace {
 
@@ -105,17 +108,18 @@ void fillPairDistSq(
                              yCloud.box[2], distSq, n);
 }
 
-#ifdef SEAMS_HAS_VESIN
+#ifdef SEAMS_HAS_CUTOFF_LIST
 /**
- * @details Runs the vesin cell list over the particles named by @a subset and
- *  reports the neighbour pairs as cloud indices. Cell-list construction is
- *  linear in the particle count, against the quadratic cost of comparing every
- *  pair.
+ * @details Cutoff pairs for the particles named by @a subset, as cloud
+ *  indices. linkcell::pairs_within is that list. Vesin is the fallback
+ *  when linkcell is not built. The rows are atom-images; the neighbour
+ *  list keeps one cloud index per partner, which is the brute-force
+ *  contract (no self pair, one slot per atom).
  * @param[in] yCloud The input molSys::PointCloud.
  * @param[in] subset Cloud indices of the particles to search over.
  * @param[in] rcutoff Distance cutoff, within which two atoms are neighbours.
  * @param[out] pairs Neighbour pairs, as cloud indices, in both directions.
- * @return True when vesin produced a neighbour list, false when the caller
+ * @return True when a cutoff list was produced, false when the caller
  *  should fall back to the brute-force path.
  */
 bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
@@ -135,57 +139,89 @@ bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   double box[3][3];
   double origin[3];
   nneigh::dumpBoundsToH(yCloud.box, yCloud.boxLow, box, origin);
-  bool periodic[3] = {true, true, true};
 
-  VesinOptions options;
-  options.cutoff = rcutoff;
-  options.full = true; // full neighbor list (both i->j and j->i)
-  options.sorted = false;
-  options.algorithm = VesinAutoAlgorithm;
-  options.return_shifts = false;
-  options.return_distances = false;
-  options.return_vectors = false;
+  // Subset-local (i, j). Both directions when the list is full.
+  std::vector<std::pair<int, int>> local;
+  bool produced = false;
 
-  VesinNeighborList neighbors;
-  const char *error_message = nullptr;
-  VesinDevice device = {VesinCPU, 0};
+#ifdef SEAMS_HAS_LINKCELL
+  try {
+    const linkcell::Cell cell = linkcell::Cell::from_vectors(
+        {box[0][0], box[0][1], box[0][2]}, {box[1][0], box[1][1], box[1][2]},
+        {box[2][0], box[2][1], box[2][2]},
+        {origin[0], origin[1], origin[2]});
+    const std::vector<linkcell::ShiftedPair> rows = linkcell::pairs_within(
+        positions[0].data(), nSubset, cell, rcutoff);
+    local.reserve(rows.size());
+    for (const linkcell::ShiftedPair &row : rows) {
+      local.emplace_back(row.i, row.j);
+    }
+    produced = true;
+  } catch (const linkcell::Error &err) {
+    std::cerr << "linkcell pairs_within failed: " << err.what()
+              << "; trying the next cutoff list.\n";
+  }
+#endif
 
-  const int status = vesin_neighbors(
-      reinterpret_cast<const double (*)[3]>(positions.data()), nSubset, box,
-      periodic, device, options, &neighbors, &error_message);
-
-  if (status != 0) {
-    std::cerr << "Vesin failed: " << (error_message ? error_message : "unknown")
-              << "; falling back to brute force.\n";
+#ifdef SEAMS_HAS_VESIN
+  if (!produced) {
+    bool periodic[3] = {true, true, true};
+    VesinOptions options;
+    options.cutoff = rcutoff;
+    options.full = true;
+    options.sorted = false;
+    options.algorithm = VesinAutoAlgorithm;
+    options.return_shifts = false;
+    options.return_distances = false;
+    options.return_vectors = false;
+    VesinNeighborList neighbors;
+    const char *error_message = nullptr;
+    VesinDevice device = {VesinCPU, 0};
+    const int status = vesin_neighbors(
+        reinterpret_cast<const double (*)[3]>(positions.data()), nSubset, box,
+        periodic, device, options, &neighbors, &error_message);
+    if (status != 0) {
+      std::cerr << "Vesin failed: "
+                << (error_message ? error_message : "unknown")
+                << "; falling back to brute force.\n";
+      vesin_free(&neighbors);
+      return false;
+    }
+    local.reserve(neighbors.length);
+    for (size_t k = 0; k < neighbors.length; k++) {
+      local.emplace_back(neighbors.pairs[k][0], neighbors.pairs[k][1]);
+    }
     vesin_free(&neighbors);
+    produced = true;
+  }
+#endif
+
+  if (!produced) {
     return false;
   }
 
   pairs.clear();
-  pairs.reserve(neighbors.length);
+  pairs.reserve(local.size());
 #ifdef SEAMS_HAS_MINIMAGE
-  std::vector<int> packed(neighbors.length * 2);
-  for (size_t k = 0; k < neighbors.length; k++) {
-    packed[2 * k] = subset[neighbors.pairs[k][0]];
-    packed[2 * k + 1] = subset[neighbors.pairs[k][1]];
+  std::vector<int> packed(local.size() * 2);
+  for (size_t k = 0; k < local.size(); k++) {
+    packed[2 * k] = subset[static_cast<size_t>(local[k].first)];
+    packed[2 * k + 1] = subset[static_cast<size_t>(local[k].second)];
   }
-  std::vector<int> kept(neighbors.length * 2, 0);
+  std::vector<int> kept(local.size() * 2, 0);
   size_t nkept = 0;
-  mi_reduce_pairs(packed.data(), neighbors.length, kept.data(), &nkept);
+  mi_reduce_pairs(packed.data(), local.size(), kept.data(), &nkept);
   for (size_t k = 0; k < nkept; k++) {
     pairs.emplace_back(kept[2 * k], kept[2 * k + 1]);
   }
 #else
-  for (size_t k = 0; k < neighbors.length; k++) {
-    const int iatom = subset[neighbors.pairs[k][0]];
-    const int jatom = subset[neighbors.pairs[k][1]];
-    // A cell list enumerates periodic images, so a particle can appear as its
-    // own neighbour through an image, and one neighbour can arrive through
-    // several images at once. Both happen as soon as the box stops being
-    // larger than twice the cutoff. The minimum image convention that the
-    // brute-force path applies admits each ordered pair once and never the
-    // self pair, so reduce to that here rather than letting box size change
-    // the meaning of a neighbour list.
+  for (const auto &lj : local) {
+    const int iatom = subset[static_cast<size_t>(lj.first)];
+    const int jatom = subset[static_cast<size_t>(lj.second)];
+    // A cutoff list enumerates periodic images, so a particle can appear
+    // as its own neighbour through an image, and one neighbour can arrive
+    // through several images. The brute-force path admits each ordered
+    // pair once and never the self pair.
     if (iatom == jatom) {
       continue;
     }
@@ -194,8 +230,6 @@ bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   std::sort(pairs.begin(), pairs.end());
   pairs.erase(std::unique(pairs.begin(), pairs.end()), pairs.end());
 #endif
-
-  vesin_free(&neighbors);
 
   return true;
 }
@@ -243,7 +277,8 @@ void appendNeighbourID(std::vector<std::vector<int>> &nList,
 
 /**
  * @details Function for building neighbour lists for each
- *  particle. Vesin cell list when built with SEAMS_HAS_VESIN, else
+ *  particle. linkcell pairs_within when built with SEAMS_HAS_LINKCELL,
+ *  vesin when that list is absent, else
  *  brute-force \f$ O(n^2) \f$. This generates the full neighbour list, by ID.
  * @param[in] rcutoff Distance cutoff, within which two atoms are neighbours.
  * @param[in] yCloud The input molSys::PointCloud
@@ -435,8 +470,8 @@ nneigh::neighListO(double rcutoff,
   }
 #endif
 
-#ifdef SEAMS_HAS_VESIN
-  // O(n) cell-list neighbor search via vesin
+#ifdef SEAMS_HAS_CUTOFF_LIST
+  // Cutoff list: linkcell pairs_within, or vesin when that library is absent.
   {
     std::vector<std::pair<int, int>> pairs;
     if (cellListPairs(yCloud, typeIIndices, rcutoff, pairs)) {
@@ -518,7 +553,7 @@ nneigh::neighListPair(
   const std::vector<int> indexToID = indexToIDTable(yCloud);
   std::vector<std::vector<int>> nList = seedWithSelfIDs(indexToID, yCloud.nop);
 
-#ifdef SEAMS_HAS_VESIN
+#ifdef SEAMS_HAS_CUTOFF_LIST
   {
     std::vector<int> subset;
     subset.reserve(static_cast<size_t>(yCloud.nop));
@@ -586,8 +621,9 @@ nneigh::neighListPair(
 
 /**
  * @details Function for building neighbour lists for each
- *  particle of only one type. Vesin cell list when built with
- *  SEAMS_HAS_VESIN, else brute-force \f$ O(n^2) \f$. This generates the
+ *  particle of only one type. linkcell pairs_within when built with
+ *  SEAMS_HAS_LINKCELL, vesin when that list is absent, else brute-force
+ *  \f$ O(n^2) \f$. This generates the
  *  half neighbour list, by ID. This function will only work for building a
  *  neighbour list between one type of particles.
  * @param[in] rcutoff Distance cutoff, within which two atoms are neighbours.
@@ -606,7 +642,7 @@ nneigh::halfNeighList(double rcutoff,
   const std::vector<int> indexToID = indexToIDTable(yCloud);
   std::vector<std::vector<int>> nList = seedWithSelfIDs(indexToID, yCloud.nop);
 
-#ifdef SEAMS_HAS_VESIN
+#ifdef SEAMS_HAS_CUTOFF_LIST
   {
     std::vector<int> typeIIndices;
     for (int i = 0; i < yCloud.nop; i++) {
@@ -693,8 +729,8 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
     }
   }
 #endif
-#ifdef SEAMS_HAS_VESIN
-  // O(n) cell-list neighbour search via vesin, over every particle
+#ifdef SEAMS_HAS_CUTOFF_LIST
+  // Cutoff list over every particle.
   {
     std::vector<int> allIndices(yCloud.nop);
     std::iota(allIndices.begin(), allIndices.end(), 0);
@@ -1366,7 +1402,7 @@ void nneigh::SkinNeighborList::rebuildCandidates(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   candidates_.clear();
   const double wide = cutoff_ + skin_;
-#ifdef SEAMS_HAS_VESIN
+#ifdef SEAMS_HAS_CUTOFF_LIST
   std::vector<int> subset;
   subset.reserve(static_cast<std::size_t>(yCloud.nop));
   for (int i = 0; i < yCloud.nop; i++) {
