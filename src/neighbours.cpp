@@ -164,6 +164,10 @@ bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   pairs.clear();
   pairs.reserve(neighbors.length);
 #ifdef SEAMS_HAS_MINIMAGE
+  if (neighbors.length == 0) {
+    vesin_free(&neighbors);
+    return true;
+  }
   std::vector<int> packed(neighbors.length * 2);
   for (size_t k = 0; k < neighbors.length; k++) {
     packed[2 * k] = subset[neighbors.pairs[k][0]];
@@ -171,11 +175,15 @@ bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   }
   std::vector<int> kept(neighbors.length * 2, 0);
   size_t nkept = 0;
-  mi_reduce_pairs(packed.data(), neighbors.length, kept.data(), &nkept);
-  for (size_t k = 0; k < nkept; k++) {
-    pairs.emplace_back(kept[2 * k], kept[2 * k + 1]);
+  if (mi_reduce_pairs(packed.data(), neighbors.length, kept.data(), &nkept) ==
+      0) {
+    for (size_t k = 0; k < nkept; k++) {
+      pairs.emplace_back(kept[2 * k], kept[2 * k + 1]);
+    }
+    vesin_free(&neighbors);
+    return true;
   }
-#else
+#endif
   for (size_t k = 0; k < neighbors.length; k++) {
     const int iatom = subset[neighbors.pairs[k][0]];
     const int jatom = subset[neighbors.pairs[k][1]];
@@ -193,7 +201,6 @@ bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   }
   std::sort(pairs.begin(), pairs.end());
   pairs.erase(std::unique(pairs.begin(), pairs.end()), pairs.end());
-#endif
 
   vesin_free(&neighbors);
 

@@ -105,24 +105,26 @@ inline double calcMedian(std::vector<double> *input) {
 
 #ifdef SEAMS_HAS_MINIMAGE
 // Dump bound spans plus optional tilt onto an mi_cell.
-inline mi_cell pointCloudCell(
-    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+inline bool pointCloudCell(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    mi_cell *out) {
   const auto &box = yCloud.box;
   const auto &boxLow = yCloud.boxLow;
   const double xlo_b = boxLow.size() > 0 ? boxLow[0] : 0.0;
   const double ylo_b = boxLow.size() > 1 ? boxLow[1] : 0.0;
   const double zlo_b = boxLow.size() > 2 ? boxLow[2] : 0.0;
-  mi_cell c = mi_cell_ortho(0.0, 0.0, 0.0);
   if (box.size() >= 6) {
-    mi_cell_from_lammps_bounds(box[0], box[1], box[2], box[3], box[4], box[5],
-                               xlo_b, ylo_b, zlo_b, &c);
-  } else if (box.size() >= 3) {
-    c = mi_cell_ortho(box[0], box[1], box[2]);
-    c.ox = xlo_b;
-    c.oy = ylo_b;
-    c.oz = zlo_b;
+    return mi_cell_from_lammps_bounds(box[0], box[1], box[2], box[3], box[4],
+                                      box[5], xlo_b, ylo_b, zlo_b, out) == 0;
   }
-  return c;
+  if (box.size() >= 3 && box[0] > 0.0 && box[1] > 0.0 && box[2] > 0.0) {
+    *out = mi_cell_ortho(box[0], box[1], box[2]);
+    out->ox = xlo_b;
+    out->oy = ylo_b;
+    out->oz = zlo_b;
+    return true;
+  }
+  return false;
 }
 #endif
 
@@ -135,13 +137,17 @@ inline std::array<double, 3> triclinicMinImage(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double xi,
     double yi, double zi, double xj, double yj, double zj) {
 #ifdef SEAMS_HAS_MINIMAGE
-  const mi_cell cell = pointCloudCell(yCloud);
-  const double p[3] = {xj, yj, zj};
-  const double q[3] = {xi, yi, zi};
-  double dr[3] = {0.0, 0.0, 0.0};
-  mi_displacement(&cell, p, q, dr);
-  return {dr[0], dr[1], dr[2]};
-#else
+  mi_cell cell;
+  if (pointCloudCell(yCloud, &cell)) {
+    const double p[3] = {xj, yj, zj};
+    const double q[3] = {xi, yi, zi};
+    double dr[3] = {0.0, 0.0, 0.0};
+    if (mi_displacement_euclidean(&cell, p, q, dr) == 0) {
+      return {dr[0], dr[1], dr[2]};
+    }
+  }
+#endif
+  {
   const auto &box = yCloud.box;
   const auto &boxLow = yCloud.boxLow;
   const double xspan = box[0];
@@ -179,7 +185,7 @@ inline std::array<double, 3> triclinicMinImage(
   dsy -= std::round(dsy);
   dsz -= std::round(dsz);
   return {lx * dsx + xy * dsy + xz * dsz, ly * dsy + yz * dsz, lz * dsz};
-#endif
+  }
 }
 
 // Generic function for getting the unwrapped distance
@@ -196,15 +202,18 @@ inline double
 periodicDistSq(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                int iatom, int jatom) {
 #ifdef SEAMS_HAS_MINIMAGE
-  const mi_cell cell = pointCloudCell(yCloud);
-  const double p[3] = {yCloud.pts[iatom].x, yCloud.pts[iatom].y,
-                       yCloud.pts[iatom].z};
-  const double q[3] = {yCloud.pts[jatom].x, yCloud.pts[jatom].y,
-                       yCloud.pts[jatom].z};
-  double out = 0.0;
-  mi_dist2(&cell, p, q, &out);
-  return out;
-#else
+  mi_cell cell;
+  if (pointCloudCell(yCloud, &cell)) {
+    const double p[3] = {yCloud.pts[iatom].x, yCloud.pts[iatom].y,
+                         yCloud.pts[iatom].z};
+    const double q[3] = {yCloud.pts[jatom].x, yCloud.pts[jatom].y,
+                         yCloud.pts[jatom].z};
+    double dr[3] = {0.0, 0.0, 0.0};
+    if (mi_displacement_euclidean(&cell, p, q, dr) == 0) {
+      return dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+    }
+  }
+#endif
   if (yCloud.box.size() >= 6) {
     const auto dr = triclinicMinImage(
         yCloud, yCloud.pts[iatom].x, yCloud.pts[iatom].y, yCloud.pts[iatom].z,
@@ -227,7 +236,6 @@ periodicDistSq(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
   }
 
   return r2;
-#endif
 }
 
 /**
@@ -306,14 +314,17 @@ inline std::array<double, 3> relDistFromPoint(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
     double xj, double yj, double zj) {
 #ifdef SEAMS_HAS_MINIMAGE
-  const mi_cell cell = pointCloudCell(yCloud);
-  const double p[3] = {xj, yj, zj};
-  const double q[3] = {yCloud.pts[iatom].x, yCloud.pts[iatom].y,
-                       yCloud.pts[iatom].z};
-  double dr[3] = {0.0, 0.0, 0.0};
-  mi_displacement(&cell, p, q, dr);
-  return {dr[0], dr[1], dr[2]};
-#else
+  mi_cell cell;
+  if (pointCloudCell(yCloud, &cell)) {
+    const double p[3] = {xj, yj, zj};
+    const double q[3] = {yCloud.pts[iatom].x, yCloud.pts[iatom].y,
+                         yCloud.pts[iatom].z};
+    double dr[3] = {0.0, 0.0, 0.0};
+    if (mi_displacement_euclidean(&cell, p, q, dr) == 0) {
+      return {dr[0], dr[1], dr[2]};
+    }
+  }
+#endif
   if (yCloud.box.size() >= 6) {
     return triclinicMinImage(yCloud, yCloud.pts[iatom].x, yCloud.pts[iatom].y,
                              yCloud.pts[iatom].z, xj, yj, zj);
@@ -330,7 +341,6 @@ inline std::array<double, 3> relDistFromPoint(
     }
   }
   return dr;
-#endif
 }
 
 inline double unWrappedDistFromPoint(

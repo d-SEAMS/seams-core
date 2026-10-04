@@ -391,6 +391,32 @@ TEST_CASE("sheared a-image pair has periodicDistSq 0.25", "[generic]") {
   REQUIRE_THAT(distSq[0], Catch::Matchers::WithinAbs(0.25, 1e-9));
 }
 
+TEST_CASE("hex-prism body diagonal is the Euclidean image", "[generic]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  const double ly = 8.660254037844386;
+  const double body[3] = {10.0 * 0.49 + 5.0 * 0.49, ly * 0.49, 10.0 * 0.49};
+  molSys::Point<double> origin;
+  molSys::Point<double> diag;
+  diag.x = body[0];
+  diag.y = body[1];
+  diag.z = body[2];
+  cloud.pts.push_back(origin);
+  cloud.pts.push_back(diag);
+  const double frac2 = body[0] * body[0] + body[1] * body[1] + body[2] * body[2];
+  const double r2 = gen::periodicDistSq(cloud, 0, 1);
+  REQUIRE(r2 + 1e-8 < frac2);
+  const int jatom[1] = {1};
+  double distSq[1] = {-1.0};
+  gen::batchPeriodicDistSq(cloud, 0, jatom, 1, distSq);
+  REQUIRE_THAT(distSq[0], Catch::Matchers::WithinAbs(r2, 1e-12));
+  const auto dr = gen::relDistFromPoint(cloud, 1, 0.0, 0.0, 0.0);
+  const double dr2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+  REQUIRE_THAT(dr2, Catch::Matchers::WithinAbs(r2, 1e-12));
+}
+
 TEST_CASE("relDistFromPoint uses dump H on a mixed image", "[generic]") {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
