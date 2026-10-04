@@ -1,9 +1,11 @@
-"""Derivation of the restricted-triclinic edge and the one-image RDF gate.
+"""Derivation of the restricted-triclinic edge and the one-image ball.
 
-The C++ pieces are dumpBoundsToH / dumpCellLengths and the vesin gate in
-sampleRDF_AA. Sollya certifies the floating-point margin
-(analysis/triclinic_gate.sollya). Lean proves the same real statements
-in lean/DseamsProofs/Cell.lean.
+dumpBoundsToH recovers lx, ly, lz. A cutoff ball wider than half the
+shortest edge holds two lattice images, which is why sampleRDF_AA
+keeps one minimum-image distance instead of every vesin image.
+Sollya encloses the two-flop recovery error
+(analysis/triclinic_gate.sollya). Lean proves the real statements in
+lean/DseamsProofs/Cell.lean.
 """
 
 import pathlib
@@ -16,15 +18,7 @@ from sympy import Abs, FiniteSet, Max, Min, Rational, Symbol, sqrt
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-HEADER = ROOT / "src" / "include" / "internal" / "neighbours.hpp"
 SOLLYA = ROOT / "analysis" / "triclinic_gate.sollya"
-
-
-def _header_constant(name):
-    text = HEADER.read_text()
-    match = re.search(rf"constexpr double {name} = ([^;]+);", text)
-    assert match, name
-    return float(sp.sympify(match.group(1)))
 
 
 def _recovered_edge(lx, xy, xz):
@@ -151,8 +145,8 @@ def test_self_header_is_not_a_neighbour():
     assert homo == 1
 
 
-def test_sollya_margin_covers_the_header():
-    """The header constant sits above the Sollya enclosure of the model."""
+def test_sollya_encloses_the_two_flop_corner():
+    """The enclosure of gamma2*|x| + u*hi on [-hi, hi] sits on the corner."""
     sollya = shutil.which("sollya")
     assert sollya, "sollya is required to certify the margin"
     proc = subprocess.run(
@@ -165,13 +159,8 @@ def test_sollya_margin_covers_the_header():
     numbers = re.findall(r"[0-9]+\.[0-9]+e[+-][0-9]+", proc.stdout)
     assert numbers, proc.stdout
     certified = float(numbers[-1])
-    edge_abs = _header_constant("kRecoveredEdgeAbs")
-    half_abs = _header_constant("kRecoveredHalfAbs")
-    assert certified <= edge_abs
-    assert half_abs * 2 == edge_abs
-    # gamma2 * hi + u * hi is the exact corner. The enclosure may sit a ulp above it.
     u = sp.Rational(1, 2**53)
     gamma2 = 2 * u / (1 - 2 * u)
     corner = gamma2 * 10000 + u * 10000
     assert certified + 1e-18 >= float(corner)
-    assert float(corner) <= edge_abs
+    assert certified < float(corner) * 1.01

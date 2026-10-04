@@ -117,11 +117,11 @@ int rdf2::rdf2Danalysis_AA(
  *  of type A in it.
  *  - gen::periodicDist (Periodic distance between a pair of atoms).
  * @param[in] yCloud The input PointCloud.
- * @param[in] cutoff Cutoff for the RDF calculation, which should be less than
- *  or equal to half the box length.
+ * @param[in] cutoff Cutoff for the RDF calculation.
  * @param[in] binwidth Width of the bin.
  * @param[in] nbin Number of bins.
- * @return RDF histogram for the current frame.
+ * @return RDF histogram for the current frame. Each pair contributes
+ *  once, at its minimum-image distance.
  */
 std::vector<int>
 rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
@@ -135,21 +135,21 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   histogram.resize(nbin);
 
 #ifdef SEAMS_HAS_VESIN
-  // vesin full=true returns every periodic image inside cutoff.
-  // sampleRDF_AA is one MIC pair (see the brute loop below).
-  // Every nonzero lattice vector is at least the shortest recovered
-  // edge m = min(lx, ly, lz), so a closed ball of radius c holds two
-  // images only when 2c >= m. The computed half-edge can exceed the
-  // true one by kRecoveredHalfAbs on the Sollya domain, and equality
-  // 2c = m still admits both images, so the comparison is strict.
-  double halfMin = 0.0;
+  // A cell list returns every periodic image inside the search cutoff.
+  // Past half the shortest edge a pair has two such images, so the
+  // histogram keeps one minimum-image distance, the same distance the
+  // loop below computes. Vesin drops a pair that sits exactly on its
+  // cutoff; the search is a hair above the caller cutoff and the
+  // filter is still r <= cutoff. Once the cutoff reaches the middle
+  // edge the candidate list is most of the pairs and the direct loop
+  // is faster, so the cell list stops there.
+  double edge[3] = {0.0, 0.0, 0.0};
   if (yCloud.box.size() >= 3) {
-    double lengths[3];
-    nneigh::dumpCellLengths(yCloud.box, yCloud.boxLow, lengths);
-    halfMin = 0.5 * std::min({lengths[0], lengths[1], lengths[2]});
+    nneigh::dumpCellLengths(yCloud.box, yCloud.boxLow, edge);
+    std::sort(edge, edge + 3);
   }
-  if (yCloud.nop > 0 && nneigh::recoveredEdgeDomain(yCloud.box) &&
-      cutoff + nneigh::kRecoveredHalfAbs < halfMin) {
+  const bool sparse = edge[1] > 0.0 && cutoff < 0.35 * edge[1];
+  if (sparse && yCloud.nop > 1 && yCloud.box.size() >= 3) {
     std::vector<std::array<double, 3>> positions(
         static_cast<size_t>(yCloud.nop));
     for (int i = 0; i < yCloud.nop; i++) {
@@ -161,12 +161,13 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
     nneigh::dumpBoundsToH(yCloud.box, yCloud.boxLow, box, origin);
     bool periodic[3] = {true, true, true};
     VesinOptions options{};
-    options.cutoff = cutoff;
+    const double pad = std::max(cutoff, 1.0) * 1e-8;
+    options.cutoff = cutoff + pad;
     options.full = true;
     options.sorted = false;
     options.algorithm = VesinAutoAlgorithm;
     options.return_shifts = false;
-    options.return_distances = true;
+    options.return_distances = false;
     options.return_vectors = false;
     VesinNeighborList neighbors;
     const char *error_message = nullptr;
@@ -175,34 +176,42 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
         reinterpret_cast<const double (*)[3]>(positions.data()),
         static_cast<size_t>(yCloud.nop), box, periodic, device, options,
         &neighbors, &error_message);
-    if (status == 0 && neighbors.distances != nullptr) {
+    if (status == 0) {
+      std::vector<std::pair<int, int>> uniq;
+      uniq.reserve(neighbors.length / 2 + 1);
       for (size_t k = 0; k < neighbors.length; k++) {
-        const int iatom = static_cast<int>(neighbors.pairs[k][0]);
-        const int jatom = static_cast<int>(neighbors.pairs[k][1]);
-        if (iatom >= jatom) {
+        int iatom = static_cast<int>(neighbors.pairs[k][0]);
+        int jatom = static_cast<int>(neighbors.pairs[k][1]);
+        if (iatom == jatom) {
           continue;
         }
-        const double r_ij = neighbors.distances[k];
-        if (r_ij > cutoff) {
-          continue;
+        if (iatom > jatom) {
+          std::swap(iatom, jatom);
         }
-        int ibin = static_cast<int>(r_ij / binwidth);
-        if (ibin < 0) {
-          continue;
-        }
-        if (ibin >= nbin) {
-          ibin = nbin - 1;
-        }
-        histogram[static_cast<size_t>(ibin)] += 2;
+        uniq.emplace_back(iatom, jatom);
       }
       vesin_free(&neighbors);
+      std::sort(uniq.begin(), uniq.end());
+      uniq.erase(std::unique(uniq.begin(), uniq.end()), uniq.end());
+      for (const auto &pair : uniq) {
+        const double r = gen::periodicDist(yCloud, pair.first, pair.second);
+        if (r > cutoff) {
+          continue;
+        }
+        int b = static_cast<int>(r / binwidth);
+        if (b < 0) {
+          continue;
+        }
+        if (b >= nbin) {
+          b = nbin - 1;
+        }
+        histogram[static_cast<size_t>(b)] += 2;
+      }
       return histogram;
     }
-    if (status != 0) {
-      std::cerr << "Vesin failed: "
-                << (error_message ? error_message : "unknown")
-                << "; falling back to brute force.\n";
-    }
+    std::cerr << "Vesin failed: "
+              << (error_message ? error_message : "unknown")
+              << "; falling back to brute force.\n";
     vesin_free(&neighbors);
   }
 #endif

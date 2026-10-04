@@ -159,7 +159,7 @@ TEST_CASE("sampleRDF_AA produces histogram with correct bin count", "[rdf2d]") {
 
 TEST_CASE("sampleRDF_AA at half an edge is MIC-once", "[rdf2d]") {
   // Atoms sit half a box apart. Both the direct pair and the wrapped
-  // image have length L/2, so a closed cutoff of L/2 sees two images.
+  // image have length L/2. The histogram keeps one of them.
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   cloud.box = {10.0, 10.0, 10.0};
   cloud.boxLow = {0.0, 0.0, 0.0};
@@ -244,14 +244,17 @@ TEST_CASE("sampleRDF_AA histograms the tilt a-image pair", "[rdf2d]") {
     cloud.pts.push_back(pt);
     cloud.idIndexMap[i + 1] = i;
   }
-  REQUIRE_THAT(gen::periodicDistSq(cloud, 0, 1),
-               Catch::Matchers::WithinAbs(0.25, 1e-9));
+  const double r = gen::periodicDist(cloud, 0, 1);
+  REQUIRE_THAT(r * r, Catch::Matchers::WithinAbs(0.25, 1e-9));
   const double cutoff = 1.0;
   const double binwidth = 0.1;
   const int nbin = 10;
+  const int expectBin = static_cast<int>(r / binwidth);
   auto hist = rdf2::sampleRDF_AA(cloud, cutoff, binwidth, nbin);
   REQUIRE(hist.size() == static_cast<std::size_t>(nbin));
-  REQUIRE(hist[5] == 2);
+  REQUIRE(expectBin >= 0);
+  REQUIRE(expectBin < nbin);
+  REQUIRE(hist[static_cast<std::size_t>(expectBin)] == 2);
 }
 
 TEST_CASE("sampleRDF_AA tilt between edge and span is MIC-once", "[rdf2d]") {

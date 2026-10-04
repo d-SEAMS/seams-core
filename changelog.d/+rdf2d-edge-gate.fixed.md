@@ -1,1 +1,1 @@
-The 2D RDF cell list runs only when the cutoff plus the certified recovery margin is strictly below half the shortest recovered edge.
+The 2D RDF histogram is one minimum-image pair. The cell list supplies the candidates, including when the cutoff exceeds half the shortest edge, and a second image of the same pair is dropped. The direct pair loop is used when the cutoff reaches the middle edge.
