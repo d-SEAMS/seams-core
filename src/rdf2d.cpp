@@ -136,17 +136,20 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
 
 #ifdef SEAMS_HAS_VESIN
   // vesin full=true returns every periodic image inside cutoff.
-  // sampleRDF_AA is one MIC pair (see the brute loop below). Images
-  // past half an edge are extra counts. The gate is the recovered
-  // edge from dumpBoundsToH: box[0..2] are bound spans, and a tilt
-  // makes those longer than lx, ly, lz.
+  // sampleRDF_AA is one MIC pair (see the brute loop below).
+  // Every nonzero lattice vector is at least the shortest recovered
+  // edge m = min(lx, ly, lz), so a closed ball of radius c holds two
+  // images only when 2c >= m. The computed half-edge can exceed the
+  // true one by kRecoveredHalfAbs on the Sollya domain, and equality
+  // 2c = m still admits both images, so the comparison is strict.
   double halfMin = 0.0;
   if (yCloud.box.size() >= 3) {
     double lengths[3];
     nneigh::dumpCellLengths(yCloud.box, yCloud.boxLow, lengths);
     halfMin = 0.5 * std::min({lengths[0], lengths[1], lengths[2]});
   }
-  if (yCloud.nop > 0 && yCloud.box.size() >= 3 && cutoff <= halfMin) {
+  if (yCloud.nop > 0 && nneigh::recoveredEdgeDomain(yCloud.box) &&
+      cutoff + nneigh::kRecoveredHalfAbs < halfMin) {
     std::vector<std::array<double, 3>> positions(
         static_cast<size_t>(yCloud.nop));
     for (int i = 0; i < yCloud.nop; i++) {

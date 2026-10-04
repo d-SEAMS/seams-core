@@ -113,6 +113,43 @@ inline void dumpCellLengths(const std::vector<double> &box,
   lengths[2] = H[2][2];
 }
 
+/// Spans and tilt offsets the Sollya certificate covers, in angstroms.
+/// analysis/triclinic_gate.sollya.
+inline constexpr double kRecoveredDomainLo = 1e-2;
+inline constexpr double kRecoveredDomainHi = 1e4;
+
+/// Absolute error of one recovered edge on that domain.
+/// The model is gamma_2 * |xspan - xmax| + u * |xmin| with
+/// u = 2^{-53} and gamma_2 = 2u / (1 - 2u). The enclosure is below
+/// this constant.
+inline constexpr double kRecoveredEdgeAbs = 4e-12;
+
+/// Half of kRecoveredEdgeAbs. A computed half-edge can sit above the
+/// true half-edge by this much.
+inline constexpr double kRecoveredHalfAbs = 2e-12;
+
+/// True when every bound span and tilt offset lies in the certificate.
+inline bool recoveredEdgeDomain(const std::vector<double> &box) {
+  if (box.size() < 3) {
+    return false;
+  }
+  for (int i = 0; i < 3; ++i) {
+    const double v = box[static_cast<std::size_t>(i)];
+    if (!(v >= kRecoveredDomainLo && v <= kRecoveredDomainHi)) {
+      return false;
+    }
+  }
+  if (box.size() >= 6) {
+    for (int i = 3; i < 6; ++i) {
+      const double v = box[static_cast<std::size_t>(i)];
+      if (!(v >= -kRecoveredDomainHi && v <= kRecoveredDomainHi)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 /// Longest recovered length: 0 = x, 1 = y, 2 = z.
 inline int dumpAxialDim(const std::vector<double> &box,
                         const std::vector<double> &boxLow) {

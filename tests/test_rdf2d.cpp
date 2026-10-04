@@ -157,6 +157,37 @@ TEST_CASE("sampleRDF_AA produces histogram with correct bin count", "[rdf2d]") {
   REQUIRE(hist[1] == 0);
 }
 
+TEST_CASE("sampleRDF_AA at half an edge is MIC-once", "[rdf2d]") {
+  // Atoms sit half a box apart. Both the direct pair and the wrapped
+  // image have length L/2, so a closed cutoff of L/2 sees two images.
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {10.0, 10.0, 10.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  const double coords[2][3] = {{0.0, 0.0, 0.0}, {5.0, 0.0, 0.0}};
+  for (int i = 0; i < 2; i++) {
+    molSys::Point<double> pt;
+    pt.type = 1;
+    pt.atomID = i + 1;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+  REQUIRE_THAT(gen::periodicDist(cloud, 0, 1),
+               Catch::Matchers::WithinAbs(5.0, 1e-12));
+  const double cutoff = 5.0;
+  const double binwidth = 1.0;
+  const int nbin = 5;
+  auto hist = rdf2::sampleRDF_AA(cloud, cutoff, binwidth, nbin);
+  int total = 0;
+  for (int bin : hist) {
+    total += bin;
+  }
+  REQUIRE(total == 2);
+}
+
 TEST_CASE("sampleRDF_AA cutoff past L/2 matches MIC-once", "[rdf2d]") {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   cloud.box = {5.0, 5.0, 5.0};

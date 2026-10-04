@@ -16,7 +16,7 @@
   matches a physical ice bilayer (Catch2 on the HC fixture covers that).
 -/
 import Mathlib.Data.Finset.Basic
-import Mathlib.Data.Nat.Basic
+import Mathlib.Data.Nat.Defs
 import Mathlib.Tactic
 
 namespace Dseams.Stacking

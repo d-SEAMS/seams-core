@@ -1,0 +1,25 @@
+// Absolute-error model for one recovered restricted-triclinic edge.
+//
+// fl(fl(xspan - xmax) + xmin) differs from xspan - xmax + xmin by at most
+// gamma2 * |xspan - xmax| + u * |xmin|, where u = 2^{-53} and
+// gamma2 = 2u / (1 - 2u). SymPy checks that gamma2 dominates
+// (1 + u)^2 - 1. On spans and tilt offsets inside [-hi, hi],
+// |xspan - xmax| and |xmin| are at most hi.
+//
+// evaluate returns an interval enclosure. sup of that interval is a
+// certified upper bound.
+
+prec = 200;
+display = decimal;
+u = 2^(-53);
+gamma2 = 2 * u / (1 - 2 * u);
+hi = 10000;
+f = gamma2 * abs(x) + u * hi;
+enclosure = evaluate(f, [-hi; hi]);
+print("gamma2");
+gamma2;
+print("enclosure");
+enclosure;
+print("sup");
+sup(enclosure);
+quit;
