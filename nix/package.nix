@@ -26,6 +26,9 @@ stdenv.mkDerivation (finalAttrs: {
       ../input
       ../templates
       ../subprojects/readcon-core.wrap
+      ../subprojects/readcon-db.wrap
+      ../subprojects/linkcell.wrap
+      ../subprojects/minimage.wrap
       ../subprojects/vesin.wrap
       ../subprojects/robin-map.wrap
       ../subprojects/packagefiles

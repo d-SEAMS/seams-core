@@ -14,8 +14,10 @@
 
 #include <algorithm>
 #include <charconv>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
@@ -932,71 +934,298 @@ sinp::readChemfiles(std::string filename, int targetFrame,
 #endif // SEAMS_HAS_CHEMFILES
 
 #ifdef SEAMS_HAS_READCON
-// The C API rather than readcon-core.hpp: the C++ wrapper is a convenience
-// layer over exactly these calls, and the C ABI is the surface cargo-c
-// versions
-#include <readcon-core.h>
+#include <readcon-core.hpp>
+#ifdef SEAMS_HAS_MINIMAGE
+#include <minimage.h>
+#endif
+#ifdef SEAMS_HAS_READCON_DB
+#include <readcon-db.h>
+#endif
+
+namespace {
+
+bool conAnglesOrtho(const double angles[3]) {
+  for (int k = 0; k < 3; k++) {
+    if (std::abs(angles[k] - 90.0) > 1e-8) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// CON lengths and angles are minimage's from_con_box basis. An
+// orthorhombic cell stays three bound spans so the pair loop does not
+// take the triclinic path. A shear is stored as dump spans plus xy, xz,
+// yz, which is the box lammpsBoxToLcCell already copies onto lc_cell.
+void applyConCell(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                  const double cell[3], const double angles[3]) {
+#ifdef SEAMS_HAS_MINIMAGE
+  mi_cell raw{};
+  if (mi_cell_from_con_box(cell, angles, &raw) == 0) {
+    if (conAnglesOrtho(angles)) {
+      yCloud.box = {raw.ax, raw.by, raw.cz};
+      yCloud.boxLow = {raw.ox, raw.oy, raw.oz};
+      return;
+    }
+    const double xy = raw.bx;
+    const double xz = raw.cx;
+    const double yz = raw.cy;
+    const double lx = raw.ax;
+    const double ly = raw.by;
+    const double lz = raw.cz;
+    const double xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));
+    const double xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));
+    const double ymin = std::min(0.0, yz);
+    const double ymax = std::max(0.0, yz);
+    yCloud.box = {lx + xmax - xmin, ly + ymax - ymin, lz, xy, xz, yz};
+    yCloud.boxLow = {raw.ox + xmin, raw.oy + ymin, raw.oz};
+    return;
+  }
+#else
+  (void)angles;
+#endif
+  yCloud.box = {cell[0], cell[1], cell[2]};
+  yCloud.boxLow = {0.0, 0.0, 0.0};
+}
+
+bool cloudFromHandle(
+    const readcon::RKRConFrame *handle, int frameNo,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  readcon::CFrame *frame = readcon::rkr_frame_to_c_frame(handle);
+  if (frame == nullptr) {
+    return false;
+  }
+  applyConCell(yCloud, frame->cell, frame->angles);
+  uintptr_t nxyz = 0;
+  const double *xyz = readcon::rkr_frame_xyz_f64(handle, &nxyz);
+  const bool rowMajor =
+      xyz != nullptr && nxyz == frame->num_atoms &&
+      (frame->num_atoms == 0 ||
+       (xyz[1] == frame->atoms[0].y && xyz[2] == frame->atoms[0].z));
+  yCloud.pts.reserve(frame->num_atoms);
+  for (size_t i = 0; i < frame->num_atoms; i++) {
+    const readcon::CAtom &atom = frame->atoms[i];
+    molSys::Point<double> pt;
+    pt.type = static_cast<int>(atom.atomic_number);
+    pt.atomID = static_cast<int>(atom.atom_id);
+    pt.molID = pt.atomID;
+    if (rowMajor) {
+      pt.x = xyz[3 * i];
+      pt.y = xyz[3 * i + 1];
+      pt.z = xyz[3 * i + 2];
+    } else {
+      pt.x = atom.x;
+      pt.y = atom.y;
+      pt.z = atom.z;
+    }
+    yCloud.pts.push_back(pt);
+    mapAtomIdToIndex(yCloud);
+  }
+  readcon::free_c_frame(frame);
+  yCloud.nop = static_cast<int>(yCloud.pts.size());
+  yCloud.currentFrame = frameNo;
+  return true;
+}
+
+#ifdef SEAMS_HAS_READCON_DB
+// shards.json is the manifest readcon-db's campaign commands write
+// (shard-init, drain, join). The C ABI opens one LMDB env, so a root
+// is fanned out by that layout instead of a second parser.
+uint32_t campaignShardCount(const std::filesystem::path &manifest) {
+  std::ifstream in(manifest);
+  if (!in) {
+    return 0;
+  }
+  std::string text((std::istreambuf_iterator<char>(in)),
+                   std::istreambuf_iterator<char>());
+  const auto key = text.find("\"n_shards\"");
+  if (key == std::string::npos) {
+    return 0;
+  }
+  const auto colon = text.find(':', key);
+  if (colon == std::string::npos) {
+    return 0;
+  }
+  const unsigned long n = std::strtoul(text.c_str() + colon + 1, nullptr, 10);
+  if (n == 0 || n > 4096) {
+    return 0;
+  }
+  return static_cast<uint32_t>(n);
+}
+
+std::string campaignDest(const std::string &corpus, std::uint64_t trajId) {
+  const auto manifest = std::filesystem::path(corpus) / "shards.json";
+  const uint32_t n = campaignShardCount(manifest);
+  if (n == 0) {
+    return corpus;
+  }
+  char name[32];
+  std::snprintf(name, sizeof name, "shard_%04u",
+                static_cast<unsigned>(trajId % n));
+  return (std::filesystem::path(corpus) / name).string();
+}
+
+std::vector<std::string> campaignEnvs(const std::string &corpus) {
+  const auto manifest = std::filesystem::path(corpus) / "shards.json";
+  const uint32_t n = campaignShardCount(manifest);
+  std::vector<std::string> roots;
+  if (n == 0) {
+    roots.push_back(corpus);
+    return roots;
+  }
+  for (uint32_t i = 0; i < n; i++) {
+    char name[32];
+    std::snprintf(name, sizeof name, "shard_%04u", i);
+    const auto dir = std::filesystem::path(corpus) / name;
+    if (std::filesystem::is_regular_file(dir / "data.mdb")) {
+      roots.push_back(dir.string());
+    }
+  }
+  return roots;
+}
+#endif
+
+} // namespace
 
 molSys::PointCloud<molSys::Point<double>, double>
 sinp::readCon(std::string filename, int targetFrame,
               molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   yCloud = molSys::clearPointCloud(yCloud);
-
-  readcon::CConFrameIterator *frames =
-      readcon::read_con_file_iterator(filename.c_str());
-  if (frames == nullptr) {
-    std::cerr << "Cannot open .con file " << filename << "\n";
+  if (targetFrame < 1) {
     return yCloud;
   }
-
-  int frameIdx = 0;
-  while (readcon::RKRConFrame *handle =
-             readcon::con_frame_iterator_next(frames)) {
-    frameIdx++;
-    if (frameIdx != targetFrame) {
-      readcon::free_rkr_frame(handle);
-      continue;
+  try {
+    readcon::ConFrameIterator frames(filename);
+    std::optional<readcon::ConFrame> frame =
+        frames.nth(static_cast<std::size_t>(targetFrame - 1));
+    if (!frame) {
+      std::cerr << "Frame " << targetFrame << " not found in " << filename
+                << "\n";
+      return yCloud;
     }
-
-    // Found the target frame; extract the transparent atom records
-    readcon::CFrame *frame = readcon::rkr_frame_to_c_frame(handle);
-    readcon::free_rkr_frame(handle);
-    if (frame == nullptr) {
+    if (!cloudFromHandle(frame->get_handle(), targetFrame, yCloud)) {
       std::cerr << "Cannot extract frame " << targetFrame << " from "
                 << filename << "\n";
-      break;
+      yCloud = molSys::clearPointCloud(yCloud);
     }
+  } catch (const std::exception &e) {
+    std::cerr << "Cannot open .con file " << filename << ": " << e.what()
+              << "\n";
+    yCloud = molSys::clearPointCloud(yCloud);
+  }
+  return yCloud;
+}
 
-    yCloud.box = {frame->cell[0], frame->cell[1], frame->cell[2]};
-    yCloud.boxLow = {0.0, 0.0, 0.0};
-    yCloud.pts.reserve(frame->num_atoms);
+#ifdef SEAMS_HAS_READCON_DB
+int sinp::ingestConCorpus(const std::string &corpus, std::uint64_t trajId,
+                          const std::string &conPath) {
+  const std::string dest = campaignDest(corpus, trajId);
+  std::error_code ec;
+  std::filesystem::create_directories(dest, ec);
+  if (ec) {
+    std::cerr << "Cannot create corpus " << dest << ": " << ec.message()
+              << "\n";
+    return -1;
+  }
+  size_t id = 0;
+  if (rkrdb_open(dest.c_str(), &id) != RKRDB_OK) {
+    std::cerr << "Cannot open corpus " << dest << "\n";
+    return -1;
+  }
+  uint32_t nframes = 0;
+  const int st =
+      rkrdb_append_trajectory(id, trajId, conPath.c_str(), &nframes);
+  rkrdb_close(id);
+  if (st != RKRDB_OK) {
+    std::cerr << "Cannot ingest " << conPath << " into " << dest << "\n";
+    return -1;
+  }
+  return static_cast<int>(nframes);
+}
 
-    for (size_t i = 0; i < frame->num_atoms; i++) {
-      const readcon::CAtom &atom = frame->atoms[i];
-      molSys::Point<double> pt;
-      pt.type = static_cast<int>(atom.atomic_number);
-      pt.atomID = static_cast<int>(atom.atom_id);
-      pt.molID = pt.atomID;
-      pt.x = atom.x;
-      pt.y = atom.y;
-      pt.z = atom.z;
-
-      yCloud.pts.push_back(pt);
-      mapAtomIdToIndex(yCloud);
-    }
-    readcon::free_c_frame(frame);
-
-    yCloud.nop = static_cast<int>(yCloud.pts.size());
-    yCloud.currentFrame = targetFrame;
-    readcon::free_con_frame_iterator(frames);
+molSys::PointCloud<molSys::Point<double>, double> sinp::readConCorpus(
+    const std::string &corpus, const std::string &symbol,
+    const std::string &formula, int targetFrame,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  yCloud = molSys::clearPointCloud(yCloud);
+  if (targetFrame < 1) {
     return yCloud;
   }
-
-  if (yCloud.pts.empty()) {
-    std::cerr << "Frame " << targetFrame << " not found in " << filename
-              << " (has " << frameIdx << " frames).\n";
+  struct Hit {
+    std::string root;
+    std::uint64_t traj = 0;
+    std::uint32_t frame = 0;
+  };
+  std::vector<Hit> hits;
+  const char *sym = symbol.empty() ? nullptr : symbol.c_str();
+  const char *form = formula.empty() ? nullptr : formula.c_str();
+  for (const std::string &root : campaignEnvs(corpus)) {
+    size_t id = 0;
+    if (rkrdb_open_readonly(root.c_str(), &id) != RKRDB_OK) {
+      continue;
+    }
+    const int st = rkrdb_select_campaign(
+        id, -1, sym, 0, UINT32_MAX, form, 0.0, 0.0, 0, 0.0, 0.0, 0, nullptr,
+        0, 0, 0, 0);
+    if (st == RKRDB_OK) {
+      const int n = rkrdb_result_count(id);
+      for (int i = 0; i < n; i++) {
+        Hit hit;
+        hit.root = root;
+        if (rkrdb_result_key(id, static_cast<size_t>(i), &hit.traj,
+                             &hit.frame) == RKRDB_OK) {
+          hits.push_back(hit);
+        }
+      }
+    }
+    rkrdb_close(id);
+  }
+  std::sort(hits.begin(), hits.end(), [](const Hit &a, const Hit &b) {
+    if (a.traj != b.traj) {
+      return a.traj < b.traj;
+    }
+    return a.frame < b.frame;
+  });
+  if (targetFrame > static_cast<int>(hits.size())) {
+    std::cerr << "Frame " << targetFrame << " not found in corpus " << corpus
+              << " (" << hits.size() << " hits).\n";
+    return yCloud;
+  }
+  const Hit &hit = hits[static_cast<std::size_t>(targetFrame - 1)];
+  size_t id = 0;
+  if (rkrdb_open_readonly(hit.root.c_str(), &id) != RKRDB_OK) {
+    std::cerr << "Cannot reopen corpus " << hit.root << "\n";
+    return yCloud;
+  }
+  std::string text(1u << 20, '\0');
+  int n = rkrdb_get_frame_text(id, hit.traj, hit.frame, text.data(),
+                               text.size());
+  if (n == RKRDB_ERR) {
+    text.assign(8u << 20, '\0');
+    n = rkrdb_get_frame_text(id, hit.traj, hit.frame, text.data(), text.size());
+  }
+  rkrdb_close(id);
+  if (n < 0) {
+    std::cerr << "Cannot read frame text from " << hit.root << "\n";
+    return yCloud;
+  }
+  text.resize(static_cast<std::size_t>(n));
+  readcon::CConFrameIterator *frames =
+      readcon::read_con_string_iterator(text.c_str());
+  if (frames == nullptr) {
+    std::cerr << "readcon-core rejected the corpus blob\n";
+    return yCloud;
+  }
+  readcon::RKRConFrame *handle = readcon::con_frame_iterator_next(frames);
+  if (handle == nullptr || !cloudFromHandle(handle, targetFrame, yCloud)) {
+    std::cerr << "Cannot decode corpus frame " << targetFrame << "\n";
+    yCloud = molSys::clearPointCloud(yCloud);
+  }
+  if (handle != nullptr) {
+    readcon::free_rkr_frame(handle);
   }
   readcon::free_con_frame_iterator(frames);
   return yCloud;
 }
+#endif // SEAMS_HAS_READCON_DB
 #endif // SEAMS_HAS_READCON

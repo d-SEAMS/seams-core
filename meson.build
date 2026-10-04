@@ -257,6 +257,25 @@ if readcon_dep.found()
   _args += ['-DSEAMS_HAS_READCON=1']
 endif
 
+# Campaign corpora (single LMDB env, or a shards.json root) decode through
+# the same readcon-core pin. The db crate vendors its own core for its
+# internal parse; seams never frees that handle with this build's
+# libreadcon_core.
+readcondb_dep = dependency('readcon-db', required: false,
+                           fallback: ['readcon-db', 'readcon_dep'],
+                           default_options: [
+                             'default_library=' + _readcon_kind,
+                             'with_tests=false',
+                           ])
+# The db cdylib sets a soname, so the loader looks up libreadcon_db.so by
+# name. The build tree keeps that file in the subproject directory.
+_readcondb_rpath = ''
+if readcon_dep.found() and readcondb_dep.found()
+  _deps += [readcondb_dep]
+  _args += ['-DSEAMS_HAS_READCON_DB=1']
+  _readcondb_rpath = meson.current_build_dir() / 'subprojects' / 'readcon-db'
+endif
+
 # IRA/SOFI (Gunde et al.). Optional: the CPU wheel stays Horn-only
 # unless the builder has libira. The C header is vendored; the probe
 # must actually link libira_match.
@@ -425,6 +444,7 @@ summary({
   'Minimum-image wrap (minimage)': minimage_dep.found(),
   'PDB/GRO/DCD readers (chemfiles)': chemfiles_dep.found(),
   '.con reader (readcon-core)': readcon_dep.found(),
+  'CON corpus (readcon-db)': readcon_dep.found() and readcondb_dep.found(),
   'IRA/SOFI shape matching (libira)': ira_found,
   'Cartesian Ylm (sphericart)': sphericart_found,
   'Cage certificates (nauty)': nauty_found,
@@ -474,6 +494,7 @@ if get_option('with_cli')
     include_directories: _incdirs,
     cpp_args: _args + ['-DSEAMS_VERSION="' + meson.project_version() + '"'],
     link_args: seams_cli_link,
+    build_rpath: _readcondb_rpath != '' ? _readcondb_rpath : meson.current_build_dir(),
     install: true)
   test(
     'seams_read',

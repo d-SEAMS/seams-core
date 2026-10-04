@@ -1,0 +1,7 @@
+[wrap-git]
+url = https://github.com/lode-org/readcon-db.git
+revision = v0.1.6
+depth = 1
+
+[provide]
+readcon-db = readcon_dep

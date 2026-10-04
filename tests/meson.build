@@ -61,6 +61,10 @@ _test_env = environment()
 _test_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
 
 # --enable-new-dtags is Linux-only (macOS ld does not support it)
+_test_rpath = '$ORIGIN/../src'
+if _readcondb_rpath != ''
+  _test_rpath = _test_rpath + ':' + _readcondb_rpath
+endif
 _test_link_args = _link_args
 if host_machine.system() == 'linux'
   _test_link_args += ['-Wl,--enable-new-dtags']
@@ -88,7 +92,7 @@ foreach name, src : test_sources
       cpp_args: _args,
       link_args: _test_link_args,
       include_directories: _incdirs,
-      build_rpath: '$ORIGIN/../src'),
+      build_rpath: _test_rpath),
     workdir: meson.project_source_root() / 'input',
     env: _test_env,
     timeout: _timeout)

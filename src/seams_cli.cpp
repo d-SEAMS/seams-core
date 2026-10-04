@@ -343,6 +343,11 @@ void printFeatures(std::ostream &os) {
 #else
   line("readcon-core", false);
 #endif
+#ifdef SEAMS_HAS_READCON_DB
+  line("readcon-db", true);
+#else
+  line("readcon-db", false);
+#endif
 #ifdef SEAMS_HAS_IRA
   line("IRA/SOFI", true);
 #else

@@ -57,6 +57,7 @@ ydslib = library('yodaLib',
   cpp_args: _args,
   link_args: _lib_link_args,
   include_directories: _incdirs,
+  build_rpath: _readcondb_rpath != '' ? _readcondb_rpath : meson.current_build_dir(),
   install: true)
 
 _linkto += ydslib

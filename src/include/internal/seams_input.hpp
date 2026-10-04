@@ -15,6 +15,7 @@
 #ifndef SEAMS_SEAMS_INPUT_H_
 #define SEAMS_SEAMS_INPUT_H_
 
+#include <cstdint>
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -118,10 +119,30 @@ readChemfiles(std::string filename, int targetFrame,
 #endif
 
 #ifdef SEAMS_HAS_READCON
-//! Read a .con format file (eOn saddle point search trajectories)
+//! Read a .con file through readcon-core. The cell lengths and angles
+//! become the minimage CON box, stored as the dump box the rest of the
+//! engine already hands to linkcell.
 molSys::PointCloud<molSys::Point<double>, double>
 readCon(std::string filename, int targetFrame,
         molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+
+#ifdef SEAMS_HAS_READCON_DB
+//! Append one CON path to a readcon-db corpus. A directory that holds
+//! shards.json is a campaign root: the frame is stored in
+//! shard_XXXX with XXXX = trajId % n_shards. Returns the number of
+//! frames written, or -1.
+int ingestConCorpus(const std::string &corpus, std::uint64_t trajId,
+                    const std::string &conPath);
+
+//! Select a campaign corpus and decode the hit with readcon-core.
+//! symbol and formula empty means no filter on that field. targetFrame
+//! is 1-based among the hits, ordered by trajectory id then frame index.
+//! A sharded root is searched across every shard that has data.mdb.
+molSys::PointCloud<molSys::Point<double>, double>
+readConCorpus(const std::string &corpus, const std::string &symbol,
+              const std::string &formula, int targetFrame,
+              molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+#endif
 #endif
 
 //! True when each component lies in [lo, hi], or that axis has lo == hi
