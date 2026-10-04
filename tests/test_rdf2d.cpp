@@ -223,6 +223,44 @@ TEST_CASE("sampleRDF_AA histograms the tilt a-image pair", "[rdf2d]") {
   REQUIRE(hist[5] == 2);
 }
 
+TEST_CASE("sampleRDF_AA tilt between edge and span is MIC-once", "[rdf2d]") {
+  // xy = 60 and x span 61 recover lx = 1. The span half-minimum is 6;
+  // the edge half-minimum is 0.5. Cutoff 2 sits between them.
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {61.0, 12.0, 50.0, 60.0, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  const double coords[2][3] = {{0.1, 1.0, 1.0}, {0.9, 1.0, 1.0}};
+  for (int i = 0; i < 2; i++) {
+    molSys::Point<double> pt;
+    pt.type = 1;
+    pt.atomID = i + 1;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+  REQUIRE_THAT(gen::periodicDist(cloud, 0, 1),
+               Catch::Matchers::WithinAbs(0.2, 1e-9));
+  double lengths[3];
+  nneigh::dumpCellLengths(cloud.box, cloud.boxLow, lengths);
+  REQUIRE_THAT(lengths[0], Catch::Matchers::WithinAbs(1.0, 1e-12));
+  const double cutoff = 2.0;
+  const double binwidth = 0.1;
+  const int nbin = 20;
+  auto hist = rdf2::sampleRDF_AA(cloud, cutoff, binwidth, nbin);
+  REQUIRE(hist.size() == static_cast<std::size_t>(nbin));
+  REQUIRE(hist[2] == 2);
+  int extra = 0;
+  for (int i = 0; i < nbin; i++) {
+    if (i != 2) {
+      extra += hist[static_cast<std::size_t>(i)];
+    }
+  }
+  REQUIRE(extra == 0);
+}
+
 // -- normalizeRDF tests --
 
 TEST_CASE("normalizeRDF produces non-negative values", "[rdf2d]") {

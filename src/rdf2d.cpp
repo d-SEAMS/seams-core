@@ -136,12 +136,15 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
 
 #ifdef SEAMS_HAS_VESIN
   // vesin full=true returns every periodic image inside cutoff.
-  // sampleRDF_AA is defined as one MIC pair (see the brute loop
-  // below). Images past L/2 are extra counts. Use vesin only when
-  // cutoff cannot see a second image.
+  // sampleRDF_AA is one MIC pair (see the brute loop below). Images
+  // past half an edge are extra counts. The gate is the recovered
+  // edge from dumpBoundsToH: box[0..2] are bound spans, and a tilt
+  // makes those longer than lx, ly, lz.
   double halfMin = 0.0;
   if (yCloud.box.size() >= 3) {
-    halfMin = 0.5 * std::min({yCloud.box[0], yCloud.box[1], yCloud.box[2]});
+    double lengths[3];
+    nneigh::dumpCellLengths(yCloud.box, yCloud.boxLow, lengths);
+    halfMin = 0.5 * std::min({lengths[0], lengths[1], lengths[2]});
   }
   if (yCloud.nop > 0 && yCloud.box.size() >= 3 && cutoff <= halfMin) {
     std::vector<std::array<double, 3>> positions(
