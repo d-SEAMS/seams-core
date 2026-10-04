@@ -471,6 +471,21 @@ TEST_CASE("a homopolar edge is counted on the atoms it joins", "[cage_enum]") {
   REQUIRE_FALSE(cage::sameNetwork(rows, late));
 }
 
+TEST_CASE("coordination skips the leading self index", "[cage_enum]") {
+  // neighbourListByIndex rows are [self, neighbours...].
+  const std::vector<std::vector<int>> nList = {
+      {0, 1, 3}, {1, 0, 2}, {2, 1, 3}, {3, 0, 2}};
+  const std::vector<std::vector<int>> rings = {{0, 1, 2, 3}};
+  const std::vector<int> species = {1, 1, 2, 2};
+  const auto rows = cage::formerRows(nList, rings, species, -1);
+  REQUIRE(rows[0].coord == 2);
+  REQUIRE(rows[0].homopolar == 1);
+  REQUIRE(rows[1].coord == 2);
+  REQUIRE(rows[1].homopolar == 1);
+  REQUIRE(rows[2].homopolar == 1);
+  REQUIRE(rows[3].homopolar == 1);
+}
+
 TEST_CASE("IRA and SOFI see the cage vertices and not the frame", "[cage_enum]") {
   std::vector<std::array<double, 3>> all(10);
   for (int i = 0; i < 8; ++i) {

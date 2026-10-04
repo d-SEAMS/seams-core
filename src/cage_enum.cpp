@@ -677,8 +677,11 @@ formerRows(const std::vector<std::vector<int>> &nList,
     FormerRow row;
     row.index = i;
     row.species = sp;
-    row.coord = static_cast<int>(nList[static_cast<size_t>(i)].size());
     for (const int nb : nList[static_cast<size_t>(i)]) {
+      if (nb == i) {
+        continue;
+      }
+      row.coord += 1;
       if (nb < 0 || static_cast<size_t>(nb) >= species.size()) {
         continue;
       }
