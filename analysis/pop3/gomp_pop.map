@@ -1,0 +1,14 @@
+GOMP_4.0 {
+  global:
+    GOMP_parallel;
+};
+
+POP3 {
+  global:
+    pop3_reset;
+    pop3_arm;
+    pop3_probe;
+    pop3_snapshot;
+  local:
+    *;
+} GOMP_4.0;
