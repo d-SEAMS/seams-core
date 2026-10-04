@@ -128,16 +128,8 @@ HWY_ATTR void accumulatePackedCell(const double *px, const double *py,
 
 namespace {
 
-// Uniform grid on the periodic cell. The cell edge is the cutoff, which is
-// the length Teschner, Heidelberger, Mueller, Pomeranets, and Gross measured
-// as the parameter that dominates a spatial hash (VMV 2003). The box is
-// known, so the grid is stored explicitly. Each cell's coordinates are packed
-// into contiguous arrays before the kernel, the same packing Goto and van de
-// Geijn use so a block stays in one TLB entry (TOMS 2008).
-//
-// Below half the shortest edge a pair has one image, so a hit is binned
-// directly. Cells whose index differs by two or more are more than one cell
-// edge apart, and that edge is longer than the cutoff.
+// Cutoff-sized periodic grid. Below half the shortest edge each pair has one
+// image, so a neighbour-cell hit is binned directly.
 bool histogramPackedGrid(
     const gen::FracBox &frame,
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,

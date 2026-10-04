@@ -3,12 +3,6 @@
 
 Lean 4 (Mathlib) model of ~ring::ringAdjacentCompletion~.
 The statements live in =DseamsProofs/Completion.lean=.
-The restricted-triclinic edge and the one-image ball live in
-=DseamsProofs/Cell.lean=. That ball is why an in-plane RDF histogram
-keeps one minimum-image distance when the cutoff passes half an edge.
-The two-flop recovery error is the Sollya script
-=analysis/triclinic_gate.sollya=, checked from
-=analysis/test_triclinic_gate.py=.
 
 * Theorems
 
