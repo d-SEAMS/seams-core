@@ -241,24 +241,26 @@ TEST_CASE("sampleRDF_AA tilt between edge and span is MIC-once", "[rdf2d]") {
     cloud.pts.push_back(pt);
     cloud.idIndexMap[i + 1] = i;
   }
-  REQUIRE_THAT(gen::periodicDist(cloud, 0, 1),
-               Catch::Matchers::WithinAbs(0.2, 1e-9));
+  const double r = gen::periodicDist(cloud, 0, 1);
+  REQUIRE_THAT(r, Catch::Matchers::WithinAbs(0.2, 1e-9));
   double lengths[3];
   nneigh::dumpCellLengths(cloud.box, cloud.boxLow, lengths);
   REQUIRE_THAT(lengths[0], Catch::Matchers::WithinAbs(1.0, 1e-12));
   const double cutoff = 2.0;
   const double binwidth = 0.1;
   const int nbin = 20;
+  const int expectBin = static_cast<int>(r / binwidth);
   auto hist = rdf2::sampleRDF_AA(cloud, cutoff, binwidth, nbin);
   REQUIRE(hist.size() == static_cast<std::size_t>(nbin));
-  REQUIRE(hist[2] == 2);
-  int extra = 0;
+  REQUIRE(expectBin >= 0);
+  REQUIRE(expectBin < nbin);
+  int total = 0;
   for (int i = 0; i < nbin; i++) {
-    if (i != 2) {
-      extra += hist[static_cast<std::size_t>(i)];
-    }
+    total += hist[static_cast<std::size_t>(i)];
   }
-  REQUIRE(extra == 0);
+  // One MIC pair, stored once for each order.
+  REQUIRE(total == 2);
+  REQUIRE(hist[static_cast<std::size_t>(expectBin)] == 2);
 }
 
 // -- normalizeRDF tests --
