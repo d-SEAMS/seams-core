@@ -1,0 +1,24 @@
+diff --git a/Cargo.toml b/Cargo.toml
+index 91c7e10..6da5cc2 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -36,3 +36,6 @@ required-features = ["capi"]
+ [profile.release]
+ lto = true
+ codegen-units = 1
++
++[patch.crates-io]
++minimage = { path = "../minimage" }
+diff --git a/scripts/copy-cargo-artifacts.py b/scripts/copy-cargo-artifacts.py
+index 8b2e055..7b38112 100644
+--- a/scripts/copy-cargo-artifacts.py
++++ b/scripts/copy-cargo-artifacts.py
+@@ -41,8 +41,6 @@ def main() -> None:
+         "--features",
+         "capi",
+     ]
+-    if (args.source / "Cargo.lock").is_file():
+-        command.append("--locked")
+     if args.profile == "release":
+         command.append("--release")
+ 

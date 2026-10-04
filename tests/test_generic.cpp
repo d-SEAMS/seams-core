@@ -391,6 +391,30 @@ TEST_CASE("sheared a-image pair has periodicDistSq 0.25", "[generic]") {
   REQUIRE_THAT(distSq[0], Catch::Matchers::WithinAbs(0.25, 1e-9));
 }
 
+TEST_CASE("extreme skew pair uses the Selling image", "[generic]") {
+  // a=(1,0,0), b=(0.99,0.01,0), c=(0,0,1). The bound spans are the
+  // dump box. v0.1.2's Minkowski image of this pair squares to 0.1586.
+  // The pull-request tip's Selling image squares to 0.0968.
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {1.99, 0.01, 1.0, 0.99, 0.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  molSys::Point<double> origin;
+  molSys::Point<double> far;
+  far.x = -0.74;
+  far.y = -0.82;
+  far.z = 0.0;
+  cloud.pts.push_back(origin);
+  cloud.pts.push_back(far);
+  const double r2 = gen::periodicDistSq(cloud, 0, 1);
+  REQUIRE(r2 + 1e-8 < 0.1586);
+  REQUIRE_THAT(r2, Catch::Matchers::WithinAbs(0.0968, 1e-12));
+  const int jatom[1] = {1};
+  double distSq[1] = {-1.0};
+  gen::batchPeriodicDistSq(cloud, 0, jatom, 1, distSq);
+  REQUIRE_THAT(distSq[0], Catch::Matchers::WithinAbs(r2, 1e-12));
+}
+
 TEST_CASE("hex-prism body diagonal is the Euclidean image", "[generic]") {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
