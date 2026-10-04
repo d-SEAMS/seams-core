@@ -1,6 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <random>
+
 #include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
@@ -295,6 +297,105 @@ TEST_CASE("sampleRDF_AA tilt between edge and span is MIC-once", "[rdf2d]") {
   // One MIC pair, stored once for each order.
   REQUIRE(total == 2);
   REQUIRE(hist[static_cast<std::size_t>(expectBin)] == 2);
+}
+
+TEST_CASE("sampleRDF_AA packed grid matches the direct minimum image",
+          "[rdf2d]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {20.0, 20.0, 20.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  constexpr int n = 64;
+  cloud.nop = n;
+  std::mt19937 rng(20);
+  std::uniform_real_distribution<double> u(0.0, 20.0);
+  for (int i = 0; i < n; i++) {
+    molSys::Point<double> pt;
+    pt.type = 1;
+    pt.atomID = i + 1;
+    pt.x = u(rng);
+    pt.y = u(rng);
+    pt.z = u(rng);
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+  const double cutoff = 3.0;
+  const double binwidth = 0.1;
+  const int nbin = 30;
+  std::vector<int> reference(static_cast<std::size_t>(nbin), 0);
+  for (int i = 0; i < n; i++) {
+    for (int j = i + 1; j < n; j++) {
+      const double r = gen::periodicDist(cloud, i, j);
+      if (r > cutoff) {
+        continue;
+      }
+      int b = static_cast<int>(r / binwidth);
+      if (b < 0) {
+        continue;
+      }
+      if (b >= nbin) {
+        b = nbin - 1;
+      }
+      reference[static_cast<std::size_t>(b)] += 2;
+    }
+  }
+  const auto hist = rdf2::sampleRDF_AA(cloud, cutoff, binwidth, nbin);
+  REQUIRE(hist.size() == reference.size());
+  for (int b = 0; b < nbin; b++) {
+    REQUIRE(hist[static_cast<std::size_t>(b)] ==
+            reference[static_cast<std::size_t>(b)]);
+  }
+}
+
+TEST_CASE("sampleRDF_AA packed grid matches a sheared minimum image",
+          "[rdf2d]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {30.0, 20.0, 25.0, 4.0, 0.5, -0.3};
+  cloud.boxLow = {1.0, -2.0, 0.5};
+  constexpr int n = 80;
+  cloud.nop = n;
+  std::mt19937 rng(7);
+  std::uniform_real_distribution<double> ux(1.0, 31.0);
+  std::uniform_real_distribution<double> uy(-2.0, 18.0);
+  std::uniform_real_distribution<double> uz(0.5, 25.5);
+  for (int i = 0; i < n; i++) {
+    molSys::Point<double> pt;
+    pt.type = 1;
+    pt.atomID = i + 1;
+    pt.x = ux(rng);
+    pt.y = uy(rng);
+    pt.z = uz(rng);
+    cloud.pts.push_back(pt);
+  }
+  const double cutoff = 3.0;
+  const double binwidth = 0.1;
+  const int nbin = 30;
+  std::vector<int> reference(static_cast<std::size_t>(nbin), 0);
+  for (int i = 0; i < n; i++) {
+    for (int j = i + 1; j < n; j++) {
+      const double r = gen::periodicDist(cloud, i, j);
+      if (r > cutoff) {
+        continue;
+      }
+      int b = static_cast<int>(r / binwidth);
+      if (b >= nbin) {
+        b = nbin - 1;
+      }
+      if (b >= 0) {
+        reference[static_cast<std::size_t>(b)] += 2;
+      }
+    }
+  }
+  const auto hist = rdf2::sampleRDF_AA(cloud, cutoff, binwidth, nbin);
+  int refSum = 0;
+  int gotSum = 0;
+  for (int b = 0; b < nbin; b++) {
+    refSum += reference[static_cast<std::size_t>(b)];
+    gotSum += hist[static_cast<std::size_t>(b)];
+    REQUIRE(hist[static_cast<std::size_t>(b)] ==
+            reference[static_cast<std::size_t>(b)]);
+  }
+  REQUIRE(refSum > 0);
+  REQUIRE(gotSum == refSum);
 }
 
 // -- normalizeRDF tests --

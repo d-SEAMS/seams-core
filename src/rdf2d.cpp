@@ -28,6 +28,344 @@
 #include <vesin.h>
 #endif
 
+#ifdef SEAMS_HAS_HWY
+#include "hwy/highway.h"
+#endif
+
+namespace {
+
+#ifdef SEAMS_HAS_HWY
+namespace hn = hwy::HWY_NAMESPACE;
+
+HWY_ATTR void accumulatePackedCell(const double *px, const double *py,
+                                   const double *pz, int begin, int end,
+                                   double sxi, double syi, double szi,
+                                   double lx, double ly, double lz, double xy,
+                                   double xz, double yz, double cut2,
+                                   double cutoff, double binwidth, int nbin,
+                                   int *local) {
+  const hn::ScalableTag<double> d;
+  const size_t lanes = hn::Lanes(d);
+  const auto vsxi = hn::Set(d, sxi);
+  const auto vsyi = hn::Set(d, syi);
+  const auto vszi = hn::Set(d, szi);
+  const auto vlx = hn::Set(d, lx);
+  const auto vly = hn::Set(d, ly);
+  const auto vlz = hn::Set(d, lz);
+  const auto vxy = hn::Set(d, xy);
+  const auto vxz = hn::Set(d, xz);
+  const auto vyz = hn::Set(d, yz);
+  alignas(64) double r2buf[16];
+  int t = begin;
+  if (lanes <= 16) {
+  for (; t + static_cast<int>(lanes) <= end; t += static_cast<int>(lanes)) {
+    const auto dsx0 =
+        hn::Sub(vsxi, hn::LoadU(d, px + static_cast<std::size_t>(t)));
+    const auto dsy0 =
+        hn::Sub(vsyi, hn::LoadU(d, py + static_cast<std::size_t>(t)));
+    const auto dsz0 =
+        hn::Sub(vszi, hn::LoadU(d, pz + static_cast<std::size_t>(t)));
+    const auto dsx = hn::NegMulAdd(hn::Set(d, 1.0), hn::Round(dsx0), dsx0);
+    const auto dsy = hn::NegMulAdd(hn::Set(d, 1.0), hn::Round(dsy0), dsy0);
+    const auto dsz = hn::NegMulAdd(hn::Set(d, 1.0), hn::Round(dsz0), dsz0);
+    const auto rx =
+        hn::MulAdd(vxz, dsz, hn::MulAdd(vxy, dsy, hn::Mul(vlx, dsx)));
+    const auto ry = hn::MulAdd(vyz, dsz, hn::Mul(vly, dsy));
+    const auto rz = hn::Mul(vlz, dsz);
+    const auto r2 =
+        hn::MulAdd(rx, rx, hn::MulAdd(ry, ry, hn::Mul(rz, rz)));
+    hn::StoreU(r2, d, r2buf);
+    for (size_t k = 0; k < lanes; k++) {
+      if (r2buf[k] > cut2) {
+        continue;
+      }
+      const double r = std::sqrt(r2buf[k]);
+      if (r > cutoff) {
+        continue;
+      }
+      int b = static_cast<int>(r / binwidth);
+      if (b < 0) {
+        continue;
+      }
+      if (b >= nbin) {
+        b = nbin - 1;
+      }
+      local[b] += 2;
+    }
+  }
+  }
+  for (; t < end; t++) {
+    double dsx = sxi - px[static_cast<std::size_t>(t)];
+    double dsy = syi - py[static_cast<std::size_t>(t)];
+    double dsz = szi - pz[static_cast<std::size_t>(t)];
+    dsx -= std::round(dsx);
+    dsy -= std::round(dsy);
+    dsz -= std::round(dsz);
+    const double rx = lx * dsx + xy * dsy + xz * dsz;
+    const double ry = ly * dsy + yz * dsz;
+    const double rz = lz * dsz;
+    const double r2 = rx * rx + ry * ry + rz * rz;
+    if (r2 > cut2) {
+      continue;
+    }
+    const double r = std::sqrt(r2);
+    if (r > cutoff) {
+      continue;
+    }
+    int b = static_cast<int>(r / binwidth);
+    if (b < 0) {
+      continue;
+    }
+    if (b >= nbin) {
+      b = nbin - 1;
+    }
+    local[b] += 2;
+  }
+}
+#endif
+
+}  // namespace
+
+namespace {
+
+// Uniform grid on the periodic cell. The cell edge is the cutoff, which is
+// the length Teschner, Heidelberger, Mueller, Pomeranets, and Gross measured
+// as the parameter that dominates a spatial hash (VMV 2003). The box is
+// known, so the grid is stored explicitly. Each cell's coordinates are packed
+// into contiguous arrays before the kernel, the same packing Goto and van de
+// Geijn use so a block stays in one TLB entry (TOMS 2008).
+//
+// Below half the shortest edge a pair has one image, so a hit is binned
+// directly. Cells whose index differs by two or more are more than one cell
+// edge apart, and that edge is longer than the cutoff.
+bool histogramPackedGrid(
+    const gen::FracBox &frame,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    double cutoff, double binwidth, int nbin, std::vector<int> &histogram) {
+  const int n = yCloud.nop;
+  if (!frame.ok || n < 2 || !(cutoff > 0.0) || nbin <= 0) {
+    return false;
+  }
+  const double span = cutoff + std::max(cutoff, 1.0) * 1e-12;
+  if (!(frame.lx > span && frame.ly > span && frame.lz > span)) {
+    return false;
+  }
+  const int nx = std::max(1, static_cast<int>(std::floor(frame.lx / span)));
+  const int ny = std::max(1, static_cast<int>(std::floor(frame.ly / span)));
+  const int nz = std::max(1, static_cast<int>(std::floor(frame.lz / span)));
+  const long long ncell64 =
+      static_cast<long long>(nx) * ny * static_cast<long long>(nz);
+  if (ncell64 < 27 || ncell64 > static_cast<long long>(n) * 8 ||
+      ncell64 > 4000000LL) {
+    return false;
+  }
+  const int ncell = static_cast<int>(ncell64);
+
+  std::vector<double> sx(static_cast<std::size_t>(n));
+  std::vector<double> sy(static_cast<std::size_t>(n));
+  std::vector<double> sz(static_cast<std::size_t>(n));
+  std::vector<int> cellOf(static_cast<std::size_t>(n));
+  std::vector<int> count(static_cast<std::size_t>(ncell), 0);
+  const double invLx = 1.0 / frame.lx;
+  const double invLy = 1.0 / frame.ly;
+  const double invLz = 1.0 / frame.lz;
+  for (int i = 0; i < n; i++) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+    const double fz = (p.z - frame.oz) * invLz;
+    const double fy = (p.y - frame.oy - frame.yz * fz) * invLy;
+    const double fx = (p.x - frame.ox - frame.xy * fy - frame.xz * fz) * invLx;
+    double wx = fx - std::floor(fx);
+    double wy = fy - std::floor(fy);
+    double wz = fz - std::floor(fz);
+    if (wx >= 1.0) {
+      wx = 0.0;
+    }
+    if (wy >= 1.0) {
+      wy = 0.0;
+    }
+    if (wz >= 1.0) {
+      wz = 0.0;
+    }
+    int ix = static_cast<int>(wx * nx);
+    int iy = static_cast<int>(wy * ny);
+    int iz = static_cast<int>(wz * nz);
+    if (ix >= nx) {
+      ix = nx - 1;
+    }
+    if (iy >= ny) {
+      iy = ny - 1;
+    }
+    if (iz >= nz) {
+      iz = nz - 1;
+    }
+    if (ix < 0) {
+      ix = 0;
+    }
+    if (iy < 0) {
+      iy = 0;
+    }
+    if (iz < 0) {
+      iz = 0;
+    }
+    sx[static_cast<std::size_t>(i)] = wx;
+    sy[static_cast<std::size_t>(i)] = wy;
+    sz[static_cast<std::size_t>(i)] = wz;
+    const int cell = (ix * ny + iy) * nz + iz;
+    cellOf[static_cast<std::size_t>(i)] = cell;
+    count[static_cast<std::size_t>(cell)] += 1;
+  }
+
+  std::vector<int> offsets(static_cast<std::size_t>(ncell) + 1, 0);
+  for (int c = 0; c < ncell; c++) {
+    offsets[static_cast<std::size_t>(c) + 1] =
+        offsets[static_cast<std::size_t>(c)] + count[static_cast<std::size_t>(c)];
+  }
+  std::vector<int> cursor = offsets;
+  std::vector<int> ids(static_cast<std::size_t>(n));
+  std::vector<double> px(static_cast<std::size_t>(n));
+  std::vector<double> py(static_cast<std::size_t>(n));
+  std::vector<double> pz(static_cast<std::size_t>(n));
+  for (int i = 0; i < n; i++) {
+    const int slot = cursor[static_cast<std::size_t>(cellOf[static_cast<std::size_t>(i)])]++;
+    ids[static_cast<std::size_t>(slot)] = i;
+    px[static_cast<std::size_t>(slot)] = sx[static_cast<std::size_t>(i)];
+    py[static_cast<std::size_t>(slot)] = sy[static_cast<std::size_t>(i)];
+    pz[static_cast<std::size_t>(slot)] = sz[static_cast<std::size_t>(i)];
+  }
+
+  std::vector<int> neighOf(static_cast<std::size_t>(ncell) + 1, 0);
+  std::vector<int> neigh;
+  neigh.reserve(static_cast<std::size_t>(ncell) * 27);
+  std::vector<int> stamp(static_cast<std::size_t>(ncell), 0);
+  int stampId = 0;
+  for (int ix = 0; ix < nx; ix++) {
+    for (int iy = 0; iy < ny; iy++) {
+      for (int iz = 0; iz < nz; iz++) {
+        const int home = (ix * ny + iy) * nz + iz;
+        neighOf[static_cast<std::size_t>(home)] = static_cast<int>(neigh.size());
+        ++stampId;
+        for (int dx = -1; dx <= 1; dx++) {
+          int jx = ix + dx;
+          jx %= nx;
+          if (jx < 0) {
+            jx += nx;
+          }
+          for (int dy = -1; dy <= 1; dy++) {
+            int jy = iy + dy;
+            jy %= ny;
+            if (jy < 0) {
+              jy += ny;
+            }
+            for (int dz = -1; dz <= 1; dz++) {
+              int jz = iz + dz;
+              jz %= nz;
+              if (jz < 0) {
+                jz += nz;
+              }
+              const int nb = (jx * ny + jy) * nz + jz;
+              if (stamp[static_cast<std::size_t>(nb)] == stampId) {
+                continue;
+              }
+              stamp[static_cast<std::size_t>(nb)] = stampId;
+              neigh.push_back(nb);
+            }
+          }
+        }
+      }
+    }
+  }
+  neighOf[static_cast<std::size_t>(ncell)] = static_cast<int>(neigh.size());
+
+  const double cut2 = cutoff * cutoff;
+  const double lx = frame.lx;
+  const double ly = frame.ly;
+  const double lz = frame.lz;
+  const double xy = frame.xy;
+  const double xz = frame.xz;
+  const double yz = frame.yz;
+  int nthreads = 1;
+#ifdef SEAMS_HAS_OPENMP
+  nthreads = omp_get_max_threads();
+#endif
+  std::vector<int> locals(static_cast<std::size_t>(nthreads) *
+                              static_cast<std::size_t>(nbin),
+                          0);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel if (n >= 512)
+#endif
+  {
+    int tid = 0;
+#ifdef SEAMS_HAS_OPENMP
+    tid = omp_get_thread_num();
+#endif
+    int *local = locals.data() + static_cast<std::size_t>(tid) *
+                                     static_cast<std::size_t>(nbin);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static)
+#endif
+    for (int i = 0; i < n; i++) {
+      const double sxi = sx[static_cast<std::size_t>(i)];
+      const double syi = sy[static_cast<std::size_t>(i)];
+      const double szi = sz[static_cast<std::size_t>(i)];
+      const int home = cellOf[static_cast<std::size_t>(i)];
+      const int nb0 = neighOf[static_cast<std::size_t>(home)];
+      const int nb1 = neighOf[static_cast<std::size_t>(home) + 1];
+      for (int u = nb0; u < nb1; u++) {
+        const int nb = neigh[static_cast<std::size_t>(u)];
+        const int begin = offsets[static_cast<std::size_t>(nb)];
+        const int end = offsets[static_cast<std::size_t>(nb) + 1];
+        const int *idbase = ids.data() + begin;
+        const int len = end - begin;
+        const int *upper = std::upper_bound(idbase, idbase + len, i);
+        const int start = begin + static_cast<int>(upper - idbase);
+#ifdef SEAMS_HAS_HWY
+        accumulatePackedCell(px.data(), py.data(), pz.data(), start, end, sxi,
+                             syi, szi, lx, ly, lz, xy, xz, yz, cut2, cutoff,
+                             binwidth, nbin, local);
+#else
+        for (int t = start; t < end; t++) {
+          double dsx = sxi - px[static_cast<std::size_t>(t)];
+          double dsy = syi - py[static_cast<std::size_t>(t)];
+          double dsz = szi - pz[static_cast<std::size_t>(t)];
+          dsx -= std::round(dsx);
+          dsy -= std::round(dsy);
+          dsz -= std::round(dsz);
+          const double rx = lx * dsx + xy * dsy + xz * dsz;
+          const double ry = ly * dsy + yz * dsz;
+          const double rz = lz * dsz;
+          const double r2 = rx * rx + ry * ry + rz * rz;
+          if (r2 > cut2) {
+            continue;
+          }
+          const double r = std::sqrt(r2);
+          if (r > cutoff) {
+            continue;
+          }
+          int b = static_cast<int>(r / binwidth);
+          if (b < 0) {
+            continue;
+          }
+          if (b >= nbin) {
+            b = nbin - 1;
+          }
+          local[b] += 2;
+        }
+#endif
+      }
+    }
+  }
+  for (int tid = 0; tid < nthreads; tid++) {
+    const int *local = locals.data() + static_cast<std::size_t>(tid) *
+                                           static_cast<std::size_t>(nbin);
+    for (int b = 0; b < nbin; b++) {
+      histogram[static_cast<std::size_t>(b)] += local[b];
+    }
+  }
+  return true;
+}
+
+}  // namespace
+
 // -----------------------------------------------------------------------------------------------------
 // IN-PLANE RDF
 // -----------------------------------------------------------------------------------------------------
@@ -151,6 +489,10 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   const bool oneImage =
       frame.ok && edge[0] > 0.0 && cutoff + pad < frame.halfMin;
   const bool sparse = oneImage && edge[1] > 0.0 && cutoff < 0.35 * edge[1];
+  if (oneImage && yCloud.nop > 1 &&
+      histogramPackedGrid(frame, yCloud, cutoff, binwidth, nbin, histogram)) {
+    return histogram;
+  }
 #ifdef SEAMS_HAS_VESIN
   if (sparse && yCloud.nop > 1 && yCloud.box.size() >= 3) {
     std::vector<std::array<double, 3>> positions(
