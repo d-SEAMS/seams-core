@@ -1188,8 +1188,9 @@ nneigh::kNearestNeighbourPair(
 
 /**
  * @details Nearest unlike neighbour of every typeI index among typeJ
- *  indices. Each typeI walks every typeJ with gen::periodicDistSq
- *  (the dump MIC). Ties keep the lowest typeJ index. Particles with
+ *  indices. Each typeI walks every typeJ with the fractional wrap, and
+ *  calls the Euclidean image only when that nearest wrap reaches half
+ *  the shortest edge. Ties keep the lowest typeJ index. Particles with
  *  no unlike partner are omitted. Results are cloud indices and the
  *  MIC distance, not a coordination number.
  */
@@ -1212,26 +1213,62 @@ std::vector<std::tuple<int, int, double>> nneigh::nearestUnlike(
     return out;
   }
 
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
+  std::vector<int> iIdx;
+  iIdx.reserve(static_cast<std::size_t>(yCloud.nop));
   for (int i = 0; i < yCloud.nop; i++) {
-    if (yCloud.pts[static_cast<std::size_t>(i)].type != typeI) {
-      continue;
+    if (yCloud.pts[static_cast<std::size_t>(i)].type == typeI) {
+      iIdx.push_back(i);
     }
+  }
+  out.resize(iIdx.size());
+  const int nI = static_cast<int>(iIdx.size());
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nI >= 256)
+#endif
+  for (int t = 0; t < nI; t++) {
+    const int i = iIdx[static_cast<std::size_t>(t)];
+    const auto &pi = yCloud.pts[static_cast<std::size_t>(i)];
     int bestJ = -1;
     double bestD2 = std::numeric_limits<double>::infinity();
     for (const int j : jIdx) {
       if (j == i) {
         continue;
       }
-      const double d2 = gen::periodicDistSq(yCloud, i, j);
+      const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
+      const double d2 =
+          frame.ok ? gen::fracDistSq(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z)
+                   : gen::periodicDistSq(yCloud, i, j);
       if (d2 < bestD2) {
         bestD2 = d2;
         bestJ = j;
       }
     }
+    if (bestJ >= 0 && frame.ok && !gen::smithInside(frame, bestD2)) {
+      bestJ = -1;
+      bestD2 = std::numeric_limits<double>::infinity();
+      for (const int j : jIdx) {
+        if (j == i) {
+          continue;
+        }
+        const double d2 = gen::periodicDistSq(frame, yCloud, i, j);
+        if (d2 < bestD2) {
+          bestD2 = d2;
+          bestJ = j;
+        }
+      }
+    }
     if (bestJ >= 0) {
-      out.emplace_back(i, bestJ, std::sqrt(bestD2));
+      out[static_cast<std::size_t>(t)] = {i, bestJ, std::sqrt(bestD2)};
+    } else {
+      out[static_cast<std::size_t>(t)] = {-1, -1, 0.0};
     }
   }
+  out.erase(std::remove_if(out.begin(), out.end(),
+                           [](const std::tuple<int, int, double> &row) {
+                             return std::get<0>(row) < 0;
+                           }),
+            out.end());
   return out;
 }
 
@@ -1282,24 +1319,39 @@ std::pair<double, double> nneigh::shellSeparation(
   double maxKth = 0.0;
   double minNext = 0.0;
   bool haveNext = false;
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
   std::vector<double> dists;
   for (int i = 0; i < yCloud.nop; i++) {
     if (yCloud.pts[i].type != typeI) {
       continue;
     }
+    const auto &pi = yCloud.pts[static_cast<std::size_t>(i)];
     dists.clear();
     for (int j = 0; j < yCloud.nop; j++) {
       if (j == i || yCloud.pts[j].type != typeI) {
         continue;
       }
-      dists.push_back(gen::periodicDistSq(yCloud, i, j));
+      const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
+      dists.push_back(frame.ok ? gen::fracDistSq(frame, pi.x, pi.y, pi.z, pj.x,
+                                                 pj.y, pj.z)
+                               : gen::periodicDistSq(yCloud, i, j));
     }
     if (static_cast<int>(dists.size()) < k + 1) {
       continue;
     }
     std::partial_sort(dists.begin(), dists.begin() + k + 1, dists.end());
-    maxKth = std::max(maxKth, std::sqrt(dists[k - 1]));
-    const double next = std::sqrt(dists[k]);
+    if (frame.ok && !gen::smithInside(frame, dists[static_cast<std::size_t>(k)])) {
+      dists.clear();
+      for (int j = 0; j < yCloud.nop; j++) {
+        if (j == i || yCloud.pts[j].type != typeI) {
+          continue;
+        }
+        dists.push_back(gen::periodicDistSq(frame, yCloud, i, j));
+      }
+      std::partial_sort(dists.begin(), dists.begin() + k + 1, dists.end());
+    }
+    maxKth = std::max(maxKth, std::sqrt(dists[static_cast<std::size_t>(k - 1)]));
+    const double next = std::sqrt(dists[static_cast<std::size_t>(k)]);
     minNext = haveNext ? std::min(minNext, next) : next;
     haveNext = true;
   }

@@ -16,6 +16,13 @@
 #include <rdf2d.hpp>
 
 #include <algorithm>
+#include <cmath>
+#include <utility>
+#include <vector>
+
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
 
 #ifdef SEAMS_HAS_VESIN
 #include <vesin.h>
@@ -127,28 +134,24 @@ std::vector<int>
 rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                    double cutoff, double binwidth, int nbin) {
   //
-  std::vector<int> histogram; // Histogram for the RDF
-  double r_ij;                // Unwrapped distance between iatom and jatom
-  int ibin; // Index of the bin in which the distance r_ij falls
+  std::vector<int> histogram;
 
   // Init the histogram to 0
   histogram.resize(nbin);
 
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
+  double edge[3] = {frame.lx, frame.ly, frame.lz};
+  std::sort(edge, edge + 3);
+  const double pad = std::max(cutoff, 1.0) * 1e-8;
+  // Below half the shortest edge a pair has one image, and that image is
+  // the distance vesin already returns. A thinner cell can still use the
+  // cell list: the histogram keeps one minimum-image distance. Past the
+  // middle edge the candidate list is most of the pairs, so the direct
+  // loop is faster.
+  const bool oneImage =
+      frame.ok && edge[0] > 0.0 && cutoff + pad < frame.halfMin;
+  const bool sparse = oneImage && edge[1] > 0.0 && cutoff < 0.35 * edge[1];
 #ifdef SEAMS_HAS_VESIN
-  // A cell list returns every periodic image inside the search cutoff.
-  // Past half the shortest edge a pair has two such images, so the
-  // histogram keeps one minimum-image distance, the same distance the
-  // loop below computes. Vesin drops a pair that sits exactly on its
-  // cutoff; the search is a hair above the caller cutoff and the
-  // filter is still r <= cutoff. Once the cutoff reaches the middle
-  // edge the candidate list is most of the pairs and the direct loop
-  // is faster, so the cell list stops there.
-  double edge[3] = {0.0, 0.0, 0.0};
-  if (yCloud.box.size() >= 3) {
-    nneigh::dumpCellLengths(yCloud.box, yCloud.boxLow, edge);
-    std::sort(edge, edge + 3);
-  }
-  const bool sparse = edge[1] > 0.0 && cutoff < 0.35 * edge[1];
   if (sparse && yCloud.nop > 1 && yCloud.box.size() >= 3) {
     std::vector<std::array<double, 3>> positions(
         static_cast<size_t>(yCloud.nop));
@@ -161,13 +164,12 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
     nneigh::dumpBoundsToH(yCloud.box, yCloud.boxLow, box, origin);
     bool periodic[3] = {true, true, true};
     VesinOptions options{};
-    const double pad = std::max(cutoff, 1.0) * 1e-8;
     options.cutoff = cutoff + pad;
     options.full = true;
     options.sorted = false;
     options.algorithm = VesinAutoAlgorithm;
     options.return_shifts = false;
-    options.return_distances = false;
+    options.return_distances = true;
     options.return_vectors = false;
     VesinNeighborList neighbors;
     const char *error_message = nullptr;
@@ -177,36 +179,59 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
         static_cast<size_t>(yCloud.nop), box, periodic, device, options,
         &neighbors, &error_message);
     if (status == 0) {
-      std::vector<std::pair<int, int>> uniq;
-      uniq.reserve(neighbors.length / 2 + 1);
-      for (size_t k = 0; k < neighbors.length; k++) {
-        int iatom = static_cast<int>(neighbors.pairs[k][0]);
-        int jatom = static_cast<int>(neighbors.pairs[k][1]);
-        if (iatom == jatom) {
-          continue;
+      if (oneImage && neighbors.distances != nullptr) {
+        for (size_t k = 0; k < neighbors.length; k++) {
+          const int iatom = static_cast<int>(neighbors.pairs[k][0]);
+          const int jatom = static_cast<int>(neighbors.pairs[k][1]);
+          if (iatom >= jatom) {
+            continue;
+          }
+          const double r = neighbors.distances[k];
+          if (r > cutoff) {
+            continue;
+          }
+          int b = static_cast<int>(r / binwidth);
+          if (b < 0) {
+            continue;
+          }
+          if (b >= nbin) {
+            b = nbin - 1;
+          }
+          histogram[static_cast<size_t>(b)] += 2;
         }
-        if (iatom > jatom) {
-          std::swap(iatom, jatom);
+      } else {
+        std::vector<std::pair<int, int>> uniq;
+        uniq.reserve(neighbors.length / 2 + 1);
+        for (size_t k = 0; k < neighbors.length; k++) {
+          int iatom = static_cast<int>(neighbors.pairs[k][0]);
+          int jatom = static_cast<int>(neighbors.pairs[k][1]);
+          if (iatom == jatom) {
+            continue;
+          }
+          if (iatom > jatom) {
+            std::swap(iatom, jatom);
+          }
+          uniq.emplace_back(iatom, jatom);
         }
-        uniq.emplace_back(iatom, jatom);
+        std::sort(uniq.begin(), uniq.end());
+        uniq.erase(std::unique(uniq.begin(), uniq.end()), uniq.end());
+        for (const auto &pair : uniq) {
+          const double r = std::sqrt(
+              gen::periodicDistSq(frame, yCloud, pair.first, pair.second));
+          if (r > cutoff) {
+            continue;
+          }
+          int b = static_cast<int>(r / binwidth);
+          if (b < 0) {
+            continue;
+          }
+          if (b >= nbin) {
+            b = nbin - 1;
+          }
+          histogram[static_cast<size_t>(b)] += 2;
+        }
       }
       vesin_free(&neighbors);
-      std::sort(uniq.begin(), uniq.end());
-      uniq.erase(std::unique(uniq.begin(), uniq.end()), uniq.end());
-      for (const auto &pair : uniq) {
-        const double r = gen::periodicDist(yCloud, pair.first, pair.second);
-        if (r > cutoff) {
-          continue;
-        }
-        int b = static_cast<int>(r / binwidth);
-        if (b < 0) {
-          continue;
-        }
-        if (b >= nbin) {
-          b = nbin - 1;
-        }
-        histogram[static_cast<size_t>(b)] += 2;
-      }
       return histogram;
     }
     std::cerr << "Vesin failed: "
@@ -216,27 +241,79 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   }
 #endif
 
-  // Loop through pairs of atoms
-  for (int iatom = 0; iatom < yCloud.nop - 1; iatom++) {
-    //
-    // Loop through the next atom in the atom pair
-    for (int jatom = iatom + 1; jatom < yCloud.nop; jatom++) {
-      // Calculate the distance between iatom and jatom
-      r_ij = gen::periodicDist(yCloud, iatom, jatom);
-      // Check if the distance is within the cutoff. Update the histogram if
-      // r_ij is within the cutoff
-      if (r_ij <= cutoff) {
-        ibin = static_cast<int>(r_ij / binwidth);
-        if (ibin < 0) {
+  const double cut2 = cutoff * cutoff;
+  const int nop = yCloud.nop;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel if (nop >= 512)
+  {
+    std::vector<int> local(static_cast<std::size_t>(nbin), 0);
+#pragma omp for schedule(static)
+    for (int iatom = 0; iatom < nop - 1; iatom++) {
+      const auto &pi = yCloud.pts[static_cast<std::size_t>(iatom)];
+      for (int jatom = iatom + 1; jatom < nop; jatom++) {
+        const auto &pj = yCloud.pts[static_cast<std::size_t>(jatom)];
+        double rij = 0.0;
+        if (oneImage && frame.ok) {
+          const double r2 =
+              gen::fracDistSq(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+          if (r2 > cut2) {
+            continue;
+          }
+          rij = std::sqrt(r2);
+        } else {
+          rij = std::sqrt(gen::periodicDistSq(frame, yCloud, iatom, jatom));
+          if (rij > cutoff) {
+            continue;
+          }
+        }
+        int b = static_cast<int>(rij / binwidth);
+        if (b < 0) {
           continue;
         }
-        if (ibin >= nbin) {
-          ibin = nbin - 1;
+        if (b >= nbin) {
+          b = nbin - 1;
         }
-        histogram[ibin] += 2;
+        local[static_cast<std::size_t>(b)] += 2;
       }
-    }                                // end of loop through jatom
-  }                                  // end of loop through iatom
+    }
+#pragma omp critical
+    {
+      for (int b = 0; b < nbin; b++) {
+        histogram[static_cast<std::size_t>(b)] +=
+            local[static_cast<std::size_t>(b)];
+      }
+    }
+  }
+#else
+  for (int iatom = 0; iatom < nop - 1; iatom++) {
+    const auto &pi = yCloud.pts[static_cast<std::size_t>(iatom)];
+    for (int jatom = iatom + 1; jatom < nop; jatom++) {
+      const auto &pj = yCloud.pts[static_cast<std::size_t>(jatom)];
+      double rij = 0.0;
+      if (oneImage && frame.ok) {
+        const double r2 =
+            gen::fracDistSq(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+        if (r2 > cut2) {
+          continue;
+        }
+        rij = std::sqrt(r2);
+      } else {
+        rij = std::sqrt(gen::periodicDistSq(frame, yCloud, iatom, jatom));
+        if (rij > cutoff) {
+          continue;
+        }
+      }
+      int b = static_cast<int>(rij / binwidth);
+      if (b < 0) {
+        continue;
+      }
+      if (b >= nbin) {
+        b = nbin - 1;
+      }
+      histogram[static_cast<std::size_t>(b)] += 2;
+    }
+  }
+#endif
 
   // Return the histogram
   return histogram;
