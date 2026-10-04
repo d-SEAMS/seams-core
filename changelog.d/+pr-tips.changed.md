@@ -1,0 +1,1 @@
+The linkcell wrap tracks 177d6db, the tip of the strong-scale pull request, and the minimage wrap tracks bea4f7d, the tip of the faster minimum-image pull request. A tilted batch builds one cell and calls mi_dist2_many. A pair outside the Smith ball still takes the Euclidean image.

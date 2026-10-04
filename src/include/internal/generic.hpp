@@ -376,12 +376,43 @@ periodicDist(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
   return std::sqrt(periodicDistSq(yCloud, iatom, jatom));
 }
 
-// Scalar pair batch. Highway BatchPeriodicDistSq is ortho-only; a
-// tilt dump (box.size() >= 6) must go through periodicDistSq.
+// Tilt batches share one mi_cell. mi_dist2_many is the fractional
+// image for every candidate. A result outside the Smith ball is
+// replaced by the Euclidean image. Orthorhombic batches stay on
+// periodicDistSq; the Highway kernel is the ortho difference path.
 inline void batchPeriodicDistSq(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
     const int *jatom, std::size_t n, double *distSq) {
   const FracBox b = makeFracBox(yCloud);
+#ifdef SEAMS_HAS_MINIMAGE
+  if (n > 0 && b.ok && b.triclinic) {
+    mi_cell cell;
+    if (pointCloudCell(yCloud, &cell)) {
+      const auto &pi = yCloud.pts[static_cast<std::size_t>(iatom)];
+      const double p[3] = {pi.x, pi.y, pi.z};
+      std::vector<double> qs(n * 3);
+      for (std::size_t k = 0; k < n; ++k) {
+        const auto &pj = yCloud.pts[static_cast<std::size_t>(jatom[k])];
+        qs[3 * k] = pj.x;
+        qs[3 * k + 1] = pj.y;
+        qs[3 * k + 2] = pj.z;
+      }
+      if (mi_dist2_many(&cell, p, qs.data(), n, distSq) == 0) {
+        for (std::size_t k = 0; k < n; ++k) {
+          if (smithInside(b, distSq[k])) {
+            continue;
+          }
+          const double q[3] = {qs[3 * k], qs[3 * k + 1], qs[3 * k + 2]};
+          double ed[3] = {0.0, 0.0, 0.0};
+          if (mi_displacement_euclidean(&cell, q, p, ed) == 0) {
+            distSq[k] = ed[0] * ed[0] + ed[1] * ed[1] + ed[2] * ed[2];
+          }
+        }
+        return;
+      }
+    }
+  }
+#endif
   for (std::size_t k = 0; k < n; k++) {
     distSq[k] = periodicDistSq(b, yCloud, iatom, jatom[k]);
   }
