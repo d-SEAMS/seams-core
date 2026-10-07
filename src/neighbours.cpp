@@ -360,6 +360,7 @@ bool nneigh::cellListRowsThreaded(
   }
   rows.assign(n, {});
   const double rc2 = rcutoff * rcutoff;
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
   // each row belongs to one thread; the 27 cells around an atom hold the
   // nearest image of every neighbour because every axis has at least
   // three cells of width rcutoff
@@ -391,7 +392,7 @@ bool nneigh::cellListRowsThreaded(
             if (j == i) {
               continue;
             }
-            if (gen::periodicDistSq(yCloud, i, j) <= rc2) {
+            if (gen::periodicDistSq(frame, yCloud, i, j) <= rc2) {
               row.push_back(j);
             }
           }
@@ -637,6 +638,7 @@ nneigh::halfNeighList(double rcutoff,
 
   // Compare squared distances so that the per-pair square root is avoided
   const double rcutoffSq = rcutoff * rcutoff;
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
 
   // Loop through every iatom and find nearest neighbours within rcutoff
   for (int iatom = 0; iatom < yCloud.nop - 1; iatom++) {
@@ -649,7 +651,7 @@ nneigh::halfNeighList(double rcutoff,
         continue;
       }
       // If the distance is greater than rcutoff, continue
-      if (gen::periodicDistSq(yCloud, iatom, jatom) > rcutoffSq) {
+      if (gen::periodicDistSq(frame, yCloud, iatom, jatom) > rcutoffSq) {
         continue;
       }
 
@@ -889,13 +891,14 @@ std::vector<int> nominatePacked(
     }
   }
   if (yCloud.box.size() >= 6) {
+    const gen::FracBox frame = gen::makeFracBox(yCloud);
     for (const int i : owners) {
       std::priority_queue<std::pair<double, int>> heap;
       for (const int j : owners) {
         if (j == i) {
           continue;
         }
-        const double d2 = gen::periodicDistSq(yCloud, i, j);
+        const double d2 = gen::periodicDistSq(frame, yCloud, i, j);
         if (static_cast<int>(heap.size()) < k) {
           heap.push({d2, j});
         } else if (d2 < heap.top().first) {
@@ -934,6 +937,7 @@ std::vector<int> nominatePacked(
 
   std::vector<int> head(static_cast<std::size_t>(ncell), -1);
   std::vector<int> next(static_cast<std::size_t>(yCloud.nop), -1);
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
 
   auto wrap = [](double x, double L) {
     double t = x / L;
@@ -1008,7 +1012,7 @@ std::vector<int> nominatePacked(
             int j = head[static_cast<std::size_t>(c)];
             while (j >= 0) {
               if (j != i) {
-                const double d2 = gen::periodicDistSq(yCloud, i, j);
+                const double d2 = gen::periodicDistSq(frame, yCloud, i, j);
                 if (static_cast<int>(heap.size()) < k) {
                   heap.push({d2, j});
                 } else if (d2 < heap.top().first) {
@@ -1238,7 +1242,7 @@ std::vector<std::tuple<int, int, double>> nneigh::nearestUnlike(
       const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
       const double d2 =
           frame.ok ? gen::fracDistSq(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z)
-                   : gen::periodicDistSq(yCloud, i, j);
+                   : gen::periodicDistSq(frame, yCloud, i, j);
       if (d2 < bestD2) {
         bestD2 = d2;
         bestJ = j;
@@ -1334,7 +1338,7 @@ std::pair<double, double> nneigh::shellSeparation(
       const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
       dists.push_back(frame.ok ? gen::fracDistSq(frame, pi.x, pi.y, pi.z, pj.x,
                                                  pj.y, pj.z)
-                               : gen::periodicDistSq(yCloud, i, j));
+                               : gen::periodicDistSq(frame, yCloud, i, j));
     }
     if (static_cast<int>(dists.size()) < k + 1) {
       continue;
@@ -1492,6 +1496,7 @@ void nneigh::SkinNeighborList::refreshBonds(
             yCloud.pts[static_cast<std::size_t>(i)].z;
   }
   if (yCloud.box.size() >= 6 && m > 0) {
+    const gen::FracBox frame = gen::makeFracBox(yCloud);
     for (std::size_t t = 0; t < m; t++) {
       const int i = candidates_[t].first;
       const int j = candidates_[t].second;
@@ -1499,7 +1504,7 @@ void nneigh::SkinNeighborList::refreshBonds(
         r2[t] = 0.0;
         continue;
       }
-      r2[t] = gen::periodicDistSq(yCloud, i, j);
+      r2[t] = gen::periodicDistSq(frame, yCloud, i, j);
     }
   } else if (yCloud.box.size() >= 3 && m > 0) {
     seams::BatchPeriodicDistSq(dx.data(), dy.data(), dz.data(), yCloud.box[0],

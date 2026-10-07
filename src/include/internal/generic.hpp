@@ -185,9 +185,11 @@ makeFracBox(const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   if (!(b.lx > 0.0 && b.ly > 0.0 && b.lz > 0.0)) {
     return b;
   }
+  const double bcz = b.xy * b.yz - b.ly * b.xz;
   b.wx = b.lx * b.ly * b.lz /
-         std::hypot(b.ly * b.lz, b.xy * b.lz, b.xy * b.yz - b.ly * b.xz);
-  b.wy = b.ly * b.lz / std::hypot(b.lz, b.yz);
+         std::sqrt(b.ly * b.lz * b.ly * b.lz + b.xy * b.lz * b.xy * b.lz +
+                   bcz * bcz);
+  b.wy = b.ly * b.lz / std::sqrt(b.lz * b.lz + b.yz * b.yz);
   b.wz = b.lz;
   b.halfMin = 0.5 * std::min(b.wx, std::min(b.wy, b.wz));
   b.ok = true;
