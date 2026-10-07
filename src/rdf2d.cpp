@@ -17,340 +17,181 @@
 
 #include <algorithm>
 #include <cmath>
-#include <utility>
 #include <vector>
 
 #ifdef SEAMS_HAS_OPENMP
 #include <omp.h>
 #endif
 
-#ifdef SEAMS_HAS_VESIN
-#include <vesin.h>
-#endif
-
-#ifdef SEAMS_HAS_HWY
-#include "hwy/highway.h"
-#endif
-
 namespace {
 
-#ifdef SEAMS_HAS_HWY
-namespace hn = hwy::HWY_NAMESPACE;
-
-HWY_ATTR void accumulatePackedCell(const double *px, const double *py,
-                                   const double *pz, int begin, int end,
-                                   double sxi, double syi, double szi,
-                                   double lx, double ly, double lz, double xy,
-                                   double xz, double yz, double cut2,
-                                   double cutoff, double binwidth, int nbin,
-                                   int *local) {
-  const hn::ScalableTag<double> d;
-  const size_t lanes = hn::Lanes(d);
-  const auto vsxi = hn::Set(d, sxi);
-  const auto vsyi = hn::Set(d, syi);
-  const auto vszi = hn::Set(d, szi);
-  const auto vlx = hn::Set(d, lx);
-  const auto vly = hn::Set(d, ly);
-  const auto vlz = hn::Set(d, lz);
-  const auto vxy = hn::Set(d, xy);
-  const auto vxz = hn::Set(d, xz);
-  const auto vyz = hn::Set(d, yz);
-  alignas(64) double r2buf[16];
-  int t = begin;
-  if (lanes <= 16) {
-  for (; t + static_cast<int>(lanes) <= end; t += static_cast<int>(lanes)) {
-    const auto dsx0 =
-        hn::Sub(vsxi, hn::LoadU(d, px + static_cast<std::size_t>(t)));
-    const auto dsy0 =
-        hn::Sub(vsyi, hn::LoadU(d, py + static_cast<std::size_t>(t)));
-    const auto dsz0 =
-        hn::Sub(vszi, hn::LoadU(d, pz + static_cast<std::size_t>(t)));
-    const auto dsx = hn::NegMulAdd(hn::Set(d, 1.0), hn::Round(dsx0), dsx0);
-    const auto dsy = hn::NegMulAdd(hn::Set(d, 1.0), hn::Round(dsy0), dsy0);
-    const auto dsz = hn::NegMulAdd(hn::Set(d, 1.0), hn::Round(dsz0), dsz0);
-    const auto rx =
-        hn::MulAdd(vxz, dsz, hn::MulAdd(vxy, dsy, hn::Mul(vlx, dsx)));
-    const auto ry = hn::MulAdd(vyz, dsz, hn::Mul(vly, dsy));
-    const auto rz = hn::Mul(vlz, dsz);
-    const auto r2 =
-        hn::MulAdd(rx, rx, hn::MulAdd(ry, ry, hn::Mul(rz, rz)));
-    hn::StoreU(r2, d, r2buf);
-    for (size_t k = 0; k < lanes; k++) {
-      if (r2buf[k] > cut2) {
-        continue;
-      }
-      const double r = std::sqrt(r2buf[k]);
-      if (r > cutoff) {
-        continue;
-      }
-      int b = static_cast<int>(r / binwidth);
-      if (b < 0) {
-        continue;
-      }
-      if (b >= nbin) {
-        b = nbin - 1;
-      }
-      local[b] += 2;
-    }
+// A pair inside the cutoff adds 2 at its distance.
+inline void binPair(double r, double cutoff, double binwidth, int nbin,
+                    int *histogram) {
+  if (r > cutoff) {
+    return;
   }
-  }
-  for (; t < end; t++) {
-    double dsx = sxi - px[static_cast<std::size_t>(t)];
-    double dsy = syi - py[static_cast<std::size_t>(t)];
-    double dsz = szi - pz[static_cast<std::size_t>(t)];
-    dsx -= std::round(dsx);
-    dsy -= std::round(dsy);
-    dsz -= std::round(dsz);
-    const double rx = lx * dsx + xy * dsy + xz * dsz;
-    const double ry = ly * dsy + yz * dsz;
-    const double rz = lz * dsz;
-    const double r2 = rx * rx + ry * ry + rz * rz;
-    if (r2 > cut2) {
-      continue;
-    }
-    const double r = std::sqrt(r2);
-    if (r > cutoff) {
-      continue;
-    }
-    int b = static_cast<int>(r / binwidth);
-    if (b < 0) {
-      continue;
-    }
-    if (b >= nbin) {
-      b = nbin - 1;
-    }
-    local[b] += 2;
+  const int b = std::min(static_cast<int>(r / binwidth), nbin - 1);
+  if (b >= 0) {
+    histogram[b] += 2;
   }
 }
-#endif
 
-}  // namespace
+// Rapaport's cell pairs (The Art of Molecular Dynamics Simulation, 2004).
+// Cells span at least the cutoff across each face separation, so inside the
+// one-image ball a pair sits in one cell or in neighbouring ones. The half
+// stencil visits each neighbouring pair of cells once, and one lattice
+// shift serves the whole pair, so the inner loop does no wrap.
+constexpr int kHalfStencil[13][3] = {
+    {0, 0, 1},  {0, 1, -1}, {0, 1, 0},  {0, 1, 1},  {1, -1, -1},
+    {1, -1, 0}, {1, -1, 1}, {1, 0, -1}, {1, 0, 0},  {1, 0, 1},
+    {1, 1, -1}, {1, 1, 0},  {1, 1, 1}};
 
-namespace {
-
-// Cutoff-sized periodic grid. Below half the shortest edge each pair has one
-// image, so a neighbour-cell hit is binned directly.
-bool histogramPackedGrid(
+bool histogramCellPairs(
     const gen::FracBox &frame,
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     double cutoff, double binwidth, int nbin, std::vector<int> &histogram) {
   const int n = yCloud.nop;
-  if (!frame.ok || n < 2 || !(cutoff > 0.0) || nbin <= 0) {
-    return false;
-  }
   const double span = cutoff + std::max(cutoff, 1.0) * 1e-12;
-  if (!(frame.wx > span && frame.wy > span && frame.wz > span)) {
+  if (!frame.ok || n < 2 || !(cutoff > 0.0) || nbin <= 0 ||
+      !(frame.wx > span && frame.wy > span && frame.wz > span)) {
     return false;
   }
-  const int nx = std::max(1, static_cast<int>(std::floor(frame.wx / span)));
-  const int ny = std::max(1, static_cast<int>(std::floor(frame.wy / span)));
-  const int nz = std::max(1, static_cast<int>(std::floor(frame.wz / span)));
-  const long long ncell64 =
-      static_cast<long long>(nx) * ny * static_cast<long long>(nz);
-  if (ncell64 < 27 || ncell64 > static_cast<long long>(n) * 8 ||
-      ncell64 > 4000000LL) {
-    return false;
+  int dims[3] = {static_cast<int>(std::min(frame.wx / span, 1.0e6)),
+                 static_cast<int>(std::min(frame.wy / span, 1.0e6)),
+                 static_cast<int>(std::min(frame.wz / span, 1.0e6))};
+  // A dilute frame takes coarser cells rather than walking empty ones.
+  while (1LL * dims[0] * dims[1] * dims[2] > 2LL * n + 27) {
+    int *widest = std::max_element(dims, dims + 3);
+    *widest = std::max(1, *widest / 2);
   }
-  const int ncell = static_cast<int>(ncell64);
+  const int ny = dims[1];
+  const int nz = dims[2];
+  const int ncell = dims[0] * ny * nz;
+  const double lx = frame.lx, ly = frame.ly, lz = frame.lz;
+  const double xy = frame.xy, xz = frame.xz, yz = frame.yz;
 
-  std::vector<double> sx(static_cast<std::size_t>(n));
-  std::vector<double> sy(static_cast<std::size_t>(n));
-  std::vector<double> sz(static_cast<std::size_t>(n));
   std::vector<int> cellOf(static_cast<std::size_t>(n));
-  std::vector<int> count(static_cast<std::size_t>(ncell), 0);
-  const double invLx = 1.0 / frame.lx;
-  const double invLy = 1.0 / frame.ly;
-  const double invLz = 1.0 / frame.lz;
+  std::vector<double> wrapped(3 * static_cast<std::size_t>(n));
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (n >= 4096)
+#endif
   for (int i = 0; i < n; i++) {
     const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
-    const double fz = (p.z - frame.oz) * invLz;
-    const double fy = (p.y - frame.oy - frame.yz * fz) * invLy;
-    const double fx = (p.x - frame.ox - frame.xy * fy - frame.xz * fz) * invLx;
-    double wx = fx - std::floor(fx);
-    double wy = fy - std::floor(fy);
-    double wz = fz - std::floor(fz);
-    if (wx >= 1.0) {
-      wx = 0.0;
+    const double fz = (p.z - frame.oz) / lz;
+    const double fy = (p.y - frame.oy - yz * fz) / ly;
+    const double fx = (p.x - frame.ox - xy * fy - xz * fz) / lx;
+    double s[3] = {fx - std::floor(fx), fy - std::floor(fy),
+                   fz - std::floor(fz)};
+    int idx[3];
+    for (int k = 0; k < 3; k++) {
+      if (s[k] >= 1.0) {
+        s[k] = 0.0;
+      }
+      idx[k] = std::min(static_cast<int>(s[k] * dims[k]), dims[k] - 1);
     }
-    if (wy >= 1.0) {
-      wy = 0.0;
-    }
-    if (wz >= 1.0) {
-      wz = 0.0;
-    }
-    int ix = static_cast<int>(wx * nx);
-    int iy = static_cast<int>(wy * ny);
-    int iz = static_cast<int>(wz * nz);
-    if (ix >= nx) {
-      ix = nx - 1;
-    }
-    if (iy >= ny) {
-      iy = ny - 1;
-    }
-    if (iz >= nz) {
-      iz = nz - 1;
-    }
-    if (ix < 0) {
-      ix = 0;
-    }
-    if (iy < 0) {
-      iy = 0;
-    }
-    if (iz < 0) {
-      iz = 0;
-    }
-    sx[static_cast<std::size_t>(i)] = wx;
-    sy[static_cast<std::size_t>(i)] = wy;
-    sz[static_cast<std::size_t>(i)] = wz;
-    const int cell = (ix * ny + iy) * nz + iz;
-    cellOf[static_cast<std::size_t>(i)] = cell;
-    count[static_cast<std::size_t>(cell)] += 1;
+    cellOf[static_cast<std::size_t>(i)] = (idx[0] * ny + idx[1]) * nz + idx[2];
+    wrapped[3 * static_cast<std::size_t>(i)] = lx * s[0] + xy * s[1] + xz * s[2];
+    wrapped[3 * static_cast<std::size_t>(i) + 1] = ly * s[1] + yz * s[2];
+    wrapped[3 * static_cast<std::size_t>(i) + 2] = lz * s[2];
   }
-
-  std::vector<int> offsets(static_cast<std::size_t>(ncell) + 1, 0);
+  std::vector<int> start(static_cast<std::size_t>(ncell) + 1, 0);
+  for (const int c : cellOf) {
+    start[static_cast<std::size_t>(c) + 1]++;
+  }
   for (int c = 0; c < ncell; c++) {
-    offsets[static_cast<std::size_t>(c) + 1] =
-        offsets[static_cast<std::size_t>(c)] + count[static_cast<std::size_t>(c)];
+    start[static_cast<std::size_t>(c) + 1] += start[static_cast<std::size_t>(c)];
   }
-  std::vector<int> cursor = offsets;
-  std::vector<int> ids(static_cast<std::size_t>(n));
+  std::vector<int> fill(start.begin(), start.end() - 1);
   std::vector<double> px(static_cast<std::size_t>(n));
   std::vector<double> py(static_cast<std::size_t>(n));
   std::vector<double> pz(static_cast<std::size_t>(n));
   for (int i = 0; i < n; i++) {
-    const int slot = cursor[static_cast<std::size_t>(cellOf[static_cast<std::size_t>(i)])]++;
-    ids[static_cast<std::size_t>(slot)] = i;
-    px[static_cast<std::size_t>(slot)] = sx[static_cast<std::size_t>(i)];
-    py[static_cast<std::size_t>(slot)] = sy[static_cast<std::size_t>(i)];
-    pz[static_cast<std::size_t>(slot)] = sz[static_cast<std::size_t>(i)];
+    const auto s = static_cast<std::size_t>(
+        fill[static_cast<std::size_t>(cellOf[static_cast<std::size_t>(i)])]++);
+    px[s] = wrapped[3 * static_cast<std::size_t>(i)];
+    py[s] = wrapped[3 * static_cast<std::size_t>(i) + 1];
+    pz[s] = wrapped[3 * static_cast<std::size_t>(i) + 2];
   }
 
-  std::vector<int> neighOf(static_cast<std::size_t>(ncell) + 1, 0);
-  std::vector<int> neigh;
-  neigh.reserve(static_cast<std::size_t>(ncell) * 27);
-  std::vector<int> stamp(static_cast<std::size_t>(ncell), 0);
-  int stampId = 0;
-  for (int ix = 0; ix < nx; ix++) {
-    for (int iy = 0; iy < ny; iy++) {
-      for (int iz = 0; iz < nz; iz++) {
-        const int home = (ix * ny + iy) * nz + iz;
-        neighOf[static_cast<std::size_t>(home)] = static_cast<int>(neigh.size());
-        ++stampId;
-        for (int dx = -1; dx <= 1; dx++) {
-          int jx = ix + dx;
-          jx %= nx;
-          if (jx < 0) {
-            jx += nx;
-          }
-          for (int dy = -1; dy <= 1; dy++) {
-            int jy = iy + dy;
-            jy %= ny;
-            if (jy < 0) {
-              jy += ny;
-            }
-            for (int dz = -1; dz <= 1; dz++) {
-              int jz = iz + dz;
-              jz %= nz;
-              if (jz < 0) {
-                jz += nz;
-              }
-              const int nb = (jx * ny + jy) * nz + jz;
-              if (stamp[static_cast<std::size_t>(nb)] == stampId) {
-                continue;
-              }
-              stamp[static_cast<std::size_t>(nb)] = stampId;
-              neigh.push_back(nb);
-            }
-          }
-        }
-      }
-    }
-  }
-  neighOf[static_cast<std::size_t>(ncell)] = static_cast<int>(neigh.size());
-
+  const double *X = px.data();
+  const double *Y = py.data();
+  const double *Z = pz.data();
+  const int *first = start.data();
   const double cut2 = cutoff * cutoff;
-  const double lx = frame.lx;
-  const double ly = frame.ly;
-  const double lz = frame.lz;
-  const double xy = frame.xy;
-  const double xz = frame.xz;
-  const double yz = frame.yz;
+  const std::size_t stride = static_cast<std::size_t>(nbin + 15) / 16 * 16;
   int nthreads = 1;
 #ifdef SEAMS_HAS_OPENMP
-  nthreads = omp_get_max_threads();
+  if (n >= 512) {
+    nthreads = omp_get_max_threads();
+  }
 #endif
-  std::vector<int> locals(static_cast<std::size_t>(nthreads) *
-                              static_cast<std::size_t>(nbin),
-                          0);
+  std::vector<int> locals(static_cast<std::size_t>(nthreads) * stride, 0);
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel if (n >= 512)
+#pragma omp parallel num_threads(nthreads)
 #endif
   {
     int tid = 0;
 #ifdef SEAMS_HAS_OPENMP
     tid = omp_get_thread_num();
 #endif
-    int *local = locals.data() + static_cast<std::size_t>(tid) *
-                                     static_cast<std::size_t>(nbin);
+    int *local = locals.data() + static_cast<std::size_t>(tid) * stride;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp for schedule(static)
 #endif
-    for (int i = 0; i < n; i++) {
-      const double sxi = sx[static_cast<std::size_t>(i)];
-      const double syi = sy[static_cast<std::size_t>(i)];
-      const double szi = sz[static_cast<std::size_t>(i)];
-      const int home = cellOf[static_cast<std::size_t>(i)];
-      const int nb0 = neighOf[static_cast<std::size_t>(home)];
-      const int nb1 = neighOf[static_cast<std::size_t>(home) + 1];
-      for (int u = nb0; u < nb1; u++) {
-        const int nb = neigh[static_cast<std::size_t>(u)];
-        const int begin = offsets[static_cast<std::size_t>(nb)];
-        const int end = offsets[static_cast<std::size_t>(nb) + 1];
-        const int *idbase = ids.data() + begin;
-        const int len = end - begin;
-        const int *upper = std::upper_bound(idbase, idbase + len, i);
-        const int start = begin + static_cast<int>(upper - idbase);
-#ifdef SEAMS_HAS_HWY
-        accumulatePackedCell(px.data(), py.data(), pz.data(), start, end, sxi,
-                             syi, szi, lx, ly, lz, xy, xz, yz, cut2, cutoff,
-                             binwidth, nbin, local);
-#else
-        for (int t = start; t < end; t++) {
-          double dsx = sxi - px[static_cast<std::size_t>(t)];
-          double dsy = syi - py[static_cast<std::size_t>(t)];
-          double dsz = szi - pz[static_cast<std::size_t>(t)];
-          dsx -= std::round(dsx);
-          dsy -= std::round(dsy);
-          dsz -= std::round(dsz);
-          const double rx = lx * dsx + xy * dsy + xz * dsz;
-          const double ry = ly * dsy + yz * dsz;
-          const double rz = lz * dsz;
-          const double r2 = rx * rx + ry * ry + rz * rz;
-          if (r2 > cut2) {
-            continue;
+    for (int c = 0; c < ncell; c++) {
+      const int a0 = first[c];
+      const int a1 = first[c + 1];
+      if (a0 == a1) {
+        continue;
+      }
+      for (int i = a0; i < a1; i++) {
+        for (int j = i + 1; j < a1; j++) {
+          const double dx = X[j] - X[i];
+          const double dy = Y[j] - Y[i];
+          const double dz = Z[j] - Z[i];
+          const double r2 = dx * dx + dy * dy + dz * dz;
+          if (r2 <= cut2) {
+            binPair(std::sqrt(r2), cutoff, binwidth, nbin, local);
           }
-          const double r = std::sqrt(r2);
-          if (r > cutoff) {
-            continue;
-          }
-          int b = static_cast<int>(r / binwidth);
-          if (b < 0) {
-            continue;
-          }
-          if (b >= nbin) {
-            b = nbin - 1;
-          }
-          local[b] += 2;
         }
-#endif
+      }
+      const int home[3] = {c / (ny * nz), (c / nz) % ny, c % nz};
+      for (const auto &d : kHalfStencil) {
+        int nb[3];
+        int w[3];
+        for (int k = 0; k < 3; k++) {
+          nb[k] = home[k] + d[k];
+          w[k] = nb[k] < 0 ? -1 : (nb[k] >= dims[k] ? 1 : 0);
+          nb[k] -= w[k] * dims[k];
+        }
+        const int cell = (nb[0] * ny + nb[1]) * nz + nb[2];
+        const int b0 = first[cell];
+        const int b1 = first[cell + 1];
+        const double sx = lx * w[0] + xy * w[1] + xz * w[2];
+        const double sy = ly * w[1] + yz * w[2];
+        const double sz = lz * w[2];
+        for (int i = a0; i < a1; i++) {
+          const double xi = X[i] - sx;
+          const double yi = Y[i] - sy;
+          const double zi = Z[i] - sz;
+          for (int j = b0; j < b1; j++) {
+            const double dx = X[j] - xi;
+            const double dy = Y[j] - yi;
+            const double dz = Z[j] - zi;
+            const double r2 = dx * dx + dy * dy + dz * dz;
+            if (r2 <= cut2) {
+              binPair(std::sqrt(r2), cutoff, binwidth, nbin, local);
+            }
+          }
+        }
       }
     }
   }
-  for (int tid = 0; tid < nthreads; tid++) {
-    const int *local = locals.data() + static_cast<std::size_t>(tid) *
-                                           static_cast<std::size_t>(nbin);
+  for (int t = 0; t < nthreads; t++) {
     for (int b = 0; b < nbin; b++) {
-      histogram[static_cast<std::size_t>(b)] += local[b];
+      histogram[static_cast<std::size_t>(b)] +=
+          locals[static_cast<std::size_t>(t) * stride + static_cast<std::size_t>(b)];
     }
   }
   return true;
@@ -469,185 +310,38 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   // Init the histogram to 0
   histogram.resize(nbin);
 
+  // Inside the one-image ball every pair has a single image within the
+  // cutoff, and the cell pairs find it. Past the ball the direct loop takes
+  // the minimum image of each pair.
   const gen::FracBox frame = gen::makeFracBox(yCloud);
-  double edge[3] = {frame.lx, frame.ly, frame.lz};
-  std::sort(edge, edge + 3);
   const double pad = std::max(cutoff, 1.0) * 1e-8;
-  // Below half the narrowest face separation a pair has one image, and that
-  // image is the distance vesin already returns. A thinner cell can use the
-  // cell list: the histogram keeps one minimum-image distance. Past the
-  // middle edge the candidate list is most of the pairs, so the direct
-  // loop is faster.
-  const bool oneImage =
-      frame.ok && edge[0] > 0.0 && cutoff + pad < frame.halfMin;
-  const bool sparse = oneImage && edge[1] > 0.0 && cutoff < 0.35 * edge[1];
-  if (oneImage && yCloud.nop > 1 &&
-      histogramPackedGrid(frame, yCloud, cutoff, binwidth, nbin, histogram)) {
+  if (frame.ok && cutoff + pad < frame.halfMin &&
+      histogramCellPairs(frame, yCloud, cutoff, binwidth, nbin, histogram)) {
     return histogram;
   }
-#ifdef SEAMS_HAS_VESIN
-  if (sparse && yCloud.nop > 1 && yCloud.box.size() >= 3) {
-    std::vector<std::array<double, 3>> positions(
-        static_cast<size_t>(yCloud.nop));
-    for (int i = 0; i < yCloud.nop; i++) {
-      positions[static_cast<size_t>(i)] = {
-          yCloud.pts[i].x, yCloud.pts[i].y, yCloud.pts[i].z};
-    }
-    double box[3][3];
-    double origin[3];
-    nneigh::dumpBoundsToH(yCloud.box, yCloud.boxLow, box, origin);
-    bool periodic[3] = {true, true, true};
-    VesinOptions options{};
-    options.cutoff = cutoff + pad;
-    options.full = true;
-    options.sorted = false;
-    options.algorithm = VesinAutoAlgorithm;
-    options.return_shifts = false;
-    options.return_distances = true;
-    options.return_vectors = false;
-    VesinNeighborList neighbors;
-    const char *error_message = nullptr;
-    VesinDevice device = {VesinCPU, 0};
-    const int status = vesin_neighbors(
-        reinterpret_cast<const double (*)[3]>(positions.data()),
-        static_cast<size_t>(yCloud.nop), box, periodic, device, options,
-        &neighbors, &error_message);
-    if (status == 0) {
-      if (oneImage && neighbors.distances != nullptr) {
-        for (size_t k = 0; k < neighbors.length; k++) {
-          const int iatom = static_cast<int>(neighbors.pairs[k][0]);
-          const int jatom = static_cast<int>(neighbors.pairs[k][1]);
-          if (iatom >= jatom) {
-            continue;
-          }
-          const double r = neighbors.distances[k];
-          if (r > cutoff) {
-            continue;
-          }
-          int b = static_cast<int>(r / binwidth);
-          if (b < 0) {
-            continue;
-          }
-          if (b >= nbin) {
-            b = nbin - 1;
-          }
-          histogram[static_cast<size_t>(b)] += 2;
-        }
-      } else {
-        std::vector<std::pair<int, int>> uniq;
-        uniq.reserve(neighbors.length / 2 + 1);
-        for (size_t k = 0; k < neighbors.length; k++) {
-          int iatom = static_cast<int>(neighbors.pairs[k][0]);
-          int jatom = static_cast<int>(neighbors.pairs[k][1]);
-          if (iatom == jatom) {
-            continue;
-          }
-          if (iatom > jatom) {
-            std::swap(iatom, jatom);
-          }
-          uniq.emplace_back(iatom, jatom);
-        }
-        std::sort(uniq.begin(), uniq.end());
-        uniq.erase(std::unique(uniq.begin(), uniq.end()), uniq.end());
-        for (const auto &pair : uniq) {
-          const double r = std::sqrt(
-              gen::periodicDistSq(frame, yCloud, pair.first, pair.second));
-          if (r > cutoff) {
-            continue;
-          }
-          int b = static_cast<int>(r / binwidth);
-          if (b < 0) {
-            continue;
-          }
-          if (b >= nbin) {
-            b = nbin - 1;
-          }
-          histogram[static_cast<size_t>(b)] += 2;
-        }
-      }
-      vesin_free(&neighbors);
-      return histogram;
-    }
-    std::cerr << "Vesin failed: "
-              << (error_message ? error_message : "unknown")
-              << "; falling back to brute force.\n";
-    vesin_free(&neighbors);
-  }
-#endif
 
-  const double cut2 = cutoff * cutoff;
   const int nop = yCloud.nop;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (nop >= 512)
-  {
-    std::vector<int> local(static_cast<std::size_t>(nbin), 0);
-#pragma omp for schedule(static)
-    for (int iatom = 0; iatom < nop - 1; iatom++) {
-      const auto &pi = yCloud.pts[static_cast<std::size_t>(iatom)];
-      for (int jatom = iatom + 1; jatom < nop; jatom++) {
-        const auto &pj = yCloud.pts[static_cast<std::size_t>(jatom)];
-        double rij = 0.0;
-        if (oneImage && frame.ok) {
-          const double r2 =
-              gen::fracDistSq(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
-          if (r2 > cut2) {
-            continue;
-          }
-          rij = std::sqrt(r2);
-        } else {
-          rij = std::sqrt(gen::periodicDistSq(frame, yCloud, iatom, jatom));
-          if (rij > cutoff) {
-            continue;
-          }
-        }
-        int b = static_cast<int>(rij / binwidth);
-        if (b < 0) {
-          continue;
-        }
-        if (b >= nbin) {
-          b = nbin - 1;
-        }
-        local[static_cast<std::size_t>(b)] += 2;
-      }
-    }
-#pragma omp critical
-    {
-      for (int b = 0; b < nbin; b++) {
-        histogram[static_cast<std::size_t>(b)] +=
-            local[static_cast<std::size_t>(b)];
-      }
-    }
-  }
-#else
-  for (int iatom = 0; iatom < nop - 1; iatom++) {
-    const auto &pi = yCloud.pts[static_cast<std::size_t>(iatom)];
-    for (int jatom = iatom + 1; jatom < nop; jatom++) {
-      const auto &pj = yCloud.pts[static_cast<std::size_t>(jatom)];
-      double rij = 0.0;
-      if (oneImage && frame.ok) {
-        const double r2 =
-            gen::fracDistSq(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
-        if (r2 > cut2) {
-          continue;
-        }
-        rij = std::sqrt(r2);
-      } else {
-        rij = std::sqrt(gen::periodicDistSq(frame, yCloud, iatom, jatom));
-        if (rij > cutoff) {
-          continue;
-        }
-      }
-      int b = static_cast<int>(rij / binwidth);
-      if (b < 0) {
-        continue;
-      }
-      if (b >= nbin) {
-        b = nbin - 1;
-      }
-      histogram[static_cast<std::size_t>(b)] += 2;
-    }
-  }
 #endif
+  {
+    std::vector<int> local(histogram.size(), 0);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(dynamic, 16)
+#endif
+    for (int iatom = 0; iatom < nop - 1; iatom++) {
+      for (int jatom = iatom + 1; jatom < nop; jatom++) {
+        binPair(std::sqrt(gen::periodicDistSq(frame, yCloud, iatom, jatom)),
+                cutoff, binwidth, nbin, local.data());
+      }
+    }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp critical
+#endif
+    for (std::size_t b = 0; b < local.size(); b++) {
+      histogram[b] += local[b];
+    }
+  }
 
   // Return the histogram
   return histogram;

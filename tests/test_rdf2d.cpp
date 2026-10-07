@@ -44,9 +44,10 @@ static std::vector<int>
 referenceHistogram(const molSys::PointCloud<molSys::Point<double>, double> &cloud,
                    double cutoff, double binwidth, int nbin) {
   std::vector<int> reference(static_cast<std::size_t>(nbin), 0);
+  const gen::FracBox frame = gen::makeFracBox(cloud);
   for (int i = 0; i < cloud.nop; i++) {
     for (int j = i + 1; j < cloud.nop; j++) {
-      const double r = gen::periodicDist(cloud, i, j);
+      const double r = std::sqrt(gen::periodicDistSq(frame, cloud, i, j));
       if (r > cutoff) {
         continue;
       }
@@ -331,7 +332,7 @@ TEST_CASE("sampleRDF_AA tilt between edge and span is MIC-once", "[rdf2d]") {
   REQUIRE(hist[static_cast<std::size_t>(expectBin)] == 2);
 }
 
-TEST_CASE("sampleRDF_AA packed grid matches the direct minimum image",
+TEST_CASE("sampleRDF_AA cell pairs match the direct minimum image",
           "[rdf2d]") {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   cloud.box = {20.0, 20.0, 20.0};
@@ -349,7 +350,7 @@ TEST_CASE("sampleRDF_AA packed grid matches the direct minimum image",
   REQUIRE(rdf2::sampleRDF_AA(cloud, 3.0, 0.1, 30) == reference);
 }
 
-TEST_CASE("sampleRDF_AA packed grid matches a sheared minimum image",
+TEST_CASE("sampleRDF_AA cell pairs match a sheared minimum image",
           "[rdf2d]") {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   cloud.box = {30.0, 20.0, 25.0, 4.0, 0.5, -0.3};
@@ -386,7 +387,7 @@ TEST_CASE("sampleRDF_AA keeps a tilted pair the fractional wrap pushes out",
   REQUIRE(rdf2::sampleRDF_AA(cloud, 4.9, 0.1, 49) == reference);
 }
 
-TEST_CASE("sampleRDF_AA packed grid sizes cells on the perpendicular width",
+TEST_CASE("sampleRDF_AA cell pairs size cells on the face separation",
           "[rdf2d]") {
   // yz = ly/2 in a 42 cell: four rows along the b diagonal are 9.4 apart
   // across the tilt, so a pair inside a 10 cutoff can sit two rows apart.
@@ -407,6 +408,26 @@ TEST_CASE("sampleRDF_AA packed grid sizes cells on the perpendicular width",
   REQUIRE(gen::periodicDist(cloud, 0, 1) < 10.0);
   const auto reference = referenceHistogram(cloud, 10.0, 0.25, 40);
   REQUIRE(rdf2::sampleRDF_AA(cloud, 10.0, 0.25, 40) == reference);
+}
+
+TEST_CASE("sampleRDF_AA cell pairs match a threaded frame tilted on every axis",
+          "[rdf2d]") {
+  // Enough atoms for the parallel build and the threaded walk.
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {50.0, 45.0, 40.0, 6.0, -4.0, 5.0};
+  cloud.boxLow = {-4.0, 0.0, 0.0};
+  cloud.nop = 0;
+  std::mt19937 rng(11);
+  std::uniform_real_distribution<double> u(0.0, 1.0);
+  for (int i = 0; i < 4500; i++) {
+    const double sx = u(rng);
+    const double sy = u(rng);
+    const double sz = u(rng);
+    addPoint(cloud, 40.0 * sx + 6.0 * sy - 4.0 * sz, 40.0 * sy + 5.0 * sz,
+             40.0 * sz);
+  }
+  const auto reference = referenceHistogram(cloud, 5.0, 0.05, 100);
+  REQUIRE(rdf2::sampleRDF_AA(cloud, 5.0, 0.05, 100) == reference);
 }
 
 // -- normalizeRDF tests --
