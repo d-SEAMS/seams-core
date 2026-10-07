@@ -318,6 +318,7 @@ nneigh::neighList(double rcutoff,
 
 namespace {
 constexpr int kThreadedCellRowsMinAtoms = 2048;
+constexpr int kThreadedCellRowsParallelAtoms = 4096;
 } // namespace
 
 bool nneigh::cellListRowsThreaded(
@@ -408,7 +409,8 @@ bool nneigh::cellListRowsThreaded(
   // nvc++ -mp=gpu (SEAMS_HAS_OFFLOAD) SIGSEGVs this host parallel-for
   // in libnvomp (__kmpc_fork_call).
 #if !defined(SEAMS_HAS_OFFLOAD)
-#pragma omp parallel for schedule(dynamic, 256) if (n >= 4096)
+#pragma omp parallel for schedule(dynamic, 256) \
+    if (n >= static_cast<std::size_t>(kThreadedCellRowsParallelAtoms))
 #endif
 #endif
   for (std::int64_t kk = 0; kk < static_cast<std::int64_t>(n); kk++) {
@@ -466,6 +468,33 @@ nneigh::neighListO(double rcutoff,
     }
   }
 
+#ifdef SEAMS_HAS_OPENMP
+  // threaded cell list: one row per thread, the same minimum-image set
+  const auto threadedRows = [&]() {
+    std::vector<std::vector<int>> rows;
+    if (typeIIndices.size() < static_cast<std::size_t>(kThreadedCellRowsMinAtoms) ||
+        !cellListRowsThreaded(yCloud, typeIIndices, rcutoff, rows)) {
+      return false;
+    }
+    nList = seedWithSelfIDs(indexToID, yCloud.nop);
+    for (std::size_t k = 0; k < rows.size(); k++) {
+      for (const int j : rows[k]) {
+        appendNeighbourID(nList, indexToID, typeIIndices[k], j);
+      }
+    }
+    return true;
+  };
+#if !defined(SEAMS_HAS_OFFLOAD)
+  // From this size the rows run in parallel, and above two threads they beat
+  // the cutoff list, whose sort and row appends stay on one thread.
+  if (typeIIndices.size() >=
+          static_cast<std::size_t>(kThreadedCellRowsParallelAtoms) &&
+      omp_get_max_threads() > 2 && threadedRows()) {
+    return nList;
+  }
+#endif
+#endif
+
 #ifdef SEAMS_HAS_CUTOFF_LIST
   // Cutoff list: linkcell pairs_within, or vesin when that library is absent.
   {
@@ -486,19 +515,8 @@ nneigh::neighListO(double rcutoff,
 #endif
 
 #ifdef SEAMS_HAS_OPENMP
-  // threaded cell list: one row per thread, the same minimum-image set
-  if (typeIIndices.size() >= static_cast<std::size_t>(kThreadedCellRowsMinAtoms)) {
-    std::vector<std::vector<int>> rows;
-    if (cellListRowsThreaded(yCloud, typeIIndices, rcutoff, rows)) {
-      nList = seedWithSelfIDs(indexToID, yCloud.nop);
-      for (std::size_t k = 0; k < rows.size(); k++) {
-        auto &dest = nList[static_cast<std::size_t>(typeIIndices[k])];
-        for (const int j : rows[k]) {
-          dest.push_back(indexToID[static_cast<std::size_t>(j)]);
-        }
-      }
-      return nList;
-    }
+  if (threadedRows()) {
+    return nList;
   }
 #endif
 

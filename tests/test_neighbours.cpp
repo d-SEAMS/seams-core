@@ -16,6 +16,10 @@
 #include <tuple>
 #include <vector>
 
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
+
 // Helper: build a 4-atom system in a 10x10x10 box
 // Atoms at (0,0,0), (1,0,0), (0,1,0), (5,5,5)
 // With cutoff 1.5, atoms 0,1,2 are mutual neighbours; atom 3 is isolated
@@ -999,6 +1003,25 @@ TEST_CASE("threaded cell-list rows are the minimum-image neighbours", "[neighbou
   std::vector<std::vector<int>> rows;
   REQUIRE_FALSE(nneigh::cellListRowsThreaded(tight, all, cutoff, rows));
 }
+
+#ifdef SEAMS_HAS_OPENMP
+TEST_CASE("threaded neighListO leaves an unmapped atom as an empty row",
+          "[neighbours]") {
+  auto cloud = jitteredLattice(16, 3.0, 0.0, 0.0, 0.0);
+  REQUIRE(cloud.nop == 4096);
+  cloud.idIndexMap.erase(101);
+  const int threads = omp_get_max_threads();
+  omp_set_num_threads(4);
+  const auto nList = nneigh::neighListO(3.5, cloud, 1);
+  omp_set_num_threads(threads);
+  REQUIRE(nList[100].empty());
+  bool unmappedPartner = false;
+  for (const auto &row : nList) {
+    unmappedPartner |= std::find(row.begin(), row.end(), -1) != row.end();
+  }
+  REQUIRE_FALSE(unmappedPartner);
+}
+#endif
 
 TEST_CASE("water-type mask keeps Ag out of the 4-NN list", "[neighbours]") {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
