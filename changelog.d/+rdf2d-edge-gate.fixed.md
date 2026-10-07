@@ -1,1 +1,1 @@
-The 2D RDF histogram is one minimum-image pair. The cell list supplies the candidates, including when the cutoff exceeds half the shortest edge, and a second image of the same pair is dropped. The direct pair loop is used when the cutoff reaches the middle edge.
+The 2D RDF histogram, `nearestUnlike`, and `shellSeparation` trust the fractional wrap only below half the narrowest face separation of a tilted cell. Half an edge or half a bound span let a pair inside the cutoff wrap to a longer image and drop out, and let the RDF grid put a pair two cells apart.
