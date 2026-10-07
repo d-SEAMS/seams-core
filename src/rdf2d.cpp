@@ -139,12 +139,12 @@ bool histogramPackedGrid(
     return false;
   }
   const double span = cutoff + std::max(cutoff, 1.0) * 1e-12;
-  if (!(frame.lx > span && frame.ly > span && frame.lz > span)) {
+  if (!(frame.wx > span && frame.wy > span && frame.wz > span)) {
     return false;
   }
-  const int nx = std::max(1, static_cast<int>(std::floor(frame.lx / span)));
-  const int ny = std::max(1, static_cast<int>(std::floor(frame.ly / span)));
-  const int nz = std::max(1, static_cast<int>(std::floor(frame.lz / span)));
+  const int nx = std::max(1, static_cast<int>(std::floor(frame.wx / span)));
+  const int ny = std::max(1, static_cast<int>(std::floor(frame.wy / span)));
+  const int nz = std::max(1, static_cast<int>(std::floor(frame.wz / span)));
   const long long ncell64 =
       static_cast<long long>(nx) * ny * static_cast<long long>(nz);
   if (ncell64 < 27 || ncell64 > static_cast<long long>(n) * 8 ||
@@ -473,8 +473,8 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   double edge[3] = {frame.lx, frame.ly, frame.lz};
   std::sort(edge, edge + 3);
   const double pad = std::max(cutoff, 1.0) * 1e-8;
-  // Below half the shortest edge a pair has one image, and that image is
-  // the distance vesin already returns. A thinner cell can still use the
+  // Below half the narrowest face separation a pair has one image, and that
+  // image is the distance vesin already returns. A thinner cell can use the
   // cell list: the histogram keeps one minimum-image distance. Past the
   // middle edge the candidate list is most of the pairs, so the direct
   // loop is faster.

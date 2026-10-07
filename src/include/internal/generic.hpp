@@ -130,7 +130,8 @@ inline bool pointCloudCell(
 
 // One dump box, recovered once per frame. Orthorhombic lengths are the
 // bound spans. A tilt dump stores those spans in box[0..2] and xy, xz, yz
-// in box[3..5]; lx, ly, lz are the recovered edge lengths.
+// in box[3..5]; lx, ly, lz are the recovered edge lengths, and wx, wy, wz
+// the separations of opposite faces, which tilt makes shorter.
 struct FracBox {
   double lx = 0.0;
   double ly = 0.0;
@@ -141,6 +142,9 @@ struct FracBox {
   double ox = 0.0;
   double oy = 0.0;
   double oz = 0.0;
+  double wx = 0.0;
+  double wy = 0.0;
+  double wz = 0.0;
   double halfMin = 0.0;
   bool triclinic = false;
   bool ok = false;
@@ -181,7 +185,11 @@ makeFracBox(const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   if (!(b.lx > 0.0 && b.ly > 0.0 && b.lz > 0.0)) {
     return b;
   }
-  b.halfMin = 0.5 * std::min(b.lx, std::min(b.ly, b.lz));
+  b.wx = b.lx * b.ly * b.lz /
+         std::hypot(b.ly * b.lz, b.xy * b.lz, b.xy * b.yz - b.ly * b.xz);
+  b.wy = b.ly * b.lz / std::hypot(b.lz, b.yz);
+  b.wz = b.lz;
+  b.halfMin = 0.5 * std::min(b.wx, std::min(b.wy, b.wz));
   b.ok = true;
   return b;
 }
@@ -228,9 +236,10 @@ inline double fracDistSq(const FracBox &b, double xi, double yi, double zi,
   return dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
 }
 
-// Smith, CCP5 1989: below half the shortest edge the fractional wrap is
-// the only lattice image in the ball. An orthorhombic wrap is that image
-// on every axis, including past half an edge.
+// Smith, CCP5 1989: below half the narrowest face separation the fractional
+// wrap is the only lattice image in the ball, and every image inside that
+// ball is a fractional wrap. An orthorhombic wrap is that image on every
+// axis, including past half an edge.
 inline bool smithInside(const FracBox &b, double r2) {
   return b.ok && (!b.triclinic || std::sqrt(r2) + 1e-12 < b.halfMin);
 }

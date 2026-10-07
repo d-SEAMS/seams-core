@@ -8,6 +8,7 @@
 #include <neighbours.hpp>
 #include <rdf2d.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <filesystem>
 #include <vector>
@@ -36,6 +37,37 @@ makeRdfCloud(int nop, double boxLen = 10.0) {
   }
   cloud.nop = nop;
   return cloud;
+}
+
+// Every pair once, at gen::periodicDist, binned as sampleRDF_AA bins.
+static std::vector<int>
+referenceHistogram(const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+                   double cutoff, double binwidth, int nbin) {
+  std::vector<int> reference(static_cast<std::size_t>(nbin), 0);
+  for (int i = 0; i < cloud.nop; i++) {
+    for (int j = i + 1; j < cloud.nop; j++) {
+      const double r = gen::periodicDist(cloud, i, j);
+      if (r > cutoff) {
+        continue;
+      }
+      const int b = std::min(static_cast<int>(r / binwidth), nbin - 1);
+      reference[static_cast<std::size_t>(b)] += 2;
+    }
+  }
+  return reference;
+}
+
+static void addPoint(molSys::PointCloud<molSys::Point<double>, double> &cloud,
+                     double x, double y, double z) {
+  molSys::Point<double> pt;
+  pt.type = 1;
+  pt.atomID = cloud.nop + 1;
+  pt.x = x;
+  pt.y = y;
+  pt.z = z;
+  cloud.pts.push_back(pt);
+  cloud.idIndexMap[pt.atomID] = cloud.nop;
+  cloud.nop++;
 }
 
 // -- getSystemLengths tests --
@@ -304,46 +336,17 @@ TEST_CASE("sampleRDF_AA packed grid matches the direct minimum image",
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   cloud.box = {20.0, 20.0, 20.0};
   cloud.boxLow = {0.0, 0.0, 0.0};
-  constexpr int n = 64;
-  cloud.nop = n;
+  cloud.nop = 0;
   std::mt19937 rng(20);
   std::uniform_real_distribution<double> u(0.0, 20.0);
-  for (int i = 0; i < n; i++) {
-    molSys::Point<double> pt;
-    pt.type = 1;
-    pt.atomID = i + 1;
-    pt.x = u(rng);
-    pt.y = u(rng);
-    pt.z = u(rng);
-    cloud.pts.push_back(pt);
-    cloud.idIndexMap[i + 1] = i;
+  for (int i = 0; i < 64; i++) {
+    const double x = u(rng);
+    const double y = u(rng);
+    const double z = u(rng);
+    addPoint(cloud, x, y, z);
   }
-  const double cutoff = 3.0;
-  const double binwidth = 0.1;
-  const int nbin = 30;
-  std::vector<int> reference(static_cast<std::size_t>(nbin), 0);
-  for (int i = 0; i < n; i++) {
-    for (int j = i + 1; j < n; j++) {
-      const double r = gen::periodicDist(cloud, i, j);
-      if (r > cutoff) {
-        continue;
-      }
-      int b = static_cast<int>(r / binwidth);
-      if (b < 0) {
-        continue;
-      }
-      if (b >= nbin) {
-        b = nbin - 1;
-      }
-      reference[static_cast<std::size_t>(b)] += 2;
-    }
-  }
-  const auto hist = rdf2::sampleRDF_AA(cloud, cutoff, binwidth, nbin);
-  REQUIRE(hist.size() == reference.size());
-  for (int b = 0; b < nbin; b++) {
-    REQUIRE(hist[static_cast<std::size_t>(b)] ==
-            reference[static_cast<std::size_t>(b)]);
-  }
+  const auto reference = referenceHistogram(cloud, 3.0, 0.1, 30);
+  REQUIRE(rdf2::sampleRDF_AA(cloud, 3.0, 0.1, 30) == reference);
 }
 
 TEST_CASE("sampleRDF_AA packed grid matches a sheared minimum image",
@@ -351,51 +354,59 @@ TEST_CASE("sampleRDF_AA packed grid matches a sheared minimum image",
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   cloud.box = {30.0, 20.0, 25.0, 4.0, 0.5, -0.3};
   cloud.boxLow = {1.0, -2.0, 0.5};
-  constexpr int n = 80;
-  cloud.nop = n;
+  cloud.nop = 0;
   std::mt19937 rng(7);
   std::uniform_real_distribution<double> ux(1.0, 31.0);
   std::uniform_real_distribution<double> uy(-2.0, 18.0);
   std::uniform_real_distribution<double> uz(0.5, 25.5);
-  for (int i = 0; i < n; i++) {
-    molSys::Point<double> pt;
-    pt.type = 1;
-    pt.atomID = i + 1;
-    pt.x = ux(rng);
-    pt.y = uy(rng);
-    pt.z = uz(rng);
-    cloud.pts.push_back(pt);
+  for (int i = 0; i < 80; i++) {
+    const double x = ux(rng);
+    const double y = uy(rng);
+    const double z = uz(rng);
+    addPoint(cloud, x, y, z);
   }
-  const double cutoff = 3.0;
-  const double binwidth = 0.1;
-  const int nbin = 30;
-  std::vector<int> reference(static_cast<std::size_t>(nbin), 0);
-  for (int i = 0; i < n; i++) {
-    for (int j = i + 1; j < n; j++) {
-      const double r = gen::periodicDist(cloud, i, j);
-      if (r > cutoff) {
-        continue;
-      }
-      int b = static_cast<int>(r / binwidth);
-      if (b >= nbin) {
-        b = nbin - 1;
-      }
-      if (b >= 0) {
-        reference[static_cast<std::size_t>(b)] += 2;
-      }
-    }
+  const auto reference = referenceHistogram(cloud, 3.0, 0.1, 30);
+  REQUIRE(reference != std::vector<int>(30, 0));
+  REQUIRE(rdf2::sampleRDF_AA(cloud, 3.0, 0.1, 30) == reference);
+}
+
+TEST_CASE("sampleRDF_AA keeps a tilted pair the fractional wrap pushes out",
+          "[rdf2d]") {
+  // yz = ly/2: the width across b is 10/sqrt(1.25), so a 4.9 cutoff passes
+  // half of it while staying below half of every H diagonal.
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {10.0, 15.0, 10.0, 0.0, 0.0, 5.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 0;
+  addPoint(cloud, 5.0, 5.0, 2.0);
+  addPoint(cloud, 5.0, 1.4, 5.0);
+  REQUIRE_THAT(gen::periodicDist(cloud, 0, 1),
+               Catch::Matchers::WithinAbs(std::sqrt(3.6 * 3.6 + 9.0), 1e-12));
+  const auto reference = referenceHistogram(cloud, 4.9, 0.1, 49);
+  REQUIRE(rdf2::sampleRDF_AA(cloud, 4.9, 0.1, 49) == reference);
+}
+
+TEST_CASE("sampleRDF_AA packed grid sizes cells on the perpendicular width",
+          "[rdf2d]") {
+  // yz = ly/2 in a 42 cell: four rows along the b diagonal are 9.4 apart
+  // across the tilt, so a pair inside a 10 cutoff can sit two rows apart.
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {42.0, 63.0, 42.0, 0.0, 0.0, 21.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 0;
+  addPoint(cloud, 21.0, 42.0 * 0.249 + 21.0 * 0.6, 42.0 * 0.6);
+  addPoint(cloud, 21.0, 42.0 * 0.51 + 21.0 * 0.4956, 42.0 * 0.4956);
+  std::mt19937 rng(3);
+  std::uniform_real_distribution<double> u(0.0, 1.0);
+  for (int i = 0; i < 200; i++) {
+    const double sx = u(rng);
+    const double sy = u(rng);
+    const double sz = u(rng);
+    addPoint(cloud, 42.0 * sx, 42.0 * sy + 21.0 * sz, 42.0 * sz);
   }
-  const auto hist = rdf2::sampleRDF_AA(cloud, cutoff, binwidth, nbin);
-  int refSum = 0;
-  int gotSum = 0;
-  for (int b = 0; b < nbin; b++) {
-    refSum += reference[static_cast<std::size_t>(b)];
-    gotSum += hist[static_cast<std::size_t>(b)];
-    REQUIRE(hist[static_cast<std::size_t>(b)] ==
-            reference[static_cast<std::size_t>(b)]);
-  }
-  REQUIRE(refSum > 0);
-  REQUIRE(gotSum == refSum);
+  REQUIRE(gen::periodicDist(cloud, 0, 1) < 10.0);
+  const auto reference = referenceHistogram(cloud, 10.0, 0.25, 40);
+  REQUIRE(rdf2::sampleRDF_AA(cloud, 10.0, 0.25, 40) == reference);
 }
 
 // -- normalizeRDF tests --

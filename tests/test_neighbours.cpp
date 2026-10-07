@@ -801,6 +801,34 @@ TEST_CASE("nearestUnlike picks the sheared a-image unlike ion",
   REQUIRE(pairs[0].second == 1);
 }
 
+TEST_CASE("nearestUnlike finds an image the tilted wrap overshoots",
+          "[neighbours]") {
+  // yz = ly/2. The partner at 4.686 wraps to 7.07; the decoy at 4.8 wraps
+  // exactly and sits below half of every H diagonal, not half the width.
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {10.0, 15.0, 10.0, 0.0, 0.0, 5.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 3;
+  const double coords[3][3] = {{5.0, 5.0, 2.0}, {5.0, 1.4, 5.0}, {9.8, 5.0, 2.0}};
+  const int types[3] = {1, 2, 2};
+  for (int i = 0; i < 3; i++) {
+    molSys::Point<double> pt;
+    pt.type = types[i];
+    pt.atomID = i + 1;
+    pt.molID = i + 1;
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+  const auto nearest = nneigh::nearestUnlike(cloud, 1, 2);
+  REQUIRE(nearest.size() == 1);
+  REQUIRE(std::get<1>(nearest[0]) == 1);
+  REQUIRE_THAT(std::get<2>(nearest[0]),
+               Catch::Matchers::WithinAbs(std::sqrt(3.6 * 3.6 + 9.0), 1e-12));
+}
+
 #ifdef SEAMS_HAS_LINKCELL
 TEST_CASE("residentFrameCell uses dump H when nBox is 6", "[neighbours]") {
   const double box[6] = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
