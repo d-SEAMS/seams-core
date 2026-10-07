@@ -1,1 +1,1 @@
-Cutoff neighbour lists use linkcell pairs_within before the threaded cell list, with cells of about 20 atoms rather than one cutoff. The neighbour list still keeps one index per atom. k-nearest stays knearest.
+Cutoff neighbour lists use linkcell pairs_within with cells of about 20 atoms rather than one cutoff. From 4096 atoms with more than two OpenMP threads, `neighListO` takes the threaded cell rows first, since they run in parallel there. The neighbour list still keeps one index per atom. k-nearest stays knearest.
