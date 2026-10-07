@@ -1,0 +1,1 @@
+Cutoff neighbour lists use linkcell pairs_within before the threaded cell list, with cells of about 20 atoms rather than one cutoff. The neighbour list still keeps one index per atom. k-nearest stays knearest.
