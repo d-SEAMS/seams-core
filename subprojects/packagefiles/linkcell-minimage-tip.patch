@@ -1,5 +1,5 @@
 diff --git a/Cargo.toml b/Cargo.toml
-index 91c7e10..6da5cc2 100644
+index 7b004c5..d585de8 100644
 --- a/Cargo.toml
 +++ b/Cargo.toml
 @@ -36,3 +36,6 @@ required-features = ["capi"]
@@ -22,3 +22,16 @@ index 8b2e055..7b38112 100644
      if args.profile == "release":
          command.append("--release")
  
+diff --git a/tests/agree.rs b/tests/agree.rs
+index b5f1e5f..6a1dbde 100644
+--- a/tests/agree.rs
++++ b/tests/agree.rs
+@@ -390,7 +390,7 @@ fn wrap_around_sources_near_faces_and_corners() {
+         (
+             "triclinic-corner k=1",
+             &tri,
+-            &[[0.20, 0.20, 0.20], [13.80, 10.80, 7.80], [7.0, 5.5, 4.0]],
++            &[[0.20, 0.20, 0.20], [13.80, 10.80, 7.80], [7.0, 5.5, 4.25]],
+             1,
+         ),
+         (
