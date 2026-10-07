@@ -8,7 +8,6 @@ doxyYoda_*
 run*
 bbdir/
 bbdir-cov/
-lean/.lake/
 /.snakemake/
 # Manual updates ONLY
 spack.yml
