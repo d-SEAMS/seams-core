@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <numeric>
+#include <random>
 #include <array>
 #include <stdexcept>
 #include <string>
@@ -827,6 +828,59 @@ TEST_CASE("nearestUnlike finds an image the tilted wrap overshoots",
   REQUIRE(std::get<1>(nearest[0]) == 1);
   REQUIRE_THAT(std::get<2>(nearest[0]),
                Catch::Matchers::WithinAbs(std::sqrt(3.6 * 3.6 + 9.0), 1e-12));
+}
+
+TEST_CASE("cell-list neighbours match the minimum image on a tilted frame",
+          "[neighbours]") {
+  // Water density and fewer atoms than the threaded rows take, so both
+  // lists come from cellListPairs across many cells.
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {44.0, 40.0, 36.0, 5.0, -3.0, 4.0};
+  cloud.boxLow = {-3.0, 0.0, 0.0};
+  constexpr int n = 1500;
+  std::mt19937 rng(17);
+  std::uniform_real_distribution<double> u(0.0, 1.0);
+  for (int i = 0; i < n; i++) {
+    const double sx = u(rng);
+    const double sy = u(rng);
+    const double sz = u(rng);
+    molSys::Point<double> pt;
+    pt.type = 1;
+    pt.atomID = i + 1;
+    pt.molID = i + 1;
+    pt.x = 36.0 * sx + 5.0 * sy - 3.0 * sz;
+    pt.y = 36.0 * sy + 4.0 * sz;
+    pt.z = 36.0 * sz;
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[i + 1] = i;
+  }
+  cloud.nop = n;
+  const double cutoff = 3.0;
+  const gen::FracBox frame = gen::makeFracBox(cloud);
+  std::vector<std::vector<int>> wantFull(n), wantHalf(n);
+  for (int i = 0; i < n; i++) {
+    for (int j = i + 1; j < n; j++) {
+      if (gen::periodicDistSq(frame, cloud, i, j) <= cutoff * cutoff) {
+        wantFull[i].push_back(j + 1);
+        wantFull[j].push_back(i + 1);
+        wantHalf[i].push_back(j + 1);
+      }
+    }
+  }
+  const auto rows = [](const std::vector<std::vector<int>> &list) {
+    std::vector<std::vector<int>> out;
+    for (const auto &row : list) {
+      std::vector<int> ids(row.begin() + 1, row.end());
+      std::sort(ids.begin(), ids.end());
+      out.push_back(ids);
+    }
+    return out;
+  };
+  for (auto &row : wantFull) {
+    std::sort(row.begin(), row.end());
+  }
+  REQUIRE(rows(nneigh::neighListO(cutoff, cloud, 1)) == wantFull);
+  REQUIRE(rows(nneigh::halfNeighList(cutoff, cloud, 1)) == wantHalf);
 }
 
 #ifdef SEAMS_HAS_LINKCELL
