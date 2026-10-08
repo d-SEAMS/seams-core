@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -36,6 +37,10 @@
 #include <string_view>
 #include <utility>
 #include <vector>
+
+#ifdef SEAMS_HAS_MPI
+#include <mpi.h>
+#endif
 
 using namespace Argum;
 
@@ -151,6 +156,89 @@ bool forEachInputFrame(const std::string &path, int first, int last,
                            std::forward<Fn>(fn), nThreads);
   return true;
 }
+
+#ifdef SEAMS_HAS_MPI
+//! Ranks of an MPI launch, each taking a contiguous block of the frame range.
+//! A bare run stays out of MPI: a singleton start costs about a second.
+struct FrameRanks {
+  bool active = false;
+  int rank = 0;
+  int size = 1;
+
+  FrameRanks(int *argc, char ***argv) {
+    for (const char *name : {"OMPI_COMM_WORLD_SIZE", "PMIX_RANK", "PMI_RANK",
+                             "PMI_SIZE", "MV2_COMM_WORLD_SIZE"}) {
+      active = active || std::getenv(name) != nullptr;
+    }
+    if (!active) {
+      return;
+    }
+    int provided = 0;
+    MPI_Init_thread(argc, argv, MPI_THREAD_FUNNELED, &provided);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    // A rank analyses whole frames, so the atom split stays on it
+    chill::setSteinhardtAtomSplit(false);
+    if (rank != 0) {
+      std::cout.setstate(std::ios::failbit);
+    }
+  }
+  ~FrameRanks() {
+    if (active) {
+      MPI_Finalize();
+    }
+  }
+  FrameRanks(const FrameRanks &) = delete;
+  FrameRanks &operator=(const FrameRanks &) = delete;
+};
+
+//! Inputs forEachInputFrame walks as an indexed LAMMPS dump
+bool indexedDump(const std::string &path) {
+  const auto dot = path.find_last_of('.');
+  const std::string ext = dot == std::string::npos ? "" : path.substr(dot + 1);
+  return ext != "xyz" && ext != "con" && ext != "pdb" && ext != "gro" &&
+         ext != "dcd";
+}
+
+//! Every rank's (frame index, status, text) records, unpacked on rank 0
+void gatherFrameResults(const FrameRanks &ranks,
+                        std::vector<std::string> &lines,
+                        std::vector<int> &status, std::vector<bool> &seen) {
+  std::string pack;
+  for (std::size_t i = 0; i < lines.size(); i++) {
+    if (seen[i]) {
+      const int head[3] = {static_cast<int>(i), status[i],
+                           static_cast<int>(lines[i].size())};
+      pack.append(reinterpret_cast<const char *>(head), sizeof head);
+      pack += lines[i];
+    }
+  }
+  const int bytes = static_cast<int>(pack.size());
+  std::vector<int> counts(static_cast<std::size_t>(ranks.size), 0);
+  MPI_Gather(&bytes, 1, MPI_INT, counts.data(), 1, MPI_INT, 0,
+             MPI_COMM_WORLD);
+  std::vector<int> displs(counts.size(), 0);
+  std::string all;
+  if (ranks.rank == 0) {
+    for (std::size_t r = 1; r < counts.size(); r++) {
+      displs[r] = displs[r - 1] + counts[r - 1];
+    }
+    all.resize(static_cast<std::size_t>(displs.back() + counts.back()));
+  }
+  MPI_Gatherv(pack.data(), bytes, MPI_CHAR, all.data(), counts.data(),
+              displs.data(), MPI_CHAR, 0, MPI_COMM_WORLD);
+  for (std::size_t at = 0; at + 3 * sizeof(int) <= all.size();) {
+    int head[3];
+    std::memcpy(head, all.data() + at, sizeof head);
+    at += sizeof head;
+    const auto i = static_cast<std::size_t>(head[0]);
+    lines[i] = all.substr(at, static_cast<std::size_t>(head[2]));
+    status[i] = head[1];
+    seen[i] = true;
+    at += static_cast<std::size_t>(head[2]);
+  }
+}
+#endif
 
 std::string jsonEscape(std::string_view value) {
   std::string escaped;
@@ -1386,7 +1474,12 @@ int main(int argc, char *argv[]) {
 
   parser.add(Option("--last")
                  .argName("N")
-                 .help("Last frame (inclusive). Omit for a single --frame")
+                 .help("Last frame (inclusive). Omit for a single --frame"
+#ifdef SEAMS_HAS_MPI
+                       ". Under mpiexec each rank takes a block of a dump's "
+                       "range and runs --jobs workers"
+#endif
+                       )
                  .handler([&](std::string_view value) {
                    last = parseIntegral<int>(value);
                  }));
@@ -1678,6 +1771,17 @@ int main(int argc, char *argv[]) {
               << "\n";
     return 2;
   }
+  // After parsing: --help, --version and --features leave through std::exit
+#ifdef SEAMS_HAS_MPI
+  const FrameRanks ranks(&argc, &argv);
+  if (ranks.size > 1 && !perAtomPath.empty()) {
+    if (ranks.rank == 0) {
+      std::cerr << colorizer.error("--per-atom writes one file; run it on one rank")
+                << "\n";
+    }
+    return 2;
+  }
+#endif
 
   if (outputFormat != "text" && outputFormat != "json") {
     std::cerr << colorizer.error("bad --format (want text|json)") << "\n";
@@ -1909,6 +2013,11 @@ int main(int argc, char *argv[]) {
   const int loadType = loadAll ? -1 : typeI;
 
   if (last <= 0 || last == frame) {
+#ifdef SEAMS_HAS_MPI
+    if (ranks.rank != 0) {
+      return 0;
+    }
+#endif
     Cloud cloud = load(file, frame, loadType);
     std::ostringstream line;
     const int rc = runOne(line, cloud);
@@ -1939,7 +2048,29 @@ int main(int argc, char *argv[]) {
           }
         }
       };
-  if (!forEachInputFrame(file, frame, last, typeFilter, jobs, processFrame)) {
+  int lo = frame;
+  int hi = last;
+#ifdef SEAMS_HAS_MPI
+  if (ranks.size > 1 && indexedDump(file)) {
+    // Blocks of the frames the dump holds, within one frame of each other
+    const int stop = std::min(last, sinp::nLammpsFrames(file));
+    const long long span = std::max(0LL, static_cast<long long>(stop) - frame + 1);
+    lo = frame + static_cast<int>(span * ranks.rank / ranks.size);
+    hi = frame + static_cast<int>(span * (ranks.rank + 1) / ranks.size) - 1;
+  } else if (ranks.rank != 0) {
+    // Other readers end a range at its first missing frame, so rank 0
+    // reads them alone
+    lo = hi + 1;
+  }
+#endif
+  const bool ranged =
+      lo > hi || forEachInputFrame(file, lo, hi, typeFilter, jobs, processFrame);
+#ifdef SEAMS_HAS_MPI
+  if (ranks.size > 1) {
+    gatherFrameResults(ranks, outputLines, outputStatus, outputSeen);
+  }
+#endif
+  if (!ranged) {
     std::cerr << colorizer.error("frame ranges are unsupported for this input format")
               << "\n";
     return 2;

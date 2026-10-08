@@ -344,6 +344,11 @@ struct SteinhardtQl {
 steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
              const std::vector<std::vector<int>> &nList, int orderL);
 
+//! Whether steinhardtQl splits atoms over the ranks of an initialised
+//! MPI_COMM_WORLD (true unless set). A driver that gives each rank whole
+//! frames of its own turns it off.
+void setSteinhardtAtomSplit(bool split);
+
 } // namespace chill
 
 /** \brief Functions used for spherical harmonics

@@ -308,6 +308,22 @@ at most. Chemfiles and readcon inputs are read serially until the requested
 range or the first missing frame. ~--jobs 1~ is serial; non-LAMMPS readers
 do not use OpenMP workers.
 
+An MPI build (~-Dwith_mpi=enabled~) started by ~mpiexec~ splits a LAMMPS
+dump's range into contiguous blocks, one per rank and within one frame of
+each other, and rank 0 prints every frame in order; its ~--last~ help says
+so. Other readers stay on rank 0, and ~--per-atom~ needs a single rank. Each
+rank runs ~--jobs~ workers, OpenMP threads inside a frame, and linkcell's
+rayon pool, so set them per rank and bind each rank to its cores:
+
+#+begin_src sh
+mpiexec -n 2 --map-by slot:PE=4 -x OMP_NUM_THREADS=4 -x RAYON_NUM_THREADS=1 \
+  seams --jobs 4 --frame 1 --last 100 cages dump.lammpstrj
+#+end_src
+
+On one node ~--jobs~ alone is faster, since the MPI launch costs about a
+second; ranks pay off across nodes. A run without a launcher never
+initialises MPI.
+
 * ~--features~
 
 Heading ~Compile-time features:~ then one line per backend. Each
