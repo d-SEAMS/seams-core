@@ -24,6 +24,28 @@
 namespace {
 
 /**
+ * @brief Graph rows packed back to back: row u is cols[first[u]] up to
+ *  cols[first[u + 1]]. Two allocations for the whole graph, where a vector
+ *  per row costs one each to build and to free on the calling thread.
+ */
+struct PackedRows {
+  std::vector<std::size_t> first;
+  std::vector<int> cols;
+
+  struct Row {
+    const int *b;
+    const int *e;
+    const int *begin() const { return b; }
+    const int *end() const { return e; }
+  };
+
+  Row operator[](std::size_t u) const {
+    return {cols.data() + first[u], cols.data() + first[u + 1]};
+  }
+  std::size_t size() const { return first.empty() ? 0 : first.size() - 1; }
+};
+
+/**
  * @brief Sorted (vertex, distance) pairs within a fixed radius of each vertex.
  * @details One bounded breadth-first sweep per vertex for the whole ring
  *  search, cleared by walking what each sweep touched. Every shortcut question
@@ -33,8 +55,9 @@ namespace {
 struct BoundedBalls {
   std::vector<std::vector<std::pair<int, int>>> ball;
 
-  void fillVertex(int v, const std::vector<std::vector<int>> &adjacency,
-                  int radius, std::vector<int> &dist, std::vector<int> &touched,
+  template <typename Graph>
+  void fillVertex(int v, const Graph &adjacency, int radius,
+                  std::vector<int> &dist, std::vector<int> &touched,
                   std::vector<int> &frontier, std::vector<int> &next) {
     const int nVertices = static_cast<int>(adjacency.size());
     for (const int w : touched) {
@@ -68,7 +91,7 @@ struct BoundedBalls {
     std::sort(b.begin(), b.end());
   }
 
-  void fillAll(const std::vector<std::vector<int>> &adjacency, int radius) {
+  template <typename Graph> void fillAll(const Graph &adjacency, int radius) {
     const int nVertices = static_cast<int>(adjacency.size());
     ball.assign(nVertices, {});
 #ifdef SEAMS_HAS_OPENMP
@@ -138,8 +161,9 @@ struct BoundedBalls {
 };
 
 //! Bounded breadth-first levels from src, scratch reused across sources
-void levelsFrom(const std::vector<std::vector<int>> &adjacency, int src,
-                int maxLvl, std::vector<int> &lvl, std::vector<int> &touched,
+template <typename Graph>
+void levelsFrom(const Graph &adjacency, int src, int maxLvl,
+                std::vector<int> &lvl, std::vector<int> &touched,
                 std::vector<int> &frontier, std::vector<int> &next) {
   for (const int w : touched) {
     lvl[w] = -1;
@@ -161,36 +185,6 @@ void levelsFrom(const std::vector<std::vector<int>> &adjacency, int src,
     }
     frontier.swap(next);
   }
-}
-
-//! All shortest paths src -> target under the level field, excluding src.
-//! The path is grown in @a cur by push/pop so each hop does not copy.
-void allShortestPathsRec(const std::vector<std::vector<int>> &adjacency,
-                         const std::vector<int> &lvl, int src, int target,
-                         std::vector<int> &cur,
-                         std::vector<std::vector<int>> &out) {
-  if (target == src) {
-    std::vector<int> path = cur;
-    std::reverse(path.begin(), path.end());
-    out.push_back(std::move(path));
-    return;
-  }
-  for (const int w : adjacency[target]) {
-    if (w >= 0 && w < static_cast<int>(lvl.size()) && lvl[w] >= 0 &&
-        lvl[w] == lvl[target] - 1) {
-      cur.push_back(target);
-      allShortestPathsRec(adjacency, lvl, src, w, cur, out);
-      cur.pop_back();
-    }
-  }
-}
-
-void allShortestPaths(const std::vector<std::vector<int>> &adjacency,
-                      const std::vector<int> &lvl, int src, int target,
-                      std::vector<std::vector<int>> &out) {
-  std::vector<int> cur;
-  cur.reserve(8);
-  allShortestPathsRec(adjacency, lvl, src, target, cur, out);
 }
 
 //! Shortest-path criterion over every pair of members, by ball lookup
@@ -225,12 +219,56 @@ inline bool pushUniqueMember(std::vector<int> &ring, int v) {
 
 /**
  * @brief Reusable scratch for the per-source ring enumeration.
+ * @details Vertex v holds pathCount[v] shortest paths from the source, each
+ *  of lvl[v] vertices (source excluded, v last), stored back to back in
+ *  pathBuf from pathFirst[v].
  */
 struct RingScratch {
   std::vector<int> lvl;
   std::vector<int> touched, frontier, next;
-  std::vector<std::vector<int>> paths, pathsQ;
+  std::vector<int> pathFirst, pathCount, pathBuf;
+  std::vector<int> ring;
 };
+
+//! Shortest paths from src to every touched vertex, built in breadth-first
+//! order as each parent's paths extended by the vertex. Parents are taken in
+//! adjacency order, which lists the paths in the order a depth-first walk
+//! back along decreasing levels would.
+template <typename Graph>
+void shortestPathsFrom(const Graph &adjacency, int src, RingScratch &scr) {
+  const int nVertices = static_cast<int>(adjacency.size());
+  if (static_cast<int>(scr.pathFirst.size()) != nVertices) {
+    scr.pathFirst.assign(nVertices, 0);
+    scr.pathCount.assign(nVertices, 0);
+  }
+  scr.pathBuf.clear();
+  scr.pathFirst[src] = 0;
+  scr.pathCount[src] = 1;
+  for (const int v : scr.touched) {
+    const int lv = scr.lvl[v];
+    if (lv < 1) {
+      continue;
+    }
+    const int first = static_cast<int>(scr.pathBuf.size());
+    int count = 0;
+    for (const int w : adjacency[v]) {
+      if (w < 0 || w >= nVertices || scr.lvl[w] != lv - 1) {
+        continue;
+      }
+      for (int k = 0; k < scr.pathCount[w]; k++) {
+        const int from = scr.pathFirst[w] + k * (lv - 1);
+        for (int j = 0; j < lv - 1; j++) {
+          const int u = scr.pathBuf[from + j];
+          scr.pathBuf.push_back(u);
+        }
+        scr.pathBuf.push_back(v);
+        count++;
+      }
+    }
+    scr.pathFirst[v] = first;
+    scr.pathCount[v] = count;
+  }
+}
 
 /**
  * @details Enumerates every primitive ring whose lowest-indexed member is
@@ -238,9 +276,9 @@ struct RingScratch {
  *  the incremental updater, which re-runs it only for sources a
  *  frame-to-frame change can reach.
  */
-void enumerateFromSource(const std::vector<std::vector<int>> &adjacency,
-                         const BoundedBalls &balls, int src, int maxDepth,
-                         int maxLvl, RingScratch &scr,
+template <typename Graph>
+void enumerateFromSource(const Graph &adjacency, const BoundedBalls &balls,
+                         int src, int maxDepth, int maxLvl, RingScratch &scr,
                          std::vector<std::vector<int>> &out) {
   const int nVertices = static_cast<int>(adjacency.size());
   if (static_cast<int>(scr.lvl.size()) != nVertices) {
@@ -257,51 +295,56 @@ void enumerateFromSource(const std::vector<std::vector<int>> &adjacency,
       scr.lvl[v] = -1;
     }
   }
+  shortestPathsFrom(adjacency, src, scr);
+  std::vector<int> &ring = scr.ring;
   for (const int p : scr.touched) {
-    if (scr.lvl[p] < 1 || scr.lvl[p] > maxLvl) {
+    const int lp = scr.lvl[p];
+    if (lp < 1 || lp > maxLvl) {
       continue;
     }
-    scr.paths.clear();
-    allShortestPaths(adjacency, scr.lvl, src, p, scr.paths);
+    const int *pathsP = scr.pathBuf.data() + scr.pathFirst[p];
+    const int nP = scr.pathCount[p];
     // Even rings: two vertex-disjoint shortest paths to an antipodal vertex
-    if (2 * scr.lvl[p] >= 3 && 2 * scr.lvl[p] <= maxDepth) {
-      for (size_t a = 0; a < scr.paths.size(); a++) {
-        for (size_t b = a + 1; b < scr.paths.size(); b++) {
-          std::vector<int> ring{src};
+    if (2 * lp >= 3 && 2 * lp <= maxDepth) {
+      for (int a = 0; a < nP; a++) {
+        for (int b = a + 1; b < nP; b++) {
+          const int *pa = pathsP + a * lp;
+          const int *pb = pathsP + b * lp;
+          ring.assign(1, src);
           bool ok = true;
-          for (const int v : scr.paths[a]) {
-            ok = ok && pushUniqueMember(ring, v);
+          for (int i = 0; i < lp && ok; i++) {
+            ok = pushUniqueMember(ring, pa[i]);
           }
-          for (int i = static_cast<int>(scr.paths[b].size()) - 2; i >= 0 && ok;
-               i--) {
-            ok = pushUniqueMember(ring, scr.paths[b][i]);
+          for (int i = lp - 2; i >= 0 && ok; i--) {
+            ok = pushUniqueMember(ring, pb[i]);
           }
           if (ok && ringIsPrimitive(balls, ring)) {
-            out.push_back(std::move(ring));
+            out.push_back(ring);
           }
         }
       }
     }
     // Odd rings: an antipodal edge between two vertices at the same level
-    if (2 * scr.lvl[p] + 1 <= maxDepth) {
+    if (2 * lp + 1 <= maxDepth) {
       for (const int q : adjacency[p]) {
-        if (q <= p || q >= nVertices || scr.lvl[q] != scr.lvl[p]) {
+        if (q <= p || q >= nVertices || scr.lvl[q] != lp) {
           continue;
         }
-        scr.pathsQ.clear();
-        allShortestPaths(adjacency, scr.lvl, src, q, scr.pathsQ);
-        for (const auto &pa : scr.paths) {
-          for (const auto &pb : scr.pathsQ) {
-            std::vector<int> ring{src};
+        const int *pathsQ = scr.pathBuf.data() + scr.pathFirst[q];
+        for (int a = 0; a < nP; a++) {
+          for (int b = 0; b < scr.pathCount[q]; b++) {
+            const int *pa = pathsP + a * lp;
+            const int *pb = pathsQ + b * lp;
+            ring.assign(1, src);
             bool ok = true;
-            for (const int v : pa) {
-              ok = ok && pushUniqueMember(ring, v);
+            for (int i = 0; i < lp && ok; i++) {
+              ok = pushUniqueMember(ring, pa[i]);
             }
-            for (int i = static_cast<int>(pb.size()) - 1; i >= 0 && ok; i--) {
+            for (int i = lp - 1; i >= 0 && ok; i--) {
               ok = pushUniqueMember(ring, pb[i]);
             }
             if (ok && ringIsPrimitive(balls, ring)) {
-              out.push_back(std::move(ring));
+              out.push_back(ring);
             }
           }
         }
@@ -351,10 +394,21 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth)
   // Adjacency by index; the first element of each nList row is the vertex
   // itself, so it is skipped
   const int nVertices = static_cast<int>(nList.size());
-  std::vector<std::vector<int>> adjacency(nVertices);
+  PackedRows adjacency;
+  adjacency.first.assign(nVertices + 1, 0);
+  for (int i = 0; i < nVertices; i++) {
+    adjacency.first[i + 1] =
+        adjacency.first[i] + (nList[i].empty() ? 0 : nList[i].size() - 1);
+  }
+  adjacency.cols.resize(adjacency.first[nVertices]);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nVertices >= 256 && !omp_in_parallel())
+#endif
   for (int i = 0; i < nVertices; i++) {
     if (nList[i].size() > 1) {
-      adjacency[i].assign(nList[i].begin() + 1, nList[i].end());
+      std::copy(nList[i].begin() + 1, nList[i].end(),
+                adjacency.cols.begin() +
+                    static_cast<std::ptrdiff_t>(adjacency.first[i]));
     }
   }
 
@@ -378,14 +432,24 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth)
                             perSource[src]);
       }
     }
-    size_t total = 0;
-    for (const auto &group : perSource) {
-      total += group.size();
+    // Every ring, source list and ball is a heap block of its own; moving
+    // and freeing them on one thread is a sizeable share of a threaded search
+    std::vector<std::size_t> offset(static_cast<std::size_t>(nVertices) + 1, 0);
+    for (int src = 0; src < nVertices; src++) {
+      offset[src + 1] = offset[src] + perSource[src].size();
     }
-    rings.reserve(total);
-    for (auto &group : perSource) {
-      for (auto &ring : group) {
-        rings.push_back(std::move(ring));
+    rings.resize(offset[nVertices]);
+#pragma omp parallel
+    {
+#pragma omp for schedule(static) nowait
+      for (int src = 0; src < nVertices; src++) {
+        std::move(perSource[src].begin(), perSource[src].end(),
+                  rings.begin() + static_cast<std::ptrdiff_t>(offset[src]));
+        std::vector<std::vector<int>>().swap(perSource[src]);
+      }
+#pragma omp for schedule(static)
+      for (int v = 0; v < nVertices; v++) {
+        std::vector<std::pair<int, int>>().swap(balls.ball[v]);
       }
     }
     return rings;

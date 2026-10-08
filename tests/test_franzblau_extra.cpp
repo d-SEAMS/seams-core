@@ -5,6 +5,7 @@
 #include <chrono>
 #include <cmath>
 #include <set>
+#include <utility>
 #include <vector>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
@@ -171,7 +172,7 @@ std::vector<std::vector<int>> jitteredNetwork(int nAtoms, double jitterFrac) {
 
 TEST_CASE("ringNetwork matches the generate-then-filter route", "[franzblau]") {
   for (const double jitterFrac : {0.05, 0.30, 0.60}) {
-    for (const int maxDepth : {6, 7}) {
+    for (const int maxDepth : {3, 4, 5, 6, 7, 8}) {
       INFO("jitter " << jitterFrac << ", maxDepth " << maxDepth);
       auto idx = jitteredNetwork(400, jitterFrac);
 
@@ -192,6 +193,30 @@ TEST_CASE("ringNetwork matches the generate-then-filter route", "[franzblau]") {
       REQUIRE(fastSet.size() == fast.size());
       REQUIRE(fastSet == refSet);
     }
+  }
+}
+
+TEST_CASE("ringNetwork lists its rings in a fixed order", "[franzblau]") {
+  // Callers and the incremental updater see rings in this order, so it is
+  // pinned: FNV-1a over the members, a separator after each ring
+  const auto digest = [](const std::vector<std::vector<int>> &rings) {
+    unsigned long long h = 14695981039346656037ULL;
+    for (const auto &r : rings) {
+      for (const int v : r) {
+        h = (h ^ static_cast<unsigned long long>(v)) * 1099511628211ULL;
+      }
+      h = (h ^ 0xffffffffULL) * 1099511628211ULL;
+    }
+    return h;
+  };
+  const auto idx = jitteredNetwork(2000, 0.30);
+  const std::pair<int, unsigned long long> expected[] = {
+      {3, 0xa13df6df365e3c4bULL}, {4, 0x55072279d6ca8e3fULL},
+      {5, 0x4562ad570939d67dULL}, {6, 0x7677399c7c170978ULL},
+      {7, 0x7c49cb2584802fbbULL}, {8, 0x43d9e8f1b4143932ULL}};
+  for (const auto &[maxDepth, want] : expected) {
+    INFO("maxDepth " << maxDepth);
+    REQUIRE(digest(primitive::ringNetwork(idx, maxDepth)) == want);
   }
 }
 
