@@ -51,6 +51,7 @@ def same(args, records, rc=0, extra=None):
     check(" ".join(args), serial.returncode == rc and
           (mpi.returncode == 0) == (rc == 0) and serial.stdout == mpi.stdout and
           serial.stdout.count('{"schema"') == records)
+    return serial, mpi
 
 
 # A Steinhardt atom split still spanning both ranks pairs different frames
@@ -67,6 +68,20 @@ same(["--frame", "3", "steinhardt", dump], 1)
 same(["--strict-input", "--type", "99", "--frame", "1", "--last", "11", "read",
       dump], 11, rc=2)
 same(["--frame", "1", "--last", "4", "read", dump], 4, extra={"FORCE_COLOR": "1"})
+
+# A last frame cut short keeps the atoms it has and warns on stderr once, as
+# only the rank dealt that frame reads it
+with tempfile.TemporaryDirectory() as tmp:
+    short = os.path.join(tmp, "short.lammpstrj")
+    with open(dump) as f:
+        lines = f.readlines()
+    atoms = max(i for i, line in enumerate(lines) if line.startswith("ITEM: ATOMS"))
+    with open(short, "w") as f:
+        f.writelines(lines[:atoms + 3])
+    serial, mpi = same(["--frame", "1", "--last", "20", "read", short], 11)
+    warning = "Atoms didn't get filled in properly."
+    check("short frame warns once", '"nop 2 frame 11 ' in serial.stdout and
+          serial.stderr.count(warning) == 1 and mpi.stderr.count(warning) == 1)
 
 with tempfile.TemporaryDirectory() as tmp:
     out = os.path.join(tmp, "cages.dump")
