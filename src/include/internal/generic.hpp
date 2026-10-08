@@ -207,12 +207,8 @@ inline std::array<double, 3> fracDelta(const FracBox &b, double xi, double yi,
     std::array<double, 3> dr = {xi - xj, yi - yj, zi - zj};
     const double len[3] = {b.lx, b.ly, b.lz};
     for (int k = 0; k < 3; k++) {
-      if (dr[static_cast<std::size_t>(k)] < -0.5 * len[k]) {
-        dr[static_cast<std::size_t>(k)] += len[k];
-      }
-      if (dr[static_cast<std::size_t>(k)] >= 0.5 * len[k]) {
-        dr[static_cast<std::size_t>(k)] -= len[k];
-      }
+      dr[static_cast<std::size_t>(k)] -=
+          len[k] * std::floor(dr[static_cast<std::size_t>(k)] / len[k] + 0.5);
     }
     return dr;
   }

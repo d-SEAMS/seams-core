@@ -65,6 +65,17 @@ TEST_CASE("periodicDist for identical atoms is zero", "[generic]") {
   REQUIRE_THAT(d, Catch::Matchers::WithinAbs(0.0, 1e-10));
 }
 
+TEST_CASE("periodicDist wraps unfolded coordinates more than a box apart",
+          "[generic]") {
+  // 16 apart in a 10 box: the nearest image is 4, not the 6 of one wrap.
+  auto cloud = makeTwoAtomCloud(1.0, 2.0, 3.0, 17.0, -18.0, 3.5);
+  REQUIRE_THAT(gen::periodicDist(cloud, 0, 1),
+               Catch::Matchers::WithinAbs(std::sqrt(16.0 + 0.0 + 0.25), 1e-12));
+  const auto dr = gen::relDistFromPoint(cloud, 0, 17.0, -18.0, 3.5);
+  REQUIRE_THAT(dr[0], Catch::Matchers::WithinAbs(4.0, 1e-12));
+  REQUIRE_THAT(dr[1], Catch::Matchers::WithinAbs(0.0, 1e-12));
+}
+
 // -- distance tests (no PBC) --
 
 TEST_CASE("distance without PBC", "[generic]") {
