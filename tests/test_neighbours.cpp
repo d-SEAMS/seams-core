@@ -1038,8 +1038,7 @@ TEST_CASE("threaded cell-list rows are the minimum-image neighbours", "[neighbou
       INFO("tilt " << tilt[0] << " atom " << iatom);
       REQUIRE(rows[static_cast<std::size_t>(iatom)] == minimumImageNeighbours(cloud, iatom, cutoff));
     }
-    // the public builders take the same path above the size threshold and
-    // agree with the brute-force reference row by row
+    // the public builders agree with the brute-force reference row by row
     const auto byIndex = nneigh::getNewNeighbourListByIndex(cloud, cutoff);
     const auto byID = nneigh::neighbourListByIndex(cloud, nneigh::neighListO(cutoff, cloud, 1));
     REQUIRE(byIndex.size() == all.size());
@@ -1067,8 +1066,44 @@ TEST_CASE("threaded cell-list rows are the minimum-image neighbours", "[neighbou
 #endif
 }
 
+TEST_CASE("index rows list self then the minimum image in ascending order",
+          "[neighbours]") {
 #ifdef SEAMS_HAS_OPENMP
-TEST_CASE("threaded neighListO leaves an unmapped atom as an empty row",
+  const int threads = omp_get_max_threads();
+  omp_set_num_threads(4);
+#endif
+  const auto rowsMatch = [](const auto &cloud, double cutoff, int step) {
+    const auto byIndex = nneigh::getNewNeighbourListByIndex(cloud, cutoff);
+    const auto byID =
+        nneigh::neighbourListByIndex(cloud, nneigh::neighListO(cutoff, cloud, 1));
+    REQUIRE(byIndex.size() == static_cast<std::size_t>(cloud.nop));
+    REQUIRE(byID.size() == static_cast<std::size_t>(cloud.nop));
+    for (int iatom = 0; iatom < cloud.nop; iatom += step) {
+      std::vector<int> want{iatom};
+      const auto ref = minimumImageNeighbours(cloud, iatom, cutoff);
+      want.insert(want.end(), ref.begin(), ref.end());
+      INFO("cutoff " << cutoff << " atom " << iatom);
+      REQUIRE(byIndex[static_cast<std::size_t>(iatom)] == want);
+      REQUIRE(byID[static_cast<std::size_t>(iatom)] == want);
+    }
+  };
+  for (const auto tilt : {std::array<double, 3>{0.0, 0.0, 0.0}, std::array<double, 3>{4.0, 2.0, 3.0}}) {
+    rowsMatch(jitteredLattice(16, 3.0, tilt[0], tilt[1], tilt[2]), 3.5, 7);
+  }
+  // Just under and just over half the narrowest face separation, where a
+  // pair can sit inside the cutoff through more than one image
+  const auto small = jitteredLattice(4, 3.0, 3.0, 1.0, -2.0);
+  const double half = gen::makeFracBox(small).halfMin;
+  for (const double cutoff : {half - 0.05, half + 0.05}) {
+    rowsMatch(small, cutoff, 1);
+  }
+#ifdef SEAMS_HAS_OPENMP
+  omp_set_num_threads(threads);
+#endif
+}
+
+#ifdef SEAMS_HAS_OPENMP
+TEST_CASE("neighListO on four threads leaves an unmapped atom as an empty row",
           "[neighbours]") {
   auto cloud = jitteredLattice(16, 3.0, 0.0, 0.0, 0.0);
   REQUIRE(cloud.nop == 4096);

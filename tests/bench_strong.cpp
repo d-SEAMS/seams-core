@@ -4,10 +4,10 @@
 ** SPDX-License-Identifier: MIT
 **
 ** Strong scaling at fixed N of every stage the ring-and-cage pipeline
-** runs on the host: the cutoff neighbour list (threaded cell list), the
-** Steinhardt kernel, the index-ordered list and primitive rings. Every
-** stage is timed as the best of `reps` runs; `total` is their sum. Under
-** MPI the neighbour list is still built on every rank.
+** runs on the host: the cutoff neighbour list, the Steinhardt kernel, the
+** index-ordered list and primitive rings. Every stage is timed as the best
+** of `reps` runs; `total` is their sum. Under MPI the neighbour list is
+** still built on every rank.
 **
 **   bench_strong [nAtoms] [reps]
 **

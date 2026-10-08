@@ -114,6 +114,20 @@ void fillPairDistSq(
 // about this many atoms beat cells one cutoff wide by two to six times.
 constexpr double kAtomsPerLinkcellCell = 20.0;
 #endif
+// Below this many atoms a row-by-row pass is cheaper than waking a team.
+constexpr int kParallelRowsMinAtoms = 4096;
+
+//! Where each row's run of pairs starts, for pairs sorted by row, and one
+//! past the last run
+std::vector<std::size_t> rowStarts(const std::vector<std::pair<int, int>> &pairs,
+                                   int nop) {
+  std::vector<std::size_t> first(static_cast<std::size_t>(nop) + 1, 0);
+  for (const auto &pr : pairs) {
+    first[static_cast<std::size_t>(pr.first) + 1]++;
+  }
+  std::partial_sum(first.begin(), first.end(), first.begin());
+  return first;
+}
 
 /**
  * @details Cutoff pairs for the particles named by @a subset, as cloud
@@ -122,9 +136,10 @@ constexpr double kAtomsPerLinkcellCell = 20.0;
  *  list keeps one cloud index per partner, which is the brute-force
  *  contract (no self pair, one slot per atom).
  * @param[in] yCloud The input molSys::PointCloud.
- * @param[in] subset Cloud indices of the particles to search over.
+ * @param[in] subset Cloud indices of the particles to search over, each once.
  * @param[in] rcutoff Distance cutoff, within which two atoms are neighbours.
- * @param[out] pairs Neighbour pairs, as cloud indices, in both directions.
+ * @param[out] pairs Neighbour pairs, as cloud indices, in both directions,
+ *  sorted by (i, j).
  * @return True when a cutoff list was produced, false when the caller
  *  should fall back to the brute-force path.
  */
@@ -211,6 +226,38 @@ bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   }
 
   pairs.clear();
+  // Below half the narrowest face separation a pair has one image within
+  // the cutoff and no atom meets its own, so the reduction would only sort.
+  // A count by row and a sort of each short row give the same list, and the
+  // rows sort on every thread.
+  const gen::FracBox fb = gen::makeFracBox(yCloud);
+  if (fb.ok && rcutoff + 1e-12 < fb.halfMin) {
+    const int nop = yCloud.nop;
+    std::vector<std::size_t> first(static_cast<std::size_t>(nop) + 1, 0);
+    for (const auto &lj : local) {
+      first[static_cast<std::size_t>(subset[static_cast<size_t>(lj.first)]) + 1]++;
+    }
+    std::partial_sum(first.begin(), first.end(), first.begin());
+    std::vector<std::size_t> fill(first.begin(), first.end() - 1);
+    std::vector<int> partner(local.size());
+    for (const auto &lj : local) {
+      partner[fill[static_cast<std::size_t>(subset[static_cast<size_t>(lj.first)])]++] =
+          subset[static_cast<size_t>(lj.second)];
+    }
+    pairs.resize(local.size());
+    // nvc++ -mp=gpu SIGSEGVs host parallel-fors in libnvomp
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp parallel for schedule(static) if (nop >= kParallelRowsMinAtoms && !omp_in_parallel())
+#endif
+    for (int i = 0; i < nop; i++) {
+      std::sort(partner.begin() + static_cast<std::ptrdiff_t>(first[i]),
+                partner.begin() + static_cast<std::ptrdiff_t>(first[i + 1]));
+      for (std::size_t k = first[i]; k < first[i + 1]; k++) {
+        pairs[k] = {i, partner[k]};
+      }
+    }
+    return true;
+  }
   pairs.reserve(local.size());
 #ifdef SEAMS_HAS_MINIMAGE
   std::vector<int> packed(local.size() * 2);
@@ -514,15 +561,6 @@ nneigh::neighListO(double rcutoff,
     }
     return true;
   };
-#if !defined(SEAMS_HAS_OFFLOAD)
-  // From this size the rows run in parallel, and above two threads they beat
-  // the cutoff list, whose sort and row appends stay on one thread.
-  if (typeIIndices.size() >=
-          static_cast<std::size_t>(kThreadedCellRowsParallelAtoms) &&
-      omp_get_max_threads() > 2 && threadedRows()) {
-    return nList;
-  }
-#endif
 #endif
 
 #ifdef SEAMS_HAS_CUTOFF_LIST
@@ -532,12 +570,17 @@ nneigh::neighListO(double rcutoff,
     if (cellListPairs(yCloud, typeIIndices, rcutoff, pairs)) {
       // Initialize nList for ALL atoms (not just typeI)
       nList = seedWithSelfIDs(indexToID, yCloud.nop);
-
-      // Fill neighbor pairs from vesin output, which is already bidirectional
-      for (const auto &[iatom, jatom] : pairs) {
-        appendNeighbourID(nList, indexToID, iatom, jatom);
+      const auto first = rowStarts(pairs, yCloud.nop);
+      // nvc++ -mp=gpu SIGSEGVs host parallel-fors in libnvomp
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp parallel for schedule(static) if (yCloud.nop >= kParallelRowsMinAtoms && !omp_in_parallel())
+#endif
+      for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+        nList[iatom].reserve(nList[iatom].size() + first[iatom + 1] - first[iatom]);
+        for (std::size_t k = first[iatom]; k < first[iatom + 1]; k++) {
+          appendNeighbourID(nList, indexToID, iatom, pairs[k].second);
+        }
       }
-
       return nList;
     }
     // If the cutoff list failed, fall through.
@@ -772,11 +815,6 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
 
   std::vector<std::vector<int>> nList(yCloud.nop);
 
-  // Initialize and fill the first element with the index of the atom whose
-  // neighbour list will be filled
-  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-    nList[iatom].push_back(iatom);
-  } // end of init
   // -------------------------------------------------------
 #ifdef SEAMS_HAS_CUTOFF_LIST
   // Cutoff list over every particle.
@@ -786,14 +824,28 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
 
     std::vector<std::pair<int, int>> pairs;
     if (cellListPairs(yCloud, allIndices, cutoff, pairs)) {
-      // vesin returns both directions, so each row is filled from its own pairs
-      for (const auto &[iatom, jatom] : pairs) {
-        nList[iatom].push_back(jatom);
+      const auto first = rowStarts(pairs, yCloud.nop);
+      // nvc++ -mp=gpu SIGSEGVs host parallel-fors in libnvomp
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp parallel for schedule(static) if (yCloud.nop >= kParallelRowsMinAtoms && !omp_in_parallel())
+#endif
+      for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+        auto &row = nList[iatom];
+        row.reserve(1 + first[iatom + 1] - first[iatom]);
+        row.push_back(iatom);
+        for (std::size_t k = first[iatom]; k < first[iatom + 1]; k++) {
+          row.push_back(pairs[k].second);
+        }
       }
       return nList;
     }
   }
 #endif
+  // Initialize and fill the first element with the index of the atom whose
+  // neighbour list will be filled
+  for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+    nList[iatom].push_back(iatom);
+  } // end of init
 #ifdef SEAMS_HAS_OPENMP
   if (yCloud.nop >= kThreadedCellRowsMinAtoms) {
     std::vector<int> allIndices(static_cast<std::size_t>(yCloud.nop));
