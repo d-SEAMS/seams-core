@@ -308,6 +308,31 @@ at most. Chemfiles and readcon inputs are read serially until the requested
 range or the first missing frame. ~--jobs 1~ is serial; non-LAMMPS readers
 do not use OpenMP workers.
 
+An MPI build (~-Dwith_mpi=enabled~) started by ~mpiexec~ shares a LAMMPS
+dump's frames among the ranks in serpentine rounds: of R ranks, rank r takes
+slot r of even rounds and slot R-1-r of odd ones, so a cost that steps,
+drifts or alternates along the run reaches every rank. Rank 0 prints every
+frame in order; ranks past the frame count idle. Other readers stay on rank
+0, ~--per-atom~ needs a single rank, ranks that differ in arguments,
+directory or ~SEAMS_~ settings are refused, and colour stays off unless the
+environment forces it. Each rank runs ~--jobs~ frame workers, OpenMP threads
+inside a frame, and linkcell's rayon pool; on a launch of several ranks,
+~OMP_NUM_THREADS~ and ~RAYON_NUM_THREADS~ default to 1 when unset. For
+hybrid runs set them per rank and bind each rank to its cores; with Open
+MPI:
+
+#+begin_src sh
+mpiexec -n 2 --map-by slot:PE=4 -x OMP_NUM_THREADS=4 -x RAYON_NUM_THREADS=1 \
+  seams --jobs 4 --frame 1 --last 100 cages dump.lammpstrj
+#+end_src
+
+On a host without a libfabric network, Open MPI's ~ofi~ transport spends
+about a second probing at start-up; ~--mca btl ^ofi~ skips it. Ranks then
+matched ~--jobs~ on one 8-core node, beat it where frame cost steps or
+alternates along the run, and eight ranks on two 4-core core sets talking
+only over TCP took about half the time of threads on one. A run without a
+launcher, or with ~SEAMS_MPI=0~, never initialises MPI.
+
 * ~--features~
 
 Heading ~Compile-time features:~ then one line per backend. Each

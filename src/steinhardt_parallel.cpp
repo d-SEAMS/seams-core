@@ -600,11 +600,19 @@ void allgathervDoubles(std::vector<double> &buf, int nAtoms, int perAtom,
   MPI_Allgatherv(send.data(), counts[rank], MPI_DOUBLE, buf.data(),
                  counts.data(), displs.data(), MPI_DOUBLE, MPI_COMM_WORLD);
 }
+
+bool atomSplit = true;
 #endif
 
 } // namespace
 
 namespace chill {
+
+void setSteinhardtAtomSplit([[maybe_unused]] bool split) {
+#ifdef SEAMS_HAS_MPI
+  atomSplit = split;
+#endif
+}
 
 SteinhardtQl steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                           const std::vector<std::vector<int>> &nList, int orderL) {
@@ -635,8 +643,13 @@ SteinhardtQl steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double
   int rank = 0;
   int nranks = 1;
 #ifdef SEAMS_HAS_MPI
+  // A frame-split driver turns the split off: its ranks hold different
+  // frames, and under FUNNELED its frame workers may not call the
+  // communicator
   int initialized = 0;
-  MPI_Initialized(&initialized);
+  if (atomSplit) {
+    MPI_Initialized(&initialized);
+  }
   if (initialized) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &nranks);

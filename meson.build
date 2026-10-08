@@ -719,4 +719,20 @@ if get_option('with_cli')
     ],
     depends: [seams_exe],
     timeout: 60)
+  _mpiexec = find_program('mpiexec', required: false)
+  if mpi_found and _mpiexec.found()
+    test(
+      'seams_mpi_frames_match_serial',
+      python3,
+      args: [
+        files('tests/mpi_frames.py'),
+        _mpiexec.full_path(),
+        seams_exe.full_path(),
+        meson.project_source_root() / 'input' / 'traj' / 'mW_cubic.lammpstrj',
+        meson.project_source_root() / 'input' / 'con' / 'tiny_multi_cuh2.con',
+      ],
+      depends: [seams_exe],
+      is_parallel: false,
+      timeout: 300)
+  endif
 endif

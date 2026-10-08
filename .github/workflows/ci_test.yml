@@ -34,6 +34,18 @@ jobs:
       - run: pixi run test
       - run: pixi run install
 
+  mpi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: mpi
+          cache-key: pixi-mpi-
+      - run: pixi run -e mpi meson setup bbdir-mpi -Dwith_mpi=enabled -Dwith_tests=false -Dwith_python=false
+      - run: pixi run -e mpi ninja -C bbdir-mpi
+      - run: pixi run -e mpi meson test -C bbdir-mpi --print-errorlogs seams_mpi_frames_match_serial
+
   coverage:
     runs-on: ubuntu-latest
     steps:
