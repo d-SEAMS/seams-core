@@ -57,6 +57,7 @@ rdf::PartialRdf rdf::partialRdf(
 
   const auto nList = nneigh::neighListPair(rmax, yCloud, typeI, typeJ);
   const bool like = typeI == typeJ;
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
   for (int iatom = 0; iatom < yCloud.nop; ++iatom) {
     if (yCloud.pts[static_cast<std::size_t>(iatom)].type != typeI) {
       continue;
@@ -80,7 +81,7 @@ rdf::PartialRdf rdf::partialRdf(
       if (like && jatom <= iatom) {
         continue;
       }
-      const double rij = gen::periodicDist(yCloud, iatom, jatom);
+      const double rij = std::sqrt(gen::periodicDistSq(frame, yCloud, iatom, jatom));
       if (rij > rmax) {
         continue;
       }

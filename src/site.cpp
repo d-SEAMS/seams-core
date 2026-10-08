@@ -304,6 +304,7 @@ ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     }
   }
   const double cut2 = cutoff * cutoff;
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
   for (int i : ionIndices) {
     if (i < 0 || i >= n) {
       continue;
@@ -318,7 +319,7 @@ ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
       if (waterType != 0 && yCloud.pts[static_cast<std::size_t>(j)].type != waterType) {
         continue;
       }
-      if (gen::periodicDistSq(yCloud, i, j) >= cut2) {
+      if (gen::periodicDistSq(frame, yCloud, i, j) >= cut2) {
         continue;
       }
       ++shell;

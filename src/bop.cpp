@@ -251,12 +251,13 @@ std::vector<int> nearestNeighbourIndices(
     int coordination) {
   std::vector<std::pair<double, int>> candidates;
   candidates.reserve(nList[iatomIndex].size());
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
   for (size_t j = 1; j < nList[iatomIndex].size(); j++) {
     const auto it = yCloud.idIndexMap.find(nList[iatomIndex][j]);
     if (it == yCloud.idIndexMap.end()) {
       continue;
     }
-    candidates.emplace_back(gen::periodicDistSq(yCloud, iatomIndex, it->second),
+    candidates.emplace_back(gen::periodicDistSq(frame, yCloud, iatomIndex, it->second),
                             it->second);
   }
 
