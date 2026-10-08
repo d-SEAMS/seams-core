@@ -250,9 +250,10 @@ void enumerateFromSource(const std::vector<std::vector<int>> &adjacency,
   levelsFrom(adjacency, src, maxLvl, scr.lvl, scr.touched, scr.frontier,
              scr.next);
   // Directing: only the lowest-indexed member of a ring enumerates it, so
-  // vertices below the source leave the level field entirely
-  for (int v = 0; v < src; v++) {
-    if (scr.lvl[v] >= 0) {
+  // vertices below the source leave the level field entirely. Only touched
+  // vertices hold a level.
+  for (const int v : scr.touched) {
+    if (v < src) {
       scr.lvl[v] = -1;
     }
   }

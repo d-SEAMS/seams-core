@@ -2,6 +2,7 @@
 
 #include <franzblau.hpp>
 
+#include <chrono>
 #include <cmath>
 #include <set>
 #include <vector>
@@ -192,6 +193,20 @@ TEST_CASE("ringNetwork matches the generate-then-filter route", "[franzblau]") {
       REQUIRE(fastSet == refSet);
     }
   }
+}
+
+TEST_CASE("ringNetwork stays linear in the number of vertices", "[franzblau]") {
+  // A pass per source over every lower index would take minutes here
+  std::vector<std::vector<int>> isolated(1000000);
+  for (int i = 0; i < static_cast<int>(isolated.size()); i++) {
+    isolated[static_cast<std::size_t>(i)].push_back(i);
+  }
+  const auto t0 = std::chrono::steady_clock::now();
+  const auto rings = primitive::ringNetwork(isolated, 6);
+  const double seconds =
+      std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+  REQUIRE(rings.empty());
+  REQUIRE(seconds < 10.0);
 }
 
 // ---------------------------------------------------------------------------
