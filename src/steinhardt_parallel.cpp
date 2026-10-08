@@ -643,8 +643,9 @@ SteinhardtQl steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double
   int rank = 0;
   int nranks = 1;
 #ifdef SEAMS_HAS_MPI
-  // Frame workers may run this off the main thread, where an MPI started
-  // FUNNELED takes no calls, so a frame-split driver makes none
+  // A frame-split driver turns the split off: its ranks hold different
+  // frames, and under FUNNELED its frame workers may not call the
+  // communicator
   int initialized = 0;
   if (atomSplit) {
     MPI_Initialized(&initialized);

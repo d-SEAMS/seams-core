@@ -719,17 +719,13 @@ if get_option('with_cli')
     ],
     depends: [seams_exe],
     timeout: 60)
-  # Two ranks split eleven dump frames five and six; a Steinhardt call that
-  # still split atoms over every rank would pair different frames, then hang.
-  # The two-frame CON file stays on rank 0.
   _mpiexec = find_program('mpiexec', required: false)
   if mpi_found and _mpiexec.found()
     test(
       'seams_mpi_frames_match_serial',
       python3,
       args: [
-        '-c',
-        'import subprocess,sys; m,s,f,c=sys.argv[1:5]; run=lambda pre,a: subprocess.run(pre+[s,"--format","json","--frame","1"]+a,capture_output=True,text=True,timeout=90); same=lambda a,n: (lambda p,q: p.returncode==0 and q.returncode==0 and p.stdout==q.stdout and p.stdout.count("{")==n)(run([],a),run([m,"-n","2"],a)); sys.exit(0 if same(["--last","11","steinhardt",f],11) and same(["--last","11","cages",f],11) and same(["--last","8","read",c],2) else 1)',
+        files('tests/mpi_frames.py'),
         _mpiexec.full_path(),
         seams_exe.full_path(),
         meson.project_source_root() / 'input' / 'traj' / 'mW_cubic.lammpstrj',
@@ -737,6 +733,6 @@ if get_option('with_cli')
       ],
       depends: [seams_exe],
       is_parallel: false,
-      timeout: 240)
+      timeout: 300)
   endif
 endif

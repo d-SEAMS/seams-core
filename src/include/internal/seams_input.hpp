@@ -62,17 +62,20 @@ int nLammpsFrames(const std::string &filename);
 //! Drop a cached dump session (tests that rewrite a path in place).
 void dropLammpsDumpIndex(const std::string &filename);
 
-//! Call fn(frame, cloud) for each frame in [first, last] (1-based,
-//! inclusive). last <= 0 means every ITEM: TIMESTEP. typeFilter <= 0
-//! keeps every atom. nThreads <= 0 uses the OpenMP default; 1 is
-//! serial. Each worker opens its own handle and seeks the shared
+//! Call fn(frame, cloud) for each frame from max(first, 1) to last
+//! (1-based, inclusive) that falls to part of parts. last <= 0 means every
+//! ITEM: TIMESTEP. Frames are dealt in rounds of parts, in serpentine order
+//! (part p takes slot p of even rounds and slot parts - 1 - p of odd ones),
+//! so a cost that drifts or alternates along the run reaches every part.
+//! typeFilter <= 0 keeps every atom. nThreads <= 0 uses the OpenMP default;
+//! 1 is serial. Each worker opens its own handle and seeks the shared
 //! offset table. Incremental RingUpdater / AffiliationUpdater state
 //! cannot be shared across workers: use the batch classifiers.
 void forEachLammpsFrame(
     const std::string &filename, int first, int last, int typeFilter,
     const std::function<void(
         int, molSys::PointCloud<molSys::Point<double>, double> &)> &fn,
-    int nThreads = 0);
+    int nThreads = 0, int part = 0, int parts = 1);
 
 //! Function for reading in a specified frame (frame number and not timestep
 //! value)

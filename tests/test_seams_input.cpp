@@ -302,6 +302,32 @@ TEST_CASE("forEachLammpsFrame matches sequential reads", "[seams_input]") {
   sinp::dropLammpsDumpIndex(tiny);
 }
 
+TEST_CASE("forEachLammpsFrame deals frames to parts in serpentine order",
+          "[seams_input]") {
+  // Frames 2 to 11 in rounds of three, odd rounds reversed: {2, 3, 4},
+  // {7, 6, 5}, {8, 9, 10}, {-, -, 11}
+  const std::vector<std::vector<int>> expected = {
+      {2, 7, 8}, {3, 6, 9}, {4, 5, 10, 11}, {}};
+  for (int part = 0; part < 4; part++) {
+    std::vector<int> seen(12, 0);
+    sinp::forEachLammpsFrame(
+        "traj/mW_cubic.lammpstrj", 2, 11, 1,
+        [&](int frame, molSys::PointCloud<molSys::Point<double>, double> &cloud) {
+          seen[static_cast<std::size_t>(frame)] =
+              cloud.currentFrame == frame ? 1 : -1;
+        },
+        2, part, 3);
+    std::vector<int> got;
+    for (int frame = 0; frame < 12; frame++) {
+      if (seen[static_cast<std::size_t>(frame)] != 0) {
+        REQUIRE(seen[static_cast<std::size_t>(frame)] == 1);
+        got.push_back(frame);
+      }
+    }
+    REQUIRE(got == expected[static_cast<std::size_t>(part)]);
+  }
+}
+
 TEST_CASE("empty NUMBER OF ATOMS frames are valid snapshots",
           "[seams_input]") {
   const auto dump = writeEmptyMiddleDump();

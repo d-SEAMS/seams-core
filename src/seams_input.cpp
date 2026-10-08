@@ -352,7 +352,7 @@ void sinp::forEachLammpsFrame(
     const std::string &filename, int first, int last, int typeFilter,
     const std::function<void(
         int, molSys::PointCloud<molSys::Point<double>, double> &)> &fn,
-    int nThreads) {
+    int nThreads, int part, int parts) {
   const int nframes = nLammpsFrames(filename);
   if (nframes <= 0) {
     return;
@@ -366,13 +366,27 @@ void sinp::forEachLammpsFrame(
   if (first > last) {
     return;
   }
+  parts = std::max(parts, 1);
+  if (part < 0 || part >= parts) {
+    return;
+  }
+  std::vector<int> frames;
+  for (int round = 0; first + round * parts <= last; ++round) {
+    const int slot = round % 2 == 0 ? part : parts - 1 - part;
+    const int frame = first + round * parts + slot;
+    if (frame <= last) {
+      frames.push_back(frame);
+    }
+  }
+  const int count = static_cast<int>(frames.size());
 
 #ifdef SEAMS_HAS_OPENMP
   const int threads = nThreads > 0 ? nThreads : omp_get_max_threads();
 #pragma omp parallel for schedule(dynamic, 1) num_threads(threads)             \
-    if (threads > 1 && last > first)
+    if (threads > 1 && count > 1)
 #endif
-  for (int frame = first; frame <= last; ++frame) {
+  for (int k = 0; k < count; ++k) {
+    const int frame = frames[static_cast<std::size_t>(k)];
     molSys::PointCloud<molSys::Point<double>, double> cloud;
     if (typeFilter > 0) {
       cloud = readLammpsTrjO(filename, frame, cloud, typeFilter);
@@ -701,13 +715,16 @@ void parseLammpsFrameBody(
     }
   }
 
+  // A frame cut short (a dump still being written) keeps the atoms it has;
+  // the warning goes to stderr, which every rank of a frame split keeps
   if (keep != LammpsKeep::All) {
     yCloud.nop = static_cast<int>(yCloud.pts.size());
     if (yCloud.pts.size() != static_cast<std::size_t>(nKept)) {
-      std::cout << "Atoms didn't get filled in properly.\n";
+      std::cerr << "Atoms didn't get filled in properly.\n";
     }
   } else if (nop >= 0 && yCloud.pts.size() != static_cast<std::size_t>(yCloud.nop)) {
-    std::cout << "Atoms didn't get filled in properly.\n";
+    yCloud.nop = static_cast<int>(yCloud.pts.size());
+    std::cerr << "Atoms didn't get filled in properly.\n";
   }
 }
 
