@@ -892,7 +892,7 @@ TEST_CASE("nearestUnlike matches the brute-force minimum image at scale",
 TEST_CASE("cell-list neighbours match the minimum image on a tilted frame",
           "[neighbours]") {
   // Water density and fewer atoms than the threaded rows take, so both
-  // lists come from cellListPairs across many cells.
+  // lists come from cutoffRows across many cells.
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   cloud.box = {44.0, 40.0, 36.0, 5.0, -3.0, 4.0};
   cloud.boxLow = {-3.0, 0.0, 0.0};
@@ -1118,6 +1118,47 @@ TEST_CASE("neighListO on four threads leaves an unmapped atom as an empty row",
     unmappedPartner |= std::find(row.begin(), row.end(), -1) != row.end();
   }
   REQUIRE_FALSE(unmappedPartner);
+}
+
+TEST_CASE("type-filtered cutoff rows agree on uneven thread counts",
+          "[neighbours]") {
+  // 4913 rows split unevenly into blocks on three and four threads, and
+  // alternating types make every type subset differ from the cloud order
+  const double cutoff = 3.5;
+  const int threads = omp_get_max_threads();
+  for (const auto tilt : {std::array<double, 3>{0.0, 0.0, 0.0}, std::array<double, 3>{4.0, 2.0, 3.0}}) {
+    auto cloud = jitteredLattice(17, 3.0, tilt[0], tilt[1], tilt[2]);
+    for (auto &p : cloud.pts) {
+      p.type = 1 + p.atomID % 2;
+    }
+    std::vector<std::array<std::vector<std::vector<int>>, 4>> lists;
+    for (const int width : {1, 3, 4}) {
+      omp_set_num_threads(width);
+      lists.push_back({nneigh::neighListO(cutoff, cloud, 2),
+                       nneigh::halfNeighList(cutoff, cloud, 1),
+                       nneigh::neighListPair(cutoff, cloud, 1, 2),
+                       nneigh::getNewNeighbourListByIndex(cloud, cutoff)});
+    }
+    omp_set_num_threads(threads);
+    INFO("tilt " << tilt[0]);
+    REQUIRE((lists[1] == lists[0]));
+    REQUIRE((lists[2] == lists[0]));
+    // the type-2 rows on four threads are the type-2 minimum image, ascending
+    const auto byIndex = nneigh::neighbourListByIndex(cloud, lists[2][0]);
+    for (int iatom = 0; iatom < cloud.nop; iatom += 7) {
+      if (cloud.pts[static_cast<std::size_t>(iatom)].type != 2) {
+        continue;
+      }
+      std::vector<int> want{iatom};
+      for (const int j : minimumImageNeighbours(cloud, iatom, cutoff)) {
+        if (cloud.pts[static_cast<std::size_t>(j)].type == 2) {
+          want.push_back(j);
+        }
+      }
+      INFO("atom " << iatom);
+      REQUIRE(byIndex[static_cast<std::size_t>(iatom)] == want);
+    }
+  }
 }
 #endif
 

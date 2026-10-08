@@ -13,10 +13,12 @@
 //-----------------------------------------------------------------------------------
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstdint>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <numeric>
 #include <queue>
 #include <stdexcept>
@@ -117,38 +119,166 @@ constexpr double kAtomsPerLinkcellCell = 20.0;
 // Below this many atoms a row-by-row pass is cheaper than waking a team.
 constexpr int kParallelRowsMinAtoms = 4096;
 
-//! Where each row's run of pairs starts, for pairs sorted by row, and one
-//! past the last run
-std::vector<std::size_t> rowStarts(const std::vector<std::pair<int, int>> &pairs,
-                                   int nop) {
-  std::vector<std::size_t> first(static_cast<std::size_t>(nop) + 1, 0);
-  for (const auto &pr : pairs) {
-    first[static_cast<std::size_t>(pr.first) + 1]++;
+//! A cutoff list as rows of cloud indices: row i is partner[first[i]] up to
+//! partner[first[i + 1]], sorted, with no self pair and one slot per atom
+struct CutoffRows {
+  std::vector<std::size_t> first;
+  std::vector<int> partner;
+
+  //! fn(i, j) for every pair, in (i, j) order
+  template <typename Fn> void forEachPair(Fn &&fn) const {
+    for (std::size_t i = 0; i + 1 < first.size(); i++) {
+      for (std::size_t k = first[i]; k < first[i + 1]; k++) {
+        fn(static_cast<int>(i), partner[k]);
+      }
+    }
   }
-  std::partial_sum(first.begin(), first.end(), first.begin());
-  return first;
+};
+
+//! Rows from pairs sorted by (i, j)
+void sortedRows(const std::vector<std::pair<int, int>> &pairs, int nop,
+                CutoffRows &out) {
+  out.first.assign(static_cast<std::size_t>(nop) + 1, 0);
+  out.partner.resize(pairs.size());
+  for (std::size_t k = 0; k < pairs.size(); k++) {
+    out.first[static_cast<std::size_t>(pairs[k].first) + 1]++;
+    out.partner[k] = pairs[k].second;
+  }
+  std::partial_sum(out.first.begin(), out.first.end(), out.first.begin());
 }
 
 /**
- * @details Cutoff pairs for the particles named by @a subset, as cloud
+ * @details Rows from the cutoff pairs ends(0) to ends(count - 1), given as
+ *  positions in @a subset, when each pair has one image and none is a self
+ *  pair. On several threads the pairs are dealt into blocks of rows, four
+ *  per thread, and one thread counts, places and sorts each block, so no
+ *  pass waits on shared counters and the rows do not depend on the thread
+ *  count.
+ */
+template <typename Ends>
+void binCutoffRows(std::size_t count, const Ends &ends,
+                   const std::vector<int> &subset, int nop, CutoffRows &out) {
+  const std::size_t rows = static_cast<std::size_t>(nop);
+  out.first.assign(rows + 1, count);
+  out.partner.resize(count);
+  // Rows r0 to r1 from the (row, partner) pairs at(k0) to at(k1)
+  const auto place = [&out](const auto &at, std::size_t r0, std::size_t r1,
+                            std::size_t k0, std::size_t k1,
+                            std::vector<std::size_t> &next) {
+    next.assign(r1 - r0, 0);
+    for (std::size_t k = k0; k < k1; k++) {
+      next[static_cast<std::size_t>(at(k).first) - r0]++;
+    }
+    std::size_t run = k0;
+    for (std::size_t r = r0; r < r1; r++) {
+      out.first[r] = run;
+      run += next[r - r0];
+      next[r - r0] = out.first[r];
+    }
+    for (std::size_t k = k0; k < k1; k++) {
+      const auto [r, j] = at(k);
+      out.partner[next[static_cast<std::size_t>(r) - r0]++] = j;
+    }
+    for (std::size_t r = r0; r < r1; r++) {
+      std::sort(out.partner.begin() + static_cast<std::ptrdiff_t>(out.first[r]),
+                out.partner.begin() + static_cast<std::ptrdiff_t>(next[r - r0]));
+    }
+  };
+  const auto cloudPair = [&](std::size_t k) {
+    const auto [i, j] = ends(k);
+    return std::pair<int, int>{subset[static_cast<std::size_t>(i)],
+                               subset[static_cast<std::size_t>(j)]};
+  };
+  int threads = 1;
+  // nvc++ -mp=gpu SIGSEGVs host parallel regions in libnvomp
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+  if (nop >= kParallelRowsMinAtoms && !omp_in_parallel()) {
+    threads = omp_get_max_threads();
+  }
+#endif
+  if (threads == 1) {
+    std::vector<std::size_t> next;
+    place(cloudPair, 0, rows, 0, count, next);
+    return;
+  }
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+  const std::size_t width = static_cast<std::size_t>(threads);
+  const std::size_t blocks = 4 * width;
+  const std::size_t span = (rows + blocks - 1) / blocks;
+  // Each thread's share of each block: its count, then where it starts
+  std::vector<std::size_t> where(blocks * width, 0);
+  std::vector<std::size_t> blockStart(blocks + 1, 0);
+  std::unique_ptr<std::array<int, 2>[]> staged(new std::array<int, 2>[count]);
+#pragma omp parallel num_threads(threads)
+  {
+    const auto t = static_cast<std::size_t>(omp_get_thread_num());
+    const auto nt = static_cast<std::size_t>(omp_get_num_threads());
+    const std::size_t lo = count * t / nt;
+    const std::size_t hi = count * (t + 1) / nt;
+    std::vector<std::size_t> mine(blocks, 0);
+    for (std::size_t k = lo; k < hi; k++) {
+      mine[static_cast<std::size_t>(cloudPair(k).first) / span]++;
+    }
+    for (std::size_t b = 0; b < blocks; b++) {
+      where[b * width + t] = mine[b];
+    }
+#pragma omp barrier
+#pragma omp single
+    {
+      std::size_t run = 0;
+      for (std::size_t b = 0; b < blocks; b++) {
+        blockStart[b] = run;
+        for (std::size_t s = 0; s < nt; s++) {
+          const std::size_t n = where[b * width + s];
+          where[b * width + s] = run;
+          run += n;
+        }
+      }
+      blockStart[blocks] = run;
+    }
+    for (std::size_t b = 0; b < blocks; b++) {
+      mine[b] = where[b * width + t];
+    }
+    for (std::size_t k = lo; k < hi; k++) {
+      const auto [r, j] = cloudPair(k);
+      staged[mine[static_cast<std::size_t>(r) / span]++] = {r, j};
+    }
+#pragma omp barrier
+    std::vector<std::size_t> next;
+#pragma omp for schedule(dynamic, 1)
+    for (std::int64_t b = 0; b < static_cast<std::int64_t>(blocks); b++) {
+      const std::size_t r0 = std::min(rows, static_cast<std::size_t>(b) * span);
+      place([&staged](std::size_t k) {
+              return std::pair<int, int>{staged[k][0], staged[k][1]};
+            },
+            r0, std::min(rows, r0 + span), blockStart[b], blockStart[b + 1],
+            next);
+    }
+  }
+#endif
+}
+
+/**
+ * @details Cutoff rows for the particles named by @a subset, as cloud
  *  indices. linkcell::pairs_within is that list. Vesin is the fallback
- *  when linkcell is not built. The rows are atom-images; the neighbour
- *  list keeps one cloud index per partner, which is the brute-force
- *  contract (no self pair, one slot per atom).
+ *  when linkcell is not built. The pairs are atom-images; the rows keep
+ *  one cloud index per partner, which is the brute-force contract (no self
+ *  pair, one slot per atom).
  * @param[in] yCloud The input molSys::PointCloud.
  * @param[in] subset Cloud indices of the particles to search over, each once.
  * @param[in] rcutoff Distance cutoff, within which two atoms are neighbours.
- * @param[out] pairs Neighbour pairs, as cloud indices, in both directions,
- *  sorted by (i, j).
+ * @param[out] out A row for every particle of the cloud; one outside
+ *  @a subset is empty.
  * @return True when a cutoff list was produced, false when the caller
  *  should fall back to the brute-force path.
  */
-bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-                   const std::vector<int> &subset, double rcutoff,
-                   std::vector<std::pair<int, int>> &pairs) {
+bool cutoffRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                const std::vector<int> &subset, double rcutoff,
+                CutoffRows &out) {
   const size_t nSubset = subset.size();
   if (nSubset == 0) {
-    pairs.clear();
+    out.first.assign(static_cast<std::size_t>(yCloud.nop) + 1, 0);
+    out.partner.clear();
     return true;
   }
   std::vector<std::array<double, 3>> positions(nSubset);
@@ -162,10 +292,12 @@ bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   nneigh::dumpBoundsToH(yCloud.box, yCloud.boxLow, box, origin);
 
   // Subset-local (i, j). Both directions when the list is full.
+  std::size_t count = 0;
   std::vector<std::pair<int, int>> local;
   bool produced = false;
 
 #ifdef SEAMS_HAS_LINKCELL
+  std::unique_ptr<lc_pair[]> found;
   try {
     const linkcell::Cell cell = linkcell::Cell::from_vectors(
         {box[0][0], box[0][1], box[0][2]}, {box[1][0], box[1][1], box[1][2]},
@@ -175,16 +307,28 @@ bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yClo
         rcutoff, std::cbrt(kAtomsPerLinkcellCell *
                            nneigh::dumpVolume(yCloud.box, yCloud.boxLow) /
                            static_cast<double>(nSubset)));
-    const std::vector<linkcell::ShiftedPair> rows = linkcell::pairs_within(
-        positions[0].data(), nSubset, cell, rcutoff, nullptr, hint);
-    local.reserve(rows.size());
-    for (const linkcell::ShiftedPair &row : rows) {
-      local.emplace_back(row.i, row.j);
+    // linkcell::pairs_within zeroes its vector on this thread before the
+    // fill writes it; the C call fills a buffer nothing has touched
+    const lc_cell raw = cell.raw();
+    const auto rowsInto = [&](lc_pair *rows, std::size_t cap) {
+      const int status = lc_pairs_within_rows(positions[0].data(), nSubset,
+                                              &raw, rcutoff, nullptr, hint, 0,
+                                              rows, cap, &count);
+      if (status != 0) {
+        const char *msg = lc_last_error();
+        throw linkcell::Error(status, msg != nullptr ? msg : "unknown");
+      }
+    };
+    rowsInto(nullptr, 0);
+    if (count > 0) {
+      found.reset(new lc_pair[count]);
+      rowsInto(found.get(), count);
     }
     produced = true;
   } catch (const linkcell::Error &err) {
     std::cerr << "linkcell pairs_within failed: " << err.what()
               << "; trying the next cutoff list.\n";
+    found.reset();
   }
 #endif
 
@@ -216,6 +360,7 @@ bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yClo
     for (size_t k = 0; k < neighbors.length; k++) {
       local.emplace_back(neighbors.pairs[k][0], neighbors.pairs[k][1]);
     }
+    count = local.size();
     vesin_free(&neighbors);
     produced = true;
   }
@@ -224,40 +369,29 @@ bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   if (!produced) {
     return false;
   }
+  const auto ends = [&](std::size_t k) {
+#ifdef SEAMS_HAS_LINKCELL
+    if (found) {
+      return std::pair<int, int>{found[k].i, found[k].j};
+    }
+#endif
+    return local[k];
+  };
 
-  pairs.clear();
   // Below half the narrowest face separation a pair has one image within
   // the cutoff and no atom meets its own, so the reduction would only sort.
-  // A count by row and a sort of each short row give the same list, and the
-  // rows sort on every thread.
+  // Binning by row and sorting each short row give the same list.
   const gen::FracBox fb = gen::makeFracBox(yCloud);
   if (fb.ok && rcutoff + 1e-12 < fb.halfMin) {
-    const int nop = yCloud.nop;
-    std::vector<std::size_t> first(static_cast<std::size_t>(nop) + 1, 0);
-    for (const auto &lj : local) {
-      first[static_cast<std::size_t>(subset[static_cast<size_t>(lj.first)]) + 1]++;
-    }
-    std::partial_sum(first.begin(), first.end(), first.begin());
-    std::vector<std::size_t> fill(first.begin(), first.end() - 1);
-    std::vector<int> partner(local.size());
-    for (const auto &lj : local) {
-      partner[fill[static_cast<std::size_t>(subset[static_cast<size_t>(lj.first)])]++] =
-          subset[static_cast<size_t>(lj.second)];
-    }
-    pairs.resize(local.size());
-    // nvc++ -mp=gpu SIGSEGVs host parallel-fors in libnvomp
-#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-#pragma omp parallel for schedule(static) if (nop >= kParallelRowsMinAtoms && !omp_in_parallel())
-#endif
-    for (int i = 0; i < nop; i++) {
-      std::sort(partner.begin() + static_cast<std::ptrdiff_t>(first[i]),
-                partner.begin() + static_cast<std::ptrdiff_t>(first[i + 1]));
-      for (std::size_t k = first[i]; k < first[i + 1]; k++) {
-        pairs[k] = {i, partner[k]};
-      }
-    }
+    binCutoffRows(count, ends, subset, yCloud.nop, out);
     return true;
   }
+#ifdef SEAMS_HAS_LINKCELL
+  for (std::size_t k = 0; found && k < count; k++) {
+    local.emplace_back(found[k].i, found[k].j);
+  }
+#endif
+  std::vector<std::pair<int, int>> pairs;
   pairs.reserve(local.size());
 #ifdef SEAMS_HAS_MINIMAGE
   std::vector<int> packed(local.size() * 2);
@@ -272,6 +406,11 @@ bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yClo
     for (size_t k = 0; k < nkept; k++) {
       pairs.emplace_back(kept[2 * k], kept[2 * k + 1]);
     }
+    // minimage's C header does not promise (i, j) order
+    if (!std::is_sorted(pairs.begin(), pairs.end())) {
+      std::sort(pairs.begin(), pairs.end());
+    }
+    sortedRows(pairs, yCloud.nop, out);
     return true;
   }
 #endif
@@ -290,6 +429,7 @@ bool cellListPairs(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   std::sort(pairs.begin(), pairs.end());
   pairs.erase(std::unique(pairs.begin(), pairs.end()), pairs.end());
 
+  sortedRows(pairs, yCloud.nop, out);
   return true;
 }
 #endif
@@ -331,6 +471,39 @@ void appendNeighbourID(std::vector<std::vector<int>> &nList,
   }
   nList[iatom].push_back(indexToID[jatom]);
 }
+
+#ifdef SEAMS_HAS_CUTOFF_LIST
+//! The rows by atom ID, as seedWithSelfIDs then appendNeighbourID leave
+//! them, with each row allocated once on the thread that fills it
+std::vector<std::vector<int>> rowsByID(const CutoffRows &rows,
+                                       const std::vector<int> &indexToID,
+                                       int nop) {
+  for (int iatom = 0; iatom < nop; iatom++) {
+    if (indexToID[iatom] == -1) {
+      std::cerr << "Something is wrong with your idIndexMap!\n";
+    }
+  }
+  std::vector<std::vector<int>> nList(static_cast<std::size_t>(nop));
+  // nvc++ -mp=gpu SIGSEGVs host parallel-fors in libnvomp
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp parallel for schedule(static) if (nop >= kParallelRowsMinAtoms && !omp_in_parallel())
+#endif
+  for (int iatom = 0; iatom < nop; iatom++) {
+    if (indexToID[iatom] == -1) {
+      continue;
+    }
+    auto &row = nList[static_cast<std::size_t>(iatom)];
+    row.reserve(1 + rows.first[iatom + 1] - rows.first[iatom]);
+    row.push_back(indexToID[iatom]);
+    for (std::size_t k = rows.first[iatom]; k < rows.first[iatom + 1]; k++) {
+      if (hasAtomID(indexToID, rows.partner[k])) {
+        row.push_back(indexToID[rows.partner[k]]);
+      }
+    }
+  }
+  return nList;
+}
+#endif
 
 } // namespace
 
@@ -566,22 +739,10 @@ nneigh::neighListO(double rcutoff,
 #ifdef SEAMS_HAS_CUTOFF_LIST
   // Cutoff list: linkcell pairs_within, or vesin when that library is absent.
   {
-    std::vector<std::pair<int, int>> pairs;
-    if (cellListPairs(yCloud, typeIIndices, rcutoff, pairs)) {
-      // Initialize nList for ALL atoms (not just typeI)
-      nList = seedWithSelfIDs(indexToID, yCloud.nop);
-      const auto first = rowStarts(pairs, yCloud.nop);
-      // nvc++ -mp=gpu SIGSEGVs host parallel-fors in libnvomp
-#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-#pragma omp parallel for schedule(static) if (yCloud.nop >= kParallelRowsMinAtoms && !omp_in_parallel())
-#endif
-      for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-        nList[iatom].reserve(nList[iatom].size() + first[iatom + 1] - first[iatom]);
-        for (std::size_t k = first[iatom]; k < first[iatom + 1]; k++) {
-          appendNeighbourID(nList, indexToID, iatom, pairs[k].second);
-        }
-      }
-      return nList;
+    CutoffRows rows;
+    if (cutoffRows(yCloud, typeIIndices, rcutoff, rows)) {
+      // Every atom gets a row, not just typeI
+      return rowsByID(rows, indexToID, yCloud.nop);
     }
     // If the cutoff list failed, fall through.
   }
@@ -667,18 +828,18 @@ nneigh::neighListPair(
         subset.push_back(i);
       }
     }
-    std::vector<std::pair<int, int>> pairs;
-    if (cellListPairs(yCloud, subset, rcutoff, pairs)) {
-      for (const auto &[iatom, jatom] : pairs) {
+    CutoffRows rows;
+    if (cutoffRows(yCloud, subset, rcutoff, rows)) {
+      rows.forEachPair([&](int iatom, int jatom) {
         const int ti = yCloud.pts[iatom].type;
         const int tj = yCloud.pts[jatom].type;
         const bool mixed = (ti == typeI && tj == typeJ) ||
                            (ti == typeJ && tj == typeI);
         if (!mixed) {
-          continue;
+          return;
         }
         appendNeighbourID(nList, indexToID, iatom, jatom);
-      }
+      });
       return nList;
     }
   }
@@ -754,15 +915,15 @@ nneigh::halfNeighList(double rcutoff,
         typeIIndices.push_back(i);
       }
     }
-    std::vector<std::pair<int, int>> pairs;
-    if (cellListPairs(yCloud, typeIIndices, rcutoff, pairs)) {
+    CutoffRows rows;
+    if (cutoffRows(yCloud, typeIIndices, rcutoff, rows)) {
       // Half list: keep the lower cloud index as the owner, matching the
       // brute walk that only writes j into i when i < j.
-      for (const auto &[iatom, jatom] : pairs) {
+      rows.forEachPair([&](int iatom, int jatom) {
         if (iatom < jatom) {
           appendNeighbourID(nList, indexToID, iatom, jatom);
         }
-      }
+      });
       return nList;
     }
   }
@@ -822,19 +983,18 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
     std::vector<int> allIndices(yCloud.nop);
     std::iota(allIndices.begin(), allIndices.end(), 0);
 
-    std::vector<std::pair<int, int>> pairs;
-    if (cellListPairs(yCloud, allIndices, cutoff, pairs)) {
-      const auto first = rowStarts(pairs, yCloud.nop);
+    CutoffRows rows;
+    if (cutoffRows(yCloud, allIndices, cutoff, rows)) {
       // nvc++ -mp=gpu SIGSEGVs host parallel-fors in libnvomp
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
 #pragma omp parallel for schedule(static) if (yCloud.nop >= kParallelRowsMinAtoms && !omp_in_parallel())
 #endif
       for (int iatom = 0; iatom < yCloud.nop; iatom++) {
         auto &row = nList[iatom];
-        row.reserve(1 + first[iatom + 1] - first[iatom]);
+        row.reserve(1 + rows.first[iatom + 1] - rows.first[iatom]);
         row.push_back(iatom);
-        for (std::size_t k = first[iatom]; k < first[iatom + 1]; k++) {
-          row.push_back(pairs[k].second);
+        for (std::size_t k = rows.first[iatom]; k < rows.first[iatom + 1]; k++) {
+          row.push_back(rows.partner[k]);
         }
       }
       return nList;
@@ -1609,13 +1769,13 @@ void nneigh::SkinNeighborList::rebuildCandidates(
       subset.push_back(i);
     }
   }
-  std::vector<std::pair<int, int>> pairs;
-  if (cellListPairs(yCloud, subset, wide, pairs)) {
-    for (const auto &[i, j] : pairs) {
+  CutoffRows rows;
+  if (cutoffRows(yCloud, subset, wide, rows)) {
+    rows.forEachPair([&](int i, int j) {
       if (i < j) {
         candidates_.emplace_back(i, j);
       }
-    }
+    });
   } else
 #endif
   {
