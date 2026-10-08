@@ -321,18 +321,41 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   }
 
   const int nop = yCloud.nop;
+#ifdef SEAMS_HAS_MINIMAGE
+  const gen::CellFrame cells = gen::makeCellFrame(yCloud);
+#endif
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (nop >= 512)
 #endif
   {
     std::vector<int> local(histogram.size(), 0);
+    std::vector<double> row(static_cast<std::size_t>(std::max(nop, 1)));
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp for schedule(dynamic, 16)
 #endif
     for (int iatom = 0; iatom < nop - 1; iatom++) {
-      for (int jatom = iatom + 1; jatom < nop; jatom++) {
-        binPair(std::sqrt(gen::periodicDistSq(frame, yCloud, iatom, jatom)),
-                cutoff, binwidth, nbin, local.data());
+      const auto rest = static_cast<std::size_t>(nop - iatom - 1);
+      bool batched = false;
+#ifdef SEAMS_HAS_MINIMAGE
+      // One batch of engine wraps; past the Smith ball the frame's cell
+      // gives the Euclidean image.
+      const std::size_t at = 3 * static_cast<std::size_t>(iatom);
+      batched = cells.ok && frame.ok &&
+                mi_dist2_many(&cells.cell, &cells.xyz[at], &cells.xyz[at + 3],
+                              rest, row.data()) == 0;
+      for (std::size_t k = 0; k < rest && batched; k++) {
+        if (!gen::smithInside(frame, row[k])) {
+          const int jatom = iatom + 1 + static_cast<int>(k);
+          const double r2 = gen::euclideanDistSq(cells, iatom, jatom);
+          row[k] = r2 >= 0.0 ? r2 : gen::periodicDistSq(frame, yCloud, iatom, jatom);
+        }
+      }
+#endif
+      for (std::size_t k = 0; k < rest; k++) {
+        const int jatom = iatom + 1 + static_cast<int>(k);
+        const double r2 =
+            batched ? row[k] : gen::periodicDistSq(frame, yCloud, iatom, jatom);
+        binPair(std::sqrt(r2), cutoff, binwidth, nbin, local.data());
       }
     }
 #ifdef SEAMS_HAS_OPENMP

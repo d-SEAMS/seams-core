@@ -9,6 +9,7 @@
 #include <rdf2d.hpp>
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <filesystem>
 #include <vector>
@@ -408,6 +409,37 @@ TEST_CASE("sampleRDF_AA cell pairs size cells on the face separation",
   REQUIRE(gen::periodicDist(cloud, 0, 1) < 10.0);
   const auto reference = referenceHistogram(cloud, 10.0, 0.25, 40);
   REQUIRE(rdf2::sampleRDF_AA(cloud, 10.0, 0.25, 40) == reference);
+}
+
+TEST_CASE("sampleRDF_AA direct loop past the ball matches the minimum image",
+          "[rdf2d]") {
+  // The cutoff passes half the narrowest face separation, so the direct loop
+  // runs; under tilt the pairs past the Smith ball take the Euclidean image.
+  for (const auto &tilt : {std::array<double, 3>{0.0, 0.0, 0.0},
+                           std::array<double, 3>{6.0, -4.0, 5.0}}) {
+    const double L = 20.0;
+    const double xy = tilt[0], xz = tilt[1], yz = tilt[2];
+    const double xmin = std::min({0.0, xy, xz, xy + xz});
+    const double xmax = std::max({0.0, xy, xz, xy + xz});
+    molSys::PointCloud<molSys::Point<double>, double> cloud;
+    cloud.box = {L + xmax - xmin, L + std::max(0.0, yz) - std::min(0.0, yz), L,
+                 xy, xz, yz};
+    cloud.boxLow = {xmin, std::min(0.0, yz), 0.0};
+    if (xy == 0.0 && xz == 0.0 && yz == 0.0) {
+      cloud.box.resize(3);
+    }
+    cloud.nop = 0;
+    std::mt19937 rng(13);
+    std::uniform_real_distribution<double> u(0.0, 1.0);
+    for (int i = 0; i < 600; i++) {
+      const double sx = u(rng);
+      const double sy = u(rng);
+      const double sz = u(rng);
+      addPoint(cloud, L * sx + xy * sy + xz * sz, L * sy + yz * sz, L * sz);
+    }
+    const auto reference = referenceHistogram(cloud, 13.0, 0.1, 130);
+    REQUIRE(rdf2::sampleRDF_AA(cloud, 13.0, 0.1, 130) == reference);
+  }
 }
 
 TEST_CASE("sampleRDF_AA cell pairs match a threaded frame tilted on every axis",

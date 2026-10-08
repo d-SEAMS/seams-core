@@ -8,6 +8,8 @@
 #include <seams_input.hpp>
 
 #include <algorithm>
+#include <cmath>
+#include <limits>
 #include <numeric>
 #include <random>
 #include <array>
@@ -834,6 +836,59 @@ TEST_CASE("nearestUnlike finds an image the tilted wrap overshoots",
                Catch::Matchers::WithinAbs(std::sqrt(3.6 * 3.6 + 9.0), 1e-12));
 }
 
+TEST_CASE("nearestUnlike matches the brute-force minimum image at scale",
+          "[neighbours]") {
+  // 300 ions of each type, orthorhombic and tilted on every axis; in the
+  // 2 A slab most nearest partners lie past the Smith ball.
+  const std::array<double, 6> frames[] = {{20, 20, 20, 0, 0, 0},
+                                          {20, 20, 20, 3, -2, 4},
+                                          {60, 60, 2, 9, -6, 0.5}};
+  for (const auto &f : frames) {
+    const double xy = f[3], xz = f[4], yz = f[5];
+    const double xmin = std::min({0.0, xy, xz, xy + xz});
+    const double xmax = std::max({0.0, xy, xz, xy + xz});
+    molSys::PointCloud<molSys::Point<double>, double> cloud;
+    cloud.box = {f[0] + xmax - xmin, f[1] + std::max(0.0, yz) - std::min(0.0, yz),
+                 f[2], xy, xz, yz};
+    cloud.boxLow = {xmin, std::min(0.0, yz), 0.0};
+    if (xy == 0.0 && xz == 0.0 && yz == 0.0) {
+      cloud.box.resize(3);
+    }
+    std::mt19937 rng(5);
+    std::uniform_real_distribution<double> u(0.0, 1.0);
+    for (int i = 0; i < 600; i++) {
+      const double sx = u(rng);
+      const double sy = u(rng);
+      const double sz = u(rng);
+      molSys::Point<double> pt;
+      pt.type = 1 + i % 2;
+      pt.atomID = i + 1;
+      pt.x = f[0] * sx + xy * sy + xz * sz;
+      pt.y = f[1] * sy + yz * sz;
+      pt.z = f[2] * sz;
+      cloud.pts.push_back(pt);
+      cloud.idIndexMap[i + 1] = i;
+    }
+    cloud.nop = 600;
+    const gen::FracBox frame = gen::makeFracBox(cloud);
+    const auto got = nneigh::nearestUnlike(cloud, 1, 2);
+    REQUIRE(got.size() == 300);
+    for (const auto &[i, j, d] : got) {
+      int bestJ = -1;
+      double bestD2 = std::numeric_limits<double>::infinity();
+      for (int k = 1; k < cloud.nop; k += 2) {
+        const double d2 = gen::periodicDistSq(frame, cloud, i, k);
+        if (d2 < bestD2) {
+          bestD2 = d2;
+          bestJ = k;
+        }
+      }
+      REQUIRE(j == bestJ);
+      REQUIRE_THAT(d, Catch::Matchers::WithinAbs(std::sqrt(bestD2), 1e-9));
+    }
+  }
+}
+
 TEST_CASE("cell-list neighbours match the minimum image on a tilted frame",
           "[neighbours]") {
   // Water density and fewer atoms than the threaded rows take, so both
@@ -966,9 +1021,14 @@ jitteredLattice(int side, double a, double xy, double xz, double yz) {
 
 TEST_CASE("threaded cell-list rows are the minimum-image neighbours", "[neighbours]") {
   const double cutoff = 3.5;
+#ifdef SEAMS_HAS_OPENMP
+  // 4096 atoms and more than one thread: the rows run in parallel.
+  const int threads = omp_get_max_threads();
+  omp_set_num_threads(4);
+#endif
   for (const auto tilt : {std::array<double, 3>{0.0, 0.0, 0.0}, std::array<double, 3>{4.0, 2.0, 3.0}}) {
-    const auto cloud = jitteredLattice(14, 3.0, tilt[0], tilt[1], tilt[2]);
-    REQUIRE(cloud.nop == 14 * 14 * 14);
+    const auto cloud = jitteredLattice(16, 3.0, tilt[0], tilt[1], tilt[2]);
+    REQUIRE(cloud.nop == 16 * 16 * 16);
     std::vector<int> all(static_cast<std::size_t>(cloud.nop));
     std::iota(all.begin(), all.end(), 0);
     std::vector<std::vector<int>> rows;
@@ -1002,6 +1062,9 @@ TEST_CASE("threaded cell-list rows are the minimum-image neighbours", "[neighbou
   std::iota(all.begin(), all.end(), 0);
   std::vector<std::vector<int>> rows;
   REQUIRE_FALSE(nneigh::cellListRowsThreaded(tight, all, cutoff, rows));
+#ifdef SEAMS_HAS_OPENMP
+  omp_set_num_threads(threads);
+#endif
 }
 
 #ifdef SEAMS_HAS_OPENMP

@@ -402,6 +402,11 @@ bool nneigh::cellListRowsThreaded(
   rows.assign(n, {});
   const double rc2 = rcutoff * rcutoff;
   const gen::FracBox frame = gen::makeFracBox(yCloud);
+#ifdef SEAMS_HAS_MINIMAGE
+  // Cells span the cutoff across every face separation, so the engine wrap
+  // of a neighbour inside the cutoff is its minimum image.
+  const gen::CellFrame cells = gen::makeCellFrame(yCloud);
+#endif
   // each row belongs to one thread; the 27 cells around an atom hold the
   // nearest image of every neighbour because every axis has at least
   // three cells of width rcutoff
@@ -409,39 +414,64 @@ bool nneigh::cellListRowsThreaded(
   // nvc++ -mp=gpu (SEAMS_HAS_OFFLOAD) SIGSEGVs this host parallel-for
   // in libnvomp (__kmpc_fork_call).
 #if !defined(SEAMS_HAS_OFFLOAD)
-#pragma omp parallel for schedule(dynamic, 256) \
-    if (n >= static_cast<std::size_t>(kThreadedCellRowsParallelAtoms))
+#pragma omp parallel if (n >= static_cast<std::size_t>(kThreadedCellRowsParallelAtoms))
 #endif
 #endif
-  for (std::int64_t kk = 0; kk < static_cast<std::int64_t>(n); kk++) {
-    const std::size_t k = static_cast<std::size_t>(kk);
-    const int i = subset[k];
-    const int cid = cellOf[k];
-    const int cz = cid % ncell[2];
-    const int cy = (cid / ncell[2]) % ncell[1];
-    const int cx = cid / (ncell[1] * ncell[2]);
-    auto &row = rows[k];
-    for (int dx = -1; dx <= 1; dx++) {
-      const int nx = (cx + dx + ncell[0]) % ncell[0];
-      for (int dy = -1; dy <= 1; dy++) {
-        const int ny = (cy + dy + ncell[1]) % ncell[1];
-        for (int dz = -1; dz <= 1; dz++) {
-          const int nz = (cz + dz + ncell[2]) % ncell[2];
-          const int ncid = (nx * ncell[1] + ny) * ncell[2] + nz;
-          for (int m = cellStart[static_cast<std::size_t>(ncid)];
-               m < cellStart[static_cast<std::size_t>(ncid) + 1]; m++) {
-            const int j = subset[static_cast<std::size_t>(cellAtoms[static_cast<std::size_t>(m)])];
-            if (j == i) {
-              continue;
-            }
-            if (gen::periodicDistSq(frame, yCloud, i, j) <= rc2) {
-              row.push_back(j);
+  {
+    std::vector<int> cand;
+    std::vector<double> qs;
+    std::vector<double> d2;
+#ifdef SEAMS_HAS_OPENMP
+#if !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp for schedule(dynamic, 256)
+#endif
+#endif
+    for (std::int64_t kk = 0; kk < static_cast<std::int64_t>(n); kk++) {
+      const std::size_t k = static_cast<std::size_t>(kk);
+      const int i = subset[k];
+      const int cid = cellOf[k];
+      const int cz = cid % ncell[2];
+      const int cy = (cid / ncell[2]) % ncell[1];
+      const int cx = cid / (ncell[1] * ncell[2]);
+      cand.clear();
+      for (int dx = -1; dx <= 1; dx++) {
+        const int nx = (cx + dx + ncell[0]) % ncell[0];
+        for (int dy = -1; dy <= 1; dy++) {
+          const int ny = (cy + dy + ncell[1]) % ncell[1];
+          for (int dz = -1; dz <= 1; dz++) {
+            const int nz = (cz + dz + ncell[2]) % ncell[2];
+            const int ncid = (nx * ncell[1] + ny) * ncell[2] + nz;
+            for (int m = cellStart[static_cast<std::size_t>(ncid)];
+                 m < cellStart[static_cast<std::size_t>(ncid) + 1]; m++) {
+              const int j = subset[static_cast<std::size_t>(cellAtoms[static_cast<std::size_t>(m)])];
+              if (j != i) {
+                cand.push_back(j);
+              }
             }
           }
         }
       }
+      bool batched = false;
+#ifdef SEAMS_HAS_MINIMAGE
+      if (cells.ok && !cand.empty()) {
+        qs.resize(3 * cand.size());
+        d2.resize(cand.size());
+        for (std::size_t t = 0; t < cand.size(); t++) {
+          std::copy_n(&cells.xyz[3 * static_cast<std::size_t>(cand[t])], 3, &qs[3 * t]);
+        }
+        batched = mi_dist2_many(&cells.cell, &cells.xyz[3 * static_cast<std::size_t>(i)],
+                                qs.data(), cand.size(), d2.data()) == 0;
+      }
+#endif
+      auto &row = rows[k];
+      for (std::size_t t = 0; t < cand.size(); t++) {
+        const double r2 = batched ? d2[t] : gen::periodicDistSq(frame, yCloud, i, cand[t]);
+        if (r2 <= rc2) {
+          row.push_back(cand[t]);
+        }
+      }
+      std::sort(row.begin(), row.end());
     }
-    std::sort(row.begin(), row.end());
   }
   return true;
 }
@@ -1285,45 +1315,77 @@ std::vector<std::tuple<int, int, double>> nneigh::nearestUnlike(
   }
   out.resize(iIdx.size());
   const int nI = static_cast<int>(iIdx.size());
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (nI >= 256)
+  const std::size_t nJ = jIdx.size();
+#ifdef SEAMS_HAS_MINIMAGE
+  // Every typeJ position once; each typeI then takes one engine-wrap batch.
+  const gen::CellFrame cells = gen::makeCellFrame(yCloud);
+  std::vector<double> targets(cells.ok && frame.ok ? 3 * nJ : 0);
+  for (std::size_t k = 0; 3 * k < targets.size(); k++) {
+    std::copy_n(&cells.xyz[3 * static_cast<std::size_t>(jIdx[k])], 3,
+                &targets[3 * k]);
+  }
 #endif
-  for (int t = 0; t < nI; t++) {
-    const int i = iIdx[static_cast<std::size_t>(t)];
-    const auto &pi = yCloud.pts[static_cast<std::size_t>(i)];
-    int bestJ = -1;
-    double bestD2 = std::numeric_limits<double>::infinity();
-    for (const int j : jIdx) {
-      if (j == i) {
-        continue;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel if (nI >= 256)
+#endif
+  {
+    std::vector<double> row(nJ);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static)
+#endif
+    for (int t = 0; t < nI; t++) {
+      const int i = iIdx[static_cast<std::size_t>(t)];
+      const auto &pi = yCloud.pts[static_cast<std::size_t>(i)];
+      bool batched = false;
+#ifdef SEAMS_HAS_MINIMAGE
+      batched = !targets.empty() &&
+                mi_dist2_many(&cells.cell, &cells.xyz[3 * static_cast<std::size_t>(i)],
+                              targets.data(), nJ, row.data()) == 0;
+#endif
+      for (std::size_t k = 0; k < nJ && !batched; k++) {
+        const auto &pj = yCloud.pts[static_cast<std::size_t>(jIdx[k])];
+        row[k] = frame.ok ? gen::fracDistSq(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z)
+                          : gen::periodicDistSq(frame, yCloud, i, jIdx[k]);
       }
-      const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
-      const double d2 =
-          frame.ok ? gen::fracDistSq(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z)
-                   : gen::periodicDistSq(frame, yCloud, i, j);
-      if (d2 < bestD2) {
-        bestD2 = d2;
-        bestJ = j;
-      }
-    }
-    if (bestJ >= 0 && frame.ok && !gen::smithInside(frame, bestD2)) {
-      bestJ = -1;
-      bestD2 = std::numeric_limits<double>::infinity();
-      for (const int j : jIdx) {
-        if (j == i) {
-          continue;
+      int bestJ = -1;
+      double bestD2 = std::numeric_limits<double>::infinity();
+      for (std::size_t k = 0; k < nJ; k++) {
+        if (jIdx[k] != i && row[k] < bestD2) {
+          bestD2 = row[k];
+          bestJ = jIdx[k];
         }
-        const double d2 = gen::periodicDistSq(frame, yCloud, i, j);
-        if (d2 < bestD2) {
-          bestD2 = d2;
-          bestJ = j;
+      }
+      if (bestJ >= 0 && frame.ok && !gen::smithInside(frame, bestD2)) {
+        bestJ = -1;
+        bestD2 = std::numeric_limits<double>::infinity();
+        for (std::size_t k = 0; k < nJ; k++) {
+          const int j = jIdx[k];
+          if (j == i) {
+            continue;
+          }
+          double d2 = row[k];
+          if (!gen::smithInside(frame, d2)) {
+            d2 = -1.0;
+#ifdef SEAMS_HAS_MINIMAGE
+            if (batched) {
+              d2 = gen::euclideanDistSq(cells, i, j);
+            }
+#endif
+            if (d2 < 0.0) {
+              d2 = gen::periodicDistSq(frame, yCloud, i, j);
+            }
+          }
+          if (d2 < bestD2) {
+            bestD2 = d2;
+            bestJ = j;
+          }
         }
       }
-    }
-    if (bestJ >= 0) {
-      out[static_cast<std::size_t>(t)] = {i, bestJ, std::sqrt(bestD2)};
-    } else {
-      out[static_cast<std::size_t>(t)] = {-1, -1, 0.0};
+      if (bestJ >= 0) {
+        out[static_cast<std::size_t>(t)] = {i, bestJ, std::sqrt(bestD2)};
+      } else {
+        out[static_cast<std::size_t>(t)] = {-1, -1, 0.0};
+      }
     }
   }
   out.erase(std::remove_if(out.begin(), out.end(),

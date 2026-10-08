@@ -254,6 +254,42 @@ inline bool euclideanDelta(
   const double q[3] = {xi, yi, zi};
   return mi_displacement_euclidean(&cell, p, q, dr) == 0;
 }
+
+// One frame on minimage's cell, built once, with the positions packed for
+// its batch kernels.
+struct CellFrame {
+  mi_cell cell{};
+  std::vector<double> xyz;
+  bool ok = false;
+};
+
+inline CellFrame
+makeCellFrame(const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  CellFrame f;
+  if (!pointCloudCell(yCloud, &f.cell)) {
+    return f;
+  }
+  const std::size_t n = yCloud.pts.size();
+  f.xyz.resize(3 * n);
+  for (std::size_t i = 0; i < n; i++) {
+    f.xyz[3 * i] = yCloud.pts[i].x;
+    f.xyz[3 * i + 1] = yCloud.pts[i].y;
+    f.xyz[3 * i + 2] = yCloud.pts[i].z;
+  }
+  f.ok = true;
+  return f;
+}
+
+// Squared Euclidean minimum image from j to i on the frame's cell, or -1.
+inline double euclideanDistSq(const CellFrame &f, int i, int j) {
+  double dr[3];
+  if (mi_displacement_euclidean(&f.cell, &f.xyz[3 * static_cast<std::size_t>(j)],
+                                &f.xyz[3 * static_cast<std::size_t>(i)],
+                                dr) != 0) {
+    return -1.0;
+  }
+  return dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+}
 #endif
 
 // Recover H (columns a, b, c) and origin from a LAMMPS dump box with the
