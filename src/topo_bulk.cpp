@@ -1023,8 +1023,11 @@ bool ring::basalConditions(const std::vector<std::vector<int>> &nList,
   int kIndex;            // Index of m_k in basal2, corresponding to m_k
   int currentKindex;     // Current k index when finding alternating elements of
                          // basal2
-  std::vector<int> evenTriplet; // contains m_k, m_{k+2}, m_{k+4}
-  std::vector<int> oddTriplet;  // contains m_{k+1}, m_{k+3}, m_{k+5}
+  // Hot, and called from every thread of cageAffiliation's sweeps
+  static thread_local std::vector<int> evenTriplet; // m_k, m_{k+2}, m_{k+4}
+  static thread_local std::vector<int> oddTriplet; // m_{k+1}, m_{k+3}, m_{k+5}
+  evenTriplet.clear();
+  oddTriplet.clear();
   int compare1, compare2;       // l3 and l5 OR l4 and l6
   int index;
   bool l1_neighbour, l2_neighbour; // m_k is a neighbour of l1(true) or not

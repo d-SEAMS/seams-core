@@ -17,6 +17,10 @@
 #include <unordered_set>
 #include <vector>
 
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
+
 namespace {
 
 //! Canonical cycle of a ring: the lexicographically least sequence over all
@@ -69,6 +73,9 @@ struct FrameContext {
     index = ring::buildRingSearchIndex(rings, maxAtom + 1);
     const int nR = static_cast<int>(rings.size());
     sortedRings.resize(static_cast<std::size_t>(nR));
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp parallel for schedule(static) if (nR >= 1024 && !omp_in_parallel())
+#endif
     for (int i = 0; i < nR; i++) {
       sortedRings[static_cast<std::size_t>(i)] =
           rings[static_cast<std::size_t>(i)];
@@ -129,14 +136,14 @@ struct FrameContext {
   }
 
   //! Ordered basal-pair predicate, exactly the findHC acceptance test
-  [[nodiscard]] bool basalPair(int i, int j) {
+  [[nodiscard]] bool basalPair(int i, int j) const {
     if (i == j || shareAtoms(i, j)) {
       return false;
     }
     return ring::basalConditions(nList, rings[i], rings[j]);
   }
 
-  [[nodiscard]] const std::vector<int> &adjacentRings(int r) const {
+  [[nodiscard]] const std::vector<int> &adjacentRings(int r) {
     static const std::vector<int> empty;
     if (r < 0 || r >= static_cast<int>(adjRings.size())) {
       return empty;
@@ -172,7 +179,7 @@ struct FrameContext {
     return out;
   }
 
-  [[nodiscard]] const std::vector<int> &basalCandidates(int i) const {
+  [[nodiscard]] const std::vector<int> &basalCandidates(int i) {
     static const std::vector<int> empty;
     if (i < 0 || i >= static_cast<int>(basalCand.size())) {
       return empty;
@@ -186,17 +193,22 @@ struct FrameContext {
 
   //! Prismatic rings of the ordered passing pair (i, j)
   std::vector<int> prismaticOf(int i, int j) {
+    return prismaticOf(i, j, scratchListHC, scratchType);
+  }
+
+  //! As above, on caller-owned scratch, so threads can share the context
+  std::vector<int> prismaticOf(int i, int j, std::vector<int> &listHC,
+                               std::vector<ring::strucType> &types) const {
     std::vector<int> prismatic;
-    scratchListHC.clear();
-    (void)ring::findPrismatic(rings, scratchListHC, scratchType, i, j,
-                              prismatic, index);
+    listHC.clear();
+    (void)ring::findPrismatic(rings, listHC, types, i, j, prismatic, index);
     return prismatic;
   }
 
   //! The equatorial-conditions test of findDDC without the claim skip; on a
   //! pass, fills the six unique peripheral ring indices
   bool equatorialPass(int i, bool hcAffiliated,
-                      std::vector<int> &peripherals) {
+                      std::vector<int> &peripherals) const {
     if (hcAffiliated) {
       return false;
     }
@@ -266,34 +278,70 @@ ring::cageAffiliation(const std::vector<std::vector<int>> &rings,
   if (nRings == 0) {
     return result;
   }
-  FrameContext ctx(rings, nList);
+  const FrameContext ctx(rings, nList);
+  const int nR = static_cast<int>(nRings);
+  // nvc++ -mp=gpu (SEAMS_HAS_OFFLOAD) SIGSEGVs host parallel-fors in libnvomp
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+  const bool threaded = nR >= 1024 && !omp_in_parallel();
+#endif
 
   // HC affiliation by a global sweep over ordered pairs: every passing pair
   // marks its basal rings and its prismatic rings. Sweeping every i covers
-  // both directions of every pair once.
-  for (size_t i = 0; i < nRings; i++) {
-    const std::vector<int> &candidates = ctx.basalCandidates(static_cast<int>(i));
-    for (const int j : candidates) {
-      if (!ctx.basalPair(static_cast<int>(i), j)) {
-        continue;
+  // both directions of every pair once. A flag only ever turns on, so each
+  // thread keeps its marks and sets them once its share is done.
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp parallel if (threaded)
+#endif
+  {
+    std::vector<int> marks;
+    std::vector<int> listHC;
+    std::vector<ring::strucType> types(nRings, ring::strucType::unclassified);
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp for schedule(dynamic, 256) nowait
+#endif
+    for (int i = 0; i < nR; i++) {
+      for (const int j : ctx.collectBasalCandidates(i)) {
+        if (!ctx.basalPair(i, j)) {
+          continue;
+        }
+        marks.push_back(i);
+        marks.push_back(j);
+        for (const int k : ctx.prismaticOf(i, j, listHC, types)) {
+          marks.push_back(k);
+        }
       }
-      result.hc[i] = true;
-      result.hc[j] = true;
-      for (const int k : ctx.prismaticOf(static_cast<int>(i), j)) {
-        result.hc[k] = true;
-      }
+    }
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp critical(seams_cage_affiliation)
+#endif
+    for (const int m : marks) {
+      result.hc[static_cast<std::size_t>(m)] = true;
     }
   }
 
   // DDC affiliation: every ring passing the equatorial conditions marks
   // itself and its six peripherals
-  std::vector<int> peripherals;
-  for (size_t i = 0; i < nRings; i++) {
-    if (ctx.equatorialPass(static_cast<int>(i), result.hc[i], peripherals)) {
-      result.ddc[i] = true;
-      for (const int p : peripherals) {
-        result.ddc[p] = true;
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp parallel if (threaded)
+#endif
+  {
+    std::vector<int> marks;
+    std::vector<int> peripherals;
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp for schedule(dynamic, 256) nowait
+#endif
+    for (int i = 0; i < nR; i++) {
+      if (ctx.equatorialPass(i, result.hc[static_cast<std::size_t>(i)],
+                             peripherals)) {
+        marks.push_back(i);
+        marks.insert(marks.end(), peripherals.begin(), peripherals.end());
       }
+    }
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp critical(seams_cage_affiliation)
+#endif
+    for (const int m : marks) {
+      result.ddc[static_cast<std::size_t>(m)] = true;
     }
   }
   return result;
