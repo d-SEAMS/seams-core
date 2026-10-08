@@ -2,14 +2,18 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <bop.hpp>
+#include <generic.hpp>
 #include <ira_sofi.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <structure_desc.hpp>
 #include <voronoi_qlm.hpp>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
+#include <complex>
+#include <numbers>
 #include <vector>
 
 namespace {
@@ -213,6 +217,121 @@ TEST_CASE("soapSpectrumAll matches soapSpectrum for atom 0",
   REQUIRE(all[0].size() == one.size());
   for (size_t i = 0; i < one.size(); i++) {
     REQUIRE_THAT(all[0][i], Catch::Matchers::WithinAbs(one[i], 1e-12));
+  }
+}
+
+namespace {
+
+// n atoms at water density, uniform from a portable xorshift, in an
+// orthorhombic or tilted box; atom i has ID 3 i + 7
+Cloud xorshiftFrame(int n, double tilt) {
+  Cloud cloud;
+  const double L = std::cbrt(n / 0.0332);
+  const double xy = tilt;
+  const double xz = -0.5 * tilt;
+  const double yz = 0.3 * tilt;
+  if (tilt == 0.0) {
+    cloud.box = {L, L, L};
+    cloud.boxLow = {0.0, 0.0, 0.0};
+  } else {
+    const double xmin = std::min({0.0, xy, xz, xy + xz});
+    const double xmax = std::max({0.0, xy, xz, xy + xz});
+    cloud.box = {L + xmax - xmin, L + std::max(0.0, yz) - std::min(0.0, yz), L,
+                 xy, xz, yz};
+    cloud.boxLow = {xmin, std::min(0.0, yz), 0.0};
+  }
+  unsigned long long state = 0x2545F4914F6CDD1DULL;
+  auto unit = [&state]() {
+    state ^= state << 13;
+    state ^= state >> 7;
+    state ^= state << 17;
+    return static_cast<double>(state >> 11) / 9007199254740992.0;
+  };
+  for (int i = 0; i < n; i++) {
+    const double sx = unit();
+    const double sy = unit();
+    const double sz = unit();
+    molSys::Point<double> p;
+    p.type = 1;
+    p.atomID = 3 * i + 7;
+    p.molID = p.atomID;
+    p.x = L * sx + xy * sy + xz * sz;
+    p.y = L * sy + yz * sz;
+    p.z = L * sz;
+    cloud.pts.push_back(p);
+    cloud.idIndexMap[p.atomID] = i;
+  }
+  cloud.nop = n;
+  cloud.currentFrame = 1;
+  return cloud;
+}
+
+// The power spectrum term by term: every Y_lm evaluated afresh for each
+// neighbour, radial function and degree
+std::vector<double> soapByTerms(const Cloud &cloud,
+                                const std::vector<std::vector<int>> &nList,
+                                int iatom, int nMax, int lMax, double rcut) {
+  const int nComp = (lMax + 1) * (lMax + 1);
+  const double sigma = rcut / static_cast<double>(nMax);
+  std::vector<std::complex<double>> coeff(
+      static_cast<size_t>(nMax) * static_cast<size_t>(nComp), {0.0, 0.0});
+  for (size_t j = 1; j < nList[static_cast<size_t>(iatom)].size(); j++) {
+    const int jatom = cloud.idIndexMap.at(nList[static_cast<size_t>(iatom)][j]);
+    const auto d = gen::relDist(cloud, iatom, jatom);
+    const double r = std::sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
+    if (r <= 0.0 || r >= rcut) {
+      continue;
+    }
+    const std::array<double, 2> angles = {std::atan2(d[0], d[1]),
+                                          std::acos(d[2] / r)};
+    for (int n = 0; n < nMax; n++) {
+      const double rn = (n + 0.5) * rcut / static_cast<double>(nMax);
+      const double g = std::exp(-((r - rn) / sigma) * ((r - rn) / sigma));
+      for (int l = 0; l <= lMax; l++) {
+        if (l == 0) {
+          coeff[static_cast<size_t>(n) * nComp] +=
+              g * (0.5 / std::sqrt(std::numbers::pi));
+          continue;
+        }
+        const auto yl = sph::spheriHarmo(l, angles);
+        for (int m = 0; m < 2 * l + 1; m++) {
+          coeff[static_cast<size_t>(n) * nComp + l * l + m] +=
+              g * yl[static_cast<size_t>(m)];
+        }
+      }
+    }
+  }
+  std::vector<double> spec;
+  for (int n = 0; n < nMax; n++) {
+    for (int np = 0; np < nMax; np++) {
+      for (int l = 0; l <= lMax; l++) {
+        std::complex<double> acc = 0.0;
+        for (int m = 0; m < 2 * l + 1; m++) {
+          acc += coeff[static_cast<size_t>(n) * nComp + l * l + m] *
+                 std::conj(coeff[static_cast<size_t>(np) * nComp + l * l + m]);
+        }
+        spec.push_back(acc.real());
+      }
+    }
+  }
+  return spec;
+}
+
+} // namespace
+
+TEST_CASE("SOAP equals its term-by-term expansion on disordered frames",
+          "[structure_desc]") {
+  for (const double tilt : {0.0, 3.0}) {
+    INFO("tilt " << tilt);
+    const auto cloud = xorshiftFrame(400, tilt);
+    const auto nList = nneigh::neighListO(5.0, cloud, 1);
+    const auto all = chill::soapSpectrumAll(cloud, nList, 4, 6, 5.0);
+    REQUIRE(all.size() == 400);
+    for (int i = 0; i < cloud.nop; i++) {
+      REQUIRE(all[static_cast<size_t>(i)] ==
+              soapByTerms(cloud, nList, i, 4, 6, 5.0));
+    }
+    REQUIRE(chill::soapSpectrum(cloud, 7, nList, 4, 6, 5.0) == all[7]);
   }
 }
 
