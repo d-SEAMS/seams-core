@@ -980,9 +980,9 @@ TEST_CASE("steinhardtQl rejects unsupported degrees", "[bop]") {
 }
 
 TEST_CASE("steinhardtQl is independent of the OpenMP thread count", "[bop]") {
-  // steinhardtQl only starts threads at 50000 atoms. A chain of nearest
-  // neighbours is enough to exercise both parallel loops without building
-  // a physical lattice.
+  // steinhardtQl starts threads at 256 atoms. A chain of nearest neighbours
+  // is enough to exercise every parallel loop without building a physical
+  // lattice.
   constexpr int nAtoms = 50000;
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   cloud.nop = nAtoms;
@@ -1027,6 +1027,168 @@ TEST_CASE("steinhardtQl is independent of the OpenMP thread count", "[bop]") {
     REQUIRE_THAT(threaded.qlBar[i],
                  Catch::Matchers::WithinAbs(serial.qlBar[i], 1e-15));
   }
+}
+
+namespace {
+
+// side^3 atoms on a jittered simple-cubic lattice at water density, from a
+// portable xorshift, in an orthorhombic or tilted box. Atom k has ID
+// idStride * k + idOffset.
+molSys::PointCloud<molSys::Point<double>, double>
+xorshiftLattice(int side, double tilt, int idStride, int idOffset) {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  const double L = std::cbrt(side * side * side / 0.0332);
+  const double xy = tilt;
+  const double xz = -0.5 * tilt;
+  const double yz = 0.3 * tilt;
+  if (tilt == 0.0) {
+    cloud.box = {L, L, L};
+    cloud.boxLow = {0.0, 0.0, 0.0};
+  } else {
+    const double xmin = std::min({0.0, xy, xz, xy + xz});
+    const double xmax = std::max({0.0, xy, xz, xy + xz});
+    cloud.box = {L + xmax - xmin, L + std::max(0.0, yz) - std::min(0.0, yz), L,
+                 xy, xz, yz};
+    cloud.boxLow = {xmin, std::min(0.0, yz), 0.0};
+  }
+  unsigned long long state = 0x9E3779B97F4A7C15ULL;
+  int k = 0;
+  for (int i = 0; i < side; i++) {
+    for (int j = 0; j < side; j++) {
+      for (int l = 0; l < side; l++, k++) {
+        double f[3];
+        for (double &fk : f) {
+          state ^= state << 13;
+          state ^= state >> 7;
+          state ^= state << 17;
+          fk = (static_cast<double>(state >> 11) / 9007199254740992.0 - 0.5) *
+               0.3 / side;
+        }
+        const double fa = (i + 0.5) / side + f[0];
+        const double fb = (j + 0.5) / side + f[1];
+        const double fc = (l + 0.5) / side + f[2];
+        molSys::Point<double> p;
+        p.type = 1;
+        p.atomID = idStride * k + idOffset;
+        p.molID = p.atomID;
+        p.x = fa * L + fb * xy + fc * xz;
+        p.y = fb * L + fc * yz;
+        p.z = fc * L;
+        cloud.pts.push_back(p);
+        cloud.idIndexMap[p.atomID] = k;
+      }
+    }
+  }
+  cloud.nop = k;
+  cloud.currentFrame = 1;
+  return cloud;
+}
+
+// Steinhardt of a neighbour list by ID with its own ID lookup and bond
+// table, one bond at a time through gen::relDist, then the same per-atom
+// kernels steinhardtQl runs
+chill::SteinhardtQl perBondSteinhardt(
+    const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+    const std::vector<std::vector<int>> &nList, int orderL) {
+  std::vector<int> offsets{0};
+  std::vector<int> cols;
+  std::vector<double> dr;
+  for (int i = 0; i < cloud.nop; i++) {
+    const auto &row = nList[static_cast<std::size_t>(i)];
+    for (std::size_t k = 1; k < row.size(); k++) {
+      const auto it = cloud.idIndexMap.find(row[k]);
+      if (it == cloud.idIndexMap.end() || it->second < 0 ||
+          it->second >= cloud.nop) {
+        continue;
+      }
+      cols.push_back(it->second);
+      const auto d = gen::relDist(cloud, i, it->second);
+      dr.insert(dr.end(), d.begin(), d.end());
+    }
+    offsets.push_back(static_cast<int>(cols.size()));
+  }
+  const int nComp = 2 * orderL + 1;
+  std::vector<double> qlm(static_cast<std::size_t>(cloud.nop) * nComp * 2, 0.0);
+  chill::SteinhardtQl out;
+  out.ql.assign(static_cast<std::size_t>(cloud.nop), 0.0);
+  out.qlBar.assign(static_cast<std::size_t>(cloud.nop), 0.0);
+  for (int i = 0; i < cloud.nop; i++) {
+    seams::steinhardt::qlmOneAtomDr(i, orderL, dr.data(), offsets.data(),
+                                    cols.data(), qlm.data());
+  }
+  for (int i = 0; i < cloud.nop; i++) {
+    seams::steinhardt::qlOneAtom(i, orderL, qlm.data(), offsets.data(),
+                                 cols.data(), out.ql.data(), out.qlBar.data());
+  }
+  return out;
+}
+
+} // namespace
+
+TEST_CASE("steinhardtQl matches a per-bond reference on threaded frames with "
+          "sparse atom IDs",
+          "[bop]") {
+#ifdef SEAMS_HAS_OPENMP
+  const int maxThreads = omp_get_max_threads();
+#endif
+  constexpr int pastTheEnd = 9000000;
+  for (const double tilt : {0.0, 4.0}) {
+    // The same 4096 positions under dense IDs and under sparse ones, which
+    // steinhardtQl resolves through idIndexMap
+    auto dense = xorshiftLattice(16, tilt, 1, 1);
+    auto sparse = xorshiftLattice(16, tilt, 7919, 13);
+    REQUIRE(dense.nop == 4096);
+    const auto byIndex = nneigh::getNewNeighbourListByIndex(dense, 3.5);
+    const auto byID = [&](const auto &cloud) {
+      std::vector<std::vector<int>> rows(byIndex.size());
+      for (std::size_t i = 0; i < byIndex.size(); i++) {
+        for (const int j : byIndex[i]) {
+          rows[i].push_back(cloud.pts[static_cast<std::size_t>(j)].atomID);
+        }
+      }
+      return rows;
+    };
+    auto denseRows = byID(dense);
+    auto sparseRows = byID(sparse);
+    // IDs with no atom, inside and outside the dense table, and one the map
+    // sends past the end of the cloud
+    for (auto *rows : {&denseRows, &sparseRows}) {
+      (*rows)[0].push_back(-5);
+      (*rows)[1].push_back(pastTheEnd);
+      (*rows)[2].push_back(0);
+    }
+    dense.idIndexMap[pastTheEnd] = dense.nop + 3;
+    sparse.idIndexMap[pastTheEnd] = sparse.nop + 3;
+
+    for (const int orderL : {4, 6, 12}) {
+      INFO("tilt " << tilt << " l " << orderL);
+      std::vector<chill::SteinhardtQl> runs;
+      for (const int threads : {1, 4, 8}) {
+#ifdef SEAMS_HAS_OPENMP
+        omp_set_dynamic(0);
+        omp_set_num_threads(threads);
+#endif
+        runs.push_back(chill::steinhardtQl(dense, denseRows, orderL));
+        runs.push_back(chill::steinhardtQl(sparse, sparseRows, orderL));
+      }
+      for (const auto &run : runs) {
+        REQUIRE(run.ql == runs[0].ql);
+        REQUIRE(run.qlBar == runs[0].qlBar);
+      }
+      if (orderL != 12) {
+        const auto ref = perBondSteinhardt(dense, denseRows, orderL);
+        for (int i = 0; i < dense.nop; i++) {
+          REQUIRE_THAT(runs[0].ql[i],
+                       Catch::Matchers::WithinAbs(ref.ql[i], 1e-12));
+          REQUIRE_THAT(runs[0].qlBar[i],
+                       Catch::Matchers::WithinAbs(ref.qlBar[i], 1e-12));
+        }
+      }
+    }
+  }
+#ifdef SEAMS_HAS_OPENMP
+  omp_set_num_threads(maxThreads);
+#endif
 }
 
 namespace {

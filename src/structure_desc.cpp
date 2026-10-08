@@ -195,7 +195,8 @@ double overlayRmsd(const Eigen::MatrixXd &refIn, const Eigen::MatrixXd &tgtIn) {
   return best;
 }
 
-std::vector<double> soapOne(const Cloud &yCloud, int iatom,
+std::vector<double> soapOne(const Cloud &yCloud, const gen::FracBox &frame,
+                            int iatom,
                             const std::vector<std::vector<int>> &nList,
                             int nMax, int lMax, double rcut) {
   const int nComp = (lMax + 1) * (lMax + 1);
@@ -207,7 +208,10 @@ std::vector<double> soapOne(const Cloud &yCloud, int iatom,
                                0.0);
   }
   const double sigma = rcut / static_cast<double>(nMax);
-  std::vector<std::complex<double>> ylmScratch;
+  // The basis is a product of a radial and an angular factor, so each
+  // neighbour's Y_lm serve every radial function
+  std::vector<std::vector<std::complex<double>>> ylm(
+      static_cast<size_t>(lMax) + 1);
   auto addNeighbour = [&](const Vec3 &d) {
     const double r = std::sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
     if (r <= 0.0 || r >= rcut) {
@@ -215,6 +219,9 @@ std::vector<double> soapOne(const Cloud &yCloud, int iatom,
     }
     const std::array<double, 2> angles = {std::atan2(d[0], d[1]),
                                           std::acos(d[2] / r)};
+    for (int l = 1; l <= lMax; l++) {
+      sph::spheriHarmoInto(l, angles, ylm[static_cast<size_t>(l)]);
+    }
     for (int n = 0; n < nMax; n++) {
       const double rn = (n + 0.5) * rcut / static_cast<double>(nMax);
       const double g = std::exp(-((r - rn) / sigma) * ((r - rn) / sigma));
@@ -225,10 +232,10 @@ std::vector<double> soapOne(const Cloud &yCloud, int iatom,
               g * (0.5 / std::sqrt(std::numbers::pi));
           continue;
         }
-        sph::spheriHarmoInto(l, angles, ylmScratch);
+        const auto &yl = ylm[static_cast<size_t>(l)];
         for (int m = 0; m < 2 * l + 1; m++) {
           coeff[static_cast<size_t>(n) * nComp + base + m] +=
-              g * ylmScratch[static_cast<size_t>(m)];
+              g * yl[static_cast<size_t>(m)];
         }
       }
     }
@@ -239,7 +246,9 @@ std::vector<double> soapOne(const Cloud &yCloud, int iatom,
     if (it == yCloud.idIndexMap.end()) {
       continue;
     }
-    const auto d = gen::relDist(yCloud, iatom, it->second);
+    const auto &pj = yCloud.pts[static_cast<size_t>(it->second)];
+    const auto d =
+        gen::relDistFromPoint(frame, yCloud, iatom, pj.x, pj.y, pj.z);
     addNeighbour({d[0], d[1], d[2]});
   }
 
@@ -315,19 +324,21 @@ std::vector<chill::TemplateHit> chill::classifyTemplates(
 std::vector<double> chill::soapSpectrum(
     const Cloud &yCloud, int iatom, const std::vector<std::vector<int>> &nList,
     int nMax, int lMax, double rcut) {
-  return soapOne(yCloud, iatom, nList, nMax, lMax, rcut);
+  return soapOne(yCloud, gen::makeFracBox(yCloud), iatom, nList, nMax, lMax,
+                 rcut);
 }
 
 std::vector<std::vector<double>> chill::soapSpectrumAll(
     const Cloud &yCloud, const std::vector<std::vector<int>> &nList, int nMax,
     int lMax, double rcut) {
   std::vector<std::vector<double>> out(static_cast<size_t>(yCloud.nop));
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (yCloud.nop >= 64)
 #endif
   for (int i = 0; i < yCloud.nop; i++) {
     out[static_cast<size_t>(i)] =
-        soapOne(yCloud, i, nList, nMax, lMax, rcut);
+        soapOne(yCloud, frame, i, nList, nMax, lMax, rcut);
   }
   return out;
 }

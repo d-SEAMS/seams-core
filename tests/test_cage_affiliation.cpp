@@ -10,9 +10,14 @@
 #include <topo_bulk.hpp>
 
 #include <algorithm>
+#include <cmath>
 #include <map>
 #include <string>
 #include <vector>
+
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
 
 namespace {
 
@@ -71,6 +76,44 @@ molSys::PointCloud<molSys::Point<double>, double> hcCloud() {
   return yCloud;
 }
 
+// Ideal hexagonal ice: the lonsdaleite O network at 2.76 A, nx x ny x nz
+// orthogonal cells of eight molecules in a periodic box
+molSys::PointCloud<molSys::Point<double>, double> iceIh(int nx, int ny,
+                                                        int nz) {
+  const double a = 2.76 * std::sqrt(8.0 / 3.0);
+  const double c = a * std::sqrt(8.0 / 3.0);
+  const double b = a * std::sqrt(3.0);
+  const double basis[4][3] = {{1.0 / 3, 2.0 / 3, 0.0},
+                              {2.0 / 3, 1.0 / 3, 0.5},
+                              {1.0 / 3, 2.0 / 3, 3.0 / 8},
+                              {2.0 / 3, 1.0 / 3, 7.0 / 8}};
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud.box = {nx * a, ny * b, nz * c};
+  yCloud.boxLow = {0.0, 0.0, 0.0};
+  yCloud.currentFrame = 1;
+  for (int ix = 0; ix < nx; ix++) {
+    for (int iy = 0; iy < ny; iy++) {
+      for (int iz = 0; iz < nz; iz++) {
+        for (const double shift : {0.0, 0.5}) {
+          for (const auto &f : basis) {
+            molSys::Point<double> p;
+            p.type = 1;
+            p.atomID = yCloud.nop;
+            p.x = std::fmod(shift * a + f[0] * a - f[1] * a / 2 + ix * a,
+                            nx * a);
+            p.y = std::fmod(shift * b + f[1] * b / 2 + iy * b, ny * b);
+            p.z = (f[2] + iz) * c;
+            yCloud.idIndexMap[p.atomID] = yCloud.nop;
+            yCloud.pts.push_back(p);
+            yCloud.nop++;
+          }
+        }
+      }
+    }
+  }
+  return yCloud;
+}
+
 } // namespace
 
 TEST_CASE("seeded affiliation on an empty framed cloud is empty",
@@ -102,8 +145,6 @@ TEST_CASE("cageAffiliation matches the greedy classification on mW",
   auto six = sixMembered(primitive::ringNetwork(idx, 7));
   REQUIRE(six.size() == 8192);
 
-  const auto affiliation = ring::cageAffiliation(six, idx);
-
   std::vector<ring::strucType> rt(six.size(), ring::strucType::unclassified);
   std::vector<cage::Cage> cl;
   auto hc = ring::findHC(six, rt, idx, cl);
@@ -113,10 +154,20 @@ TEST_CASE("cageAffiliation matches the greedy classification on mW",
   // the order-free predicates agree ring for ring
   REQUIRE(ddc.size() == six.size());
   REQUIRE(hc.empty());
-  for (size_t i = 0; i < six.size(); i++) {
-    REQUIRE(affiliation.ddc[i]);
-    REQUIRE_FALSE(affiliation.hc[i]);
+#ifdef SEAMS_HAS_OPENMP
+  const int maxThreads = omp_get_max_threads();
+  for (const int threads : {1, 4}) {
+    omp_set_num_threads(threads);
+#endif
+    const auto affiliation = ring::cageAffiliation(six, idx);
+    for (size_t i = 0; i < six.size(); i++) {
+      REQUIRE(affiliation.ddc[i]);
+      REQUIRE_FALSE(affiliation.hc[i]);
+    }
+#ifdef SEAMS_HAS_OPENMP
   }
+  omp_set_num_threads(maxThreads);
+#endif
 }
 
 TEST_CASE("stackingPlanes marks HC basals and keeps them off DDC equatorials",
@@ -189,6 +240,37 @@ TEST_CASE("cageAffiliation marks the rings of an isolated hexagonal cage",
         listHC.end();
     REQUIRE(affiliation.hc[i] == inGreedy);
   }
+}
+
+TEST_CASE("cageAffiliation marks hexagonal ice HC on every thread count",
+          "[cage_affiliation]") {
+  // Enough rings for the threaded sweeps
+  auto yCloud = iceIh(8, 5, 5);
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  auto idx = nneigh::neighbourListByIndex(yCloud, nList);
+  auto six = sixMembered(primitive::ringNetwork(idx, 6));
+  REQUIRE(six.size() >= 1024);
+
+  std::vector<ring::strucType> rt(six.size(), ring::strucType::unclassified);
+  std::vector<cage::Cage> cl;
+  auto hc = ring::findHC(six, rt, idx, cl);
+  REQUIRE(ring::findDDC(six, rt, hc, cl).empty());
+  REQUIRE(hc.size() == six.size());
+
+#ifdef SEAMS_HAS_OPENMP
+  const int maxThreads = omp_get_max_threads();
+  for (const int threads : {1, 4}) {
+    omp_set_num_threads(threads);
+#endif
+    const auto affiliation = ring::cageAffiliation(six, idx);
+    for (size_t i = 0; i < six.size(); i++) {
+      REQUIRE(affiliation.hc[i]);
+      REQUIRE_FALSE(affiliation.ddc[i]);
+    }
+#ifdef SEAMS_HAS_OPENMP
+  }
+  omp_set_num_threads(maxThreads);
+#endif
 }
 
 TEST_CASE("cageAffiliation is invariant under ring permutation",

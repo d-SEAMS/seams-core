@@ -110,26 +110,13 @@ std::vector<int> ring::findsCommonElements(const std::vector<int> &ring1,
 bool ring::commonElementsInThreeRings(const std::vector<int> &ring1,
                                       const std::vector<int> &ring2,
                                       const std::vector<int> &ring3) {
-  std::vector<int>
-      common1; // Vector containing the common elements of the first two rings
-  std::vector<int>
-      common2; // Vector containing the common elements of the three rings
-
-  // Common elements among the first two rings
-  common1 = ring::findsCommonElements(ring1, ring2);
-  if (common1.empty()) {
-    return false;
-  } // no common elements in ring1 and ring2
-
-  // Common elements among all three rings
-  common2 = ring::findsCommonElements(common1, ring3);
-
-  // If no common elements were found:
-  if (common2.empty()) {
-    return false;
-  } // no common elements between ring1, ring2, and ring3
-
-  return true; // Common elements found!
+  for (const int atom : ring1) {
+    if (std::find(ring2.begin(), ring2.end(), atom) != ring2.end() &&
+        std::find(ring3.begin(), ring3.end(), atom) != ring3.end()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
