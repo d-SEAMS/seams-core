@@ -13,6 +13,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <algorithm>
+#include <numeric>
 #include <vector>
 
 #include <franzblau.hpp>
@@ -92,10 +93,19 @@ struct BoundedBalls {
   }
 
   template <typename Graph> void fillAll(const Graph &adjacency, int radius) {
+    std::vector<int> all(adjacency.size());
+    std::iota(all.begin(), all.end(), 0);
+    fillList(adjacency, radius, all);
+  }
+
+  template <typename Graph>
+  void fillList(const Graph &adjacency, int radius,
+                const std::vector<int> &which) {
     const int nVertices = static_cast<int>(adjacency.size());
+    const int nWhich = static_cast<int>(which.size());
     ball.assign(nVertices, {});
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel if (nVertices >= 256 && !omp_in_parallel())
+#pragma omp parallel if (nWhich >= 256 && !omp_in_parallel())
 #endif
     {
       std::vector<int> dist(nVertices, -1);
@@ -103,8 +113,8 @@ struct BoundedBalls {
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp for schedule(static)
 #endif
-      for (int v = 0; v < nVertices; v++) {
-        fillVertex(v, adjacency, radius, dist, touched, frontier, next);
+      for (int k = 0; k < nWhich; k++) {
+        fillVertex(which[k], adjacency, radius, dist, touched, frontier, next);
       }
     }
   }
@@ -386,6 +396,18 @@ void enumerateFromSource(const Graph &adjacency, const BoundedBalls &balls,
  */
 std::vector<std::vector<int>>
 primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth) {
+  return ringNetwork(nList, maxDepth, std::vector<char>());
+}
+
+/**
+ * @details The rings of the whole search whose lowest-indexed member is
+ *  flagged in @a sources, in the same order; an empty mask flags every
+ *  vertex. Balls are filled only within maxDepth/2 hops of a flagged
+ *  vertex, where the members of its rings lie.
+ */
+std::vector<std::vector<int>>
+primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth,
+                       const std::vector<char> &sources) {
   std::vector<std::vector<int>> rings;
   if (maxDepth < 3 || nList.empty()) {
     return rings;
@@ -414,38 +436,66 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth)
 
   const int maxLvl = maxDepth / 2;
   const int radius = std::max(maxLvl - 1, 1);
+  std::vector<int> from;
+  for (int v = 0; v < nVertices; v++) {
+    if (sources.empty() || (v < static_cast<int>(sources.size()) && sources[v])) {
+      from.push_back(v);
+    }
+  }
   BoundedBalls balls;
-  balls.fillAll(adjacency, radius);
+  if (static_cast<int>(from.size()) == nVertices) {
+    balls.fillList(adjacency, radius, from);
+  } else {
+    std::vector<int> lvl(nVertices, -1);
+    std::vector<int> reached = from;
+    for (const int v : from) {
+      lvl[v] = 0;
+    }
+    for (std::size_t k = 0; k < reached.size(); k++) {
+      const int u = reached[k];
+      if (lvl[u] == maxLvl) {
+        continue;
+      }
+      for (const int w : adjacency[u]) {
+        if (w >= 0 && w < nVertices && lvl[w] == -1) {
+          lvl[w] = lvl[u] + 1;
+          reached.push_back(w);
+        }
+      }
+    }
+    balls.fillList(adjacency, radius, reached);
+  }
+  const int nFrom = static_cast<int>(from.size());
 
 #ifdef SEAMS_HAS_OPENMP
-  if (nVertices >= 256 && !omp_in_parallel()) {
+  if (nFrom >= 256 && !omp_in_parallel()) {
     // Sources are independent given the shared read-only balls; per-source
     // collection keeps the output identical to the serial ascending-source
     // order
-    std::vector<std::vector<std::vector<int>>> perSource(nVertices);
+    std::vector<std::vector<std::vector<int>>> perSource(nFrom);
 #pragma omp parallel
     {
       RingScratch scratch;
 #pragma omp for schedule(dynamic, 64)
-      for (int src = 0; src < nVertices; src++) {
-        enumerateFromSource(adjacency, balls, src, maxDepth, maxLvl, scratch,
-                            perSource[src]);
+      for (int k = 0; k < nFrom; k++) {
+        enumerateFromSource(adjacency, balls, from[k], maxDepth, maxLvl,
+                            scratch, perSource[k]);
       }
     }
     // Every ring, source list and ball is a heap block of its own; moving
     // and freeing them on one thread is a sizeable share of a threaded search
-    std::vector<std::size_t> offset(static_cast<std::size_t>(nVertices) + 1, 0);
-    for (int src = 0; src < nVertices; src++) {
-      offset[src + 1] = offset[src] + perSource[src].size();
+    std::vector<std::size_t> offset(static_cast<std::size_t>(nFrom) + 1, 0);
+    for (int k = 0; k < nFrom; k++) {
+      offset[k + 1] = offset[k] + perSource[k].size();
     }
-    rings.resize(offset[nVertices]);
+    rings.resize(offset[nFrom]);
 #pragma omp parallel
     {
 #pragma omp for schedule(static) nowait
-      for (int src = 0; src < nVertices; src++) {
-        std::move(perSource[src].begin(), perSource[src].end(),
-                  rings.begin() + static_cast<std::ptrdiff_t>(offset[src]));
-        std::vector<std::vector<int>>().swap(perSource[src]);
+      for (int k = 0; k < nFrom; k++) {
+        std::move(perSource[k].begin(), perSource[k].end(),
+                  rings.begin() + static_cast<std::ptrdiff_t>(offset[k]));
+        std::vector<std::vector<int>>().swap(perSource[k]);
       }
 #pragma omp for schedule(static)
       for (int v = 0; v < nVertices; v++) {
@@ -457,7 +507,7 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth)
 #endif
 
   RingScratch scratch;
-  for (int src = 0; src < nVertices; src++) {
+  for (const int src : from) {
     enumerateFromSource(adjacency, balls, src, maxDepth, maxLvl, scratch,
                         rings);
   }

@@ -6,16 +6,20 @@
 ** Strong scaling at fixed N of every stage the ring-and-cage pipeline
 ** runs on the host: the cutoff neighbour list, the Steinhardt kernel, the
 ** index-ordered list and primitive rings. Every stage is timed as the best
-** of `reps` runs; `total` is their sum. Under MPI the neighbour list is
-** still built on every rank.
+** of `reps` runs; `total` is their sum. Under MPI the neighbour list, the
+** index list and the rings are still built on every rank, and `domain` is
+** the index list and the rings again, split over the ranks by
+** seams::domain and gathered on every rank; it is not in the total.
 **
 **   bench_strong [nAtoms] [reps]
 **
-** MPI: launch with mpirun -n R. OpenMP threads come from OMP_NUM_THREADS.
+** MPI: launch with mpirun -n R. OpenMP threads come from OMP_NUM_THREADS,
+** and linkcell's from RAYON_NUM_THREADS, which defaults to every core.
 ** Offload: build with -Dwith_openmp_offload=true and SEAMS_OFFLOAD=1.
 */
 
 #include <bop.hpp>
+#include <domain.hpp>
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
@@ -131,19 +135,36 @@ int main(int argc, char **argv) {
         (void)rings;
       },
       reps);
+#ifdef SEAMS_HAS_MPI
+  const double tDomain = bestMillis(
+      [&]() {
+        volatile auto rings =
+            seams::domain::gatherRings(cloud, 3.5, 6, MPI_COMM_WORLD);
+        (void)rings;
+      },
+      reps);
+#endif
 
   if (rank == 0) {
     std::cout << std::left << std::setw(10) << "nAtoms" << std::setw(8)
               << "ranks" << std::setw(8) << "thr" << std::setw(8) << "devs"
               << std::setw(16) << "neigh/ms" << std::setw(16) << "ql/ms"
               << std::setw(16) << "index/ms" << std::setw(16) << "rings/ms"
-              << std::setw(16) << "total/ms" << "\n";
+              << std::setw(16) << "total/ms";
+#ifdef SEAMS_HAS_MPI
+    std::cout << std::setw(16) << "domain/ms";
+#endif
+    std::cout << "\n";
     std::cout << std::left << std::setw(10) << nAtoms << std::setw(8) << nranks
               << std::setw(8) << nThreads << std::setw(8) << nDevices
               << std::setw(16) << std::fixed << std::setprecision(3) << tNeigh
               << std::setw(16) << tQl << std::setw(16) << tIndex
               << std::setw(16) << tRings << std::setw(16)
-              << (tNeigh + tQl + tIndex + tRings) << "\n";
+              << (tNeigh + tQl + tIndex + tRings);
+#ifdef SEAMS_HAS_MPI
+    std::cout << std::setw(16) << tDomain;
+#endif
+    std::cout << "\n";
     std::cout << "# every stage threaded on the host; best of " << reps << " runs\n";
   }
 

@@ -13,6 +13,7 @@ test_sources = {
   'bond': 'test_bond.cpp',
   'bop': 'test_bop.cpp',
   'cluster': 'test_cluster.cpp',
+  'domain': 'test_domain.cpp',
   'generic': 'test_generic.cpp',
   'order_parameter': 'test_order_parameter.cpp',
   'phase': 'test_phase.cpp',
@@ -97,6 +98,23 @@ foreach name, src : test_sources
     env: _test_env,
     timeout: _timeout)
 endforeach
+
+if mpi_found
+  _mpiexec = find_program('mpiexec', required: false)
+  if _mpiexec.found()
+    _domain_mpi = executable('test_domain_mpi', 'test_domain_mpi.cpp',
+      dependencies: [yds_dep],
+      cpp_args: _args,
+      link_args: _test_link_args,
+      include_directories: _incdirs,
+      build_rpath: _test_rpath)
+    test('domain_mpi', _mpiexec,
+      args: ['-n', '2', _domain_mpi],
+      env: _test_env,
+      is_parallel: false,
+      timeout: 120)
+  endif
+endif
 
 # SIMD verification test (header-only, does not need libyodaLib)
 _simd_deps = [catch2_dep]

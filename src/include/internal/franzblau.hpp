@@ -118,6 +118,12 @@ struct Graph {
 std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,
                                           int maxDepth);
 
+//! The rings ringNetwork returns whose lowest-indexed member is flagged in
+//! @a sources (by index; empty flags every vertex), in the same order
+std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,
+                                          int maxDepth,
+                                          const std::vector<char> &sources);
+
 //! Creates a graph object and fills it with the information from a neighbour
 //! list and pointCloud created before. NOTE: the neighbourListIndex contains
 //! the indices and NOT the atom IDs as in the neighbour list
