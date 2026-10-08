@@ -17,6 +17,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
+#include <numeric>
 #include <vector>
 
 #ifdef SEAMS_HAS_MPI
@@ -59,44 +60,61 @@ NeighbourCSR flatten(const molSys::PointCloud<molSys::Point<double>, double> &yC
     }
   }
 
-  int nnzGuess = 0;
-  for (int i = 0; i < g.nop && static_cast<size_t>(i) < nList.size(); i++) {
-    if (nList[static_cast<size_t>(i)].size() > 1) {
-      nnzGuess += static_cast<int>(nList[static_cast<size_t>(i)].size()) - 1;
-    }
-  }
-  g.cols.reserve(static_cast<size_t>(std::max(nnzGuess, 0)));
-  g.dr.reserve(static_cast<size_t>(std::max(nnzGuess, 0)) * 3);
-
-  int nnz = 0;
-  for (int i = 0; i < g.nop; i++) {
-    if (static_cast<size_t>(i) >= nList.size() ||
-        nList[static_cast<size_t>(i)].size() < 2) {
-      g.offsets[static_cast<size_t>(i) + 1] = nnz;
-      continue;
-    }
-    for (size_t j = 1; j < nList[static_cast<size_t>(i)].size(); j++) {
-      const int atomId = nList[static_cast<size_t>(i)][j];
-      int jidx = -1;
-      if (dense && atomId >= 0 && atomId <= maxId) {
-        jidx = idToIdx[static_cast<size_t>(atomId)];
-      } else {
-        const auto it = yCloud.idIndexMap.find(atomId);
-        if (it != yCloud.idIndexMap.end()) {
-          jidx = it->second;
-        }
+  // The cloud index of a neighbour's atom ID; negative when it has none
+  const auto indexOf = [&](int atomId) {
+    int jidx = -1;
+    if (dense && atomId >= 0 && atomId <= maxId) {
+      jidx = idToIdx[static_cast<size_t>(atomId)];
+    } else {
+      const auto it = yCloud.idIndexMap.find(atomId);
+      if (it != yCloud.idIndexMap.end()) {
+        jidx = it->second;
       }
-      if (jidx < 0 || jidx >= g.nop) {
+    }
+    return jidx < g.nop ? jidx : -1;
+  };
+  const int nRows = std::min(g.nop, static_cast<int>(nList.size()));
+
+  // A row keeps the same neighbours in both passes and writes only its own
+  // run of cols and dr, so the rows are independent.
+  // nvc++ -mp=gpu SIGSEGVs host parallel-fors in libnvomp
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+  const bool useThreads = g.nop >= kParallelThreshold;
+#pragma omp parallel for schedule(static) if (useThreads)
+#endif
+  for (int i = 0; i < nRows; i++) {
+    int kept = 0;
+    for (size_t j = 1; j < nList[static_cast<size_t>(i)].size(); j++) {
+      if (indexOf(nList[static_cast<size_t>(i)][j]) >= 0) {
+        kept++;
+      }
+    }
+    g.offsets[static_cast<size_t>(i) + 1] = kept;
+  }
+  std::partial_sum(g.offsets.begin(), g.offsets.end(), g.offsets.begin());
+  const int nnz = g.offsets[static_cast<size_t>(g.nop)];
+  g.cols.resize(static_cast<size_t>(nnz));
+  g.dr.resize(static_cast<size_t>(nnz) * 3);
+
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp parallel for schedule(static) if (useThreads)
+#endif
+  for (int i = 0; i < nRows; i++) {
+    int k = g.offsets[static_cast<size_t>(i)];
+    for (size_t j = 1; j < nList[static_cast<size_t>(i)].size(); j++) {
+      const int jidx = indexOf(nList[static_cast<size_t>(i)][j]);
+      if (jidx < 0) {
         continue;
       }
-      g.cols.push_back(jidx);
-      const auto d = gen::relDist(yCloud, i, jidx);
-      g.dr.push_back(d[0]);
-      g.dr.push_back(d[1]);
-      g.dr.push_back(d[2]);
-      nnz++;
+      const auto &pj = yCloud.pts[static_cast<size_t>(jidx)];
+      const auto d = gen::relDistFromPoint(frame, yCloud, i, pj.x, pj.y, pj.z);
+      g.cols[static_cast<size_t>(k)] = jidx;
+      g.dr[3 * static_cast<size_t>(k)] = d[0];
+      g.dr[3 * static_cast<size_t>(k) + 1] = d[1];
+      g.dr[3 * static_cast<size_t>(k) + 2] = d[2];
+      k++;
     }
-    g.offsets[static_cast<size_t>(i) + 1] = nnz;
   }
   return g;
 }

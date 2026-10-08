@@ -502,16 +502,17 @@ inline void writeDumpBoxBounds(
  *  Inline generic function for obtaining
  *  the unwrapped periodic distance between one particle and another point,
  *  whose index has been given.
+ *  @param[in] b The box of yCloud, from makeFracBox.
  *  @param[in] yCloud The input PointCloud, which contains the particle
  *  coordinates, simulation box lengths etc.
  *  @param[in] iatom The index of the \f$ i^{th} \f$ atom.
- *  @param[in] singlePoint Vector containing coordinate values
+ *  @param[in] xj, yj, zj The other point.
  *  \return The unwrapped periodic distance.
  */
 inline std::array<double, 3> relDistFromPoint(
+    const FracBox &b,
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
     double xj, double yj, double zj) {
-  const FracBox b = makeFracBox(yCloud);
   if (b.ok) {
     const auto &pi = yCloud.pts[static_cast<std::size_t>(iatom)];
     const auto dr = fracDelta(b, pi.x, pi.y, pi.z, xj, yj, zj);
@@ -543,6 +544,12 @@ inline std::array<double, 3> relDistFromPoint(
     }
   }
   return dr;
+}
+
+inline std::array<double, 3> relDistFromPoint(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
+    double xj, double yj, double zj) {
+  return relDistFromPoint(makeFracBox(yCloud), yCloud, iatom, xj, yj, zj);
 }
 
 inline double unWrappedDistFromPoint(
