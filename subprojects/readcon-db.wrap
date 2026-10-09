@@ -1,6 +1,6 @@
 [wrap-git]
 url = https://github.com/lode-org/readcon-db.git
-revision = v0.1.6
+revision = 396c2cd6bdc2b3a034eb7e83e5ae8aa5fd9ae852
 depth = 1
 
 [provide]

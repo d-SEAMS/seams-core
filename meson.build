@@ -261,7 +261,7 @@ endif
 # the same readcon-core pin. The db crate vendors its own core for its
 # internal parse; seams never frees that handle with this build's
 # libreadcon_core.
-readcondb_dep = dependency('readcon-db', required: false,
+readcondb_dep = dependency('readcon-db', version: '>=0.1.7', required: false,
                            fallback: ['readcon-db', 'readcon_dep'],
                            default_options: [
                              'default_library=' + _readcon_kind,
