@@ -20,3 +20,6 @@ option('with_nauty', type: 'feature', value: 'auto',
   description: 'Canonical cage certificates via nauty')
 option('with_lua', type: 'feature', value: 'disabled',
   description: 'Unused. Lua is the dseams library in the yodaStruct repo')
+
+option('with_linkcell', type: 'feature', value: 'auto', description: 'Periodic linked-cell neighbour search')
+option('with_minimage', type: 'feature', value: 'auto', description: 'Euclidean minimum-image geometry')

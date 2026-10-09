@@ -224,7 +224,7 @@ _linkcell_opts = []
 if gpulite_dep.found() and not gpulite_opt.disabled()
   _linkcell_opts += ['with_gpulite=enabled']
 endif
-linkcell_dep = dependency('linkcell', version: '>=0.3.5', required: false,
+linkcell_dep = dependency('linkcell', version: '>=0.3.10', required: get_option('with_linkcell'),
                           fallback: ['linkcell', 'linkcell_dep'],
                           default_options: _linkcell_opts)
 if linkcell_dep.found()
@@ -232,7 +232,7 @@ if linkcell_dep.found()
   _args += ['-DSEAMS_HAS_LINKCELL=1']
 endif
 
-minimage_dep = dependency('minimage', required: false,
+minimage_dep = dependency('minimage', version: '>=0.1.4', required: get_option('with_minimage'),
                           fallback: ['minimage', 'minimage_dep'])
 if minimage_dep.found()
   _deps += [minimage_dep]
