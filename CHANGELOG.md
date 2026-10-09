@@ -10,6 +10,42 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## [2.11.0] - 2026-10-09
+
+### Added
+
+- Ice XXI library matches the Lee et al. 2026 I-42d oxygen cell (SI CIF, Z=152).
+- Under mpiexec, an MPI build of `seams` shares a LAMMPS dump's `--frame`/`--last` frames among the ranks in serpentine rounds (`sinp::forEachLammpsFrame` takes a part and a part count), and rank 0 prints every frame in order. Other readers stay on rank 0, `--per-atom` needs a single rank, ranks that differ in arguments, directory or `SEAMS_` settings are refused, `OMP_NUM_THREADS` and `RAYON_NUM_THREADS` default to 1 on a launch of several ranks, and a run without a launcher, or with `SEAMS_MPI=0`, never starts MPI. `chill::setSteinhardtAtomSplit(false)` keeps `steinhardtQl` from splitting atoms over ranks that hold different frames, and a dump frame cut short keeps the atoms it read, with its warning on stderr. With Open MPI's libfabric probe skipped (`--mca btl ^ofi`), eight ranks match eight `--jobs` workers on one node for `cages` over 32 frames of 32768-atom ice (4.2 against 4.3 s), and keep load balance 0.99 where frame cost steps or alternates along the run (2.6 s against 2.8 and 3.1 s for `--jobs`; contiguous blocks reach 0.59 on the step). On two four-core core sets standing in for nodes, with MPI over TCP only, eight ranks take 4.4 s against 8.7 s for threads on one, at POP parallel efficiency 0.98 (release builds).
+- `seams::domain` splits a periodic frame over ranks: cells ordered along a Hilbert curve are cut into runs of equal atom count, and each rank also holds every atom within a halo of its own. `domain::rings` finds the primitive rings whose lowest-indexed member a rank owns from its share alone, `primitive::ringNetwork` takes a mask of the sources to enumerate from, and `domain::gatherRings` collects every rank's rings on every MPI rank in the order `ringNetwork` lists them. On one eight-core node threads still win (a 65536-atom frame takes 58 ms on one rank of eight threads and 67 ms on eight single-thread ranks), and every rank rebuilding the whole list costs 72 ms of 251 at 262144 atoms on eight ranks; `bench_strong` reports it as `domain/ms` in MPI builds, and CI runs the gather under `mpiexec`.
+
+### Changed
+
+- Below half the narrowest face separation the cutoff list skips minimage's pair reduction, which only sorted there, and sorts its rows on every thread; `getNewNeighbourListByIndex` and `neighListO` fill their rows in parallel, and `neighListO` takes the cutoff list first at every thread count. On `bench_strong`'s 65536-atom frame the index list goes from 25.8 to 13.9 ms on one thread and from 22.7 to 7.8 ms on eight (release builds).
+- CON frames are read with readcon-core's frame iterator. Lengths and angles become the minimage cell, and that cell is the dump box linkcell already uses. A readcon-db corpus, including a sharded campaign root, is selected and decoded with the same reader.
+- Cutoff neighbour lists use linkcell pairs_within with cells of about 20 atoms rather than one cutoff, ahead of the threaded cell rows. The neighbour list still keeps one index per atom. k-nearest stays knearest.
+- Inside the one-image ball the in-plane RDF walks Rapaport cell pairs: cells span the cutoff across each face separation, a half stencil visits each neighbouring pair of cells once, and one lattice shift serves the pair. It replaces the packed grid and the vesin list; 8192 atoms at a 6 Å cutoff take 2.2 ms on one thread and 0.4 ms on eight.
+- Pair distances use the fractional wrap below half the narrowest face separation, and call the Euclidean image only past that. The in-plane RDF bins the cell-list distance inside that ball, and the direct loop runs in parallel.
+- The SOAP power spectrum evaluates each neighbour's spherical harmonics once and reuses them for every radial function, since its basis is a product of the two; the values are unchanged. On 8192 atoms at water density with nMax 8, lMax 6 and a 6 Å cutoff, `soapSpectrumAll` goes from 831 to 199 ms on one thread (release builds).
+- The cutoff lists bin linkcell's pairs by row on every thread: the pairs are dealt into blocks of rows, four per thread, and one thread counts, places and sorts each block, so no pass waits on shared counters and the rows do not depend on the thread count. linkcell fills a buffer through `lc_pairs_within_rows`, where `linkcell::pairs_within` zeroes its vector on one thread first, and `neighListO` allocates each row once, on the thread that fills it. On a jittered 65536-atom lattice at water density the cutoff list goes from 17.6 to 14.5 ms on one thread, and at 262144 atoms from 67.7 to 57.6 ms on one thread and from 35.1 to 15.2 ms on eight (medians of three interleaved rounds, release builds, both on the same linkcell build).
+- The linkcell wrap tracks v0.3.9 and the minimage wrap tracks v0.1.4. The linkcell patch builds that crate against the minimage wrap checked out beside it.
+- The ring search builds each source's shortest paths once, in breadth-first order into one buffer, keeps the graph in two packed arrays, and moves the per-source results out on every thread. With the fix above, `bench_strong`'s ring stage at 65536 atoms goes from 1408 to 265 ms on one thread and from 190 to 40 ms on eight (release builds), and lists the same rings in the same order.
+- `cageAffiliation` runs its hexagonal- and double-diamond-cage sweeps on every thread, and `basalConditions` and `commonElementsInThreeRings` stop allocating per call. Seeded cage affiliation of a 32768-atom jittered cubic-ice frame goes from 1046 to 849 ms on one thread and to 132 ms on eight, and `cages` over 32 such frames from 36.2 to 6.3 s on eight threads (release builds).
+- `nearestUnlike` and the threaded neighbour rows score candidates with minimage's `mi_dist2_many` over positions packed once per call, and take the Euclidean image on that call's cell; the in-plane RDF's direct loop past the one-image ball takes each row's Euclidean images in one `mi_dist2_euclidean_many` call. On eight threads `nearestUnlike` over 8192 atoms goes from 24.6 to 3.7 ms, the orthorhombic direct loop from 4.2 to 1.6 ms, and tilted threaded rows from 3.7 to 2.4 ms. Under tilt the row batch takes the direct loop on 2048 atoms at a 30 Å cutoff from 60.4 to 19.5 ms on one thread, against `mi_dist2_many` plus one Euclidean call per pair past the Smith ball, with the same distances bit for bit on default compiler flags.
+- `steinhardtQl` builds its bond table with the box computed once rather than once per bond, and counts and fills its rows on every thread; the values are unchanged. On `bench_strong`'s 65536-atom frame the stage goes from 11.7 to 4.0 ms on eight threads and from 23.1 to 19.7 ms on one (release builds).
+
+### Fixed
+
+- An orthorhombic displacement wraps every period, not one. Unfolded coordinates 16 apart in a 10 box are 4 apart, not 6.
+- Coordination and homopolar counts skip the leading self entry on an index neighbour row.
+- Host OpenMP cell-list loops no longer fork under nvc++ `-mp=gpu`, so `[bulkTUM][offload]` reaches `usedDevice`.
+- In OpenMP builds the threaded neighbour rows gave an atom missing from `idIndexMap` its neighbours' IDs as a row header, and gave its partners -1. That atom now keeps an empty row.
+- SOAP now fills every l through lMax. classifyBonds reuses a Ylm buffer. Fingerprint builds one hop graph per atom.
+- The 2D RDF histogram, `nearestUnlike`, and `shellSeparation` trust the fractional wrap only below half the narrowest face separation of a tilted cell. Half an edge or half a bound span let a pair inside the cutoff wrap to a longer image and drop out, and let the RDF grid put a pair two cells apart.
+- The cutoff neighbour list sizes its row buffer from the pairs found. A shell denser than the ideal-gas estimate no longer writes past that buffer.
+- The ring search no longer clears the level field over every lower index for each source, a pass quadratic in the frame: on one thread `bench_strong`'s ring stage grew about threefold with each doubling of the frame, to 16.9 s at 262144 atoms, and now doubles.
+- Use linkcell 0.3.10 and minimage 0.1.4 without a downstream source patch. The with_linkcell and with_minimage options can require these dependencies.
+
+
 ## [2.10.0] - 2026-09-06
 
 ### Added

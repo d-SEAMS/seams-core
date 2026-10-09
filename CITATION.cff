@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata below."
 title: "d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations"
 type: software
-version: "2.10.0"
-date-released: "2026-09-06"
+version: "2.11.0"
+date-released: "2026-10-09"
 license: MIT
 repository-code: "https://github.com/d-SEAMS/seams-core"
 url: https://dseams.info

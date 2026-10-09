@@ -9,6 +9,13 @@ The release history is [[file:../../CHANGELOG.md][CHANGELOG.md]]
 (Keep a Changelog, assembled by towncrier). This page is the
 narrative cut used in the book.
 
+* 2.11.0
+
+Cutoff rows and cage affiliation run across host threads. The MPI CLI
+assigns complete frames to ranks and preserves frame order in its output.
+Periodic geometry uses minimage 0.1.4 and linkcell 0.3.10. The library
+exports can coexist in a static application.
+
 * 2.10.0
 
 Rodger F4 and host \(q_{12}\) are CLI fields. CHILL and CHILL+ use
