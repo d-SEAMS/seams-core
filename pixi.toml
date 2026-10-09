@@ -31,10 +31,10 @@ build = { cmd = "ninja -j4 -C bbdir", depends-on = ["setup"] }
 test = { cmd = "meson test -C bbdir -v", depends-on = ["build"] }
 install = { cmd = "meson install -C bbdir", depends-on = ["build"] }
 # Python tests live in d-SEAMS/PydSEAMSlib
-coverage-setup = "meson setup bbdir-cov --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=false -Db_coverage=true --wipe 2>/dev/null; meson setup bbdir-cov --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=false -Db_coverage=true"
+coverage-setup = "meson setup bbdir-cov --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=false -Db_coverage=true -Dbuildtype=debugoptimized --wipe 2>/dev/null; meson setup bbdir-cov --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=false -Db_coverage=true -Dbuildtype=debugoptimized"
 coverage-build = { cmd = "ninja -j4 -C bbdir-cov", depends-on = ["coverage-setup"] }
 coverage-run = { cmd = """
-meson test -C bbdir-cov && ninja -C bbdir-cov coverage && \
+meson test -C bbdir-cov --num-processes 1 && ninja -C bbdir-cov coverage && \
 lcov --remove bbdir-cov/meson-logs/coverage.info \
   '*/external/backward.hpp' '*/backward.cpp' \
   '*/tests/*' '*/bench_*' \
