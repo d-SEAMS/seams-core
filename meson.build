@@ -249,7 +249,7 @@ endif
 # embeds it and a shared engine ships it alongside; a shared reader under a
 # static engine would point consumers at a build-directory path.
 _readcon_kind = get_option('default_library') == 'static' ? 'static' : 'shared'
-readcon_dep = dependency('readcon-core', required: false,
+readcon_dep = dependency('readcon-core', version: '>=0.16.2', required: false,
                          fallback: ['readcon-core', 'readcon_dep'],
                          default_options: ['default_library=' + _readcon_kind])
 if readcon_dep.found()
