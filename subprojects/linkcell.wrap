@@ -1,6 +1,6 @@
 [wrap-git]
 url = https://github.com/d-SEAMS/linkcell.git
-revision = 9eff6bf10feea3876cb0483efcb2445a3dbfa2ef
+revision = v0.3.9
 depth = 1
 diff_files = linkcell-minimage-tip.patch
 
