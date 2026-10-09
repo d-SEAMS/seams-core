@@ -38,23 +38,11 @@ int ylmCartesian(int orderL, const double *xyz, int nVec, double *ylmOut) {
   }
   const int nComp = 2 * orderL + 1;
   std::vector<double> cart(xyz, xyz + static_cast<size_t>(nVec) * 3);
-  static sphericart::SphericalHarmonics<double> calc3(3);
-  static sphericart::SphericalHarmonics<double> calc4(4);
-  static sphericart::SphericalHarmonics<double> calc6(6);
-  static sphericart::SphericalHarmonics<double> calc8(8);
-  static sphericart::SphericalHarmonics<double> calc12(12);
-  sphericart::SphericalHarmonics<double> *calc = &calc6;
-  if (orderL == 3) {
-    calc = &calc3;
-  } else if (orderL == 4) {
-    calc = &calc4;
-  } else if (orderL == 8) {
-    calc = &calc8;
-  } else if (orderL == 12) {
-    calc = &calc12;
-  }
+  // The calculator owns mutable scratch sized for the calling OpenMP team.
+  // Frame workers and calls with different team sizes need independent storage.
+  sphericart::SphericalHarmonics<double> calc(orderL);
   std::vector<double> sph;
-  calc->compute(cart, sph);
+  calc.compute(cart, sph);
   const int base = orderL * orderL;
   for (int i = 0; i < nVec; i++) {
     const double *row = sph.data() + static_cast<size_t>(i) * (orderL + 1) * (orderL + 1);
