@@ -3,6 +3,7 @@
 usage: mpi_frames.py MPIEXEC SEAMS DUMP CON
 """
 
+import difflib
 import os
 import signal
 import subprocess
@@ -48,9 +49,19 @@ def same(args, records, rc=0, extra=None):
     serial = run([seams, "--format", "json"] + args, dict(bare, **(extra or {})))
     mpi = run([mpiexec, "-n", "2", seams, "--format", "json"] + args,
               dict(base, **(extra or {})))
-    check(" ".join(args), serial.returncode == rc and
+    ok = (serial.returncode == rc and
           (mpi.returncode == 0) == (rc == 0) and serial.stdout == mpi.stdout and
           serial.stdout.count('{"schema"') == records)
+    check(" ".join(args), ok)
+    if not ok:
+        print("comparison:", " ".join(args))
+        print("return codes:", serial.returncode, mpi.returncode, "expected:", rc)
+        print("serial stderr:", repr(serial.stderr[-2000:]))
+        print("MPI stderr:", repr(mpi.stderr[-2000:]))
+        delta = list(difflib.unified_diff(serial.stdout.splitlines(True),
+                                        mpi.stdout.splitlines(True),
+                                        fromfile="serial", tofile="MPI"))
+        print("output diff:", repr("".join(delta[:20])))
     return serial, mpi
 
 
