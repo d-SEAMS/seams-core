@@ -248,6 +248,10 @@ Namespaces</h2></td></tr>
 <tr class="memitem:gen" id="r_gen"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespacegen.html">gen</a></td></tr>
 <tr class="memdesc:namespacegen"><td class="mdescLeft">&#160;</td><td class="mdescRight">Small generic functions that are shared by all namespaces. <br /></td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:gen_3A_3AFracBox" id="r_gen_3A_3AFracBox"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structgen_1_1FracBox.html">gen::FracBox</a></td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gaeadb5e8ff98078b0007d0def0eaad39d" id="r_gaeadb5e8ff98078b0007d0def0eaad39d"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#gaeadb5e8ff98078b0007d0def0eaad39d">gen::radDeg</a> (double angle)</td></tr>
@@ -258,16 +262,22 @@ Functions</h2></td></tr>
 <tr class="memdesc:gaf3593d4e71600e8d85fbd873fcd95558"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the average, after excluding the outliers, using quartiles.  <br /></td></tr>
 <tr class="memitem:ga6046c3c9db73fbf420ad07834047942e" id="r_ga6046c3c9db73fbf420ad07834047942e"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga6046c3c9db73fbf420ad07834047942e">gen::calcMedian</a> (std::vector&lt; double &gt; *input)</td></tr>
 <tr class="memdesc:ga6046c3c9db73fbf420ad07834047942e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inline generic function for calculating the median given a vector of the values.  <br /></td></tr>
+<tr class="memitem:ga9833e867efd9f0e5b9e6af932811daad" id="r_ga9833e867efd9f0e5b9e6af932811daad"><td class="memItemLeft"><a class="el" href="structgen_1_1FracBox.html">FracBox</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga9833e867efd9f0e5b9e6af932811daad">gen::makeFracBox</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:gab34364ca503fda783a0795a8e4525670" id="r_gab34364ca503fda783a0795a8e4525670"><td class="memItemLeft">std::array&lt; double, 3 &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gab34364ca503fda783a0795a8e4525670">gen::fracDelta</a> (const <a class="el" href="structgen_1_1FracBox.html">FracBox</a> &amp;b, double xi, double yi, double zi, double xj, double yj, double zj)</td></tr>
+<tr class="memitem:ga099f0b52a85217f92284e497b97d0466" id="r_ga099f0b52a85217f92284e497b97d0466"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga099f0b52a85217f92284e497b97d0466">gen::fracDistSq</a> (const <a class="el" href="structgen_1_1FracBox.html">FracBox</a> &amp;b, double xi, double yi, double zi, double xj, double yj, double zj)</td></tr>
+<tr class="memitem:ga9e1ff0c0e75fc4bad58a49f68f95d5c2" id="r_ga9e1ff0c0e75fc4bad58a49f68f95d5c2"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ga9e1ff0c0e75fc4bad58a49f68f95d5c2">gen::smithInside</a> (const <a class="el" href="structgen_1_1FracBox.html">FracBox</a> &amp;b, double r2)</td></tr>
 <tr class="memitem:ga74b57e7951bcff4f7c31fdc4ec5e79bf" id="r_ga74b57e7951bcff4f7c31fdc4ec5e79bf"><td class="memItemLeft">std::array&lt; double, 3 &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga74b57e7951bcff4f7c31fdc4ec5e79bf">gen::triclinicMinImage</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double xi, double yi, double zi, double xj, double yj, double zj)</td></tr>
+<tr class="memitem:gac55d45ba7b50cb75763412f158ecd713" id="r_gac55d45ba7b50cb75763412f158ecd713"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#gac55d45ba7b50cb75763412f158ecd713">gen::periodicDistSq</a> (const <a class="el" href="structgen_1_1FracBox.html">FracBox</a> &amp;b, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int iatom, int jatom)</td></tr>
+<tr class="memdesc:gac55d45ba7b50cb75763412f158ecd713"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inline generic function for obtaining the unwrapped periodic distance between two particles, whose indices (not IDs) have been given.  <br /></td></tr>
 <tr class="memitem:gafdafa646c7cceaa4eeb8d92b14e0a192" id="r_gafdafa646c7cceaa4eeb8d92b14e0a192"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#gafdafa646c7cceaa4eeb8d92b14e0a192">gen::periodicDistSq</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int iatom, int jatom)</td></tr>
-<tr class="memdesc:gafdafa646c7cceaa4eeb8d92b14e0a192"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inline generic function for obtaining the unwrapped periodic distance between two particles, whose indices (not IDs) have been given.  <br /></td></tr>
 <tr class="memitem:ga4038dadde6016e7a738c2cb015344ee3" id="r_ga4038dadde6016e7a738c2cb015344ee3"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga4038dadde6016e7a738c2cb015344ee3">gen::periodicDist</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int iatom, int jatom)</td></tr>
 <tr class="memdesc:ga4038dadde6016e7a738c2cb015344ee3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inline generic function for obtaining the unwrapped periodic distance between two particles, whose indices (not IDs) have been given.  <br /></td></tr>
 <tr class="memitem:gacdbacffd9c9867dc307efc89686e5634" id="r_gacdbacffd9c9867dc307efc89686e5634"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#gacdbacffd9c9867dc307efc89686e5634">gen::batchPeriodicDistSq</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int iatom, const int *jatom, std::size_t n, double *distSq)</td></tr>
 <tr class="memitem:ga92412c34a5480e96297c968633b07652" id="r_ga92412c34a5480e96297c968633b07652"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#ga92412c34a5480e96297c968633b07652">gen::formatDumpBox</a> (const std::vector&lt; double &gt; &amp;box)</td></tr>
 <tr class="memitem:ga2cc6ef1ffc20f6eebc857d8aafd47f97" id="r_ga2cc6ef1ffc20f6eebc857d8aafd47f97"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ga2cc6ef1ffc20f6eebc857d8aafd47f97">gen::writeDumpBoxBounds</a> (std::ostream &amp;os, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:ga2fbd5127b1fdc22c99f5cd6d57d4bf86" id="r_ga2fbd5127b1fdc22c99f5cd6d57d4bf86"><td class="memItemLeft">std::array&lt; double, 3 &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga2fbd5127b1fdc22c99f5cd6d57d4bf86">gen::relDistFromPoint</a> (const <a class="el" href="structgen_1_1FracBox.html">FracBox</a> &amp;b, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int iatom, double xj, double yj, double zj)</td></tr>
+<tr class="memdesc:ga2fbd5127b1fdc22c99f5cd6d57d4bf86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inline generic function for obtaining the unwrapped periodic distance between one particle and another point, whose index has been given.  <br /></td></tr>
 <tr class="memitem:gacd27073a9df4d812fa5a6d24a8b6efae" id="r_gacd27073a9df4d812fa5a6d24a8b6efae"><td class="memItemLeft">std::array&lt; double, 3 &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gacd27073a9df4d812fa5a6d24a8b6efae">gen::relDistFromPoint</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int iatom, double xj, double yj, double zj)</td></tr>
-<tr class="memdesc:gacd27073a9df4d812fa5a6d24a8b6efae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inline generic function for obtaining the unwrapped periodic distance between one particle and another point, whose index has been given.  <br /></td></tr>
 <tr class="memitem:gafd586580b7217567d600fd49249bd87f" id="r_gafd586580b7217567d600fd49249bd87f"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#gafd586580b7217567d600fd49249bd87f">gen::unWrappedDistFromPoint</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int iatom, const std::vector&lt; double &gt; &amp;singlePoint)</td></tr>
 <tr class="memitem:ga13dd7fd24f050c7a639a1811d22c8d5b" id="r_ga13dd7fd24f050c7a639a1811d22c8d5b"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga13dd7fd24f050c7a639a1811d22c8d5b">gen::distance</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int iatom, int jatom)</td></tr>
 <tr class="memdesc:ga13dd7fd24f050c7a639a1811d22c8d5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inline generic function for obtaining the wrapped distance between two particles WITHOUT applying PBCs, whose indices (not IDs) have been given.  <br /></td></tr>
@@ -295,6 +305,21 @@ Functions</h2></td></tr>
 Variables</h2></td></tr>
 <tr class="memitem:ga9aee9bc09915c8d7a816b9ab38cff0f3" id="r_ga9aee9bc09915c8d7a816b9ab38cff0f3"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">gen::pi</a> = std::numbers::pi</td></tr>
 <tr class="memdesc:ga9aee9bc09915c8d7a816b9ab38cff0f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uses Boost to get the value of pi.  <br /></td></tr>
+<tr class="memitem:gaba26c695f2991cc062aaab7cf0bf6c37" id="r_gaba26c695f2991cc062aaab7cf0bf6c37"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#gaba26c695f2991cc062aaab7cf0bf6c37">gen::FracBox::lx</a> = 0.0</td></tr>
+<tr class="memitem:gafec94241bb6c5f9cafbc50f063131b67" id="r_gafec94241bb6c5f9cafbc50f063131b67"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#gafec94241bb6c5f9cafbc50f063131b67">gen::FracBox::ly</a> = 0.0</td></tr>
+<tr class="memitem:ga1f4527e15aff74eb89d18712e87cde33" id="r_ga1f4527e15aff74eb89d18712e87cde33"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga1f4527e15aff74eb89d18712e87cde33">gen::FracBox::lz</a> = 0.0</td></tr>
+<tr class="memitem:ga546c69a47f8bce2ad98a8e16c1509cde" id="r_ga546c69a47f8bce2ad98a8e16c1509cde"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga546c69a47f8bce2ad98a8e16c1509cde">gen::FracBox::xy</a> = 0.0</td></tr>
+<tr class="memitem:gaa26559856d32586825b90c3875f4f596" id="r_gaa26559856d32586825b90c3875f4f596"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#gaa26559856d32586825b90c3875f4f596">gen::FracBox::xz</a> = 0.0</td></tr>
+<tr class="memitem:ga6989dd6519cd9bd1718dbafc3e65b87b" id="r_ga6989dd6519cd9bd1718dbafc3e65b87b"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga6989dd6519cd9bd1718dbafc3e65b87b">gen::FracBox::yz</a> = 0.0</td></tr>
+<tr class="memitem:ga08e107066539e533e19563cbf3489752" id="r_ga08e107066539e533e19563cbf3489752"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga08e107066539e533e19563cbf3489752">gen::FracBox::ox</a> = 0.0</td></tr>
+<tr class="memitem:gab8ee5dd41226e38d0deb68cec73c5813" id="r_gab8ee5dd41226e38d0deb68cec73c5813"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#gab8ee5dd41226e38d0deb68cec73c5813">gen::FracBox::oy</a> = 0.0</td></tr>
+<tr class="memitem:ga8223c9e3944f04f345f5565071e403d6" id="r_ga8223c9e3944f04f345f5565071e403d6"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga8223c9e3944f04f345f5565071e403d6">gen::FracBox::oz</a> = 0.0</td></tr>
+<tr class="memitem:ga2068521d8d2bc8c5a5d17aa685bbff58" id="r_ga2068521d8d2bc8c5a5d17aa685bbff58"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga2068521d8d2bc8c5a5d17aa685bbff58">gen::FracBox::wx</a> = 0.0</td></tr>
+<tr class="memitem:gace4ed28ee95c0ceb0c86610120e041c1" id="r_gace4ed28ee95c0ceb0c86610120e041c1"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#gace4ed28ee95c0ceb0c86610120e041c1">gen::FracBox::wy</a> = 0.0</td></tr>
+<tr class="memitem:ga9bc354ca956884de3aa23857701b45a6" id="r_ga9bc354ca956884de3aa23857701b45a6"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga9bc354ca956884de3aa23857701b45a6">gen::FracBox::wz</a> = 0.0</td></tr>
+<tr class="memitem:ga98c1cc9e3f0235611d771fd03fb05cf2" id="r_ga98c1cc9e3f0235611d771fd03fb05cf2"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga98c1cc9e3f0235611d771fd03fb05cf2">gen::FracBox::halfMin</a> = 0.0</td></tr>
+<tr class="memitem:ga91c0b39f9ac6dd64fe532938d4d15213" id="r_ga91c0b39f9ac6dd64fe532938d4d15213"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ga91c0b39f9ac6dd64fe532938d4d15213">gen::FracBox::triclinic</a> = false</td></tr>
+<tr class="memitem:ga5b087ebcc42fbb4c7fead909c9fd25a8" id="r_ga5b087ebcc42fbb4c7fead909c9fd25a8"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ga5b087ebcc42fbb4c7fead909c9fd25a8">gen::FracBox::ok</a> = false</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"></div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
@@ -363,17 +388,17 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>length \(2l+1\), normalized by the number of nearest neighbours </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00478">478</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  478</span>                                                             {</div>
-<div class="line"><span class="lineno">  479</span>  <span class="keywordflow">if</span> (neigh == 0) {</div>
-<div class="line"><span class="lineno">  480</span>    <span class="keywordflow">return</span> v;</div>
-<div class="line"><span class="lineno">  481</span>  }</div>
-<div class="line"><span class="lineno">  482</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; 2 * l + 1; m++) {</div>
-<div class="line"><span class="lineno">  483</span>    v[m] = (1.0 / <span class="keyword">static_cast&lt;</span><span class="keywordtype">double</span><span class="keyword">&gt;</span>(neigh)) * v[m];</div>
-<div class="line"><span class="lineno">  484</span>  }</div>
-<div class="line"><span class="lineno">  485</span> </div>
-<div class="line"><span class="lineno">  486</span>  <span class="keywordflow">return</span> v;</div>
-<div class="line"><span class="lineno">  487</span>}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00697">697</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  697</span>                                                             {</div>
+<div class="line"><span class="lineno">  698</span>  <span class="keywordflow">if</span> (neigh == 0) {</div>
+<div class="line"><span class="lineno">  699</span>    <span class="keywordflow">return</span> v;</div>
+<div class="line"><span class="lineno">  700</span>  }</div>
+<div class="line"><span class="lineno">  701</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> m = 0; m &lt; 2 * l + 1; m++) {</div>
+<div class="line"><span class="lineno">  702</span>    v[m] = (1.0 / <span class="keyword">static_cast&lt;</span><span class="keywordtype">double</span><span class="keyword">&gt;</span>(neigh)) * v[m];</div>
+<div class="line"><span class="lineno">  703</span>  }</div>
+<div class="line"><span class="lineno">  704</span> </div>
+<div class="line"><span class="lineno">  705</span>  <span class="keywordflow">return</span> v;</div>
+<div class="line"><span class="lineno">  706</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -419,13 +444,50 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00250">250</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  252</span>                                                   {</div>
-<div class="line"><span class="lineno">  253</span>  <span class="keywordflow">for</span> (std::size_t k = 0; k &lt; n; k++) {</div>
-<div class="line"><span class="lineno">  254</span>    distSq[k] = <a class="code hl_function" href="#gafdafa646c7cceaa4eeb8d92b14e0a192">periodicDistSq</a>(yCloud, iatom, jatom[k]);</div>
-<div class="line"><span class="lineno">  255</span>  }</div>
-<div class="line"><span class="lineno">  256</span>}</div>
-<div class="ttc" id="agroup__gen_html_gafdafa646c7cceaa4eeb8d92b14e0a192"><div class="ttname"><a href="#gafdafa646c7cceaa4eeb8d92b14e0a192">gen::periodicDistSq</a></div><div class="ttdeci">double periodicDistSq(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int iatom, int jatom)</div><div class="ttdoc">Inline generic function for obtaining the unwrapped periodic distance between two particles,...</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00196">generic.hpp:196</a></div></div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00426">426</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  428</span>                                                   {</div>
+<div class="line"><span class="lineno">  429</span>  <span class="keyword">const</span> <a class="code hl_struct" href="structgen_1_1FracBox.html">FracBox</a> b = <a class="code hl_function" href="#ga9833e867efd9f0e5b9e6af932811daad">makeFracBox</a>(yCloud);</div>
+<div class="line"><span class="lineno">  430</span><span class="preprocessor">#ifdef SEAMS_HAS_MINIMAGE</span></div>
+<div class="line"><span class="lineno">  431</span>  <span class="keywordflow">if</span> (n &gt; 0 &amp;&amp; b.<a class="code hl_variable" href="#ga5b087ebcc42fbb4c7fead909c9fd25a8">ok</a> &amp;&amp; b.<a class="code hl_variable" href="#ga91c0b39f9ac6dd64fe532938d4d15213">triclinic</a>) {</div>
+<div class="line"><span class="lineno">  432</span>    mi_cell cell;</div>
+<div class="line"><span class="lineno">  433</span>    <span class="keywordflow">if</span> (pointCloudCell(yCloud, &amp;cell)) {</div>
+<div class="line"><span class="lineno">  434</span>      <span class="keyword">const</span> <span class="keyword">auto</span> &amp;<a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a> = yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(iatom)];</div>
+<div class="line"><span class="lineno">  435</span>      <span class="keyword">const</span> <span class="keywordtype">double</span> p[3] = {<a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.x, <a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.y, <a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.z};</div>
+<div class="line"><span class="lineno">  436</span>      std::vector&lt;double&gt; qs(n * 3);</div>
+<div class="line"><span class="lineno">  437</span>      <span class="keywordflow">for</span> (std::size_t k = 0; k &lt; n; ++k) {</div>
+<div class="line"><span class="lineno">  438</span>        <span class="keyword">const</span> <span class="keyword">auto</span> &amp;pj = yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(jatom[k])];</div>
+<div class="line"><span class="lineno">  439</span>        qs[3 * k] = pj.x;</div>
+<div class="line"><span class="lineno">  440</span>        qs[3 * k + 1] = pj.y;</div>
+<div class="line"><span class="lineno">  441</span>        qs[3 * k + 2] = pj.z;</div>
+<div class="line"><span class="lineno">  442</span>      }</div>
+<div class="line"><span class="lineno">  443</span>      <span class="keywordflow">if</span> (mi_dist2_many(&amp;cell, p, qs.data(), n, distSq) == 0) {</div>
+<div class="line"><span class="lineno">  444</span>        <span class="keywordflow">for</span> (std::size_t k = 0; k &lt; n; ++k) {</div>
+<div class="line"><span class="lineno">  445</span>          <span class="keywordflow">if</span> (<a class="code hl_function" href="#ga9e1ff0c0e75fc4bad58a49f68f95d5c2">smithInside</a>(b, distSq[k])) {</div>
+<div class="line"><span class="lineno">  446</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  447</span>          }</div>
+<div class="line"><span class="lineno">  448</span>          <span class="keyword">const</span> <span class="keywordtype">double</span> q[3] = {qs[3 * k], qs[3 * k + 1], qs[3 * k + 2]};</div>
+<div class="line"><span class="lineno">  449</span>          <span class="keywordtype">double</span> ed[3] = {0.0, 0.0, 0.0};</div>
+<div class="line"><span class="lineno">  450</span>          <span class="keywordflow">if</span> (mi_displacement_euclidean(&amp;cell, q, p, ed) == 0) {</div>
+<div class="line"><span class="lineno">  451</span>            distSq[k] = ed[0] * ed[0] + ed[1] * ed[1] + ed[2] * ed[2];</div>
+<div class="line"><span class="lineno">  452</span>          }</div>
+<div class="line"><span class="lineno">  453</span>        }</div>
+<div class="line"><span class="lineno">  454</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  455</span>      }</div>
+<div class="line"><span class="lineno">  456</span>    }</div>
+<div class="line"><span class="lineno">  457</span>  }</div>
+<div class="line"><span class="lineno">  458</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  459</span>  <span class="keywordflow">for</span> (std::size_t k = 0; k &lt; n; k++) {</div>
+<div class="line"><span class="lineno">  460</span>    distSq[k] = <a class="code hl_function" href="#gac55d45ba7b50cb75763412f158ecd713">periodicDistSq</a>(b, yCloud, iatom, jatom[k]);</div>
+<div class="line"><span class="lineno">  461</span>  }</div>
+<div class="line"><span class="lineno">  462</span>}</div>
+<div class="ttc" id="agroup__gen_html_ga5b087ebcc42fbb4c7fead909c9fd25a8"><div class="ttname"><a href="#ga5b087ebcc42fbb4c7fead909c9fd25a8">gen::FracBox::ok</a></div><div class="ttdeci">bool ok</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00150">generic.hpp:150</a></div></div>
+<div class="ttc" id="agroup__gen_html_ga91c0b39f9ac6dd64fe532938d4d15213"><div class="ttname"><a href="#ga91c0b39f9ac6dd64fe532938d4d15213">gen::FracBox::triclinic</a></div><div class="ttdeci">bool triclinic</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00149">generic.hpp:149</a></div></div>
+<div class="ttc" id="agroup__gen_html_ga9833e867efd9f0e5b9e6af932811daad"><div class="ttname"><a href="#ga9833e867efd9f0e5b9e6af932811daad">gen::makeFracBox</a></div><div class="ttdeci">FracBox makeFracBox(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud)</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00154">generic.hpp:154</a></div></div>
+<div class="ttc" id="agroup__gen_html_ga9aee9bc09915c8d7a816b9ab38cff0f3"><div class="ttname"><a href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">gen::pi</a></div><div class="ttdeci">constexpr double pi</div><div class="ttdoc">Uses Boost to get the value of pi.</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00064">generic.hpp:64</a></div></div>
+<div class="ttc" id="agroup__gen_html_ga9e1ff0c0e75fc4bad58a49f68f95d5c2"><div class="ttname"><a href="#ga9e1ff0c0e75fc4bad58a49f68f95d5c2">gen::smithInside</a></div><div class="ttdeci">bool smithInside(const FracBox &amp;b, double r2)</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00241">generic.hpp:241</a></div></div>
+<div class="ttc" id="agroup__gen_html_gac55d45ba7b50cb75763412f158ecd713"><div class="ttname"><a href="#gac55d45ba7b50cb75763412f158ecd713">gen::periodicDistSq</a></div><div class="ttdeci">double periodicDistSq(const FracBox &amp;b, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int iatom, int jatom)</div><div class="ttdoc">Inline generic function for obtaining the unwrapped periodic distance between two particles,...</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00363">generic.hpp:363</a></div></div>
+<div class="ttc" id="agroup__molSys_html_ga67ab89369cd26572878a91afd521ef81"><div class="ttname"><a href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">molSys::PointCloud::pts</a></div><div class="ttdeci">std::vector&lt; S &gt; pts</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00174">mol_sys.hpp:174</a></div></div>
+<div class="ttc" id="astructgen_1_1FracBox_html"><div class="ttname"><a href="structgen_1_1FracBox.html">gen::FracBox</a></div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00135">generic.hpp:135</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -521,10 +583,10 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if the atom ID of A is less than the atom ID of B </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00401">401</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  402</span>                                                          {</div>
-<div class="line"><span class="lineno">  403</span>  <span class="keywordflow">return</span> a.<a class="code hl_variable" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a> &lt; b.<a class="code hl_variable" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a>;</div>
-<div class="line"><span class="lineno">  404</span>}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00620">620</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  621</span>                                                          {</div>
+<div class="line"><span class="lineno">  622</span>  <span class="keywordflow">return</span> a.<a class="code hl_variable" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a> &lt; b.<a class="code hl_variable" href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">atomID</a>;</div>
+<div class="line"><span class="lineno">  623</span>}</div>
 <div class="ttc" id="agroup__molSys_html_gafbcfc945f41267043cddfd9bae8c10a2"><div class="ttname"><a href="group__molSys.html#gafbcfc945f41267043cddfd9bae8c10a2">molSys::Point::atomID</a></div><div class="ttdeci">int atomID</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00153">mol_sys.hpp:153</a></div></div>
 </div><!-- fragment -->
 </div>
@@ -572,24 +634,23 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The wrapped distance. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00356">356</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  357</span>                    {</div>
-<div class="line"><span class="lineno">  358</span>  std::array&lt;double, 3&gt; dr;</div>
-<div class="line"><span class="lineno">  359</span>  <span class="keywordtype">double</span> r2 = 0.0; <span class="comment">// Squared absolute distance</span></div>
-<div class="line"><span class="lineno">  360</span> </div>
-<div class="line"><span class="lineno">  361</span>  <span class="comment">// Get x1-x2 etc</span></div>
-<div class="line"><span class="lineno">  362</span>  dr[0] = fabs(yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x - yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x);</div>
-<div class="line"><span class="lineno">  363</span>  dr[1] = fabs(yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y - yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y);</div>
-<div class="line"><span class="lineno">  364</span>  dr[2] = fabs(yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z - yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z);</div>
-<div class="line"><span class="lineno">  365</span> </div>
-<div class="line"><span class="lineno">  366</span>  <span class="comment">// Get the squared absolute distance</span></div>
-<div class="line"><span class="lineno">  367</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
-<div class="line"><span class="lineno">  368</span>    r2 += pow(dr[k], 2.0);</div>
-<div class="line"><span class="lineno">  369</span>  }</div>
-<div class="line"><span class="lineno">  370</span> </div>
-<div class="line"><span class="lineno">  371</span>  <span class="keywordflow">return</span> sqrt(r2);</div>
-<div class="line"><span class="lineno">  372</span>}</div>
-<div class="ttc" id="agroup__molSys_html_ga67ab89369cd26572878a91afd521ef81"><div class="ttname"><a href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">molSys::PointCloud::pts</a></div><div class="ttdeci">std::vector&lt; S &gt; pts</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00174">mol_sys.hpp:174</a></div></div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00575">575</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  576</span>                    {</div>
+<div class="line"><span class="lineno">  577</span>  std::array&lt;double, 3&gt; dr;</div>
+<div class="line"><span class="lineno">  578</span>  <span class="keywordtype">double</span> r2 = 0.0; <span class="comment">// Squared absolute distance</span></div>
+<div class="line"><span class="lineno">  579</span> </div>
+<div class="line"><span class="lineno">  580</span>  <span class="comment">// Get x1-x2 etc</span></div>
+<div class="line"><span class="lineno">  581</span>  dr[0] = fabs(yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x - yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x);</div>
+<div class="line"><span class="lineno">  582</span>  dr[1] = fabs(yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y - yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y);</div>
+<div class="line"><span class="lineno">  583</span>  dr[2] = fabs(yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z - yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z);</div>
+<div class="line"><span class="lineno">  584</span> </div>
+<div class="line"><span class="lineno">  585</span>  <span class="comment">// Get the squared absolute distance</span></div>
+<div class="line"><span class="lineno">  586</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
+<div class="line"><span class="lineno">  587</span>    r2 += pow(dr[k], 2.0);</div>
+<div class="line"><span class="lineno">  588</span>  }</div>
+<div class="line"><span class="lineno">  589</span> </div>
+<div class="line"><span class="lineno">  590</span>  <span class="keywordflow">return</span> sqrt(r2);</div>
+<div class="line"><span class="lineno">  591</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -647,10 +708,10 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00465">465</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  465</span>                                               {</div>
-<div class="line"><span class="lineno">  466</span>  <span class="keywordflow">return</span> std::filesystem::exists(name);</div>
-<div class="line"><span class="lineno">  467</span>}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00684">684</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  684</span>                                               {</div>
+<div class="line"><span class="lineno">  685</span>  <span class="keywordflow">return</span> std::filesystem::exists(name);</div>
+<div class="line"><span class="lineno">  686</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -677,17 +738,168 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00259">259</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  259</span>                                                             {</div>
-<div class="line"><span class="lineno">  260</span>  std::ostringstream oss;</div>
-<div class="line"><span class="lineno">  261</span>  <span class="keywordflow">if</span> (box.size() &gt;= 3) {</div>
-<div class="line"><span class="lineno">  262</span>    oss &lt;&lt; box[0] &lt;&lt; <span class="charliteral">&#39; &#39;</span> &lt;&lt; box[1] &lt;&lt; <span class="charliteral">&#39; &#39;</span> &lt;&lt; box[2];</div>
-<div class="line"><span class="lineno">  263</span>  }</div>
-<div class="line"><span class="lineno">  264</span>  <span class="keywordflow">if</span> (box.size() &gt;= 6) {</div>
-<div class="line"><span class="lineno">  265</span>    oss &lt;&lt; <span class="stringliteral">&quot; xy &quot;</span> &lt;&lt; box[3] &lt;&lt; <span class="stringliteral">&quot; xz &quot;</span> &lt;&lt; box[4] &lt;&lt; <span class="stringliteral">&quot; yz &quot;</span> &lt;&lt; box[5];</div>
-<div class="line"><span class="lineno">  266</span>  }</div>
-<div class="line"><span class="lineno">  267</span>  <span class="keywordflow">return</span> oss.str();</div>
-<div class="line"><span class="lineno">  268</span>}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00465">465</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  465</span>                                                             {</div>
+<div class="line"><span class="lineno">  466</span>  std::ostringstream oss;</div>
+<div class="line"><span class="lineno">  467</span>  <span class="keywordflow">if</span> (box.size() &gt;= 3) {</div>
+<div class="line"><span class="lineno">  468</span>    oss &lt;&lt; box[0] &lt;&lt; <span class="charliteral">&#39; &#39;</span> &lt;&lt; box[1] &lt;&lt; <span class="charliteral">&#39; &#39;</span> &lt;&lt; box[2];</div>
+<div class="line"><span class="lineno">  469</span>  }</div>
+<div class="line"><span class="lineno">  470</span>  <span class="keywordflow">if</span> (box.size() &gt;= 6) {</div>
+<div class="line"><span class="lineno">  471</span>    oss &lt;&lt; <span class="stringliteral">&quot; xy &quot;</span> &lt;&lt; box[3] &lt;&lt; <span class="stringliteral">&quot; xz &quot;</span> &lt;&lt; box[4] &lt;&lt; <span class="stringliteral">&quot; yz &quot;</span> &lt;&lt; box[5];</div>
+<div class="line"><span class="lineno">  472</span>  }</div>
+<div class="line"><span class="lineno">  473</span>  <span class="keywordflow">return</span> oss.str();</div>
+<div class="line"><span class="lineno">  474</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gab34364ca503fda783a0795a8e4525670" name="gab34364ca503fda783a0795a8e4525670"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gab34364ca503fda783a0795a8e4525670">&#9670;&#160;</a></span>fracDelta()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::array&lt; double, 3 &gt; gen::fracDelta </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structgen_1_1FracBox.html">FracBox</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>b</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>xi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>yi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>zi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>xj</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>yj</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>zj</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00203">203</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  205</span>                                                  {</div>
+<div class="line"><span class="lineno">  206</span>  <span class="keywordflow">if</span> (!b.<a class="code hl_variable" href="#ga91c0b39f9ac6dd64fe532938d4d15213">triclinic</a>) {</div>
+<div class="line"><span class="lineno">  207</span>    std::array&lt;double, 3&gt; dr = {xi - xj, yi - yj, zi - zj};</div>
+<div class="line"><span class="lineno">  208</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> len[3] = {b.<a class="code hl_variable" href="#gaba26c695f2991cc062aaab7cf0bf6c37">lx</a>, b.<a class="code hl_variable" href="#gafec94241bb6c5f9cafbc50f063131b67">ly</a>, b.<a class="code hl_variable" href="#ga1f4527e15aff74eb89d18712e87cde33">lz</a>};</div>
+<div class="line"><span class="lineno">  209</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
+<div class="line"><span class="lineno">  210</span>      dr[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k)] -=</div>
+<div class="line"><span class="lineno">  211</span>          len[k] * std::floor(dr[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k)] / len[k] + 0.5);</div>
+<div class="line"><span class="lineno">  212</span>    }</div>
+<div class="line"><span class="lineno">  213</span>    <span class="keywordflow">return</span> dr;</div>
+<div class="line"><span class="lineno">  214</span>  }</div>
+<div class="line"><span class="lineno">  215</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> sz_i = (zi - b.<a class="code hl_variable" href="#ga8223c9e3944f04f345f5565071e403d6">oz</a>) / b.<a class="code hl_variable" href="#ga1f4527e15aff74eb89d18712e87cde33">lz</a>;</div>
+<div class="line"><span class="lineno">  216</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> sy_i = (yi - b.<a class="code hl_variable" href="#gab8ee5dd41226e38d0deb68cec73c5813">oy</a> - b.<a class="code hl_variable" href="#ga6989dd6519cd9bd1718dbafc3e65b87b">yz</a> * sz_i) / b.<a class="code hl_variable" href="#gafec94241bb6c5f9cafbc50f063131b67">ly</a>;</div>
+<div class="line"><span class="lineno">  217</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> sx_i = (xi - b.<a class="code hl_variable" href="#ga08e107066539e533e19563cbf3489752">ox</a> - b.<a class="code hl_variable" href="#ga546c69a47f8bce2ad98a8e16c1509cde">xy</a> * sy_i - b.<a class="code hl_variable" href="#gaa26559856d32586825b90c3875f4f596">xz</a> * sz_i) / b.<a class="code hl_variable" href="#gaba26c695f2991cc062aaab7cf0bf6c37">lx</a>;</div>
+<div class="line"><span class="lineno">  218</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> sz_j = (zj - b.<a class="code hl_variable" href="#ga8223c9e3944f04f345f5565071e403d6">oz</a>) / b.<a class="code hl_variable" href="#ga1f4527e15aff74eb89d18712e87cde33">lz</a>;</div>
+<div class="line"><span class="lineno">  219</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> sy_j = (yj - b.<a class="code hl_variable" href="#gab8ee5dd41226e38d0deb68cec73c5813">oy</a> - b.<a class="code hl_variable" href="#ga6989dd6519cd9bd1718dbafc3e65b87b">yz</a> * sz_j) / b.<a class="code hl_variable" href="#gafec94241bb6c5f9cafbc50f063131b67">ly</a>;</div>
+<div class="line"><span class="lineno">  220</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> sx_j = (xj - b.<a class="code hl_variable" href="#ga08e107066539e533e19563cbf3489752">ox</a> - b.<a class="code hl_variable" href="#ga546c69a47f8bce2ad98a8e16c1509cde">xy</a> * sy_j - b.<a class="code hl_variable" href="#gaa26559856d32586825b90c3875f4f596">xz</a> * sz_j) / b.<a class="code hl_variable" href="#gaba26c695f2991cc062aaab7cf0bf6c37">lx</a>;</div>
+<div class="line"><span class="lineno">  221</span>  <span class="keywordtype">double</span> dsx = sx_i - sx_j;</div>
+<div class="line"><span class="lineno">  222</span>  <span class="keywordtype">double</span> dsy = sy_i - sy_j;</div>
+<div class="line"><span class="lineno">  223</span>  <span class="keywordtype">double</span> dsz = sz_i - sz_j;</div>
+<div class="line"><span class="lineno">  224</span>  dsx -= std::round(dsx);</div>
+<div class="line"><span class="lineno">  225</span>  dsy -= std::round(dsy);</div>
+<div class="line"><span class="lineno">  226</span>  dsz -= std::round(dsz);</div>
+<div class="line"><span class="lineno">  227</span>  <span class="keywordflow">return</span> {b.<a class="code hl_variable" href="#gaba26c695f2991cc062aaab7cf0bf6c37">lx</a> * dsx + b.<a class="code hl_variable" href="#ga546c69a47f8bce2ad98a8e16c1509cde">xy</a> * dsy + b.<a class="code hl_variable" href="#gaa26559856d32586825b90c3875f4f596">xz</a> * dsz, b.<a class="code hl_variable" href="#gafec94241bb6c5f9cafbc50f063131b67">ly</a> * dsy + b.<a class="code hl_variable" href="#ga6989dd6519cd9bd1718dbafc3e65b87b">yz</a> * dsz,</div>
+<div class="line"><span class="lineno">  228</span>          b.<a class="code hl_variable" href="#ga1f4527e15aff74eb89d18712e87cde33">lz</a> * dsz};</div>
+<div class="line"><span class="lineno">  229</span>}</div>
+<div class="ttc" id="agroup__gen_html_ga08e107066539e533e19563cbf3489752"><div class="ttname"><a href="#ga08e107066539e533e19563cbf3489752">gen::FracBox::ox</a></div><div class="ttdeci">double ox</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00142">generic.hpp:142</a></div></div>
+<div class="ttc" id="agroup__gen_html_ga1f4527e15aff74eb89d18712e87cde33"><div class="ttname"><a href="#ga1f4527e15aff74eb89d18712e87cde33">gen::FracBox::lz</a></div><div class="ttdeci">double lz</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00138">generic.hpp:138</a></div></div>
+<div class="ttc" id="agroup__gen_html_ga546c69a47f8bce2ad98a8e16c1509cde"><div class="ttname"><a href="#ga546c69a47f8bce2ad98a8e16c1509cde">gen::FracBox::xy</a></div><div class="ttdeci">double xy</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00139">generic.hpp:139</a></div></div>
+<div class="ttc" id="agroup__gen_html_ga6989dd6519cd9bd1718dbafc3e65b87b"><div class="ttname"><a href="#ga6989dd6519cd9bd1718dbafc3e65b87b">gen::FracBox::yz</a></div><div class="ttdeci">double yz</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00141">generic.hpp:141</a></div></div>
+<div class="ttc" id="agroup__gen_html_ga8223c9e3944f04f345f5565071e403d6"><div class="ttname"><a href="#ga8223c9e3944f04f345f5565071e403d6">gen::FracBox::oz</a></div><div class="ttdeci">double oz</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00144">generic.hpp:144</a></div></div>
+<div class="ttc" id="agroup__gen_html_gaa26559856d32586825b90c3875f4f596"><div class="ttname"><a href="#gaa26559856d32586825b90c3875f4f596">gen::FracBox::xz</a></div><div class="ttdeci">double xz</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00140">generic.hpp:140</a></div></div>
+<div class="ttc" id="agroup__gen_html_gab8ee5dd41226e38d0deb68cec73c5813"><div class="ttname"><a href="#gab8ee5dd41226e38d0deb68cec73c5813">gen::FracBox::oy</a></div><div class="ttdeci">double oy</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00143">generic.hpp:143</a></div></div>
+<div class="ttc" id="agroup__gen_html_gaba26c695f2991cc062aaab7cf0bf6c37"><div class="ttname"><a href="#gaba26c695f2991cc062aaab7cf0bf6c37">gen::FracBox::lx</a></div><div class="ttdeci">double lx</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00136">generic.hpp:136</a></div></div>
+<div class="ttc" id="agroup__gen_html_gafec94241bb6c5f9cafbc50f063131b67"><div class="ttname"><a href="#gafec94241bb6c5f9cafbc50f063131b67">gen::FracBox::ly</a></div><div class="ttdeci">double ly</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00137">generic.hpp:137</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga099f0b52a85217f92284e497b97d0466" name="ga099f0b52a85217f92284e497b97d0466"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga099f0b52a85217f92284e497b97d0466">&#9670;&#160;</a></span>fracDistSq()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::fracDistSq </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structgen_1_1FracBox.html">FracBox</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>b</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>xi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>yi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>zi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>xj</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>yj</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>zj</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00231">231</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  232</span>                                                          {</div>
+<div class="line"><span class="lineno">  233</span>  <span class="keyword">const</span> <span class="keyword">auto</span> dr = <a class="code hl_function" href="#gab34364ca503fda783a0795a8e4525670">fracDelta</a>(b, xi, yi, zi, xj, yj, zj);</div>
+<div class="line"><span class="lineno">  234</span>  <span class="keywordflow">return</span> dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];</div>
+<div class="line"><span class="lineno">  235</span>}</div>
+<div class="ttc" id="agroup__gen_html_gab34364ca503fda783a0795a8e4525670"><div class="ttname"><a href="#gab34364ca503fda783a0795a8e4525670">gen::fracDelta</a></div><div class="ttdeci">std::array&lt; double, 3 &gt; fracDelta(const FracBox &amp;b, double xi, double yi, double zi, double xj, double yj, double zj)</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00203">generic.hpp:203</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -708,6 +920,83 @@ Variables</h2></td></tr>
 
 <p>Get the average, after excluding the outliers, using quartiles. </p>
 
+</div>
+</div>
+<a id="ga9833e867efd9f0e5b9e6af932811daad" name="ga9833e867efd9f0e5b9e6af932811daad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga9833e867efd9f0e5b9e6af932811daad">&#9670;&#160;</a></span>makeFracBox()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structgen_1_1FracBox.html">FracBox</a> gen::makeFracBox </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00154">154</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  154</span>                                                                         {</div>
+<div class="line"><span class="lineno">  155</span>  <a class="code hl_struct" href="structgen_1_1FracBox.html">FracBox</a> b;</div>
+<div class="line"><span class="lineno">  156</span>  <span class="keyword">const</span> <span class="keyword">auto</span> &amp;box = yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>;</div>
+<div class="line"><span class="lineno">  157</span>  <span class="keyword">const</span> <span class="keyword">auto</span> &amp;boxLow = yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>;</div>
+<div class="line"><span class="lineno">  158</span>  b.<a class="code hl_variable" href="#ga08e107066539e533e19563cbf3489752">ox</a> = boxLow.size() &gt; 0 ? boxLow[0] : 0.0;</div>
+<div class="line"><span class="lineno">  159</span>  b.<a class="code hl_variable" href="#gab8ee5dd41226e38d0deb68cec73c5813">oy</a> = boxLow.size() &gt; 1 ? boxLow[1] : 0.0;</div>
+<div class="line"><span class="lineno">  160</span>  b.<a class="code hl_variable" href="#ga8223c9e3944f04f345f5565071e403d6">oz</a> = boxLow.size() &gt; 2 ? boxLow[2] : 0.0;</div>
+<div class="line"><span class="lineno">  161</span>  <span class="keywordflow">if</span> (box.size() &gt;= 6) {</div>
+<div class="line"><span class="lineno">  162</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> xy = box[3];</div>
+<div class="line"><span class="lineno">  163</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> xz = box[4];</div>
+<div class="line"><span class="lineno">  164</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> yz = box[5];</div>
+<div class="line"><span class="lineno">  165</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));</div>
+<div class="line"><span class="lineno">  166</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));</div>
+<div class="line"><span class="lineno">  167</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> ymin = std::min(0.0, yz);</div>
+<div class="line"><span class="lineno">  168</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> ymax = std::max(0.0, yz);</div>
+<div class="line"><span class="lineno">  169</span>    b.<a class="code hl_variable" href="#gaba26c695f2991cc062aaab7cf0bf6c37">lx</a> = box[0] - xmax + xmin;</div>
+<div class="line"><span class="lineno">  170</span>    b.<a class="code hl_variable" href="#gafec94241bb6c5f9cafbc50f063131b67">ly</a> = box[1] - ymax + ymin;</div>
+<div class="line"><span class="lineno">  171</span>    b.<a class="code hl_variable" href="#ga1f4527e15aff74eb89d18712e87cde33">lz</a> = box[2];</div>
+<div class="line"><span class="lineno">  172</span>    b.<a class="code hl_variable" href="#ga546c69a47f8bce2ad98a8e16c1509cde">xy</a> = xy;</div>
+<div class="line"><span class="lineno">  173</span>    b.<a class="code hl_variable" href="#gaa26559856d32586825b90c3875f4f596">xz</a> = xz;</div>
+<div class="line"><span class="lineno">  174</span>    b.<a class="code hl_variable" href="#ga6989dd6519cd9bd1718dbafc3e65b87b">yz</a> = yz;</div>
+<div class="line"><span class="lineno">  175</span>    b.<a class="code hl_variable" href="#ga08e107066539e533e19563cbf3489752">ox</a> -= xmin;</div>
+<div class="line"><span class="lineno">  176</span>    b.<a class="code hl_variable" href="#gab8ee5dd41226e38d0deb68cec73c5813">oy</a> -= ymin;</div>
+<div class="line"><span class="lineno">  177</span>    b.<a class="code hl_variable" href="#ga91c0b39f9ac6dd64fe532938d4d15213">triclinic</a> = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  178</span>  } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (box.size() &gt;= 3) {</div>
+<div class="line"><span class="lineno">  179</span>    b.<a class="code hl_variable" href="#gaba26c695f2991cc062aaab7cf0bf6c37">lx</a> = box[0];</div>
+<div class="line"><span class="lineno">  180</span>    b.<a class="code hl_variable" href="#gafec94241bb6c5f9cafbc50f063131b67">ly</a> = box[1];</div>
+<div class="line"><span class="lineno">  181</span>    b.<a class="code hl_variable" href="#ga1f4527e15aff74eb89d18712e87cde33">lz</a> = box[2];</div>
+<div class="line"><span class="lineno">  182</span>  } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  183</span>    <span class="keywordflow">return</span> b;</div>
+<div class="line"><span class="lineno">  184</span>  }</div>
+<div class="line"><span class="lineno">  185</span>  <span class="keywordflow">if</span> (!(b.<a class="code hl_variable" href="#gaba26c695f2991cc062aaab7cf0bf6c37">lx</a> &gt; 0.0 &amp;&amp; b.<a class="code hl_variable" href="#gafec94241bb6c5f9cafbc50f063131b67">ly</a> &gt; 0.0 &amp;&amp; b.<a class="code hl_variable" href="#ga1f4527e15aff74eb89d18712e87cde33">lz</a> &gt; 0.0)) {</div>
+<div class="line"><span class="lineno">  186</span>    <span class="keywordflow">return</span> b;</div>
+<div class="line"><span class="lineno">  187</span>  }</div>
+<div class="line"><span class="lineno">  188</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> bcz = b.<a class="code hl_variable" href="#ga546c69a47f8bce2ad98a8e16c1509cde">xy</a> * b.<a class="code hl_variable" href="#ga6989dd6519cd9bd1718dbafc3e65b87b">yz</a> - b.<a class="code hl_variable" href="#gafec94241bb6c5f9cafbc50f063131b67">ly</a> * b.<a class="code hl_variable" href="#gaa26559856d32586825b90c3875f4f596">xz</a>;</div>
+<div class="line"><span class="lineno">  189</span>  b.<a class="code hl_variable" href="#ga2068521d8d2bc8c5a5d17aa685bbff58">wx</a> = b.<a class="code hl_variable" href="#gaba26c695f2991cc062aaab7cf0bf6c37">lx</a> * b.<a class="code hl_variable" href="#gafec94241bb6c5f9cafbc50f063131b67">ly</a> * b.<a class="code hl_variable" href="#ga1f4527e15aff74eb89d18712e87cde33">lz</a> /</div>
+<div class="line"><span class="lineno">  190</span>         std::sqrt(b.<a class="code hl_variable" href="#gafec94241bb6c5f9cafbc50f063131b67">ly</a> * b.<a class="code hl_variable" href="#ga1f4527e15aff74eb89d18712e87cde33">lz</a> * b.<a class="code hl_variable" href="#gafec94241bb6c5f9cafbc50f063131b67">ly</a> * b.<a class="code hl_variable" href="#ga1f4527e15aff74eb89d18712e87cde33">lz</a> + b.<a class="code hl_variable" href="#ga546c69a47f8bce2ad98a8e16c1509cde">xy</a> * b.<a class="code hl_variable" href="#ga1f4527e15aff74eb89d18712e87cde33">lz</a> * b.<a class="code hl_variable" href="#ga546c69a47f8bce2ad98a8e16c1509cde">xy</a> * b.<a class="code hl_variable" href="#ga1f4527e15aff74eb89d18712e87cde33">lz</a> +</div>
+<div class="line"><span class="lineno">  191</span>                   bcz * bcz);</div>
+<div class="line"><span class="lineno">  192</span>  b.<a class="code hl_variable" href="#gace4ed28ee95c0ceb0c86610120e041c1">wy</a> = b.<a class="code hl_variable" href="#gafec94241bb6c5f9cafbc50f063131b67">ly</a> * b.<a class="code hl_variable" href="#ga1f4527e15aff74eb89d18712e87cde33">lz</a> / std::sqrt(b.<a class="code hl_variable" href="#ga1f4527e15aff74eb89d18712e87cde33">lz</a> * b.<a class="code hl_variable" href="#ga1f4527e15aff74eb89d18712e87cde33">lz</a> + b.<a class="code hl_variable" href="#ga6989dd6519cd9bd1718dbafc3e65b87b">yz</a> * b.<a class="code hl_variable" href="#ga6989dd6519cd9bd1718dbafc3e65b87b">yz</a>);</div>
+<div class="line"><span class="lineno">  193</span>  b.<a class="code hl_variable" href="#ga9bc354ca956884de3aa23857701b45a6">wz</a> = b.<a class="code hl_variable" href="#ga1f4527e15aff74eb89d18712e87cde33">lz</a>;</div>
+<div class="line"><span class="lineno">  194</span>  b.<a class="code hl_variable" href="#ga98c1cc9e3f0235611d771fd03fb05cf2">halfMin</a> = 0.5 * std::min(b.<a class="code hl_variable" href="#ga2068521d8d2bc8c5a5d17aa685bbff58">wx</a>, std::min(b.<a class="code hl_variable" href="#gace4ed28ee95c0ceb0c86610120e041c1">wy</a>, b.<a class="code hl_variable" href="#ga9bc354ca956884de3aa23857701b45a6">wz</a>));</div>
+<div class="line"><span class="lineno">  195</span>  b.<a class="code hl_variable" href="#ga5b087ebcc42fbb4c7fead909c9fd25a8">ok</a> = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  196</span>  <span class="keywordflow">return</span> b;</div>
+<div class="line"><span class="lineno">  197</span>}</div>
+<div class="ttc" id="agroup__gen_html_ga2068521d8d2bc8c5a5d17aa685bbff58"><div class="ttname"><a href="#ga2068521d8d2bc8c5a5d17aa685bbff58">gen::FracBox::wx</a></div><div class="ttdeci">double wx</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00145">generic.hpp:145</a></div></div>
+<div class="ttc" id="agroup__gen_html_ga98c1cc9e3f0235611d771fd03fb05cf2"><div class="ttname"><a href="#ga98c1cc9e3f0235611d771fd03fb05cf2">gen::FracBox::halfMin</a></div><div class="ttdeci">double halfMin</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00148">generic.hpp:148</a></div></div>
+<div class="ttc" id="agroup__gen_html_ga9bc354ca956884de3aa23857701b45a6"><div class="ttname"><a href="#ga9bc354ca956884de3aa23857701b45a6">gen::FracBox::wz</a></div><div class="ttdeci">double wz</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00147">generic.hpp:147</a></div></div>
+<div class="ttc" id="agroup__gen_html_gace4ed28ee95c0ceb0c86610120e041c1"><div class="ttname"><a href="#gace4ed28ee95c0ceb0c86610120e041c1">gen::FracBox::wy</a></div><div class="ttdeci">double wy</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00146">generic.hpp:146</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gaa7d9b8543780baf4a495c7acdb1f87d8"><div class="ttname"><a href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">molSys::PointCloud::box</a></div><div class="ttdeci">std::vector&lt; T &gt; box</div><div class="ttdoc">Number of atoms.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00177">mol_sys.hpp:177</a></div></div>
+<div class="ttc" id="agroup__molSys_html_gac861daaeb2b1e75a6ac9eb3390bc6105"><div class="ttname"><a href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">molSys::PointCloud::boxLow</a></div><div class="ttdeci">std::vector&lt; T &gt; boxLow</div><div class="ttdoc">Periodic box lengths.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00178">mol_sys.hpp:178</a></div></div>
+</div><!-- fragment -->
 </div>
 </div>
 <a id="ga4038dadde6016e7a738c2cb015344ee3" name="ga4038dadde6016e7a738c2cb015344ee3"></a>
@@ -753,15 +1042,15 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The unwrapped periodic distance. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00243">243</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  244</span>                                   {</div>
-<div class="line"><span class="lineno">  245</span>  <span class="keywordflow">return</span> std::sqrt(<a class="code hl_function" href="#gafdafa646c7cceaa4eeb8d92b14e0a192">periodicDistSq</a>(yCloud, iatom, jatom));</div>
-<div class="line"><span class="lineno">  246</span>}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00417">417</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  418</span>                                   {</div>
+<div class="line"><span class="lineno">  419</span>  <span class="keywordflow">return</span> std::sqrt(<a class="code hl_function" href="#gac55d45ba7b50cb75763412f158ecd713">periodicDistSq</a>(yCloud, iatom, jatom));</div>
+<div class="line"><span class="lineno">  420</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
-<a id="gafdafa646c7cceaa4eeb8d92b14e0a192" name="gafdafa646c7cceaa4eeb8d92b14e0a192"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gafdafa646c7cceaa4eeb8d92b14e0a192">&#9670;&#160;</a></span>periodicDistSq()</h2>
+<a id="gac55d45ba7b50cb75763412f158ecd713" name="gac55d45ba7b50cb75763412f158ecd713"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac55d45ba7b50cb75763412f158ecd713">&#9670;&#160;</a></span>periodicDistSq() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -772,6 +1061,11 @@ Variables</h2></td></tr>
         <tr>
           <td class="memname">double gen::periodicDistSq </td>
           <td>(</td>
+          <td class="paramtype">const <a class="el" href="structgen_1_1FracBox.html">FracBox</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>b</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
         </tr>
         <tr>
@@ -803,44 +1097,83 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The unwrapped periodic distance. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00196">196</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  197</span>                                     {</div>
-<div class="line"><span class="lineno">  198</span><span class="preprocessor">#ifdef SEAMS_HAS_MINIMAGE</span></div>
-<div class="line"><span class="lineno">  199</span>  <span class="keyword">const</span> mi_cell cell = pointCloudCell(yCloud);</div>
-<div class="line"><span class="lineno">  200</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> p[3] = {yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y,</div>
-<div class="line"><span class="lineno">  201</span>                       yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z};</div>
-<div class="line"><span class="lineno">  202</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> q[3] = {yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y,</div>
-<div class="line"><span class="lineno">  203</span>                       yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z};</div>
-<div class="line"><span class="lineno">  204</span>  <span class="keywordtype">double</span> out = 0.0;</div>
-<div class="line"><span class="lineno">  205</span>  mi_dist2(&amp;cell, p, q, &amp;out);</div>
-<div class="line"><span class="lineno">  206</span>  <span class="keywordflow">return</span> out;</div>
-<div class="line"><span class="lineno">  207</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  208</span>  <span class="keywordflow">if</span> (yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.size() &gt;= 6) {</div>
-<div class="line"><span class="lineno">  209</span>    <span class="keyword">const</span> <span class="keyword">auto</span> dr = <a class="code hl_function" href="#ga74b57e7951bcff4f7c31fdc4ec5e79bf">triclinicMinImage</a>(</div>
-<div class="line"><span class="lineno">  210</span>        yCloud, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z,</div>
-<div class="line"><span class="lineno">  211</span>        yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z);</div>
-<div class="line"><span class="lineno">  212</span>    <span class="keywordflow">return</span> dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];</div>
-<div class="line"><span class="lineno">  213</span>  }</div>
-<div class="line"><span class="lineno">  214</span> </div>
-<div class="line"><span class="lineno">  215</span>  std::array&lt;double, 3&gt; dr;</div>
-<div class="line"><span class="lineno">  216</span>  <span class="keywordtype">double</span> r2 = 0.0; <span class="comment">// Squared absolute distance</span></div>
-<div class="line"><span class="lineno">  217</span> </div>
-<div class="line"><span class="lineno">  218</span>  <span class="comment">// Get x1-x2 etc</span></div>
-<div class="line"><span class="lineno">  219</span>  dr[0] = std::fabs(yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x - yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x);</div>
-<div class="line"><span class="lineno">  220</span>  dr[1] = std::fabs(yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y - yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y);</div>
-<div class="line"><span class="lineno">  221</span>  dr[2] = std::fabs(yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z - yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z);</div>
-<div class="line"><span class="lineno">  222</span> </div>
-<div class="line"><span class="lineno">  223</span>  <span class="comment">// Three-axis wrap for an orthorhombic length-3 box</span></div>
-<div class="line"><span class="lineno">  224</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
-<div class="line"><span class="lineno">  225</span>    dr[k] -= yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k] * std::round(dr[k] / yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k]);</div>
-<div class="line"><span class="lineno">  226</span>    r2 += dr[k] * dr[k];</div>
-<div class="line"><span class="lineno">  227</span>  }</div>
-<div class="line"><span class="lineno">  228</span> </div>
-<div class="line"><span class="lineno">  229</span>  <span class="keywordflow">return</span> r2;</div>
-<div class="line"><span class="lineno">  230</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  231</span>}</div>
-<div class="ttc" id="agroup__gen_html_ga74b57e7951bcff4f7c31fdc4ec5e79bf"><div class="ttname"><a href="#ga74b57e7951bcff4f7c31fdc4ec5e79bf">gen::triclinicMinImage</a></div><div class="ttdeci">std::array&lt; double, 3 &gt; triclinicMinImage(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, double xi, double yi, double zi, double xj, double yj, double zj)</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00134">generic.hpp:134</a></div></div>
-<div class="ttc" id="agroup__molSys_html_gaa7d9b8543780baf4a495c7acdb1f87d8"><div class="ttname"><a href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">molSys::PointCloud::box</a></div><div class="ttdeci">std::vector&lt; T &gt; box</div><div class="ttdoc">Number of atoms.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00177">mol_sys.hpp:177</a></div></div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00363">363</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  365</span>                                     {</div>
+<div class="line"><span class="lineno">  366</span>  <span class="keyword">const</span> <span class="keyword">auto</span> &amp;<a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a> = yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(iatom)];</div>
+<div class="line"><span class="lineno">  367</span>  <span class="keyword">const</span> <span class="keyword">auto</span> &amp;pj = yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(jatom)];</div>
+<div class="line"><span class="lineno">  368</span>  <span class="keywordflow">if</span> (b.<a class="code hl_variable" href="#ga5b087ebcc42fbb4c7fead909c9fd25a8">ok</a>) {</div>
+<div class="line"><span class="lineno">  369</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> r2 = <a class="code hl_function" href="#ga099f0b52a85217f92284e497b97d0466">fracDistSq</a>(b, <a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.x, <a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.y, <a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.z, pj.x, pj.y, pj.z);</div>
+<div class="line"><span class="lineno">  370</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="#ga9e1ff0c0e75fc4bad58a49f68f95d5c2">smithInside</a>(b, r2)) {</div>
+<div class="line"><span class="lineno">  371</span>      <span class="keywordflow">return</span> r2;</div>
+<div class="line"><span class="lineno">  372</span>    }</div>
+<div class="line"><span class="lineno">  373</span><span class="preprocessor">#ifdef SEAMS_HAS_MINIMAGE</span></div>
+<div class="line"><span class="lineno">  374</span>    <span class="keywordtype">double</span> ed[3] = {0.0, 0.0, 0.0};</div>
+<div class="line"><span class="lineno">  375</span>    <span class="keywordflow">if</span> (euclideanDelta(yCloud, <a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.x, <a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.y, <a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.z, pj.x, pj.y, pj.z, ed)) {</div>
+<div class="line"><span class="lineno">  376</span>      <span class="keywordflow">return</span> ed[0] * ed[0] + ed[1] * ed[1] + ed[2] * ed[2];</div>
+<div class="line"><span class="lineno">  377</span>    }</div>
+<div class="line"><span class="lineno">  378</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  379</span>    <span class="keywordflow">return</span> r2;</div>
+<div class="line"><span class="lineno">  380</span>  }</div>
+<div class="line"><span class="lineno">  381</span>  <span class="keywordflow">if</span> (yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.size() &gt;= 6) {</div>
+<div class="line"><span class="lineno">  382</span>    <span class="keyword">const</span> <span class="keyword">auto</span> dr =</div>
+<div class="line"><span class="lineno">  383</span>        <a class="code hl_function" href="#ga74b57e7951bcff4f7c31fdc4ec5e79bf">triclinicMinImage</a>(yCloud, <a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.x, <a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.y, <a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.z, pj.x, pj.y, pj.z);</div>
+<div class="line"><span class="lineno">  384</span>    <span class="keywordflow">return</span> dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];</div>
+<div class="line"><span class="lineno">  385</span>  }</div>
+<div class="line"><span class="lineno">  386</span>  std::array&lt;double, 3&gt; dr;</div>
+<div class="line"><span class="lineno">  387</span>  <span class="keywordtype">double</span> r2 = 0.0;</div>
+<div class="line"><span class="lineno">  388</span>  dr[0] = std::fabs(<a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.x - pj.x);</div>
+<div class="line"><span class="lineno">  389</span>  dr[1] = std::fabs(<a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.y - pj.y);</div>
+<div class="line"><span class="lineno">  390</span>  dr[2] = std::fabs(<a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.z - pj.z);</div>
+<div class="line"><span class="lineno">  391</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
+<div class="line"><span class="lineno">  392</span>    dr[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k)] -=</div>
+<div class="line"><span class="lineno">  393</span>        yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k)] *</div>
+<div class="line"><span class="lineno">  394</span>        std::round(dr[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k)] /</div>
+<div class="line"><span class="lineno">  395</span>                   yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k)]);</div>
+<div class="line"><span class="lineno">  396</span>    r2 += dr[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k)] * dr[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k)];</div>
+<div class="line"><span class="lineno">  397</span>  }</div>
+<div class="line"><span class="lineno">  398</span>  <span class="keywordflow">return</span> r2;</div>
+<div class="line"><span class="lineno">  399</span>}</div>
+<div class="ttc" id="agroup__gen_html_ga099f0b52a85217f92284e497b97d0466"><div class="ttname"><a href="#ga099f0b52a85217f92284e497b97d0466">gen::fracDistSq</a></div><div class="ttdeci">double fracDistSq(const FracBox &amp;b, double xi, double yi, double zi, double xj, double yj, double zj)</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00231">generic.hpp:231</a></div></div>
+<div class="ttc" id="agroup__gen_html_ga74b57e7951bcff4f7c31fdc4ec5e79bf"><div class="ttname"><a href="#ga74b57e7951bcff4f7c31fdc4ec5e79bf">gen::triclinicMinImage</a></div><div class="ttdeci">std::array&lt; double, 3 &gt; triclinicMinImage(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, double xi, double yi, double zi, double xj, double yj, double zj)</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00298">generic.hpp:298</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gafdafa646c7cceaa4eeb8d92b14e0a192" name="gafdafa646c7cceaa4eeb8d92b14e0a192"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafdafa646c7cceaa4eeb8d92b14e0a192">&#9670;&#160;</a></span>periodicDistSq() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::periodicDistSq </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>iatom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>jatom</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00402">402</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  403</span>                                     {</div>
+<div class="line"><span class="lineno">  404</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#gac55d45ba7b50cb75763412f158ecd713">periodicDistSq</a>(<a class="code hl_function" href="#ga9833e867efd9f0e5b9e6af932811daad">makeFracBox</a>(yCloud), yCloud, iatom, jatom);</div>
+<div class="line"><span class="lineno">  405</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -909,7 +1242,6 @@ Variables</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00071">71</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   71</span>{ <span class="keywordflow">return</span> (angle * 180) / <a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">gen::pi</a>; }</div>
-<div class="ttc" id="agroup__gen_html_ga9aee9bc09915c8d7a816b9ab38cff0f3"><div class="ttname"><a href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">gen::pi</a></div><div class="ttdeci">constexpr double pi</div><div class="ttdoc">Uses Boost to get the value of pi.</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00064">generic.hpp:64</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -956,17 +1288,113 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The unwrapped relative distances for each dimension. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00386">386</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  387</span>                   {</div>
-<div class="line"><span class="lineno">  388</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#gacd27073a9df4d812fa5a6d24a8b6efae">relDistFromPoint</a>(yCloud, iatom, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x,</div>
-<div class="line"><span class="lineno">  389</span>                          yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z);</div>
-<div class="line"><span class="lineno">  390</span>}</div>
-<div class="ttc" id="agroup__gen_html_gacd27073a9df4d812fa5a6d24a8b6efae"><div class="ttname"><a href="#gacd27073a9df4d812fa5a6d24a8b6efae">gen::relDistFromPoint</a></div><div class="ttdeci">std::array&lt; double, 3 &gt; relDistFromPoint(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int iatom, double xj, double yj, double zj)</div><div class="ttdoc">Inline generic function for obtaining the unwrapped periodic distance between one particle and anothe...</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00305">generic.hpp:305</a></div></div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00605">605</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  606</span>                   {</div>
+<div class="line"><span class="lineno">  607</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#ga2fbd5127b1fdc22c99f5cd6d57d4bf86">relDistFromPoint</a>(yCloud, iatom, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].x,</div>
+<div class="line"><span class="lineno">  608</span>                          yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].y, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[jatom].z);</div>
+<div class="line"><span class="lineno">  609</span>}</div>
+<div class="ttc" id="agroup__gen_html_ga2fbd5127b1fdc22c99f5cd6d57d4bf86"><div class="ttname"><a href="#ga2fbd5127b1fdc22c99f5cd6d57d4bf86">gen::relDistFromPoint</a></div><div class="ttdeci">std::array&lt; double, 3 &gt; relDistFromPoint(const FracBox &amp;b, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int iatom, double xj, double yj, double zj)</div><div class="ttdoc">Inline generic function for obtaining the unwrapped periodic distance between one particle and anothe...</div><div class="ttdef"><b>Definition</b> <a href="generic_8hpp_source.html#l00512">generic.hpp:512</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga2fbd5127b1fdc22c99f5cd6d57d4bf86" name="ga2fbd5127b1fdc22c99f5cd6d57d4bf86"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga2fbd5127b1fdc22c99f5cd6d57d4bf86">&#9670;&#160;</a></span>relDistFromPoint() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::array&lt; double, 3 &gt; gen::relDistFromPoint </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structgen_1_1FracBox.html">FracBox</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>b</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>iatom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>xj</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>yj</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>zj</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Inline generic function for obtaining the unwrapped periodic distance between one particle and another point, whose index has been given. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>The box of yCloud, from makeFracBox. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yCloud</td><td>The input PointCloud, which contains the particle coordinates, simulation box lengths etc. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">iatom</td><td>The index of the \( i^{th} \) atom. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">xj,yj,zj</td><td>The other point. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The unwrapped periodic distance. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00512">512</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  515</span>                                     {</div>
+<div class="line"><span class="lineno">  516</span>  <span class="keywordflow">if</span> (b.<a class="code hl_variable" href="#ga5b087ebcc42fbb4c7fead909c9fd25a8">ok</a>) {</div>
+<div class="line"><span class="lineno">  517</span>    <span class="keyword">const</span> <span class="keyword">auto</span> &amp;<a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a> = yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(iatom)];</div>
+<div class="line"><span class="lineno">  518</span>    <span class="keyword">const</span> <span class="keyword">auto</span> dr = <a class="code hl_function" href="#gab34364ca503fda783a0795a8e4525670">fracDelta</a>(b, <a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.x, <a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.y, <a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.z, xj, yj, zj);</div>
+<div class="line"><span class="lineno">  519</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> r2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];</div>
+<div class="line"><span class="lineno">  520</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="#ga9e1ff0c0e75fc4bad58a49f68f95d5c2">smithInside</a>(b, r2)) {</div>
+<div class="line"><span class="lineno">  521</span>      <span class="keywordflow">return</span> dr;</div>
+<div class="line"><span class="lineno">  522</span>    }</div>
+<div class="line"><span class="lineno">  523</span><span class="preprocessor">#ifdef SEAMS_HAS_MINIMAGE</span></div>
+<div class="line"><span class="lineno">  524</span>    <span class="keywordtype">double</span> ed[3] = {0.0, 0.0, 0.0};</div>
+<div class="line"><span class="lineno">  525</span>    <span class="keywordflow">if</span> (euclideanDelta(yCloud, <a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.x, <a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.y, <a class="code hl_variable" href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">pi</a>.z, xj, yj, zj, ed)) {</div>
+<div class="line"><span class="lineno">  526</span>      <span class="keywordflow">return</span> {ed[0], ed[1], ed[2]};</div>
+<div class="line"><span class="lineno">  527</span>    }</div>
+<div class="line"><span class="lineno">  528</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  529</span>    <span class="keywordflow">return</span> dr;</div>
+<div class="line"><span class="lineno">  530</span>  }</div>
+<div class="line"><span class="lineno">  531</span>  <span class="keywordflow">if</span> (yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.size() &gt;= 6) {</div>
+<div class="line"><span class="lineno">  532</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="#ga74b57e7951bcff4f7c31fdc4ec5e79bf">triclinicMinImage</a>(yCloud, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y,</div>
+<div class="line"><span class="lineno">  533</span>                             yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z, xj, yj, zj);</div>
+<div class="line"><span class="lineno">  534</span>  }</div>
+<div class="line"><span class="lineno">  535</span> </div>
+<div class="line"><span class="lineno">  536</span>  std::array&lt;double, 3&gt; dr = {yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x - xj, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y - yj,</div>
+<div class="line"><span class="lineno">  537</span>                              yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z - zj};</div>
+<div class="line"><span class="lineno">  538</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
+<div class="line"><span class="lineno">  539</span>    <span class="keywordflow">if</span> (dr[k] &lt; -yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k] * 0.5) {</div>
+<div class="line"><span class="lineno">  540</span>      dr[k] += yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k];</div>
+<div class="line"><span class="lineno">  541</span>    }</div>
+<div class="line"><span class="lineno">  542</span>    <span class="keywordflow">if</span> (dr[k] &gt;= yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k] * 0.5) {</div>
+<div class="line"><span class="lineno">  543</span>      dr[k] -= yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k];</div>
+<div class="line"><span class="lineno">  544</span>    }</div>
+<div class="line"><span class="lineno">  545</span>  }</div>
+<div class="line"><span class="lineno">  546</span>  <span class="keywordflow">return</span> dr;</div>
+<div class="line"><span class="lineno">  547</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
 <a id="gacd27073a9df4d812fa5a6d24a8b6efae" name="gacd27073a9df4d812fa5a6d24a8b6efae"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gacd27073a9df4d812fa5a6d24a8b6efae">&#9670;&#160;</a></span>relDistFromPoint()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#gacd27073a9df4d812fa5a6d24a8b6efae">&#9670;&#160;</a></span>relDistFromPoint() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1007,46 +1435,44 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Inline generic function for obtaining the unwrapped periodic distance between one particle and another point, whose index has been given. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">yCloud</td><td>The input PointCloud, which contains the particle coordinates, simulation box lengths etc. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">iatom</td><td>The index of the \( i^{th} \) atom. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">singlePoint</td><td>Vector containing coordinate values </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The unwrapped periodic distance. </dd></dl>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00549">549</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  551</span>                                     {</div>
+<div class="line"><span class="lineno">  552</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#ga2fbd5127b1fdc22c99f5cd6d57d4bf86">relDistFromPoint</a>(<a class="code hl_function" href="#ga9833e867efd9f0e5b9e6af932811daad">makeFracBox</a>(yCloud), yCloud, iatom, xj, yj, zj);</div>
+<div class="line"><span class="lineno">  553</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga9e1ff0c0e75fc4bad58a49f68f95d5c2" name="ga9e1ff0c0e75fc4bad58a49f68f95d5c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga9e1ff0c0e75fc4bad58a49f68f95d5c2">&#9670;&#160;</a></span>smithInside()</h2>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00305">305</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  307</span>                                     {</div>
-<div class="line"><span class="lineno">  308</span><span class="preprocessor">#ifdef SEAMS_HAS_MINIMAGE</span></div>
-<div class="line"><span class="lineno">  309</span>  <span class="keyword">const</span> mi_cell cell = pointCloudCell(yCloud);</div>
-<div class="line"><span class="lineno">  310</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> p[3] = {xj, yj, zj};</div>
-<div class="line"><span class="lineno">  311</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> q[3] = {yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y,</div>
-<div class="line"><span class="lineno">  312</span>                       yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z};</div>
-<div class="line"><span class="lineno">  313</span>  <span class="keywordtype">double</span> dr[3] = {0.0, 0.0, 0.0};</div>
-<div class="line"><span class="lineno">  314</span>  mi_displacement(&amp;cell, p, q, dr);</div>
-<div class="line"><span class="lineno">  315</span>  <span class="keywordflow">return</span> {dr[0], dr[1], dr[2]};</div>
-<div class="line"><span class="lineno">  316</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  317</span>  <span class="keywordflow">if</span> (yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.size() &gt;= 6) {</div>
-<div class="line"><span class="lineno">  318</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="#ga74b57e7951bcff4f7c31fdc4ec5e79bf">triclinicMinImage</a>(yCloud, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y,</div>
-<div class="line"><span class="lineno">  319</span>                             yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z, xj, yj, zj);</div>
-<div class="line"><span class="lineno">  320</span>  }</div>
-<div class="line"><span class="lineno">  321</span> </div>
-<div class="line"><span class="lineno">  322</span>  std::array&lt;double, 3&gt; dr = {yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].x - xj, yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].y - yj,</div>
-<div class="line"><span class="lineno">  323</span>                              yCloud.<a class="code hl_variable" href="group__molSys.html#ga67ab89369cd26572878a91afd521ef81">pts</a>[iatom].z - zj};</div>
-<div class="line"><span class="lineno">  324</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
-<div class="line"><span class="lineno">  325</span>    <span class="keywordflow">if</span> (dr[k] &lt; -yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k] * 0.5) {</div>
-<div class="line"><span class="lineno">  326</span>      dr[k] += yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k];</div>
-<div class="line"><span class="lineno">  327</span>    }</div>
-<div class="line"><span class="lineno">  328</span>    <span class="keywordflow">if</span> (dr[k] &gt;= yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k] * 0.5) {</div>
-<div class="line"><span class="lineno">  329</span>      dr[k] -= yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k];</div>
-<div class="line"><span class="lineno">  330</span>    }</div>
-<div class="line"><span class="lineno">  331</span>  }</div>
-<div class="line"><span class="lineno">  332</span>  <span class="keywordflow">return</span> dr;</div>
-<div class="line"><span class="lineno">  333</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  334</span>}</div>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gen::smithInside </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structgen_1_1FracBox.html">FracBox</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>b</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>r2</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00241">241</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  241</span>                                                     {</div>
+<div class="line"><span class="lineno">  242</span>  <span class="keywordflow">return</span> b.<a class="code hl_variable" href="#ga5b087ebcc42fbb4c7fead909c9fd25a8">ok</a> &amp;&amp; (!b.<a class="code hl_variable" href="#ga91c0b39f9ac6dd64fe532938d4d15213">triclinic</a> || std::sqrt(r2) + 1e-12 &lt; b.<a class="code hl_variable" href="#ga98c1cc9e3f0235611d771fd03fb05cf2">halfMin</a>);</div>
+<div class="line"><span class="lineno">  243</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1081,13 +1507,13 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00426">426</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  426</span>                                                      {</div>
-<div class="line"><span class="lineno">  427</span>  std::istringstream iss(line);</div>
-<div class="line"><span class="lineno">  428</span>  std::vector&lt;std::string&gt; tokens{std::istream_iterator&lt;std::string&gt;{iss},</div>
-<div class="line"><span class="lineno">  429</span>                                  std::istream_iterator&lt;std::string&gt;{}};</div>
-<div class="line"><span class="lineno">  430</span>  <span class="keywordflow">return</span> tokens;</div>
-<div class="line"><span class="lineno">  431</span>}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00645">645</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  645</span>                                                      {</div>
+<div class="line"><span class="lineno">  646</span>  std::istringstream iss(line);</div>
+<div class="line"><span class="lineno">  647</span>  std::vector&lt;std::string&gt; tokens{std::istream_iterator&lt;std::string&gt;{iss},</div>
+<div class="line"><span class="lineno">  648</span>                                  std::istream_iterator&lt;std::string&gt;{}};</div>
+<div class="line"><span class="lineno">  649</span>  <span class="keywordflow">return</span> tokens;</div>
+<div class="line"><span class="lineno">  650</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1122,16 +1548,16 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00437">437</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  437</span>                                                         {</div>
-<div class="line"><span class="lineno">  438</span>  std::istringstream iss(line);</div>
-<div class="line"><span class="lineno">  439</span>  std::vector&lt;double&gt; tokens;</div>
-<div class="line"><span class="lineno">  440</span>  <span class="keywordtype">double</span> number; <span class="comment">// Each number being read in from the line</span></div>
-<div class="line"><span class="lineno">  441</span>  <span class="keywordflow">while</span> (iss &gt;&gt; number) {</div>
-<div class="line"><span class="lineno">  442</span>    tokens.push_back(number);</div>
-<div class="line"><span class="lineno">  443</span>  }</div>
-<div class="line"><span class="lineno">  444</span>  <span class="keywordflow">return</span> tokens;</div>
-<div class="line"><span class="lineno">  445</span>}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00656">656</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  656</span>                                                         {</div>
+<div class="line"><span class="lineno">  657</span>  std::istringstream iss(line);</div>
+<div class="line"><span class="lineno">  658</span>  std::vector&lt;double&gt; tokens;</div>
+<div class="line"><span class="lineno">  659</span>  <span class="keywordtype">double</span> number; <span class="comment">// Each number being read in from the line</span></div>
+<div class="line"><span class="lineno">  660</span>  <span class="keywordflow">while</span> (iss &gt;&gt; number) {</div>
+<div class="line"><span class="lineno">  661</span>    tokens.push_back(number);</div>
+<div class="line"><span class="lineno">  662</span>  }</div>
+<div class="line"><span class="lineno">  663</span>  <span class="keywordflow">return</span> tokens;</div>
+<div class="line"><span class="lineno">  664</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1166,16 +1592,16 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00451">451</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  451</span>                                                   {</div>
-<div class="line"><span class="lineno">  452</span>  std::istringstream iss(line);</div>
-<div class="line"><span class="lineno">  453</span>  std::vector&lt;int&gt; tokens;</div>
-<div class="line"><span class="lineno">  454</span>  <span class="keywordtype">int</span> number; <span class="comment">// Each number being read in from the line</span></div>
-<div class="line"><span class="lineno">  455</span>  <span class="keywordflow">while</span> (iss &gt;&gt; number) {</div>
-<div class="line"><span class="lineno">  456</span>    tokens.push_back(number);</div>
-<div class="line"><span class="lineno">  457</span>  }</div>
-<div class="line"><span class="lineno">  458</span>  <span class="keywordflow">return</span> tokens;</div>
-<div class="line"><span class="lineno">  459</span>}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00670">670</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  670</span>                                                   {</div>
+<div class="line"><span class="lineno">  671</span>  std::istringstream iss(line);</div>
+<div class="line"><span class="lineno">  672</span>  std::vector&lt;int&gt; tokens;</div>
+<div class="line"><span class="lineno">  673</span>  <span class="keywordtype">int</span> number; <span class="comment">// Each number being read in from the line</span></div>
+<div class="line"><span class="lineno">  674</span>  <span class="keywordflow">while</span> (iss &gt;&gt; number) {</div>
+<div class="line"><span class="lineno">  675</span>    tokens.push_back(number);</div>
+<div class="line"><span class="lineno">  676</span>  }</div>
+<div class="line"><span class="lineno">  677</span>  <span class="keywordflow">return</span> tokens;</div>
+<div class="line"><span class="lineno">  678</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1231,56 +1657,58 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00134">134</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  136</span>                                                           {</div>
-<div class="line"><span class="lineno">  137</span><span class="preprocessor">#ifdef SEAMS_HAS_MINIMAGE</span></div>
-<div class="line"><span class="lineno">  138</span>  <span class="keyword">const</span> mi_cell cell = pointCloudCell(yCloud);</div>
-<div class="line"><span class="lineno">  139</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> p[3] = {xj, yj, zj};</div>
-<div class="line"><span class="lineno">  140</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> q[3] = {xi, yi, zi};</div>
-<div class="line"><span class="lineno">  141</span>  <span class="keywordtype">double</span> dr[3] = {0.0, 0.0, 0.0};</div>
-<div class="line"><span class="lineno">  142</span>  mi_displacement(&amp;cell, p, q, dr);</div>
-<div class="line"><span class="lineno">  143</span>  <span class="keywordflow">return</span> {dr[0], dr[1], dr[2]};</div>
-<div class="line"><span class="lineno">  144</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  145</span>  <span class="keyword">const</span> <span class="keyword">auto</span> &amp;box = yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>;</div>
-<div class="line"><span class="lineno">  146</span>  <span class="keyword">const</span> <span class="keyword">auto</span> &amp;boxLow = yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>;</div>
-<div class="line"><span class="lineno">  147</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xspan = box[0];</div>
-<div class="line"><span class="lineno">  148</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yspan = box[1];</div>
-<div class="line"><span class="lineno">  149</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zspan = box[2];</div>
-<div class="line"><span class="lineno">  150</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xlo_b = boxLow.size() &gt; 0 ? boxLow[0] : 0.0;</div>
-<div class="line"><span class="lineno">  151</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ylo_b = boxLow.size() &gt; 1 ? boxLow[1] : 0.0;</div>
-<div class="line"><span class="lineno">  152</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zlo_b = boxLow.size() &gt; 2 ? boxLow[2] : 0.0;</div>
-<div class="line"><span class="lineno">  153</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xy = box[3];</div>
-<div class="line"><span class="lineno">  154</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xz = box[4];</div>
-<div class="line"><span class="lineno">  155</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yz = box[5];</div>
-<div class="line"><span class="lineno">  156</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));</div>
-<div class="line"><span class="lineno">  157</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));</div>
-<div class="line"><span class="lineno">  158</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymin = std::min(0.0, yz);</div>
-<div class="line"><span class="lineno">  159</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymax = std::max(0.0, yz);</div>
-<div class="line"><span class="lineno">  160</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lx = xspan - xmax + xmin;</div>
-<div class="line"><span class="lineno">  161</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ly = yspan - ymax + ymin;</div>
-<div class="line"><span class="lineno">  162</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lz = zspan;</div>
-<div class="line"><span class="lineno">  163</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ox = xlo_b - xmin;</div>
-<div class="line"><span class="lineno">  164</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> oy = ylo_b - ymin;</div>
-<div class="line"><span class="lineno">  165</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> oz = zlo_b;</div>
-<div class="line"><span class="lineno">  166</span> </div>
-<div class="line"><span class="lineno">  167</span>  <span class="keyword">auto</span> toFrac = [&amp;](<span class="keywordtype">double</span> x, <span class="keywordtype">double</span> y, <span class="keywordtype">double</span> z) {</div>
-<div class="line"><span class="lineno">  168</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> sz = (z - oz) / lz;</div>
-<div class="line"><span class="lineno">  169</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> sy = (y - oy - yz * sz) / ly;</div>
-<div class="line"><span class="lineno">  170</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> sx = (x - ox - xy * sy - xz * sz) / lx;</div>
-<div class="line"><span class="lineno">  171</span>    <span class="keywordflow">return</span> std::array&lt;double, 3&gt;{sx, sy, sz};</div>
-<div class="line"><span class="lineno">  172</span>  };</div>
-<div class="line"><span class="lineno">  173</span>  <span class="keyword">const</span> <span class="keyword">auto</span> si = toFrac(xi, yi, zi);</div>
-<div class="line"><span class="lineno">  174</span>  <span class="keyword">const</span> <span class="keyword">auto</span> sj = toFrac(xj, yj, zj);</div>
-<div class="line"><span class="lineno">  175</span>  <span class="keywordtype">double</span> dsx = si[0] - sj[0];</div>
-<div class="line"><span class="lineno">  176</span>  <span class="keywordtype">double</span> dsy = si[1] - sj[1];</div>
-<div class="line"><span class="lineno">  177</span>  <span class="keywordtype">double</span> dsz = si[2] - sj[2];</div>
-<div class="line"><span class="lineno">  178</span>  dsx -= std::round(dsx);</div>
-<div class="line"><span class="lineno">  179</span>  dsy -= std::round(dsy);</div>
-<div class="line"><span class="lineno">  180</span>  dsz -= std::round(dsz);</div>
-<div class="line"><span class="lineno">  181</span>  <span class="keywordflow">return</span> {lx * dsx + xy * dsy + xz * dsz, ly * dsy + yz * dsz, lz * dsz};</div>
-<div class="line"><span class="lineno">  182</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  183</span>}</div>
-<div class="ttc" id="agroup__molSys_html_gac861daaeb2b1e75a6ac9eb3390bc6105"><div class="ttname"><a href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">molSys::PointCloud::boxLow</a></div><div class="ttdeci">std::vector&lt; T &gt; boxLow</div><div class="ttdoc">Periodic box lengths.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00178">mol_sys.hpp:178</a></div></div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00298">298</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  300</span>                                                           {</div>
+<div class="line"><span class="lineno">  301</span>  <span class="keyword">const</span> <a class="code hl_struct" href="structgen_1_1FracBox.html">FracBox</a> b = <a class="code hl_function" href="#ga9833e867efd9f0e5b9e6af932811daad">makeFracBox</a>(yCloud);</div>
+<div class="line"><span class="lineno">  302</span>  <span class="keywordflow">if</span> (b.<a class="code hl_variable" href="#ga5b087ebcc42fbb4c7fead909c9fd25a8">ok</a> &amp;&amp; b.<a class="code hl_variable" href="#ga91c0b39f9ac6dd64fe532938d4d15213">triclinic</a>) {</div>
+<div class="line"><span class="lineno">  303</span>    <span class="keyword">const</span> <span class="keyword">auto</span> dr = <a class="code hl_function" href="#gab34364ca503fda783a0795a8e4525670">fracDelta</a>(b, xi, yi, zi, xj, yj, zj);</div>
+<div class="line"><span class="lineno">  304</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> r2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];</div>
+<div class="line"><span class="lineno">  305</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="#ga9e1ff0c0e75fc4bad58a49f68f95d5c2">smithInside</a>(b, r2)) {</div>
+<div class="line"><span class="lineno">  306</span>      <span class="keywordflow">return</span> dr;</div>
+<div class="line"><span class="lineno">  307</span>    }</div>
+<div class="line"><span class="lineno">  308</span><span class="preprocessor">#ifdef SEAMS_HAS_MINIMAGE</span></div>
+<div class="line"><span class="lineno">  309</span>    <span class="keywordtype">double</span> ed[3] = {0.0, 0.0, 0.0};</div>
+<div class="line"><span class="lineno">  310</span>    <span class="keywordflow">if</span> (euclideanDelta(yCloud, xi, yi, zi, xj, yj, zj, ed)) {</div>
+<div class="line"><span class="lineno">  311</span>      <span class="keywordflow">return</span> {ed[0], ed[1], ed[2]};</div>
+<div class="line"><span class="lineno">  312</span>    }</div>
+<div class="line"><span class="lineno">  313</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  314</span>    <span class="keywordflow">return</span> dr;</div>
+<div class="line"><span class="lineno">  315</span>  }</div>
+<div class="line"><span class="lineno">  316</span>  <span class="keyword">const</span> <span class="keyword">auto</span> &amp;box = yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>;</div>
+<div class="line"><span class="lineno">  317</span>  <span class="keyword">const</span> <span class="keyword">auto</span> &amp;boxLow = yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>;</div>
+<div class="line"><span class="lineno">  318</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xspan = box[0];</div>
+<div class="line"><span class="lineno">  319</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yspan = box[1];</div>
+<div class="line"><span class="lineno">  320</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zspan = box[2];</div>
+<div class="line"><span class="lineno">  321</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xlo_b = boxLow.size() &gt; 0 ? boxLow[0] : 0.0;</div>
+<div class="line"><span class="lineno">  322</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ylo_b = boxLow.size() &gt; 1 ? boxLow[1] : 0.0;</div>
+<div class="line"><span class="lineno">  323</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zlo_b = boxLow.size() &gt; 2 ? boxLow[2] : 0.0;</div>
+<div class="line"><span class="lineno">  324</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xy = box[3];</div>
+<div class="line"><span class="lineno">  325</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xz = box[4];</div>
+<div class="line"><span class="lineno">  326</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yz = box[5];</div>
+<div class="line"><span class="lineno">  327</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));</div>
+<div class="line"><span class="lineno">  328</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));</div>
+<div class="line"><span class="lineno">  329</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymin = std::min(0.0, yz);</div>
+<div class="line"><span class="lineno">  330</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymax = std::max(0.0, yz);</div>
+<div class="line"><span class="lineno">  331</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lx = xspan - xmax + xmin;</div>
+<div class="line"><span class="lineno">  332</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ly = yspan - ymax + ymin;</div>
+<div class="line"><span class="lineno">  333</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lz = zspan;</div>
+<div class="line"><span class="lineno">  334</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ox = xlo_b - xmin;</div>
+<div class="line"><span class="lineno">  335</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> oy = ylo_b - ymin;</div>
+<div class="line"><span class="lineno">  336</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> oz = zlo_b;</div>
+<div class="line"><span class="lineno">  337</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> sz_i = (zi - oz) / lz;</div>
+<div class="line"><span class="lineno">  338</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> sy_i = (yi - oy - yz * sz_i) / ly;</div>
+<div class="line"><span class="lineno">  339</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> sx_i = (xi - ox - xy * sy_i - xz * sz_i) / lx;</div>
+<div class="line"><span class="lineno">  340</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> sz_j = (zj - oz) / lz;</div>
+<div class="line"><span class="lineno">  341</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> sy_j = (yj - oy - yz * sz_j) / ly;</div>
+<div class="line"><span class="lineno">  342</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> sx_j = (xj - ox - xy * sy_j - xz * sz_j) / lx;</div>
+<div class="line"><span class="lineno">  343</span>  <span class="keywordtype">double</span> dsx = sx_i - sx_j;</div>
+<div class="line"><span class="lineno">  344</span>  <span class="keywordtype">double</span> dsy = sy_i - sy_j;</div>
+<div class="line"><span class="lineno">  345</span>  <span class="keywordtype">double</span> dsz = sz_i - sz_j;</div>
+<div class="line"><span class="lineno">  346</span>  dsx -= std::round(dsx);</div>
+<div class="line"><span class="lineno">  347</span>  dsy -= std::round(dsy);</div>
+<div class="line"><span class="lineno">  348</span>  dsz -= std::round(dsz);</div>
+<div class="line"><span class="lineno">  349</span>  <span class="keywordflow">return</span> {lx * dsx + xy * dsy + xz * dsz, ly * dsy + yz * dsz, lz * dsz};</div>
+<div class="line"><span class="lineno">  350</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1382,13 +1810,13 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00336">336</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  338</span>                                          {</div>
-<div class="line"><span class="lineno">  339</span>  <span class="keyword">const</span> <span class="keyword">auto</span> dr =</div>
-<div class="line"><span class="lineno">  340</span>      <a class="code hl_function" href="#gacd27073a9df4d812fa5a6d24a8b6efae">relDistFromPoint</a>(yCloud, iatom, singlePoint[0], singlePoint[1],</div>
-<div class="line"><span class="lineno">  341</span>                       singlePoint[2]);</div>
-<div class="line"><span class="lineno">  342</span>  <span class="keywordflow">return</span> std::sqrt(dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2]);</div>
-<div class="line"><span class="lineno">  343</span>}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00555">555</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  557</span>                                          {</div>
+<div class="line"><span class="lineno">  558</span>  <span class="keyword">const</span> <span class="keyword">auto</span> dr =</div>
+<div class="line"><span class="lineno">  559</span>      <a class="code hl_function" href="#ga2fbd5127b1fdc22c99f5cd6d57d4bf86">relDistFromPoint</a>(yCloud, iatom, singlePoint[0], singlePoint[1],</div>
+<div class="line"><span class="lineno">  560</span>                       singlePoint[2]);</div>
+<div class="line"><span class="lineno">  561</span>  <span class="keywordflow">return</span> std::sqrt(dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2]);</div>
+<div class="line"><span class="lineno">  562</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1419,32 +1847,160 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00271">271</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  273</span>                                                                 {</div>
-<div class="line"><span class="lineno">  274</span>  <span class="keyword">const</span> <span class="keywordtype">bool</span> tilt = yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.size() &gt;= 6;</div>
-<div class="line"><span class="lineno">  275</span>  <span class="keywordflow">if</span> (tilt) {</div>
-<div class="line"><span class="lineno">  276</span>    os &lt;&lt; <span class="stringliteral">&quot;ITEM: BOX BOUNDS xy xz yz pp pp pp\n&quot;</span>;</div>
-<div class="line"><span class="lineno">  277</span>  } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  278</span>    os &lt;&lt; <span class="stringliteral">&quot;ITEM: BOX BOUNDS pp pp pp\n&quot;</span>;</div>
-<div class="line"><span class="lineno">  279</span>  }</div>
-<div class="line"><span class="lineno">  280</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
-<div class="line"><span class="lineno">  281</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> lo = (<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k) &lt; yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>.size())</div>
-<div class="line"><span class="lineno">  282</span>                          ? yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>[k]</div>
-<div class="line"><span class="lineno">  283</span>                          : 0.0;</div>
-<div class="line"><span class="lineno">  284</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> len = (<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k) &lt; yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.size())</div>
-<div class="line"><span class="lineno">  285</span>                           ? yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k]</div>
-<div class="line"><span class="lineno">  286</span>                           : 0.0;</div>
-<div class="line"><span class="lineno">  287</span>    os &lt;&lt; lo &lt;&lt; <span class="charliteral">&#39; &#39;</span> &lt;&lt; lo + len;</div>
-<div class="line"><span class="lineno">  288</span>    <span class="keywordflow">if</span> (tilt) {</div>
-<div class="line"><span class="lineno">  289</span>      os &lt;&lt; <span class="charliteral">&#39; &#39;</span> &lt;&lt; yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k + 3)];</div>
-<div class="line"><span class="lineno">  290</span>    }</div>
-<div class="line"><span class="lineno">  291</span>    os &lt;&lt; <span class="charliteral">&#39;\n&#39;</span>;</div>
-<div class="line"><span class="lineno">  292</span>  }</div>
-<div class="line"><span class="lineno">  293</span>}</div>
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00477">477</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  479</span>                                                                 {</div>
+<div class="line"><span class="lineno">  480</span>  <span class="keyword">const</span> <span class="keywordtype">bool</span> tilt = yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.size() &gt;= 6;</div>
+<div class="line"><span class="lineno">  481</span>  <span class="keywordflow">if</span> (tilt) {</div>
+<div class="line"><span class="lineno">  482</span>    os &lt;&lt; <span class="stringliteral">&quot;ITEM: BOX BOUNDS xy xz yz pp pp pp\n&quot;</span>;</div>
+<div class="line"><span class="lineno">  483</span>  } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  484</span>    os &lt;&lt; <span class="stringliteral">&quot;ITEM: BOX BOUNDS pp pp pp\n&quot;</span>;</div>
+<div class="line"><span class="lineno">  485</span>  }</div>
+<div class="line"><span class="lineno">  486</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
+<div class="line"><span class="lineno">  487</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> lo = (<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k) &lt; yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>.size())</div>
+<div class="line"><span class="lineno">  488</span>                          ? yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>[k]</div>
+<div class="line"><span class="lineno">  489</span>                          : 0.0;</div>
+<div class="line"><span class="lineno">  490</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> len = (<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k) &lt; yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>.size())</div>
+<div class="line"><span class="lineno">  491</span>                           ? yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[k]</div>
+<div class="line"><span class="lineno">  492</span>                           : 0.0;</div>
+<div class="line"><span class="lineno">  493</span>    os &lt;&lt; lo &lt;&lt; <span class="charliteral">&#39; &#39;</span> &lt;&lt; lo + len;</div>
+<div class="line"><span class="lineno">  494</span>    <span class="keywordflow">if</span> (tilt) {</div>
+<div class="line"><span class="lineno">  495</span>      os &lt;&lt; <span class="charliteral">&#39; &#39;</span> &lt;&lt; yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k + 3)];</div>
+<div class="line"><span class="lineno">  496</span>    }</div>
+<div class="line"><span class="lineno">  497</span>    os &lt;&lt; <span class="charliteral">&#39;\n&#39;</span>;</div>
+<div class="line"><span class="lineno">  498</span>  }</div>
+<div class="line"><span class="lineno">  499</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
 <a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="ga98c1cc9e3f0235611d771fd03fb05cf2" name="ga98c1cc9e3f0235611d771fd03fb05cf2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga98c1cc9e3f0235611d771fd03fb05cf2">&#9670;&#160;</a></span>halfMin</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::FracBox::halfMin = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00148">148</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+
+</div>
+</div>
+<a id="gaba26c695f2991cc062aaab7cf0bf6c37" name="gaba26c695f2991cc062aaab7cf0bf6c37"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaba26c695f2991cc062aaab7cf0bf6c37">&#9670;&#160;</a></span>lx</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::FracBox::lx = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00136">136</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+
+</div>
+</div>
+<a id="gafec94241bb6c5f9cafbc50f063131b67" name="gafec94241bb6c5f9cafbc50f063131b67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafec94241bb6c5f9cafbc50f063131b67">&#9670;&#160;</a></span>ly</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::FracBox::ly = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00137">137</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga1f4527e15aff74eb89d18712e87cde33" name="ga1f4527e15aff74eb89d18712e87cde33"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga1f4527e15aff74eb89d18712e87cde33">&#9670;&#160;</a></span>lz</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::FracBox::lz = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00138">138</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga5b087ebcc42fbb4c7fead909c9fd25a8" name="ga5b087ebcc42fbb4c7fead909c9fd25a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5b087ebcc42fbb4c7fead909c9fd25a8">&#9670;&#160;</a></span>ok</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gen::FracBox::ok = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00150">150</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga08e107066539e533e19563cbf3489752" name="ga08e107066539e533e19563cbf3489752"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga08e107066539e533e19563cbf3489752">&#9670;&#160;</a></span>ox</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::FracBox::ox = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00142">142</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+
+</div>
+</div>
+<a id="gab8ee5dd41226e38d0deb68cec73c5813" name="gab8ee5dd41226e38d0deb68cec73c5813"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gab8ee5dd41226e38d0deb68cec73c5813">&#9670;&#160;</a></span>oy</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::FracBox::oy = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00143">143</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga8223c9e3944f04f345f5565071e403d6" name="ga8223c9e3944f04f345f5565071e403d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8223c9e3944f04f345f5565071e403d6">&#9670;&#160;</a></span>oz</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::FracBox::oz = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00144">144</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+
+</div>
+</div>
 <a id="ga9aee9bc09915c8d7a816b9ab38cff0f3" name="ga9aee9bc09915c8d7a816b9ab38cff0f3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga9aee9bc09915c8d7a816b9ab38cff0f3">&#9670;&#160;</a></span>pi</h2>
 
@@ -1468,6 +2024,118 @@ Variables</h2></td></tr>
 <p>Uses Boost to get the value of pi. </p>
 
 <p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00064">64</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga91c0b39f9ac6dd64fe532938d4d15213" name="ga91c0b39f9ac6dd64fe532938d4d15213"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga91c0b39f9ac6dd64fe532938d4d15213">&#9670;&#160;</a></span>triclinic</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gen::FracBox::triclinic = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00149">149</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga2068521d8d2bc8c5a5d17aa685bbff58" name="ga2068521d8d2bc8c5a5d17aa685bbff58"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga2068521d8d2bc8c5a5d17aa685bbff58">&#9670;&#160;</a></span>wx</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::FracBox::wx = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00145">145</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+
+</div>
+</div>
+<a id="gace4ed28ee95c0ceb0c86610120e041c1" name="gace4ed28ee95c0ceb0c86610120e041c1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gace4ed28ee95c0ceb0c86610120e041c1">&#9670;&#160;</a></span>wy</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::FracBox::wy = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00146">146</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga9bc354ca956884de3aa23857701b45a6" name="ga9bc354ca956884de3aa23857701b45a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga9bc354ca956884de3aa23857701b45a6">&#9670;&#160;</a></span>wz</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::FracBox::wz = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00147">147</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga546c69a47f8bce2ad98a8e16c1509cde" name="ga546c69a47f8bce2ad98a8e16c1509cde"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga546c69a47f8bce2ad98a8e16c1509cde">&#9670;&#160;</a></span>xy</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::FracBox::xy = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00139">139</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+
+</div>
+</div>
+<a id="gaa26559856d32586825b90c3875f4f596" name="gaa26559856d32586825b90c3875f4f596"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa26559856d32586825b90c3875f4f596">&#9670;&#160;</a></span>xz</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::FracBox::xz = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00140">140</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga6989dd6519cd9bd1718dbafc3e65b87b" name="ga6989dd6519cd9bd1718dbafc3e65b87b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6989dd6519cd9bd1718dbafc3e65b87b">&#9670;&#160;</a></span>yz</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gen::FracBox::yz = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="generic_8hpp_source.html#l00141">141</a> of file <a class="el" href="generic_8hpp_source.html">generic.hpp</a>.</p>
 
 </div>
 </div>

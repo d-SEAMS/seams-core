@@ -33,6 +33,7 @@ var group__primitive =
     [ "primitive::removeNonSPrings", "group__primitive.html#ga592086d3afae4fab5aa5ff6aa5c1d215", null ],
     [ "primitive::restoreEdgesFromIndices", "group__primitive.html#ga30435e6338c201e8908991462d0fb228", null ],
     [ "primitive::ringNetwork", "group__primitive.html#ga69f1b870183f33e58426c88ee93f0635", null ],
+    [ "primitive::ringNetwork", "group__primitive.html#gaf77d72908c71333829fc895c931f38a7", null ],
     [ "primitive::RingUpdater::RingUpdater", "group__primitive.html#ga8cc0a54ed956da02142a250c4c7bf8c2", null ],
     [ "primitive::RingUpdater::RingUpdater", "group__primitive.html#ga61b88624c282b4573177cba65781a2f1", null ],
     [ "primitive::RingUpdater::RingUpdater", "group__primitive.html#ga5d186144c78bff338a8c6d3bc88b5d47", null ],

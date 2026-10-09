@@ -11,5 +11,6 @@ var namespaceprimitive =
     [ "removeNonSPrings", "group__primitive.html#ga592086d3afae4fab5aa5ff6aa5c1d215", null ],
     [ "restoreEdgesFromIndices", "group__primitive.html#ga30435e6338c201e8908991462d0fb228", null ],
     [ "ringNetwork", "group__primitive.html#ga69f1b870183f33e58426c88ee93f0635", null ],
+    [ "ringNetwork", "group__primitive.html#gaf77d72908c71333829fc895c931f38a7", null ],
     [ "shortestPath", "group__primitive.html#ga6031dcefe2fd5432b7d26cb6c9f38f47", null ]
 ];

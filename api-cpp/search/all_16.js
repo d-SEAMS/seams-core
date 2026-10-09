@@ -34,5 +34,8 @@ var searchData=
   ['writeringnumbulk_31',['writeRingNumBulk',['../namespacesout.html#a971cb6b5c97b5b9ba3d552f0a6c47055',1,'sout']]],
   ['writerings_32',['writeRings',['../namespacesout.html#aa5a5fe7be0281da3e75c9c45c7bc005d',1,'sout']]],
   ['writetopobulkdata_33',['writeTopoBulkData',['../namespacesout.html#a5ca5eeff9edc702cdcf1b26e8501dc0c',1,'sout']]],
-  ['writexyzcluster_34',['writeXYZcluster',['../namespacesout.html#a2b208dcfe7724d9af7b158dfd15c808d',1,'sout']]]
+  ['writexyzcluster_34',['writeXYZcluster',['../namespacesout.html#a2b208dcfe7724d9af7b158dfd15c808d',1,'sout']]],
+  ['wx_35',['wx',['../group__gen.html#ga2068521d8d2bc8c5a5d17aa685bbff58',1,'gen::FracBox']]],
+  ['wy_36',['wy',['../group__gen.html#gace4ed28ee95c0ceb0c86610120e041c1',1,'gen::FracBox']]],
+  ['wz_37',['wz',['../group__gen.html#ga9bc354ca956884de3aa23857701b45a6',1,'gen::FracBox']]]
 ];

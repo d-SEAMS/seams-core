@@ -1,0 +1,11 @@
+.. index:: pair: struct; gen::FracBox
+.. _doxid-structgen_1_1_frac_box:
+
+struct gen::FracBox
+===================
+
+.. toctree::
+	:hidden:
+
+
+

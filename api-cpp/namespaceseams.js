@@ -1,6 +1,7 @@
 var namespaceseams =
 [
     [ "cfg", "namespaceseams_1_1cfg.html", "namespaceseams_1_1cfg" ],
+    [ "domain", "namespaceseams_1_1domain.html", "namespaceseams_1_1domain" ],
     [ "sphericart_ylm", "namespaceseams_1_1sphericart__ylm.html", [
       [ "available", "namespaceseams_1_1sphericart__ylm.html#ac07a3ae725018c5cd077e46edebaa712", null ],
       [ "ylmCartesian", "namespaceseams_1_1sphericart__ylm.html#a3d7e262a77527ba90b9a718c6b692b9b", null ]

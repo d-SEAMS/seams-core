@@ -67,28 +67,29 @@ From ``nix/package.nix`` (``pname = "seams"``, ``version = "2.2.0"``):
 
 The fileset is ``meson.build``, ``meson_options.txt``, ``src``, ``tests``,
 ``input``, ``templates``, and the wraps ``readcon-core.wrap``,
-``vesin.wrap``, ``robin-map.wrap``, ``subprojects/packagefiles``.
+``readcon-db.wrap``, ``linkcell.wrap``, ``minimage.wrap``, ``vesin.wrap``,
+``robin-map.wrap``, ``subprojects/packagefiles``.
 
 What stays off
 --------------
 
 .. table::
 
-    +-------------------------+-------------------------------------------------------------+
-    | ``with_python``         | Meson error if forced; Python is PydSEAMSlib                |
-    +-------------------------+-------------------------------------------------------------+
-    | ``with_lua``            | Meson error if forced; Lua is yodaStruct                    |
-    +-------------------------+-------------------------------------------------------------+
-    | ``with_mpi``            | ``false``                                                   |
-    +-------------------------+-------------------------------------------------------------+
-    | ``with_openmp_offload`` | ``false``                                                   |
-    +-------------------------+-------------------------------------------------------------+
-    | vesin, readcon-core     | wrap-git fallbacks are not fetched (``nodownload``)         |
-    +-------------------------+-------------------------------------------------------------+
-    | chemfiles               | not in the flake closure                                    |
-    +-------------------------+-------------------------------------------------------------+
-    | IRA, sphericart, nauty  | ``auto_features=disabled``, so the ``auto`` probes stay off |
-    +-------------------------+-------------------------------------------------------------+
+    +-----------------------------------------------------+-------------------------------------------------------------+
+    | ``with_python``                                     | Meson error if forced; Python is PydSEAMSlib                |
+    +-----------------------------------------------------+-------------------------------------------------------------+
+    | ``with_lua``                                        | Meson error if forced; Lua is yodaStruct                    |
+    +-----------------------------------------------------+-------------------------------------------------------------+
+    | ``with_mpi``                                        | ``false``                                                   |
+    +-----------------------------------------------------+-------------------------------------------------------------+
+    | ``with_openmp_offload``                             | ``false``                                                   |
+    +-----------------------------------------------------+-------------------------------------------------------------+
+    | vesin, readcon-core, readcon-db, linkcell, minimage | wrap-git fallbacks are not fetched (``nodownload``)         |
+    +-----------------------------------------------------+-------------------------------------------------------------+
+    | chemfiles                                           | not in the flake closure                                    |
+    +-----------------------------------------------------+-------------------------------------------------------------+
+    | IRA, sphericart, nauty                              | ``auto_features=disabled``, so the ``auto`` probes stay off |
+    +-----------------------------------------------------+-------------------------------------------------------------+
 
 ``seams --features`` on a flake build therefore reports Highway (and
 OpenMP when it linked) as enabled, and vesin, chemfiles, readcon-core,

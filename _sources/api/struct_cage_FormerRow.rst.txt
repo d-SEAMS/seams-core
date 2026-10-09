@@ -34,5 +34,5 @@ Detailed Documentation
 
 One network-former atom: coordination, same-species bonds, and the primitive rings that pass through it.
 
-``:ref:`rings <doxid-structcage_1_1_former_row_1ae427133e1513cfea1afae90af6039689>``` counts are through this atom, so a ring of size n contributes to n rows.
+``:ref:`rings <doxid-structcage_1_1_former_row_1ae427133e1513cfea1afae90af6039689>``` counts are through this atom, so a ring of size n contributes to n rows. An index row may lead with the atom itself; that entry is not a neighbour.
 

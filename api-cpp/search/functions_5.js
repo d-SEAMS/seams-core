@@ -21,8 +21,10 @@ var searchData=
   ['firstminimumbin_18',['firstMinimumBin',['../group__rdf.html#ga69992a657891f8f1142240d0522b3e47',1,'rdf']]],
   ['firstringthrough_19',['firstRingThrough',['../namespacetum_1_1device.html#a1e28269a0e7df30aede0377144f889f8',1,'tum::device']]],
   ['fit_20',['fit',['../structchill_1_1LinearClassifier.html#a71891e00818b87d370748614fc3e84ff',1,'chill::LinearClassifier']]],
-  ['foreachlammpsframe_21',['forEachLammpsFrame',['../group__sinp.html#ga4fe394481a2ab435bb497c1423235033',1,'sinp']]],
+  ['foreachlammpsframe_21',['forEachLammpsFrame',['../group__sinp.html#ga7830353a092ad93a805dea34a07e7804',1,'sinp']]],
   ['formatdumpbox_22',['formatDumpBox',['../group__gen.html#ga92412c34a5480e96297c968633b07652',1,'gen']]],
   ['formerrows_23',['formerRows',['../namespacecage.html#af3f2527405729e81960c0351ce17e00b',1,'cage']]],
-  ['framedensity_24',['frameDensity',['../namespacephase.html#a548c3829160adf36ec9d7ba7dbb065a1',1,'phase']]]
+  ['fracdelta_24',['fracDelta',['../group__gen.html#gab34364ca503fda783a0795a8e4525670',1,'gen']]],
+  ['fracdistsq_25',['fracDistSq',['../group__gen.html#ga099f0b52a85217f92284e497b97d0466',1,'gen']]],
+  ['framedensity_26',['frameDensity',['../namespacephase.html#a548c3829160adf36ec9d7ba7dbb065a1',1,'phase']]]
 ];

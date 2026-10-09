@@ -12,6 +12,18 @@ Overview
 
 Small generic functions that are shared by all namespaces. :ref:`More...<details-namespacegen>`
 
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace gen {
+
+	// structs
+
+	struct :ref:`FracBox<doxid-structgen_1_1_frac_box>`;
+
+	} // namespace gen
 .. _details-namespacegen:
 
 Detailed Documentation

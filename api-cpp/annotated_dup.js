@@ -20,6 +20,9 @@ var annotated_dup =
     [ "clump", "namespaceclump.html", [
       [ "Domain", "structclump_1_1Domain.html", "structclump_1_1Domain" ]
     ] ],
+    [ "gen", "namespacegen.html", [
+      [ "FracBox", "structgen_1_1FracBox.html", "structgen_1_1FracBox" ]
+    ] ],
     [ "gpu", "namespacegpu.html", [
       [ "BatchResult", "structgpu_1_1BatchResult.html", "structgpu_1_1BatchResult" ],
       [ "DeviceInfo", "structgpu_1_1DeviceInfo.html", "structgpu_1_1DeviceInfo" ],
@@ -59,6 +62,9 @@ var annotated_dup =
     [ "seams", "namespaceseams.html", [
       [ "cfg", "namespaceseams_1_1cfg.html", [
         [ "Runtime", "structseams_1_1cfg_1_1Runtime.html", "structseams_1_1cfg_1_1Runtime" ]
+      ] ],
+      [ "domain", "namespaceseams_1_1domain.html", [
+        [ "Share", "structseams_1_1domain_1_1Share.html", "structseams_1_1domain_1_1Share" ]
       ] ]
     ] ],
     [ "site", "namespacesite.html", [

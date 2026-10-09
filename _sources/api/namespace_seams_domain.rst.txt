@@ -1,0 +1,89 @@
+.. index:: pair: namespace; seams::domain
+.. _doxid-namespaceseams_1_1domain:
+
+namespace seams::domain
+=======================
+
+.. toctree::
+	:hidden:
+
+	struct_seams_domain_Share.rst
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace domain {
+
+	// typedefs
+
+	typedef :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> :target:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>`;
+
+	// structs
+
+	struct :ref:`Share<doxid-structseams_1_1domain_1_1_share>`;
+
+	// global functions
+
+	std::uint64_t :ref:`hilbertKey<doxid-namespaceseams_1_1domain_1ad678cb494640b797ce08a5c07565785c>`(std::uint32_t x, std::uint32_t y, std::uint32_t z, int bits);
+	:ref:`Share<doxid-structseams_1_1domain_1_1_share>` :ref:`decompose<doxid-namespaceseams_1_1domain_1a98d70d81f9a7b925ff2ddefedb2be450>`(const :ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>`& cloud, int rank, int nRanks, double halo);
+	:ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>` :ref:`subCloud<doxid-namespaceseams_1_1domain_1a117adcb3bb1eb7b853386cdb464eded8>`(const :ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>`& cloud, const std::vector<int>& atoms);
+	std::vector<std::vector<int>> :ref:`rings<doxid-namespaceseams_1_1domain_1ab982f532567f97c32b948bf06caa992b>`(const :ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>`& cloud, double cutoff, int maxDepth, int rank, int nRanks);
+
+	} // namespace domain
+.. _details-namespaceseams_1_1domain:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Global Functions
+----------------
+
+.. index:: pair: function; hilbertKey
+.. _doxid-namespaceseams_1_1domain_1ad678cb494640b797ce08a5c07565785c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::uint64_t hilbertKey(std::uint32_t x, std::uint32_t y, std::uint32_t z, int bits)
+
+Position of cell (x, y, z) along the Hilbert curve over a 2^bits grid.
+
+.. index:: pair: function; decompose
+.. _doxid-namespaceseams_1_1domain_1a98d70d81f9a7b925ff2ddefedb2be450:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Share<doxid-structseams_1_1domain_1_1_share>` decompose(const :ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>`& cloud, int rank, int nRanks, double halo)
+
+The atoms rank *rank* of *nRanks* owns, and every atom within *halo* of one of them. Without a periodic box rank 0 owns every atom.
+
+.. index:: pair: function; subCloud
+.. _doxid-namespaceseams_1_1domain_1a117adcb3bb1eb7b853386cdb464eded8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>` subCloud(const :ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>`& cloud, const std::vector<int>& atoms)
+
+The listed atoms of *cloud*, in that order, in the same box.
+
+.. index:: pair: function; rings
+.. _doxid-namespaceseams_1_1domain_1ab982f532567f97c32b948bf06caa992b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> rings(const :ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>`& cloud, double cutoff, int maxDepth, int rank, int nRanks)
+
+Primitive rings of the cutoff graph up to *maxDepth* members whose lowest-indexed member rank *rank* owns, by frame index, as :ref:`primitive::ringNetwork <doxid-group__primitive_1ga69f1b870183f33e58426c88ee93f0635>` lists them for the graph with ascending rows. Each rank needs only its share, and the ranks' rings partition the frame's.
+

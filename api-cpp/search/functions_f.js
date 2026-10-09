@@ -7,7 +7,7 @@ var searchData=
   ['pathfromargv_4',['pathFromArgv',['../namespaceseams_1_1cfg.html#a3b2a50f145d13cd1992555c5c9c0bee0',1,'seams::cfg']]],
   ['periodiccentroid_5',['periodicCentroid',['../namespacesite.html#a208c6e1f8e6106530d6c75bb16dccaad',1,'site']]],
   ['periodicdist_6',['periodicDist',['../group__gen.html#ga4038dadde6016e7a738c2cb015344ee3',1,'gen']]],
-  ['periodicdistsq_7',['periodicDistSq',['../group__gen.html#gafdafa646c7cceaa4eeb8d92b14e0a192',1,'gen']]],
+  ['periodicdistsq_7',['periodicDistSq',['../group__gen.html#gac55d45ba7b50cb75763412f158ecd713',1,'gen::periodicDistSq(const FracBox &amp;b, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int iatom, int jatom)'],['../group__gen.html#gafdafa646c7cceaa4eeb8d92b14e0a192',1,'gen::periodicDistSq(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int iatom, int jatom)']]],
   ['planbatch_8',['planBatch',['../namespacegpu.html#a36de5ad975f1dee03bd8b55ccd15a4c3',1,'gpu']]],
   ['pointgroup_9',['pointGroup',['../namespaceira.html#aa9b334b9ee20ce45a89d779f800a8fad',1,'ira']]],
   ['polygonringanalysis_10',['polygonRingAnalysis',['../group__ring.html#ga346b2c43ca9cf794e95cb70f0dd5c642',1,'ring']]],

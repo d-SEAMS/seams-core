@@ -37,6 +37,7 @@ var namespacechill =
     [ "printIceType", "group__chill.html#ga0981b3101b04cacd525c2b5dc52f8a96", null ],
     [ "reclassifyWater", "group__chill.html#gaaad5ad6884511e350e8b2cda1baeaea2", null ],
     [ "registerBondClassifier", "group__chill.html#gafdbd8e7d77ca3e23619b0073b02a2e05", null ],
+    [ "setSteinhardtAtomSplit", "group__chill.html#ga794193ca26ae29cc438c91471a0cb3d5", null ],
     [ "soapSpectrum", "namespacechill.html#a7ce20c1ee581242dfd8e0dc80ddc17bc", null ],
     [ "soapSpectrumAll", "namespacechill.html#a587a1bffcd6e21ecf2feb16a95fe01c1", null ],
     [ "specializedChillPlus", "namespacechill.html#a30ed8d4d44a99044fddf3ea0b7f0ee0c", null ],

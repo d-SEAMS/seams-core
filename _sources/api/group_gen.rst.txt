@@ -9,6 +9,7 @@ Gen
 
 	group_ring.rst
 	namespace_gen.rst
+	struct_gen_FracBox.rst
 
 
 
@@ -23,4 +24,8 @@ Gen
 	// namespaces
 
 	namespace :ref:`gen<doxid-namespacegen>`;
+
+	// structs
+
+	struct :ref:`gen::FracBox<doxid-structgen_1_1_frac_box>`;
 

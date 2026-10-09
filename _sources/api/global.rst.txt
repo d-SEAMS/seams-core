@@ -50,6 +50,7 @@ Global Namespace
 	namespace :ref:`ring<doxid-namespacering>`;
 	namespace :ref:`seams<doxid-namespaceseams>`;
 		namespace :ref:`seams::cfg<doxid-namespaceseams_1_1cfg>`;
+		namespace :ref:`seams::domain<doxid-namespaceseams_1_1domain>`;
 		namespace :ref:`seams::sphericart_ylm<doxid-namespaceseams_1_1sphericart__ylm>`;
 		namespace :ref:`seams::steinhardt<doxid-namespaceseams_1_1steinhardt>`;
 	namespace :ref:`sinp<doxid-namespacesinp>`;

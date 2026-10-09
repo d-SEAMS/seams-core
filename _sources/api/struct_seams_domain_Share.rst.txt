@@ -1,0 +1,56 @@
+.. index:: pair: struct; seams::domain::Share
+.. _doxid-structseams_1_1domain_1_1_share:
+
+struct seams::domain::Share
+===========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+One rank's share of a frame. :ref:`More...<details-structseams_1_1domain_1_1_share>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <domain.hpp>
+	
+	struct Share {
+		// fields
+	
+		std::vector<int> :ref:`local<doxid-structseams_1_1domain_1_1_share_1affcf600ef9637c9805fbd80d685533bb>`;
+		std::vector<char> :ref:`owned<doxid-structseams_1_1domain_1_1_share_1a3a06bd73f2c9fe2c4496704a480b7a31>`;
+	};
+.. _details-structseams_1_1domain_1_1_share:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+One rank's share of a frame.
+
+Fields
+------
+
+.. index:: pair: variable; local
+.. _doxid-structseams_1_1domain_1_1_share_1affcf600ef9637c9805fbd80d685533bb:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> local
+
+owned and halo atoms by frame index, ascending
+
+.. index:: pair: variable; owned
+.. _doxid-structseams_1_1domain_1_1_share_1a3a06bd73f2c9fe2c4496704a480b7a31:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<char> owned
+
+nonzero where local[k] belongs to this rank
+

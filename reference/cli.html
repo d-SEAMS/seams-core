@@ -661,6 +661,28 @@ deterministic output order. XYZ is a single-frame input and emits frame 1
 at most. Chemfiles and readcon inputs are read serially until the requested
 range or the first missing frame. <code class="docutils literal notranslate"><span class="pre">--jobs</span> <span class="pre">1</span></code> is serial; non-LAMMPS readers
 do not use OpenMP workers.</p>
+<p>An MPI build (<code class="docutils literal notranslate"><span class="pre">-Dwith_mpi=enabled</span></code>) started by <code class="docutils literal notranslate"><span class="pre">mpiexec</span></code> shares a LAMMPS
+dump’s frames among the ranks in serpentine rounds: of R ranks, rank r takes
+slot r of even rounds and slot R-1-r of odd ones, so a cost that steps,
+drifts or alternates along the run reaches every rank. Rank 0 prints every
+frame in order; ranks past the frame count idle. Other readers stay on rank
+0, <code class="docutils literal notranslate"><span class="pre">--per-atom</span></code> needs a single rank, ranks that differ in arguments,
+directory or <code class="docutils literal notranslate"><span class="pre">SEAMS_</span></code> settings are refused, and colour stays off unless the
+environment forces it. Each rank runs <code class="docutils literal notranslate"><span class="pre">--jobs</span></code> frame workers, OpenMP threads
+inside a frame, and linkcell’s rayon pool; on a launch of several ranks,
+<code class="docutils literal notranslate"><span class="pre">OMP_NUM_THREADS</span></code> and <code class="docutils literal notranslate"><span class="pre">RAYON_NUM_THREADS</span></code> default to 1 when unset. For
+hybrid runs set them per rank and bind each rank to its cores; with Open
+MPI:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span data-line="1">mpiexec<span class="w"> </span>-n<span class="w"> </span><span class="m">2</span><span class="w"> </span>--map-by<span class="w"> </span>slot:PE<span class="o">=</span><span class="m">4</span><span class="w"> </span>-x<span class="w"> </span><span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">4</span><span class="w"> </span>-x<span class="w"> </span><span class="nv">RAYON_NUM_THREADS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+</span><span data-line="2"><span class="w">  </span>seams<span class="w"> </span>--jobs<span class="w"> </span><span class="m">4</span><span class="w"> </span>--frame<span class="w"> </span><span class="m">1</span><span class="w"> </span>--last<span class="w"> </span><span class="m">100</span><span class="w"> </span>cages<span class="w"> </span>dump.lammpstrj
+</span></pre></div>
+</div>
+<p>On a host without a libfabric network, Open MPI’s <code class="docutils literal notranslate"><span class="pre">ofi</span></code> transport spends
+about a second probing at start-up; <code class="docutils literal notranslate"><span class="pre">--mca</span> <span class="pre">btl</span> <span class="pre">^ofi</span></code> skips it. Ranks then
+matched <code class="docutils literal notranslate"><span class="pre">--jobs</span></code> on one 8-core node, beat it where frame cost steps or
+alternates along the run, and eight ranks on two 4-core core sets talking
+only over TCP took about half the time of threads on one. A run without a
+launcher, or with <code class="docutils literal notranslate"><span class="pre">SEAMS_MPI=0</span></code>, never initialises MPI.</p>
 </section>
 <section id="features">
 <h2><code class="docutils literal notranslate"><span class="pre">--features</span></code><a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>
