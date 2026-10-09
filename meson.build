@@ -224,7 +224,7 @@ _linkcell_opts = []
 if gpulite_dep.found() and not gpulite_opt.disabled()
   _linkcell_opts += ['with_gpulite=enabled']
 endif
-linkcell_dep = dependency('linkcell', version: '>=0.3.10', required: get_option('with_linkcell'),
+linkcell_dep = dependency('linkcell', version: '>=0.3.11', required: get_option('with_linkcell'),
                           fallback: ['linkcell', 'linkcell_dep'],
                           default_options: _linkcell_opts)
 if linkcell_dep.found()
@@ -261,7 +261,7 @@ endif
 # the same readcon-core pin. The db crate vendors its own core for its
 # internal parse; seams never frees that handle with this build's
 # libreadcon_core.
-readcondb_dep = dependency('readcon-db', version: '>=0.1.7', required: false,
+readcondb_dep = dependency('readcon-db', version: '>=0.1.8', required: false,
                            fallback: ['readcon-db', 'readcon_dep'],
                            default_options: [
                              'default_library=' + _readcon_kind,
