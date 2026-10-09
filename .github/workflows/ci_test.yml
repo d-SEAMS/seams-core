@@ -36,6 +36,9 @@ jobs:
 
   mpi:
     runs-on: ubuntu-latest
+    env:
+      # Hosted runners expose MANA devices without usable RDMA queues.
+      UCX_TLS: tcp,self,sm
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
