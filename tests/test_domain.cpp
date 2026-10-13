@@ -3,6 +3,7 @@
 #include "domain_frames.hpp"
 
 #include <domain.hpp>
+#include <ring.hpp>
 #include <franzblau.hpp>
 #include <generic.hpp>
 #include <neighbours.hpp>
@@ -152,6 +153,30 @@ TEST_CASE("Ranks' rings together are the frame's rings", "[domain]") {
                          [](const auto &a, const auto &b) { return a[0] < b[0]; });
         REQUIRE(joined == whole);
       }
+    }
+  }
+}
+
+TEST_CASE("A summary of the ranks' rings is the frame's summary", "[domain]") {
+  const double cutoff = 3.4;
+  const auto frame = tiltedFrame(16000, 78.4, 9.0, 5.0, -7.0, 5);
+  for (const int depth : {6, 8}) {
+    const auto whole = sortedRowRings(frame, cutoff, depth);
+    const auto want = seams::domain::summarize(whole, frame.nop, depth);
+    // ring::assignPolygonType with every atom starting unclassified
+    std::vector<int> types(static_cast<std::size_t>(frame.nop), 1);
+    std::vector<int> nRingList;
+    ring::assignPolygonType(whole, types, nRingList);
+    REQUIRE(want.atomType == types);
+    for (const int nRanks : {2, 3, 8}) {
+      std::vector<std::vector<int>> joined;
+      for (int rank = 0; rank < nRanks; rank++) {
+        const auto mine = seams::domain::rings(frame, cutoff, depth, rank, nRanks);
+        joined.insert(joined.end(), mine.begin(), mine.end());
+      }
+      const auto got = seams::domain::summarize(joined, frame.nop, depth);
+      REQUIRE(got.sizeCount == want.sizeCount);
+      REQUIRE(got.atomType == want.atomType);
     }
   }
 }
