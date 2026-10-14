@@ -1,5 +1,6 @@
 var NAVTREEINDEX3 =
 {
+"namespacetum_1_1device.html#a061391c12acf0965ef0b283462f43fd1":[2,0,25,0,19],
 "namespacetum_1_1device.html#a0d0b742692a97da157edb94e385c3368":[2,0,25,0,14],
 "namespacetum_1_1device.html#a19baaa6f3828a39fc70ec4bbfa5c6159":[2,0,25,0,10],
 "namespacetum_1_1device.html#a1e28269a0e7df30aede0377144f889f8":[2,0,25,0,11],
@@ -248,6 +249,5 @@ var NAVTREEINDEX3 =
 "structphase_1_1IceXXIHit.html#ad460af558a81e77fe720269e23a9f4d7":[2,0,11,0,0],
 "structphase_1_1IceXXIHit.html#ad460af558a81e77fe720269e23a9f4d7":[4,0,8,0,0],
 "structphase_1_1IceXXIHit.html#ad68eea6102729132f408bea7bb70585e":[2,0,11,0,2],
-"structphase_1_1IceXXIHit.html#ad68eea6102729132f408bea7bb70585e":[4,0,8,0,2],
-"structphase_1_1IceXXIHit.html#ada69293ebab3b1ba2d813fe8cb7fa6a2":[2,0,11,0,4]
+"structphase_1_1IceXXIHit.html#ad68eea6102729132f408bea7bb70585e":[4,0,8,0,2]
 };

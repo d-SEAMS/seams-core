@@ -27,7 +27,8 @@ var searchData=
   ['atomoverride_24',['atomOverride',['../structsite_1_1Table.html#ae4fef91b396372693e47e15c4aaf149c',1,'site::Table']]],
   ['atomsfromcages_25',['atomsFromCages',['../group__ring.html#ga11cd9029a926adccce0454064cfb9e45',1,'tum3']]],
   ['atomsinsingleslice_26',['atomsInSingleSlice',['../group__ring.html#ga14c78fad4483668aa3d053ec7d335c79',1,'gen']]],
-  ['available_27',['available',['../structgpu_1_1DeviceInfo.html#aa906d2f24ad5737eb03a4766f5866f24',1,'gpu::DeviceInfo::available'],['../namespaceira.html#a78158b2832fc60ee81ee0690306a1513',1,'ira::available()'],['../namespaceseams_1_1sphericart__ylm.html#ac07a3ae725018c5cd077e46edebaa712',1,'seams::sphericart_ylm::available()']]],
-  ['averagermsdatom_28',['averageRMSDatom',['../group__ring.html#gaeb733184d3f90032143304cf1c7b4b2e',1,'tum3']]],
-  ['avgvector_29',['avgVector',['../group__gen.html#ga17d4f5636c0469c19d7efa59344396b2',1,'gen']]]
+  ['atomtype_27',['atomType',['../structseams_1_1domain_1_1RingSummary.html#acc99d07f5a72f9395e2c9555e9b37520',1,'seams::domain::RingSummary']]],
+  ['available_28',['available',['../structgpu_1_1DeviceInfo.html#aa906d2f24ad5737eb03a4766f5866f24',1,'gpu::DeviceInfo::available'],['../namespaceira.html#a78158b2832fc60ee81ee0690306a1513',1,'ira::available()'],['../namespaceseams_1_1sphericart__ylm.html#ac07a3ae725018c5cd077e46edebaa712',1,'seams::sphericart_ylm::available()']]],
+  ['averagermsdatom_29',['averageRMSDatom',['../group__ring.html#gaeb733184d3f90032143304cf1c7b4b2e',1,'tum3']]],
+  ['avgvector_30',['avgVector',['../group__gen.html#ga17d4f5636c0469c19d7efa59344396b2',1,'gen']]]
 ];

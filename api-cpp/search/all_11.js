@@ -47,13 +47,14 @@ var searchData=
   ['ringsdropped_44',['ringsDropped',['../structgpu_1_1BatchResult.html#aa2bf91a0e7f7a2dccfc3c4139e54f6fa',1,'gpu::BatchResult::ringsDropped'],['../structtum_1_1CageCounts.html#a8ba2a68345d60657b3fcf399a54ded38',1,'tum::CageCounts::ringsDropped']]],
   ['ringsearchindex_45',['RingSearchIndex',['../structring_1_1RingSearchIndex.html',1,'ring']]],
   ['ringsthrough_46',['ringsThrough',['../namespacetum_1_1device.html#a65530a55ba9f0502f557be5cc08974ca',1,'tum::device']]],
-  ['ringupdater_47',['RingUpdater',['../classprimitive_1_1RingUpdater.html',1,'primitive::RingUpdater'],['../group__primitive.html#ga61b88624c282b4573177cba65781a2f1',1,'primitive::RingUpdater::RingUpdater(int maxDepth)'],['../group__primitive.html#ga5d186144c78bff338a8c6d3bc88b5d47',1,'primitive::RingUpdater::RingUpdater(RingUpdater &amp;&amp;) noexcept'],['../group__primitive.html#ga8cc0a54ed956da02142a250c4c7bf8c2',1,'primitive::RingUpdater::RingUpdater(const RingUpdater &amp;)=delete']]],
-  ['rmax_48',['rmax',['../group__rdf.html#gaf633cbb773b23a72ae1e070d691c76ec',1,'rdf::PartialRdf']]],
-  ['rmaxialtranslations_49',['rmAxialTranslations',['../group__ring.html#ga5f5496ef80d800cb0e9b4d87b6cca4bf',1,'ring']]],
-  ['rmsd_50',['rmsd',['../structcage_1_1CageShape.html#aff481658b1a1979a566dfc1667b36a9d',1,'cage::CageShape::rmsd'],['../structira_1_1Match.html#ab14b20ac985fe3c9fb6359973da2b5c9',1,'ira::Match::rmsd'],['../structchill_1_1TemplateHit.html#ab9b9bdbf34e6272e29ab3bdcf2c9e1c2',1,'chill::TemplateHit::rmsd']]],
-  ['rodgerf4_51',['rodgerF4',['../namespacetopoparam.html#ac9f9075f5de0b04fb6d0431ee15a29b9',1,'topoparam']]],
-  ['rotation_52',['rotation',['../structira_1_1Match.html#a4a98f0d5bfd17ab0b1aa668dbf72c415',1,'ira::Match']]],
-  ['rows_53',['Rows',['../namespacetopo.html#a770ae81afc5c8c715470d90d4e3c8e6e',1,'topo']]],
-  ['runningcn_54',['runningCN',['../group__rdf.html#ga2a54eea649f6c234be50494cec2cee82',1,'rdf::runningCN(const PartialRdf &amp;h)'],['../group__rdf.html#ga86d11871fc6dcad3daa99cddf7fc11dc',1,'rdf::runningCN(const PartialRdf &amp;h, double rhoJ)']]],
-  ['runtime_55',['Runtime',['../structseams_1_1cfg_1_1Runtime.html',1,'seams::cfg']]]
+  ['ringsummary_47',['RingSummary',['../structseams_1_1domain_1_1RingSummary.html',1,'seams::domain']]],
+  ['ringupdater_48',['RingUpdater',['../classprimitive_1_1RingUpdater.html',1,'primitive::RingUpdater'],['../group__primitive.html#ga61b88624c282b4573177cba65781a2f1',1,'primitive::RingUpdater::RingUpdater(int maxDepth)'],['../group__primitive.html#ga5d186144c78bff338a8c6d3bc88b5d47',1,'primitive::RingUpdater::RingUpdater(RingUpdater &amp;&amp;) noexcept'],['../group__primitive.html#ga8cc0a54ed956da02142a250c4c7bf8c2',1,'primitive::RingUpdater::RingUpdater(const RingUpdater &amp;)=delete']]],
+  ['rmax_49',['rmax',['../group__rdf.html#gaf633cbb773b23a72ae1e070d691c76ec',1,'rdf::PartialRdf']]],
+  ['rmaxialtranslations_50',['rmAxialTranslations',['../group__ring.html#ga5f5496ef80d800cb0e9b4d87b6cca4bf',1,'ring']]],
+  ['rmsd_51',['rmsd',['../structcage_1_1CageShape.html#aff481658b1a1979a566dfc1667b36a9d',1,'cage::CageShape::rmsd'],['../structira_1_1Match.html#ab14b20ac985fe3c9fb6359973da2b5c9',1,'ira::Match::rmsd'],['../structchill_1_1TemplateHit.html#ab9b9bdbf34e6272e29ab3bdcf2c9e1c2',1,'chill::TemplateHit::rmsd']]],
+  ['rodgerf4_52',['rodgerF4',['../namespacetopoparam.html#ac9f9075f5de0b04fb6d0431ee15a29b9',1,'topoparam']]],
+  ['rotation_53',['rotation',['../structira_1_1Match.html#a4a98f0d5bfd17ab0b1aa668dbf72c415',1,'ira::Match']]],
+  ['rows_54',['Rows',['../namespacetopo.html#a770ae81afc5c8c715470d90d4e3c8e6e',1,'topo']]],
+  ['runningcn_55',['runningCN',['../group__rdf.html#ga2a54eea649f6c234be50494cec2cee82',1,'rdf::runningCN(const PartialRdf &amp;h)'],['../group__rdf.html#ga86d11871fc6dcad3daa99cddf7fc11dc',1,'rdf::runningCN(const PartialRdf &amp;h, double rhoJ)']]],
+  ['runtime_56',['Runtime',['../structseams_1_1cfg_1_1Runtime.html',1,'seams::cfg']]]
 ];

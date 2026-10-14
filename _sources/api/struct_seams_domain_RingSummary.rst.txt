@@ -1,0 +1,56 @@
+.. index:: pair: struct; seams::domain::RingSummary
+.. _doxid-structseams_1_1domain_1_1_ring_summary:
+
+struct seams::domain::RingSummary
+=================================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+What the ring analyses read off a frame's primitive rings. :ref:`More...<details-structseams_1_1domain_1_1_ring_summary>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <domain.hpp>
+	
+	struct RingSummary {
+		// fields
+	
+		std::vector<long long> :ref:`sizeCount<doxid-structseams_1_1domain_1_1_ring_summary_1a1e4953e17db15ae07393b9ab0a35b667>`;
+		std::vector<int> :ref:`atomType<doxid-structseams_1_1domain_1_1_ring_summary_1acc99d07f5a72f9395e2c9555e9b37520>`;
+	};
+.. _details-structseams_1_1domain_1_1_ring_summary:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+What the ring analyses read off a frame's primitive rings.
+
+Fields
+------
+
+.. index:: pair: variable; sizeCount
+.. _doxid-structseams_1_1domain_1_1_ring_summary_1a1e4953e17db15ae07393b9ab0a35b667:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<long long> sizeCount
+
+Rings of each size, indexed by member count, 0 through maxDepth.
+
+.. index:: pair: variable; atomType
+.. _doxid-structseams_1_1domain_1_1_ring_summary_1acc99d07f5a72f9395e2c9555e9b37520:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> atomType
+
+Largest ring size each atom belongs to, 1 when it is in none, the rule :ref:`ring::assignPolygonType <doxid-group__ring_1gafa6c593ce7cd865c74e11d39fa27f04b>` applies. Filled on the root rank only.
+

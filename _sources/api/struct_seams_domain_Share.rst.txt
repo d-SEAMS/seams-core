@@ -23,6 +23,7 @@ One rank's share of a frame. :ref:`More...<details-structseams_1_1domain_1_1_sha
 	
 		std::vector<int> :ref:`local<doxid-structseams_1_1domain_1_1_share_1affcf600ef9637c9805fbd80d685533bb>`;
 		std::vector<char> :ref:`owned<doxid-structseams_1_1domain_1_1_share_1a3a06bd73f2c9fe2c4496704a480b7a31>`;
+		std::vector<int> :ref:`owner<doxid-structseams_1_1domain_1_1_share_1a7d955cd85a1166a0846e5084ef949314>`;
 	};
 .. _details-structseams_1_1domain_1_1_share:
 
@@ -53,4 +54,14 @@ owned and halo atoms by frame index, ascending
 	std::vector<char> owned
 
 nonzero where local[k] belongs to this rank
+
+.. index:: pair: variable; owner
+.. _doxid-structseams_1_1domain_1_1_share_1a7d955cd85a1166a0846e5084ef949314:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> owner
+
+rank owning local[k]
 

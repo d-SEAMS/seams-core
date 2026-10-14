@@ -129,11 +129,12 @@ var NAVTREEINDEX2 =
 "namespaceseams_1_1cfg.html#aabf071e8f8e859b7daa9df9a9024377f":[2,0,18,0,3],
 "namespaceseams_1_1cfg.html#afc15aaadf171c66c374b2e93295c7649":[2,0,18,0,4],
 "namespaceseams_1_1domain.html":[2,0,18,1],
-"namespaceseams_1_1domain.html#a117adcb3bb1eb7b853386cdb464eded8":[2,0,18,1,5],
-"namespaceseams_1_1domain.html#a98d70d81f9a7b925ff2ddefedb2be450":[2,0,18,1,2],
-"namespaceseams_1_1domain.html#ab1bfe8a7863d4a64c57f3ea273eacfc3":[2,0,18,1,1],
-"namespaceseams_1_1domain.html#ab982f532567f97c32b948bf06caa992b":[2,0,18,1,4],
-"namespaceseams_1_1domain.html#ad678cb494640b797ce08a5c07565785c":[2,0,18,1,3],
+"namespaceseams_1_1domain.html#a08b7a66725169b459556ffeb9a2791de":[2,0,18,1,7],
+"namespaceseams_1_1domain.html#a117adcb3bb1eb7b853386cdb464eded8":[2,0,18,1,6],
+"namespaceseams_1_1domain.html#a98d70d81f9a7b925ff2ddefedb2be450":[2,0,18,1,3],
+"namespaceseams_1_1domain.html#ab1bfe8a7863d4a64c57f3ea273eacfc3":[2,0,18,1,2],
+"namespaceseams_1_1domain.html#ab982f532567f97c32b948bf06caa992b":[2,0,18,1,5],
+"namespaceseams_1_1domain.html#ad678cb494640b797ce08a5c07565785c":[2,0,18,1,4],
 "namespaceseams_1_1sphericart__ylm.html":[2,0,18,2],
 "namespaceseams_1_1sphericart__ylm.html#a3d7e262a77527ba90b9a718c6b692b9b":[2,0,18,2,1],
 "namespaceseams_1_1sphericart__ylm.html#ac07a3ae725018c5cd077e46edebaa712":[2,0,18,2,0],
@@ -248,6 +249,5 @@ var NAVTREEINDEX2 =
 "namespacetum.html#a5db91702c7f7d13a3878708e01999945":[2,0,25,2],
 "namespacetum.html#a9dc1d26c60d5f757e66305b65b42aed0":[2,0,25,4],
 "namespacetum3.html":[1,6,0,0],
-"namespacetum_1_1device.html":[2,0,25,0],
-"namespacetum_1_1device.html#a061391c12acf0965ef0b283462f43fd1":[2,0,25,0,19]
+"namespacetum_1_1device.html":[2,0,25,0]
 };

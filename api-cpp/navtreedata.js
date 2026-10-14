@@ -63,7 +63,7 @@ var NAVTREEINDEX =
 "absOrientation_8hpp.html",
 "group__gen.html#gafec94241bb6c5f9cafbc50f063131b67",
 "namespacemembers.html",
-"namespacetum_1_1device.html#a0d0b742692a97da157edb94e385c3368",
+"namespacetum_1_1device.html#a061391c12acf0965ef0b283462f43fd1",
 "structphase_1_1IceXXIHit.html#ada69293ebab3b1ba2d813fe8cb7fa6a2"
 ];
 

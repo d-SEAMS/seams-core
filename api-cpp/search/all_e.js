@@ -17,7 +17,8 @@ var searchData=
   ['out_5fof_5frange_14',['out_of_range',['../group__molSys.html#gga1c858200c3d088bf02839453d0f46328a4fb901c70a0fdc05b55d95985f3300b0',1,'molSys']]],
   ['overlayvertices_15',['overlayVertices',['../namespacecage.html#aed0eb6a1e977e36efaeab5046ab334fb',1,'cage']]],
   ['owned_16',['owned',['../structseams_1_1domain_1_1Share.html#a3a06bd73f2c9fe2c4496704a480b7a31',1,'seams::domain::Share']]],
-  ['ox_17',['ox',['../group__gen.html#ga08e107066539e533e19563cbf3489752',1,'gen::FracBox']]],
-  ['oy_18',['oy',['../group__gen.html#gab8ee5dd41226e38d0deb68cec73c5813',1,'gen::FracBox']]],
-  ['oz_19',['oz',['../group__gen.html#ga8223c9e3944f04f345f5565071e403d6',1,'gen::FracBox']]]
+  ['owner_17',['owner',['../structseams_1_1domain_1_1Share.html#a7d955cd85a1166a0846e5084ef949314',1,'seams::domain::Share']]],
+  ['ox_18',['ox',['../group__gen.html#ga08e107066539e533e19563cbf3489752',1,'gen::FracBox']]],
+  ['oy_19',['oy',['../group__gen.html#gab8ee5dd41226e38d0deb68cec73c5813',1,'gen::FracBox']]],
+  ['oz_20',['oz',['../group__gen.html#ga8223c9e3944f04f345f5565071e403d6',1,'gen::FracBox']]]
 ];

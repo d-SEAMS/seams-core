@@ -249,6 +249,8 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:affcf600ef9637c9805fbd80d685533bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">owned and halo atoms by frame index, ascending  <br /></td></tr>
 <tr class="memitem:a3a06bd73f2c9fe2c4496704a480b7a31" id="r_a3a06bd73f2c9fe2c4496704a480b7a31"><td class="memItemLeft">std::vector&lt; char &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a3a06bd73f2c9fe2c4496704a480b7a31">owned</a></td></tr>
 <tr class="memdesc:a3a06bd73f2c9fe2c4496704a480b7a31"><td class="mdescLeft">&#160;</td><td class="mdescRight">nonzero where local[k] belongs to this rank  <br /></td></tr>
+<tr class="memitem:a7d955cd85a1166a0846e5084ef949314" id="r_a7d955cd85a1166a0846e5084ef949314"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a7d955cd85a1166a0846e5084ef949314">owner</a></td></tr>
+<tr class="memdesc:a7d955cd85a1166a0846e5084ef949314"><td class="mdescLeft">&#160;</td><td class="mdescRight">rank owning local[k]  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>One rank's share of a frame. </p>
@@ -288,6 +290,24 @@ Public Attributes</h2></td></tr>
 <p>nonzero where local[k] belongs to this rank </p>
 
 <p class="definition">Definition at line <a class="el" href="domain_8hpp_source.html#l00032">32</a> of file <a class="el" href="domain_8hpp_source.html">domain.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a7d955cd85a1166a0846e5084ef949314" name="a7d955cd85a1166a0846e5084ef949314"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d955cd85a1166a0846e5084ef949314">&#9670;&#160;</a></span>owner</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;int&gt; seams::domain::Share::owner</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>rank owning local[k] </p>
+
+<p class="definition">Definition at line <a class="el" href="domain_8hpp_source.html#l00033">33</a> of file <a class="el" href="domain_8hpp_source.html">domain.hpp</a>.</p>
 
 </div>
 </div>

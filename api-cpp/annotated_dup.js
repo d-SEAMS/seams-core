@@ -64,7 +64,8 @@ var annotated_dup =
         [ "Runtime", "structseams_1_1cfg_1_1Runtime.html", "structseams_1_1cfg_1_1Runtime" ]
       ] ],
       [ "domain", "namespaceseams_1_1domain.html", [
-        [ "Share", "structseams_1_1domain_1_1Share.html", "structseams_1_1domain_1_1Share" ]
+        [ "Share", "structseams_1_1domain_1_1Share.html", "structseams_1_1domain_1_1Share" ],
+        [ "RingSummary", "structseams_1_1domain_1_1RingSummary.html", "structseams_1_1domain_1_1RingSummary" ]
       ] ]
     ] ],
     [ "site", "namespacesite.html", [

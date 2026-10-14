@@ -7,6 +7,7 @@ namespace seams::domain
 .. toctree::
 	:hidden:
 
+	struct_seams_domain_RingSummary.rst
 	struct_seams_domain_Share.rst
 
 Overview
@@ -27,10 +28,12 @@ Overview
 
 	// structs
 
+	struct :ref:`RingSummary<doxid-structseams_1_1domain_1_1_ring_summary>`;
 	struct :ref:`Share<doxid-structseams_1_1domain_1_1_share>`;
 
 	// global functions
 
+	:ref:`RingSummary<doxid-structseams_1_1domain_1_1_ring_summary>` :ref:`summarize<doxid-namespaceseams_1_1domain_1a08b7a66725169b459556ffeb9a2791de>`(const std::vector<std::vector<int>>& ringList, int nAtoms, int maxDepth);
 	std::uint64_t :ref:`hilbertKey<doxid-namespaceseams_1_1domain_1ad678cb494640b797ce08a5c07565785c>`(std::uint32_t x, std::uint32_t y, std::uint32_t z, int bits);
 	:ref:`Share<doxid-structseams_1_1domain_1_1_share>` :ref:`decompose<doxid-namespaceseams_1_1domain_1a98d70d81f9a7b925ff2ddefedb2be450>`(const :ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>`& cloud, int rank, int nRanks, double halo);
 	:ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>` :ref:`subCloud<doxid-namespaceseams_1_1domain_1a117adcb3bb1eb7b853386cdb464eded8>`(const :ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>`& cloud, const std::vector<int>& atoms);
@@ -46,6 +49,16 @@ Detailed Documentation
 
 Global Functions
 ----------------
+
+.. index:: pair: function; summarize
+.. _doxid-namespaceseams_1_1domain_1a08b7a66725169b459556ffeb9a2791de:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`RingSummary<doxid-structseams_1_1domain_1_1_ring_summary>` summarize(const std::vector<std::vector<int>>& ringList, int nAtoms, int maxDepth)
+
+The summary of *ringList* over a frame of *nAtoms* atoms.
 
 .. index:: pair: function; hilbertKey
 .. _doxid-namespaceseams_1_1domain_1ad678cb494640b797ce08a5c07565785c:

@@ -31,5 +31,6 @@ var searchData=
   ['steinhardtql_28',['steinhardtQl',['../group__chill.html#gad60f25b03dc9b26dc62d80fd3fac53c3',1,'chill']]],
   ['steinhardtqlvoronoi_29',['steinhardtQlVoronoi',['../namespacechill.html#ac42b78e61e685301c32b8bc54d344ec1',1,'chill::steinhardtQlVoronoi(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, double candidateCutoff, int orderL)'],['../namespacechill.html#a97ec0cac9a6ea6fbcc25ccbaab1e4b31',1,'chill::steinhardtQlVoronoi(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; VoronoiWeights &gt; &amp;cells, int orderL)']]],
   ['str_30',['str',['../group__cage.html#gac8c529682fe69784b3a0df99c096ecc2',1,'cage::Signature']]],
-  ['subcloud_31',['subCloud',['../namespaceseams_1_1domain.html#a117adcb3bb1eb7b853386cdb464eded8',1,'seams::domain']]]
+  ['subcloud_31',['subCloud',['../namespaceseams_1_1domain.html#a117adcb3bb1eb7b853386cdb464eded8',1,'seams::domain']]],
+  ['summarize_32',['summarize',['../namespaceseams_1_1domain.html#a08b7a66725169b459556ffeb9a2791de',1,'seams::domain']]]
 ];
