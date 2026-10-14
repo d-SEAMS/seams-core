@@ -143,6 +143,13 @@ int main(int argc, char **argv) {
         (void)rings;
       },
       reps);
+  const double tReduce = bestMillis(
+      [&]() {
+        volatile auto s =
+            seams::domain::reduceRings(cloud, 3.5, 6, MPI_COMM_WORLD);
+        (void)s;
+      },
+      reps);
 #endif
 
   if (rank == 0) {
@@ -152,7 +159,7 @@ int main(int argc, char **argv) {
               << std::setw(16) << "index/ms" << std::setw(16) << "rings/ms"
               << std::setw(16) << "total/ms";
 #ifdef SEAMS_HAS_MPI
-    std::cout << std::setw(16) << "domain/ms";
+    std::cout << std::setw(16) << "domain/ms" << std::setw(16) << "reduce/ms";
 #endif
     std::cout << "\n";
     std::cout << std::left << std::setw(10) << nAtoms << std::setw(8) << nranks
@@ -162,7 +169,7 @@ int main(int argc, char **argv) {
               << std::setw(16) << tRings << std::setw(16)
               << (tNeigh + tQl + tIndex + tRings);
 #ifdef SEAMS_HAS_MPI
-    std::cout << std::setw(16) << tDomain;
+    std::cout << std::setw(16) << tDomain << std::setw(16) << tReduce;
 #endif
     std::cout << "\n";
     std::cout << "# every stage threaded on the host; best of " << reps << " runs\n";

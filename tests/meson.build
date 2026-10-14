@@ -108,11 +108,17 @@ if mpi_found
       link_args: _test_link_args,
       include_directories: _incdirs,
       build_rpath: _test_rpath)
-    test('domain_mpi', _mpiexec,
-      args: ['-n', '2', _domain_mpi],
-      env: _test_env,
-      is_parallel: false,
-      timeout: 120)
+    _mpi_env = environment({'RAYON_NUM_THREADS': '1', 'OMP_NUM_THREADS': '1'})
+    _mpi_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+    # CI asks for domain_mpi. Meson treats that as a whole-name pattern, so
+    # domain_mpi_1 never matches. Repeat the name once per rank count.
+    foreach _np : ['1', '2', '4']
+      test('domain_mpi', _mpiexec,
+        args: ['--oversubscribe', '-n', _np, _domain_mpi],
+        env: _mpi_env,
+        is_parallel: false,
+        timeout: 300)
+    endforeach
   endif
 endif
 

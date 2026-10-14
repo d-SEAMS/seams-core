@@ -122,6 +122,7 @@ Share decompose(const Cloud &cloud, int rank, int nRanks, double halo) {
       share.local.resize(static_cast<std::size_t>(nAtoms));
       std::iota(share.local.begin(), share.local.end(), 0);
       share.owned.assign(static_cast<std::size_t>(nAtoms), 1);
+      share.owner.assign(static_cast<std::size_t>(nAtoms), 0);
     }
     return share;
   }
@@ -170,6 +171,7 @@ Share decompose(const Cloud &cloud, int rank, int nRanks, double halo) {
                      static_cast<std::uint32_t>((c / np) % np),
                      static_cast<std::uint32_t>(c / (np * np)), bits)] = c;
   }
+  std::vector<int> ownerOf(count.size(), 0);
   std::vector<char> owned(count.size(), 0);
   long long before = 0;
   for (const int c : along) {
@@ -177,6 +179,7 @@ Share decompose(const Cloud &cloud, int rank, int nRanks, double halo) {
     const long long owner =
         std::min<long long>(nRanks - 1, (2 * before + here) * nRanks /
                                             (2 * static_cast<long long>(nAtoms)));
+    ownerOf[static_cast<std::size_t>(c)] = static_cast<int>(owner);
     owned[static_cast<std::size_t>(c)] = owner == rank;
     before += here;
   }
@@ -199,6 +202,8 @@ Share decompose(const Cloud &cloud, int rank, int nRanks, double halo) {
                  near[static_cast<std::size_t>(haloOf[static_cast<std::size_t>(i)])])) {
       share.local.push_back(i);
       share.owned.push_back(mine);
+      share.owner.push_back(
+          ownerOf[static_cast<std::size_t>(partOf[static_cast<std::size_t>(i)])]);
     }
   }
   return share;
@@ -221,8 +226,11 @@ Cloud subCloud(const Cloud &cloud, const std::vector<int> &atoms) {
   return out;
 }
 
-std::vector<std::vector<int>> rings(const Cloud &cloud, double cutoff,
-                                    int maxDepth, int rank, int nRanks) {
+namespace {
+//! Rings whose lowest-indexed member the share owns, by local index
+std::vector<std::vector<int>> shareRings(const Cloud &cloud, double cutoff,
+                                         int maxDepth, int rank, int nRanks,
+                                         Share &share) {
   // Members of a ring lie within maxLvl hops of its source, and the search
   // reads adjacency no further out. A ball is consulted only on whether two
   // members are joined by a path shorter than their separation around the
@@ -232,7 +240,7 @@ std::vector<std::vector<int>> rings(const Cloud &cloud, double cutoff,
   // the cutoff.
   const int maxLvl = maxDepth / 2;
   const int hops = maxLvl + (maxLvl - 1) / 2;
-  const Share share = decompose(cloud, rank, nRanks, hops * cutoff);
+  share = decompose(cloud, rank, nRanks, hops * cutoff);
   if (share.local.empty()) {
     return {};
   }
@@ -248,7 +256,26 @@ std::vector<std::vector<int>> rings(const Cloud &cloud, double cutoff,
       std::sort(nList[k].begin() + 1, nList[k].end());
     }
   }
-  auto out = primitive::ringNetwork(nList, maxDepth, share.owned);
+  return primitive::ringNetwork(nList, maxDepth, share.owned);
+}
+
+//! Largest ring size through each local atom, 1 through none
+void localTypes(const std::vector<std::vector<int>> &ringList,
+                std::vector<int> &type) {
+  for (const auto &ring : ringList) {
+    const int size = static_cast<int>(ring.size());
+    for (const int v : ring) {
+      type[static_cast<std::size_t>(v)] =
+          std::max(type[static_cast<std::size_t>(v)], size);
+    }
+  }
+}
+} // namespace
+
+std::vector<std::vector<int>> rings(const Cloud &cloud, double cutoff,
+                                    int maxDepth, int rank, int nRanks) {
+  Share share;
+  auto out = shareRings(cloud, cutoff, maxDepth, rank, nRanks, share);
   const int nRings = static_cast<int>(out.size());
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (nRings >= kParallelMin && !omp_in_parallel())
@@ -259,6 +286,20 @@ std::vector<std::vector<int>> rings(const Cloud &cloud, double cutoff,
     }
   }
   return out;
+}
+
+RingSummary summarize(const std::vector<std::vector<int>> &ringList,
+                      int nAtoms, int maxDepth) {
+  RingSummary s;
+  s.sizeCount.assign(static_cast<std::size_t>(std::max(maxDepth, 0)) + 1, 0);
+  s.atomType.assign(static_cast<std::size_t>(nAtoms), 1);
+  for (const auto &ring : ringList) {
+    if (ring.size() < s.sizeCount.size()) {
+      s.sizeCount[ring.size()]++;
+    }
+  }
+  localTypes(ringList, s.atomType);
+  return s;
 }
 
 #ifdef SEAMS_HAS_MPI
@@ -311,6 +352,94 @@ std::vector<std::vector<int>> gatherRings(const Cloud &cloud, double cutoff,
     out[slot[r]].assign(begin, begin + all[at[r]]);
   }
   return out;
+}
+
+RingSummary reduceRings(const Cloud &cloud, double cutoff, int maxDepth,
+                        MPI_Comm comm, int root) {
+  int rank = 0;
+  int nRanks = 1;
+  MPI_Comm_rank(comm, &rank);
+  MPI_Comm_size(comm, &nRanks);
+  const int nAtoms = static_cast<int>(cloud.pts.size());
+  Share share;
+  const auto mine = shareRings(cloud, cutoff, maxDepth, rank, nRanks, share);
+  const std::size_t nLocal = share.local.size();
+
+  // Counts: every ring is listed by exactly one rank, its source's owner
+  RingSummary s;
+  std::vector<long long> count(static_cast<std::size_t>(std::max(maxDepth, 0)) + 1, 0);
+  for (const auto &ring : mine) {
+    if (ring.size() < count.size()) {
+      count[ring.size()]++;
+    }
+  }
+  s.sizeCount.assign(count.size(), 0);
+  MPI_Allreduce(count.data(), s.sizeCount.data(), static_cast<int>(count.size()),
+                MPI_LONG_LONG, MPI_SUM, comm);
+
+  // Types: the maximum is order free, so a halo atom's local type folds into
+  // its owner's after one exchange of (frame index, type) pairs
+  std::vector<int> type(nLocal, 1);
+  localTypes(mine, type);
+  std::vector<int> sendCount(static_cast<std::size_t>(nRanks), 0);
+  for (std::size_t k = 0; k < nLocal; k++) {
+    if (!share.owned[k] && type[k] > 1) {
+      sendCount[static_cast<std::size_t>(share.owner[k])] += 2;
+    }
+  }
+  std::vector<int> sendDispl(static_cast<std::size_t>(nRanks), 0);
+  std::exclusive_scan(sendCount.begin(), sendCount.end(), sendDispl.begin(), 0);
+  std::vector<int> send(static_cast<std::size_t>(sendDispl.back() + sendCount.back()));
+  {
+    std::vector<int> at = sendDispl;
+    for (std::size_t k = 0; k < nLocal; k++) {
+      if (!share.owned[k] && type[k] > 1) {
+        int &pos = at[static_cast<std::size_t>(share.owner[k])];
+        send[static_cast<std::size_t>(pos++)] = share.local[k];
+        send[static_cast<std::size_t>(pos++)] = type[k];
+      }
+    }
+  }
+  std::vector<int> recvCount(static_cast<std::size_t>(nRanks), 0);
+  MPI_Alltoall(sendCount.data(), 1, MPI_INT, recvCount.data(), 1, MPI_INT, comm);
+  std::vector<int> recvDispl(static_cast<std::size_t>(nRanks), 0);
+  std::exclusive_scan(recvCount.begin(), recvCount.end(), recvDispl.begin(), 0);
+  std::vector<int> recv(static_cast<std::size_t>(recvDispl.back() + recvCount.back()));
+  MPI_Alltoallv(send.data(), sendCount.data(), sendDispl.data(), MPI_INT,
+                recv.data(), recvCount.data(), recvDispl.data(), MPI_INT, comm);
+  for (std::size_t j = 0; j + 1 < recv.size(); j += 2) {
+    // share.local is ascending, and an owner holds every atom it owns
+    const auto it = std::lower_bound(share.local.begin(), share.local.end(), recv[j]);
+    const auto k = static_cast<std::size_t>(it - share.local.begin());
+    type[k] = std::max(type[k], recv[j + 1]);
+  }
+
+  // Only owned atoms in some ring go to the root
+  std::vector<int> owned;
+  for (std::size_t k = 0; k < nLocal; k++) {
+    if (share.owned[k] && type[k] > 1) {
+      owned.push_back(share.local[k]);
+      owned.push_back(type[k]);
+    }
+  }
+  const int ownedCount = static_cast<int>(owned.size());
+  std::vector<int> counts(rank == root ? static_cast<std::size_t>(nRanks) : 0);
+  MPI_Gather(&ownedCount, 1, MPI_INT, counts.data(), 1, MPI_INT, root, comm);
+  std::vector<int> displs(counts.size(), 0);
+  std::vector<int> all;
+  if (rank == root) {
+    std::exclusive_scan(counts.begin(), counts.end(), displs.begin(), 0);
+    all.resize(static_cast<std::size_t>(displs.back() + counts.back()));
+  }
+  MPI_Gatherv(owned.data(), ownedCount, MPI_INT, all.data(), counts.data(),
+              displs.data(), MPI_INT, root, comm);
+  if (rank == root) {
+    s.atomType.assign(static_cast<std::size_t>(nAtoms), 1);
+    for (std::size_t j = 0; j + 1 < all.size(); j += 2) {
+      s.atomType[static_cast<std::size_t>(all[j])] = all[j + 1];
+    }
+  }
+  return s;
 }
 #endif
 

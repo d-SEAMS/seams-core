@@ -1,4 +1,6 @@
-// Run under mpiexec: every rank's gathered rings are the whole frame's.
+// Run under mpiexec at any rank count: every rank's gathered rings are the
+// whole frame's, and the reduced ring counts and per-atom types equal the
+// threaded single-process summary.
 
 #include "domain_frames.hpp"
 
@@ -21,6 +23,20 @@ int main(int argc, char **argv) {
           seams::domain::gatherRings(c, cutoff, depth, MPI_COMM_WORLD);
       if (got.empty() || got != sortedRowRings(c, cutoff, depth)) {
         std::fprintf(stderr, "rank %d: depth %d rings differ\n", rank, depth);
+        bad++;
+      }
+      const auto want = seams::domain::summarize(sortedRowRings(c, cutoff, depth),
+                                                 c.nop, depth);
+      const auto red = seams::domain::reduceRings(c, cutoff, depth, MPI_COMM_WORLD);
+      if (red.sizeCount != want.sizeCount) {
+        std::fprintf(stderr, "rank %d: depth %d ring counts differ\n", rank, depth);
+        bad++;
+      }
+      if (rank == 0 && red.atomType != want.atomType) {
+        std::fprintf(stderr, "rank 0: depth %d atom types differ\n", depth);
+        bad++;
+      }
+      if (rank != 0 && !red.atomType.empty()) {
         bad++;
       }
     }

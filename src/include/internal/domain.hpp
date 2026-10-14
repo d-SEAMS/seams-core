@@ -30,7 +30,21 @@ using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
 struct Share {
   std::vector<int> local;  //!< owned and halo atoms by frame index, ascending
   std::vector<char> owned; //!< nonzero where local[k] belongs to this rank
+  std::vector<int> owner;  //!< rank owning local[k]
 };
+
+//! What the ring analyses read off a frame's primitive rings
+struct RingSummary {
+  //! Rings of each size, indexed by member count, 0 through maxDepth
+  std::vector<long long> sizeCount;
+  //! Largest ring size each atom belongs to, 1 when it is in none, the rule
+  //! ring::assignPolygonType applies. Filled on the root rank only.
+  std::vector<int> atomType;
+};
+
+//! The summary of @a ringList over a frame of @a nAtoms atoms
+RingSummary summarize(const std::vector<std::vector<int>> &ringList,
+                      int nAtoms, int maxDepth);
 
 //! Position of cell (x, y, z) along the Hilbert curve over a 2^bits grid
 std::uint64_t hilbertKey(std::uint32_t x, std::uint32_t y, std::uint32_t z,
@@ -58,6 +72,16 @@ std::vector<std::vector<int>> rings(const Cloud &cloud, double cutoff,
 //! RAYON_NUM_THREADS, every core unless a rank sets it.
 std::vector<std::vector<int>> gatherRings(const Cloud &cloud, double cutoff,
                                           int maxDepth, MPI_Comm comm);
+
+//! summarize() of the whole frame's rings, with nothing whole-frame sized
+//! leaving a rank. Each rank searches its own domain and halo for the rings
+//! whose lowest-indexed member it owns. Ring counts are summed with
+//! MPI_Allreduce, so every rank gets them. A halo atom's type travels to its
+//! owner over MPI_Alltoallv, and only owned atoms in some ring reach @a root
+//! through MPI_Gatherv, so atomType is filled on @a root alone. Collective
+//! over @a comm.
+RingSummary reduceRings(const Cloud &cloud, double cutoff, int maxDepth,
+                        MPI_Comm comm, int root = 0);
 #endif
 
 } // namespace seams::domain
