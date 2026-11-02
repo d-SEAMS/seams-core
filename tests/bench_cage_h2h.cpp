@@ -13,6 +13,7 @@
 #include <seams_input.hpp>
 #include <topo_bulk.hpp>
 
+#include <array>
 #include <chrono>
 #include <cstdint>
 #include <cstdlib>
@@ -57,6 +58,12 @@ int main(int argc, char **argv) {
   }
   const auto kept = ring::contractibleRings(ringsAll, yCloud);
   const auto rank = ring::positionRank(yCloud);
+  std::vector<std::array<double, 3>> xyz(static_cast<size_t>(yCloud.nop));
+  for (int i = 0; i < yCloud.nop; ++i) {
+    xyz[static_cast<size_t>(i)] = {yCloud.pts[static_cast<size_t>(i)].x,
+                                   yCloud.pts[static_cast<size_t>(i)].y,
+                                   yCloud.pts[static_cast<size_t>(i)].z};
+  }
   const auto sigs = std::vector<cage::Signature>{
       cage::Signature::parse("512"),
       cage::Signature::parse("51262"),
@@ -91,7 +98,7 @@ int main(int argc, char **argv) {
       ++ddcOnly;
     }
   }
-  const auto found = cage::findBySignatures(kept, idx, sigs, rank);
+  const auto found = cage::findBySignatures(kept, idx, sigs, rank, &xyz, &yCloud.box);
   const auto aff = ring::cageAffiliation(six, idx);
 
   const double cand = 3.5 + 1.5;
@@ -169,7 +176,7 @@ int main(int argc, char **argv) {
     bestIce = std::min(bestIce, msSince(t0));
 
     t0 = std::chrono::steady_clock::now();
-    auto f = cage::findBySignatures(kept, idx, sigs, rank);
+    auto f = cage::findBySignatures(kept, idx, sigs, rank, &xyz, &yCloud.box);
     bestClath = std::min(bestClath, msSince(t0));
 
     t0 = std::chrono::steady_clock::now();
@@ -177,7 +184,7 @@ int main(int argc, char **argv) {
     cages.clear();
     hc = ring::findHC(six, ringType, idx, cages, index);
     ddc = ring::findDDC(six, ringType, hc, cages, index);
-    f = cage::findBySignatures(kept, idx, sigs, rank);
+    f = cage::findBySignatures(kept, idx, sigs, rank, &xyz, &yCloud.box);
     bestBoth = std::min(bestBoth, msSince(t0));
     finger = fingerprint(cages, f);
 

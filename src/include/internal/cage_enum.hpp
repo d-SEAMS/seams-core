@@ -100,7 +100,9 @@ std::vector<std::vector<FoundCage>>
 findBySignatures(const std::vector<std::vector<int>> &rings,
                  const std::vector<std::vector<int>> &nList,
                  const std::vector<Signature> &signatures,
-                 const std::vector<int> &atomRank);
+                 const std::vector<int> &atomRank,
+                 const std::vector<std::array<double, 3>> *xyz = nullptr,
+                 const std::vector<double> *box = nullptr);
 
 /** Connected face sets that stay inside the signature budget, have at
  *  least `minFaces` faces, and are not closed. Cups and incomplete

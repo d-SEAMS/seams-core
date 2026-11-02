@@ -12,6 +12,7 @@
 #include <array>
 #include <bit>
 #include <cctype>
+#include <cmath>
 #include <cstdint>
 #include <map>
 #include <set>
@@ -20,6 +21,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -28,6 +30,53 @@
 #endif
 
 namespace {
+
+// Oxygen-oxygen contacts of the reference cells sit in this window
+// (mW 2.757 Å, sI 2.771–2.805 Å, sII 2.737–2.771 Å). A shorter edge is an
+// intramolecular contact and is not a face of these cages.
+bool waterFace(const std::vector<int> &ring,
+               const std::vector<std::array<double, 3>> &xyz,
+               const std::vector<double> *box) {
+  const int n = static_cast<int>(ring.size());
+  double len[3] = {0, 0, 0};
+  const bool ortho = box != nullptr && box->size() >= 3;
+  if (ortho) {
+    len[0] = (*box)[0];
+    len[1] = (*box)[1];
+    len[2] = (*box)[2];
+  }
+  for (int i = 0; i < n; ++i) {
+    const int ia = ring[static_cast<size_t>(i)];
+    const int ib = ring[static_cast<size_t>((i + 1) % n)];
+    if (ia < 0 || ib < 0 || static_cast<size_t>(ia) >= xyz.size() ||
+        static_cast<size_t>(ib) >= xyz.size()) {
+      return false;
+    }
+    double d[3];
+    for (int k = 0; k < 3; ++k) {
+      d[k] = xyz[static_cast<size_t>(ia)][static_cast<size_t>(k)] -
+             xyz[static_cast<size_t>(ib)][static_cast<size_t>(k)];
+      if (ortho && len[k] > 0) {
+        d[k] -= len[k] * std::round(d[k] / len[k]);
+      }
+    }
+    const double r = std::sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
+    if (r < 2.65 || r > 3.15) {
+      return false;
+    }
+  }
+  return true;
+}
+
+struct FaceSetHash {
+  size_t operator()(const std::vector<int> &v) const {
+    size_t h = v.size();
+    for (const int x : v) {
+      h ^= static_cast<size_t>(x) + 0x9e3779b9u + (h << 6) + (h >> 2);
+    }
+    return h;
+  }
+};
 
 std::string trimmed(std::string_view in) {
   size_t a = 0;
@@ -509,6 +558,10 @@ struct ClosedSearch {
   std::vector<std::vector<int>> optsAt;
   std::vector<std::vector<cage::FoundCage>> found;
   std::vector<int> branchOverride;
+  // Face sets already expanded from this seed. The edges and vertices of a
+  // partial cage are a function of the set, so a second route to the same
+  // faces has the same continuations.
+  std::unordered_set<std::vector<int>, FaceSetHash> seenFaces;
   bool trivalent = true;
   int seed = 0;
   int nVerts = 0;
@@ -516,7 +569,9 @@ struct ClosedSearch {
 
   ClosedSearch(const std::vector<std::vector<int>> &allRings,
                const std::vector<cage::Signature> &signatures,
-               const std::vector<char> *admit = nullptr)
+               const std::vector<char> *admit = nullptr,
+               const std::vector<std::array<double, 3>> *xyz = nullptr,
+               const std::vector<double> *box = nullptr)
       : rings(allRings), sigs(signatures) {
     const size_t nSig = sigs.size();
     int maxSize = 0;
@@ -571,6 +626,9 @@ struct ClosedSearch {
         continue;
       }
       if (sz < 3 || sz > maxSize || inSome[static_cast<size_t>(sz)] == 0) {
+        continue;
+      }
+      if (xyz != nullptr && !waterFace(ring, *xyz, box)) {
         continue;
       }
       std::set<int> distinct(ring.begin(), ring.end());
@@ -958,6 +1016,12 @@ struct ClosedSearch {
       restore(mark);
       return;
     }
+    std::vector<int> faceKey = chosen;
+    std::sort(faceKey.begin(), faceKey.end());
+    if (!seenFaces.insert(std::move(faceKey)).second) {
+      restore(mark);
+      return;
+    }
     auto &opts = optsAt[chosen.size()];
     opts.clear();
     if (!branchOverride.empty()) {
@@ -1018,6 +1082,7 @@ struct ClosedSearch {
   void searchSeeds(const std::vector<int> &seeds) {
     for (const int r : seeds) {
       seed = r;
+      seenFaces.clear();
       bool seedOk = true;
       for (const int e : ringEdges[static_cast<size_t>(r)]) {
         if (ringsOfEdge[static_cast<size_t>(e)].size() < 2) {
@@ -1559,7 +1624,9 @@ std::vector<std::vector<FoundCage>>
 findBySignatures(const std::vector<std::vector<int>> &rings,
                  const std::vector<std::vector<int>> &nList,
                  const std::vector<Signature> &signatures,
-                 const std::vector<int> &atomRank) {
+                 const std::vector<int> &atomRank,
+                 const std::vector<std::array<double, 3>> *xyz,
+                 const std::vector<double> *box) {
   std::vector<std::vector<FoundCage>> out(signatures.size());
   std::vector<Signature> census;
   std::vector<std::vector<size_t>> askedAt;
@@ -1609,7 +1676,7 @@ findBySignatures(const std::vector<std::vector<int>> &rings,
     if (!any) {
       continue;
     }
-    ClosedSearch search(rings, chunk);
+    ClosedSearch search(rings, chunk, nullptr, xyz, box);
     search.run();
     for (size_t j = 0; j < chunk.size(); ++j) {
       for (const size_t i : askedAt[from + j]) {
