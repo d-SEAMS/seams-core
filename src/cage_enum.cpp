@@ -6,13 +6,13 @@
 #include <cage_canon.hpp>
 #include <cage_enum.hpp>
 #include <ira_sofi.hpp>
+#include <number_parse.hpp>
 #include <topo_bulk.hpp>
 
 #include <algorithm>
 #include <array>
 #include <bit>
 #include <cctype>
-#include <charconv>
 #include <cmath>
 #include <cstdint>
 #include <map>
@@ -1209,10 +1209,12 @@ bool parseBound(std::string_view text, double &out) {
   if (text.empty()) {
     return false;
   }
-  const char *begin = text.data();
-  const char *end = begin + text.size();
-  const auto parsed = std::from_chars(begin, end, out);
-  return parsed.ec == std::errc{} && parsed.ptr == end && std::isfinite(out);
+  double value = 0.0;
+  if (!seams::parseExactDouble(text, value) || !std::isfinite(value)) {
+    return false;
+  }
+  out = value;
+  return true;
 }
 
 } // namespace

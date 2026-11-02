@@ -1,4 +1,5 @@
 #include <cage_enum.hpp>
+#include <number_parse.hpp>
 #include <seams_config.hpp>
 
 #include <cctype>
@@ -75,9 +76,7 @@ double envDouble(const char *key, double fallback) {
     return fallback;
   }
   double out = 0.0;
-  const char *end = v + std::strlen(v);
-  const auto parsed = std::from_chars(v, end, out);
-  if (parsed.ec != std::errc{} || parsed.ptr != end) {
+  if (!parseExactDouble(v, out)) {
     return fallback;
   }
   return out;
