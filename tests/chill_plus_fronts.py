@@ -5,11 +5,15 @@ usage: chill_plus_fronts.py SEAMS LIBSEAMS_LANG [--require-all]
 Each front runs ``chill_plus`` on frame 1 of ``input/traj/exampleTraj.lammpstrj``
 (oxygen, LAMMPS type 2, cutoff 3.5 A) with its default graph, with
 ``graph="cutoff"``, and with ``graph="mutual"``. The default must be the
-cutoff list. Histograms must agree across all four fronts and per-atom labels
-across Python, R, and Julia. A front that is not installed is skipped (exit 77
-if any is missing) unless ``--require-all`` is given.
+cutoff list. Histograms must agree across the fronts that can run each list,
+and per-atom labels across Python, R, and Julia. The installed pydseamslib
+``chill_plus`` takes no graph argument and is the cutoff list; a build that
+accepts ``graph`` is also checked on the mutual list. A front that is not
+installed is skipped (exit 77 if any is missing) unless ``--require-all``
+is given.
 """
 
+import inspect
 import json
 import os
 import shutil
@@ -73,12 +77,14 @@ def python():
     except ImportError as exc:
         raise Missing("pydseamslib is not installed") from exc
     frame = pydseams.read(str(TIP), atom_type=2, cutoff=3.5)
+    accepts_graph = "graph" in inspect.signature(frame.chill_plus).parameters
+    graphs = GRAPHS if accepts_graph else ("default", "cutoff")
     out = {}
-    for graph in GRAPHS:
-        try:
-            counts = frame.chill_plus() if graph == "default" else frame.chill_plus(graph=graph)
-        except TypeError as exc:
-            raise RuntimeError("pydseamslib has no chill_plus(graph=...)") from exc
+    for graph in graphs:
+        if graph == "default" or not accepts_graph:
+            counts = frame.chill_plus()
+        else:
+            counts = frame.chill_plus(graph=graph)
         labels = [NAMES.index(pt.iceType.name) for pt in frame.cloud.pts]
         out[graph] = {"counts": {k: v for k, v in counts.items() if v}, "labels": labels}
     return out
@@ -159,19 +165,28 @@ def main(argv):
     failures = []
     for front, by_graph in results.items():
         for graph in GRAPHS:
+            if graph not in by_graph:
+                continue
             want = EXPECTED["cutoff" if graph == "default" else graph]
             got = by_graph[graph]["counts"]
             print(f"{front:6s} {graph:7s} {json.dumps(got, sort_keys=True)}")
             if got != want:
                 failures.append(f"{front} {graph}: {got} != {want}")
-        labels = by_graph["default"]["labels"]
-        if labels is not None and labels != by_graph["cutoff"]["labels"]:
-            failures.append(f"{front}: default labels are not the cutoff labels")
-    labelled = [f for f in results if results[f]["default"]["labels"] is not None]
+        if "default" in by_graph and "cutoff" in by_graph:
+            labels = by_graph["default"]["labels"]
+            if labels is not None and labels != by_graph["cutoff"]["labels"]:
+                failures.append(f"{front}: default labels are not the cutoff labels")
     for graph in GRAPHS:
+        labelled = [
+            front
+            for front, by_graph in results.items()
+            if graph in by_graph and by_graph[graph]["labels"] is not None
+        ]
         for front in labelled[1:]:
             if results[front][graph]["labels"] != results[labelled[0]][graph]["labels"]:
-                failures.append(f"{front} {graph}: labels differ from {labelled[0]}")
+                failures.append(
+                    f"{front} {graph}: labels differ from {labelled[0]}"
+                )
 
     for line in missing:
         print(f"skipped {line}")
